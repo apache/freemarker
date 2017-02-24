@@ -37,17 +37,17 @@ final class ASTExpComparison extends ASTExpBoolean {
         opString = opString.intern();
         this.opString = opString;
         if (opString == "==" || opString == "=") {
-            operation = EvalUtil.CMP_OP_EQUALS;
+            operation = _EvalUtil.CMP_OP_EQUALS;
         } else if (opString == "!=") {
-            operation = EvalUtil.CMP_OP_NOT_EQUALS;
+            operation = _EvalUtil.CMP_OP_NOT_EQUALS;
         } else if (opString == "gt" || opString == "\\gt" || opString == ">" || opString == "&gt;") {
-            operation = EvalUtil.CMP_OP_GREATER_THAN;
+            operation = _EvalUtil.CMP_OP_GREATER_THAN;
         } else if (opString == "gte" || opString == "\\gte" || opString == ">=" || opString == "&gt;=") {
-            operation = EvalUtil.CMP_OP_GREATER_THAN_EQUALS;
+            operation = _EvalUtil.CMP_OP_GREATER_THAN_EQUALS;
         } else if (opString == "lt" || opString == "\\lt" || opString == "<" || opString == "&lt;") {
-            operation = EvalUtil.CMP_OP_LESS_THAN;
+            operation = _EvalUtil.CMP_OP_LESS_THAN;
         } else if (opString == "lte" || opString == "\\lte" || opString == "<=" || opString == "&lt;=") {
-            operation = EvalUtil.CMP_OP_LESS_THAN_EQUALS;
+            operation = _EvalUtil.CMP_OP_LESS_THAN_EQUALS;
         } else {
             throw new BugException("Unknown comparison operator " + opString);
         }
@@ -59,7 +59,7 @@ final class ASTExpComparison extends ASTExpBoolean {
      */
     @Override
     boolean evalToBoolean(Environment env) throws TemplateException {
-        return EvalUtil.compare(left, operation, opString, right, this, env);
+        return _EvalUtil.compare(left, operation, opString, right, this, env);
     }
 
     @Override

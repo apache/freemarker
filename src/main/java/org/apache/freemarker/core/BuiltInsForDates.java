@@ -57,7 +57,7 @@ class BuiltInsForDates {
                 if (tdmDateType != TemplateDateModel.UNKNOWN) {
                     return tdm;
                 }
-                return new SimpleDate(EvalUtil.modelToDate(tdm, target), dateType);
+                return new SimpleDate(_EvalUtil.modelToDate(tdm, target), dateType);
             } else {
                 throw BuiltInForDate.newNonDateException(env, model, target);
             }
@@ -100,7 +100,7 @@ class BuiltInsForDates {
                             instanceof TimeZone) {
                     tzArg = (TimeZone) adaptedObj;                    
                 } else if (tzArgTM instanceof TemplateScalarModel) {
-                    String tzName = EvalUtil.modelToString((TemplateScalarModel) tzArgTM, null, null);
+                    String tzName = _EvalUtil.modelToString((TemplateScalarModel) tzArgTM, null, null);
                     try {
                         tzArg = _DateUtil.getTimeZone(tzName);
                     } catch (UnrecognizedTimeZoneException e) {

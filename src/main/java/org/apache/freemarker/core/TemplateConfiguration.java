@@ -30,6 +30,8 @@ import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.util._NullArgumentException;
+import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
+import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 
 /**
  * Used for customizing the configuration settings for individual {@link Template}-s (or rather groups of templates),

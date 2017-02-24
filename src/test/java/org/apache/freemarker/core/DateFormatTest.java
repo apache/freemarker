@@ -41,6 +41,10 @@ import org.apache.freemarker.core.userpkg.EpochMillisDivTemplateDateFormatFactor
 import org.apache.freemarker.core.userpkg.EpochMillisTemplateDateFormatFactory;
 import org.apache.freemarker.core.userpkg.HTMLISOTemplateDateFormatFactory;
 import org.apache.freemarker.core.userpkg.LocAndTZSensitiveTemplateDateFormatFactory;
+import org.apache.freemarker.core.valueformat.impl.AliasTemplateDateFormatFactory;
+import org.apache.freemarker.core.valueformat.TemplateDateFormat;
+import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
+import org.apache.freemarker.core.valueformat.UndefinedCustomFormatException;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Before;
 import org.junit.Test;

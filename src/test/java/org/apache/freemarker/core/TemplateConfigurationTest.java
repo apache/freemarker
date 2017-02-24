@@ -61,6 +61,8 @@ import org.apache.freemarker.core.userpkg.HexTemplateNumberFormatFactory;
 import org.apache.freemarker.core.userpkg.LocAndTZSensitiveTemplateDateFormatFactory;
 import org.apache.freemarker.core.userpkg.LocaleSensitiveTemplateNumberFormatFactory;
 import org.apache.freemarker.core.util._NullArgumentException;
+import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
+import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;

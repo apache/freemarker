@@ -52,7 +52,7 @@ final class ArithmeticExpression extends ASTExpression {
 
     static TemplateModel _eval(Environment env, ASTNode parent, Number lhoNumber, int operator, Number rhoNumber)
             throws TemplateException {
-        ArithmeticEngine ae = EvalUtil.getArithmeticEngine(env, parent); 
+        ArithmeticEngine ae = _EvalUtil.getArithmeticEngine(env, parent);
         switch (operator) {
             case TYPE_SUBSTRACTION : 
                 return new SimpleNumber(ae.subtract(lhoNumber, rhoNumber));

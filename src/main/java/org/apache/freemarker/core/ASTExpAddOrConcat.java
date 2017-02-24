@@ -68,8 +68,8 @@ final class ASTExpAddOrConcat extends ASTExpression {
             ASTExpression rightExp, TemplateModel rightModel)
             throws TemplateException {
         if (leftModel instanceof TemplateNumberModel && rightModel instanceof TemplateNumberModel) {
-            Number first = EvalUtil.modelToNumber((TemplateNumberModel) leftModel, leftExp);
-            Number second = EvalUtil.modelToNumber((TemplateNumberModel) rightModel, rightExp);
+            Number first = _EvalUtil.modelToNumber((TemplateNumberModel) leftModel, leftExp);
+            Number second = _EvalUtil.modelToNumber((TemplateNumberModel) rightModel, rightExp);
             return _evalOnNumbers(env, parent, first, second);
         } else if (leftModel instanceof TemplateSequenceModel && rightModel instanceof TemplateSequenceModel) {
             return new ConcatenatedSequence((TemplateSequenceModel) leftModel, (TemplateSequenceModel) rightModel);
@@ -80,7 +80,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
                 // We try string addition first. If hash addition is possible, then instead of throwing exception
                 // we return null and do hash addition instead. (We can't simply give hash addition a priority, like
                 // with sequence addition above, as FTL strings are often also FTL hashes.)
-                Object leftOMOrStr = EvalUtil.coerceModelToStringOrMarkup(
+                Object leftOMOrStr = _EvalUtil.coerceModelToStringOrMarkup(
                         leftModel, leftExp, /* returnNullOnNonCoercableType = */ hashConcatPossible, null,
                         env);
                 if (leftOMOrStr == null) {
@@ -88,7 +88,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
                 }
 
                 // Same trick with null return as above.
-                Object rightOMOrStr = EvalUtil.coerceModelToStringOrMarkup(
+                Object rightOMOrStr = _EvalUtil.coerceModelToStringOrMarkup(
                         rightModel, rightExp, /* returnNullOnNonCoercableType = */ hashConcatPossible, null,
                         env);
                 if (rightOMOrStr == null) {
@@ -100,18 +100,18 @@ final class ASTExpAddOrConcat extends ASTExpression {
                         return new SimpleScalar(((String) leftOMOrStr).concat((String) rightOMOrStr));
                     } else { // rightOMOrStr instanceof TemplateMarkupOutputModel
                         TemplateMarkupOutputModel<?> rightMO = (TemplateMarkupOutputModel<?>) rightOMOrStr; 
-                        return EvalUtil.concatMarkupOutputs(parent,
+                        return _EvalUtil.concatMarkupOutputs(parent,
                                 rightMO.getOutputFormat().fromPlainTextByEscaping((String) leftOMOrStr),
                                 rightMO);
                     }                    
                 } else { // leftOMOrStr instanceof TemplateMarkupOutputModel 
                     TemplateMarkupOutputModel<?> leftMO = (TemplateMarkupOutputModel<?>) leftOMOrStr; 
                     if (rightOMOrStr instanceof String) {  // markup output
-                        return EvalUtil.concatMarkupOutputs(parent,
+                        return _EvalUtil.concatMarkupOutputs(parent,
                                 leftMO,
                                 leftMO.getOutputFormat().fromPlainTextByEscaping((String) rightOMOrStr));
                     } else { // rightOMOrStr instanceof TemplateMarkupOutputModel
-                        return EvalUtil.concatMarkupOutputs(parent,
+                        return _EvalUtil.concatMarkupOutputs(parent,
                                 leftMO,
                                 (TemplateMarkupOutputModel<?>) rightOMOrStr);
                     }
@@ -148,7 +148,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
 
     static TemplateModel _evalOnNumbers(Environment env, ASTNode parent, Number first, Number second)
             throws TemplateException {
-        ArithmeticEngine ae = EvalUtil.getArithmeticEngine(env, parent);
+        ArithmeticEngine ae = _EvalUtil.getArithmeticEngine(env, parent);
         return new SimpleNumber(ae.add(first, second));
     }
 

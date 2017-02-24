@@ -59,9 +59,9 @@ final class ASTDirSwitch extends _ASTElement {
                     processCase = true;
                 } else if (cas.condition != null) {
                     // Otherwise, if this case isn't the default, test it.
-                    processCase = EvalUtil.compare(
+                    processCase = _EvalUtil.compare(
                             searched,
-                            EvalUtil.CMP_OP_EQUALS, "case==", cas.condition, cas.condition, env);
+                            _EvalUtil.CMP_OP_EQUALS, "case==", cas.condition, cas.condition, env);
                 }
                 if (processCase) {
                     env.visit(cas);

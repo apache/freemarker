@@ -69,6 +69,11 @@ import org.apache.freemarker.core.util._DateUtil;
 import org.apache.freemarker.core.util._DateUtil.DateToISO8601CalendarFactory;
 import org.apache.freemarker.core.util._NullWriter;
 import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.valueformat.*;
+import org.apache.freemarker.core.valueformat.impl.ISOTemplateDateFormatFactory;
+import org.apache.freemarker.core.valueformat.impl.JavaTemplateDateFormatFactory;
+import org.apache.freemarker.core.valueformat.impl.JavaTemplateNumberFormatFactory;
+import org.apache.freemarker.core.valueformat.impl.XSTemplateDateFormatFactory;
 import org.slf4j.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -958,7 +963,7 @@ public final class Environment extends Configurable {
      */
     public boolean applyEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
-        return EvalUtil.compare(leftValue, EvalUtil.CMP_OP_EQUALS, rightValue, this);
+        return _EvalUtil.compare(leftValue, _EvalUtil.CMP_OP_EQUALS, rightValue, this);
     }
 
     /**
@@ -970,7 +975,7 @@ public final class Environment extends Configurable {
      */
     public boolean applyEqualsOperatorLenient(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
-        return EvalUtil.compareLenient(leftValue, EvalUtil.CMP_OP_EQUALS, rightValue, this);
+        return _EvalUtil.compareLenient(leftValue, _EvalUtil.CMP_OP_EQUALS, rightValue, this);
     }
 
     /**
@@ -980,7 +985,7 @@ public final class Environment extends Configurable {
      */
     public boolean applyLessThanOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
-        return EvalUtil.compare(leftValue, EvalUtil.CMP_OP_LESS_THAN, rightValue, this);
+        return _EvalUtil.compare(leftValue, _EvalUtil.CMP_OP_LESS_THAN, rightValue, this);
     }
 
     /**
@@ -990,7 +995,7 @@ public final class Environment extends Configurable {
      */
     public boolean applyLessThanOrEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
-        return EvalUtil.compare(leftValue, EvalUtil.CMP_OP_LESS_THAN_EQUALS, rightValue, this);
+        return _EvalUtil.compare(leftValue, _EvalUtil.CMP_OP_LESS_THAN_EQUALS, rightValue, this);
     }
 
     /**
@@ -1000,7 +1005,7 @@ public final class Environment extends Configurable {
      */
     public boolean applyGreaterThanOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
-        return EvalUtil.compare(leftValue, EvalUtil.CMP_OP_GREATER_THAN, rightValue, this);
+        return _EvalUtil.compare(leftValue, _EvalUtil.CMP_OP_GREATER_THAN, rightValue, this);
     }
 
     /**
@@ -1010,7 +1015,7 @@ public final class Environment extends Configurable {
      */
     public boolean applyWithGreaterThanOrEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
-        return EvalUtil.compare(leftValue, EvalUtil.CMP_OP_GREATER_THAN_EQUALS, rightValue, this);
+        return _EvalUtil.compare(leftValue, _EvalUtil.CMP_OP_GREATER_THAN_EQUALS, rightValue, this);
     }
 
     public void setOut(Writer out) {
@@ -1049,26 +1054,9 @@ public final class Environment extends Configurable {
             boolean useTempModelExc)
             throws TemplateException {
         try {
-            return EvalUtil.assertFormatResultNotNull(format.formatToPlainText(number));
+            return _EvalUtil.assertFormatResultNotNull(format.formatToPlainText(number));
         } catch (TemplateValueFormatException e) {
             throw MessageUtil.newCantFormatNumberException(format, exp, e, useTempModelExc);
-        }
-    }
-
-    /**
-     * Format number with the number format specified as the parameter, with the current locale.
-     * 
-     * @param exp
-     *            The blamed expression if an error occurs; it's only needed for better error messages
-     */
-    String formatNumberToPlainText(Number number, BackwardCompatibleTemplateNumberFormat format, ASTExpression exp)
-            throws TemplateModelException, _MiscTemplateException {
-        try {
-            return format.format(number);
-        } catch (UnformattableValueException e) {
-            throw new _MiscTemplateException(exp, e, this,
-                    "Failed to format number with ", new _DelayedJQuote(format.getDescription()), ": ",
-                    e.getMessage());
         }
     }
 
@@ -1323,7 +1311,7 @@ public final class Environment extends Configurable {
         TemplateDateFormat format = getTemplateDateFormat(tdm, tdmSourceExpr, useTempModelExc);
         
         try {
-            return EvalUtil.assertFormatResultNotNull(format.formatToPlainText(tdm));
+            return _EvalUtil.assertFormatResultNotNull(format.formatToPlainText(tdm));
         } catch (TemplateValueFormatException e) {
             throw MessageUtil.newCantFormatDateException(format, tdmSourceExpr, e, useTempModelExc);
         }
@@ -1338,7 +1326,7 @@ public final class Environment extends Configurable {
     String formatDateToPlainText(TemplateDateModel tdm, String formatString,
             ASTExpression blamedDateSourceExp, ASTExpression blamedFormatterExp,
             boolean useTempModelExc) throws TemplateException {
-        Date date = EvalUtil.modelToDate(tdm, blamedDateSourceExp);
+        Date date = _EvalUtil.modelToDate(tdm, blamedDateSourceExp);
         
         TemplateDateFormat format = getTemplateDateFormat(
                 formatString, tdm.getDateType(), date.getClass(),
@@ -1346,7 +1334,7 @@ public final class Environment extends Configurable {
                 useTempModelExc);
         
         try {
-            return EvalUtil.assertFormatResultNotNull(format.formatToPlainText(tdm));
+            return _EvalUtil.assertFormatResultNotNull(format.formatToPlainText(tdm));
         } catch (TemplateValueFormatException e) {
             throw MessageUtil.newCantFormatDateException(format, blamedDateSourceExp, e, useTempModelExc);
         }
@@ -1518,7 +1506,7 @@ public final class Environment extends Configurable {
     
     TemplateDateFormat getTemplateDateFormat(TemplateDateModel tdm, ASTExpression tdmSourceExpr, boolean useTempModelExc)
             throws TemplateException {
-        Date date = EvalUtil.modelToDate(tdm, tdmSourceExpr);
+        Date date = _EvalUtil.modelToDate(tdm, tdmSourceExpr);
         
         return getTemplateDateFormat(
                 tdm.getDateType(), date.getClass(), tdmSourceExpr,

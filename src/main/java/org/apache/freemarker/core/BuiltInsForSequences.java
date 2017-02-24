@@ -215,7 +215,7 @@ class BuiltInsForSequences {
                             hadItem = true;
                         }
                         try {
-                            sb.append(EvalUtil.coerceModelToStringOrUnsupportedMarkup(item, null, null, env));
+                            sb.append(_EvalUtil.coerceModelToStringOrUnsupportedMarkup(item, null, null, env));
                         } catch (TemplateException e) {
                             throw new _TemplateModelException(e,
                                     "\"?", key, "\" failed at index ", Integer.valueOf(idx), " with this error:\n\n",
@@ -856,9 +856,9 @@ class BuiltInsForSequences {
             Environment env)
             throws TemplateModelException {
         try {
-            return EvalUtil.compare(
+            return _EvalUtil.compare(
                     seqItem, null,
-                    EvalUtil.CMP_OP_EQUALS, null,
+                    _EvalUtil.CMP_OP_EQUALS, null,
                     searchedItem, null,
                     null, false,
                     true, true, true, // The last one is true to emulate an old bug for BC 

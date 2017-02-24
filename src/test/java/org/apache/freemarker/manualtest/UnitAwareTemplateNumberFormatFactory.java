@@ -21,9 +21,9 @@ package org.apache.freemarker.manualtest;
 import java.util.Locale;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.TemplateNumberFormat;
-import org.apache.freemarker.core.TemplateNumberFormatFactory;
-import org.apache.freemarker.core.TemplateValueFormatException;
+import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
+import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
+import org.apache.freemarker.core.valueformat.TemplateValueFormatException;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 

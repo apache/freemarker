@@ -154,7 +154,7 @@ final class ASTDirAssignment extends _ASTElement {
             } else {  // Numerical operation
                 Number lhoNumber;
                 if (lhoValue instanceof TemplateNumberModel) {
-                    lhoNumber = EvalUtil.modelToNumber((TemplateNumberModel) lhoValue, null);
+                    lhoNumber = _EvalUtil.modelToNumber((TemplateNumberModel) lhoValue, null);
                 } else if (lhoValue == null) {
                     throw InvalidReferenceException.getInstance(variableName, getOperatorTypeAsString(), env);
                 } else {

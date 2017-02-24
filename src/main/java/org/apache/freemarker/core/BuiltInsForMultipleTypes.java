@@ -45,6 +45,9 @@ import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl.beans.OverloadedMethodsModel;
 import org.apache.freemarker.core.model.impl.beans.SimpleMethodModel;
 import org.apache.freemarker.core.util.BugException;
+import org.apache.freemarker.core.valueformat.TemplateDateFormat;
+import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
+import org.apache.freemarker.core.valueformat.TemplateValueFormatException;
 
 /**
  * A holder for builtins that didn't fit into any other category.
@@ -71,7 +74,7 @@ class BuiltInsForMultipleTypes {
 
         @Override
         protected TemplateModel formatNumber(Environment env, TemplateModel model) throws TemplateModelException {
-            Number num = EvalUtil.modelToNumber((TemplateNumberModel) model, target);
+            Number num = _EvalUtil.modelToNumber((TemplateNumberModel) model, target);
             if (num instanceof Integer || num instanceof Long) {
                 // Accelerate these fairly common cases
                 return new SimpleScalar(num.toString());
@@ -534,7 +537,7 @@ class BuiltInsForMultipleTypes {
                 defaultFormat = dateType == TemplateDateModel.UNKNOWN
                         ? null  // Lazy unknown type error in getAsString()
                         : env.getTemplateDateFormat(
-                                dateType, EvalUtil.modelToDate(dateModel, target).getClass(), target, true);
+                                dateType, _EvalUtil.modelToDate(dateModel, target).getClass(), target, true);
             }
     
             @Override
@@ -571,7 +574,7 @@ class BuiltInsForMultipleTypes {
                         }
                     }
                     try {
-                        cachedValue = EvalUtil.assertFormatResultNotNull(defaultFormat.formatToPlainText(dateModel));
+                        cachedValue = _EvalUtil.assertFormatResultNotNull(defaultFormat.formatToPlainText(dateModel));
                     } catch (TemplateValueFormatException e) {
                         try {
                             throw MessageUtil.newCantFormatDateException(defaultFormat, target, e, true);
@@ -606,7 +609,7 @@ class BuiltInsForMultipleTypes {
                 
                 // As we format lazily, we need a snapshot of the format inputs:
                 this.numberModel = numberModel;
-                number = EvalUtil.modelToNumber(numberModel, target);  // for BackwardCompatibleTemplateNumberFormat-s
+                number = _EvalUtil.modelToNumber(numberModel, target);  // for BackwardCompatibleTemplateNumberFormat-s
                 try {
                     defaultFormat = env.getTemplateNumberFormat(stringBI.this, true);
                 } catch (TemplateException e) {
@@ -633,11 +636,7 @@ class BuiltInsForMultipleTypes {
                 
                 String result;
                 try {
-                    if (format instanceof BackwardCompatibleTemplateNumberFormat) {
-                        result = env.formatNumberToPlainText(number, (BackwardCompatibleTemplateNumberFormat) format, target);
-                    } else {
-                        result = env.formatNumberToPlainText(numberModel, format, target, true);
-                    }
+                    result = env.formatNumberToPlainText(numberModel, format, target, true);
                 } catch (TemplateException e) {
                     // `e` should always be a TemplateModelException here, but to be sure: 
                     throw _CoreAPI.ensureIsTemplateModelException("Failed to format number", e); 
@@ -650,12 +649,7 @@ class BuiltInsForMultipleTypes {
             public String getAsString() throws TemplateModelException {
                 if (cachedValue == null) {
                     try {
-                        if (defaultFormat instanceof BackwardCompatibleTemplateNumberFormat) {
-                            cachedValue = env.formatNumberToPlainText(
-                                    number, (BackwardCompatibleTemplateNumberFormat) defaultFormat, target);
-                        } else {
-                            cachedValue = env.formatNumberToPlainText(numberModel, defaultFormat, target, true);
-                        }
+                        cachedValue = env.formatNumberToPlainText(numberModel, defaultFormat, target, true);
                     } catch (TemplateException e) {
                         // `e` should always be a TemplateModelException here, but to be sure: 
                         throw _CoreAPI.ensureIsTemplateModelException("Failed to format number", e); 
@@ -675,7 +669,7 @@ class BuiltInsForMultipleTypes {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateNumberModel) {
                 TemplateNumberModel numberModel = (TemplateNumberModel) model;
-                Number num = EvalUtil.modelToNumber(numberModel, target);
+                Number num = _EvalUtil.modelToNumber(numberModel, target);
                 return new NumberFormatter(numberModel, env);
             } else if (model instanceof TemplateDateModel) {
                 TemplateDateModel dm = (TemplateDateModel) model;

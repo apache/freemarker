@@ -85,6 +85,8 @@ import org.apache.freemarker.core.util._DateUtil;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._NullWriter;
 import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
+import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;

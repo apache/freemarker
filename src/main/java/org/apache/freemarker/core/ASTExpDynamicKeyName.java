@@ -56,7 +56,7 @@ final class ASTExpDynamicKeyName extends ASTExpression {
             return dealWithNumericalKey(targetModel, index, env);
         }
         if (keyModel instanceof TemplateScalarModel) {
-            String key = EvalUtil.modelToString((TemplateScalarModel) keyModel, keyExpression, env);
+            String key = _EvalUtil.modelToString((TemplateScalarModel) keyModel, keyExpression, env);
             return dealWithStringKey(targetModel, key, env);
         }
         if (keyModel instanceof RangeModel) {

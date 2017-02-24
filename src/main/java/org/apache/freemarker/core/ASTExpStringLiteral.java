@@ -104,7 +104,7 @@ final class ASTExpStringLiteral extends ASTExpression implements TemplateScalarM
                     TemplateMarkupOutputModel<?> partMO = calcedPart instanceof String
                             ? markupResult.getOutputFormat().fromPlainTextByEscaping((String) calcedPart)
                             : (TemplateMarkupOutputModel<?>) calcedPart;
-                    markupResult = EvalUtil.concatMarkupOutputs(this, markupResult, partMO);
+                    markupResult = _EvalUtil.concatMarkupOutputs(this, markupResult, partMO);
                 } else { // We are using `plainTextOutput` (or nothing yet)
                     if (calcedPart instanceof String) {
                         String partStr = (String) calcedPart;
@@ -118,7 +118,7 @@ final class ASTExpStringLiteral extends ASTExpression implements TemplateScalarM
                         if (plainTextResult != null) {
                             TemplateMarkupOutputModel<?> leftHandMO = moPart.getOutputFormat()
                                     .fromPlainTextByEscaping(plainTextResult.toString());
-                            markupResult = EvalUtil.concatMarkupOutputs(this, leftHandMO, moPart);
+                            markupResult = _EvalUtil.concatMarkupOutputs(this, leftHandMO, moPart);
                             plainTextResult = null;
                         } else {
                             markupResult = moPart;

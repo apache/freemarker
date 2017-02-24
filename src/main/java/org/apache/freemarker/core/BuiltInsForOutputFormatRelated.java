@@ -49,7 +49,7 @@ class BuiltInsForOutputFormatRelated {
         @Override
         protected TemplateModel calculateResult(Environment env) throws TemplateException {
             TemplateModel lhoTM = target.eval(env);
-            Object lhoMOOrStr = EvalUtil.coerceModelToStringOrMarkup(lhoTM, target, null, env);
+            Object lhoMOOrStr = _EvalUtil.coerceModelToStringOrMarkup(lhoTM, target, null, env);
             MarkupOutputFormat contextOF = outputFormat;
             if (lhoMOOrStr instanceof String) { // TemplateMarkupOutputModel
                 return calculateResult((String) lhoMOOrStr, contextOF, env);

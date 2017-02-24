@@ -222,7 +222,7 @@ class BuiltInsForNumbers {
             TemplateModel model = target.eval(env);
             if (!(model instanceof TemplateNumberModel)
                     && model instanceof TemplateDateModel) {
-                Date date = EvalUtil.modelToDate((TemplateDateModel) model, target);
+                Date date = _EvalUtil.modelToDate((TemplateDateModel) model, target);
                 return new SimpleNumber(date.getTime());
             } else {
                 Number num = target.modelToNumber(model, env);

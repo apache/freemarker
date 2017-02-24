@@ -24,6 +24,10 @@ import java.util.ArrayList;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.valueformat.TemplateDateFormat;
+import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
+import org.apache.freemarker.core.valueformat.TemplateValueFormatException;
+import org.apache.freemarker.core.valueformat.UnknownDateTypeFormattingUnsupportedException;
 
 /**
  * Utilities for creating error messages (and other messages).
@@ -34,13 +38,9 @@ class MessageUtil {
             = "Can't convert the date-like value to string because it isn't "
               + "known if it's a date (no time part), time or date-time value.";
     
-    static final String UNKNOWN_DATE_PARSING_ERROR_MESSAGE
-            = "Can't parse the string to date-like value because it isn't "
-              + "known if it's desired result should be a date (no time part), a time, or a date-time value.";
-
-    static final String UNKNOWN_DATE_TYPE_ERROR_TIP = 
+    static final String UNKNOWN_DATE_TYPE_ERROR_TIP =
             "Use ?date, ?time, or ?datetime to tell FreeMarker the exact type.";
-    
+
     static final Object[] UNKNOWN_DATE_TO_STRING_TIPS = {
             UNKNOWN_DATE_TYPE_ERROR_TIP,
             "If you need a particular format only once, use ?string(pattern), like ?string('dd.MM.yyyy HH:mm:ss'), "
@@ -53,7 +53,7 @@ class MessageUtil {
 
     // Can't be instantiated
     private MessageUtil() { }
-        
+
     static String formatLocationForSimpleParsingError(Template template, int line, int column) {
         return formatLocation("in", template, line, column);
     }
@@ -78,7 +78,7 @@ class MessageUtil {
         Template t = macro.getTemplate();
         return formatLocation("at", t != null ? t.getSourceName() : null, macro.getName(), macro.isFunction(), line, column);
     }
-    
+
     static String formatLocationForEvaluationError(String templateSourceName, int line, int column) {
         return formatLocation("at", templateSourceName, line, column);
     }
@@ -86,7 +86,7 @@ class MessageUtil {
     private static String formatLocation(String preposition, Template template, int line, int column) {
         return formatLocation(preposition, template != null ? template.getSourceName() : null, line, column);
     }
-    
+
     private static String formatLocation(String preposition, String templateSourceName, int line, int column) {
         return formatLocation(
                 preposition, templateSourceName,
@@ -102,7 +102,7 @@ class MessageUtil {
         if (line < 0) {
             templateDesc = "?eval-ed string";
             macroOrFuncName = null;
-        } else { 
+        } else {
             templateDesc = templateSourceName != null
                 ? "template " + _StringUtil.jQuoteNoXSS(templateSourceName)
                 : "nameless template";
@@ -114,7 +114,7 @@ class MessageUtil {
               + " "
               + preposition + " " + formatPosition(line, column);
     }
-    
+
     static String formatPosition(int line, int column) {
         return "line " + (line >= 0 ? line : line - (ASTNode.RUNTIME_EVAL_LINE_DISPLACEMENT - 1))
                 + ", column " + column;
@@ -123,11 +123,11 @@ class MessageUtil {
     /**
      * Returns a single line string that is no longer than {@code maxLength}.
      * If will truncate the string at line-breaks too.
-     * The truncation is always signaled with a a {@code "..."} at the end of the result string.  
+     * The truncation is always signaled with a a {@code "..."} at the end of the result string.
      */
     static String shorten(String s, int maxLength) {
         if (maxLength < 5) maxLength = 5;
-        
+
         boolean isTruncated = false;
         
         int brIdx = s.indexOf('\n');
@@ -286,7 +286,7 @@ class MessageUtil {
                 "Instantiating ", className, " is not allowed in the template for security reasons.");
     }
     
-    static _TemplateModelException newCantFormatUnknownTypeDateException(
+    static TemplateModelException newCantFormatUnknownTypeDateException(
             ASTExpression dateSourceExpr, UnknownDateTypeFormattingUnsupportedException cause) {
         return new _TemplateModelException(cause, null, new _ErrorDescriptionBuilder(
                 MessageUtil.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE)
@@ -295,7 +295,7 @@ class MessageUtil {
     }
 
     static TemplateException newCantFormatDateException(TemplateDateFormat format, ASTExpression dataSrcExp,
-            TemplateValueFormatException e, boolean useTempModelExc) {
+                                                        TemplateValueFormatException e, boolean useTempModelExc) {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                 "Failed to format date/time/datetime with format ", new _DelayedJQuote(format.getDescription()), ": ",
                 e.getMessage())
@@ -306,7 +306,7 @@ class MessageUtil {
     }
     
     static TemplateException newCantFormatNumberException(TemplateNumberFormat format, ASTExpression dataSrcExp,
-            TemplateValueFormatException e, boolean useTempModelExc) {
+                                                          TemplateValueFormatException e, boolean useTempModelExc) {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                 "Failed to format number with format ", new _DelayedJQuote(format.getDescription()), ": ",
                 e.getMessage())

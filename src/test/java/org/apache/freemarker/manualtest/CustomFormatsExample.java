@@ -24,12 +24,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.freemarker.core.AliasTemplateDateFormatFactory;
-import org.apache.freemarker.core.AliasTemplateNumberFormatFactory;
+import org.apache.freemarker.core.valueformat.impl.AliasTemplateDateFormatFactory;
+import org.apache.freemarker.core.valueformat.impl.AliasTemplateNumberFormatFactory;
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.TemplateDateFormatFactory;
+import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.TemplateNumberFormatFactory;
+import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 import org.apache.freemarker.core.userpkg.BaseNTemplateNumberFormatFactory;
 import org.junit.Test;
 

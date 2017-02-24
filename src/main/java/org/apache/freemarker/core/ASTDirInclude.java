@@ -140,7 +140,7 @@ final class ASTDirInclude extends _ASTElement {
             TemplateModel tm = parseExp.eval(env);
             if (tm instanceof TemplateScalarModel) {
                 // Legacy
-                parse = getYesNo(parseExp, EvalUtil.modelToString((TemplateScalarModel) tm, parseExp, env));
+                parse = getYesNo(parseExp, _EvalUtil.modelToString((TemplateScalarModel) tm, parseExp, env));
             } else {
                 parse = parseExp.modelToBoolean(tm, env);
             }

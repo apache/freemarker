@@ -422,7 +422,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         if (!(arg instanceof TemplateScalarModel)) {
             throw MessageUtil.newMethodArgMustBeStringException("?" + key, argIdx, arg);
         } else {
-            return EvalUtil.modelToString((TemplateScalarModel) arg, null, null);
+            return _EvalUtil.modelToString((TemplateScalarModel) arg, null, null);
         }
     }
 
@@ -435,7 +435,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         if (!(arg instanceof TemplateNumberModel)) {
             throw MessageUtil.newMethodArgMustBeNumberException("?" + key, argIdx, arg);
         } else {
-            return EvalUtil.modelToNumber((TemplateNumberModel) arg, null);
+            return _EvalUtil.modelToNumber((TemplateNumberModel) arg, null);
         }
     }
     
