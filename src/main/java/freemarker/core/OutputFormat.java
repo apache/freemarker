@@ -40,19 +40,19 @@ public abstract class OutputFormat {
     
     /**
      * Returns the MIME type of the output format. This might comes handy when generating a HTTP response. {@code null}
-     * if this output format doesn't clearly corresponds to a specific MIME type.
+     * {@code null} if this output format doesn't clearly corresponds to a specific MIME type.
      */
     public abstract String getMimeType();
 
     /**
      * Tells if this output format allows inserting {@link TemplateMarkupOutputModel}-s of another output formats into
      * it. If {@code true}, the foreign {@link TemplateMarkupOutputModel} will be inserted into the output as is (like
-     * if the surrounding output format was the same). This is usually a bad idea allow, as such an event could indicate
-     * application bugs. If this method returns {@code false} (recommended), then FreeMarker will try to assimilate the
-     * inserted value by converting its format to this format, which will currently (2.3.24) cause exception, unless the
-     * inserted value is made by escaping plain text and the target format is non-escaping, in which case format
-     * conversion is trivially possible. (It's not impossible that conversions will be extended beyond this, if there
-     * will be demand for that.)
+     * if the surrounding output format was the same). This is usually a bad idea to allow, as such an event could
+     * indicate application bugs. If this method returns {@code false} (recommended), then FreeMarker will try to
+     * assimilate the inserted value by converting its format to this format, which will currently (2.3.24) cause
+     * exception, unless the inserted value is made by escaping plain text and the target format is non-escaping, in
+     * which case format conversion is trivially possible. (It's not impossible that conversions will be extended beyond
+     * this, if there will be demand for that.)
      * 
      * <p>
      * {@code true} value is used by {@link UndefinedOutputFormat}.

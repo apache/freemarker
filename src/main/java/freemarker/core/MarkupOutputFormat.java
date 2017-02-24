@@ -31,10 +31,10 @@ import freemarker.template.TemplateModelException;
  * {@link Configuration#setOutputFormat(OutputFormat)}.)
  * 
  * <p>
- * An {@link OutputFormat} subclass always has a corresponding {@link TemplateMarkupOutputModel} subclass pair (like
- * {@link HTMLOutputFormat} has {@link TemplateHTMLOutputModel}). The {@link OutputFormat} implements the operations
- * related to {@link TemplateMarkupOutputModel} objects of that kind, while the {@link TemplateMarkupOutputModel} only
- * encapsulates the data (the actual markup or text).
+ * A {@link MarkupOutputFormat} subclass always has a corresponding {@link TemplateMarkupOutputModel} subclass pair
+ * (like {@link HTMLOutputFormat} has {@link TemplateHTMLOutputModel}). The {@link OutputFormat} implements the
+ * operations related to {@link TemplateMarkupOutputModel} objects of that kind, while the
+ * {@link TemplateMarkupOutputModel} only encapsulates the data (the actual markup or text).
  * 
  * <p>
  * To implement a custom output format, you may want to extend {@link CommonMarkupOutputFormat}.
