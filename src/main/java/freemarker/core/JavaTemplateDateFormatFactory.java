@@ -103,7 +103,7 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
             
             if (GLOBAL_FORMAT_CACHE.size() >= LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE) {
                 boolean triggered = false;
-                synchronized (JavaTemplateNumberFormatFactory.class) {
+                synchronized (JavaTemplateDateFormatFactory.class) {
                     if (GLOBAL_FORMAT_CACHE.size() >= LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE) {
                         triggered = true;
                         GLOBAL_FORMAT_CACHE.clear();
