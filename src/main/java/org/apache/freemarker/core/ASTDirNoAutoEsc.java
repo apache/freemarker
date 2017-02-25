@@ -24,7 +24,7 @@ import java.io.IOException;
 /**
  * AST directive node: {@code #noautoesc}.
  */
-final class ASTDirNoAutoEsc extends _ASTElement {
+final class ASTDirNoAutoEsc extends ASTDirective {
     
     ASTDirNoAutoEsc(TemplateElements children) { 
         setChildren(children);

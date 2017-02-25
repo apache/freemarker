@@ -32,7 +32,7 @@ import org.apache.freemarker.core.model.impl.SimpleSequence;
 /**
  * AST directive node: {@code #recurse}.
  */
-final class ASTDirRecurse extends _ASTElement {
+final class ASTDirRecurse extends ASTDirective {
     
     ASTExpression targetNode, namespaces;
     

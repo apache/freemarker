@@ -24,7 +24,7 @@ import java.io.IOException;
 /**
  * AST directive node: {@code #switch}.
  */
-final class ASTDirSwitch extends _ASTElement {
+final class ASTDirSwitch extends ASTDirective {
 
     private ASTDirCase defaultCase;
     private final ASTExpression searched;

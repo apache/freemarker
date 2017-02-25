@@ -30,7 +30,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 /**
  * AST directive node: {@code #nested}.
  */
-final class ASTDirNested extends _ASTElement {
+final class ASTDirNested extends ASTDirective {
     
     
     private List bodyParameters;

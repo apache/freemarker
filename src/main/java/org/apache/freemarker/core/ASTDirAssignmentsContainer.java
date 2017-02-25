@@ -26,7 +26,7 @@ import java.io.IOException;
  * Each assignment is represented by a {@link ASTDirAssignment} child element.
  * If there's only one assignment, its usually just a {@link ASTDirAssignment} without parent {@link ASTDirAssignmentsContainer}.
  */
-final class ASTDirAssignmentsContainer extends _ASTElement {
+final class ASTDirAssignmentsContainer extends ASTDirective {
 
     private int scope;
     private ASTExpression namespaceExp;

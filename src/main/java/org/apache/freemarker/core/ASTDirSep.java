@@ -25,7 +25,7 @@ import org.apache.freemarker.core.ASTDirList.IterationContext;
 /**
  * AST directive node: {@code #sep}.
  */
-class ASTDirSep extends _ASTElement {
+class ASTDirSep extends ASTDirective {
 
     public ASTDirSep(TemplateElements children) {
         setChildren(children);

@@ -26,7 +26,7 @@ import java.io.IOException;
  * Each such block is a nested {@link ASTDirIfOrElseOrElseIf}. Note that if an {@code #if} stands alone,
  * {@link ASTDirIfOrElseOrElseIf} doesn't need this parent element.
  */
-final class ASTDirIfElseIfElseContainer extends _ASTElement {
+final class ASTDirIfElseIfElseContainer extends ASTDirective {
 
     ASTDirIfElseIfElseContainer(ASTDirIfOrElseOrElseIf block) {
         setChildBufferCapacity(1);

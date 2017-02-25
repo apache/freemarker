@@ -173,8 +173,8 @@ public class FMParser {
         // If this is a Template under construction, we do the below.
         // If this is just the enclosing Template for ?eval or such, we must not modify it.
         if (newTemplate) {
-            _TemplateAPI.setAutoEscaping(template, autoEscaping);
-            _TemplateAPI.setOutputFormat(template, outputFormat);
+            template.setAutoEscaping(autoEscaping);
+            template.setOutputFormat(outputFormat);
         }
     }
     
@@ -946,7 +946,7 @@ TOKEN:
             // doesn't match any directive starter tokens, because that token requires whitespace after the
             // name as it should be followed by parameters. For now we work this around so we don't report
             // unknown directive:
-            if (_CoreAPI.ALL_BUILT_IN_DIRECTIVE_NAMES.contains(dn)) {
+            if (ASTDirective.ALL_BUILT_IN_DIRECTIVE_NAMES.contains(dn)) {
                 throw new TokenMgrError(
                         "#" + dn + " is an existing directive, but the tag is malformed. " 
                         + " (See FreeMarker Manual / Directive Reference.)",
@@ -4061,7 +4061,7 @@ void HeaderElement() :
                                 autoEscapingPolicy = Configuration.DISABLE_AUTO_ESCAPING_POLICY;
                             }
                             recalculateAutoEscapingField();
-                            _TemplateAPI.setAutoEscaping(template, autoEscaping);
+                            template.setAutoEscaping(autoEscaping);
                         } else if (ks.equalsIgnoreCase("output_format") || ks.equals("outputFormat")) {
                             if (vs == null) {
                                 throw new ParseException("Expected a string constant for \"" + ks + "\".", exp);
@@ -4074,8 +4074,8 @@ void HeaderElement() :
 					            throw new ParseException(e.getMessage(), exp, e.getCause());
 					        }
                             recalculateAutoEscapingField();                                
-                            _TemplateAPI.setOutputFormat(template, outputFormat);
-                            _TemplateAPI.setAutoEscaping(template, autoEscaping);
+                            template.setOutputFormat(outputFormat);
+                            template.setAutoEscaping(autoEscaping);
                         } else if (ks.equalsIgnoreCase("ns_prefixes") || ks.equals("nsPrefixes")) {
                             if (!(value instanceof TemplateHashModelEx)) {
                                 throw new ParseException("Expecting a hash of prefixes to namespace URI's.", exp);

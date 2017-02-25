@@ -27,7 +27,7 @@ import org.apache.freemarker.core.util._StringUtil;
 /**
  * AST directive node: {@code #escape}.
  */
-class ASTDirEscape extends _ASTElement {
+class ASTDirEscape extends ASTDirective {
 
     private final String variable;
     private final ASTExpression expr;

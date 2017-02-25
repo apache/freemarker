@@ -153,7 +153,9 @@ public class TemplateException extends Exception {
         this.descriptionBuilder = descriptionBuilder;
         description = renderedDescription;
         
-        if (env != null) ftlInstructionStackSnapshot = _CoreAPI.getInstructionStackSnapshot(env);
+        if (env != null) {
+            ftlInstructionStackSnapshot = env.getInstructionStackSnapshot();
+        }
     }
     
     private void renderMessages() {
@@ -171,10 +173,10 @@ public class TemplateException extends Exception {
         String stackTopFew = getFTLInstructionStackTopFew();
         if (stackTopFew != null) {
             message = messageWithoutStackTop + "\n\n"
-                    + _CoreAPI.ERROR_MESSAGE_HR + "\n"
+                    + MessageUtil.ERROR_MESSAGE_HR + "\n"
                     + FTL_INSTRUCTION_STACK_TRACE_TITLE + "\n"
                     + stackTopFew
-                    + _CoreAPI.ERROR_MESSAGE_HR;
+                    + MessageUtil.ERROR_MESSAGE_HR;
             messageWithoutStackTop = message.substring(0, messageWithoutStackTop.length());  // to reuse backing char[]
         } else {
             message = messageWithoutStackTop;
@@ -214,7 +216,7 @@ public class TemplateException extends Exception {
                 if (renderedFtlInstructionStackSnapshot == null) {
                     StringWriter sw = new StringWriter();
                     PrintWriter pw = new PrintWriter(sw);
-                    _CoreAPI.outputInstructionStack(ftlInstructionStackSnapshot, false, pw);
+                    Environment.outputInstructionStack(ftlInstructionStackSnapshot, false, pw);
                     pw.close();
                     if (renderedFtlInstructionStackSnapshot == null) {
                         renderedFtlInstructionStackSnapshot = sw.toString();
@@ -238,7 +240,7 @@ public class TemplateException extends Exception {
                         s = "";
                     } else {
                         StringWriter sw = new StringWriter();
-                        _CoreAPI.outputInstructionStack(ftlInstructionStackSnapshot, true, sw);
+                        Environment.outputInstructionStack(ftlInstructionStackSnapshot, true, sw);
                         s = sw.toString();
                     }
                     if (renderedFtlInstructionStackSnapshotTop == null) {
@@ -343,10 +345,10 @@ public class TemplateException extends Exception {
                 if (stackTrace != null) {
                     out.println(getMessageWithoutStackTop());  // Not getMessage()!
                     out.println();
-                    out.println(_CoreAPI.ERROR_MESSAGE_HR);
+                    out.println(MessageUtil.ERROR_MESSAGE_HR);
                     out.println(FTL_INSTRUCTION_STACK_TRACE_TITLE);
                     out.print(stackTrace);
-                    out.println(_CoreAPI.ERROR_MESSAGE_HR);
+                    out.println(MessageUtil.ERROR_MESSAGE_HR);
                 } else {
                     ftlStackTrace = false;
                     javaStackTrace = true;
@@ -357,7 +359,7 @@ public class TemplateException extends Exception {
                 if (ftlStackTrace) {  // We are after an FTL stack trace
                     out.println();
                     out.println("Java stack trace (for programmers):");
-                    out.println(_CoreAPI.ERROR_MESSAGE_HR);
+                    out.println(MessageUtil.ERROR_MESSAGE_HR);
                     synchronized (lock) {
                         if (messageWasAlreadyPrintedForThisTrace == null) {
                             messageWasAlreadyPrintedForThisTrace = new ThreadLocal();

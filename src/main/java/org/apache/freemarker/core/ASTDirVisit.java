@@ -31,7 +31,7 @@ import org.apache.freemarker.core.model.impl.SimpleSequence;
 /**
  * AST directive node: {@code #visit}.
  */
-final class ASTDirVisit extends _ASTElement {
+final class ASTDirVisit extends ASTDirective {
     
     ASTExpression targetNode, namespaces;
     

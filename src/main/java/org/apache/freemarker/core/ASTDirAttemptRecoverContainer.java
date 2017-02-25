@@ -25,7 +25,7 @@ import java.io.IOException;
  * AST directive node: Holder for the attempted section of the {@code #attempt} element and of the nested
  * {@code #recover} element ({@link ASTDirRecover}).
  */
-final class ASTDirAttemptRecoverContainer extends _ASTElement {
+final class ASTDirAttemptRecoverContainer extends ASTDirective {
     
     private _ASTElement attemptedSection;
     private ASTDirRecover recoverySection;

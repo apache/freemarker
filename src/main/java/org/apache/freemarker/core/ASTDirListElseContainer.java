@@ -23,7 +23,7 @@ import java.io.IOException;
 /**
  * AST directive node: When a {@code #list} has an {@code #else}, this is the parent of the two nodes.
  */
-class ASTDirListElseContainer extends _ASTElement {
+class ASTDirListElseContainer extends ASTDirective {
 
     private final ASTDirList listPart;
     private final ASTDirElseOfList elsePart;

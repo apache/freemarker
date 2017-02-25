@@ -372,7 +372,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      * See {@link Configuration#setTagSyntax(int)}.
      */
     public void setTagSyntax(int tagSyntax) {
-        _TemplateAPI.valideTagSyntaxValue(tagSyntax);
+        Configuration.valideTagSyntaxValue(tagSyntax);
         this.tagSyntax = Integer.valueOf(tagSyntax);
     }
 
@@ -395,7 +395,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      * See {@link Configuration#setNamingConvention(int)}.
      */
     public void setNamingConvention(int namingConvention) {
-        _TemplateAPI.validateNamingConventionValue(namingConvention);
+        Configuration.validateNamingConventionValue(namingConvention);
         this.namingConvention = Integer.valueOf(namingConvention);
     }
 
@@ -442,7 +442,8 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      * Sets the output format of the template; see {@link Configuration#setAutoEscapingPolicy(int)} for more.
      */
     public void setAutoEscapingPolicy(int autoEscapingPolicy) {
-        _TemplateAPI.validateAutoEscapingPolicyValue(autoEscapingPolicy);
+        Configuration.validateAutoEscapingPolicyValue(autoEscapingPolicy);
+
         this.autoEscapingPolicy = Integer.valueOf(autoEscapingPolicy);
     }
 

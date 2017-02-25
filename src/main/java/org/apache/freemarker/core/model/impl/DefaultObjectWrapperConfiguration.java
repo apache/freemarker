@@ -35,7 +35,7 @@ import org.apache.freemarker.core.model.impl.beans.BeansWrapperConfiguration;
 public abstract class DefaultObjectWrapperConfiguration extends BeansWrapperConfiguration {
     
     private boolean useAdaptersForContainers = true;
-    private boolean forceLegacyNonListCollections = true; // [FM3] [2.4]: = IcI < _TemplateAPI.VERSION_INT_2_4_0;
+    private boolean forceLegacyNonListCollections = true; // [FM3] [2.4]: = IcI < _CoreAPI.VERSION_INT_2_4_0;
     private boolean iterableSupport;
 
     protected DefaultObjectWrapperConfiguration(Version incompatibleImprovements) {

@@ -24,7 +24,7 @@ import java.io.IOException;
 /**
  * AST directive node: {@code #else} inside a {@code  #list}.
  */
-final class ASTDirElseOfList extends _ASTElement {
+final class ASTDirElseOfList extends ASTDirective {
     
     ASTDirElseOfList(TemplateElements children) {
         setChildren(children);

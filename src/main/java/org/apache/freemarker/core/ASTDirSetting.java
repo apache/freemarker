@@ -30,7 +30,7 @@ import org.apache.freemarker.core.util._StringUtil;
 /**
  * AST directive node: {@code #setting}.
  */
-final class ASTDirSetting extends _ASTElement {
+final class ASTDirSetting extends ASTDirective {
 
     private final String key;
     private final ASTExpression value;
@@ -63,8 +63,8 @@ final class ASTDirSetting extends _ASTElement {
         String key = keyTk.image;
         if (Arrays.binarySearch(SETTING_NAMES, key) < 0) {
             StringBuilder sb = new StringBuilder();
-            if (_TemplateAPI.getConfigurationSettingNames(cfg, true).contains(key)
-                    || _TemplateAPI.getConfigurationSettingNames(cfg, false).contains(key)) {
+            if (cfg.getSettingNames(true).contains(key)
+                    || cfg.getSettingNames(false).contains(key)) {
                 sb.append("The setting name is recognized, but changing this setting from inside a template isn't "
                         + "supported.");                
             } else {

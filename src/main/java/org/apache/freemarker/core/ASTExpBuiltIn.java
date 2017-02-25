@@ -481,5 +481,5 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         default: throw new IndexOutOfBoundsException();
         }
     }
-    
+
 }

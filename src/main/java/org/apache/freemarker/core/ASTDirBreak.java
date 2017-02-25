@@ -22,7 +22,7 @@ package org.apache.freemarker.core;
 /**
  * AST directive node: {@code #break}
  */
-final class ASTDirBreak extends _ASTElement {
+final class ASTDirBreak extends ASTDirective {
 
     @Override
     _ASTElement[] accept(Environment env) {

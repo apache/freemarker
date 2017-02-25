@@ -30,7 +30,7 @@ import org.apache.freemarker.core.util._StringUtil;
  * This is also used as the child of {@link ASTDirAssignmentsContainer}, if there are multiple assignments in the same
  * tag, like in {@code <#local x=1 y=2>}.
  */
-final class ASTDirAssignment extends _ASTElement {
+final class ASTDirAssignment extends ASTDirective {
 
     // These must not clash with ArithmeticExpression.TYPE_... constants: 
     private static final int OPERATOR_TYPE_EQUALS = 0x10000;
@@ -162,10 +162,10 @@ final class ASTDirAssignment extends _ASTElement {
                 }
 
                 if (operatorType == OPERATOR_TYPE_PLUS_PLUS) {
-                    value  = ASTExpAddOrConcat._evalOnNumbers(env, getParentElement(), lhoNumber, ONE);
+                    value  = ASTExpAddOrConcat._evalOnNumbers(env, getParent(), lhoNumber, ONE);
                 } else if (operatorType == OPERATOR_TYPE_MINUS_MINUS) {
                     value = ArithmeticExpression._eval(
-                            env, getParentElement(), lhoNumber, ArithmeticExpression.TYPE_SUBSTRACTION, ONE);
+                            env, getParent(), lhoNumber, ArithmeticExpression.TYPE_SUBSTRACTION, ONE);
                 } else { // operatorType == ArithmeticExpression.TYPE_...
                     Number rhoNumber = valueExp.evalToNumber(env);
                     value = ArithmeticExpression._eval(env, this, lhoNumber, operatorType, rhoNumber);
@@ -184,7 +184,7 @@ final class ASTDirAssignment extends _ASTElement {
     @Override
     protected String dump(boolean canonical) {
         StringBuilder buf = new StringBuilder();
-        String dn = getParentElement() instanceof ASTDirAssignmentsContainer ? null : getNodeTypeSymbol();
+        String dn = getParent() instanceof ASTDirAssignmentsContainer ? null : getNodeTypeSymbol();
         if (dn != null) {
             if (canonical) buf.append("<");
             buf.append(dn);

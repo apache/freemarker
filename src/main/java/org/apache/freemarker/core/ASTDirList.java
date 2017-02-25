@@ -41,7 +41,7 @@ import org.apache.freemarker.core.util._StringUtil;
  * AST directive node: {@code #list} (or {@code #foreach}) element, or pre-{@code #else} section of it inside a
  * {@link ASTDirListElseContainer}.
  */
-final class ASTDirList extends _ASTElement {
+final class ASTDirList extends ASTDirective {
 
     private final ASTExpression listedExp;
     private final String loopVarName;
@@ -150,7 +150,7 @@ final class ASTDirList extends _ASTElement {
         if (canonical) {
             buf.append(">");
             buf.append(getChildrenCanonicalForm());
-            if (!(getParentElement() instanceof ASTDirListElseContainer)) {
+            if (!(getParent() instanceof ASTDirListElseContainer)) {
                 buf.append("</");
                 buf.append(getNodeTypeSymbol());
                 buf.append('>');

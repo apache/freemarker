@@ -51,6 +51,8 @@ class MessageUtil {
 
     static final String EMBEDDED_MESSAGE_END = "\n---end-message---";
 
+    static final String ERROR_MESSAGE_HR = "----";
+
     // Can't be instantiated
     private MessageUtil() { }
 

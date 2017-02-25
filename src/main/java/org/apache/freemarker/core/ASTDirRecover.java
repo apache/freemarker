@@ -24,7 +24,7 @@ import java.io.IOException;
 /**
  * AST directive node: {@code #recover}.
  */
-final class ASTDirRecover extends _ASTElement {
+final class ASTDirRecover extends ASTDirective {
     
     ASTDirRecover(TemplateElements children) {
         setChildren(children);

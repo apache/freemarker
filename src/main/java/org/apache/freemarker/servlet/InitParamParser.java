@@ -40,6 +40,8 @@ import org.slf4j.Logger;
 
 final class InitParamParser {
 
+    // [FM3] Can't we just use the same syntax for TemplateLoader-s as Configuration does? Then we wouldn't depend on
+    // _ObjectBuilderSettingEvaluator either, and it could become package visible.
     static final String TEMPLATE_PATH_PREFIX_CLASS = "class://";
     static final String TEMPLATE_PATH_PREFIX_CLASSPATH = "classpath:";
     static final String TEMPLATE_PATH_PREFIX_FILE = "file://";

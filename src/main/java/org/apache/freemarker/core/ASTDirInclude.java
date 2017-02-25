@@ -31,7 +31,7 @@ import org.apache.freemarker.core.util._StringUtil;
 /**
  * AST directive node: {@code #include} 
  */
-final class ASTDirInclude extends _ASTElement {
+final class ASTDirInclude extends ASTDirective {
 
     private final ASTExpression includedTemplateNameExp, encodingExp, parseExp, ignoreMissingExp;
     private final String encoding;

@@ -252,7 +252,7 @@ public class Template extends Configurable {
             reader = ltbReader;
             
             try {
-                FMParser parser = _CoreAPI.newFMParser(
+                FMParser parser = new FMParser(
                         this, reader, actualParserConfiguration, streamToUnmarkWhenEncEstabd);
                 try {
                     rootElement = parser.Root();
@@ -314,13 +314,13 @@ public class Template extends Configurable {
         } catch (IOException e) {
             throw new BugException("Plain text template creation failed", e);
         }
-        _CoreAPI.replaceText((ASTStaticText) template.rootElement, content);
+        ((ASTStaticText) template.rootElement).replaceText(content);
         DebuggerService.registerTemplate(template);
         return template;
     }
 
     private static Version normalizeTemplateLanguageVersion(Version incompatibleImprovements) {
-        _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
+        _CoreAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         return Configuration.VERSION_3_0_0;
     }
 

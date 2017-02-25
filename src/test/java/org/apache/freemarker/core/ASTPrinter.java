@@ -248,11 +248,11 @@ public class ASTPrinter {
     
     public static void validateAST(Template t) throws InvalidASTException {
         final _ASTElement node = t.getRootTreeNode();
-        if (node.getParentElement() != null) {
+        if (node.getParent() != null) {
             throw new InvalidASTException("Root node parent must be null."
                     + "\nRoot node: " + node.dump(false)
                     + "\nParent"
-                    + ": " + node.getParentElement().getClass() + ", " + node.getParentElement().dump(false));
+                    + ": " + node.getParent().getClass() + ", " + node.getParent().dump(false));
         }
         validateAST(node);
     }
@@ -261,12 +261,12 @@ public class ASTPrinter {
         int childCount = te.getChildCount();
         for (int i = 0; i < childCount; i++) {
             _ASTElement child = te.getChild(i);
-            _ASTElement parentElement = child.getParentElement();
+            _ASTElement parentElement = child.getParent();
             // As ASTImplicitParent.accept does nothing but returns its children, it's optimized out in the final
             // AST tree. While it will be present as a child, the parent element also will have children
             // that contains the children of the ASTImplicitParent directly. 
-            if (parentElement instanceof ASTImplicitParent && parentElement.getParentElement() != null) {
-                parentElement = parentElement.getParentElement();
+            if (parentElement instanceof ASTImplicitParent && parentElement.getParent() != null) {
+                parentElement = parentElement.getParent();
             }
             if (parentElement != te) {
                 throw new InvalidASTException("Wrong parent node."

@@ -22,7 +22,7 @@ package org.apache.freemarker.core;
 /**
  * AST directive node: {@code #return}.
  */
-final class ASTDirReturn extends _ASTElement {
+final class ASTDirReturn extends ASTDirective {
 
     private ASTExpression exp;
 
@@ -35,7 +35,7 @@ final class ASTDirReturn extends _ASTElement {
         if (exp != null) {
             env.setLastReturnValue(exp.eval(env));
         }
-        if (nextSibling() == null && getParentElement() instanceof ASTDirMacro) {
+        if (nextSibling() == null && getParent() instanceof ASTDirMacro) {
             // Avoid unnecessary exception throwing 
             return null;
         }

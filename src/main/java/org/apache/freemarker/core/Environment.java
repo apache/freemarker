@@ -2086,7 +2086,7 @@ public final class Environment extends Configurable {
     static private ASTDirMacro getEnclosingMacro(_ASTElement stackEl) {
         while (stackEl != null) {
             if (stackEl instanceof ASTDirMacro) return (ASTDirMacro) stackEl;
-            stackEl = stackEl.getParentElement();
+            stackEl = stackEl.getParent();
         }
         return null;
     }

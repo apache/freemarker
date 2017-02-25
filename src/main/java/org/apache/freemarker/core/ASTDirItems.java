@@ -26,7 +26,7 @@ import org.apache.freemarker.core.util._StringUtil;
 /**
  * AST directive node: {@code #items}
  */
-class ASTDirItems extends _ASTElement {
+class ASTDirItems extends ASTDirective {
 
     private final String loopVarName;
     private final String loopVar2Name;

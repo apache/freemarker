@@ -22,7 +22,7 @@ package org.apache.freemarker.core;
 /**
  * AST directive node: {@code #case} (inside a {@code #switch}) 
  */
-final class ASTDirCase extends _ASTElement {
+final class ASTDirCase extends ASTDirective {
 
     final int TYPE_CASE = 0;
     final int TYPE_DEFAULT = 1;

@@ -24,7 +24,7 @@ import java.io.IOException;
 /**
  * AST directive node: {@code #flush} 
  */
-final class ASTDirFlush extends _ASTElement {
+final class ASTDirFlush extends ASTDirective {
 
     @Override
     _ASTElement[] accept(Environment env) throws IOException {

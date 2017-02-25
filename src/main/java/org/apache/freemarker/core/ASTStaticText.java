@@ -111,7 +111,7 @@ final class ASTStaticText extends _ASTElement {
         if (!stripWhitespace || text.length == 0 ) {
             return this;
         }
-        _ASTElement parentElement = getParentElement();
+        _ASTElement parentElement = getParent();
         if (isTopLevelTextIfParentIs(parentElement) && previousSibling() == null) {
             return this;
         }
@@ -352,7 +352,7 @@ final class ASTStaticText extends _ASTElement {
             if (!_StringUtil.isTrimmableToEmpty(text)) {
                 return false;
             }
-            _ASTElement parentElement = getParentElement();
+            _ASTElement parentElement = getParent();
             boolean atTopLevel = isTopLevelTextIfParentIs(parentElement);
             _ASTElement prevSibling = previousSibling();
             _ASTElement nextSibling = nextSibling();
@@ -365,7 +365,7 @@ final class ASTStaticText extends _ASTElement {
 
     private boolean isTopLevelTextIfParentIs(_ASTElement parentElement) {
         return parentElement == null
-                || parentElement.getParentElement() == null && parentElement instanceof ASTImplicitParent;
+                || parentElement.getParent() == null && parentElement instanceof ASTImplicitParent;
     }
     
 

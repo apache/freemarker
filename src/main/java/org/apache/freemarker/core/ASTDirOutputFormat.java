@@ -24,7 +24,7 @@ import java.io.IOException;
 /**
  * AST directive node: {@code #outputformat}.
  */
-final class ASTDirOutputFormat extends _ASTElement {
+final class ASTDirOutputFormat extends ASTDirective {
     
     private final ASTExpression paramExp;
 

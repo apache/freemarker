@@ -223,7 +223,7 @@ public class ConfigurationTest extends TestCase {
     
     public void testVersion() {
         Version v = Configuration.getVersion();
-        assertTrue(v.intValue() >= _TemplateAPI.VERSION_INT_3_0_0);
+        assertTrue(v.intValue() >= _CoreAPI.VERSION_INT_3_0_0);
         
         try {
             new Configuration(new Version(999, 1, 2));

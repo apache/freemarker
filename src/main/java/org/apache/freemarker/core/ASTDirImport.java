@@ -27,7 +27,7 @@ import org.apache.freemarker.core.util._StringUtil;
 /**
  * AST directive node: {@code #import}
  */
-final class ASTDirImport extends _ASTElement {
+final class ASTDirImport extends ASTDirective {
 
     private ASTExpression importedTemplateNameExp;
     private String targetNsVarName;

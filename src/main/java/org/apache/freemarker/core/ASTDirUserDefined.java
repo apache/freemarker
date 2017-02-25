@@ -40,7 +40,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * AST directive node: {@code <@exp .../>} or {@code <@exp ...>...</@...>}. Calls an user-defined directive (like a
  * macro).
  */
-final class ASTDirUserDefined extends _ASTElement implements DirectiveCallPlace {
+final class ASTDirUserDefined extends ASTDirective implements DirectiveCallPlace {
 
     private ASTExpression nameExp;
     private Map namedArgs;

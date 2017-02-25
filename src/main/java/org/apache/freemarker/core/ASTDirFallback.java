@@ -24,7 +24,7 @@ import java.io.IOException;
 /**
  * AST directive node: {@code #fallback}.
  */
-final class ASTDirFallback extends _ASTElement {
+final class ASTDirFallback extends ASTDirective {
 
     @Override
     _ASTElement[] accept(Environment env) throws IOException, TemplateException {

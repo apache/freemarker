@@ -34,7 +34,7 @@ import org.apache.freemarker.core.model.TemplateTransformModel;
 /**
  * AST directive node: {@code #transform}.
  */
-final class ASTDirTransform extends _ASTElement {
+final class ASTDirTransform extends ASTDirective {
 
     private ASTExpression transformExpression;
     Map namedArgs;

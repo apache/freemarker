@@ -22,7 +22,7 @@ package org.apache.freemarker.core;
 /**
  * AST directive node: {@code #stop}.
  */
-final class ASTDirStop extends _ASTElement {
+final class ASTDirStop extends ASTDirective {
 
     private ASTExpression exp;
 

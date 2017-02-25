@@ -30,7 +30,7 @@ import org.apache.freemarker.core.util.StandardCompress;
  * 
  * @see org.apache.freemarker.core.util.StandardCompress
  */
-final class ASTDirCompress extends _ASTElement {
+final class ASTDirCompress extends ASTDirective {
 
     ASTDirCompress(TemplateElements children) { 
         setChildren(children);

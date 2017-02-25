@@ -217,7 +217,7 @@ abstract public class _ASTElement extends ASTNode {
     /**
      * The element whose child this element is, or {@code null} if this is the root node.
      */
-    final _ASTElement getParentElement() {
+    final _ASTElement getParent() {
         return parent;
     }
 

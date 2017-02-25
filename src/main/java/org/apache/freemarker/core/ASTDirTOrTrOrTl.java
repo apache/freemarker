@@ -22,7 +22,7 @@ package org.apache.freemarker.core;
 /**
  * AST directive node: {@code #t}, {@code #tr}, {@code #tl}.
  */
-final class ASTDirTOrTrOrTl extends _ASTElement {
+final class ASTDirTOrTrOrTl extends ASTDirective {
     
     private static final int TYPE_T = 0;
     private static final int TYPE_LT = 1;

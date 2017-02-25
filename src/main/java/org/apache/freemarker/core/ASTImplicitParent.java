@@ -51,7 +51,7 @@ final class ASTImplicitParent extends _ASTElement {
         if (canonical) {
             return getChildrenCanonicalForm();
         } else {
-            if (getParentElement() == null) {
+            if (getParent() == null) {
                 return "root";
             }
             return getNodeTypeSymbol(); // ASTImplicitParent is uninteresting in a stack trace.

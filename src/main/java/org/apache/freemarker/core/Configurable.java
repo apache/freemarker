@@ -355,7 +355,7 @@ public class Configurable {
      * Called by the {@link Configuration} constructor.
      */
     protected Configurable(Version incompatibleImprovements) {
-        _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
+        _CoreAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         parent = null;
         locale = Locale.getDefault();
         timeZone = TimeZone.getDefault();
@@ -364,8 +364,7 @@ public class Configurable {
         timeFormat = "";
         dateFormat = "";
         dateTimeFormat = "";
-        templateExceptionHandler = _TemplateAPI.getDefaultTemplateExceptionHandler(
-                incompatibleImprovements);
+        templateExceptionHandler = Configuration.getDefaultTemplateExceptionHandler();
         arithmeticEngine = BigDecimalArithmeticEngine.INSTANCE;
         objectWrapper = Configuration.getDefaultObjectWrapper(incompatibleImprovements);
         autoFlush = Boolean.TRUE;
@@ -2144,8 +2143,8 @@ public class Configurable {
                     || CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE.equals(name)) {
                 Map map = (Map) _ObjectBuilderSettingEvaluator.eval(
                                 value, Map.class, false, _SettingEvaluationEnvironment.getCurrent());
-                _CoreAPI.checkSettingValueItemsType("Map keys", String.class, map.keySet());
-                _CoreAPI.checkSettingValueItemsType("Map values", TemplateNumberFormatFactory.class, map.values());
+                checkSettingValueItemsType("Map keys", String.class, map.keySet());
+                checkSettingValueItemsType("Map values", TemplateNumberFormatFactory.class, map.values());
                 setCustomNumberFormats(map);
             } else if (TIME_FORMAT_KEY_SNAKE_CASE.equals(name) || TIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setTimeFormat(value);
@@ -2157,8 +2156,8 @@ public class Configurable {
                     || CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE.equals(name)) {
                 Map map = (Map) _ObjectBuilderSettingEvaluator.eval(
                                 value, Map.class, false, _SettingEvaluationEnvironment.getCurrent());
-                _CoreAPI.checkSettingValueItemsType("Map keys", String.class, map.keySet());
-                _CoreAPI.checkSettingValueItemsType("Map values", TemplateDateFormatFactory.class, map.values());
+                checkSettingValueItemsType("Map keys", String.class, map.keySet());
+                checkSettingValueItemsType("Map values", TemplateDateFormatFactory.class, map.values());
                 setCustomDateFormats(map);
             } else if (TIME_ZONE_KEY_SNAKE_CASE.equals(name) || TIME_ZONE_KEY_CAMEL_CASE.equals(name)) {
                 setTimeZone(parseTimeZoneSettingValue(value));
@@ -2286,7 +2285,23 @@ public class Configurable {
             throw unknownSettingException(name);
         }
     }
-    
+
+    /**
+     * @throws IllegalArgumentException
+     *             if the type of the some of the values isn't as expected
+     */
+    private void checkSettingValueItemsType(String somethingsSentenceStart, Class<?> expectedClass,
+                                                  Collection<?> values) {
+        if (values == null) return;
+        for (Object value : values) {
+            if (!expectedClass.isInstance(value)) {
+                throw new IllegalArgumentException(somethingsSentenceStart + " must be instances of "
+                        + _ClassUtil.getShortClassName(expectedClass) + ", but one of them was a(n) "
+                        + _ClassUtil.getShortClassNameOfObject(value) + ".");
+            }
+        }
+    }
+
     /**
      * Returns the valid setting names that aren't {@link Configuration}-only.
      *

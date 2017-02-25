@@ -33,7 +33,7 @@ import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 /**
  * AST directive node: Like {@code <#local x>...</#local>}.
  */
-final class ASTDirCapturingAssignment extends _ASTElement {
+final class ASTDirCapturingAssignment extends ASTDirective {
 
     private final String varName;
     private final ASTExpression namespaceExp;

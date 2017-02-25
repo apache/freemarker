@@ -24,7 +24,7 @@ import java.io.IOException;
 /**
  * AST directive node: {@code #noescape}.
  */
-class ASTDirNoEscape extends _ASTElement {
+class ASTDirNoEscape extends ASTDirective {
 
     ASTDirNoEscape(TemplateElements children) {
         setChildren(children);

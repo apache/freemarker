@@ -554,17 +554,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         // Nothing to override
     }
 
-    private TemplateExceptionHandler getDefaultTemplateExceptionHandler() {
-        return getDefaultTemplateExceptionHandler(getIncompatibleImprovements());
+    static TemplateExceptionHandler getDefaultTemplateExceptionHandler() {
+        return TemplateExceptionHandler.DEBUG_HANDLER; // [FM3] RETHROW
     }
-    
+
     private ObjectWrapper getDefaultObjectWrapper() {
         return getDefaultObjectWrapper(getIncompatibleImprovements());
-    }
-    
-    // Package visible as Configurable needs this to initialize the field defaults.
-    static TemplateExceptionHandler getDefaultTemplateExceptionHandler(Version incompatibleImprovements) {
-        return TemplateExceptionHandler.DEBUG_HANDLER;
     }
     
     @Override
@@ -1199,7 +1194,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.20
      */
     public void setIncompatibleImprovements(Version incompatibleImprovements) {
-        _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
+        _CoreAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         
         if (!this.incompatibleImprovements.equals(incompatibleImprovements)) {
             this.incompatibleImprovements = incompatibleImprovements;
@@ -1318,12 +1313,24 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.24
      */
     public void setAutoEscapingPolicy(int autoEscapingPolicy) {
-        _TemplateAPI.validateAutoEscapingPolicyValue(autoEscapingPolicy);
+        validateAutoEscapingPolicyValue(autoEscapingPolicy);
         
         int prevAutoEscaping = getAutoEscapingPolicy();
         this.autoEscapingPolicy = autoEscapingPolicy;
         if (prevAutoEscaping != autoEscapingPolicy) {
             clearTemplateCache();
+        }
+    }
+
+    // [FM3] Use enum; won't be needed
+    static void validateAutoEscapingPolicyValue(int autoEscaping) {
+        if (autoEscaping != Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY
+                && autoEscaping != Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY
+                && autoEscaping != Configuration.DISABLE_AUTO_ESCAPING_POLICY) {
+            throw new IllegalArgumentException("\"auto_escaping\" can only be set to one of these: "
+                    + "Configuration.ENABLE_AUTO_ESCAPING_IF_DEFAULT, "
+                    + "or Configuration.ENABLE_AUTO_ESCAPING_IF_SUPPORTED"
+                    + "or Configuration.DISABLE_AUTO_ESCAPING");
         }
     }
 
@@ -1661,8 +1668,19 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * the syntax.
      */
     public void setTagSyntax(int tagSyntax) {
-        _TemplateAPI.valideTagSyntaxValue(tagSyntax);
+        valideTagSyntaxValue(tagSyntax);
         this.tagSyntax = tagSyntax;
+    }
+
+    // [FM3] Use enum; won't be needed
+    static void valideTagSyntaxValue(int tagSyntax) {
+        if (tagSyntax != Configuration.AUTO_DETECT_TAG_SYNTAX
+                && tagSyntax != Configuration.SQUARE_BRACKET_TAG_SYNTAX
+                && tagSyntax != Configuration.ANGLE_BRACKET_TAG_SYNTAX) {
+            throw new IllegalArgumentException("\"tag_syntax\" can only be set to one of these: "
+                    + "Configuration.AUTO_DETECT_TAG_SYNTAX, Configuration.ANGLE_BRACKET_SYNTAX, "
+                    + "or Configuration.SQUARE_BRACKET_SYNTAX");
+        }
     }
 
     /**
@@ -1719,10 +1737,21 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.23
      */
     public void setNamingConvention(int namingConvention) {
-        _TemplateAPI.validateNamingConventionValue(namingConvention);
+        validateNamingConventionValue(namingConvention);
         this.namingConvention = namingConvention;
     }
 
+    // [FM3] Use enum; won't be needed
+    static void validateNamingConventionValue(int namingConvention) {
+        if (namingConvention != Configuration.AUTO_DETECT_NAMING_CONVENTION
+                && namingConvention != Configuration.LEGACY_NAMING_CONVENTION
+                && namingConvention != Configuration.CAMEL_CASE_NAMING_CONVENTION) {
+            throw new IllegalArgumentException("\"naming_convention\" can only be set to one of these: "
+                    + "Configuration.AUTO_DETECT_NAMING_CONVENTION, "
+                    + "or Configuration.LEGACY_NAMING_CONVENTION"
+                    + "or Configuration.CAMEL_CASE_NAMING_CONVENTION");
+        }
+    }
     /**
      * The getter pair of {@link #setNamingConvention(int)}.
      * 
@@ -2695,7 +2724,17 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.24
      */
     public Set<String> getSupportedBuiltInNames(int namingConvention) {
-        return _CoreAPI.getSupportedBuiltInNames(namingConvention);
+        Set<String> names;
+        if (namingConvention == Configuration.AUTO_DETECT_NAMING_CONVENTION) {
+            names = ASTExpBuiltIn.BUILT_INS_BY_NAME.keySet();
+        } else if (namingConvention == Configuration.LEGACY_NAMING_CONVENTION) {
+            names = ASTExpBuiltIn.SNAKE_CASE_NAMES;
+        } else if (namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION) {
+            names = ASTExpBuiltIn.CAMEL_CASE_NAMES;
+        } else {
+            throw new IllegalArgumentException("Unsupported naming convention constant: " + namingConvention);
+        }
+        return Collections.unmodifiableSet(names);
     }
     
     /**
@@ -2720,11 +2759,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     public Set<String> getSupportedBuiltInDirectiveNames(int namingConvention) {
         if (namingConvention == AUTO_DETECT_NAMING_CONVENTION) {
-            return _CoreAPI.ALL_BUILT_IN_DIRECTIVE_NAMES;
+            return ASTDirective.ALL_BUILT_IN_DIRECTIVE_NAMES;
         } else if (namingConvention == LEGACY_NAMING_CONVENTION) {
-            return _CoreAPI.LEGACY_BUILT_IN_DIRECTIVE_NAMES;
+            return ASTDirective.LEGACY_BUILT_IN_DIRECTIVE_NAMES;
         } else if (namingConvention == CAMEL_CASE_NAMING_CONVENTION) {
-            return _CoreAPI.CAMEL_CASE_BUILT_IN_DIRECTIVE_NAMES;
+            return ASTDirective.CAMEL_CASE_BUILT_IN_DIRECTIVE_NAMES;
         } else {
             throw new IllegalArgumentException("Unsupported naming convention constant: " + namingConvention);
         }

@@ -53,11 +53,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core._TemplateAPI;
+import org.apache.freemarker.core.*;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
@@ -106,7 +102,7 @@ public class DefaultObjectWrapperTest {
         expected.add(Configuration.VERSION_3_0_0);
 
         List<Version> actual = new ArrayList<>();
-        int i = _TemplateAPI.VERSION_INT_3_0_0;
+        int i = _CoreAPI.VERSION_INT_3_0_0;
         while (i <= Configuration.getVersion().intValue()) {
             int major = i / 1000000;
             int minor = i % 1000000 / 1000;

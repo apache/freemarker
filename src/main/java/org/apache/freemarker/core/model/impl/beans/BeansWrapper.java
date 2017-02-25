@@ -38,13 +38,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core._CoreLogs;
-import org.apache.freemarker.core._DelayedFTLTypeDescription;
-import org.apache.freemarker.core._DelayedShortClassName;
-import org.apache.freemarker.core._TemplateAPI;
-import org.apache.freemarker.core._TemplateModelException;
+import org.apache.freemarker.core.*;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
@@ -707,7 +701,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * @since 2.3.21
      */
     protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
-        _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
+        _CoreAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         return Configuration.VERSION_3_0_0;
     }
 

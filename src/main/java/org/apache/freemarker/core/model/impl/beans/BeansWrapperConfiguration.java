@@ -20,7 +20,7 @@
 package org.apache.freemarker.core.model.impl.beans;
 
 import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core._TemplateAPI;
+import org.apache.freemarker.core._CoreAPI;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
@@ -74,7 +74,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
      * @since 2.3.22
      */
     protected BeansWrapperConfiguration(Version incompatibleImprovements, boolean isIncompImprsAlreadyNormalized) {
-        _TemplateAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
+        _CoreAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         
         incompatibleImprovements = isIncompImprsAlreadyNormalized
                 ? incompatibleImprovements

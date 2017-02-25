@@ -25,11 +25,11 @@ import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.util._StringUtil;
 
 /**
- * [2.4] Should become public somehow; this is more intelligent than a {@code null} check, for example, when the body
- * only contains a thread interruption check, it treats it as valid. Indicates that the directive shouldn't have
- * nested content, but it had. This will probably become public when the directive/method stuff was reworked.
+ * Used in custom {@link org.apache.freemarker.core.model.TemplateDirectiveModel}-s to check if the directive invocation
+ * has no body. This is more intelligent than a {@code null} check; for example, when the body
+ * only contains a thread interruption check node, it treats it as valid.
  */
-class NestedContentNotSupportedException extends TemplateException {
+public class NestedContentNotSupportedException extends TemplateException {
 
     public static void check(TemplateDirectiveBody body) throws NestedContentNotSupportedException {
         if (body == null) {

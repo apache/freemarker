@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.NestedContentNotSupportedException;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._CoreAPI;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
@@ -66,7 +67,7 @@ public class AssertEqualsDirective implements TemplateDirectiveModel {
         if (expected == null) {
             throw new MissingRequiredParameterException(EXPECTED_PARAM, env);
         }
-        _CoreAPI.checkHasNoNestedContent(body);
+        NestedContentNotSupportedException.check(body);
         
         if (!env.applyEqualsOperatorLenient(actual, expected)) {
             throw new AssertationFailedInTemplateException("Assertion failed:\n"

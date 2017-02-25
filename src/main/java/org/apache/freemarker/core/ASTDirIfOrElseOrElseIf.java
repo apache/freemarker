@@ -28,7 +28,7 @@ import org.apache.freemarker.core.util.BugException;
  * {@code #elseif}. Note that when an {@code #if} has related {@code #elseif}-s or {@code #else}, an
  * {@link ASTDirIfElseIfElseContainer} parent must be used. For a lonely {@code #if}, no such parent is needed. 
  */
-final class ASTDirIfOrElseOrElseIf extends _ASTElement {
+final class ASTDirIfOrElseOrElseIf extends ASTDirective {
 
     static final int TYPE_IF = 0;
     static final int TYPE_ELSE = 1;
@@ -63,7 +63,7 @@ final class ASTDirIfOrElseOrElseIf extends _ASTElement {
         if (canonical) {
             buf.append(">");
             buf.append(getChildrenCanonicalForm());
-            if (!(getParentElement() instanceof ASTDirIfElseIfElseContainer)) {
+            if (!(getParent() instanceof ASTDirIfElseIfElseContainer)) {
                 buf.append("</#if>");
             }
         }

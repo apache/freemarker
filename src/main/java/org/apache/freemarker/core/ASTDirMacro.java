@@ -33,7 +33,7 @@ import org.apache.freemarker.core.util._StringUtil;
 /**
  * AST directive node: {@code #macro}
  */
-final class ASTDirMacro extends _ASTElement implements TemplateModel {
+final class ASTDirMacro extends ASTDirective implements TemplateModel {
 
     static final ASTDirMacro DO_NOTHING_MACRO = new ASTDirMacro(".pass", 
             Collections.EMPTY_LIST, 
