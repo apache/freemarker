@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,11 +26,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.freemarker.core.util._ClassUtil;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.*;
 
 /**
- * A {@link TemplateClassResolver} that resolves only the classes whose name 
+ * A {@link TemplateClassResolver} that resolves only the classes whose name
  * was specified in the constructor.
  */
 public class OptInTemplateClassResolver implements TemplateClassResolver {

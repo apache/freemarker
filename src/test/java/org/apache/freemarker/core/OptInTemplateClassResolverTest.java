@@ -26,6 +26,7 @@ import java.util.Set;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
+import org.apache.freemarker.core.util.OptInTemplateClassResolver;
 
 public class OptInTemplateClassResolverTest extends TestCase {
 
