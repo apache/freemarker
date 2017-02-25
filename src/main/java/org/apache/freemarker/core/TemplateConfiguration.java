@@ -26,6 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;

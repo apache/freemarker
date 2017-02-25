@@ -46,6 +46,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
 
+import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
+import org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
@@ -447,7 +449,7 @@ public class ObjectBuilderSettingsTest {
             props.setProperty(Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY, "rethrow");
             cfg.setSettings(props);
             assertEquals(BeansWrapper.class, cfg.getObjectWrapper().getClass());
-            assertSame(ArithmeticEngine.BIGDECIMAL_ENGINE, cfg.getArithmeticEngine());
+            assertSame(BigDecimalArithmeticEngine.INSTANCE, cfg.getArithmeticEngine());
             assertSame(TemplateExceptionHandler.RETHROW_HANDLER, cfg.getTemplateExceptionHandler());
             assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
             assertEquals(Configuration.VERSION_3_0_0,

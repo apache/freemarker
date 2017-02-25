@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core;
 
+import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 

@@ -49,6 +49,8 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import org.apache.commons.collections.ListUtils;
+import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
+import org.apache.freemarker.core.arithmetic.impl.ConservativeArithmeticEngine;
 import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
@@ -183,7 +185,7 @@ public class TemplateConfigurationTest {
         SETTING_ASSIGNMENTS.put("templateExceptionHandler", TemplateExceptionHandler.IGNORE_HANDLER);
         SETTING_ASSIGNMENTS.put("timeFormat", "@HH:mm");
         SETTING_ASSIGNMENTS.put("timeZone", NON_DEFAULT_TZ);
-        SETTING_ASSIGNMENTS.put("arithmeticEngine", ArithmeticEngine.CONSERVATIVE_ENGINE);
+        SETTING_ASSIGNMENTS.put("arithmeticEngine", ConservativeArithmeticEngine.INSTANCE);
         SETTING_ASSIGNMENTS.put("customNumberFormats",
                 ImmutableMap.of("dummy", HexTemplateNumberFormatFactory.INSTANCE));
         SETTING_ASSIGNMENTS.put("customDateFormats",

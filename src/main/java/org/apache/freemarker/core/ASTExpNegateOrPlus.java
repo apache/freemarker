@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core;
 
+import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
+import org.apache.freemarker.core.arithmetic.impl.ConservativeArithmeticEngine;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
@@ -54,7 +56,8 @@ final class ASTExpNegateOrPlus extends ASTExpression {
         }
         target.assertNonNull(targetModel, env);
         Number n = targetModel.getAsNumber();
-        n = ArithmeticEngine.CONSERVATIVE_ENGINE.multiply(MINUS_ONE, n);
+        // [FM3] Add ArithmeticEngine.negate, then use the engine from the env
+        n = ConservativeArithmeticEngine.INSTANCE.multiply(MINUS_ONE, n);
         return new SimpleNumber(n);
     }
     

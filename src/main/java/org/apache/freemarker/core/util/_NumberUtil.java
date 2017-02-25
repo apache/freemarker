@@ -202,4 +202,27 @@ public class _NumberUtil {
         }
         return number;
     }
+
+    public static BigDecimal toBigDecimal(Number num) {
+        try {
+            return num instanceof BigDecimal ? (BigDecimal) num : new BigDecimal(num.toString());
+        } catch (NumberFormatException e) {
+            // The exception message is useless, so we add a new one:
+            throw new NumberFormatException("Can't parse this as BigDecimal number: " + _StringUtil.jQuote(num));
+        }
+    }
+
+    public static Number toBigDecimalOrDouble(String s) {
+        if (s.length() > 2) {
+            char c = s.charAt(0);
+            if (c == 'I' && (s.equals("INF") || s.equals("Infinity"))) {
+                return Double.valueOf(Double.POSITIVE_INFINITY);
+            } else if (c == 'N' && s.equals("NaN")) {
+                return Double.valueOf(Double.NaN);
+            } else if (c == '-' && s.charAt(1) == 'I' && (s.equals("-INF") || s.equals("-Infinity"))) {
+                return Double.valueOf(Double.NEGATIVE_INFINITY);
+            }
+        }
+        return new BigDecimal(s);
+    }
 }

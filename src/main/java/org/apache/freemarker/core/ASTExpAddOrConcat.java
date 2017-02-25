@@ -22,6 +22,7 @@ package org.apache.freemarker.core;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;

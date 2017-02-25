@@ -39,6 +39,9 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
+import org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine;
+import org.apache.freemarker.core.arithmetic.impl.ConservativeArithmeticEngine;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
@@ -64,11 +67,7 @@ import org.apache.freemarker.core.templateresolver.PathRegexMatcher;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
-import org.apache.freemarker.core.util.FTLUtil;
-import org.apache.freemarker.core.util.GenericParseException;
-import org.apache.freemarker.core.util._NullArgumentException;
-import org.apache.freemarker.core.util._SortedArraySet;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util.*;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
@@ -367,7 +366,7 @@ public class Configurable {
         dateTimeFormat = "";
         templateExceptionHandler = _TemplateAPI.getDefaultTemplateExceptionHandler(
                 incompatibleImprovements);
-        arithmeticEngine = ArithmeticEngine.BIGDECIMAL_ENGINE;
+        arithmeticEngine = BigDecimalArithmeticEngine.INSTANCE;
         objectWrapper = Configuration.getDefaultObjectWrapper(incompatibleImprovements);
         autoFlush = Boolean.TRUE;
         newBuiltinClassResolver = TemplateClassResolver.UNRESTRICTED_RESOLVER;
@@ -1145,7 +1144,7 @@ public class Configurable {
 
     /**
      * Sets the arithmetic engine used to perform arithmetic operations.
-     * The default is {@link ArithmeticEngine#BIGDECIMAL_ENGINE}.
+     * The default is {@link BigDecimalArithmeticEngine#INSTANCE}.
      */
     public void setArithmeticEngine(ArithmeticEngine arithmeticEngine) {
         _NullArgumentException.check("arithmeticEngine", arithmeticEngine);
@@ -2193,9 +2192,9 @@ public class Configurable {
             } else if (ARITHMETIC_ENGINE_KEY_SNAKE_CASE.equals(name) || ARITHMETIC_ENGINE_KEY_CAMEL_CASE.equals(name)) {
                 if (value.indexOf('.') == -1) { 
                     if ("bigdecimal".equalsIgnoreCase(value)) {
-                        setArithmeticEngine(ArithmeticEngine.BIGDECIMAL_ENGINE);
+                        setArithmeticEngine(BigDecimalArithmeticEngine.INSTANCE);
                     } else if ("conservative".equalsIgnoreCase(value)) {
-                        setArithmeticEngine(ArithmeticEngine.CONSERVATIVE_ENGINE);
+                        setArithmeticEngine(ConservativeArithmeticEngine.INSTANCE);
                     } else {
                         throw invalidSettingValueException(name, value);
                     }

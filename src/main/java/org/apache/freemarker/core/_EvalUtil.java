@@ -21,6 +21,8 @@ package org.apache.freemarker.core;
 
 import java.util.Date;
 
+import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
+import org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
@@ -219,7 +221,7 @@ public class _EvalUtil {
                         ? env.getArithmeticEngine()
                         : (leftExp != null
                             ? leftExp.getTemplate().getArithmeticEngine()
-                            : ArithmeticEngine.BIGDECIMAL_ENGINE);
+                            : BigDecimalArithmeticEngine.INSTANCE);
             try {
                 cmpResult = ae.compareNumbers(leftNum, rightNum);
             } catch (RuntimeException e) {
