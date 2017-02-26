@@ -27,7 +27,7 @@ import java.io.IOException;
 final class ASTDirFlush extends ASTDirective {
 
     @Override
-    _ASTElement[] accept(Environment env) throws IOException {
+    ASTElement[] accept(Environment env) throws IOException {
         env.getOut().flush();
         return null;
     }

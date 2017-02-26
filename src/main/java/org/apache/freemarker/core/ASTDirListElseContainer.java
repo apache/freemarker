@@ -37,7 +37,7 @@ class ASTDirListElseContainer extends ASTDirective {
     }
 
     @Override
-    _ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] accept(Environment env) throws TemplateException, IOException {
         if (!listPart.acceptWithResult(env)) {
             return elsePart.accept(env);
         }
@@ -55,7 +55,7 @@ class ASTDirListElseContainer extends ASTDirective {
             StringBuilder buf = new StringBuilder();
             int ln = getChildCount();
             for (int i = 0; i < ln; i++) {
-                _ASTElement element = getChild(i);
+                ASTElement element = getChild(i);
                 buf.append(element.dump(canonical));
             }
             buf.append("</#list>");

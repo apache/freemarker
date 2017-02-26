@@ -403,7 +403,7 @@ public class OutputFormatTest extends TemplateTest {
     public void testUnparsedTemplate() throws IOException, TemplateException {
         String content = "<#ftl>a<#foo>b${x}";
         {
-            Template t = Template.getPlainTextTemplate("x", content, getConfiguration());
+            Template t = Template.createPlainTextTemplate("x", content, getConfiguration());
             Writer sw = new StringWriter();
             t.process(null, sw);
             assertEquals(content, sw.toString());
@@ -412,7 +412,7 @@ public class OutputFormatTest extends TemplateTest {
         
         {
             getConfiguration().setOutputFormat(HTMLOutputFormat.INSTANCE);
-            Template t = Template.getPlainTextTemplate("x", content, getConfiguration());
+            Template t = Template.createPlainTextTemplate("x", content, getConfiguration());
             Writer sw = new StringWriter();
             t.process(null, sw);
             assertEquals(content, sw.toString());

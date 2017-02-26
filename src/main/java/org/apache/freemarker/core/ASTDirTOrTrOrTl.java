@@ -37,7 +37,7 @@ final class ASTDirTOrTrOrTl extends ASTDirective {
     }
 
     @Override
-    _ASTElement[] accept(Environment env) {
+    ASTElement[] accept(Environment env) {
         // This instruction does nothing at render-time, only parse-time.
         return null;
     }

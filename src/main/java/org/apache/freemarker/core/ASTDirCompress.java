@@ -37,8 +37,8 @@ final class ASTDirCompress extends ASTDirective {
     }
 
     @Override
-    _ASTElement[] accept(Environment env) throws TemplateException, IOException {
-        _ASTElement[] childBuffer = getChildBuffer();
+    ASTElement[] accept(Environment env) throws TemplateException, IOException {
+        ASTElement[] childBuffer = getChildBuffer();
         if (childBuffer != null) {
             env.visitAndTransform(childBuffer, StandardCompress.INSTANCE, null);
         }

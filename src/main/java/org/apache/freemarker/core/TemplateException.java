@@ -42,7 +42,7 @@ public class TemplateException extends Exception {
     private transient _ErrorDescriptionBuilder descriptionBuilder;
     private final transient Environment env;
     private final transient ASTExpression blamedExpression;
-    private transient _ASTElement[] ftlInstructionStackSnapshot;
+    private transient ASTElement[] ftlInstructionStackSnapshot;
     
     // Calculated on demand:
     private String renderedFtlInstructionStackSnapshot;  // clalc. from ftlInstructionStackSnapshot 
@@ -276,7 +276,7 @@ public class TemplateException extends Exception {
         }
     }
 
-    private _ASTElement getFailingInstruction() {
+    private ASTElement getFailingInstruction() {
         if (ftlInstructionStackSnapshot != null && ftlInstructionStackSnapshot.length > 0) {
             return ftlInstructionStackSnapshot[0];
         } else {

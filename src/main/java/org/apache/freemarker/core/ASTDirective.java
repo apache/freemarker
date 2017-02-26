@@ -7,7 +7,7 @@ import java.util.TreeSet;
 /**
  * AST directive node superclass.
  */
-abstract class ASTDirective extends _ASTElement {
+abstract class ASTDirective extends ASTElement {
 
     private static void addName(Set<String> allNames, Set<String> lcNames, Set<String> ccNames,
                                 String commonName) {

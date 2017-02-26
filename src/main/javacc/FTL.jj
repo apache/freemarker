@@ -2322,7 +2322,7 @@ ASTHashInterpolation ASTHashInterpolation() :
     }
 }
 
-_ASTElement If() :
+ASTElement If() :
 {
     Token start, end, t;
     ASTExpression condition;
@@ -2404,7 +2404,7 @@ ASTDirRecover Recover() :
     }
 }
 
-_ASTElement List() :
+ASTElement List() :
 {
     ASTExpression exp;
     Token loopVar = null, loopVar2 = null, start, end;
@@ -2466,7 +2466,7 @@ _ASTElement List() :
                 childrendBeforeElse, iterCtx.hashListing, false);
         list.setLocation(template, start, end);
 
-        _ASTElement result;
+        ASTElement result;
         if (elseOfList == null) {
             result = list;
         } else {
@@ -2753,7 +2753,7 @@ ASTDirStop Stop() :
     }
 }
 
-_ASTElement Nested() :
+ASTElement Nested() :
 {
     Token t, end;
     ArrayList bodyParameters;
@@ -2787,7 +2787,7 @@ _ASTElement Nested() :
     }
 }
 
-_ASTElement Flush() :
+ASTElement Flush() :
 {
     Token t;
 }
@@ -2800,7 +2800,7 @@ _ASTElement Flush() :
     }
 }
 
-_ASTElement Trim() :
+ASTElement Trim() :
 {
     Token t;
     ASTDirTOrTrOrTl result = null;
@@ -2822,7 +2822,7 @@ _ASTElement Trim() :
 }
 
 
-_ASTElement Assign() :
+ASTElement Assign() :
 {
     Token start, end;
     int scope;
@@ -3182,7 +3182,7 @@ ASTDirCompress Compress() :
     }
 }
 
-_ASTElement UnifiedMacroTransform() :
+ASTElement UnifiedMacroTransform() :
 {
     Token start = null, end, t;
     HashMap namedArgs = null;
@@ -3269,7 +3269,7 @@ _ASTElement UnifiedMacroTransform() :
         )
     )
     {
-        _ASTElement result = (positionalArgs != null)
+        ASTElement result = (positionalArgs != null)
         		? new ASTDirUserDefined(exp, positionalArgs, children, bodyParameters)
 	            : new ASTDirUserDefined(exp, namedArgs, children, bodyParameters);
         result.setLocation(template, start, end);
@@ -3277,7 +3277,7 @@ _ASTElement UnifiedMacroTransform() :
     }
 }
 
-_ASTElement Call() :
+ASTElement Call() :
 {
     Token start, end, id;
     HashMap namedArgs = null;
@@ -3728,9 +3728,9 @@ ASTDirSetting Setting() :
 /**
  * A production for FreeMarker directives.
  */
-_ASTElement FreemarkerDirective() :
+ASTElement FreemarkerDirective() :
 {
-    _ASTElement tp;
+    ASTElement tp;
 }
 {
     // Note that this doesn't include elements like "else", "recover", etc., because those indicate the end
@@ -3868,9 +3868,9 @@ Token UnparsedContent(Token start, StringBuilder buf) :
 
 TemplateElements MixedContentElements() :
 {
-    _ASTElement[] childBuffer = null;
+    ASTElement[] childBuffer = null;
     int childCount = 0;
-    _ASTElement elem;
+    ASTElement elem;
     mixedContentNesting++;
 }
 {
@@ -3890,9 +3890,9 @@ TemplateElements MixedContentElements() :
             if (elem != null) {
 	            childCount++;
 	            if (childBuffer == null) {
-	                childBuffer = new _ASTElement[16]; 
+	                childBuffer = new ASTElement[16]; 
 	            } else if (childBuffer.length < childCount) {
-	                _ASTElement[] newChildBuffer = new _ASTElement[childCount * 2];
+	                ASTElement[] newChildBuffer = new ASTElement[childCount * 2];
 	                for (int i = 0; i < childBuffer.length; i++) {
 	                    newChildBuffer[i] = childBuffer[i];
 	                }
@@ -3916,7 +3916,7 @@ TemplateElements MixedContentElements() :
 ASTImplicitParent ASTImplicitParent() :
 {
     ASTImplicitParent mixedContent = new ASTImplicitParent();
-    _ASTElement elem, begin = null;
+    ASTElement elem, begin = null;
     mixedContentNesting++;
 }
 {
@@ -3954,9 +3954,9 @@ ASTImplicitParent ASTImplicitParent() :
  *
  * @deprecated Use {@link #MixedContentElements} instead.
  */
-_ASTElement OptionalBlock() :
+ASTElement OptionalBlock() :
 {
-    _ASTElement tp = null;
+    ASTElement tp = null;
 }
 {
     [
@@ -3972,10 +3972,10 @@ _ASTElement OptionalBlock() :
  * A production freemarker text that may contain
  * ${...} and #{...} but no directives.
  */
-_ASTElement FreeMarkerText() :
+ASTElement FreeMarkerText() :
 {
     ASTImplicitParent nodes = new ASTImplicitParent();
-    _ASTElement elem, begin = null;
+    ASTElement elem, begin = null;
 }
 {
     (
@@ -4228,7 +4228,7 @@ List<Object> StaticTextAndInterpolations() :
  * Root production to be used when parsing
  * an entire file.
  */
-_ASTElement Root() :
+ASTElement Root() :
 {
     TemplateElements children;
 }
@@ -4248,7 +4248,7 @@ _ASTElement Root() :
     children = MixedContentElements()
     <EOF>
     {
-        _ASTElement root = children.asSingleElement(); 
+        ASTElement root = children.asSingleElement(); 
         root.setFieldsForRootElement();
         root = root.postParseCleanup(stripWhitespace);
         // The cleanup result is possibly an element from deeper:

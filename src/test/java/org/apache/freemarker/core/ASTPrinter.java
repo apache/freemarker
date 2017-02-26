@@ -242,12 +242,12 @@ public class ASTPrinter {
         validateAST(t);
         
         StringWriter out = new StringWriter();
-        printNode(t.getRootTreeNode(), "", null, opts != null ? opts : Options.DEFAULT_INSTANCE, out);
+        printNode(t.getRootASTNode(), "", null, opts != null ? opts : Options.DEFAULT_INSTANCE, out);
         return out.toString();
     }
     
     public static void validateAST(Template t) throws InvalidASTException {
-        final _ASTElement node = t.getRootTreeNode();
+        final ASTElement node = t.getRootASTNode();
         if (node.getParent() != null) {
             throw new InvalidASTException("Root node parent must be null."
                     + "\nRoot node: " + node.dump(false)
@@ -257,11 +257,11 @@ public class ASTPrinter {
         validateAST(node);
     }
 
-    private static void validateAST(_ASTElement te) {
+    private static void validateAST(ASTElement te) {
         int childCount = te.getChildCount();
         for (int i = 0; i < childCount; i++) {
-            _ASTElement child = te.getChild(i);
-            _ASTElement parentElement = child.getParent();
+            ASTElement child = te.getChild(i);
+            ASTElement parentElement = child.getParent();
             // As ASTImplicitParent.accept does nothing but returns its children, it's optimized out in the final
             // AST tree. While it will be present as a child, the parent element also will have children
             // that contains the children of the ASTImplicitParent directly. 
@@ -285,7 +285,7 @@ public class ASTPrinter {
             throw new InvalidASTException("Mixed content with child count less than 2 should removed by optimizatoin, "
                     + "but found one with " + te.getChildCount() + " child(ren).");
         }
-        _ASTElement[] children = te.getChildBuffer();
+        ASTElement[] children = te.getChildBuffer();
         if (children != null) {
             if (childCount == 0) {
                 throw new InvalidASTException(
@@ -343,8 +343,8 @@ public class ASTPrinter {
                 Object value = tObj.getParameterValue(i);
                 printNode(value, ind + INDENTATION, role, opts, out);
             }
-            if (tObj instanceof _ASTElement) {
-                Enumeration enu = ((_ASTElement) tObj).children();
+            if (tObj instanceof ASTElement) {
+                Enumeration enu = ((ASTElement) tObj).children();
                 while (enu.hasMoreElements()) {
                     printNode(enu.nextElement(), INDENTATION + ind, null, opts, out);
                 }

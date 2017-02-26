@@ -27,7 +27,7 @@ import java.io.IOException;
 final class ASTDirFallback extends ASTDirective {
 
     @Override
-    _ASTElement[] accept(Environment env) throws IOException, TemplateException {
+    ASTElement[] accept(Environment env) throws IOException, TemplateException {
         env.fallback();
         return null;
     }

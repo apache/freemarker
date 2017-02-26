@@ -113,7 +113,7 @@ public final class Environment extends Configurable {
 
     private final Configuration configuration;
     private final TemplateHashModel rootDataModel;
-    private _ASTElement[] instructionStack = new _ASTElement[16];
+    private ASTElement[] instructionStack = new ASTElement[16];
     private int instructionStackSize = 0;
     private final ArrayList recoveredErrorStack = new ArrayList();
 
@@ -248,7 +248,7 @@ public final class Environment extends Configurable {
     public DirectiveCallPlace getCurrentDirectiveCallPlace() {
         int ln = instructionStackSize;
         if (ln == 0) return null;
-        _ASTElement te = instructionStack[ln - 1];
+        ASTElement te = instructionStack[ln - 1];
         if (te instanceof ASTDirUserDefined) return (ASTDirUserDefined) te;
         if (te instanceof ASTDirMacro && ln > 1 && instructionStack[ln - 2] instanceof ASTDirUserDefined) {
             return (ASTDirUserDefined) instructionStack[ln - 2];
@@ -282,7 +282,7 @@ public final class Environment extends Configurable {
             clearCachedValues();
             try {
                 doAutoImportsAndIncludes(this);
-                visit(getMainTemplate().getRootTreeNode());
+                visit(getMainTemplate().getRootASTNode());
                 // It's here as we must not flush if there was an exception.
                 if (getAutoFlush()) {
                     out.flush();
@@ -299,13 +299,13 @@ public final class Environment extends Configurable {
     /**
      * "Visit" the template element.
      */
-    void visit(_ASTElement element) throws IOException, TemplateException {
-        // ATTENTION: This method body is manually "inlined" into visit(_ASTElement[]); keep them in sync!
+    void visit(ASTElement element) throws IOException, TemplateException {
+        // ATTENTION: This method body is manually "inlined" into visit(ASTElement[]); keep them in sync!
         pushElement(element);
         try {
-            _ASTElement[] templateElementsToVisit = element.accept(this);
+            ASTElement[] templateElementsToVisit = element.accept(this);
             if (templateElementsToVisit != null) {
-                for (_ASTElement el : templateElementsToVisit) {
+                for (ASTElement el : templateElementsToVisit) {
                     if (el == null) {
                         break;  // Skip unused trailing buffer capacity 
                     }
@@ -317,7 +317,7 @@ public final class Environment extends Configurable {
         } finally {
             popElement();
         }
-        // ATTENTION: This method body above is manually "inlined" into visit(_ASTElement[]); keep them in sync!
+        // ATTENTION: This method body above is manually "inlined" into visit(ASTElement[]); keep them in sync!
     }
     
     /**
@@ -326,22 +326,22 @@ public final class Environment extends Configurable {
      * 
      * @since 2.3.24
      */
-    final void visit(_ASTElement[] elementBuffer) throws IOException, TemplateException {
+    final void visit(ASTElement[] elementBuffer) throws IOException, TemplateException {
         if (elementBuffer == null) {
             return;
         }
-        for (_ASTElement element : elementBuffer) {
+        for (ASTElement element : elementBuffer) {
             if (element == null) {
                 break;  // Skip unused trailing buffer capacity 
             }
             
-            // ATTENTION: This part is the manually "inlining" of visit(_ASTElement[]); keep them in sync!
+            // ATTENTION: This part is the manually "inlining" of visit(ASTElement[]); keep them in sync!
             // We don't just let Hotspot to do it, as we want a hard guarantee regarding maximum stack usage. 
             pushElement(element);
             try {
-                _ASTElement[] templateElementsToVisit = element.accept(this);
+                ASTElement[] templateElementsToVisit = element.accept(this);
                 if (templateElementsToVisit != null) {
-                    for (_ASTElement el : templateElementsToVisit) {
+                    for (ASTElement el : templateElementsToVisit) {
                         if (el == null) {
                             break;  // Skip unused trailing buffer capacity 
                         }
@@ -353,24 +353,24 @@ public final class Environment extends Configurable {
             } finally {
                 popElement();
             }
-            // ATTENTION: This part above is the manually "inlining" of visit(_ASTElement[]); keep them in sync!
+            // ATTENTION: This part above is the manually "inlining" of visit(ASTElement[]); keep them in sync!
         }
     }
 
     @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "Not called when stack is empty")
-    private _ASTElement replaceTopElement(_ASTElement element) {
+    private ASTElement replaceTopElement(ASTElement element) {
         return instructionStack[instructionStackSize - 1] = element;
     }
 
     private static final TemplateModel[] NO_OUT_ARGS = new TemplateModel[0];
 
-    void visit(final _ASTElement element,
+    void visit(final ASTElement element,
             TemplateDirectiveModel directiveModel, Map args,
             final List bodyParameterNames) throws TemplateException, IOException {
-        visit(new _ASTElement[] { element }, directiveModel, args, bodyParameterNames);
+        visit(new ASTElement[] { element }, directiveModel, args, bodyParameterNames);
     }
     
-    void visit(final _ASTElement[] childBuffer,
+    void visit(final ASTElement[] childBuffer,
             TemplateDirectiveModel directiveModel, Map args,
             final List bodyParameterNames) throws TemplateException, IOException {
         TemplateDirectiveBody nested;
@@ -419,7 +419,7 @@ public final class Environment extends Configurable {
      * @param args
      *            optional arguments fed to the transform
      */
-    void visitAndTransform(_ASTElement[] elementBuffer,
+    void visitAndTransform(ASTElement[] elementBuffer,
             TemplateTransformModel transform,
             Map args)
                     throws TemplateException, IOException {
@@ -469,7 +469,7 @@ public final class Environment extends Configurable {
      * Visit a block using buffering/recovery
      */
      void visitAttemptRecover(
-             ASTDirAttemptRecoverContainer attemptBlock, _ASTElement attemptedSection, ASTDirRecover recoverySection)
+             ASTDirAttemptRecoverContainer attemptBlock, ASTElement attemptedSection, ASTDirRecover recoverySection)
              throws TemplateException, IOException {
         Writer prevOut = out;
         StringWriter sw = new StringWriter();
@@ -527,7 +527,7 @@ public final class Environment extends Configurable {
     void invokeNestedContent(ASTDirNested.Context bodyCtx) throws TemplateException, IOException {
         ASTDirMacro.Context invokingMacroContext = getCurrentMacroContext();
         LocalContextStack prevLocalContextStack = localContextStack;
-        _ASTElement[] nestedContentBuffer = invokingMacroContext.nestedContentBuffer;
+        ASTElement[] nestedContentBuffer = invokingMacroContext.nestedContentBuffer;
         if (nestedContentBuffer != null) {
             currentMacroContext = invokingMacroContext.prevMacroContext;
             currentNamespace = invokingMacroContext.nestedContentNamespace;
@@ -654,7 +654,7 @@ public final class Environment extends Configurable {
      */
     void invoke(ASTDirMacro macro,
             Map namedArgs, List positionalArgs,
-            List bodyParameterNames, _ASTElement[] childBuffer) throws TemplateException, IOException {
+            List bodyParameterNames, ASTElement[] childBuffer) throws TemplateException, IOException {
         if (macro == ASTDirMacro.DO_NOTHING_MACRO) {
             return;
         }
@@ -1959,7 +1959,7 @@ public final class Environment extends Configurable {
      * @since 2.3.21
      */
     static void outputInstructionStack(
-            _ASTElement[] instructionStackSnapshot, boolean terseMode, Writer w) {
+            ASTElement[] instructionStackSnapshot, boolean terseMode, Writer w) {
         final PrintWriter pw = (PrintWriter) (w instanceof PrintWriter ? w : null);
         try {
             if (instructionStackSnapshot != null) {
@@ -1974,7 +1974,7 @@ public final class Environment extends Configurable {
                 int trailingFramesHidden = 0;
                 int framesPrinted = 0;
                 for (int frameIdx = 0; frameIdx < totalFrames; frameIdx++) {
-                    _ASTElement stackEl = instructionStackSnapshot[frameIdx];
+                    ASTElement stackEl = instructionStackSnapshot[frameIdx];
                     final boolean nestingRelatedElement = (frameIdx > 0 && stackEl instanceof ASTDirNested)
                             || (frameIdx > 1 && instructionStackSnapshot[frameIdx - 1] instanceof ASTDirNested);
                     if (framesPrinted < framesToPrint) {
@@ -2037,12 +2037,12 @@ public final class Environment extends Configurable {
      * 
      * @since 2.3.20
      */
-    _ASTElement[] getInstructionStackSnapshot() {
+    ASTElement[] getInstructionStackSnapshot() {
         int requiredLength = 0;
         int ln = instructionStackSize;
 
         for (int i = 0; i < ln; i++) {
-            _ASTElement stackEl = instructionStack[i];
+            ASTElement stackEl = instructionStack[i];
             if (i == ln - 1 || stackEl.isShownInStackTrace()) {
                 requiredLength++;
             }
@@ -2050,10 +2050,10 @@ public final class Environment extends Configurable {
 
         if (requiredLength == 0) return null;
 
-        _ASTElement[] result = new _ASTElement[requiredLength];
+        ASTElement[] result = new ASTElement[requiredLength];
         int dstIdx = requiredLength - 1;
         for (int i = 0; i < ln; i++) {
-            _ASTElement stackEl = instructionStack[i];
+            ASTElement stackEl = instructionStack[i];
             if (i == ln - 1 || stackEl.isShownInStackTrace()) {
                 result[dstIdx--] = stackEl;
             }
@@ -2062,13 +2062,13 @@ public final class Environment extends Configurable {
         return result;
     }
 
-    static String instructionStackItemToString(_ASTElement stackEl) {
+    static String instructionStackItemToString(ASTElement stackEl) {
         StringBuilder sb = new StringBuilder();
         appendInstructionStackItem(stackEl, sb);
         return sb.toString();
     }
 
-    static void appendInstructionStackItem(_ASTElement stackEl, StringBuilder sb) {
+    static void appendInstructionStackItem(ASTElement stackEl, StringBuilder sb) {
         sb.append(MessageUtil.shorten(stackEl.getDescription(), 40));
 
         sb.append("  [");
@@ -2083,7 +2083,7 @@ public final class Environment extends Configurable {
         sb.append("]");
     }
 
-    static private ASTDirMacro getEnclosingMacro(_ASTElement stackEl) {
+    static private ASTDirMacro getEnclosingMacro(ASTElement stackEl) {
         while (stackEl != null) {
             if (stackEl instanceof ASTDirMacro) return (ASTDirMacro) stackEl;
             stackEl = stackEl.getParent();
@@ -2228,11 +2228,11 @@ public final class Environment extends Configurable {
         };
     }
 
-    private void pushElement(_ASTElement element) {
+    private void pushElement(ASTElement element) {
         final int newSize = ++instructionStackSize;
-        _ASTElement[] instructionStack = this.instructionStack;
+        ASTElement[] instructionStack = this.instructionStack;
         if (newSize > instructionStack.length) {
-            final _ASTElement[] newInstructionStack = new _ASTElement[newSize * 2];
+            final ASTElement[] newInstructionStack = new ASTElement[newSize * 2];
             for (int i = 0; i < instructionStack.length; i++) {
                 newInstructionStack[i] = instructionStack[i]; 
             }
@@ -2246,7 +2246,7 @@ public final class Environment extends Configurable {
         instructionStackSize--;
     }
 
-    void replaceElementStackTop(_ASTElement instr) {
+    void replaceElementStackTop(ASTElement instr) {
         instructionStack[instructionStackSize - 1] = instr;
     }
 
@@ -2449,7 +2449,7 @@ public final class Environment extends Configurable {
         final Template prevTemplate;
 
         importMacros(includedTemplate);
-        visit(includedTemplate.getRootTreeNode());
+        visit(includedTemplate.getRootASTNode());
     }
 
     /**
@@ -2630,7 +2630,7 @@ public final class Environment extends Configurable {
         return _CacheAPI.toRootBasedName(configuration.getTemplateNameFormat(), baseName, targetName);
     }
 
-    String renderElementToString(_ASTElement te) throws IOException, TemplateException {
+    String renderElementToString(ASTElement te) throws IOException, TemplateException {
         Writer prevOut = out;
         try {
             StringWriter sw = new StringWriter();
@@ -2709,9 +2709,9 @@ public final class Environment extends Configurable {
 
     final class NestedElementTemplateDirectiveBody implements TemplateDirectiveBody {
 
-        private final _ASTElement[] childBuffer;
+        private final ASTElement[] childBuffer;
 
-        private NestedElementTemplateDirectiveBody(_ASTElement[] childBuffer) {
+        private NestedElementTemplateDirectiveBody(ASTElement[] childBuffer) {
             this.childBuffer = childBuffer;
         }
 
@@ -2726,7 +2726,7 @@ public final class Environment extends Configurable {
             }
         }
         
-        _ASTElement[] getChildrenBuffer() {
+        ASTElement[] getChildrenBuffer() {
             return childBuffer;
         }
 

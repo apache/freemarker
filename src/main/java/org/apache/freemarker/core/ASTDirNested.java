@@ -54,7 +54,7 @@ final class ASTDirNested extends ASTDirective {
      * I (JR) realized this thanks to some incisive comments from Daniel Dekany.
      */
     @Override
-    _ASTElement[] accept(Environment env) throws IOException, TemplateException {
+    ASTElement[] accept(Environment env) throws IOException, TemplateException {
         Context bodyContext = new Context(env);
         env.invokeNestedContent(bodyContext);
         return null;

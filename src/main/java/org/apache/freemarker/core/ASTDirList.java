@@ -88,7 +88,7 @@ final class ASTDirList extends ASTDirective {
     }
 
     @Override
-    _ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] accept(Environment env) throws TemplateException, IOException {
         acceptWithResult(env);
         return null;
     }
@@ -237,7 +237,7 @@ final class ASTDirList extends ASTDirective {
             return executeNestedContent(env, getChildBuffer());
         }
 
-        void loopForItemsElement(Environment env, _ASTElement[] childBuffer, String loopVarName, String loopVar2Name)
+        void loopForItemsElement(Environment env, ASTElement[] childBuffer, String loopVarName, String loopVar2Name)
                     throws
                 TemplateException, IOException {
             try {
@@ -259,14 +259,14 @@ final class ASTDirList extends ASTDirective {
          * Executes the given block for the {@link #listedValue}: if {@link #loopVarName} is non-{@code null}, then for
          * each list item once, otherwise once if {@link #listedValue} isn't empty.
          */
-        private boolean executeNestedContent(Environment env, _ASTElement[] childBuffer)
+        private boolean executeNestedContent(Environment env, ASTElement[] childBuffer)
                 throws TemplateException, IOException {
             return !hashListing
                     ? executedNestedContentForCollOrSeqListing(env, childBuffer)
                     : executedNestedContentForHashListing(env, childBuffer);
         }
 
-        private boolean executedNestedContentForCollOrSeqListing(Environment env, _ASTElement[] childBuffer)
+        private boolean executedNestedContentForCollOrSeqListing(Environment env, ASTElement[] childBuffer)
                 throws IOException, TemplateException {
             final boolean listNotEmpty;
             if (listedValue instanceof TemplateCollectionModel) {
@@ -329,7 +329,7 @@ final class ASTDirList extends ASTDirective {
             return listNotEmpty;
         }
 
-        private boolean executedNestedContentForHashListing(Environment env, _ASTElement[] childBuffer)
+        private boolean executedNestedContentForHashListing(Environment env, ASTElement[] childBuffer)
                 throws IOException, TemplateException {
             final boolean hashNotEmpty;
             if (listedValue instanceof TemplateHashModelEx) {

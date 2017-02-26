@@ -35,17 +35,17 @@ import org.apache.freemarker.core.util._ArrayEnumeration;
  * compatibility.
  */
 // TODO [FM3] Get rid of "public" and thus the "_" prefix
-abstract class _ASTElement extends ASTNode {
+abstract class ASTElement extends ASTNode {
 
     private static final int INITIAL_CHILD_BUFFER_CAPACITY = 6;
 
-    private _ASTElement parent;
+    private ASTElement parent;
 
     /**
      * Contains 1 or more nested elements with optional trailing {@code null}-s, or is {@code null} exactly if there are
      * no nested elements.
      */
-    private _ASTElement[] childBuffer;
+    private ASTElement[] childBuffer;
 
     /**
      * Contains the number of elements in the {@link #childBuffer}, not counting the trailing {@code null}-s. If this is
@@ -61,8 +61,8 @@ abstract class _ASTElement extends ASTNode {
     private int index;
 
     /**
-     * Executes this {@link _ASTElement}. Usually should not be called directly, but through
-     * {@link Environment#visit(_ASTElement)} or a similar {@link Environment} method.
+     * Executes this {@link ASTElement}. Usually should not be called directly, but through
+     * {@link Environment#visit(ASTElement)} or a similar {@link Environment} method.
      *
      * @param env
      *            The runtime environment
@@ -72,7 +72,7 @@ abstract class _ASTElement extends ASTNode {
      *         executing them inside this method is a trick used for decreasing stack usage when there's nothing to do
      *         after the children was processed anyway.
      */
-    abstract _ASTElement[] accept(Environment env) throws TemplateException, IOException;
+    abstract ASTElement[] accept(Environment env) throws TemplateException, IOException;
 
     /**
      * One-line description of the element, that contain all the information that is used in {@link #getCanonicalForm()}
@@ -102,12 +102,12 @@ abstract class _ASTElement extends ASTNode {
         return getChildrenCanonicalForm(childBuffer);
     }
     
-    static String getChildrenCanonicalForm(_ASTElement[] children) {
+    static String getChildrenCanonicalForm(ASTElement[] children) {
         if (children == null) {
             return "";
         }
         StringBuilder sb = new StringBuilder();
-        for (_ASTElement child : children) {
+        for (ASTElement child : children) {
             if (child == null) {
                 break;
             }
@@ -181,7 +181,7 @@ abstract class _ASTElement extends ASTNode {
         return childCount == 0;
     }
 
-    public int getIndex(_ASTElement node) {
+    public int getIndex(ASTElement node) {
         for (int i = 0; i < childCount; i++) {
             if (childBuffer[i].equals(node)) {
                 return i;
@@ -204,7 +204,7 @@ abstract class _ASTElement extends ASTNode {
                 : Collections.enumeration(Collections.EMPTY_LIST);
     }
 
-    public void setChildAt(int index, _ASTElement element) {
+    public void setChildAt(int index, ASTElement element) {
         if (index < childCount && index >= 0) {
             childBuffer[index] = element;
             element.index = index;
@@ -217,13 +217,13 @@ abstract class _ASTElement extends ASTNode {
     /**
      * The element whose child this element is, or {@code null} if this is the root node.
      */
-    final _ASTElement getParent() {
+    final ASTElement getParent() {
         return parent;
     }
 
     final void setChildBufferCapacity(int capacity) {
         int ln = childCount;
-        _ASTElement[] newChildBuffer = new _ASTElement[capacity];
+        ASTElement[] newChildBuffer = new ASTElement[capacity];
         for (int i = 0; i < ln; i++) {
             newChildBuffer[i] = childBuffer[i];
         }
@@ -233,19 +233,19 @@ abstract class _ASTElement extends ASTNode {
     /**
      * Inserts a new nested element after the last nested element.
      */
-    final void addChild(_ASTElement nestedElement) {
+    final void addChild(ASTElement nestedElement) {
         addChild(childCount, nestedElement);
     }
 
     /**
      * Inserts a new nested element at the given index, which can also be one higher than the current highest index.
      */
-    final void addChild(int index, _ASTElement nestedElement) {
+    final void addChild(int index, ASTElement nestedElement) {
         final int lChildCount = childCount;
 
-        _ASTElement[] lChildBuffer = childBuffer;
+        ASTElement[] lChildBuffer = childBuffer;
         if (lChildBuffer == null) {
-            lChildBuffer = new _ASTElement[INITIAL_CHILD_BUFFER_CAPACITY];
+            lChildBuffer = new ASTElement[INITIAL_CHILD_BUFFER_CAPACITY];
             childBuffer = lChildBuffer;
         } else if (lChildCount == lChildBuffer.length) {
             setChildBufferCapacity(lChildCount != 0 ? lChildCount * 2 : 1);
@@ -254,7 +254,7 @@ abstract class _ASTElement extends ASTNode {
         // At this point: nestedElements == this.nestedElements, and has sufficient capacity.
 
         for (int i = lChildCount; i > index; i--) {
-            _ASTElement movedElement = lChildBuffer[i - 1];
+            ASTElement movedElement = lChildBuffer[i - 1];
             movedElement.index = i;
             lChildBuffer[i] = movedElement;
         }
@@ -264,7 +264,7 @@ abstract class _ASTElement extends ASTNode {
         childCount = lChildCount + 1;
     }
 
-    final _ASTElement getChild(int index) {
+    final ASTElement getChild(int index) {
         return childBuffer[index];
     }
 
@@ -272,7 +272,7 @@ abstract class _ASTElement extends ASTNode {
      * @return Array containing 1 or more nested elements with optional trailing {@code null}-s, or is {@code null}
      *         exactly if there are no nested elements.
      */
-    final _ASTElement[] getChildBuffer() {
+    final ASTElement[] getChildBuffer() {
         return childBuffer;
     }
 
@@ -282,10 +282,10 @@ abstract class _ASTElement extends ASTNode {
      * @since 2.3.24
      */
     final void setChildren(TemplateElements buffWithCnt) {
-        _ASTElement[] childBuffer = buffWithCnt.getBuffer();
+        ASTElement[] childBuffer = buffWithCnt.getBuffer();
         int childCount = buffWithCnt.getCount();
         for (int i = 0; i < childCount; i++) {
-            _ASTElement child = childBuffer[i];
+            ASTElement child = childBuffer[i];
             child.index = i;
             child.parent = this;
         }
@@ -317,11 +317,11 @@ abstract class _ASTElement extends ASTNode {
      *         actual replacement will happen. Note that adjusting the {@link #parent} and {@link #index} of the result
      *         is the duty of the caller, not of this method.
      */
-    _ASTElement postParseCleanup(boolean stripWhitespace) throws ParseException {
+    ASTElement postParseCleanup(boolean stripWhitespace) throws ParseException {
         int childCount = this.childCount;
         if (childCount != 0) {
             for (int i = 0; i < childCount; i++) {
-                _ASTElement te = childBuffer[i];
+                ASTElement te = childBuffer[i];
                 
                 /*
                 // Assertion:
@@ -341,12 +341,12 @@ abstract class _ASTElement extends ASTNode {
                 te.index = i;
             }
             for (int i = 0; i < childCount; i++) {
-                _ASTElement te = childBuffer[i];
+                ASTElement te = childBuffer[i];
                 if (te.isIgnorable(stripWhitespace)) {
                     childCount--;
                     // As later isIgnorable calls might investigates the siblings, we have to move all the items now. 
                     for (int j = i; j < childCount; j++) {
-                        final _ASTElement te2 = childBuffer[j + 1];
+                        final ASTElement te2 = childBuffer[j + 1];
                         childBuffer[j] = te2;
                         te2.index = j;
                     }
@@ -359,7 +359,7 @@ abstract class _ASTElement extends ASTNode {
                 childBuffer = null;
             } else if (childCount < childBuffer.length
                     && childCount <= childBuffer.length * 3 / 4) {
-                _ASTElement[] trimmedChildBuffer = new _ASTElement[childCount];
+                ASTElement[] trimmedChildBuffer = new ASTElement[childCount];
                 for (int i = 0; i < childCount; i++) {
                     trimmedChildBuffer[i] = childBuffer[i];
                 }
@@ -376,8 +376,8 @@ abstract class _ASTElement extends ASTNode {
     // The following methods exist to support some fancier tree-walking
     // and were introduced to support the whitespace cleanup feature in 2.2
 
-    _ASTElement prevTerminalNode() {
-        _ASTElement prev = previousSibling();
+    ASTElement prevTerminalNode() {
+        ASTElement prev = previousSibling();
         if (prev != null) {
             return prev.getLastLeaf();
         } else if (parent != null) {
@@ -386,8 +386,8 @@ abstract class _ASTElement extends ASTNode {
         return null;
     }
 
-    _ASTElement nextTerminalNode() {
-        _ASTElement next = nextSibling();
+    ASTElement nextTerminalNode() {
+        ASTElement next = nextSibling();
         if (next != null) {
             return next.getFirstLeaf();
         } else if (parent != null) {
@@ -396,31 +396,31 @@ abstract class _ASTElement extends ASTNode {
         return null;
     }
 
-    _ASTElement previousSibling() {
+    ASTElement previousSibling() {
         if (parent == null) {
             return null;
         }
         return index > 0 ? parent.childBuffer[index - 1] : null;
     }
 
-    _ASTElement nextSibling() {
+    ASTElement nextSibling() {
         if (parent == null) {
             return null;
         }
         return index + 1 < parent.childCount ? parent.childBuffer[index + 1] : null;
     }
 
-    private _ASTElement getFirstChild() {
+    private ASTElement getFirstChild() {
         return childCount == 0 ? null : childBuffer[0];
     }
 
-    private _ASTElement getLastChild() {
+    private ASTElement getLastChild() {
         final int childCount = this.childCount;
         return childCount == 0 ? null : childBuffer[childCount - 1];
     }
 
-    private _ASTElement getFirstLeaf() {
-        _ASTElement te = this;
+    private ASTElement getFirstLeaf() {
+        ASTElement te = this;
         while (!te.isLeaf() && !(te instanceof ASTDirMacro) && !(te instanceof ASTDirCapturingAssignment)) {
             // A macro or macro invocation is treated as a leaf here for special reasons
             te = te.getFirstChild();
@@ -428,8 +428,8 @@ abstract class _ASTElement extends ASTNode {
         return te;
     }
 
-    private _ASTElement getLastLeaf() {
-        _ASTElement te = this;
+    private ASTElement getLastLeaf() {
+        ASTElement te = this;
         while (!te.isLeaf() && !(te instanceof ASTDirMacro) && !(te instanceof ASTDirCapturingAssignment)) {
             // A macro or macro invocation is treated as a leaf here for special reasons
             te = te.getLastChild();

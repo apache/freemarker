@@ -57,7 +57,7 @@ final class ASTDollarInterpolation extends ASTInterpolation {
      * Outputs the string value of the enclosed expression.
      */
     @Override
-    _ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] accept(Environment env) throws TemplateException, IOException {
         final Object moOrStr = calculateInterpolatedStringOrMarkup(env);
         final Writer out = env.getOut();
         if (moOrStr instanceof String) {

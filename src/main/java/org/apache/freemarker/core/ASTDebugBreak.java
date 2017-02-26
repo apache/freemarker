@@ -24,17 +24,16 @@ import java.io.IOException;
 import org.apache.freemarker.core.debug.impl.DebuggerService;
 
 /**
- * Don't use this; used internally by FreeMarker, might changes without notice.
- * A debug breakpoint inserted into the template 
+ * AST node: A debug breakpoint
  */
-class _ASTDebugBreak extends _ASTElement {
-    public _ASTDebugBreak(_ASTElement nestedBlock) {
+class ASTDebugBreak extends ASTElement {
+    public ASTDebugBreak(ASTElement nestedBlock) {
         addChild(nestedBlock);
         copyLocationFrom(nestedBlock);
     }
     
     @Override
-    protected _ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    protected ASTElement[] accept(Environment env) throws TemplateException, IOException {
         if (!DebuggerService.suspendEnvironment(
                 env, getTemplate().getSourceName(), getChild(0).getBeginLine())) {
             return getChild(0).accept(env);

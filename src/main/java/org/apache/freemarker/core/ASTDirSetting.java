@@ -103,7 +103,7 @@ final class ASTDirSetting extends ASTDirective {
     }
 
     @Override
-    _ASTElement[] accept(Environment env) throws TemplateException {
+    ASTElement[] accept(Environment env) throws TemplateException {
         TemplateModel mval = value.eval(env);
         String strval;
         if (mval instanceof TemplateScalarModel) {

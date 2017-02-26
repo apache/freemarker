@@ -44,7 +44,7 @@ final class ASTDirIfOrElseOrElseIf extends ASTDirective {
     }
 
     @Override
-    _ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] accept(Environment env) throws TemplateException, IOException {
         if (condition == null || condition.evalToBoolean(env)) {
             return getChildBuffer();
         }

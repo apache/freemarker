@@ -25,7 +25,7 @@ package org.apache.freemarker.core;
 final class ASTDirBreak extends ASTDirective {
 
     @Override
-    _ASTElement[] accept(Environment env) {
+    ASTElement[] accept(Environment env) {
         throw Break.INSTANCE;
     }
 

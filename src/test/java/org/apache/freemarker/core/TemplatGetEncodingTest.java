@@ -76,7 +76,7 @@ public class TemplatGetEncodingTest {
         }
 
         {
-            Template nonStoredT = Template.getPlainTextTemplate(null, "<#test>", cfg);
+            Template nonStoredT = Template.createPlainTextTemplate(null, "<#test>", cfg);
             assertNull(nonStoredT.getEncoding());
         }
     }

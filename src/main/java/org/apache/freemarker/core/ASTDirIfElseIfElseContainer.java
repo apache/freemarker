@@ -38,7 +38,7 @@ final class ASTDirIfElseIfElseContainer extends ASTDirective {
     }
 
     @Override
-    _ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] accept(Environment env) throws TemplateException, IOException {
         int ln  = getChildCount();
         for (int i = 0; i < ln; i++) {
             ASTDirIfOrElseOrElseIf cblock = (ASTDirIfOrElseOrElseIf) getChild(i);
@@ -52,7 +52,7 @@ final class ASTDirIfElseIfElseContainer extends ASTDirective {
     }
 
     @Override
-    _ASTElement postParseCleanup(boolean stripWhitespace)
+    ASTElement postParseCleanup(boolean stripWhitespace)
         throws ParseException {
         if (getChildCount() == 1) {
             ASTDirIfOrElseOrElseIf cblock = (ASTDirIfOrElseOrElseIf) getChild(0);

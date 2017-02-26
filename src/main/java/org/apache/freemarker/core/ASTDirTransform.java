@@ -49,7 +49,7 @@ final class ASTDirTransform extends ASTDirective {
     }
 
     @Override
-    _ASTElement[] accept(Environment env)
+    ASTElement[] accept(Environment env)
     throws TemplateException, IOException {
         TemplateTransformModel ttm = env.getTransform(transformExpression);
         if (ttm != null) {

@@ -66,7 +66,7 @@ public class _ErrorDescriptionBuilder {
         return toString(null, true);
     }
     
-    public String toString(_ASTElement parentElement, boolean showTips) {
+    public String toString(ASTElement parentElement, boolean showTips) {
         if (blamed == null && tips == null && tip == null && descriptionParts == null) return description;
 
         StringBuilder sb = new StringBuilder(200);

@@ -70,7 +70,7 @@ final class ASTDirUserDefined extends ASTDirective implements DirectiveCallPlace
     }
 
     @Override
-    _ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] accept(Environment env) throws TemplateException, IOException {
         TemplateModel tm = nameExp.eval(env);
         if (tm == ASTDirMacro.DO_NOTHING_MACRO) return null; // shortcut here.
         if (tm instanceof ASTDirMacro) {

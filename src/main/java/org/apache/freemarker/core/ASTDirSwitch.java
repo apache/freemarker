@@ -45,7 +45,7 @@ final class ASTDirSwitch extends ASTDirective {
     }
 
     @Override
-    _ASTElement[] accept(Environment env)
+    ASTElement[] accept(Environment env)
         throws TemplateException, IOException {
         boolean processedCase = false;
         int ln = getChildCount();

@@ -84,7 +84,7 @@ final class ASTDirMacro extends ASTDirective implements TemplateModel {
     }
 
     @Override
-    _ASTElement[] accept(Environment env) {
+    ASTElement[] accept(Environment env) {
         env.visitMacroDef(this);
         return null;
     }
@@ -149,14 +149,14 @@ final class ASTDirMacro extends ASTDirective implements TemplateModel {
 
     class Context implements LocalContext {
         final Environment.Namespace localVars; 
-        final _ASTElement[] nestedContentBuffer;
+        final ASTElement[] nestedContentBuffer;
         final Environment.Namespace nestedContentNamespace;
         final List nestedContentParameterNames;
         final LocalContextStack prevLocalContextStack;
         final Context prevMacroContext;
         
         Context(Environment env, 
-                _ASTElement[] nestedContentBuffer,
+                ASTElement[] nestedContentBuffer,
                 List nestedContentParameterNames) {
             localVars = env.new Namespace();
             this.nestedContentBuffer = nestedContentBuffer;

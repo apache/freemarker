@@ -37,7 +37,7 @@ abstract class ASTNode {
     }
 
     final void setLocation(Template template, Token tagBegin, Token tagEnd, TemplateElements children) {
-        _ASTElement lastChild = children.getLast();
+        ASTElement lastChild = children.getLast();
         if (lastChild != null) {
             // [<#if exp>children]<#else>
             setLocation(template, tagBegin, lastChild);
@@ -172,7 +172,7 @@ abstract class ASTNode {
      * FTL generated from the AST of the node, which must be parseable to an AST that does the same as the original
      * source, assuming we turn off automatic white-space removal when parsing the canonical form.
      * 
-     * @see _ASTElement#getDescription()
+     * @see ASTElement#getDescription()
      * @see #getNodeTypeSymbol()
      */
     abstract public String getCanonicalForm();
@@ -184,11 +184,11 @@ abstract class ASTNode {
      * that is equivalent with the original could be reconstructed from the tree view. Thus, for literal values that are
      * leaf nodes the symbols should be the canonical form of value.
      * 
-     * Note that {@link _ASTElement#getDescription()} has similar role, only it doesn't go under the element level
+     * Note that {@link ASTElement#getDescription()} has similar role, only it doesn't go under the element level
      * (i.e. down to the expression level), instead it always prints the embedded expressions itself.
      * 
      * @see #getCanonicalForm()
-     * @see _ASTElement#getDescription()
+     * @see ASTElement#getDescription()
      */
     abstract String getNodeTypeSymbol();
     

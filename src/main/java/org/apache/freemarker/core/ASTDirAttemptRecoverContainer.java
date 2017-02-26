@@ -27,11 +27,11 @@ import java.io.IOException;
  */
 final class ASTDirAttemptRecoverContainer extends ASTDirective {
     
-    private _ASTElement attemptedSection;
+    private ASTElement attemptedSection;
     private ASTDirRecover recoverySection;
     
     ASTDirAttemptRecoverContainer(TemplateElements attemptedSectionChildren, ASTDirRecover recoverySection) {
-        _ASTElement attemptedSection = attemptedSectionChildren.asSingleElement();
+        ASTElement attemptedSection = attemptedSectionChildren.asSingleElement();
         this.attemptedSection = attemptedSection;
         this.recoverySection = recoverySection;
         setChildBufferCapacity(2);
@@ -40,7 +40,7 @@ final class ASTDirAttemptRecoverContainer extends ASTDirective {
     }
 
     @Override
-    _ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] accept(Environment env) throws TemplateException, IOException {
         env.visitAttemptRecover(this, attemptedSection, recoverySection);
         return null;
     }

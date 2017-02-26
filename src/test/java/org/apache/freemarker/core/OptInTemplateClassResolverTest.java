@@ -51,7 +51,7 @@ public class OptInTemplateClassResolverTest extends TestCase {
             ALLOWED_CLASSES, TRUSTED_TEMPLATES);
     
     private Configuration dummyCfg = new Configuration();
-    private Template dummyTemp = Template.getPlainTextTemplate("foo.ftl", "", dummyCfg);
+    private Template dummyTemp = Template.createPlainTextTemplate("foo.ftl", "", dummyCfg);
     
     public void testOptIn() throws TemplateException {
         assertEquals(String.class, resolver.resolve("java.lang.String", null, dummyTemp));
@@ -66,17 +66,17 @@ public class OptInTemplateClassResolverTest extends TestCase {
 
     public void testTrusted() throws TemplateException {
         assertEquals(Long.class, resolver.resolve("java.lang.Long", null,
-                Template.getPlainTextTemplate("lib/foo.ftl", "", dummyCfg)));
+                Template.createPlainTextTemplate("lib/foo.ftl", "", dummyCfg)));
         assertEquals(String.class, resolver.resolve("java.lang.String", null,
-                Template.getPlainTextTemplate("lib/foo.ftl", "", dummyCfg)));
+                Template.createPlainTextTemplate("lib/foo.ftl", "", dummyCfg)));
         assertEquals(Long.class, resolver.resolve("java.lang.Long", null,
-                Template.getPlainTextTemplate("/lib/foo.ftl", "", dummyCfg)));
+                Template.createPlainTextTemplate("/lib/foo.ftl", "", dummyCfg)));
         assertEquals(Long.class, resolver.resolve("java.lang.Long", null,
-                Template.getPlainTextTemplate("include/foo.ftl", "", dummyCfg)));
+                Template.createPlainTextTemplate("include/foo.ftl", "", dummyCfg)));
         assertEquals(Long.class, resolver.resolve("java.lang.Long", null,
-                Template.getPlainTextTemplate("trusted.ftl", "", dummyCfg)));
+                Template.createPlainTextTemplate("trusted.ftl", "", dummyCfg)));
         assertEquals(Long.class, resolver.resolve("java.lang.Long", null,
-                Template.getPlainTextTemplate("/trusted.ftl", "", dummyCfg)));
+                Template.createPlainTextTemplate("/trusted.ftl", "", dummyCfg)));
     }
 
     public void testCraftedTrusted() throws TemplateException {
@@ -111,7 +111,7 @@ public class OptInTemplateClassResolverTest extends TestCase {
     public void testTrusted_checkFails(String templateName) {
         try {
             resolver.resolve("java.lang.Long", null,
-                    Template.getPlainTextTemplate(templateName, "", dummyCfg));
+                    Template.createPlainTextTemplate(templateName, "", dummyCfg));
             fail();
         } catch (TemplateException e) {
             // Expected
@@ -125,12 +125,12 @@ public class OptInTemplateClassResolverTest extends TestCase {
                 "trusted_templates: foo.ftl, \"lib/*\"");
         TemplateClassResolver res = cfg.getNewBuiltinClassResolver();
         assertEquals(String.class, res.resolve("java.lang.String", null,
-                Template.getPlainTextTemplate("foo.ftl", "", cfg)));
+                Template.createPlainTextTemplate("foo.ftl", "", cfg)));
         assertEquals(String.class, res.resolve("java.lang.String", null,
-                Template.getPlainTextTemplate("lib/bar.ftl", "", cfg)));
+                Template.createPlainTextTemplate("lib/bar.ftl", "", cfg)));
         try {
             res.resolve("java.lang.String", null,
-                    Template.getPlainTextTemplate("bar.ftl", "", cfg));
+                    Template.createPlainTextTemplate("bar.ftl", "", cfg));
             fail();
         } catch (TemplateException e) {
             // Expected
@@ -140,12 +140,12 @@ public class OptInTemplateClassResolverTest extends TestCase {
                 "allowed_classes: java.lang.String, java.lang.Integer");
         res = cfg.getNewBuiltinClassResolver();
         assertEquals(String.class, res.resolve("java.lang.String", null,
-                Template.getPlainTextTemplate("foo.ftl", "", cfg)));
+                Template.createPlainTextTemplate("foo.ftl", "", cfg)));
         assertEquals(Integer.class, res.resolve("java.lang.Integer", null,
-                Template.getPlainTextTemplate("foo.ftl", "", cfg)));
+                Template.createPlainTextTemplate("foo.ftl", "", cfg)));
         try {
             res.resolve("java.lang.Long", null,
-                    Template.getPlainTextTemplate("foo.ftl", "", cfg));
+                    Template.createPlainTextTemplate("foo.ftl", "", cfg));
             fail();
         } catch (TemplateException e) {
             // good
@@ -156,23 +156,23 @@ public class OptInTemplateClassResolverTest extends TestCase {
                 "allowed_classes: 'java.lang.String', java.lang.Integer");
         res = cfg.getNewBuiltinClassResolver();
         assertEquals(String.class, res.resolve("java.lang.String", null,
-                Template.getPlainTextTemplate("x.ftl", "", cfg)));
+                Template.createPlainTextTemplate("x.ftl", "", cfg)));
         assertEquals(Integer.class, res.resolve("java.lang.Integer", null,
-                Template.getPlainTextTemplate("x.ftl", "", cfg)));
+                Template.createPlainTextTemplate("x.ftl", "", cfg)));
         try {
             res.resolve("java.lang.Long", null,
-                    Template.getPlainTextTemplate("x.ftl", "", cfg));
+                    Template.createPlainTextTemplate("x.ftl", "", cfg));
             fail();
         } catch (TemplateException e) {
             // Expected
         }
         assertEquals(Long.class, res.resolve("java.lang.Long", null,
-                Template.getPlainTextTemplate("foo.ftl", "", cfg)));
+                Template.createPlainTextTemplate("foo.ftl", "", cfg)));
         assertEquals(Long.class, res.resolve("java.lang.Long", null,
-                Template.getPlainTextTemplate("lib/bar.ftl", "", cfg)));
+                Template.createPlainTextTemplate("lib/bar.ftl", "", cfg)));
         try {
             res.resolve("java.lang.Long", null,
-                    Template.getPlainTextTemplate("x.ftl", "", cfg));
+                    Template.createPlainTextTemplate("x.ftl", "", cfg));
             fail();
         } catch (TemplateException e) {
             // Expected
@@ -190,16 +190,16 @@ public class OptInTemplateClassResolverTest extends TestCase {
                 "'trusted_templates' :\"lib:*\"");
         res = cfg.getNewBuiltinClassResolver();
         assertEquals(String.class, res.resolve("java.lang.String", null,
-                Template.getPlainTextTemplate("x.ftl", "", cfg)));
+                Template.createPlainTextTemplate("x.ftl", "", cfg)));
         try {
             res.resolve("java.lang.Long", null,
-                    Template.getPlainTextTemplate("x.ftl", "", cfg));
+                    Template.createPlainTextTemplate("x.ftl", "", cfg));
             fail();
         } catch (TemplateException e) {
             // Expected
         }
         assertEquals(Long.class, res.resolve("java.lang.Long", null,
-                Template.getPlainTextTemplate("lib:bar.ftl", "", cfg)));
+                Template.createPlainTextTemplate("lib:bar.ftl", "", cfg)));
     }
     
 }

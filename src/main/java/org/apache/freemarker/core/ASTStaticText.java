@@ -27,7 +27,7 @@ import org.apache.freemarker.core.util._StringUtil;
 /**
  * AST node representing static text.
  */
-final class ASTStaticText extends _ASTElement {
+final class ASTStaticText extends ASTElement {
     
     // We're using char[] instead of String for storing the text block because
     // Writer.write(String) involves copying the String contents to a char[] 
@@ -61,7 +61,7 @@ final class ASTStaticText extends _ASTElement {
      */
     @Deprecated
     @Override
-    public _ASTElement[] accept(Environment env)
+    public ASTElement[] accept(Environment env)
     throws IOException {
         env.getOut().write(text);
         return null;
@@ -103,7 +103,7 @@ final class ASTStaticText extends _ASTElement {
     }
 
     @Override
-    _ASTElement postParseCleanup(boolean stripWhitespace) {
+    ASTElement postParseCleanup(boolean stripWhitespace) {
         if (text.length == 0) return this;
         int openingCharsToStrip = 0, trailingCharsToStrip = 0;
         boolean deliberateLeftTrim = deliberateLeftTrim();
@@ -111,7 +111,7 @@ final class ASTStaticText extends _ASTElement {
         if (!stripWhitespace || text.length == 0 ) {
             return this;
         }
-        _ASTElement parentElement = getParent();
+        ASTElement parentElement = getParent();
         if (isTopLevelTextIfParentIs(parentElement) && previousSibling() == null) {
             return this;
         }
@@ -141,7 +141,7 @@ final class ASTStaticText extends _ASTElement {
      */
     private boolean deliberateLeftTrim() {
         boolean result = false;
-        for (_ASTElement elem = nextTerminalNode();
+        for (ASTElement elem = nextTerminalNode();
              elem != null && elem.beginLine == endLine;
              elem = elem.nextTerminalNode()) {
             if (elem instanceof ASTDirTOrTrOrTl) {
@@ -179,7 +179,7 @@ final class ASTStaticText extends _ASTElement {
      */
     private boolean deliberateRightTrim() {
         boolean result = false;
-        for (_ASTElement elem = prevTerminalNode();
+        for (ASTElement elem = prevTerminalNode();
              elem != null && elem.endLine == beginLine;
              elem = elem.prevTerminalNode()) {
             if (elem instanceof ASTDirTOrTrOrTl) {
@@ -213,7 +213,7 @@ final class ASTStaticText extends _ASTElement {
                         if (_StringUtil.isTrimmableToEmpty(trailingPart)) {
                         // THIS BLOCK IS HEINOUS! THERE MUST BE A BETTER WAY! REVISIT (JR)
                             boolean trimTrailingPart = true;
-                            for (_ASTElement te = nextTerminalNode();
+                            for (ASTElement te = nextTerminalNode();
                                  te != null && te.beginLine == endLine;
                                  te = te.nextTerminalNode()) {
                                 if (te.heedsOpeningWhitespace()) {
@@ -276,7 +276,7 @@ final class ASTStaticText extends _ASTElement {
         }
         // We look at the preceding elements on the line to see if we should
         // strip the opening newline and any whitespace preceding it.
-        for (_ASTElement elem = prevTerminalNode();
+        for (ASTElement elem = prevTerminalNode();
              elem != null && elem.endLine == beginLine;
              elem = elem.prevTerminalNode()) {
             if (elem.heedsOpeningWhitespace()) {
@@ -300,7 +300,7 @@ final class ASTStaticText extends _ASTElement {
         }
         // We look at the elements afterward on the same line to see if we should
         // strip any whitespace after the last newline
-        for (_ASTElement elem = nextTerminalNode();
+        for (ASTElement elem = nextTerminalNode();
              elem != null && elem.beginLine == endLine;
              elem = elem.nextTerminalNode()) {
             if (elem.heedsTrailingWhitespace()) {
@@ -352,10 +352,10 @@ final class ASTStaticText extends _ASTElement {
             if (!_StringUtil.isTrimmableToEmpty(text)) {
                 return false;
             }
-            _ASTElement parentElement = getParent();
+            ASTElement parentElement = getParent();
             boolean atTopLevel = isTopLevelTextIfParentIs(parentElement);
-            _ASTElement prevSibling = previousSibling();
-            _ASTElement nextSibling = nextSibling();
+            ASTElement prevSibling = previousSibling();
+            ASTElement nextSibling = nextSibling();
             return ((prevSibling == null && atTopLevel) || nonOutputtingType(prevSibling))
                     && ((nextSibling == null && atTopLevel) || nonOutputtingType(nextSibling));
         } else {
@@ -363,13 +363,13 @@ final class ASTStaticText extends _ASTElement {
         }
     }
 
-    private boolean isTopLevelTextIfParentIs(_ASTElement parentElement) {
+    private boolean isTopLevelTextIfParentIs(ASTElement parentElement) {
         return parentElement == null
                 || parentElement.getParent() == null && parentElement instanceof ASTImplicitParent;
     }
     
 
-    private boolean nonOutputtingType(_ASTElement element) {
+    private boolean nonOutputtingType(ASTElement element) {
         return (element instanceof ASTDirMacro ||
                 element instanceof ASTDirAssignment || 
                 element instanceof ASTDirAssignmentsContainer ||

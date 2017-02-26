@@ -21,7 +21,7 @@ package org.apache.freemarker.core;
 import org.apache.freemarker.core.util._CollectionUtil;
 
 /**
- * Holds an buffer (array) of {@link _ASTElement}-s with the count of the utilized items in it. The un-utilized tail
+ * Holds an buffer (array) of {@link ASTElement}-s with the count of the utilized items in it. The un-utilized tail
  * of the array must only contain {@code null}-s.
  * 
  * @since 2.3.24
@@ -30,7 +30,7 @@ class TemplateElements {
     
     static final TemplateElements EMPTY = new TemplateElements(null, 0);
 
-    private final _ASTElement[] buffer;
+    private final ASTElement[] buffer;
     private final int count;
 
     /**
@@ -39,7 +39,7 @@ class TemplateElements {
      * @param count
      *            The number of utilized buffer elements; if 0, then {@code null} must be {@code null}.
      */
-    TemplateElements(_ASTElement[] buffer, int count) {
+    TemplateElements(ASTElement[] buffer, int count) {
         /*
         // Assertion:
         if (count == 0 && buffer != null) {
@@ -51,7 +51,7 @@ class TemplateElements {
         this.count = count;
     }
 
-    _ASTElement[] getBuffer() {
+    ASTElement[] getBuffer() {
         return buffer;
     }
 
@@ -59,22 +59,22 @@ class TemplateElements {
         return count;
     }
 
-    _ASTElement getFirst() {
+    ASTElement getFirst() {
         return buffer != null ? buffer[0] : null;
     }
     
-    _ASTElement getLast() {
+    ASTElement getLast() {
         return buffer != null ? buffer[count - 1] : null;
     }
     
     /**
      * Used for some backward compatibility hacks.
      */
-    _ASTElement asSingleElement() {
+    ASTElement asSingleElement() {
         if (count == 0) {
             return new ASTStaticText(_CollectionUtil.EMPTY_CHAR_ARRAY, false);
         } else {
-            _ASTElement first = buffer[0];
+            ASTElement first = buffer[0];
             if (count == 1) {
                 return first;
             } else {
@@ -92,7 +92,7 @@ class TemplateElements {
     ASTImplicitParent asMixedContent() {
         ASTImplicitParent mixedContent = new ASTImplicitParent();
         if (count != 0) {
-            _ASTElement first = buffer[0];
+            ASTElement first = buffer[0];
             mixedContent.setChildren(this);
             mixedContent.setLocation(first.getTemplate(), first, getLast());
         }

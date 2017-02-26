@@ -32,7 +32,6 @@ import java.io.Writer;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,7 +78,7 @@ public class Template extends Configurable {
     
     private Map macros = new HashMap();
     private List imports = new Vector();
-    private _ASTElement rootElement;
+    private ASTElement rootElement;
     private String encoding, defaultNS;
     private Object customLookupCondition;
     private int actualTagSyntax;
@@ -284,17 +283,17 @@ public class Template extends Configurable {
         namespaceURIToPrefixLookup = Collections.unmodifiableMap(namespaceURIToPrefixLookup);
         prefixToNamespaceURILookup = Collections.unmodifiableMap(prefixToNamespaceURILookup);
     }
-    
+
     /**
-     * Same as {@link #getPlainTextTemplate(String, String, String, Configuration)} with {@code null} {@code sourceName}
-     * argument.
+     * Same as {@link #createPlainTextTemplate(String, String, String, Configuration, String)} with {@code null}
+     * {@code sourceName} argument.
      */
-    static public Template getPlainTextTemplate(String name, String content, Configuration config) {
-        return getPlainTextTemplate(name, null, content, config);
+    static public Template createPlainTextTemplate(String name, String content, Configuration config) {
+        return createPlainTextTemplate(name, null, content, config, null);
     }
-    
+
     /**
-     * Creates (not "get"-s) a {@link Template} that only contains a single block of static text, no dynamic content.
+     * Creates a {@link Template} that only contains a single block of static text, no dynamic content.
      * 
      * @param name
      *            See {@link #getName} for more details.
@@ -304,10 +303,12 @@ public class Template extends Configurable {
      *            the block of text that this template represents
      * @param config
      *            the configuration to which this template belongs
-     * 
+     *
+     * @param encoding
      * @since 2.3.22
      */
-    static public Template getPlainTextTemplate(String name, String sourceName, String content, Configuration config) {
+    static public Template createPlainTextTemplate(String name, String sourceName, String content, Configuration config,
+               String encoding) {
         Template template;
         try {
             template = new Template(name, sourceName, new StringReader("X"), config);
@@ -315,7 +316,10 @@ public class Template extends Configurable {
             throw new BugException("Plain text template creation failed", e);
         }
         ((ASTStaticText) template.rootElement).replaceText(content);
+        template.setEncoding(encoding);
+
         DebuggerService.registerTemplate(template);
+
         return template;
     }
 
@@ -566,11 +570,8 @@ public class Template extends Configurable {
      *            The encoding that was used to read this template. When this template {@code #include}-s or
      *            {@code #import}-s another template, by default it will use this encoding for those. For backward
      *            compatibility, this can be {@code null}, which will unset this setting.
-     * 
-     * @deprecated Should only be used internally, and might will be removed later.
      */
-    @Deprecated
-    public void setEncoding(String encoding) {
+    void setEncoding(String encoding) {
         this.encoding = encoding;
     }
 
@@ -685,23 +686,11 @@ public class Template extends Configurable {
         out.write(rootElement.getCanonicalForm());
     }
 
-    /**
-     * Called by code internally to maintain a table of macros
-     * 
-     * @deprecated Should only be used internally, and might will be removed later.
-     */
-    @Deprecated
-    public void addMacro(ASTDirMacro macro) {
+    void addMacro(ASTDirMacro macro) {
         macros.put(macro.getName(), macro);
     }
 
-    /**
-     * Called by code internally to maintain a list of imports
-     * 
-     * @deprecated Should only be used internally, and might will be removed later.
-     */
-    @Deprecated
-    public void addImport(ASTDirImport ll) {
+    void addImport(ASTDirImport ll) {
         imports.add(ll);
     }
 
@@ -853,37 +842,19 @@ public class Template extends Configurable {
         }
     }
 
-    /**
-     * @deprecated Should only be used internally, and might will be removed later.
-     */
-    @Deprecated
-    public _ASTElement getRootTreeNode() {
+    ASTElement getRootASTNode() {
         return rootElement;
     }
     
-    /**
-     * @deprecated Should only be used internally, and might will be removed later.
-     */
-    @Deprecated
-    public Map getMacros() {
+    Map getMacros() {
         return macros;
     }
 
-    /**
-     * @deprecated Should only be used internally, and might will be removed later.
-     */
-    @Deprecated
-    public List getImports() {
+    List getImports() {
         return imports;
     }
 
-    /**
-     * This is used internally.
-     * 
-     * @deprecated Should only be used internally, and might will be removed later.
-     */
-    @Deprecated
-    public void addPrefixNSMapping(String prefix, String nsURI) {
+    void addPrefixNSMapping(String prefix, String nsURI) {
         if (nsURI.length() == 0) {
             throw new IllegalArgumentException("Cannot map empty string URI");
         }
@@ -958,28 +929,6 @@ public class Template extends Configurable {
             return null;
         }
         return prefix + ":" + localName;
-    }
-    
-    /**
-     * @return an array of the {@link _ASTElement}s containing the given column and line numbers.
-     * @deprecated Should only be used internally, and might will be removed later.
-     */
-    @Deprecated
-    public List containingElements(int column, int line) {
-        final ArrayList elements = new ArrayList();
-        _ASTElement element = rootElement;
-        mainloop: while (element.contains(column, line)) {
-            elements.add(element);
-            for (Enumeration enumeration = element.children(); enumeration.hasMoreElements(); ) {
-                _ASTElement elem = (_ASTElement) enumeration.nextElement();
-                if (elem.contains(column, line)) {
-                    element = elem;
-                    continue mainloop;
-                }
-            }
-            break;
-        }
-        return elements.isEmpty() ? null : elements;
     }
 
     /**

@@ -116,7 +116,7 @@ final class ASTDirInclude extends ASTDirective {
     }
     
     @Override
-    _ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] accept(Environment env) throws TemplateException, IOException {
         final String includedTemplateName = includedTemplateNameExp.evalAndCoerceToPlainText(env);
         final String fullIncludedTemplateName;
         try {

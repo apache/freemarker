@@ -59,7 +59,7 @@ final class ASTHashInterpolation extends ASTInterpolation {
     }
 
     @Override
-    _ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] accept(Environment env) throws TemplateException, IOException {
         String s = calculateInterpolatedStringOrMarkup(env);
         Writer out = env.getOut();
         if (autoEscapeOutputFormat != null) {

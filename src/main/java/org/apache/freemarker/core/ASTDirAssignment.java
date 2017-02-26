@@ -102,7 +102,7 @@ final class ASTDirAssignment extends ASTDirective {
     }
 
     @Override
-    _ASTElement[] accept(Environment env) throws TemplateException {
+    ASTElement[] accept(Environment env) throws TemplateException {
         final Environment.Namespace namespace;
         if (namespaceExp == null) {
             switch (scope) {

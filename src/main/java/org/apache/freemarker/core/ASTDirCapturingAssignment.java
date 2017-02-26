@@ -49,8 +49,8 @@ final class ASTDirCapturingAssignment extends ASTDirective {
     }
 
     @Override
-    _ASTElement[] accept(Environment env) throws TemplateException, IOException {
-        _ASTElement[] children = getChildBuffer();
+    ASTElement[] accept(Environment env) throws TemplateException, IOException {
+        ASTElement[] children = getChildBuffer();
         if (children != null) {
             env.visitAndTransform(children, new CaptureOutput(env), null);
         } else {

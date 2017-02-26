@@ -23,7 +23,7 @@ import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 /**
  * AST interpolation node superclass.
  */
-abstract class ASTInterpolation extends _ASTElement {
+abstract class ASTInterpolation extends ASTElement {
 
     protected abstract String dump(boolean canonical, boolean inStringLiteral);
 

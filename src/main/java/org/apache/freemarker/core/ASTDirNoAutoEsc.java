@@ -31,7 +31,7 @@ final class ASTDirNoAutoEsc extends ASTDirective {
     }
 
     @Override
-    _ASTElement[] accept(Environment env) throws TemplateException, IOException {
+    ASTElement[] accept(Environment env) throws TemplateException, IOException {
         return getChildBuffer();
     }
 

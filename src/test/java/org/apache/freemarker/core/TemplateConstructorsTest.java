@@ -80,7 +80,7 @@ public class TemplateConstructorsTest {
             assertEquals("UTF-16LE", t.getEncoding());
         }
         {
-            Template t = Template.getPlainTextTemplate(name, content, cfg);
+            Template t = Template.createPlainTextTemplate(name, content, cfg);
             assertEquals(name, t.getName());
             assertEquals(name, t.getSourceName());
             assertEquals(content, t.toString());

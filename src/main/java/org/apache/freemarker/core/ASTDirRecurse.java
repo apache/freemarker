@@ -42,7 +42,7 @@ final class ASTDirRecurse extends ASTDirective {
     }
 
     @Override
-    _ASTElement[] accept(Environment env) throws IOException, TemplateException {
+    ASTElement[] accept(Environment env) throws IOException, TemplateException {
         TemplateModel node = targetNode == null ? null : targetNode.eval(env);
         if (node != null && !(node instanceof TemplateNodeModel)) {
             throw new NonNodeException(targetNode, node, "node", env);

@@ -24,7 +24,7 @@ import org.apache.freemarker.core.util._StringUtil;
 /**
  * AST comment node
  */
-final class ASTComment extends _ASTElement {
+final class ASTComment extends ASTElement {
 
     private final String text;
 
@@ -33,7 +33,7 @@ final class ASTComment extends _ASTElement {
     }
 
     @Override
-    _ASTElement[] accept(Environment env) {
+    ASTElement[] accept(Environment env) {
         // do nothing, skip the body
         return null;
     }

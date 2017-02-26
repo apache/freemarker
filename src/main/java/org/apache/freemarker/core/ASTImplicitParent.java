@@ -22,26 +22,26 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 
 /**
- * AST directive-like node, used where there's no other parent for a list of {@link _ASTElement}-s. Most often occurs as
+ * AST directive-like node, used where there's no other parent for a list of {@link ASTElement}-s. Most often occurs as
  * the root node of the AST.
  */
-final class ASTImplicitParent extends _ASTElement {
+final class ASTImplicitParent extends ASTElement {
 
     ASTImplicitParent() { }
     
     @Override
-    _ASTElement postParseCleanup(boolean stripWhitespace)
+    ASTElement postParseCleanup(boolean stripWhitespace)
         throws ParseException {
         super.postParseCleanup(stripWhitespace);
         return getChildCount() == 1 ? getChild(0) : this;
     }
 
     /**
-     * Processes the contents of the internal <tt>_ASTElement</tt> list,
+     * Processes the contents of the internal <tt>ASTElement</tt> list,
      * and outputs the resulting text.
      */
     @Override
-    _ASTElement[] accept(Environment env)
+    ASTElement[] accept(Environment env)
         throws TemplateException, IOException {
         return getChildBuffer();
     }

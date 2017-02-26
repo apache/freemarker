@@ -623,8 +623,8 @@ public class DefaultTemplateResolver extends TemplateResolver {
                     while ((charsRead = reader.read(buf)) > 0) {
                         sb.append(buf, 0, charsRead);
                     }
-                    template = Template.getPlainTextTemplate(name, sourceName, sb.toString(), config);
-                    template.setEncoding(initialEncoding);
+                    template = Template.createPlainTextTemplate(name, sourceName, sb.toString(), config,
+                            initialEncoding);
                 }
             } finally {
                 reader.close();

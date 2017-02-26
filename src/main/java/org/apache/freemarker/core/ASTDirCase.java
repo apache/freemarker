@@ -35,7 +35,7 @@ final class ASTDirCase extends ASTDirective {
     }
 
     @Override
-    _ASTElement[] accept(Environment env) {
+    ASTElement[] accept(Environment env) {
         return getChildBuffer();
     }
 

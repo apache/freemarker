@@ -22,26 +22,26 @@ import java.util.Collection;
 import java.util.Collections;
 
 /**
- * Used as the return value of {@link _ASTElement#accept(Environment)} when the invoked element has nested elements
+ * Used as the return value of {@link ASTElement#accept(Environment)} when the invoked element has nested elements
  * to invoke. It would be more natural to invoke child elements before returning from
- * {@link _ASTElement#accept(Environment)}, however, if there's nothing to do after the child elements were invoked,
+ * {@link ASTElement#accept(Environment)}, however, if there's nothing to do after the child elements were invoked,
  * that would mean wasting stack space.
  * 
  * @since 2.3.24
  */
 class TemplateElementsToVisit {
 
-    private final Collection<_ASTElement> templateElements;
+    private final Collection<ASTElement> templateElements;
 
-    TemplateElementsToVisit(Collection<_ASTElement> templateElements) {
-        this.templateElements = null != templateElements ? templateElements : Collections.<_ASTElement> emptyList();
+    TemplateElementsToVisit(Collection<ASTElement> templateElements) {
+        this.templateElements = null != templateElements ? templateElements : Collections.<ASTElement> emptyList();
     }
 
-    TemplateElementsToVisit(_ASTElement nestedBlock) {
+    TemplateElementsToVisit(ASTElement nestedBlock) {
         this(Collections.singleton(nestedBlock));
     }
 
-    Collection<_ASTElement> getTemplateElements() {
+    Collection<ASTElement> getTemplateElements() {
         return templateElements;
     }
     

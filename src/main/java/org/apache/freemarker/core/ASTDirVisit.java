@@ -41,7 +41,7 @@ final class ASTDirVisit extends ASTDirective {
     }
 
     @Override
-    _ASTElement[] accept(Environment env) throws IOException, TemplateException {
+    ASTElement[] accept(Environment env) throws IOException, TemplateException {
         TemplateModel node = targetNode.eval(env);
         if (!(node instanceof TemplateNodeModel)) {
             throw new NonNodeException(targetNode, node, env);

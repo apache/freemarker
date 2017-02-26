@@ -48,11 +48,11 @@ class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcess
 
     @Override
     public void postProcess(Template t) throws TemplatePostProcessorException {
-        final _ASTElement te = t.getRootTreeNode();
+        final ASTElement te = t.getRootASTNode();
         addInterruptionChecks(te);
     }
 
-    private void addInterruptionChecks(final _ASTElement te) throws TemplatePostProcessorException {
+    private void addInterruptionChecks(final ASTElement te) throws TemplatePostProcessorException {
         if (te == null) {
             return;
         }
@@ -75,14 +75,14 @@ class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcess
      * AST directive-like node: Checks if the current thread's "interrupted" flag is set, and throws
      * {@link TemplateProcessingThreadInterruptedException} if it is. We inject this to some points into the AST.
      */
-    static class ASTThreadInterruptionCheck extends _ASTElement {
+    static class ASTThreadInterruptionCheck extends ASTElement {
         
-        private ASTThreadInterruptionCheck(_ASTElement te) throws ParseException {
+        private ASTThreadInterruptionCheck(ASTElement te) throws ParseException {
             setLocation(te.getTemplate(), te.beginColumn, te.beginLine, te.beginColumn, te.beginLine);
         }
 
         @Override
-        _ASTElement[] accept(Environment env) throws TemplateException, IOException {
+        ASTElement[] accept(Environment env) throws TemplateException, IOException {
             // As the API doesn't allow throwing InterruptedException here (nor anywhere else, most importantly,
             // Template.process can't throw it), we must not clear the "interrupted" flag of the thread.
             if (Thread.currentThread().isInterrupted()) {
