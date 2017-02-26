@@ -27,7 +27,7 @@ import org.apache.freemarker.core.debug.impl.DebuggerService;
  * Don't use this; used internally by FreeMarker, might changes without notice.
  * A debug breakpoint inserted into the template 
  */
-public class _ASTDebugBreak extends _ASTElement {
+class _ASTDebugBreak extends _ASTElement {
     public _ASTDebugBreak(_ASTElement nestedBlock) {
         addChild(nestedBlock);
         copyLocationFrom(nestedBlock);

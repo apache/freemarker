@@ -28,18 +28,13 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core._ASTDebugBreak;
-import org.apache.freemarker.core._ASTElement;
-import org.apache.freemarker.core._CoreAPI;
+import org.apache.freemarker.core.*;
 import org.apache.freemarker.core.debug.Breakpoint;
 import org.apache.freemarker.core.debug.DebuggerListener;
 import org.apache.freemarker.core.debug.EnvironmentSuspendedEvent;
@@ -138,7 +133,7 @@ extends
             // Inject already defined breakpoints into the template
             for (Iterator iter = tdi.breakpoints.iterator(); iter.hasNext(); ) {
                 Breakpoint breakpoint = (Breakpoint) iter.next();
-                insertDebugBreak(template, breakpoint);
+                _Debug.insertDebugBreak(template, breakpoint.getLine());
             }
         }
     }
@@ -178,64 +173,13 @@ extends
                     if (t == null) {
                         iter.remove();
                     } else {
-                        insertDebugBreak(t, breakpoint);
+                        _Debug.insertDebugBreak(t, breakpoint.getLine());
                     }
                 }
             }
         }
     }
 
-    private static void insertDebugBreak(Template t, Breakpoint breakpoint) {
-        _ASTElement te = findTemplateElement(t.getRootTreeNode(), breakpoint.getLine());
-        if (te == null) {
-            return;
-        }
-        _ASTElement parent = _CoreAPI.getParentElement(te);
-        _ASTDebugBreak db = new _ASTDebugBreak(te);
-        // TODO: Ensure there always is a parent by making sure
-        // that the root element in the template is always a ASTImplicitParent
-        // Also make sure it doesn't conflict with anyone's code.
-        parent.setChildAt(parent.getIndex(te), db);
-    }
-
-    private static _ASTElement findTemplateElement(_ASTElement te, int line) {
-        if (te.getBeginLine() > line || te.getEndLine() < line) {
-            return null;
-        }
-        // Find the narrowest match
-        List childMatches = new ArrayList();
-        for (Enumeration children = te.children(); children.hasMoreElements(); ) {
-            _ASTElement child = (_ASTElement) children.nextElement();
-            _ASTElement childmatch = findTemplateElement(child, line);
-            if (childmatch != null) {
-                childMatches.add(childmatch);
-            }
-        }
-        //find a match that exactly matches the begin/end line
-        _ASTElement bestMatch = null;
-        for (int i = 0; i < childMatches.size(); i++) {
-            _ASTElement e = (_ASTElement) childMatches.get(i);
-
-            if ( bestMatch == null ) {
-                bestMatch = e;
-            }
-
-            if ( e.getBeginLine() == line && e.getEndLine() > line ) {
-                bestMatch = e;
-            }
-
-            if ( e.getBeginLine() == e.getEndLine() && e.getBeginLine() == line) {
-                bestMatch = e;
-                break;
-            }
-        }
-        if ( bestMatch != null) {
-           return bestMatch;
-        }
-        // If no child provides narrower match, return this
-        return te;
-    }
-    
     private TemplateDebugInfo findTemplateDebugInfo(String templateName) {
         processRefQueue();
         return (TemplateDebugInfo) templateDebugInfos.get(templateName); 
@@ -265,7 +209,7 @@ extends
                         if (t == null) {
                             iter.remove();
                         } else {
-                            removeDebugBreak(t, breakpoint);
+                            _Debug.removeDebugBreak(t, breakpoint.getLine());
                         }
                     }
                 }
@@ -276,26 +220,6 @@ extends
         }
     }
 
-    private void removeDebugBreak(Template t, Breakpoint breakpoint) {
-        _ASTElement te = findTemplateElement(t.getRootTreeNode(), breakpoint.getLine());
-        if (te == null) {
-            return;
-        }
-        _ASTDebugBreak db = null;
-        while (te != null) {
-            if (te instanceof _ASTDebugBreak) {
-                db = (_ASTDebugBreak) te;
-                break;
-            }
-            te = _CoreAPI.getParentElement(te);
-        }
-        if (db == null) {
-            return;
-        }
-        _ASTElement parent = _CoreAPI.getParentElement(db); 
-        parent.setChildAt(parent.getIndex(db), _CoreAPI.getChildElement(db, 0));
-    }
-    
     void removeBreakpoints(String templateName) {
         synchronized (templateDebugInfos) {
             TemplateDebugInfo tdi = findTemplateDebugInfo(templateName);
@@ -328,24 +252,11 @@ extends
             if (t == null) {
                 iter.remove();
             } else {
-                removeDebugBreaks(t.getRootTreeNode());
+                _Debug.removeDebugBreaks(t);
             }
         }
     }
-    
-    private void removeDebugBreaks(_ASTElement te) {
-        int count = te.getChildCount();
-        for (int i = 0; i < count; ++i) {
-            _ASTElement child = _CoreAPI.getChildElement(te, i);
-            while (child instanceof _ASTDebugBreak) {
-                _ASTElement dbchild = _CoreAPI.getChildElement(child, 0); 
-                te.setChildAt(i, dbchild);
-                child = dbchild;
-            }
-            removeDebugBreaks(child);
-        }
-    }
-    
+
     private static final class TemplateDebugInfo {
         final List templates = new ArrayList();
         final List breakpoints = new ArrayList();

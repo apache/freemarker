@@ -19,7 +19,10 @@
 
 package org.apache.freemarker.core;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
+import java.util.List;
 
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
@@ -64,16 +67,6 @@ public final class _CoreAPI {
         }
     }
 
-    // Because of debug...
-    public static _ASTElement getParentElement(_ASTElement te) {
-        return te.getParent();
-    }
-
-    // Because of debug...
-    public static _ASTElement getChildElement(_ASTElement te, int index) {
-        return te.getChild(index);
-    }
-
     // [FM3] Should become unnecessary as custom directive classes are reworked
     public static boolean isMacroOrFunction(TemplateModel m) {
         return m instanceof ASTDirMacro;
@@ -97,4 +90,5 @@ public final class _CoreAPI {
                     + incompatibleImprovements);
         }
     }
+
 }

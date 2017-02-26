@@ -35,7 +35,7 @@ import org.apache.freemarker.core.util._ArrayEnumeration;
  * compatibility.
  */
 // TODO [FM3] Get rid of "public" and thus the "_" prefix
-abstract public class _ASTElement extends ASTNode {
+abstract class _ASTElement extends ASTNode {
 
     private static final int INITIAL_CHILD_BUFFER_CAPACITY = 6;
 
