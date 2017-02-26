@@ -23,8 +23,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import junit.framework.TestCase;
 import freemarker.cache.StringTemplateLoader;
+import junit.framework.TestCase;
 
 public class IncudeFromNamelessTest extends TestCase {
 

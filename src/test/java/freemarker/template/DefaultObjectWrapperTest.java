@@ -55,7 +55,6 @@ import com.google.common.collect.ImmutableMap;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.HashAdapter;
 import freemarker.ext.util.WrapperTemplateModel;
-import freemarker.test.templatesuite.models.Listables;
 
 public class DefaultObjectWrapperTest {
 

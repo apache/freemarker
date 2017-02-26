@@ -19,11 +19,11 @@
 
 package freemarker.ext.beans;
 
-import junit.framework.TestCase;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
+import junit.framework.TestCase;
 
 public abstract class AbstractParallelIntrospectionTest extends TestCase {
     

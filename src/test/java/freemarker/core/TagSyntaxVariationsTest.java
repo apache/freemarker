@@ -23,11 +23,11 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import junit.framework.TestCase;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.utility.StringUtil;
+import junit.framework.TestCase;
 
 /**
  * Test various generated templates (permutations), including some deliberately

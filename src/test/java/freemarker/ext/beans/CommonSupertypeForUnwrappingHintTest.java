@@ -22,9 +22,9 @@ package freemarker.ext.beans;
 import java.io.Serializable;
 import java.util.List;
 
-import junit.framework.TestCase;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateModelException;
+import junit.framework.TestCase;
 
 public class CommonSupertypeForUnwrappingHintTest extends TestCase {
     

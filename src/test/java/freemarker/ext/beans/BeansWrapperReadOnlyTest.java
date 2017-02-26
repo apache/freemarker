@@ -25,11 +25,11 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import junit.framework.TestCase;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.WriteProtectable;
+import junit.framework.TestCase;
 
 /**
  * Tests if all JavaBean properties of the standard {@link ObjectWrapper} classes are locked by

@@ -22,11 +22,10 @@ package freemarker.ext.beans;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import junit.framework.TestCase;
-
 import org.junit.Assert;
 
 import freemarker.template.Configuration;
+import junit.framework.TestCase;
 
 public class MiscNumericalOperationsTest extends TestCase {
 

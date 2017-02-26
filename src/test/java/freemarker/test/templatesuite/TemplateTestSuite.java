@@ -32,8 +32,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import junit.framework.TestSuite;
-
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -46,6 +44,7 @@ import freemarker.ext.dom.NodeModel;
 import freemarker.template.Configuration;
 import freemarker.template.Version;
 import freemarker.template.utility.StringUtil;
+import junit.framework.TestSuite;
 
 /**
  * Test suite where the test cases are defined in testcases.xml, and usually process

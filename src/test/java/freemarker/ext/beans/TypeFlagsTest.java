@@ -34,8 +34,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import junit.framework.TestCase;
 import freemarker.template.Configuration;
+import junit.framework.TestCase;
 
 public class TypeFlagsTest extends TestCase {
 

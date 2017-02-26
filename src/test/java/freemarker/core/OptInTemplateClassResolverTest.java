@@ -24,12 +24,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.utility.ObjectConstructor;
+import junit.framework.AssertionFailedError;
+import junit.framework.TestCase;
 
 public class OptInTemplateClassResolverTest extends TestCase {
 

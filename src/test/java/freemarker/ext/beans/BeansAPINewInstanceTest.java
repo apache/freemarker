@@ -19,9 +19,9 @@
 
 package freemarker.ext.beans;
 
-import junit.framework.TestCase;
 import freemarker.template.Configuration;
 import freemarker.test.utility.TestUtil;
+import junit.framework.TestCase;
 
 public class BeansAPINewInstanceTest extends TestCase {
 

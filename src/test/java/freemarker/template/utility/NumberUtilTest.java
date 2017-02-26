@@ -22,9 +22,9 @@ package freemarker.template.utility;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import junit.framework.TestCase;
-
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 public class NumberUtilTest extends TestCase {
 

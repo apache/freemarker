@@ -32,10 +32,10 @@ import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Locale;
 
-import junit.framework.TestCase;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.core.ParseException;
 import freemarker.template.utility.NullWriter;
+import junit.framework.TestCase;
 public class ExceptionTest extends TestCase {
     
     public ExceptionTest(String name) {

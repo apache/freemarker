@@ -30,11 +30,11 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import junit.framework.TestCase;
 import freemarker.template.utility.DateUtil.CalendarFieldsToDateConverter;
 import freemarker.template.utility.DateUtil.DateParseException;
 import freemarker.template.utility.DateUtil.DateToISO8601CalendarFactory;
 import freemarker.template.utility.DateUtil.TrivialCalendarFieldsToDateConverter;
+import junit.framework.TestCase;
 
 public class DateUtilTest extends TestCase {
     
