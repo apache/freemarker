@@ -142,7 +142,7 @@ public class _TemplateAPI {
             && tagSyntax != Configuration.ANGLE_BRACKET_TAG_SYNTAX) {
             throw new IllegalArgumentException("\"tag_syntax\" can only be set to one of these: "
                     + "Configuration.AUTO_DETECT_TAG_SYNTAX, Configuration.ANGLE_BRACKET_SYNTAX, "
-                    + "or Configuration.SQAUARE_BRACKET_SYNTAX");
+                    + "or Configuration.SQUARE_BRACKET_SYNTAX");
         }
     }
     

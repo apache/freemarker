@@ -37,7 +37,7 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
 
     private static final ConcurrentHashMap<CacheKey, DateFormat> GLOBAL_FORMAT_CACHE
             = new ConcurrentHashMap<CacheKey, DateFormat>();
-    private static final int LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE = 1024;
+    private static final int LEAK_ALERT_DATE_FORMAT_CACHE_SIZE = 1024;
     
     private JavaTemplateDateFormatFactory() {
         // Can't be instantiated
@@ -101,16 +101,16 @@ class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
             }
             jFormat.setTimeZone(cacheKey.timeZone);
             
-            if (GLOBAL_FORMAT_CACHE.size() >= LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE) {
+            if (GLOBAL_FORMAT_CACHE.size() >= LEAK_ALERT_DATE_FORMAT_CACHE_SIZE) {
                 boolean triggered = false;
                 synchronized (JavaTemplateDateFormatFactory.class) {
-                    if (GLOBAL_FORMAT_CACHE.size() >= LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE) {
+                    if (GLOBAL_FORMAT_CACHE.size() >= LEAK_ALERT_DATE_FORMAT_CACHE_SIZE) {
                         triggered = true;
                         GLOBAL_FORMAT_CACHE.clear();
                     }
                 }
                 if (triggered) {
-                    LOG.warn("Global Java DateFormat cache has exceeded " + LEAK_ALERT_NUMBER_FORMAT_CACHE_SIZE
+                    LOG.warn("Global Java DateFormat cache has exceeded " + LEAK_ALERT_DATE_FORMAT_CACHE_SIZE
                             + " entries => cache flushed. "
                             + "Typical cause: Some template generates high variety of format pattern strings.");
                 }
