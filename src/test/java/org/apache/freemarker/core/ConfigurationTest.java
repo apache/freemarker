@@ -19,17 +19,9 @@
 
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.test.hamcerst.Matchers.containsStringIgnoringCase;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.isIn;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
+import static org.apache.freemarker.test.hamcerst.Matchers.*;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.StringWriter;

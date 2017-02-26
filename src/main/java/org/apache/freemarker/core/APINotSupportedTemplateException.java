@@ -19,11 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.SimpleHash;
-import org.apache.freemarker.core.model.impl.SimpleSequence;
 
 /**
  * Thrown when {@code ?api} is not supported by a value.

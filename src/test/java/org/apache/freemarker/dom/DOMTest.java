@@ -18,10 +18,8 @@
  */
 package org.apache.freemarker.dom;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.StringReader;

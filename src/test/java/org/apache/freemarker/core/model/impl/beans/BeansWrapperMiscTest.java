@@ -19,11 +19,7 @@
 
 package org.apache.freemarker.core.model.impl.beans;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.TemplateBooleanModel;

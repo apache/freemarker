@@ -24,6 +24,7 @@ import static org.junit.Assert.*;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+
 import javax.annotation.PostConstruct;
 
 import org.apache.freemarker.core.model.TemplateBooleanModel;

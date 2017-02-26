@@ -34,7 +34,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.freemarker.core.*;
+import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.Template;
+import org.apache.freemarker.core._Debug;
 import org.apache.freemarker.core.debug.Breakpoint;
 import org.apache.freemarker.core.debug.DebuggerListener;
 import org.apache.freemarker.core.debug.EnvironmentSuspendedEvent;

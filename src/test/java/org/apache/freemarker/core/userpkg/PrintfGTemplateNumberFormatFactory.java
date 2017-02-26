@@ -23,15 +23,15 @@ import java.math.BigInteger;
 import java.util.Locale;
 
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.model.TemplateNumberModel;
+import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
+import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.core.valueformat.InvalidFormatParametersException;
 import org.apache.freemarker.core.valueformat.TemplateFormatUtil;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 import org.apache.freemarker.core.valueformat.UnformattableValueException;
-import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
-import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Formats like {@code %G} in {@code printf}, with the specified number of significant digits. Also has special

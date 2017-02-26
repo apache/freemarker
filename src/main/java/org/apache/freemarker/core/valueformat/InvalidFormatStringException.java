@@ -18,10 +18,6 @@
  */
 package org.apache.freemarker.core.valueformat;
 
-import org.apache.freemarker.core.valueformat.TemplateDateFormat;
-import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
-import org.apache.freemarker.core.valueformat.TemplateValueFormatException;
-
 /**
  * Used when creating {@link TemplateDateFormat}-s and {@link TemplateNumberFormat}-s to indicate that the format
  * string (like the value of the {@code dateFormat} setting) is malformed.

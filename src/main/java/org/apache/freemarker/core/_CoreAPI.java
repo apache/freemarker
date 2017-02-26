@@ -19,14 +19,8 @@
 
 package org.apache.freemarker.core;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.List;
-
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.core.util._NullArgumentException;
 
 /**

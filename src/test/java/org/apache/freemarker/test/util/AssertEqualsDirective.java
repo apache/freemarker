@@ -25,7 +25,6 @@ import java.util.Map;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.NestedContentNotSupportedException;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core._CoreAPI;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateDirectiveBody;

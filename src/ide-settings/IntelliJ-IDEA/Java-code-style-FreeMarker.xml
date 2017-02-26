@@ -1,0 +1,35 @@
+<code_scheme name="FreeMarker">
+  <option name="LINE_SEPARATOR" value="&#xA;" />
+  <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="99" />
+  <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="1" />
+  <option name="IMPORT_LAYOUT_TABLE">
+    <value>
+      <package name="" withSubpackages="true" static="true" />
+      <emptyLine />
+      <package name="java" withSubpackages="true" static="false" />
+      <emptyLine />
+      <package name="javax" withSubpackages="true" static="false" />
+      <emptyLine />
+      <package name="org" withSubpackages="true" static="false" />
+      <emptyLine />
+      <package name="com" withSubpackages="true" static="false" />
+      <emptyLine />
+      <package name="" withSubpackages="true" static="false" />
+      <emptyLine />
+    </value>
+  </option>
+  <option name="WRAP_WHEN_TYPING_REACHES_RIGHT_MARGIN" value="true" />
+  <option name="JD_ADD_BLANK_AFTER_PARM_COMMENTS" value="true" />
+  <option name="JD_ADD_BLANK_AFTER_RETURN" value="true" />
+  <option name="JD_KEEP_EMPTY_PARAMETER" value="false" />
+  <option name="JD_KEEP_EMPTY_EXCEPTION" value="false" />
+  <option name="JD_KEEP_EMPTY_RETURN" value="false" />
+  <option name="JD_PARAM_DESCRIPTION_ON_NEW_LINE" value="true" />
+  <option name="WRAP_COMMENTS" value="true" />
+  <JavaCodeStyleSettings>
+    <option name="CLASS_NAMES_IN_JAVADOC" value="2" />
+  </JavaCodeStyleSettings>
+  <codeStyleSettings language="JAVA">
+    <option name="RIGHT_MARGIN" value="120" />
+  </codeStyleSettings>
+</code_scheme>

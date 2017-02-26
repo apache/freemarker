@@ -22,9 +22,9 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.valueformat.TemplateFormatUtil;
 import org.apache.freemarker.core.util._LocaleUtil;
 import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.valueformat.TemplateFormatUtil;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateValueFormatException;

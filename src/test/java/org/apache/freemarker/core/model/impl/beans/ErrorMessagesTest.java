@@ -18,13 +18,9 @@
  */
 
 package org.apache.freemarker.core.model.impl.beans;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.util.Collections;
 import java.util.Date;

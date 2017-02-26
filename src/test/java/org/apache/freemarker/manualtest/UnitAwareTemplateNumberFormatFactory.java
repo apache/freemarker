@@ -21,11 +21,11 @@ package org.apache.freemarker.manualtest;
 import java.util.Locale;
 
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateValueFormatException;
-import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.model.TemplateNumberModel;
 
 /**
  * A number format that takes any other number format as parameter (specified as a string, as

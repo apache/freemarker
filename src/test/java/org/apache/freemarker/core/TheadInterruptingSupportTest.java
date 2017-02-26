@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.Map;

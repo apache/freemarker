@@ -24,9 +24,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.freemarker.core.util.OptInTemplateClassResolver;
+
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
-import org.apache.freemarker.core.util.OptInTemplateClassResolver;
 
 public class OptInTemplateClassResolverTest extends TestCase {
 

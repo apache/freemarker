@@ -23,7 +23,6 @@ import java.math.BigDecimal;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Implements the arithmetic operations executed by the template language; see

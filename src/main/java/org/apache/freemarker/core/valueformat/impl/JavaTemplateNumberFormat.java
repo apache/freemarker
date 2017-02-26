@@ -20,9 +20,9 @@ package org.apache.freemarker.core.valueformat.impl;
 
 import java.text.NumberFormat;
 
-import org.apache.freemarker.core.valueformat.TemplateFormatUtil;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
+import org.apache.freemarker.core.valueformat.TemplateFormatUtil;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.UnformattableValueException;
 

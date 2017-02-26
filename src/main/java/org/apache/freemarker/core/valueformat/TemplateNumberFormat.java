@@ -20,8 +20,8 @@ package org.apache.freemarker.core.valueformat;
 
 import java.text.NumberFormat;
 
-import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModelException;

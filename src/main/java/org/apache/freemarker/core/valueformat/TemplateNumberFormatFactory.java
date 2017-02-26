@@ -18,11 +18,11 @@
  */
 package org.apache.freemarker.core.valueformat;
 
+import java.util.Locale;
+
 import org.apache.freemarker.core.Configurable;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Environment;
-
-import java.util.Locale;
 
 /**
  * Factory for a certain kind of number formatting ({@link TemplateNumberFormat}). Usually a singleton (one-per-VM or

@@ -19,8 +19,8 @@
 
 package org.apache.freemarker.core;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;

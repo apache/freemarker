@@ -18,16 +18,16 @@
  */
 package org.apache.freemarker.core.arithmetic.impl;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._MiscTemplateException;
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._NumberUtil;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Arithmetic engine that uses (more-or-less) the widening conversions of

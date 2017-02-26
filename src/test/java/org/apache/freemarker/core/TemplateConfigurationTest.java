@@ -18,15 +18,8 @@
  */
 package org.apache.freemarker.core;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;

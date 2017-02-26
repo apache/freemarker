@@ -18,19 +18,9 @@
  */
 package org.apache.freemarker.servlet;
 
-import static org.apache.freemarker.servlet.FreemarkerServlet.INIT_PARAM_CONTENT_TYPE;
-import static org.apache.freemarker.servlet.FreemarkerServlet.INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE;
-import static org.apache.freemarker.servlet.FreemarkerServlet.INIT_PARAM_OVERRIDE_RESPONSE_LOCALE;
-import static org.apache.freemarker.servlet.FreemarkerServlet.INIT_PARAM_RESPONSE_CHARACTER_ENCODING;
-import static org.apache.freemarker.servlet.FreemarkerServlet.INIT_PARAM_VALUE_ALWAYS;
-import static org.apache.freemarker.servlet.FreemarkerServlet.INIT_PARAM_VALUE_NEVER;
-import static org.apache.freemarker.servlet.FreemarkerServlet.INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.apache.freemarker.servlet.FreemarkerServlet.*;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

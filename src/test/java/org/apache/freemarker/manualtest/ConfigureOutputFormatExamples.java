@@ -18,7 +18,7 @@
  */
 package org.apache.freemarker.manualtest;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateConfiguration;

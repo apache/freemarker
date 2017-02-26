@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.StringWriter;

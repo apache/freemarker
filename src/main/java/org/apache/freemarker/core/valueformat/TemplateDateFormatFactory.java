@@ -23,7 +23,9 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.apache.freemarker.core.*;
+import org.apache.freemarker.core.Configurable;
+import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.model.TemplateDateModel;
 
 /**

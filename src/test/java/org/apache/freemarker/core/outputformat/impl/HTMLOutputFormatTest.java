@@ -18,12 +18,8 @@
  */
 package org.apache.freemarker.core.outputformat.impl;
 
-import static org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat.INSTANCE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.StringWriter;

@@ -19,11 +19,8 @@
 
 package org.apache.freemarker.core;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +34,16 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.freemarker.core.model.*;
+import org.apache.freemarker.core.model.TemplateBooleanModel;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateCollectionModelEx;
+import org.apache.freemarker.core.model.TemplateDateModel;
+import org.apache.freemarker.core.model.TemplateHashModelEx2;
+import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
+import org.apache.freemarker.core.model.TemplateNumberModel;
+import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
 import org.junit.Test;
 import org.w3c.dom.Document;

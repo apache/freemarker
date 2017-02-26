@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.TemplateBooleanModel;

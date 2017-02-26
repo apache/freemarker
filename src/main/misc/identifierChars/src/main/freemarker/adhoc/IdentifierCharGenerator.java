@@ -21,7 +21,6 @@ package freemarker.adhoc;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 /**

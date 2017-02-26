@@ -21,16 +21,16 @@ package org.apache.freemarker.core.userpkg;
 import java.util.Locale;
 
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.model.TemplateNumberModel;
+import org.apache.freemarker.core.util._NumberUtil;
+import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.core.valueformat.InvalidFormatParametersException;
 import org.apache.freemarker.core.valueformat.TemplateFormatUtil;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateValueFormatException;
 import org.apache.freemarker.core.valueformat.UnformattableValueException;
-import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.util._NumberUtil;
-import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Shows a number in base N number system. Can only format numbers that fit into an {@code int},

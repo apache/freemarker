@@ -19,13 +19,13 @@
 
 package org.apache.freemarker.core.valueformat.impl;
 
+import java.util.Locale;
+import java.util.TimeZone;
+
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.valueformat.InvalidFormatParametersException;
 import org.apache.freemarker.core.valueformat.TemplateDateFormat;
 import org.apache.freemarker.core.valueformat.UnknownDateTypeFormattingUnsupportedException;
-
-import java.util.Locale;
-import java.util.TimeZone;
 
 /**
  * Creates {@link TemplateDateFormat}-s that follows ISO 8601 extended format that is also compatible with the XML

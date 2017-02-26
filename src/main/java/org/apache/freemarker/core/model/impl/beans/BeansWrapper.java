@@ -38,7 +38,13 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
-import org.apache.freemarker.core.*;
+import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.Version;
+import org.apache.freemarker.core._CoreAPI;
+import org.apache.freemarker.core._CoreLogs;
+import org.apache.freemarker.core._DelayedFTLTypeDescription;
+import org.apache.freemarker.core._DelayedShortClassName;
+import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;

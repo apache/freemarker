@@ -19,13 +19,13 @@
 
 package org.apache.freemarker.core.valueformat.impl;
 
+import java.util.Locale;
+import java.util.TimeZone;
+
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.valueformat.InvalidFormatParametersException;
 import org.apache.freemarker.core.valueformat.TemplateDateFormat;
 import org.apache.freemarker.core.valueformat.UnknownDateTypeFormattingUnsupportedException;
-
-import java.util.Locale;
-import java.util.TimeZone;
 
 /**
  * Creates {@link TemplateDateFormat}-s that follows the W3C XML Schema date, time and dateTime syntax.

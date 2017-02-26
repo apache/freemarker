@@ -34,8 +34,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Version;
-import org.apache.freemarker.dom.NodeModel;
 import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.dom.NodeModel;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

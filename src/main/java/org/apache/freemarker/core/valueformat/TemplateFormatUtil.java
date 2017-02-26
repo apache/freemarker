@@ -18,13 +18,13 @@
  */
 package org.apache.freemarker.core.valueformat;
 
+import java.util.Date;
+
 import org.apache.freemarker.core._EvalUtil;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-
-import java.util.Date;
 
 /**
  * Utility classes for implementing {@link TemplateValueFormat}-s.

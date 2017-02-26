@@ -19,9 +19,8 @@
 
 package org.apache.freemarker.core.model.impl.beans;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.lang.ref.Reference;
 import java.util.HashMap;

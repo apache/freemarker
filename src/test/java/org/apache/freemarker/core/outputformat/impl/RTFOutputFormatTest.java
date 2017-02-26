@@ -18,10 +18,8 @@
  */
 package org.apache.freemarker.core.outputformat.impl;
 
-import static org.apache.freemarker.core.outputformat.impl.RTFOutputFormat.INSTANCE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.apache.freemarker.core.outputformat.impl.RTFOutputFormat.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.StringWriter;

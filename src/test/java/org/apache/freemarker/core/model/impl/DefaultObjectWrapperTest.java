@@ -19,18 +19,9 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import static org.apache.freemarker.test.hamcerst.Matchers.containsStringIgnoringCase;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.apache.freemarker.test.hamcerst.Matchers.*;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -53,7 +44,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.freemarker.core.*;
+import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.Template;
+import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.Version;
+import org.apache.freemarker.core._CoreAPI;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
@@ -72,7 +67,6 @@ import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;

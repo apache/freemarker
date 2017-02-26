@@ -19,9 +19,6 @@
 
 package org.apache.freemarker.core.valueformat;
 
-import org.apache.freemarker.core.valueformat.TemplateValueFormat;
-import org.apache.freemarker.core.valueformat.TemplateValueFormatException;
-
 /**
  * Thrown when the content of the string that should be parsed by the {@link TemplateValueFormat} doesn't match what the
  * format expects.

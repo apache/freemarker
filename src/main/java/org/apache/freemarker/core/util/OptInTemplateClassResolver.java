@@ -26,7 +26,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.freemarker.core.*;
+import org.apache.freemarker.core.Configurable;
+import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.Template;
+import org.apache.freemarker.core.TemplateClassResolver;
+import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core._MiscTemplateException;
 
 /**
  * A {@link TemplateClassResolver} that resolves only the classes whose name

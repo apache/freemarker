@@ -18,11 +18,8 @@
  */
 package org.apache.freemarker.core.valueformat;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -31,7 +28,11 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.freemarker.core.*;
+import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.Template;
+import org.apache.freemarker.core.TemplateConfiguration;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
