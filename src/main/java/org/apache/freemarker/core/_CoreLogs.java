@@ -32,7 +32,6 @@ public final class _CoreLogs {
     public static final Logger ATTEMPT = LoggerFactory.getLogger("org.apache.freemarker.core.runtime.attempt");
     public static final Logger SECURITY = LoggerFactory.getLogger("org.apache.freemarker.core.security");
     public static final Logger BEANS_WRAPPER = LoggerFactory.getLogger("org.apache.freemarker.core.model.impl.beans");
-    public static final Logger DOM_WRAPPER = LoggerFactory.getLogger("org.apache.freemarker.core.model.impl.dom");
     public static final Logger TEMPLATE_RESOLVER = LoggerFactory.getLogger(
             "org.apache.freemarker.core.templateresolver");
     public static final Logger DEBUG_SERVER = LoggerFactory.getLogger("org.apache.freemarker.core.debug.server");

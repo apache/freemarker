@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.model.impl.dom;
+package org.apache.freemarker.dom;
 
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
@@ -67,27 +67,4 @@ final class DomStringUtil {
         return true;
     }    
 
-    /**
-     * @return whether the qname matches the combination of nodeName, nsURI, and environment prefix settings. 
-     */
-    static boolean matchesName(String qname, String nodeName, String nsURI, Environment env) {
-        String defaultNS = env.getDefaultNS();
-        if ((defaultNS != null) && defaultNS.equals(nsURI)) {
-            return qname.equals(nodeName) 
-               || qname.equals(Template.DEFAULT_NAMESPACE_PREFIX + ":" + nodeName); 
-        }
-        if ("".equals(nsURI)) {
-            if (defaultNS != null) {
-                return qname.equals(Template.NO_NS_PREFIX + ":" + nodeName);
-            } else {
-                return qname.equals(nodeName) || qname.equals(Template.NO_NS_PREFIX + ":" + nodeName);
-            }
-        }
-        String prefix = env.getPrefixForNamespace(nsURI);
-        if (prefix == null) {
-            return false; // Is this the right thing here???
-        }
-        return qname.equals(prefix + ":" + nodeName);
-    }
-    
 }

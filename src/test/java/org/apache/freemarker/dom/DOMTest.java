@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core.model.impl.dom;
+package org.apache.freemarker.dom;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;

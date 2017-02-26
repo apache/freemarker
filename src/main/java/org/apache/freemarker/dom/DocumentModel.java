@@ -17,7 +17,7 @@
  * under the License.
  */
  
-package org.apache.freemarker.core.model.impl.dom; 
+package org.apache.freemarker.dom;
  
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.model.TemplateHashModel;

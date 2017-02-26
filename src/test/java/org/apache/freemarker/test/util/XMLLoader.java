@@ -28,7 +28,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.freemarker.core.model.impl.dom.NodeModel;
+import org.apache.freemarker.dom.NodeModel;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;

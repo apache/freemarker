@@ -30,8 +30,8 @@ import java.util.regex.Pattern;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core.model.impl.dom._ExtDomApi;
 
 /** Don't use this; used internally by FreeMarker, might changes without notice. */
 public class _StringUtil {
@@ -1098,8 +1098,24 @@ public class _StringUtil {
     /**
      * @return whether the qname matches the combination of nodeName, nsURI, and environment prefix settings.
      */
-    static public boolean matchesName(String qname, String nodeName, String nsURI, Environment env) {
-        return _ExtDomApi.matchesName(qname, nodeName, nsURI, env);
+    static public boolean matchesQName(String qname, String nodeName, String nsURI, Environment env) {
+        String defaultNS = env.getDefaultNS();
+        if ((defaultNS != null) && defaultNS.equals(nsURI)) {
+            return qname.equals(nodeName)
+                    || qname.equals(Template.DEFAULT_NAMESPACE_PREFIX + ":" + nodeName);
+        }
+        if ("".equals(nsURI)) {
+            if (defaultNS != null) {
+                return qname.equals(Template.NO_NS_PREFIX + ":" + nodeName);
+            } else {
+                return qname.equals(nodeName) || qname.equals(Template.NO_NS_PREFIX + ":" + nodeName);
+            }
+        }
+        String prefix = env.getPrefixForNamespace(nsURI);
+        if (prefix == null) {
+            return false; // Is this the right thing here???
+        }
+        return qname.equals(prefix + ":" + nodeName);
     }
     
     /**

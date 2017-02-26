@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.model.impl.dom;
+package org.apache.freemarker.dom;
 
 import java.io.IOException;
 

@@ -17,7 +17,7 @@
  * under the License.
  */
  
-package org.apache.freemarker.core.model.impl.dom;
+package org.apache.freemarker.dom;
 
 import java.util.Collections;
 
@@ -28,6 +28,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.util._StringUtil;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -228,6 +229,6 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
     }
 
     boolean matchesName(String name, Environment env) {
-        return DomStringUtil.matchesName(name, getNodeName(), getNodeNamespace(), env);
+        return _StringUtil.matchesQName(name, getNodeName(), getNodeNamespace(), env);
     }
 }

@@ -37,7 +37,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 import org.apache.freemarker.core.model.impl.beans.BeansWrapperConfiguration;
-import org.apache.freemarker.core.model.impl.dom.NodeModel;
+import org.apache.freemarker.dom.NodeModel;
 import org.w3c.dom.Node;
 
 /**

@@ -17,14 +17,30 @@
  * under the License.
  */
  
-package org.apache.freemarker.core.model.impl.dom;
+package org.apache.freemarker.dom;
 
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.w3c.dom.CharacterData;
+import org.w3c.dom.Comment;
 
-public interface XPathSupport {
+class CharacterDataNodeModel extends NodeModel implements TemplateScalarModel {
     
-    // [2.4] Add argument to pass down the ObjectWrapper to use 
-    TemplateModel executeQuery(Object context, String xpathQuery) throws TemplateModelException;
+    public CharacterDataNodeModel(CharacterData text) {
+        super(text);
+    }
     
+    @Override
+    public String getAsString() {
+        return ((org.w3c.dom.CharacterData) node).getData();
+    }
+    
+    @Override
+    public String getNodeName() {
+        return (node instanceof Comment) ? "@comment" : "@text";
+    }
+    
+    @Override
+    public boolean isEmpty() {
+        return true;
+    }
 }

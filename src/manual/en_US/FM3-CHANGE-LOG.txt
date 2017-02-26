@@ -75,7 +75,7 @@ the FreeMarer 3 changelog here:
   ArithmeticEngine related classes were moved to org.apache.freemarker.core.arithmetic.
   freemarker.ext.beans were moved under org.apache.freemarker.core.model.impl.beans for now (but later
   we only want a DefaultObject wrapper, no BeansWrapper, so this will change) and freemarker.ext.dom
-  was moved to org.apache.freemarker.core.model.impl.dom.
+  was moved to org.apache.freemarker.dom.
 - Moved the all the static final ObjectWrapper-s to the new _StaticObjectWrappers class, and made them
   write protected (non-configurable). Also now they come from the pool that ObjectWrapper builders use.
 - WrappingTemplateModel.objectWrapper is now final, and its statically stored default value can't be set anymore.

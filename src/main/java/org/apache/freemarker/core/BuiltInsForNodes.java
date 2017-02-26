@@ -28,7 +28,7 @@ import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNodeModelEx;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
-import org.apache.freemarker.core.model.impl.dom._ExtDomApi;
+import org.apache.freemarker.core.util._StringUtil;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -120,7 +120,7 @@ class BuiltInsForNodes {
     static class AncestorSequence extends SimpleSequence implements TemplateMethodModel {
         
         @SuppressFBWarnings(value="SE_BAD_FIELD",
-                justification="Can't make this Serializable, and not extneding SimpleSequence would be non-BC.")
+                justification="Can't make this Serializable, and not extending SimpleSequence would be non-BC.")
         private Environment env;
         
         AncestorSequence(Environment env) {
@@ -143,7 +143,7 @@ class BuiltInsForNodes {
                     }
                 } else {
                     for (int j = 0; j < names.size(); j++) {
-                        if (_ExtDomApi.matchesName((String) names.get(j), nodeName, nsURI, env)) {
+                        if (_StringUtil.matchesQName((String) names.get(j), nodeName, nsURI, env)) {
                             result.add(tnm);
                             break;
                         }

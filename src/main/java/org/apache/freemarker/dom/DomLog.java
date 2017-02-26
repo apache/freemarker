@@ -16,31 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- 
-package org.apache.freemarker.core.model.impl.dom;
+package org.apache.freemarker.dom;
 
-import org.apache.freemarker.core.model.TemplateScalarModel;
-import org.w3c.dom.CharacterData;
-import org.w3c.dom.Comment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-class CharacterDataNodeModel extends NodeModel implements TemplateScalarModel {
-    
-    public CharacterDataNodeModel(CharacterData text) {
-        super(text);
+final class DomLog {
+
+    private DomLog() {
+        //
     }
-    
-    @Override
-    public String getAsString() {
-        return ((org.w3c.dom.CharacterData) node).getData();
-    }
-    
-    @Override
-    public String getNodeName() {
-        return (node instanceof Comment) ? "@comment" : "@text";
-    }
-    
-    @Override
-    public boolean isEmpty() {
-        return true;
-    }
+
+    public static final Logger LOG = LoggerFactory.getLogger("org.apache.freemarker.dom");
+
 }

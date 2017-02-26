@@ -16,28 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+ 
+package org.apache.freemarker.dom;
 
-package org.apache.freemarker.core.model.impl.dom;
+import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelException;
 
-import org.apache.freemarker.core.Environment;
-
-/**
- * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
- * This class is to work around the lack of module system in Java, i.e., so that other FreeMarker packages can
- * access things inside this package that users shouldn't. 
- */
-public final class _ExtDomApi {
-
-    private _ExtDomApi() {
-        // Not meant to be called
-    }
+public interface XPathSupport {
     
-    static public boolean isXMLNameLike(String name) {
-        return DomStringUtil.isXMLNameLike(name);
-    }
-    
-    static public boolean matchesName(String qname, String nodeName, String nsURI, Environment env) {
-        return DomStringUtil.matchesName(qname, nodeName, nsURI, env);
-    }
+    // [2.4] Add argument to pass down the ObjectWrapper to use 
+    TemplateModel executeQuery(Object context, String xpathQuery) throws TemplateModelException;
     
 }

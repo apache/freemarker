@@ -17,7 +17,7 @@
  * under the License.
  */
  
-package org.apache.freemarker.core.model.impl.dom;
+package org.apache.freemarker.dom;
 
 import java.util.List;
 
@@ -30,34 +30,34 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.xml.utils.PrefixResolver;
+import org.apache.xpath.XPath;
+import org.apache.xpath.XPathContext;
+import org.apache.xpath.objects.XBoolean;
+import org.apache.xpath.objects.XNodeSet;
+import org.apache.xpath.objects.XNull;
+import org.apache.xpath.objects.XNumber;
+import org.apache.xpath.objects.XObject;
+import org.apache.xpath.objects.XString;
 import org.w3c.dom.Node;
 import org.w3c.dom.traversal.NodeIterator;
 
-import com.sun.org.apache.xml.internal.utils.PrefixResolver;
-import com.sun.org.apache.xpath.internal.XPath;
-import com.sun.org.apache.xpath.internal.XPathContext;
-import com.sun.org.apache.xpath.internal.objects.XBoolean;
-import com.sun.org.apache.xpath.internal.objects.XNodeSet;
-import com.sun.org.apache.xpath.internal.objects.XNull;
-import com.sun.org.apache.xpath.internal.objects.XNumber;
-import com.sun.org.apache.xpath.internal.objects.XObject;
-import com.sun.org.apache.xpath.internal.objects.XString;
-
 /**
- * This is just the XalanXPathSupport class using the sun internal
- * package names
+ * Some glue code that bridges the Xalan XPath stuff (that is built into the JDK 1.4.x)
+ * with FreeMarker TemplateModel semantics
  */
 
-class SunInternalXalanXPathSupport implements XPathSupport {
+class XalanXPathSupport implements XPathSupport {
     
     private XPathContext xpathContext = new XPathContext();
         
+    /* I don't recommend Jaxen...
     private static final String ERRMSG_RECOMMEND_JAXEN
             = "(Note that there is no such restriction if you "
                     + "configure FreeMarker to use Jaxen instead of Xalan.)";
-
+    */
     private static final String ERRMSG_EMPTY_NODE_SET
-            = "Cannot perform an XPath query against an empty node set." + ERRMSG_RECOMMEND_JAXEN;
+            = "Cannot perform an XPath query against an empty node set."; /* " + ERRMSG_RECOMMEND_JAXEN;*/
     
     @Override
     synchronized public TemplateModel executeQuery(Object context, String xpathQuery) throws TemplateModelException {
@@ -68,7 +68,7 @@ class SunInternalXalanXPathSupport implements XPathSupport {
                     if (cnt != 0) {
                         throw new TemplateModelException(
                                 "Cannot perform an XPath query against a node set of " + cnt
-                                + " nodes. Expecting a single node." + ERRMSG_RECOMMEND_JAXEN);
+                                + " nodes. Expecting a single node."/* " + ERRMSG_RECOMMEND_JAXEN*/);
                     } else {
                         throw new TemplateModelException(ERRMSG_EMPTY_NODE_SET);
                     }

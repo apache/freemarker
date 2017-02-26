@@ -17,7 +17,7 @@
  * under the License.
  */
  
-package org.apache.freemarker.core.model.impl.dom;
+package org.apache.freemarker.dom;
 
 
 import java.lang.ref.WeakReference;
@@ -75,7 +75,7 @@ abstract public class NodeModel
 implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     AdapterTemplateModel, WrapperTemplateModel, _UnexpectedTypeErrorExplainerTemplateModel {
 
-    static private final Logger LOG = _CoreLogs.DOM_WRAPPER;
+    static private final Logger LOG = DomLog.LOG;
 
     private static final Object STATIC_LOCK = new Object();
     
@@ -481,7 +481,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
      */
     static public void useJaxenXPathSupport() throws Exception {
         Class.forName("org.jaxen.dom.DOMXPath");
-        Class c = Class.forName("org.apache.freemarker.core.model.impl.dom.JaxenXPathSupport");
+        Class c = Class.forName("org.apache.freemarker.dom.JaxenXPathSupport");
         jaxenXPathSupport = (XPathSupport) c.newInstance();
         synchronized (STATIC_LOCK) {
             xpathSupportClass = c;
@@ -497,7 +497,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
      */
     static public void useXalanXPathSupport() throws Exception {
         Class.forName("org.apache.xpath.XPath");
-        Class c = Class.forName("org.apache.freemarker.core.model.impl.dom.XalanXPathSupport");
+        Class c = Class.forName("org.apache.freemarker.dom.XalanXPathSupport");
         synchronized (STATIC_LOCK) {
             xpathSupportClass = c;
         }
@@ -508,7 +508,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     
     static public void useSunInternalXPathSupport() throws Exception {
         Class.forName("com.sun.org.apache.xpath.internal.XPath");
-        Class c = Class.forName("org.apache.freemarker.core.model.impl.dom.SunInternalXalanXPathSupport");
+        Class c = Class.forName("org.apache.freemarker.dom.SunInternalXalanXPathSupport");
         synchronized (STATIC_LOCK) {
             xpathSupportClass = c;
         }
@@ -518,14 +518,14 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     }
     
     /**
-     * Set an alternative implementation of org.apache.freemarker.core.model.impl.dom.XPathSupport to use
+     * Set an alternative implementation of org.apache.freemarker.dom.XPathSupport to use
      * as the XPath engine.
      * @param cl the class, or <code>null</code> to disable XPath support.
      */
     static public void setXPathSupportClass(Class cl) {
         if (cl != null && !XPathSupport.class.isAssignableFrom(cl)) {
             throw new RuntimeException("Class " + cl.getName()
-                    + " does not implement org.apache.freemarker.core.model.impl.dom.XPathSupport");
+                    + " does not implement org.apache.freemarker.dom.XPathSupport");
         }
         synchronized (STATIC_LOCK) {
             xpathSupportClass = cl;
@@ -533,7 +533,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     }
 
     /**
-     * Get the currently used org.apache.freemarker.core.model.impl.dom.XPathSupport used as the XPath engine.
+     * Get the currently used org.apache.freemarker.dom.XPathSupport used as the XPath engine.
      * Returns <code>null</code> if XPath support is disabled.
      */
     static public Class getXPathSupportClass() {
