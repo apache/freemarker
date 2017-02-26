@@ -22,14 +22,10 @@ package org.apache.freemarker.core.model;
 import java.util.Collection;
 
 /**
- * <b>Experimental - subject to change:</b> "extended collection" template language data type: Adds size/emptiness
- * querybility and "contains" test to {@link TemplateCollectionModel}. The added extra operations is provided by all
- * Java {@link Collection}-s, and this interface was added to make that accessible for templates too.
- * 
- * <p>
- * <b>Experimental status warning:</b> This interface is subject to change on non-backward compatible ways, hence, it
- * shouldn't be implemented outside FreeMarker yet.
- * 
+ * "extended collection" template language data type: Adds size/emptiness querybility and "contains" test to
+ * {@link TemplateCollectionModel}. The added extra operations is provided by all Java {@link Collection}-s, and
+ * this interface was added to make that accessible for templates too.
+ *
  * @since 2.3.22
  */
 public interface TemplateCollectionModelEx extends TemplateCollectionModel {

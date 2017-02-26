@@ -70,4 +70,4 @@ MyList: [1, 2, 3] [org.apache.freemarker.servlet.jsp.RealServletContainertTest$M
 LinkedHashMap: {a=1, b=2, c=3} [java.util.LinkedHashMap]
 TreeMap: {a=1, b=2, c=3} [java.util.TreeMap]
 MyMap: {a=1, b=2, c=3} [org.apache.freemarker.servlet.jsp.RealServletContainertTest$MyMap]
-TreeSet: [1, 2, 3] [org.apache.freemarker.core.model.impl.beans.SequenceAdapter]
+TreeSet: [1, 2, 3] [java.util.TreeSet]

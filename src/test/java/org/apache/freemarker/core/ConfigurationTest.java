@@ -661,20 +661,6 @@ public class ConfigurationTest extends TestCase {
             cfg.setSetting(Configurable.OBJECT_WRAPPER_KEY, "simple");
             assertSame(_StaticObjectWrappers.SIMPLE_OBJECT_WRAPPER, cfg.getObjectWrapper());
         }
-        
-        {
-            cfg.setSetting(Configurable.OBJECT_WRAPPER_KEY,
-                    "DefaultObjectWrapper(3.0.0, useAdaptersForContainers=true, forceLegacyNonListCollections=false)");
-            DefaultObjectWrapper dow = (DefaultObjectWrapper) cfg.getObjectWrapper();
-            assertEquals(Configuration.VERSION_3_0_0, dow.getIncompatibleImprovements());
-            assertFalse(dow.getForceLegacyNonListCollections());
-        }
-        
-        {
-            cfg.setSetting(Configurable.OBJECT_WRAPPER_KEY, "defAult");
-            DefaultObjectWrapper dow = (DefaultObjectWrapper) cfg.getObjectWrapper();
-            assertTrue(dow.getForceLegacyNonListCollections());
-        }
     }
     
     public void testTemplateLookupStrategyDefaultAndSet() throws IOException {

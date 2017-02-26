@@ -1801,7 +1801,7 @@ public class Configurable {
      *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
      *       expression</a>, with the addition that {@link BeansWrapper}, {@link DefaultObjectWrapper} and
      *       {@link SimpleObjectWrapper} can be referred without package name. For example, these strings are valid
-     *       values: {@code "DefaultObjectWrapper(2.3.21, forceLegacyNonListCollections=false, iterableSupport=true)"},
+     *       values: {@code "DefaultObjectWrapper(3.0.0)"},
      *       {@code "BeansWrapper(2.3.21, simpleMapWrapper=true)"}.
      *       <br>If the value does not contain dot, then it must be one of these special values (case insensitive):
      *       {@code "default"} means the default of {@link Configuration} (the default depends on the

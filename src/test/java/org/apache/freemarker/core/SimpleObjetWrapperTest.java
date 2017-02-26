@@ -37,15 +37,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
-import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -78,8 +70,8 @@ public class SimpleObjetWrapperTest {
         assertTrue(sow.wrap(new ArrayList()) instanceof TemplateSequenceModel);
         assertTrue(sow.wrap(new String[0]) instanceof TemplateSequenceModel);
         assertTrue(sow.wrap(new ArrayList().iterator()) instanceof TemplateCollectionModel);
-        assertTrue(sow.wrap(new HashSet()) instanceof TemplateSequenceModel);
-        assertTrue(sow.wrap(new HashMap()) instanceof TemplateHashModelEx);
+        assertTrue(sow.wrap(new HashSet()) instanceof TemplateCollectionModelEx);
+        assertTrue(sow.wrap(new HashMap()) instanceof TemplateHashModelEx2);
         assertNull(sow.wrap(null));
     }
     

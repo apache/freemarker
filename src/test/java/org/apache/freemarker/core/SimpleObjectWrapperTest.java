@@ -19,38 +19,37 @@
 
 package org.apache.freemarker.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import javax.annotation.PostConstruct;
 
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.DefaultArrayAdapter;
 import org.apache.freemarker.core.model.impl.DefaultListAdapter;
 import org.apache.freemarker.core.model.impl.DefaultMapAdapter;
+import org.apache.freemarker.core.model.impl.DefaultNonListCollectionAdapter;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapperTest.TestBean;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.model.impl.SimpleSequence;
 import org.junit.Test;
 
 public class SimpleObjectWrapperTest {
-    
+
     @Test
     public void testBasics() throws TemplateModelException {
+        PostConstruct.class.toString();
         SimpleObjectWrapper ow = new SimpleObjectWrapper(Configuration.VERSION_3_0_0);
         testCustomizationCommonPart(ow);
         assertTrue(ow.wrap(Collections.emptyMap()) instanceof DefaultMapAdapter);
         assertTrue(ow.wrap(Collections.emptyList()) instanceof DefaultListAdapter);
         assertTrue(ow.wrap(new boolean[] { }) instanceof DefaultArrayAdapter);
-        assertTrue(ow.wrap(new HashSet()) instanceof SimpleSequence);  // at least until IcI 2.4
+        assertTrue(ow.wrap(new HashSet()) instanceof DefaultNonListCollectionAdapter);
     }
 
     @SuppressWarnings("boxing")

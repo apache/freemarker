@@ -18,7 +18,7 @@
   under the License.
 -->
 
-<!DOCTYPE testcases [
+<!DOCTYPE testCases [
   <!ELEMENT testCases (setting?, testCase*)>
   <!ELEMENT testCase (setting?)>
      <!ATTLIST testCase 
@@ -57,7 +57,7 @@ Note that for the incompatible_improvements setting you can specify a list of ve
    
    <testCase name="api-builtins" noOutput="true">
       <setting
-            object_wrapper="DefaultObjectWrapper(3.0.0, forceLegacyNonListCollections=false)"
+            object_wrapper="DefaultObjectWrapper(3.0.0)"
             api_builtin_enabled="true"
       />
    </testCase>
@@ -108,23 +108,23 @@ Note that for the incompatible_improvements setting you can specify a list of ve
       <setting object_wrapper="org.apache.freemarker.test.util.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
    </testCase>
    <testCase name="list[#endTN]-collectionAdapter" expected="list.txt">
-      <setting object_wrapper="DefaultObjectWrapper(3.0.0, forceLegacyNonListCollections=false)" />
+      <setting object_wrapper="DefaultObjectWrapper(3.0.0)" />
    </testCase>
    <testCase name="list2[#endTN]-simpleTemplateModels" expected="list2.txt">
       <setting object_wrapper="org.apache.freemarker.test.util.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
    </testCase>
    <testCase name="list2[#endTN]-collectionAdapter" expected="list2.txt">
-      <setting object_wrapper="DefaultObjectWrapper(3.0.0, forceLegacyNonListCollections=false)" />
+      <setting object_wrapper="DefaultObjectWrapper(3.0.0)" />
    </testCase>
    <testCase name="list3[#endTN]-simpleTemplateModels" expected="list3.txt">
       <setting object_wrapper="org.apache.freemarker.test.util.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
    </testCase>
    <testCase name="list3[#endTN]-collectionAdapter" expected="list3.txt">
-      <setting object_wrapper="DefaultObjectWrapper(3.0.0, forceLegacyNonListCollections=false)" />
+      <setting object_wrapper="DefaultObjectWrapper(3.0.0)" />
    </testCase>
    <testCase name="list-bis" />
    <testCase name="list-bis[#endTN]-collectionAdapter" expected="list-bis.txt">
-      <setting object_wrapper="DefaultObjectWrapper(3.0.0, forceLegacyNonListCollections=false)" />
+      <setting object_wrapper="DefaultObjectWrapper(3.0.0)" />
    </testCase>
    <testCase name="listhash" />
    <testCase name="listhashliteral" />
@@ -168,7 +168,7 @@ Note that for the incompatible_improvements setting you can specify a list of ve
       <setting object_wrapper="default"/> 
    </testCase>
    <testCase name="sequence-builtins[#endTN]-with-DefaultObjectWrapper-collAdapters" expected="sequence-builtins.txt">
-      <setting object_wrapper="DefaultObjectWrapper(3.0.0, forceLegacyNonListCollections=false)"/> 
+      <setting object_wrapper="DefaultObjectWrapper(3.0.0)"/>
    </testCase>
    <testCase name="simplehash-char-key" noOutput="true" />
    <testCase name="existence-operators" noOutput="true" />

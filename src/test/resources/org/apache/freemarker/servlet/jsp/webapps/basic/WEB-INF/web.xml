@@ -97,7 +97,7 @@
         </init-param>
         <init-param>
             <param-name>object_wrapper</param-name>
-            <param-value>DefaultObjectWrapper(3.0.0, forceLegacyNonListCollections=false)</param-value>
+            <param-value>DefaultObjectWrapper(3.0.0)</param-value>
         </init-param>
         
         <!-- Common parts: -->

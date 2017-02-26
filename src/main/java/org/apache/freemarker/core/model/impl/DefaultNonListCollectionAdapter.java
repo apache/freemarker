@@ -38,25 +38,15 @@ import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
 
 /**
- * <b>Experimental - subject to change:</b> Adapts a non-{@link List} Java {@link Collection} to the corresponding
- * {@link TemplateModel} interface(s), most importantly to {@link TemplateCollectionModelEx}. For {@link List}-s, use
- * {@link DefaultListAdapter}, or else you lose indexed element access.
+ * Adapts a non-{@link List} Java {@link Collection} to the corresponding {@link TemplateModel} interface(s), most
+ * importantly to {@link TemplateCollectionModelEx}. For {@link List}-s, use {@link DefaultListAdapter}, or else you
+ * lose indexed element access.
  * 
  * <p>
  * Thread safety: A {@link DefaultNonListCollectionAdapter} is as thread-safe as the {@link Collection} that it wraps
  * is. Normally you only have to consider read-only access, as the FreeMarker template language doesn't allow writing
  * these collections (though of course, Java methods called from the template can violate this rule).
- * 
- * <p>
- * This adapter is used by {@link DefaultObjectWrapper} if its {@code useAdaptersForCollections} property is
- * {@code true}, which is the default when its {@code incompatibleImprovements} property is 2.3.22 or higher, and its
- * {@link DefaultObjectWrapper#setForceLegacyNonListCollections(boolean) forceLegacyNonListCollections} property is
- * {@code false}, which is still not the default as of 2.3.22 (so you have to set it explicitly).
- * 
- * <p>
- * <b>Experimental status warning:</b> This class is subject to change on non-backward compatible ways, hence, it
- * shouldn't be used from outside FreeMarker yet.
- * 
+ *
  * @since 2.3.22
  */
 public class DefaultNonListCollectionAdapter extends WrappingTemplateModel implements TemplateCollectionModelEx,

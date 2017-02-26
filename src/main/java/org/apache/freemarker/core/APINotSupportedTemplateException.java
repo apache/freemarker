@@ -45,23 +45,6 @@ class APINotSupportedTemplateException extends TemplateException {
 
         if (blamedExpr.isLiteral()) {
             desc.tip("Only adapted Java objects can possibly have API, not values created inside templates.");
-        } else {
-            ObjectWrapper ow = env.getObjectWrapper();
-            if (ow instanceof DefaultObjectWrapper
-                    && (tm instanceof SimpleHash || tm instanceof SimpleSequence)) {
-                DefaultObjectWrapper dow = (DefaultObjectWrapper) ow;
-                if (!dow.getUseAdaptersForContainers()) {
-                    desc.tip("In the FreeMarker configuration, \"", Configurable.OBJECT_WRAPPER_KEY,
-                            "\" is a DefaultObjectWrapper with its \"useAdaptersForContainers\" property set to "
-                            + "false. Setting it to true might solves this problem.");
-                } else if (tm instanceof SimpleSequence && dow.getForceLegacyNonListCollections()) {
-                    desc.tip("In the FreeMarker configuration, \"",
-                            Configurable.OBJECT_WRAPPER_KEY,
-                            "\" is a DefaultObjectWrapper with its \"forceLegacyNonListCollections\" property set "
-                            + "to true. If you are trying to access the API of a non-List Collection, setting the "
-                            + "\"forceLegacyNonListCollections\" property to false might solves this problem.");
-                }
-            }
         }
 
         return desc;
