@@ -29,7 +29,7 @@ import org.apache.freemarker.core.Environment;
 
 /**
  * "method" template language data type: Objects that act like functions. The name comes from that their original
- * application was calling Java methods via {@link org.apache.freemarker.core.model.impl.beans.BeansWrapper}. 
+ * application was calling Java methods via {@link org.apache.freemarker.core.model.impl.DefaultObjectWrapper}.
  * 
  * <p>In templates they are used like {@code myMethod("foo", "bar")} or {@code myJavaObject.myJavaMethod("foo", "bar")}. 
  * 

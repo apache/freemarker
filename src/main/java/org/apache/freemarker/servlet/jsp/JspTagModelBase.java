@@ -40,7 +40,7 @@ import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.servlet.jsp.SimpleTagDirectiveModel.TemplateExceptionWrapperJspException;
 
@@ -84,7 +84,7 @@ class JspTagModelBase {
         if (args != null && !args.isEmpty()) {
             ObjectWrapperAndUnwrapper unwrapper = 
                     wrapper instanceof ObjectWrapperAndUnwrapper ? (ObjectWrapperAndUnwrapper) wrapper
-                            : _StaticObjectWrappers.BEANS_WRAPPER;  // [2.4] Throw exception in this case
+                            : _StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER;  // [2.4] Throw exception in this case
             final Object[] argArray = new Object[1];
             for (Iterator iter = args.entrySet().iterator(); iter.hasNext(); ) {
                 final Map.Entry entry = (Map.Entry) iter.next();
@@ -102,7 +102,7 @@ class JspTagModelBase {
                     }
                 } else {
                     if (arg instanceof BigDecimal) {
-                        argArray[0] = BeansWrapper.coerceBigDecimal(
+                        argArray[0] = DefaultObjectWrapper.coerceBigDecimal(
                                 (BigDecimal) arg, setterMethod.getParameterTypes()[0]);
                     }
                     try {

@@ -19,8 +19,6 @@
 package org.apache.freemarker.core.model.impl;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapperBuilder;
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
@@ -36,9 +34,6 @@ public final class _StaticObjectWrappers {
     public static final DefaultObjectWrapper DEFAULT_OBJECT_WRAPPER
             = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
 
-    public static final BeansWrapper BEANS_WRAPPER
-            = new BeansWrapperBuilder(Configuration.VERSION_3_0_0).build();
-    
     public static final SimpleObjectWrapper SIMPLE_OBJECT_WRAPPER
             = new SimpleObjectWrapper(Configuration.VERSION_3_0_0);
     {

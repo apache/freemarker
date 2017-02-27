@@ -42,10 +42,9 @@ import org.apache.freemarker.core.Configurable.UnknownSettingException;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapperBuilder;
-import org.apache.freemarker.core.model.impl.beans.StringModel;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.UnregisteredOutputFormatException;
@@ -1081,12 +1080,12 @@ public class ConfigurationTest extends TestCase {
         cfg.setSharedVariable("b", "bbLegacy");
         
         // Cause re-wrapping of variables added via setSharedVaribles:
-        cfg.setObjectWrapper(new BeansWrapperBuilder(Configuration.VERSION_3_0_0).build());
+        cfg.setObjectWrapper(new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build());
 
         {
             TemplateScalarModel aVal = (TemplateScalarModel) cfg.getSharedVariable("a");
             assertEquals("aa", aVal.getAsString());
-            assertEquals(StringModel.class, aVal.getClass());
+            assertEquals(SimpleScalar.class, aVal.getClass());
             
             TemplateScalarModel bVal = (TemplateScalarModel) cfg.getSharedVariable("b");
             assertEquals("bbLegacy", bVal.getAsString());

@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -77,9 +78,10 @@ import com.google.common.collect.ImmutableMap;
 
 public class DefaultObjectWrapperTest {
 
-    private final static DefaultObjectWrapper OW300 = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0)
+    private final static DefaultObjectWrapper OW = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0)
             .build();
 
+    // This will make sense if we will have multipe incompatibleImprovement versions.
     @Test
     public void testIncompatibleImprovementsVersionBreakPoints() throws Exception {
         List<Version> expected = new ArrayList<>();
@@ -135,22 +137,26 @@ public class DefaultObjectWrapperTest {
     @SuppressWarnings("boxing")
     @Test
     public void testBuilder() throws Exception {
-        for (boolean simpleMapWrapper : new boolean[] { true, false }) {
-            DefaultObjectWrapperBuilder builder = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
-            builder.setSimpleMapWrapper(simpleMapWrapper); // Shouldn't mater
-            DefaultObjectWrapper bw = builder.build();
-            assertSame(bw, builder.build());
-            assertSame(bw.getClass(), DefaultObjectWrapper.class);
-            assertEquals(Configuration.VERSION_3_0_0, bw.getIncompatibleImprovements());
-            assertTrue(bw.isWriteProtected());
-            assertEquals(simpleMapWrapper, bw.isSimpleMapWrapper());
+        DefaultObjectWrapperBuilder builder = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+        DefaultObjectWrapper ow = builder.build();
+        assertSame(ow, builder.build());
+        assertSame(ow.getClass(), DefaultObjectWrapper.class);
+        assertEquals(Configuration.VERSION_3_0_0, ow.getIncompatibleImprovements());
+        assertTrue(ow.isWriteProtected());
+    }
 
-            assertThat(bw.wrap(new HashMap()), instanceOf(DefaultMapAdapter.class));
-            assertThat(bw.wrap(new ArrayList()), instanceOf(DefaultListAdapter.class));
-            assertThat(bw.wrap(new String[] {}), instanceOf(DefaultArrayAdapter.class));
-            assertThat(bw.wrap(new HashSet()), instanceOf(DefaultNonListCollectionAdapter.class));
-            assertThat(bw.wrap(new PureIterable()), instanceOf(DefaultIterableAdapter.class));
-        }
+    @Test
+    public void testWrappedTypes() throws Exception {
+        DefaultObjectWrapperBuilder builder = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+        DefaultObjectWrapper ow = builder.build();
+
+        assertThat(ow.wrap(new HashMap()), instanceOf(DefaultMapAdapter.class));
+        assertThat(ow.wrap(new ArrayList()), instanceOf(DefaultListAdapter.class));
+        assertThat(ow.wrap(new String[] {}), instanceOf(DefaultArrayAdapter.class));
+        assertThat(ow.wrap(new HashSet()), instanceOf(DefaultNonListCollectionAdapter.class));
+        assertThat(ow.wrap(new PureIterable()), instanceOf(DefaultIterableAdapter.class));
+        assertThat(ow.wrap(new Vector<>().iterator()), instanceOf(DefaultIteratorAdapter.class));
+        assertThat(ow.wrap(new Vector<>().elements()), instanceOf(DefaultEnumerationAdapter.class));
     }
     
     @Test
@@ -218,8 +224,8 @@ public class DefaultObjectWrapperTest {
 
     @SuppressWarnings("boxing")
     @Test
-    public void testRoundtripping() throws TemplateModelException, ClassNotFoundException {
-        DefaultObjectWrapper dow22 = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
+    public void testCompositeValueWrapping() throws TemplateModelException, ClassNotFoundException {
+        DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
 
         final Map hashMap = new HashMap();
         inintTestMap(hashMap);
@@ -234,13 +240,16 @@ public class DefaultObjectWrapperTest {
         linkedList.add("c");
         final int[] intArray = new int[] { 1, 2, 3 };
         final String[] stringArray = new String[] { "a", "b", "c" };
+        final PureIterable pureIterable = new PureIterable();
+        final HashSet hashSet = new HashSet();
 
-        assertRoundtrip(dow22, linkedHashMap, DefaultMapAdapter.class, LinkedHashMap.class, linkedHashMap.toString());
-        assertRoundtrip(dow22, treeMap, DefaultMapAdapter.class, TreeMap.class, treeMap.toString());
-        assertRoundtrip(dow22, gMap, DefaultMapAdapter.class, ImmutableMap.class, gMap.toString());
-        assertRoundtrip(dow22, linkedList, DefaultListAdapter.class, LinkedList.class, linkedList.toString());
-        assertRoundtrip(dow22, intArray, DefaultArrayAdapter.class, int[].class, null);
-        assertRoundtrip(dow22, stringArray, DefaultArrayAdapter.class, String[].class, null);
+        assertRoundtrip(ow, linkedHashMap, DefaultMapAdapter.class, LinkedHashMap.class, linkedHashMap.toString());
+        assertRoundtrip(ow, treeMap, DefaultMapAdapter.class, TreeMap.class, treeMap.toString());
+        assertRoundtrip(ow, gMap, DefaultMapAdapter.class, ImmutableMap.class, gMap.toString());
+        assertRoundtrip(ow, linkedList, DefaultListAdapter.class, LinkedList.class, linkedList.toString());
+        assertRoundtrip(ow, intArray, DefaultArrayAdapter.class, int[].class, null);
+        assertRoundtrip(ow, stringArray, DefaultArrayAdapter.class, String[].class, null);
+        assertRoundtrip(ow, hashSet, DefaultNonListCollectionAdapter.class, HashSet.class, hashSet.toString());
     }
 
     @SuppressWarnings("boxing")
@@ -260,7 +269,7 @@ public class DefaultObjectWrapperTest {
         testMap.put("d", Collections.singletonList("x"));
 
         {
-            TemplateHashModelEx hash = (TemplateHashModelEx) OW300.wrap(testMap);
+            TemplateHashModelEx hash = (TemplateHashModelEx) OW.wrap(testMap);
             assertEquals(4, hash.size());
             assertFalse(hash.isEmpty());
             assertNull(hash.get("e"));
@@ -276,7 +285,7 @@ public class DefaultObjectWrapperTest {
         }
 
         {
-            assertTrue(((TemplateHashModel) OW300.wrap(Collections.emptyMap())).isEmpty());
+            assertTrue(((TemplateHashModel) OW.wrap(Collections.emptyMap())).isEmpty());
         }
     }
 
@@ -290,14 +299,14 @@ public class DefaultObjectWrapperTest {
                 if (idx >= expectedItems.length) {
                     fail("Number of items is more than the expected " + expectedItems.length);
                 }
-                assertEquals(expectedItems[idx], OW300.unwrap(actualItem));
+                assertEquals(expectedItems[idx], OW.unwrap(actualItem));
                 if (i == 1) {
                     // In the 2nd round we also test with two iterators in parallel.
                     // This 2nd iterator is also special in that its hasNext() is never called.
                     if (it2 == null) {
                         it2 = coll.iterator();
                     }
-                    assertEquals(expectedItems[idx], OW300.unwrap(it2.next()));
+                    assertEquals(expectedItems[idx], OW.unwrap(it2.next()));
                 }
                 idx++;
             }
@@ -317,7 +326,7 @@ public class DefaultObjectWrapperTest {
             testList.add("c");
             testList.add(new String[] { "x" });
 
-            TemplateSequenceModel seq = (TemplateSequenceModel) OW300.wrap(testList);
+            TemplateSequenceModel seq = (TemplateSequenceModel) OW.wrap(testList);
             assertTrue(seq instanceof DefaultListAdapter);
             assertFalse(seq instanceof TemplateCollectionModel); // Maybe changes at 2.4.0
             assertEquals(4, seq.size());
@@ -337,7 +346,7 @@ public class DefaultObjectWrapperTest {
             testList.add(null);
             testList.add("c");
 
-            TemplateSequenceModel seq = (TemplateSequenceModel) OW300.wrap(testList);
+            TemplateSequenceModel seq = (TemplateSequenceModel) OW.wrap(testList);
             assertTrue(seq instanceof DefaultListAdapter);
             assertTrue(seq instanceof TemplateCollectionModel); // Maybe changes at 2.4.0
             assertEquals(3, seq.size());
@@ -364,16 +373,16 @@ public class DefaultObjectWrapperTest {
 
     @Test
     public void testArrayAdapterTypes() throws TemplateModelException {
-        assertArrayAdapterClass("Object", OW300.wrap(new Object[] {}));
-        assertArrayAdapterClass("Object", OW300.wrap(new String[] {}));
-        assertArrayAdapterClass("byte", OW300.wrap(new byte[] {}));
-        assertArrayAdapterClass("short", OW300.wrap(new short[] {}));
-        assertArrayAdapterClass("int", OW300.wrap(new int[] {}));
-        assertArrayAdapterClass("long", OW300.wrap(new long[] {}));
-        assertArrayAdapterClass("float", OW300.wrap(new float[] {}));
-        assertArrayAdapterClass("double", OW300.wrap(new double[] {}));
-        assertArrayAdapterClass("boolean", OW300.wrap(new boolean[] {}));
-        assertArrayAdapterClass("char", OW300.wrap(new char[] {}));
+        assertArrayAdapterClass("Object", OW.wrap(new Object[] {}));
+        assertArrayAdapterClass("Object", OW.wrap(new String[] {}));
+        assertArrayAdapterClass("byte", OW.wrap(new byte[] {}));
+        assertArrayAdapterClass("short", OW.wrap(new short[] {}));
+        assertArrayAdapterClass("int", OW.wrap(new int[] {}));
+        assertArrayAdapterClass("long", OW.wrap(new long[] {}));
+        assertArrayAdapterClass("float", OW.wrap(new float[] {}));
+        assertArrayAdapterClass("double", OW.wrap(new double[] {}));
+        assertArrayAdapterClass("boolean", OW.wrap(new boolean[] {}));
+        assertArrayAdapterClass("char", OW.wrap(new char[] {}));
     }
 
     private void assertArrayAdapterClass(String adapterCompType, TemplateModel adaptedArray) {
@@ -388,7 +397,7 @@ public class DefaultObjectWrapperTest {
         {
             final String[] testArray = new String[] { "a", null, "c" };
 
-            TemplateSequenceModel seq = (TemplateSequenceModel) OW300.wrap(testArray);
+            TemplateSequenceModel seq = (TemplateSequenceModel) OW.wrap(testArray);
             assertEquals(3, seq.size());
             assertNull(seq.get(-1));
             assertEquals("a", ((TemplateScalarModel) seq.get(0)).getAsString());
@@ -399,7 +408,7 @@ public class DefaultObjectWrapperTest {
 
         {
             final int[] testArray = new int[] { 11, 22 };
-            TemplateSequenceModel seq = (TemplateSequenceModel) OW300.wrap(testArray);
+            TemplateSequenceModel seq = (TemplateSequenceModel) OW.wrap(testArray);
             assertEquals(2, seq.size());
             assertNull(seq.get(-1));
             assertEqualsAndSameClass(Integer.valueOf(11), ((TemplateNumberModel) seq.get(0)).getAsNumber());
@@ -409,7 +418,7 @@ public class DefaultObjectWrapperTest {
 
         {
             final double[] testArray = new double[] { 11, 22 };
-            TemplateSequenceModel seq = (TemplateSequenceModel) OW300.wrap(testArray);
+            TemplateSequenceModel seq = (TemplateSequenceModel) OW.wrap(testArray);
             assertEquals(2, seq.size());
             assertNull(seq.get(-1));
             assertEqualsAndSameClass(Double.valueOf(11), ((TemplateNumberModel) seq.get(0)).getAsNumber());
@@ -419,7 +428,7 @@ public class DefaultObjectWrapperTest {
 
         {
             final boolean[] testArray = new boolean[] { true, false };
-            TemplateSequenceModel seq = (TemplateSequenceModel) OW300.wrap(testArray);
+            TemplateSequenceModel seq = (TemplateSequenceModel) OW.wrap(testArray);
             assertEquals(2, seq.size());
             assertNull(seq.get(-1));
             assertEqualsAndSameClass(Boolean.valueOf(true), ((TemplateBooleanModel) seq.get(0)).getAsBoolean());
@@ -429,7 +438,7 @@ public class DefaultObjectWrapperTest {
 
         {
             final char[] testArray = new char[] { 'a', 'b' };
-            TemplateSequenceModel seq = (TemplateSequenceModel) OW300.wrap(testArray);
+            TemplateSequenceModel seq = (TemplateSequenceModel) OW.wrap(testArray);
             assertEquals(2, seq.size());
             assertNull(seq.get(-1));
             assertEquals("a", ((TemplateScalarModel) seq.get(0)).getAsString());
@@ -476,25 +485,25 @@ public class DefaultObjectWrapperTest {
             set.add("a");
             set.add("b");
             set.add("c");
-            TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW300.wrap(set);
+            TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW.wrap(set);
             assertTrue(coll instanceof DefaultNonListCollectionAdapter);
             assertEquals(3, coll.size());
             assertFalse(coll.isEmpty());
             assertCollectionTMEquals(coll, "a", "b", "c");
 
-            assertTrue(coll.contains(OW300.wrap("a")));
-            assertTrue(coll.contains(OW300.wrap("b")));
-            assertTrue(coll.contains(OW300.wrap("c")));
-            assertTrue(coll.contains(OW300.wrap("c")));
-            assertFalse(coll.contains(OW300.wrap("d")));
+            assertTrue(coll.contains(OW.wrap("a")));
+            assertTrue(coll.contains(OW.wrap("b")));
+            assertTrue(coll.contains(OW.wrap("c")));
+            assertTrue(coll.contains(OW.wrap("c")));
+            assertFalse(coll.contains(OW.wrap("d")));
             try {
-                assertFalse(coll.contains(OW300.wrap(1)));
+                assertFalse(coll.contains(OW.wrap(1)));
                 fail();
             } catch (TemplateModelException e) {
                 assertThat(e.getMessage(), containsString("Integer"));
             }
 
-            assertRoundtrip(OW300, set, DefaultNonListCollectionAdapter.class, TreeSet.class, "[a, b, c]");
+            assertRoundtrip(OW, set, DefaultNonListCollectionAdapter.class, TreeSet.class, "[a, b, c]");
             
             assertSizeThroughAPIModel(3, coll);
         }
@@ -504,24 +513,24 @@ public class DefaultObjectWrapperTest {
             final List<String> list = Collections.singletonList("b");
             set.add(list);
             set.add(null);
-            TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW300.wrap(set);
+            TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW.wrap(set);
             TemplateModelIterator it = coll.iterator();
             final TemplateModel tm1 = it.next();
-            Object obj1 = OW300.unwrap(tm1);
+            Object obj1 = OW.unwrap(tm1);
             final TemplateModel tm2 = it.next();
-            Object obj2 = OW300.unwrap(tm2);
+            Object obj2 = OW.unwrap(tm2);
             assertTrue(obj1 == null || obj2 == null);
             assertTrue(obj1 != null && obj1.equals(list) || obj2 != null && obj2.equals(list));
             assertTrue(tm1 instanceof DefaultListAdapter || tm2 instanceof DefaultListAdapter);
 
             List similarList = new ArrayList();
             similarList.add("b");
-            assertTrue(coll.contains(OW300.wrap(similarList)));
-            assertTrue(coll.contains(OW300.wrap(null)));
-            assertFalse(coll.contains(OW300.wrap("a")));
-            assertFalse(coll.contains(OW300.wrap(1)));
+            assertTrue(coll.contains(OW.wrap(similarList)));
+            assertTrue(coll.contains(OW.wrap(null)));
+            assertFalse(coll.contains(OW.wrap("a")));
+            assertFalse(coll.contains(OW.wrap(1)));
 
-            assertRoundtrip(OW300, set, DefaultNonListCollectionAdapter.class, HashSet.class, "[" + obj1 + ", "
+            assertRoundtrip(OW, set, DefaultNonListCollectionAdapter.class, HashSet.class, "[" + obj1 + ", "
                     + obj2 + "]");
         }
     }
@@ -531,14 +540,14 @@ public class DefaultObjectWrapperTest {
     public void testCollectionAdapterOutOfBounds() throws TemplateModelException {
         Set set = Collections.singleton(123);
 
-        TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW300.wrap(set);
+        TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW.wrap(set);
         TemplateModelIterator it = coll.iterator();
 
         for (int i = 0; i < 3; i++) {
             assertTrue(it.hasNext());
         }
 
-        assertEquals(123, OW300.unwrap(it.next()));
+        assertEquals(123, OW.unwrap(it.next()));
 
         for (int i = 0; i < 3; i++) {
             assertFalse(it.hasNext());
@@ -556,7 +565,7 @@ public class DefaultObjectWrapperTest {
         Set set = new HashSet();
         set.add(null);
 
-        TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW300.wrap(set);
+        TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW.wrap(set);
         assertEquals(1, coll.size());
         assertFalse(coll.isEmpty());
         assertNull(coll.iterator().next());
@@ -566,18 +575,18 @@ public class DefaultObjectWrapperTest {
     public void testIteratorWrapping() throws TemplateModelException, ClassNotFoundException {
         final List<String> list = ImmutableList.of("a", "b", "c");
         Iterator<String> it = list.iterator();
-        TemplateCollectionModel coll = (TemplateCollectionModel) OW300.wrap(it);
+        TemplateCollectionModel coll = (TemplateCollectionModel) OW.wrap(it);
 
-        assertRoundtrip(OW300, coll, DefaultIteratorAdapter.class, Iterator.class, null);
+        assertRoundtrip(OW, coll, DefaultIteratorAdapter.class, Iterator.class, null);
 
         TemplateModelIterator itIt = coll.iterator();
         TemplateModelIterator itIt2 = coll.iterator(); // used later
         assertTrue(itIt.hasNext());
-        assertEquals("a", OW300.unwrap(itIt.next()));
+        assertEquals("a", OW.unwrap(itIt.next()));
         assertTrue(itIt.hasNext());
-        assertEquals("b", OW300.unwrap(itIt.next()));
+        assertEquals("b", OW.unwrap(itIt.next()));
         assertTrue(itIt.hasNext());
-        assertEquals("c", OW300.unwrap(itIt.next()));
+        assertEquals("c", OW.unwrap(itIt.next()));
         assertFalse(itIt.hasNext());
         try {
             itIt.next();
@@ -614,20 +623,20 @@ public class DefaultObjectWrapperTest {
         Map sortedMapC = new TreeMap<>();
         sortedMapC.put('a', 1);
         
-        assertEquals(1, OW300.unwrap(((TemplateHashModel) OW300.wrap(hashMapS)).get("a")));
-        assertEquals(1, OW300.unwrap(((TemplateHashModel) OW300.wrap(hashMapC)).get("a")));
-        assertEquals(1, OW300.unwrap(((TemplateHashModel) OW300.wrap(sortedMapS)).get("a")));
+        assertEquals(1, OW.unwrap(((TemplateHashModel) OW.wrap(hashMapS)).get("a")));
+        assertEquals(1, OW.unwrap(((TemplateHashModel) OW.wrap(hashMapC)).get("a")));
+        assertEquals(1, OW.unwrap(((TemplateHashModel) OW.wrap(sortedMapS)).get("a")));
         try {
-            ((TemplateHashModel) OW300.wrap(sortedMapC)).get("a");
+            ((TemplateHashModel) OW.wrap(sortedMapC)).get("a");
         } catch (TemplateModelException e) {
             assertThat(e.getMessage(), containsStringIgnoringCase("String key"));
         }
         
-        assertNull(((TemplateHashModel) OW300.wrap(hashMapS)).get("b"));
-        assertNull(((TemplateHashModel) OW300.wrap(hashMapC)).get("b"));
-        assertNull(((TemplateHashModel) OW300.wrap(sortedMapS)).get("b"));
+        assertNull(((TemplateHashModel) OW.wrap(hashMapS)).get("b"));
+        assertNull(((TemplateHashModel) OW.wrap(hashMapC)).get("b"));
+        assertNull(((TemplateHashModel) OW.wrap(sortedMapS)).get("b"));
         try {
-            ((TemplateHashModel) OW300.wrap(sortedMapC)).get("b");
+            ((TemplateHashModel) OW.wrap(sortedMapC)).get("b");
         } catch (TemplateModelException e) {
             assertThat(e.getMessage(), containsStringIgnoringCase("String key"));
         }
@@ -639,7 +648,7 @@ public class DefaultObjectWrapperTest {
         
         String listingFTL = "<#list value as x>${x}<#sep>, </#list>";
         
-        DefaultObjectWrapper ow = OW300;
+        DefaultObjectWrapper ow = OW;
         TemplateModel tm = ow.wrap(iterable);
         assertThat(tm, instanceOf(TemplateCollectionModel.class));
         TemplateCollectionModel iterableTM = (TemplateCollectionModel) tm;
@@ -661,7 +670,7 @@ public class DefaultObjectWrapperTest {
             }
         }
 
-        assertTemplateOutput(OW300, iterable, listingFTL, "a, b, c");
+        assertTemplateOutput(OW, iterable, listingFTL, "a, b, c");
     }
     
     @Test
@@ -671,9 +680,27 @@ public class DefaultObjectWrapperTest {
         InputSource is = new InputSource();
         is.setCharacterStream(new StringReader("<doc><sub a='1' /></doc>"));
         Document doc = db.parse(is);        
-        assertTrue(OW300.wrap(doc) instanceof TemplateNodeModel);
+        assertTrue(OW.wrap(doc) instanceof TemplateNodeModel);
     }
-    
+
+    @Test
+    public void testExposureLevel() throws Exception {
+        final DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
+
+        TemplateHashModel tm = (TemplateHashModel) ow.wrap(new TestBean());
+        assertNotNull(tm.get("hashCode"));
+        assertNotNull(tm.get("class"));
+        ow.setExposureLevel(DefaultObjectWrapper.EXPOSE_PROPERTIES_ONLY);
+        assertNull(tm.get("hashCode"));
+        assertNotNull(tm.get("class"));
+        ow.setExposureLevel(DefaultObjectWrapper.EXPOSE_NOTHING);
+        assertNull(tm.get("hashCode"));
+        assertNull(tm.get("class"));
+        ow.setExposureLevel(DefaultObjectWrapper.EXPOSE_ALL);
+        assertNotNull(tm.get("hashCode"));
+        assertNotNull(tm.get("class"));
+    }
+
     private void assertSizeThroughAPIModel(int expectedSize, TemplateModel normalModel) throws TemplateModelException {
         if (!(normalModel instanceof TemplateModelWithAPISupport)) {
             fail(); 

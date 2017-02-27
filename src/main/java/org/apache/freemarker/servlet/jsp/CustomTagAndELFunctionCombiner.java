@@ -33,7 +33,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.TemplateTransformModel;
-import org.apache.freemarker.core.model.impl.beans.SimpleMethodModel;
+import org.apache.freemarker.core.model.impl.SimpleMethodModel;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._ClassUtil;
 

@@ -43,17 +43,17 @@ import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
-import org.apache.freemarker.core.model.impl.beans.BeanModel;
-import org.apache.freemarker.core.model.impl.beans.BooleanModel;
-import org.apache.freemarker.core.model.impl.beans.CollectionModel;
-import org.apache.freemarker.core.model.impl.beans.DateModel;
-import org.apache.freemarker.core.model.impl.beans.EnumerationModel;
-import org.apache.freemarker.core.model.impl.beans.IteratorModel;
-import org.apache.freemarker.core.model.impl.beans.MapModel;
-import org.apache.freemarker.core.model.impl.beans.NumberModel;
-import org.apache.freemarker.core.model.impl.beans.OverloadedMethodsModel;
-import org.apache.freemarker.core.model.impl.beans.SimpleMethodModel;
-import org.apache.freemarker.core.model.impl.beans.StringModel;
+import org.apache.freemarker.core.model.impl.BeanModel;
+import org.apache.freemarker.core.model.impl.BooleanModel;
+import org.apache.freemarker.core.model.impl.CollectionModel;
+import org.apache.freemarker.core.model.impl.DateModel;
+import org.apache.freemarker.core.model.impl.EnumerationModel;
+import org.apache.freemarker.core.model.impl.IteratorModel;
+import org.apache.freemarker.core.model.impl.MapModel;
+import org.apache.freemarker.core.model.impl.NumberModel;
+import org.apache.freemarker.core.model.impl.OverloadedMethodsModel;
+import org.apache.freemarker.core.model.impl.SimpleMethodModel;
+import org.apache.freemarker.core.model.impl.StringModel;
 
 /**
  * Static utility methods that perform tasks specific to the FreeMarker Template Language (FTL).

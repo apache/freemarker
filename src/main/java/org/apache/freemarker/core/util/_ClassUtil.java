@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.util;
 
-import org.apache.freemarker.core.model.impl.beans.NumberModel;
+import org.apache.freemarker.core.model.impl.NumberModel;
 
 public class _ClassUtil {
     

@@ -21,7 +21,7 @@ package org.apache.freemarker.core;
 
 import java.util.Properties;
 
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 
 /**
  * Don't use this; used internally by FreeMarker, might changes without notice.
@@ -31,7 +31,7 @@ public class _SettingEvaluationEnvironment {
     
     private static final ThreadLocal CURRENT = new ThreadLocal();
 
-    private BeansWrapper objectWrapper;
+    private DefaultObjectWrapper objectWrapper;
     
     public static _SettingEvaluationEnvironment getCurrent() {
         Object r = CURRENT.get();
@@ -51,9 +51,9 @@ public class _SettingEvaluationEnvironment {
         CURRENT.set(previous);
     }
 
-    public BeansWrapper getObjectWrapper() {
+    public DefaultObjectWrapper getObjectWrapper() {
         if (objectWrapper == null) {
-            objectWrapper = new BeansWrapper(Configuration.VERSION_3_0_0);
+            objectWrapper = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
         }
         return objectWrapper;
     }

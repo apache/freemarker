@@ -23,7 +23,7 @@ import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
+import org.w3c.dom.Node;
 
 /**
  * A restricted object wrapper that will not expose arbitrary object, just those that directly correspond to the
@@ -33,21 +33,30 @@ import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 public class SimpleObjectWrapper extends DefaultObjectWrapper {
 
     /**
-     * @param incompatibleImprovements see in {@link BeansWrapper#BeansWrapper(Version)}.
+     * @param incompatibleImprovements see in {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}.
      * 
      * @since 2.3.21
      */
     public SimpleObjectWrapper(Version incompatibleImprovements) {
         super(incompatibleImprovements);
     }
-    
+
+    @Override
+    protected TemplateModel handW3CNode(Node node) throws TemplateModelException {
+        throw newUnhandledTypeException(node);
+    }
+
     /**
      * Called if a type other than the simple ones we know about is passed in. 
      * In this implementation, this just throws an exception.
      */
     @Override
     protected TemplateModel handleUnknownType(Object obj) throws TemplateModelException {
-        throw new TemplateModelException("SimpleObjectWrapper deliberately won't wrap this type: " 
+        throw newUnhandledTypeException(obj);
+    }
+
+    private TemplateModelException newUnhandledTypeException(Object obj) throws TemplateModelException {
+        return new TemplateModelException("SimpleObjectWrapper deliberately won't wrap this type: "
                                          + obj.getClass().getName());
     }
 
@@ -55,5 +64,5 @@ public class SimpleObjectWrapper extends DefaultObjectWrapper {
     public TemplateHashModel wrapAsAPI(Object obj) throws TemplateModelException {
         throw new TemplateModelException("SimpleObjectWrapper deliberately doesn't allow ?api.");
     }
-    
+
 }

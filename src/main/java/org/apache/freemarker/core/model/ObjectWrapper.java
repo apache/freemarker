@@ -22,15 +22,15 @@ package org.apache.freemarker.core.model;
 import java.util.Map;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 
 /**
  * Maps Java objects to the type-system of FreeMarker Template Language (see the {@link TemplateModel}
  * interfaces). Thus this is what decides what parts of the Java objects will be accessible in the templates and how.
  * 
- * <p>For example, with a {@link BeansWrapper} both the items of {@link Map} and the JavaBean properties (the getters)
+ * <p>For example, with a {@link DefaultObjectWrapper} both the items of {@link Map} and the JavaBean properties (the getters)
  * of an object are accessible in template uniformly with the {@code myObject.foo} syntax, where "foo" is the map key or
- * the property name. This is because both kind of object is wrapped by {@link BeansWrapper} into a
+ * the property name. This is because both kind of object is wrapped by {@link DefaultObjectWrapper} into a
  * {@link TemplateHashModel} implementation that will call {@link Map#get(Object)} or the getter method, transparently
  * to the template language.
  * 
@@ -44,7 +44,7 @@ public interface ObjectWrapper {
      * 
      * @param obj The object to wrap into a {@link TemplateModel}. If it already implements {@link TemplateModel},
      *      it should just return the object as is. If it's {@code null}, the method should return {@code null}
-     *      (however, {@link BeansWrapper}, has a legacy option for returning a null model object instead, but it's not
+     *      (however, {@link DefaultObjectWrapper}, has a legacy option for returning a null model object instead, but it's not
      *      a good idea).
      * 
      * @return a {@link TemplateModel} wrapper of the object passed in. To support un-wrapping, you may consider the

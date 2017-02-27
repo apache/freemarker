@@ -27,11 +27,13 @@ import org.slf4j.LoggerFactory;
  * access things inside this package that users shouldn't. 
  */ 
 public final class _CoreLogs {
-    
-    public static final Logger RUNTIME = LoggerFactory.getLogger("org.apache.freemarker.core.runtime");
-    public static final Logger ATTEMPT = LoggerFactory.getLogger("org.apache.freemarker.core.runtime.attempt");
-    public static final Logger SECURITY = LoggerFactory.getLogger("org.apache.freemarker.core.security");
-    public static final Logger BEANS_WRAPPER = LoggerFactory.getLogger("org.apache.freemarker.core.model.impl.beans");
+
+    // [FM3] Why "Runtime"? "TemplateProcessing" maybe?
+    public static final Logger RUNTIME = LoggerFactory.getLogger("org.apache.freemarker.core.Runtime");
+    public static final Logger ATTEMPT = LoggerFactory.getLogger("org.apache.freemarker.core.Runtime.Attempt");
+    public static final Logger SECURITY = LoggerFactory.getLogger("org.apache.freemarker.core.Security");
+    public static final Logger OBJECT_WRAPPER = LoggerFactory.getLogger("org.apache.freemarker.core.model" +
+            ".ObjectWrapper");
     public static final Logger TEMPLATE_RESOLVER = LoggerFactory.getLogger(
             "org.apache.freemarker.core.templateresolver");
     public static final Logger DEBUG_SERVER = LoggerFactory.getLogger("org.apache.freemarker.core.debug.server");

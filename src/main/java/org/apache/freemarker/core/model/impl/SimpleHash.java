@@ -37,7 +37,6 @@ import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 
 /**
  * A simple implementation of the {@link TemplateHashModelEx} interface, using its own underlying {@link Map} or
@@ -308,13 +307,13 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
             }
             // Create a copy to maintain immutability semantics and
             // Do nested unwrapping of elements if necessary.
-            BeansWrapper bw = _StaticObjectWrappers.BEANS_WRAPPER;
+            DefaultObjectWrapper ow = _StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER;
             for (Iterator it = map.entrySet().iterator(); it.hasNext(); ) {
                 Map.Entry entry = (Map.Entry) it.next();
                 Object key = entry.getKey();
                 Object value = entry.getValue();
                 if (value instanceof TemplateModel) {
-                    value = bw.unwrap((TemplateModel) value);
+                    value = ow.unwrap((TemplateModel) value);
                 }
                 m.put(key, value);
             }

@@ -29,7 +29,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.beans.BeanModel;
+import org.apache.freemarker.core.model.impl.BeanModel;
 
 /**
  * AST expression node superclass

@@ -46,7 +46,7 @@ implements
     @Override
     public TemplateModel get(String key) throws TemplateModelException {
         Object bean = scope == ANY_SCOPE ? pageContext.findAttribute(key) : pageContext.getAttribute(key, scope);
-        return _StaticObjectWrappers.BEANS_WRAPPER.wrap(bean);
+        return _StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER.wrap(bean);
     }
 
     @Override

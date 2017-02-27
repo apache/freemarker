@@ -35,8 +35,8 @@ import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
-import org.apache.freemarker.core.model.impl.beans.BeanModel;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
+import org.apache.freemarker.core.model.impl.BeanModel;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 
 class BuiltInsForStringsMisc {
 
@@ -289,11 +289,11 @@ class BuiltInsForStringsMisc {
             @Override
             public Object exec(List arguments) throws TemplateModelException {
                 ObjectWrapper ow = env.getObjectWrapper();
-                BeansWrapper bw = 
-                    ow instanceof BeansWrapper 
-                    ? (BeansWrapper) ow
-                    : _StaticObjectWrappers.BEANS_WRAPPER;
-                return bw.newInstance(cl, arguments);
+                DefaultObjectWrapper dow =
+                    ow instanceof DefaultObjectWrapper
+                    ? (DefaultObjectWrapper) ow
+                    : _StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER;
+                return dow.newInstance(cl, arguments);
             }
         }
     }

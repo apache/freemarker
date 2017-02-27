@@ -33,7 +33,6 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 
 /**
  * A simple implementation of the {@link TemplateSequenceModel} interface, using its own underlying {@link List} for
@@ -223,11 +222,11 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
                 throw new TemplateModelException("Error instantiating an object of type " + listClass.getName(),
                         e);
             }
-            BeansWrapper bw = _StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER;
+            DefaultObjectWrapper ow = _StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER;
             for (int i = 0; i < list.size(); i++) {
                 Object elem = list.get(i);
                 if (elem instanceof TemplateModel) {
-                    elem = bw.unwrap((TemplateModel) elem);
+                    elem = ow.unwrap((TemplateModel) elem);
                 }
                 result.add(elem);
             }

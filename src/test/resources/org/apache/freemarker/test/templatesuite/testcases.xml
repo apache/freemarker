@@ -56,23 +56,10 @@ Note that for the incompatible_improvements setting you can specify a list of ve
    <setting input_encoding="UTF-8" output_encoding="UTF-8" />
    
    <testCase name="api-builtins" noOutput="true">
-      <setting
-            object_wrapper="DefaultObjectWrapper(3.0.0)"
-            api_builtin_enabled="true"
-      />
-   </testCase>
-   <testCase name="api-builtins[#endTN]-bw" noOutput="true">
-      <setting
-            object_wrapper="BeansWrapper(3.0.0)"
-            api_builtin_enabled="true"
-      />
+      <setting api_builtin_enabled="true" />
    </testCase>
    <testCase name="arithmetic" />
    <testCase name="assignments" noOutput="true" />
-   <testCase name="bean-maps"/>
-   <testCase name="beans">
-      <setting object_wrapper="beans"/>
-   </testCase>
    <testCase name="boolean" />
    <testCase name="charset-in-header">
       <setting clear_encoding_map="Y" input_encoding="ISO-8859-5" />
@@ -86,9 +73,10 @@ Note that for the incompatible_improvements setting you can specify a list of ve
    <testCase name="dateformat-iso-bi" noOutput="true" />
    <testCase name="dateparsing" noOutput="true" />
    <testCase name="default"/>
-   <testCase name="default-xmlns">
-      <setting object_wrapper="beans"/>
+   <testCase name="default-object-wrapper">
+      <setting api_builtin_enabled="true" />
    </testCase>
+   <testCase name="default-xmlns" />
    <testCase name="encoding-builtins" />
    <testCase name="escapes" />
    <testCase name="hashliteral" />
@@ -158,9 +146,6 @@ Note that for the incompatible_improvements setting you can specify a list of ve
    <testCase name="recover" />
    <testCase name="root" />
    <testCase name="setting" noOutput="true" />
-   <testCase name="sequence-builtins[#endTN]-with-BeansWrapper" expected="sequence-builtins.txt">
-      <setting object_wrapper="beans"/> 
-   </testCase>
    <testCase name="sequence-builtins[#endTN]-with-SimpleTemplateModel" expected="sequence-builtins.txt">
       <setting object_wrapper="org.apache.freemarker.test.util.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
    </testCase>
@@ -190,22 +175,12 @@ Note that for the incompatible_improvements setting you can specify a list of ve
    <testCase name="variables"/>
    <testCase name="whitespace-trim"/>
    <testCase name="wstrip-in-header"/>
-   <testCase name="xml-fragment">
-      <setting object_wrapper="beans"/> 
-   </testCase>
-   <testCase name="xmlns1">
-      <setting object_wrapper="beans"/>
-   </testCase>
+   <testCase name="xml-fragment" />
+   <testCase name="xmlns1" />
    <testCase name="xmlns2" template="xmlns1.ftl"  expected="xmlns1.txt" />
-   <testCase name="xmlns3">
-      <setting object_wrapper="beans"/>
-   </testCase>   
-   <testCase name="xmlns4">
-      <setting object_wrapper="beans"/>
-   </testCase>   
-   <testCase name="xmlns5">
-      <setting object_wrapper="beans"/>
-   </testCase>   
+   <testCase name="xmlns3" />
+   <testCase name="xmlns4" />
+   <testCase name="xmlns5" />
    <testCase name="xml-ns_prefix-scope" template="xml-ns_prefix-scope-main.ftl" />
    <testCase name="hashconcat"/>
    <testCase name="new-defaultresolver" />
@@ -230,16 +205,10 @@ Note that for the incompatible_improvements setting you can specify a list of ve
    <testCase name="number-math-builtins" noOutput="true" />
    <testCase name="string-builtin-coercion" noOutput="true" />
    
-   <testCase name="overloaded-methods[#endTN]-inc-bw" noOutput="true">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.BeansWrapperInc"/>
-   </testCase>
-   <testCase name="overloaded-methods[#endTN]-desc-bw" noOutput="true">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.BeansWrapperDesc"/>
-   </testCase>
    <testCase name="overloaded-methods[#endTN]-inc-dow" noOutput="true">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.DefaultObjectWrapperInc"/>
+      <setting object_wrapper="org.apache.freemarker.core.model.impl.DefaultObjectWrapperInc"/>
    </testCase>
    <testCase name="overloaded-methods[#endTN]-desc-dow" noOutput="true">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.beans.DefaultObjectWrapperDesc"/>
+      <setting object_wrapper="org.apache.freemarker.core.model.impl.DefaultObjectWrapperDesc"/>
    </testCase>
 </testCases>

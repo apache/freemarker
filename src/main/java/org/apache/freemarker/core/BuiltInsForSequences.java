@@ -44,7 +44,7 @@ import org.apache.freemarker.core.model.impl.CollectionAndSequence;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl.TemplateModelListSequence;
-import org.apache.freemarker.core.model.impl.beans.CollectionModel;
+import org.apache.freemarker.core.model.impl.CollectionModel;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._StringUtil;
 

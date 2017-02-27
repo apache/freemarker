@@ -41,9 +41,8 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateExceptionHandler;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapperBuilder;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.apache.freemarker.servlet.FreemarkerServlet;
@@ -411,7 +410,7 @@ public class RealServletContainertTest extends WebAppTestCase {
             Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
             cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
             cfg.setLogTemplateExceptions(true);
-            BeansWrapperBuilder bwb = new BeansWrapperBuilder(Configuration.VERSION_3_0_0);
+            DefaultObjectWrapperBuilder bwb = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
             bwb.setUseModelCache(true);
             cfg.setObjectWrapper(bwb.build());
             cfg.setTemplateLoader(new WebAppTemplateLoader(getServletContext()));
@@ -428,9 +427,9 @@ public class RealServletContainertTest extends WebAppTestCase {
             
             {
                 ObjectWrapper ow = cfg.getObjectWrapper();
-                assertSame(BeansWrapper.class, ow.getClass());
-                assertTrue(((BeansWrapper) ow).getUseModelCache());
-                assertEquals(Configuration.VERSION_3_0_0, ((BeansWrapper) ow).getIncompatibleImprovements());
+                assertSame(DefaultObjectWrapper.class, ow.getClass());
+                assertTrue(((DefaultObjectWrapper) ow).getUseModelCache());
+                assertEquals(Configuration.VERSION_3_0_0, ((DefaultObjectWrapper) ow).getIncompatibleImprovements());
             }
             
             {
@@ -447,13 +446,13 @@ public class RealServletContainertTest extends WebAppTestCase {
         @Override
         protected void doAssertions(Configuration cfg) throws Exception {
             ObjectWrapper ow = cfg.getObjectWrapper();
-            assertSame(BeansWrapper.class, ow.getClass());
-            assertTrue(((BeansWrapper) ow).getUseModelCache());
+            assertSame(DefaultObjectWrapper.class, ow.getClass());
+            assertTrue(((DefaultObjectWrapper) ow).getUseModelCache());
         }
 
         @Override
         protected ObjectWrapper createDefaultObjectWrapper() {
-            BeansWrapperBuilder bwb = new BeansWrapperBuilder(Configuration.VERSION_3_0_0);
+            DefaultObjectWrapperBuilder bwb = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
             bwb.setUseModelCache(true);
             assertEquals(Configuration.VERSION_3_0_0, bwb.getIncompatibleImprovements());
             return bwb.build();
@@ -475,7 +474,7 @@ public class RealServletContainertTest extends WebAppTestCase {
         protected void doAssertions(Configuration cfg) throws Exception {
             ObjectWrapper ow = cfg.getObjectWrapper();
             assertSame(SimpleObjectWrapper.class, ow.getClass());
-            assertEquals(Configuration.VERSION_3_0_0, ((BeansWrapper) ow).getIncompatibleImprovements());
+            assertEquals(Configuration.VERSION_3_0_0, ((DefaultObjectWrapper) ow).getIncompatibleImprovements());
         }
         
     }

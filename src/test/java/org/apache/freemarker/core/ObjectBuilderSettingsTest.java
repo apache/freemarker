@@ -42,7 +42,6 @@ import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
@@ -359,24 +358,23 @@ public class ObjectBuilderSettingsTest {
             assertNull(res.b4.b4);
         }
     }
-    
-    @Test
-    public void beansWrapperTest() throws Exception {
-        BeansWrapper bw = (BeansWrapper) _ObjectBuilderSettingEvaluator.eval(
-                "BeansWrapper(3.0.0, simpleMapWrapper=true, exposeFields=true)",
-                ObjectWrapper.class, false, _SettingEvaluationEnvironment.getCurrent());
-        assertEquals(Configuration.VERSION_3_0_0, bw.getIncompatibleImprovements());
-        assertTrue(bw.isSimpleMapWrapper());
-        assertTrue(bw.isExposeFields());
-    }
 
     @Test
     public void defaultObjectWrapperTest() throws Exception {
-        DefaultObjectWrapper bw = (DefaultObjectWrapper) _ObjectBuilderSettingEvaluator.eval(
+        DefaultObjectWrapper ow = (DefaultObjectWrapper) _ObjectBuilderSettingEvaluator.eval(
                 "DefaultObjectWrapper(3.0.0)",
                 ObjectWrapper.class, false, _SettingEvaluationEnvironment.getCurrent());
-        assertEquals(Configuration.VERSION_3_0_0, bw.getIncompatibleImprovements());
-        assertFalse(bw.isExposeFields());
+        assertEquals(Configuration.VERSION_3_0_0, ow.getIncompatibleImprovements());
+        assertFalse(ow.isExposeFields());
+    }
+
+    @Test
+    public void defaultObjectWrapperTest2() throws Exception {
+        DefaultObjectWrapper ow = (DefaultObjectWrapper) _ObjectBuilderSettingEvaluator.eval(
+                "DefaultObjectWrapper(3.0.0, exposeFields=true)",
+                ObjectWrapper.class, false, _SettingEvaluationEnvironment.getCurrent());
+        assertEquals(Configuration.VERSION_3_0_0, ow.getIncompatibleImprovements());
+        assertTrue(ow.isExposeFields());
     }
 
     @Test
@@ -386,7 +384,7 @@ public class ObjectBuilderSettingsTest {
         {
             Properties props = new Properties();
             props.setProperty(Configurable.OBJECT_WRAPPER_KEY,
-                    "org.apache.freemarker.core.model.impl.beans.BeansWrapper(3.0.0)");
+                    "org.apache.freemarker.core.model.impl.DefaultObjectWrapper(3.0.0)");
             props.setProperty(Configurable.ARITHMETIC_ENGINE_KEY,
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyArithmeticEngine");
             props.setProperty(Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY,
@@ -399,10 +397,10 @@ public class ObjectBuilderSettingsTest {
             props.setProperty(Configuration.TEMPLATE_LOADER_KEY,
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyTemplateLoader()");
             cfg.setSettings(props);
-            assertEquals(BeansWrapper.class, cfg.getObjectWrapper().getClass());
+            assertEquals(DefaultObjectWrapper.class, cfg.getObjectWrapper().getClass());
             assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
             assertEquals(
-                    Configuration.VERSION_3_0_0, ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
+                    Configuration.VERSION_3_0_0, ((DefaultObjectWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
             assertEquals(DummyArithmeticEngine.class, cfg.getArithmeticEngine().getClass());
             assertEquals(DummyTemplateExceptionHandler.class, cfg.getTemplateExceptionHandler().getClass());
             assertEquals(DummyCacheStorage.class, cfg.getCacheStorage().getClass());
@@ -428,7 +426,7 @@ public class ObjectBuilderSettingsTest {
             assertEquals(1, ((DummyArithmeticEngine) cfg.getArithmeticEngine()).getX());
             assertEquals(1, ((DummyTemplateExceptionHandler) cfg.getTemplateExceptionHandler()).getX());
             assertEquals(Configuration.VERSION_3_0_0,
-                    ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
+                    ((DefaultObjectWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
             assertEquals(500, ((MruCacheStorage) cfg.getCacheStorage()).getSoftSizeLimit());
             assertEquals(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER, cfg.getNewBuiltinClassResolver());
             assertEquals("utf-8", cfg.getDefaultEncoding());
@@ -436,16 +434,16 @@ public class ObjectBuilderSettingsTest {
 
         {
             Properties props = new Properties();
-            props.setProperty(Configurable.OBJECT_WRAPPER_KEY, "Beans");
+            props.setProperty(Configurable.OBJECT_WRAPPER_KEY, "Default");
             props.setProperty(Configurable.ARITHMETIC_ENGINE_KEY, "bigdecimal");
             props.setProperty(Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY, "rethrow");
             cfg.setSettings(props);
-            assertEquals(BeansWrapper.class, cfg.getObjectWrapper().getClass());
+            assertEquals(DefaultObjectWrapper.class, cfg.getObjectWrapper().getClass());
             assertSame(BigDecimalArithmeticEngine.INSTANCE, cfg.getArithmeticEngine());
             assertSame(TemplateExceptionHandler.RETHROW_HANDLER, cfg.getTemplateExceptionHandler());
             assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
             assertEquals(Configuration.VERSION_3_0_0,
-                    ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
+                    ((DefaultObjectWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
         }
         
         {
@@ -456,7 +454,7 @@ public class ObjectBuilderSettingsTest {
             assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
             assertEquals(
                     Configuration.VERSION_3_0_0,
-                    ((BeansWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
+                    ((DefaultObjectWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
         }
     }
     

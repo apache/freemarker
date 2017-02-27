@@ -41,7 +41,6 @@ import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.core.model.impl.SimpleCollection;
 import org.apache.freemarker.core.model.impl.SimpleHash;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapperBuilder;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -139,10 +138,6 @@ public class Listables {
         DefaultObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
         maps.add(new SimpleHash(map, ow));
         maps.add((DefaultMapAdapter) ow.wrap(map));
-        
-        BeansWrapperBuilder bwb = new BeansWrapperBuilder(Configuration.VERSION_3_0_0);
-        bwb.setSimpleMapWrapper(true);
-        maps.add((TemplateHashModelEx2) bwb.build().wrap(map));
 
         return maps;
     }

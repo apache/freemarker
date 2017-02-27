@@ -19,9 +19,7 @@
 
 <@assertEquals actual=obj.mStringArrayVsListPreference(obj.javaStringList) expected="mStringArrayVsListPreference(List [a, b])" />
 <@assertEquals actual=obj.mStringArrayVsListPreference(obj.javaStringArray) expected="mStringArrayVsListPreference(String[] [a, b])" />
-<#if dow>
-  <@assertEquals actual=obj.mStringArrayVsListPreference(obj.javaObjectArray) expected="mStringArrayVsListPreference(List [a, b])" />
-</#if>
+<@assertEquals actual=obj.mStringArrayVsListPreference(obj.javaObjectArray) expected="mStringArrayVsListPreference(List [a, b])" />
 
 <#-- Check if non-overloaded calls still work; they share some code with overloaded methods: -->
 <@assertEquals actual=obj.mIntArrayNonOverloaded([1, 2, 3]) expected="mIntArrayNonOverloaded(int[] [1, 2, 3])" />

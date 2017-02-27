@@ -37,7 +37,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
-import org.apache.freemarker.core.model.impl.beans.RationalNumber;
+import org.apache.freemarker.core.model.impl.RationalNumber;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.test.util.TestUtil;
 

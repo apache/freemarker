@@ -30,17 +30,11 @@
 </#list>
 <@assertEquals expected="1: a, 2: b, 3: c" actual=dump />
 
-<#assign bw = testName?ends_with("-bw")>
-
 <@assert test=map?has_api />
 <@assert test=list?has_api />
 <@assert test=set?has_api />
-<@assert test = bw == s?has_api />
+<@assert test=!s?has_api />
 <@assert test=!1?has_api />
 <@assert test=!""?has_api />
 <@assert test=!{}?has_api />
 <@assert test=!true?has_api />
-
-<#if bw>
-  <@assertEquals expected="TEST" actual=s?api.toUpperCase() />
-</#if>

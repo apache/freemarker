@@ -18,6 +18,7 @@
  */
 package org.apache.freemarker.test.util;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -44,7 +45,7 @@ public class SimpleMapAndCollectionObjectWrapper extends DefaultObjectWrapper {
             return super.wrap(null);
         }        
         if (obj.getClass().isArray()) {
-            obj = convertArray(obj);
+            obj = Arrays.asList((Object[]) obj);
         }
         if (obj instanceof Collection) {
             return new SimpleSequence((Collection<?>) obj, this);

@@ -73,9 +73,7 @@ the FreeMarer 3 changelog here:
   OutputFormat realted classes were moved to org.apache.freemarker.core.outputformat.
   ValueFormat related classes were moved to org.apache.freemarker.core.valueformat.
   ArithmeticEngine related classes were moved to org.apache.freemarker.core.arithmetic.
-  freemarker.ext.beans were moved under org.apache.freemarker.core.model.impl.beans for now (but later
-  we only want a DefaultObject wrapper, no BeansWrapper, so this will change) and freemarker.ext.dom
-  was moved to org.apache.freemarker.dom.
+  freemarker.ext.dom was moved into org.apache.freemarker.dom.
 - Moved the all the static final ObjectWrapper-s to the new _StaticObjectWrappers class, and made them
   write protected (non-configurable). Also now they come from the pool that ObjectWrapper builders use.
 - WrappingTemplateModel.objectWrapper is now final, and its statically stored default value can't be set anymore.
@@ -119,4 +117,4 @@ the FreeMarer 3 changelog here:
   Also, on the places where ParseException was used for other than template   parsing, o.a.f.core.util.GenericParseException is used now instead,
   which doesn't have the template parsing related fields that we can't fill.
 - Removed DefaultObjectWrapper settings that only exist so that you can set backward compatible behavior instead of the
-  recommended value: useAdaptersForContainers, forceLegacyNonListCollections, iterableSupport
+  recommended value: useAdaptersForContainers, forceLegacyNonListCollections, iterableSupport, simpleMapWrapper

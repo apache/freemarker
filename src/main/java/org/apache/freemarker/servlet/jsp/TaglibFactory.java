@@ -68,7 +68,6 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.core.util._NullArgumentException;
@@ -306,7 +305,7 @@ public class TaglibFactory implements TemplateHashModel {
      * Sets the {@link ObjectWrapper} used when building the JSP tag library {@link TemplateHashModel}-s from the TLD-s.
      * Usually, it should be the same {@link ObjectWrapper} that will be used inside the templates. {@code null} value
      * is only supported for backward compatibility. For custom EL functions to be exposed, it must be non-{@code null}
-     * and an {@code intanceof} {@link BeansWrapper} (like typically, a {@link DefaultObjectWrapper}).
+     * and an {@code intanceof} {@link DefaultObjectWrapper} (like typically, a {@link DefaultObjectWrapper}).
      * 
      * @since 2.3.22
      */
@@ -1624,7 +1623,7 @@ public class TaglibFactory implements TemplateHashModel {
         private static final String E_LISTENER = "listener";
         private static final String E_LISTENER_CLASS = "listener-class";
 
-        private final BeansWrapper beansWrapper;
+        private final DefaultObjectWrapper defaultObjectWrapper;
 
         private final Map<String, TemplateModel> tagsAndFunctions = new HashMap<>();
         private final List listeners = new ArrayList();
@@ -1642,16 +1641,16 @@ public class TaglibFactory implements TemplateHashModel {
         private String listenerClassCData;
 
         TldParserForTaglibBuilding(ObjectWrapper wrapper) {
-            if (wrapper instanceof BeansWrapper) {
-                beansWrapper = (BeansWrapper) wrapper;
+            if (wrapper instanceof DefaultObjectWrapper) {
+                defaultObjectWrapper = (DefaultObjectWrapper) wrapper;
             } else {
-                beansWrapper = null;
+                defaultObjectWrapper = null;
                 if (LOG.isWarnEnabled()) {
                     LOG.warn("Custom EL functions won't be loaded because "
                             + (wrapper == null
                                     ? "no ObjectWrapper was specified for the TaglibFactory "
                                             + "(via TaglibFactory.setObjectWrapper(...), exists since 2.3.22)"
-                                    : "the ObjectWrapper wasn't instance of " + BeansWrapper.class.getName())
+                                    : "the ObjectWrapper wasn't instance of " + DefaultObjectWrapper.class.getName())
                             + ".");
                 }
             }
@@ -1747,7 +1746,7 @@ public class TaglibFactory implements TemplateHashModel {
 
                     tagNameCData = null;
                     tagClassCData = null;
-                } else if (E_FUNCTION.equals(qName) && beansWrapper != null) {
+                } else if (E_FUNCTION.equals(qName) && defaultObjectWrapper != null) {
                     checkChildElementNotNull(qName, E_FUNCTION_CLASS, functionClassCData);
                     checkChildElementNotNull(qName, E_FUNCTION_SIGNATURE, functionSignatureCData);
                     checkChildElementNotNull(qName, E_NAME, functionNameCData);
@@ -1777,7 +1776,7 @@ public class TaglibFactory implements TemplateHashModel {
 
                     final TemplateMethodModelEx elFunctionModel;
                     try {
-                        elFunctionModel = beansWrapper.wrap(null, functionMethod);
+                        elFunctionModel = defaultObjectWrapper.wrap(null, functionMethod);
                     } catch (Exception e) {
                         throw new TldParsingSAXException(
                                 "FreeMarker object wrapping failed on method : " + functionMethod,

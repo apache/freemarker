@@ -54,17 +54,15 @@ import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.impl.BooleanModel;
 import org.apache.freemarker.core.model.impl.DefaultNonListCollectionAdapter;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
+import org.apache.freemarker.core.model.impl.ResourceBundleModel;
 import org.apache.freemarker.core.model.impl.SimpleCollection;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapperBuilder;
-import org.apache.freemarker.core.model.impl.beans.BooleanModel;
-import org.apache.freemarker.core.model.impl.beans.Java7MembersOnlyBeansWrapper;
-import org.apache.freemarker.core.model.impl.beans.ResourceBundleModel;
 import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._NullWriter;
@@ -183,7 +181,7 @@ public class TemplateTestCase extends FileTestCase {
         conf.setTemplateLoader(new CopyrightCommentRemoverTemplateLoader(
                 new FileTemplateLoader(new File(getTestClassDirectory(), "templates"))));
         
-        BeansWrapper beansWrapper = new BeansWrapperBuilder(Configuration.VERSION_3_0_0).build();
+        DefaultObjectWrapper dow = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
         
         dataModel.put(ASSERT_VAR_NAME, AssertDirective.INSTANCE);
         dataModel.put(ASSERT_EQUALS_VAR_NAME, AssertEqualsDirective.INSTANCE);
@@ -201,46 +199,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("list", ImmutableList.of(1, 2, 3));
             dataModel.put("set", ImmutableSet.of("a", "b", "c"));
             dataModel.put("s", "test");
-        } else if (simpleTestName.equals("bean-maps")) {
-            BeansWrapper w1 = new Java7MembersOnlyBeansWrapper();
-            BeansWrapper w2 = new Java7MembersOnlyBeansWrapper();
-            BeansWrapper w3 = new Java7MembersOnlyBeansWrapper();
-            BeansWrapper w4 = new Java7MembersOnlyBeansWrapper();
-            BeansWrapper w5 = new Java7MembersOnlyBeansWrapper();
-            BeansWrapper w6 = new Java7MembersOnlyBeansWrapper();
-            BeansWrapper w7 = new Java7MembersOnlyBeansWrapper();
-    
-            w1.setExposureLevel(BeansWrapper.EXPOSE_PROPERTIES_ONLY);
-            w2.setExposureLevel(BeansWrapper.EXPOSE_PROPERTIES_ONLY);
-            w3.setExposureLevel(BeansWrapper.EXPOSE_NOTHING);
-            w4.setExposureLevel(BeansWrapper.EXPOSE_NOTHING);
-            w5.setExposureLevel(BeansWrapper.EXPOSE_ALL);
-            w6.setExposureLevel(BeansWrapper.EXPOSE_ALL);
-    
-            w1.setMethodsShadowItems(true);
-            w2.setMethodsShadowItems(false);
-            w3.setMethodsShadowItems(true);
-            w4.setMethodsShadowItems(false);
-            w5.setMethodsShadowItems(true);
-            w6.setMethodsShadowItems(false);
-    
-            w7.setSimpleMapWrapper(true);
-    
-            Object test = getTestMapBean();
-    
-            dataModel.put("m1", w1.wrap(test));
-            dataModel.put("m2", w2.wrap(test));
-            dataModel.put("m3", w3.wrap(test));
-            dataModel.put("m4", w4.wrap(test));
-            dataModel.put("m5", w5.wrap(test));
-            dataModel.put("m6", w6.wrap(test));
-            dataModel.put("m7", w7.wrap(test));
-    
-            dataModel.put("s1", w1.wrap("hello"));
-            dataModel.put("s2", w1.wrap("world"));
-            dataModel.put("s3", w5.wrap("hello"));
-            dataModel.put("s4", w5.wrap("world"));
-        } else if (simpleTestName.equals("beans")) {
+        } else if (simpleTestName.equals("default-object-wrapper")) {
             dataModel.put("array", new String[] { "array-0", "array-1"});
             dataModel.put("list", Arrays.asList("list-0", "list-1", "list-2"));
             Map<Object, Object> tmap = new HashMap<>();
@@ -253,10 +212,10 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("resourceBundle",
                     new ResourceBundleModel(ResourceBundle.getBundle(
                             "org.apache.freemarker.test.templatesuite.models.BeansTestResources"),
-                            _StaticObjectWrappers.BEANS_WRAPPER));
+                            _StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER));
             dataModel.put("date", new GregorianCalendar(1974, 10, 14).getTime());
-            dataModel.put("statics", beansWrapper.getStaticModels());
-            dataModel.put("enums", beansWrapper.getEnumModels());
+            dataModel.put("statics", dow.getStaticModels());
+            dataModel.put("enums", dow.getEnumModels());
         } else if (simpleTestName.equals("boolean")) {
             dataModel.put( "boolean1", TemplateBooleanModel.FALSE);
             dataModel.put( "boolean2", TemplateBooleanModel.TRUE);
@@ -381,7 +340,7 @@ public class TemplateTestCase extends FileTestCase {
             abcSet.add("b");
             abcSet.add("c");
             dataModel.put("abcSet", abcSet);
-            dataModel.put("abcSetNonSeq", DefaultNonListCollectionAdapter.adapt(abcSet, beansWrapper));
+            dataModel.put("abcSetNonSeq", DefaultNonListCollectionAdapter.adapt(abcSet, dow));
             
             List<String> listWithNull = new ArrayList<>();
             listWithNull.add("a");
@@ -408,7 +367,7 @@ public class TemplateTestCase extends FileTestCase {
         } else if (simpleTestName.equals("varargs")) {
           dataModel.put("m", new VarArgTestModel());
         } else if (simpleTestName.startsWith("boolean-formatting")) {
-          dataModel.put("beansBoolean", new BooleanModel(Boolean.TRUE, (BeansWrapper) conf.getObjectWrapper()));
+          dataModel.put("beansBoolean", new BooleanModel(Boolean.TRUE, (DefaultObjectWrapper) conf.getObjectWrapper()));
           dataModel.put("booleanAndString", new BooleanAndStringTemplateModel());
           dataModel.put("booleanVsStringMethods", new BooleanVsStringMethods());
         } else if (simpleTestName.startsWith("number-math-builtins")) {
@@ -436,8 +395,6 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("bdp", BigDecimal.valueOf(0.05));
         } else if (simpleTestName.startsWith("overloaded-methods")) {
             dataModel.put("obj", new OverloadedMethods2());
-            final boolean dow = conf.getObjectWrapper() instanceof DefaultObjectWrapper;
-            dataModel.put("dow", dow);
         }
     }
     

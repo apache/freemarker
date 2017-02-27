@@ -23,7 +23,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 
-import org.apache.freemarker.core.model.impl.beans._MethodUtil;
+import org.apache.freemarker.core.model.impl._MethodUtil;
 import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.core.util._StringUtil;
 import org.slf4j.Logger;

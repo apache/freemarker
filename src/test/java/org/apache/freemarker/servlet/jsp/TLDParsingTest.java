@@ -35,9 +35,9 @@ import javax.xml.parsers.SAXParserFactory;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapper;
-import org.apache.freemarker.core.model.impl.beans.BeansWrapperBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,11 +48,11 @@ import org.xml.sax.XMLReader;
 @RunWith(JUnit4.class)
 public class TLDParsingTest {
 
-    private BeansWrapper wrapper;
+    private DefaultObjectWrapper wrapper;
 
     @Before
     public void before() throws Exception {
-        wrapper = new BeansWrapperBuilder(Configuration.VERSION_3_0_0).build();
+        wrapper = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
     }
 
     @Test
