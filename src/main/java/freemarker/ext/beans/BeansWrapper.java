@@ -67,7 +67,6 @@ import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
 import freemarker.template.utility.ClassUtil;
 import freemarker.template.utility.RichObjectWrapper;
-import freemarker.template.utility.UndeclaredThrowableException;
 import freemarker.template.utility.WriteProtectable;
 
 /**
@@ -93,8 +92,6 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      */
     @Deprecated
     static final Object CAN_NOT_UNWRAP = ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
-    
-    private static final Constructor<?> ENUMS_MODEL_CTOR = enumsModelCtor();
     
     /**
      * At this level of exposure, all methods and properties of the
@@ -350,9 +347,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         falseModel = new BooleanModel(Boolean.FALSE, this);
         trueModel = new BooleanModel(Boolean.TRUE, this);
         
-        staticModels = new StaticModels(BeansWrapper.this);
-        enumModels = createEnumModels(BeansWrapper.this);
-        modelCache = new BeansModelCache(BeansWrapper.this);
+        staticModels = new StaticModels(this);
+        enumModels = new _EnumModels(this);
+        modelCache = new BeansModelCache(this);
         setUseCache(bwConf.getUseModelCache());
 
         finalizeConstruction(writeProtected);
@@ -1697,33 +1694,6 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
                + "exposeFields=" + classIntrospector.getExposeFields() + ", "
                + "sharedClassIntrospCache="
                + (classIntrospector.isShared() ? "@" + System.identityHashCode(classIntrospector) : "none");
-    }
-
-    private static ClassBasedModelFactory createEnumModels(BeansWrapper wrapper) {
-        if (ENUMS_MODEL_CTOR != null) {
-            try {
-                return (ClassBasedModelFactory) ENUMS_MODEL_CTOR.newInstance(
-                        new Object[] { wrapper });
-            } catch (Exception e) {
-                throw new UndeclaredThrowableException(e);
-            }
-        } else {
-            return null;
-        }
-    }
-    
-    private static Constructor enumsModelCtor() {
-        try {
-            // Check if Enums are available on this platform
-            Class.forName("java.lang.Enum");
-            // If they are, return the appropriate constructor for enum models
-            return Class.forName(
-                "freemarker.ext.beans._EnumModels").getDeclaredConstructor(
-                        new Class[] { BeansWrapper.class });
-        } catch (Exception e) {
-            // Otherwise, return null
-            return null;
-        }
     }
 
     /**
