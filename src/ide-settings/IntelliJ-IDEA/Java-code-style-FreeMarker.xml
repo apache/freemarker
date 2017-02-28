@@ -45,7 +45,7 @@
   <option name="JD_PARAM_DESCRIPTION_ON_NEW_LINE" value="true" />
   <option name="WRAP_COMMENTS" value="true" />
   <JavaCodeStyleSettings>
-    <option name="CLASS_NAMES_IN_JAVADOC" value="2" />
+    <option name="CLASS_NAMES_IN_JAVADOC" value="3" />
   </JavaCodeStyleSettings>
   <codeStyleSettings language="JAVA">
     <option name="RIGHT_MARGIN" value="120" />
