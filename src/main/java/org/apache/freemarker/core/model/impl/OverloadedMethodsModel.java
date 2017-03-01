@@ -20,20 +20,17 @@
 package org.apache.freemarker.core.model.impl;
 
 
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
-import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
 
 /**
  * Wraps a set of same-name overloaded methods behind {@link TemplateMethodModel} interface,
  * like if it was a single method, chooses among them behind the scenes on call-time based on the argument values.
  */
-public class OverloadedMethodsModel implements TemplateMethodModelEx, TemplateSequenceModel {
+class OverloadedMethodsModel implements TemplateMethodModelEx {
     private final Object object;
     private final OverloadedMethods overloadedMethods;
     private final DefaultObjectWrapper wrapper;
@@ -64,16 +61,5 @@ public class OverloadedMethodsModel implements TemplateMethodModelEx, TemplateSe
                     maa.getCallableMemberDescriptor(),
                     e);
         }
-    }
-
-    @Override
-    public TemplateModel get(int index) throws TemplateModelException {
-        return (TemplateModel) exec(Collections.singletonList(
-                new SimpleNumber(Integer.valueOf(index))));
-    }
-
-    @Override
-    public int size() throws TemplateModelException {
-        throw new TemplateModelException("?size is unsupported for " + getClass().getName());
     }
 }

@@ -201,7 +201,7 @@ final class OverloadedMethods {
                     }
                     if (paramType != null) {
                         if (paramType.isAssignableFrom(String.class) && !paramType.isAssignableFrom(tmArg.getClass())) {
-                            edb.tip(SimpleMethodModel.MARKUP_OUTPUT_TO_STRING_TIP);
+                            edb.tip(JavaMethodModel.MARKUP_OUTPUT_TO_STRING_TIP);
                             return;
                         }
                     }

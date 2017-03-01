@@ -122,3 +122,6 @@ the FreeMarer 3 changelog here:
   Removed many BeansWrapper-related classes that DefaultObjectWrapper doesn't use. This includes ModelCache and
   related classes, because DefaultObjectWrapper has only used the cache for "generic" classes (because that's where it
   has fallen back to BeansWrapper.wrap), which is inconsistent and doesn't worth the caching overhead and complexity.
+- Java methods (when using DefaultObjectWrapper) won't be accessible as sequences anyore. That is, earlier, instead of
+  obj.m(1), you could write obj.m[1]. This strange feature has led to some tricky cases, while almost nobody has
+  utilized it.

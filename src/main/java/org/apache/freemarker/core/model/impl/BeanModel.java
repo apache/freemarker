@@ -213,7 +213,7 @@ public class BeanModel
         if (desc instanceof IndexedPropertyDescriptor) {
             Method readMethod = ((IndexedPropertyDescriptor) desc).getIndexedReadMethod(); 
             resultModel = cachedModel = 
-                new SimpleMethodModel(object, readMethod, 
+                new JavaMethodModel(object, readMethod,
                         ClassIntrospector.getArgTypes(classInfo, readMethod), wrapper);
         } else if (desc instanceof PropertyDescriptor) {
             PropertyDescriptor pd = (PropertyDescriptor) desc;
@@ -224,7 +224,7 @@ public class BeanModel
             // cachedModel remains null, as we don't cache these
         } else if (desc instanceof Method) {
             Method method = (Method) desc;
-            resultModel = cachedModel = new SimpleMethodModel(
+            resultModel = cachedModel = new JavaMethodModel(
                     object, method, ClassIntrospector.getArgTypes(classInfo, method), wrapper);
         } else if (desc instanceof OverloadedMethods) {
             resultModel = cachedModel = new OverloadedMethodsModel(

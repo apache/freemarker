@@ -740,7 +740,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
      * @since 2.3.22
      */
     public TemplateMethodModelEx wrap(Object object, Method method) {
-        return new SimpleMethodModel(object, method, method.getParameterTypes(), this);
+        return new JavaMethodModel(object, method, method.getParameterTypes(), this);
     }
 
     /**

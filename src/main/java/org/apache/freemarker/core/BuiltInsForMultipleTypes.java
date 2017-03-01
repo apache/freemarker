@@ -42,8 +42,6 @@ import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.model.impl.OverloadedMethodsModel;
-import org.apache.freemarker.core.model.impl.SimpleMethodModel;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.valueformat.TemplateDateFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
@@ -327,7 +325,6 @@ class BuiltInsForMultipleTypes {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
             return (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)
-                    && !(tm instanceof SimpleMethodModel || tm instanceof OverloadedMethodsModel)
                     ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
@@ -416,7 +413,6 @@ class BuiltInsForMultipleTypes {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
             return tm instanceof TemplateSequenceModel
-                    && !(tm instanceof OverloadedMethodsModel || tm instanceof SimpleMethodModel) // [FM3] Until BW fixed
                     ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }

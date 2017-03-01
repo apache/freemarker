@@ -31,9 +31,8 @@ import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.TemplateTransformModel;
-import org.apache.freemarker.core.model.impl.SimpleMethodModel;
+import org.apache.freemarker.core.model.impl.JavaMethodModel;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._ClassUtil;
 
@@ -53,15 +52,15 @@ class CustomTagAndELFunctionCombiner {
      */
     static TemplateModel combine(TemplateModel customTag, TemplateMethodModelEx elFunction) {
         if (customTag instanceof TemplateDirectiveModel) {
-            return elFunction instanceof SimpleMethodModel //
+            return elFunction instanceof JavaMethodModel //
                     ? new TemplateDirectiveModelAndSimpleMethodModel( //
-                            (TemplateDirectiveModel) customTag, (SimpleMethodModel) elFunction) //
+                            (TemplateDirectiveModel) customTag, (JavaMethodModel) elFunction) //
                     : new TemplateDirectiveModelAndTemplateMethodModelEx( //
                             (TemplateDirectiveModel) customTag, elFunction);
         } else if (customTag instanceof TemplateTransformModel) {
-            return (elFunction instanceof SimpleMethodModel)
+            return (elFunction instanceof JavaMethodModel)
                     ? new TemplateTransformModelAndSimpleMethodModel( //
-                            (TemplateTransformModel) customTag, (SimpleMethodModel) elFunction) //
+                            (TemplateTransformModel) customTag, (JavaMethodModel) elFunction) //
                     : new TemplateTransformModelAndTemplateMethodModelEx( //
                             (TemplateTransformModel) customTag, elFunction);
         } else {
@@ -92,14 +91,14 @@ class CustomTagAndELFunctionCombiner {
     }
 
     private static class TemplateDirectiveModelAndSimpleMethodModel extends CombinedTemplateModel
-            implements TemplateDirectiveModel, TemplateMethodModelEx, TemplateSequenceModel,
+            implements TemplateDirectiveModel, TemplateMethodModelEx,
             _UnexpectedTypeErrorExplainerTemplateModel {
 
         private final TemplateDirectiveModel templateDirectiveModel;
-        private final SimpleMethodModel simpleMethodModel;
+        private final JavaMethodModel simpleMethodModel;
 
         public TemplateDirectiveModelAndSimpleMethodModel( //
-                TemplateDirectiveModel templateDirectiveModel, SimpleMethodModel simpleMethodModel) {
+                TemplateDirectiveModel templateDirectiveModel, JavaMethodModel simpleMethodModel) {
             this.templateDirectiveModel = templateDirectiveModel;
             this.simpleMethodModel = simpleMethodModel;
         }
@@ -118,16 +117,6 @@ class CustomTagAndELFunctionCombiner {
         @Override
         public Object[] explainTypeError(Class[] expectedClasses) {
             return simpleMethodModel.explainTypeError(expectedClasses);
-        }
-
-        @Override
-        public TemplateModel get(int index) throws TemplateModelException {
-            return simpleMethodModel.get(index);
-        }
-
-        @Override
-        public int size() throws TemplateModelException {
-            return simpleMethodModel.size();
         }
 
     }
@@ -182,14 +171,13 @@ class CustomTagAndELFunctionCombiner {
     }
 
     private static class TemplateTransformModelAndSimpleMethodModel extends CombinedTemplateModel
-            implements TemplateTransformModel, TemplateMethodModelEx, TemplateSequenceModel,
-            _UnexpectedTypeErrorExplainerTemplateModel {
+            implements TemplateTransformModel, TemplateMethodModelEx, _UnexpectedTypeErrorExplainerTemplateModel {
 
         private final TemplateTransformModel templateTransformModel;
-        private final SimpleMethodModel simpleMethodModel;
+        private final JavaMethodModel simpleMethodModel;
 
         public TemplateTransformModelAndSimpleMethodModel( //
-                TemplateTransformModel templateTransformModel, SimpleMethodModel simpleMethodModel) {
+                TemplateTransformModel templateTransformModel, JavaMethodModel simpleMethodModel) {
             this.templateTransformModel = templateTransformModel;
             this.simpleMethodModel = simpleMethodModel;
         }
@@ -202,16 +190,6 @@ class CustomTagAndELFunctionCombiner {
         @Override
         public Object[] explainTypeError(Class[] expectedClasses) {
             return simpleMethodModel.explainTypeError(expectedClasses);
-        }
-
-        @Override
-        public TemplateModel get(int index) throws TemplateModelException {
-            return simpleMethodModel.get(index);
-        }
-
-        @Override
-        public int size() throws TemplateModelException {
-            return simpleMethodModel.size();
         }
 
         @Override

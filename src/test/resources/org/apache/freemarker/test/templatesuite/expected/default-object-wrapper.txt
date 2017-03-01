@@ -33,7 +33,6 @@ foo-value
 hasfoo
 nobaz
 bar-value-0
-bar-value-0
 foo-value
 overloaded-int-1
 overloaded-String-String

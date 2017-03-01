@@ -166,7 +166,7 @@ final class StaticModel implements TemplateHashModelEx {
                 Object value = entry.getValue();
                 if (value instanceof Method) {
                     Method method = (Method) value;
-                    entry.setValue(new SimpleMethodModel(null, method, 
+                    entry.setValue(new JavaMethodModel(null, method,
                             method.getParameterTypes(), wrapper));
                 } else if (value instanceof OverloadedMethods) {
                     entry.setValue(new OverloadedMethodsModel(null, (OverloadedMethods) value, wrapper));

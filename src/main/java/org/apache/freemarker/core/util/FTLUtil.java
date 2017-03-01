@@ -33,7 +33,6 @@ import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateMethodModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNodeModel;
@@ -45,8 +44,6 @@ import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.impl.BeanAndStringModel;
 import org.apache.freemarker.core.model.impl.BeanModel;
-import org.apache.freemarker.core.model.impl.OverloadedMethodsModel;
-import org.apache.freemarker.core.model.impl.SimpleMethodModel;
 
 /**
  * Static utility methods that perform tasks specific to the FreeMarker Template Language (FTL).
@@ -716,8 +713,6 @@ public final class FTLUtil {
             } else {
                 return null;
             }
-        } else if (tm instanceof SimpleMethodModel || tm instanceof OverloadedMethodsModel) {
-            return TemplateMethodModelEx.class;
         } else {
             return null;
         }

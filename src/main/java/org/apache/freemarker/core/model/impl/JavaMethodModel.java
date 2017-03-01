@@ -21,27 +21,18 @@ package org.apache.freemarker.core.model.impl;
 
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
-import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.util.FTLUtil;
 
 /**
- * A class that will wrap a reflected method call into a
- * {@link org.apache.freemarker.core.model.TemplateMethodModel} interface. 
- * It is used by {@link BeanModel} to wrap reflected method calls
- * for non-overloaded methods.
+ * Wraps a {@link Method} into the {@link TemplateMethodModelEx} interface. It is used by {@link BeanModel} to wrap
+ * non-overloaded methods.
  */
-public final class SimpleMethodModel extends SimpleMethod
-    implements
-    TemplateMethodModelEx,
-    TemplateSequenceModel,
-    _UnexpectedTypeErrorExplainerTemplateModel {
+public final class JavaMethodModel extends SimpleMethod implements TemplateMethodModelEx,
+        _UnexpectedTypeErrorExplainerTemplateModel {
     private final Object object;
     private final DefaultObjectWrapper wrapper;
 
@@ -52,8 +43,7 @@ public final class SimpleMethodModel extends SimpleMethod
      * @param argTypes Either pass in {@code Method#getParameterTypes() method.getParameterTypes()} here,
      *          or reuse an earlier result of that call (for speed). Not {@code null}.
      */
-    SimpleMethodModel(Object object, Method method, Class[] argTypes, 
-            DefaultObjectWrapper wrapper) {
+    JavaMethodModel(Object object, Method method, Class[] argTypes, DefaultObjectWrapper wrapper) {
         super(method, argTypes);
         this.object = object;
         this.wrapper = wrapper;
@@ -63,8 +53,7 @@ public final class SimpleMethodModel extends SimpleMethod
      * Invokes the method, passing it the arguments from the list.
      */
     @Override
-    public Object exec(List arguments)
-        throws TemplateModelException {
+    public Object exec(List arguments) throws TemplateModelException {
         try {
             return wrapper.invokeMethod(object, (Method) getMember(), 
                     unwrapArguments(arguments, wrapper));
@@ -74,24 +63,7 @@ public final class SimpleMethodModel extends SimpleMethod
             throw _MethodUtil.newInvocationTemplateModelException(object, getMember(), e);
         }
     }
-    
-    @Override
-    public TemplateModel get(int index) throws TemplateModelException {
-        return (TemplateModel) exec(Collections.singletonList(
-                new SimpleNumber(Integer.valueOf(index))));
-    }
 
-    @Override
-    public int size() throws TemplateModelException {
-        throw new TemplateModelException(
-                "Getting the number of items or enumerating the items is not supported on this "
-                + FTLUtil.getTypeDescription(this) + " value.\n"
-                + "("
-                + "Hint 1: Maybe you wanted to call this method first and then do something with its return value. "
-                + "Hint 2: Getting items by intex possibly works, hence it's a \"+sequence\"."
-                + ")");
-    }
-    
     @Override
     public String toString() {
         return getMember().toString();

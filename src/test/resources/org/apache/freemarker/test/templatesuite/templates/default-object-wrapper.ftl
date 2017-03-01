@@ -33,7 +33,6 @@ ${map?api.get(objKey)}
 ${obj.foo}
 <#if obj.foo?exists>hasfoo<#else>nofoo</#if>
 <#if obj.baz?exists>hasbaz<#else>nobaz</#if>
-${obj.bar[0]}
 ${obj.bar(0)}
 ${obj.getFoo()}
 ${obj.overloaded(1?int)}
@@ -42,7 +41,7 @@ ${resourceBundle.message}
 ${resourceBundle("format", date)}
 <#assign static = statics["org.apache.freemarker.test.templatesuite.models.BeanTestClass"]>
 ${static.staticMethod()}
-${static.staticOverloaded[1]}
+${static.staticOverloaded(1)}
 ${static.staticOverloaded("String")}
 ${static.STATIC_FINAL_FIELD}
 ${static.STATIC_FIELD}
