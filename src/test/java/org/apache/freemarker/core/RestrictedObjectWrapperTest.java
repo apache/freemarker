@@ -35,18 +35,18 @@ import org.apache.freemarker.core.model.impl.DefaultListAdapter;
 import org.apache.freemarker.core.model.impl.DefaultMapAdapter;
 import org.apache.freemarker.core.model.impl.DefaultNonListCollectionAdapter;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapperTest.TestBean;
+import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
-import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.junit.Test;
 
-public class SimpleObjectWrapperTest {
+public class RestrictedObjectWrapperTest {
 
     @Test
     public void testBasics() throws TemplateModelException {
         PostConstruct.class.toString();
-        SimpleObjectWrapper ow = new SimpleObjectWrapper(Configuration.VERSION_3_0_0);
+        RestrictedObjectWrapper ow = new RestrictedObjectWrapper(Configuration.VERSION_3_0_0);
         testCustomizationCommonPart(ow);
         assertTrue(ow.wrap(Collections.emptyMap()) instanceof DefaultMapAdapter);
         assertTrue(ow.wrap(Collections.emptyList()) instanceof DefaultListAdapter);
@@ -55,7 +55,7 @@ public class SimpleObjectWrapperTest {
     }
 
     @SuppressWarnings("boxing")
-    private void testCustomizationCommonPart(SimpleObjectWrapper ow) throws TemplateModelException {
+    private void testCustomizationCommonPart(RestrictedObjectWrapper ow) throws TemplateModelException {
         assertFalse(ow.isWriteProtected());
         
         assertTrue(ow.wrap("x") instanceof SimpleScalar);

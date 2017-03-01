@@ -34,9 +34,9 @@ public final class _StaticObjectWrappers {
     public static final DefaultObjectWrapper DEFAULT_OBJECT_WRAPPER
             = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
 
-    public static final SimpleObjectWrapper SIMPLE_OBJECT_WRAPPER
-            = new SimpleObjectWrapper(Configuration.VERSION_3_0_0);
+    public static final RestrictedObjectWrapper RESTRICTED_OBJECT_WRAPPER
+            = new RestrictedObjectWrapper(Configuration.VERSION_3_0_0);
     {
-        SIMPLE_OBJECT_WRAPPER.writeProtect();
+        RESTRICTED_OBJECT_WRAPPER.writeProtect();
     }    
 }

@@ -125,3 +125,5 @@ the FreeMarer 3 changelog here:
 - Java methods (when using DefaultObjectWrapper) won't be accessible as sequences anyore. That is, earlier, instead of
   obj.m(1), you could write obj.m[1]. This strange feature has led to some tricky cases, while almost nobody has
   utilized it.
+- SimpleObjectWrapper was renamed to RestrictedObjectWrapper, also the "simple" setting value was rename to
+  "restricted".

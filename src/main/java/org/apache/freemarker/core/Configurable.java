@@ -46,7 +46,7 @@ import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
-import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
+import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
@@ -1805,7 +1805,7 @@ public class Configurable {
      *       See {@link #setObjectWrapper(ObjectWrapper)}.
      *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
      *       expression</a>, with the addition that {@link DefaultObjectWrapper}, {@link DefaultObjectWrapper} and
-     *       {@link SimpleObjectWrapper} can be referred without package name. For example, these strings are valid
+     *       {@link RestrictedObjectWrapper} can be referred without package name. For example, these strings are valid
      *       values: {@code "DefaultObjectWrapper(3.0.0)"},
      *       {@code "DefaultObjectWrapper(2.3.21, simpleMapWrapper=true)"}.
      *       <br>If the value does not contain dot, then it must be one of these special values (case insensitive):
@@ -1813,7 +1813,7 @@ public class Configurable {
      *       {@code Configuration#Configuration(Version) incompatible_improvements}, but a bug existed in 2.3.21 where
      *       that was ignored),
      *       {@code "default_2_3_0"} (means {@link _StaticObjectWrappers#DEFAULT_OBJECT_WRAPPER})
-     *       {@code "simple"} (means the deprecated {@link _StaticObjectWrappers#SIMPLE_OBJECT_WRAPPER}
+     *       {@code "restricted"} (means the deprecated {@link _StaticObjectWrappers#RESTRICTED_OBJECT_WRAPPER}
      *
      *   <li><p>{@code "number_format"}: See {@link #setNumberFormat(String)}.
      *   
@@ -2114,7 +2114,7 @@ public class Configurable {
      *   </li>
      *   <li>
      *     <p>The following classes can be referred to with simple (unqualified) name instead of fully qualified name:
-     *     {@link DefaultObjectWrapper}, {@link DefaultObjectWrapper}, {@link SimpleObjectWrapper}, {@link Locale},
+     *     {@link DefaultObjectWrapper}, {@link DefaultObjectWrapper}, {@link RestrictedObjectWrapper}, {@link Locale},
      *     {@link TemplateConfiguration}, {@link PathGlobMatcher}, {@link FileNameGlobMatcher}, {@link PathRegexMatcher},
      *     {@link AndMatcher}, {@link OrMatcher}, {@link NotMatcher}, {@link ConditionalTemplateConfigurationFactory},
      *     {@link MergingTemplateConfigurationFactory}, {@link FirstMatchTemplateConfigurationFactory},
@@ -2212,8 +2212,8 @@ public class Configurable {
                     } else {
                         setObjectWrapper(Configuration.getDefaultObjectWrapper(Configuration.VERSION_3_0_0));
                     }
-                } else if ("simple".equalsIgnoreCase(value)) {
-                    setObjectWrapper(_StaticObjectWrappers.SIMPLE_OBJECT_WRAPPER);
+                } else if ("restricted".equalsIgnoreCase(value)) {
+                    setObjectWrapper(_StaticObjectWrappers.RESTRICTED_OBJECT_WRAPPER);
                 } else {
                     setObjectWrapper((ObjectWrapper) _ObjectBuilderSettingEvaluator.eval(
                                     value, ObjectWrapper.class, false, _SettingEvaluationEnvironment.getCurrent()));

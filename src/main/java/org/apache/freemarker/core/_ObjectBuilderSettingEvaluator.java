@@ -40,8 +40,7 @@ import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
+import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
@@ -659,7 +658,7 @@ public class _ObjectBuilderSettingEvaluator {
             
             addWithSimpleName(SHORTHANDS, DefaultObjectWrapper.class);
             addWithSimpleName(SHORTHANDS, DefaultObjectWrapper.class);
-            addWithSimpleName(SHORTHANDS, SimpleObjectWrapper.class);
+            addWithSimpleName(SHORTHANDS, RestrictedObjectWrapper.class);
 
             addWithSimpleName(SHORTHANDS, TemplateConfiguration.class);
             

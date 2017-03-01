@@ -109,9 +109,9 @@ public class ConfigurationTest extends TestCase {
         assertFalse(cfg.isObjectWrapperExplicitlySet());
         assertSame(_StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER, cfg.getObjectWrapper());
         //
-        cfg.setObjectWrapper(_StaticObjectWrappers.SIMPLE_OBJECT_WRAPPER);
+        cfg.setObjectWrapper(_StaticObjectWrappers.RESTRICTED_OBJECT_WRAPPER);
         assertTrue(cfg.isObjectWrapperExplicitlySet());
-        assertSame(_StaticObjectWrappers.SIMPLE_OBJECT_WRAPPER, cfg.getObjectWrapper());
+        assertSame(_StaticObjectWrappers.RESTRICTED_OBJECT_WRAPPER, cfg.getObjectWrapper());
         //
         for (int i = 0; i < 2; i++) {
             cfg.unsetObjectWrapper();
@@ -647,8 +647,8 @@ public class ConfigurationTest extends TestCase {
         }
         
         {
-            cfg.setSetting(Configurable.OBJECT_WRAPPER_KEY, "simple");
-            assertSame(_StaticObjectWrappers.SIMPLE_OBJECT_WRAPPER, cfg.getObjectWrapper());
+            cfg.setSetting(Configurable.OBJECT_WRAPPER_KEY, "restricted");
+            assertSame(_StaticObjectWrappers.RESTRICTED_OBJECT_WRAPPER, cfg.getObjectWrapper());
         }
     }
     

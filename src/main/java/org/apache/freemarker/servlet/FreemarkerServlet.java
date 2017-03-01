@@ -410,7 +410,7 @@ public class FreemarkerServlet extends HttpServlet {
     private static final String DEPR_INITPARAM_TEMPLATE_DELAY = "TemplateDelay";
     private static final String DEPR_INITPARAM_ENCODING = "DefaultEncoding";
     private static final String DEPR_INITPARAM_OBJECT_WRAPPER = "ObjectWrapper";
-    private static final String DEPR_INITPARAM_WRAPPER_SIMPLE = "simple";
+    private static final String DEPR_INITPARAM_WRAPPER_RESTRICTED = "restricted";
     private static final String DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER = "TemplateExceptionHandler";
     private static final String DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_RETHROW = "rethrow";
     private static final String DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_DEBUG = "debug";
@@ -1297,8 +1297,8 @@ public class FreemarkerServlet extends HttpServlet {
                         + Configurable.OBJECT_WRAPPER_KEY + " and "
                         + DEPR_INITPARAM_OBJECT_WRAPPER);
             }
-            if (DEPR_INITPARAM_WRAPPER_SIMPLE.equals(wrapper)) {
-                return _StaticObjectWrappers.SIMPLE_OBJECT_WRAPPER;
+            if (DEPR_INITPARAM_WRAPPER_RESTRICTED.equals(wrapper)) {
+                return _StaticObjectWrappers.RESTRICTED_OBJECT_WRAPPER;
             }
             return createDefaultObjectWrapper();
         } else {

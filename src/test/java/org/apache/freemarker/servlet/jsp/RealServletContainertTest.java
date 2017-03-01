@@ -42,7 +42,7 @@ import org.apache.freemarker.core.TemplateExceptionHandler;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
-import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
+import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.apache.freemarker.servlet.FreemarkerServlet;
@@ -466,14 +466,14 @@ public class RealServletContainertTest extends WebAppTestCase {
         @Override
         protected Configuration createConfiguration() {
             Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-            cfg.setObjectWrapper(new SimpleObjectWrapper(Configuration.VERSION_3_0_0));
+            cfg.setObjectWrapper(new RestrictedObjectWrapper(Configuration.VERSION_3_0_0));
             return cfg;
         }
         
         @Override
         protected void doAssertions(Configuration cfg) throws Exception {
             ObjectWrapper ow = cfg.getObjectWrapper();
-            assertSame(SimpleObjectWrapper.class, ow.getClass());
+            assertSame(RestrictedObjectWrapper.class, ow.getClass());
             assertEquals(Configuration.VERSION_3_0_0, ((DefaultObjectWrapper) ow).getIncompatibleImprovements());
         }
         

@@ -44,7 +44,7 @@ import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.SimpleObjectWrapper;
+import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -54,7 +54,7 @@ public class SimpleObjetWrapperTest {
     
     @Test
     public void testDoesNotAllowAPIBuiltin() throws TemplateModelException {
-        SimpleObjectWrapper sow = new SimpleObjectWrapper(Configuration.VERSION_3_0_0);
+        RestrictedObjectWrapper sow = new RestrictedObjectWrapper(Configuration.VERSION_3_0_0);
         
         TemplateModelWithAPISupport map = (TemplateModelWithAPISupport) sow.wrap(new HashMap());
         try {
@@ -68,7 +68,7 @@ public class SimpleObjetWrapperTest {
     @SuppressWarnings("boxing")
     @Test
     public void testCanWrapBasicTypes() throws TemplateModelException {
-        SimpleObjectWrapper sow = new SimpleObjectWrapper(Configuration.VERSION_3_0_0);
+        RestrictedObjectWrapper sow = new RestrictedObjectWrapper(Configuration.VERSION_3_0_0);
         assertTrue(sow.wrap("s") instanceof TemplateScalarModel);
         assertTrue(sow.wrap(1) instanceof TemplateNumberModel);
         assertTrue(sow.wrap(true) instanceof TemplateBooleanModel);
@@ -89,7 +89,7 @@ public class SimpleObjetWrapperTest {
         is.setCharacterStream(new StringReader("<doc><sub a='1' /></doc>"));
         Document doc = db.parse(is);
         
-        SimpleObjectWrapper sow = new SimpleObjectWrapper(Configuration.VERSION_3_0_0);
+        RestrictedObjectWrapper sow = new RestrictedObjectWrapper(Configuration.VERSION_3_0_0);
         try {
             sow.wrap(doc);
             fail();
@@ -100,7 +100,7 @@ public class SimpleObjetWrapperTest {
     
     @Test
     public void testWontWrapGenericObjects() {
-        SimpleObjectWrapper sow = new SimpleObjectWrapper(Configuration.VERSION_3_0_0);
+        RestrictedObjectWrapper sow = new RestrictedObjectWrapper(Configuration.VERSION_3_0_0);
         try {
             sow.wrap(new File("/x"));
             fail();

@@ -25,18 +25,18 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
- * A restricted object wrapper that will not expose arbitrary object, just those that directly correspond to the
- * {@link TemplateModel} sub-interfaces ({@code String}, {@code Map} and such). If it had to wrap other kind of objects,
- * it will throw exception. It will also block {@code ?api} calls on the values it wraps.
+ * A restricted version of {@link DefaultObjectWrapper} that doesn't expose arbitrary object, just those that directly
+ * correspond to the {@link TemplateModel} sub-interfaces ({@code String}, {@code Map} and such). If it had to wrap
+ * other kind of objects, it will throw exception. It will also block {@code ?api} calls on the values it wraps.
  */
-public class SimpleObjectWrapper extends DefaultObjectWrapper {
+public class RestrictedObjectWrapper extends DefaultObjectWrapper {
 
     /**
      * @param incompatibleImprovements see in {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}.
      * 
      * @since 2.3.21
      */
-    public SimpleObjectWrapper(Version incompatibleImprovements) {
+    public RestrictedObjectWrapper(Version incompatibleImprovements) {
         super(incompatibleImprovements);
     }
 
@@ -46,13 +46,13 @@ public class SimpleObjectWrapper extends DefaultObjectWrapper {
      */
     @Override
     protected TemplateModel handleNonBasicTypes(Object obj) throws TemplateModelException {
-        throw new TemplateModelException("SimpleObjectWrapper deliberately won't wrap this type: "
+        throw new TemplateModelException("RestrictedObjectWrapper deliberately won't wrap this type: "
                 + obj.getClass().getName());
     }
 
     @Override
     public TemplateHashModel wrapAsAPI(Object obj) throws TemplateModelException {
-        throw new TemplateModelException("SimpleObjectWrapper deliberately doesn't allow ?api.");
+        throw new TemplateModelException("RestrictedObjectWrapper deliberately doesn't allow ?api.");
     }
 
 }
