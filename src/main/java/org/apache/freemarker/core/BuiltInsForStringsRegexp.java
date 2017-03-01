@@ -33,7 +33,6 @@ import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.model.impl.SimpleSequence;
 import org.apache.freemarker.core.util._StringUtil;
 
 
@@ -50,7 +49,8 @@ class BuiltInsForStringsRegexp {
             if (targetModel instanceof RegexMatchModel) {
                 return ((RegexMatchModel) targetModel).getGroups();
             } else if (targetModel instanceof RegexMatchModel.MatchWithGroups) {
-                return ((RegexMatchModel.MatchWithGroups) targetModel).groupsSeq;
+                return new NativeStringArraySequence(((RegexMatchModel.MatchWithGroups) targetModel).groups);
+
             } else {
                 throw new UnexpectedTypeException(target, targetModel,
                         "regular expression matcher",
@@ -138,14 +138,14 @@ class BuiltInsForStringsRegexp {
     implements TemplateBooleanModel, TemplateCollectionModel, TemplateSequenceModel {
         static class MatchWithGroups implements TemplateScalarModel {
             final String matchedInputPart;
-            final SimpleSequence groupsSeq;
-            
+            final String[] groups;
+
             MatchWithGroups(String input, Matcher matcher) {
                 matchedInputPart = input.substring(matcher.start(), matcher.end());
                 final int grpCount = matcher.groupCount() + 1;
-                groupsSeq = new SimpleSequence(grpCount);
+                groups = new String[grpCount];
                 for (int i = 0; i < grpCount; i++) {
-                    groupsSeq.add(matcher.group(i));
+                    groups[i] = matcher.group(i);
                 }
             }
             
@@ -199,6 +199,11 @@ class BuiltInsForStringsRegexp {
                     @Override
                     public TemplateModel get(int i) throws TemplateModelException {
                         try {
+                            // Avoid IndexOutOfBoundsException:
+                            if (i > firedEntireInputMatcher.groupCount()) {
+                                return null;
+                            }
+
                             return new SimpleScalar(firedEntireInputMatcher.group(i));
                         } catch (Exception e) {
                             throw new _TemplateModelException(e, "Failed to read match group");

@@ -85,34 +85,9 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
     private Map unwrappedMap;
 
     /**
-     * Constructs an empty hash that uses {@link _StaticObjectWrappers#DEFAULT_OBJECT_WRAPPER}.
-     * 
-     * @deprecated Use {@link #SimpleHash(ObjectWrapper)}
-     */
-    @Deprecated
-    public SimpleHash() {
-        this((ObjectWrapper) null);
-    }
-
-    /**
-     * Creates a new simple hash with the copy of the underlying map and the
-     * default wrapper {@link _StaticObjectWrappers#DEFAULT_OBJECT_WRAPPER}.
-     * @param map The Map to use for the key/value pairs. It makes a copy for 
-     * internal use. If the map implements the {@link SortedMap} interface, the
-     * internal copy will be a {@link TreeMap}, otherwise it will be a 
-     * {@link HashMap}.
-     * 
-     * @deprecated Use {@link #SimpleHash(Map, ObjectWrapper)}
-     */
-    @Deprecated
-    public SimpleHash(Map map) {
-        this(map, null);
-    }
-
-    /**
      * Creates an empty simple hash using the specified object wrapper.
      * @param wrapper The object wrapper to use to wrap objects into
-     * {@link TemplateModel} instances. If {@code null}, {@link _StaticObjectWrappers#DEFAULT_OBJECT_WRAPPER} is used.
+     * {@link TemplateModel} instances. Not {@code null}.
      */
     public SimpleHash(ObjectWrapper wrapper) {
         super(wrapper);
@@ -127,9 +102,8 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
      *            The Map to use for the key/value pairs. It makes a copy for internal use. If the map implements the
      *            {@link SortedMap} interface, the internal copy will be a {@link TreeMap}, otherwise it will be a
      * @param wrapper
-     *            The object wrapper to use to wrap contained objects into {@link TemplateModel} instances. Using
-     *            {@code null} is deprecated but allowed, in which case will be used
-     *            {@link _StaticObjectWrappers#DEFAULT_OBJECT_WRAPPER} is used.
+     *            The object wrapper to use to wrap contained objects into {@link TemplateModel} instances. Not
+     *            {@code null}.
      */
     public SimpleHash(Map map, ObjectWrapper wrapper) {
         super(wrapper);
@@ -288,39 +262,6 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
             put((String) entry.getKey(), entry.getValue());
         }
     }
-    
-    /**
-     * Note that this method creates and returns a deep-copy of the underlying hash used
-     * internally. This could be a gotcha for some people
-     * at some point who want to alter something in the data model,
-     * but we should maintain our immutability semantics (at least using default SimpleXXX wrappers) 
-     * for the data model. It will recursively unwrap the stuff in the underlying container. 
-     */
-    public Map toMap() throws TemplateModelException {
-        if (unwrappedMap == null) {
-            Class mapClass = map.getClass();
-            Map m = null;
-            try {
-                m = (Map) mapClass.newInstance();
-            } catch (Exception e) {
-                throw new TemplateModelException("Error instantiating map of type " + mapClass.getName() + "\n" + e.getMessage());
-            }
-            // Create a copy to maintain immutability semantics and
-            // Do nested unwrapping of elements if necessary.
-            DefaultObjectWrapper ow = _StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER;
-            for (Iterator it = map.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry entry = (Map.Entry) it.next();
-                Object key = entry.getKey();
-                Object value = entry.getValue();
-                if (value instanceof TemplateModel) {
-                    value = ow.unwrap((TemplateModel) value);
-                }
-                m.put(key, value);
-            }
-            unwrappedMap = m;
-        }
-        return unwrappedMap;
-    }
 
     /**
      * Returns the {@code toString()} of the underlying {@link Map}.
@@ -353,76 +294,5 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
     @Override
     public KeyValuePairIterator keyValuePairIterator() {
         return new MapKeyValuePairIterator(map, getObjectWrapper());
-    }
-
-    public SimpleHash synchronizedWrapper() {
-        return new SynchronizedHash();
-    }
-    
-    private class SynchronizedHash extends SimpleHash {
-
-        @Override
-        public boolean isEmpty() {
-            synchronized (SimpleHash.this) {
-                return SimpleHash.this.isEmpty();
-            }
-        }
-        
-        @Override
-        public void put(String key, Object obj) {
-            synchronized (SimpleHash.this) {
-                SimpleHash.this.put(key, obj);
-            }
-        }
-
-        @Override
-        public TemplateModel get(String key) throws TemplateModelException {
-            synchronized (SimpleHash.this) {
-                return SimpleHash.this.get(key);
-            }
-        }
-
-        @Override
-        public void remove(String key) {
-            synchronized (SimpleHash.this) {
-                SimpleHash.this.remove(key);
-            }
-        }
-
-        @Override
-        public int size() {
-            synchronized (SimpleHash.this) {
-                return SimpleHash.this.size();
-            }
-        }
-
-        @Override
-        public TemplateCollectionModel keys() {
-            synchronized (SimpleHash.this) {
-                return SimpleHash.this.keys();
-            }
-        }
-
-        @Override
-        public TemplateCollectionModel values() {
-            synchronized (SimpleHash.this) {
-                return SimpleHash.this.values();
-            }
-        }
-
-        @Override
-        public KeyValuePairIterator keyValuePairIterator() {
-            synchronized (SimpleHash.this) {
-                return SimpleHash.this.keyValuePairIterator();
-            }
-        }
-        
-        @Override
-        public Map toMap() throws TemplateModelException {
-            synchronized (SimpleHash.this) {
-                return SimpleHash.this.toMap();
-            }
-        }
-    
     }
 }

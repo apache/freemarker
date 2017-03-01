@@ -20,19 +20,17 @@
 package org.apache.freemarker.core;
 
 
+import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.SimpleCollection;
 
 /** {@code exp!defExp}, {@code (exp)!defExp} and the same two with {@code (exp)!}. */
 class ASTExpDefault extends ASTExpression {
 	
-    private static final TemplateCollectionModel EMPTY_COLLECTION = new SimpleCollection(new java.util.ArrayList(0));
-    
-	static private class EmptyStringAndSequence 
+	static private class EmptyStringAndSequence
 	  implements TemplateScalarModel, TemplateSequenceModel, TemplateHashModelEx {
 		@Override
         public String getAsString() {
@@ -56,11 +54,11 @@ class ASTExpDefault extends ASTExpression {
 		}
 		@Override
         public TemplateCollectionModel keys() {
-			return EMPTY_COLLECTION;
+			return Constants.EMPTY_COLLECTION;
 		}
 		@Override
         public TemplateCollectionModel values() {
-			return EMPTY_COLLECTION;
+			return Constants.EMPTY_COLLECTION;
 		}
 		
 	}

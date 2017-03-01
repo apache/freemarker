@@ -84,7 +84,6 @@ import org.w3c.dom.Node;
  * JSR 133 and related literature). When used as part of {@link Configuration}, of course it's enough if that was safely
  * published and then left unmodified.
  */
-// TODO Get rid of unused stuff (including other clases in this package) coming from BeansWrapper.
 public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable {
 
     private static final Logger LOG = _CoreLogs.OBJECT_WRAPPER;
@@ -168,7 +167,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
     private ObjectWrapper outerIdentity = this;
     private boolean methodsShadowItems = true;
     private boolean strict;  // initialized by PropertyAssignments.apply
-    @Deprecated // Only exists to keep some JUnit tests working...
+    @Deprecated // Only exists to keep some JUnit tests working... [FM3]
     private boolean useModelCache;
 
     private final Version incompatibleImprovements;
@@ -662,6 +661,9 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
         if (obj instanceof Number) {
             return new SimpleNumber((Number) obj);
         }
+        if (obj instanceof Boolean) {
+            return obj.equals(Boolean.TRUE) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+        }
         if (obj instanceof java.util.Date) {
             if (obj instanceof java.sql.Date) {
                 return new SimpleDate((java.sql.Date) obj);
@@ -685,9 +687,6 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
         }
         if (obj instanceof Map) {
             return DefaultMapAdapter.adapt((Map<?, ?>) obj, this);
-        }
-        if (obj instanceof Boolean) {
-            return obj.equals(Boolean.TRUE) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
         if (obj instanceof Iterator) {
             return DefaultIteratorAdapter.adapt((Iterator<?>) obj, this);

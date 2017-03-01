@@ -19,11 +19,14 @@
 
 package org.apache.freemarker.test.templatesuite.models;
 
+import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
@@ -34,11 +37,13 @@ import org.apache.freemarker.core.model.impl.SimpleSequence;
 public class MultiModel1 implements TemplateHashModel,
         TemplateSequenceModel, TemplateScalarModel {
 
+    private ObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
+
     private TemplateModel m_cSubModel = new MultiModel2();
-    private TemplateModel m_cListHashModel1 = new MultiModel4();
-    private TemplateModel m_cListHashModel2 = new MultiModel5();
-    private TemplateSequenceModel m_cListModel = new SimpleSequence();
-    private TemplateHashModel m_cHashModel = new SimpleHash();
+    private TemplateModel m_cListHashModel1 = new MultiModel4(ow);
+    private TemplateModel m_cListHashModel2 = new MultiModel5(ow);
+    private TemplateSequenceModel m_cListModel = new SimpleSequence(ow);
+    private TemplateHashModel m_cHashModel = new SimpleHash(ow);
 
     /** Creates new MultiModel1 */
     public MultiModel1() {

@@ -27,10 +27,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNodeModelEx;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.model.impl.SimpleSequence;
 import org.apache.freemarker.core.util._StringUtil;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * A holder for builtins that operate exclusively on (XML-)node left-hand value.
@@ -117,13 +114,14 @@ class BuiltInsForNodes {
     // Can't be instantiated
     private BuiltInsForNodes() { }
 
-    static class AncestorSequence extends SimpleSequence implements TemplateMethodModel {
-        
-        @SuppressFBWarnings(value="SE_BAD_FIELD",
-                justification="Can't make this Serializable, and not extending SimpleSequence would be non-BC.")
+    static class AncestorSequence extends NativeSequence implements TemplateMethodModel {
+
+        private static final int INITIAL_CAPACITY = 12;
+
         private Environment env;
         
         AncestorSequence(Environment env) {
+            super(INITIAL_CAPACITY);
             this.env = env;
         }
         

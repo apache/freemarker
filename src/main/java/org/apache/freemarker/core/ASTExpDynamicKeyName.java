@@ -19,8 +19,6 @@
 
 package org.apache.freemarker.core;
 
-import java.util.ArrayList;
-
 import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -28,7 +26,6 @@ import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.model.impl.SimpleSequence;
 
 /**
  * AST expression node: {@code target[keyExpression]}, where, in FM 2.3, {@code keyExpression} can be string, a number
@@ -211,14 +208,14 @@ final class ASTExpDynamicKeyName extends ASTExpression {
             return emptyResult(targetSeq != null);
         }
         if (targetSeq != null) {
-            ArrayList/*<TemplateModel>*/ list = new ArrayList(resultSize);
+            NativeSequence resultSeq = new NativeSequence(resultSize);
             int srcIdx = firstIdx;
             for (int i = 0; i < resultSize; i++) {
-                list.add(targetSeq.get(srcIdx));
+                resultSeq.add(targetSeq.get(srcIdx));
                 srcIdx += step;
             }
             // List items are already wrapped, so the wrapper will be null:
-            return new SimpleSequence(list, null);
+            return resultSeq;
         } else {
             final int exclEndIdx;
             if (step < 0 && resultSize > 1) {

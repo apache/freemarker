@@ -46,18 +46,13 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.BodyContent;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
-import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.apache.freemarker.servlet.FreemarkerServlet;
 import org.apache.freemarker.servlet.HttpRequestHashModel;
@@ -75,8 +70,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     private HttpSession session;
     private final HttpServletRequest request;
     private final HttpServletResponse response;
-    private final ObjectWrapper wrapper;
-    private final ObjectWrapperAndUnwrapper unwrapper;
+    private final ObjectWrapperAndUnwrapper wrapper;
     private JspWriter jspOut;
     
     protected FreeMarkerPageContext() throws TemplateModelException {
@@ -109,9 +103,8 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
             request = reqHash.getRequest();
             session = request.getSession(false);
             response = reqHash.getResponse();
-            wrapper = reqHash.getObjectWrapper();
-            unwrapper = wrapper instanceof ObjectWrapperAndUnwrapper
-                    ? (ObjectWrapperAndUnwrapper) wrapper : null;
+            ObjectWrapperAndUnwrapper ow = reqHash.getObjectWrapper();
+            wrapper = (ObjectWrapperAndUnwrapper) ow;
         } else {
             throw new  TemplateModelException("Could not find an instance of " + 
                     HttpRequestHashModel.class.getName() + 
@@ -131,7 +124,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         setAttribute(APPLICATION, servlet.getServletContext());
     }    
             
-    ObjectWrapper getObjectWrapper() {
+    ObjectWrapperAndUnwrapper getObjectWrapper() {
         return wrapper;
     }
     
@@ -191,32 +184,9 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         switch (scope) {
             case PAGE_SCOPE: {
                 try {
-                    final TemplateModel tm = environment.getGlobalNamespace().get(name);
-                    if (unwrapper != null) {
-                        return unwrapper.unwrap(tm);
-                    } else { // [FM3] Such unwrapping logic rather belongs to some core util
-                        if (tm instanceof AdapterTemplateModel) {
-                            return ((AdapterTemplateModel) tm).getAdaptedObject(OBJECT_CLASS);
-                        }
-                        if (tm instanceof WrapperTemplateModel) {
-                            return ((WrapperTemplateModel) tm).getWrappedObject();
-                        }
-                        if (tm instanceof TemplateScalarModel) {
-                            return ((TemplateScalarModel) tm).getAsString();
-                        }
-                        if (tm instanceof TemplateNumberModel) {
-                            return ((TemplateNumberModel) tm).getAsNumber();
-                        }
-                        if (tm instanceof TemplateBooleanModel) {
-                            return Boolean.valueOf(((TemplateBooleanModel) tm).getAsBoolean());
-                        }
-                        if (tm instanceof TemplateDateModel) {
-                            return ((TemplateDateModel) tm).getAsDate();
-                        }
-                        return tm;
-                    }
+                    return wrapper.unwrap(environment.getGlobalNamespace().get(name));
                 } catch (TemplateModelException e) {
-                    throw new UndeclaredThrowableException("Failed to unwrapp FTL global variable", e);
+                    throw new UndeclaredThrowableException("Failed to unwrap FTL global variable", e);
                 }
             }
             case REQUEST_SCOPE: {

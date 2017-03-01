@@ -22,6 +22,7 @@ package org.apache.freemarker.core.model.impl;
 import java.util.ArrayList;
 
 import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateCollectionModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
@@ -68,6 +69,8 @@ final public class CollectionAndSequence implements TemplateCollectionModel, Tem
     public int size() throws TemplateModelException {
         if (sequence != null) {
             return sequence.size();
+        } else if (collection instanceof TemplateCollectionModelEx) {
+            return ((TemplateCollectionModelEx) collection).size();
         } else {
             initSequence();
             return data.size();

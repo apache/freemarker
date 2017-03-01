@@ -23,9 +23,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
 
-import org.apache.freemarker.core.model.TemplateNodeModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.SimpleSequence;
 import org.apache.freemarker.core.util._ArrayEnumeration;
 
 /**
@@ -143,31 +140,6 @@ abstract class ASTElement extends ASTNode {
     abstract protected String dump(boolean canonical);
 
     // Methods to implement TemplateNodeModel
-
-    public TemplateNodeModel getParentNode() {
-        // return parent;
-        return null;
-    }
-
-    public String getNodeNamespace() {
-        return null;
-    }
-
-    public String getNodeType() {
-        return "element";
-    }
-
-    public TemplateSequenceModel getChildNodes() {
-        if (childBuffer != null) {
-            final SimpleSequence seq = new SimpleSequence(childCount);
-            for (int i = 0; i < childCount; i++) {
-                seq.add(childBuffer[i]);
-            }
-            return seq;
-        } else {
-            return new SimpleSequence(0);
-        }
-    }
 
     public String getNodeName() {
         String className = getClass().getName();

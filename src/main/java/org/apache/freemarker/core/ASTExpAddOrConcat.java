@@ -36,7 +36,6 @@ import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.CollectionAndSequence;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.model.impl.SimpleSequence;
 
 /**
  * AST expression node: binary {@code +} operator. Note that this is treated separately from the other 4 arithmetic
@@ -275,7 +274,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
         throws TemplateModelException {
             if (keys == null) {
                 HashSet keySet = new HashSet();
-                SimpleSequence keySeq = new SimpleSequence(32);
+                NativeSequence keySeq = new NativeSequence(32);
                 addKeys(keySet, keySeq, (TemplateHashModelEx) left);
                 addKeys(keySet, keySeq, (TemplateHashModelEx) right);
                 size = keySet.size();
@@ -283,7 +282,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
             }
         }
 
-        private static void addKeys(Set set, SimpleSequence keySeq, TemplateHashModelEx hash)
+        private static void addKeys(Set set, NativeSequence keySeq, TemplateHashModelEx hash)
         throws TemplateModelException {
             TemplateModelIterator it = hash.keys().iterator();
             while (it.hasNext()) {
@@ -299,7 +298,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
         private void initValues()
         throws TemplateModelException {
             if (values == null) {
-                SimpleSequence seq = new SimpleSequence(size());
+                NativeSequence seq = new NativeSequence(size());
                 // Note: size() invokes initKeys() if needed.
             
                 int ln = keys.size();

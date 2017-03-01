@@ -47,7 +47,6 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
-import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
@@ -1809,11 +1808,8 @@ public class Configurable {
      *       values: {@code "DefaultObjectWrapper(3.0.0)"},
      *       {@code "DefaultObjectWrapper(2.3.21, simpleMapWrapper=true)"}.
      *       <br>If the value does not contain dot, then it must be one of these special values (case insensitive):
-     *       {@code "default"} means the default of {@link Configuration} (the default depends on the
-     *       {@code Configuration#Configuration(Version) incompatible_improvements}, but a bug existed in 2.3.21 where
-     *       that was ignored),
-     *       {@code "default_2_3_0"} (means {@link _StaticObjectWrappers#DEFAULT_OBJECT_WRAPPER})
-     *       {@code "restricted"} (means the deprecated {@link _StaticObjectWrappers#RESTRICTED_OBJECT_WRAPPER}
+     *       {@code "default"} means the default of {@link Configuration},
+     *       {@code "restricted"} means the a {@link RestrictedObjectWrapper} instance.
      *
      *   <li><p>{@code "number_format"}: See {@link #setNumberFormat(String)}.
      *   
@@ -2213,7 +2209,7 @@ public class Configurable {
                         setObjectWrapper(Configuration.getDefaultObjectWrapper(Configuration.VERSION_3_0_0));
                     }
                 } else if ("restricted".equalsIgnoreCase(value)) {
-                    setObjectWrapper(_StaticObjectWrappers.RESTRICTED_OBJECT_WRAPPER);
+                    setObjectWrapper(new RestrictedObjectWrapper(Configuration.VERSION_3_0_0));
                 } else {
                     setObjectWrapper((ObjectWrapper) _ObjectBuilderSettingEvaluator.eval(
                                     value, ObjectWrapper.class, false, _SettingEvaluationEnvironment.getCurrent()));

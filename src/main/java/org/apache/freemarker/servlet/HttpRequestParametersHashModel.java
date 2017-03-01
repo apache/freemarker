@@ -26,6 +26,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -36,14 +37,14 @@ import org.apache.freemarker.core.model.impl.SimpleScalar;
  * TemplateHashModel wrapper for a HttpServletRequest parameters.
  */
 
-public class HttpRequestParametersHashModel
-    implements
-    TemplateHashModelEx {
+public class HttpRequestParametersHashModel implements TemplateHashModelEx {
     private final HttpServletRequest request;
+    private final ObjectWrapper objectWrapper;
     private List keys;
         
-    public HttpRequestParametersHashModel(HttpServletRequest request) {
+    public HttpRequestParametersHashModel(HttpServletRequest request, ObjectWrapper objectWrapper) {
         this.request = request;
+        this.objectWrapper = objectWrapper;
     }
 
     @Override
@@ -64,7 +65,7 @@ public class HttpRequestParametersHashModel
     
     @Override
     public TemplateCollectionModel keys() {
-        return new SimpleCollection(getKeys().iterator());
+        return new SimpleCollection(getKeys().iterator(), objectWrapper);
     }
     
     @Override
@@ -78,13 +79,13 @@ public class HttpRequestParametersHashModel
                 }
                 @Override
                 public Object next() {
-                    return request.getParameter((String) iter.next()); 
+                    return request.getParameter((String) iter.next());
                 }
                 @Override
                 public void remove() {
                     throw new UnsupportedOperationException();
                 }
-            });
+            }, objectWrapper);
     }
 
     protected String transcode(String string) {

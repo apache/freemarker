@@ -30,7 +30,6 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.impl.CollectionAndSequence;
-import org.apache.freemarker.core.model.impl.SimpleSequence;
 
 /**
  * AST expression node: <tt>{ keyExp: valueExp, ... }</tt> 
@@ -109,11 +108,11 @@ final class ASTExpHashLiteral extends ASTExpression {
 
     private class SequenceHash implements TemplateHashModelEx2 {
 
-        private HashMap map; // maps keys to integer offset
+        private HashMap<String, TemplateModel> map;
         private TemplateCollectionModel keyCollection, valueCollection; // ordered lists of keys and values
 
         SequenceHash(Environment env) throws TemplateException {
-            map = new LinkedHashMap();
+            map = new LinkedHashMap<>();
             for (int i = 0; i < size; i++) {
                 ASTExpression keyExp = (ASTExpression) keys.get(i);
                 ASTExpression valExp = (ASTExpression) values.get(i);
@@ -132,7 +131,7 @@ final class ASTExpHashLiteral extends ASTExpression {
         @Override
         public TemplateCollectionModel keys() {
             if (keyCollection == null) {
-                keyCollection = new CollectionAndSequence(new SimpleSequence(map.keySet()));
+                keyCollection = new CollectionAndSequence(new NativeStringCollectionCollectionEx(map.keySet()));
             }
             return keyCollection;
         }
@@ -140,7 +139,7 @@ final class ASTExpHashLiteral extends ASTExpression {
         @Override
         public TemplateCollectionModel values() {
             if (valueCollection == null) {
-                valueCollection = new CollectionAndSequence(new SimpleSequence(map.values()));
+                valueCollection = new CollectionAndSequence(new NativeCollectionEx(map.values()));
             }
             return valueCollection;
         }

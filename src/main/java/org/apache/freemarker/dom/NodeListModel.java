@@ -25,7 +25,6 @@ import java.util.List;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
-import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
@@ -56,27 +55,17 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
     NodeModel contextNode;
     XPathSupport xpathSupport;
     
-    private static ObjectWrapper nodeWrapper = new ObjectWrapper() {
-        @Override
-        public TemplateModel wrap(Object obj) {
-            if (obj instanceof NodeModel) {
-                return (NodeModel) obj;
-            }
-            return NodeModel.wrap((Node) obj);
-        }
-    };
-    
     NodeListModel(Node contextNode) {
         this(NodeModel.wrap(contextNode));
     }
     
     NodeListModel(NodeModel contextNode) {
-        super(nodeWrapper);
+        super(NodeQueryResultItemObjectWrapper.INSTANCE);
         this.contextNode = contextNode;
     }
     
     NodeListModel(NodeList nodeList, NodeModel contextNode) {
-        super(nodeWrapper);
+        super(NodeQueryResultItemObjectWrapper.INSTANCE);
         for (int i = 0; i < nodeList.getLength(); i++) {
             list.add(nodeList.item(i));
         }
@@ -84,7 +73,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
     }
     
     NodeListModel(NamedNodeMap nodeList, NodeModel contextNode) {
-        super(nodeWrapper);
+        super(NodeQueryResultItemObjectWrapper.INSTANCE);
         for (int i = 0; i < nodeList.getLength(); i++) {
             list.add(nodeList.item(i));
         }
@@ -92,7 +81,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
     }
     
     NodeListModel(List list, NodeModel contextNode) {
-        super(list, nodeWrapper);
+        super(list, NodeQueryResultItemObjectWrapper.INSTANCE);
         this.contextNode = contextNode;
     }
     
@@ -227,5 +216,5 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
                     : "multiple matches."
                 };
     }
-    
+
 }

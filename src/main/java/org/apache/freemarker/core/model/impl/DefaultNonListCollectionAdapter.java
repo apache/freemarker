@@ -23,8 +23,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.freemarker.core._DelayedShortClassName;
-import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
@@ -60,7 +58,7 @@ public class DefaultNonListCollectionAdapter extends WrappingTemplateModel imple
      * @param collection
      *            The collection to adapt; can't be {@code null}.
      * @param wrapper
-     *            The {@link ObjectWrapper} used to wrap the items in the array. Has to be
+     *            The {@link ObjectWrapper} used to wrap the items in the collection. Has to be
      *            {@link ObjectWrapperAndUnwrapper} because of planned future features.
      */
     public static DefaultNonListCollectionAdapter adapt(Collection collection, ObjectWrapperWithAPISupport wrapper) {
@@ -95,19 +93,6 @@ public class DefaultNonListCollectionAdapter extends WrappingTemplateModel imple
     @Override
     public Object getAdaptedObject(Class hint) {
         return getWrappedObject();
-    }
-
-    @Override
-    public boolean contains(TemplateModel item) throws TemplateModelException {
-        Object itemPojo = ((ObjectWrapperAndUnwrapper) getObjectWrapper()).unwrap(item);
-        try {
-            return collection.contains(itemPojo);
-        } catch (ClassCastException e) {
-            throw new _TemplateModelException(e,
-                    "Failed to check if the collection contains the item. Probably the item's Java type, ",
-                    itemPojo != null ? new _DelayedShortClassName(itemPojo.getClass()) : "Null",
-                    ", doesn't match the type of (some of) the collection items; see cause exception.");
-        }
     }
 
     @Override

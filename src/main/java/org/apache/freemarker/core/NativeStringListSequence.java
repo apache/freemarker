@@ -17,46 +17,40 @@
  * under the License.
  */
 
-package org.apache.freemarker.test.templatesuite.models;
+package org.apache.freemarker.core;
+
+import java.util.List;
 
 import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.SimpleSequence;
+import org.apache.freemarker.core.model.impl.DefaultListAdapter;
+import org.apache.freemarker.core.model.impl.SimpleScalar;
 
 /**
- * Model for testing the impact of isEmpty() on template list models. Every
- * other method simply delegates to a SimpleList model.
+ * Adapts (not copies) a {@link List} of {@link String}-s with on-the-fly wrapping of the items to {@link
+ * SimpleScalar}-s. The important difference to {@link DefaultListAdapter} is that it doesn't depend on an {@link
+ * ObjectWrapper}, which is needed to guarantee the behavior of some template language constructs. The important
+ * difference to {@link NativeSequence} is that it doesn't need upfront conversion to {@link TemplateModel}-s
+ * (performance).
  */
-public class BooleanList1 implements TemplateSequenceModel {
+class NativeStringListSequence implements TemplateSequenceModel {
 
-    private SimpleSequence cList;
+    private final List<String> items;
 
-    /** Creates new BooleanList1 */
-    public BooleanList1(ObjectWrapper ow) {
-        cList = new SimpleSequence(ow);
-        cList.add( "false" );
-        cList.add( "0" );
-        cList.add(TemplateBooleanModel.FALSE);
-        cList.add(TemplateBooleanModel.TRUE);
-        cList.add(TemplateBooleanModel.TRUE);
-        cList.add(TemplateBooleanModel.TRUE);
-        cList.add(TemplateBooleanModel.FALSE);
-    }
-
-    /**
-     * @return the specified index in the list
-     */
-    @Override
-    public TemplateModel get(int i) throws TemplateModelException {
-        return cList.get(i);
+    public NativeStringListSequence(List<String> items) {
+        this.items = items;
     }
 
     @Override
-    public int size() {
-        return cList.size();
+    public TemplateModel get(int index) throws TemplateModelException {
+        return index < items.size() ? new SimpleScalar(items.get(index)) : null;
+    }
+
+    @Override
+    public int size() throws TemplateModelException {
+        return items.size();
     }
 
 }

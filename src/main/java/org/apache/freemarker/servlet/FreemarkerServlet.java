@@ -49,11 +49,14 @@ import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.TemplateExceptionHandler;
 import org.apache.freemarker.core.TemplateNotFoundException;
+import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
+import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
+import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
@@ -521,7 +524,7 @@ public class FreemarkerServlet extends HttpServlet {
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private Configuration config;
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
-    private ObjectWrapper wrapper;
+    private ObjectWrapperAndUnwrapper wrapper;
     private ContentType contentType;
     private OverrideResponseContentType overrideResponseContentType = initParamValueToEnum(
             getDefaultOverrideResponseContentType(), OverrideResponseContentType.values());
@@ -1004,7 +1007,7 @@ public class FreemarkerServlet extends HttpServlet {
         return config.getLocale();
     }
 
-    protected TemplateModel createModel(ObjectWrapper objectWrapper,
+    protected TemplateModel createModel(ObjectWrapperAndUnwrapper objectWrapper,
                                         ServletContext servletContext,
                                         final HttpServletRequest request,
                                         final HttpServletResponse response) throws TemplateModelException {
@@ -1289,7 +1292,7 @@ public class FreemarkerServlet extends HttpServlet {
      * @return The {@link ObjectWrapper} that will be used for adapting request, session, and servlet context attributes
      *         to {@link TemplateModel}-s, and also as the object wrapper setting of {@link Configuration}.
      */
-    protected ObjectWrapper createObjectWrapper() {
+    protected ObjectWrapperAndUnwrapper createObjectWrapper() {
         String wrapper = getServletConfig().getInitParameter(DEPR_INITPARAM_OBJECT_WRAPPER);
         if (wrapper != null) { // BC
             if (getInitParameter(Configurable.OBJECT_WRAPPER_KEY) != null) {
@@ -1298,7 +1301,7 @@ public class FreemarkerServlet extends HttpServlet {
                         + DEPR_INITPARAM_OBJECT_WRAPPER);
             }
             if (DEPR_INITPARAM_WRAPPER_RESTRICTED.equals(wrapper)) {
-                return _StaticObjectWrappers.RESTRICTED_OBJECT_WRAPPER;
+                return new RestrictedObjectWrapper(Configuration.VERSION_3_0_0);
             }
             return createDefaultObjectWrapper();
         } else {
@@ -1307,7 +1310,7 @@ public class FreemarkerServlet extends HttpServlet {
                 if (!config.isObjectWrapperExplicitlySet()) {
                     return createDefaultObjectWrapper();
                 } else {
-                    return config.getObjectWrapper();
+                    return asObjectWrapperAndUnwrapper(config.getObjectWrapper());
                 }
             } else {
                 try {
@@ -1315,9 +1318,18 @@ public class FreemarkerServlet extends HttpServlet {
                 } catch (ConfigurationException e) {
                     throw new RuntimeException("Failed to set " + Configurable.OBJECT_WRAPPER_KEY, e);
                 }
-                return config.getObjectWrapper();
+                return asObjectWrapperAndUnwrapper(config.getObjectWrapper());
             }
         }
+    }
+
+    private ObjectWrapperAndUnwrapper asObjectWrapperAndUnwrapper(ObjectWrapper objectWrapper) {
+        if (!(objectWrapper instanceof ObjectWrapperAndUnwrapper)) {
+            throw new RuntimeException(FreemarkerServlet.class.getSimpleName() + " requires an ObjectWrapper that " +
+                    "implements " + ObjectWrapperAndUnwrapper.class.getName() + ", but this class doesn't do that: "
+                    + objectWrapper.getClass().getName());
+        }
+        return (ObjectWrapperAndUnwrapper) objectWrapper;
     }
 
     /**
@@ -1328,13 +1340,13 @@ public class FreemarkerServlet extends HttpServlet {
      * won't be called, since then that has already specified the default.
      * 
      * <p>
-     * The default implementation calls {@link Configuration#getDefaultObjectWrapper(org.apache.freemarker.core.Version)}. You
+     * The default implementation calls {@link Configuration#getDefaultObjectWrapper(Version)}. You
      * should also pass in the version paramter when creating an {@link ObjectWrapper} that supports that. You can get
      * the version by calling {@link #getConfiguration()} and then {@link Configuration#getIncompatibleImprovements()}.
      * 
      * @since 2.3.22
      */
-    protected ObjectWrapper createDefaultObjectWrapper() {
+    protected ObjectWrapperAndUnwrapper createDefaultObjectWrapper() {
         return Configuration.getDefaultObjectWrapper(config.getIncompatibleImprovements());
     }
     
@@ -1358,7 +1370,7 @@ public class FreemarkerServlet extends HttpServlet {
     }
     
     protected HttpRequestParametersHashModel createRequestParametersHashModel(HttpServletRequest request) {
-        return new HttpRequestParametersHashModel(request);
+        return new HttpRequestParametersHashModel(request, getObjectWrapper());
     }
 
     /**
@@ -1407,13 +1419,11 @@ public class FreemarkerServlet extends HttpServlet {
      *            The template that will get executed
      * @param model
      *            The data model that will be passed to the template. By default this will be an
-     *            {@link AllHttpScopesHashModel} (which is a {@link org.apache.freemarker.core.model.impl.SimpleHash} subclass). Thus, you
-     *            can add new variables to the data-model with the
-     *            {@link org.apache.freemarker.core.model.impl.SimpleHash#put(String, Object)} subclass) method. However, to adjust the
-     *            data-model, overriding
-     *            {@link #createModel(ObjectWrapper, ServletContext, HttpServletRequest, HttpServletResponse)} is
-     *            probably a more appropriate place.
-     * 
+     *            {@link AllHttpScopesHashModel} (which is a {@link SimpleHash} subclass). Thus, you can add new
+     *            variables to the data-model with the {@link SimpleHash#put(String, Object)} subclass) method. However,
+     *            to adjust the data-model, overriding {@link #createModel(ObjectWrapperAndUnwrapper, ServletContext,
+     *            HttpServletRequest, HttpServletResponse)} is probably a more appropriate place.
+     *
      * @return true to process the template, false to suppress template processing.
      */
     protected boolean preTemplateProcess(

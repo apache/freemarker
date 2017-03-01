@@ -40,6 +40,8 @@ import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.core.model.impl.SimpleCollection;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
@@ -55,6 +57,9 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
     private static long nextId = 1;
     private static Set remotes = new HashSet();
 
+    private static final DefaultObjectWrapper OBJECT_WRAPPER = new DefaultObjectWrapperBuilder(Configuration
+            .VERSION_3_0_0)
+            .build();
     
     private boolean stopped = false;
     private final long id;
@@ -129,7 +134,7 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
 
         @Override
         public TemplateCollectionModel keys() {
-            return new SimpleCollection(keySet());
+            return new SimpleCollection(keySet(), OBJECT_WRAPPER);
         }
 
         @Override
@@ -140,7 +145,7 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
             for (Iterator it = keys.iterator(); it.hasNext(); ) {
                 list.add(get((String) it.next()));
             }
-            return new SimpleCollection(list);
+            return new SimpleCollection(list, OBJECT_WRAPPER);
         }
 
         @Override

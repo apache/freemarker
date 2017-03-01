@@ -41,7 +41,6 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
-import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.jaxen.BaseXPath;
 import org.jaxen.Function;
@@ -92,8 +91,7 @@ class JaxenXPathSupport implements XPathSupport {
             }
             List result = xpath.selectNodes(context != null ? context : EMPTY_ARRAYLIST);
             if (result.size() == 1) {
-                // [2.4] Use the proper object wrapper (argument in 2.4) 
-                return _StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER.wrap(result.get(0));
+                return NodeQueryResultItemObjectWrapper.INSTANCE.wrap(result.get(0));
             }
             NodeListModel nlm = new NodeListModel(result, null);
             nlm.xpathSupport = this;

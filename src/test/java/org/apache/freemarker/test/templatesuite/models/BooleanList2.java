@@ -19,9 +19,11 @@
 
 package org.apache.freemarker.test.templatesuite.models;
 
+import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.impl.SimpleSequence;
 
 /**
  * Model for testing list models. Every
@@ -29,11 +31,11 @@ import org.apache.freemarker.core.model.TemplateSequenceModel;
  */
 public class BooleanList2 implements TemplateSequenceModel {
 
-    private LegacyList  cList;
+    private SimpleSequence cList;
 
     /** Creates new BooleanList2 */
-    public BooleanList2() {
-        cList = new LegacyList();
+    public BooleanList2(ObjectWrapper ow) {
+        cList = new SimpleSequence(ow);
     }
 
     /**

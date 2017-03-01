@@ -61,7 +61,6 @@ import org.apache.freemarker.core.model.impl.ResourceBundleModel;
 import org.apache.freemarker.core.model.impl.SimpleCollection;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
-import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
 import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._NullWriter;
@@ -210,8 +209,7 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put("obj", new org.apache.freemarker.test.templatesuite.models.BeanTestClass());
             dataModel.put("resourceBundle",
                     new ResourceBundleModel(ResourceBundle.getBundle(
-                            "org.apache.freemarker.test.templatesuite.models.BeansTestResources"),
-                            _StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER));
+                            "org.apache.freemarker.test.templatesuite.models.BeansTestResources"), dow));
             dataModel.put("date", new GregorianCalendar(1974, 10, 14).getTime());
             dataModel.put("statics", dow.getStaticModels());
             dataModel.put("enums", dow.getEnumModels());
@@ -222,8 +220,8 @@ public class TemplateTestCase extends FileTestCase {
             dataModel.put( "boolean4", TemplateBooleanModel.TRUE);
             dataModel.put( "boolean5", TemplateBooleanModel.FALSE);
             
-            dataModel.put( "list1", new BooleanList1() );
-            dataModel.put( "list2", new BooleanList2() );
+            dataModel.put( "list1", new BooleanList1(dow) );
+            dataModel.put( "list2", new BooleanList2(dow) );
     
             dataModel.put( "hash1", new BooleanHash1() );
             dataModel.put( "hash2", new BooleanHash2() );
@@ -291,8 +289,8 @@ public class TemplateTestCase extends FileTestCase {
         } else if (simpleTestName.startsWith("type-builtins")) {
             dataModel.put("testmethod", new TestMethod());
             dataModel.put("testnode", new TestNode());
-            dataModel.put("testcollection", new SimpleCollection(new ArrayList<>()));
-            dataModel.put("testcollectionEx", DefaultNonListCollectionAdapter.adapt(new HashSet<>(), null));
+            dataModel.put("testcollection", new SimpleCollection(new ArrayList<>(), dow));
+            dataModel.put("testcollectionEx", DefaultNonListCollectionAdapter.adapt(new HashSet<>(), dow));
             dataModel.put("bean", new TestBean());
         } else if (simpleTestName.equals("date-type-builtins")) {
             GregorianCalendar cal = new GregorianCalendar(2003, 4 - 1, 5, 6, 7, 8);
@@ -353,7 +351,7 @@ public class TemplateTestCase extends FileTestCase {
             listWithNull.add(null);
             dataModel.put("listWithNullsOnly", listWithNullsOnly);
             
-            dataModel.put("abcCollection", new SimpleCollection(abcSet));
+            dataModel.put("abcCollection", new SimpleCollection(abcSet, dow));
             
             Set<String> set = new HashSet<>();
             set.add("a");

@@ -19,21 +19,24 @@
 
 package org.apache.freemarker.test.templatesuite.models;
 
+import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleSequence;
 
 /**
  * Testcase to see how FreeMarker deals with multiple Template models.
  */
 public class MultiModel5 implements TemplateSequenceModel, TemplateHashModel {
 
-    private LegacyList  m_cList = new LegacyList();
+    private final SimpleSequence m_cList;
 
     /** Creates new MultiModel5 */
-    public MultiModel5() {
+    public MultiModel5(ObjectWrapper ow) {
+        this.m_cList = new SimpleSequence(ow);
         m_cList.add( new SimpleScalar( "Dummy to make list non-empty" ));
     }
 

@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.model;
 
-import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
+import org.apache.freemarker.core.util._NullArgumentException;
 
 /**
  * Convenience base-class for containers that wrap their contained arbitrary Java objects into {@link TemplateModel}
@@ -28,27 +28,16 @@ import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
 abstract public class WrappingTemplateModel {
 
     private final ObjectWrapper objectWrapper;
-    
-    /**
-     * Protected constructor that creates a new wrapping template model using
-     * the default object wrapper.
-     * 
-     * @deprecated Use {@link #WrappingTemplateModel(ObjectWrapper)} instead; this method uses the deprecated.
-     */
-    @Deprecated
-    protected WrappingTemplateModel() {
-        this(null);
-    }
 
     /**
      * Protected constructor that creates a new wrapping template model using the specified object wrapper.
      * 
      * @param objectWrapper the wrapper to use. Passing {@code null} to it
-     *     is allowed but deprecated. If {@code null} is passed, the deprecated default object wrapper
-     *     is used.
+     *     is allowed but deprecated. Not {@code null}.
      */
     protected WrappingTemplateModel(ObjectWrapper objectWrapper) {
-        this.objectWrapper = objectWrapper != null ? objectWrapper : _StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER;
+        _NullArgumentException.check("objectWrapper", objectWrapper);
+        this.objectWrapper = objectWrapper;
     }
     
     /**
@@ -67,7 +56,7 @@ abstract public class WrappingTemplateModel {
      * wrap the passed object.
      */
     protected final TemplateModel wrap(Object obj) throws TemplateModelException {
-        return objectWrapper.wrap(obj);
+            return objectWrapper.wrap(obj);
     }
     
 }

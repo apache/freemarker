@@ -62,9 +62,19 @@ public class Constants {
         
     }
 
-    public static final TemplateCollectionModel EMPTY_COLLECTION = new EmptyCollectionModel();
+    public static final TemplateCollectionModelEx EMPTY_COLLECTION = new EmptyCollectionExModel();
     
-    private static class EmptyCollectionModel implements TemplateCollectionModel, Serializable {
+    private static class EmptyCollectionExModel implements TemplateCollectionModelEx, Serializable {
+
+        @Override
+        public int size() throws TemplateModelException {
+            return 0;
+        }
+
+        @Override
+        public boolean isEmpty() throws TemplateModelException {
+            return true;
+        }
 
         @Override
         public TemplateModelIterator iterator() throws TemplateModelException {

@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
@@ -32,8 +33,6 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.model.impl.SimpleSequence;
-import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
 import org.apache.freemarker.core.util._StringUtil;
 
 class BuiltInsForStringsBasic {
@@ -555,7 +554,7 @@ class BuiltInsForStringsBasic {
                     Pattern pattern = RegexpHelper.getPattern(splitString, (int) flags);
                     result = pattern.split(s);
                 } 
-                return _StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER.wrap(result);
+                return new NativeStringArraySequence(result);
             }
         }
         
@@ -683,12 +682,12 @@ class BuiltInsForStringsBasic {
     static class word_listBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            SimpleSequence result = new SimpleSequence();
+            ArrayList<String> result = new ArrayList<>();
             StringTokenizer st = new StringTokenizer(s);
             while (st.hasMoreTokens()) {
                result.add(st.nextToken());
             }
-            return result;
+            return new  NativeStringListSequence(result);
         }
     }
 

@@ -35,11 +35,9 @@ import org.apache.freemarker.core._DelayedJQuote;
 import org.apache.freemarker.core._DelayedShortClassName;
 import org.apache.freemarker.core._ErrorDescriptionBuilder;
 import org.apache.freemarker.core._TemplateModelException;
-import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.servlet.jsp.SimpleTagDirectiveModel.TemplateExceptionWrapperJspException;
@@ -77,18 +75,15 @@ class JspTagModelBase {
         return tagClass.newInstance();
     }
     
-    void setupTag(Object tag, Map args, ObjectWrapper wrapper)
+    void setupTag(Object tag, Map args, ObjectWrapperAndUnwrapper wrapper)
     throws TemplateModelException, 
         InvocationTargetException, 
         IllegalAccessException {
         if (args != null && !args.isEmpty()) {
-            ObjectWrapperAndUnwrapper unwrapper = 
-                    wrapper instanceof ObjectWrapperAndUnwrapper ? (ObjectWrapperAndUnwrapper) wrapper
-                            : _StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER;  // [2.4] Throw exception in this case
             final Object[] argArray = new Object[1];
             for (Iterator iter = args.entrySet().iterator(); iter.hasNext(); ) {
                 final Map.Entry entry = (Map.Entry) iter.next();
-                final Object arg = unwrapper.unwrap((TemplateModel) entry.getValue());
+                final Object arg = wrapper.unwrap((TemplateModel) entry.getValue());
                 argArray[0] = arg;
                 final Object paramName = entry.getKey();
                 Method setterMethod = (Method) propertySetters.get(paramName);

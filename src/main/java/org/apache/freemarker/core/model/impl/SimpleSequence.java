@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.RichObjectWrapper;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
@@ -77,70 +76,17 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
 public class SimpleSequence extends WrappingTemplateModel implements TemplateSequenceModel, Serializable {
 
     /**
-     * The {@link List} that stored the elements of this sequence. It migth contains both {@link TemplateModel} elements
+     * The {@link List} that stored the elements of this sequence. It might contains both {@link TemplateModel} elements
      * and non-{@link TemplateModel} elements.
      */
     protected final List list;
-    
-    private List unwrappedList;
-
-    /**
-     * Constructs an empty simple sequence that will use
-     * {@link _StaticObjectWrappers#DEFAULT_OBJECT_WRAPPER}.
-     * 
-     * @deprecated Use {@link #SimpleSequence(ObjectWrapper)} instead.
-     */
-    @Deprecated
-    public SimpleSequence() {
-        this((ObjectWrapper) null);
-    }
-
-    /**
-     * Constructs an empty simple sequence with preallocated capacity and using
-     * {@link _StaticObjectWrappers#DEFAULT_OBJECT_WRAPPER}.
-     * 
-     * @deprecated Use {@link #SimpleSequence(Collection, ObjectWrapper)}.
-     */
-    @Deprecated
-    public SimpleSequence(int capacity) {
-        list = new ArrayList(capacity);
-    }
-    
-    /**
-     * Constructs a simple sequence that will contain the elements
-     * from the specified {@link Collection} and will use {@link _StaticObjectWrappers#DEFAULT_OBJECT_WRAPPER}.
-     * @param collection the collection containing initial values. Note that a
-     * copy of the collection is made for internal use.
-     * 
-     * @deprecated Use {@link #SimpleSequence(Collection, ObjectWrapper)}.
-     */
-    @Deprecated
-    public SimpleSequence(Collection collection) {
-        this(collection, null);
-    }
-    
-    /**
-     * Constructs a simple sequence from the passed collection model, which shouldn't be added to later. The internal
-     * list will be build immediately (not lazily). The resulting sequence shouldn't be extended with
-     * {@link #add(Object)}, because the appropriate {@link ObjectWrapper} won't be available; use
-     * {@link #SimpleSequence(Collection, ObjectWrapper)} instead, if you need that.
-     */
-    public SimpleSequence(TemplateCollectionModel tcm) throws TemplateModelException {
-        ArrayList alist = new ArrayList();
-        for (TemplateModelIterator it = tcm.iterator(); it.hasNext(); ) {
-            alist.add(it.next());
-        }
-        alist.trimToSize();
-        list = alist;
-    }
 
     /**
      * Constructs an empty sequence using the specified object wrapper.
      * 
      * @param wrapper
-     *            The object wrapper to use to wrap the list items into {@link TemplateModel} instances. {@code null} is
-     *            allowed, but deprecated, and will cause the deprecated default object wrapper
-     *            {@link _StaticObjectWrappers#DEFAULT_OBJECT_WRAPPER} to be used.
+     *            The object wrapper to use to wrap the list items into {@link TemplateModel} instances. Not
+     *            {@code null}.
      */
     public SimpleSequence(ObjectWrapper wrapper) {
         super(wrapper);
@@ -187,54 +133,8 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
      */
     public void add(Object obj) {
         list.add(obj);
-        unwrappedList = null;
     }
 
-    /**
-     * Adds a boolean value to the end of this sequence. The newly added boolean will be immediately converted into
-     * {@link TemplateBooleanModel#TRUE} or {@link TemplateBooleanModel#FALSE}, without using the {@link ObjectWrapper}.
-     *
-     * @param b
-     *            The boolean value to be added.
-     * 
-     * @deprecated Use {@link #add(Object)} instead, as this bypasses the {@link ObjectWrapper}.
-     */
-    @Deprecated
-    public void add(boolean b) {
-        add(b ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE);
-    }
-    
-    /**
-     * Builds a deep-copy of the underlying list, unwrapping any values that were already converted to
-     * {@link TemplateModel}-s. When called for the second time (or later), it just reuses the first result, unless the
-     * sequence was modified since then.
-     * 
-     * @deprecated No replacement exists; not a reliable way of getting back the original list elemnts.
-     */
-    @Deprecated
-    public List toList() throws TemplateModelException {
-        if (unwrappedList == null) {
-            Class listClass = list.getClass();
-            List result = null;
-            try {
-                result = (List) listClass.newInstance();
-            } catch (Exception e) {
-                throw new TemplateModelException("Error instantiating an object of type " + listClass.getName(),
-                        e);
-            }
-            DefaultObjectWrapper ow = _StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER;
-            for (int i = 0; i < list.size(); i++) {
-                Object elem = list.get(i);
-                if (elem instanceof TemplateModel) {
-                    elem = ow.unwrap((TemplateModel) elem);
-                }
-                result.add(elem);
-            }
-            unwrappedList = result;
-        }
-        return unwrappedList;
-    }
-    
     /**
      * Returns the item at the specified index of the list. If the item isn't yet an {@link TemplateModel}, it will wrap
      * it to one now, and writes it back into the backing list.
@@ -259,47 +159,9 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
         return list.size();
     }
 
-    /**
-     * @return a synchronized wrapper for list.
-     */
-    public SimpleSequence synchronizedWrapper() {
-        return new SynchronizedSequence();
-    }
-    
     @Override
     public String toString() {
         return list.toString();
     }
 
-    private class SynchronizedSequence extends SimpleSequence {
-
-        @Override
-        public void add(Object obj) {
-            synchronized (SimpleSequence.this) {
-                SimpleSequence.this.add(obj);
-            }
-        }
-
-        @Override
-        public TemplateModel get(int i) throws TemplateModelException {
-            synchronized (SimpleSequence.this) {
-                return SimpleSequence.this.get(i);
-            }
-        }
-        
-        @Override
-        public int size() {
-            synchronized (SimpleSequence.this) {
-                return SimpleSequence.this.size();
-            }
-        }
-        
-        @Override
-        public List toList() throws TemplateModelException {
-            synchronized (SimpleSequence.this) {
-                return SimpleSequence.this.toList();
-            }
-        }
-    }
-    
 }

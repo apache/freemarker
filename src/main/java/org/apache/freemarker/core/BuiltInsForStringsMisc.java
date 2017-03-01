@@ -33,10 +33,9 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.TemplateTransformModel;
-import org.apache.freemarker.core.model.impl.SimpleNumber;
-import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
 import org.apache.freemarker.core.model.impl.BeanModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
+import org.apache.freemarker.core.model.impl.SimpleNumber;
 
 class BuiltInsForStringsMisc {
 
@@ -289,11 +288,23 @@ class BuiltInsForStringsMisc {
             @Override
             public Object exec(List arguments) throws TemplateModelException {
                 ObjectWrapper ow = env.getObjectWrapper();
-                DefaultObjectWrapper dow =
-                    ow instanceof DefaultObjectWrapper
-                    ? (DefaultObjectWrapper) ow
-                    : _StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER;
-                return dow.newInstance(cl, arguments);
+                if (ow instanceof DefaultObjectWrapper) {
+                    return ((DefaultObjectWrapper) ow).newInstance(cl, arguments);
+                }
+
+                if (!arguments.isEmpty()) {
+                    throw new TemplateModelException(
+                            "className?new(args) only supports 0 arguments in the current configuration, because "
+                            + " the objectWrapper setting value is not a "
+                            + DefaultObjectWrapper.class.getName() +
+                            " (or its subclass).");
+                }
+                try {
+                    return cl.newInstance();
+                } catch (Exception e) {
+                    throw new TemplateModelException("Failed to instantiate "
+                            + cl.getName() + " with its parameterless constructor; see cause exception", e);
+                }
             }
         }
     }

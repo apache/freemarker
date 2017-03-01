@@ -26,7 +26,6 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.SimpleSequence;
 
 
 /**
@@ -56,7 +55,7 @@ final class ASTDirRecurse extends ASTDirective {
         }
         if (nss != null) {
             if (nss instanceof TemplateHashModel) {
-                SimpleSequence ss = new SimpleSequence(1);
+                NativeSequence ss = new NativeSequence(1);
                 ss.add(nss);
                 nss = ss;
             } else if (!(nss instanceof TemplateSequenceModel)) {

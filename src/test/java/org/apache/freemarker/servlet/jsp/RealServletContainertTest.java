@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateExceptionHandler;
 import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
@@ -451,7 +452,7 @@ public class RealServletContainertTest extends WebAppTestCase {
         }
 
         @Override
-        protected ObjectWrapper createDefaultObjectWrapper() {
+        protected ObjectWrapperAndUnwrapper createDefaultObjectWrapper() {
             DefaultObjectWrapperBuilder bwb = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
             bwb.setUseModelCache(true);
             assertEquals(Configuration.VERSION_3_0_0, bwb.getIncompatibleImprovements());

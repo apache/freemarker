@@ -19,10 +19,7 @@
 
 package org.apache.freemarker.core.model;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.freemarker.core.model.impl.SimpleCollection;
 
 /**
  * Singleton object representing nothing, used by ?if_exists built-in.
@@ -35,8 +32,6 @@ implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, Tem
 
     public static final TemplateModel INSTANCE = new GeneralPurposeNothing();
       
-    private static final TemplateCollectionModel EMPTY_COLLECTION = new SimpleCollection(new ArrayList(0));
-
     private GeneralPurposeNothing() {
     }
 
@@ -77,11 +72,12 @@ implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, Tem
     
     @Override
     public TemplateCollectionModel keys() {
-        return EMPTY_COLLECTION;
+        return Constants.EMPTY_COLLECTION;
     }
 
     @Override
     public TemplateCollectionModel values() {
-        return EMPTY_COLLECTION;
+        return Constants.EMPTY_COLLECTION;
     }
+
 }

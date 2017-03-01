@@ -39,21 +39,18 @@ import org.apache.freemarker.core.model.impl.SimpleCollection;
 public final class HttpRequestHashModel implements TemplateHashModelEx {
     private final HttpServletRequest request;
     private final HttpServletResponse response;
-    private final ObjectWrapper wrapper;
+    private final ObjectWrapperAndUnwrapper wrapper;
 
     /**
      * @param wrapper
      *            Should be an {@link ObjectWrapperAndUnwrapper}, or else some features might won't work properly. (It's
      *            declared as {@link ObjectWrapper} only for backward compatibility.)
      */
-    public HttpRequestHashModel(
-        HttpServletRequest request, ObjectWrapper wrapper) {
+    public HttpRequestHashModel(HttpServletRequest request, ObjectWrapperAndUnwrapper wrapper) {
         this(request, null, wrapper);
     }
 
-    public HttpRequestHashModel(
-        HttpServletRequest request, HttpServletResponse response, 
-        ObjectWrapper wrapper) {
+    public HttpRequestHashModel(HttpServletRequest request, HttpServletResponse response, ObjectWrapperAndUnwrapper wrapper) {
         this.request = request;
         this.response = response;
         this.wrapper = wrapper;
@@ -85,7 +82,7 @@ public final class HttpRequestHashModel implements TemplateHashModelEx {
         for (Enumeration enumeration = request.getAttributeNames(); enumeration.hasMoreElements(); ) {
             keys.add(enumeration.nextElement());
         }
-        return new SimpleCollection(keys.iterator());
+        return new SimpleCollection(keys.iterator(), wrapper);
     }
     
     @Override
@@ -105,7 +102,7 @@ public final class HttpRequestHashModel implements TemplateHashModelEx {
         return response;
     }
     
-    public ObjectWrapper getObjectWrapper() {
+    public ObjectWrapperAndUnwrapper getObjectWrapper() {
         return wrapper;
     }
 }

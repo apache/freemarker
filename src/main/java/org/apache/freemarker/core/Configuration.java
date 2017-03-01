@@ -42,6 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -555,10 +556,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             return existingCacheStorage;
         }
         return new DefaultSoftCacheStorage(); 
-    }
-    
-    static CacheStorage createDefaultCacheStorage(Version incompatibleImprovements) {
-        return createDefaultCacheStorage(incompatibleImprovements, null); 
     }
     
     private static class DefaultSoftCacheStorage extends SoftCacheStorage {
@@ -2709,7 +2706,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.21
      */
-    public static ObjectWrapper getDefaultObjectWrapper(Version incompatibleImprovements) {
+    public static ObjectWrapperAndUnwrapper getDefaultObjectWrapper(Version incompatibleImprovements) {
         return new DefaultObjectWrapperBuilder(incompatibleImprovements).build();
     }
 

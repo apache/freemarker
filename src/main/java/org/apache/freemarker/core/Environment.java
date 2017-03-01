@@ -57,7 +57,6 @@ import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.TransformControl;
 import org.apache.freemarker.core.model.impl.SimpleHash;
-import org.apache.freemarker.core.model.impl.SimpleSequence;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.TemplateResolver;
@@ -577,9 +576,9 @@ public final class Environment extends Configurable {
     void invokeNodeHandlerFor(TemplateNodeModel node, TemplateSequenceModel namespaces)
             throws TemplateException, IOException {
         if (nodeNamespaces == null) {
-            SimpleSequence ss = new SimpleSequence(1);
-            ss.add(currentNamespace);
-            nodeNamespaces = ss;
+            NativeSequence seq = new NativeSequence(1);
+            seq.add(currentNamespace);
+            nodeNamespaces = seq;
         }
         int prevNodeNamespaceIndex = nodeNamespaceIndex;
         String prevNodeName = currentNodeName;
@@ -705,9 +704,9 @@ public final class Environment extends Configurable {
             final Map namedArgs, final List positionalArgs) throws TemplateException {
         String catchAllParamName = macro.getCatchAll();
         if (namedArgs != null) {
-            final SimpleHash catchAllParamValue;
+            final NativeHashEx2 catchAllParamValue;
             if (catchAllParamName != null) {
-                catchAllParamValue = new SimpleHash((ObjectWrapper) null);
+                catchAllParamValue = new NativeHashEx2();
                 macroCtx.setLocalVar(catchAllParamName, catchAllParamValue);
             } else {
                 catchAllParamValue = null;
@@ -731,9 +730,9 @@ public final class Environment extends Configurable {
                 }
             }
         } else if (positionalArgs != null) {
-            final SimpleSequence catchAllParamValue;
+            final NativeSequence catchAllParamValue;
             if (catchAllParamName != null) {
-                catchAllParamValue = new SimpleSequence((ObjectWrapper) null);
+                catchAllParamValue = new NativeSequence(8);
                 macroCtx.setLocalVar(catchAllParamName, catchAllParamValue);
             } else {
                 catchAllParamValue = null;
@@ -2743,10 +2742,11 @@ public final class Environment extends Configurable {
         private Template template;
 
         Namespace() {
-            template = Environment.this.getMainTemplate();
+            this(Environment.this.getMainTemplate());
         }
 
         Namespace(Template template) {
+            super(Environment.this.getObjectWrapper());
             this.template = template;
         }
 
@@ -2883,12 +2883,6 @@ public final class Environment extends Configurable {
         public void putAll(Map m) {
             ensureInitializedRTE();
             super.putAll(m);
-        }
-
-        @Override
-        public Map toMap() throws TemplateModelException {
-            ensureInitializedTME();
-            return super.toMap();
         }
 
         @Override

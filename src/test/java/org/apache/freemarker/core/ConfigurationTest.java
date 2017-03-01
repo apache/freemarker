@@ -41,8 +41,8 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
+import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.model.impl._StaticObjectWrappers;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.UnregisteredOutputFormatException;
@@ -107,16 +107,17 @@ public class ConfigurationTest extends TestCase {
         }
         
         assertFalse(cfg.isObjectWrapperExplicitlySet());
-        assertSame(_StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER, cfg.getObjectWrapper());
+        assertSame(Configuration.getDefaultObjectWrapper(Configuration.VERSION_3_0_0), cfg.getObjectWrapper());
         //
-        cfg.setObjectWrapper(_StaticObjectWrappers.RESTRICTED_OBJECT_WRAPPER);
+        RestrictedObjectWrapper ow = new RestrictedObjectWrapper(Configuration.VERSION_3_0_0);
+        cfg.setObjectWrapper(ow);
         assertTrue(cfg.isObjectWrapperExplicitlySet());
-        assertSame(_StaticObjectWrappers.RESTRICTED_OBJECT_WRAPPER, cfg.getObjectWrapper());
+        assertSame(ow, cfg.getObjectWrapper());
         //
         for (int i = 0; i < 2; i++) {
             cfg.unsetObjectWrapper();
             assertFalse(cfg.isObjectWrapperExplicitlySet());
-            assertSame(_StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER, cfg.getObjectWrapper());
+            assertSame(Configuration.getDefaultObjectWrapper(Configuration.VERSION_3_0_0), cfg.getObjectWrapper());
         }
         
         assertFalse(cfg.isTemplateExceptionHandlerExplicitlySet());
@@ -200,10 +201,6 @@ public class ConfigurationTest extends TestCase {
         }
     }
     
-    private void assertUsesLegacyObjectWrapper(Configuration cfg) {
-        assertSame(_StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER, cfg.getObjectWrapper());
-    }
-
     private void assertUsesNewObjectWrapper(Configuration cfg) {
         assertEquals(
                 Configuration.VERSION_3_0_0,
@@ -641,14 +638,14 @@ public class ConfigurationTest extends TestCase {
         
         {
             cfg.setSetting(Configurable.OBJECT_WRAPPER_KEY, "defAult");
-            assertSame(_StaticObjectWrappers.DEFAULT_OBJECT_WRAPPER, cfg.getObjectWrapper());
+            assertSame(Configuration.getDefaultObjectWrapper(Configuration.VERSION_3_0_0), cfg.getObjectWrapper());
             DefaultObjectWrapper dow = (DefaultObjectWrapper) cfg.getObjectWrapper();
             assertEquals(Configuration.VERSION_3_0_0, dow.getIncompatibleImprovements());
         }
         
         {
             cfg.setSetting(Configurable.OBJECT_WRAPPER_KEY, "restricted");
-            assertSame(_StaticObjectWrappers.RESTRICTED_OBJECT_WRAPPER, cfg.getObjectWrapper());
+            assertThat(cfg.getObjectWrapper(), instanceOf(RestrictedObjectWrapper.class));
         }
     }
     

@@ -22,7 +22,6 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -30,7 +29,6 @@ import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.SimpleSequence;
 
 /**
  * AST expression node: {@code [ exp, ... ]} 
@@ -46,9 +44,9 @@ final class ASTExpListLiteral extends ASTExpression {
 
     @Override
     TemplateModel _eval(Environment env) throws TemplateException {
-        SimpleSequence list = new SimpleSequence(items.size());
-        for (Iterator it = items.iterator(); it.hasNext(); ) {
-            ASTExpression exp = (ASTExpression) it.next();
+        NativeSequence list = new NativeSequence(items.size());
+        for (Object item : items) {
+            ASTExpression exp = (ASTExpression) item;
             TemplateModel tm = exp.eval(env);
             exp.assertNonNull(tm, env);
             list.add(tm);
@@ -140,7 +138,7 @@ final class ASTExpListLiteral extends ASTExpression {
     // A hacky routine used by ASTDirVisit and ASTDirRecurse
     TemplateSequenceModel evaluateStringsToNamespaces(Environment env) throws TemplateException {
         TemplateSequenceModel val = (TemplateSequenceModel) eval(env);
-        SimpleSequence result = new SimpleSequence(val.size());
+        NativeSequence result = new NativeSequence(val.size());
         for (int i = 0; i < items.size(); i++) {
             Object itemExpr = items.get(i);
             if (itemExpr instanceof ASTExpStringLiteral) {

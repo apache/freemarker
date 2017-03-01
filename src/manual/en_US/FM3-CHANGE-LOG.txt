@@ -127,3 +127,15 @@ the FreeMarer 3 changelog here:
   utilized it.
 - SimpleObjectWrapper was renamed to RestrictedObjectWrapper, also the "simple" setting value was rename to
   "restricted".
+- Removed the global static final ObjectWrapper-s. It had a "few" consequences:
+  - Standard TemplateModel implementations that can have an ObjectWrapper contrucor parameter don't allow null there anymore.
+    Also, any constructor overloads where you cold omit the ObjectWrapper were removed (these were deprecated in FM2 too).
+    In FM2, such overloads has used the global static default DefaltObjectWrapper, but that was removed.
+  - If the ObjectWrapper is not a DefaultObjectWrapper (or a subclass of it), `className?new(args)` will only accept 0 arguments.
+    (Earlier we have fallen back to using the global static default DefaultObjectWrapper instance to handle argument unwrapping
+    and overloaded constructors.) Note that ?new is only used to instantiate TemplateModel-s, typically, tempalte language
+    functions/directives implemented in Java, and so they hardly ever has an argument.
+  - FreemarkerServlet now requires that the ObjectWrapper it uses implements ObjectWrapperAndUnwrapper. (Thus, the return type
+    of FreemarerServlet.createDefaultObjectWrapper() has changed to ObjectWrapperAndUnwrapper.) The unwrapping functionality is
+    required when calling JSP custom tags/functions, and in FreeMarker 2 this was worked around with using the
+    global static default DefaultObjectWrapper when the ObjectWrapper wasn't an ObjectWrapperAndUnwrapper.

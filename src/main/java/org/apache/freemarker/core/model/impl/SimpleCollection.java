@@ -52,24 +52,6 @@ implements TemplateCollectionModel, Serializable {
     private final Iterator iterator;
     private final Collection collection;
 
-    /**
-     * @deprecated Use {@link #SimpleCollection(Iterator, ObjectWrapper)}
-     */
-    @Deprecated
-    public SimpleCollection(Iterator iterator) {
-        this.iterator = iterator;
-        collection = null;
-    }
-
-    /**
-     * @deprecated Use {@link #SimpleCollection(Collection, ObjectWrapper)}
-     */
-    @Deprecated
-    public SimpleCollection(Collection collection) {
-        this.collection = collection;
-        iterator = null;
-    }
-
     public SimpleCollection(Iterator iterator, ObjectWrapper wrapper) {
         super(wrapper);
         this.iterator = iterator;
@@ -86,20 +68,16 @@ implements TemplateCollectionModel, Serializable {
      * Retrieves a template model iterator that is used to iterate over the elements in this collection.
      *  
      * <p>When you wrap an <tt>Iterator</tt> and you get <tt>TemplateModelIterator</tt> for multiple times,
-     * only on of the returned <tt>TemplateModelIterator</tt> instances can be really used. When you have called a
+     * only one of the returned <tt>TemplateModelIterator</tt> instances can be really used. When you have called a
      * method of a <tt>TemplateModelIterator</tt> instance, all other instance will throw a
      * <tt>TemplateModelException</tt> when you try to call their methods, since the wrapped <tt>Iterator</tt>
      * can't return the first element anymore.
      */
     @Override
     public TemplateModelIterator iterator() {
-        if (iterator != null) {
-            return new SimpleTemplateModelIterator(iterator, false);
-        } else {
-            synchronized (collection) {
-                return new SimpleTemplateModelIterator(collection.iterator(), true);
-            }
-        }
+        return iterator != null
+                ? new SimpleTemplateModelIterator(iterator, false)
+                : new SimpleTemplateModelIterator(collection.iterator(), true);
     }
     
     /**
@@ -122,7 +100,7 @@ implements TemplateCollectionModel, Serializable {
         public TemplateModel next() throws TemplateModelException {
             if (!iteratorOwnedByMe) { 
                 synchronized (SimpleCollection.this) {
-                    checkIteratorOwned();
+                    checkIteratorNotOwned();
                     iteratorOwned = true;
                     iteratorOwnedByMe = true;
                 }
@@ -141,14 +119,14 @@ implements TemplateCollectionModel, Serializable {
             // Calling hasNext may looks safe, but I have met sync. problems.
             if (!iteratorOwnedByMe) {
                 synchronized (SimpleCollection.this) {
-                    checkIteratorOwned();
+                    checkIteratorNotOwned();
                 }
             }
             
             return iterator.hasNext();
         }
         
-        private void checkIteratorOwned() throws TemplateModelException {
+        private void checkIteratorNotOwned() throws TemplateModelException {
             if (iteratorOwned) {
                 throw new TemplateModelException(
                         "This collection value wraps a java.util.Iterator, thus it can be listed only once.");
