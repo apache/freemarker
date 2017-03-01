@@ -23,6 +23,7 @@ import static org.junit.Assert.*;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -43,6 +44,7 @@ public class ModelCacheTest {
     }
     
     @Test
+    @Ignore // ModelCache is current removed in FM3
     public void modelCacheOn() throws Exception {
         DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
         ow.setUseModelCache(true);

@@ -54,7 +54,6 @@ import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.BooleanModel;
 import org.apache.freemarker.core.model.impl.DefaultNonListCollectionAdapter;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
@@ -367,7 +366,6 @@ public class TemplateTestCase extends FileTestCase {
         } else if (simpleTestName.equals("varargs")) {
           dataModel.put("m", new VarArgTestModel());
         } else if (simpleTestName.startsWith("boolean-formatting")) {
-          dataModel.put("beansBoolean", new BooleanModel(Boolean.TRUE, (DefaultObjectWrapper) conf.getObjectWrapper()));
           dataModel.put("booleanAndString", new BooleanAndStringTemplateModel());
           dataModel.put("booleanVsStringMethods", new BooleanVsStringMethods());
         } else if (simpleTestName.startsWith("number-math-builtins")) {

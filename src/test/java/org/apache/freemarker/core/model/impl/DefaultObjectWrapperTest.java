@@ -201,7 +201,7 @@ public class DefaultObjectWrapperTest {
         assertTrue(ow.wrap(Collections.emptyList()) instanceof DefaultListAdapter);
         assertTrue(ow.wrap(new boolean[] { }) instanceof DefaultArrayAdapter);
         assertTrue(ow.wrap(new HashSet()) instanceof DefaultNonListCollectionAdapter);
-        assertTrue(ow.wrap('c') instanceof TemplateScalarModel); // StringModel right now, but should change later
+        assertTrue(ow.wrap('c') instanceof TemplateScalarModel); // BeanAndStringModel right now, but should change later
         
         TemplateHashModel bean = (TemplateHashModel) ow.wrap(new TestBean());
         assertEquals(1, ow.unwrap(bean.get("x")));
@@ -824,12 +824,12 @@ public class DefaultObjectWrapperTest {
         }
         
         @Override
-        protected TemplateModel handleUnknownType(final Object obj) throws TemplateModelException {
+        protected TemplateModel handleNonBasicTypes(final Object obj) throws TemplateModelException {
             if (obj instanceof Tupple) {
                 return new TuppleAdapter((Tupple<?, ?>) obj, this);
             }
             
-            return super.handleUnknownType(obj);
+            return super.handleNonBasicTypes(obj);
         }
         
     }

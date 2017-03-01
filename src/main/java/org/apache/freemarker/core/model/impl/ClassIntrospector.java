@@ -602,8 +602,6 @@ class ClassIntrospector {
                 if (regedMf != null) {
                     if (regedMf instanceof ClassBasedModelFactory) {
                         ((ClassBasedModelFactory) regedMf).clearCache();
-                    } else if (regedMf instanceof ModelCache) {
-                        ((ModelCache) regedMf).clearCache();
                     } else {
                         throw new BugException();
                     }
@@ -630,8 +628,6 @@ class ClassIntrospector {
                 if (regedMf != null) {
                     if (regedMf instanceof ClassBasedModelFactory) {
                         ((ClassBasedModelFactory) regedMf).removeFromCache(clazz);
-                    } else if (regedMf instanceof ModelCache) {
-                        ((ModelCache) regedMf).clearCache(); // doesn't support selective clearing ATM
                     } else {
                         throw new BugException();
                     }
@@ -670,10 +666,6 @@ class ClassIntrospector {
         registerModelFactory((Object) mf);
     }
 
-    void registerModelFactory(ModelCache mf) {
-        registerModelFactory((Object) mf);
-    }
-
     private void registerModelFactory(Object mf) {
         // Note that this `synchronized (sharedLock)` is also need for the DefaultObjectWrapper constructor to work safely.
         synchronized (sharedLock) {
@@ -683,10 +675,6 @@ class ClassIntrospector {
     }
 
     void unregisterModelFactory(ClassBasedModelFactory mf) {
-        unregisterModelFactory((Object) mf);
-    }
-
-    void unregisterModelFactory(ModelCache mf) {
         unregisterModelFactory((Object) mf);
     }
 

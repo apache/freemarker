@@ -69,7 +69,6 @@
 <#assign x = false>${x} ${false} ${false?string}
 ${'str:' + x} ${'str:' + false}
 ${x?string('ja', 'nein')} ${true?string('ja', 'nein')}
-${beansBoolean} ${beansBoolean?string}
 ${booleanAndString} ${booleanAndString?string}
 
 <#setting boolean_format = 'y,n'>

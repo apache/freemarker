@@ -24,13 +24,9 @@ import java.util.Map;
 
 import org.apache.freemarker.core.model.TemplateModel;
 
-/**
- * Don't use this class; it's only public to work around Google App Engine Java
- * compliance issues. FreeMarker developers only: treat this class as package-visible.
- */
-public class _EnumModels extends ClassBasedModelFactory {
+class EnumModels extends ClassBasedModelFactory {
 
-    public _EnumModels(DefaultObjectWrapper wrapper) {
+    public EnumModels(DefaultObjectWrapper wrapper) {
         super(wrapper);
     }
     
@@ -49,6 +45,6 @@ public class _EnumModels extends ClassBasedModelFactory {
             Enum value = (Enum) anObj;
             map.put(value.name(), value);
         }
-        return new SimpleMapModel(map, getWrapper());
+        return new SimpleHash(map, getWrapper());
     }
 }

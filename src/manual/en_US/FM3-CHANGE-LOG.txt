@@ -96,7 +96,6 @@ the FreeMarer 3 changelog here:
 - Even for setting values that are class names without following `()` or other argument list, the INSTANCE field and
   the builder class will be searched now, and used instead of the constructor of the class. Earlier they weren't for
   backward compatibility.
-- Removed the deprecated BeansWrapper.nullModel setting. So null is always wrapped to null now.
 - Removed several deprecated methods and constants. Some notes:
   - strict_bean_models configuration setting was removed, as it should be set on the BeansWrapper itself
   - .template_name now means the same as .current_template_name (it doesn't emulate 2.3 glitches anymore)
@@ -113,8 +112,13 @@ the FreeMarer 3 changelog here:
     constructor argument anymore.)
   - When specifying the templateUpdateDelay configuration setting with a String (with Properties), the time unit is
     required, unless the value is 0.
-- setSetting (and the like) doesn't throw ParseException (the same exception used when parsing templates) anymore, but ConfigurationException.
-  Also, on the places where ParseException was used for other than template   parsing, o.a.f.core.util.GenericParseException is used now instead,
-  which doesn't have the template parsing related fields that we can't fill.
-- Removed DefaultObjectWrapper settings that only exist so that you can set backward compatible behavior instead of the
-  recommended value: useAdaptersForContainers, forceLegacyNonListCollections, iterableSupport, simpleMapWrapper
+- setSetting (and the like) doesn't throw ParseException (the same exception used when parsing templates) anymore,
+  but ConfigurationException. Also, on the places where ParseException was used for other than template parsing,
+  o.a.f.core.util.GenericParseException is used now instead, which doesn't have the template parsing related fields
+  that we can't fill.
+- Removed DefaultObjectWrapper settings that only exist so that you can set backward compatible behavior instead of
+  the recommended value: useAdaptersForContainers, forceLegacyNonListCollections, iterableSupport, simpleMapWrapper
+- Removed BeansWrapper, which was the superclass of DefaultObjectWrapper, but wasn't recommended to be used as is.
+  Removed many BeansWrapper-related classes that DefaultObjectWrapper doesn't use. This includes ModelCache and
+  related classes, because DefaultObjectWrapper has only used the cache for "generic" classes (because that's where it
+  has fallen back to BeansWrapper.wrap), which is inconsistent and doesn't worth the caching overhead and complexity.

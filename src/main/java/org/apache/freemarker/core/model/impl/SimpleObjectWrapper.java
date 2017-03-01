@@ -23,7 +23,6 @@ import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.w3c.dom.Node;
 
 /**
  * A restricted object wrapper that will not expose arbitrary object, just those that directly correspond to the
@@ -41,23 +40,14 @@ public class SimpleObjectWrapper extends DefaultObjectWrapper {
         super(incompatibleImprovements);
     }
 
-    @Override
-    protected TemplateModel handW3CNode(Node node) throws TemplateModelException {
-        throw newUnhandledTypeException(node);
-    }
-
     /**
      * Called if a type other than the simple ones we know about is passed in. 
      * In this implementation, this just throws an exception.
      */
     @Override
-    protected TemplateModel handleUnknownType(Object obj) throws TemplateModelException {
-        throw newUnhandledTypeException(obj);
-    }
-
-    private TemplateModelException newUnhandledTypeException(Object obj) throws TemplateModelException {
-        return new TemplateModelException("SimpleObjectWrapper deliberately won't wrap this type: "
-                                         + obj.getClass().getName());
+    protected TemplateModel handleNonBasicTypes(Object obj) throws TemplateModelException {
+        throw new TemplateModelException("SimpleObjectWrapper deliberately won't wrap this type: "
+                + obj.getClass().getName());
     }
 
     @Override

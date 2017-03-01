@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core;
 
+import static org.apache.freemarker.test.hamcerst.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.util.Collections;
@@ -66,7 +67,7 @@ public class SimpleObjectWrapperTest {
             ow.wrap(new TestBean());
             fail();
         } catch (TemplateModelException e) {
-            assertTrue(e.getMessage().contains("type"));
+            assertThat(e.getMessage(), containsStringIgnoringCase("type"));
         }
     }
     

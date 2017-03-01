@@ -34,8 +34,9 @@ import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 
 /**
+ * Adapts a {@link TemplateHashModel} to a {@link Map}.
  */
-public class HashAdapter extends AbstractMap implements TemplateModelAdapter {
+class HashAdapter extends AbstractMap implements TemplateModelAdapter {
     private final DefaultObjectWrapper wrapper;
     private final TemplateHashModel model;
     private Set entrySet;

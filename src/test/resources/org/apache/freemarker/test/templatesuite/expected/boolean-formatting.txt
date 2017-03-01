@@ -24,7 +24,6 @@ y y y
 n n n
 str:n str:n
 nein ja
-y y
 theStringValue theStringValue
 
 

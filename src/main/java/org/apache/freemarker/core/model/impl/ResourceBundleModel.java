@@ -31,7 +31,6 @@ import java.util.Set;
 
 import org.apache.freemarker.core._DelayedJQuote;
 import org.apache.freemarker.core._TemplateModelException;
-import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
@@ -56,14 +55,6 @@ public class ResourceBundleModel
     BeanModel
     implements
     TemplateMethodModelEx {
-    static final ModelFactory FACTORY =
-        new ModelFactory()
-        {
-            @Override
-            public TemplateModel create(Object object, ObjectWrapper wrapper) {
-                return new ResourceBundleModel((ResourceBundle) object, (DefaultObjectWrapper) wrapper);
-            }
-        };
 
     private Hashtable formats = null;
 
@@ -137,7 +128,7 @@ public class ResourceBundleModel
                 params[i] = unwrap((TemplateModel) it.next());
     
             // Invoke format
-            return new StringModel(format(key, params), wrapper);
+            return new BeanAndStringModel(format(key, params), wrapper);
         } catch (MissingResourceException e) {
             throw new TemplateModelException("No such key: " + key);
         } catch (Exception e) {

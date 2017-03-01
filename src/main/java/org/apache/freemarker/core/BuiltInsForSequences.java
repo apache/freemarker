@@ -44,7 +44,6 @@ import org.apache.freemarker.core.model.impl.CollectionAndSequence;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl.TemplateModelListSequence;
-import org.apache.freemarker.core.model.impl.CollectionModel;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._StringUtil;
 
@@ -153,7 +152,7 @@ class BuiltInsForSequences {
             TemplateModel model = target.eval(env);
             // In 2.3.x only, we prefer TemplateSequenceModel for
             // backward compatibility. In 2.4.x, we prefer TemplateCollectionModel. 
-            if (model instanceof TemplateSequenceModel && !isBuggySeqButGoodCollection(model)) {
+            if (model instanceof TemplateSequenceModel) {
                 return calculateResultForSequence((TemplateSequenceModel) model);
             } else if (model instanceof TemplateCollectionModel) {
                 return calculateResultForColletion((TemplateCollectionModel) model);
@@ -352,7 +351,7 @@ class BuiltInsForSequences {
             TemplateModel model = target.eval(env);
             // In 2.3.x only, we prefer TemplateSequenceModel for
             // backward compatibility. In 2.4.x, we prefer TemplateCollectionModel. 
-            if (model instanceof TemplateSequenceModel && !isBuggySeqButGoodCollection(model)) {
+            if (model instanceof TemplateSequenceModel) {
                 return new BIMethodForSequence((TemplateSequenceModel) model, env);
             } else if (model instanceof TemplateCollectionModel) {
                 return new BIMethodForCollection((TemplateCollectionModel) model, env);
@@ -375,9 +374,9 @@ class BuiltInsForSequences {
                     throws TemplateException {
                 TemplateModel model = target.eval(env);
                 m_seq = model instanceof TemplateSequenceModel
-                            && !isBuggySeqButGoodCollection(model)
                         ? (TemplateSequenceModel) model
                         : null;
+                // [FM3] Rework the below
                 // In 2.3.x only, we deny the possibility of collection
                 // access if there's sequence access. This is so to minimize
                 // the change of compatibility issues; without this, objects
@@ -847,11 +846,6 @@ class BuiltInsForSequences {
         
     }
 
-    private static boolean isBuggySeqButGoodCollection(
-            TemplateModel model) {
-        return model instanceof CollectionModel && !((CollectionModel) model).getSupportsIndexedAccess();
-    }
-    
     private static boolean modelsEqual(
             int seqItemIndex, TemplateModel seqItem, TemplateModel searchedItem,
             Environment env)

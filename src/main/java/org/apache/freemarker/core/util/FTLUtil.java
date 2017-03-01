@@ -43,17 +43,10 @@ import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
+import org.apache.freemarker.core.model.impl.BeanAndStringModel;
 import org.apache.freemarker.core.model.impl.BeanModel;
-import org.apache.freemarker.core.model.impl.BooleanModel;
-import org.apache.freemarker.core.model.impl.CollectionModel;
-import org.apache.freemarker.core.model.impl.DateModel;
-import org.apache.freemarker.core.model.impl.EnumerationModel;
-import org.apache.freemarker.core.model.impl.IteratorModel;
-import org.apache.freemarker.core.model.impl.MapModel;
-import org.apache.freemarker.core.model.impl.NumberModel;
 import org.apache.freemarker.core.model.impl.OverloadedMethodsModel;
 import org.apache.freemarker.core.model.impl.SimpleMethodModel;
-import org.apache.freemarker.core.model.impl.StringModel;
 
 /**
  * Static utility methods that perform tasks specific to the FreeMarker Template Language (FTL).
@@ -715,19 +708,7 @@ public final class FTLUtil {
      */
     private static Class getPrimaryTemplateModelInterface(TemplateModel tm) {
         if (tm instanceof BeanModel) {
-            if (tm instanceof CollectionModel) {
-                return TemplateSequenceModel.class;
-            } else if (tm instanceof IteratorModel || tm instanceof EnumerationModel) {
-                return TemplateCollectionModel.class;
-            } else if (tm instanceof MapModel) {
-                return TemplateHashModelEx.class;
-            } else if (tm instanceof NumberModel) {
-                return TemplateNumberModel.class;
-            } else if (tm instanceof BooleanModel) {
-                return TemplateBooleanModel.class;
-            } else if (tm instanceof DateModel) {
-                return TemplateDateModel.class;
-            } else if (tm instanceof StringModel) {
+            if (tm instanceof BeanAndStringModel) {
                 Object wrapped = ((BeanModel) tm).getWrappedObject();
                 return wrapped instanceof String
                         ? TemplateScalarModel.class

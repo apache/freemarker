@@ -32,19 +32,19 @@ public class DefaultObjectWrapperModelFactoryRegistrationTest {
     public void introspectionSettingChanges() {
         DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
         ClassIntrospector ci1 = ow.getClassIntrospector();
-        checkRegisteredModelFactories(ci1, ow.getStaticModels(), ow.getEnumModels(), ow.getModelCache());
+        checkRegisteredModelFactories(ci1, ow.getStaticModels(), ow.getEnumModels());
 
         ow.setExposeFields(true);
         ClassIntrospector ci2 = ow.getClassIntrospector();
         assertNotSame(ci1, ci2);
         checkRegisteredModelFactories(ci1);
-        checkRegisteredModelFactories(ci2, ow.getStaticModels(), ow.getEnumModels(), ow.getModelCache());
+        checkRegisteredModelFactories(ci2, ow.getStaticModels(), ow.getEnumModels());
 
         ow.setExposureLevel(DefaultObjectWrapper.EXPOSE_ALL);
         ClassIntrospector ci3 = ow.getClassIntrospector();
         assertNotSame(ci2, ci3);
         checkRegisteredModelFactories(ci2);
-        checkRegisteredModelFactories(ci3, ow.getStaticModels(), ow.getEnumModels(), ow.getModelCache());
+        checkRegisteredModelFactories(ci3, ow.getStaticModels(), ow.getEnumModels());
 
         MethodAppearanceFineTuner maf = new MethodAppearanceFineTuner() {
             @Override
@@ -56,7 +56,7 @@ public class DefaultObjectWrapperModelFactoryRegistrationTest {
         ClassIntrospector ci4 = ow.getClassIntrospector();
         assertNotSame(ci3, ci4);
         checkRegisteredModelFactories(ci3);
-        checkRegisteredModelFactories(ci4, ow.getStaticModels(), ow.getEnumModels(), ow.getModelCache());
+        checkRegisteredModelFactories(ci4, ow.getStaticModels(), ow.getEnumModels());
 
         ow.setExposeFields(true);
         assertSame(ci4, ow.getClassIntrospector());
@@ -64,7 +64,7 @@ public class DefaultObjectWrapperModelFactoryRegistrationTest {
         assertSame(ci4, ow.getClassIntrospector());
         ow.setMethodAppearanceFineTuner(maf);
         assertSame(ci4, ow.getClassIntrospector());
-        checkRegisteredModelFactories(ci4, ow.getStaticModels(), ow.getEnumModels(), ow.getModelCache());
+        checkRegisteredModelFactories(ci4, ow.getStaticModels(), ow.getEnumModels());
     }
 
     private void checkRegisteredModelFactories(ClassIntrospector ci, Object... expected) {

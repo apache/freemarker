@@ -150,21 +150,12 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
     private final StaticModels staticModels;
 
     /**
-     * {@link String} class name to {@link EnumerationModel} cache.
+     * {@link String} class name to an enum value hash.
      * This object only belongs to a single {@link DefaultObjectWrapper}.
      * This has to be final as {@link #getStaticModels()} might returns it any time and then it has to remain a good
      * reference.
      */
     private final ClassBasedModelFactory enumModels;
-
-    /**
-     * Object to wrapped object cache; not used by default.
-     * This object only belongs to a single {@link DefaultObjectWrapper}.
-     */
-    private final ModelCache modelCache;
-
-    private final BooleanModel falseModel;
-    private final BooleanModel trueModel;
 
     // -----------------------------------------------------------------------------------------------------------------
 
@@ -177,6 +168,8 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
     private ObjectWrapper outerIdentity = this;
     private boolean methodsShadowItems = true;
     private boolean strict;  // initialized by PropertyAssignments.apply
+    @Deprecated // Only exists to keep some JUnit tests working...
+    private boolean useModelCache;
 
     private final Version incompatibleImprovements;
 
@@ -278,12 +271,8 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
             sharedIntrospectionLock = classIntrospector.getSharedLock();
         }
 
-        falseModel = new BooleanModel(Boolean.FALSE, this);
-        trueModel = new BooleanModel(Boolean.TRUE, this);
-
         staticModels = new StaticModels(this);
-        enumModels = new _EnumModels(this);
-        modelCache = new BeansModelCache(this);
+        enumModels = new EnumModels(this);
         setUseModelCache(bwConf.getUseModelCache());
 
         finalizeConstruction(writeProtected);
@@ -553,16 +542,6 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
                     oldCI.unregisterModelFactory(enumModels);
                     enumModels.clearCache();
                 }
-                if (modelCache != null) {
-                    oldCI.unregisterModelFactory(modelCache);
-                    modelCache.clearCache();
-                }
-                if (trueModel != null) {
-                    trueModel.clearMemberCache();
-                }
-                if (falseModel != null) {
-                    falseModel.clearMemberCache();
-                }
             }
 
             classIntrospector = newCI;
@@ -577,9 +556,6 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
         }
         if (enumModels != null) {
             classIntrospector.registerModelFactory(enumModels);
-        }
-        if (modelCache != null) {
-            classIntrospector.registerModelFactory(modelCache);
         }
     }
 
@@ -633,22 +609,22 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
     }
 
     /**
-     * Sets whether this wrapper caches the {@link TemplateModel}-s created for the Java objects that has wrapped with
-     * this object wrapper. Default is {@code false}.
-     * When set to {@code true}, calling {@link #wrap(Object)} multiple times for
-     * the same object will likely return the same model (although there is
-     * no guarantee as the cache items can be cleared any time).
+     * @deprecated Does nothing in FreeMarker 3 - we kept it for now to postopne reworking some JUnit tests.
      */
+    // [FM3] Remove
+    @Deprecated
     public void setUseModelCache(boolean useCache) {
         checkModifiable();
-        modelCache.setUseCache(useCache);
+        useModelCache = useCache;
     }
 
     /**
-     * @since 2.3.21
+     * @deprecated Does nothing in FreeMarker 3 - we kept it for now to postopne reworking some JUnit tests.
      */
+    // [FM3] Remove
+    @Deprecated
     public boolean getUseModelCache() {
-        return modelCache.getUseCache();
+        return useModelCache;
     }
 
     /**
@@ -666,7 +642,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
      * and dates will be wrapped into the corresponding {@code SimpleXxx} classes (like {@link SimpleNumber}).
      * {@link Map}-s, {@link List}-s, other {@link Collection}-s, arrays and {@link Iterator}-s will be wrapped into the
      * corresponding {@code DefaultXxxAdapter} classes ({@link DefaultMapAdapter}), depending on). After that, the
-     * wrapping is handled by {@link #handleUnknownType(Object)}, so see more there.
+     * wrapping is handled by {@link #handleNonBasicTypes(Object)}, so see more there.
      */
     @Override
     public TemplateModel wrap(Object obj) throws TemplateModelException {
@@ -723,29 +699,30 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
             return DefaultEnumerationAdapter.adapt((Enumeration<?>) obj, this);
         }
 
-        // [FM3] Via plugin mechanism, not by default anymore
-        if (obj instanceof Node) {
-            return handW3CNode((Node) obj);
-        }
-
-        return handleUnknownType(obj);
-    }
-
-    protected TemplateModel handW3CNode(Node node) throws TemplateModelException {
-        return NodeModel.wrap(node);
+        return handleNonBasicTypes(obj);
     }
 
     /**
-     * Called for an object that isn't considered to be of a "basic" Java type, like for an application specific type.
-     * In its default implementation, the object will be wrapped as a generic JavaBean.
+     * Called for an object that isn't considered to be of a "basic" Java type, like for all application specific types,
+     * but currently also for {@link Node}-s and {@link ResourceBundle}-s.
      *
      * <p>
      * When you override this method, you should first decide if you want to wrap the object in a custom way (and if so
      * then do it and return with the result), and if not, then you should call the super method (assuming the default
      * behavior is fine with you).
      */
-    protected TemplateModel handleUnknownType(Object obj) throws TemplateModelException {
-        return modelCache.getInstance(obj);
+    // [FM3] This is an awkward temporary solution, rework it.
+    protected TemplateModel handleNonBasicTypes(Object obj) throws TemplateModelException {
+        // [FM3] Via plugin mechanism, not by default anymore
+        if (obj instanceof Node) {
+            return NodeModel.wrap((Node) obj);
+        }
+
+        if (obj instanceof ResourceBundle) {
+            return new ResourceBundleModel((ResourceBundle) obj, this);
+        }
+
+        return new BeanAndStringModel(obj, this);
     }
 
     /**
@@ -772,58 +749,6 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
     @Override
     public TemplateHashModel wrapAsAPI(Object obj) throws TemplateModelException {
         return new APIModel(obj, this);
-    }
-
-    private final ModelFactory BOOLEAN_FACTORY = new ModelFactory() {
-        @Override
-        public TemplateModel create(Object object, ObjectWrapper wrapper) {
-            return ((Boolean) object).booleanValue() ? trueModel : falseModel;
-        }
-    };
-
-    private static final ModelFactory ITERATOR_FACTORY = new ModelFactory() {
-        @Override
-        public TemplateModel create(Object object, ObjectWrapper wrapper) {
-            return new IteratorModel((Iterator<?>) object, (DefaultObjectWrapper) wrapper);
-        }
-    };
-
-    private static final ModelFactory ENUMERATION_FACTORY = new ModelFactory() {
-        @Override
-        public TemplateModel create(Object object, ObjectWrapper wrapper) {
-            return new EnumerationModel((Enumeration<?>) object, (DefaultObjectWrapper) wrapper);
-        }
-    };
-
-    protected ModelFactory getModelFactory(Class<?> clazz) {
-        if (Map.class.isAssignableFrom(clazz)) {
-            return SimpleMapModel.FACTORY;
-        }
-        if (Collection.class.isAssignableFrom(clazz)) {
-            return CollectionModel.FACTORY;
-        }
-        if (Number.class.isAssignableFrom(clazz)) {
-            return NumberModel.FACTORY;
-        }
-        if (Date.class.isAssignableFrom(clazz)) {
-            return DateModel.FACTORY;
-        }
-        if (Boolean.class == clazz) { // Boolean is final
-            return BOOLEAN_FACTORY;
-        }
-        if (ResourceBundle.class.isAssignableFrom(clazz)) {
-            return ResourceBundleModel.FACTORY;
-        }
-        if (Iterator.class.isAssignableFrom(clazz)) {
-            return ITERATOR_FACTORY;
-        }
-        if (Enumeration.class.isAssignableFrom(clazz)) {
-            return ENUMERATION_FACTORY;
-        }
-        if (clazz.isArray()) {
-            return ArrayModel.FACTORY;
-        }
-        return StringModel.FACTORY;
     }
 
     /**
@@ -1360,11 +1285,6 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
      */
     public TemplateHashModel getEnumModels() {
         return enumModels;
-    }
-
-    /** For Unit tests only */
-    ModelCache getModelCache() {
-        return modelCache;
     }
 
     /**

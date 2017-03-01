@@ -37,7 +37,6 @@ import org.apache.freemarker.core._DelayedFTLTypeDescription;
 import org.apache.freemarker.core._DelayedJQuote;
 import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
-import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -60,8 +59,7 @@ import org.slf4j.Logger;
  */
 
 public class BeanModel
-implements
-    TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport {
+        implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport {
     
     private static final Logger LOG = _CoreLogs.OBJECT_WRAPPER;
     
@@ -70,15 +68,6 @@ implements
     
     // We use this to represent an unknown value as opposed to known value of null (JR)
     static final TemplateModel UNKNOWN = new SimpleScalar("UNKNOWN");
-    
-    static final ModelFactory FACTORY =
-        new ModelFactory()
-        {
-            @Override
-            public TemplateModel create(Object object, ObjectWrapper wrapper) {
-                return new BeanModel(object, (DefaultObjectWrapper) wrapper);
-            }
-        };
 
     // I've tried to use a volatile ConcurrentHashMap field instead of HashMap + synchronized(this), but oddly it was
     // a bit slower, at least on Java 8 u66. 

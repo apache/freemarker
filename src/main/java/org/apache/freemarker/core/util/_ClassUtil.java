@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.util;
 
-import org.apache.freemarker.core.model.impl.NumberModel;
+import org.apache.freemarker.core.model.impl.BeanModel;
 
 public class _ClassUtil {
     
@@ -69,8 +69,8 @@ public class _ClassUtil {
      * 
      * @param pClass can be {@code null}, in which case the method returns {@code null}.
      * @param shortenFreeMarkerClasses if {@code true}, it will also shorten FreeMarker class names. The exact rules
-     *     aren't specified and might change over time, but right now, {@link NumberModel} for
-     *     example becomes to {@code f.e.b.NumberModel}. 
+     *     aren't specified and might change over time, but right now, {@link BeanModel} for
+     *     example becomes to {@code o.a.f.c.m.BeanModel}.
      * 
      * @since 2.3.20
      */
