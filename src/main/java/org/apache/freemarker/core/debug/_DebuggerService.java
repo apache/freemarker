@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.debug.impl;
+package org.apache.freemarker.core.debug;
 
 import java.rmi.RemoteException;
 import java.util.Collections;
@@ -28,14 +28,14 @@ import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.util._SecurityUtil;
 
 /**
+ * Don't use this; used internally by FreeMarker, might changes without notice.
  * This class provides debugging hooks for the core FreeMarker engine. It is
- * not usable for anyone outside the FreeMarker core classes. It is public only
- * as an implementation detail.
+ * not usable for anyone outside the FreeMarker core classes.
  */
-public abstract class DebuggerService {
-    private static final DebuggerService instance = createInstance();
+public abstract class _DebuggerService {
+    private static final _DebuggerService INSTANCE = createInstance();
     
-    private static DebuggerService createInstance() {
+    private static _DebuggerService createInstance() {
         // Creates the appropriate service class. If the debugging is turned
         // off, this is a fast no-op service, otherwise it's the real-thing
         // RMI service.
@@ -46,20 +46,20 @@ public abstract class DebuggerService {
     }
 
     public static List getBreakpoints(String templateName) {
-        return instance.getBreakpointsSpi(templateName);
+        return INSTANCE.getBreakpointsSpi(templateName);
     }
     
     abstract List getBreakpointsSpi(String templateName);
 
     public static void registerTemplate(Template template) {
-        instance.registerTemplateSpi(template);
+        INSTANCE.registerTemplateSpi(template);
     }
     
     abstract void registerTemplateSpi(Template template);
     
     public static boolean suspendEnvironment(Environment env, String templateName, int line)
     throws RemoteException {
-        return instance.suspendEnvironmentSpi(env, templateName, line);
+        return INSTANCE.suspendEnvironmentSpi(env, templateName, line);
     }
     
     abstract boolean suspendEnvironmentSpi(Environment env, String templateName, int line)
@@ -68,10 +68,10 @@ public abstract class DebuggerService {
     abstract void shutdownSpi();
 
     public static void shutdown() {
-        instance.shutdownSpi();
+        INSTANCE.shutdownSpi();
     }
 
-    private static class NoOpDebuggerService extends DebuggerService {
+    private static class NoOpDebuggerService extends _DebuggerService {
         @Override
         List getBreakpointsSpi(String templateName) {
             return Collections.EMPTY_LIST;

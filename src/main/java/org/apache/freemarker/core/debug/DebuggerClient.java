@@ -30,7 +30,6 @@ import java.security.MessageDigest;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.freemarker.core.debug.impl.RmiDebuggerListenerImpl;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 
 /**

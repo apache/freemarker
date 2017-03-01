@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.debug.impl;
+package org.apache.freemarker.core.debug;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -36,8 +36,6 @@ import org.apache.freemarker.core.Configurable;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.debug.DebugModel;
-import org.apache.freemarker.core.debug.DebuggedEnvironment;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;

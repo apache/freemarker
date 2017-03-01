@@ -17,16 +17,12 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.debug.impl;
+package org.apache.freemarker.core.debug;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Collection;
 import java.util.List;
-
-import org.apache.freemarker.core.debug.Breakpoint;
-import org.apache.freemarker.core.debug.Debugger;
-import org.apache.freemarker.core.debug.DebuggerListener;
 
 /**
  */

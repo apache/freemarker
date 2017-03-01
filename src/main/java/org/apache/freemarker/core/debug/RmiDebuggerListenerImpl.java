@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.debug.impl;
+package org.apache.freemarker.core.debug;
 
 import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
@@ -33,7 +33,7 @@ import org.slf4j.Logger;
 /**
  * Used by the {@link DebuggerClient} to create local 
  */
-public class RmiDebuggerListenerImpl
+class RmiDebuggerListenerImpl
 extends
     UnicastRemoteObject
 implements

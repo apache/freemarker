@@ -21,7 +21,7 @@ package org.apache.freemarker.core;
 
 import java.io.IOException;
 
-import org.apache.freemarker.core.debug.impl.DebuggerService;
+import org.apache.freemarker.core.debug._DebuggerService;
 
 /**
  * AST node: A debug breakpoint
@@ -34,7 +34,7 @@ class ASTDebugBreak extends ASTElement {
     
     @Override
     protected ASTElement[] accept(Environment env) throws TemplateException, IOException {
-        if (!DebuggerService.suspendEnvironment(
+        if (!_DebuggerService.suspendEnvironment(
                 env, getTemplate().getSourceName(), getChild(0).getBeginLine())) {
             return getChild(0).accept(env);
         } else {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.debug.impl;
+package org.apache.freemarker.core.debug;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.freemarker.core.debug.DebugModel;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;

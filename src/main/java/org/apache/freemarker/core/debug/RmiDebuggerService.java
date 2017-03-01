@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.debug.impl;
+package org.apache.freemarker.core.debug;
 
 import java.io.Serializable;
 import java.lang.ref.ReferenceQueue;
@@ -37,9 +37,6 @@ import java.util.Map;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core._Debug;
-import org.apache.freemarker.core.debug.Breakpoint;
-import org.apache.freemarker.core.debug.DebuggerListener;
-import org.apache.freemarker.core.debug.EnvironmentSuspendedEvent;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -49,7 +46,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  */
 class RmiDebuggerService
 extends
-    DebuggerService {
+        _DebuggerService {
     private final Map templateDebugInfos = new HashMap();
     private final HashSet suspendedEnvironments = new HashSet();
     private final Map listeners = new HashMap();

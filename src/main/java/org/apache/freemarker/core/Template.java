@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import org.apache.freemarker.core.debug.impl.DebuggerService;
+import org.apache.freemarker.core.debug._DebuggerService;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -279,7 +279,7 @@ public class Template extends Configurable {
         // Throws any exception that JavaCC has silently treated as EOF:
         ltbReader.throwFailure();
         
-        DebuggerService.registerTemplate(this);
+        _DebuggerService.registerTemplate(this);
         namespaceURIToPrefixLookup = Collections.unmodifiableMap(namespaceURIToPrefixLookup);
         prefixToNamespaceURILookup = Collections.unmodifiableMap(prefixToNamespaceURILookup);
     }
@@ -318,7 +318,7 @@ public class Template extends Configurable {
         ((ASTStaticText) template.rootElement).replaceText(content);
         template.setEncoding(encoding);
 
-        DebuggerService.registerTemplate(template);
+        _DebuggerService.registerTemplate(template);
 
         return template;
     }

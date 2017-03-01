@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -489,6 +490,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         loadBuiltInSharedVariables();
     }
 
+    @Override
+    public void setTimeZone(TimeZone timeZone) {
+        super.setTimeZone(timeZone);
+    }
+
     private void createTemplateResolver() {
         templateResolver = new DefaultTemplateResolver(
                 null,
@@ -500,7 +506,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         templateResolver.clearTemplateCache(); // for fully BC behavior
         templateResolver.setTemplateUpdateDelayMilliseconds(5000);
     }
-    
+
+    @Override
+    public TemplateExceptionHandler getTemplateExceptionHandler() {
+        return super.getTemplateExceptionHandler();
+    }
+
     private void recreateTemplateResolverWith(
             TemplateLoader loader, CacheStorage storage,
             TemplateLookupStrategy templateLookupStrategy, TemplateNameFormat templateNameFormat,

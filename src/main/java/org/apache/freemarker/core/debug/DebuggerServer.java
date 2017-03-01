@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.debug.impl;
+package org.apache.freemarker.core.debug;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -40,7 +40,7 @@ import org.slf4j.Logger;
 /**
  */
 class DebuggerServer {
-    
+
     private static final Logger LOG = _CoreLogs.DEBUG_SERVER;
     
     // TODO: Eventually replace with Yarrow    
@@ -111,7 +111,7 @@ class DebuggerServer {
                     out.writeObject(null);
                 }
             } catch (Exception e) {
-                LOG.warn("Connection to {} abruply broke", s.getInetAddress().getHostAddress(), e);
+                LOG.warn("Connection to {} abruptly broke", s.getInetAddress().getHostAddress(), e);
             }
         }
 
