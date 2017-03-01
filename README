@@ -97,6 +97,10 @@ to deal with them, because if you are using an optional feature
 that's certainly because your application already uses the related
 library.
 
+The minimum required Java version is currently Java SE 7. (The presence
+of a later version may be detected on runtime and utilized by
+FreeMarker.)
+
 
 Change log
 ----------
