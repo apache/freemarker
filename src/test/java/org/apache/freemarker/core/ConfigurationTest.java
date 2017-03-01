@@ -37,8 +37,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
-import org.apache.freemarker.core.Configurable.SettingValueAssignmentException;
-import org.apache.freemarker.core.Configurable.UnknownSettingException;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
@@ -819,7 +817,7 @@ public class ConfigurationTest extends TestCase {
        
        try {
            cfg.setSetting(Configuration.OUTPUT_FORMAT_KEY, "null");
-       } catch (SettingValueAssignmentException e) {
+       } catch (ConfigurationSettingValueStringException e) {
            assertThat(e.getCause().getMessage(), containsString(UndefinedOutputFormat.class.getSimpleName()));
        }
     }
@@ -1128,7 +1126,7 @@ public class ConfigurationTest extends TestCase {
         try {
             cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "5");
             assertEquals(5000L, cfg.getTemplateUpdateDelayMilliseconds());
-        } catch (SettingValueAssignmentException e) {
+        } catch (ConfigurationSettingValueStringException e) {
             assertThat(e.getCause().getMessage(), containsStringIgnoringCase("unit must be specified"));
         }
         cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "0");
@@ -1136,7 +1134,7 @@ public class ConfigurationTest extends TestCase {
         try {
             cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "5 foo");
             assertEquals(5000L, cfg.getTemplateUpdateDelayMilliseconds());
-        } catch (SettingValueAssignmentException e) {
+        } catch (ConfigurationSettingValueStringException e) {
             assertThat(e.getCause().getMessage(), containsStringIgnoringCase("\"foo\""));
         }
         
@@ -1554,7 +1552,7 @@ public class ConfigurationTest extends TestCase {
                 try {
                     cfg.setSetting(nameCC, value);
                 } catch (Exception e) {
-                    assertThat(e, not(instanceOf(UnknownSettingException.class)));
+                    assertThat(e, not(instanceOf(UnknownConfigurationSettingException.class)));
                     resultCC = e;
                 }
                 
@@ -1563,7 +1561,7 @@ public class ConfigurationTest extends TestCase {
                 try {
                     cfg.setSetting(nameSC, value);
                 } catch (Exception e) {
-                    assertThat(e, not(instanceOf(UnknownSettingException.class)));
+                    assertThat(e, not(instanceOf(UnknownConfigurationSettingException.class)));
                     resultSC = e;
                 }
                 

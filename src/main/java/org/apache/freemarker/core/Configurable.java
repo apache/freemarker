@@ -2133,8 +2133,8 @@ public class Configurable {
      * @param name the name of the setting.
      * @param value the string that describes the new value of the setting.
      * 
-     * @throws UnknownSettingException if the name is wrong.
-     * @throws SettingValueAssignmentException if the new value of the setting can't be set for any other reasons.
+     * @throws UnknownConfigurationSettingException if the name is wrong.
+     * @throws ConfigurationSettingValueStringException if the new value of the setting can't be set for any other reasons.
      */
     public void setSetting(String name, String value) throws ConfigurationException {
         boolean unknown = false;
@@ -2338,11 +2338,11 @@ public class Configurable {
     /**
      * Creates the exception that should be thrown when a setting name isn't recognized.
      */
-    protected final UnknownSettingException unknownSettingException(String name) {
+    protected final UnknownConfigurationSettingException unknownSettingException(String name) {
         Version removalVersion = getRemovalVersionForUnknownSetting(name);
         return removalVersion != null
-                ? new UnknownSettingException(name, removalVersion)
-                : new UnknownSettingException(name, getCorrectedNameForUnknownSetting(name));
+                ? new UnknownConfigurationSettingException(name, removalVersion)
+                : new UnknownConfigurationSettingException(name, getCorrectedNameForUnknownSetting(name));
     }
 
     /**
@@ -2365,9 +2365,9 @@ public class Configurable {
         return null;
     }
     
-    protected final SettingValueAssignmentException settingValueAssignmentException(
+    protected final ConfigurationSettingValueStringException settingValueAssignmentException(
             String name, String value, Throwable cause) {
-        return new SettingValueAssignmentException(name, value, cause);
+        return new ConfigurationSettingValueStringException(name, value, cause);
     }
 
     protected final TemplateException invalidSettingValueException(String name, String value) {
@@ -2379,43 +2379,7 @@ public class Configurable {
                 "Invalid value for setting ", new _DelayedJQuote(name), ": ", new _DelayedJQuote(value),
                 (reason != null ? ": " : null), (reason != null ? reason : null));
     }
-    
-    /**
-     * Thrown by {@link Configuration#setSetting(String, String)}; The setting name was not recognized. 
-     */
-    @SuppressWarnings("serial")
-    public static class UnknownSettingException extends ConfigurationException {
 
-        private UnknownSettingException(String name, String correctedName) {
-            super("Unknown FreeMarker configuration setting: " + _StringUtil.jQuote(name)
-                    + (correctedName == null ? "" : ". You may meant: " + _StringUtil.jQuote(correctedName)));
-        }
-
-        private UnknownSettingException(String name, Version removedInVersion) {
-            super("Unknown FreeMarker configuration setting: " + _StringUtil.jQuote(name)
-                    + (removedInVersion == null ? "" : ". This setting was removed in version " + removedInVersion));
-        }
-        
-    }
-
-    /**
-     * Thrown by {@link Configuration#setSetting(String, String)}; The setting name was recognized, but its value
-     * couldn't be parsed or the setting couldn't be set for some other reason. This exception should always have a
-     * cause exception.
-     *  
-     * @since 2.3.21
-     */
-    @SuppressWarnings("serial")
-    public static class SettingValueAssignmentException extends ConfigurationException {
-        
-        private SettingValueAssignmentException(String name, String value, Throwable cause) {
-            super("Failed to set FreeMarker configuration setting " + _StringUtil.jQuote(name)
-                    + " to value " + _StringUtil.jQuote(value) + "; see cause exception.", cause);
-            _NullArgumentException.check("cause", cause);
-        }
-        
-    }
-    
     /**
      * Set the settings stored in a <code>Properties</code> object.
      * 
