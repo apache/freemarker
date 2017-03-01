@@ -132,6 +132,7 @@ public class _ModelAPI {
      * @param dowSubclassFactory Creates a <em>new</em> read-only object wrapper of the desired
      *     {@link DefaultObjectWrapper} subclass. 
      */
+    // [FM3] Unnecessary generalization, unless we publish this API
     public static <OW extends DefaultObjectWrapper, OWC extends DefaultObjectWrapperConfiguration> OW
     getDefaultObjectWrapperSubclassSingleton(
             OWC settings,
