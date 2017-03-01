@@ -251,7 +251,7 @@
     />
         
     <rmic base="build/classes" classpathref="ivy.dep"
-      includes="build/src-main-java-filtered/org/apache/freemarker/core/debug/impl/Rmi*Impl.class"
+      includes="build/src-main-java-filtered/org/apache/freemarker/core/debug/Rmi*Impl.class"
       verify="yes" stubversion="1.2"
     />
     
