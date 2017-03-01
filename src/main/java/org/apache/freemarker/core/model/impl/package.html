@@ -18,22 +18,9 @@
 -->
 <html>
 <head>
-<title></title>
 </head>
 <body>
-
-<p>The {@linkplain org.apache.freemarker.core.model.impl.DefaultObjectWrapper default object wrapper} of FreeMarker uses
-this to expose Java Beans and POJO-s to templates.</p>
-
-<p>Most of the issues dealing with beans are handled by the 
-{@link freemarker.ext.beans.DefaultObjectWrapper#wrap(Object)}and {@link
-freemarker.ext.beans.DefaultObjectWrapper#getStaticModels()} methods. In normal cases,
- these are the only methods
-you should use to turn an arbitrary Java object into a 
-FreeMarker {@link freemarker.template.TemplateModel}. Additionally, you can manually create 
-instance of any wrapper class using its constructors.
-Note, however that in such cases you bypass the eventual model caching
-of the wrapper.</p>
-
+<p>Data model and template language type system: Standard implementations. This package is part of the
+published API, that is, user code can safely depend on it.</p>
 </body>
 </html>
