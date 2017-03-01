@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -31,10 +31,10 @@ import freemarker.template.TemplateModelException;
  * {@link Configuration#setOutputFormat(OutputFormat)}.)
  * 
  * <p>
- * An {@link OutputFormat} subclass always has a corresponding {@link TemplateMarkupOutputModel} subclass pair (like
- * {@link HTMLOutputFormat} has {@link TemplateHTMLOutputModel}). The {@link OutputFormat} implements the operations
- * related to {@link TemplateMarkupOutputModel} objects of that kind, while the {@link TemplateMarkupOutputModel} only
- * encapsulates the data (the actual markup or text).
+ * A {@link MarkupOutputFormat} subclass always has a corresponding {@link TemplateMarkupOutputModel} subclass pair
+ * (like {@link HTMLOutputFormat} has {@link TemplateHTMLOutputModel}). The {@link OutputFormat} implements the
+ * operations related to {@link TemplateMarkupOutputModel} objects of that kind, while the
+ * {@link TemplateMarkupOutputModel} only encapsulates the data (the actual markup or text).
  * 
  * <p>
  * To implement a custom output format, you may want to extend {@link CommonMarkupOutputFormat}.

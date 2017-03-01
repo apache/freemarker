@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,6 +18,8 @@
  */
  
 package freemarker.ext.dom;
+
+import java.util.Collections;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
@@ -31,10 +33,9 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template.utility.StringUtil;
 
 class ElementModel extends NodeModel implements TemplateScalarModel {
-    
+
     public ElementModel(Element element) {
         super(element);
     }
@@ -66,45 +67,63 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
                 }
             }
             return ns;
-        }
-        if (key.equals("**")) {
-            Element elem = (Element) node;
-            return new NodeListModel(elem.getElementsByTagName("*"), this);    
-        }
-        if (key.startsWith("@")) {
-            if (key.equals("@@") || key.equals("@*")) {
-                return new NodeListModel(node.getAttributes(), this);
-            }
-            if (key.equals("@@start_tag")) {
-                NodeOutputter nodeOutputter = new NodeOutputter(node);
-                return new SimpleScalar(nodeOutputter.getOpeningTag((Element) node));
-            }
-            if (key.equals("@@end_tag")) {
-                NodeOutputter nodeOutputter = new NodeOutputter(node);
-                return new SimpleScalar(nodeOutputter.getClosingTag((Element) node));
-            }
-            if (key.equals("@@attributes_markup")) {
-                StringBuilder buf = new StringBuilder();
-                NodeOutputter nu = new NodeOutputter(node);
-                nu.outputContent(node.getAttributes(), buf);
-                return new SimpleScalar(buf.toString().trim());
-            }
-            if (StringUtil.isXMLID(key.substring(1))) {
-                Attr att = getAttribute(key.substring(1));
-                if (att == null) { 
-                    return new NodeListModel(this);
+        } else if (key.equals("**")) {
+            return new NodeListModel(((Element) node).getElementsByTagName("*"), this);    
+        } else if (key.startsWith("@")) {
+            if (key.startsWith("@@")) {
+                if (key.equals(AtAtKey.ATTRIBUTES.getKey())) {
+                    return new NodeListModel(node.getAttributes(), this);
+                } else if (key.equals(AtAtKey.START_TAG.getKey())) {
+                    NodeOutputter nodeOutputter = new NodeOutputter(node);
+                    return new SimpleScalar(nodeOutputter.getOpeningTag((Element) node));
+                } else if (key.equals(AtAtKey.END_TAG.getKey())) {
+                    NodeOutputter nodeOutputter = new NodeOutputter(node);
+                    return new SimpleScalar(nodeOutputter.getClosingTag((Element) node));
+                } else if (key.equals(AtAtKey.ATTRIBUTES_MARKUP.getKey())) {
+                    StringBuilder buf = new StringBuilder();
+                    NodeOutputter nu = new NodeOutputter(node);
+                    nu.outputContent(node.getAttributes(), buf);
+                    return new SimpleScalar(buf.toString().trim());
+                } else if (key.equals(AtAtKey.PREVIOUS_SIBLING_ELEMENT.getKey())) {
+                    Node previousSibling = node.getPreviousSibling();
+                    while (previousSibling != null && !this.isSignificantNode(previousSibling)) {
+                        previousSibling = previousSibling.getPreviousSibling();
+                    }
+                    return previousSibling != null && previousSibling.getNodeType() == Node.ELEMENT_NODE
+                            ? wrap(previousSibling) : new NodeListModel(Collections.emptyList(), null);  
+                } else if (key.equals(AtAtKey.NEXT_SIBLING_ELEMENT.getKey())) {
+                    Node nextSibling = node.getNextSibling();
+                    while (nextSibling != null && !this.isSignificantNode(nextSibling)) {
+                        nextSibling = nextSibling.getNextSibling();
+                    }
+                    return nextSibling != null && nextSibling.getNodeType() == Node.ELEMENT_NODE
+                            ? wrap(nextSibling) : new NodeListModel(Collections.emptyList(), null);  
+                } else {
+                    // We don't know anything like this that's element-specific; fall back 
+                    return super.get(key);
                 }
-                return wrap(att);
+            } else { // Starts with "@", but not with "@@"
+                if (DomStringUtil.isXMLNameLike(key, 1)) {
+                    Attr att = getAttribute(key.substring(1));
+                    if (att == null) { 
+                        return new NodeListModel(this);
+                    }
+                    return wrap(att);
+                } else if (key.equals("@*")) {
+                    return new NodeListModel(node.getAttributes(), this);
+                } else {
+                    // We don't know anything like this that's element-specific; fall back 
+                    return super.get(key);
+                }
             }
-        }
-        if (StringUtil.isXMLID(key)) {
+        } else if (DomStringUtil.isXMLNameLike(key)) {
+            // We interpret key as an element name
             NodeListModel result = ((NodeListModel) getChildNodes()).filterByName(key);
-            if (result.size() == 1) {
-                return result.get(0);
-            }
-            return result;
+            return result.size() != 1 ? result : result.get(0);
+        } else {
+            // We don't anything like this that's element-specific; fall back 
+            return super.get(key);
         }
-        return super.get(key);
     }
 
     public String getAsString() throws TemplateModelException {
@@ -181,7 +200,32 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
         return result;
     }
     
+    private boolean isSignificantNode(Node node) throws TemplateModelException {
+        return (node.getNodeType() == Node.TEXT_NODE || node.getNodeType() == Node.CDATA_SECTION_NODE)
+                ? !isBlankXMLText(node.getTextContent())
+                : node.getNodeType() != Node.PROCESSING_INSTRUCTION_NODE && node.getNodeType() != Node.COMMENT_NODE;
+    }
+    
+    private boolean isBlankXMLText(String s) {
+        if (s == null) {
+            return true;
+        }
+        for (int i = 0; i < s.length(); i++) {
+            if (!isXMLWhiteSpace(s.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * White space according the XML spec. 
+     */
+    private boolean isXMLWhiteSpace(char c) {
+        return c == ' ' || c == '\t' || c == '\n' | c == '\r';
+    }
+
     boolean matchesName(String name, Environment env) {
-        return StringUtil.matchesName(name, getNodeName(), getNodeNamespace(), env);
+        return DomStringUtil.matchesName(name, getNodeName(), getNodeNamespace(), env);
     }
 }

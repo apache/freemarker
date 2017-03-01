@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -18,31 +18,22 @@
  */
 package freemarker.test.templatesuite.models;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.TreeSet;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import freemarker.core._DelayedJQuote;
-import freemarker.core._TemplateModelException;
 import freemarker.ext.beans.BeansWrapperBuilder;
-import freemarker.ext.util.WrapperTemplateModel;
-import freemarker.template.AdapterTemplateModel;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultMapAdapter;
 import freemarker.template.DefaultObjectWrapperBuilder;
-import freemarker.template.MapKeyValuePairIterator;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleCollection;
 import freemarker.template.SimpleHash;
@@ -51,10 +42,7 @@ import freemarker.template.TemplateHashModelEx;
 import freemarker.template.TemplateHashModelEx2;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import freemarker.template.TemplateModelWithAPISupport;
 import freemarker.template.WrappingTemplateModel;
-import freemarker.template.TemplateHashModelEx2.KeyValuePairIterator;
-import freemarker.template.utility.ObjectWrapperWithAPISupport;
 
 @SuppressWarnings("boxing")
 public class Listables {

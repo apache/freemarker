@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -38,10 +38,10 @@ public class MultiTemplateLoaderTest {
         stl2.putTemplate("both.ftl", "both 2");
         
         MultiTemplateLoader mtl = new MultiTemplateLoader(new TemplateLoader[] { stl1, stl2 });
-        assertEquals("1", getTemplate(mtl, "1.ftl"));
-        assertEquals("2", getTemplate(mtl, "2.ftl"));
-        assertEquals("both 1", getTemplate(mtl, "both.ftl"));
-        assertNull(getTemplate(mtl, "neither.ftl"));
+        assertEquals("1", getTemplateContent(mtl, "1.ftl"));
+        assertEquals("2", getTemplateContent(mtl, "2.ftl"));
+        assertEquals("both 1", getTemplateContent(mtl, "both.ftl"));
+        assertNull(getTemplateContent(mtl, "neither.ftl"));
     }
 
     @Test
@@ -64,16 +64,16 @@ public class MultiTemplateLoaderTest {
         MultiTemplateLoader mtl = new MultiTemplateLoader(new TemplateLoader[] { stl1, stl2 });
         mtl.setSticky(sticky);
         
-        assertEquals("both 1", getTemplate(mtl, "both.ftl"));
+        assertEquals("both 1", getTemplateContent(mtl, "both.ftl"));
         assertTrue(stl1.removeTemplate("both.ftl"));
-        assertEquals("both 2", getTemplate(mtl, "both.ftl"));
+        assertEquals("both 2", getTemplateContent(mtl, "both.ftl"));
         stl1.putTemplate("both.ftl", "both 1");
-        assertEquals(sticky ? "both 2" : "both 1", getTemplate(mtl, "both.ftl"));
+        assertEquals(sticky ? "both 2" : "both 1", getTemplateContent(mtl, "both.ftl"));
         assertTrue(stl2.removeTemplate("both.ftl"));
-        assertEquals("both 1", getTemplate(mtl, "both.ftl"));
+        assertEquals("both 1", getTemplateContent(mtl, "both.ftl"));
     }
     
-    private String getTemplate(TemplateLoader tl, String name) throws IOException {
+    private String getTemplateContent(TemplateLoader tl, String name) throws IOException {
         Object tSrc = tl.findTemplateSource(name);
         if (tSrc == null) {
             return null;

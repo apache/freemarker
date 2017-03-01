@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -632,28 +632,28 @@ public class ConfigurationTest extends TestCase {
         t.process(null, sw);
         assertEquals(expectedContent, sw.toString());
     }
-    
+
     public void testSetTemplateLoaderAndCache() throws Exception {
         Configuration cfg = new Configuration();
         
-        CacheStorageWithGetSize cache = (CacheStorageWithGetSize) cfg.getCacheStorage();
-        assertEquals(0, cache.getSize());
+        CacheStorageWithGetSize cacheStorage = (CacheStorageWithGetSize) cfg.getCacheStorage();
+        assertEquals(0, cacheStorage.getSize());
         cfg.setCacheStorage(new StrongCacheStorage());
-        cache = (CacheStorageWithGetSize) cfg.getCacheStorage();
-        assertEquals(0, cache.getSize());
+        cacheStorage = (CacheStorageWithGetSize) cfg.getCacheStorage();
+        assertEquals(0, cacheStorage.getSize());
         
         cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
-        assertEquals(0, cache.getSize());
+        assertEquals(0, cacheStorage.getSize());
         cfg.getTemplate("toCache1.ftl");
-        assertEquals(1, cache.getSize());
+        assertEquals(1, cacheStorage.getSize());
         cfg.getTemplate("toCache2.ftl");
-        assertEquals(2, cache.getSize());
+        assertEquals(2, cacheStorage.getSize());
         cfg.setClassForTemplateLoading(ConfigurationTest.class, "");
-        assertEquals(0, cache.getSize());
+        assertEquals(0, cacheStorage.getSize());
         cfg.getTemplate("toCache1.ftl");
-        assertEquals(1, cache.getSize());
+        assertEquals(1, cacheStorage.getSize());
         cfg.setTemplateLoader(cfg.getTemplateLoader());
-        assertEquals(1, cache.getSize());
+        assertEquals(1, cacheStorage.getSize());
     }
 
     public void testChangingLocalizedLookupClearsCache() throws Exception {

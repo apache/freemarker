@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -33,10 +33,12 @@ import freemarker.core.BuiltInsForMarkupOutputs.markup_stringBI;
 import freemarker.core.BuiltInsForMultipleTypes.is_dateLikeBI;
 import freemarker.core.BuiltInsForNodes.ancestorsBI;
 import freemarker.core.BuiltInsForNodes.childrenBI;
+import freemarker.core.BuiltInsForNodes.nextSiblingBI;
 import freemarker.core.BuiltInsForNodes.node_nameBI;
 import freemarker.core.BuiltInsForNodes.node_namespaceBI;
 import freemarker.core.BuiltInsForNodes.node_typeBI;
 import freemarker.core.BuiltInsForNodes.parentBI;
+import freemarker.core.BuiltInsForNodes.previousSiblingBI;
 import freemarker.core.BuiltInsForNodes.rootBI;
 import freemarker.core.BuiltInsForNumbers.absBI;
 import freemarker.core.BuiltInsForNumbers.byteBI;
@@ -81,9 +83,9 @@ abstract class BuiltIn extends Expression implements Cloneable {
 
     static final Set<String> CAMEL_CASE_NAMES = new TreeSet<String>();
     static final Set<String> SNAKE_CASE_NAMES = new TreeSet<String>();
-    
-    static final int NUMBER_OF_BIS = 259;
+    static final int NUMBER_OF_BIS = 263;
     static final HashMap<String, BuiltIn> BUILT_INS_BY_NAME = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
+
     static {
         // Note that you must update NUMBER_OF_BIS if you add new items here!
         
@@ -103,14 +105,14 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("date_if_unknown", "dateIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATE));
         putBI("datetime", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.DATETIME));
         putBI("datetime_if_unknown", "datetimeIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATETIME));
-        putBI("default", new ExistenceBuiltins.defaultBI());
+        putBI("default", new BuiltInsForExistenceHandling.defaultBI());
         putBI("double", new doubleBI());
         putBI("ends_with", "endsWith", new BuiltInsForStringsBasic.ends_withBI());
         putBI("ensure_ends_with", "ensureEndsWith", new BuiltInsForStringsBasic.ensure_ends_withBI());
         putBI("ensure_starts_with", "ensureStartsWith", new BuiltInsForStringsBasic.ensure_starts_withBI());
         putBI("esc", new escBI());
         putBI("eval", new evalBI());
-        putBI("exists", new ExistenceBuiltins.existsBI());
+        putBI("exists", new BuiltInsForExistenceHandling.existsBI());
         putBI("first", new firstBI());
         putBI("float", new floatBI());
         putBI("floor", new floorBI());
@@ -118,10 +120,10 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("counter", new BuiltInsForLoopVariables.counterBI());
         putBI("item_cycle", "itemCycle", new BuiltInsForLoopVariables.item_cycleBI());
         putBI("has_api", "hasApi", new BuiltInsForMultipleTypes.has_apiBI());
-        putBI("has_content", "hasContent", new ExistenceBuiltins.has_contentBI());
+        putBI("has_content", "hasContent", new BuiltInsForExistenceHandling.has_contentBI());
         putBI("has_next", "hasNext", new BuiltInsForLoopVariables.has_nextBI());
         putBI("html", new BuiltInsForStringsEncoding.htmlBI());
-        putBI("if_exists", "ifExists", new ExistenceBuiltins.if_existsBI());
+        putBI("if_exists", "ifExists", new BuiltInsForExistenceHandling.if_existsBI());
         putBI("index", new BuiltInsForLoopVariables.indexBI());
         putBI("index_of", "indexOf", new BuiltInsForStringsBasic.index_ofBI(false));
         putBI("int", new intBI());
@@ -246,6 +248,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("number_to_time", "numberToTime", new number_to_dateBI(TemplateDateModel.TIME));
         putBI("number_to_datetime", "numberToDatetime", new number_to_dateBI(TemplateDateModel.DATETIME));
         putBI("parent", new parentBI());
+        putBI("previous_sibling", "previousSibling", new previousSiblingBI());
+        putBI("next_sibling", "nextSibling", new nextSiblingBI());
         putBI("item_parity", "itemParity", new BuiltInsForLoopVariables.item_parityBI());
         putBI("item_parity_cap", "itemParityCap", new BuiltInsForLoopVariables.item_parity_capBI());
         putBI("reverse", new reverseBI());
@@ -284,6 +288,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("matches", new BuiltInsForStringsRegexp.matchesBI());
         putBI("groups", new BuiltInsForStringsRegexp.groupsBI());
         putBI("replace", new BuiltInsForStringsRegexp.replace_reBI());
+
         
         if (NUMBER_OF_BIS < BUILT_INS_BY_NAME.size()) {
             throw new AssertionError("Update NUMBER_OF_BIS! Should be: " + BUILT_INS_BY_NAME.size());

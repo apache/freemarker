@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.net.URLConnection;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -1143,7 +1142,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     /**
      * Sets a {@link TemplateLoader} that is used to look up and load templates;
-     * as a side effect the template cache will be emptied.
+     * as a side effect the template cache will be emptied (unless the new and the old values are the same).
      * By providing your own {@link TemplateLoader} implementation, you can load templates from whatever kind of
      * storages, like from relational databases, NoSQL-storages, etc.
      * 
@@ -2969,7 +2968,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     unsetTemplateLoader();
                 } else {
                     setTemplateLoader((TemplateLoader) _ObjectBuilderSettingEvaluator.eval(
-                            value, TemplateLoader.class, false, _SettingEvaluationEnvironment.getCurrent()));
+                            value, TemplateLoader.class, true, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE.equals(name)
                     || TEMPLATE_LOOKUP_STRATEGY_KEY_CAMEL_CASE.equals(name)) {

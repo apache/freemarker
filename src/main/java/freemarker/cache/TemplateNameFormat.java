@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -100,24 +100,46 @@ public abstract class TemplateNameFormat {
     public static final TemplateNameFormat DEFAULT_2_4_0 = new Default020400();
     
     /**
-     * @param baseName Maybe {@code null}, maybe a "file" name instead of a "directory" name.
-     * @param targetName No {@code null}. Maybe relative, maybe absolute.
+     * Converts a name to a template root directory based name, so that it can be used to find a template without
+     * knowing what (like which template) has referred to it. The rules depend on the name format, but a typical example
+     * is converting "t.ftl" with base "sub/contex.ftl" to "sub/t.ftl".
+     * 
+     * @param baseName
+     *            Maybe a file name, maybe a directory name. The meaning of file name VS directory name depends on the
+     *            name format, but typically, something like "foo/bar/" is a directory name, and something like
+     *            "foo/bar" is a file name, and thus in the last case the effective base is "foo/" (i.e., the directory
+     *            that contains the file). Not {@code null}.
+     * @param targetName
+     *            The name to convert. This usually comes from a template that refers to another template by name. It
+     *            can be a relative name, or an absolute name. (In typical name formats absolute names start with
+     *            {@code "/"} or maybe with an URL scheme, and all others are relative). Not {@code null}.
+     * 
+     * @return The path in template root directory relative format, or even an absolute name (where the root directory
+     *         is not the real root directory of the file system, but the imaginary directory that exists to store the
+     *         templates). The standard implementations shipped with FreeMarker always return a root relative path
+     *         (except if the name starts with an URI schema, in which case a full URI is returned).
      */
-    abstract String toAbsoluteName(String baseName, String targetName) throws MalformedTemplateNameException;
+    abstract String toRootBasedName(String baseName, String targetName) throws MalformedTemplateNameException;
     
     /**
-     * @return For backward compatibility only, {@code null} is allowed and will be treated as if the template doesn't
-     *         exist (despite that a normalizer doesn't access the storage, so it's not its duty to decide that).
+     * Normalizes a template root directory based name (relative to the root or absolute), so that equivalent names
+     * become equivalent according {@link String#equals(Object)} too. The rules depend on the name format, but typical
+     * examples are "sub/../t.ftl" to "t.ftl", "sub/./t.ftl" to "sub/t.ftl" and "/t.ftl" to "t.ftl".
+     * 
+     * <p>The standard implementations shipped with FreeMarker always returns a root relative path
+     * (except if the name starts with an URI schema, in which case a full URI is returned), for example, "/foo.ftl"
+     * becomes to "foo.ftl".
+     * 
+     * @param name
+     *            The root based name. Not {@code null}.
+     * 
+     * @return The normalized root based name. Not {@code null}.
      */
-    abstract String normalizeAbsoluteName(String name) throws MalformedTemplateNameException;
+    abstract String normalizeRootBasedName(String name) throws MalformedTemplateNameException;
 
     private static final class Default020300 extends TemplateNameFormat {
         @Override
-        String toAbsoluteName(String baseName, String targetName) {
-            if (baseName == null) {
-                return targetName;
-            }
-            
+        String toRootBasedName(String baseName, String targetName) {
             if (targetName.indexOf("://") > 0) {
                 return targetName;
             } else if (targetName.startsWith("/")) {
@@ -136,7 +158,7 @@ public abstract class TemplateNameFormat {
         }
     
         @Override
-        String normalizeAbsoluteName(final String name) throws MalformedTemplateNameException {
+        String normalizeRootBasedName(final String name) throws MalformedTemplateNameException {
             // Disallow 0 for security reasons.
             checkNameHasNoNullCharacter(name);
             
@@ -188,11 +210,7 @@ public abstract class TemplateNameFormat {
 
     private static final class Default020400 extends TemplateNameFormat {
         @Override
-        String toAbsoluteName(String baseName, String targetName) {
-            if (baseName == null) {
-                return targetName;
-            }
-            
+        String toRootBasedName(String baseName, String targetName) {
             if (findSchemeSectionEnd(targetName) != 0) {
                 return targetName;
             } else if (targetName.startsWith("/")) {  // targetName is an absolute path
@@ -219,7 +237,7 @@ public abstract class TemplateNameFormat {
         }
     
         @Override
-        String normalizeAbsoluteName(final String name) throws MalformedTemplateNameException {
+        String normalizeRootBasedName(final String name) throws MalformedTemplateNameException {
             // Disallow 0 for security reasons.
             checkNameHasNoNullCharacter(name);
     

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -722,7 +722,7 @@ public class Configurable {
      *   {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time}, and then if, for example,
      *   {@code time_zone} is GMT+00:00, the
      *   values from the earlier examples will be shown as 2014-07-11 (one day off) and 09:57:00 (2 hours off). While
-     *   those are the time zone correct renderings, those values probably was meant to shown "as is".
+     *   those are the time zone correct renderings, those values are probably meant to be shown "as is".
      *   
      *   <li>You may wonder why this setting isn't simply "SQL time zone", since the time zone related behavior of JDBC
      *   applies to {@link java.sql.Timestamp java.sql.Timestamp} too. FreeMarker assumes that you have set up your
@@ -2270,7 +2270,7 @@ public class Configurable {
      *   <li><p>{@code "template_loader"}:
      *       See: {@link Configuration#setTemplateLoader(TemplateLoader)}.
      *       <br>String value: {@code "default"} (case insensitive) for the default, or else interpreted as an
-     *       <a href="#fm_obe">object builder expression</a>.
+     *       <a href="#fm_obe">object builder expression</a>. {@code "null"} is also allowed since 2.3.26.
      *       
      *   <li><p>{@code "template_lookup_strategy"}:
      *       See: {@link Configuration#setTemplateLookupStrategy(freemarker.cache.TemplateLookupStrategy)}.
@@ -2768,7 +2768,7 @@ public class Configurable {
      */
     void copyDirectCustomAttributes(Configurable target, boolean overwriteExisting) {
         synchronized (customAttributes) {
-            for (Entry<? extends Object, ? extends Object> custAttrEnt : customAttributes.entrySet()) {
+            for (Entry<?, ?> custAttrEnt : customAttributes.entrySet()) {
                 Object custAttrKey = custAttrEnt.getKey();
                 if (overwriteExisting || !target.isCustomAttributeSet(custAttrKey)) {
                     if (custAttrKey instanceof String) {

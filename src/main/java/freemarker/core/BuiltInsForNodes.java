@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,13 +22,14 @@ package freemarker.core;
 import java.util.List;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import freemarker.ext.dom._ExtDomApi;
 import freemarker.template.SimpleScalar;
 import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNodeModel;
-import freemarker.template.utility.StringUtil;
+import freemarker.template.TemplateNodeModelEx;
 
 /**
  * A holder for builtins that operate exclusively on (XML-)node left-hand value.
@@ -97,7 +98,20 @@ class BuiltInsForNodes {
             return result;
        }
     }
-    
+
+    static class previousSiblingBI extends BuiltInForNodeEx {
+        @Override
+        TemplateModel calculateResult(TemplateNodeModelEx nodeModel, Environment env) throws TemplateModelException {
+            return nodeModel.getPreviousSibling();
+        }
+    }
+
+    static class nextSiblingBI extends  BuiltInForNodeEx {
+        @Override
+        TemplateModel calculateResult(TemplateNodeModelEx nodeModel, Environment env) throws TemplateModelException {
+            return nodeModel.getNextSibling();
+        }
+    }
     
     // Can't be instantiated
     private BuiltInsForNodes() { }
@@ -127,7 +141,7 @@ class BuiltInsForNodes {
                     }
                 } else {
                     for (int j = 0; j < names.size(); j++) {
-                        if (StringUtil.matchesName((String) names.get(j), nodeName, nsURI, env)) {
+                        if (_ExtDomApi.matchesName((String) names.get(j), nodeName, nsURI, env)) {
                             result.add(tnm);
                             break;
                         }

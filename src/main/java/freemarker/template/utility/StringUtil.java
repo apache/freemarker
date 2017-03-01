@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 import freemarker.core.Environment;
 import freemarker.core.ParseException;
-import freemarker.template.Template;
+import freemarker.ext.dom._ExtDomApi;
 import freemarker.template.Version;
 
 /**
@@ -1656,55 +1656,20 @@ public class StringUtil {
      * Used internally by the XML DOM wrapper to check if the subvariable name is just an element name, or a more
      * complex XPath expression.
      * 
-     * @return whether the name is a valid XML tagname. (This routine might only be 99% accurate. Should maybe REVISIT)
+     * @return whether the name is a valid XML element name. (This routine might only be 99% accurate. REVISIT)
      * 
      * @deprecated Don't use this outside FreeMarker; it's name if misleading, and it doesn't follow the XML specs.
      */
     @Deprecated
     static public boolean isXMLID(String name) {
-        int ln = name.length();
-        for (int i = 0; i < ln; i++) {
-            char c = name.charAt(i);
-            if (i == 0 && (c == '-' || c == '.' || Character.isDigit(c))) {
-                    return false;
-            }
-            if (!Character.isLetterOrDigit(c) && c != '_' && c != '-' && c != '.') {
-                if (c == ':') {
-                    if (i + 1 < ln && name.charAt(i + 1) == ':') {
-                        // "::" is used in XPath
-                        return false;
-                    }
-                    // We don't return here, as a lonely ":" is allowed.
-                } else {
-                    return false;
-                }
-            }
-        }
-        return true;
+        return _ExtDomApi.isXMLNameLike(name);
     }
     
     /**
-     * @return whether the qname matches the combination of nodeName, nsURI, and environment prefix settings. 
+     * @return whether the qname matches the combination of nodeName, nsURI, and environment prefix settings.
      */
-    
     static public boolean matchesName(String qname, String nodeName, String nsURI, Environment env) {
-        String defaultNS = env.getDefaultNS();
-        if ((defaultNS != null) && defaultNS.equals(nsURI)) {
-            return qname.equals(nodeName) 
-               || qname.equals(Template.DEFAULT_NAMESPACE_PREFIX + ":" + nodeName); 
-        }
-        if ("".equals(nsURI)) {
-            if (defaultNS != null) {
-                return qname.equals(Template.NO_NS_PREFIX + ":" + nodeName);
-            } else {
-                return qname.equals(nodeName) || qname.equals(Template.NO_NS_PREFIX + ":" + nodeName);
-            }
-        }
-        String prefix = env.getPrefixForNamespace(nsURI);
-        if (prefix == null) {
-            return false; // Is this the right thing here???
-        }
-        return qname.equals(prefix + ":" + nodeName);
+        return _ExtDomApi.matchesName(qname, nodeName, nsURI, env);
     }
     
     /**

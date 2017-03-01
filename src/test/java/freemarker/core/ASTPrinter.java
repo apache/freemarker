@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -264,8 +264,8 @@ public class ASTPrinter {
         for (int i = 0; i < childCount; i++) {
             TemplateElement child = te.getChild(i);
             TemplateElement parentElement = child.getParentElement();
-            // As MixedContent.accept does nothing but return its regulatedChildren, it's optimized out in the final
-            // AST tree. While it will be present as a child, the parent element also will have regularedChildren
+            // As MixedContent.accept does nothing but return its children, it's optimized out in the final
+            // AST tree. While it will be present as a child, the parent element also will have children
             // that contains the children of the MixedContent directly. 
             if (parentElement instanceof MixedContent && parentElement.getParentElement() != null) {
                 parentElement = parentElement.getParentElement();
@@ -287,31 +287,31 @@ public class ASTPrinter {
             throw new InvalidASTException("Mixed content with child count less than 2 should removed by optimizatoin, "
                     + "but found one with " + te.getChildCount() + " child(ren).");
         }
-        TemplateElement[] regulatedChildren = te.getChildBuffer();
-        if (regulatedChildren != null) {
+        TemplateElement[] children = te.getChildBuffer();
+        if (children != null) {
             if (childCount == 0) {
                 throw new InvalidASTException(
-                        "regularChildren must be null when regularChild is 0."
+                        "Children must be null when childCount is 0."
                         + "\nNode: " + te.dump(false));
             }
             for (int i = 0; i < te.getChildCount(); i++) {
-                if (regulatedChildren[i] == null) {
+                if (children[i] == null) {
                     throw new InvalidASTException(
-                            "regularChildren can't be null at index " + i
+                            "Children can't be null at index " + i
                             + "\nNode: " + te.dump(false));
                 }
             }
-            for (int i = te.getChildCount(); i < regulatedChildren.length; i++) {
-                if (regulatedChildren[i] != null) {
+            for (int i = te.getChildCount(); i < children.length; i++) {
+                if (children[i] != null) {
                     throw new InvalidASTException(
-                            "regularChildren can't be non-null at index " + i
+                            "Children can't be non-null at index " + i
                             + "\nNode: " + te.dump(false));
                 }
             }
         } else {
             if (childCount != 0) {
                 throw new InvalidASTException(
-                        "regularChildren mustn't be null when regularChild isn't 0."
+                        "Children mustn't be null when childCount isn't 0."
                         + "\nNode: " + te.dump(false));
             }
         }

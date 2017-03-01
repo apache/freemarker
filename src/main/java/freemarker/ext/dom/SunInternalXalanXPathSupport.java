@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -19,16 +19,30 @@
  
 package freemarker.ext.dom;
 
-import freemarker.template.*;
-import freemarker.core.Environment;
-
-import org.w3c.dom.*;
-import org.w3c.dom.traversal.NodeIterator;
-import com.sun.org.apache.xpath.internal.*;
-import com.sun.org.apache.xpath.internal.objects.*;
-import com.sun.org.apache.xml.internal.utils.PrefixResolver;
 import java.util.List;
+
 import javax.xml.transform.TransformerException;
+
+import org.w3c.dom.Node;
+import org.w3c.dom.traversal.NodeIterator;
+
+import com.sun.org.apache.xml.internal.utils.PrefixResolver;
+import com.sun.org.apache.xpath.internal.XPath;
+import com.sun.org.apache.xpath.internal.XPathContext;
+import com.sun.org.apache.xpath.internal.objects.XBoolean;
+import com.sun.org.apache.xpath.internal.objects.XNodeSet;
+import com.sun.org.apache.xpath.internal.objects.XNull;
+import com.sun.org.apache.xpath.internal.objects.XNumber;
+import com.sun.org.apache.xpath.internal.objects.XObject;
+import com.sun.org.apache.xpath.internal.objects.XString;
+
+import freemarker.core.Environment;
+import freemarker.template.SimpleNumber;
+import freemarker.template.SimpleScalar;
+import freemarker.template.Template;
+import freemarker.template.TemplateBooleanModel;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
 
 /**
  * This is just the XalanXPathSupport class using the sun internal

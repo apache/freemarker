@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -80,11 +80,9 @@ import freemarker.debug.impl.DebuggerService;
 public class Template extends Configurable {
     public static final String DEFAULT_NAMESPACE_PREFIX = "D";
     public static final String NO_NS_PREFIX = "N";
-    
-    /** This is only non-null during parsing. It's used internally to make some information available through the
-     *  Template API-s earlier than the parsing was finished. */
-    private transient FMParser parser;
 
+    private static final int READER_BUFFER_SIZE = 4096;
+    
     private Map macros = new HashMap();
     private List imports = new Vector();
     private TemplateElement rootElement;
@@ -138,11 +136,7 @@ public class Template extends Configurable {
     /**
      * Convenience constructor for {@link #Template(String, String, Reader, Configuration, String) Template(name, null,
      * reader, cfg, encoding)}.
-     * 
-     * @deprecated In most applications, use {@link #Template(String, Reader, Configuration)} instead, which doesn't
-     *             specify the encoding.
      */
-    @Deprecated
     public Template(String name, Reader reader, Configuration cfg, String encoding) throws IOException {
         this(name, null, reader, cfg, encoding);
     }
@@ -170,7 +164,10 @@ public class Template extends Configurable {
      *            See {@link #getSourceName()} for the meaning. Can be {@code null}, in which case
      *            {@link #getSourceName()} will return the same as {@link #getName()}.
      * @param reader
-     *            The character stream to read from. It will always be closed ({@link Reader#close()}) by this method.
+     *            The character stream to read from. It will always be closed ({@link Reader#close()}) by
+     *            this method (this is for backward compatibility; later major versions may discontinue this behavior).
+     *            The {@link Reader} need not be buffered, because this method ensures that it will be read in few
+     *            kilobyte chunks, not byte by byte.
      * @param cfg
      *            The Configuration object that this Template is associated with. If this is {@code null}, the "default"
      *            {@link Configuration} object is used, which is highly discouraged, because it can easily lead to
@@ -188,20 +185,17 @@ public class Template extends Configurable {
      * recommended).
      *
      * @param encoding
-     *            This is the encoding that we are supposed to be using. But it's not really necessary because we have a
-     *            {@link Reader} which is already decoded, but it's kept as meta-info. It also has an impact when
-     *            {@code #include}-ing/{@code #import}-ing another template from this template, as its default encoding
-     *            will be this. But this behavior of said directives is considered to be harmful, and will be probably
-     *            phased out. Until that, it's better to leave this on {@code null}, so that the encoding will come from
-     *            the {@link Configuration}. Note that if this is non-{@code null} and there's an {@code #ftl} header
-     *            with encoding, they must match, or else a {@link WrongEncodingException} is thrown.
-     * 
-     * @deprecated In most applications, use {@link #Template(String, String, Reader, Configuration)} instead, which
-     *             doesn't specify the encoding.
-     * 
+     *            This is the encoding that we are supposed to be using. At the first glance it's unnecessary because we
+     *            already have a {@link Reader} (so decoding with the charset has already happened), however, if this is
+     *            non-{@code null} and there's an {@code #ftl} header with {@code encoding} parameter, they must match,
+     *            or else a {@link WrongEncodingException} is thrown. Thus, it should be set if to decode the template,
+     *            we were using an encoding (a charset), otherwise it should be {@code null}. It's also kept as
+     *            meta-info (returned by {@link #getEncoding()}). It also has an impact when {@code #include}-ing or
+     *            {@code #import}-ing another template from this template, as its default encoding will be this. But
+     *            this behavior of said directives is considered to be harmful, and will be probably phased out.
+     *             
      * @since 2.3.22
      */
-   @Deprecated
    public Template(
            String name, String sourceName, Reader reader, Configuration cfg, String encoding) throws IOException {
        this(name, sourceName, reader, cfg, null, encoding);
@@ -243,13 +237,13 @@ public class Template extends Configurable {
             ParserConfiguration actualParserConfiguration = getParserConfiguration();
             
             if (!(reader instanceof BufferedReader) && !(reader instanceof StringReader)) {
-                reader = new BufferedReader(reader, 0x1000);
+                reader = new BufferedReader(reader, READER_BUFFER_SIZE);
             }
             ltbReader = new LineTableBuilder(reader, actualParserConfiguration);
             reader = ltbReader;
             
             try {
-                parser = new FMParser(this, reader, actualParserConfiguration);
+                FMParser parser = new FMParser(this, reader, actualParserConfiguration);
                 try {
                     this.rootElement = parser.Root();
                 } catch (IndexOutOfBoundsException exc) {
@@ -267,8 +261,6 @@ public class Template extends Configurable {
                 // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it
                 // to ParseException
                 throw exc.toParseException(this);
-            } finally {
-                parser = null;
             }
         } catch (ParseException e) {
             e.setTemplateName(getSourceName());

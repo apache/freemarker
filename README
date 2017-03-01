@@ -95,6 +95,10 @@ dependencies, but usually you don't have to deal with them, because if
 you are using an optional feature that's certainly because your
 application already uses the related library.
 
+The minimum required Java version is currently Java SE 5. (The presence
+of a later version may be detected on runtime and utilized by
+FreeMarker.)
+
 
 Change log
 ----------
@@ -146,14 +150,32 @@ apply it to your development environment:
 - Window -> Preferences
   - General -> Workspace, set the text file encoding
     to "UTF-8". (Or, you can set the same later on project level instead.)
+  - General -> Editors, set:
+    - Insert space for tabs
+    - Show print margin, 120 columns
   - Java -> Code Style -> Formatter -> Import...
-    Select src\ide-settings\Eclipse-Mars\Formatter-profile-FreeMarker.xml
+    Select src\ide-settings\Eclipse\Formatter-profile-FreeMarker.xml
     inside the FreeMarker project directory.
+    (On IntelliJ IDEA, import
+    src/ide-settings/IntelliJ-IDEA/Java-code-style-FreeMarker.xml instead)
     This profile uses space-only indentation policy and 120 character line
     width, and formatting rules that are pretty much standard in modern Java.
+  - Java -> Code Style -> Organize imports
+    (On IntelliJ IDEA, this was already configured by the Java code style
+    import earlier.)
+    The order is this (the Eclipse default): java, javax, org, com.
+    Number of imports required for .*: 99
+    Number of static imports needed for .*: 1
   - Java -> Installed JRE-s:
     Ensure that you have JDK 6 installed, and that it was added to Eclipse.
     Note that it's not JRE, but JDK.
+  - Java -> Compiler -> Javadoc:
+    "Malformed Javadoc comments": Error
+    "Only consider members as visible": Private
+    "Validate tag argunebts": true
+    "Missing tag descriptions": Validate @return tags
+    "Missing Javadoc tags": Ignore
+    "Missing Javadoc comments": Ignore
 - Create new "Java Project" in Eclipse:
   - In the first window popping up:
     - Change the "location" to the directory of the FreeMarker project
@@ -193,6 +215,12 @@ apply it to your development environment:
   Also, close these files if they are open. Now you shouldn't have any errors.
 - At Project -> Properties -> Java Code Style -> Formatter, check in "Enable
   project specific settings", and then select "FreeMarker" as active profile.
+- At Project -> Properties -> Java Editor -> Save Actions, check "Enable project
+  specific settings", then "Perform the selected actions on save", and have
+  only "Organize imports" and "Additional actions" checked (the list for the
+  last should contain "Add missing @Override annotations",
+  "Add missing @Override annotations to implementations of interface methods",
+  "Add missing @Deprecated annotations", and "Remove unnecessary cast").
 - Right click on the project -> Run As -> JUnit Test
   It should run without problems (all green).
 - It's highly recommened to use the Eclipse FindBugs plugin.

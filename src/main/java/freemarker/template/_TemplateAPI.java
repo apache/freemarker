@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -100,7 +100,7 @@ public class _TemplateAPI {
     }
     
     /**
-     * [FM 2.4] getSettingNames() becomes to public; remove this.
+     * [2.4] getSettingNames() becomes to public; remove this.
      */
     public static Set/*<String>*/ getConfigurationSettingNames(Configuration cfg, boolean camelCase) {
         return cfg.getSettingNames(camelCase);
@@ -142,7 +142,7 @@ public class _TemplateAPI {
             && tagSyntax != Configuration.ANGLE_BRACKET_TAG_SYNTAX) {
             throw new IllegalArgumentException("\"tag_syntax\" can only be set to one of these: "
                     + "Configuration.AUTO_DETECT_TAG_SYNTAX, Configuration.ANGLE_BRACKET_SYNTAX, "
-                    + "or Configuration.SQAUARE_BRACKET_SYNTAX");
+                    + "or Configuration.SQUARE_BRACKET_SYNTAX");
         }
     }
     

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -24,6 +24,8 @@ import java.io.Reader;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import freemarker.template.utility.NullArgumentException;
+
 /**
  * A {@link TemplateLoader} that uses a set of other loaders to load the templates. On every request, loaders are
  * queried in the order of their appearance in the array of loaders provided to the constructor. However, by default, if
@@ -35,31 +37,35 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MultiTemplateLoader implements StatefulTemplateLoader {
 
-    private final TemplateLoader[] loaders;
-    private final Map<String, TemplateLoader> lastLoaderForName = new ConcurrentHashMap<String, TemplateLoader>();
+    private final TemplateLoader[] templateLoaders;
+    private final Map<String, TemplateLoader> lastTemplateLoaderForName
+            = new ConcurrentHashMap<String, TemplateLoader>();
     
     private boolean sticky = true;
 
     /**
-     * Creates a new multi template Loader that will use the specified loaders.
+     * Creates a new instance that will use the specified template loaders.
      * 
-     * @param loaders
-     *            the loaders that are used to load templates.
+     * @param templateLoaders
+     *            the template loaders that are used to load templates, in the order as they will be searched
+     *            (except where {@linkplain #setSticky(boolean) stickiness} says otherwise).
      */
-    public MultiTemplateLoader(TemplateLoader[] loaders) {
-        this.loaders = loaders.clone();
+    public MultiTemplateLoader(TemplateLoader[] templateLoaders) {
+        NullArgumentException.check("templateLoaders", templateLoaders);
+        this.templateLoaders = templateLoaders.clone();
     }
 
     public Object findTemplateSource(String name)
             throws IOException {
+        TemplateLoader lastTemplateLoader = null;
         if (sticky) {
             // Use soft affinity - give the loader that last found this
             // resource a chance to find it again first.
-            TemplateLoader lastLoader = lastLoaderForName.get(name);
-            if (lastLoader != null) {
-                Object source = lastLoader.findTemplateSource(name);
+            lastTemplateLoader = lastTemplateLoaderForName.get(name);
+            if (lastTemplateLoader != null) {
+                Object source = lastTemplateLoader.findTemplateSource(name);
                 if (source != null) {
-                    return new MultiSource(source, lastLoader);
+                    return new MultiSource(source, lastTemplateLoader);
                 }
             }
         }
@@ -68,26 +74,22 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
         // again, try all loaders in order of appearance. If any manages
         // to find the resource, then associate it as the new affine loader
         // for this resource.
-        for (int i = 0; i < loaders.length; ++i) {
-            TemplateLoader loader = loaders[i];
-            Object source = loader.findTemplateSource(name);
-            if (source != null) {
-                if (sticky) {
-                    lastLoaderForName.put(name, loader);
+        for (TemplateLoader templateLoader : templateLoaders) {
+            if (lastTemplateLoader != templateLoader) {
+                Object source = templateLoader.findTemplateSource(name);
+                if (source != null) {
+                    if (sticky) {
+                        lastTemplateLoaderForName.put(name, templateLoader);
+                    }
+                    return new MultiSource(source, templateLoader);
                 }
-                return new MultiSource(source, loader);
             }
         }
 
         if (sticky) {
-            lastLoaderForName.remove(name);
+            lastTemplateLoaderForName.remove(name);
         }
         // Resource not found
-        return null;
-    }
-
-    private Object modifyForIcI(Object source) {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -106,12 +108,11 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
     }
 
     /**
-     * Clears the soft affinity memory, also resets all enclosed {@link StatefulTemplateLoader}-s.
+     * Clears the sickiness memory, also resets the state of all enclosed {@link StatefulTemplateLoader}-s.
      */
     public void resetState() {
-        lastLoaderForName.clear();
-        for (int i = 0; i < loaders.length; i++) {
-            TemplateLoader loader = loaders[i];
+        lastTemplateLoaderForName.clear();
+        for (TemplateLoader loader : templateLoaders) {
             if (loader instanceof StatefulTemplateLoader) {
                 ((StatefulTemplateLoader) loader).resetState();
             }
@@ -179,11 +180,11 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("MultiTemplateLoader(");
-        for (int i = 0; i < loaders.length; i++) {
+        for (int i = 0; i < templateLoaders.length; i++) {
             if (i != 0) {
                 sb.append(", ");
             }
-            sb.append("loader").append(i + 1).append(" = ").append(loaders[i]);
+            sb.append("loader").append(i + 1).append(" = ").append(templateLoaders[i]);
         }
         sb.append(")");
         return sb.toString();
@@ -195,7 +196,7 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
      * @since 2.3.23
      */
     public int getTemplateLoaderCount() {
-        return loaders.length;
+        return templateLoaders.length;
     }
 
     /**
@@ -205,10 +206,12 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
      *            Must be below {@link #getTemplateLoaderCount()}.
      */
     public TemplateLoader getTemplateLoader(int index) {
-        return loaders[index];
+        return templateLoaders[index];
     }
 
     /**
+     * Getter pair of {@link #setSticky(boolean)}.
+     * 
      * @since 2.3.24
      */
     public boolean isSticky() {
@@ -216,6 +219,10 @@ public class MultiTemplateLoader implements StatefulTemplateLoader {
     }
 
     /**
+     * Sets if for a name that was already loaded earlier the same {@link TemplateLoader} will be tried first, or
+     * we always try the {@link TemplateLoader}-s strictly in the order as it was specified in the constructor.
+     * The default is {@code true}.
+     * 
      * @since 2.3.24
      */
     public void setSticky(boolean sticky) {

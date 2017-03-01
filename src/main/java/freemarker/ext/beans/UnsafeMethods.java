@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -21,7 +21,6 @@ package freemarker.ext.beans;
 
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -34,6 +33,7 @@ import freemarker.template.utility.ClassUtil;
 
 class UnsafeMethods {
 
+    private static final String UNSAFE_METHODS_PROPERTIES = "unsafeMethods.properties";
     private static final Set UNSAFE_METHODS = createUnsafeMethodsSet();
     
     private UnsafeMethods() { }
@@ -45,36 +45,37 @@ class UnsafeMethods {
     private static final Set createUnsafeMethodsSet() {
         Properties props = new Properties();
         InputStream in = BeansWrapper.class.getResourceAsStream("unsafeMethods.properties");
-        if (in != null) {
-            String methodSpec = null;
+        if (in == null) {
+            throw new IllegalStateException("Class loader resource not found: "
+                        + BeansWrapper.class.getPackage().getName() + UNSAFE_METHODS_PROPERTIES);
+        }
+        String methodSpec = null;
+        try {
             try {
+                props.load(in);
+            } finally {
+                in.close();
+            }
+            Set set = new HashSet(props.size() * 4 / 3, 1f);
+            Map primClasses = createPrimitiveClassesMap();
+            for (Iterator iterator = props.keySet().iterator(); iterator.hasNext(); ) {
+                methodSpec = (String) iterator.next();
                 try {
-                    props.load(in);
-                } finally {
-                    in.close();
-                }
-                Set set = new HashSet(props.size() * 4 / 3, 1f);
-                Map primClasses = createPrimitiveClassesMap();
-                for (Iterator iterator = props.keySet().iterator(); iterator.hasNext(); ) {
-                    methodSpec = (String) iterator.next();
-                    try {
-                        set.add(parseMethodSpec(methodSpec, primClasses));
-                    } catch (ClassNotFoundException e) {
-                        if (ClassIntrospector.DEVELOPMENT_MODE) {
-                            throw e;
-                        }
-                    } catch (NoSuchMethodException e) {
-                        if (ClassIntrospector.DEVELOPMENT_MODE) {
-                            throw e;
-                        }
+                    set.add(parseMethodSpec(methodSpec, primClasses));
+                } catch (ClassNotFoundException e) {
+                    if (ClassIntrospector.DEVELOPMENT_MODE) {
+                        throw e;
+                    }
+                } catch (NoSuchMethodException e) {
+                    if (ClassIntrospector.DEVELOPMENT_MODE) {
+                        throw e;
                     }
                 }
-                return set;
-            } catch (Exception e) {
-                throw new RuntimeException("Could not load unsafe method " + methodSpec + " " + e.getClass().getName() + " " + e.getMessage());
             }
+            return set;
+        } catch (Exception e) {
+            throw new RuntimeException("Could not load unsafe method " + methodSpec + " " + e.getClass().getName() + " " + e.getMessage());
         }
-        return Collections.EMPTY_SET;
     }
 
     private static Method parseMethodSpec(String methodSpec, Map primClasses)

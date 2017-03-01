@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -60,7 +60,6 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateHashModelEx;
-import freemarker.template.TemplateHashModelEx2.KeyValuePairIterator;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
@@ -2405,7 +2404,7 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Emulates <code>include</code> directive, except that <code>name</code> must be tempate root relative.
+     * Emulates <code>include</code> directive, except that <code>name</code> must be template root relative.
      *
      * <p>
      * It's the same as <code>include(getTemplateForInclusion(name, encoding, parse))</code>. But, you may want to
@@ -2611,7 +2610,7 @@ public final class Environment extends Configurable {
             // that (at least in 2.3.x) the name used for eager import namespace key isn't the template.sourceName, but
             // the looked up name (template.name), which we can get quickly:
             TemplateNameFormat tnf = getConfiguration().getTemplateNameFormat();
-            templateName = _CacheAPI.normalizeAbsoluteName(tnf, _CacheAPI.toAbsoluteName(tnf, null, templateName));
+            templateName = _CacheAPI.normalizeRootBasedName(tnf, templateName);
         }
         
         if (loadedLibs == null) {
@@ -2668,12 +2667,13 @@ public final class Environment extends Configurable {
      * template refers to another template.
      * 
      * @param baseName
-     *            The name to which relative {@code targetName}-s are relative to. Maybe {@code null}, which usually
-     *            means that the base is the root "directory". Assuming {@link TemplateNameFormat#DEFAULT_2_3_0} or
+     *            The name to which relative {@code targetName}-s are relative to. Maybe {@code null} (happens when
+     *            resolving names in nameless templates), which means that the base is the root "directory", and so the
+     *            {@code targetName} is returned without change. Assuming {@link TemplateNameFormat#DEFAULT_2_3_0} or
      *            {@link TemplateNameFormat#DEFAULT_2_4_0}, the rules are as follows. If you want to specify a base
      *            directory here, it must end with {@code "/"}. If it doesn't end with {@code "/"}, it's parent
      *            directory will be used as the base path. Might starts with a scheme part (like {@code "foo://"}, or
-     *            with {@link TemplateNameFormat#DEFAULT_2_4_0} even just {@code "foo:"}).
+     *            with {@link TemplateNameFormat#DEFAULT_2_4_0} even just with {@code "foo:"}).
      * @param targetName
      *            The name of the template, which is either a relative or absolute name. Assuming
      *            {@link TemplateNameFormat#DEFAULT_2_3_0} or {@link TemplateNameFormat#DEFAULT_2_4_0}, the rules are as
@@ -2688,12 +2688,11 @@ public final class Environment extends Configurable {
      */
     public String toFullTemplateName(String baseName, String targetName)
             throws MalformedTemplateNameException {
-        if (isClassicCompatible()) {
-            // Early FM only had absolute names.
+        if (isClassicCompatible() /* FM1 only had absolute names */ || baseName == null) {
             return targetName;
         }
 
-        return _CacheAPI.toAbsoluteName(configuration.getTemplateNameFormat(), baseName, targetName);
+        return _CacheAPI.toRootBasedName(configuration.getTemplateNameFormat(), baseName, targetName);
     }
 
     String renderElementToString(TemplateElement te) throws IOException, TemplateException {

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,7 @@ import org.w3c.dom.NodeList;
 
 import freemarker.core.Environment;
 import freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
+import freemarker.template.Configuration;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleScalar;
 import freemarker.template.SimpleSequence;
@@ -40,15 +41,19 @@ import freemarker.template.TemplateNodeModel;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template.utility.StringUtil;
 
 /**
  * Used when the result set contains 0 or multiple nodes; shouldn't be used when you have exactly 1 node. For exactly 1
  * node, use {@link NodeModel#wrap(Node)}, because {@link NodeModel} subclasses can have extra features building on that
  * restriction, like single elements with text content can be used as FTL string-s.
+ * 
+ * <p>
+ * This class is not guaranteed to be thread safe, so instances of this shouldn't be used as shared variable (
+ * {@link Configuration#setSharedVariable(String, Object)}).
  */
 class NodeListModel extends SimpleSequence implements TemplateHashModel, _UnexpectedTypeErrorExplainerTemplateModel {
     
+    // [2.4] make these private
     NodeModel contextNode;
     XPathSupport xpathSupport;
     
@@ -61,8 +66,8 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
         }
     };
     
-    NodeListModel(Node node) {
-        this(NodeModel.wrap(node));
+    NodeListModel(Node contextNode) {
+        this(NodeModel.wrap(contextNode));
     }
     
     NodeListModel(NodeModel contextNode) {
@@ -118,21 +123,34 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
             NodeModel nm = (NodeModel) get(0);
             return nm.get(key);
         }
-        if (key.startsWith("@@") &&
-            (key.equals("@@markup") 
-            || key.equals("@@nested_markup") 
-            || key.equals("@@text"))) {
-            StringBuilder result = new StringBuilder();
-            for (int i = 0; i < size(); i++) {
-                NodeModel nm = (NodeModel) get(i);
-                TemplateScalarModel textModel = (TemplateScalarModel) nm.get(key);
-                result.append(textModel.getAsString());
+        if (key.startsWith("@@")) {
+            if (key.equals(AtAtKey.MARKUP.getKey()) 
+                    || key.equals(AtAtKey.NESTED_MARKUP.getKey()) 
+                    || key.equals(AtAtKey.TEXT.getKey())) {
+                StringBuilder result = new StringBuilder();
+                for (int i = 0; i < size(); i++) {
+                    NodeModel nm = (NodeModel) get(i);
+                    TemplateScalarModel textModel = (TemplateScalarModel) nm.get(key);
+                    result.append(textModel.getAsString());
+                }
+                return new SimpleScalar(result.toString());
+            } else if (key.length() != 2 /* to allow "@@" to fall through */) {
+                // As @@... would cause exception in the XPath engine, we throw a nicer exception now. 
+                if (AtAtKey.containsKey(key)) {
+                    throw new TemplateModelException(
+                            "\"" + key + "\" is only applicable to a single XML node, but it was applied on "
+                            + (size() != 0
+                                    ? size() + " XML nodes (multiple matches)."
+                                    : "an empty list of XML nodes (no matches)."));
+                } else {
+                    throw new TemplateModelException("Unsupported @@ key: " + key);
+                }
             }
-            return new SimpleScalar(result.toString());
         }
-        if (StringUtil.isXMLID(key) 
-            || ((key.startsWith("@") && StringUtil.isXMLID(key.substring(1))))
-            || key.equals("*") || key.equals("**") || key.equals("@@") || key.equals("@*")) {
+        if (DomStringUtil.isXMLNameLike(key) 
+                || ((key.startsWith("@")
+                        && (DomStringUtil.isXMLNameLike(key, 1)  || key.equals("@@") || key.equals("@*"))))
+                || key.equals("*") || key.equals("**")) {
             NodeListModel result = new NodeListModel(contextNode);
             for (int i = 0; i < size(); i++) {
                 NodeModel nm = (NodeModel) get(i);
@@ -155,12 +173,11 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
         if (xps != null) {
             Object context = (size() == 0) ? null : rawNodeList(); 
             return xps.executeQuery(context, key);
+        } else {
+            throw new TemplateModelException(
+                    "Can't try to resolve the XML query key, because no XPath support is available. "
+                    + "This is either malformed or an XPath expression: " + key);
         }
-        throw new TemplateModelException("Key: '" + key + "' is not legal for a node sequence ("
-                + this.getClass().getName() + "). This node sequence contains " + size() + " node(s). "
-                + "Some keys are valid only for node sequences of size 1. "
-                + "If you use Xalan (instead of Jaxen), XPath expression keys work only with "
-                + "node lists of size 1.");
     }
     
     private List rawNodeList() throws TemplateModelException {

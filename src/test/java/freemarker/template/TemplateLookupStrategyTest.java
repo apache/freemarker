@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -67,8 +67,8 @@ public class TemplateLookupStrategyTest {
             fail();
         } catch (TemplateNotFoundException e) {
             assertEquals("missing.ftl", e.getTemplateName());
-            assertEquals(ImmutableList.of("aa/missing.ftl", "missing.ftl"), tl.getTemplatesTried());
-            tl.clear();
+            assertEquals(ImmutableList.of("aa/missing.ftl", "missing.ftl"), tl.getNamesSearched());
+            tl.clearEvents();
             cfg.clearTemplateCache();
         }
         
@@ -78,8 +78,8 @@ public class TemplateLookupStrategyTest {
             assertEquals("aa/test.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
             assertNull(t.getCustomLookupCondition());
-            assertEquals(ImmutableList.of("aa/test.ftl"), tl.getTemplatesTried());
-            tl.clear();
+            assertEquals(ImmutableList.of("aa/test.ftl"), tl.getNamesSearched());
+            tl.clearEvents();
             cfg.clearTemplateCache();
         }
     }
@@ -108,8 +108,8 @@ public class TemplateLookupStrategyTest {
                             "missing_aa_BB.ftl",
                             "missing_aa.ftl",
                             "missing.ftl"),
-                    tl.getTemplatesTried());
-            tl.clear();
+                    tl.getNamesSearched());
+            tl.clearEvents();
             cfg.clearTemplateCache();
         }
         
@@ -121,8 +121,8 @@ public class TemplateLookupStrategyTest {
             assertEquals("missing.ftl", e.getTemplateName());
             assertEquals(
                     ImmutableList.of("missing_xx.ftl", "missing.ftl"),
-                    tl.getTemplatesTried());
-            tl.clear();
+                    tl.getNamesSearched());
+            tl.clearEvents();
             cfg.clearTemplateCache();
         }
         
@@ -134,8 +134,8 @@ public class TemplateLookupStrategyTest {
             assertEquals("missing.ftl", e.getTemplateName());
             assertEquals(
                     ImmutableList.of("missing.ftl"),
-                    tl.getTemplatesTried());
-            tl.clear();
+                    tl.getNamesSearched());
+            tl.clearEvents();
             cfg.clearTemplateCache();
         }
         cfg.setLocalizedLookup(true);
@@ -147,8 +147,8 @@ public class TemplateLookupStrategyTest {
             assertEquals("_a_b_.ftl", e.getTemplateName());
             assertEquals(
                     ImmutableList.of("_a_b__xx_YY.ftl", "_a_b__xx.ftl", "_a_b_.ftl"),
-                    tl.getTemplatesTried());
-            tl.clear();
+                    tl.getNamesSearched());
+            tl.clearEvents();
             cfg.clearTemplateCache();
         }
 
@@ -160,9 +160,9 @@ public class TemplateLookupStrategyTest {
                 assertEquals("test_aa_BB_CC_DD.ftl", t.getSourceName());
                 assertEquals(locale, t.getLocale());
                 assertNull(t.getCustomLookupCondition());
-                assertEquals(ImmutableList.of("test_aa_BB_CC_DD.ftl"), tl.getTemplatesTried());
+                assertEquals(ImmutableList.of("test_aa_BB_CC_DD.ftl"), tl.getNamesSearched());
                 assertNull(t.getCustomLookupCondition());
-                tl.clear();
+                tl.clearEvents();
                 cfg.clearTemplateCache();
             }
             
@@ -173,8 +173,8 @@ public class TemplateLookupStrategyTest {
                 assertEquals("test_aa_BB_CC.ftl", t.getSourceName());
                 assertEquals(locale, t.getLocale());
                 assertNull(t.getCustomLookupCondition());
-                assertEquals(ImmutableList.of("test_aa_BB_CC_XX.ftl", "test_aa_BB_CC.ftl"), tl.getTemplatesTried());
-                tl.clear();
+                assertEquals(ImmutableList.of("test_aa_BB_CC_XX.ftl", "test_aa_BB_CC.ftl"), tl.getNamesSearched());
+                tl.clearEvents();
                 cfg.clearTemplateCache();
             }
             
@@ -187,8 +187,8 @@ public class TemplateLookupStrategyTest {
                 assertNull(t.getCustomLookupCondition());
                 assertEquals(
                         ImmutableList.of("test_aa_BB_XX_XX.ftl", "test_aa_BB_XX.ftl", "test_aa_BB.ftl"),
-                        tl.getTemplatesTried());
-                tl.clear();
+                        tl.getNamesSearched());
+                tl.clearEvents();
                 cfg.clearTemplateCache();
             }
     
@@ -202,8 +202,8 @@ public class TemplateLookupStrategyTest {
                 assertNull(t.getCustomLookupCondition());
                 assertEquals(
                         ImmutableList.of("test.ftl"),
-                        tl.getTemplatesTried());
-                tl.clear();
+                        tl.getNamesSearched());
+                tl.clearEvents();
                 cfg.clearTemplateCache();
                 cfg.setLocalizedLookup(true);
             }
@@ -217,8 +217,8 @@ public class TemplateLookupStrategyTest {
                 assertNull(t.getCustomLookupCondition());
                 assertEquals(
                         ImmutableList.of("test_aa_XX_XX_XX.ftl", "test_aa_XX_XX.ftl", "test_aa_XX.ftl", "test_aa.ftl"),
-                        tl.getTemplatesTried());
-                tl.clear();
+                        tl.getNamesSearched());
+                tl.clearEvents();
                 cfg.clearTemplateCache();
             }
             
@@ -232,8 +232,8 @@ public class TemplateLookupStrategyTest {
                 assertEquals(
                         ImmutableList.of(
                                 "test_xx_XX_XX_XX.ftl", "test_xx_XX_XX.ftl", "test_xx_XX.ftl", "test_xx.ftl", "test.ftl"),
-                        tl.getTemplatesTried());
-                tl.clear();
+                        tl.getNamesSearched());
+                tl.clearEvents();
                 cfg.clearTemplateCache();
             }
             
@@ -247,8 +247,8 @@ public class TemplateLookupStrategyTest {
                 assertEquals(
                         ImmutableList.of(
                             "test_xx_BB_CC_DD.ftl", "test_xx_BB_CC.ftl", "test_xx_BB.ftl", "test_xx.ftl", "test.ftl"),
-                        tl.getTemplatesTried());
-                tl.clear();
+                        tl.getNamesSearched());
+                tl.clearEvents();
                 cfg.clearTemplateCache();
             }
         }
@@ -276,8 +276,8 @@ public class TemplateLookupStrategyTest {
                     ImmutableList.of(
                         "x/y/sub/i_xx.ftl", "x/sub/i_xx.ftl", "sub/i_xx.ftl",
                         "x/y/sub/i.ftl", "x/sub/i.ftl"),
-                    tl.getTemplatesTried());
-            tl.clear();
+                    tl.getNamesSearched());
+            tl.clearEvents();
             cfg.clearTemplateCache();
         }
 
@@ -291,8 +291,8 @@ public class TemplateLookupStrategyTest {
                     ImmutableList.of(
                         "a/b/sub/i_xx.ftl", "a/sub/i_xx.ftl", "sub/i_xx.ftl",
                         "a/b/sub/i.ftl", "a/sub/i.ftl", "sub/i.ftl"),
-                    tl.getTemplatesTried());
-            tl.clear();
+                    tl.getNamesSearched());
+            tl.clearEvents();
             cfg.clearTemplateCache();
         }
     }
@@ -344,15 +344,15 @@ public class TemplateLookupStrategyTest {
             assertEquals(tAtFooComContent, t.toString());
             assertEquals(
                     ImmutableList.of("@foo.com/t_xx.ftl", "@foo.com/t.ftl"),
-                    tl.getTemplatesTried());
+                    tl.getNamesSearched());
             
-            tl.clear();
+            tl.clearEvents();
             assertOutputEquals(tAtFooComWithoutIncludeContent + iAtFooComContent, t);
             assertEquals(
                     ImmutableList.of("@foo.com/i_xx.ftl", "@foo.com/i.ftl"),
-                    tl.getTemplatesTried());
+                    tl.getNamesSearched());
             
-            tl.clear();
+            tl.clearEvents();
             cfg.clearTemplateCache();
         }
 
@@ -367,17 +367,17 @@ public class TemplateLookupStrategyTest {
             assertEquals(tAtBarComContent, t.toString());
             assertEquals(
                     ImmutableList.of("@bar.com/t_xx.ftl", "@bar.com/t.ftl"),
-                    tl.getTemplatesTried());
+                    tl.getNamesSearched());
             
-            tl.clear();
+            tl.clearEvents();
             assertOutputEquals(tAtBarComWithoutIncludeContent + iXxAtDefaultContent, t);
             assertEquals(
                     ImmutableList.of(
                             "@bar.com/i_xx.ftl", "@bar.com/i.ftl",
                             "@default/i_xx.ftl"),
-                    tl.getTemplatesTried());
+                    tl.getNamesSearched());
             
-            tl.clear();
+            tl.clearEvents();
             cfg.clearTemplateCache();
         }
         
@@ -394,15 +394,15 @@ public class TemplateLookupStrategyTest {
                     ImmutableList.of(
                             "@baaz.com/t_xx_YY.ftl", "@baaz.com/t_xx.ftl", "@baaz.com/t.ftl",
                             "@default/t_xx_YY.ftl", "@default/t_xx.ftl", "@default/t.ftl"),
-                    tl.getTemplatesTried());
+                    tl.getNamesSearched());
             
-            tl.clear();
+            tl.clearEvents();
             assertOutputEquals(tAtDefaultWithoutIncludeContent + iAtBaazComContent, t);
             assertEquals(
                     ImmutableList.of("@baaz.com/i_xx_YY.ftl", "@baaz.com/i_xx.ftl", "@baaz.com/i.ftl"),
-                    tl.getTemplatesTried());
+                    tl.getNamesSearched());
             
-            tl.clear();
+            tl.clearEvents();
             cfg.clearTemplateCache();
         }
         
@@ -419,9 +419,9 @@ public class TemplateLookupStrategyTest {
                     ImmutableList.of(
                             "@nosuch.com/i_xx_YY.ftl", "@nosuch.com/i_xx.ftl", "@nosuch.com/i.ftl",
                             "@default/i_xx_YY.ftl", "@default/i_xx.ftl"),
-                    tl.getTemplatesTried());
+                    tl.getNamesSearched());
             
-            tl.clear();
+            tl.clearEvents();
             cfg.clearTemplateCache();
         }
 
@@ -437,9 +437,9 @@ public class TemplateLookupStrategyTest {
             assertEquals(iAtDefaultContent, t.toString());
             assertEquals(
                     ImmutableList.of("@nosuch.com/i.ftl", "@default/i.ftl"),
-                    tl.getTemplatesTried());
+                    tl.getNamesSearched());
             
-            tl.clear();
+            tl.clearEvents();
             cfg.setLocalizedLookup(true);
             cfg.clearTemplateCache();
         }
@@ -454,9 +454,9 @@ public class TemplateLookupStrategyTest {
                             "@foo.com/t2_xx.ftl", "@foo.com/t2.ftl",
                             "@foo.com/i2_xx.ftl", "@foo.com/i2.ftl", "@default/i2_xx.ftl", "@default/i2.ftl",
                             "@foo.com/i3_xx.ftl"),
-                    tl.getTemplatesTried());
+                    tl.getNamesSearched());
             
-            tl.clear();
+            tl.clearEvents();
             cfg.clearTemplateCache();
         }
         
@@ -470,9 +470,9 @@ public class TemplateLookupStrategyTest {
                             "@foo.com/t2_yy.ftl", "@foo.com/t2.ftl",
                             "@foo.com/i2_yy.ftl", "@foo.com/i2.ftl", "@default/i2_yy.ftl", "@default/i2.ftl",
                             "@foo.com/i3_yy.ftl", "@foo.com/i3.ftl"),
-                    tl.getTemplatesTried());
+                    tl.getNamesSearched());
             
-            tl.clear();
+            tl.clearEvents();
             cfg.clearTemplateCache();
         }
         
@@ -487,9 +487,9 @@ public class TemplateLookupStrategyTest {
                             "@foo.com/t2.ftl",
                             "@foo.com/i2.ftl", "@default/i2.ftl",
                             "@foo.com/i3.ftl"),
-                    tl.getTemplatesTried());
+                    tl.getNamesSearched());
             
-            tl.clear();
+            tl.clearEvents();
             cfg.setLocalizedLookup(true);
             cfg.clearTemplateCache();
         }
@@ -500,9 +500,9 @@ public class TemplateLookupStrategyTest {
             cfg.getTemplate("i3.ftl", locale, domain, "utf-8", true, false); 
             assertEquals(
                     ImmutableList.of("@foo.com/i3_xx.ftl"),
-                    tl.getTemplatesTried());
+                    tl.getNamesSearched());
             
-            tl.clear();
+            tl.clearEvents();
             cfg.clearTemplateCache();
         }
         
@@ -519,9 +519,9 @@ public class TemplateLookupStrategyTest {
                     ImmutableList.of(
                             "@bar.com/i3_xx.ftl", "@bar.com/i3.ftl",
                             "@default/i3_xx.ftl", "@default/i3.ftl"),
-                    tl.getTemplatesTried());
+                    tl.getNamesSearched());
             
-            tl.clear();
+            tl.clearEvents();
             cfg.clearTemplateCache();
         }
         
@@ -546,8 +546,8 @@ public class TemplateLookupStrategyTest {
                             "missing_aa_BB.txt",
                             "missing_aa.txt",
                             "missing.txt"),
-                    tl.getTemplatesTried());
-            tl.clear();
+                    tl.getNamesSearched());
+            tl.clearEvents();
             cfg.clearTemplateCache();
         }
         
@@ -559,7 +559,7 @@ public class TemplateLookupStrategyTest {
                     ImmutableList.of(
                             "test_aa_BB.txt",
                             "test_aa.txt"),
-                    tl.getTemplatesTried());
+                    tl.getNamesSearched());
         }
     }
 

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -155,7 +155,8 @@ public class TemplateCache {
 
     /**
      * @param templateLoader
-     *            The {@link TemplateLoader} to use. Can't be {@code null}.
+     *            The {@link TemplateLoader} to use. Can be {@code null}, though then every request will result in
+     *            {@link TemplateNotFoundException}.
      * @param cacheStorage
      *            The {@link CacheStorage} to use. Can't be {@code null}.
      * @param templateLookupStrategy
@@ -274,7 +275,7 @@ public class TemplateCache {
         NullArgumentException.check("encoding", encoding);
         
         try {
-            name = templateNameFormat.normalizeAbsoluteName(name);
+            name = templateNameFormat.normalizeRootBasedName(name);
         } catch (MalformedTemplateNameException e) {
             // If we don't have to emulate backward compatible behavior, then just rethrow it: 
             if (templateNameFormat != TemplateNameFormat.DEFAULT_2_3_0
@@ -686,7 +687,7 @@ public class TemplateCache {
         if (encoding == null) {
             throw new IllegalArgumentException("Argument \"encoding\" can't be null");
         }
-        name = templateNameFormat.normalizeAbsoluteName(name);
+        name = templateNameFormat.normalizeRootBasedName(name);
         if (name != null && templateLoader != null) {
             boolean debug = LOG.isDebugEnabled();
             String debugName = debug
@@ -701,7 +702,9 @@ public class TemplateCache {
                     storage.remove(tk);
                 }
             }
-            LOG.debug(debugName + " was removed from the cache, if it was there");
+            if (debug) {
+                LOG.debug(debugName + " was removed from the cache, if it was there");
+            }
         }
     }
 

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -33,6 +33,7 @@ import javax.servlet.ServletContext;
 import freemarker.log.Logger;
 import freemarker.template.Configuration;
 import freemarker.template.utility.CollectionUtils;
+import freemarker.template.utility.NullArgumentException;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -76,12 +77,8 @@ public class WebappTemplateLoader implements TemplateLoader {
      *            the base path to template resources.
      */
     public WebappTemplateLoader(ServletContext servletContext, String subdirPath) {
-        if (servletContext == null) {
-            throw new IllegalArgumentException("servletContext == null");
-        }
-        if (subdirPath == null) {
-            throw new IllegalArgumentException("path == null");
-        }
+        NullArgumentException.check("servletContext", servletContext);
+        NullArgumentException.check("subdirPath", subdirPath);
 
         subdirPath = subdirPath.replace('\\', '/');
         if (!subdirPath.endsWith("/")) {

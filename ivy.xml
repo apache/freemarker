@@ -76,8 +76,6 @@
         description="to be used in IDE-s (maybe with the Ivy plugin)"
     />
     
-    <conf name="retrotranslate" description="for retro-translation" />
-    
     <conf name="parser" extends="default" description="for generating parser" />
     
     <conf name="manual" description="for generating the manual with Docgen" />
@@ -85,12 +83,6 @@
     <conf name="rat" description="for generating the Rat report" />
 
     <conf name="bnd" description="for creating OSGi bundle" />
-    
-    <conf name="example.servlet" description="servlet-based examples" />
-    <conf name="example.webapp1" extends="example.servlet" />
-    <conf name="example.webapp2" extends="example.servlet" />
-    <conf name="example.struts-webapp" extends="example.servlet" />
-    <conf name="example.ant" />
   </configurations>
   <publications>
     <artifact name="freemarker" type="jar" conf="runtime" ext="jar" />
@@ -112,8 +104,8 @@
       <exclude org="xml-apis" module="xml-apis" />
     </dependency>
     
-    <dependency org="javax.servlet.jsp" name="jsp-api" rev="2.0" conf="build.jsp2.0->default; example.struts-webapp->default" />
-    <dependency org="javax.servlet" name="servlet-api" rev="2.4" conf="build.jsp2.0->default; example.servlet->default" />
+    <dependency org="javax.servlet.jsp" name="jsp-api" rev="2.0" conf="build.jsp2.0->default" />
+    <dependency org="javax.servlet" name="servlet-api" rev="2.4" conf="build.jsp2.0->default" />
     <dependency org="javax.servlet.jsp" name="jsp-api" rev="2.1" conf="build.jsp2.1->default" />
     <dependency org="javax.servlet" name="servlet-api" rev="2.5" conf="build.jsp2.1->default" />
     

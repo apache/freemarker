@@ -1937,9 +1937,9 @@ The average of the price of a python and an elephant is:
             interpolations is
             <literal>${<replaceable>expression</replaceable>}</literal> where
             expression gives the value you want to insert into the output as
-            text. So <literal>${(5 + 8)/2}</literal> prints ``6.5'' to the
-            output (or possibly ``6,5'' if the language of your output is not
-            US English).</para>
+            text. So <literal>${(5 + 8)/2}</literal> prints <quote>6.5</quote>
+            to the output (or possibly <quote>6,5</quote> if the language of
+            your output is not US English).</para>
           </listitem>
 
           <listitem>
@@ -3398,7 +3398,7 @@ ${12 % -5} &lt;#-- Prints 2 --&gt;
           (or <literal>=</literal> as a <emphasis>deprecated</emphasis>
           alternative) To test two values for inequality you use
           <literal>!=</literal>. For example, assume that
-          <literal>user</literal> is ``Big Joe'':</para>
+          <literal>user</literal> is <quote>Big Joe</quote>:</para>
 
           <programlisting role="template">&lt;#if <emphasis>user == "Big Joe"</emphasis>&gt;
   It is Big Joe
@@ -3409,8 +3409,8 @@ ${12 % -5} &lt;#-- Prints 2 --&gt;
 
           <para>The <literal>user == "Big Joe"</literal> expression in the
           <literal>&lt;#if ...&gt;</literal> will evaluate to the boolean
-          <literal>true</literal>, so the above will say ``It is Big
-          Joe''.</para>
+          <literal>true</literal>, so the above will say <quote>It is Big
+          Joe</quote>.</para>
 
           <para>The expressions on both sides of the <literal>==</literal> or
           <literal>!=</literal> must evaluate to a scalar (not a sequence or
@@ -3577,7 +3577,7 @@ ${testSequence?size}
 ${testSequence?join(", ")}</programlisting>
 
           <para>Assuming that <literal>testString</literal> stores the string
-          ``Tom &amp; Jerry'', and testSequnce stores the strings
+          <quote>Tom &amp; Jerry</quote>, and testSequnce stores the strings
           <quote>foo</quote>, <quote>bar</quote> and <quote>baz</quote>, the
           output will be:</para>
 
@@ -3994,7 +3994,7 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
           precedence. Operators with higher precedence are evaluated before
           operators with a relatively lower precedence. Operators on the same
           line have equal precedence. When binary operators (operators with
-          two ``parameters'', as <literal>+</literal> and
+          two <quote>parameters</quote>, as <literal>+</literal> and
           <literal>-</literal>) of equal precedence appear next to each other,
           they are evaluated in left-to-right order.</para>
 
@@ -4397,7 +4397,7 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
           <para>A macro is a template fragment associated with a variable. You
           can use that variable in your template as a user-defined directive,
           so it helps in repetitive tasks. For example, this creates a macro
-          variable that prints a big ``Hello Joe!'':</para>
+          variable that prints a big <quote>Hello Joe!</quote>:</para>
 
           <programlisting role="template"><emphasis>&lt;#macro greet&gt;</emphasis>
   &lt;font size="+2"&gt;Hello Joe!&lt;/font&gt;
@@ -4451,8 +4451,8 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
           <title>Parameters</title>
 
           <para>Let's improve the <literal>greet</literal> macro so it can use
-          arbitrary name, not only ``Joe''. For this purpose you can use
-          <emphasis role="term">parameters</emphasis>. You define the
+          arbitrary name, not only <quote>Joe</quote>. For this purpose you
+          can use <emphasis role="term">parameters</emphasis>. You define the
           parameters after the name of the macro in the
           <literal>macro</literal> directive. Here we define one parameter for
           the <literal>greet</literal> macro,
@@ -9616,7 +9616,7 @@ Configuration cfg = ...;
 ...
 Map&lt;String, TemplateNumberFormatFactory&gt; customNumberFormats = ...;
 ...
-customNumberFormats.put("hex", BaseNTemplateNumberFormatFactory.INSTANCE);
+customNumberFormats.put("base", BaseNTemplateNumberFormatFactory.INSTANCE);
 ...
 cfg.setCustomNumberFormats(customNumberFormats);</programlisting>
 
@@ -11142,19 +11142,20 @@ TemplateHashModel roundingModeEnums =
 
         <para>But, probably you want to use FreeMarker with some already
         existing Web application framework. Many frameworks rely on the
-        ``Model 2'' architecture, where JSP pages handle presentation. If you
-        use such a framework (for example, <link
+        <quote>Model 2</quote> architecture, where JSP pages handle
+        presentation. If you use such a framework (for example, <link
         xlink:href="http://jakarta.apache.org/struts">Apache Struts</link>),
         then read on. For other frameworks please refer to the documentation
         of the framework.</para>
 
         <section xml:id="pgui_misc_servlet_model2">
-          <title>Using FreeMarker for ``Model 2''</title>
+          <title>Using FreeMarker for <quote>Model 2</quote></title>
 
           <para>Many frameworks follow the strategy that the HTTP request is
-          dispatched to user-defined ``action'' classes that put data into
-          <literal>ServletContext</literal>, <literal>HttpSession</literal>
-          and <literal>HttpServletRequest</literal> objects as attributes, and
+          dispatched to user-defined <quote>action</quote> classes that put
+          data into <literal>ServletContext</literal>,
+          <literal>HttpSession</literal> and
+          <literal>HttpServletRequest</literal> objects as attributes, and
           then the request is forwarded by the framework to a JSP page (the
           view) that will generate the HTML page using the data sent with the
           attributes. This is often referred as Model 2.</para>
@@ -11642,15 +11643,16 @@ ${bar?trim}</programlisting>
           </note>
 
           <para>Since JSP custom tags are written to operate in JSP
-          environment, they assume that variables (often referred as ``beans''
-          in JSP world) are stored in 4 scopes: page scope, request scope,
-          session scope and application scope. FTL has no such notation (the 4
-          scopes), but <literal>FreemarkerServlet</literal> provides emulated
-          JSP environment for the custom JSP tags, which maintains
-          correspondence between the ``beans'' of JSP scopes and FTL
-          variables. For the custom JSP tags, the request, session and
-          application scopes are exactly the same as with real JSP: the
-          attributes of the <literal>javax.servlet.ServletContext</literal>,
+          environment, they assume that variables (often referred as
+          <quote>beans</quote> in JSP world) are stored in 4 scopes: page
+          scope, request scope, session scope and application scope. FTL has
+          no such notation (the 4 scopes), but
+          <literal>FreemarkerServlet</literal> provides emulated JSP
+          environment for the custom JSP tags, which maintains correspondence
+          between the <quote>beans</quote> of JSP scopes and FTL variables.
+          For the custom JSP tags, the request, session and application scopes
+          are exactly the same as with real JSP: the attributes of the
+          <literal>javax.servlet.ServletContext</literal>,
           <literal>HttpSession</literal> and <literal>ServletRequest</literal>
           objects. From the FTL side you see these 3 scopes together as the
           data-model, as it was explained earlier. The page scope corresponds
@@ -11672,9 +11674,10 @@ ${bar?trim}</programlisting>
           since custom tags are accessible in FTL templates as user-defined
           FTL directives, you have to use the FTL syntax rules inside the
           custom tags, not the JSP rules. So when you specify the value of an
-          ``attribute'', then on the right side of the <literal>=</literal>
-          there is an <link linkend="dgui_template_exp">FTL expression</link>.
-          Thus, <emphasis>you must not quote boolean and numerical parameter
+          <quote>attribute</quote>, then on the right side of the
+          <literal>=</literal> there is an <link
+          linkend="dgui_template_exp">FTL expression</link>. Thus,
+          <emphasis>you must not quote boolean and numerical parameter
           values</emphasis> (e.g. <literal>&lt;@tiles.insert
           page="/layout.ftl" flush=true/&gt;</literal>), or they are
           interpreted as string values, and this will cause a type mismatch
@@ -12157,7 +12160,7 @@ grant codeBase "file:/path/to/freemarker.jar"
           <primary>ant task</primary>
         </indexterm>
 
-        <para>There are two ``FreeMarker Ant tasks'' that we know
+        <para>There are two <quote>FreeMarker Ant tasks</quote> that we know
         about:</para>
 
         <itemizedlist>
@@ -12647,6 +12650,11 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link
+            linkend="ref_builtin_next_sibling">next_sibling</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_no_esc">no_esc</link></para>
           </listitem>
 
@@ -12676,6 +12684,11 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link linkend="ref_builtin_parent">parent</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref_builtin_previous_sibling">previous_sibling</link></para>
           </listitem>
 
           <listitem>
@@ -12895,7 +12908,7 @@ grant codeBase "file:/path/to/freemarker.jar"
           </indexterm>
 
           <para>The string with the very first word of the string capitalized.
-          For the precise meaning of ``word'' see the <link
+          For the precise meaning of <quote>word</quote> see the <link
           linkend="ref_builtin_word_list">word_list built-in</link>.
           Example:</para>
 
@@ -12921,8 +12934,9 @@ GreEN mouse
           </indexterm>
 
           <para>The string with all words capitalized. For the precise meaning
-          of ``word'' see the <link linkend="ref_builtin_word_list">word_list
-          built-in</link>. Example:</para>
+          of <quote>word</quote> see the <link
+          linkend="ref_builtin_word_list">word_list built-in</link>.
+          Example:</para>
 
           <programlisting role="template">${"  green  mouse"?capitalize}
 ${"GreEN mouse"?capitalize}</programlisting>
@@ -13765,8 +13779,8 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
             <primary>matches built-in</primary>
           </indexterm>
 
-          <para>This is a ``power user'' built-in. Ignore it if you don't know
-          <link linkend="gloss.regularExpression">regular
+          <para>This is a <quote>power user</quote> built-in. Ignore it if you
+          don't know <link linkend="gloss.regularExpression">regular
           expressions</link>.</para>
 
           <para>This built-in determines if the string exactly matches the
@@ -14695,11 +14709,11 @@ ${x?url}</programlisting>
           <title>Common flags</title>
 
           <para>Many string built-ins accept an optional string parameter, the
-          so called ``flags''. In this string, each letter influences a
-          certain aspect of the behavior of the built-in. For example, letter
-          <literal>i</literal> means that the built-in should not
-          differentiate the lower and upper-case variation of the same letter.
-          The order of the letters in the flags string is not
+          so called <quote>flags</quote>. In this string, each letter
+          influences a certain aspect of the behavior of the built-in. For
+          example, letter <literal>i</literal> means that the built-in should
+          not differentiate the lower and upper-case variation of the same
+          letter. The order of the letters in the flags string is not
           significant.</para>
 
           <para>This is the complete list of letters (flags):</para>
@@ -15010,8 +15024,8 @@ rif: foo XYr baar</programlisting>
           <literal>${x}</literal>), or else the output will be possibly broken
           depending on the current number formatting settings and locale (like
           the decimal point is not dot, but comma in many countries) and the
-          value of the number (like big numbers are possibly ``damaged'' by
-          grouping separators).</para>
+          value of the number (like big numbers are possibly
+          <quote>damaged</quote> by grouping separators).</para>
 
           <para>If the <literal>incompatible_imporvements</literal> FreeMarker
           configuration setting is set to 2.3.24 or higher (also if it's set
@@ -16400,8 +16414,8 @@ N
           <para>This built in is mostly for outputting sequnces in
           tabular/columnar format. When used with HTML tables, the 2nd
           parameter is often <literal>"\xA0"</literal> (that is the code of
-          the no-break space character, also known as ``nbsp''), so the border
-          of the empty TD-s will not be missing.</para>
+          the no-break space character, also known as <quote>nbsp</quote>), so
+          the border of the empty TD-s will not be missing.</para>
 
           <para>The 1st parameter must be a number that is at least 1. If the
           number is not integer, it will be silently rounded down to integer
@@ -16965,8 +16979,9 @@ Sorted by name.last:
           </indexterm>
 
           <para>Returns the string that is used to determine what user-defined
-          directive to invoke to handle this node when it is ``visited''. See:
-          the <link linkend="ref.directive.visit">visit</link> and <link
+          directive to invoke to handle this node when it is
+          <quote>visited</quote>. See: the <link
+          linkend="ref.directive.visit">visit</link> and <link
           linkend="ref.directive.recurse">recurse</link> directives.</para>
 
           <para>XML: If the node is an element or attribute, then the string
@@ -16977,6 +16992,42 @@ Sorted by name.last:
           name returned in the DOM API; the goal of FreeMarker node names is
           to give the name of the used-defined directive that will process the
           node.</para>
+        </section>
+
+        <section xml:id="ref_builtin_next_sibling">
+          <title>next_sibling</title>
+
+          <indexterm>
+            <primary>next_sibling built-in</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is only available since 2.3.26</para>
+          </note>
+
+          <para>Returns the following sibling node of the node. (Two nodes in
+          a tree are said to be siblings if they are on the same level and are
+          directly next to each other.) If there's no such node, the
+          expression
+          <literal><replaceable>node</replaceable>?next_sibling??</literal>
+          evaluates to <literal>false</literal>.</para>
+
+          <para>XML: Note that the value returned by this built-in is also a
+          sequence of length 1 (same as the result of some XPath expressions),
+          however if there's no next sibling, the result is a missing value
+          (null) instead of an empty sequence. Also note that for XML element
+          nodes you can also use
+          <literal><replaceable>node</replaceable>.@@next_sibling_element</literal>,
+          which is practical if you want to ignore the whitespace that
+          separates two apparently sibling elements; see more <link
+          linkend="xgui_imperative_formal">here...</link></para>
+
+          <note>
+            <para>For custom node implementations this built-in is only
+            supported if that implements the
+            <literal>freemarker.template.TemplateNodeModelEx</literal>
+            interface.</para>
+          </note>
         </section>
 
         <section xml:id="ref_builtin_node_namespace">
@@ -17009,10 +17060,10 @@ Sorted by name.last:
             <primary>node_type built-in</primary>
           </indexterm>
 
-          <para>A string that describes the type of node this is. FreeMarker
-          does not define the exact meaning of node type; it depends on what
-          your variables are modeling. It's possible that a node doesn't
-          support node type at all. In this case, the built-in evaluates to an
+          <para>A string that describes the type of the node. FreeMarker does
+          not define the exact meaning of node type; it depends on what your
+          variables are modeling. It's possible that a node doesn't support
+          node type at all. In this case, the built-in evaluates to an
           undefined value, so you can't use the returned value. (You can still
           check if a node supports the type property with
           <literal><replaceable>node</replaceable>?node_type??</literal>.)</para>
@@ -17035,18 +17086,44 @@ Sorted by name.last:
             <primary>parent built-in</primary>
           </indexterm>
 
-          <para>The node that is this node's immediate parent in the node
-          tree. The root node has no parent node, so for the root node, the
-          expression
+          <para>Returns the node that is this node's immediate parent in the
+          node tree. The root node has no parent node, so for the root node,
+          the expression
           <literal><replaceable>node</replaceable>?parent??</literal>
           evaluates to <literal>false</literal>.</para>
 
           <para>XML: Note that the value returned by this built-in is also a
           sequence (same as the result of XPath expression
           <literal>..</literal>, when you write
-          <literal>someNode[".."]</literal>). Also note that for attribute
-          nodes, it returns the element the attribute belongs to, despite that
-          attribute nodes are not counted as children of the element.</para>
+          <literal>someNode[".."]</literal>), however if there's no parent,
+          the result is a missing value (null) instead of an empty sequence.
+          Also note that for attribute nodes, it returns the element the
+          attribute belongs to, despite that attribute nodes are not counted
+          as children of the element.</para>
+        </section>
+
+        <section xml:id="ref_builtin_previous_sibling">
+          <title>previous_sibling</title>
+
+          <indexterm>
+            <primary>previous_sibling built-in</primary>
+          </indexterm>
+
+          <note>
+            <para>This built-in is only available since 2.3.26</para>
+          </note>
+
+          <para>Returns the previous sibling node of the node. Apart from the
+          direction, this is the same as <literal>next_sibling</literal>, so
+          see more details <link
+          linkend="ref_builtin_next_sibling">there...</link></para>
+
+          <note>
+            <para>For custom node implementations this built-in is only
+            supported if that implements the
+            <literal>freemarker.template.TemplateNodeModelEx</literal>
+            interface.</para>
+          </note>
         </section>
 
         <section xml:id="ref_builtin_root">
@@ -17062,12 +17139,12 @@ Sorted by name.last:
           <para>XML: According to W3C, the root of an XML document is not the
           topmost element node, but the document itself, which is the parent
           of the topmost element. For example, if you want to get the topmost
-          <emphasis>element</emphasis> of the XML (the so called ``document
-          element''; do not mix it with the ``document''), which is called
-          <literal>foo</literal>, then you have to write
-          <literal>someNode?root.foo</literal>. If you write just
-          <literal>someNode?root</literal>, then you get the document itself,
-          and not the document element.</para>
+          <emphasis>element</emphasis> of the XML (the so called
+          <quote>document element</quote>; do not mix it with the
+          <quote>document</quote>), which is called <literal>foo</literal>,
+          then you have to write <literal>someNode?root.foo</literal>. If you
+          write just <literal>someNode?root</literal>, then you get the
+          document itself, and not the document element.</para>
         </section>
       </section>
 
@@ -18162,9 +18239,10 @@ Sorted by name.last:
             <primary>namespace built-in</primary>
           </indexterm>
 
-          <para>This built-in returns the namespace (i.e. the ``gate'' hash to
-          the namespace) associated with a macro or function variable. You can
-          use it with macros and functions only.</para>
+          <para>This built-in returns the namespace (i.e. the
+          <quote>gate</quote> hash to the namespace) associated with a macro
+          or function variable. You can use it with macros and functions
+          only.</para>
         </section>
 
         <section xml:id="ref_builtin_new">
@@ -18729,12 +18807,12 @@ Primary content continued</programlisting>
           or no output at all results from the execution of the
           <literal><replaceable>attempt block</replaceable></literal> (when
           there was an error). For example, above, the failure happens after
-          ``Optional content: '' was printed, still it is not there in the
-          output before the ``Ops!''. (<phrase role="forProgrammers">This is
-          implemented with the aggressive buffering of the output inside the
-          <literal><replaceable>attempt block</replaceable></literal>. Not
-          even the <literal>flush</literal> directive will send the output to
-          the client.</phrase>)</para>
+          <quote>Optional content: </quote> was printed, still it is not there
+          in the output before the <quote>Ops!</quote>. (<phrase
+          role="forProgrammers">This is implemented with the aggressive
+          buffering of the output inside the <literal><replaceable>attempt
+          block</replaceable></literal>. Not even the <literal>flush</literal>
+          directive will send the output to the client.</phrase>)</para>
 
           <para>To prevent misunderstandings coming from the above example:
           <literal>attempt</literal>/<literal>recover</literal> is not (only)
@@ -19296,11 +19374,11 @@ m2: &amp;lt;test&amp;gt;</programlisting>
               an FTL namespace is created for the template that contains it,
               otherwise the <literal>ns_prefixes</literal> parameter has no
               effect. An FTL namespace is made for a template when: (a) the
-              template is the ``main'' template, that is, it is not invoked as
-              a result of an <literal>&lt;#include ...&gt;</literal>, but it
-              is directly invoked (<phrase role="forProgrammers">with the
-              <literal>process</literal> Java method of class
-              <literal>Template</literal> or
+              template is the <quote>main</quote> template, that is, it is not
+              invoked as a result of an <literal>&lt;#include
+              ...&gt;</literal>, but it is directly invoked (<phrase
+              role="forProgrammers">with the <literal>process</literal> Java
+              method of class <literal>Template</literal> or
               <literal>Environment</literal></phrase>); (b) the template is
               invoked directly with <literal>&lt;#import
               ...&gt;</literal>.</para>
@@ -19329,18 +19407,15 @@ m2: &amp;lt;test&amp;gt;</programlisting>
 
             <listitem>
               <para><literal>strict_syntax</literal>: This turns on/off
-              ``strict syntax''. Valid values are the boolean constants
+              <quote>strict syntax</quote>, which is the standard syntax after
+              FreeMarker 2.1. Valid values are the boolean constants
               <literal>true</literal> and <literal>false</literal>. (And for
               backward compatibility, strings <literal>"yes"</literal>,
               <literal>"no"</literal>, <literal>"true"</literal>,
-              <literal>"false"</literal>). The default value (i.e. when you
+              <literal>"false"</literal>). The default value (i.e., when you
               don't use this parameter) depends on the FreeMarker
-              configuration set by the programmers, but it should be
-              <literal>true</literal> for new projects. <phrase
-              role="forProgrammers">(Programmers: you must set explicitly this
-              setting to <literal>true</literal> for this:
-              <literal>config.setStrictSyntaxMode(true);</literal>)</phrase>
-              For more information read: <xref
+              configuration set by the programmers, but it's most certainly
+              set to <literal>true</literal>. For more information read: <xref
               linkend="ref_depr_oldsyntax"/></para>
             </listitem>
 
@@ -22175,16 +22250,16 @@ or
 
           <itemizedlist>
             <listitem>
-              <para>``leading white-space'' means all space and tab (and other
-              character that are white-space according to <link
+              <para><quote>leading white-space</quote> means all space and tab
+              (and other character that are white-space according to <link
               linkend="gloss.unicode">UNICODE</link>, except <link
               linkend="gloss.lineBreak">line breaks</link>) before the first
               non-white-space character of the line.</para>
             </listitem>
 
             <listitem>
-              <para>``trailing white-space'' means all space and tab (and
-              other character that are white-space according to <link
+              <para><quote>trailing white-space</quote> means all space and
+              tab (and other character that are white-space according to <link
               linkend="gloss.unicode">UNICODE</link>, except line breaks)
               after the last non-white-space character of the line,
               <emphasis>and</emphasis> the line break at the end of the
@@ -23067,31 +23142,33 @@ There was no specific handler for node y
 
       <itemizedlist spacing="compact">
         <listitem>
-          <para><literal>true</literal>: boolean value ``true''</para>
+          <para><literal>true</literal>: boolean value
+          <quote>true</quote></para>
         </listitem>
 
         <listitem>
-          <para><literal>false</literal>: boolean value ``false''</para>
+          <para><literal>false</literal>: boolean value
+          <quote>false</quote></para>
         </listitem>
 
         <listitem>
-          <para><literal>gt</literal>: comparison operator ``greater
-          than''</para>
+          <para><literal>gt</literal>: comparison operator <quote>greater
+          than</quote></para>
         </listitem>
 
         <listitem>
-          <para><literal>gte</literal>: comparison operator ``greater than or
-          equivalent''</para>
+          <para><literal>gte</literal>: comparison operator <quote>greater
+          than or equivalent</quote></para>
         </listitem>
 
         <listitem>
-          <para><literal>lt</literal>: comparison operator ``less
-          than''</para>
+          <para><literal>lt</literal>: comparison operator <quote>less
+          than</quote></para>
         </listitem>
 
         <listitem>
-          <para><literal>lte</literal>: comparison operator ``less than or
-          equivalent''</para>
+          <para><literal>lte</literal>: comparison operator <quote>less than
+          or equivalent</quote></para>
         </listitem>
 
         <listitem>
@@ -23458,7 +23535,7 @@ or
 
           <para>Some transforms may take parameters. The name and meaning of
           parameters depends on the transform in question. For example here we
-          give a parameter called ``var'':</para>
+          give a parameter called <quote>var</quote>:</para>
 
           <programlisting role="template">&lt;#-- This transform stores the output in the variable x,
      rather than sending it to the output --&gt;
@@ -23515,12 +23592,13 @@ some test
 
         <para>While the <literal>#</literal>-less syntax was more natural for
         HTML authors, it had too many drawbacks, so finally we have decided to
-        deprecate it. With the newer syntax (a.k.a ``strict syntax''), the
-        <literal>#</literal> is strictly required. That is, things like
-        <literal>&lt;include "common_footer.html"&gt;</literal> will go to the
-        output as is, since they are not considered as FTL tags. Note that
-        user-defined directives use <literal>@</literal> <emphasis>instead
-        of</emphasis> <literal>#</literal>.</para>
+        deprecate it. With the newer syntax (a.k.a <quote>strict
+        syntax</quote>), the <literal>#</literal> is strictly required. That
+        is, things like <literal>&lt;include
+        "common_footer.html"&gt;</literal> will go to the output as is, since
+        they are not considered as FTL tags. Note that user-defined directives
+        use <literal>@</literal> <emphasis>instead of</emphasis>
+        <literal>#</literal>.</para>
 
         <para>However, to give users time to prepare for this change, in
         FreeMarker 2.1 and 2.2 the usage of <literal>#</literal> is optional,
@@ -23534,8 +23612,8 @@ some test
         linkend="ref.directive.ftl"><literal>ftl</literal>
         directive</link>.</para>
 
-        <para>The advantages of ``strict syntax'' over the legacy FTL syntax
-        are:</para>
+        <para>The advantages of <quote>strict syntax</quote> over the legacy
+        FTL syntax are:</para>
 
         <itemizedlist>
           <listitem>
@@ -23698,11 +23776,11 @@ or
       cases. Also its syntax is terribly verbose. However, XSLT's
       "apply-templates" method can be very handy when you process XML
       documents, thus FreeMarker supports something similar called the
-      ``visitor pattern''. So in many applications, it is much easier to write
-      FTL stylesheets than XSLT style-sheets. Another fundamental difference
-      is that FTL "transforms" the node tree to text, while XSLT transforms
-      the tree to another tree. So you cannot always use FreeMarker where you
-      can use XSLT.</para>
+      <quote>visitor pattern</quote>. So in many applications, it is much
+      easier to write FTL stylesheets than XSLT style-sheets. Another
+      fundamental difference is that FTL "transforms" the node tree to text,
+      while XSLT transforms the tree to another tree. So you cannot always use
+      FreeMarker where you can use XSLT.</para>
     </preface>
 
     <chapter xml:id="xgui_expose">
@@ -23808,8 +23886,8 @@ or
           <listitem>
             <para>The topmost node of a tree is called the <emphasis
             role="term">root</emphasis>. In the case of XML documents, it is
-            always the ``document'' node, and not the top-most element
-            (<literal>book</literal> in this example).</para>
+            always the <quote>document</quote> node, and not the top-most
+            element (<literal>book</literal> in this example).</para>
           </listitem>
 
           <listitem>
@@ -23869,7 +23947,7 @@ or
         </note>
 
         <para>It's easy to create a simple program to try the examples. Just
-        replace the ``Create a data-model'' part of <link
+        replace the <quote>Create a data-model</quote> part of <link
         linkend="pgui_quickstart_all">the example of Programmer's Guide
         Quickstart</link> with this:</para>
 
@@ -23927,10 +24005,10 @@ root.put(
         <para>Assume that the programmer has put the XML document into the
         data-model as variable <literal>doc</literal>. This variable
         corresponds to the root of the <link linkend="xgui_expose_dom">DOM
-        tree</link>, the ``document''. The actual variable structure behind
-        <literal>doc</literal> is wily enough, and only roughly resembles the
-        DOM tree. So instead of getting lost in the details, let's see how to
-        use it by example.</para>
+        tree</link>, the <quote>document</quote>. The actual variable
+        structure behind <literal>doc</literal> is wily enough, and only
+        roughly resembles the DOM tree. So instead of getting lost in the
+        details, let's see how to use it by example.</para>
 
         <section>
           <title>Accessing elements by name</title>
@@ -24052,9 +24130,9 @@ root.put(
   &lt;/#list&gt;
 &lt;/#list&gt;</programlisting>
 
-          <para>Finally, a ``generalized`` usage of the child selector
-          mechanism: this template lists all <literal>para</literal>-s of the
-          example XML document:</para>
+          <para>Finally, a generalized usage of the child selector mechanism:
+          this template lists all <literal>para</literal>-s of the example XML
+          document:</para>
 
           <programlisting role="template">&lt;#list doc.book.chapter.para as p&gt;
   &lt;p&gt;${p}
@@ -24290,7 +24368,7 @@ Test Book</programlisting>
           sections) stands for XPath results as well. That is, if the
           resulting sequence contains exactly 1 node, it also acts as the node
           itself. For example, print the first paragraph of chapter
-          ``Ch1'':</para>
+          <quote>Ch1</quote>:</para>
 
           <programlisting role="template">${doc["book/chapter[title='Ch1']/para[1]"]}</programlisting>
 
@@ -24474,12 +24552,12 @@ Test Book</programlisting>
               <td>No string value. (Error when you try to use it as
               string.)</td>
 
-              <td><literal>"<replaceable>elementName</replaceable>"</literal>,
+              <td><literal><replaceable>elementName</replaceable></literal>,
               <literal>"<replaceable>prefix</replaceable>:<replaceable>elementName</replaceable>"</literal>,
-              <literal>"*"</literal>, <literal>"**"</literal>,
-              <literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal></td>
+              <literal>*</literal>, <literal>**</literal>,
+              <literal>@@markup</literal>, <literal>@@nested_markup</literal>,
+              <literal>@@text</literal>, <literal>@@local_name</literal>,
+              <literal>@@qname</literal>, <literal>@@namespace</literal></td>
             </tr>
 
             <tr>
@@ -24493,18 +24571,19 @@ Test Book</programlisting>
               children concatenated together. Error otherwise, when you try to
               use it as string.</td>
 
-              <td><literal>"<replaceable>elementName</replaceable>"</literal>,
+              <td><literal><replaceable>elementName</replaceable></literal>,
               <literal>"<replaceable>prefix</replaceable>:<replaceable>elementName</replaceable>"</literal>,
-              <literal>"*"</literal>, <literal>"**"</literal>,
-              <literal>"@<replaceable>attrName</replaceable>"</literal>,
+              <literal>*</literal>, <literal>**</literal>,
+              <literal>@<replaceable>attrName</replaceable></literal>,
               <literal>"@<replaceable>prefix</replaceable>:<replaceable>attrName</replaceable>"</literal>,
-              <literal>"@@"</literal>, <literal>"@*"</literal>,
-              <literal>"@@start_tag"</literal>,
-              <literal>"@@end_tag"</literal>,
-              <literal>"@@attributes_markup"</literal>,
-              <literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal>, <literal>"@@qname"</literal></td>
+              <literal>@@</literal>, <literal>"@*"</literal>,
+              <literal>@@start_tag</literal>, <literal>@@end_tag</literal>,
+              <literal>@@attributes_markup</literal>,
+              <literal>@@next_sibling_element</literal>,
+              <literal>@@previous_sibling_element</literal>,
+              <literal>@@markup</literal>, <literal>@@nested_markup</literal>,
+              <literal>@@text</literal>, <literal>@@local_name</literal>,
+              <literal>@@qname</literal>, <literal>@@namespace</literal></td>
             </tr>
 
             <tr>
@@ -24514,9 +24593,10 @@ Test Book</programlisting>
 
               <td>The text itself.</td>
 
-              <td><literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal></td>
+              <td><literal>@@markup</literal>,
+              <literal>@@nested_markup</literal>, <literal>@@text</literal>,
+              <literal>@@local_name</literal>, <literal>@@qname</literal>,
+              <literal>@@namespace</literal></td>
             </tr>
 
             <tr>
@@ -24527,9 +24607,10 @@ Test Book</programlisting>
               <td>The part between the target name and the
               <literal>?&gt;</literal>.</td>
 
-              <td><literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal></td>
+              <td><literal>@@markup</literal>,
+              <literal>@@nested_markup</literal>, <literal>@@text</literal>,
+              <literal>@@local_name</literal>, <literal>@@qname</literal>,
+              <literal>@@namespace</literal></td>
             </tr>
 
             <tr>
@@ -24540,9 +24621,10 @@ Test Book</programlisting>
               <td>The text of the comment, without the delimiters
               <literal>&lt;!--</literal> and <literal>--&gt;</literal>.</td>
 
-              <td><literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal></td>
+              <td><literal>@@markup</literal>,
+              <literal>@@nested_markup</literal>, <literal>@@text</literal>,
+              <literal>@@local_name</literal>, <literal>@@qname</literal>,
+              <literal>@@namespace</literal></td>
             </tr>
 
             <tr>
@@ -24554,9 +24636,10 @@ Test Book</programlisting>
 
               <td>The value of the attribute.</td>
 
-              <td><literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal>, <literal>"@@qname"</literal></td>
+              <td><literal>@@markup</literal>,
+              <literal>@@nested_markup</literal>, <literal>@@text</literal>,
+              <literal>@@qname</literal>, <literal>@@local_name</literal>,
+              <literal>@@qname</literal>, <literal>@@namespace</literal></td>
             </tr>
 
             <tr>
@@ -24569,9 +24652,10 @@ Test Book</programlisting>
               <td>No string value. (Error when you try to use it as
               string.)</td>
 
-              <td><literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal>,
-              <literal>"@@text"</literal></td>
+              <td><literal>@@markup</literal>,
+              <literal>@@nested_markup</literal>, <literal>@@text</literal>,
+              <literal>@@local_name</literal>, <literal>@@qname</literal>,
+              <literal>@@namespace</literal></td>
             </tr>
           </tbody>
         </informaltable>
@@ -24622,14 +24706,15 @@ Test Book</programlisting>
 
         <itemizedlist>
           <listitem>
-            <para><literal>"<replaceable>elementName</replaceable>"</literal>,
+            <para><literal><replaceable>elementName</replaceable></literal>,
             <literal>"<replaceable>prefix</replaceable>:<replaceable>elementName</replaceable>"</literal>:
             Returns the sequence of child nodes that are elements of name
             <literal><replaceable>elementName</replaceable></literal>. (Note
-            that the term ``child'' means <emphasis>immediate</emphasis>
-            descendant.) The selection is XML name-space aware, unless the XML
-            document was persed with an XML parser that was not in namespace
-            aware mode. In XML name-space aware mode, names without prefix
+            that the term <quote>child</quote> means
+            <emphasis>immediate</emphasis> descendant.) The selection is XML
+            name-space aware, unless the XML document was persed with an XML
+            parser that was not in namespace aware mode. In XML name-space
+            aware mode, names without prefix
             (<replaceable>elementName</replaceable>) selects only elements
             that doesn't belong to any XML name-space (unless you have
             registered a default XML namespace), and names with prefix
@@ -24643,22 +24728,22 @@ Test Book</programlisting>
           </listitem>
 
           <listitem>
-            <para><literal>"*"</literal>: Returns the sequence of all child
-            (direct descedant) <emphasis>element</emphasis> nodes. The
-            sequence will contain the elements in the ``document order'', that
-            is, in the order in which the first character of the XML
-            representation of each node occurs (after expansion of general
-            entities).</para>
+            <para><literal>*</literal>: Returns the sequence of all child
+            (direct descendant) <emphasis>element</emphasis> nodes. The
+            sequence will contain the elements in the <quote>document
+            order</quote>, that is, in the order in which the first character
+            of the XML representation of each node occurs (after expansion of
+            general entities).</para>
           </listitem>
 
           <listitem>
-            <para><literal>"**"</literal>: Returns the sequence of all
+            <para><literal>**</literal>: Returns the sequence of all
             descendant <emphasis>element</emphasis> nodes. The sequence will
             contain the elements in the document order.</para>
           </listitem>
 
           <listitem>
-            <para><literal>"@<replaceable>attName</replaceable>"</literal>,
+            <para><literal>@<replaceable>attName</replaceable></literal>,
             <literal>"@<replaceable>prefix</replaceable>:<replaceable>attrName</replaceable>"</literal>:
             Returns the attribute
             <literal><replaceable>attName</replaceable></literal> of the
@@ -24686,32 +24771,41 @@ Test Book</programlisting>
           </listitem>
 
           <listitem>
-            <para><literal>"@@"</literal> or <literal>"@*"</literal>: Returns
+            <para><literal>@@</literal> or <literal>"@*"</literal>: Returns
             the sequence of attribute nodes belonging to the parent element.
             This is the same as XPath <literal>@*</literal>.</para>
           </listitem>
 
           <listitem>
-            <para><literal>"@@qname"</literal>: Returns the full-qualified
-            name of the element (such as <literal>e:book</literal>, in
-            contrast to the local name returned by
-            <literal>?node_name</literal> that is <literal>book</literal>) .
-            The prefix used (as <literal>e</literal>) is chosen based on the
-            prefix registered in the current namespace with the
-            <literal>ns_prefixes</literal> parameter of the
-            <literal>ftl</literal> directive, and not influenced by the prefix
-            used in the source XML document. If you have set a default XML
-            namespace, then for nodes that use that, prefix
-            <literal>D</literal> will be used. For nodes that does not belong
-            to an XML namespace, no prefix is used (even if you have set a
-            default namespace). If there is no prefix registered for the
+            <para><literal>@@qname</literal>: Returns the full-qualified name
+            of the element (such as <literal>e:book</literal>, in contrast to
+            the local name returned by <literal>?node_name</literal> that is
+            <literal>book</literal>) . The prefix used (as
+            <literal>e</literal>) is chosen based on the prefix registered in
+            the current namespace with the <literal>ns_prefixes</literal>
+            parameter of the <literal>ftl</literal> directive, and not
+            influenced by the prefix used in the source XML document. If you
+            have set a default XML namespace, then for nodes that use that,
+            prefix <literal>D</literal> will be used. For nodes that does not
+            belong to an XML namespace, no prefix is used (even if you have
+            set a default namespace). If there is no prefix registered for the
             namespace of the node, the result is a non-existent variable
             (<literal>node.@@qname??</literal> is
             <literal>false</literal>).</para>
           </listitem>
 
           <listitem>
-            <para><literal>"@@markup"</literal>: This returns the full XML
+            <para><literal>@@local_mame</literal>: The name of the node
+            without the namespace prefix.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>@@namespace</literal>: The namespace URL (not the
+            namespace prefix) of the node.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>@@markup</literal>: This returns the full XML
             markup of a node, as a string. (Full XML markup means that it also
             contains the markup of the child nodes, and the markup of the
             children of the child nodes, and so on.) The markup you get is not
@@ -24735,20 +24829,20 @@ Test Book</programlisting>
           </listitem>
 
           <listitem>
-            <para><literal>"@@nested_markup"</literal>: This is similar to
-            <literal>"@@markup"</literal>, but it returns the XML markup of an
+            <para><literal>@@nested_markup</literal>: This is similar to
+            <literal>@@markup</literal>, but it returns the XML markup of an
             element without its opening and closing tags. For the document
-            node, it returns the same as <literal>"@@markup"</literal>. For
+            node, it returns the same as <literal>@@markup</literal>. For
             other node types (text, processing instruction, etc.), it returns
-            an empty string. Unlike with <literal>"@@markup"</literal>, no
+            an empty string. Unlike with <literal>@@markup</literal>, no
             <literal>xmlns:<replaceable>prefix</replaceable></literal>
-            attributes will be placed into the ouput, but regarding the
+            attributes will be placed into the output, but regarding the
             prefixes used in element and attribute names the rules are the
             same.</para>
           </listitem>
 
           <listitem>
-            <para><literal>"@@text"</literal>: This returns the value of all
+            <para><literal>@@text</literal>: This returns the value of all
             text nodes that occur within the node (all descendant text nodes,
             not just direct children), concatenated together into a single
             string. If the node has no text node children, then the result is
@@ -24756,7 +24850,7 @@ Test Book</programlisting>
           </listitem>
 
           <listitem>
-            <para><literal>"@@start_tag"</literal>: Returns the markup of the
+            <para><literal>@@start_tag</literal>: Returns the markup of the
             <link linkend="gloss.startTag">start-tag</link> of the element
             node. As with <literal>@@markup</literal>, the output is not
             necessary the same as in the original XML document, but it is
@@ -24767,7 +24861,7 @@ Test Book</programlisting>
           </listitem>
 
           <listitem>
-            <para><literal>"@@end_tag"</literal>: Returns the markup of the
+            <para><literal>@@end_tag</literal>: Returns the markup of the
             <link linkend="gloss.endTag">end-tag</link> of the element node.
             As with <literal>@@markup</literal>, the output is not necessary
             the same as in the original XML document, but it is semantically
@@ -24780,6 +24874,26 @@ Test Book</programlisting>
             element node. As with <literal>@@markup</literal>, the output is
             not necessary the same as in the original XML document, but it is
             semantically equivalent with that.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>@@next_sibling_element</literal> (since 2.3.26):
+            The following sibling element of an element node or an empty node
+            sequence if there's no such element. An element counts as a
+            sibling of another element if they are on the same hierarchical
+            level, and there's no other element or non-whitespace character
+            data (text or CDATA) between the two elements. For example in
+            <literal>&lt;a/&gt;&lt;!-- comment
+            --&gt;#&amp;x20;&lt;b/&gt;</literal> the two elements are
+            siblings, but not in <literal>&lt;a/&gt;text&lt;b/&gt;</literal>
+            or <literal>&lt;a/&gt;&lt;x/&gt;&lt;b/&gt;</literal>.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>@@previous_sibling_element</literal> (since
+            2.3.26): The previous sibling element of an element node or an
+            empty node sequence if there's no such element. See the last point
+            for the meaning of sibling.</para>
           </listitem>
         </itemizedlist>
 
@@ -24816,30 +24930,30 @@ Test Book</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para><literal>"<replaceable>elementName</replaceable>"</literal>,
+              <para><literal><replaceable>elementName</replaceable></literal>,
               <literal>"<replaceable>prefix</replaceable>:<replaceable>elementName</replaceable>"</literal></para>
             </listitem>
 
             <listitem>
-              <para><literal>"@<replaceable>attrName</replaceable>"</literal>,
+              <para><literal>@<replaceable>attrName</replaceable></literal>,
               <literal>"@<replaceable>prefix</replaceable>:<replaceable>attrName</replaceable>"</literal></para>
             </listitem>
 
             <listitem>
-              <para><literal>"@@markup"</literal>,
-              <literal>"@@nested_markup"</literal></para>
+              <para><literal>@@markup</literal>,
+              <literal>@@nested_markup</literal></para>
             </listitem>
 
             <listitem>
-              <para><literal>"@@text"</literal></para>
+              <para><literal>@@text</literal></para>
             </listitem>
 
             <listitem>
-              <para><literal>"*"</literal>, <literal>"**"</literal></para>
+              <para><literal>*</literal>, <literal>**</literal></para>
             </listitem>
 
             <listitem>
-              <para><literal>"@@"</literal>, <literal>"@*"</literal></para>
+              <para><literal>@@</literal>, <literal>"@*"</literal></para>
             </listitem>
           </itemizedlist>
 
@@ -24902,14 +25016,14 @@ Test Book</programlisting>
         is the <link
         linkend="ref.directive.recurse"><literal>recurse</literal>
         directive</link>. This directive gets a node variable as parameter,
-        and ``visits'' all its children nodes, one after the other, starting
-        with the first child. ``Visiting'' a node means that it calls a
-        user-defined directive (like a macro) that has the same name as the
-        name of the child node (<literal>?node_name</literal>). We say on
-        this, that the user-defined directive <emphasis>handles</emphasis> the
-        node. The node that the user-defined directive just handles is
-        available as special variable <literal>.node</literal>. For example,
-        this FTL:</para>
+        and <quote>visits</quote> all its children nodes, one after the other,
+        starting with the first child. <quote>Visiting</quote> a node means
+        that it calls a user-defined directive (like a macro) that has the
+        same name as the name of the child node
+        (<literal>?node_name</literal>). We say on this, that the user-defined
+        directive <emphasis>handles</emphasis> the node. The node that the
+        user-defined directive just handles is available as special variable
+        <literal>.node</literal>. For example, this FTL:</para>
 
         <programlisting role="template">&lt;#recurse doc&gt;
 
@@ -25337,11 +25451,11 @@ End book</programlisting>
               </listitem>
 
               <listitem>
-                <para>``Object wrapping''. This lets you show the objects to
-                templates in a customized, presentation oriented way (e.g.
-                <link linkend="xgui_imperative_learn">see here</link> how a
-                W3C DOM nodes can be seen by templates using this
-                technology.)</para>
+                <para><quote>Object wrapping</quote>. This lets you show the
+                objects to templates in a customized, presentation oriented
+                way (e.g. <link linkend="xgui_imperative_learn">see
+                here</link> how a W3C DOM nodes can be seen by templates using
+                this technology.)</para>
               </listitem>
 
               <listitem>
@@ -25361,11 +25475,12 @@ End book</programlisting>
 
             <itemizedlist>
               <listitem>
-                <para>Not a ``standard''. There are fewer tools and IDE
-                integrations, fewer developers knows it and there's much less
-                industry support in general. (However, most JSP tag libraries
-                can work in FreeMarker templates with the proper setup, unless
-                they are base on <literal>.tag</literal> files.)</para>
+                <para>Not a <quote>standard</quote>. There are fewer tools and
+                IDE integrations, fewer developers knows it and there's much
+                less industry support in general. (However, most JSP tag
+                libraries can work in FreeMarker templates with the proper
+                setup, unless they are base on <literal>.tag</literal>
+                files.)</para>
               </listitem>
 
               <listitem>
@@ -25532,7 +25647,7 @@ End book</programlisting>
             <programlisting role="template">&lt;a href="/shop/productdetails?id=${<emphasis>product.id?c</emphasis>}"&gt;Details...&lt;/a&gt;</programlisting>
 
             <para>For computer audience you need <literal>?c</literal> anyway,
-            as the decimal separators can also warry depending on the
+            as the decimal separators can also wary depending on the
             locale.</para>
           </answer>
         </qandaentry>
@@ -25555,10 +25670,10 @@ End book</programlisting>
 // where cfg is a freemarker.template.Configuration object</programlisting>
 
             <para>However, sometimes you want to output a number not for human
-            audience, but for ``computer audience'' (like you want to print a
-            size in CSS), in which case you must use dot as decimal separator,
-            regardless of the locale (language) of the page. For that use the
-            <link linkend="ref_builtin_c"><literal>c</literal>
+            audience, but for <quote>computer audience</quote> (like you want
+            to print a size in CSS), in which case you must use dot as decimal
+            separator, regardless of the locale (language) of the page. For
+            that use the <link linkend="ref_builtin_c"><literal>c</literal>
             built-in</link>, for example:</para>
 
             <programlisting role="template">font-size: ${<emphasis>fontSize?c</emphasis>}pt;</programlisting>
@@ -25626,7 +25741,7 @@ End book</programlisting>
           </question>
 
           <answer>
-            <para>Firs of all, you should know that FreeMarker doesn't load
+            <para>First of all, you should know that FreeMarker doesn't load
             templates from file system paths directly. Instead, it uses a
             simple virtual file system that might reads non-filesystem
             resources (templates from inside jar-s, from inside a database
@@ -25720,8 +25835,8 @@ End book</programlisting>
             there is an older version of <literal>freemarker.jar</literal>
             around, which shadows the never. To check this, try to print the
             version number in a template with <literal>${.version}</literal>.
-            (If it dies with ``Unknown built-in variable: version'' error
-            message, then you use a very, very old release.).</para>
+            (If it dies with <quote>Unknown built-in variable: version</quote>
+            error message, then you use a very, very old release.).</para>
 
             <para>If you suspect that the problem is that you have multiple
             <literal>freemarker.jar</literal>-s, the typical culprit is that
@@ -25960,8 +26075,8 @@ End book</programlisting>
             <itemizedlist>
               <listitem>
                 <para>Directives and methods that are written for presentation
-                purposes (like kind of ``tools'' for helping FreeMarker
-                templates) should declare their arguments as
+                purposes (like kind of <quote>tools</quote> for helping
+                FreeMarker templates) should declare their arguments as
                 <literal>TemplateModel</literal>-s and the more specific sub
                 interfaces of that. After all, the object wrapping is about
                 transforming the data-model to something that serves the
@@ -26021,13 +26136,24 @@ End book</programlisting>
             <literal>user["password"]</literal>), and variable names are
             strings.</para>
 
-            <para>So until FTL has a type that supports non-string keys, you
-            will have to turn to the Java API of the <literal>Map</literal>.
-            You can do it like this:
-            <literal>myMap?api.get(nonStringKey)</literal>. However, for
-            <literal>?api</literal> to work, you may need to configure
-            FreeMarker a bit; <link linkend="ref_buitin_api_and_has_api">see
-            more here...</link></para>
+            <para>If you only need to list the key-value pairs of a
+            <literal>Map</literal>, you can just write something like
+            <literal>&lt;#list myMap as k, v&gt;${k}:
+            ${v}&lt;/#list&gt;</literal> (see more about <link
+            linkend="ref.directive.list">the <literal>list directive</literal>
+            here</link>). This enumerates the <literal>Map</literal> entries,
+            and supports non-string keys. This requires FreeMarker 2.3.25 or
+            later. (If for some reason you can't upgrade to 2.3.25, you can
+            use the Java API of <literal>Map</literal> instead, like
+            <literal>&lt;#list myMap?api.entrySet() as kvp&gt;${kvp.key}:
+            ${kvp.value}&lt;/#list&gt;</literal>.)</para>
+
+            <para>If you need to do more than listing, you will have to turn
+            to the Java API of the <literal>Map</literal>. You can do it like
+            this: <literal>myMap?api.get(nonStringKey)</literal>. However, for
+            <literal>?api</literal> to be enabled, you may need to configure
+            FreeMarker a bit (<link linkend="ref_buitin_api_and_has_api">see
+            more here</link>).</para>
 
             <para>Note that as Java's <literal>Map</literal> is particular
             about the exact class of the key, at least for numerical keys
@@ -26038,7 +26164,7 @@ End book</programlisting>
             is because of FTL's deliberately simplified type system has only a
             single numerical type, while Java distinguishes a lot of numerical
             types. Note that the casting is not needed when the key value
-            comes directly from the data-model (i.e. you didn't modified its
+            comes directly from the data-model (i.e., you didn't modified its
             value with arithmetical calculations in the template), including
             the case when it's the return value of a method, and it was of the
             proper class before wrapping, because then the result of the
@@ -26157,10 +26283,25 @@ End book</programlisting>
             anyway.</para>
 
             <para>Now, if you still say you need to modify sequences/hashes
-            directly with the FreeMarker template, here are two solutions, but
-            please read the warning after them:</para>
+            directly with the FreeMarker template, here are some solutions,
+            but please read the warning after them:</para>
 
             <itemizedlist>
+              <listitem>
+                <para>You can access the Java API of a
+                <literal>java.util.Map</literal> with the help of the
+                <literal>api</literal> built-in, like
+                <literal>myMap?api.put(11, "eleven")</literal>. You will need
+                to get a <literal>Map</literal> from somewhere though (an FTL
+                hash literal like <literal>{}</literal> won't suffice, as it's
+                read only and doesn't support <literal>api</literal> either).
+                For example, you could expose a Java method or
+                <literal>TemplateMethodModelEx</literal> to the template that
+                returns a <literal>new LinkeHashMap()</literal>, so you can do
+                <literal>&lt;#assign myMap =
+                utils.newLinkedHashMap()&gt;</literal>.</para>
+              </listitem>
+
               <listitem>
                 <para>You can write a <literal>TemplateMethodModelEx</literal>
                 and <literal>TemplateDirectiveModel</literal> implementation
@@ -26186,13 +26327,8 @@ End book</programlisting>
 
               <listitem>
                 <para>A sequence can have some methods/directives if you use a
-                customized wrapper (so you can <literal>&lt;@myList.append foo
-                /&gt;</literal>). (Also, if you use
-                <literal>BeansWrapper</literal> and configure it so it exposes
-                the public methods, you can use the Java API for variables
-                that are for <literal>java.util.Map</literal>-s and
-                <literal>java.util.List-s</literal>. Just like with Apache
-                Velocity.)</para>
+                customized wrapper (so you can write something like
+                <literal>&lt;@myList.append foo /&gt;</literal>).</para>
               </listitem>
             </itemizedlist>
 
@@ -26238,11 +26374,11 @@ End book</programlisting>
             <literal>null</literal>, it treats it exactly as a missing
             variable. For example, both if <literal>x</literal> is
             <literal>null</literal> in the data-model and if it's not present
-            at all, <literal>${x!'missing'}</literal> will print ``missing'',
-            you can't tell the difference. Also, if for example you want to
-            test if a Java method has returned <literal>null</literal>, just
-            write something like <literal>&lt;#if
-            foo.bar()??&gt;</literal>.</para>
+            at all, <literal>${x!'missing'}</literal> will print
+            <quote>missing</quote>, you can't tell the difference. Also, if
+            for example you want to test if a Java method has returned
+            <literal>null</literal>, just write something like
+            <literal>&lt;#if foo.bar()??&gt;</literal>.</para>
 
             <para>You may interested in the rationale behind this. From the
             viewpoint of the presentation layer a <literal>null</literal> and
@@ -26274,7 +26410,7 @@ End book</programlisting>
             to the method instead. Like <literal>foo.bar(nullArg)</literal>
             will call the <literal>bar</literal> method with
             <literal>null</literal> as argument, assuming that there is no
-            varaible exists with ``nullArg'' name.</para>
+            variable exists with <quote>nullArg</quote> name.</para>
           </answer>
         </qandaentry>
 
@@ -26296,8 +26432,8 @@ End book</programlisting>
 
         <qandaentry xml:id="faq_questionmark">
           <question>
-            <para>Why do I have ``?''-s in the output instead of character
-            <replaceable>X</replaceable>?</para>
+            <para>Why do I have <quote>?</quote>-s in the output instead of
+            character <replaceable>X</replaceable>?</para>
           </question>
 
           <answer>
@@ -26617,7 +26753,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_26">
         <title>2.3.26 (incubating at Apache)</title>
 
-        <para>Release date: FIXME</para>
+        <para>Release date: 2017-FIXME</para>
 
         <para><emphasis role="bold">This is a stable, final
         release.</emphasis> The <quote>incubating</quote> suffix is required
@@ -26640,6 +26776,28 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               earlier it has failed depending on the
               <literal>object_wrapper</literal> configuration setting.</para>
             </listitem>
+
+            <listitem>
+              <para>Added
+              <literal><replaceable>node</replaceable>?next_sibling</literal>
+              and
+              <literal><replaceable>node</replaceable>?previous_sibling</literal>
+              to move sideways in a node trees (<link
+              linkend="ref_builtin_next_sibling">see reference...</link>).
+              This works with XML DOM nodes, or with any custom
+              <literal>TemplateNodeModelEx</literal> implementations.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added new <literal>@@</literal> keys to XML DOM models:
+              <literal>@@next_sibling_element</literal>,
+              <literal>@@previous_sibling_element</literal>. These get the
+              sibling node if that's an element, with the extra that they
+              silently skip any whitespace text and comment and processing
+              instruction between them. (See more about <literal>@@</literal>
+              keys <link
+              linkend="xgui_imperative_formal">here...</link>)</para>
+            </listitem>
           </itemizedlist>
         </section>
 
@@ -26648,9 +26806,120 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para>Added the
+              <literal>freemarker.template.TemplateNodeModelEx</literal>
+              interface which extends the <literal>TemplateNodeModel</literal>
+              instance with two methods, <literal>TemplateNodeModelEx
+              getNextSibling()</literal> and <literal>TemplateNodeModelEx
+              getPreviousSibling()</literal> methods. This is required by
+              <literal><replaceable>node</replaceable>?next_sibling</literal>
+              and
+              <literal><replaceable>node</replaceable>?previous_sibling</literal>
+              in the templates. This new interface is already implemented by
+              the standard W3C DOM node wrapper of FreeMarker.</para>
+            </listitem>
+
+            <listitem>
               <para>Made <literal>+</literal> operator when adding two hashes
               significantly faster (be removing the overhead caused be
               throwing and then catching an exception).</para>
+            </listitem>
+
+            <listitem>
+              <para>Better error messages when someone tries to get an invalid
+              <literal>@@<replaceable>...</replaceable></literal> subvariable
+              of an XML DOM node. (Now it's not issued by the XPath
+              implementation, which just sees it as a syntactical
+              error.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: <literal>MultiTemplateLoader</literal>, when
+              it's in sticky mode (the default), and the
+              <literal>TemplateLoader</literal> that was successfully used for
+              a given name last time doesn't find the template now (let's call
+              it the sticked <literal>TemplateLoader</literal>), and thus
+              <literal>MultiTemplateLoader</literal> falls back to trying all
+              the <literal>TemplateLoader</literal>-s in order, will now skip
+              the sticked <literal>TemplateLoader</literal>, as that was
+              already attempted in the same
+              <literal>MultiTemplateLoader.findTemplateSource</literal>
+              invocation.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed:
+              <literal>NodeModel.mergeAdjacentText(Node)</literal> didn't
+              merged all adjacent text nodes, only pairs of adjacent text
+              nodes. (Luckily this method is hardly ever used, and the more
+              often used <literal>NodeModel.simplify(Node)</literal> was
+              working correctly.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Performance improvements in the static utility methods of
+              <literal>NodeModel</literal>: <literal>simplify(Node)</literal>,
+              <literal>mergeAdjacentText(Node)</literal>,
+              <literal>removeComments(Node)</literal>,
+              <literal>removePIs(Node)</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added warning to the JavaDoc of
+              <literal>NodeModel.parse</literal> methods to inform users about
+              the possibility of XML External Entity (XXE) attacks if the
+              source XML (not a template) comes from untrusted source. This is
+              just an XML fact (i.e., that in an XML you can have external
+              entities and they can be exploited), and has no much to do with
+              FreeMarker. Also note that FreeMarker itself never calls
+              <literal>NodeModel.parse</literal>; these are merely convenience
+              methods that some applications directly call themselves to
+              create a <literal>NodeModel</literal> from an XML file. As this
+              method encapsulates the call to the platform XML parser, we
+              thought it's better to point this risk out.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>Configuration.setSetting(String,
+              String)</literal> and <literal>setSettings</literal> now allows
+              <literal>null</literal> value for
+              <literal>template_loader</literal> (because
+              <literal>Configuration.setTemplateLoader(null)</literal> is also
+              allowed for a while.).</para>
+            </listitem>
+
+            <listitem>
+              <para>Various smaller code cleanups.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Other changes</title>
+
+          <itemizedlist>
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-17">FREEMARKER-17</link>:
+              Removed the Servlet- and JSP-related <literal>*.dtd</literal>
+              files to simplify licensing. We can operate without them as
+              before, as validation with them was disabled earlier too. At
+              this point, everything in the source code of the FreeMarker
+              engine, and everything in the produced
+              <literal>freemarker.jar</literal> was created inside the
+              FreeMarker project.</para>
+            </listitem>
+
+            <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-27">FREEMARKER-27</link>:
+              Moved some content from the <literal>NOTICES</literal> files
+              over to the <literal>LICENSE</literal> file, to follow the
+              Apache Incubator guidelines closer.</para>
+            </listitem>
+
+            <listitem>
+              <para>Various smaller JavaDoc improvements.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -32169,14 +32438,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               templates!</emphasis> Fixed the bugs of the <link
               linkend="ref_builtin_c"><literal>c</literal> built-in</link>
               (<literal>?c</literal>) that sometimes caused whole numbers to
-              be formatted with ``.0'' at the end (like: 1.0), and caused
-              numbers sometimes formatted to exponential form (like 4E-20).
-              From now whole numbers will never use decimal dot (not even if
-              the wrapped number is a <literal>double</literal>; remember, the
-              template language knows only a single numerical type), and
-              exponential form will never be used either. Also, the maximum
-              number of digits after the decimal dot was limited to 16, so
-              numbers smaller than 1E-16 will be shown as 0.</para>
+              be formatted with <quote>.0</quote> at the end (like: 1.0), and
+              caused numbers sometimes formatted to exponential form (like
+              4E-20). From now whole numbers will never use decimal dot (not
+              even if the wrapped number is a <literal>double</literal>;
+              remember, the template language knows only a single numerical
+              type), and exponential form will never be used either. Also, the
+              maximum number of digits after the decimal dot was limited to
+              16, so numbers smaller than 1E-16 will be shown as 0.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -32624,12 +32893,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal><replaceable>myString</replaceable>[<replaceable>from</replaceable>..&lt;<replaceable>toExclusive</replaceable>]</literal>.)
               Sequence (list) slices still has to be get with the old syntax,
               since <literal>substring</literal> only applies to strings.
-              Please note that the ``to'' parameter is 1 greater with this new
-              builtin, as it is an exclusive index. Further difference is that
-              the <literal>substring</literal> built-in requires that the
-              ``from'' index is less than or equal to the ``to'' index. So 0
-              length substrings are possible now, but not reversed
-              substrings.</para>
+              Please note that the <quote>to</quote> parameter is 1 greater
+              with this new builtin, as it is an exclusive index. Further
+              difference is that the <literal>substring</literal> built-in
+              requires that the <quote>from</quote> index is less than or
+              equal to the <quote>to</quote> index. So 0 length substrings are
+              possible now, but not reversed substrings.</para>
             </listitem>
 
             <listitem>
@@ -32964,8 +33233,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>New built-in for formatting numbers for ``computer
-              audience'' as opposed to human audience: <link
+              <para>New built-in for formatting numbers for <quote>computer
+              audience</quote> as opposed to human audience: <link
               linkend="ref_builtin_c"><literal>c</literal></link>. It should
               be used for numbers that must use Java language formatting
               regardless of the number format and locale settings, like for a
@@ -33136,7 +33405,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Bugfix: The <literal>DefaultObjectWrapper</literal> has
               ignored the value of the <literal>nullModel</literal> property.
-              (Note that it's discouraged to use a ``null model''.)</para>
+              (Note that it's discouraged to use a <quote>null
+              model</quote>.)</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -33452,13 +33722,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         the 2.2.x series (see the list below), so you may choose to use it for
         new projects only.</para>
 
-        <para>Probably the most ``loudly promoted'' new feature is the totally
-        redesigned XML wrapper. With the new XML wrapper FreeMarker targets a
-        new application domain, which is similar to the application domain of
-        XSLT: transforming complex XML to whatever textual output. Although
-        this subproject is young, it is definitely usable in practice. See the
-        <link linkend="xgui">XML Processing Guide</link> for more
-        details.</para>
+        <para>Probably the most <quote>loudly promoted</quote> new feature is
+        the totally redesigned XML wrapper. With the new XML wrapper
+        FreeMarker targets a new application domain, which is similar to the
+        application domain of XSLT: transforming complex XML to whatever
+        textual output. Although this subproject is young, it is definitely
+        usable in practice. See the <link linkend="xgui">XML Processing
+        Guide</link> for more details.</para>
 
         <section>
           <title>Non backward-compatible changes!</title>
@@ -33678,8 +33948,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>A new header parameter, <literal>strip_text</literal>,
               that removes all top-level text from a template. This is useful
-              for ``include files'' to suppress newlines that separate the
-              macro definitions. See <link
+              for <quote>include files</quote> to suppress newlines that
+              separate the macro definitions. See <link
               linkend="ref.directive.ftl"><literal>ftl</literal>
               directive</link></para>
             </listitem>
@@ -34113,7 +34383,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <itemizedlist>
               <listitem>
                 <para>Bugfix: Fixing a fatal bug in the template cache that
-                was introduced with the latest cache ``bugfix''. The template
+                was introduced with the latest cache bugfix. The template
                 cache has always reloaded the unchanged template when the
                 update delay has been elapsed, until the template has been
                 actually changed, in which case it has never reloaded the
@@ -34283,10 +34553,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               </listitem>
 
               <listitem>
-                <para>From now, if no XPath engine is available, and the hash
-                key in an ``XML query'' can't be interpreted without XPath, an
-                error will tell this clearly, rather than silently returning
-                undefined variable (null).</para>
+                <para>From now on, if no XPath engine is available, and the
+                hash key in an XML query can't be interpreted without XPath,
+                an error will tell this clearly, rather than silently
+                returning undefined variable (null).</para>
               </listitem>
 
               <listitem>
@@ -34485,9 +34755,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                     reworked and is absolutely incompatible with pre 10. Don't
                     worry about this if none of your XML input documents use
                     you use <literal>xmlns</literal> attributes. Worry,
-                    though, if you have utilized the ``loose mode'', where
-                    only the local name of elements were compared, because
-                    that's now gone. Sorry...</para>
+                    though, if you have utilized the <quote>loose
+                    mode</quote>, where only the local name of elements were
+                    compared, because that's now gone. Sorry...</para>
                   </listitem>
 
                   <listitem>
@@ -34988,10 +35258,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <itemizedlist>
             <listitem>
               <para>Bugfix: Fixing a fatal bug in the template cache that was
-              introduced with the latest cache ``bugfix''. The template cache
-              has always reloaded the unchanged template when the update delay
-              has been elapsed, until the template has been actually changed,
-              in which case it has never reloaded the template anymore.</para>
+              introduced with the latest cache <quote>bugfix</quote>. The
+              template cache has always reloaded the unchanged template when
+              the update delay has been elapsed, until the template has been
+              actually changed, in which case it has never reloaded the
+              template anymore.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -35076,8 +35347,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Fixes and improvements in the Manual and in the API
               JavaDoc. The documentation now works with the Eclipse help
-              plugin (accessible in the ``Editor/IDE plugins'' section of the
-              FreeMarker Web page).</para>
+              plugin (accessible in the <quote>Editor/IDE plugins</quote>
+              section of the FreeMarker Web page).</para>
             </listitem>
 
             <listitem>
@@ -35424,11 +35695,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>&lt;nested&gt;</literal>, then that will be
               misinterpreted as a directive. To prevent this kind of problem
               in the future, we recommend everybody to switch from the old
-              syntax to the new syntax (``strict syntax''). The strict syntax
-              will be the the default syntax starting from some of the later
-              releases anyway. We plan to release a conversion tool for
-              converting old templates. For more information please read:
-              <xref linkend="ref_depr_oldsyntax"/></para>
+              syntax to the new syntax (<quote>strict syntax</quote>). The
+              strict syntax will be the the default syntax starting from some
+              of the later releases anyway. We plan to release a conversion
+              tool for converting old templates. For more information please
+              read: <xref linkend="ref_depr_oldsyntax"/></para>
             </listitem>
 
             <listitem>
@@ -35503,14 +35774,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Namespaces: Names-spaces are invaluable if you want to
-              assemble collections (``libraries'') of macros and transforms
-              (and other variables), and then use them in any template without
-              worrying about accidental name clashes with the application
-              specific and temporary variables, or with the variables of other
-              collections you want to use in the same template. This is
-              extremely important if FreeMarker users want to share their
-              macro/transform collections. For more information read: <xref
-              linkend="dgui_misc_namespace"/></para>
+              assemble collections (<quote>libraries</quote>) of macros and
+              transforms (and other variables), and then use them in any
+              template without worrying about accidental name clashes with the
+              application specific and temporary variables, or with the
+              variables of other collections you want to use in the same
+              template. This is extremely important if FreeMarker users want
+              to share their macro/transform collections. For more information
+              read: <xref linkend="dgui_misc_namespace"/></para>
             </listitem>
 
             <listitem>
@@ -36564,11 +36835,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bugfix: operator ``or'' (<literal>||</literal>) worked
-              wrongly when its left operand was a composite expression (e.g.
-              the second <literal>||</literal> in <literal>false || true ||
-              false</literal>; this was evaluated to <literal>false</literal>,
-              but it should be <literal>true</literal>)</para>
+              <para>Bugfix: operator <quote>or</quote> (<literal>||</literal>)
+              worked wrongly when its left operand was a composite expression
+              (e.g., the second <literal>||</literal> in <literal>false ||
+              true || false</literal>; this was evaluated to
+              <literal>false</literal>, but it should be
+              <literal>true</literal>)</para>
             </listitem>
 
             <listitem>
@@ -36657,8 +36929,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <para>Note however that the programmer can configure
                   FreeMarker so that it ignores certain errors (say, undefined
                   variables), and continues template processing by skipping
-                  the problematic part. This ``loose'' policy should be used
-                  only for sites that don't show critical information.</para>
+                  the problematic part. This <quote>loose</quote> policy
+                  should be used only for sites that don't show critical
+                  information.</para>
                 </listitem>
 
                 <listitem>
@@ -37946,20 +38219,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 END LICENSE
 
 
-Files developed outside the FreeMarker project
-----------------------------------------------
-
-FreeMarker, both in its source code and binary form (freemarker.jar)
-includes a number of files that are licensed by the Apache Software
-Foundation under the Apache License, Version 2.0. This is the same
-license as the license of FreeMaker. These files are:
-
-    freemarker/ext/jsp/web-app_2_2.dtd
-    freemarker/ext/jsp/web-app_2_3.dtd
-    freemarker/ext/jsp/web-jsptaglibrary_1_1.dtd
-    freemarker/ext/jsp/web-jsptaglibrary_1_2.dtd
-
-
 Historical notes
 ----------------
 
@@ -38025,8 +38284,9 @@ Apache Software Foundation.</programlisting>
 
       <glossdef>
         <para>A symbol that people use in writing. Examples of characters:
-        Latin capital letter A (``A''), Latin small letter A (``a''), digit
-        four (``4''), number sign (``#''), colon (``:'')</para>
+        Latin capital letter A (<quote>A</quote>), Latin small letter A
+        (<quote>a</quote>), digit four (<quote>4</quote>), number sign
+        (<quote>#</quote>), colon (<quote>:</quote>)</para>
       </glossdef>
     </glossentry>
 
@@ -38064,8 +38324,8 @@ Apache Software Foundation.</programlisting>
 
       <glossdef>
         <para>Means output <link linkend="gloss.charset">charset</link>. In
-        the Java world the term ``encoding'' is commonly (mis)used as a
-        synonym to ``charset''.</para>
+        the Java world the term <quote>encoding</quote> is commonly (mis)used
+        as a synonym to charset.</para>
       </glossdef>
     </glossentry>
 
@@ -38074,8 +38334,8 @@ Apache Software Foundation.</programlisting>
 
       <glossdef>
         <para>Means template <link linkend="gloss.charset">charset</link>. In
-        the Java world the term ``encoding'' is commonly (mis)used as a
-        synonym to ``charset''.</para>
+        the Java world the term <quote>encoding</quote> is commonly (mis)used
+        as a synonym to charset.</para>
       </glossdef>
     </glossentry>
 
@@ -38238,13 +38498,14 @@ Apache Software Foundation.</programlisting>
         text (say, when you read the text with Windows notepad). Typically you
         type this character by hitting ENTER or RETURN key. The line break is
         represented with different characters on different platforms (to cause
-        incompatibility and confusion...): ``line feed'' character on UNIX-es,
-        ``carriage return'' character on Macintosh, ``carriage return''+``line
-        feed'' (two characters!) on Windows and DOS. Note that line breaks in
-        HTML do not have a visual effect when viewed in a browser; you must
-        use markup such as <literal>&lt;BR&gt;</literal> for that. This manual
-        never means <literal>&lt;BR&gt;</literal> when it says
-        ``line-break''.</para>
+        incompatibility and confusion...): <quote>line feed</quote> character
+        on UNIX-es, <quote>carriage return</quote> character on Macintosh,
+        <quote>carriage return</quote> + <quote>line feed</quote> (two
+        characters!) on Windows and DOS. Note that line breaks in HTML do not
+        have a visual effect when viewed in a browser; you must use markup
+        such as <literal>&lt;BR&gt;</literal> for that. This manual never
+        means <literal>&lt;BR&gt;</literal> when it says
+        <quote>line-break</quote>.</para>
       </glossdef>
     </glossentry>
 
@@ -38398,11 +38659,12 @@ Apache Software Foundation.</programlisting>
         <literal>"fo*"</literal> matches <literal>"f"</literal>,
         <literal>"fo"</literal>, <literal>"foo"</literal>, etc. Regular
         expressions are used in several languages and other tools. In
-        FreeMarker, the usage of them is a ``power user'' option. So if you
-        have never used them before, there is no need to worry about not being
-        familiar with them. But if you are interested in regular expressions,
-        you can find several Web pages and books about them. FreeMarker uses
-        the variation of regular expressions described at: <link
+        FreeMarker, the usage of them is a <quote>power user</quote> option.
+        So if you have never used them before, there is no need to worry about
+        not being familiar with them. But if you are interested in regular
+        expressions, you can find several Web pages and books about them.
+        FreeMarker uses the variation of regular expressions described at:
+        <link
         xlink:href="http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html">http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html</link></para>
       </glossdef>
     </glossentry>
@@ -38432,7 +38694,8 @@ Apache Software Foundation.</programlisting>
 
       <glossdef>
         <para>A sequence of <link linkend="gloss.character">characters</link>
-        such as ``m'', ``o'', ``u'', ``s'', ``e''.</para>
+        such as <quote>m</quote>, <quote>o</quote>, <quote>u</quote>,
+        <quote>s</quote>, <quote>e</quote>.</para>
       </glossdef>
     </glossentry>
 
@@ -38530,12 +38793,13 @@ Apache Software Foundation.</programlisting>
       <glossdef>
         <para>This is international standard (ISO-10646) that defines a huge
         set of <link linkend="gloss.character">characters</link> and assigns a
-        unique number for each character (``!'' is 33, ..., ``A'' is 61, ``B''
-        is 62, ..., Arabic letter hamza is 1569... etc.). This character set
-        (not charset) contains almost all characters used today (Latin
-        alphabet, Cyrillic alphabet, Chinese letters, etc.). The idea behind
-        UCS is that we can specify any character with a unique number, not
-        mater what the platform or the language is.</para>
+        unique number for each character (<quote>!</quote> is 33, ...,
+        <quote>A</quote> is 61, <quote>B</quote> is 62, ..., Arabic letter
+        hamza is 1569... etc.). This character set (not charset) contains
+        almost all characters used today (Latin alphabet, Cyrillic alphabet,
+        Chinese letters, etc.). The idea behind UCS is that we can specify any
+        character with a unique number, not mater what the platform or the
+        language is.</para>
 
         <glossseealso otherterm="gloss.unicode"/>
       </glossdef>

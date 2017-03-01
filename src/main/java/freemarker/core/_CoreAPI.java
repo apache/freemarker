@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -22,7 +22,6 @@ package freemarker.core;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -183,7 +182,7 @@ public class _CoreAPI {
      *             if the type of the some of the values isn't as expected
      */
     public static void checkSettingValueItemsType(String somethingsSentenceStart, Class<?> expectedClass,
-            Collection<? extends Object> values) {
+            Collection<?> values) {
         if (values == null) return;
         for (Object value : values) {
             if (!expectedClass.isInstance(value)) {

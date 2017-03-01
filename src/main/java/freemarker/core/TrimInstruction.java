@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -25,10 +25,10 @@ package freemarker.core;
  */
 final class TrimInstruction extends TemplateElement {
     
-    private final int TYPE_T = 0;  
-    private final int TYPE_LT = 1;  
-    private final int TYPE_RT = 2;  
-    private final int TYPE_NT = 3;  
+    private static final int TYPE_T = 0;  
+    private static final int TYPE_LT = 1;  
+    private static final int TYPE_RT = 2;  
+    private static final int TYPE_NT = 3;  
 
     final boolean left, right;
 

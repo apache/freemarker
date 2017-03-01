@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
+ *
  *   http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -50,6 +50,7 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateNodeModel;
+import freemarker.template.TemplateNodeModelEx;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
@@ -190,7 +191,9 @@ public class ClassUtil {
     private static void appendTemplateModelTypeName(StringBuilder sb, Set typeNamesAppended, Class cl) {
         int initalLength = sb.length();
         
-        if (TemplateNodeModel.class.isAssignableFrom(cl)) {
+        if (TemplateNodeModelEx.class.isAssignableFrom(cl)) {
+            appendTypeName(sb, typeNamesAppended, "extended node");
+        } else if (TemplateNodeModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "node");
         }
         
