@@ -797,8 +797,6 @@ TOKEN:
     |
     <RETURN : <START_TAG> "return" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <CALL : <START_TAG> "call" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
-    |
     <SETTING : <START_TAG> "setting" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
     <OUTPUTFORMAT : <START_TAG> "output" ("f"|"F") "ormat" <BLANK>> {
@@ -3277,43 +3275,6 @@ ASTElement UnifiedMacroTransform() :
     }
 }
 
-ASTElement Call() :
-{
-    Token start, end, id;
-    HashMap namedArgs = null;
-    ArrayList positionalArgs = null;
-    String macroName= null;
-}
-{
-    start = <CALL>
-    id = <ID> { macroName = id.image; }
-    (
-        LOOKAHEAD(<ID><EQUALS>)
-        namedArgs = NamedArgs()
-        |
-        (
-            [
-            LOOKAHEAD(<OPEN_PAREN>)
-                <OPEN_PAREN>
-            ]
-            positionalArgs = PositionalArgs()
-            [<CLOSE_PAREN>]
-        )
-    )
-    end = LooseDirectiveEnd()
-    {
-        ASTDirUserDefined result = null;
-        if (positionalArgs != null) {
-            result = new ASTDirUserDefined(new ASTExpVariable(macroName), positionalArgs, TemplateElements.EMPTY, null);
-        } else {
-            result = new ASTDirUserDefined(new ASTExpVariable(macroName), namedArgs, TemplateElements.EMPTY, null);
-        }
-        result.legacySyntax = true;
-        result.setLocation(template, start, end);
-        return result;
-    }
-}
-
 HashMap NamedArgs() :
 {
     HashMap result = new HashMap();
@@ -3757,8 +3718,6 @@ ASTElement FreemarkerDirective() :
         tp = ASTDirItems()
         |
         tp = ASTDirSep()
-        |
-        tp = Call()
         |
         tp = ASTComment()
         |

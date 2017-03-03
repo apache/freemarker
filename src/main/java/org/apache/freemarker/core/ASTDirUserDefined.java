@@ -45,7 +45,6 @@ final class ASTDirUserDefined extends ASTDirective implements DirectiveCallPlace
     private ASTExpression nameExp;
     private Map namedArgs;
     private List positionalArgs, bodyParameterNames;
-    boolean legacySyntax;
     private transient volatile SoftReference/*List<Map.Entry<String,ASTExpression>>*/ sortedNamedArgsCache;
     private CustomDataHolder customDataHolder;
 
@@ -75,7 +74,7 @@ final class ASTDirUserDefined extends ASTDirective implements DirectiveCallPlace
         if (tm == ASTDirMacro.DO_NOTHING_MACRO) return null; // shortcut here.
         if (tm instanceof ASTDirMacro) {
             ASTDirMacro macro = (ASTDirMacro) tm;
-            if (macro.isFunction() && !legacySyntax) {
+            if (macro.isFunction()) {
                 throw new _MiscTemplateException(env,
                         "Routine ", new _DelayedJQuote(macro.getName()), " is a function, not a directive. "
                         + "Functions can only be called from expressions, like in ${f()}, ${x + f()} or ",

@@ -139,3 +139,5 @@ the FreeMarer 3 changelog here:
     of FreemarerServlet.createDefaultObjectWrapper() has changed to ObjectWrapperAndUnwrapper.) The unwrapping functionality is
     required when calling JSP custom tags/functions, and in FreeMarker 2 this was worked around with using the
     global static default DefaultObjectWrapper when the ObjectWrapper wasn't an ObjectWrapperAndUnwrapper.
+- Removed some long deprecated template language directives:
+  - <call ...>
