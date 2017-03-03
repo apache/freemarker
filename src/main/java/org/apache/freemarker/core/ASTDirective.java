@@ -62,7 +62,6 @@ abstract class ASTDirective extends ASTElement {
         addName(allNames, lcNames, ccNames, "escape");
         addName(allNames, lcNames, ccNames, "fallback");
         addName(allNames, lcNames, ccNames, "flush");
-        addName(allNames, lcNames, ccNames, "foreach", "forEach");
         addName(allNames, lcNames, ccNames, "ftl");
         addName(allNames, lcNames, ccNames, "function");
         addName(allNames, lcNames, ccNames, "global");

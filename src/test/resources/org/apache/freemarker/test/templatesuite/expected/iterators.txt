@@ -68,8 +68,6 @@
 <p>four</p>
 <p>five</p>
 
-<p>Now test the list and foreach keywords...</p>
-
 <p>one</p>
 <p>two</p>
 <p>three</p>

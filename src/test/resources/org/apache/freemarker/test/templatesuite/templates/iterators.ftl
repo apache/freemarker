@@ -59,8 +59,6 @@
 <p>${item}</p>
 </#list>
 
-<p>Now test the list and foreach keywords...</p>
-
 <#list hash2["value"].key as key>
 <p>${key}</p>
 </#list>
