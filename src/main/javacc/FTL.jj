@@ -2513,7 +2513,7 @@ ASTDirList ForEach() :
     }
 }
 
-ASTDirItems ASTDirItems() :
+ASTDirItems Items() :
 {
     Token loopVar, loopVar2 = null, start, end;
     TemplateElements children;
@@ -2572,7 +2572,7 @@ ASTDirItems ASTDirItems() :
     }
 }
 
-ASTDirSep ASTDirSep() :
+ASTDirSep Sep() :
 {
     Token loopVar, start, end = null;
     TemplateElements children;
@@ -2984,7 +2984,7 @@ ASTElement Assign() :
     )
 }
 
-ASTDirInclude ASTDirInclude() :
+ASTDirInclude Include() :
 {
     ASTExpression nameExp;
     Token att, start, end;
@@ -3048,7 +3048,7 @@ ASTDirImport Import() :
     }
 }
 
-ASTDirMacro ASTDirMacro() :
+ASTDirMacro Macro() :
 {
     Token arg, start, end;
     ASTExpression nameExp;
@@ -3310,7 +3310,7 @@ ArrayList PositionalArgs() :
 }
 
 
-ASTComment ASTComment() :
+ASTComment Comment() :
 {
     Token start, end;
     StringBuilder buf = new StringBuilder();
@@ -3658,21 +3658,21 @@ ASTElement FreemarkerDirective() :
         |
         tp = Assign()
         |
-        tp = ASTDirInclude()
+        tp = Include()
         |
         tp = Import()
         |
-        tp = ASTDirMacro()
+        tp = Macro()
         |
         tp = Compress()
         |
         tp = UnifiedMacroTransform()
         |
-        tp = ASTDirItems()
+        tp = Items()
         |
-        tp = ASTDirSep()
+        tp = Sep()
         |
-        tp = ASTComment()
+        tp = Comment()
         |
         tp = NoParse()
         |
