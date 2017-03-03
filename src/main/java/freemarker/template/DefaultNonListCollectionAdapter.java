@@ -57,7 +57,7 @@ public class DefaultNonListCollectionAdapter extends WrappingTemplateModel imple
      * @param collection
      *            The collection to adapt; can't be {@code null}.
      * @param wrapper
-     *            The {@link ObjectWrapper} used to wrap the items in the array. Has to be
+     *            The {@link ObjectWrapper} used to wrap the items in the collection. Has to be
      *            {@link ObjectWrapperAndUnwrapper} because of planned future features.
      */
     public static DefaultNonListCollectionAdapter adapt(Collection collection, ObjectWrapperWithAPISupport wrapper) {
