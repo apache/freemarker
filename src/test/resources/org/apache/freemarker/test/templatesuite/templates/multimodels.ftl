@@ -32,8 +32,8 @@ hash as a single class. Let's try some tests...</p>
 
 <p>Now as a list...</p>
 
-<#foreach item in data>${item}<br />
-</#foreach>
+<#list data as item>${item}<br />
+</#list>
 
 <p>Index into a list...</p>
 <p>${data[ 1 ]}</p>

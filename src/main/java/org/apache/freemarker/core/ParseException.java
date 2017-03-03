@@ -377,9 +377,6 @@ public class ParseException extends IOException implements FMParserConstants {
             for (int[] sequence : expectedTokenSequences) {
                 for (int aSequence : sequence) {
                     switch (aSequence) {
-                        case END_FOREACH:
-                            endNames.add("#foreach");
-                            break;
                         case END_LIST:
                             endNames.add("#list");
                             break;

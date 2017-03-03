@@ -41,7 +41,6 @@ public class BreakPlacementTest extends TemplateTest {
                 + "<#list xs>[<#items as x>${x}</#items>]<#else><#break></#list>"
                 + "</#list>.",
                 "[12][34].");
-        assertOutput("<#forEach x in 1..2>${x}<#break></#forEach>", "1");
     }
 
     @Test

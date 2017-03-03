@@ -18,11 +18,11 @@
 -->
 <#-- test processing instructions -->
 <#global PIs = doc._content._ftype("p")>
-<#foreach pi in PIs>
+<#list PIs as pi>
   ${pi}
   ${pi["@target"]._text}
   ${pi["@data"]._text}
-</#foreach>
+</#list>
 ${PIs?size}
 <#global firstPi = PIs[0]>
 ${firstPi._type}
@@ -37,11 +37,11 @@ ${docRoot["ns:e1"]["@a1"]._name}
 ${docRoot["ns:e1"]["@a2"]._text}
 ${docRoot._children._parent._name}
 ${docRoot._children._parent._unique._name}
-<#foreach d in doc._descendant>
+<#list doc._descendant as d>
   ${d._name}
-</#foreach>
-<#foreach d in doc._descendant._ancestorOrSelf>
+</#list>
+<#list doc._descendant._ancestorOrSelf as d>
   ${d._name}
-</#foreach>
+</#list>
 ${docRoot["ns:e2"]["ns:e12"]._text}
 ${docRoot["ns:e2"]["ns:e12"]._plaintext}

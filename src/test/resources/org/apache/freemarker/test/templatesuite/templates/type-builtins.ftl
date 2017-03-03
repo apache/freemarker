@@ -18,13 +18,13 @@
 -->
 <#setting boolean_format="1,0">
 StNuBoMeTaMaHaHxSeCoCxEnInDiNo
-<#foreach x in [
+<#list [
   "a", 1, false,
   testmethod, testmacro, html_escape,
   {"a":1}, [1], testcollection, testcollectionEx,
   testnode,
   bean, bean.m, bean.mOverloaded
-]>
+] as x>
   ${x?is_string} <#t>
   ${x?is_number} <#t>
   ${x?is_boolean} <#t>
@@ -40,5 +40,5 @@ StNuBoMeTaMaHaHxSeCoCxEnInDiNo
   ${x?is_indexable} <#t>
   ${x?is_directive} <#t>
   ${x?is_node}<#lt>
-</#foreach>
+</#list>
 <#macro testmacro></#macro>

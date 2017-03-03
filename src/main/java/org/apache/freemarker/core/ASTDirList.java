@@ -38,7 +38,7 @@ import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.util._StringUtil;
 
 /**
- * AST directive node: {@code #list} (or {@code #foreach}) element, or pre-{@code #else} section of it inside a
+ * AST directive node: {@code #list} element, or pre-{@code #else} section of it inside a
  * {@link ASTDirListElseContainer}.
  */
 final class ASTDirList extends ASTDirective {
@@ -47,7 +47,6 @@ final class ASTDirList extends ASTDirective {
     private final String loopVarName;
     private final String loopVar2Name;
     private final boolean hashListing;
-    private final boolean forEach;
 
     /**
      * @param listedExp
@@ -66,21 +65,17 @@ final class ASTDirList extends ASTDirective {
      * @param hashListing
      *            Whether this is a key-value pair listing, or a usual listing. This is properly set even if we have
      *            a nested {@code #items}.
-     * @param forEach
-     *            Whether this is {@code #foreach} or a {@code #list}.
      */
     ASTDirList(ASTExpression listedExp,
                   String loopVarName,
                   String loopVar2Name,
                   TemplateElements childrenBeforeElse,
-                  boolean hashListing,
-                  boolean forEach) {
+                  boolean hashListing) {
         this.listedExp = listedExp;
         this.loopVarName = loopVarName;
         this.loopVar2Name = loopVar2Name;
         setChildren(childrenBeforeElse);
         this.hashListing = hashListing;
-        this.forEach = forEach;
     }
     
     boolean isHashListing() {
@@ -132,19 +127,13 @@ final class ASTDirList extends ASTDirective {
         if (canonical) buf.append('<');
         buf.append(getNodeTypeSymbol());
         buf.append(' ');
-        if (forEach) {
+        buf.append(listedExp.getCanonicalForm());
+        if (loopVarName != null) {
+            buf.append(" as ");
             buf.append(_StringUtil.toFTLTopLevelIdentifierReference(loopVarName));
-            buf.append(" in ");
-            buf.append(listedExp.getCanonicalForm());
-        } else {
-            buf.append(listedExp.getCanonicalForm());
-            if (loopVarName != null) {
-                buf.append(" as ");
-                buf.append(_StringUtil.toFTLTopLevelIdentifierReference(loopVarName));
-                if (loopVar2Name != null) {
-                    buf.append(", ");
-                    buf.append(_StringUtil.toFTLTopLevelIdentifierReference(loopVar2Name));
-                }
+            if (loopVar2Name != null) {
+                buf.append(", ");
+                buf.append(_StringUtil.toFTLTopLevelIdentifierReference(loopVar2Name));
             }
         }
         if (canonical) {
@@ -196,7 +185,7 @@ final class ASTDirList extends ASTDirective {
     
     @Override
     String getNodeTypeSymbol() {
-        return forEach ? "#foreach" : "#list";
+        return "#list";
     }
 
     @Override
@@ -205,7 +194,7 @@ final class ASTDirList extends ASTDirective {
     }
 
     /**
-     * Holds the context of a #list (or #forEach) directive.
+     * Holds the context of a #list directive.
      */
     class IterationContext implements LocalContext {
         

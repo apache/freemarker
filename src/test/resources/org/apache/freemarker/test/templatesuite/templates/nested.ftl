@@ -18,9 +18,9 @@
 -->
 <#macro repeat count>
   <#local y = "test">
-  <#foreach x in 1..count>
+  <#list 1..count as x>
     ${y} ${count}/${x}: <#nested x, "asdf"> <#-- the second body parameter is not used below -->
-  </#foreach>
+  </#list>
 </#macro>
 <@repeat count=3>${y?default("undefined")} ${x?default("undefined")} ${count?default("undefined")}</@repeat>
 <#global x = "X">

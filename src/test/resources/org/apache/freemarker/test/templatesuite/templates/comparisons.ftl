@@ -67,7 +67,7 @@
 
 <p>The comparison operators:</p>
 <#assign list1 = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ]>
-<#foreach item in list1>
+<#list list1 as item>
    <p>Item is: ${item}</p>
    <#if item lt 5>
    <p>Item is less than five.</p>
@@ -81,7 +81,7 @@
    <#if (item >= 10)>
    <p>Item is greater than or equal to ten.</p>
    </#if>
-</#foreach>
+</#list>
 
 <#-- Signum-based optimization test, all 9 permutations: -->
 <#-- 1 -->

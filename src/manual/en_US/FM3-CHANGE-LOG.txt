@@ -143,3 +143,4 @@ the FreeMarer 3 changelog here:
   - <#call ...> (deprecated by <@... />)
   - <#comment>...</#comment> (deprecated by <#-- ... -->)
   - <#transform ...>...</#transform> (deprecated by <@...>...</@...>)
+  - <#foreach x in xs>...</#foreach> (deprecated by <#list xs as x>...</#list>)

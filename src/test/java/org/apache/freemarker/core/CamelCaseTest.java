@@ -324,13 +324,6 @@ public class CamelCaseTest extends TemplateTest {
         assertOutput(
                 squared("<#noparse></#noParse></#noparse>", squared),
                 squared("</#noParse>", squared));
-        
-        assertOutput(
-                squared("<#forEach x in 1..3>${x}</#forEach>", squared),
-                "123");
-        assertOutput(
-                squared("<#foreach x in 1..3>${x}</#foreach>", squared),
-                "123");
     }
     
     private String squared(String ftl, boolean squared) {
@@ -370,14 +363,7 @@ public class CamelCaseTest extends TemplateTest {
         assertOutput(
                 squared("<#escape x as -x><#noEscape>${1}</#noEscape></#escape>", squared),
                 "1");
-        
-        assertErrorContains(
-                squared("<#foreach x in 1..3>${x}</#foreach>", squared),
-                "naming convention", "camel", "#foreach");
-        assertOutput(
-                squared("<#forEach x in 1..3>${x}</#forEach>", squared),
-                "123");
-        
+
         // ---
         
         getConfiguration().setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
@@ -402,13 +388,6 @@ public class CamelCaseTest extends TemplateTest {
         assertOutput(
                 squared("<#escape x as -x><#noescape>${1}</#noescape></#escape>", squared),
                 "1");
-        
-        assertErrorContains(
-                squared("<#forEach x in 1..3>${x}</#forEach>", squared),
-                "naming convention", "legacy", "#forEach");
-        assertOutput(
-                squared("<#foreach x in 1..3>${x}</#foreach>", squared),
-                "123");
     }
     
     @Test
@@ -440,19 +419,7 @@ public class CamelCaseTest extends TemplateTest {
         assertErrorContains(
                 "<#escape x as x + 1><#noescape></#noescape><#noEscape></#noEscape></#escape>",
                 "naming convention", "legacy");
-        assertErrorContains(
-                "<#forEach x in 1..3>${x}</#foreach>",
-                "naming convention", "camel");
-        assertErrorContains(
-                "<#forEach x in 1..3>${x}</#forEach><#foreach x in 1..3>${x}</#foreach>",
-                "naming convention", "camel");
-        assertErrorContains(
-                "<#foreach x in 1..3>${x}</#forEach>",
-                "naming convention", "legacy");
-        assertErrorContains(
-                "<#foreach x in 1..3>${x}</#foreach><#forEach x in 1..3>${x}</#forEach>",
-                "naming convention", "legacy");
-        
+
         assertErrorContains("${x?upperCase?is_string}",
                 "naming convention", "camel", "upperCase", "is_string");
         assertErrorContains("${x?upper_case?isString}",

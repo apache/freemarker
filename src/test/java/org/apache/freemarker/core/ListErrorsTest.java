@@ -52,30 +52,24 @@ public class ListErrorsTest extends TemplateTest {
                 "#items", "must be inside", "#list");
         assertErrorContains("<#list xs><#macro m><#items as x></#items></#macro></#list>",
                 "#items", "must be inside", "#list");
-        assertErrorContains("<#list xs><#forEach x in xs><#items as x></#items></#forEach></#list>",
-                "#forEach", "doesn't support", "#items");
         assertErrorContains("<#list xs as x><#items as x>${x}</#items></#list>",
                 "#list", "must not have", "#items", "as loopVar");
         assertErrorContains("<#list xs><#list xs as x><#items as x>${x}</#items></#list></#list>",
                 "#list", "must not have", "#items", "as loopVar");
         assertErrorContains("<#list xs></#list>",
                 "#list", "must have", "#items", "as loopVar");
-        assertErrorContains("<#forEach x in xs><#items as x></#items></#forEach>",
-                "#forEach", "doesn't support", "#items");
-        assertErrorContains("<#list xs><#forEach x in xs><#items as x></#items></#forEach></#list>",
-                "#forEach", "doesn't support", "#items");
     }
 
     @Test
     public void testInvalidSepParseTime() throws IOException, TemplateException {
         assertErrorContains("<#sep>, </#sep>",
-                "#sep", "must be inside", "#list", "#foreach");
+                "#sep", "must be inside", "#list");
         assertErrorContains("<#sep>, ",
-                "#sep", "must be inside", "#list", "#foreach");
+                "#sep", "must be inside", "#list");
         assertErrorContains("<#list xs as x><#else><#sep>, </#list>",
-                "#sep", "must be inside", "#list", "#foreach");
+                "#sep", "must be inside", "#list");
         assertErrorContains("<#list xs as x><#macro m><#sep>, </#macro></#list>",
-                "#sep", "must be inside", "#list", "#foreach");
+                "#sep", "must be inside", "#list");
     }
 
     @Test

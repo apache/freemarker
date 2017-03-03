@@ -34,51 +34,51 @@
 
 The list contains #{test?size} items.
 
-<#foreach item in test>
+<#list test as item>
 <p>${item}</p>
-</#foreach>
+</#list>
 
 <p>Now update the assignment and repeat:</p>
 
 <#assign mymessage = "world">
 
-<#foreach item in test>
+<#list test as item>
 <p>${item}</p>
-</#foreach>
+</#list>
 
 <p>Now reassign the list and repeat:</p>
 
 <#assign test = [ hash.temp, "test1", "test23", "test45", mymessage, "hash", hash["temp"]]>
 <#assign test = [ "foo", "bar" ] + test>
 
-<#foreach item in test[1..4]>
+<#list test[1..4] as item>
 <p>${item}</p>
-</#foreach>
+</#list>
 
 <p>Silly, but necessary tests, for one and zero element lists:</p>
 
 <#assign test = [ "Hello, world" ]>
 
-<#foreach item in test>
+<#list test as item>
 <p>${item}</p>
-</#foreach>
+</#list>
 
 <p>Zero item test:</p>
 
 <#assign test = []>
 
-<#foreach item in test>
+<#list test as item>
 <p>${item}</p>
-</#foreach>
+</#list>
 
 <p>Dumb test for number literals -- these weren't working as expected:</p>
 
 <#assign test = [] + [1, 2,3, 5, 7]>
 
-<#foreach item in test>
+<#list test as item>
 <p>${item}</p>
 <#if item == 5><#break></#if>
-</#foreach>
+</#list>
 
 </body>
 </html>

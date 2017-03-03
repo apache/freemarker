@@ -57,8 +57,8 @@ xhtml:      ${"\"Blah's is > 1 & < 2\""?xhtml}
 
 word_list:
 <#global words = x?word_list>
-<#foreach shortvariablenamesmakeyourcodemorereadable in words>- ${shortvariablenamesmakeyourcodemorereadable}
-</#foreach>
+<#list words as w>- ${w}
+</#list>
 
 <#global canufeelitbabe = x?interpret>
 interpret: <@canufeelitbabe></@>

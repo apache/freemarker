@@ -27,7 +27,7 @@
     "squirrel", "zebra" ]>
 <#assign favoriteAnimal = "kiwi">
 
-<#foreach animal in animalList>
+<#list animalList as animal>
 <p>Animal is: ${animal}.<br />
 <#switch animal>
     <#case "zebra">
@@ -48,7 +48,7 @@
         <#break>
 </#switch>
 </p>
-</#foreach>
+</#list>
 
 <#-- Nesting and no-match -->
 <#list [ 1, 2, 3 ] as x>

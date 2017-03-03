@@ -31,9 +31,9 @@
 
 <p>Now iterate over a list:</p>
 
-<#foreach item in list>
+<#list list as item>
 <p>${item}</p>
-</#foreach>
+</#list>
 
 <p>Now iterate again:</p>
 
@@ -47,13 +47,13 @@
 <p>${item}</p>
 </#list>
 
-<#foreach item in hash.key>
+<#list hash.key as item>
 <p>${item}</p>
-</#foreach>
+</#list>
 
-<#foreach item in hash[ "key" ]>
+<#list hash[ "key" ] as item>
 <p>${item}</p>
-</#foreach>
+</#list>
 
 <#list hash["key"] as item>
 <p>${item}</p>
@@ -65,9 +65,9 @@
 <p>${key}</p>
 </#list>
 
-<#foreach az in hash2.value.key>
+<#list hash2.value.key as az>
 <p>${az}</p>
-</#foreach>
+</#list>
 
 </body>
 </html>

@@ -17,7 +17,7 @@
   under the License.
 -->
 <#global x=["a", "b", "c"]>
-<#global templateSource = r"<#foreach y in x>${y}</#foreach>">
+<#global templateSource = r"<#list x as y>${y}</#list>">
 <@templateSource?interpret>def</@>
 <@[templateSource]?interpret>def</@>
 <@[templateSource,"id"]?interpret>def</@>

@@ -44,9 +44,8 @@ import java.util.*;
 public class FMParser {
 
     private static final int ITERATOR_BLOCK_KIND_LIST = 0; 
-    private static final int ITERATOR_BLOCK_KIND_FOREACH = 1; 
-    private static final int ITERATOR_BLOCK_KIND_ITEMS = 2; 
-    private static final int ITERATOR_BLOCK_KIND_USER_DIRECTIVE = 3; 
+    private static final int ITERATOR_BLOCK_KIND_ITEMS = 1;
+    private static final int ITERATOR_BLOCK_KIND_USER_DIRECTIVE = 2;
 
     private static class ParserIteratorBlockContext {
         /**
@@ -82,19 +81,14 @@ public class FMParser {
     private ParserConfiguration pCfg;
     private InputStream streamToUnmarkWhenEncEstabd;
 
-    /** Keeps track of #list and #foreach nesting. */
+    /** Keeps track of #list nesting. */
     private List/*<ParserIteratorBlockContext>*/ iteratorBlockContexts;
     
     /**
      * Keeps track of the nesting depth of directives that support #break.
      */
     private int breakableDirectiveNesting;
-    
-    /**
-     * Keeps track of the flags of the innermost parent #list or #foreach directive.
-     */
-    private int parentListAndForeachFlags;
-    
+
     private boolean inMacro, inFunction;
     private LinkedList escapes = new LinkedList();
     private int mixedContentNesting; // for stripText
@@ -438,12 +432,7 @@ public class FMParser {
                 + "but there's no loop variable in scope with this name: " + loopVarName,
                 lhoExp);
     }
-    
-	private String forEachDirectiveSymbol() {    
-	    // [2.4] Use camel case as the default
-	    return token_source.namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION ? "#forEach" : "#foreach";
-	}
-    
+
 }
 
 PARSER_END(FMParser)
@@ -766,10 +755,6 @@ TOKEN:
     |
     <SEP : <START_TAG> "sep" <CLOSE_TAG1>>
     |
-    <FOREACH : <START_TAG> "for" ("e" | "E") "ach" <BLANK>> {
-        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 3), FM_EXPRESSION);
-    }
-    |
     <SWITCH : <START_TAG> "switch" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
     <CASE : <START_TAG> "case" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
@@ -829,10 +814,6 @@ TOKEN:
     <END_RECOVER : <END_TAG> "recover" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
     <END_ATTEMPT : <END_TAG> "attempt" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
-    |
-    <END_FOREACH : <END_TAG> "for" ("e" | "E") "ach" <CLOSE_TAG1>> {
-        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 3), DEFAULT);
-    }
     |
     <END_LOCAL : <END_TAG> "local" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
@@ -2452,7 +2433,7 @@ ASTElement List() :
                 exp,
                 loopVar != null ? loopVar.image : null,  // null when we have a nested #items
                 loopVar2 != null ? loopVar2.image : null,
-                childrendBeforeElse, iterCtx.hashListing, false);
+                childrendBeforeElse, iterCtx.hashListing);
         list.setLocation(template, start, end);
 
         ASTElement result;
@@ -2481,38 +2462,6 @@ ASTDirElseOfList ASTDirElseOfList() :
         }
 }
 
-ASTDirList ForEach() :
-{
-    ASTExpression exp;
-    Token loopVar, start, end;
-    TemplateElements children;
-}
-{
-    start = <FOREACH>
-    loopVar = <ID>
-    <IN>
-    exp = ASTExpression()
-    <DIRECTIVE_END>
-    {
-        ParserIteratorBlockContext iterCtx = pushIteratorBlockContext();
-        iterCtx.loopVarName = loopVar.image;
-        iterCtx.kind = ITERATOR_BLOCK_KIND_FOREACH;
-        breakableDirectiveNesting++;
-    }
-    
-    children = MixedContentElements()
-    
-    end = <END_FOREACH>
-    {
-        breakableDirectiveNesting--;
-        popIteratorBlockContext();
-                
-        ASTDirList result = new ASTDirList(exp, loopVar.image, null, children, false, true);
-        result.setLocation(template, start, end);
-        return result;
-    }
-}
-
 ASTDirItems Items() :
 {
     Token loopVar, loopVar2 = null, start, end;
@@ -2534,9 +2483,7 @@ ASTDirItems Items() :
         }
         if (iterCtx.loopVarName != null) {
             String msg;
-	        if (iterCtx.kind == ITERATOR_BLOCK_KIND_FOREACH) {
-	            msg = forEachDirectiveSymbol() + " doesn't support nested #items.";
-	        } else if (iterCtx.kind == ITERATOR_BLOCK_KIND_ITEMS) {
+	        if (iterCtx.kind == ITERATOR_BLOCK_KIND_ITEMS) {
                 msg = "Can't nest #items into each other when they belong to the same #list.";
 	        } else {
 	            msg = "The parent #list of the #items must not have \"as loopVar\" parameter.";
@@ -2582,7 +2529,7 @@ ASTDirSep Sep() :
     {
         if (peekIteratorBlockContext() == null) {
             throw new ParseException(
-                    "#sep must be inside a #list (or " + forEachDirectiveSymbol() + ") block.",
+                    "#sep must be inside a #list block.",
                     template, start);
         }
     }
@@ -2679,7 +2626,7 @@ ASTDirBreak Break() :
     {
         if (breakableDirectiveNesting < 1) {
             throw new ParseException(start.image + " must be nested inside a directive that supports it: " 
-                    + " #list with \"as\", #items, #switch (or the deprecated " + forEachDirectiveSymbol() + ")",
+                    + " #list with \"as\", #items, #switch",
                     template, start);
         }
         ASTDirBreak result = new ASTDirBreak();
@@ -3653,8 +3600,6 @@ ASTElement FreemarkerDirective() :
         tp = If()
         |
         tp = List()
-        |
-        tp = ForEach()
         |
         tp = Assign()
         |
