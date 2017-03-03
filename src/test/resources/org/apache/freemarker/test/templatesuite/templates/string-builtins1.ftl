@@ -61,7 +61,7 @@ word_list:
 </#foreach>
 
 <#global canufeelitbabe = x?interpret>
-interpret: <#transform canufeelitbabe></#transform>
+interpret: <@canufeelitbabe></@>
 <#setting locale="es_ES">number: ${"-123.45"?number + 1.1}
 ${"1.5e3"?number?c}
 ${"0005"?number?c}

@@ -788,8 +788,6 @@ TOKEN:
     |
     <MACRO : <START_TAG> "macro" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <TRANSFORM : <START_TAG> "transform" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
-    |
     <VISIT : <START_TAG> "visit" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
     <STOP : <START_TAG> "stop" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
@@ -859,8 +857,6 @@ TOKEN:
     }
     |
     <END_COMPRESS : <END_TAG> "compress" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
-    |
-    <END_TRANSFORM : <END_TAG> "transform" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
     <END_SWITCH : <END_TAG> "switch" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
@@ -3346,42 +3342,6 @@ ASTStaticText NoParse() :
     }
 }
 
-ASTDirTransform Transform() :
-{
-    Token start, end, argName;
-    ASTExpression exp, argExp;
-    TemplateElements children = null;
-    HashMap args = null;
-}
-{
-    start = <TRANSFORM>
-    exp = ASTExpression()
-    [<SEMICOLON>]
-    (
-        argName = <ID>
-        <EQUALS>
-        argExp = ASTExpression()
-        {
-            if (args == null) args = new HashMap();
-            args.put(argName.image, argExp);
-        }
-    )*
-    (
-        end = <EMPTY_DIRECTIVE_END>
-        |
-        (
-            <DIRECTIVE_END>
-            children = MixedContentElements()
-            end = <END_TRANSFORM>
-        )
-    )
-    {
-        ASTDirTransform result = new ASTDirTransform(exp, args, children);
-        result.setLocation(template, start, end);
-        return result;
-    }
-}
-
 ASTDirSwitch Switch() :
 {
     ASTDirSwitch switchBlock;
@@ -3715,8 +3675,6 @@ ASTElement FreemarkerDirective() :
         tp = ASTComment()
         |
         tp = NoParse()
-        |
-        tp = Transform()
         |
         tp = Switch()
         |

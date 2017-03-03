@@ -18,7 +18,7 @@
 -->
 <#assign message="Hello, world!\n">
 <#assign normalizeNewlines = "org.apache.freemarker.core.util.NormalizeNewlines"?new()>
-<#transform normalizeNewlines>
+<@normalizeNewlines>
 <html>
 <head>
 <title>FreeMarker: Newlines the Second Test</title>
@@ -30,4 +30,4 @@
 
 </body>
 </html>
-</#transform>
+</@normalizeNewlines>

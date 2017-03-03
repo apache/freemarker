@@ -140,5 +140,6 @@ the FreeMarer 3 changelog here:
     required when calling JSP custom tags/functions, and in FreeMarker 2 this was worked around with using the
     global static default DefaultObjectWrapper when the ObjectWrapper wasn't an ObjectWrapperAndUnwrapper.
 - Removed some long deprecated template language directives:
-  - <#call ...>
-  - <#comment>...</#comment>
+  - <#call ...> (deprecated by <@... />)
+  - <#comment>...</#comment> (deprecated by <#-- ... -->)
+  - <#transform ...>...</#transform> (deprecated by <@...>...</@...>)

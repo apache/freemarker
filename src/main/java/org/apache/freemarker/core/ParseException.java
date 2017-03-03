@@ -397,9 +397,6 @@ public class ParseException extends IOException implements FMParserConstants {
                         case END_FUNCTION:
                             endNames.add("#function");
                             break;
-                        case END_TRANSFORM:
-                            endNames.add("#transform");
-                            break;
                         case END_ESCAPE:
                             endNames.add("#escape");
                             break;

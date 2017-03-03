@@ -89,7 +89,6 @@ abstract class ASTDirective extends ASTElement {
         addName(allNames, lcNames, ccNames, "stop");
         addName(allNames, lcNames, ccNames, "switch");
         addName(allNames, lcNames, ccNames, "t");
-        addName(allNames, lcNames, ccNames, "transform");
         addName(allNames, lcNames, ccNames, "visit");
 
         ALL_BUILT_IN_DIRECTIVE_NAMES = Collections.unmodifiableSet(allNames);
