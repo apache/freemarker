@@ -7,9 +7,9 @@
   to you under the Apache License, Version 2.0 (the
   "License"); you may not use this file except in compliance
   with the License.  You may obtain a copy of the License at
-
+  
     http://www.apache.org/licenses/LICENSE-2.0
-
+  
   Unless required by applicable law or agreed to in writing,
   software distributed under the License is distributed on an
   "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -13848,9 +13848,48 @@ Matching sub-strings:
   - "aa/rx;" is "a" per "a/rx"
   - " ab/r;" is " " per "ab/r"</programlisting>
 
-          <para>Note above that <literal>groups</literal> has worked both with
-          substring matches and with the result of entire string
-          matching.</para>
+          <para>Notes regarding the behavior of the <literal>groups</literal>
+          built-in:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>It works both with substring matches and with the result
+              of entire string matching (as it was shown in the above
+              example)</para>
+            </listitem>
+
+            <listitem>
+              <para>The first item in the sequence that
+              <literal>groups</literal> returns is the whole substring matched
+              by the regular expression. Hence, the index of the first
+              explicit regular expression group (with other words, of the
+              first <literal>(<replaceable>...</replaceable>)</literal> in the
+              regular expression) is 1, and not 0. Also, because of this, the
+              size of the sequence is one more than the number of explicit
+              regular expression groups.</para>
+            </listitem>
+
+            <listitem>
+              <para>The size of the sequence returned by
+              <literal>groups</literal> only depends on the number of explicit
+              groups in the regular expression, and so it will be the same
+              (non-0) even if there was no match found for the regular
+              expression. Attempting to access an item of the sequence (as in
+              <literal>res?groups[1]</literal>) when there was match will
+              cause an error. Thus, before accessing the groups, you should
+              always check if there was any match (as in <literal>&lt;#if
+              res&gt;<replaceable>access the groups
+              here</replaceable>&lt;/#if&gt;</literal>).</para>
+            </listitem>
+
+            <listitem>
+              <para>When there's a match for the regular expression, but not
+              for a certain explicit group inside the regular expression, then
+              for that group the sequence will contain a 0 length string. So
+              accessing a group that matches nothing is safe, as far as the
+              containing regular expression has matched something.</para>
+            </listitem>
+          </itemizedlist>
 
           <para><literal>matches</literal> accepts an optional 2nd parameter,
           the <link linkend="ref_builtin_string_flags">flags</link>. Note that
