@@ -31,17 +31,17 @@ A more rigorous test, showing that we're not faking it:
 
 ${message@#$%&}
 
---><#-- > --><#-- -> --><#-- -- --><#-- -- > --><#comment> > </#comment><#comment> </#comment </#comment>
+--><#-- > --><#-- -> --><#-- -- --><#-- -- > -->
 <#if message?exists>
 	<p>Message exists!
-	<#comment>
+	<#--
 		...and even generates output!
-	</#comment>
+	-->
 	</p>
 </#if>
 
 a <#-- < --> b
-a <#-- </#comment> - -- --> b
+a <#-- </#noparse> - -- --> b
 
 ${1 + 2 + [#-- c --] <#-- c --> <!-- c --> 3}
 ${<!-- > -> -- #> #] --> 7}

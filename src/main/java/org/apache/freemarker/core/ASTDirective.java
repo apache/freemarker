@@ -54,9 +54,7 @@ abstract class ASTDirective extends ASTElement {
         addName(allNames, lcNames, ccNames, "attempt");
         addName(allNames, lcNames, ccNames, "autoesc", "autoEsc");
         addName(allNames, lcNames, ccNames, "break");
-        addName(allNames, lcNames, ccNames, "call");
         addName(allNames, lcNames, ccNames, "case");
-        addName(allNames, lcNames, ccNames, "comment");
         addName(allNames, lcNames, ccNames, "compress");
         addName(allNames, lcNames, ccNames, "default");
         addName(allNames, lcNames, ccNames, "else");

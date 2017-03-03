@@ -488,9 +488,8 @@ TOKEN_MGR_DECLS:
 
     /**
      * The noparseTag is set when we enter a block of text that the parser more or less ignores. These are <noparse> and
-     * <comment>. This variable tells us what the closing tag should be, and when we hit that, we resume parsing. Note
-     * that with this scheme, <comment> and <noparse> tags cannot nest recursively, but it is not clear how important
-     * that is.
+     * <#-- ... --->. This variable tells us what the closing tag should be, and when we hit that, we resume parsing.
+     * Note that with this scheme, <noparse> tags and comments cannot nest recursively.
      */
     String noparseTag;
 
@@ -812,10 +811,6 @@ TOKEN:
     }
     |
     <COMPRESS : <START_TAG> "compress" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
-    |
-    <COMMENT : <START_TAG> "comment" <CLOSE_TAG1>> {
-        handleTagSyntaxAndSwitch(matchedToken, NO_PARSE); noparseTag = "comment";
-    }
     |
     <TERSE_COMMENT : ("<" | "[") "#--" > { noparseTag = "-->"; handleTagSyntaxAndSwitch(matchedToken, NO_PARSE); }
     |
@@ -3326,8 +3321,6 @@ ASTComment ASTComment() :
 }
 {
     (
-        start = <COMMENT>
-        |
         start = <TERSE_COMMENT>
     )
     end = UnparsedContent(start, buf)
