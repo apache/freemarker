@@ -26937,6 +26937,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para><literal>freemarker.template.DefaultNonListCollectionAdapter</literal>
+              class is not experimental anymore, so now it has backward
+              compatibility guarantees.</para>
+            </listitem>
+
+            <listitem>
               <para>Various smaller code cleanups.</para>
             </listitem>
           </itemizedlist>
