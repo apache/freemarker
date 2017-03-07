@@ -32,11 +32,14 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +48,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import freemarker.core.BugException;
+import freemarker.core._JavaVersions;
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecision;
 import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecisionInput;
 import freemarker.ext.util.ModelCache;
@@ -136,6 +140,7 @@ class ClassIntrospector {
     final boolean exposeFields;
     final MethodAppearanceFineTuner methodAppearanceFineTuner;
     final MethodSorter methodSorter;
+    final boolean treatDefaultMethodsAsBeanMembers;
     final boolean bugfixed;
 
     /** See {@link #getHasSharedInstanceRestrictons()} */
@@ -185,6 +190,7 @@ class ClassIntrospector {
         this.exposeFields = builder.getExposeFields();
         this.methodAppearanceFineTuner = builder.getMethodAppearanceFineTuner();
         this.methodSorter = builder.getMethodSorter();
+        this.treatDefaultMethodsAsBeanMembers = builder.getTreatDefaultMethodsAsBeanMembers();
         this.bugfixed = builder.isBugfixed();
 
         this.sharedLock = sharedLock;
@@ -201,7 +207,7 @@ class ClassIntrospector {
      * Returns a {@link ClassIntrospectorBuilder}-s that could be used to create an identical {@link #ClassIntrospector}
      * . The returned {@link ClassIntrospectorBuilder} can be modified without interfering with anything.
      */
-    ClassIntrospectorBuilder getPropertyAssignments() {
+    ClassIntrospectorBuilder createBuilder() {
         return new ClassIntrospectorBuilder(this);
     }
 
@@ -312,70 +318,309 @@ class ClassIntrospector {
             Map<Object, Object> introspData, Class<?> clazz, Map<MethodSignature, List<Method>> accessibleMethods)
             throws IntrospectionException {
         BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
-
-        PropertyDescriptor[] pda = beanInfo.getPropertyDescriptors();
-        if (pda != null) {
-            int pdaLength = pda.length;
-            for (int i = pdaLength - 1; i >= 0; --i) {
-                addPropertyDescriptorToClassIntrospectionData(
-                        introspData, pda[i], clazz,
-                        accessibleMethods);
-            }
+        List<PropertyDescriptor> pdas = getPropertyDescriptors(beanInfo, clazz);
+        int pdasLength = pdas.size();
+        // Reverse order shouldn't mater, but we keep it to not risk backward incompatibility.
+        for (int i = pdasLength - 1; i >= 0; --i) {
+            addPropertyDescriptorToClassIntrospectionData(
+                    introspData, pdas.get(i), clazz,
+                    accessibleMethods);
         }
 
         if (exposureLevel < BeansWrapper.EXPOSE_PROPERTIES_ONLY) {
             final MethodAppearanceDecision decision = new MethodAppearanceDecision();
             MethodAppearanceDecisionInput decisionInput = null;
-            final MethodDescriptor[] mda = sortMethodDescriptors(beanInfo.getMethodDescriptors());
-            if (mda != null) {
-                int mdaLength = mda.length;
-                for (int i = mdaLength - 1; i >= 0; --i) {
-                    final MethodDescriptor md = mda[i];
-                    final Method method = getMatchingAccessibleMethod(md.getMethod(), accessibleMethods);
-                    if (method != null && isAllowedToExpose(method)) {
-                        decision.setDefaults(method);
-                        if (methodAppearanceFineTuner != null) {
-                            if (decisionInput == null) {
-                                decisionInput = new MethodAppearanceDecisionInput();
-                            }
-                            decisionInput.setContainingClass(clazz);
-                            decisionInput.setMethod(method);
-    
-                            methodAppearanceFineTuner.process(decisionInput, decision);
+            List<MethodDescriptor> mds = getMethodDescriptors(beanInfo, clazz);
+            sortMethodDescriptors(mds);
+            int mdsSize = mds.size();
+            IdentityHashMap<Method, Void> argTypesUsedByIndexerPropReaders = null;
+            for (int i = mdsSize - 1; i >= 0; --i) {
+                final MethodDescriptor md = mds.get(i);
+                final Method method = getMatchingAccessibleMethod(md.getMethod(), accessibleMethods);
+                if (method != null && isAllowedToExpose(method)) {
+                    decision.setDefaults(method);
+                    if (methodAppearanceFineTuner != null) {
+                        if (decisionInput == null) {
+                            decisionInput = new MethodAppearanceDecisionInput();
                         }
-    
-                        PropertyDescriptor propDesc = decision.getExposeAsProperty();
-                        if (propDesc != null && !(introspData.get(propDesc.getName()) instanceof PropertyDescriptor)) {
-                            addPropertyDescriptorToClassIntrospectionData(
-                                    introspData, propDesc, clazz, accessibleMethods);
-                        }
-    
-                        String methodKey = decision.getExposeMethodAs();
-                        if (methodKey != null) {
-                            Object previous = introspData.get(methodKey);
-                            if (previous instanceof Method) {
-                                // Overloaded method - replace Method with a OverloadedMethods
-                                OverloadedMethods overloadedMethods = new OverloadedMethods(bugfixed);
-                                overloadedMethods.addMethod((Method) previous);
-                                overloadedMethods.addMethod(method);
-                                introspData.put(methodKey, overloadedMethods);
-                                // Remove parameter type information
+                        decisionInput.setContainingClass(clazz);
+                        decisionInput.setMethod(method);
+
+                        methodAppearanceFineTuner.process(decisionInput, decision);
+                    }
+
+                    PropertyDescriptor propDesc = decision.getExposeAsProperty();
+                    if (propDesc != null && !(introspData.get(propDesc.getName()) instanceof PropertyDescriptor)) {
+                        addPropertyDescriptorToClassIntrospectionData(
+                                introspData, propDesc, clazz, accessibleMethods);
+                    }
+
+                    String methodKey = decision.getExposeMethodAs();
+                    if (methodKey != null) {
+                        Object previous = introspData.get(methodKey);
+                        if (previous instanceof Method) {
+                            // Overloaded method - replace Method with a OverloadedMethods
+                            OverloadedMethods overloadedMethods = new OverloadedMethods(bugfixed);
+                            overloadedMethods.addMethod((Method) previous);
+                            overloadedMethods.addMethod(method);
+                            introspData.put(methodKey, overloadedMethods);
+                            // Remove parameter type information (unless an indexed property reader needs it):
+                            if (argTypesUsedByIndexerPropReaders == null
+                                    || !argTypesUsedByIndexerPropReaders.containsKey(previous)) {
                                 getArgTypesByMethod(introspData).remove(previous);
-                            } else if (previous instanceof OverloadedMethods) {
-                                // Already overloaded method - add new overload
-                                ((OverloadedMethods) previous).addMethod(method);
-                            } else if (decision.getMethodShadowsProperty()
-                                    || !(previous instanceof PropertyDescriptor)) {
-                                // Simple method (this far)
-                                introspData.put(methodKey, method);
-                                getArgTypesByMethod(introspData).put(method,
-                                        method.getParameterTypes());
+                            }
+                        } else if (previous instanceof OverloadedMethods) {
+                            // Already overloaded method - add new overload
+                            ((OverloadedMethods) previous).addMethod(method);
+                        } else if (decision.getMethodShadowsProperty()
+                                || !(previous instanceof PropertyDescriptor)) {
+                            // Simple method (this far)
+                            introspData.put(methodKey, method);
+                            Class<?>[] replaced = getArgTypesByMethod(introspData).put(method,
+                                    method.getParameterTypes());
+                            if (replaced != null) {
+                                if (argTypesUsedByIndexerPropReaders == null) {
+                                    argTypesUsedByIndexerPropReaders = new IdentityHashMap<Method, Void>();
+                                }
+                                argTypesUsedByIndexerPropReaders.put(method, null);                                
                             }
                         }
                     }
-                } // for each in mda
-            } // if mda != null
+                }
+            } // for each in mds
         } // end if (exposureLevel < EXPOSE_PROPERTIES_ONLY)
+    }
+
+    /**
+     * Very similar to {@link BeanInfo#getPropertyDescriptors()}, but can deal with Java 8 default methods too.
+     */
+    private List<PropertyDescriptor> getPropertyDescriptors(BeanInfo beanInfo, Class<?> clazz) {
+        PropertyDescriptor[] introspectorPDsArray = beanInfo.getPropertyDescriptors();
+        List<PropertyDescriptor> introspectorPDs = introspectorPDsArray != null ? Arrays.asList(introspectorPDsArray)
+                : Collections.<PropertyDescriptor>emptyList();
+        
+        if (!treatDefaultMethodsAsBeanMembers || _JavaVersions.JAVA_8 == null) {
+            // java.beans.Introspector was good enough then.
+            return introspectorPDs;
+        }
+        
+        // introspectorPDs contains each property exactly once. But as now we will search them manually too, it can
+        // happen that we find the same property for multiple times. Worse, because of indexed properties, it's possible
+        // that we have to merge entries (like one has the normal reader method, the other has the indexed reader
+        // method), instead of just replacing them in a Map. That's why we have introduced PropertyReaderMethodPair,
+        // which holds the methods belonging to the same property name. IndexedPropertyDescriptor is not good for that,
+        // as it can't store two methods whose types are incompatible, and we have to wait until all the merging was
+        // done to see if the incompatibility goes away.
+        
+        // This could be Map<String, PropertyReaderMethodPair>, but since we rarely need to do merging, we try to avoid
+        // creating those and use the source objects as much as possible. Also note that we initialize this lazily.
+        LinkedHashMap<String, Object /*PropertyReaderMethodPair|Method|PropertyDescriptor*/> mergedPRMPs = null;
+
+        // Collect Java 8 default methods that look like property readers into mergedPRMPs: 
+        // (Note that java.beans.Introspector discovers non-accessible public methods, and to emulate that behavior
+        // here, we don't utilize the accessibleMethods Map, which we might already have at this point.)
+        for (Method method : clazz.getMethods()) {
+            if (_JavaVersions.JAVA_8.isDefaultMethod(method) && method.getReturnType() != void.class
+                    && !method.isSynthetic()) {
+                Class<?>[] paramTypes = method.getParameterTypes();
+                if (paramTypes.length == 0
+                        || paramTypes.length == 1 && paramTypes[0] == int.class /* indexed property reader */) {
+                    String propName = _MethodUtil.getBeanPropertyNameFromReaderMethodName(
+                            method.getName(), method.getReturnType());
+                    if (propName != null) {
+                        if (mergedPRMPs == null) {
+                            // Lazy initialization
+                            mergedPRMPs = new LinkedHashMap<String, Object>();
+                        }
+                        if (paramTypes.length == 0) {
+                            mergeInPropertyReaderMethod(mergedPRMPs, propName, method);
+                        } else { // It's an indexed property reader method
+                            mergeInPropertyReaderMethodPair(mergedPRMPs, propName,
+                                    new PropertyReaderedMethodPair(null, method));
+                        }
+                    }
+                }
+            }
+        } // for clazz.getMethods()
+        
+        if (mergedPRMPs == null) {
+            // We had no interfering Java 8 default methods, so we can chose the fast route.
+            return introspectorPDs;
+        }
+        
+        for (PropertyDescriptor introspectorPD : introspectorPDs) {
+            mergeInPropertyDescriptor(mergedPRMPs, introspectorPD);
+        }
+        
+        // Now we convert the PRMPs to PDs, handling case where the normal and the indexed read methods contradict.
+        List<PropertyDescriptor> mergedPDs = new ArrayList<PropertyDescriptor>(mergedPRMPs.size());
+        for (Entry<String, Object> entry : mergedPRMPs.entrySet()) {
+            String propName = entry.getKey();
+            Object propDescObj = entry.getValue();
+            if (propDescObj instanceof PropertyDescriptor) {
+                mergedPDs.add((PropertyDescriptor) propDescObj);
+            } else {
+                Method readMethod;
+                Method indexedReadMethod;
+                if (propDescObj instanceof Method) {
+                    readMethod = (Method) propDescObj;
+                    indexedReadMethod = null;
+                } else if (propDescObj instanceof PropertyReaderedMethodPair) {
+                    PropertyReaderedMethodPair prmp = (PropertyReaderedMethodPair) propDescObj;
+                    readMethod = prmp.readMethod;
+                    indexedReadMethod = prmp.indexedReadMethod;
+                    if (readMethod != null && indexedReadMethod != null
+                            && indexedReadMethod.getReturnType() != readMethod.getReturnType().getComponentType()) {
+                        // Here we copy the java.beans.Introspector behavior: If the array item class is not exactly the
+                        // the same as the indexed read method return type, we say that the property is not indexed.
+                        indexedReadMethod = null;
+                    }
+                } else {
+                    throw new BugException();
+                }
+                try {
+                    mergedPDs.add(
+                            indexedReadMethod != null
+                                    ? new IndexedPropertyDescriptor(propName,
+                                            readMethod, null, indexedReadMethod, null)
+                                    : new PropertyDescriptor(propName, readMethod, null));
+                } catch (IntrospectionException e) {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn("Failed creating property descriptor for " + clazz.getName() + " property " + propName,
+                                e);
+                    }
+                }
+            }
+        }
+        return mergedPDs;
+    }
+
+    private static class PropertyReaderedMethodPair {
+        private final Method readMethod;
+        private final Method indexedReadMethod;
+        
+        PropertyReaderedMethodPair(Method readerMethod, Method indexedReaderMethod) {
+            this.readMethod = readerMethod;
+            this.indexedReadMethod = indexedReaderMethod;
+        }
+        
+        PropertyReaderedMethodPair(PropertyDescriptor pd) {
+            this(
+                    pd.getReadMethod(),
+                    pd instanceof IndexedPropertyDescriptor
+                            ? ((IndexedPropertyDescriptor) pd).getIndexedReadMethod() : null);
+        }
+    
+        static PropertyReaderedMethodPair from(Object obj) {
+            if (obj instanceof PropertyReaderedMethodPair) {
+                return (PropertyReaderedMethodPair) obj;
+            } else if (obj instanceof PropertyDescriptor) {
+                return new PropertyReaderedMethodPair((PropertyDescriptor) obj);
+            } else if (obj instanceof Method) {
+                return new PropertyReaderedMethodPair((Method) obj, null);
+            } else {
+                throw new BugException("Unexpected obj type: " + obj.getClass().getName());
+            }
+        }
+        
+        static PropertyReaderedMethodPair merge(PropertyReaderedMethodPair oldMethods, PropertyReaderedMethodPair newMethods) {
+            return new PropertyReaderedMethodPair(
+                    newMethods.readMethod != null ? newMethods.readMethod : oldMethods.readMethod,
+                    newMethods.indexedReadMethod != null ? newMethods.indexedReadMethod
+                            : oldMethods.indexedReadMethod);
+        }
+    
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((indexedReadMethod == null) ? 0 : indexedReadMethod.hashCode());
+            result = prime * result + ((readMethod == null) ? 0 : readMethod.hashCode());
+            return result;
+        }
+    
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (getClass() != obj.getClass()) return false;
+            PropertyReaderedMethodPair other = (PropertyReaderedMethodPair) obj;
+            return other.readMethod == readMethod && other.indexedReadMethod == indexedReadMethod;
+        }
+        
+    }
+
+    private void mergeInPropertyDescriptor(LinkedHashMap<String, Object> mergedPRMPs, PropertyDescriptor pd) {
+        String propName = pd.getName();
+        Object replaced = mergedPRMPs.put(propName, pd);
+        if (replaced != null) {
+            PropertyReaderedMethodPair newPRMP = new PropertyReaderedMethodPair(pd);
+            putIfMergedPropertyReaderMethodPairDiffers(mergedPRMPs, propName, replaced, newPRMP);
+        }
+    }
+
+    private void mergeInPropertyReaderMethodPair(LinkedHashMap<String, Object> mergedPRMPs,
+            String propName, PropertyReaderedMethodPair newPRM) {
+        Object replaced = mergedPRMPs.put(propName, newPRM);
+        if (replaced != null) {
+            putIfMergedPropertyReaderMethodPairDiffers(mergedPRMPs, propName, replaced, newPRM);
+        }
+    }
+    
+    private void mergeInPropertyReaderMethod(LinkedHashMap<String, Object> mergedPRMPs,
+            String propName, Method readerMethod) {
+        Object replaced = mergedPRMPs.put(propName, readerMethod);
+        if (replaced != null) {
+            putIfMergedPropertyReaderMethodPairDiffers(mergedPRMPs, propName,
+                    replaced, new PropertyReaderedMethodPair(readerMethod, null));
+        }
+    }
+
+    private void putIfMergedPropertyReaderMethodPairDiffers(LinkedHashMap<String, Object> mergedPRMPs,
+            String propName, Object replaced, PropertyReaderedMethodPair newPRMP) {
+        PropertyReaderedMethodPair replacedPRMP = PropertyReaderedMethodPair.from(replaced);
+        PropertyReaderedMethodPair mergedPRMP = PropertyReaderedMethodPair.merge(replacedPRMP, newPRMP);
+        if (!mergedPRMP.equals(newPRMP)) {
+            mergedPRMPs.put(propName, mergedPRMP);
+        }
+    }
+    
+    /**
+     * Very similar to {@link BeanInfo#getMethodDescriptors()}, but can deal with Java 8 default methods too.
+     */
+    private List<MethodDescriptor> getMethodDescriptors(BeanInfo beanInfo, Class<?> clazz) {
+        MethodDescriptor[] introspectorMDArray = beanInfo.getMethodDescriptors();
+        List<MethodDescriptor> introspectionMDs = introspectorMDArray != null && introspectorMDArray.length != 0
+                ? Arrays.asList(introspectorMDArray) : Collections.<MethodDescriptor>emptyList();
+
+        if (!treatDefaultMethodsAsBeanMembers || _JavaVersions.JAVA_8 == null) {
+            // java.beans.Introspector was good enough then.
+            return introspectionMDs;
+        }
+        
+        boolean anyDefaultMethodsAdded = false;
+        findDefaultMethods: for (Method method : clazz.getMethods()) {
+            if (_JavaVersions.JAVA_8.isDefaultMethod(method)) {
+                if (!anyDefaultMethodsAdded) {
+                    for (MethodDescriptor methodDescriptor : introspectionMDs) {
+                        // Check if java.bean.Introspector now finds default methods (it did not in Java 1.8.0_66):
+                        if (_JavaVersions.JAVA_8.isDefaultMethod(methodDescriptor.getMethod())) {
+                            break findDefaultMethods;
+                        }
+                        
+                        // Recreate introspectionMDs so that its size can grow: 
+                        ArrayList<MethodDescriptor> newIntrospectionMDs
+                                = new ArrayList<MethodDescriptor>(introspectionMDs.size() + 16);
+                        newIntrospectionMDs.addAll(introspectionMDs);
+                        introspectionMDs = newIntrospectionMDs;
+                    }
+                    anyDefaultMethodsAdded = true;
+                }
+                introspectionMDs.add(new MethodDescriptor(method));
+            }
+        }
+        
+        return introspectionMDs;
     }
 
     private void addPropertyDescriptorToClassIntrospectionData(Map<Object, Object> introspData,
@@ -410,7 +655,6 @@ class ClassIntrospector {
                 try {
                     if (readMethod != publicReadMethod) {
                         pd = new PropertyDescriptor(pd.getName(), publicReadMethod, null);
-                        pd.setReadMethod(publicReadMethod);
                     }
                     introspData.put(pd.getName(), pd);
                 } catch (IntrospectionException e) {
@@ -539,8 +783,10 @@ class ClassIntrospector {
     /**
      * As of this writing, this is only used for testing if method order really doesn't mater.
      */
-    private MethodDescriptor[] sortMethodDescriptors(MethodDescriptor[] methodDescriptors) {
-        return methodSorter != null ? methodSorter.sortMethodDescriptors(methodDescriptors) : methodDescriptors;
+    private void sortMethodDescriptors(List<MethodDescriptor> methodDescriptors) {
+        if (methodSorter != null) {
+            methodSorter.sortMethodDescriptors(methodDescriptors);
+        }
     }
 
     boolean isAllowedToExpose(Method method) {
@@ -777,6 +1023,10 @@ class ClassIntrospector {
 
     boolean getExposeFields() {
         return exposeFields;
+    }
+    
+    boolean getTreatDefaultMethodsAsBeanMembers() {
+        return treatDefaultMethodsAsBeanMembers;
     }
 
     MethodAppearanceFineTuner getMethodAppearanceFineTuner() {

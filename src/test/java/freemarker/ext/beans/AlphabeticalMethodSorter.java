@@ -20,10 +20,9 @@
 package freemarker.ext.beans;
 
 import java.beans.MethodDescriptor;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 class AlphabeticalMethodSorter implements MethodSorter {
 
@@ -33,15 +32,13 @@ class AlphabeticalMethodSorter implements MethodSorter {
         this.desc = desc;
     }
 
-    public MethodDescriptor[] sortMethodDescriptors(MethodDescriptor[] methodDescriptors) {
-        ArrayList<MethodDescriptor> ls = new ArrayList<MethodDescriptor>(Arrays.asList(methodDescriptors));
-        Collections.sort(ls, new Comparator<MethodDescriptor>() {
+    public void sortMethodDescriptors(List<MethodDescriptor> methodDescriptors) {
+        Collections.sort(methodDescriptors, new Comparator<MethodDescriptor>() {
             public int compare(MethodDescriptor o1, MethodDescriptor o2) {
                 int res = o1.getMethod().toString().compareTo(o2.getMethod().toString());
                 return desc ? -res : res;
             }
         });
-        return ls.toArray(new MethodDescriptor[ls.size()]);
     }
     
 }

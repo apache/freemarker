@@ -200,8 +200,6 @@ apply it to your development environment:
    - Press "Finish"
 - Eclipse will indicate many errors at this point; it's expected, read on.
 - Project -> Properties -> Java Compiler
-  - Set "Compiler Compliance Level" to "1.5" (you will have to uncheck
-    "Use compliance from execution environment" for that)
   - In Errors/Warnings, check in "Enable project specific settings", then set
     "Forbidden reference (access rules)" from "Error" to "Warning".
 - You will still have errors on these java files (because different java

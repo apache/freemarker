@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import freemarker.template.Version;
+import freemarker.template._TemplateAPI;
 
 final class ClassIntrospectorBuilder implements Cloneable {
     
@@ -38,6 +39,7 @@ final class ClassIntrospectorBuilder implements Cloneable {
     // Properties and their *defaults*:
     private int exposureLevel = BeansWrapper.EXPOSE_SAFE;
     private boolean exposeFields;
+    private boolean treatDefaultMethodsAsBeanMembers;
     private MethodAppearanceFineTuner methodAppearanceFineTuner;
     private MethodSorter methodSorter;
     // Attention:
@@ -50,6 +52,7 @@ final class ClassIntrospectorBuilder implements Cloneable {
         bugfixed = ci.bugfixed;
         exposureLevel = ci.exposureLevel;
         exposeFields = ci.exposeFields;
+        treatDefaultMethodsAsBeanMembers = ci.treatDefaultMethodsAsBeanMembers;
         methodAppearanceFineTuner = ci.methodAppearanceFineTuner;
         methodSorter = ci.methodSorter; 
     }
@@ -59,6 +62,8 @@ final class ClassIntrospectorBuilder implements Cloneable {
         // change in the BeansWrapper.normalizeIncompatibleImprovements results. That is, this class may don't react
         // to some version changes that affects BeansWrapper, but not the other way around. 
         bugfixed = BeansWrapper.is2321Bugfixed(incompatibleImprovements);
+        treatDefaultMethodsAsBeanMembers
+                = incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_26;
     }
     
     @Override
@@ -76,6 +81,7 @@ final class ClassIntrospectorBuilder implements Cloneable {
         int result = 1;
         result = prime * result + (bugfixed ? 1231 : 1237);
         result = prime * result + (exposeFields ? 1231 : 1237);
+        result = prime * result + (treatDefaultMethodsAsBeanMembers ? 1231 : 1237);
         result = prime * result + exposureLevel;
         result = prime * result + System.identityHashCode(methodAppearanceFineTuner);
         result = prime * result + System.identityHashCode(methodSorter);
@@ -91,6 +97,7 @@ final class ClassIntrospectorBuilder implements Cloneable {
         
         if (bugfixed != other.bugfixed) return false;
         if (exposeFields != other.exposeFields) return false;
+        if (treatDefaultMethodsAsBeanMembers != other.treatDefaultMethodsAsBeanMembers) return false;
         if (exposureLevel != other.exposureLevel) return false;
         if (methodAppearanceFineTuner != other.methodAppearanceFineTuner) return false;
         if (methodSorter != other.methodSorter) return false;
@@ -118,6 +125,14 @@ final class ClassIntrospectorBuilder implements Cloneable {
     /** See {@link BeansWrapper#setExposeFields(boolean)}. */
     public void setExposeFields(boolean exposeFields) {
         this.exposeFields = exposeFields;
+    }
+    
+    public boolean getTreatDefaultMethodsAsBeanMembers() {
+        return treatDefaultMethodsAsBeanMembers;
+    }
+
+    public void setTreatDefaultMethodsAsBeanMembers(boolean treatDefaultMethodsAsBeanMembers) {
+        this.treatDefaultMethodsAsBeanMembers = treatDefaultMethodsAsBeanMembers;
     }
 
     public MethodAppearanceFineTuner getMethodAppearanceFineTuner() {

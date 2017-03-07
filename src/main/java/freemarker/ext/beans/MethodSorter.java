@@ -20,6 +20,7 @@
 package freemarker.ext.beans;
 
 import java.beans.MethodDescriptor;
+import java.util.List;
 
 /**
  * Used for JUnit testing method-order dependence bugs via
@@ -27,6 +28,9 @@ import java.beans.MethodDescriptor;
  */
 interface MethodSorter {
 
-    MethodDescriptor[] sortMethodDescriptors(MethodDescriptor[] methodDescriptors);
+    /**
+     * Sorts the methods in place (that is, by modifying the parameter list).
+     */
+    void sortMethodDescriptors(List<MethodDescriptor> methodDescriptors);
     
 }

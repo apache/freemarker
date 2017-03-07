@@ -26845,6 +26845,28 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para><link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-24">FREEMARKER-24</link>:
+              Added workaround (not enabled by default) to expose Java 8
+              default methods (and the bean properties they define) to
+              templates, despite that
+              <literal>java.beans.Introspector</literal> (the official
+              JavaBeans introspector) ignores them, at least as of JRE
+              1.8.0_66. To enable this workaround, either increase the value
+              of the <literal>incompatibleImprovements</literal> constructor
+              argument of <literal>DefaultObjectWrapper</literal> or
+              <literal>BeansWrapper</literal> the used to 2.3.26, or set its
+              <literal>treatDefaultMethodsAsBeanMembers</literal> setting to
+              <literal>true</literal>. Note that if you leave the
+              <literal>object_wrapper</literal> setting of the
+              <literal>Configuration</literal> on its default, it's enough to
+              increase the <literal>incompatibleImprovements</literal> setting
+              of the <literal>Configuration</literal> to 2.3.26, as that's
+              inherited by the default <literal>object_wrapper</literal>.
+              </para>
+            </listitem>
+
+            <listitem>
               <para>Added the
               <literal>freemarker.template.TemplateNodeModelEx</literal>
               interface which extends the <literal>TemplateNodeModel</literal>

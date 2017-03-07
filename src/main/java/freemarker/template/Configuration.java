@@ -814,6 +814,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *          {@link Configurable}-s always do this filtering regardless of the incompatible improvements setting. 
      *     </ul>
      *   </li>
+     *   <li><p>
+     *     2.3.26 (or higher):
+     *     <ul>
+     *       <li><p>
+     *          {@link BeansWrapper} and {@link DefaultObjectWrapper} now exposes Java 8 default methods (and the bean
+     *          properties they define); see {@link BeansWrapper#BeansWrapper(Version)}. 
+     *     </ul>
+     *   </li>
      * </ul>
      * 
      * @throws IllegalArgumentException

@@ -162,6 +162,11 @@ public class ConfigurationTest extends TestCase {
         cfg = new Configuration(Configuration.VERSION_2_3_22);
         assertUses2322ObjectWrapper(cfg);
         assertUsesNewTemplateLoader(cfg);
+        
+        cfg = new Configuration(Configuration.VERSION_2_3_25);
+        assertFalse(((DefaultObjectWrapper) cfg.getObjectWrapper()).getTreatDefaultMethodsAsBeanMembers());
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_26);
+        assertTrue(((DefaultObjectWrapper) cfg.getObjectWrapper()).getTreatDefaultMethodsAsBeanMembers());
     }
 
     private void assertUses2322ObjectWrapper(Configuration cfg) {
