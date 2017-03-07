@@ -18,30 +18,17 @@
  */
 package freemarker.core;
 
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
+import java.lang.reflect.Method;
 
 /**
  * Used internally only, might changes without notice!
- * Used for accessing functionality that's only present in Java 6 or later.
+ * Used for accessing functionality that's only present in Java 8 or later.
  */
-//Compile this against Java 6
-@SuppressWarnings("Since15") // For IntelliJ inspection   
-public final class _Java6Impl implements _Java6 {
-    
-    public static final _Java6 INSTANCE = new _Java6Impl();
+public interface _Java8 {
 
-    private _Java6Impl() {
-        // Not meant to be instantiated
-    }
-
-    public void setRoundingMode(DecimalFormat df, RoundingMode roundingMode) {
-        df.setRoundingMode(roundingMode);
-    }
-
-    public void setExponentSeparator(DecimalFormatSymbols dfs, String exponentSeparator) {
-        dfs.setExponentSeparator(exponentSeparator);
-    }
+    /**
+     * Returns if it's a Java 8 "default method".
+     */
+    boolean isDefaultMethod(Method method);
     
 }
