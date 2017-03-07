@@ -26928,6 +26928,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>The
+              <literal>freemarker.template.TemplateCollectionModelEx</literal>
+              interface and is not experimental anymore, so now it has
+              backward compatibility guarantees. Note that the
+              <literal>TemplateCollectionModelEx.contains(TemplateModel)</literal>
+              method was removed from it.</para>
+            </listitem>
+
+            <listitem>
               <para>Various smaller code cleanups.</para>
             </listitem>
           </itemizedlist>
