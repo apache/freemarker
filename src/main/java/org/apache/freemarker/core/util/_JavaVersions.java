@@ -20,6 +20,7 @@ package org.apache.freemarker.core.util;
 
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core._CoreLogs;
+import org.apache.freemarker.core._Java8;
 
 /**
  * Used internally only, might changes without notice!
@@ -60,11 +61,11 @@ public final class _JavaVersions {
         _Java8 java8;
         if (IS_AT_LEAST_8) {
             try {
-                java8 = (_Java8) Class.forName("org.apache.freemarker.core.util._Java8Impl")
+                java8 = (_Java8) Class.forName("org.apache.freemarker.core._Java8Impl")
                         .getField("INSTANCE").get(null);
             } catch (Exception e) {
                 try {
-                    _CoreLogs.RUNTIME.error("Failed to access Java 6 functionality", e);
+                    _CoreLogs.RUNTIME.error("Failed to access Java 8 functionality", e);
                 } catch (Exception e2) {
                     // Suppressed
                 }

@@ -169,7 +169,7 @@ apply it to your development environment:
     Number of imports required for .*: 99
     Number of static imports needed for .*: 1
   - Java -> Installed JRE-s:
-    Ensure that you have JDK 7 installed, and that it was added to Eclipse.
+    Ensure that you have JDK 8 installed, and that it was added to Eclipse.
     Note that it's not JRE, but JDK.
   - Java -> Compiler -> Javadoc:
     "Malformed Javadoc comments": Error
@@ -192,7 +192,7 @@ apply it to your development environment:
         src/test/resources
     - On the "Libraries" tab:
       - Delete everyhing from there, except the "JRE System Library [...]"
-      - Edit "JRE System Library [...]" to "Execution Environment" "JavaSE 1.7"
+      - Edit "JRE System Library [...]" to "Execution Environment" "JavaSE 1.8"
       - Add all jar-s that are directly under the "ide-dependencies" directory
         (use the "Add JARs..." and select all those files).
    - Press "Finish"

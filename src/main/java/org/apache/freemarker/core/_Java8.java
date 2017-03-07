@@ -16,7 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core.util;
+
+package org.apache.freemarker.core;
+
+import java.lang.reflect.Method;
 
 /**
  * Used internally only, might changes without notice!
@@ -25,8 +28,7 @@ package org.apache.freemarker.core.util;
 public interface _Java8 {
 
     /**
-     * This is just a placeholder. Remove this when we have some real functionality here.
+     * Returns if it's a Java 8 "default method".
      */
-    void doSomething();
-    
+    boolean isDefaultMethod(Method method);
 }
