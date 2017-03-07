@@ -732,18 +732,6 @@ public class DefaultObjectWrapperTest {
             assertFalse(coll.isEmpty());
             assertCollectionTMEquals(coll, "a", "b", "c");
 
-            assertTrue(coll.contains(OW22CA.wrap("a")));
-            assertTrue(coll.contains(OW22CA.wrap("b")));
-            assertTrue(coll.contains(OW22CA.wrap("c")));
-            assertTrue(coll.contains(OW22CA.wrap("c")));
-            assertFalse(coll.contains(OW22CA.wrap("d")));
-            try {
-                assertFalse(coll.contains(OW22CA.wrap(1)));
-                fail();
-            } catch (TemplateModelException e) {
-                assertThat(e.getMessage(), containsString("Integer"));
-            }
-
             assertRoundtrip(OW22CA, set, DefaultNonListCollectionAdapter.class, TreeSet.class, "[a, b, c]");
             
             assertSizeThroughAPIModel(3, coll);
@@ -763,13 +751,6 @@ public class DefaultObjectWrapperTest {
             assertTrue(obj1 == null || obj2 == null);
             assertTrue(obj1 != null && obj1.equals(list) || obj2 != null && obj2.equals(list));
             assertTrue(tm1 instanceof DefaultListAdapter || tm2 instanceof DefaultListAdapter);
-
-            List similarList = new ArrayList();
-            similarList.add("b");
-            assertTrue(coll.contains(OW22CA.wrap(similarList)));
-            assertTrue(coll.contains(OW22CA.wrap(null)));
-            assertFalse(coll.contains(OW22CA.wrap("a")));
-            assertFalse(coll.contains(OW22CA.wrap(1)));
 
             assertRoundtrip(OW22CA, set, DefaultNonListCollectionAdapter.class, HashSet.class, "[" + obj1 + ", "
                     + obj2 + "]");
