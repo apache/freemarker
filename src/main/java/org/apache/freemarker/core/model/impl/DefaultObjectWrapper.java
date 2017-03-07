@@ -262,11 +262,11 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
             // but we need to use the same sharedInrospectionLock forever, because that's what the model factories
             // synchronize on, even during the classIntrospector is being replaced.
             sharedIntrospectionLock = new Object();
-            classIntrospector = new ClassIntrospector(bwConf.classIntrospectorFactory, sharedIntrospectionLock);
+            classIntrospector = new ClassIntrospector(bwConf.classIntrospectorBuilder, sharedIntrospectionLock);
         } else {
             // As this is a read-only DefaultObjectWrapper, the classIntrospector is never replaced, and since it's shared by
             // other DefaultObjectWrapper instances, we use the lock belonging to the shared ClassIntrospector.
-            classIntrospector = bwConf.classIntrospectorFactory.build();
+            classIntrospector = bwConf.classIntrospectorBuilder.build();
             sharedIntrospectionLock = classIntrospector.getSharedLock();
         }
 
@@ -425,9 +425,9 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
         checkModifiable();
 
         if (classIntrospector.getExposureLevel() != exposureLevel) {
-            ClassIntrospectorBuilder pa = classIntrospector.getPropertyAssignments();
-            pa.setExposureLevel(exposureLevel);
-            replaceClassIntrospector(pa);
+            ClassIntrospectorBuilder builder = classIntrospector.createBuilder();
+            builder.setExposureLevel(exposureLevel);
+            replaceClassIntrospector(builder);
         }
     }
 
@@ -452,9 +452,9 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
         checkModifiable();
 
         if (classIntrospector.getExposeFields() != exposeFields) {
-            ClassIntrospectorBuilder pa = classIntrospector.getPropertyAssignments();
-            pa.setExposeFields(exposeFields);
-            replaceClassIntrospector(pa);
+            ClassIntrospectorBuilder builder = classIntrospector.createBuilder();
+            builder.setExposeFields(exposeFields);
+            replaceClassIntrospector(builder);
         }
     }
 
@@ -479,9 +479,9 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
         checkModifiable();
 
         if (classIntrospector.getMethodAppearanceFineTuner() != methodAppearanceFineTuner) {
-            ClassIntrospectorBuilder pa = classIntrospector.getPropertyAssignments();
-            pa.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
-            replaceClassIntrospector(pa);
+            ClassIntrospectorBuilder builder = classIntrospector.createBuilder();
+            builder.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
+            replaceClassIntrospector(builder);
         }
     }
 
@@ -493,9 +493,9 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
         checkModifiable();
 
         if (classIntrospector.getMethodSorter() != methodSorter) {
-            ClassIntrospectorBuilder pa = classIntrospector.getPropertyAssignments();
-            pa.setMethodSorter(methodSorter);
-            replaceClassIntrospector(pa);
+            ClassIntrospectorBuilder builder = classIntrospector.createBuilder();
+            builder.setMethodSorter(methodSorter);
+            replaceClassIntrospector(builder);
         }
     }
 
@@ -517,10 +517,10 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
      * Replaces the value of {@link #classIntrospector}, but first it unregisters
      * the model factories in the old {@link #classIntrospector}.
      */
-    private void replaceClassIntrospector(ClassIntrospectorBuilder pa) {
+    private void replaceClassIntrospector(ClassIntrospectorBuilder builder) {
         checkModifiable();
 
-        final ClassIntrospector newCI = new ClassIntrospector(pa, sharedIntrospectionLock);
+        final ClassIntrospector newCI = new ClassIntrospector(builder, sharedIntrospectionLock);
         final ClassIntrospector oldCI;
 
         // In principle this need not be synchronized, but as apps might publish the configuration improperly, or

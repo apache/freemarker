@@ -190,7 +190,7 @@ class ClassIntrospector {
      * Returns a {@link ClassIntrospectorBuilder}-s that could be used to create an identical {@link #ClassIntrospector}
      * . The returned {@link ClassIntrospectorBuilder} can be modified without interfering with anything.
      */
-    ClassIntrospectorBuilder getPropertyAssignments() {
+    ClassIntrospectorBuilder createBuilder() {
         return new ClassIntrospectorBuilder(this);
     }
 
