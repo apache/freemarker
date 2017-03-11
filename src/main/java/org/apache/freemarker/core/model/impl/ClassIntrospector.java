@@ -396,7 +396,6 @@ class ClassIntrospector {
                 try {
                     if (readMethod != publicReadMethod) {
                         pd = new PropertyDescriptor(pd.getName(), publicReadMethod, null);
-                        pd.setReadMethod(publicReadMethod);
                     }
                     introspData.put(pd.getName(), pd);
                 } catch (IntrospectionException e) {
