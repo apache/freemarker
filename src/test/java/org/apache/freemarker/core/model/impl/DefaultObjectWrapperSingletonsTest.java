@@ -67,51 +67,51 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         
         builder1.setExposeFields(true);
         assertNotEquals(builder1, builder2);
-        assertFalse(builder1.hashCode() == builder2.hashCode());
+        assertNotEquals(builder1.hashCode(), builder2.hashCode());
         builder2.setExposeFields(true);
         assertEquals(builder1, builder2);
-        assertTrue(builder1.hashCode() == builder2.hashCode());
+        assertEquals(builder1.hashCode(), builder2.hashCode());
         
         builder1.setExposureLevel(0);
         assertNotEquals(builder1, builder2);
-        assertFalse(builder1.hashCode() == builder2.hashCode());
+        assertNotEquals(builder1.hashCode(), builder2.hashCode());
         builder2.setExposureLevel(0);
         assertEquals(builder1, builder2);
-        assertTrue(builder1.hashCode() == builder2.hashCode());
+        assertEquals(builder1.hashCode(), builder2.hashCode());
         
         builder1.setExposureLevel(1);
         assertNotEquals(builder1, builder2);
-        assertFalse(builder1.hashCode() == builder2.hashCode());
+        assertNotEquals(builder1.hashCode(), builder2.hashCode());
         builder2.setExposureLevel(1);
         assertEquals(builder1, builder2);
-        assertTrue(builder1.hashCode() == builder2.hashCode());
+        assertEquals(builder1.hashCode(), builder2.hashCode());
         
         builder1.setDefaultDateType(TemplateDateModel.DATE);
         assertNotEquals(builder1, builder2);
         builder2.setDefaultDateType(TemplateDateModel.DATE);
         assertEquals(builder1, builder2);
-        assertTrue(builder1.hashCode() == builder2.hashCode());
+        assertEquals(builder1.hashCode(), builder2.hashCode());
         
         builder1.setStrict(true);
         assertNotEquals(builder1, builder2);
-        assertFalse(builder1.hashCode() == builder2.hashCode());
+        assertNotEquals(builder1.hashCode(), builder2.hashCode());
         builder2.setStrict(true);
         assertEquals(builder1, builder2);
-        assertTrue(builder1.hashCode() == builder2.hashCode());
+        assertEquals(builder1.hashCode(), builder2.hashCode());
 
         builder1.setUseModelCache(true);
         assertNotEquals(builder1, builder2);
-        assertFalse(builder1.hashCode() == builder2.hashCode());
+        assertNotEquals(builder1.hashCode(), builder2.hashCode());
         builder2.setUseModelCache(true);
         assertEquals(builder1, builder2);
-        assertTrue(builder1.hashCode() == builder2.hashCode());
+        assertEquals(builder1.hashCode(), builder2.hashCode());
         
         AlphabeticalMethodSorter ms = new AlphabeticalMethodSorter(true);
         builder1.setMethodSorter(ms);
         assertNotEquals(builder1, builder2);
         builder2.setMethodSorter(ms);
         assertEquals(builder1, builder2);
-        assertTrue(builder1.hashCode() == builder2.hashCode());
+        assertEquals(builder1.hashCode(), builder2.hashCode());
 
         MethodAppearanceFineTuner maft = new MethodAppearanceFineTuner() {
             @Override
@@ -121,7 +121,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         assertNotEquals(builder1, builder2);
         builder2.setMethodAppearanceFineTuner(maft);
         assertEquals(builder1, builder2);
-        assertTrue(builder1.hashCode() == builder2.hashCode());
+        assertEquals(builder1.hashCode(), builder2.hashCode());
     }
     
     public void testDefaultObjectWrapperBuilderProducts() throws Exception {
@@ -574,10 +574,6 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         assertEquals(expectedSize, getClassIntrospectorInstanceCacheSize());
     }
 
-    private void assertNotEquals(Object o1, Object o2) {
-        assertFalse(o1.equals(o2));
-    }
-    
     public class C {
         
         public String foo = "FOO";
