@@ -26959,8 +26959,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para><literal>DefaultIteratorAdapter</literal> now support
-              <literal>?api</literal>.</para>
+              <para><literal>DefaultIteratorAdapter</literal> now supports
+              <literal>?api</literal>. It was an oversight that it
+              didn't.</para>
             </listitem>
 
             <listitem>
