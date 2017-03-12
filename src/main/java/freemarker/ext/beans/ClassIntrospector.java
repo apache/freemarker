@@ -597,30 +597,66 @@ class ClassIntrospector {
             // java.beans.Introspector was good enough then.
             return introspectionMDs;
         }
-        
-        boolean anyDefaultMethodsAdded = false;
-        findDefaultMethods: for (Method method : clazz.getMethods()) {
-            if (_JavaVersions.JAVA_8.isDefaultMethod(method)) {
-                if (!anyDefaultMethodsAdded) {
-                    for (MethodDescriptor methodDescriptor : introspectionMDs) {
-                        // Check if java.bean.Introspector now finds default methods (it did not in Java 1.8.0_66):
-                        if (_JavaVersions.JAVA_8.isDefaultMethod(methodDescriptor.getMethod())) {
-                            break findDefaultMethods;
-                        }
-                        
-                        // Recreate introspectionMDs so that its size can grow: 
-                        ArrayList<MethodDescriptor> newIntrospectionMDs
-                                = new ArrayList<MethodDescriptor>(introspectionMDs.size() + 16);
-                        newIntrospectionMDs.addAll(introspectionMDs);
-                        introspectionMDs = newIntrospectionMDs;
-                    }
-                    anyDefaultMethodsAdded = true;
+
+        Map<String, List<Method>> defaultMethodsToAddByName = null;
+        for (Method method : clazz.getMethods()) {
+            if (_JavaVersions.JAVA_8.isDefaultMethod(method) && !method.isBridge()) {
+                if (defaultMethodsToAddByName == null) {
+                    defaultMethodsToAddByName = new HashMap<String, List<Method>>();
                 }
+                List<Method> overloads = defaultMethodsToAddByName.get(method.getName());
+                if (overloads == null) {
+                    overloads = new ArrayList<Method>(0);
+                    defaultMethodsToAddByName.put(method.getName(), overloads);
+                }
+                overloads.add(method);
+            }
+        }
+        
+        if (defaultMethodsToAddByName == null) {
+            // We had no interfering default methods:
+            return introspectionMDs;
+        }
+
+        // Recreate introspectionMDs so that its size can grow: 
+        ArrayList<MethodDescriptor> newIntrospectionMDs
+                = new ArrayList<MethodDescriptor>(introspectionMDs.size() + 16);
+        for (MethodDescriptor introspectorMD : introspectionMDs) {
+            Method introspectorM = introspectorMD.getMethod();
+            // Prevent cases where the same method is added with different return types both from the list of default
+            // methods and from the list of Introspector-discovered methods, as that would lead to overloaded method
+            // selection ambiguity later. This is known to happen when the default method in an interface has reified
+            // return type, and then the interface is implemented by a class where the compiler generates an override
+            // for the bridge method only. (Other tricky cases might exist.)
+            if (!containsMethodWithSameParameterTypes(
+                    defaultMethodsToAddByName.get(introspectorM.getName()), introspectorM)) {
+                newIntrospectionMDs.add(introspectorMD);
+            }
+        }
+        introspectionMDs = newIntrospectionMDs;
+        
+        // Add default methods:
+        for (Entry<String, List<Method>> entry : defaultMethodsToAddByName.entrySet()) {
+            for (Method method : entry.getValue()) {
                 introspectionMDs.add(new MethodDescriptor(method));
             }
         }
         
         return introspectionMDs;
+    }
+
+    private boolean containsMethodWithSameParameterTypes(List<Method> overloads, Method m) {
+        if (overloads == null) {
+            return false;
+        }
+        
+        Class<?>[] paramTypes = m.getParameterTypes();
+        for (Method overload : overloads) {
+            if (Arrays.equals(overload.getParameterTypes(), paramTypes)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void addPropertyDescriptorToClassIntrospectionData(Map<Object, Object> introspData,
