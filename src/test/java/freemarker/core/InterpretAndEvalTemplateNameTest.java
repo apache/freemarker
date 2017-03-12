@@ -23,7 +23,9 @@ import java.io.IOException;
 import org.junit.Test;
 
 import freemarker.cache.StringTemplateLoader;
+import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
+import freemarker.template.Version;
 import freemarker.test.TemplateTest;
 
 /**
@@ -31,9 +33,20 @@ import freemarker.test.TemplateTest;
  * {@code ?eval}-ed parts.  
  */
 public class InterpretAndEvalTemplateNameTest extends TemplateTest {
-    
+
     @Test
-    public void testInterpret() throws IOException, TemplateException {
+    public void testInterpret230() throws IOException, TemplateException {
+        testInterpret(Configuration.VERSION_2_3_0);
+    }
+
+    @Test
+    public void testInterpret2326() throws IOException, TemplateException {
+        testInterpret(Configuration.VERSION_2_3_26);
+    }
+    
+    private void testInterpret(Version version) throws IOException, TemplateException {
+        getConfiguration().setIncompatibleImprovements(version);
+        
         for (String getTemplateNames : new String[] {
                 "c=${.current_template_name}, m=${.main_template_name}",
                 "c=${\".current_template_name\"?eval}, m=${\".main_template_name\"?eval}"
