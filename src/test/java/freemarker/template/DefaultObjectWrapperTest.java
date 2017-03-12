@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -53,6 +54,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.EnumerationModel;
 import freemarker.ext.beans.HashAdapter;
 import freemarker.ext.util.WrapperTemplateModel;
 
@@ -942,6 +944,44 @@ public class DefaultObjectWrapperTest {
             
             assertTemplateOutput(OW22IS, iterable, listingFTL, "a, b, c");
         }
+    }
+
+    @Test
+    public void testNoEnumerationAdapter() throws TemplateModelException {
+         DefaultObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_25).build();
+         Vector<String> vector = new Vector<String>();
+         vector.add("a");
+         vector.add("b");
+         
+         TemplateModel wrappedEnumeration = ow.wrap(vector.elements());
+         assertThat(wrappedEnumeration, instanceOf(EnumerationModel.class));
+         EnumerationModel enumModel = (EnumerationModel) wrappedEnumeration;
+         assertNotNull(enumModel.get("nextElement"));
+    }
+    
+    @Test
+    public void testEnumerationAdapter() throws TemplateModelException {
+         DefaultObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_26).build();
+         Vector<String> vector = new Vector<String>();
+         vector.add("a");
+         vector.add("b");
+         
+         TemplateModel wrappedEnumeration = ow.wrap(vector.elements());
+         assertThat(wrappedEnumeration, instanceOf(DefaultEnumerationAdapter.class));
+         DefaultEnumerationAdapter enumAdapter = (DefaultEnumerationAdapter) wrappedEnumeration;
+         TemplateModelIterator iterator = enumAdapter.iterator();
+         assertTrue(iterator.hasNext());
+         assertEquals("a", ((TemplateScalarModel) iterator.next()).getAsString());
+         assertTrue(iterator.hasNext());
+         assertEquals("b", ((TemplateScalarModel) iterator.next()).getAsString());
+         assertFalse(iterator.hasNext());
+         
+         iterator = enumAdapter.iterator();
+         try {
+             iterator.hasNext();
+         } catch (TemplateException e) {
+             assertThat(e.getMessage(), containsStringIgnoringCase("only once"));
+         }
     }
     
     @Test

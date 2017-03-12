@@ -22,6 +22,7 @@ package freemarker.template;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import org.w3c.dom.Node;
 
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperConfiguration;
+import freemarker.ext.beans.EnumerationModel;
 import freemarker.ext.dom.NodeModel;
 import freemarker.log.Logger;
 
@@ -68,6 +70,7 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
     private boolean useAdaptersForContainers;
     private boolean forceLegacyNonListCollections;
     private boolean iterableSupport;
+    private final boolean useAdapterForEnumerations;
     
     /**
      * Creates a new instance with the incompatible-improvements-version specified in
@@ -97,6 +100,13 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
      *                  won't cause the a later iteration (or further emptiness check) to fail anymore. Earlier, in
      *                  certain situations, the second operation has failed saying that the iterator "can be listed only
      *                  once".  
+     *              <li>2.3.26 (or higher): {@link Enumeration}-s are wrapped into {@link DefaultEnumerationAdapter}
+     *                  instead of into {@link EnumerationModel} (as far as
+     *                  {@link #setUseAdaptersForContainers(boolean) useAdaptersForContainers} is {@code true}, which is
+     *                  the default). This adapter is cleaner than {@link EnumerationModel} as it only implements the
+     *                  minimally required FTL type, which avoids some ambiguous situations. (Note that Java API methods
+     *                  aren't exposed anymore as subvariables; if you really need them, you can use {@code ?api}). 
+     *                  </li>
      *            </ul>
      * 
      * @since 2.3.21
@@ -117,6 +127,8 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
                 ? (DefaultObjectWrapperConfiguration) bwCfg
                 : new DefaultObjectWrapperConfiguration(bwCfg.getIncompatibleImprovements()) { }; 
         useAdaptersForContainers = dowDowCfg.getUseAdaptersForContainers();
+        useAdapterForEnumerations = useAdaptersForContainers
+                && getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_26;
         forceLegacyNonListCollections = dowDowCfg.getForceLegacyNonListCollections();
         iterableSupport = dowDowCfg.getIterableSupport();
         finalizeConstruction(writeProtected);
@@ -226,9 +238,13 @@ public class DefaultObjectWrapper extends freemarker.ext.beans.BeansWrapper {
                     ? (TemplateModel) DefaultIteratorAdapter.adapt((Iterator<?>) obj, this)
                     : (TemplateModel) new SimpleCollection((Iterator<?>) obj, this);
         }
+        if (useAdapterForEnumerations && obj instanceof Enumeration) {
+            return DefaultEnumerationAdapter.adapt((Enumeration<?>) obj, this);
+        }        
         if (iterableSupport && obj instanceof Iterable) {
             return DefaultIterableAdapter.adapt((Iterable<?>) obj, this);
         }
+        
         return handleUnknownType(obj);
     }
     
