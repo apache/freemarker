@@ -249,10 +249,10 @@ public final class TemplateConfiguration extends Configurable implements ParserC
             setLazyAutoImports(tc.getLazyAutoImports());
         }
         if (tc.isAutoImportsSet()) {
-            setAutoImports(mergeMaps(isAutoImportsSet() ? getAutoImports() : null, tc.getAutoImports(), true));
+            setAutoImports(mergeMaps(getAutoImportsWithoutFallback(), tc.getAutoImportsWithoutFallback(),true));
         }
         if (tc.isAutoIncludesSet()) {
-            setAutoIncludes(mergeLists(isAutoIncludesSet() ? getAutoIncludes() : null, tc.getAutoIncludes()));
+            setAutoIncludes(mergeLists(getAutoIncludesWithoutFallback(), tc.getAutoIncludesWithoutFallback()));
         }
         
         tc.copyDirectCustomAttributes(this, true);
