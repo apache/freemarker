@@ -55,7 +55,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         BeansWrapperBuilder.clearInstanceCache();
     }
 
-    public void testBeansWrapperFactoryEquals() throws Exception {
+    public void testBeansWrapperBuilderEquals() throws Exception {
         assertEquals(Configuration.VERSION_2_3_21, new BeansWrapperBuilder(Configuration.VERSION_2_3_21).getIncompatibleImprovements());
         assertEquals(Configuration.VERSION_2_3_0, new BeansWrapperBuilder(Configuration.VERSION_2_3_20).getIncompatibleImprovements());
         try {
@@ -144,7 +144,7 @@ public class BeansWrapperSingletonsTest extends TestCase {
         assertEquals(builder1.hashCode(), builder2.hashCode());
     }
     
-    public void testBeansWrapperFactoryProducts() throws Exception {
+    public void testBeansWrapperBuilderProducts() throws Exception {
         List<BeansWrapper> hardReferences = new LinkedList<BeansWrapper>();
         
         assertEquals(0, getBeansWrapperInstanceCacheSize());
@@ -684,10 +684,6 @@ public class BeansWrapperSingletonsTest extends TestCase {
         assertEquals(expectedSize, getClassIntrospectorInstanceCacheSize());
     }
 
-    private void assertNotEquals(Object o1, Object o2) {
-        assertFalse(o1.equals(o2));
-    }
-    
     public class C {
         
         public String foo = "FOO";
