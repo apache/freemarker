@@ -869,6 +869,17 @@ public class DefaultObjectWrapperTest {
         }
     }
     
+    @Test
+    public void testIteratorApiSupport() throws TemplateModelException {
+        TemplateModel wrappedIterator = OW22.wrap(Collections.emptyIterator());
+        assertThat(wrappedIterator, instanceOf(DefaultIteratorAdapter.class));
+        DefaultIteratorAdapter iteratorAdapter = (DefaultIteratorAdapter) wrappedIterator;
+        
+        TemplateHashModel api = (TemplateHashModel) iteratorAdapter.getAPI();
+        assertFalse(((TemplateBooleanModel) ((TemplateMethodModelEx)
+                api.get("hasNext")).exec(Collections.emptyList())).getAsBoolean());
+    }
+    
     @SuppressWarnings("boxing")
     @Test
     public void testCharKeyFallback() throws TemplateModelException {
@@ -982,6 +993,10 @@ public class DefaultObjectWrapperTest {
          } catch (TemplateException e) {
              assertThat(e.getMessage(), containsStringIgnoringCase("only once"));
          }
+         
+         TemplateHashModel api = (TemplateHashModel) enumAdapter.getAPI();
+         assertFalse(((TemplateBooleanModel) ((TemplateMethodModelEx)
+                 api.get("hasMoreElements")).exec(Collections.emptyList())).getAsBoolean());
     }
     
     @Test

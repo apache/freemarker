@@ -24,6 +24,7 @@ import java.util.Iterator;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.ext.util.WrapperTemplateModel;
+import freemarker.template.utility.ObjectWrapperWithAPISupport;
 
 /**
  * Adapts an {@link Iterator} to the corresponding {@link TemplateModel} interface(s), most importantly to
@@ -43,7 +44,7 @@ import freemarker.ext.util.WrapperTemplateModel;
  * @since 2.3.22
  */
 public class DefaultIteratorAdapter extends WrappingTemplateModel implements TemplateCollectionModel,
-        AdapterTemplateModel, WrapperTemplateModel, Serializable {
+        AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport, Serializable {
 
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="We hope it's Seralizable")
     private final Iterator iterator;
@@ -76,6 +77,10 @@ public class DefaultIteratorAdapter extends WrappingTemplateModel implements Tem
         return new SimpleTemplateModelIterator();
     }
 
+    public TemplateModel getAPI() throws TemplateModelException {
+        return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(iterator);
+    }
+    
     /**
      * Not thread-safe.
      */

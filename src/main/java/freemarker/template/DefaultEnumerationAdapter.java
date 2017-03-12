@@ -6,6 +6,7 @@ import java.util.Iterator;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import freemarker.ext.util.WrapperTemplateModel;
+import freemarker.template.utility.ObjectWrapperWithAPISupport;
 
 /**
  * Adapts an {@link Enumeration} to the corresponding {@link TemplateModel} interface(s), most importantly to
@@ -16,7 +17,7 @@ import freemarker.ext.util.WrapperTemplateModel;
  */
 @SuppressWarnings("serial")
 public class DefaultEnumerationAdapter extends WrappingTemplateModel implements TemplateCollectionModel,
-        AdapterTemplateModel, WrapperTemplateModel, Serializable {
+        AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport, Serializable {
 
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="We hope it's Seralizable")
     private final Enumeration<?> enumeration;
@@ -52,6 +53,10 @@ public class DefaultEnumerationAdapter extends WrappingTemplateModel implements 
         return new SimpleTemplateModelIterator();
     }
 
+    public TemplateModel getAPI() throws TemplateModelException {
+        return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(enumeration);
+    }
+    
     /**
      * Not thread-safe.
      */

@@ -26887,24 +26887,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para><literal>DefaultObjectWrapper</literal>, only with its
-              <literal>incompatible_improvements</literal> set to 2.3.26
-              (<link linkend="topic.defaultObjectWrapperIcI">see how
-              here...</link>), wraps
-              <literal>java.util.Enumeration</literal>-s into
-              <literal>freemarker.template.DefaultEnumerationAdapter</literal>
-              (a new class) instead of into
-              <literal>freemarker.ext.beans.EnumerationModel</literal> (as far
-              as <literal>useAdaptersForContainers</literal> is
-              <literal>true</literal>, which is the default). This adapter is
-              cleaner than <literal>EnumerationModel</literal> as it only
-              implements the minimally required FTL type, which avoids some
-              ambiguous situations. (Note that Java API methods aren't exposed
-              anymore as subvariables; if you really need them, you can use
-              <literal>?api</literal>).</para>
-            </listitem>
-
-            <listitem>
               <para>Better error messages when someone tries to get an invalid
               <literal>@@<replaceable>...</replaceable></literal> subvariable
               of an XML DOM node. (Now it's not issued by the XPath
@@ -26956,6 +26938,29 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               create a <literal>NodeModel</literal> from an XML file. As this
               method encapsulates the call to the platform XML parser, we
               thought it's better to point this risk out.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>DefaultObjectWrapper</literal>, only with its
+              <literal>incompatible_improvements</literal> set to 2.3.26
+              (<link linkend="topic.defaultObjectWrapperIcI">see how
+              here...</link>), wraps
+              <literal>java.util.Enumeration</literal>-s into
+              <literal>freemarker.template.DefaultEnumerationAdapter</literal>
+              (a new class) instead of into
+              <literal>freemarker.ext.beans.EnumerationModel</literal> (as far
+              as <literal>useAdaptersForContainers</literal> is
+              <literal>true</literal>, which is the default). This adapter is
+              cleaner than <literal>EnumerationModel</literal> as it only
+              implements the minimally required FTL type, which avoids some
+              ambiguous situations. (Note that Java API methods aren't exposed
+              anymore as subvariables; if you really need them, you can use
+              <literal>?api</literal>).</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>DefaultIteratorAdapter</literal> now support
+              <literal>?api</literal>.</para>
             </listitem>
 
             <listitem>
