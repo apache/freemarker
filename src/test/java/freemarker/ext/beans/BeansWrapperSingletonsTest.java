@@ -65,76 +65,83 @@ public class BeansWrapperSingletonsTest extends TestCase {
             assertThat(e.getMessage(), containsString("upgrade"));
         }
 
-        BeansWrapperBuilder pa1;
-        BeansWrapperBuilder pa2;
+        BeansWrapperBuilder builder1;
+        BeansWrapperBuilder builder2;
         
-        pa1 = new BeansWrapperBuilder(Configuration.VERSION_2_3_21);
-        pa2 = new BeansWrapperBuilder(Configuration.VERSION_2_3_21);
-        assertEquals(pa1, pa2);
+        builder1 = new BeansWrapperBuilder(Configuration.VERSION_2_3_21);
+        builder2 = new BeansWrapperBuilder(Configuration.VERSION_2_3_21);
+        assertEquals(builder1, builder2);
         
-        pa1.setSimpleMapWrapper(true);
-        assertNotEquals(pa1, pa2);
-        assertFalse(pa1.hashCode() == pa2.hashCode());
-        pa2.setSimpleMapWrapper(true);
-        assertEquals(pa1, pa2);
-        assertTrue(pa1.hashCode() == pa2.hashCode());
+        builder1.setSimpleMapWrapper(true);
+        assertNotEquals(builder1, builder2);
+        assertNotEquals(builder1.hashCode(), builder2.hashCode());
+        builder2.setSimpleMapWrapper(true);
+        assertEquals(builder1, builder2);
+        assertEquals(builder1.hashCode(), builder2.hashCode());
         
-        pa1.setExposeFields(true);
-        assertNotEquals(pa1, pa2);
-        assertFalse(pa1.hashCode() == pa2.hashCode());
-        pa2.setExposeFields(true);
-        assertEquals(pa1, pa2);
-        assertTrue(pa1.hashCode() == pa2.hashCode());
+        builder1.setExposeFields(true);
+        assertNotEquals(builder1, builder2);
+        assertNotEquals(builder1.hashCode(), builder2.hashCode());
+        builder2.setExposeFields(true);
+        assertEquals(builder1, builder2);
+        assertEquals(builder1.hashCode(), builder2.hashCode());
         
-        pa1.setExposureLevel(0);
-        assertNotEquals(pa1, pa2);
-        assertFalse(pa1.hashCode() == pa2.hashCode());
-        pa2.setExposureLevel(0);
-        assertEquals(pa1, pa2);
-        assertTrue(pa1.hashCode() == pa2.hashCode());
+        builder1.setExposureLevel(0);
+        assertNotEquals(builder1, builder2);
+        assertNotEquals(builder1.hashCode(), builder2.hashCode());
+        builder2.setExposureLevel(0);
+        assertEquals(builder1, builder2);
+        assertEquals(builder1.hashCode(), builder2.hashCode());
         
-        pa1.setExposureLevel(1);
-        assertNotEquals(pa1, pa2);
-        assertFalse(pa1.hashCode() == pa2.hashCode());
-        pa2.setExposureLevel(1);
-        assertEquals(pa1, pa2);
-        assertTrue(pa1.hashCode() == pa2.hashCode());
+        builder1.setExposureLevel(1);
+        assertNotEquals(builder1, builder2);
+        assertNotEquals(builder1.hashCode(), builder2.hashCode());
+        builder2.setExposureLevel(1);
+        assertEquals(builder1, builder2);
+        assertEquals(builder1.hashCode(), builder2.hashCode());
         
-        pa1.setDefaultDateType(TemplateDateModel.DATE);
-        assertNotEquals(pa1, pa2);
-        pa2.setDefaultDateType(TemplateDateModel.DATE);
-        assertEquals(pa1, pa2);
-        assertTrue(pa1.hashCode() == pa2.hashCode());
+        builder1.setDefaultDateType(TemplateDateModel.DATE);
+        assertNotEquals(builder1, builder2);
+        builder2.setDefaultDateType(TemplateDateModel.DATE);
+        assertEquals(builder1, builder2);
+        assertEquals(builder1.hashCode(), builder2.hashCode());
         
-        pa1.setStrict(true);
-        assertNotEquals(pa1, pa2);
-        assertFalse(pa1.hashCode() == pa2.hashCode());
-        pa2.setStrict(true);
-        assertEquals(pa1, pa2);
-        assertTrue(pa1.hashCode() == pa2.hashCode());
+        builder1.setStrict(true);
+        assertNotEquals(builder1, builder2);
+        assertNotEquals(builder1.hashCode(), builder2.hashCode());
+        builder2.setStrict(true);
+        assertEquals(builder1, builder2);
+        assertEquals(builder1.hashCode(), builder2.hashCode());
 
-        pa1.setUseModelCache(true);
-        assertNotEquals(pa1, pa2);
-        assertFalse(pa1.hashCode() == pa2.hashCode());
-        pa2.setUseModelCache(true);
-        assertEquals(pa1, pa2);
-        assertTrue(pa1.hashCode() == pa2.hashCode());
+        builder1.setUseModelCache(true);
+        assertNotEquals(builder1, builder2);
+        assertNotEquals(builder1.hashCode(), builder2.hashCode());
+        builder2.setUseModelCache(true);
+        assertEquals(builder1, builder2);
+        assertEquals(builder1.hashCode(), builder2.hashCode());
         
         AlphabeticalMethodSorter ms = new AlphabeticalMethodSorter(true);
-        pa1.setMethodSorter(ms);
-        assertNotEquals(pa1, pa2);
-        pa2.setMethodSorter(ms);
-        assertEquals(pa1, pa2);
-        assertTrue(pa1.hashCode() == pa2.hashCode());
+        builder1.setMethodSorter(ms);
+        assertNotEquals(builder1, builder2);
+        builder2.setMethodSorter(ms);
+        assertEquals(builder1, builder2);
+        assertEquals(builder1.hashCode(), builder2.hashCode());
         
         MethodAppearanceFineTuner maft = new MethodAppearanceFineTuner() {
             public void process(MethodAppearanceDecisionInput in, MethodAppearanceDecision out) { }
         };
-        pa1.setMethodAppearanceFineTuner(maft);
-        assertNotEquals(pa1, pa2);
-        pa2.setMethodAppearanceFineTuner(maft);
-        assertEquals(pa1, pa2);
-        assertTrue(pa1.hashCode() == pa2.hashCode());
+        builder1.setMethodAppearanceFineTuner(maft);
+        assertNotEquals(builder1, builder2);
+        builder2.setMethodAppearanceFineTuner(maft);
+        assertEquals(builder1, builder2);
+        assertEquals(builder1.hashCode(), builder2.hashCode());
+        
+        builder1.setTreatDefaultMethodsAsBeanMembers(true);
+        assertNotEquals(builder1, builder2);
+        assertNotEquals(builder1.hashCode(), builder2.hashCode());
+        builder2.setTreatDefaultMethodsAsBeanMembers(true);
+        assertEquals(builder1, builder2);
+        assertEquals(builder1.hashCode(), builder2.hashCode());
     }
     
     public void testBeansWrapperFactoryProducts() throws Exception {
