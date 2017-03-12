@@ -24,10 +24,12 @@ import java.util.Iterator;
 
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
+import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
 
@@ -51,7 +53,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * @since 2.3.22
  */
 public class DefaultIteratorAdapter extends WrappingTemplateModel implements TemplateCollectionModel,
-        AdapterTemplateModel, WrapperTemplateModel, Serializable {
+        AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport, Serializable {
 
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="We hope it's Seralizable")
     private final Iterator iterator;
@@ -85,6 +87,11 @@ public class DefaultIteratorAdapter extends WrappingTemplateModel implements Tem
     @Override
     public TemplateModelIterator iterator() throws TemplateModelException {
         return new SimpleTemplateModelIterator();
+    }
+
+    @Override
+    public TemplateModel getAPI() throws TemplateModelException {
+        return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(iterator);
     }
 
     /**

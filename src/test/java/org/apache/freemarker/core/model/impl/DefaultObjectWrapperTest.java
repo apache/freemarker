@@ -591,7 +591,18 @@ public class DefaultObjectWrapperTest {
             assertThat(e.getMessage(), containsString("can be listed only once"));
         }
     }
-    
+
+    @Test
+    public void testIteratorApiSupport() throws TemplateModelException {
+        TemplateModel wrappedIterator = OW.wrap(Collections.emptyIterator());
+        assertThat(wrappedIterator, instanceOf(DefaultIteratorAdapter.class));
+        DefaultIteratorAdapter iteratorAdapter = (DefaultIteratorAdapter) wrappedIterator;
+
+        TemplateHashModel api = (TemplateHashModel) iteratorAdapter.getAPI();
+        assertFalse(((TemplateBooleanModel) ((TemplateMethodModelEx)
+                api.get("hasNext")).exec(Collections.emptyList())).getAsBoolean());
+    }
+
     @SuppressWarnings("boxing")
     @Test
     public void testCharKeyFallback() throws TemplateModelException {
@@ -656,12 +667,11 @@ public class DefaultObjectWrapperTest {
 
     @Test
     public void testEnumerationAdapter() throws TemplateModelException {
-        DefaultObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
         Vector<String> vector = new Vector<String>();
         vector.add("a");
         vector.add("b");
 
-        TemplateModel wrappedEnumeration = ow.wrap(vector.elements());
+        TemplateModel wrappedEnumeration = OW.wrap(vector.elements());
         assertThat(wrappedEnumeration, instanceOf(DefaultEnumerationAdapter.class));
         DefaultEnumerationAdapter enumAdapter = (DefaultEnumerationAdapter) wrappedEnumeration;
         TemplateModelIterator iterator = enumAdapter.iterator();
@@ -677,6 +687,10 @@ public class DefaultObjectWrapperTest {
         } catch (TemplateException e) {
             assertThat(e.getMessage(), containsStringIgnoringCase("only once"));
         }
+
+        TemplateHashModel api = (TemplateHashModel) enumAdapter.getAPI();
+        assertFalse(((TemplateBooleanModel) ((TemplateMethodModelEx)
+                api.get("hasMoreElements")).exec(Collections.emptyList())).getAsBoolean());
     }
 
     @Test
