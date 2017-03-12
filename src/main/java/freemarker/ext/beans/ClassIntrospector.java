@@ -421,7 +421,7 @@ class ClassIntrospector {
         // here, we don't utilize the accessibleMethods Map, which we might already have at this point.)
         for (Method method : clazz.getMethods()) {
             if (_JavaVersions.JAVA_8.isDefaultMethod(method) && method.getReturnType() != void.class
-                    && !method.isSynthetic()) {
+                    && !method.isBridge()) {
                 Class<?>[] paramTypes = method.getParameterTypes();
                 if (paramTypes.length == 0
                         || paramTypes.length == 1 && paramTypes[0] == int.class /* indexed property reader */) {
