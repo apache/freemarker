@@ -39,25 +39,25 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * {@link TemplateCollectionModel}. Putting aside that it wraps an {@link Enumeration} instead of an {@link Iterator},
  * this is identical to {@link DefaultIteratorAdapter}, so see further details there.
  */
-// TODO JUnit
+@SuppressWarnings("serial")
 public class DefaultEnumerationAdapter extends WrappingTemplateModel implements TemplateCollectionModel,
         AdapterTemplateModel, WrapperTemplateModel, Serializable {
 
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="We hope it's Seralizable")
-    private final Enumeration enumeration;
+    private final Enumeration<?> enumeration;
     private boolean enumerationOwnedBySomeone;
 
     /**
      * Factory method for creating new adapter instances.
      *
-     * @param iterator
+     * @param enumeration
      *            The enumeration to adapt; can't be {@code null}.
      */
-    public static DefaultEnumerationAdapter adapt(Enumeration iterator, ObjectWrapper wrapper) {
-        return new DefaultEnumerationAdapter(iterator, wrapper);
+    public static DefaultEnumerationAdapter adapt(Enumeration<?> enumeration, ObjectWrapper wrapper) {
+        return new DefaultEnumerationAdapter(enumeration, wrapper);
     }
 
-    private DefaultEnumerationAdapter(Enumeration enumeration, ObjectWrapper wrapper) {
+    private DefaultEnumerationAdapter(Enumeration<?> enumeration, ObjectWrapper wrapper) {
         super(wrapper);
         this.enumeration = enumeration;
     }
@@ -68,7 +68,7 @@ public class DefaultEnumerationAdapter extends WrappingTemplateModel implements 
     }
 
     @Override
-    public Object getAdaptedObject(Class hint) {
+    public Object getAdaptedObject(Class<?> hint) {
         return getWrappedObject();
     }
 

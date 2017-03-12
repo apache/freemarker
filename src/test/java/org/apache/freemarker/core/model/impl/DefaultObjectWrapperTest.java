@@ -653,7 +653,32 @@ public class DefaultObjectWrapperTest {
 
         assertTemplateOutput(OW, iterable, listingFTL, "a, b, c");
     }
-    
+
+    @Test
+    public void testEnumerationAdapter() throws TemplateModelException {
+        DefaultObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
+        Vector<String> vector = new Vector<String>();
+        vector.add("a");
+        vector.add("b");
+
+        TemplateModel wrappedEnumeration = ow.wrap(vector.elements());
+        assertThat(wrappedEnumeration, instanceOf(DefaultEnumerationAdapter.class));
+        DefaultEnumerationAdapter enumAdapter = (DefaultEnumerationAdapter) wrappedEnumeration;
+        TemplateModelIterator iterator = enumAdapter.iterator();
+        assertTrue(iterator.hasNext());
+        assertEquals("a", ((TemplateScalarModel) iterator.next()).getAsString());
+        assertTrue(iterator.hasNext());
+        assertEquals("b", ((TemplateScalarModel) iterator.next()).getAsString());
+        assertFalse(iterator.hasNext());
+
+        iterator = enumAdapter.iterator();
+        try {
+            iterator.hasNext();
+        } catch (TemplateException e) {
+            assertThat(e.getMessage(), containsStringIgnoringCase("only once"));
+        }
+    }
+
     @Test
     public void assertCanWrapDOM() throws SAXException, IOException, ParserConfigurationException,
             TemplateModelException {
