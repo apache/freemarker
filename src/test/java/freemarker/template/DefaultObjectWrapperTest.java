@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Vector;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -53,6 +54,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import freemarker.ext.beans.BeansWrapper;
+import freemarker.ext.beans.EnumerationModel;
 import freemarker.ext.beans.HashAdapter;
 import freemarker.ext.util.WrapperTemplateModel;
 
@@ -90,7 +92,7 @@ public class DefaultObjectWrapperTest {
         expected.add(Configuration.VERSION_2_3_22); // no non-BC change in 2.3.23
         expected.add(Configuration.VERSION_2_3_24);
         expected.add(Configuration.VERSION_2_3_24); // no non-BC change in 2.3.25
-        expected.add(Configuration.VERSION_2_3_24); // no non-BC change in 2.3.26
+        expected.add(Configuration.VERSION_2_3_26);
 
         List<Version> actual = new ArrayList<Version>();
         for (int i = _TemplateAPI.VERSION_INT_2_3_0; i <= Configuration.getVersion().intValue(); i++) {
@@ -732,18 +734,6 @@ public class DefaultObjectWrapperTest {
             assertFalse(coll.isEmpty());
             assertCollectionTMEquals(coll, "a", "b", "c");
 
-            assertTrue(coll.contains(OW22CA.wrap("a")));
-            assertTrue(coll.contains(OW22CA.wrap("b")));
-            assertTrue(coll.contains(OW22CA.wrap("c")));
-            assertTrue(coll.contains(OW22CA.wrap("c")));
-            assertFalse(coll.contains(OW22CA.wrap("d")));
-            try {
-                assertFalse(coll.contains(OW22CA.wrap(1)));
-                fail();
-            } catch (TemplateModelException e) {
-                assertThat(e.getMessage(), containsString("Integer"));
-            }
-
             assertRoundtrip(OW22CA, set, DefaultNonListCollectionAdapter.class, TreeSet.class, "[a, b, c]");
             
             assertSizeThroughAPIModel(3, coll);
@@ -763,13 +753,6 @@ public class DefaultObjectWrapperTest {
             assertTrue(obj1 == null || obj2 == null);
             assertTrue(obj1 != null && obj1.equals(list) || obj2 != null && obj2.equals(list));
             assertTrue(tm1 instanceof DefaultListAdapter || tm2 instanceof DefaultListAdapter);
-
-            List similarList = new ArrayList();
-            similarList.add("b");
-            assertTrue(coll.contains(OW22CA.wrap(similarList)));
-            assertTrue(coll.contains(OW22CA.wrap(null)));
-            assertFalse(coll.contains(OW22CA.wrap("a")));
-            assertFalse(coll.contains(OW22CA.wrap(1)));
 
             assertRoundtrip(OW22CA, set, DefaultNonListCollectionAdapter.class, HashSet.class, "[" + obj1 + ", "
                     + obj2 + "]");
@@ -886,6 +869,17 @@ public class DefaultObjectWrapperTest {
         }
     }
     
+    @Test
+    public void testIteratorApiSupport() throws TemplateModelException {
+        TemplateModel wrappedIterator = OW22.wrap(Collections.emptyIterator());
+        assertThat(wrappedIterator, instanceOf(DefaultIteratorAdapter.class));
+        DefaultIteratorAdapter iteratorAdapter = (DefaultIteratorAdapter) wrappedIterator;
+        
+        TemplateHashModel api = (TemplateHashModel) iteratorAdapter.getAPI();
+        assertFalse(((TemplateBooleanModel) ((TemplateMethodModelEx)
+                api.get("hasNext")).exec(Collections.emptyList())).getAsBoolean());
+    }
+    
     @SuppressWarnings("boxing")
     @Test
     public void testCharKeyFallback() throws TemplateModelException {
@@ -961,6 +955,48 @@ public class DefaultObjectWrapperTest {
             
             assertTemplateOutput(OW22IS, iterable, listingFTL, "a, b, c");
         }
+    }
+
+    @Test
+    public void testNoEnumerationAdapter() throws TemplateModelException {
+         DefaultObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_25).build();
+         Vector<String> vector = new Vector<String>();
+         vector.add("a");
+         vector.add("b");
+         
+         TemplateModel wrappedEnumeration = ow.wrap(vector.elements());
+         assertThat(wrappedEnumeration, instanceOf(EnumerationModel.class));
+         EnumerationModel enumModel = (EnumerationModel) wrappedEnumeration;
+         assertNotNull(enumModel.get("nextElement"));
+    }
+    
+    @Test
+    public void testEnumerationAdapter() throws TemplateModelException {
+         DefaultObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_26).build();
+         Vector<String> vector = new Vector<String>();
+         vector.add("a");
+         vector.add("b");
+         
+         TemplateModel wrappedEnumeration = ow.wrap(vector.elements());
+         assertThat(wrappedEnumeration, instanceOf(DefaultEnumerationAdapter.class));
+         DefaultEnumerationAdapter enumAdapter = (DefaultEnumerationAdapter) wrappedEnumeration;
+         TemplateModelIterator iterator = enumAdapter.iterator();
+         assertTrue(iterator.hasNext());
+         assertEquals("a", ((TemplateScalarModel) iterator.next()).getAsString());
+         assertTrue(iterator.hasNext());
+         assertEquals("b", ((TemplateScalarModel) iterator.next()).getAsString());
+         assertFalse(iterator.hasNext());
+         
+         iterator = enumAdapter.iterator();
+         try {
+             iterator.hasNext();
+         } catch (TemplateException e) {
+             assertThat(e.getMessage(), containsStringIgnoringCase("only once"));
+         }
+         
+         TemplateHashModel api = (TemplateHashModel) enumAdapter.getAPI();
+         assertFalse(((TemplateBooleanModel) ((TemplateMethodModelEx)
+                 api.get("hasMoreElements")).exec(Collections.emptyList())).getAsBoolean());
     }
     
     @Test

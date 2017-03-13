@@ -57,7 +57,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
     NodeModel contextNode;
     XPathSupport xpathSupport;
     
-    private static ObjectWrapper nodeWrapper = new ObjectWrapper() {
+    private static final ObjectWrapper NODE_WRAPPER = new ObjectWrapper() {
         public TemplateModel wrap(Object obj) {
             if (obj instanceof NodeModel) {
                 return (NodeModel) obj;
@@ -71,12 +71,12 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
     }
     
     NodeListModel(NodeModel contextNode) {
-        super(nodeWrapper);
+        super(NODE_WRAPPER);
         this.contextNode = contextNode;
     }
     
     NodeListModel(NodeList nodeList, NodeModel contextNode) {
-        super(nodeWrapper);
+        super(NODE_WRAPPER);
         for (int i = 0; i < nodeList.getLength(); i++) {
             list.add(nodeList.item(i));
         }
@@ -84,7 +84,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
     }
     
     NodeListModel(NamedNodeMap nodeList, NodeModel contextNode) {
-        super(nodeWrapper);
+        super(NODE_WRAPPER);
         for (int i = 0; i < nodeList.getLength(); i++) {
             list.add(nodeList.item(i));
         }
@@ -92,7 +92,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
     }
     
     NodeListModel(List list, NodeModel contextNode) {
-        super(list, nodeWrapper);
+        super(list, NODE_WRAPPER);
         this.contextNode = contextNode;
     }
     

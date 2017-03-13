@@ -85,13 +85,9 @@ implements TemplateCollectionModel, Serializable {
      * can't return the first element anymore.
      */
     public TemplateModelIterator iterator() {
-        if (iterator != null) {
-            return new SimpleTemplateModelIterator(iterator, false);
-        } else {
-            synchronized (collection) {
-                return new SimpleTemplateModelIterator(collection.iterator(), true);
-            }
-        }
+        return iterator != null
+                ? new SimpleTemplateModelIterator(iterator, false)
+                : new SimpleTemplateModelIterator(collection.iterator(), true);
     }
     
     /**

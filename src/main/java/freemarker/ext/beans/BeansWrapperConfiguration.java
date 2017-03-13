@@ -42,7 +42,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
 
     private final Version incompatibleImprovements;
     
-    protected ClassIntrospectorBuilder classIntrospectorFactory;
+    protected ClassIntrospectorBuilder classIntrospectorBuilder;
     
     // Properties and their *defaults*:
     private boolean simpleMapWrapper = false;
@@ -81,7 +81,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
                 : BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
         this.incompatibleImprovements = incompatibleImprovements;
         
-        classIntrospectorFactory = new ClassIntrospectorBuilder(incompatibleImprovements);
+        classIntrospectorBuilder = new ClassIntrospectorBuilder(incompatibleImprovements);
     }
     
     /**
@@ -101,7 +101,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
         result = prime * result + (outerIdentity != null ? outerIdentity.hashCode() : 0);
         result = prime * result + (strict ? 1231 : 1237);
         result = prime * result + (useModelCache ? 1231 : 1237);
-        result = prime * result + classIntrospectorFactory.hashCode();
+        result = prime * result + classIntrospectorBuilder.hashCode();
         return result;
     }
 
@@ -122,7 +122,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
         if (outerIdentity != other.outerIdentity) return false;
         if (strict != other.strict) return false;
         if (useModelCache != other.useModelCache) return false;
-        if (!classIntrospectorFactory.equals(other.classIntrospectorFactory)) return false;
+        if (!classIntrospectorBuilder.equals(other.classIntrospectorBuilder)) return false;
         
         return true;
     }
@@ -131,8 +131,8 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
         try {
             BeansWrapperConfiguration clone = (BeansWrapperConfiguration) super.clone();
             if (deepCloneKey) {
-                clone.classIntrospectorFactory
-                        = (ClassIntrospectorBuilder) classIntrospectorFactory.clone();
+                clone.classIntrospectorBuilder
+                        = (ClassIntrospectorBuilder) classIntrospectorBuilder.clone();
             }
             return clone;
         } catch (CloneNotSupportedException e) {
@@ -193,25 +193,34 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
     }
     
     public int getExposureLevel() {
-        return classIntrospectorFactory.getExposureLevel();
+        return classIntrospectorBuilder.getExposureLevel();
     }
 
     /** See {@link BeansWrapper#setExposureLevel(int)}. */
     public void setExposureLevel(int exposureLevel) {
-        classIntrospectorFactory.setExposureLevel(exposureLevel);
+        classIntrospectorBuilder.setExposureLevel(exposureLevel);
     }
 
     public boolean getExposeFields() {
-        return classIntrospectorFactory.getExposeFields();
+        return classIntrospectorBuilder.getExposeFields();
     }
 
     /** See {@link BeansWrapper#setExposeFields(boolean)}. */
     public void setExposeFields(boolean exposeFields) {
-        classIntrospectorFactory.setExposeFields(exposeFields);
+        classIntrospectorBuilder.setExposeFields(exposeFields);
+    }
+
+    public boolean getTreatDefaultMethodsAsBeanMembers() {
+        return classIntrospectorBuilder.getTreatDefaultMethodsAsBeanMembers();
+    }
+    
+    /** See {@link BeansWrapper#setTreatDefaultMethodsAsBeanMembers(boolean)} */
+    public void setTreatDefaultMethodsAsBeanMembers(boolean treatDefaultMethodsAsBeanMembers) {
+        classIntrospectorBuilder.setTreatDefaultMethodsAsBeanMembers(treatDefaultMethodsAsBeanMembers);
     }
 
     public MethodAppearanceFineTuner getMethodAppearanceFineTuner() {
-        return classIntrospectorFactory.getMethodAppearanceFineTuner();
+        return classIntrospectorBuilder.getMethodAppearanceFineTuner();
     }
 
     /**
@@ -220,15 +229,15 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
      * the value implements {@link SingletonCustomizer}.
      */
     public void setMethodAppearanceFineTuner(MethodAppearanceFineTuner methodAppearanceFineTuner) {
-        classIntrospectorFactory.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
+        classIntrospectorBuilder.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
     }
 
     MethodSorter getMethodSorter() {
-        return classIntrospectorFactory.getMethodSorter();
+        return classIntrospectorBuilder.getMethodSorter();
     }
 
     void setMethodSorter(MethodSorter methodSorter) {
-        classIntrospectorFactory.setMethodSorter(methodSorter);
+        classIntrospectorBuilder.setMethodSorter(methodSorter);
     }
  
 }

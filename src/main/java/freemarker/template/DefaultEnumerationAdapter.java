@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package freemarker.template;
 
 import java.io.Serializable;
+import java.util.Enumeration;
 import java.util.Iterator;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -27,58 +27,52 @@ import freemarker.ext.util.WrapperTemplateModel;
 import freemarker.template.utility.ObjectWrapperWithAPISupport;
 
 /**
- * Adapts an {@link Iterator} to the corresponding {@link TemplateModel} interface(s), most importantly to
- * {@link TemplateCollectionModel}. The resulting {@link TemplateCollectionModel} can only be listed (iterated) once.
- * If the user tries list the variable for a second time, an exception will be thrown instead of silently gettig an
- * empty (or partial) listing.
+ * Adapts an {@link Enumeration} to the corresponding {@link TemplateModel} interface(s), most importantly to
+ * {@link TemplateCollectionModel}. Putting aside that it wraps an {@link Enumeration} instead of an {@link Iterator},
+ * this is identical to {@link DefaultIteratorAdapter}, so see further details there.
  * 
- * <p>
- * Thread safety: A {@link DefaultListAdapter} is as thread-safe as the array that it wraps is. Normally you only
- * have to consider read-only access, as the FreeMarker template language doesn't allow writing these sequences (though
- * of course, Java methods called from the template can violate this rule).
- * 
- * <p>
- * This adapter is used by {@link DefaultObjectWrapper} if its {@code useAdaptersForCollections} property is
- * {@code true}, which is the default when its {@code incompatibleImprovements} property is 2.3.22 or higher.
- * 
- * @since 2.3.22
+ * @since 2.3.26
  */
-public class DefaultIteratorAdapter extends WrappingTemplateModel implements TemplateCollectionModel,
+@SuppressWarnings("serial")
+public class DefaultEnumerationAdapter extends WrappingTemplateModel implements TemplateCollectionModel,
         AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport, Serializable {
 
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="We hope it's Seralizable")
-    private final Iterator iterator;
-    private boolean iteratorOwnedBySomeone;
+    private final Enumeration<?> enumeration;
+    private boolean enumerationOwnedBySomeone;
 
     /**
      * Factory method for creating new adapter instances.
-     * 
-     * @param iterator
-     *            The iterator to adapt; can't be {@code null}.
+     *
+     * @param enumeration
+     *            The enumeration to adapt; can't be {@code null}.
      */
-    public static DefaultIteratorAdapter adapt(Iterator iterator, ObjectWrapper wrapper) {
-        return new DefaultIteratorAdapter(iterator, wrapper);
+    public static DefaultEnumerationAdapter adapt(Enumeration<?> enumeration, ObjectWrapper wrapper) {
+        return new DefaultEnumerationAdapter(enumeration, wrapper);
     }
 
-    private DefaultIteratorAdapter(Iterator iterator, ObjectWrapper wrapper) {
+    private DefaultEnumerationAdapter(Enumeration<?> enumeration, ObjectWrapper wrapper) {
         super(wrapper);
-        this.iterator = iterator;
+        this.enumeration = enumeration;
     }
 
+    @Override
     public Object getWrappedObject() {
-        return iterator;
+        return enumeration;
     }
 
-    public Object getAdaptedObject(Class hint) {
+    @Override
+    public Object getAdaptedObject(Class<?> hint) {
         return getWrappedObject();
     }
 
+    @Override
     public TemplateModelIterator iterator() throws TemplateModelException {
         return new SimpleTemplateModelIterator();
     }
 
     public TemplateModel getAPI() throws TemplateModelException {
-        return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(iterator);
+        return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(enumeration);
     }
     
     /**
@@ -86,36 +80,38 @@ public class DefaultIteratorAdapter extends WrappingTemplateModel implements Tem
      */
     private class SimpleTemplateModelIterator implements TemplateModelIterator {
 
-        private boolean iteratorOwnedByMe;
+        private boolean enumerationOwnedByMe;
 
+        @Override
         public TemplateModel next() throws TemplateModelException {
-            if (!iteratorOwnedByMe) {
+            if (!enumerationOwnedByMe) {
                 checkNotOwner();
-                iteratorOwnedBySomeone = true;
-                iteratorOwnedByMe = true;
+                enumerationOwnedBySomeone = true;
+                enumerationOwnedByMe = true;
             }
 
-            if (!iterator.hasNext()) {
+            if (!enumeration.hasMoreElements()) {
                 throw new TemplateModelException("The collection has no more items.");
             }
 
-            Object value = iterator.next();
+            Object value = enumeration.nextElement();
             return value instanceof TemplateModel ? (TemplateModel) value : wrap(value);
         }
 
+        @Override
         public boolean hasNext() throws TemplateModelException {
             // Calling hasNext may looks safe, but I have met sync. problems.
-            if (!iteratorOwnedByMe) {
+            if (!enumerationOwnedByMe) {
                 checkNotOwner();
             }
 
-            return iterator.hasNext();
+            return enumeration.hasMoreElements();
         }
 
         private void checkNotOwner() throws TemplateModelException {
-            if (iteratorOwnedBySomeone) {
+            if (enumerationOwnedBySomeone) {
                 throw new TemplateModelException(
-                        "This collection value wraps a java.util.Iterator, thus it can be listed only once.");
+                        "This collection value wraps a java.util.Enumeration, thus it can be listed only once.");
             }
         }
     }

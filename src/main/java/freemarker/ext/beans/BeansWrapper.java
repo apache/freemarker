@@ -241,6 +241,12 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      *       empty exactly if it has no elements left. (Note that this bug has never affected basic functionality, like
      *       {@code <#list ...>}.) 
      *     </li>  
+     *     <li>
+     *       <p>2.3.26 (or higher):
+     *       The default of {@link BeansWrapper#getTreatDefaultMethodsAsBeanMembers()} changes from {@code false} to
+     *       {@code true}. Thus, Java 8 default methods (and the bean properties they define) are exposed, despite that
+     *       {@link java.beans.Introspector} (the official JavaBeans introspector) ignores them, at least as of Java 8. 
+     *     </li>  
      *   </ul>
      *   
      *   <p>Note that the version will be normalized to the lowest version where the same incompatible
@@ -336,11 +342,11 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             // but we need to use the same sharedInrospectionLock forever, because that's what the model factories
             // synchronize on, even during the classIntrospector is being replaced.
             sharedIntrospectionLock = new Object();
-            classIntrospector = new ClassIntrospector(bwConf.classIntrospectorFactory, sharedIntrospectionLock);
+            classIntrospector = new ClassIntrospector(bwConf.classIntrospectorBuilder, sharedIntrospectionLock);
         } else {
             // As this is a read-only BeansWrapper, the classIntrospector is never replaced, and since it's shared by
             // other BeansWrapper instances, we use the lock belonging to the shared ClassIntrospector.
-            classIntrospector = bwConf.classIntrospectorFactory.build();
+            classIntrospector = bwConf.classIntrospectorBuilder.build();
             sharedIntrospectionLock = classIntrospector.getSharedLock(); 
         }
         
@@ -539,9 +545,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         checkModifiable();
      
         if (classIntrospector.getExposureLevel() != exposureLevel) {
-            ClassIntrospectorBuilder pa = classIntrospector.getPropertyAssignments();
-            pa.setExposureLevel(exposureLevel);
-            replaceClassIntrospector(pa);
+            ClassIntrospectorBuilder builder = classIntrospector.createBuilder();
+            builder.setExposureLevel(exposureLevel);
+            replaceClassIntrospector(builder);
         }
     }
     
@@ -566,9 +572,34 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         checkModifiable();
         
         if (classIntrospector.getExposeFields() != exposeFields) {
-            ClassIntrospectorBuilder pa = classIntrospector.getPropertyAssignments();
-            pa.setExposeFields(exposeFields);
-            replaceClassIntrospector(pa);
+            ClassIntrospectorBuilder builder = classIntrospector.createBuilder();
+            builder.setExposeFields(exposeFields);
+            replaceClassIntrospector(builder);
+        }
+    }
+    
+    /**
+     * Controls whether Java 8 default methods that weren't overridden in a class will be recognized as bean property
+     * accessors and/or bean actions, and thus will be visible from templates. (We expose bean properties and bean
+     * actions, not methods in general.) Before {@link #getIncompatibleImprovements incompatibleImprovements} 2.3.26
+     * this defaults to {@code false} for backward compatibility. Starting with {@link #getIncompatibleImprovements
+     * incompatibleImprovements} 2.3.26 it defaults to {@code true}.
+     * <p>
+     * Some explanation: FreeMarker uses {@link java.beans.Introspector} to discover the bean properties and actions of
+     * classes, for maximum conformance to the JavaBeans specification. But for some reason (perhaps just a bug in the
+     * Oracle/OpenJDK Java 8 implementation) that ignores the Java 8 default methods coming from the interfaces. When
+     * this setting is {@code true}, we search for non-overridden default methods ourselves, and add them to the set of
+     * discovered bean members.
+     * 
+     * @since 2.3.26
+     */
+    public void setTreatDefaultMethodsAsBeanMembers(boolean treatDefaultMethodsAsBeanMembers) {
+        checkModifiable();
+        
+        if (classIntrospector.getTreatDefaultMethodsAsBeanMembers() != treatDefaultMethodsAsBeanMembers) {
+            ClassIntrospectorBuilder builder = classIntrospector.createBuilder();
+            builder.setTreatDefaultMethodsAsBeanMembers(treatDefaultMethodsAsBeanMembers);
+            replaceClassIntrospector(builder);
         }
     }
     
@@ -576,9 +607,18 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * Returns whether exposure of public instance fields of classes is 
      * enabled. See {@link #setExposeFields(boolean)} for details.
      * @return true if public instance fields are exposed, false otherwise.
+     * 
+     * @since 2.3.26
      */
     public boolean isExposeFields() {
         return classIntrospector.getExposeFields();
+    }
+    
+    /**
+     * See {@link #setTreatDefaultMethodsAsBeanMembers(boolean)}.
+     */
+    public boolean getTreatDefaultMethodsAsBeanMembers() {
+        return classIntrospector.getTreatDefaultMethodsAsBeanMembers();
     }
     
     public MethodAppearanceFineTuner getMethodAppearanceFineTuner() {
@@ -593,9 +633,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         checkModifiable();
         
         if (classIntrospector.getMethodAppearanceFineTuner() != methodAppearanceFineTuner) {
-            ClassIntrospectorBuilder pa = classIntrospector.getPropertyAssignments();
-            pa.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
-            replaceClassIntrospector(pa);
+            ClassIntrospectorBuilder builder = classIntrospector.createBuilder();
+            builder.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
+            replaceClassIntrospector(builder);
         }
     }
 
@@ -607,9 +647,9 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         checkModifiable();
         
         if (classIntrospector.getMethodSorter() != methodSorter) {
-            ClassIntrospectorBuilder pa = classIntrospector.getPropertyAssignments();
-            pa.setMethodSorter(methodSorter);
-            replaceClassIntrospector(pa);
+            ClassIntrospectorBuilder builder = classIntrospector.createBuilder();
+            builder.setMethodSorter(methodSorter);
+            replaceClassIntrospector(builder);
         }
     }
     
@@ -631,10 +671,10 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * Replaces the value of {@link #classIntrospector}, but first it unregisters
      * the model factories in the old {@link #classIntrospector}.
      */
-    private void replaceClassIntrospector(ClassIntrospectorBuilder pa) {
+    private void replaceClassIntrospector(ClassIntrospectorBuilder builder) {
         checkModifiable();
         
-        final ClassIntrospector newCI = new ClassIntrospector(pa, sharedIntrospectionLock);
+        final ClassIntrospector newCI = new ClassIntrospector(builder, sharedIntrospectionLock);
         final ClassIntrospector oldCI;
         
         // In principle this need not be synchronized, but as apps might publish the configuration improperly, or
@@ -803,7 +843,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_0) {
             throw new IllegalArgumentException("Version must be at least 2.3.0.");
         }
-        return is2324Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_24
+        return incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_26 ? Configuration.VERSION_2_3_26
+                : is2324Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_24
                 : is2321Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_21
                 : Configuration.VERSION_2_3_0;
     }
@@ -1692,6 +1733,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         return "simpleMapWrapper=" + simpleMapWrapper + ", "
                + "exposureLevel=" + classIntrospector.getExposureLevel() + ", "
                + "exposeFields=" + classIntrospector.getExposeFields() + ", "
+               + "treatDefaultMethodsAsBeanMembers="
+               + classIntrospector.getTreatDefaultMethodsAsBeanMembers() + ", "
                + "sharedClassIntrospCache="
                + (classIntrospector.isShared() ? "@" + System.identityHashCode(classIntrospector) : "none");
     }

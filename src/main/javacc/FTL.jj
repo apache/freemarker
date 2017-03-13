@@ -85,11 +85,6 @@ public class FMParser {
      */
     private int breakableDirectiveNesting;
     
-    /**
-     * Keeps track of the flags of the innermost parent #list or #foreach directive.
-     */
-    private int parentListAndForeachFlags;
-    
     private boolean inMacro, inFunction;
     private LinkedList escapes = new LinkedList();
     private int mixedContentNesting; // for stripText

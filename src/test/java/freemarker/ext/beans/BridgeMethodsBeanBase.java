@@ -16,32 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package freemarker.core;
+package freemarker.ext.beans;
 
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
+public abstract class BridgeMethodsBeanBase<T> {
 
-/**
- * Used internally only, might changes without notice!
- * Used for accessing functionality that's only present in Java 6 or later.
- */
-//Compile this against Java 6
-@SuppressWarnings("Since15") // For IntelliJ inspection   
-public final class _Java6Impl implements _Java6 {
+    public abstract T m1();
     
-    public static final _Java6 INSTANCE = new _Java6Impl();
-
-    private _Java6Impl() {
-        // Not meant to be instantiated
-    }
-
-    public void setRoundingMode(DecimalFormat df, RoundingMode roundingMode) {
-        df.setRoundingMode(roundingMode);
-    }
-
-    public void setExponentSeparator(DecimalFormatSymbols dfs, String exponentSeparator) {
-        dfs.setExponentSeparator(exponentSeparator);
+    public T m2() {
+        return null;
     }
     
 }

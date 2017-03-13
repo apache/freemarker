@@ -16,21 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package freemarker.ext.beans;
 
-import java.beans.MethodDescriptor;
-import java.util.List;
-
-/**
- * Used for JUnit testing method-order dependence bugs via
- * {@link BeansWrapperBuilder#setMethodSorter(MethodSorter)}.
- */
-interface MethodSorter {
-
-    /**
-     * Sorts the methods in place (that is, by modifying the parameter list).
-     */
-    void sortMethodDescriptors(List<MethodDescriptor> methodDescriptors);
-    
+public class BridgeMethodsWithDefaultMethodBean2 implements BridgeMethodsWithDefaultMethodBeanBase2 {
+    // All inherited
 }

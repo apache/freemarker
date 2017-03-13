@@ -19,6 +19,7 @@
 *.iws
 *.ipr
 .idea_modules/
+.out/
 
 *.tmp
 *.bak
