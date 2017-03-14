@@ -388,10 +388,10 @@ public class Configurable {
         parent = null;
         properties = new Properties();
         
-        locale = Locale.getDefault();
+        locale = _TemplateAPI.getDefaultLocale();
         properties.setProperty(LOCALE_KEY, locale.toString());
         
-        timeZone = TimeZone.getDefault();
+        timeZone = _TemplateAPI.getDefaultTimeZone();
         properties.setProperty(TIME_ZONE_KEY, timeZone.getID());
         
         sqlDataAndTimeTimeZone = null;
@@ -1992,7 +1992,8 @@ public class Configurable {
      * <ul>
      *   <li><p>{@code "locale"}:
      *       See {@link #setLocale(Locale)}.
-     *       <br>String value: local codes with the usual format in Java, such as {@code "en_US"}.
+     *       <br>String value: local codes with the usual format in Java, such as {@code "en_US"}, or since 2.3.26,
+     *       "JVM default" (ignoring case) to use the default locale of the Java environment.
      *       
      *   <li><p>{@code "classic_compatible"}:
      *       See {@link #setClassicCompatible(boolean)} and {@link Configurable#setClassicCompatibleAsInt(int)}.
@@ -2179,7 +2180,8 @@ public class Configurable {
      *       {@code "disable"} for {@link Configuration#DISABLE_AUTO_ESCAPING_POLICY}.
      *       
      *   <li><p>{@code "default_encoding"}:
-     *       See {@link Configuration#setDefaultEncoding(String)}.
+     *       See {@link Configuration#setDefaultEncoding(String)}; since 2.3.26 also accepts value "JVM default"
+     *       (not case sensitive) to set the Java environment default value.
      *       <br>As the default value is the system default, which can change
      *       from one server to another, <b>you should always set this!</b>
      *       
@@ -2385,7 +2387,11 @@ public class Configurable {
         boolean unknown = false;
         try {
             if (LOCALE_KEY.equals(name)) {
-                setLocale(StringUtil.deduceLocale(value));
+                if (JVM_DEFAULT.equalsIgnoreCase(value)) {
+                    setLocale(Locale.getDefault());
+                } else {
+                    setLocale(StringUtil.deduceLocale(value));
+                }
             } else if (NUMBER_FORMAT_KEY_SNAKE_CASE.equals(name) || NUMBER_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setNumberFormat(value);
             } else if (CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE.equals(name)

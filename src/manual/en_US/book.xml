@@ -26862,8 +26862,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>Configuration</literal> on its default, it's enough to
               increase the <literal>incompatibleImprovements</literal> setting
               of the <literal>Configuration</literal> to 2.3.26, as that's
-              inherited by the default <literal>object_wrapper</literal>.
-              </para>
+              inherited by the default
+              <literal>object_wrapper</literal>.</para>
             </listitem>
 
             <listitem>
@@ -26892,6 +26892,31 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               of an XML DOM node. (Now it's not issued by the XPath
               implementation, which just sees it as a syntactical
               error.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>Configuration.is<replaceable>Xxx</replaceable>ExplictlySet</literal>
+              and
+              <literal>Configuration.unset<replaceable>Xxx</replaceable></literal>
+              methods for the Configuration settings:
+              <literal>locale</literal>, <literal>time_zone</literal>,
+              <literal>default_encoding</literal>. (This can be utilized in
+              frameworks to detect if the application has missed setting
+              these. The backward compatible default values are often
+              unwanted, as they are the default locale, time zone and file
+              encoding of the Java environment.)</para>
+            </listitem>
+
+            <listitem>
+              <para>The <literal>locale</literal> and
+              <literal>default_encoding</literal> configuration settings now
+              supports the special <literal>"JVM default"</literal> value when
+              set from Java <literal>.properties</literal> file, or via
+              <literal>Configuration.setSettings(Properties)</literal>, or via
+              the <literal>#setting</literal> directive. Earlier only the
+              <literal>time_zone</literal> setting has supported this
+              value.</para>
             </listitem>
 
             <listitem>
