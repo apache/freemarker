@@ -1460,7 +1460,70 @@ public class ConfigurationTest extends TestCase {
         assertNull(cfg.getLazyAutoImports());
         assertTrue(cfg.isLazyAutoImportsSet());
     }
-    
+
+    public void testLocaleSetting() throws TemplateException, ConfigurationException {
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+
+        assertEquals(Locale.getDefault(), cfg.getLocale());
+        assertFalse(cfg.isLocaleExplicitlySet());
+
+        Locale nonDefault = Locale.getDefault().equals(Locale.GERMANY) ? Locale.FRANCE : Locale.GERMANY;
+        cfg.setLocale(nonDefault);
+        assertTrue(cfg.isLocaleExplicitlySet());
+        assertEquals(nonDefault, cfg.getLocale());
+
+        cfg.unsetLocale();
+        assertEquals(Locale.getDefault(), cfg.getLocale());
+        assertFalse(cfg.isLocaleExplicitlySet());
+
+        cfg.setSetting(Configuration.LOCALE_KEY, "JVM default");
+        assertEquals(Locale.getDefault(), cfg.getLocale());
+        assertTrue(cfg.isLocaleExplicitlySet());
+    }
+
+    public void testDefaultEncodingSetting() throws TemplateException, ConfigurationException {
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+
+        String defaultFileEncoding = System.getProperty("file.encoding");
+        assertNotNull(defaultFileEncoding);
+
+        assertEquals(defaultFileEncoding, cfg.getDefaultEncoding());
+        assertFalse(cfg.isDefaultEncodingExplicitlySet());
+
+        String nonDefault = defaultFileEncoding.equalsIgnoreCase("UTF-8") ? "ISO-8859-1" : "UTF-8";
+        cfg.setDefaultEncoding(nonDefault);
+        assertTrue(cfg.isDefaultEncodingExplicitlySet());
+        assertEquals(nonDefault, cfg.getDefaultEncoding());
+
+        cfg.unsetDefaultEncoding();
+        assertEquals(defaultFileEncoding, cfg.getDefaultEncoding());
+        assertFalse(cfg.isDefaultEncodingExplicitlySet());
+
+        cfg.setSetting(Configuration.DEFAULT_ENCODING_KEY, "JVM default");
+        assertEquals(defaultFileEncoding, cfg.getDefaultEncoding());
+        assertTrue(cfg.isDefaultEncodingExplicitlySet());
+    }
+
+    public void testTimeZoneSetting() throws TemplateException, ConfigurationException {
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+
+        assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
+        assertFalse(cfg.isTimeZoneExplicitlySet());
+
+        TimeZone nonDefault = TimeZone.getDefault().equals(_DateUtil.UTC) ? TimeZone.getTimeZone("PST") : _DateUtil.UTC;
+        cfg.setTimeZone(nonDefault);
+        assertTrue(cfg.isTimeZoneExplicitlySet());
+        assertEquals(nonDefault, cfg.getTimeZone());
+
+        cfg.unsetTimeZone();
+        assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
+        assertFalse(cfg.isTimeZoneExplicitlySet());
+
+        cfg.setSetting(Configuration.TIME_ZONE_KEY, "JVM default");
+        assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
+        assertTrue(cfg.isTimeZoneExplicitlySet());
+    }
+
     @Test
     public void testGetSettingNamesAreSorted() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);

@@ -28,7 +28,9 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.freemarker.core.Configuration;
@@ -60,11 +62,27 @@ public abstract class TemplateTest {
             try {
                 configuration = createConfiguration();
                 addCommonTemplates();
+                applyEnvironmentIndependentDefaults();
             } catch (Exception e) {
                 throw new RuntimeException("Failed to set up configuration for the test", e);
             }
         }
         return configuration;
+    }
+
+    /**
+     * Ensure that the configuration settings don't depend on the machine that runs the test.
+     */
+    private void applyEnvironmentIndependentDefaults() {
+        if (!configuration.isLocaleExplicitlySet()) {
+            configuration.setLocale(Locale.US);
+        }
+        if (!configuration.isDefaultEncodingExplicitlySet()) {
+            configuration.setDefaultEncoding(StandardCharsets.UTF_8.name());
+        }
+        if (!configuration.isTimeZoneExplicitlySet()) {
+            configuration.setTimeZone(TimeZone.getTimeZone("GMT+1"));
+        }
     }
 
     protected final void setConfiguration(Configuration configuration) {

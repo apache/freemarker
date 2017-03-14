@@ -91,9 +91,9 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 public class Configurable {
     static final String C_TRUE_FALSE = "true,false";
     
-    private static final String NULL = "null";
-    private static final String DEFAULT = "default";
-    private static final String JVM_DEFAULT = "JVM default";
+    static final String NULL = "null";
+    static final String DEFAULT = "default";
+    static final String JVM_DEFAULT = "JVM default";
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String LOCALE_KEY_SNAKE_CASE = "locale";
@@ -361,8 +361,8 @@ public class Configurable {
     protected Configurable(Version incompatibleImprovements) {
         _CoreAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         parent = null;
-        locale = Locale.getDefault();
-        timeZone = TimeZone.getDefault();
+        locale = Configuration.getDefaultLocale();
+        timeZone = Configuration.getDefaultTimeZone();
         sqlDataAndTimeTimeZone = null;
         numberFormat = "number";
         timeFormat = "";
@@ -1769,7 +1769,8 @@ public class Configurable {
      * <ul>
      *   <li><p>{@code "locale"}:
      *       See {@link #setLocale(Locale)}.
-     *       <br>String value: local codes with the usual format in Java, such as {@code "en_US"}.
+     *       <br>String value: local codes with the usual format in Java, such as {@code "en_US"}, or
+     *       "JVM default" (ignoring case) to use the default locale of the Java environment.
      *
      *   <li><p>{@code "custom_number_formats"}: See {@link #setCustomNumberFormats(Map)}.
      *   <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
@@ -1943,7 +1944,8 @@ public class Configurable {
      *       {@code "disable"} for {@link Configuration#DISABLE_AUTO_ESCAPING_POLICY}.
      *       
      *   <li><p>{@code "default_encoding"}:
-     *       See {@link Configuration#setDefaultEncoding(String)}.
+     *       See {@link Configuration#setDefaultEncoding(String)}; since 2.3.26 also accepts value "JVM default"
+     *       (not case sensitive) to set the Java environment default value.
      *       <br>As the default value is the system default, which can change
      *       from one server to another, <b>you should always set this!</b>
      *       
@@ -2136,7 +2138,11 @@ public class Configurable {
         boolean unknown = false;
         try {
             if (LOCALE_KEY.equals(name)) {
-                setLocale(_StringUtil.deduceLocale(value));
+                if (JVM_DEFAULT.equalsIgnoreCase(value)) {
+                    setLocale(Locale.getDefault());
+                } else {
+                    setLocale(_StringUtil.deduceLocale(value));
+                }
             } else if (NUMBER_FORMAT_KEY_SNAKE_CASE.equals(name) || NUMBER_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setNumberFormat(value);
             } else if (CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE.equals(name)

@@ -354,9 +354,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /** The default of {@link #getIncompatibleImprovements()}, currently {@link #VERSION_3_0_0}. */
     public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_3_0_0;
     
-    private static final String NULL = "null";
-    private static final String DEFAULT = "default";
-    
     private static final Version VERSION;
     static {
         try {
@@ -418,7 +415,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private boolean objectWrapperExplicitlySet;
     private boolean templateExceptionHandlerExplicitlySet;
     private boolean logTemplateExceptionsExplicitlySet;
-    
+    private boolean localeExplicitlySet;
+    private boolean defaultEncodingExplicitlySet;
+    private boolean timeZoneExplicitlySet;
+
     private HashMap/*<String, TemplateModel>*/ sharedVariables = new HashMap();
 
     /**
@@ -428,7 +428,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     private HashMap<String, Object> rewrappableSharedVariables = null;
     
-    private String defaultEncoding = _SecurityUtil.getSystemProperty("file.encoding", "utf-8");
+    private String defaultEncoding = getDefaultDefaultEncoding();
     private ConcurrentMap localeToCharsetMap = new ConcurrentHashMap();
     
     /**
@@ -489,11 +489,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         
         createTemplateResolver();
         loadBuiltInSharedVariables();
-    }
-
-    @Override
-    public void setTimeZone(TimeZone timeZone) {
-        super.setTimeZone(timeZone);
     }
 
     private void createTemplateResolver() {
@@ -1123,7 +1118,71 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public boolean isObjectWrapperExplicitlySet() {
         return objectWrapperExplicitlySet;
     }
-    
+
+    @Override
+    public void setLocale(Locale locale) {
+        super.setLocale(locale);
+        localeExplicitlySet = true;
+    }
+
+    /**
+     * Resets the setting to its default, as if it was never set.
+     *
+     * @since 2.3.26
+     */
+    public void unsetLocale() {
+        if (localeExplicitlySet) {
+            setLocale(getDefaultLocale());
+            localeExplicitlySet = false;
+        }
+    }
+
+    /**
+     * Tells if {@link #setLocale(Locale)} (or equivalent) was already called on this instance, or it just holds the
+     * default value.
+     *
+     * @since 2.3.26
+     */
+    public boolean isLocaleExplicitlySet() {
+        return localeExplicitlySet;
+    }
+
+    static Locale getDefaultLocale() {
+        return Locale.getDefault();
+    }
+
+    @Override
+    public void setTimeZone(TimeZone timeZone) {
+        super.setTimeZone(timeZone);
+        timeZoneExplicitlySet = true;
+    }
+
+    /**
+     * Resets the setting to its default, as if it was never set.
+     *
+     * @since 2.3.26
+     */
+    public void unsetTimeZone() {
+        if (timeZoneExplicitlySet) {
+            setTimeZone(getDefaultTimeZone());
+            timeZoneExplicitlySet = false;
+        }
+    }
+
+    /**
+     * Tells if {@link #setTimeZone(TimeZone)} (or equivalent) was already called on this instance, or it just holds the
+     * default value.
+     *
+     * @since 2.3.26
+     */
+    public boolean isTimeZoneExplicitlySet() {
+        return timeZoneExplicitlySet;
+    }
+
+    static TimeZone getDefaultTimeZone() {
+        return TimeZone.getDefault();
+    }
+
     @Override
     public void setTemplateExceptionHandler(TemplateExceptionHandler templateExceptionHandler) {
         super.setTemplateExceptionHandler(templateExceptionHandler);
@@ -2056,6 +2115,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     public void setDefaultEncoding(String encoding) {
         defaultEncoding = encoding;
+        defaultEncodingExplicitlySet = true;
     }
 
     /**
@@ -2065,6 +2125,36 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     public String getDefaultEncoding() {
         return defaultEncoding;
+    }
+
+    /**
+     * Resets the setting to its default, as if it was never set.
+     *
+     * @since 2.3.26
+     */
+    public void unsetDefaultEncoding() {
+        if (defaultEncodingExplicitlySet) {
+            setDefaultEncoding(getDefaultDefaultEncoding());
+            defaultEncodingExplicitlySet = false;
+        }
+    }
+
+    /**
+     * Tells if {@link #setDefaultEncoding(String)} (or equivalent) was already called on this instance, or it just holds the
+     * default value.
+     *
+     * @since 2.3.26
+     */
+    public boolean isDefaultEncodingExplicitlySet() {
+        return defaultEncodingExplicitlySet;
+    }
+
+    static private String getDefaultDefaultEncoding() {
+        return getJVMDefaultEncoding();
+    }
+
+    static private String getJVMDefaultEncoding() {
+        return _SecurityUtil.getSystemProperty("file.encoding", "utf-8");
     }
 
     /**
@@ -2366,7 +2456,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             }
             
             if (DEFAULT_ENCODING_KEY_SNAKE_CASE.equals(name) || DEFAULT_ENCODING_KEY_CAMEL_CASE.equals(name)) {
-                setDefaultEncoding(value);
+                if (JVM_DEFAULT.equalsIgnoreCase(value)) {
+                    setDefaultEncoding(getJVMDefaultEncoding());
+                } else {
+                    setDefaultEncoding(value);
+                }
             } else if (LOCALIZED_LOOKUP_KEY_SNAKE_CASE.equals(name) || LOCALIZED_LOOKUP_KEY_CAMEL_CASE.equals(name)) {
                 setLocalizedLookup(_StringUtil.getYesNo(value));
             } else if (WHITESPACE_STRIPPING_KEY_SNAKE_CASE.equals(name)
