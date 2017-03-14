@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Test;
@@ -49,7 +50,9 @@ public class CustomFormatsExample extends ExamplesTest {
 
         Map<String, TemplateDateFormatFactory> customDateFormats
                 = new HashMap<String, TemplateDateFormatFactory>();
-        customDateFormats.put("fileDate", new AliasTemplateDateFormatFactory("dd/MMM/yy hh:mm a"));
+        Map<Locale, String> m=new HashMap<Locale,String>();
+        m.put(Locale.US, "dd/MMM/yy hh:mm a");
+        customDateFormats.put("fileDate", new AliasTemplateDateFormatFactory("dd/MMM/yy hh:mm a",m));
         customDateFormats.put("logEventTime", new AliasTemplateDateFormatFactory("iso ms u"));
         cfg.setCustomDateFormats(customDateFormats);
 

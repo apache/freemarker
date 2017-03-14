@@ -24,6 +24,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.util.Locale;
 
@@ -41,7 +42,7 @@ public class ExtendedDecimalFormatTest extends TemplateTest {
     public void testNonExtended() throws ParseException {
         for (String fStr : new String[] { "0.00", "0.###", "#,#0.###", "#0.####", "0.0;m", "0.0;",
                 "0'x'", "0'x';'m'", "0';'", "0';';m", "0';';'#'m';'", "0';;'", "" }) {
-            assertFormatsEquivalent(new DecimalFormat(fStr), ExtendedDecimalFormatParser.parse(fStr, LOC));
+            assertFormatsEquivalent(new DecimalFormat(fStr,DecimalFormatSymbols.getInstance(LOC)), ExtendedDecimalFormatParser.parse(fStr, LOC));
         }
         
         try {
@@ -59,17 +60,18 @@ public class ExtendedDecimalFormatTest extends TemplateTest {
 
     @Test
     public void testNonExtended2() throws ParseException {
-        assertFormatsEquivalent(new DecimalFormat("0.0"), ExtendedDecimalFormatParser.parse("0.0;", LOC));
-        assertFormatsEquivalent(new DecimalFormat("0.0"), ExtendedDecimalFormatParser.parse("0.0;;", LOC));
-        assertFormatsEquivalent(new DecimalFormat("0.0;m"), ExtendedDecimalFormatParser.parse("0.0;m;", LOC));
-        assertFormatsEquivalent(new DecimalFormat(""), ExtendedDecimalFormatParser.parse(";;", LOC));
-        assertFormatsEquivalent(new DecimalFormat("0'x'"), ExtendedDecimalFormatParser.parse("0'x';;", LOC));
-        assertFormatsEquivalent(new DecimalFormat("0'x';'m'"), ExtendedDecimalFormatParser.parse("0'x';'m';", LOC));
-        assertFormatsEquivalent(new DecimalFormat("0';'"), ExtendedDecimalFormatParser.parse("0';';;", LOC));
-        assertFormatsEquivalent(new DecimalFormat("0';';m"), ExtendedDecimalFormatParser.parse("0';';m;", LOC));
-        assertFormatsEquivalent(new DecimalFormat("0';';'#'m';'"), ExtendedDecimalFormatParser.parse("0';';'#'m';';",
+        DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance(LOC);
+        assertFormatsEquivalent(new DecimalFormat("0.0", symbols), ExtendedDecimalFormatParser.parse("0.0;", LOC));
+        assertFormatsEquivalent(new DecimalFormat("0.0", symbols), ExtendedDecimalFormatParser.parse("0.0;;", LOC));
+        assertFormatsEquivalent(new DecimalFormat("0.0;m", symbols), ExtendedDecimalFormatParser.parse("0.0;m;", LOC));
+        assertFormatsEquivalent(new DecimalFormat("", symbols), ExtendedDecimalFormatParser.parse(";;", LOC));
+        assertFormatsEquivalent(new DecimalFormat("0'x'", symbols), ExtendedDecimalFormatParser.parse("0'x';;", LOC));
+        assertFormatsEquivalent(new DecimalFormat("0'x';'m'", symbols), ExtendedDecimalFormatParser.parse("0'x';'m';", LOC));
+        assertFormatsEquivalent(new DecimalFormat("0';'", symbols), ExtendedDecimalFormatParser.parse("0';';;", LOC));
+        assertFormatsEquivalent(new DecimalFormat("0';';m", symbols), ExtendedDecimalFormatParser.parse("0';';m;", LOC));
+        assertFormatsEquivalent(new DecimalFormat("0';';'#'m';'", symbols), ExtendedDecimalFormatParser.parse("0';';'#'m';';",
                 LOC));
-        assertFormatsEquivalent(new DecimalFormat("0';;'"), ExtendedDecimalFormatParser.parse("0';;';;", LOC));
+        assertFormatsEquivalent(new DecimalFormat("0';;'", symbols), ExtendedDecimalFormatParser.parse("0';;';;", LOC));
         
         try {
             new DecimalFormat(";m");

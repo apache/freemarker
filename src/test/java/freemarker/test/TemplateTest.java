@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
@@ -132,7 +133,9 @@ public abstract class TemplateTest {
     }
     
     protected Configuration createConfiguration() throws Exception {
-        return new Configuration(Configuration.VERSION_2_3_0);
+        Configuration c=new Configuration(Configuration.VERSION_2_3_0);
+        c.setLocale(Locale.US);
+        return c;
     }
     
     protected void addCommonTemplates() {
