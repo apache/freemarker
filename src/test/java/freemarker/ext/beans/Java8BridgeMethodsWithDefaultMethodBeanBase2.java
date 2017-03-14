@@ -18,11 +18,11 @@
  */
 package freemarker.ext.beans;
 
-public interface BridgeMethodsWithDefaultMethodBeanBase2 extends BridgeMethodsWithDefaultMethodBeanBase<String> {
+public interface Java8BridgeMethodsWithDefaultMethodBeanBase2 extends Java8BridgeMethodsWithDefaultMethodBeanBase<String> {
 
     @Override
     default String m1() {
-        return BridgeMethodsWithDefaultMethodBean.M1_RETURN_VALUE;
+        return Java8BridgeMethodsWithDefaultMethodBean.M1_RETURN_VALUE;
     }
     
 }

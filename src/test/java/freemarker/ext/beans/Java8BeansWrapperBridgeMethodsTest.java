@@ -29,7 +29,7 @@ import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModelException;
 
-public class BeansWrapperBridgeMethodsTest {
+public class Java8BeansWrapperBridgeMethodsTest {
     
     @Test
     public void testWithoutDefaultMethod() throws TemplateModelException {
@@ -38,12 +38,12 @@ public class BeansWrapperBridgeMethodsTest {
 
     @Test
     public void testWithDefaultMethod() throws TemplateModelException {
-        test(BridgeMethodsWithDefaultMethodBean.class);
+        test(Java8BridgeMethodsWithDefaultMethodBean.class);
     }
 
     @Test
     public void testWithDefaultMethod2() throws TemplateModelException {
-        test(BridgeMethodsWithDefaultMethodBean2.class);
+        test(Java8BridgeMethodsWithDefaultMethodBean2.class);
     }
 
     private void test(Class<?> pClass) throws TemplateModelException {

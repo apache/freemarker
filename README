@@ -200,6 +200,8 @@ apply it to your development environment:
    - Press "Finish"
 - Eclipse will indicate many errors at this point; it's expected, read on.
 - Project -> Properties -> Java Compiler
+  - Set "Compiler Compliance Level" to "1.5" (you will have to uncheck
+    "Use compliance from execution environment" for that)
   - In Errors/Warnings, check in "Enable project specific settings", then set
     "Forbidden reference (access rules)" from "Error" to "Warning".
 - You will still have errors on these java files (because different java
@@ -210,6 +212,7 @@ apply it to your development environment:
     _Jython22*.java
     _FreeMarkerPageContext2.java
     FreeMarkerJspFactory2.java
+    Java8*.java
   Also, close these files if they are open. Now you shouldn't have any errors.
 - At Project -> Properties -> Java Code Style -> Formatter, check in "Enable
   project specific settings", and then select "FreeMarker" as active profile.

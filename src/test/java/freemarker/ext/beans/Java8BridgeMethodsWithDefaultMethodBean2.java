@@ -18,14 +18,6 @@
  */
 package freemarker.ext.beans;
 
-public interface BridgeMethodsWithDefaultMethodBeanBase<T> {
-
-    default T m1() {
-        return null;
-    }
-    
-    default T m2() {
-        return null;
-    }
-    
+public class Java8BridgeMethodsWithDefaultMethodBean2 implements Java8BridgeMethodsWithDefaultMethodBeanBase2 {
+    // All inherited
 }
