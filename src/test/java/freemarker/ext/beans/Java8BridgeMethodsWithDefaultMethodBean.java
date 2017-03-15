@@ -18,6 +18,12 @@
  */
 package freemarker.ext.beans;
 
-public class BridgeMethodsWithDefaultMethodBean2 implements BridgeMethodsWithDefaultMethodBeanBase2 {
-    // All inherited
+public class Java8BridgeMethodsWithDefaultMethodBean implements Java8BridgeMethodsWithDefaultMethodBeanBase<String> {
+
+    static final String M1_RETURN_VALUE = "m1ReturnValue"; 
+    
+    public String m1() {
+        return M1_RETURN_VALUE;
+    }
+
 }

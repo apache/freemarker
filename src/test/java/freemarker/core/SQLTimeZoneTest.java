@@ -135,6 +135,7 @@ public class SQLTimeZoneTest extends TemplateTest {
         TimeZone.setDefault(GMT_P02);
         try {
             Configuration cfg = getConfiguration();
+            cfg.unsetTimeZone();
             assertNull(cfg.getSQLDateAndTimeTimeZone());
             assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
             
@@ -150,6 +151,7 @@ public class SQLTimeZoneTest extends TemplateTest {
         TimeZone.setDefault(GMT_P02);
         try {
             Configuration cfg = getConfiguration();
+            cfg.unsetTimeZone();
             cfg.setSQLDateAndTimeTimeZone(GMT_P02);
             
             assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_DIFFERENT);

@@ -32,7 +32,7 @@ import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
 
-public class BeansWrapperJava8Test {
+public class Java8BeansWrapperTest {
 
     @Test
     public void testDefaultMethodNotRecognized() throws TemplateModelException {

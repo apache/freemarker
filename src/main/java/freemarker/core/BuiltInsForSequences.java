@@ -698,7 +698,7 @@ class BuiltInsForSequences {
                     if (key == null) {
                         throw new _TemplateModelException(
                                 startErrorMessage(keyNamesLn, i),
-                                "The " + StringUtil.jQuote(keyNames[keyNameI]), " subvariable was not found.");
+                                "The " + StringUtil.jQuote(keyNames[keyNameI]), " subvariable was null or missing.");
                     }
                 } // for each key
                 

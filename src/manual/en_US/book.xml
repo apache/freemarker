@@ -1406,6 +1406,15 @@ brown</programlisting>
 
           <para>The data-model itself (or better said the root of it) is a
           hash.</para>
+
+          <para>FreeMarker templates don't support modifying the contents of
+          containers (such as adding, removing or replacing sub variables),
+          and it assumes that their content won't change during template
+          processing. (But you can make new container values by adding
+          together two existing container values with <literal>+</literal>;
+          see that in the <link linkend="exp_cheatsheet">chapter about
+          expressions</link>, and please note the performance
+          consequences.)</para>
         </section>
 
         <section>
@@ -3079,11 +3088,12 @@ CDEF</programlisting>
             repeated concatenations, like for appending items to a sequence
             inside a loop. It's just for things like <literal>&lt;#list users
             + admins as person&gt;</literal>. Although concatenating sequences
-            is fast and its speed is independently of the size of the
-            concatenated sequences, the resulting sequence will be always a
-            little bit slower to read than the original two sequences were.
-            This way the result of many repeated concatenations is a sequence
-            that is slow to read.</para>
+            is fast and is constant time (it's speed is independently of the
+            size of the concatenated sequences), the resulting sequence will
+            be always a little bit slower to read than the original two
+            sequences were. Thus, after tens or hundreds of repeated
+            concatenations the result can be impractically slow to
+            reader.</para>
           </section>
 
           <section xml:id="dgui_template_exp_seqenceop_slice">
@@ -3232,9 +3242,11 @@ Slicing with right-unlimited ranges:
 
             <para>Note that hash concatenation is not to be used for many
             repeated concatenations, like for adding items to a hash inside a
-            loop. It's the same as with the <link
-            linkend="dgui_template_exp_sequenceop_cat">sequence
-            concatenation</link>.</para>
+            loop. While adding together hashes is fast and is constant time
+            (independent of the size of the hashes added), the resulting hash
+            is a bit slower to read than the hashes added together. Thus after
+            tens or hundreds of additions the result can be impractically slow
+            to read.</para>
           </section>
         </section>
 
@@ -18622,8 +18634,17 @@ or
               string literal does not expand interpolations (as
               <literal>"${foo}"</literal>); if you need to assign to a
               dynamically constructed name, the you have to use <link
-              linkend="faq_assign_to_dynamic_variable_name">this
-              trick</link>.</para>
+              linkend="faq_assign_to_dynamic_variable_name">a different
+              trick</link>. Note that because the FreeMarker template language
+              assumes that sequences (lists, arrays, etc.) and hashes (maps,
+              beans, etc.) are immutable, you can <emphasis>not</emphasis>
+              write something like <literal>&lt;#assign myObj.someProperty =
+              'will NOT work'&gt;</literal> or <literal>&lt;#assign myList[0]
+              = 'will NOT work'&gt;</literal>. However, adding sequences or
+              hashes with the <literal>+</literal> operator to form another
+              value is supported; see in the <link
+              linkend="exp_cheatsheet">chapter about expressions</link>, and
+              please note the performance consequences.</para>
             </listitem>
 
             <listitem>
@@ -26862,8 +26883,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>Configuration</literal> on its default, it's enough to
               increase the <literal>incompatibleImprovements</literal> setting
               of the <literal>Configuration</literal> to 2.3.26, as that's
-              inherited by the default <literal>object_wrapper</literal>.
-              </para>
+              inherited by the default
+              <literal>object_wrapper</literal>.</para>
             </listitem>
 
             <listitem>
@@ -26892,6 +26913,31 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               of an XML DOM node. (Now it's not issued by the XPath
               implementation, which just sees it as a syntactical
               error.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>Configuration.is<replaceable>Xxx</replaceable>ExplictlySet</literal>
+              and
+              <literal>Configuration.unset<replaceable>Xxx</replaceable></literal>
+              methods for the Configuration settings:
+              <literal>locale</literal>, <literal>time_zone</literal>,
+              <literal>default_encoding</literal>. (This can be utilized in
+              frameworks to detect if the application has missed setting
+              these. The backward compatible default values are often
+              unwanted, as they are the default locale, time zone and file
+              encoding of the Java environment.)</para>
+            </listitem>
+
+            <listitem>
+              <para>The <literal>locale</literal> and
+              <literal>default_encoding</literal> configuration settings now
+              supports the special <literal>"JVM default"</literal> value when
+              set from Java <literal>.properties</literal> file, or via
+              <literal>Configuration.setSettings(Properties)</literal>, or via
+              the <literal>#setting</literal> directive. Earlier only the
+              <literal>time_zone</literal> setting has supported this
+              value.</para>
             </listitem>
 
             <listitem>

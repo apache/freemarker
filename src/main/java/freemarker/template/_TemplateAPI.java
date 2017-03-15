@@ -19,7 +19,9 @@
 
 package freemarker.template;
 
+import java.util.Locale;
 import java.util.Set;
+import java.util.TimeZone;
 
 import freemarker.cache.CacheStorage;
 import freemarker.cache.TemplateLoader;
@@ -148,6 +150,14 @@ public class _TemplateAPI {
     
     public static Expression getBlamedExpression(TemplateException e) {
         return e.getBlamedExpression();
+    }
+    
+    public static Locale getDefaultLocale() {
+        return Configuration.getDefaultLocale();
+    }
+    
+    public static TimeZone getDefaultTimeZone() {
+        return Configuration.getDefaultTimeZone();
     }
     
 }

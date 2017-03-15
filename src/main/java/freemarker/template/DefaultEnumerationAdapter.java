@@ -56,17 +56,14 @@ public class DefaultEnumerationAdapter extends WrappingTemplateModel implements 
         this.enumeration = enumeration;
     }
 
-    @Override
     public Object getWrappedObject() {
         return enumeration;
     }
 
-    @Override
     public Object getAdaptedObject(Class<?> hint) {
         return getWrappedObject();
     }
 
-    @Override
     public TemplateModelIterator iterator() throws TemplateModelException {
         return new SimpleTemplateModelIterator();
     }
@@ -82,7 +79,6 @@ public class DefaultEnumerationAdapter extends WrappingTemplateModel implements 
 
         private boolean enumerationOwnedByMe;
 
-        @Override
         public TemplateModel next() throws TemplateModelException {
             if (!enumerationOwnedByMe) {
                 checkNotOwner();
@@ -98,7 +94,6 @@ public class DefaultEnumerationAdapter extends WrappingTemplateModel implements 
             return value instanceof TemplateModel ? (TemplateModel) value : wrap(value);
         }
 
-        @Override
         public boolean hasNext() throws TemplateModelException {
             // Calling hasNext may looks safe, but I have met sync. problems.
             if (!enumerationOwnedByMe) {

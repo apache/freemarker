@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -424,6 +425,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     private static final String NULL = "null";
     private static final String DEFAULT = "default";
+    private static final String JVM_DEFAULT = "JVM default";
     
     private static final Version VERSION;
     static {
@@ -509,6 +511,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private boolean objectWrapperExplicitlySet;
     private boolean templateExceptionHandlerExplicitlySet;
     private boolean logTemplateExceptionsExplicitlySet;
+    private boolean localeExplicitlySet;
+    private boolean defaultEncodingExplicitlySet;
+    private boolean timeZoneExplicitlySet;
+
     
     private HashMap/*<String, TemplateModel>*/ sharedVariables = new HashMap();
 
@@ -519,7 +525,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     private HashMap/*<String, Object>*/ rewrappableSharedVariables = null;
     
-    private String defaultEncoding = SecurityUtilities.getSystemProperty("file.encoding", "utf-8");
+    private String defaultEncoding = getDefaultDefaultEncoding();
     private ConcurrentMap localeToCharsetMap = new ConcurrentHashMap();
     
     /**
@@ -1606,6 +1612,70 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     @Override
+    public void setLocale(Locale locale) {
+        super.setLocale(locale);
+        localeExplicitlySet = true;
+    }
+    
+    /**
+     * Resets the setting to its default, as if it was never set.
+     * 
+     * @since 2.3.26
+     */
+    public void unsetLocale() {
+        if (localeExplicitlySet) {
+            setLocale(getDefaultLocale());
+            localeExplicitlySet = false;
+        }
+    }
+    
+    /**
+     * Tells if {@link #setLocale(Locale)} (or equivalent) was already called on this instance, or it just holds the
+     * default value.
+     * 
+     * @since 2.3.26
+     */
+    public boolean isLocaleExplicitlySet() {
+        return localeExplicitlySet;
+    }
+    
+    static Locale getDefaultLocale() {
+        return Locale.getDefault();
+    }
+    
+    @Override
+    public void setTimeZone(TimeZone timeZone) {
+        super.setTimeZone(timeZone);
+        timeZoneExplicitlySet = true;
+    }
+    
+    /**
+     * Resets the setting to its default, as if it was never set.
+     * 
+     * @since 2.3.26
+     */
+    public void unsetTimeZone() {
+        if (timeZoneExplicitlySet) {
+            setTimeZone(getDefaultTimeZone());
+            timeZoneExplicitlySet = false;
+        }
+    }
+    
+    /**
+     * Tells if {@link #setTimeZone(TimeZone)} (or equivalent) was already called on this instance, or it just holds the
+     * default value.
+     * 
+     * @since 2.3.26
+     */
+    public boolean isTimeZoneExplicitlySet() {
+        return timeZoneExplicitlySet;
+    }
+    
+    static TimeZone getDefaultTimeZone() {
+        return TimeZone.getDefault();
+    }
+    
+    @Override
     public void setTemplateExceptionHandler(TemplateExceptionHandler templateExceptionHandler) {
         super.setTemplateExceptionHandler(templateExceptionHandler);
         templateExceptionHandlerExplicitlySet = true;
@@ -2534,6 +2604,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     public void setDefaultEncoding(String encoding) {
         defaultEncoding = encoding;
+        defaultEncodingExplicitlySet = true;
     }
 
     /**
@@ -2544,7 +2615,37 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public String getDefaultEncoding() {
         return defaultEncoding;
     }
+    
+    /**
+     * Resets the setting to its default, as if it was never set.
+     * 
+     * @since 2.3.26
+     */
+    public void unsetDefaultEncoding() {
+        if (defaultEncodingExplicitlySet) {
+            setDefaultEncoding(getDefaultDefaultEncoding());
+            defaultEncodingExplicitlySet = false;
+        }
+    }
+    
+    /**
+     * Tells if {@link #setDefaultEncoding(String)} (or equivalent) was already called on this instance, or it just holds the
+     * default value.
+     * 
+     * @since 2.3.26
+     */
+    public boolean isDefaultEncodingExplicitlySet() {
+        return defaultEncodingExplicitlySet;
+    }
+    
+    static private String getDefaultDefaultEncoding() {
+        return getJVMDefaultEncoding();
+    }
 
+    static private String getJVMDefaultEncoding() {
+        return SecurityUtilities.getSystemProperty("file.encoding", "utf-8");
+    }
+    
     /**
      * Gets the preferred character encoding for the given locale, or the 
      * default encoding if no encoding is set explicitly for the specified
@@ -2845,7 +2946,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             }
             
             if (DEFAULT_ENCODING_KEY_SNAKE_CASE.equals(name) || DEFAULT_ENCODING_KEY_CAMEL_CASE.equals(name)) {
-                setDefaultEncoding(value);
+                if (JVM_DEFAULT.equalsIgnoreCase(value)) {
+                    setDefaultEncoding(getJVMDefaultEncoding()); 
+                } else {
+                    setDefaultEncoding(value);
+                }
             } else if (LOCALIZED_LOOKUP_KEY_SNAKE_CASE.equals(name) || LOCALIZED_LOOKUP_KEY_CAMEL_CASE.equals(name)) {
                 setLocalizedLookup(StringUtil.getYesNo(value));
             } else if (STRICT_SYNTAX_KEY_SNAKE_CASE.equals(name) || STRICT_SYNTAX_KEY_CAMEL_CASE.equals(name)) {
