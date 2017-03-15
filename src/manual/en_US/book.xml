@@ -27048,6 +27048,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para><literal>BeansWrapperConfiguration.classIntrospectorFactory</literal>
+              is no more protected field, but private. Especially as the class
+              of this field (<literal>ClassIntrospectorBuilder</literal>) was
+              package private, it's pretty much sure that nobody depends on
+              this field.</para>
+            </listitem>
+
+            <listitem>
               <para>Various smaller code cleanups.</para>
             </listitem>
           </itemizedlist>

@@ -42,7 +42,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
 
     private final Version incompatibleImprovements;
     
-    protected ClassIntrospectorBuilder classIntrospectorBuilder;
+    private ClassIntrospectorBuilder classIntrospectorBuilder;
     
     // Properties and their *defaults*:
     private boolean simpleMapWrapper = false;
@@ -238,6 +238,10 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
 
     void setMethodSorter(MethodSorter methodSorter) {
         classIntrospectorBuilder.setMethodSorter(methodSorter);
+    }
+
+    ClassIntrospectorBuilder getClassIntrospectorBuilder() {
+        return classIntrospectorBuilder;
     }
  
 }
