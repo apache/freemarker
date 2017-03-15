@@ -26941,6 +26941,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fixed: The OSGi
+              <literal>Bundle-RequiredExecutionEnvironment</literal> entry in
+              <literal>META-INF/MANIFEST.MF</literal> has incorrectly stated
+              that the minimum required version is
+              <literal>J2SE-1.4</literal>, while it's in fact
+              <literal>J2SE-1.5</literal>. Also the highest utilized version
+              was raised to <literal>JavaSE-1.8</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed: If <link
               linkend="pgui_config_incompatible_improvements_how_to_set">the
               <literal>incompatible_improvements</literal> setting</link> is
