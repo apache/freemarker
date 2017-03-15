@@ -542,7 +542,7 @@
   </target>
   
   <target name="_dist"
-    depends="jar, javadoc, manualOffline"
+    depends="jar, test, javadoc, manualOffline"
   >
     <delete dir="${dist.dir}" />
 

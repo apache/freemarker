@@ -35,7 +35,7 @@ public abstract class DefaultObjectWrapperConfiguration implements Cloneable {
 
     private final Version incompatibleImprovements;
 
-    protected ClassIntrospectorBuilder classIntrospectorBuilder;
+    ClassIntrospectorBuilder classIntrospectorBuilder;
 
     // Properties and their *defaults*:
     private boolean simpleMapWrapper = false;
