@@ -26813,7 +26813,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_26">
         <title>2.3.26 (incubating at Apache)</title>
 
-        <para>Release date: 2017-FIXME</para>
+        <para>Release date: 2017-03-15 + release process delay</para>
 
         <para><emphasis role="bold">This is a stable, final
         release.</emphasis> The <quote>incubating</quote> suffix is required
@@ -26824,19 +26824,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the FTL side</title>
 
           <itemizedlist>
-            <listitem>
-              <para>Bug fixed (<link
-              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-42">FREEMARKER-42</link>):
-              <literal>?first</literal> now works with FTL collections (things
-              that can be listed but doesn't support getting items by index),
-              not only with sequences. The practical importance of this is
-              that <literal>?first</literal> now always works on Java
-              <literal>Set</literal>-s (which is useful for
-              <literal>Set</literal>-s with well defined ordering), while
-              earlier it has failed depending on the
-              <literal>object_wrapper</literal> configuration setting.</para>
-            </listitem>
-
             <listitem>
               <para>Added
               <literal><replaceable>node</replaceable>?next_sibling</literal>
@@ -26857,6 +26844,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               instruction between them. (See more about <literal>@@</literal>
               keys <link
               linkend="xgui_imperative_formal">here...</link>)</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-42">FREEMARKER-42</link>):
+              <literal>?first</literal> now works with FTL collections (things
+              that can be listed but doesn't support getting items by index),
+              not only with sequences. The practical importance of this is
+              that <literal>?first</literal> now always works on Java
+              <literal>Set</literal>-s (which is useful for
+              <literal>Set</literal>-s with well defined ordering), while
+              earlier it has failed depending on the
+              <literal>object_wrapper</literal> configuration setting.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -27059,10 +27059,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para><literal>BeansWrapperConfiguration.classIntrospectorFactory</literal>
-              is no more protected field, but private. Especially as the class
-              of this field (<literal>ClassIntrospectorBuilder</literal>) was
-              package private, it's pretty much sure that nobody depends on
-              this field.</para>
+              is not a protected field anymore, but a private one. Especially
+              as the class of that field
+              (<literal>ClassIntrospectorBuilder</literal>) was package
+              private, it's pretty much sure that nobody depends on this
+              field.</para>
             </listitem>
 
             <listitem>
