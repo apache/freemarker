@@ -49,10 +49,10 @@ Import-Package: !org.apache.freemarker.*, *;resolution:="optional"
 # This is needed for "a.class.from.another.Bundle"?new() to work.
 DynamicImport-Package: *
 
-# The required minimum is 1.4, but we utilize 1.5 if available.
+# The required minimum is 1.7, but we utilize 1.8 if available.
 # See also: http://wiki.eclipse.org/Execution_Environments, "Compiling
 # against more than is required"
-Bundle-RequiredExecutionEnvironment: J2SE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8, JavaSE-1.7
 
 # Non-OSGi meta:
 Extension-name: Apache FreeMarker

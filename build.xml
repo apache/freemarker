@@ -294,7 +294,7 @@
       />
     </copy>
     <copy toDir="build/classes/META-INF">
-      <fileset dir="." includes="LICENSE, DISCLAIMER" />
+      <fileset dir="." includes="DISCLAIMER" />
     </copy>
     <copy toDir="build/classes/META-INF">
       <fileset dir="src/dist/jar/META-INF" includes="*" />
