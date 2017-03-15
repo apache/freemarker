@@ -342,11 +342,12 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             // but we need to use the same sharedInrospectionLock forever, because that's what the model factories
             // synchronize on, even during the classIntrospector is being replaced.
             sharedIntrospectionLock = new Object();
-            classIntrospector = new ClassIntrospector(bwConf.classIntrospectorBuilder, sharedIntrospectionLock);
+            classIntrospector = new ClassIntrospector(
+                    _BeansAPI.getClassIntrospectorBuilder(bwConf), sharedIntrospectionLock);
         } else {
             // As this is a read-only BeansWrapper, the classIntrospector is never replaced, and since it's shared by
             // other BeansWrapper instances, we use the lock belonging to the shared ClassIntrospector.
-            classIntrospector = bwConf.classIntrospectorBuilder.build();
+            classIntrospector = _BeansAPI.getClassIntrospectorBuilder(bwConf).build();
             sharedIntrospectionLock = classIntrospector.getSharedLock(); 
         }
         

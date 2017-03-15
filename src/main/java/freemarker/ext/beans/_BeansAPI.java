@@ -223,4 +223,8 @@ public class _BeansAPI {
         BW create(BWC sa);
     }
     
+    public static ClassIntrospectorBuilder getClassIntrospectorBuilder(BeansWrapperConfiguration bwc) {
+        return bwc.getClassIntrospectorBuilder();
+    }
+    
 }
