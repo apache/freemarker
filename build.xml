@@ -367,13 +367,6 @@
       verify="yes" stubversion="1.2"
     />
     
-    <!-- We don't have this file in 2.4.X... yet?
-    <copy
-      file="build/classes/freemarker/core/SecureRendererImpl.class"
-      tofile="build/classes/freemarker/core/SecureRendererImpl.clazz"
-    />
-    -->
-    
     <copy toDir="build/classes">
       <fileset dir="src/main/resources"
         excludes="
@@ -387,12 +380,11 @@
       />
     </copy>
     <copy toDir="build/classes/META-INF">
-      <fileset dir="." includes="LICENSE, DISCLAIMER" />
+      <fileset dir="." includes="DISCLAIMER" />
     </copy>
     <copy toDir="build/classes/META-INF">
       <fileset dir="src/dist/jar/META-INF" includes="*" />
     </copy>
-    
     <delete dir="build/src-main-java-filtered" />
   </target>
 
