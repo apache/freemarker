@@ -16,30 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.apache.freemarker.core.model.impl;
 
-import java.beans.MethodDescriptor;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+public class Java8BridgeMethodsWithDefaultMethodBean implements Java8BridgeMethodsWithDefaultMethodBeanBase<String> {
 
-class AlphabeticalMethodSorter implements MethodSorter {
-
-    private final boolean desc;
+    static final String M1_RETURN_VALUE = "m1ReturnValue"; 
     
-    public AlphabeticalMethodSorter(boolean desc) {
-        this.desc = desc;
+    public String m1() {
+        return M1_RETURN_VALUE;
     }
 
-    @Override
-    public void sortMethodDescriptors(List<MethodDescriptor> methodDescriptors) {
-        Collections.sort(methodDescriptors, new Comparator<MethodDescriptor>() {
-            public int compare(MethodDescriptor o1, MethodDescriptor o2) {
-                int res = o1.getMethod().toString().compareTo(o2.getMethod().toString());
-                return desc ? -res : res;
-            }
-        });
-    }
-    
 }

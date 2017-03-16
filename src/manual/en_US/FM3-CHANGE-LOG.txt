@@ -144,3 +144,10 @@ the FreeMarer 3 changelog here:
   - <#comment>...</#comment> (deprecated by <#-- ... -->)
   - <#transform ...>...</#transform> (deprecated by <@...>...</@...>)
   - <#foreach x in xs>...</#foreach> (deprecated by <#list xs as x>...</#list>)
+- If for an indexed JavaBean property there's both an indexed read method (like `Foo getFoo(int index)`) and a normal read method
+  (like Foo[] getFoo()), we prefer the normal read method, and so the result will be a clean FTL sequence (not a multi-type value
+  with sequence+method type). If there's only an indexed read method, then we don't expose the property anymore, but the indexed
+  read method can still be called as an usual method (as `myObj.getFoo(index)`). These changes were made because building on the
+  indexed read method we can't create a proper sequence (which the value of the property should be), since sequences are required
+  to support returning their size. (In FreeMarker 2 such sequences has thrown exception on calling size(), which caused more
+  problems and confusion than it solved.)

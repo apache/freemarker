@@ -290,4 +290,30 @@ public final class _MethodUtil {
                 "; see cause exception in the Java stack trace.");
     }
 
+    /**
+     * Extracts the JavaBeans property from a reader method name, or returns {@code null} if the method name doesn't
+     * look like a reader method name.
+     */
+    public static String getBeanPropertyNameFromReaderMethodName(String name, Class<?> returnType) {
+        int start;
+        if (name.startsWith("get")) {
+            start = 3;
+        } else if (returnType == boolean.class && name.startsWith("is")) {
+            start = 2;
+        } else {
+            return null;
+        }
+        int ln = name.length();
+
+        if (start == ln) {
+            return null;
+        }
+        char c1 = name.charAt(start);
+
+        return start + 1 < ln && Character.isUpperCase(name.charAt(start + 1)) && Character.isUpperCase(c1)
+                ? name.substring(start) // getFOOBar => "FOOBar" (not lower case) according the JavaBeans spec.
+                : new StringBuilder(ln - start).append(Character.toLowerCase(c1)).append(name, start + 1, ln)
+                .toString();
+    }
+
 }

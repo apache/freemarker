@@ -210,15 +210,21 @@ public class BeanModel
         }
 
         TemplateModel resultModel = UNKNOWN;
-        if (desc instanceof IndexedPropertyDescriptor) {
-            Method readMethod = ((IndexedPropertyDescriptor) desc).getIndexedReadMethod(); 
-            resultModel = cachedModel = 
-                new JavaMethodModel(object, readMethod,
-                        ClassIntrospector.getArgTypes(classInfo, readMethod), wrapper);
-        } else if (desc instanceof PropertyDescriptor) {
+        if (desc instanceof PropertyDescriptor) {
             PropertyDescriptor pd = (PropertyDescriptor) desc;
-            resultModel = wrapper.invokeMethod(object, pd.getReadMethod(), null);
-            // cachedModel remains null, as we don't cache these
+            Method readMethod = pd.getReadMethod();
+            if (readMethod != null) {
+                // Unlike in FreeMarker 2, we prefer the normal read method even if there's an indexed read method.
+                resultModel = wrapper.invokeMethod(object, readMethod, null);
+                // cachedModel remains null, as we don't cache these
+            } else if (desc instanceof IndexedPropertyDescriptor) {
+                // In FreeMarker 2 we have exposed such indexed properties as sequences, but they can't support
+                // the size() method, so we have discontinued that. People has to call the indexed read method like
+                // any other method.
+                resultModel = UNKNOWN;
+            } else {
+                throw new IllegalStateException("PropertyDescriptor.readMethod shouldn't be null");
+            }
         } else if (desc instanceof Field) {
             resultModel = wrapper.wrap(((Field) desc).get(object));
             // cachedModel remains null, as we don't cache these

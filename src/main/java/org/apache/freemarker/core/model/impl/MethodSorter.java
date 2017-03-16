@@ -20,13 +20,17 @@
 package org.apache.freemarker.core.model.impl;
 
 import java.beans.MethodDescriptor;
+import java.util.List;
 
 /**
  * Used for JUnit testing method-order dependence bugs via
- * {@link DefaultObjectWrapperBuilder#setMethodSorter(MethodSorter)}.
+ * {@link DefaultObjectWrapper#setMethodSorter(MethodSorter)}.
  */
 interface MethodSorter {
 
-    MethodDescriptor[] sortMethodDescriptors(MethodDescriptor[] methodDescriptors);
-    
+    /**
+     * Sorts the methods in place (that is, by modifying the parameter list).
+     */
+    void sortMethodDescriptors(List<MethodDescriptor> methodDescriptors);
+
 }

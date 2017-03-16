@@ -33,7 +33,7 @@ ${map?api.get(objKey)}
 ${obj.foo}
 <#if obj.foo?exists>hasfoo<#else>nofoo</#if>
 <#if obj.baz?exists>hasbaz<#else>nobaz</#if>
-${obj.bar(0)}
+${obj.bar[0]}
 ${obj.getFoo()}
 ${obj.overloaded(1?int)}
 ${obj.overloaded("String")}
