@@ -36,7 +36,7 @@ import org.apache.freemarker.core.model.impl.SimpleSequence;
 public class SimpleMapAndCollectionObjectWrapper extends DefaultObjectWrapper {
 
     public SimpleMapAndCollectionObjectWrapper(Version incompatibleImprovements) {
-        super(incompatibleImprovements);
+        super(new DefaultObjectWrapper.Builder(incompatibleImprovements), true);
     }
 
     @Override

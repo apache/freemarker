@@ -25,7 +25,7 @@ import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.util.HtmlEscape;
 import org.apache.freemarker.core.util.StandardCompress;
@@ -36,7 +36,7 @@ import org.apache.freemarker.core.util.StandardCompress;
 public class TransformHashWrapper implements TemplateHashModel,
         TemplateScalarModel {
 
-    private ObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
+    private ObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
     private SimpleHash m_cHashModel = new SimpleHash(ow);
 
     /** Creates new TransformHashWrapper */

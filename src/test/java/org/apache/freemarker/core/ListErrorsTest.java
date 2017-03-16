@@ -121,7 +121,7 @@ public class ListErrorsTest extends TemplateTest {
     @Test
     public void testNonEx2NonStringKey() throws IOException, TemplateException {
         addToDataModel("m", new Listables.NonEx2MapAdapter(ImmutableMap.of("k1", "v1", 2, "v2"),
-                new DefaultObjectWrapper(Configuration.VERSION_3_0_0)));
+                new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build()));
         assertOutput("<#list m?keys as k>${k};</#list>", "k1;2;");
         assertErrorContains("<#list m as k, v></#list>",
                 "string", "number", ".TemplateHashModelEx2");

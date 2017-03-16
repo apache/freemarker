@@ -43,7 +43,7 @@ public class Java7MembersOnlyDefaultObjectWrapper extends DefaultObjectWrapper {
     private static final Set<String> POST_JAVA_7_COLLECTION_METHODS = newHashSet("parallelStream", "removeIf", "stream");
     private static final Set<String> POST_JAVA_7_LIST_METHODS = newHashSet("sort", "spliterator");
     
-    MethodAppearanceFineTuner POST_JAVA_7_FILTER = new MethodAppearanceFineTuner() {
+    static final MethodAppearanceFineTuner POST_JAVA_7_FILTER = new MethodAppearanceFineTuner() {
 
         @Override
         public void process(DecisionInput in, Decision out) {
@@ -83,8 +83,7 @@ public class Java7MembersOnlyDefaultObjectWrapper extends DefaultObjectWrapper {
     };
     
     public Java7MembersOnlyDefaultObjectWrapper(Version version) {
-        super(version);
-        setMethodAppearanceFineTuner(POST_JAVA_7_FILTER);
+        super(new DefaultObjectWrapper.Builder(version).methodAppearanceFineTuner(POST_JAVA_7_FILTER), true);
     }
 
     private static <T> Set<T> newHashSet(T... items) {

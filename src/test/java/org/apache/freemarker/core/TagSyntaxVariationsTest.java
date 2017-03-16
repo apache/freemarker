@@ -160,7 +160,7 @@ public class TagSyntaxVariationsTest extends TestCase {
             t = new Template("string", new StringReader(template), cfg);
         } catch (ParseException e) {
             if (expected != null) {
-                fail("Couldn't create Template from "
+                fail("Couldn't invoke Template from "
                         + _StringUtil.jQuote(template) + ": " + e);
             } else {
                 return;

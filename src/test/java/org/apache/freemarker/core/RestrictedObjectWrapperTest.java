@@ -46,7 +46,7 @@ public class RestrictedObjectWrapperTest {
     @Test
     public void testBasics() throws TemplateModelException {
         PostConstruct.class.toString();
-        RestrictedObjectWrapper ow = new RestrictedObjectWrapper(Configuration.VERSION_3_0_0);
+        RestrictedObjectWrapper ow = new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         testCustomizationCommonPart(ow);
         assertTrue(ow.wrap(Collections.emptyMap()) instanceof DefaultMapAdapter);
         assertTrue(ow.wrap(Collections.emptyList()) instanceof DefaultListAdapter);
@@ -56,8 +56,6 @@ public class RestrictedObjectWrapperTest {
 
     @SuppressWarnings("boxing")
     private void testCustomizationCommonPart(RestrictedObjectWrapper ow) throws TemplateModelException {
-        assertFalse(ow.isWriteProtected());
-        
         assertTrue(ow.wrap("x") instanceof SimpleScalar);
         assertTrue(ow.wrap(1.5) instanceof SimpleNumber);
         assertTrue(ow.wrap(new Date()) instanceof SimpleDate);

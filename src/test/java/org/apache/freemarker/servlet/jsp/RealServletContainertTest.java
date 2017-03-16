@@ -42,7 +42,6 @@ import org.apache.freemarker.core.TemplateExceptionHandler;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
@@ -411,7 +410,7 @@ public class RealServletContainertTest extends WebAppTestCase {
             Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
             cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
             cfg.setLogTemplateExceptions(true);
-            DefaultObjectWrapperBuilder bwb = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+            DefaultObjectWrapper.Builder bwb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
             bwb.setUseModelCache(true);
             cfg.setObjectWrapper(bwb.build());
             cfg.setTemplateLoader(new WebAppTemplateLoader(getServletContext()));
@@ -453,7 +452,7 @@ public class RealServletContainertTest extends WebAppTestCase {
 
         @Override
         protected ObjectWrapperAndUnwrapper createDefaultObjectWrapper() {
-            DefaultObjectWrapperBuilder bwb = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+            DefaultObjectWrapper.Builder bwb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
             bwb.setUseModelCache(true);
             assertEquals(Configuration.VERSION_3_0_0, bwb.getIncompatibleImprovements());
             return bwb.build();
@@ -467,7 +466,7 @@ public class RealServletContainertTest extends WebAppTestCase {
         @Override
         protected Configuration createConfiguration() {
             Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-            cfg.setObjectWrapper(new RestrictedObjectWrapper(Configuration.VERSION_3_0_0));
+            cfg.setObjectWrapper(new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
             return cfg;
         }
         

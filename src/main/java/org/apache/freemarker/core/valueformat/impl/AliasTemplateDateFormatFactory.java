@@ -89,7 +89,7 @@ public final class AliasTemplateDateFormatFactory extends TemplateDateFormatFact
             }
             return env.getTemplateDateFormat(targetFormatString, dateType, locale, timeZone, zonelessInput);
         } catch (TemplateValueFormatException e) {
-            throw new AliasTargetTemplateValueFormatException("Failed to create format based on target format string,  "
+            throw new AliasTargetTemplateValueFormatException("Failed to invoke format based on target format string,  "
                     + _StringUtil.jQuote(params) + ". Reason given: " + e.getMessage(), e);
         }
     }

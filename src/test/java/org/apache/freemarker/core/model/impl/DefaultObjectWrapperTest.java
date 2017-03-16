@@ -78,7 +78,7 @@ import com.google.common.collect.ImmutableMap;
 
 public class DefaultObjectWrapperTest {
 
-    private final static DefaultObjectWrapper OW = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0)
+    private final static DefaultObjectWrapper OW = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
             .build();
 
     // This will make sense if we will have multipe incompatibleImprovement versions.
@@ -98,7 +98,7 @@ public class DefaultObjectWrapperTest {
             final Version normalizedVersion = DefaultObjectWrapper.normalizeIncompatibleImprovementsVersion(version);
             actual.add(normalizedVersion);
 
-            final DefaultObjectWrapperBuilder builder = new DefaultObjectWrapperBuilder(version);
+            final DefaultObjectWrapper.Builder builder = new DefaultObjectWrapper.Builder(version);
             assertEquals(normalizedVersion, builder.getIncompatibleImprovements());
             assertEquals(normalizedVersion, builder.build().getIncompatibleImprovements());
             
@@ -127,7 +127,7 @@ public class DefaultObjectWrapperTest {
             // expected
         }
         try {
-            new DefaultObjectWrapperBuilder(futureVersion);
+            new DefaultObjectWrapper.Builder(futureVersion);
             fail();
         } catch (IllegalArgumentException e) {
             // expected
@@ -137,17 +137,16 @@ public class DefaultObjectWrapperTest {
     @SuppressWarnings("boxing")
     @Test
     public void testBuilder() throws Exception {
-        DefaultObjectWrapperBuilder builder = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+        DefaultObjectWrapper.Builder builder = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
         DefaultObjectWrapper ow = builder.build();
         assertSame(ow, builder.build());
         assertSame(ow.getClass(), DefaultObjectWrapper.class);
         assertEquals(Configuration.VERSION_3_0_0, ow.getIncompatibleImprovements());
-        assertTrue(ow.isWriteProtected());
     }
 
     @Test
     public void testWrappedTypes() throws Exception {
-        DefaultObjectWrapperBuilder builder = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+        DefaultObjectWrapper.Builder builder = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
         DefaultObjectWrapper ow = builder.build();
 
         assertThat(ow.wrap(new HashMap()), instanceOf(DefaultMapAdapter.class));
@@ -162,18 +161,13 @@ public class DefaultObjectWrapperTest {
     @Test
     public void testConstructors() throws Exception {
         {
-            DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
-            assertEquals(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS, ow.getIncompatibleImprovements());
-        }
-        
-        {
-            DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
+            DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .usePrivateCaches(true).build();
             assertEquals(Configuration.VERSION_3_0_0, ow.getIncompatibleImprovements());
-            assertFalse(ow.isWriteProtected());
         }
         
         try {
-            new DefaultObjectWrapper(new Version(99, 9, 9));
+            new DefaultObjectWrapper.Builder(new Version(99, 9, 9)).build();
             fail();
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("version"));
@@ -185,8 +179,7 @@ public class DefaultObjectWrapperTest {
     public void testCustomization() throws TemplateModelException {
         CustomizedDefaultObjectWrapper ow = new CustomizedDefaultObjectWrapper(Configuration.VERSION_3_0_0);
         assertEquals(Configuration.VERSION_3_0_0, ow.getIncompatibleImprovements());
-        assertFalse(ow.isWriteProtected());
-        
+
         TemplateSequenceModel seq = (TemplateSequenceModel) ow.wrap(new Tupple(11, 22));
         assertEquals(2, seq.size());
         assertEquals(11, ow.unwrap(seq.get(0)));
@@ -225,7 +218,7 @@ public class DefaultObjectWrapperTest {
     @SuppressWarnings("boxing")
     @Test
     public void testCompositeValueWrapping() throws TemplateModelException, ClassNotFoundException {
-        DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
+        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
 
         final Map hashMap = new HashMap();
         inintTestMap(hashMap);
@@ -705,20 +698,37 @@ public class DefaultObjectWrapperTest {
 
     @Test
     public void testExposureLevel() throws Exception {
-        final DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
+        TestBean bean = new TestBean();
 
-        TemplateHashModel tm = (TemplateHashModel) ow.wrap(new TestBean());
-        assertNotNull(tm.get("hashCode"));
-        assertNotNull(tm.get("class"));
-        ow.setExposureLevel(DefaultObjectWrapper.EXPOSE_PROPERTIES_ONLY);
-        assertNull(tm.get("hashCode"));
-        assertNotNull(tm.get("class"));
-        ow.setExposureLevel(DefaultObjectWrapper.EXPOSE_NOTHING);
-        assertNull(tm.get("hashCode"));
-        assertNull(tm.get("class"));
-        ow.setExposureLevel(DefaultObjectWrapper.EXPOSE_ALL);
-        assertNotNull(tm.get("hashCode"));
-        assertNotNull(tm.get("class"));
+        {
+            TemplateHashModel tm = wrapWithExposureLevel(bean, DefaultObjectWrapper.EXPOSE_SAFE);
+            assertNotNull(tm.get("hashCode"));
+            assertNotNull(tm.get("class"));
+        }
+
+        {
+            TemplateHashModel tm = wrapWithExposureLevel(bean, DefaultObjectWrapper.EXPOSE_PROPERTIES_ONLY);
+            assertNull(tm.get("hashCode"));
+            assertNotNull(tm.get("class"));
+        }
+
+        {
+            TemplateHashModel tm = wrapWithExposureLevel(bean, DefaultObjectWrapper.EXPOSE_NOTHING);
+            assertNull(tm.get("hashCode"));
+            assertNull(tm.get("class"));
+        }
+
+        {
+            TemplateHashModel tm = wrapWithExposureLevel(bean, DefaultObjectWrapper.EXPOSE_ALL);
+            assertNotNull(tm.get("hashCode"));
+            assertNotNull(tm.get("class"));
+        }
+    }
+
+    private TemplateHashModel wrapWithExposureLevel(Object bean, int exposureLevel) throws TemplateModelException {
+        return (TemplateHashModel) new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                .exposureLevel(exposureLevel).build()
+                .wrap(bean);
     }
 
     private void assertSizeThroughAPIModel(int expectedSize, TemplateModel normalModel) throws TemplateModelException {
@@ -840,7 +850,7 @@ public class DefaultObjectWrapperTest {
     private static class CustomizedDefaultObjectWrapper extends DefaultObjectWrapper {
 
         private CustomizedDefaultObjectWrapper(Version incompatibleImprovements) {
-            super(incompatibleImprovements);
+            super(new DefaultObjectWrapper.Builder(incompatibleImprovements), true);
         }
         
         @Override

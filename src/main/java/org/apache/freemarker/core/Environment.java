@@ -105,7 +105,7 @@ public final class Environment extends Configurable {
     private static final Logger LOG = _CoreLogs.RUNTIME;
     private static final Logger LOG_ATTEMPT = _CoreLogs.ATTEMPT;
 
-    // Do not use this object directly; clone it first! DecimalFormat isn't
+    // Do not use this object directly; deepClone it first! DecimalFormat isn't
     // thread-safe.
     private static final DecimalFormat C_NUMBER_FORMAT = new DecimalFormat(
             "0.################",
@@ -1573,7 +1573,7 @@ public final class Environment extends Configurable {
             throw MessageUtil.newCantFormatUnknownTypeDateException(blamedDateSourceExp, e);
         } catch (TemplateValueFormatException e) {
             _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
-                    "Can't create date/time/datetime format based on format string ",
+                    "Can't invoke date/time/datetime format based on format string ",
                     new _DelayedJQuote(formatString), ". Reason given: ",
                     e.getMessage())
                     .blame(blamedFormatterExp);
@@ -2209,7 +2209,7 @@ public final class Environment extends Configurable {
     /**
      * Returns the read-only hash of globally visible variables. This is the correspondent of FTL <code>.globals</code>
      * hash. That is, you see the variables created with <code>&lt;#global ...&gt;</code>, and the variables of the
-     * data-model. To create new global variables, use {@link #setGlobalVariable setGlobalVariable}.
+     * data-model. To invoke new global variables, use {@link #setGlobalVariable setGlobalVariable}.
      */
     public TemplateHashModel getGlobalVariables() {
         return new TemplateHashModel() {

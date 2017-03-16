@@ -100,7 +100,7 @@ public class IncludePage implements TemplateDirectiveModel {
             final PrintWriter printWriter = (envOut instanceof PrintWriter) ?
                 (PrintWriter) envOut :
                 new PrintWriter(envOut); 
-            // Otherwise, create a response wrapper that will pass the
+            // Otherwise, invoke a response wrapper that will pass the
             // env writer, potentially first wrapping it in a print
             // writer when it ain't one already.
             wrappedResponse = new HttpServletResponseWrapper(response) {

@@ -108,7 +108,7 @@ public interface DirectiveCallPlace {
      *            {@link IdentityHashMap}, but then this feature would be slower, while {@code providerIdentity}
      *            mismatches aren't occurring in most applications.)
      * @param objectFactory
-     *            Called when the custom data wasn't yet set, to create its initial value. If this parameter is
+     *            Called when the custom data wasn't yet set, to invoke its initial value. If this parameter is
      *            {@code null} and the custom data wasn't set yet, then {@code null} will be returned. The returned
      *            value of {@link ObjectFactory#createObject()} can be any kind of object, but can't be {@code null}.
      * 

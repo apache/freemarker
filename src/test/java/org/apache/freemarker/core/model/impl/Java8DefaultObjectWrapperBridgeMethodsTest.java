@@ -47,7 +47,7 @@ public class Java8DefaultObjectWrapperBridgeMethodsTest {
     }
 
     private void test(Class<?> pClass) throws TemplateModelException {
-        DefaultObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
+        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         TemplateHashModel wrapped;
         try {
             wrapped = (TemplateHashModel) ow.wrap(pClass.newInstance());

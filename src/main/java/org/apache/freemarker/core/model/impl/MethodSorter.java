@@ -24,7 +24,7 @@ import java.util.List;
 
 /**
  * Used for JUnit testing method-order dependence bugs via
- * {@link DefaultObjectWrapper#setMethodSorter(MethodSorter)}.
+ * {@link DefaultObjectWrapper.Builder#setMethodSorter(MethodSorter)}.
  */
 interface MethodSorter {
 

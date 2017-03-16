@@ -50,11 +50,11 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-public class SimpleObjetWrapperTest {
+public class RestrictedObjetWrapperTest {
     
     @Test
     public void testDoesNotAllowAPIBuiltin() throws TemplateModelException {
-        RestrictedObjectWrapper sow = new RestrictedObjectWrapper(Configuration.VERSION_3_0_0);
+        RestrictedObjectWrapper sow = new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         
         TemplateModelWithAPISupport map = (TemplateModelWithAPISupport) sow.wrap(new HashMap());
         try {
@@ -68,7 +68,7 @@ public class SimpleObjetWrapperTest {
     @SuppressWarnings("boxing")
     @Test
     public void testCanWrapBasicTypes() throws TemplateModelException {
-        RestrictedObjectWrapper sow = new RestrictedObjectWrapper(Configuration.VERSION_3_0_0);
+        RestrictedObjectWrapper sow = new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         assertTrue(sow.wrap("s") instanceof TemplateScalarModel);
         assertTrue(sow.wrap(1) instanceof TemplateNumberModel);
         assertTrue(sow.wrap(true) instanceof TemplateBooleanModel);
@@ -89,7 +89,7 @@ public class SimpleObjetWrapperTest {
         is.setCharacterStream(new StringReader("<doc><sub a='1' /></doc>"));
         Document doc = db.parse(is);
         
-        RestrictedObjectWrapper sow = new RestrictedObjectWrapper(Configuration.VERSION_3_0_0);
+        RestrictedObjectWrapper sow = new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         try {
             sow.wrap(doc);
             fail();
@@ -100,7 +100,7 @@ public class SimpleObjetWrapperTest {
     
     @Test
     public void testWontWrapGenericObjects() {
-        RestrictedObjectWrapper sow = new RestrictedObjectWrapper(Configuration.VERSION_3_0_0);
+        RestrictedObjectWrapper sow = new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         try {
             sow.wrap(new File("/x"));
             fail();

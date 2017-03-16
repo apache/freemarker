@@ -1809,7 +1809,7 @@ public class TaglibFactory implements TemplateHashModel {
                         listener = listenerClass.newInstance();
                     } catch (Exception e) {
                         throw new TldParsingSAXException(
-                                "Failed to create new instantiate from listener class " + listenerClassCData,
+                                "Failed to invoke new instantiate from listener class " + listenerClassCData,
                                 locator,
                                 e);
                     }

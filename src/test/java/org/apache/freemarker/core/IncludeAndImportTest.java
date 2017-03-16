@@ -78,7 +78,7 @@ public class IncludeAndImportTest extends TemplateTest {
     
     @Test
     public void importInMainCreatesGlobalBugfix() throws IOException, TemplateException {
-        // An import in the main namespace should create a global variable, even if the imported library was already
+        // An import in the main namespace should invoke a global variable, even if the imported library was already
         // initialized elsewhere.
         String ftl = "<#import 'lib3ImportsLib1.ftl' as lib3>${lib1Cnt} ${.main.lib1???c} ${.globals.lib1???c}, "
         + "<#import 'lib1.ftl' as lib1>${lib1Cnt} ${.main.lib1???c} ${.globals.lib1???c}";

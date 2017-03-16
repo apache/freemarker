@@ -59,7 +59,7 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
  * from a plain Java method to which it had to be passed adapted to a {@link List}).
  * 
  * <p>
- * If regardless of which of the above two cases stand, you just need to (or more convenient to) create the sequence
+ * If regardless of which of the above two cases stand, you just need to (or more convenient to) invoke the sequence
  * from a {@link List} (via {@link DefaultListAdapter#adapt(List, RichObjectWrapper)} or
  * {@link SimpleSequence#SimpleSequence(Collection)}), which will be the faster depends on how many times will the
  * <em>same</em> {@link List} entry be read from the template(s) later, on average. If, on average, you read each entry

@@ -21,10 +21,11 @@ package org.apache.freemarker.core.model.impl;
 
 import org.apache.freemarker.core.Configuration;
 
-public class DefaultObjectWrapperInc extends DefaultObjectWrapperWithSortedMethods {
+public class DefaultObjectWrapperInc extends DefaultObjectWrapper {
 
     public DefaultObjectWrapperInc() {
-        super(Configuration.VERSION_3_0_0, false);
+        super(new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                .methodSorter(new AlphabeticalMethodSorter(false)), true);
     }
 
 }

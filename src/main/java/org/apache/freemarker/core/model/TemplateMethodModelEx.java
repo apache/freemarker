@@ -26,7 +26,7 @@ import org.apache.freemarker.core.util.DeepUnwrap;
 
 /**
  * "extended method" template language data type: Objects that act like functions. Their main application is calling
- * Java methods via {@link org.apache.freemarker.core.model.impl.DefaultObjectWrapper}, but you can implement this interface to create
+ * Java methods via {@link org.apache.freemarker.core.model.impl.DefaultObjectWrapper}, but you can implement this interface to invoke
  * top-level functions too. They are "extended" compared to the deprecated {@link TemplateMethodModel}, which could only
  * accept string parameters.
  * 

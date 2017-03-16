@@ -31,13 +31,8 @@ import org.apache.freemarker.core.model.TemplateModelException;
  */
 public class RestrictedObjectWrapper extends DefaultObjectWrapper {
 
-    /**
-     * @param incompatibleImprovements see in {@link DefaultObjectWrapper#DefaultObjectWrapper(Version)}.
-     * 
-     * @since 2.3.21
-     */
-    public RestrictedObjectWrapper(Version incompatibleImprovements) {
-        super(incompatibleImprovements);
+    protected RestrictedObjectWrapper(Builder builder) {
+        super(builder, true);
     }
 
     /**
@@ -53,6 +48,28 @@ public class RestrictedObjectWrapper extends DefaultObjectWrapper {
     @Override
     public TemplateHashModel wrapAsAPI(Object obj) throws TemplateModelException {
         throw new TemplateModelException("RestrictedObjectWrapper deliberately doesn't allow ?api.");
+    }
+
+    protected static abstract class ExtendableBuilder<
+            ProductT extends RestrictedObjectWrapper, SelfT extends ExtendableBuilder<ProductT,
+            SelfT>> extends DefaultObjectWrapper.ExtendableBuilder<ProductT, SelfT> {
+
+        protected ExtendableBuilder(Version incompatibleImprovements, boolean isIncompImprsAlreadyNormalized) {
+            super(incompatibleImprovements, isIncompImprsAlreadyNormalized);
+        }
+
+    }
+
+    public static final class Builder extends ExtendableBuilder<RestrictedObjectWrapper, Builder> {
+
+        public Builder(Version incompatibleImprovements) {
+            super(incompatibleImprovements, false);
+        }
+
+        @Override
+        public RestrictedObjectWrapper build() {
+            return new RestrictedObjectWrapper(this);
+        }
     }
 
 }

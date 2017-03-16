@@ -38,7 +38,7 @@ public class ErrorMessagesTest {
 
     @Test
     public void getterMessage() throws TemplateModelException {
-        DefaultObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
+        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         TemplateHashModel thm= (TemplateHashModel) ow.wrap(new TestBean());
         
         try {
@@ -56,7 +56,7 @@ public class ErrorMessagesTest {
     public void markupOutputParameter() throws Exception {
         TemplateHTMLOutputModel html = HTMLOutputFormat.INSTANCE.fromMarkup("<p>a");
 
-        DefaultObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
+        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         TemplateHashModel thm = (TemplateHashModel) ow.wrap(new TestBean());
         
         {

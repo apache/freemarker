@@ -17,25 +17,23 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.model.impl;
-
-
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Version;
+package org.apache.freemarker.core.util;
 
 /**
- * Used so that the order in which the methods are added to the introspection cache is deterministic. 
+ * A builder that encloses an already built product. {@link #build()} will always return the same product object.
  */
-public abstract class DefaultObjectWrapperWithShortedMethods extends DefaultObjectWrapper {
-    
-    public DefaultObjectWrapperWithShortedMethods(boolean desc) {
-        super(Configuration.VERSION_3_0_0);
-        setMethodSorter(new AlphabeticalMethodSorter(desc));
+public class ProductWrappingBuilder<ProductT, SelfT extends ProductWrappingBuilder<ProductT, SelfT>>
+        extends BuilderBase<ProductT, SelfT> {
+
+    private final ProductT product;
+
+    public ProductWrappingBuilder(ProductT product) {
+        _NullArgumentException.check("product", product);
+        this.product = product;
     }
 
-    public DefaultObjectWrapperWithShortedMethods(Version incompatibleImprovements, boolean desc) {
-        super(incompatibleImprovements);
-        setMethodSorter(new AlphabeticalMethodSorter(desc));
+    @Override
+    public ProductT build() {
+        return product;
     }
-
 }

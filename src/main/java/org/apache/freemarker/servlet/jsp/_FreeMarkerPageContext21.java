@@ -110,7 +110,7 @@ public class _FreeMarkerPageContext21 extends FreeMarkerPageContext {
                 elContext.putContext(JspContext.class, this);
             } else {
                 throw new UnsupportedOperationException(
-                        "Can not create an ELContext using a foreign JspApplicationContext (of class "
+                        "Can not invoke an ELContext using a foreign JspApplicationContext (of class "
                         + _ClassUtil.getShortClassNameOfObject(jspctx) + ").\n" +
                         "Hint: The cause of this is often that you are trying to use JSTL tags/functions in FTL. "
                         + "In that case, know that that's not really suppored, and you are supposed to use FTL "

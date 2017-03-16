@@ -36,7 +36,7 @@ public class Java8DefaultObjectWrapperTest {
 
     @Test
     public void testDefaultMethodRecognized() throws TemplateModelException {
-        DefaultObjectWrapperBuilder owb = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+        DefaultObjectWrapper.Builder owb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
         DefaultObjectWrapper ow = owb.build();
         TemplateHashModel wrappedBean = (TemplateHashModel) ow.wrap(new Java8DefaultMethodsBean());
         

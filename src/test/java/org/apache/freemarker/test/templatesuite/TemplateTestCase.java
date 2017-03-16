@@ -56,7 +56,6 @@ import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.DefaultNonListCollectionAdapter;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.core.model.impl.ResourceBundleModel;
 import org.apache.freemarker.core.model.impl.SimpleCollection;
 import org.apache.freemarker.core.model.impl.SimpleDate;
@@ -179,7 +178,7 @@ public class TemplateTestCase extends FileTestCase {
         conf.setTemplateLoader(new CopyrightCommentRemoverTemplateLoader(
                 new FileTemplateLoader(new File(getTestClassDirectory(), "templates"))));
         
-        DefaultObjectWrapper dow = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
+        DefaultObjectWrapper dow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         
         dataModel.put(ASSERT_VAR_NAME, AssertDirective.INSTANCE);
         dataModel.put(ASSERT_EQUALS_VAR_NAME, AssertEqualsDirective.INSTANCE);

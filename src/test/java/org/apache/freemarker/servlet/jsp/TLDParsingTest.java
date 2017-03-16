@@ -36,7 +36,6 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +51,7 @@ public class TLDParsingTest {
 
     @Before
     public void before() throws Exception {
-        wrapper = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
+        wrapper = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
     }
 
     @Test

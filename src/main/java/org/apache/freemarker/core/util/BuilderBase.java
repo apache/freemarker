@@ -17,24 +17,18 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.model.impl;
+package org.apache.freemarker.core.util;
 
-import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Version;
+/**
+ * Common superclass of builders (used for implementing the builder pattern).
+ */
+public abstract class BuilderBase<ProductT, SelfT extends BuilderBase<ProductT, SelfT>> {
 
-public class DefaultObjectWrapperWithSortedMethods extends DefaultObjectWrapper {
-    
-    public DefaultObjectWrapperWithSortedMethods(boolean desc) {
-        this(Configuration.VERSION_3_0_0, desc);
+    public abstract ProductT build();
+
+    @SuppressWarnings("unchecked")
+    protected SelfT self() {
+        return (SelfT) this;
     }
 
-    public DefaultObjectWrapperWithSortedMethods(Version incompatibleImprovements, boolean desc) {
-        super(incompatibleImprovements);
-        setMethodSorter(this, desc);
-    }
-    
-    static void setMethodSorter(DefaultObjectWrapper ow, boolean desc) {
-        ow.setMethodSorter(new AlphabeticalMethodSorter(desc));
-    }
-    
 }

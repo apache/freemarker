@@ -99,7 +99,7 @@ final class ASTDirCapturingAssignment extends ASTDirective {
                         result = capturedStringToModel(toString());
                     } catch (TemplateModelException e) {
                         // [Java 1.6] e to cause
-                        throw new IOException("Failed to create FTL value from captured string: " + e);
+                        throw new IOException("Failed to invoke FTL value from captured string: " + e);
                     }
                     switch(scope) {
                         case ASTDirAssignment.NAMESPACE: {

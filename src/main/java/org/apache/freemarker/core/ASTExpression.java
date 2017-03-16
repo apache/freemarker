@@ -163,7 +163,7 @@ abstract class ASTExpression extends ASTNode {
     
     static class ReplacemenetState {
         /**
-         * If the replacement expression is not in use yet, we don't have to clone it.
+         * If the replacement expression is not in use yet, we don't have to deepClone it.
          */
         boolean replacementAlreadyInUse; 
     }

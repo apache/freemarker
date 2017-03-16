@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core.model.impl;
 
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -36,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Version;
@@ -61,30 +64,28 @@ import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.util.BugException;
-import org.apache.freemarker.core.util.WriteProtectable;
+import org.apache.freemarker.core.util.BuilderBase;
 import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.dom.NodeModel;
 import org.slf4j.Logger;
 import org.w3c.dom.Node;
 
 /**
- * The default implementation of the {@link ObjectWrapper} interface. Usually, you don't need to create instances of
+ * The default implementation of the {@link ObjectWrapper} interface. Usually, you don't need to invoke instances of
  * this, as an instance of this is already the default value of the
  * {@link Configuration#setObjectWrapper(ObjectWrapper) object_wrapper setting}. Then the
- * {@link #DefaultObjectWrapper(Version) incompatibleImprovements} of the {@link DefaultObjectWrapper} will be the
- * same that you have set for the {@link Configuration} itself.
+ * {@link ExtendableBuilder#ExtendableBuilder(Version, boolean) incompatibleImprovements} of the
+ * {@link DefaultObjectWrapper} will be the same that you have set for the {@link Configuration} itself.
  * 
  * <p>
- * If you still need to create an instance, that should be done with an {@link DefaultObjectWrapperBuilder} (or
- * with {@link Configuration#setSetting(String, String)} with {@code "object_wrapper"} key), not with
- * its constructor, as that allows FreeMarker to reuse singletons.
+ * If you still need to invoke an instance, that should be done with {@link Builder#build()} (or
+ * with {@link Configuration#setSetting(String, String)} with {@code "objectWrapper"} key); the constructor isn't
+ * public.
  *
  * <p>
- * This class is only thread-safe after you have finished calling its setter methods, and then safely published it (see
- * JSR 133 and related literature). When used as part of {@link Configuration}, of course it's enough if that was safely
- * published and then left unmodified.
+ * This class is thread-safe.
  */
-public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable {
+public class DefaultObjectWrapper implements RichObjectWrapper {
 
     private static final Logger LOG = _CoreLogs.OBJECT_WRAPPER;
 
@@ -118,9 +119,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
      * At this level of exposure, no bean properties and methods are exposed.
      * Only map items, resource bundle items, and objects retrieved through
      * the generic get method (on objects of classes that have a generic get
-     * method) can be retrieved through the hash interface. You might want to
-     * call {@link #setMethodsShadowItems(boolean)} with <tt>false</tt> value to
-     * speed up map item retrieval.
+     * method) can be retrieved through the hash interface.
      */
     public static final int EXPOSE_NOTHING = 3;
 
@@ -133,12 +132,10 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
      * {@link Class} to class info cache.
      * This object is possibly shared with other {@link DefaultObjectWrapper}-s!
      *
-     * <p>To write this, always use {@link #replaceClassIntrospector(ClassIntrospectorBuilder)}.
-     *
      * <p>When reading this, it's good idea to synchronize on sharedInrospectionLock when it doesn't hurt overall
      * performance. In theory that's not needed, but apps might fail to keep the rules.
      */
-    private ClassIntrospector classIntrospector;
+    private final ClassIntrospector classIntrospector;
 
     /**
      * {@link String} class name to {@link StaticModel} cache.
@@ -158,138 +155,56 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
 
     // -----------------------------------------------------------------------------------------------------------------
 
-    // Why volatile: In principle it need not be volatile, but we want to catch modification attempts even if the
-    // object was published improperly to other threads. After all, the main goal of WriteProtectable is protecting
-    // things from buggy user code.
-    private volatile boolean writeProtected;
-
-    private int defaultDateType; // initialized by PropertyAssignments.apply
-    private ObjectWrapper outerIdentity = this;
-    private boolean methodsShadowItems = true;
-    private boolean strict;  // initialized by PropertyAssignments.apply
+    private final int defaultDateType;
+    private final ObjectWrapper outerIdentity;
+    private final boolean strict;
     @Deprecated // Only exists to keep some JUnit tests working... [FM3]
-    private boolean useModelCache;
+    private final boolean useModelCache;
 
     private final Version incompatibleImprovements;
 
     /**
-     * Use {@link DefaultObjectWrapperBuilder} instead of the public constructors if possible.
-     * The main disadvantage of using the public constructors is that the instances won't share caches. So unless having
-     * a private cache is your goal, don't use them. See
-     *
-     * @param incompatibleImprovements
-     *   Sets which of the non-backward-compatible improvements should be enabled. Not {@code null}. This version number
-     *   is the same as the FreeMarker version number with which the improvements were implemented.
-     *
-     *   <p>For new projects, it's recommended to set this to the FreeMarker version that's used during the development.
-     *   For released products that are still actively developed it's a low risk change to increase the 3rd
-     *   version number further as FreeMarker is updated, but of course you should always check the list of effects
-     *   below. Increasing the 2nd or 1st version number possibly mean substantial changes with higher risk of breaking
-     *   the application, but again, see the list of effects below.
-     *
-     *   <p>The reason it's separate from {@link Configuration#setIncompatibleImprovements(Version)} is that
-     *   {@link ObjectWrapper} objects are often shared among multiple {@link Configuration}-s, so the two version
-     *   numbers are technically independent. But it's recommended to keep those two version numbers the same.
-     *
-     *   <p>The changes enabled by {@code incompatibleImprovements} are:
-     *   <ul>
-     *     <li>
-     *       <p>2.3.0: No changes; this is the starting point, the version used in older projects.
-     *     </li>
-     *     <li>
-     *       <p>2.3.21 (or higher):
-     *       Several glitches were oms in <em>overloaded</em> method selection. This usually just gets
-     *       rid of errors (like ambiguity exceptions and numerical precision loses due to bad overloaded method
-     *       choices), still, as in some cases the method chosen can be a different one now (that was the point of
-     *       the reworking after all), it can mean a change in the behavior of the application. The most important
-     *       change is that the treatment of {@code null} arguments were oms, as earlier they were only seen
-     *       applicable to parameters of type {@code Object}. Now {@code null}-s are seen to be applicable to any
-     *       non-primitive parameters, and among those the one with the most specific type will be preferred (just
-     *       like in Java), which is hence never the one with the {@code Object} parameter type. For more details
-     *       about overloaded method selection changes see the version history in the FreeMarker Manual.
-     *     </li>
-     *     <li>
-     *       <p>2.3.24 (or higher):
-     *       {@link Iterator}-s were always said to be non-empty when using {@code ?has_content} and such (i.e.,
-     *       operators that check emptiness without reading any elements). Now an {@link Iterator} counts as
-     *       empty exactly if it has no elements left. (Note that this bug has never affected basic functionality, like
-     *       {@code <#list ...>}.)
-     *     </li>
-     *   </ul>
-     *
-     *   <p>Note that the version will be normalized to the lowest version where the same incompatible
-     *   {@link DefaultObjectWrapper} improvements were already present, so {@link #getIncompatibleImprovements()} might returns
-     *   a lower version than what you have specified.
-     *
-     * @since 2.3.21
-     */
-    public DefaultObjectWrapper(Version incompatibleImprovements) {
-        this(new DefaultObjectWrapperConfiguration(incompatibleImprovements) {}, false);
-        // Attention! Don't don anything here, as the instance is possibly already visible to other threads through the
-        // model factory callbacks.
-    }
-
-    /**
-     * Same as {@link #DefaultObjectWrapper(DefaultObjectWrapperConfiguration, boolean, boolean)} with {@code true}
-     * {@code finalizeConstruction} argument.
-     *
-     * @since 2.3.21
-     */
-    protected DefaultObjectWrapper(DefaultObjectWrapperConfiguration bwConf, boolean writeProtected) {
-        this(bwConf, writeProtected, true);
-    }
-
-    /**
-     * Initializes the instance based on the the {@link DefaultObjectWrapperConfiguration} specified.
-     *
-     * @param writeProtected Makes the instance's configuration settings read-only via
-     *     {@link WriteProtectable#writeProtect()}; this way it can use the shared class introspection cache.
+     * Initializes the instance based on the the {@link ExtendableBuilder} specified.
      *
      * @param finalizeConstruction Decides if the construction is finalized now, or the caller will do some more
-     *     adjustments on the instance and then call {@link #finalizeConstruction(boolean)} itself.
-     *
-     * @since 2.3.22
+     *     adjustments on the instance and then call {@link #finalizeConstruction()} itself.
      */
-    protected DefaultObjectWrapper(DefaultObjectWrapperConfiguration bwConf, boolean writeProtected, boolean finalizeConstruction) {
-        incompatibleImprovements = bwConf.getIncompatibleImprovements();  // normalized
+    protected DefaultObjectWrapper(ExtendableBuilder builder, boolean finalizeConstruction) {
+        incompatibleImprovements = builder.getIncompatibleImprovements();  // normalized
 
-        defaultDateType = bwConf.getDefaultDateType();
-        outerIdentity = bwConf.getOuterIdentity() != null ? bwConf.getOuterIdentity() : this;
-        strict = bwConf.isStrict();
+        defaultDateType = builder.getDefaultDateType();
+        outerIdentity = builder.getOuterIdentity() != null ? builder.getOuterIdentity() : this;
+        strict = builder.isStrict();
 
-        if (!writeProtected) {
+        if (builder.getUsePrivateCaches()) {
             // As this is not a read-only DefaultObjectWrapper, the classIntrospector will be possibly replaced for a few times,
             // but we need to use the same sharedInrospectionLock forever, because that's what the model factories
             // synchronize on, even during the classIntrospector is being replaced.
             sharedIntrospectionLock = new Object();
-            classIntrospector = new ClassIntrospector(bwConf.classIntrospectorBuilder, sharedIntrospectionLock);
+            classIntrospector = new ClassIntrospector(builder.classIntrospectorBuilder, sharedIntrospectionLock);
         } else {
             // As this is a read-only DefaultObjectWrapper, the classIntrospector is never replaced, and since it's shared by
             // other DefaultObjectWrapper instances, we use the lock belonging to the shared ClassIntrospector.
-            classIntrospector = bwConf.classIntrospectorBuilder.build();
+            classIntrospector = builder.classIntrospectorBuilder.build();
             sharedIntrospectionLock = classIntrospector.getSharedLock();
         }
 
         staticModels = new StaticModels(this);
         enumModels = new EnumModels(this);
-        setUseModelCache(bwConf.getUseModelCache());
+        useModelCache = builder.getUseModelCache();
 
-        finalizeConstruction(writeProtected);
+        finalizeConstruction();
     }
 
     /**
-     * Meant to be called after {@link DefaultObjectWrapper#DefaultObjectWrapper(DefaultObjectWrapperConfiguration, boolean, boolean)} when
+     * Meant to be called after {@link DefaultObjectWrapper#DefaultObjectWrapper(ExtendableBuilder, boolean)} when
      * its last argument was {@code false}; makes the instance read-only if necessary, then registers the model
      * factories in the class introspector. No further changes should be done after calling this, if
      * {@code writeProtected} was {@code true}.
      *
      * @since 2.3.22
      */
-    protected void finalizeConstruction(boolean writeProtected) {
-        if (writeProtected) {
-            writeProtect();
-        }
-
+    protected void finalizeConstruction() {
         // Attention! At this point, the DefaultObjectWrapper must be fully initialized, as when the model factories are
         // registered below, the DefaultObjectWrapper can immediately get concurrent callbacks. That those other threads will
         // see consistent image of the DefaultObjectWrapper is ensured that callbacks are always sync-ed on
@@ -298,94 +213,20 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
         registerModelFactories();
     }
 
-    /**
-     * Makes the configuration properties (settings) of this {@link DefaultObjectWrapper} object read-only. As changing them
-     * after the object has become visible to multiple threads leads to undefined behavior, it's recommended to call
-     * this when you have finished configuring the object.
-     *
-     * <p>Consider using {@link DefaultObjectWrapperBuilder} instead, which gives an instance that's already
-     * write protected and also uses some shared caches/pools.
-     *
-     * @since 2.3.21
-     */
-    @Override
-    public void writeProtect() {
-        writeProtected = true;
-    }
-
-    /**
-     * @since 2.3.21
-     */
-    @Override
-    public boolean isWriteProtected() {
-        return writeProtected;
-    }
-
     Object getSharedIntrospectionLock() {
         return sharedIntrospectionLock;
     }
 
     /**
-     * If this object is already read-only according to {@link WriteProtectable}, throws {@link IllegalStateException},
-     * otherwise does nothing.
-     *
-     * @since 2.3.21
-     */
-    protected void checkModifiable() {
-        if (writeProtected) throw new IllegalStateException(
-                "Can't modify the " + getClass().getName() + " object, as it was write protected.");
-    }
-
-    /**
-     * @see #setStrict(boolean)
+     * @see ExtendableBuilder#setStrict(boolean)
      */
     public boolean isStrict() {
         return strict;
     }
 
     /**
-     * Specifies if an attempt to read a bean property that doesn't exist in the
-     * wrapped object should throw an {@link InvalidPropertyException}.
-     *
-     * <p>If this property is <tt>false</tt> (the default) then an attempt to read
-     * a missing bean property is the same as reading an existing bean property whose
-     * value is <tt>null</tt>. The template can't tell the difference, and thus always
-     * can use <tt>?default('something')</tt> and <tt>?exists</tt> and similar built-ins
-     * to handle the situation.
-     *
-     * <p>If this property is <tt>true</tt> then an attempt to read a bean propertly in
-     * the template (like <tt>myBean.aProperty</tt>) that doesn't exist in the bean
-     * object (as opposed to just holding <tt>null</tt> value) will cause
-     * {@link InvalidPropertyException}, which can't be suppressed in the template
-     * (not even with <tt>myBean.noSuchProperty?default('something')</tt>). This way
-     * <tt>?default('something')</tt> and <tt>?exists</tt> and similar built-ins can be used to
-     * handle existing properties whose value is <tt>null</tt>, without the risk of
-     * hiding typos in the property names. Typos will always cause error. But mind you, it
-     * goes against the basic approach of FreeMarker, so use this feature only if you really
-     * know what you are doing.
-     */
-    public void setStrict(boolean strict) {
-        checkModifiable();
-        this.strict = strict;
-    }
-
-    /**
-     * When wrapping an object, the DefaultObjectWrapper commonly needs to wrap
-     * "sub-objects", for example each element in a wrapped collection.
-     * Normally it wraps these objects using itself. However, this makes
-     * it difficult to delegate to a DefaultObjectWrapper as part of a custom
-     * aggregate ObjectWrapper. This method lets you set the ObjectWrapper
-     * which will be used to wrap the sub-objects.
-     * @param outerIdentity the aggregate ObjectWrapper
-     */
-    public void setOuterIdentity(ObjectWrapper outerIdentity) {
-        checkModifiable();
-        this.outerIdentity = outerIdentity;
-    }
-
-    /**
      * By default returns <tt>this</tt>.
-     * @see #setOuterIdentity(ObjectWrapper)
+     * @see ExtendableBuilder#setOuterIdentity(ObjectWrapper)
      */
     public ObjectWrapper getOuterIdentity() {
         return outerIdentity;
@@ -417,21 +258,6 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
     */
 
     /**
-     * Sets the method exposure level. By default, set to <code>EXPOSE_SAFE</code>.
-     * @param exposureLevel can be any of the <code>EXPOSE_xxx</code>
-     * constants.
-     */
-    public void setExposureLevel(int exposureLevel) {
-        checkModifiable();
-
-        if (classIntrospector.getExposureLevel() != exposureLevel) {
-            ClassIntrospectorBuilder builder = classIntrospector.createBuilder();
-            builder.setExposureLevel(exposureLevel);
-            replaceClassIntrospector(builder);
-        }
-    }
-
-    /**
      * @since 2.3.21
      */
     public int getExposureLevel() {
@@ -439,28 +265,8 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
     }
 
     /**
-     * Controls whether public instance fields of classes are exposed to
-     * templates.
-     * @param exposeFields if set to true, public instance fields of classes
-     * that do not have a property getter defined can be accessed directly by
-     * their name. If there is a property getter for a property of the same
-     * name as the field (i.e. getter "getFoo()" and field "foo"), then
-     * referring to "foo" in template invokes the getter. If set to false, no
-     * access to public instance fields of classes is given. Default is false.
-     */
-    public void setExposeFields(boolean exposeFields) {
-        checkModifiable();
-
-        if (classIntrospector.getExposeFields() != exposeFields) {
-            ClassIntrospectorBuilder builder = classIntrospector.createBuilder();
-            builder.setExposeFields(exposeFields);
-            replaceClassIntrospector(builder);
-        }
-    }
-
-    /**
      * Returns whether exposure of public instance fields of classes is
-     * enabled. See {@link #setExposeFields(boolean)} for details.
+     * enabled. See {@link ExtendableBuilder#setExposeFields(boolean)} for details.
      * @return true if public instance fields are exposed, false otherwise.
      */
     public boolean isExposeFields() {
@@ -471,39 +277,15 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
         return classIntrospector.getMethodAppearanceFineTuner();
     }
 
-    /**
-     * Used to tweak certain aspects of how methods appear in the data-model;
-     * see {@link MethodAppearanceFineTuner} for more.
-     */
-    public void setMethodAppearanceFineTuner(MethodAppearanceFineTuner methodAppearanceFineTuner) {
-        checkModifiable();
-
-        if (classIntrospector.getMethodAppearanceFineTuner() != methodAppearanceFineTuner) {
-            ClassIntrospectorBuilder builder = classIntrospector.createBuilder();
-            builder.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
-            replaceClassIntrospector(builder);
-        }
-    }
-
     MethodSorter getMethodSorter() {
         return classIntrospector.getMethodSorter();
-    }
-
-    void setMethodSorter(MethodSorter methodSorter) {
-        checkModifiable();
-
-        if (classIntrospector.getMethodSorter() != methodSorter) {
-            ClassIntrospectorBuilder builder = classIntrospector.createBuilder();
-            builder.setMethodSorter(methodSorter);
-            replaceClassIntrospector(builder);
-        }
     }
 
     /**
      * Tells if this instance acts like if its class introspection cache is sharable with other {@link DefaultObjectWrapper}-s.
      * A restricted cache denies certain too "antisocial" operations, like {@link #clearClassIntrospecitonCache()}.
      * The value depends on how the instance
-     * was created; with a public constructor (then this is {@code false}), or with {@link DefaultObjectWrapperBuilder}
+     * was created; with a public constructor (then this is {@code false}), or with {@link Builder}
      * (then it's {@code true}). Note that in the last case it's possible that the introspection cache
      * will not be actually shared because there's no one to share with, but this will {@code true} even then.
      *
@@ -511,42 +293,6 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
      */
     public boolean isClassIntrospectionCacheRestricted() {
         return classIntrospector.getHasSharedInstanceRestrictons();
-    }
-
-    /**
-     * Replaces the value of {@link #classIntrospector}, but first it unregisters
-     * the model factories in the old {@link #classIntrospector}.
-     */
-    private void replaceClassIntrospector(ClassIntrospectorBuilder builder) {
-        checkModifiable();
-
-        final ClassIntrospector newCI = new ClassIntrospector(builder, sharedIntrospectionLock);
-        final ClassIntrospector oldCI;
-
-        // In principle this need not be synchronized, but as apps might publish the configuration improperly, or
-        // even modify the wrapper after publishing. This doesn't give 100% protection from those violations,
-        // as classIntrospector reading aren't everywhere synchronized for performance reasons. It still decreases the
-        // chance of accidents, because some ops on classIntrospector are synchronized, and because it will at least
-        // push the new value into the common shared memory.
-        synchronized (sharedIntrospectionLock) {
-            oldCI = classIntrospector;
-            if (oldCI != null) {
-                // Note that after unregistering the model factory might still gets some callback from the old
-                // classIntrospector
-                if (staticModels != null) {
-                    oldCI.unregisterModelFactory(staticModels);
-                    staticModels.clearCache();
-                }
-                if (enumModels != null) {
-                    oldCI.unregisterModelFactory(enumModels);
-                    enumModels.clearCache();
-                }
-            }
-
-            classIntrospector = newCI;
-
-            registerModelFactories();
-        }
     }
 
     private void registerModelFactories() {
@@ -559,47 +305,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
     }
 
     /**
-     * Sets whether methods shadow items in beans. When true (this is the
-     * default value), <code>${object.name}</code> will first try to locate
-     * a bean method or property with the specified name on the object, and
-     * only if it doesn't find it will it try to call
-     * <code>object.get(name)</code>, the so-called "generic get method" that
-     * is usually used to access items of a container (i.e. elements of a map).
-     * When set to false, the lookup order is reversed and generic get method
-     * is called first, and only if it returns null is method lookup attempted.
-     */
-    public void setMethodsShadowItems(boolean methodsShadowItems) {
-        // This sync is here as this method was originally synchronized, but was never truly thread-safe, so I don't
-        // want to advertise it in the javadoc, nor I wanted to break any apps that work because of this accidentally.
-        synchronized (this) {
-            checkModifiable();
-            this.methodsShadowItems = methodsShadowItems;
-        }
-    }
-
-    boolean isMethodsShadowItems() {
-        return methodsShadowItems;
-    }
-
-    /**
-     * Sets the default date type to use for date models that result from
-     * a plain <tt>java.util.Date</tt> instead of <tt>java.sql.Date</tt> or
-     * <tt>java.sql.Time</tt> or <tt>java.sql.Timestamp</tt>. Default value is
-     * {@link TemplateDateModel#UNKNOWN}.
-     * @param defaultDateType the new default date type.
-     */
-    public void setDefaultDateType(int defaultDateType) {
-        // This sync is here as this method was originally synchronized, but was never truly thread-safe, so I don't
-        // want to advertise it in the javadoc, nor I wanted to break any apps that work because of this accidentally.
-        synchronized (this) {
-            checkModifiable();
-
-            this.defaultDateType = defaultDateType;
-        }
-    }
-
-    /**
-     * Returns the default date type. See {@link #setDefaultDateType(int)} for
+     * Returns the default date type. See {@link ExtendableBuilder#setDefaultDateType(int)} for
      * details.
      * @return the default date type
      */
@@ -612,23 +318,14 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
      */
     // [FM3] Remove
     @Deprecated
-    public void setUseModelCache(boolean useCache) {
-        checkModifiable();
-        useModelCache = useCache;
-    }
-
-    /**
-     * @deprecated Does nothing in FreeMarker 3 - we kept it for now to postopne reworking some JUnit tests.
-     */
-    // [FM3] Remove
-    @Deprecated
     public boolean getUseModelCache() {
         return useModelCache;
     }
 
     /**
-     * Returns the version given with {@link #DefaultObjectWrapper(Version)}, normalized to the lowest version where a change
-     * has occurred. Thus, this is not necessarily the same version than that was given to the constructor.
+     * Returns the version given with {@link Builder (Version)}, normalized to the lowest version
+     * where a change has occurred. Thus, this is not necessarily the same version than that was given to the
+     * constructor.
      *
      * @since 2.3.21
      */
@@ -1481,4 +1178,501 @@ public class DefaultObjectWrapper implements RichObjectWrapper, WriteProtectable
                 + ")";
     }
 
+    /**
+     * Gets/creates a {@link DefaultObjectWrapper} singleton instance that's already configured as specified in the properties of
+     * this object; this is recommended over using the {@link DefaultObjectWrapper} constructors. The returned instance can't be
+     * further configured (it's write protected).
+     *
+     * <p>The builder meant to be used as a drop-away object (not stored in a field), like in this example:
+     * <pre>
+     *    DefaultObjectWrapper dow = new Builder(Configuration.VERSION_2_3_21).build();
+     * </pre>
+     *
+     * <p>Or, a more complex example:</p>
+     * <pre>
+     *    // Create the builder:
+     *    Builder builder = new Builder(Configuration.VERSION_2_3_21);
+     *    // Set desired DefaultObjectWrapper configuration properties:
+     *    builder.setUseModelCache(true);
+     *    builder.setExposeFields(true);
+     *
+     *    // Get the singleton:
+     *    DefaultObjectWrapper dow = builder.build();
+     *    // You don't need the builder anymore.
+     * </pre>
+     *
+     * <p>Despite that builders aren't meant to be used as long-lived objects (singletons), the builder is thread-safe after
+     * you have stopped calling its setters and it was safely published (see JSR 133) to other threads. This can be useful
+     * if you have to put the builder into an IoC container, rather than the singleton it produces.
+     *
+     * <p>The main benefit of using a builder instead of a {@link DefaultObjectWrapper} constructor is that this way the
+     * internal object wrapping-related caches (most notably the class introspection cache) will come from a global,
+     * JVM-level (more precisely, {@code freemarker-core.jar}-class-loader-level) cache. Also the
+     * {@link DefaultObjectWrapper} singletons
+     * themselves are stored in this global cache. Some of the wrapping-related caches are expensive to build and can take
+     * significant amount of memory. Using builders, components that use FreeMarker will share {@link DefaultObjectWrapper}
+     * instances and said caches even if they use separate FreeMarker {@link Configuration}-s. (Many Java libraries use
+     * FreeMarker internally, so {@link Configuration} sharing is not an option.)
+     *
+     * <p>Note that the returned {@link DefaultObjectWrapper} instances are only weak-referenced from inside the builder mechanism,
+     * so singletons are garbage collected when they go out of usage, just like non-singletons.
+     *
+     * <p>About the object wrapping-related caches:
+     * <ul>
+     *   <li><p>Class introspection cache: Stores information about classes that once had to be wrapped. The cache is
+     *     stored in the static fields of certain FreeMarker classes. Thus, if you have two {@link DefaultObjectWrapper}
+     *     instances, they might share the same class introspection cache. But if you have two
+     *     {@code freemarker.jar}-s (typically, in two Web Application's {@code WEB-INF/lib} directories), those won't
+     *     share their caches (as they don't share the same FreeMarker classes).
+     *     Also, currently there's a separate cache for each permutation of the property values that influence class
+     *     introspection: {@link Builder#setExposeFields(boolean) expose_fields} and
+     *     {@link Builder#setExposureLevel(int) exposure_level}. So only {@link DefaultObjectWrapper} where those
+     *     properties are the same may share class introspection caches among each other.
+     *   </li>
+     *   <li><p>Model caches: These are local to a {@link DefaultObjectWrapper}. {@link Builder} returns the same
+     *     {@link DefaultObjectWrapper} instance for equivalent properties (unless the existing instance was garbage collected
+     *     and thus a new one had to be created), hence these caches will be re-used too. {@link DefaultObjectWrapper} instances
+     *     are cached in the static fields of FreeMarker too, but there's a separate cache for each
+     *     Thread Context Class Loader, which in a servlet container practically means a separate cache for each Web
+     *     Application (each servlet context). (This is like so because for resolving class names to classes FreeMarker
+     *     uses the Thread Context Class Loader, so the result of the resolution can be different for different
+     *     Thread Context Class Loaders.) The model caches are:
+     *     <ul>
+     *       <li><p>
+     *         Static model caches: These are used by the hash returned by {@link DefaultObjectWrapper#getEnumModels()} and
+     *         {@link DefaultObjectWrapper#getStaticModels()}, for caching {@link TemplateModel}-s for the static methods/fields
+     *         and Java enums that were accessed through them. To use said hashes, you have to put them
+     *         explicitly into the data-model or expose them to the template explicitly otherwise, so in most applications
+     *         these caches aren't unused.
+     *       </li>
+     *       <li><p>
+     *         Instance model cache: By default off (see {@link ExtendableBuilder#setUseModelCache(boolean)}). Caches the
+     *         {@link TemplateModel}-s for all Java objects that were accessed from templates.
+     *       </li>
+     *     </ul>
+     *   </li>
+     * </ul>
+     *
+     * <p>Note that what this method documentation says about {@link DefaultObjectWrapper} also applies to
+     * {@link Builder}.
+     */
+    public static final class Builder extends ExtendableBuilder<DefaultObjectWrapper, Builder> {
+
+        private final static Map<ClassLoader, Map<Builder, WeakReference<DefaultObjectWrapper>>>
+                INSTANCE_CACHE = new WeakHashMap<>();
+        private final static ReferenceQueue<DefaultObjectWrapper> INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue<>();
+
+        /**
+         * See {@link ExtendableBuilder#ExtendableBuilder(Version, boolean)}
+         */
+        public Builder(Version incompatibleImprovements) {
+            super(incompatibleImprovements, false);
+        }
+
+        /** For unit testing only */
+        static void clearInstanceCache() {
+            synchronized (INSTANCE_CACHE) {
+                INSTANCE_CACHE.clear();
+            }
+        }
+
+        /**
+         * Returns a {@link DefaultObjectWrapper} instance that matches the settings of this builder. This will be possibly
+         * a singleton that is also in use elsewhere.
+         */
+        public DefaultObjectWrapper build() {
+            return _ModelAPI.getDefaultObjectWrapperSubclassSingleton(
+                    this, INSTANCE_CACHE, INSTANCE_CACHE_REF_QUEUE, ConstructorInvoker.INSTANCE);
+        }
+
+        /**
+         * For unit testing only
+         */
+        static Map<ClassLoader, Map<Builder, WeakReference<DefaultObjectWrapper>>> getInstanceCache() {
+            return INSTANCE_CACHE;
+        }
+
+        private static class ConstructorInvoker
+            implements _ModelAPI._ConstructorInvoker<DefaultObjectWrapper, Builder> {
+
+            private static final ConstructorInvoker INSTANCE = new ConstructorInvoker();
+
+            @Override
+            public DefaultObjectWrapper invoke(Builder builder) {
+                return new DefaultObjectWrapper(builder, true);
+            }
+        }
+
+    }
+
+    /**
+     * Holds {@link DefaultObjectWrapper} configuration settings and defines their defaults.
+     * You will not use this abstract class directly, but concrete subclasses like {@link Builder}.
+     * Unless, you are developing a builder for a custom {@link DefaultObjectWrapper} subclass. In that case, note that
+     * overriding the {@link #equals} and {@link #hashCode} is important, as these objects are used as {@link ObjectWrapper}
+     * singleton lookup keys.
+     */
+    protected abstract static class ExtendableBuilder<
+            ProductT extends DefaultObjectWrapper, SelfT extends ExtendableBuilder<ProductT, SelfT>>
+            extends BuilderBase<ProductT, SelfT> implements Cloneable {
+
+        private final Version incompatibleImprovements;
+
+        ClassIntrospector.Builder classIntrospectorBuilder;
+
+        // Properties and their *defaults*:
+        private boolean simpleMapWrapper;
+        private int defaultDateType = TemplateDateModel.UNKNOWN;
+        private ObjectWrapper outerIdentity;
+        private boolean strict;
+        private boolean useModelCache;
+        private boolean usePrivateCaches;
+        // Attention!
+        // - As this object is a cache key, non-normalized field values should be avoided.
+        // - Fields with default values must be set until the end of the constructor to ensure that when the lookup happens,
+        //   there will be no unset fields.
+        // - If you add a new field, review all methods in this class
+
+        /**
+         * @param incompatibleImprovements
+         *   Sets which of the non-backward-compatible improvements should be enabled. Not {@code null}. This version number
+         *   is the same as the FreeMarker version number with which the improvements were implemented.
+         *
+         *   <p>For new projects, it's recommended to set this to the FreeMarker version that's used during the development.
+         *   For released products that are still actively developed it's a low risk change to increase the 3rd
+         *   version number further as FreeMarker is updated, but of course you should always check the list of effects
+         *   below. Increasing the 2nd or 1st version number possibly mean substantial changes with higher risk of breaking
+         *   the application, but again, see the list of effects below.
+         *
+         *   <p>The reason it's separate from {@link Configuration#setIncompatibleImprovements(Version)} is that
+         *   {@link ObjectWrapper} objects are often shared among multiple {@link Configuration}-s, so the two version
+         *   numbers are technically independent. But it's recommended to keep those two version numbers the same.
+         *
+         *   <p>The changes enabled by {@code incompatibleImprovements} are:
+         *   <ul>
+         *     <li>
+         *       <p>3.0.0: No changes; this is the starting point, the version used in older projects.
+         *     </li>
+         *   </ul>
+         *
+         *   <p>Note that the version will be normalized to the lowest version where the same incompatible
+         *   {@link DefaultObjectWrapper} improvements were already present, so {@link #getIncompatibleImprovements()} might returns
+         *   a lower version than what you have specified.
+         * @param isIncompImprsAlreadyNormalized
+         *         Tells if the {@code incompatibleImprovements} parameter contains an <em>already normalized</em> value.
+         *         This parameter meant to be {@code true} when the class that extends {@link DefaultObjectWrapper} needs to
+         *         add additional breaking versions over those of {@link DefaultObjectWrapper}. Thus, if this parameter is
+         *         {@code true}, the versions where {@link DefaultObjectWrapper} had breaking changes must be already
+         *         factored into the {@code incompatibleImprovements} parameter value, as no more normalization will happen.
+         *         (You can use {@link DefaultObjectWrapper#normalizeIncompatibleImprovementsVersion(Version)} to discover
+         *         those.)
+         */
+        protected ExtendableBuilder(Version incompatibleImprovements, boolean isIncompImprsAlreadyNormalized) {
+            _CoreAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
+
+            incompatibleImprovements = isIncompImprsAlreadyNormalized
+                    ? incompatibleImprovements
+                    : normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
+            this.incompatibleImprovements = incompatibleImprovements;
+
+            classIntrospectorBuilder = new ClassIntrospector.Builder(incompatibleImprovements);
+        }
+
+        /**
+         * Properly implementing this method is important if the builder is used as a cache key; if you override
+         * {@link ExtendableBuilder} and add new fields, don't forget to override it!
+         */
+        // TODO Move this to Builder and a static helper method
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + incompatibleImprovements.hashCode();
+            result = prime * result + (simpleMapWrapper ? 1231 : 1237);
+            result = prime * result + defaultDateType;
+            result = prime * result + (outerIdentity != null ? outerIdentity.hashCode() : 0);
+            result = prime * result + (strict ? 1231 : 1237);
+            result = prime * result + (useModelCache ? 1231 : 1237);
+            result = prime * result + (usePrivateCaches ? 1231 : 1237);
+            result = prime * result + classIntrospectorBuilder.hashCode();
+            return result;
+        }
+
+        /**
+         * Two {@link ExtendableBuilder}-s are equal exactly if their classes are identical ({@code ==}), and their
+         * field values are equal. Properly implementing this method is important if the builder is used as a cache key;
+         * if you override {@link ExtendableBuilder} and add new fields, don't forget to override it!
+         */
+        // TODO Move this to Builder and a static helper method
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (getClass() != obj.getClass()) return false;
+            ExtendableBuilder other = (ExtendableBuilder) obj;
+
+            if (!incompatibleImprovements.equals(other.incompatibleImprovements)) return false;
+            if (simpleMapWrapper != other.simpleMapWrapper) return false;
+            if (defaultDateType != other.defaultDateType) return false;
+            if (outerIdentity != other.outerIdentity) return false;
+            if (strict != other.strict) return false;
+            if (useModelCache != other.useModelCache) return false;
+            if (usePrivateCaches != other.usePrivateCaches) return false;
+            return classIntrospectorBuilder.equals(other.classIntrospectorBuilder);
+        }
+
+        /**
+         * In case the builder is used as a cache key, this is used to clone it before it's actually used as a key; if
+         * you override {@link ExtendableBuilder} and add new fields that needs deep cloning, don't forget to
+         * override it! Calls {@link Object#clone()} internally (among others), so newly added fields are automatically
+         * copied, but again, that's not enough if the field value is mutable.
+         */
+        // TODO Move this to Builder and DeepCloneableBuilder
+        protected SelfT deepClone() {
+            try {
+                @SuppressWarnings("unchecked") SelfT clone = (SelfT) super.clone();
+                clone.classIntrospectorBuilder = (ClassIntrospector.Builder) classIntrospectorBuilder.clone();
+                return clone;
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException("Failed to deepClone ExtendableBuilder", e);
+            }
+        }
+
+        public Version getIncompatibleImprovements() {
+            return incompatibleImprovements;
+        }
+
+        /**
+         * Getter pair of {@link #setDefaultDateType(int)}
+         */
+        public int getDefaultDateType() {
+            return defaultDateType;
+        }
+
+        /**
+         * Sets the default date type to use for date models that result from
+         * a plain <tt>java.util.Date</tt> instead of <tt>java.sql.Date</tt> or
+         * <tt>java.sql.Time</tt> or <tt>java.sql.Timestamp</tt>. Default value is
+         * {@link TemplateDateModel#UNKNOWN}.
+         * @param defaultDateType the new default date type.
+         */
+        public void setDefaultDateType(int defaultDateType) {
+            this.defaultDateType = defaultDateType;
+        }
+
+        /**
+         * Fluent API equivalent of {@link #setDefaultDateType(int)}.
+         */
+        public SelfT defaultDateType(int defaultDateType) {
+            setDefaultDateType(defaultDateType);
+            return self();
+        }
+
+        /**
+         * Getter pair of {@link #setOuterIdentity(ObjectWrapper)}.
+         */
+        public ObjectWrapper getOuterIdentity() {
+            return outerIdentity;
+        }
+
+        /**
+         * When wrapping an object, the DefaultObjectWrapper commonly needs to wrap "sub-objects", for example each
+         * element in a wrapped collection. Normally it wraps these objects using itself. However, this makes it
+         * difficult to delegate to a DefaultObjectWrapper as part of a custom aggregate ObjectWrapper. This method lets
+         * you set the ObjectWrapper which will be used to wrap the sub-objects.
+         *
+         * @param outerIdentity
+         *         the aggregate ObjectWrapper, or {@code null} if we will use the object created by this builder.
+         */
+        public void setOuterIdentity(ObjectWrapper outerIdentity) {
+            this.outerIdentity = outerIdentity;
+        }
+
+        /**
+         * Fluent API equivalent of {@link #setOuterIdentity(ObjectWrapper)}.
+         */
+        public SelfT outerIdentity(ObjectWrapper outerIdentity) {
+            setOuterIdentity(outerIdentity);
+            return self();
+        }
+
+        /**
+         * Getter pair of {@link #setStrict(boolean)}.
+         */
+        public boolean isStrict() {
+            return strict;
+        }
+
+        /**
+         * Specifies if an attempt to read a bean property that doesn't exist in the
+         * wrapped object should throw an {@link InvalidPropertyException}.
+         *
+         * <p>If this property is <tt>false</tt> (the default) then an attempt to read
+         * a missing bean property is the same as reading an existing bean property whose
+         * value is <tt>null</tt>. The template can't tell the difference, and thus always
+         * can use <tt>?default('something')</tt> and <tt>?exists</tt> and similar built-ins
+         * to handle the situation.
+         *
+         * <p>If this property is <tt>true</tt> then an attempt to read a bean propertly in
+         * the template (like <tt>myBean.aProperty</tt>) that doesn't exist in the bean
+         * object (as opposed to just holding <tt>null</tt> value) will cause
+         * {@link InvalidPropertyException}, which can't be suppressed in the template
+         * (not even with <tt>myBean.noSuchProperty?default('something')</tt>). This way
+         * <tt>?default('something')</tt> and <tt>?exists</tt> and similar built-ins can be used to
+         * handle existing properties whose value is <tt>null</tt>, without the risk of
+         * hiding typos in the property names. Typos will always cause error. But mind you, it
+         * goes against the basic approach of FreeMarker, so use this feature only if you really
+         * know what you are doing.
+         */
+        public void setStrict(boolean strict) {
+            this.strict = strict;
+        }
+
+        /**
+         * Fluent API equivalent of {@link #setStrict(boolean)}.
+         */
+        public SelfT strict(boolean strict) {
+            setStrict(strict);
+            return self();
+        }
+
+        public boolean getUseModelCache() {
+            return useModelCache;
+        }
+
+        /**
+         * @deprecated Does nothing in FreeMarker 3 - we kept it for now to postopne reworking some JUnit tests.
+         */
+        // [FM3] Remove
+        public void setUseModelCache(boolean useModelCache) {
+            this.useModelCache = useModelCache;
+        }
+
+        /**
+         * Fluent API equivalent of {@link #setUseModelCache(boolean)}.
+         * @deprecated Does nothing in FreeMarker 3 - we kept it for now to postopne reworking some JUnit tests.
+         */
+        public SelfT useModelCache(boolean useModelCache) {
+            setUseModelCache(useModelCache);
+            return self();
+        }
+
+        /**
+         * Getter pair of {@link #setUsePrivateCaches(boolean)}.
+         */
+        public boolean getUsePrivateCaches() {
+            return usePrivateCaches;
+        }
+
+        /**
+         * Tells if the instance cerates should try to caches with other {@link DefaultObjectWrapper} instances (where
+         * possible), or it should always invoke its own caches and not share that with anyone else.
+         * */
+        public void setUsePrivateCaches(boolean usePrivateCaches) {
+            this.usePrivateCaches = usePrivateCaches;
+        }
+
+        /**
+         * Fluent API equivalent of {@link #setUsePrivateCaches(boolean)}
+         */
+        public SelfT usePrivateCaches(boolean usePrivateCaches) {
+            setUsePrivateCaches(usePrivateCaches);
+            return self();
+        }
+
+        public int getExposureLevel() {
+            return classIntrospectorBuilder.getExposureLevel();
+        }
+
+        /**
+         * Sets the method exposure level. By default, set to <code>EXPOSE_SAFE</code>.
+         * @param exposureLevel can be any of the <code>EXPOSE_xxx</code>
+         * constants.
+         */
+        public void setExposureLevel(int exposureLevel) {
+            classIntrospectorBuilder.setExposureLevel(exposureLevel);
+        }
+
+        public SelfT exposureLevel(int exposureLevel) {
+            setExposureLevel(exposureLevel);
+            return self();
+        }
+
+        /**
+         * Getter pair of {@link #setExposeFields(boolean)}
+         */
+        public boolean getExposeFields() {
+            return classIntrospectorBuilder.getExposeFields();
+        }
+
+        /**
+         * Controls whether public instance fields of classes are exposed to
+         * templates.
+         * @param exposeFields if set to true, public instance fields of classes
+         * that do not have a property getter defined can be accessed directly by
+         * their name. If there is a property getter for a property of the same
+         * name as the field (i.e. getter "getFoo()" and field "foo"), then
+         * referring to "foo" in template invokes the getter. If set to false, no
+         * access to public instance fields of classes is given. Default is false.
+         */
+        public void setExposeFields(boolean exposeFields) {
+            classIntrospectorBuilder.setExposeFields(exposeFields);
+        }
+
+        /**
+         * Fluent API equivalent of {@link #setExposeFields(boolean)}
+         */
+        public SelfT exposeFields(boolean exposeFields) {
+            setExposeFields(exposeFields);
+            return self();
+        }
+
+        /**
+         * Getter pair of {@link #setMethodAppearanceFineTuner(MethodAppearanceFineTuner)}
+         */
+        public MethodAppearanceFineTuner getMethodAppearanceFineTuner() {
+            return classIntrospectorBuilder.getMethodAppearanceFineTuner();
+        }
+
+        /**
+         * Used to tweak certain aspects of how methods appear in the data-model;
+         * see {@link MethodAppearanceFineTuner} for more.
+         * Setting this to non-{@code null} will disable class introspection cache sharing, unless
+         * the value implements {@link SingletonCustomizer}.
+         */
+        public void setMethodAppearanceFineTuner(MethodAppearanceFineTuner methodAppearanceFineTuner) {
+            classIntrospectorBuilder.setMethodAppearanceFineTuner(methodAppearanceFineTuner);
+        }
+
+        /**
+         * Fluent API equivalent of {@link #setMethodAppearanceFineTuner(MethodAppearanceFineTuner)}
+         */
+        public SelfT methodAppearanceFineTuner(MethodAppearanceFineTuner methodAppearanceFineTuner) {
+            setMethodAppearanceFineTuner(methodAppearanceFineTuner);
+            return self();
+        }
+
+        /**
+         * Used internally for testing.
+         */
+        MethodSorter getMethodSorter() {
+            return classIntrospectorBuilder.getMethodSorter();
+        }
+
+        /**
+         * Used internally for testing.
+         */
+        void setMethodSorter(MethodSorter methodSorter) {
+            classIntrospectorBuilder.setMethodSorter(methodSorter);
+        }
+
+        /**
+         * Used internally for testing.
+         */
+        SelfT methodSorter(MethodSorter methodSorter) {
+            setMethodSorter(methodSorter);
+            return self();
+        }
+
+    }
 }

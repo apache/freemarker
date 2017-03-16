@@ -47,8 +47,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.util.BugException;
+import org.apache.freemarker.core.util.BuilderBase;
 import org.apache.freemarker.core.util._JavaVersions;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.slf4j.Logger;
@@ -161,17 +163,17 @@ class ClassIntrospector {
      * @param pa
      *            Stores what the values of the JavaBean properties of the returned instance will be. Not {@code null}.
      */
-    ClassIntrospector(ClassIntrospectorBuilder pa, Object sharedLock) {
+    ClassIntrospector(Builder pa, Object sharedLock) {
         this(pa, sharedLock, false, false);
     }
 
     /**
      * @param hasSharedInstanceRestrictons
-     *            {@code true} exactly if we are creating a new instance with {@link ClassIntrospectorBuilder}. Then
+     *            {@code true} exactly if we are creating a new instance with {@link Builder}. Then
      *            it's {@code true} even if it won't put the instance into the cache.
      */
-    ClassIntrospector(ClassIntrospectorBuilder builder, Object sharedLock,
-            boolean hasSharedInstanceRestrictons, boolean shared) {
+    ClassIntrospector(Builder builder, Object sharedLock,
+                      boolean hasSharedInstanceRestrictons, boolean shared) {
         _NullArgumentException.check("sharedLock", sharedLock);
 
         exposureLevel = builder.getExposureLevel();
@@ -190,11 +192,11 @@ class ClassIntrospector {
     }
 
     /**
-     * Returns a {@link ClassIntrospectorBuilder}-s that could be used to create an identical {@link #ClassIntrospector}
-     * . The returned {@link ClassIntrospectorBuilder} can be modified without interfering with anything.
+     * Returns a {@link Builder}-s that could be used to invoke an identical {@link #ClassIntrospector}
+     * . The returned {@link Builder} can be modified without interfering with anything.
      */
-    ClassIntrospectorBuilder createBuilder() {
-        return new ClassIntrospectorBuilder(this);
+    Builder createBuilder() {
+        return new Builder(this);
     }
 
     // ------------------------------------------------------------------------------------------------------------------
@@ -1037,7 +1039,7 @@ class ClassIntrospector {
     }
 
     /**
-     * Returns {@code true} if this instance was created with {@link ClassIntrospectorBuilder}, even if it wasn't
+     * Returns {@code true} if this instance was created with {@link Builder}, even if it wasn't
      * actually put into the cache (as we reserve the right to do so in later versions).
      */
     boolean getHasSharedInstanceRestrictons() {
@@ -1071,4 +1073,164 @@ class ClassIntrospector {
         }
     }
 
+    static final class Builder extends BuilderBase<ClassIntrospector, Builder> implements Cloneable {
+
+        private static final Map/*<PropertyAssignments, Reference<ClassIntrospector>>*/ INSTANCE_CACHE = new HashMap();
+        private static final ReferenceQueue INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue();
+
+        // Properties and their *defaults*:
+        private int exposureLevel = DefaultObjectWrapper.EXPOSE_SAFE;
+        private boolean exposeFields;
+        private MethodAppearanceFineTuner methodAppearanceFineTuner;
+        private MethodSorter methodSorter;
+        // Attention:
+        // - This is also used as a cache key, so non-normalized field values should be avoided.
+        // - If some field has a default value, it must be set until the end of the constructor. No field that has a
+        //   default can be left unset (like null).
+        // - If you add a new field, review all methods in this class, also the ClassIntrospector constructor
+
+        Builder(ClassIntrospector ci) {
+            exposureLevel = ci.exposureLevel;
+            exposeFields = ci.exposeFields;
+            methodAppearanceFineTuner = ci.methodAppearanceFineTuner;
+            methodSorter = ci.methodSorter;
+        }
+
+        Builder(Version incompatibleImprovements) {
+            // Warning: incompatibleImprovements must not affect this object at versions increments where there's no
+            // change in the DefaultObjectWrapper.normalizeIncompatibleImprovements results. That is, this class may don't react
+            // to some version changes that affects DefaultObjectWrapper, but not the other way around.
+            _NullArgumentException.check(incompatibleImprovements);
+            // Currently nothing depends on incompatibleImprovements
+        }
+
+        @Override
+        protected Object clone() {
+            try {
+                return super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException("Failed to deepClone Builder", e);
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + (exposeFields ? 1231 : 1237);
+            result = prime * result + exposureLevel;
+            result = prime * result + System.identityHashCode(methodAppearanceFineTuner);
+            result = prime * result + System.identityHashCode(methodSorter);
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (getClass() != obj.getClass()) return false;
+            Builder other = (Builder) obj;
+
+            if (exposeFields != other.exposeFields) return false;
+            if (exposureLevel != other.exposureLevel) return false;
+            if (methodAppearanceFineTuner != other.methodAppearanceFineTuner) return false;
+            return methodSorter == other.methodSorter;
+        }
+
+        public int getExposureLevel() {
+            return exposureLevel;
+        }
+
+        /** See {@link DefaultObjectWrapper#setExposureLevel(int)}. */
+        public void setExposureLevel(int exposureLevel) {
+            if (exposureLevel < DefaultObjectWrapper.EXPOSE_ALL || exposureLevel > DefaultObjectWrapper.EXPOSE_NOTHING) {
+                throw new IllegalArgumentException("Illegal exposure level: " + exposureLevel);
+            }
+
+            this.exposureLevel = exposureLevel;
+        }
+
+        public boolean getExposeFields() {
+            return exposeFields;
+        }
+
+        /** See {@link DefaultObjectWrapper#setExposeFields(boolean)}. */
+        public void setExposeFields(boolean exposeFields) {
+            this.exposeFields = exposeFields;
+        }
+
+        public MethodAppearanceFineTuner getMethodAppearanceFineTuner() {
+            return methodAppearanceFineTuner;
+        }
+
+        public void setMethodAppearanceFineTuner(MethodAppearanceFineTuner methodAppearanceFineTuner) {
+            this.methodAppearanceFineTuner = methodAppearanceFineTuner;
+        }
+
+        public MethodSorter getMethodSorter() {
+            return methodSorter;
+        }
+
+        public void setMethodSorter(MethodSorter methodSorter) {
+            this.methodSorter = methodSorter;
+        }
+
+        private static void removeClearedReferencesFromInstanceCache() {
+            Reference clearedRef;
+            while ((clearedRef = INSTANCE_CACHE_REF_QUEUE.poll()) != null) {
+                synchronized (INSTANCE_CACHE) {
+                    findClearedRef: for (Iterator it = INSTANCE_CACHE.values().iterator(); it.hasNext(); ) {
+                        if (it.next() == clearedRef) {
+                            it.remove();
+                            break findClearedRef;
+                        }
+                    }
+                }
+            }
+        }
+
+        /** For unit testing only */
+        static void clearInstanceCache() {
+            synchronized (INSTANCE_CACHE) {
+                INSTANCE_CACHE.clear();
+            }
+        }
+
+        /** For unit testing only */
+        static Map getInstanceCache() {
+            return INSTANCE_CACHE;
+        }
+
+        /**
+         * Returns an instance that is possibly shared (singleton). Note that this comes with its own "shared lock",
+         * since everyone who uses this object will have to lock with that common object.
+         */
+        @Override
+        public ClassIntrospector build() {
+            if ((methodAppearanceFineTuner == null || methodAppearanceFineTuner instanceof SingletonCustomizer)
+                    && (methodSorter == null || methodSorter instanceof SingletonCustomizer)) {
+                // Instance can be cached.
+                ClassIntrospector instance;
+                synchronized (INSTANCE_CACHE) {
+                    Reference instanceRef = (Reference) INSTANCE_CACHE.get(this);
+                    instance = instanceRef != null ? (ClassIntrospector) instanceRef.get() : null;
+                    if (instance == null) {
+                        Builder thisClone = (Builder) clone();  // prevent any aliasing issues
+                        instance = new ClassIntrospector(thisClone, new Object(), true, true);
+                        INSTANCE_CACHE.put(thisClone, new WeakReference(instance, INSTANCE_CACHE_REF_QUEUE));
+                    }
+                }
+
+                removeClearedReferencesFromInstanceCache();
+
+                return instance;
+            } else {
+                // If methodAppearanceFineTuner or methodSorter is specified and isn't marked as a singleton, the
+                // ClassIntrospector can't be shared/cached as those objects could contain a back-reference to the
+                // DefaultObjectWrapper.
+                return new ClassIntrospector(this, new Object(), true, false);
+            }
+        }
+
+    }
 }

@@ -302,7 +302,7 @@ public class WebAppTestCase {
                 FileUtils.deleteDirectory(d);
             }
             if (!d.mkdirs()) {
-               throw new IOException("Failed to create Jetty temp directory: " + d); 
+               throw new IOException("Failed to invoke Jetty temp directory: " + d);
             }
             testTempDirectory = d;
         }

@@ -26,9 +26,9 @@ import org.apache.freemarker.core.util._NullArgumentException;
 
 /**
  * Class of {@link TemplateLookupResult} instances created by {@link TemplateLoaderBasedTemplateLookupContext}. To
- * create instances of this inside your own {@link TemplateLoaderBasedTemplateLookupContext} subclass, call
+ * invoke instances of this inside your own {@link TemplateLoaderBasedTemplateLookupContext} subclass, call
  * {@link TemplateLoaderBasedTemplateLookupContext#createLookupResult(String, TemplateLoadingResult)} and
- * {@link TemplateLoaderBasedTemplateLookupContext#createNegativeLookupResult()}. You should not try to create instances
+ * {@link TemplateLoaderBasedTemplateLookupContext#createNegativeLookupResult()}. You should not try to invoke instances
  * anywhere else. Also, this class deliberately can't be subclassed (except inside FreeMarker).
  */
 public abstract class TemplateLoaderBasedTemplateLookupResult extends TemplateLookupResult {
@@ -38,7 +38,7 @@ public abstract class TemplateLoaderBasedTemplateLookupResult extends TemplateLo
         return NegativeTemplateLookupResult.INSTANCE;
     }
     
-    /** Used internally to create the appropriate kind of result from the parameters. */
+    /** Used internally to invoke the appropriate kind of result from the parameters. */
     static TemplateLoaderBasedTemplateLookupResult from(String templateSourceName, TemplateLoadingResult templateLoaderResult) {
         return templateLoaderResult.getStatus() != TemplateLoadingResultStatus.NOT_FOUND
                 ? new PositiveTemplateLookupResult(templateSourceName, templateLoaderResult)

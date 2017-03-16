@@ -22,13 +22,12 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
 
 public class IteratorIssuesTest extends TemplateTest {
 
-    private static final DefaultObjectWrapper OW = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
+    private static final DefaultObjectWrapper OW = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
 
     private static final String FTL_HAS_CONTENT_AND_LIST
             = "<#if it?hasContent><#list it as i>${i}</#list><#else>empty</#if>";

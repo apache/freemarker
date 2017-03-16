@@ -44,7 +44,7 @@ public final class XMLLoader {
     }
     
     /**
-     * Convenience method to create a {@link NodeModel} from a SAX {@link InputSource}.
+     * Convenience method to invoke a {@link NodeModel} from a SAX {@link InputSource}.
      */
     static public NodeModel toModel(InputSource is, boolean simplify)
         throws SAXException, IOException, ParserConfigurationException {

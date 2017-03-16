@@ -100,7 +100,7 @@ public class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory
             }
         }  // if cache miss
         
-        // JFormat-s aren't thread-safe; must clone it
+        // JFormat-s aren't thread-safe; must deepClone it
         jFormat = (NumberFormat) jFormat.clone();
         
         return new JavaTemplateNumberFormat(jFormat, params);

@@ -26,7 +26,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
@@ -37,7 +37,7 @@ import org.apache.freemarker.core.model.impl.SimpleSequence;
 public class MultiModel1 implements TemplateHashModel,
         TemplateSequenceModel, TemplateScalarModel {
 
-    private ObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
+    private ObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
 
     private TemplateModel m_cSubModel = new MultiModel2();
     private TemplateModel m_cListHashModel1 = new MultiModel4(ow);

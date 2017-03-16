@@ -369,7 +369,7 @@
     <delete includeEmptyDirs="yes">
       <fileset dir="build/api" includes="**/*" />
     </delete>
-    <!-- javadoc with <fileset> has bugs, so we create a filtered copy: -->
+    <!-- javadoc with <fileset> has bugs, so we invoke a filtered copy: -->
     <copy todir="build/javadoc-sources">
       <fileset dir="src/main/java">
         <exclude name="**/_*.java" />

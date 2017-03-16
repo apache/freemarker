@@ -59,7 +59,6 @@ import org.apache.freemarker.core.templateresolver.PathRegexMatcher;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.FTLUtil;
 import org.apache.freemarker.core.util.GenericParseException;
-import org.apache.freemarker.core.util.WriteProtectable;
 import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.core.util._StringUtil;
 
@@ -79,7 +78,8 @@ public class _ObjectBuilderSettingEvaluator {
 
     private static final String BUILD_METHOD_NAME = "build";
 
-    private static final String BUILDER_CLASS_POSTFIX = "Builder";
+    private static final String BUILDER_CLASS_POSTFIX_1 = "$Builder";
+    private static final String BUILDER_CLASS_POSTFIX_2 = "Builder";
 
     private static Map<String,String> SHORTHANDS;
     
@@ -860,30 +860,35 @@ public class _ObjectBuilderSettingEvaluator {
             
             boolean clIsBuilderClass;
             try {
-                cl = _ClassUtil.forName(className + BUILDER_CLASS_POSTFIX);
+                cl = _ClassUtil.forName(className + BUILDER_CLASS_POSTFIX_1);
                 clIsBuilderClass = true;
-            } catch (ClassNotFoundException e) {
-                clIsBuilderClass = false;
+            } catch (ClassNotFoundException eIgnored) {
                 try {
-                    cl = _ClassUtil.forName(className);
-                } catch (Exception e2) {
-                    boolean failedToGetAsStaticField;
-                    if (canBeStaticField) {
-                        // Try to interpret className as static filed: 
-                        try {
-                            return getStaticFieldValue(className);
-                        } catch (_ObjectBuilderSettingEvaluationException e3) {
-                            // Suppress it
-                            failedToGetAsStaticField = true;
+                    cl = _ClassUtil.forName(className + BUILDER_CLASS_POSTFIX_2);
+                    clIsBuilderClass = true;
+                } catch (ClassNotFoundException e) {
+                    clIsBuilderClass = false;
+                    try {
+                        cl = _ClassUtil.forName(className);
+                    } catch (Exception e2) {
+                        boolean failedToGetAsStaticField;
+                        if (canBeStaticField) {
+                            // Try to interpret className as static filed:
+                            try {
+                                return getStaticFieldValue(className);
+                            } catch (_ObjectBuilderSettingEvaluationException e3) {
+                                // Suppress it
+                                failedToGetAsStaticField = true;
+                            }
+                        } else {
+                            failedToGetAsStaticField = false;
                         }
-                    } else {
-                        failedToGetAsStaticField = false;
+                        throw new _ObjectBuilderSettingEvaluationException(
+                                "Failed to get class " + _StringUtil.jQuote(className)
+                                        + (failedToGetAsStaticField ? " (also failed to resolve name as static field)" : "")
+                                        + ".",
+                                e2);
                     }
-                    throw new _ObjectBuilderSettingEvaluationException(
-                            "Failed to get class " + _StringUtil.jQuote(className)
-                            + (failedToGetAsStaticField ? " (also failed to resolve name as static field)" : "")
-                            + ".",
-                            e2);
                 }
             }
             
@@ -909,17 +914,7 @@ public class _ObjectBuilderSettingEvaluator {
             // Named parameters will set JavaBeans properties:
             setJavaBeanProperties(constructorResult, namedParamNames, namedParamValues);
 
-            final Object result;
-            if (clIsBuilderClass) {
-                result = callBuild(constructorResult);
-            } else {
-                if (constructorResult instanceof WriteProtectable) {
-                    ((WriteProtectable) constructorResult).writeProtect();
-                }
-                result = constructorResult;
-            }
-            
-            return result;
+            return clIsBuilderClass ? callBuild(constructorResult) : constructorResult;
         }
         
         private Object getStaticFieldValue(String dottedName) throws _ObjectBuilderSettingEvaluationException {
@@ -972,7 +967,7 @@ public class _ObjectBuilderSettingEvaluator {
         private Object callConstructor(Class cl)
                 throws _ObjectBuilderSettingEvaluationException {
             if (hasNoParameters()) {
-                // No need to create ObjectWrapper
+                // No need to invoke ObjectWrapper
                 try {
                     return cl.newInstance();
                 } catch (Exception e) {

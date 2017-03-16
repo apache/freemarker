@@ -79,7 +79,7 @@ public class CustomAttribute {
     /**
      * This method is invoked when {@link #get()} is invoked without 
      * {@link #set(Object)} being invoked before it to define the value in the 
-     * current scope. Override it to create the attribute value on-demand.  
+     * current scope. Override it to invoke the attribute value on-demand.
      * @return the initial value for the custom attribute. By default returns null.
      */
     protected Object create() {

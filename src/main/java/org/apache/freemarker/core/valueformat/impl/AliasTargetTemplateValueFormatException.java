@@ -21,7 +21,7 @@ package org.apache.freemarker.core.valueformat.impl;
 import org.apache.freemarker.core.valueformat.TemplateValueFormatException;
 
 /**
- * Can't create a template format that the template format refers to (typically thrown by alias template formats).
+ * Can't invoke a template format that the template format refers to (typically thrown by alias template formats).
  * 
  * @since 2.3.24
  */

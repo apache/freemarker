@@ -33,7 +33,7 @@ public class ModelCacheTest {
     
     @Test
     public void modelCacheOff() throws Exception {
-        DefaultObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
+        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         assertFalse(ow.getUseModelCache());  // default is off
         
         String s = "foo";
@@ -46,8 +46,8 @@ public class ModelCacheTest {
     @Test
     @Ignore // ModelCache is current removed in FM3
     public void modelCacheOn() throws Exception {
-        DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
-        ow.setUseModelCache(true);
+        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                .useModelCache(true).build();
         assertTrue(ow.getUseModelCache());
 
         TestBean obj = new TestBean();

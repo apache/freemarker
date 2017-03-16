@@ -49,7 +49,6 @@ import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
 import org.apache.freemarker.core.templateresolver.impl.MruCacheStorage;
 import org.apache.freemarker.core.userpkg.PublicWithMixedConstructors;
-import org.apache.freemarker.core.util.WriteProtectable;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -236,31 +235,6 @@ public class ObjectBuilderSettingsTest {
             assertNotSame(TestBean5.INSTANCE, res);
         }
     }
-    
-    @Test
-    public void writeProtectionTest() throws Exception {
-        {
-            TestBean3 res = (TestBean3) _ObjectBuilderSettingEvaluator.eval(
-                    "org.apache.freemarker.core.ObjectBuilderSettingsTest$TestBean3(x = 1)",
-                    Object.class, false, _SettingEvaluationEnvironment.getCurrent());
-            assertEquals(1, res.x);
-            assertTrue(res.isWriteProtected());
-            try {
-                res.setX(2);
-                fail();
-            } catch (IllegalStateException e) {
-                // expected
-            }
-        }
-        
-        {
-            TestBean3 res = (TestBean3) _ObjectBuilderSettingEvaluator.eval(
-                    "org.apache.freemarker.core.ObjectBuilderSettingsTest$TestBean3",
-                    Object.class, false, _SettingEvaluationEnvironment.getCurrent());
-            assertEquals(0, res.x);
-            assertTrue(res.isWriteProtected()); // Still uses a builder
-        }
-    }
 
     @Test
     public void stringLiteralsTest() throws Exception {
@@ -398,7 +372,6 @@ public class ObjectBuilderSettingsTest {
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyTemplateLoader()");
             cfg.setSettings(props);
             assertEquals(DefaultObjectWrapper.class, cfg.getObjectWrapper().getClass());
-            assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
             assertEquals(
                     Configuration.VERSION_3_0_0, ((DefaultObjectWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
             assertEquals(DummyArithmeticEngine.class, cfg.getArithmeticEngine().getClass());
@@ -422,7 +395,6 @@ public class ObjectBuilderSettingsTest {
                     "allows_nothing");
             cfg.setSettings(props);
             assertEquals(DefaultObjectWrapper.class, cfg.getObjectWrapper().getClass());
-            assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
             assertEquals(1, ((DummyArithmeticEngine) cfg.getArithmeticEngine()).getX());
             assertEquals(1, ((DummyTemplateExceptionHandler) cfg.getTemplateExceptionHandler()).getX());
             assertEquals(Configuration.VERSION_3_0_0,
@@ -441,7 +413,6 @@ public class ObjectBuilderSettingsTest {
             assertEquals(DefaultObjectWrapper.class, cfg.getObjectWrapper().getClass());
             assertSame(BigDecimalArithmeticEngine.INSTANCE, cfg.getArithmeticEngine());
             assertSame(TemplateExceptionHandler.RETHROW_HANDLER, cfg.getTemplateExceptionHandler());
-            assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
             assertEquals(Configuration.VERSION_3_0_0,
                     ((DefaultObjectWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
         }
@@ -451,7 +422,6 @@ public class ObjectBuilderSettingsTest {
             props.setProperty(Configurable.OBJECT_WRAPPER_KEY, "DefaultObjectWrapper(3.0.0)");
             cfg.setSettings(props);
             assertEquals(DefaultObjectWrapper.class, cfg.getObjectWrapper().getClass());
-            assertTrue(((WriteProtectable) cfg.getObjectWrapper()).isWriteProtected());
             assertEquals(
                     Configuration.VERSION_3_0_0,
                     ((DefaultObjectWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
@@ -1120,28 +1090,15 @@ public class ObjectBuilderSettingsTest {
         
     }
 
-    public static class TestBean3 implements WriteProtectable {
-        
-        private boolean writeProtected;
+    public static class TestBean3 {
         
         private int x;
-
-        @Override
-        public void writeProtect() {
-            writeProtected = true;
-        }
-
-        @Override
-        public boolean isWriteProtected() {
-            return writeProtected;
-        }
 
         public int getX() {
             return x;
         }
 
         public void setX(int x) {
-            if (writeProtected) throw new IllegalStateException();
             this.x = x;
         }
         

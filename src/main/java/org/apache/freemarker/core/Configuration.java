@@ -49,7 +49,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateScalarModel;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.UnregisteredOutputFormatException;
@@ -97,7 +97,7 @@ import org.apache.freemarker.core.util._UnmodifiableCompositeSet;
  * <b>The main entry point into the FreeMarker API</b>; encapsulates the configuration settings of FreeMarker,
  * also serves as a central template-loading and caching service.
  *
- * <p>This class is meant to be used in a singleton pattern. That is, you create an instance of this at the beginning of
+ * <p>This class is meant to be used in a singleton pattern. That is, you invoke an instance of this at the beginning of
  * the application life-cycle, set its {@link #setSetting(String, String) configuration settings} there (either with the
  * setter methods like {@link #setTemplateLoader(TemplateLoader)} or by loading a {@code .properties} file), and then
  * use that single instance everywhere in your application. Frequently re-creating {@link Configuration} is a typical
@@ -900,7 +900,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * {@link MruCacheStorage} instead might be advisable. If you don't want caching at
      * all, use {@link org.apache.freemarker.core.templateresolver.impl.NullCacheStorage} (you can't use {@code null}).
      * 
-     * <p>Note that setting the templateResolver storage will re-create the template templateResolver, so
+     * <p>Note that setting the templateResolver storage will re-invoke the template templateResolver, so
      * all its content will be lost.
      */
     public void setCacheStorage(CacheStorage cacheStorage) {
@@ -2266,7 +2266,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *
      * <p>The values in the map must be thread safe, if you are running templates from multiple threads with
      * this configuration. This means that both the plain Java object and the {@link TemplateModel}-s created from them
-     * by the {@link ObjectWrapper} must be thread safe. (The standard {@link ObjectWrapper}-s of FreeMarker create
+     * by the {@link ObjectWrapper} must be thread safe. (The standard {@link ObjectWrapper}-s of FreeMarker invoke
      * thread safe {@link TemplateModel}-s.) The {@link Map} itself need not be thread-safe.
      * 
      * <p>This setter method has no getter pair because of the tricky relation ship with
@@ -2801,7 +2801,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.21
      */
     public static ObjectWrapperAndUnwrapper getDefaultObjectWrapper(Version incompatibleImprovements) {
-        return new DefaultObjectWrapperBuilder(incompatibleImprovements).build();
+        return new DefaultObjectWrapper.Builder(incompatibleImprovements).build();
     }
 
     /**

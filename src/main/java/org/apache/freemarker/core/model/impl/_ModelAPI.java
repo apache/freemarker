@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util.BugException;
+import org.apache.freemarker.core.util.BuilderBase;
 import org.apache.freemarker.core.util._CollectionUtil;
 
 /**
@@ -129,24 +129,26 @@ public class _ModelAPI {
     /**
      * Contains the common parts of the singleton management for {@link DefaultObjectWrapper} and {@link DefaultObjectWrapper}.  
      *  
-     * @param dowSubclassFactory Creates a <em>new</em> read-only object wrapper of the desired
+     * @param dowConstructorInvoker Creates a <em>new</em> read-only object wrapper of the desired
      *     {@link DefaultObjectWrapper} subclass. 
      */
-    // [FM3] Unnecessary generalization, unless we publish this API
-    public static <OW extends DefaultObjectWrapper, OWC extends DefaultObjectWrapperConfiguration> OW
-    getDefaultObjectWrapperSubclassSingleton(
-            OWC settings,
-            Map<ClassLoader, Map<OWC, WeakReference<OW>>> instanceCache,
-            ReferenceQueue<OW> instanceCacheRefQue,
-            _DefaultObjectWrapperSubclassFactory<OW, OWC> dowSubclassFactory) {
+    // [FM3] Generalize and publish this functionality
+    public static <
+            ObjectWrapperT extends DefaultObjectWrapper,
+            BuilderT extends DefaultObjectWrapper.ExtendableBuilder<ObjectWrapperT, BuilderT>>
+    ObjectWrapperT getDefaultObjectWrapperSubclassSingleton(
+            BuilderT builder,
+            Map<ClassLoader, Map<BuilderT, WeakReference<ObjectWrapperT>>> instanceCache,
+            ReferenceQueue<ObjectWrapperT> instanceCacheRefQue,
+            _ConstructorInvoker<ObjectWrapperT, BuilderT> dowConstructorInvoker) {
         // DefaultObjectWrapper can't be cached across different Thread Context Class Loaders (TCCL), because the result of
         // a class name (String) to Class mappings depends on it, and the staticModels and enumModels need that.
         // (The ClassIntrospector doesn't have to consider the TCCL, as it only works with Class-es, not class
         // names.)
         ClassLoader tccl = Thread.currentThread().getContextClassLoader();
         
-        Reference<OW> instanceRef;
-        Map<OWC, WeakReference<OW>> tcclScopedCache;
+        Reference<ObjectWrapperT> instanceRef;
+        Map<BuilderT, WeakReference<ObjectWrapperT>> tcclScopedCache;
         synchronized (instanceCache) {
             tcclScopedCache = instanceCache.get(tccl);
             if (tcclScopedCache == null) {
@@ -154,27 +156,24 @@ public class _ModelAPI {
                 instanceCache.put(tccl, tcclScopedCache);
                 instanceRef = null;
             } else {
-                instanceRef = tcclScopedCache.get(settings);
+                instanceRef = tcclScopedCache.get(builder);
             }
         }
 
-        OW instance = instanceRef != null ? instanceRef.get() : null;
+        ObjectWrapperT instance = instanceRef != null ? instanceRef.get() : null;
         if (instance != null) {  // cache hit
             return instance;
         }
         // cache miss
         
-        settings = clone(settings);  // prevent any aliasing issues 
-        instance = dowSubclassFactory.create(settings);
-        if (!instance.isWriteProtected()) {
-            throw new BugException();
-        }
-        
+        builder = builder.deepClone();  // prevent any aliasing issues
+        instance = dowConstructorInvoker.invoke(builder);
+
         synchronized (instanceCache) {
-            instanceRef = tcclScopedCache.get(settings);
-            OW concurrentInstance = instanceRef != null ? instanceRef.get() : null;
+            instanceRef = tcclScopedCache.get(builder);
+            ObjectWrapperT concurrentInstance = instanceRef != null ? instanceRef.get() : null;
             if (concurrentInstance == null) {
-                tcclScopedCache.put(settings, new WeakReference<>(instance, instanceCacheRefQue));
+                tcclScopedCache.put(builder, new WeakReference<>(instance, instanceCacheRefQue));
             } else {
                 instance = concurrentInstance;
             }
@@ -185,20 +184,16 @@ public class _ModelAPI {
         return instance;
     }
 
-    @SuppressWarnings("unchecked")
-    private static <BWC extends DefaultObjectWrapperConfiguration> BWC clone(BWC settings) {
-        return (BWC) settings.clone(true);
-    }
-    
-    private static <BW extends DefaultObjectWrapper, BWC extends DefaultObjectWrapperConfiguration>
+    private static <
+            ObjectWrapperT extends DefaultObjectWrapper, BuilderT extends DefaultObjectWrapper.ExtendableBuilder>
             void removeClearedReferencesFromCache(
-                    Map<ClassLoader, Map<BWC, WeakReference<BW>>> instanceCache,
-                    ReferenceQueue<BW> instanceCacheRefQue) {
-        Reference<? extends BW> clearedRef;
+                    Map<ClassLoader, Map<BuilderT, WeakReference<ObjectWrapperT>>> instanceCache,
+                    ReferenceQueue<ObjectWrapperT> instanceCacheRefQue) {
+        Reference<? extends ObjectWrapperT> clearedRef;
         while ((clearedRef = instanceCacheRefQue.poll()) != null) {
             synchronized (instanceCache) {
-                findClearedRef: for (Map<BWC, WeakReference<BW>> tcclScopedCache : instanceCache.values()) {
-                    for (Iterator<WeakReference<BW>> it2 = tcclScopedCache.values().iterator(); it2.hasNext(); ) {
+                findClearedRef: for (Map<BuilderT, WeakReference<ObjectWrapperT>> tcclScopedCache : instanceCache.values()) {
+                    for (Iterator<WeakReference<ObjectWrapperT>> it2 = tcclScopedCache.values().iterator(); it2.hasNext(); ) {
                         if (it2.next() == clearedRef) {
                             it2.remove();
                             break findClearedRef;
@@ -211,11 +206,12 @@ public class _ModelAPI {
     
     /**
      * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
+     * Used when the builder delegates the product creation to something else (typically, an instance cache). Calling
+     * {@link BuilderBase#build()} would be infinite recursion in such cases.
      */
-    public interface _DefaultObjectWrapperSubclassFactory<BW extends DefaultObjectWrapper, BWC extends DefaultObjectWrapperConfiguration> {
+    public interface _ConstructorInvoker<ProductT, BuilderT> {
         
-        /** Creates a new read-only {@link DefaultObjectWrapper}; used for {@link DefaultObjectWrapperBuilder} and such. */
-        BW create(BWC sa);
+        ProductT invoke(BuilderT builder);
     }
     
 }

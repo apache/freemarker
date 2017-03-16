@@ -56,7 +56,7 @@ import org.apache.freemarker.core.util._NullArgumentException;
  * threads.
  * 
  * <p>
- * Typically, you will use {@link Configuration#getTemplate(String)} to create/get {@link Template} objects, so you
+ * Typically, you will use {@link Configuration#getTemplate(String)} to invoke/get {@link Template} objects, so you
  * don't construct them directly. But you can also construct a template from a {@link Reader} or a {@link String} that
  * contains the template source code. But then it's important to know that while the resulting {@link Template} is
  * efficient for later processing, creating a new {@link Template} itself is relatively expensive. So try to re-use

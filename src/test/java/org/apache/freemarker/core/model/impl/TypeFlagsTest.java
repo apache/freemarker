@@ -44,7 +44,7 @@ public class TypeFlagsTest extends TestCase {
         super(name);
     }
     
-    private final DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
+    private final DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
 
     public void testSingleNumType() {
         checkTypeFlags(SingleNumTypeC.class, "mInt",

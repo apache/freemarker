@@ -38,7 +38,8 @@ public class EnumModelsTest {
     
     @Test
     public void modelCaching() throws Exception {
-        DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
+        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).usePrivateCaches(true)
+                .build();
         TemplateHashModel enums = ow.getEnumModels();
         TemplateHashModel e = (TemplateHashModel) enums.get(E.class.getName());
         assertNotNull(e);

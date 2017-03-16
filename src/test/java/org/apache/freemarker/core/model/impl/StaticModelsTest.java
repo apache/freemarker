@@ -39,7 +39,8 @@ public class StaticModelsTest {
 
     @Test
     public void modelCaching() throws Exception {
-        DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
+        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).usePrivateCaches(true)
+                .build();
         TemplateHashModel statics = ow.getStaticModels();
         TemplateHashModel s = (TemplateHashModel) statics.get(S.class.getName());
         assertNotNull(s);

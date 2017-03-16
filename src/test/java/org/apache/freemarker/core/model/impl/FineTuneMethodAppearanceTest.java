@@ -36,9 +36,10 @@ public class FineTuneMethodAppearanceTest {
 
     @Test
     public void newWayOfConfiguring() throws TemplateModelException {
-        DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
-        ow.setMethodAppearanceFineTuner(GetlessMethodsAsPropertyGettersRule.INSTANCE);
-        ow.setExposeFields(true);
+        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                .methodAppearanceFineTuner(GetlessMethodsAsPropertyGettersRule.INSTANCE)
+                .exposeFields(true)
+                .build();
         checkIfProperlyWrapped(ow.wrap(new C()));
     }
     

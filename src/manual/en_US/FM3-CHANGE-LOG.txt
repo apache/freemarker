@@ -151,3 +151,9 @@ the FreeMarer 3 changelog here:
   indexed read method we can't create a proper sequence (which the value of the property should be), since sequences are required
   to support returning their size. (In FreeMarker 2 such sequences has thrown exception on calling size(), which caused more
   problems and confusion than it solved.)
+- When looking for a builder class in builder expressions used in setting values like `com.example.Foo()`, now we first
+  look for com.example.Foo.Builder, and only then com.example.FooBuilder.
+- Removed DefaultObjectWrapper.methodsShadowItems setting, in effect defaulting it to true. This has decided if the generic
+  get method (`get(String)`) had priority over methods of similar name. The generic get method is only recognized from its
+  name and parameter type, so it's a quite consfusing feature, and might will be removed alltogether.
+- DefaultObjectWrapper is not immutable (has no setter methods), and can only be constructed with DefaultObjectWrapper.Builder.n

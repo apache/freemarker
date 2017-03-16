@@ -31,7 +31,7 @@ import org.apache.freemarker.core.debug.EnvironmentSuspendedEvent;
 import org.slf4j.Logger;
 
 /**
- * Used by the {@link DebuggerClient} to create local 
+ * Used by the {@link DebuggerClient} to invoke local
  */
 class RmiDebuggerListenerImpl
 extends

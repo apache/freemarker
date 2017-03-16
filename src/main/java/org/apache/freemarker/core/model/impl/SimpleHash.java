@@ -65,7 +65,7 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
  * to which it had to be passed adapted to a {@link Map}).
  * 
  * <p>
- * If regardless of which of the above two cases stand, you just need to (or more convenient to) create the hash from a
+ * If regardless of which of the above two cases stand, you just need to (or more convenient to) invoke the hash from a
  * {@link Map} (via {@link SimpleHash#SimpleHash(Map, ObjectWrapper)} or
  * {@link SimpleHash#SimpleHash(Map, ObjectWrapper)}), which will be the faster depends on how many times will the
  * <em>same</em> {@link Map} entry be read from the template(s) later, on average. If, on average, you read each entry

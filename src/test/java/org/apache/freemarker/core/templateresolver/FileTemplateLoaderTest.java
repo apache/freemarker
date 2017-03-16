@@ -47,7 +47,7 @@ public class FileTemplateLoaderTest {
         File sub1Dir = new File(templateRootDir, "sub1");
         File sub2Dir = new File(sub1Dir, "sub2");
         if (!sub2Dir.mkdirs()) {
-            throw new IOException("Failed to create subdirectories");
+            throw new IOException("Failed to invoke subdirectories");
         }
         File tFile = new File(sub2Dir, "t.ftl");
         FileUtils.write(tFile, "foo");

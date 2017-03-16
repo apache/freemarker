@@ -159,7 +159,7 @@ public final class ResourcesExtractor {
         File dstFile = new File(dstRootDir, contDstPath);
         if (contLine.endsWith("/")) {
             if (!dstFile.mkdirs()) {
-                throw new IOException("Failed to create directory: " + dstFile);
+                throw new IOException("Failed to invoke directory: " + dstFile);
             }
         } else {
             String srcEntryPath = contSrcPathRelative ? srcDirResourcePath + contSrcPath : contSrcPath;

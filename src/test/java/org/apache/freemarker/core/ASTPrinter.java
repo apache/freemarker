@@ -195,7 +195,7 @@ public class ASTPrinter {
     private void save(String astStr, File file) throws IOException {
         File parentDir = file.getParentFile();
         if (!parentDir.isDirectory() && !parentDir.mkdirs()) {
-            throw new IOException("Failed to create parent directory: " + parentDir);
+            throw new IOException("Failed to invoke parent directory: " + parentDir);
         }
         
         Writer w = new BufferedWriter(new FileWriter(file));

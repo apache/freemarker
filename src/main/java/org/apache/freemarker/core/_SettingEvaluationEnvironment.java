@@ -53,7 +53,7 @@ public class _SettingEvaluationEnvironment {
 
     public DefaultObjectWrapper getObjectWrapper() {
         if (objectWrapper == null) {
-            objectWrapper = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
+            objectWrapper = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         }
         return objectWrapper;
     }

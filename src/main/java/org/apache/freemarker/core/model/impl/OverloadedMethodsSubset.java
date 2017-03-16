@@ -134,7 +134,7 @@ abstract class OverloadedMethodsSubset {
         MaybeEmptyCallableMemberDescriptor memberDesc
                 = (MaybeEmptyCallableMemberDescriptor) argTypesToMemberDescCache.get(argTypes);
         if (memberDesc == null) {
-            // Synchronized so that we won't unnecessarily create the same member desc. for multiple times in parallel.
+            // Synchronized so that we won't unnecessarily invoke the same member desc. for multiple times in parallel.
             synchronized (argTypesToMemberDescCache) {
                 memberDesc = (MaybeEmptyCallableMemberDescriptor) argTypesToMemberDescCache.get(argTypes);
                 if (memberDesc == null) {

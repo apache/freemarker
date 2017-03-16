@@ -46,23 +46,23 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
     
     @Override
     protected void setUp() throws Exception {
-        DefaultObjectWrapperBuilder.clearInstanceCache();
+        DefaultObjectWrapper.Builder.clearInstanceCache();
     }
 
     public void testBuilderEqualsAndHash() throws Exception {
-        assertEquals(Configuration.VERSION_3_0_0, new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).getIncompatibleImprovements());
+        assertEquals(Configuration.VERSION_3_0_0, new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).getIncompatibleImprovements());
         try {
-            new DefaultObjectWrapperBuilder(TestUtil.getClosestFutureVersion());
+            new DefaultObjectWrapper.Builder(TestUtil.getClosestFutureVersion());
             fail("Maybe you need to update this test for the new FreeMarker version");
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("upgrade"));
         }
 
-        DefaultObjectWrapperBuilder builder1;
-        DefaultObjectWrapperBuilder builder2;
+        DefaultObjectWrapper.Builder builder1;
+        DefaultObjectWrapper.Builder builder2;
         
-        builder1 = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
-        builder2 = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+        builder1 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
+        builder2 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
         assertEquals(builder1, builder2);
         
         builder1.setExposeFields(true);
@@ -134,7 +134,6 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
             assertEquals(1, getDefaultObjectWrapperInstanceCacheSize());
             assertSame(ow.getClass(), DefaultObjectWrapper.class);
             assertEquals(Configuration.VERSION_3_0_0, ow.getIncompatibleImprovements());
-            assertTrue(ow.isWriteProtected());
             assertFalse(ow.isStrict());
             assertTrue(ow.getUseModelCache());
             assertEquals(TemplateDateModel.UNKNOWN, ow.getDefaultDateType());
@@ -142,14 +141,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
             assertTrue(ow.isClassIntrospectionCacheRestricted());
             assertNull(ow.getMethodAppearanceFineTuner());
             assertNull(ow.getMethodSorter());
-            
-            try {
-                ow.setExposeFields(true);  // can't modify the settings of a (potential) singleton
-                fail();
-            } catch (IllegalStateException e) {
-                assertThat(e.getMessage(), containsString("modify"));
-            }
-            
+
             assertSame(ow, getDefaultObjectWrapperWithSetting(Configuration.VERSION_3_0_0, true));
             assertEquals(1, getDefaultObjectWrapperInstanceCacheSize());
             
@@ -161,7 +153,6 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
             assertEquals(2, getDefaultObjectWrapperInstanceCacheSize());
             assertSame(ow.getClass(), DefaultObjectWrapper.class);
             assertEquals(Configuration.VERSION_3_0_0, ow.getIncompatibleImprovements());
-            assertTrue(ow.isWriteProtected());
             assertFalse(ow.getUseModelCache());
 
             assertSame(ow, getDefaultObjectWrapperWithSetting(Configuration.VERSION_3_0_0, false));
@@ -170,7 +161,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
         
         {
-            DefaultObjectWrapperBuilder factory = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+            DefaultObjectWrapper.Builder factory = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
             factory.setExposureLevel(DefaultObjectWrapper.EXPOSE_PROPERTIES_ONLY);
             DefaultObjectWrapper ow1 = factory.build();
             DefaultObjectWrapper ow2 = factory.build();
@@ -179,7 +170,6 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
             
             assertSame(ow1.getClass(), DefaultObjectWrapper.class);
             assertEquals(Configuration.VERSION_3_0_0, ow1.getIncompatibleImprovements());
-            assertTrue(ow1.isWriteProtected());
             assertEquals(DefaultObjectWrapper.EXPOSE_PROPERTIES_ONLY, ow1.getExposureLevel());
             assertFalse(ow1.isStrict());
             assertEquals(TemplateDateModel.UNKNOWN, ow1.getDefaultDateType());
@@ -189,7 +179,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
         
         {
-            DefaultObjectWrapperBuilder factory = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+            DefaultObjectWrapper.Builder factory = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
             factory.setExposeFields(true);
             DefaultObjectWrapper ow1 = factory.build();
             DefaultObjectWrapper ow2 = factory.build();
@@ -198,17 +188,16 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
             
             assertSame(ow1.getClass(), DefaultObjectWrapper.class);
             assertEquals(Configuration.VERSION_3_0_0, ow1.getIncompatibleImprovements());
-            assertTrue(ow1.isWriteProtected());
             assertTrue(ow1.isExposeFields());
             
             hardReferences.add(ow1);
         }
         
         {
-            DefaultObjectWrapperBuilder factory = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+            DefaultObjectWrapper.Builder factory = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
             factory.setStrict(true);
             factory.setDefaultDateType(TemplateDateModel.DATETIME);
-            factory.setOuterIdentity(new RestrictedObjectWrapper(Configuration.VERSION_3_0_0));
+            factory.setOuterIdentity(new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
             DefaultObjectWrapper ow = factory.build();
             assertEquals(5, getDefaultObjectWrapperInstanceCacheSize());
             assertTrue(ow.isStrict());
@@ -220,7 +209,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         
         // Effect of reference and cache clearings:
         {
-            DefaultObjectWrapper bw1 = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
+            DefaultObjectWrapper bw1 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
             assertEquals(5, getDefaultObjectWrapperInstanceCacheSize());
             assertEquals(5, getDefaultObjectWrapperNonClearedInstanceCacheSize());
             
@@ -228,23 +217,23 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
             assertEquals(5, getDefaultObjectWrapperInstanceCacheSize());
             assertEquals(0, getDefaultObjectWrapperNonClearedInstanceCacheSize());
             
-            DefaultObjectWrapper bw2 = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
+            DefaultObjectWrapper bw2 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
             assertNotSame(bw1, bw2);
             assertEquals(5, getDefaultObjectWrapperInstanceCacheSize());
             assertEquals(1, getDefaultObjectWrapperNonClearedInstanceCacheSize());
             
-            assertSame(bw2, new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build());
+            assertSame(bw2, new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
             assertEquals(1, getDefaultObjectWrapperNonClearedInstanceCacheSize());
             
             clearDefaultObjectWrapperInstanceCacheReferences(true);
-            DefaultObjectWrapper bw3 = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
+            DefaultObjectWrapper bw3 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
             assertNotSame(bw2, bw3);
             assertEquals(1, getDefaultObjectWrapperInstanceCacheSize());
             assertEquals(1, getDefaultObjectWrapperNonClearedInstanceCacheSize());
         }
 
         {
-            DefaultObjectWrapperBuilder factory = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+            DefaultObjectWrapper.Builder factory = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
             factory.setUseModelCache(true);
             DefaultObjectWrapper ow = factory.build();
             assertTrue(ow.getUseModelCache());
@@ -257,7 +246,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
     }
     
     private DefaultObjectWrapper getDefaultObjectWrapperWithSetting(Version ici, boolean useModelCache) {
-        DefaultObjectWrapperBuilder f = new DefaultObjectWrapperBuilder(ici);
+        DefaultObjectWrapper.Builder f = new DefaultObjectWrapper.Builder(ici);
         f.setUseModelCache(useModelCache);
         return f.build();
     }
@@ -267,7 +256,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         
         assertEquals(0, getDefaultObjectWrapperInstanceCacheSize());
         
-        DefaultObjectWrapper bw1 = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
+        DefaultObjectWrapper bw1 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         assertEquals(1, getDefaultObjectWrapperInstanceCacheSize());
         hardReferences.add(bw1);
         
@@ -278,25 +267,25 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         DefaultObjectWrapper bw2;
         Thread.currentThread().setContextClassLoader(newTCCL);
         try {
-            bw2 = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
+            bw2 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
             assertEquals(2, getDefaultObjectWrapperInstanceCacheSize());
             hardReferences.add(bw2);
             
             assertNotSame(bw1, bw2);
-            assertSame(bw2, new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build());
+            assertSame(bw2, new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
         } finally {
             Thread.currentThread().setContextClassLoader(oldTCCL);
         }
         
-        assertSame(bw1, new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build());
+        assertSame(bw1, new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
         assertEquals(2, getDefaultObjectWrapperInstanceCacheSize());
 
         DefaultObjectWrapper bw3;
         Thread.currentThread().setContextClassLoader(newTCCL);
         try {
-            assertSame(bw2, new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build());
+            assertSame(bw2, new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
             
-            DefaultObjectWrapperBuilder bwb = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+            DefaultObjectWrapper.Builder bwb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
             bwb.setExposeFields(true);
             bw3 = bwb.build();
             assertEquals(3, getDefaultObjectWrapperInstanceCacheSize());
@@ -306,7 +295,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
         
         {
-            DefaultObjectWrapperBuilder bwb = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+            DefaultObjectWrapper.Builder bwb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
             bwb.setExposeFields(true);
             DefaultObjectWrapper bw4 = bwb.build();
             assertEquals(4, getDefaultObjectWrapperInstanceCacheSize());
@@ -318,19 +307,20 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
     }
     
     public void testClassInrospectorCache() throws TemplateModelException {
-        assertFalse(new DefaultObjectWrapper(Configuration.VERSION_3_0_0).isClassIntrospectionCacheRestricted());
-        assertTrue(new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0)
+        assertFalse(new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                .usePrivateCaches(true).build().isClassIntrospectionCacheRestricted());
+        assertTrue(new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
                 .build().isClassIntrospectionCacheRestricted());
         
-        ClassIntrospectorBuilder.clearInstanceCache();
-        DefaultObjectWrapperBuilder.clearInstanceCache();
+        ClassIntrospector.Builder.clearInstanceCache();
+        DefaultObjectWrapper.Builder.clearInstanceCache();
         checkClassIntrospectorCacheSize(0);
         
         List<DefaultObjectWrapper> hardReferences = new LinkedList<>();
-        DefaultObjectWrapperBuilder builder;
+        DefaultObjectWrapper.Builder builder;
 
         {
-            builder = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+            builder = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
             
             DefaultObjectWrapper bw1 = builder.build();
             checkClassIntrospectorCacheSize(1);
@@ -355,7 +345,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
         
         {
-            builder = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+            builder = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
             builder.setExposeFields(true);
             DefaultObjectWrapper ow = builder.build();
             checkClassIntrospectorCacheSize(2);
@@ -434,7 +424,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
         
         {
-            builder = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+            builder = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
             builder.setUseModelCache(true);
             builder.setExposeFields(false);
             builder.setExposureLevel(DefaultObjectWrapper.EXPOSE_PROPERTIES_ONLY);
@@ -463,7 +453,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
 
         // The ClassInrospector cache couldn't become cleared in reality otherwise:
-        DefaultObjectWrapperBuilder.clearInstanceCache();
+        DefaultObjectWrapper.Builder.clearInstanceCache();
 
         clearClassIntrospectorInstanceCacheReferences(false);
         checkClassIntrospectorCacheSize(8);
@@ -496,7 +486,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
         
         {
-            builder = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+            builder = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
             DefaultObjectWrapper ow = builder.build();
             checkClassIntrospectorCacheSize(8);
             assertEquals(2, getClassIntrospectorNonClearedInstanceCacheSize());
@@ -514,7 +504,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         assertEquals(0, getClassIntrospectorNonClearedInstanceCacheSize());
         
         {
-            builder = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+            builder = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
             builder.setExposeFields(true);
             DefaultObjectWrapper ow = builder.build();
             checkClassIntrospectorCacheSize(1);
@@ -528,7 +518,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
         
         {
-            builder = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+            builder = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
             builder.setMethodAppearanceFineTuner(new MethodAppearanceFineTuner() {
                 @Override
                 public void process(DecisionInput in, Decision out) {
@@ -549,7 +539,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
 
         {
-            builder = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0);
+            builder = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
             builder.setMethodAppearanceFineTuner(
                     GetlessMethodsAsPropertyGettersRule.INSTANCE);  // doesn't spoils sharing
 
@@ -611,14 +601,14 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
     }
     
     static int getClassIntrospectorInstanceCacheSize() {
-        Map instanceCache = ClassIntrospectorBuilder.getInstanceCache();
+        Map instanceCache = ClassIntrospector.Builder.getInstanceCache();
         synchronized (instanceCache) {
             return instanceCache.size();
         }
     }
 
     static int getClassIntrospectorNonClearedInstanceCacheSize() {
-        Map instanceCache = ClassIntrospectorBuilder.getInstanceCache();
+        Map instanceCache = ClassIntrospector.Builder.getInstanceCache();
         synchronized (instanceCache) {
             int cnt = 0;
             for (Iterator it = instanceCache.values().iterator(); it.hasNext(); ) {
@@ -629,7 +619,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
     }
     
     static void clearClassIntrospectorInstanceCacheReferences(boolean enqueue) {
-        Map instanceCache = ClassIntrospectorBuilder.getInstanceCache();
+        Map instanceCache = ClassIntrospector.Builder.getInstanceCache();
         synchronized (instanceCache) {
             for (Iterator it = instanceCache.values().iterator(); it.hasNext(); ) {
                 Reference ref = ((Reference) it.next());
@@ -642,7 +632,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
     }
 
     static int getDefaultObjectWrapperInstanceCacheSize() {
-        Map instanceCache = DefaultObjectWrapperBuilder.getInstanceCache();
+        Map instanceCache = DefaultObjectWrapper.Builder.getInstanceCache();
         synchronized (instanceCache) {
             int size = 0; 
             for (Iterator it1 = instanceCache.values().iterator(); it1.hasNext(); ) {
@@ -653,7 +643,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
     }
 
     static int getDefaultObjectWrapperNonClearedInstanceCacheSize() {
-        Map instanceCache = DefaultObjectWrapperBuilder.getInstanceCache();
+        Map instanceCache = DefaultObjectWrapper.Builder.getInstanceCache();
         synchronized (instanceCache) {
             int cnt = 0;
             for (Iterator it1 = instanceCache.values().iterator(); it1.hasNext(); ) {
@@ -667,7 +657,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
     }
     
     static void clearDefaultObjectWrapperInstanceCacheReferences(boolean enqueue) {
-        Map instanceCache = DefaultObjectWrapperBuilder.getInstanceCache();
+        Map instanceCache = DefaultObjectWrapper.Builder.getInstanceCache();
         synchronized (instanceCache) {
             for (Iterator it1 = instanceCache.values().iterator(); it1.hasNext(); ) {
                 Map tcclScope = (Map) it1.next();

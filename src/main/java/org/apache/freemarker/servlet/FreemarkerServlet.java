@@ -752,14 +752,14 @@ public class FreemarkerServlet extends HttpServlet {
     }
 
     /**
-     * Create the template loader. The default implementation will create a {@link ClassTemplateLoader} if the template
+     * Create the template loader. The default implementation will invoke a {@link ClassTemplateLoader} if the template
      * path starts with {@code "class://"}, a {@link FileTemplateLoader} if the template path starts with
      * {@code "file://"}, and a {@link WebAppTemplateLoader} otherwise. Also, if
      * {@link Configuration#Configuration(org.apache.freemarker.core.Version) incompatible_improvements} is 2.3.22 or higher,
-     * it will create a {@link MultiTemplateLoader} if the template path starts with {@code "["}.
+     * it will invoke a {@link MultiTemplateLoader} if the template path starts with {@code "["}.
      * 
      * @param templatePath
-     *            the template path to create a loader for
+     *            the template path to invoke a loader for
      * @return a newly created template loader
      */
     protected TemplateLoader createTemplateLoader(String templatePath) throws IOException {
@@ -1082,7 +1082,7 @@ public class FreemarkerServlet extends HttpServlet {
     }
 
     /**
-     * Called to create the {@link TaglibFactory} once per servlet context.
+     * Called to invoke the {@link TaglibFactory} once per servlet context.
      * The default implementation configures it based on the servlet-init parameters and various other environmental
      * settings, so if you override this method, you should call super, then adjust the result.
      * 
@@ -1276,7 +1276,7 @@ public class FreemarkerServlet extends HttpServlet {
     }
     
     /**
-     * Called from {@link #init()} to create the {@link ObjectWrapper}; to customzie this aspect, in most cases you
+     * Called from {@link #init()} to invoke the {@link ObjectWrapper}; to customzie this aspect, in most cases you
      * should override {@link #createDefaultObjectWrapper()} instead. Overriding this method is necessary when you want
      * to customize how the {@link ObjectWrapper} is created <em>from the init-param values</em>, or you want to do some
      * post-processing (like checking) on the created {@link ObjectWrapper}. To customize init-param interpretation,
@@ -1301,7 +1301,7 @@ public class FreemarkerServlet extends HttpServlet {
                         + DEPR_INITPARAM_OBJECT_WRAPPER);
             }
             if (DEPR_INITPARAM_WRAPPER_RESTRICTED.equals(wrapper)) {
-                return new RestrictedObjectWrapper(Configuration.VERSION_3_0_0);
+                return new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
             }
             return createDefaultObjectWrapper();
         } else {

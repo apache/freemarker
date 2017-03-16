@@ -172,7 +172,7 @@ public class TemplateConfigurationTest {
         SETTING_ASSIGNMENTS.put("logTemplateExceptions", true);
         SETTING_ASSIGNMENTS.put("newBuiltinClassResolver", TemplateClassResolver.ALLOWS_NOTHING_RESOLVER);
         SETTING_ASSIGNMENTS.put("numberFormat", "0.0000");
-        SETTING_ASSIGNMENTS.put("objectWrapper", new RestrictedObjectWrapper(ICI));
+        SETTING_ASSIGNMENTS.put("objectWrapper", new RestrictedObjectWrapper.Builder(ICI).build());
         SETTING_ASSIGNMENTS.put("outputEncoding", "utf-16");
         SETTING_ASSIGNMENTS.put("showErrorTips", false);
         SETTING_ASSIGNMENTS.put("templateExceptionHandler", TemplateExceptionHandler.IGNORE_HANDLER);

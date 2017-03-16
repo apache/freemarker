@@ -88,7 +88,7 @@ public final class AliasTemplateNumberFormatFactory extends TemplateNumberFormat
             }
             return env.getTemplateNumberFormat(targetFormatString, locale);
         } catch (TemplateValueFormatException e) {
-            throw new AliasTargetTemplateValueFormatException("Failed to create format based on target format string,  "
+            throw new AliasTargetTemplateValueFormatException("Failed to invoke format based on target format string,  "
                     + _StringUtil.jQuote(params) + ". Reason given: " + e.getMessage(), e);
         }
     }

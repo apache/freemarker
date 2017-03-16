@@ -26,7 +26,7 @@ import junit.framework.TestCase;
 
 public class ModelAPINewInstanceTest extends TestCase {
 
-    private DefaultObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
+    private DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
 
     public ModelAPINewInstanceTest(String name) {
         super(name);

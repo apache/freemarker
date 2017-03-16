@@ -45,7 +45,6 @@ import org.apache.freemarker.core.arithmetic.impl.ConservativeArithmeticEngine;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
@@ -1173,7 +1172,7 @@ public class Configurable {
 
     /**
      * Sets the object wrapper used to wrap objects to {@link TemplateModel}-s.
-     * The default is {@link DefaultObjectWrapperBuilder#build()}.
+     * The default is {@link DefaultObjectWrapper.Builder#build()}.
      */
     public void setObjectWrapper(ObjectWrapper objectWrapper) {
         _NullArgumentException.check("objectWrapper", objectWrapper);
@@ -1503,7 +1502,7 @@ public class Configurable {
     /**
      * Adds an invisible <code>#import <i>templateName</i> as <i>namespaceVarName</i></code> at the beginning of the
      * main template (that's the top-level template that wasn't included/imported from another template). While it only
-     * affects the main template directly, as the imports will create a global variable there, the imports will be
+     * affects the main template directly, as the imports will invoke a global variable there, the imports will be
      * visible from the further imported templates too (note that {@link Configuration#getIncompatibleImprovements()}
      * set to 2.3.24 fixes a rarely surfacing bug with that).
      * 
@@ -2051,7 +2050,7 @@ public class Configurable {
      *       <i>propName1</i>=<i>propValue1</i>, <i>propName2</i>=<i>propValue2</i>, ...
      *       <i>propNameN</i>=<i>propValueN</i>)</tt>,
      *       where
-     *       <tt><i>className</i></tt> is the fully qualified class name of the instance to create (except if we have
+     *       <tt><i>className</i></tt> is the fully qualified class name of the instance to invoke (except if we have
      *       builder class or <tt>INSTANCE</tt> field around, but see that later),
      *       <tt><i>constrArg</i></tt>-s are the values of constructor arguments,
      *       and <tt><i>propName</i>=<i>propValue</i></tt>-s set JavaBean properties (like <tt>x=1</tt> means
@@ -2215,7 +2214,7 @@ public class Configurable {
                         setObjectWrapper(Configuration.getDefaultObjectWrapper(Configuration.VERSION_3_0_0));
                     }
                 } else if ("restricted".equalsIgnoreCase(value)) {
-                    setObjectWrapper(new RestrictedObjectWrapper(Configuration.VERSION_3_0_0));
+                    setObjectWrapper(new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
                 } else {
                     setObjectWrapper((ObjectWrapper) _ObjectBuilderSettingEvaluator.eval(
                                     value, ObjectWrapper.class, false, _SettingEvaluationEnvironment.getCurrent()));

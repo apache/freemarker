@@ -40,7 +40,6 @@ import java.util.TimeZone;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
@@ -109,7 +108,7 @@ public class ConfigurationTest extends TestCase {
         assertFalse(cfg.isObjectWrapperExplicitlySet());
         assertSame(Configuration.getDefaultObjectWrapper(Configuration.VERSION_3_0_0), cfg.getObjectWrapper());
         //
-        RestrictedObjectWrapper ow = new RestrictedObjectWrapper(Configuration.VERSION_3_0_0);
+        RestrictedObjectWrapper ow = new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         cfg.setObjectWrapper(ow);
         assertTrue(cfg.isObjectWrapperExplicitlySet());
         assertSame(ow, cfg.getObjectWrapper());
@@ -1075,7 +1074,7 @@ public class ConfigurationTest extends TestCase {
         cfg.setSharedVariable("b", "bbLegacy");
         
         // Cause re-wrapping of variables added via setSharedVaribles:
-        cfg.setObjectWrapper(new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build());
+        cfg.setObjectWrapper(new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
 
         {
             TemplateScalarModel aVal = (TemplateScalarModel) cfg.getSharedVariable("a");

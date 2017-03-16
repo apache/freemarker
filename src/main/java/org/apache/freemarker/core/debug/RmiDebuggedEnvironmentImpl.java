@@ -41,7 +41,6 @@ import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.core.model.impl.SimpleCollection;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
@@ -57,7 +56,7 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
     private static long nextId = 1;
     private static Set remotes = new HashSet();
 
-    private static final DefaultObjectWrapper OBJECT_WRAPPER = new DefaultObjectWrapperBuilder(Configuration
+    private static final DefaultObjectWrapper OBJECT_WRAPPER = new DefaultObjectWrapper.Builder(Configuration
             .VERSION_3_0_0)
             .build();
     

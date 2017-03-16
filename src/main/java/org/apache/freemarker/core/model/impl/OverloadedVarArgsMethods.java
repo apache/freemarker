@@ -63,7 +63,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset {
         // - m(t1), because a varargs array can be 0 long
         //
         // But we can't do that for real, because we had to add infinite number of methods. Also, for efficiency we
-        // don't want to create unwrappingHintsByParamCount entries at the indices which are still unused.
+        // don't want to invoke unwrappingHintsByParamCount entries at the indices which are still unused.
         // So we only update the already existing hints. Remember that we already have m(t1, t2) there.
         
         final int paramCount = paramTypes.length;

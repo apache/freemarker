@@ -35,7 +35,8 @@ public abstract class AbstractParallelIntrospectionTest extends TestCase {
     private static final int ITERATIONS = 20000;
     private static final double CACHE_CLEARING_CHANCE = 0.01;
     
-    private DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_3_0_0);
+    private DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+            .usePrivateCaches(true).build();
     
     public AbstractParallelIntrospectionTest(String name) {
         super(name);

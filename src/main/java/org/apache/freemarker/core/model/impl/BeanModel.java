@@ -114,7 +114,7 @@ public class BeanModel
      * (Side-note: this also implies that any class whose method has been called
      * will be strongly referred to by the framework and will not become
      * unloadable until this class has been unloaded first. Normally this is not
-     * an issue, but can be in a rare scenario where you create many classes on-
+     * an issue, but can be in a rare scenario where you invoke many classes on-
      * the-fly. Also, as the cache grows with new classes and methods introduced
      * to the framework, it may appear as if it were leaking memory. The
      * framework does, however detect class reloads (if you happen to be in an
@@ -137,29 +137,11 @@ public class BeanModel
         TemplateModel retval = null;
         
         try {
-            if (wrapper.isMethodsShadowItems()) {
-                Object fd = classInfo.get(key);
-                if (fd != null) {
-                    retval = invokeThroughDescriptor(fd, classInfo);
-                } else {
-                    retval = invokeGenericGet(classInfo, clazz, key);
-                }
+            Object fd = classInfo.get(key);
+            if (fd != null) {
+                retval = invokeThroughDescriptor(fd, classInfo);
             } else {
-                TemplateModel model = invokeGenericGet(classInfo, clazz, key);
-                final TemplateModel nullModel = wrapper.wrap(null);
-                if (model != nullModel && model != UNKNOWN) {
-                    return model;
-                }
-                Object fd = classInfo.get(key);
-                if (fd != null) {
-                    retval = invokeThroughDescriptor(fd, classInfo);
-                    if (retval == UNKNOWN && model == nullModel) {
-                        // This is the (somewhat subtle) case where the generic get() returns null
-                        // and we have no bean info, so we respect the fact that
-                        // the generic get() returns null and return null. (JR)
-                        retval = nullModel;
-                    }
-                }
+                retval = invokeGenericGet(classInfo, clazz, key);
             }
             if (retval == UNKNOWN) {
                 if (wrapper.isStrict()) {

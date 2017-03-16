@@ -38,7 +38,6 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultMapAdapter;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapperBuilder;
 import org.apache.freemarker.core.model.impl.SimpleCollection;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 
@@ -124,7 +123,7 @@ public class Listables {
     public List<? extends TemplateHashModelEx> getEmptyHashes() throws TemplateModelException {
         List<TemplateHashModelEx> emptyMaps = new ArrayList<>();
         emptyMaps.addAll(getMapsWrappedAsEx2(Collections.emptyMap()));
-        emptyMaps.add((TemplateHashModelEx) new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build()
+        emptyMaps.add((TemplateHashModelEx) new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build()
                 .wrap(Collections.emptyMap()));
         return emptyMaps;
     }
@@ -135,7 +134,7 @@ public class Listables {
     private List<TemplateHashModelEx2> getMapsWrappedAsEx2(Map<?, ?> map) throws TemplateModelException {
         List<TemplateHashModelEx2> maps = new ArrayList<>();
         
-        DefaultObjectWrapper ow = new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build();
+        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         maps.add(new SimpleHash(map, ow));
         maps.add((DefaultMapAdapter) ow.wrap(map));
 
@@ -144,7 +143,7 @@ public class Listables {
     
     public TemplateHashModelEx getHashNonEx2() {
         return new NonEx2MapAdapter(ImmutableMap.of("k1", 11, "k2", 22),
-                new DefaultObjectWrapperBuilder(Configuration.VERSION_3_0_0).build());
+                new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
     }
     
     public static class NonEx2MapAdapter extends WrappingTemplateModel implements TemplateHashModelEx {
