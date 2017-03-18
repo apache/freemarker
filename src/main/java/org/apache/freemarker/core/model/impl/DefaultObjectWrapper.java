@@ -1185,20 +1185,15 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      *
      * <p>The builder meant to be used as a drop-away object (not stored in a field), like in this example:
      * <pre>
-     *    DefaultObjectWrapper dow = new Builder(Configuration.VERSION_2_3_21).build();
+     *    DefaultObjectWrapper dow = new Builder(Configuration.VERSION_3_0_0).build();
      * </pre>
      *
      * <p>Or, a more complex example:</p>
      * <pre>
      *    // Create the builder:
-     *    Builder builder = new Builder(Configuration.VERSION_2_3_21);
-     *    // Set desired DefaultObjectWrapper configuration properties:
-     *    builder.setUseModelCache(true);
-     *    builder.setExposeFields(true);
-     *
-     *    // Get the singleton:
-     *    DefaultObjectWrapper dow = builder.build();
-     *    // You don't need the builder anymore.
+     *    DefaultObjectWrapper dow = new Builder(Configuration.VERSION_3_0_0)
+     *            .exposeFields(true)
+     *            .build();
      * </pre>
      *
      * <p>Despite that builders aren't meant to be used as long-lived objects (singletons), the builder is thread-safe after
