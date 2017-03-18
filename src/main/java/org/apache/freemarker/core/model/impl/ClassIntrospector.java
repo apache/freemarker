@@ -1080,8 +1080,11 @@ class ClassIntrospector {
 
         // Properties and their *defaults*:
         private int exposureLevel = DefaultObjectWrapper.EXPOSE_SAFE;
+        private boolean exposureLevelExplicitlySet;
         private boolean exposeFields;
+        private boolean exposeFieldsExplicitlySet;
         private MethodAppearanceFineTuner methodAppearanceFineTuner;
+        private boolean methodAppearanceFineTunerExplicitlySet;
         private MethodSorter methodSorter;
         // Attention:
         // - This is also used as a cache key, so non-normalized field values should be avoided.
@@ -1141,22 +1144,32 @@ class ClassIntrospector {
             return exposureLevel;
         }
 
-        /** See {@link DefaultObjectWrapper#setExposureLevel(int)}. */
+        /** See {@link DefaultObjectWrapper.ExtendableBuilder#setExposureLevel(int)}. */
         public void setExposureLevel(int exposureLevel) {
             if (exposureLevel < DefaultObjectWrapper.EXPOSE_ALL || exposureLevel > DefaultObjectWrapper.EXPOSE_NOTHING) {
                 throw new IllegalArgumentException("Illegal exposure level: " + exposureLevel);
             }
 
             this.exposureLevel = exposureLevel;
+            exposureLevelExplicitlySet = true;
+        }
+
+        public boolean isExposureLevelExplicitlySet() {
+            return exposureLevelExplicitlySet;
         }
 
         public boolean getExposeFields() {
             return exposeFields;
         }
 
-        /** See {@link DefaultObjectWrapper#setExposeFields(boolean)}. */
+        /** See {@link DefaultObjectWrapper.ExtendableBuilder#setExposeFields(boolean)}. */
         public void setExposeFields(boolean exposeFields) {
             this.exposeFields = exposeFields;
+            exposeFieldsExplicitlySet = true;
+        }
+
+        public boolean isExposeFieldsExplicitlySet() {
+            return exposeFieldsExplicitlySet;
         }
 
         public MethodAppearanceFineTuner getMethodAppearanceFineTuner() {
@@ -1165,6 +1178,11 @@ class ClassIntrospector {
 
         public void setMethodAppearanceFineTuner(MethodAppearanceFineTuner methodAppearanceFineTuner) {
             this.methodAppearanceFineTuner = methodAppearanceFineTuner;
+            methodAppearanceFineTunerExplicitlySet = true;
+        }
+
+        public boolean isMethodAppearanceFineTunerExplicitlySet() {
+            return methodAppearanceFineTunerExplicitlySet;
         }
 
         public MethodSorter getMethodSorter() {

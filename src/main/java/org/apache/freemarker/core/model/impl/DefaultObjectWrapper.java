@@ -1339,10 +1339,15 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
 
         // Properties and their *defaults*:
         private int defaultDateType = TemplateDateModel.UNKNOWN;
+        private boolean defaultDataTypeExplicitlySet;
         private ObjectWrapper outerIdentity;
+        private boolean outerIdentityExplicitlySet;
         private boolean strict;
+        private boolean strictExplicitlySet;
         private boolean useModelCache;
+        private boolean useModelCacheExplicitlySet;
         private boolean usePrivateCaches;
+        private boolean usePrivateCachesExplicitlySet;
         // Attention!
         // - As this object is a cache key, non-normalized field values should be avoided.
         // - Fields with default values must be set until the end of the constructor to ensure that when the lookup happens,
@@ -1489,6 +1494,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          */
         public void setDefaultDateType(int defaultDateType) {
             this.defaultDateType = defaultDateType;
+            defaultDataTypeExplicitlySet = true;
         }
 
         /**
@@ -1497,6 +1503,13 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         public SelfT defaultDateType(int defaultDateType) {
             setDefaultDateType(defaultDateType);
             return self();
+        }
+
+        /**
+         * Tells if the property was explicitly set, as opposed to just holding its default value.
+         */
+        public boolean isDefaultDataTypeExplicitlySet() {
+            return defaultDataTypeExplicitlySet;
         }
 
         /**
@@ -1517,6 +1530,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          */
         public void setOuterIdentity(ObjectWrapper outerIdentity) {
             this.outerIdentity = outerIdentity;
+            outerIdentityExplicitlySet = true;
         }
 
         /**
@@ -1525,6 +1539,13 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         public SelfT outerIdentity(ObjectWrapper outerIdentity) {
             setOuterIdentity(outerIdentity);
             return self();
+        }
+
+        /**
+         * Tells if the property was explicitly set, as opposed to just holding its default value.
+         */
+        public boolean isOuterIdentityExplicitlySet() {
+            return outerIdentityExplicitlySet;
         }
 
         /**
@@ -1557,6 +1578,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          */
         public void setStrict(boolean strict) {
             this.strict = strict;
+            strictExplicitlySet = true;
         }
 
         /**
@@ -1565,6 +1587,13 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         public SelfT strict(boolean strict) {
             setStrict(strict);
             return self();
+        }
+
+        /**
+         * Tells if the property was explicitly set, as opposed to just holding its default value.
+         */
+        public boolean isStrictExplicitlySet() {
+            return strictExplicitlySet;
         }
 
         public boolean getUseModelCache() {
@@ -1577,6 +1606,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         // [FM3] Remove
         public void setUseModelCache(boolean useModelCache) {
             this.useModelCache = useModelCache;
+            useModelCacheExplicitlySet = true;
         }
 
         /**
@@ -1586,6 +1616,13 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         public SelfT useModelCache(boolean useModelCache) {
             setUseModelCache(useModelCache);
             return self();
+        }
+
+        /**
+         * Tells if the property was explicitly set, as opposed to just holding its default value.
+         */
+        public boolean isUseModelCacheExplicitlySet() {
+            return useModelCacheExplicitlySet;
         }
 
         /**
@@ -1601,6 +1638,14 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          * */
         public void setUsePrivateCaches(boolean usePrivateCaches) {
             this.usePrivateCaches = usePrivateCaches;
+            usePrivateCaches = true;
+        }
+
+        /**
+         * Tells if the property was explicitly set, as opposed to just holding its default value.
+         */
+        public boolean isUsePrivateCachesExplicitlySet() {
+            return usePrivateCachesExplicitlySet;
         }
 
         /**
@@ -1627,6 +1672,13 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         public SelfT exposureLevel(int exposureLevel) {
             setExposureLevel(exposureLevel);
             return self();
+        }
+
+        /**
+         * Tells if the property was explicitly set, as opposed to just holding its default value.
+         */
+        public boolean setExposureLevelExplicitlySet() {
+            return classIntrospectorBuilder.isExposureLevelExplicitlySet();
         }
 
         /**
@@ -1658,6 +1710,10 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
             return self();
         }
 
+        public boolean isExposeFieldsExplicitlySet() {
+            return classIntrospectorBuilder.isExposeFieldsExplicitlySet();
+        }
+
         /**
          * Getter pair of {@link #setMethodAppearanceFineTuner(MethodAppearanceFineTuner)}
          */
@@ -1681,6 +1737,10 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         public SelfT methodAppearanceFineTuner(MethodAppearanceFineTuner methodAppearanceFineTuner) {
             setMethodAppearanceFineTuner(methodAppearanceFineTuner);
             return self();
+        }
+
+        public boolean isMethodAppearanceFineTunerExplicitlySet() {
+            return classIntrospectorBuilder.isMethodAppearanceFineTunerExplicitlySet();
         }
 
         /**
