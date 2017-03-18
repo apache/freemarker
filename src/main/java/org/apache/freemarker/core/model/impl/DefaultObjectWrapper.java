@@ -1638,7 +1638,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          * */
         public void setUsePrivateCaches(boolean usePrivateCaches) {
             this.usePrivateCaches = usePrivateCaches;
-            usePrivateCaches = true;
+            usePrivateCachesExplicitlySet = true;
         }
 
         /**
