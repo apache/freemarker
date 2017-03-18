@@ -25,7 +25,7 @@ import java.lang.reflect.Method;
 
 /**
  * Used for customizing how the methods are visible from templates, via
- * {@link DefaultObjectWrapper#setMethodAppearanceFineTuner(MethodAppearanceFineTuner)}.
+ * {@link DefaultObjectWrapper.ExtendableBuilder#setMethodAppearanceFineTuner(MethodAppearanceFineTuner)}.
  * The object that implements this should also implement {@link SingletonCustomizer} whenever possible.
  * 
  * @since 2.3.21
