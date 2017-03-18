@@ -19,6 +19,11 @@
 
 package org.apache.freemarker.core.model.impl;
 
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
+import java.util.Map;
+import java.util.WeakHashMap;
+
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -31,8 +36,8 @@ import org.apache.freemarker.core.model.TemplateModelException;
  */
 public class RestrictedObjectWrapper extends DefaultObjectWrapper {
 
-    protected RestrictedObjectWrapper(Builder builder) {
-        super(builder, true);
+    protected RestrictedObjectWrapper(Builder builder, boolean finalizeConstruction) {
+        super(builder, finalizeConstruction);
     }
 
     /**
@@ -62,14 +67,32 @@ public class RestrictedObjectWrapper extends DefaultObjectWrapper {
 
     public static final class Builder extends ExtendableBuilder<RestrictedObjectWrapper, Builder> {
 
+        private final static Map<ClassLoader, Map<Builder, WeakReference<RestrictedObjectWrapper>>>
+                INSTANCE_CACHE = new WeakHashMap<>();
+
+        private final static ReferenceQueue<RestrictedObjectWrapper> INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue<>();
+
         public Builder(Version incompatibleImprovements) {
             super(incompatibleImprovements, false);
         }
 
         @Override
         public RestrictedObjectWrapper build() {
-            return new RestrictedObjectWrapper(this);
+            return DefaultObjectWrapperTCCLSingletonUtil.getSingleton(
+                    this, INSTANCE_CACHE, INSTANCE_CACHE_REF_QUEUE, ConstructorInvoker.INSTANCE);
         }
+
+        private static class ConstructorInvoker
+                implements DefaultObjectWrapperTCCLSingletonUtil._ConstructorInvoker<RestrictedObjectWrapper, Builder> {
+
+            private static final ConstructorInvoker INSTANCE = new ConstructorInvoker();
+
+            @Override
+            public RestrictedObjectWrapper invoke(Builder builder) {
+                return new RestrictedObjectWrapper(builder, true);
+            }
+        }
+
     }
 
 }

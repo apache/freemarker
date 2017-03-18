@@ -1281,8 +1281,24 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          * a singleton that is also in use elsewhere.
          */
         public DefaultObjectWrapper build() {
-            return _ModelAPI.getDefaultObjectWrapperSubclassSingleton(
+            return DefaultObjectWrapperTCCLSingletonUtil.getSingleton(
                     this, INSTANCE_CACHE, INSTANCE_CACHE_REF_QUEUE, ConstructorInvoker.INSTANCE);
+        }
+
+        /**
+         * Calls {@link ExtendableBuilder#hashCodeForCacheKey(ExtendableBuilder)}.
+         */
+        @Override
+        public int hashCode() {
+            return hashCodeForCacheKey(this);
+        }
+
+        /**
+         * Calls {@link ExtendableBuilder#equalsForCacheKey(ExtendableBuilder, Object)}.
+         */
+        @Override
+        public boolean equals(Object obj) {
+            return equalsForCacheKey(this, obj);
         }
 
         /**
@@ -1293,7 +1309,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         }
 
         private static class ConstructorInvoker
-            implements _ModelAPI._ConstructorInvoker<DefaultObjectWrapper, Builder> {
+            implements DefaultObjectWrapperTCCLSingletonUtil._ConstructorInvoker<DefaultObjectWrapper, Builder> {
 
             private static final ConstructorInvoker INSTANCE = new ConstructorInvoker();
 
@@ -1318,10 +1334,10 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
 
         private final Version incompatibleImprovements;
 
-        ClassIntrospector.Builder classIntrospectorBuilder;
+        // Can't be final because deep cloning must replace it
+        private ClassIntrospector.Builder classIntrospectorBuilder;
 
         // Properties and their *defaults*:
-        private boolean simpleMapWrapper;
         private int defaultDateType = TemplateDateModel.UNKNOWN;
         private ObjectWrapper outerIdentity;
         private boolean strict;
@@ -1335,37 +1351,37 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
 
         /**
          * @param incompatibleImprovements
-         *   Sets which of the non-backward-compatible improvements should be enabled. Not {@code null}. This version number
-         *   is the same as the FreeMarker version number with which the improvements were implemented.
-         *
-         *   <p>For new projects, it's recommended to set this to the FreeMarker version that's used during the development.
-         *   For released products that are still actively developed it's a low risk change to increase the 3rd
-         *   version number further as FreeMarker is updated, but of course you should always check the list of effects
-         *   below. Increasing the 2nd or 1st version number possibly mean substantial changes with higher risk of breaking
-         *   the application, but again, see the list of effects below.
-         *
-         *   <p>The reason it's separate from {@link Configuration#setIncompatibleImprovements(Version)} is that
-         *   {@link ObjectWrapper} objects are often shared among multiple {@link Configuration}-s, so the two version
-         *   numbers are technically independent. But it's recommended to keep those two version numbers the same.
-         *
-         *   <p>The changes enabled by {@code incompatibleImprovements} are:
-         *   <ul>
-         *     <li>
-         *       <p>3.0.0: No changes; this is the starting point, the version used in older projects.
-         *     </li>
-         *   </ul>
-         *
-         *   <p>Note that the version will be normalized to the lowest version where the same incompatible
-         *   {@link DefaultObjectWrapper} improvements were already present, so {@link #getIncompatibleImprovements()} might returns
-         *   a lower version than what you have specified.
+         *         Sets which of the non-backward-compatible improvements should be enabled. Not {@code null}. This
+         *         version number is the same as the FreeMarker version number with which the improvements were
+         *         implemented.
+         *         <p>
+         *         For new projects, it's recommended to set this to the FreeMarker version that's used during the
+         *         development. For released products that are still actively developed it's a low risk change to
+         *         increase the 3rd version number further as FreeMarker is updated, but of course you should always
+         *         check the list of effects below. Increasing the 2nd or 1st version number possibly mean substantial
+         *         changes with higher risk of breaking the application, but again, see the list of effects below.
+         *         <p>
+         *         The reason it's separate from {@link Configuration#setIncompatibleImprovements(Version)} is that
+         *         {@link ObjectWrapper} objects are often shared among multiple {@link Configuration}-s, so the two
+         *         version numbers are technically independent. But it's recommended to keep those two version numbers
+         *         the same.
+         *         <p>
+         *         The changes enabled by {@code incompatibleImprovements} are:
+         *         <ul>
+         *             <li><p>3.0.0: No changes; this is the starting point, the version used in older projects.</li>
+         *         </ul>
+         *         <p>
+         *         Note that the version will be normalized to the lowest version where the same incompatible {@link
+         *         DefaultObjectWrapper} improvements were already present, so {@link #getIncompatibleImprovements()}
+         *         might returns a lower version than what you have specified.
          * @param isIncompImprsAlreadyNormalized
-         *         Tells if the {@code incompatibleImprovements} parameter contains an <em>already normalized</em> value.
-         *         This parameter meant to be {@code true} when the class that extends {@link DefaultObjectWrapper} needs to
-         *         add additional breaking versions over those of {@link DefaultObjectWrapper}. Thus, if this parameter is
-         *         {@code true}, the versions where {@link DefaultObjectWrapper} had breaking changes must be already
-         *         factored into the {@code incompatibleImprovements} parameter value, as no more normalization will happen.
-         *         (You can use {@link DefaultObjectWrapper#normalizeIncompatibleImprovementsVersion(Version)} to discover
-         *         those.)
+         *         Tells if the {@code incompatibleImprovements} parameter contains an <em>already normalized</em>
+         *         value. This parameter meant to be {@code true} when the class that extends {@link
+         *         DefaultObjectWrapper} needs to add additional breaking versions over those of {@link
+         *         DefaultObjectWrapper}. Thus, if this parameter is {@code true}, the versions where {@link
+         *         DefaultObjectWrapper} had breaking changes must be already factored into the {@code
+         *         incompatibleImprovements} parameter value, as no more normalization will happen. (You can use {@link
+         *         DefaultObjectWrapper#normalizeIncompatibleImprovementsVersion(Version)} to discover those.)
          */
         protected ExtendableBuilder(Version incompatibleImprovements, boolean isIncompImprsAlreadyNormalized) {
             _CoreAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
@@ -1379,62 +1395,77 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         }
 
         /**
-         * Properly implementing this method is important if the builder is used as a cache key; if you override
-         * {@link ExtendableBuilder} and add new fields, don't forget to override it!
+         * Calculate a content-based hash that could be used when looking up the product object that {@link #build()}
+         * returns from a cache. If you override {@link ExtendableBuilder} and add new fields, don't forget to take
+         * those into account too!
+         *
+         * <p>{@link Builder#hashCode()} is delegated to this.
+         *
+         * @see #equalsForCacheKey(ExtendableBuilder, Object)
+         * @see #cloneForCacheKey()
          */
-        // TODO Move this to Builder and a static helper method
-        @Override
-        public int hashCode() {
+        protected static int hashCodeForCacheKey(ExtendableBuilder<?, ?> builder) {
             final int prime = 31;
             int result = 1;
-            result = prime * result + incompatibleImprovements.hashCode();
-            result = prime * result + (simpleMapWrapper ? 1231 : 1237);
-            result = prime * result + defaultDateType;
-            result = prime * result + (outerIdentity != null ? outerIdentity.hashCode() : 0);
-            result = prime * result + (strict ? 1231 : 1237);
-            result = prime * result + (useModelCache ? 1231 : 1237);
-            result = prime * result + (usePrivateCaches ? 1231 : 1237);
-            result = prime * result + classIntrospectorBuilder.hashCode();
+            result = prime * result + builder.getIncompatibleImprovements().hashCode();
+            result = prime * result + builder.getDefaultDateType();
+            result = prime * result + (builder.getOuterIdentity() != null ? builder.getOuterIdentity().hashCode() : 0);
+            result = prime * result + (builder.isStrict() ? 1231 : 1237);
+            result = prime * result + (builder.getUseModelCache() ? 1231 : 1237);
+            result = prime * result + (builder.getUsePrivateCaches() ? 1231 : 1237);
+            result = prime * result + builder.classIntrospectorBuilder.hashCode();
             return result;
         }
 
         /**
-         * Two {@link ExtendableBuilder}-s are equal exactly if their classes are identical ({@code ==}), and their
-         * field values are equal. Properly implementing this method is important if the builder is used as a cache key;
-         * if you override {@link ExtendableBuilder} and add new fields, don't forget to override it!
+         * A content-based {@link Object#equals(Object)} that could be used to look up the product object that
+         * {@link #build()} returns from a cache. If you override {@link ExtendableBuilder} and add new fields, don't
+         * forget to take those into account too!
+         *
+         * <p>
+         * {@link Builder#equals(Object)} is delegated to this.
+         *
+         * @see #hashCodeForCacheKey(ExtendableBuilder)
+         * @see #cloneForCacheKey()
          */
-        // TODO Move this to Builder and a static helper method
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null) return false;
-            if (getClass() != obj.getClass()) return false;
-            ExtendableBuilder other = (ExtendableBuilder) obj;
+        protected static boolean equalsForCacheKey(ExtendableBuilder<?, ?> thisBuilder,  Object thatObj) {
+            if (thisBuilder == thatObj) return true;
+            if (thatObj == null) return false;
+            if (thisBuilder.getClass() != thatObj.getClass()) return false;
+            ExtendableBuilder<?, ?> thatBuilder = (ExtendableBuilder<?, ?>) thatObj;
 
-            if (!incompatibleImprovements.equals(other.incompatibleImprovements)) return false;
-            if (simpleMapWrapper != other.simpleMapWrapper) return false;
-            if (defaultDateType != other.defaultDateType) return false;
-            if (outerIdentity != other.outerIdentity) return false;
-            if (strict != other.strict) return false;
-            if (useModelCache != other.useModelCache) return false;
-            if (usePrivateCaches != other.usePrivateCaches) return false;
-            return classIntrospectorBuilder.equals(other.classIntrospectorBuilder);
+            if (!thisBuilder.getIncompatibleImprovements().equals(thatBuilder.getIncompatibleImprovements())) {
+                return false;
+            }
+            if (thisBuilder.getDefaultDateType() != thatBuilder.getDefaultDateType()) return false;
+            if (thisBuilder.getOuterIdentity() != thatBuilder.getOuterIdentity()) return false;
+            if (thisBuilder.isStrict() != thatBuilder.isStrict()) return false;
+            if (thisBuilder.getUseModelCache() != thatBuilder.getUseModelCache()) return false;
+            if (thisBuilder.getUsePrivateCaches() != thatBuilder.getUsePrivateCaches()) return false;
+            return thisBuilder.classIntrospectorBuilder.equals(thatBuilder.classIntrospectorBuilder);
         }
 
         /**
-         * In case the builder is used as a cache key, this is used to clone it before it's actually used as a key; if
-         * you override {@link ExtendableBuilder} and add new fields that needs deep cloning, don't forget to
-         * override it! Calls {@link Object#clone()} internally (among others), so newly added fields are automatically
-         * copied, but again, that's not enough if the field value is mutable.
+         * If the builder is used as a cache key, this is used to clone it before it's stored in the cache as a key, so
+         * that further changes in the original builder won't change the key (aliasing). It calls {@link Object#clone()}
+         * internally, so all fields are automatically copied, but it will also individually clone field values that are
+         * both mutable and has a content-based equals method (deep cloning).
+         * <p>
+         * If you extend {@link ExtendableBuilder} with new fields with mutable values that have a content-based equals
+         * method, and you will also cache product instances, you need to clone those values manually to prevent
+         * aliasing problems, so don't forget to override this method!
+         *
+         * @see #equalsForCacheKey(ExtendableBuilder, Object)
+         * @see #hashCodeForCacheKey(ExtendableBuilder)
          */
-        // TODO Move this to Builder and DeepCloneableBuilder
-        protected SelfT deepClone() {
+        protected SelfT cloneForCacheKey() {
             try {
                 @SuppressWarnings("unchecked") SelfT clone = (SelfT) super.clone();
-                clone.classIntrospectorBuilder = (ClassIntrospector.Builder) classIntrospectorBuilder.clone();
+                ((ExtendableBuilder<?, ?>) clone).classIntrospectorBuilder = (ClassIntrospector.Builder)
+                        classIntrospectorBuilder.clone();
                 return clone;
             } catch (CloneNotSupportedException e) {
-                throw new RuntimeException("Failed to deepClone ExtendableBuilder", e);
+                throw new RuntimeException("Failed to deepClone Builder", e);
             }
         }
 
