@@ -161,7 +161,7 @@ public class TemplateNotFoundMessageTest {
         }
         
         try {
-            cfg.getTemplate("./missing", null, "example.com", null, true, false);
+            cfg.getTemplate("./missing", null, "example.com", null, false);
             fail();
         } catch (TemplateNotFoundException e) {
             showErrorMessage(e.getMessage());

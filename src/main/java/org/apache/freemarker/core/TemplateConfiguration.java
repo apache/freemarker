@@ -79,6 +79,7 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
  */
 public final class TemplateConfiguration extends Configurable implements ParserConfiguration {
 
+    private TemplateLanguage templateLanguage;
     private Integer tagSyntax;
     private Integer namingConvention;
     private Boolean whitespaceStripping;
@@ -223,6 +224,9 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         }
         if (tc.isTagSyntaxSet()) {
             setTagSyntax(tc.getTagSyntax());
+        }
+        if (tc.isTemplateLanguageSet()) {
+            setTemplateLanguage(tc.getTemplateLanguage());
         }
         if (tc.isTemplateExceptionHandlerSet()) {
             setTemplateExceptionHandler(tc.getTemplateExceptionHandler());
@@ -373,7 +377,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      */
     public void setTagSyntax(int tagSyntax) {
         Configuration.valideTagSyntaxValue(tagSyntax);
-        this.tagSyntax = Integer.valueOf(tagSyntax);
+        this.tagSyntax = tagSyntax;
     }
 
     /**
@@ -381,7 +385,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      */
     @Override
     public int getTagSyntax() {
-        return tagSyntax != null ? tagSyntax.intValue() : getNonNullParentConfiguration().getTagSyntax();
+        return tagSyntax != null ? tagSyntax : getNonNullParentConfiguration().getTagSyntax();
     }
 
     /**
@@ -392,11 +396,31 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     }
 
     /**
+     * See {@link Configuration#getTemplateLanguage()}
+     */
+    @Override
+    public TemplateLanguage getTemplateLanguage() {
+        return templateLanguage != null ? templateLanguage : getNonNullParentConfiguration().getTemplateLanguage();
+    }
+
+    /**
+     * See {@link Configuration#setTemplateLanguage(TemplateLanguage)}
+     */
+    public void setTemplateLanguage(TemplateLanguage templateLanguage) {
+        _NullArgumentException.check("templateLanguage", templateLanguage);
+        this.templateLanguage = templateLanguage;
+    }
+
+    public boolean isTemplateLanguageSet() {
+        return templateLanguage != null;
+    }
+
+    /**
      * See {@link Configuration#setNamingConvention(int)}.
      */
     public void setNamingConvention(int namingConvention) {
         Configuration.validateNamingConventionValue(namingConvention);
-        this.namingConvention = Integer.valueOf(namingConvention);
+        this.namingConvention = namingConvention;
     }
 
     /**
@@ -404,7 +428,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      */
     @Override
     public int getNamingConvention() {
-        return namingConvention != null ? namingConvention.intValue()
+        return namingConvention != null ? namingConvention
                 : getNonNullParentConfiguration().getNamingConvention();
     }
 

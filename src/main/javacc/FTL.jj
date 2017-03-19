@@ -2935,7 +2935,7 @@ ASTDirInclude Include() :
 {
     ASTExpression nameExp;
     Token att, start, end;
-    ASTExpression exp, parseExp = null, encodingExp = null, ignoreMissingExp = null;
+    ASTExpression exp, encodingExp = null, ignoreMissingExp = null;
 }
 {
     start = <_INCLUDE>
@@ -2947,9 +2947,7 @@ ASTDirInclude Include() :
         exp = ASTExpression()
         {
             String attString = att.image;
-            if (attString.equalsIgnoreCase("parse")) {
-        	    parseExp = exp;
-            } else if (attString.equalsIgnoreCase("encoding")) {
+            if (attString.equalsIgnoreCase("encoding")) {
             	encodingExp = exp;
             } else if (attString.equalsIgnoreCase("ignore_missing") || attString.equals("ignoreMissing")) {
                 token_source.checkNamingConvention(att);
@@ -2958,7 +2956,7 @@ ASTDirInclude Include() :
                 String correctedName = attString.equals("ignoreMissing") ? "ignore_missing" : null;
                 throw new ParseException(
                 		"Unsupported named #include parameter: \"" + attString + "\". Supported parameters are: "
-                		+ "\"parse\", \"encoding\", \"ignore_missing\"."
+                		+ "\"encoding\", \"ignore_missing\"."
                 		+ (correctedName == null
                 		      ? ""
                 		      : " Supporting camelCase parameter names is planned for FreeMarker 2.4.0; "
@@ -2970,7 +2968,7 @@ ASTDirInclude Include() :
     )*
     end = LooseDirectiveEnd()
     {
-        ASTDirInclude result = new ASTDirInclude(template, nameExp, encodingExp, parseExp, ignoreMissingExp);
+        ASTDirInclude result = new ASTDirInclude(template, nameExp, encodingExp, ignoreMissingExp);
         result.setLocation(template, start, end);
         return result;
     }
@@ -3897,9 +3895,9 @@ void HeaderElement() :
                             }
                             if (template.getEncoding() != null && vs != null
                                     && !template.getEncoding().equalsIgnoreCase(vs)) {
-                                throw new Template.WrongEncodingException(vs, template.getEncoding());
+                                throw new WrongTemplateCharsetException(vs, template.getEncoding());
                             }
-                            // There will be no WrongEncodingException exception, release mark buffer:
+                            // There will be no WrongTemplateCharsetException exception, release mark buffer:
                             if (streamToUnmarkWhenEncEstabd != null) {
                                 streamToUnmarkWhenEncEstabd.mark(0);
                                 streamToUnmarkWhenEncEstabd = null;

@@ -81,9 +81,9 @@ public abstract class TemplateResolver {
      *             should never be a {@link TemplateNotFoundException}, as that condition is indicated in the return
      *             value.
      */
-    // [FM3] These parameters will certainly be removed: String suggestedEncoding, boolean parseAsFTL
+    // [FM3] This parameters will be removed: String encoding
     public abstract GetTemplateResult getTemplate(String name, Locale locale, Object customLookupCondition,
-            String encoding, boolean parseAsFTL)
+            String encoding)
             throws MalformedTemplateNameException, ParseException, IOException;
 
     /**
@@ -108,7 +108,7 @@ public abstract class TemplateResolver {
      * {@link Configuration#setTemplateUpdateDelayMilliseconds(long)} alone does.
      * 
      * <p>
-     * For the meaning of the parameters, see {@link #getTemplate(String, Locale, Object, String, boolean)}
+     * For the meaning of the parameters, see {@link #getTemplate(String, Locale, Object, String)}
      * 
      * <p>
      * This method is thread-safe and can be called while the engine processes templates.
@@ -116,7 +116,7 @@ public abstract class TemplateResolver {
      * @throws UnsupportedOperationException If the {@link TemplateResolver} implementation doesn't support this
      *        operation.
      */
-    public abstract void removeTemplateFromCache(String name, Locale locale, String encoding, boolean parse)
+    public abstract void removeTemplateFromCache(String name, Locale locale, String encoding)
             throws IOException, UnsupportedOperationException;
 
     /**

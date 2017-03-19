@@ -34,7 +34,9 @@ import java.util.StringTokenizer;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateConfiguration;
+import org.apache.freemarker.core.TemplateLanguage;
 import org.apache.freemarker.core.TemplateNotFoundException;
+import org.apache.freemarker.core.WrongTemplateCharsetException;
 import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.GetTemplateResult;
@@ -222,7 +224,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
      */
     @Override
     public GetTemplateResult getTemplate(String name, Locale locale, Object customLookupCondition,
-            String encoding, boolean parseAsFTL)
+            String encoding)
     throws IOException {
         _NullArgumentException.check("name", name);
         _NullArgumentException.check("locale", locale);
@@ -234,7 +236,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
             return new GetTemplateResult(name, "The TemplateLoader (and TemplateLoader2) was null.");
         }
         
-        Template template = getTemplateInternal(name, locale, customLookupCondition, encoding, parseAsFTL);
+        Template template = getTemplateInternal(name, locale, customLookupCondition, encoding);
         return template != null ? new GetTemplateResult(template) : new GetTemplateResult(name, (String) null);
     }
 
@@ -250,13 +252,13 @@ public class DefaultTemplateResolver extends TemplateResolver {
 
     private Template getTemplateInternal(
             final String name, final Locale locale, final Object customLookupCondition,
-            final String encoding, final boolean parseAsFTL)
+            final String encoding)
     throws IOException {
         final boolean debug = LOG.isDebugEnabled();
         final String debugPrefix = debug
-                ? getDebugPrefix("getTemplate", name, locale, customLookupCondition, encoding, parseAsFTL)
+                ? getDebugPrefix("getTemplate", name, locale, customLookupCondition, encoding)
                 : null;
-        final CachedResultKey cacheKey = new CachedResultKey(name, locale, customLookupCondition, encoding, parseAsFTL);
+        final CachedResultKey cacheKey = new CachedResultKey(name, locale, customLookupCondition, encoding);
         
         CachedResult oldCachedResult = (CachedResult) cacheStorage.get(cacheKey);
         
@@ -386,7 +388,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
             Template template = loadTemplate(
                     templateLoaderResult,
                     name, newLookupResult.getTemplateSourceName(), locale, customLookupCondition,
-                    encoding, parseAsFTL);
+                    encoding);
             if (session != null) {
                 session.close();
                 if (debug) {
@@ -523,7 +525,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
     private Template loadTemplate(
             TemplateLoadingResult templateLoaderResult,
             final String name, final String sourceName, Locale locale, final Object customLookupCondition,
-            String initialEncoding, final boolean parseAsFTL) throws IOException {
+            String initialEncoding) throws IOException {
         TemplateConfiguration tc;
         {
             TemplateConfiguration cfgTC;
@@ -549,7 +551,8 @@ public class DefaultTemplateResolver extends TemplateResolver {
                 tc = cfgTC;
             }
         }
-        
+
+        TemplateLanguage templateLanguage = null;
         if (tc != null) {
             // TC.{encoding,locale} is stronger than the cfg.getTemplate arguments by design.
             if (tc.isEncodingSet()) {
@@ -558,8 +561,15 @@ public class DefaultTemplateResolver extends TemplateResolver {
             if (tc.isLocaleSet()) {
                 locale = tc.getLocale();
             }
+            if (tc.isTemplateLanguageSet()) {
+                templateLanguage = tc.getTemplateLanguage();
+            }
         }
-        
+
+        if (templateLanguage == null) {
+            templateLanguage = config.getTemplateLanguage();
+        }
+
         Template template;
         {
             Reader reader = templateLoaderResult.getReader();
@@ -573,7 +583,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
                 initialEncoding = null;  // No charset decoding has happened
                 markedInputStream = null;
             } else if (inputStream != null) {
-                if (parseAsFTL) {
+                if (templateLanguage.getCanSpecifyCharsetInContent()) {
                     // We need mark support, to restart if the charset suggested by <#ftl encoding=...> differs
                     // from that we use initially.
                     if (!inputStream.markSupported()) {
@@ -594,37 +604,27 @@ public class DefaultTemplateResolver extends TemplateResolver {
             }
             
             try {
-                if (parseAsFTL) {
-                    try {
-                        template = new Template(name, sourceName, reader, config, tc,
-                                initialEncoding, markedInputStream);
-                    } catch (Template.WrongEncodingException wee) {
-                        final String templateSpecifiedEncoding = wee.getTemplateSpecifiedEncoding();
-                        
-                        if (inputStream != null) {
-                            // We restart InputStream to re-decode it with the new charset.
-                            inputStream.reset();
-                            
-                            // Don't close `reader`; it's an InputStreamReader that would close the wrapped InputStream.
-                            reader = new InputStreamReader(inputStream, templateSpecifiedEncoding);
-                        } else {
-                            // Should be impossible to get here
-                            throw new BugException();
-                        }
-                        
-                        template = new Template(name, sourceName, reader, config, tc,
-                                templateSpecifiedEncoding, markedInputStream);
+                try {
+                    template = templateLanguage.parse(name, sourceName, reader, config, tc,
+                            initialEncoding, markedInputStream);
+                } catch (WrongTemplateCharsetException charsetException) {
+                    final String templateSpecifiedEncoding = charsetException.getTemplateSpecifiedEncoding();
+
+                    if (inputStream != null) {
+                        // We restart InputStream to re-decode it with the new charset.
+                        inputStream.reset();
+
+                        // Don't close `reader`; it's an InputStreamReader that would close the wrapped InputStream.
+                        reader = new InputStreamReader(inputStream, templateSpecifiedEncoding);
+                    } else {
+                        throw new IllegalStateException(
+                                "TemplateLanguage " + _StringUtil.jQuote(templateLanguage.getName()) + " has thrown "
+                                + WrongTemplateCharsetException.class.getName()
+                                + ", but its canSpecifyCharsetInContent property is false.");
                     }
-                } else {
-                    // Read the contents into a StringWriter, then construct a single-text-block template from it.
-                    final StringBuilder sb = new StringBuilder();
-                    final char[] buf = new char[4096];
-                    int charsRead;
-                    while ((charsRead = reader.read(buf)) > 0) {
-                        sb.append(buf, 0, charsRead);
-                    }
-                    template = Template.createPlainTextTemplate(name, sourceName, sb.toString(), config,
-                            initialEncoding);
+
+                    template = templateLanguage.parse(name, sourceName, reader, config, tc,
+                            templateSpecifiedEncoding, markedInputStream);
                 }
             } finally {
                 reader.close();
@@ -689,7 +689,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
 
     /**
      * Removes all entries from the cache, forcing reloading of templates on subsequent
-     * {@link #getTemplate(String, Locale, Object, String, boolean)} calls.
+     * {@link #getTemplate(String, Locale, Object, String)} calls.
      * 
      * @param resetTemplateLoader
      *            Whether to call {@link TemplateLoader#resetState()}. on the template loader.
@@ -717,13 +717,13 @@ public class DefaultTemplateResolver extends TemplateResolver {
     }
 
     /**
-     * Same as {@link #removeTemplateFromCache(String, Locale, Object, String, boolean)} with {@code null}
+     * Same as {@link #removeTemplateFromCache(String, Locale, Object, String)} with {@code null}
      * {@code customLookupCondition}.
      */
     @Override
     public void removeTemplateFromCache(
-            String name, Locale locale, String encoding, boolean parse) throws IOException {
-        removeTemplateFromCache(name, locale, null, encoding, parse);
+            String name, Locale locale, String encoding) throws IOException {
+        removeTemplateFromCache(name, locale, null, encoding);
     }
     
     /**
@@ -732,10 +732,10 @@ public class DefaultTemplateResolver extends TemplateResolver {
      * {@link #setTemplateUpdateDelayMilliseconds(long)} alone does.
      * 
      * For the meaning of the parameters, see
-     * {@link Configuration#getTemplate(String, Locale, Object, String, boolean, boolean)}
+     * {@link Configuration#getTemplate(String, Locale, Object, String, boolean)}
      */
     public void removeTemplateFromCache(
-            String name, Locale locale, Object customLookupCondition, String encoding, boolean parse)
+            String name, Locale locale, Object customLookupCondition, String encoding)
     throws IOException {
         if (name == null) {
             throw new IllegalArgumentException("Argument \"name\" can't be null");
@@ -750,9 +750,9 @@ public class DefaultTemplateResolver extends TemplateResolver {
         if (name != null && templateLoader != null) {
             boolean debug = LOG.isDebugEnabled();
             String debugPrefix = debug
-                    ? getDebugPrefix("removeTemplate", name, locale, customLookupCondition, encoding, parse)
+                    ? getDebugPrefix("removeTemplate", name, locale, customLookupCondition, encoding)
                     : null;
-            CachedResultKey tk = new CachedResultKey(name, locale, customLookupCondition, encoding, parse);
+            CachedResultKey tk = new CachedResultKey(name, locale, customLookupCondition, encoding);
             
             cacheStorage.remove(tk);
             if (debug) {
@@ -761,14 +761,12 @@ public class DefaultTemplateResolver extends TemplateResolver {
         }
     }
 
-    private String getDebugPrefix(String operation, String name, Locale locale, Object customLookupCondition, String encoding,
-            boolean parse) {
+    private String getDebugPrefix(String operation, String name, Locale locale, Object customLookupCondition, String encoding) {
         return operation + " " + _StringUtil.jQuoteNoXSS(name) + "("
                 + _StringUtil.jQuoteNoXSS(locale)
                 + (customLookupCondition != null ? ", cond=" + _StringUtil.jQuoteNoXSS(customLookupCondition) : "")
                 + ", " + encoding
-                + (parse ? ", parsed)" : ", unparsed]")
-                + ": ";
+                + "): ";
     }    
 
     /**
@@ -817,14 +815,12 @@ public class DefaultTemplateResolver extends TemplateResolver {
         private final Locale locale;
         private final Object customLookupCondition;
         private final String encoding;
-        private final boolean parse;
 
-        CachedResultKey(String name, Locale locale, Object customLookupCondition, String encoding, boolean parse) {
+        CachedResultKey(String name, Locale locale, Object customLookupCondition, String encoding) {
             this.name = name;
             this.locale = locale;
             this.customLookupCondition = customLookupCondition;
             this.encoding = encoding;
-            this.parse = parse;
         }
 
         @Override
@@ -832,7 +828,6 @@ public class DefaultTemplateResolver extends TemplateResolver {
             if (o instanceof CachedResultKey) {
                 CachedResultKey tk = (CachedResultKey) o;
                 return
-                    parse == tk.parse &&
                     name.equals(tk.name) &&
                     locale.equals(tk.locale) &&
                     nullSafeEquals(customLookupCondition, tk.customLookupCondition) &&
@@ -847,13 +842,12 @@ public class DefaultTemplateResolver extends TemplateResolver {
                 name.hashCode() ^
                 locale.hashCode() ^
                 encoding.hashCode() ^
-                (customLookupCondition != null ? customLookupCondition.hashCode() : 0) ^
-                Boolean.valueOf(!parse).hashCode();
+                (customLookupCondition != null ? customLookupCondition.hashCode() : 0);
         }
     }
 
     /**
-     * Hold the a cached {@link #getTemplate(String, Locale, Object, String, boolean)} result and the associated
+     * Hold the a cached {@link #getTemplate(String, Locale, Object, String)} result and the associated
      * information needed to check if the cached value is up to date.
      * 
      * <p>

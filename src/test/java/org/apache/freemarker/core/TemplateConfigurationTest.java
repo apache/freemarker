@@ -48,6 +48,8 @@ import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
+import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
+import org.apache.freemarker.core.templateresolver.FileExtensionMatcher;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.core.userpkg.BaseNTemplateNumberFormatFactory;
 import org.apache.freemarker.core.userpkg.EpochMillisDivTemplateDateFormatFactory;
@@ -185,6 +187,7 @@ public class TemplateConfigurationTest {
                 ImmutableMap.of("dummy", EpochMillisTemplateDateFormatFactory.INSTANCE));
 
         // Parser-only settings:
+        SETTING_ASSIGNMENTS.put("templateLanguage", TemplateLanguage.STATIC_TEXT);
         SETTING_ASSIGNMENTS.put("tagSyntax", Configuration.SQUARE_BRACKET_TAG_SYNTAX);
         SETTING_ASSIGNMENTS.put("namingConvention", Configuration.LEGACY_NAMING_CONVENTION);
         SETTING_ASSIGNMENTS.put("whitespaceStripping", false);
@@ -677,7 +680,37 @@ public class TemplateConfigurationTest {
                     "13", "8");
             testedProps.add(Configuration.TAB_SIZE_KEY_CAMEL_CASE);
         }
-        
+
+        {
+            // As the TemplateLanguage-based parser selection happens in the TemplateResolver, we can't use
+            // assertOutput here, as that hard-coded to create an FTL Template.
+
+            TemplateConfiguration tc = new TemplateConfiguration();
+            tc.setTemplateLanguage(TemplateLanguage.STATIC_TEXT);
+
+            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+            cfg.setTemplateConfigurations(new ConditionalTemplateConfigurationFactory(new FileExtensionMatcher
+                    ("txt"), tc));
+
+            StringTemplateLoader templateLoader = new StringTemplateLoader();
+            templateLoader.putTemplate("adhoc.ftl", "${1+1}");
+            templateLoader.putTemplate("adhoc.txt", "${1+1}");
+            cfg.setTemplateLoader(templateLoader);
+
+            {
+                StringWriter out = new StringWriter();
+                cfg.getTemplate("adhoc.ftl").process(null, out);
+                assertEquals("2", out.toString());
+            }
+            {
+                StringWriter out = new StringWriter();
+                cfg.getTemplate("adhoc.txt").process(null, out);
+                assertEquals("${1+1}", out.toString());
+            }
+
+            testedProps.add(Configuration.TEMPLATE_LANGUAGE_KEY_CAMEL_CASE);
+        }
+
         assertEquals("Check that you have tested all parser settings; ", PARSER_PROP_NAMES, testedProps);
     }
     

@@ -36,8 +36,6 @@ ${message}
 ${foo}
 ${nestedMessage}
 
-<p>Test unparsed includes:</p>
-<#include "included.ftl" parse=false>
 <@twice>
 Kilroy
 </@twice>

@@ -332,7 +332,7 @@ public class TemplateLookupStrategyTest {
         {
             final Locale locale = new Locale("xx");
             final String domain = "foo.com";
-            final Template t = cfg.getTemplate("t.ftl", locale, domain, "utf-8", true, false); 
+            final Template t = cfg.getTemplate("t.ftl", locale, domain, "utf-8", false);
             assertEquals("t.ftl", t.getName());
             assertEquals("@foo.com/t.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
@@ -355,7 +355,7 @@ public class TemplateLookupStrategyTest {
         {
             final Locale locale = new Locale("xx");
             final String domain = "bar.com";
-            final Template t = cfg.getTemplate("t.ftl", locale, domain, "utf-8", true, false); 
+            final Template t = cfg.getTemplate("t.ftl", locale, domain, "utf-8", false);
             assertEquals("t.ftl", t.getName());
             assertEquals("@bar.com/t.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
@@ -380,7 +380,7 @@ public class TemplateLookupStrategyTest {
         {
             final Locale locale = new Locale("xx", "YY");
             final String domain = "baaz.com";
-            final Template t = cfg.getTemplate("t.ftl", locale, domain, "utf-8", true, false); 
+            final Template t = cfg.getTemplate("t.ftl", locale, domain, "utf-8", false);
             assertEquals("t.ftl", t.getName());
             assertEquals("@default/t.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
@@ -405,7 +405,7 @@ public class TemplateLookupStrategyTest {
         {
             final Locale locale = new Locale("xx", "YY");
             final String domain = "nosuch.com";
-            final Template t = cfg.getTemplate("i.ftl", locale, domain, "utf-8", true, false); 
+            final Template t = cfg.getTemplate("i.ftl", locale, domain, "utf-8", false);
             assertEquals("i.ftl", t.getName());
             assertEquals("@default/i_xx.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
@@ -425,7 +425,7 @@ public class TemplateLookupStrategyTest {
             cfg.setLocalizedLookup(false);
             final Locale locale = new Locale("xx", "YY");
             final String domain = "nosuch.com";
-            final Template t = cfg.getTemplate("i.ftl", locale, domain, "utf-8", true, false); 
+            final Template t = cfg.getTemplate("i.ftl", locale, domain, "utf-8", false);
             assertEquals("i.ftl", t.getName());
             assertEquals("@default/i.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
@@ -443,7 +443,7 @@ public class TemplateLookupStrategyTest {
         {
             final Locale locale = new Locale("xx");
             final String domain = "foo.com";
-            final Template t = cfg.getTemplate("t2.ftl", locale, domain, "utf-8", true, false); 
+            final Template t = cfg.getTemplate("t2.ftl", locale, domain, "utf-8", false);
             assertOutputEquals(t2XxLocaleExpectedOutput, t);
             assertEquals(
                     ImmutableList.of(
@@ -459,7 +459,7 @@ public class TemplateLookupStrategyTest {
         {
             final Locale locale = new Locale("yy");
             final String domain = "foo.com";
-            final Template t = cfg.getTemplate("t2.ftl", locale, domain, "utf-8", true, false); 
+            final Template t = cfg.getTemplate("t2.ftl", locale, domain, "utf-8", false);
             assertOutputEquals(t2OtherLocaleExpectedOutput, t);
             assertEquals(
                     ImmutableList.of(
@@ -476,7 +476,7 @@ public class TemplateLookupStrategyTest {
             cfg.setLocalizedLookup(false);
             final Locale locale = new Locale("xx");
             final String domain = "foo.com";
-            final Template t = cfg.getTemplate("t2.ftl", locale, domain, "utf-8", true, false); 
+            final Template t = cfg.getTemplate("t2.ftl", locale, domain, "utf-8", false);
             assertOutputEquals(t2OtherLocaleExpectedOutput, t);
             assertEquals(
                     ImmutableList.of(
@@ -493,7 +493,7 @@ public class TemplateLookupStrategyTest {
         {
             final Locale locale = new Locale("xx");
             final String domain = "foo.com";
-            cfg.getTemplate("i3.ftl", locale, domain, "utf-8", true, false); 
+            cfg.getTemplate("i3.ftl", locale, domain, "utf-8", false);
             assertEquals(
                     ImmutableList.of("@foo.com/i3_xx.ftl"),
                     tl.getLoadNames());
@@ -506,7 +506,7 @@ public class TemplateLookupStrategyTest {
             final Locale locale = new Locale("xx");
             final String domain = "bar.com";
             try {
-                cfg.getTemplate("i3.ftl", locale, domain, "utf-8", true, false);
+                cfg.getTemplate("i3.ftl", locale, domain, "utf-8", false);
             } catch (TemplateNotFoundException e) {
                 assertEquals("i3.ftl", e.getTemplateName());
                 assertEquals(domain, e.getCustomLookupCondition());

@@ -33,20 +33,18 @@ import org.apache.freemarker.core.util._StringUtil;
  */
 final class ASTDirInclude extends ASTDirective {
 
-    private final ASTExpression includedTemplateNameExp, encodingExp, parseExp, ignoreMissingExp;
+    private final ASTExpression includedTemplateNameExp, encodingExp, ignoreMissingExp;
     private final String encoding;
-    private final Boolean parse;
     private final Boolean ignoreMissingExpPrecalcedValue;
 
     /**
      * @param template the template that this <tt>#include</tt> is a part of.
      * @param includedTemplateNameExp the path of the template to be included.
      * @param encodingExp the encoding to be used or null, if it's the default.
-     * @param parseExp whether the template should be parsed (or is raw text)
      */
     ASTDirInclude(Template template,
             ASTExpression includedTemplateNameExp,
-            ASTExpression encodingExp, ASTExpression parseExp, ASTExpression ignoreMissingExp) throws ParseException {
+            ASTExpression encodingExp, ASTExpression ignoreMissingExp) throws ParseException {
         this.includedTemplateNameExp = includedTemplateNameExp;
         
         this.encodingExp = encodingExp;
@@ -69,33 +67,7 @@ final class ASTDirInclude extends ASTDirective {
                 encoding = null;
             }
         }
-        
-        this.parseExp = parseExp;
-        if (parseExp == null) {
-            parse = Boolean.TRUE;
-        } else {
-            if (parseExp.isLiteral()) {
-                try {
-                    if (parseExp instanceof ASTExpStringLiteral) {
-                        // Legacy
-                        parse = Boolean.valueOf(_StringUtil.getYesNo(parseExp.evalAndCoerceToPlainText(null)));
-                    } else {
-                        try {
-                            parse = Boolean.valueOf(parseExp.evalToBoolean(template.getConfiguration()));
-                        } catch (NonBooleanException e) {
-                            throw new ParseException("Expected a boolean or string as the value of the parse attribute",
-                                    parseExp, e);
-                        }
-                    }
-                } catch (TemplateException e) {
-                    // evaluation of literals must not throw a TemplateException
-                    throw new BugException(e);
-                }
-            } else {
-                parse = null;
-            }
-        }
-        
+
         this.ignoreMissingExp = ignoreMissingExp;
         if (ignoreMissingExp != null && ignoreMissingExp.isLiteral()) {
             try {
@@ -133,19 +105,6 @@ final class ASTDirInclude extends ASTDirective {
                         ? encodingExp.evalAndCoerceToPlainText(env)
                         : null);
         
-        final boolean parse;
-        if (this.parse != null) {
-            parse = this.parse.booleanValue();
-        } else {
-            TemplateModel tm = parseExp.eval(env);
-            if (tm instanceof TemplateScalarModel) {
-                // Legacy
-                parse = getYesNo(parseExp, _EvalUtil.modelToString((TemplateScalarModel) tm, parseExp, env));
-            } else {
-                parse = parseExp.modelToBoolean(tm, env);
-            }
-        }
-        
         final boolean ignoreMissing;
         if (ignoreMissingExpPrecalcedValue != null) {
             ignoreMissing = ignoreMissingExpPrecalcedValue.booleanValue();
@@ -157,7 +116,7 @@ final class ASTDirInclude extends ASTDirective {
         
         final Template includedTemplate;
         try {
-            includedTemplate = env.getTemplateForInclusion(fullIncludedTemplateName, encoding, parse, ignoreMissing);
+            includedTemplate = env.getTemplateForInclusion(fullIncludedTemplateName, encoding, ignoreMissing);
         } catch (IOException e) {
             throw new _MiscTemplateException(e, env,
                     "Template inclusion failed (for parameter value ",
@@ -181,9 +140,6 @@ final class ASTDirInclude extends ASTDirective {
         if (encodingExp != null) {
             buf.append(" encoding=").append(encodingExp.getCanonicalForm());
         }
-        if (parseExp != null) {
-            buf.append(" parse=").append(parseExp.getCanonicalForm());
-        }
         if (ignoreMissingExp != null) {
             buf.append(" ignore_missing=").append(ignoreMissingExp.getCanonicalForm());
         }
@@ -205,9 +161,8 @@ final class ASTDirInclude extends ASTDirective {
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return includedTemplateNameExp;
-        case 1: return parseExp;
-        case 2: return encodingExp;
-        case 3: return ignoreMissingExp;
+        case 1: return encodingExp;
+        case 2: return ignoreMissingExp;
         default: throw new IndexOutOfBoundsException();
         }
     }
@@ -216,9 +171,8 @@ final class ASTDirInclude extends ASTDirective {
     ParameterRole getParameterRole(int idx) {
         switch (idx) {
         case 0: return ParameterRole.TEMPLATE_NAME;
-        case 1: return ParameterRole.PARSE_PARAMETER;
-        case 2: return ParameterRole.ENCODING_PARAMETER;
-        case 3: return ParameterRole.IGNORE_MISSING_PARAMETER;
+        case 1: return ParameterRole.ENCODING_PARAMETER;
+        case 2: return ParameterRole.IGNORE_MISSING_PARAMETER;
         default: throw new IndexOutOfBoundsException();
         }
     }

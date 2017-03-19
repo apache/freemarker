@@ -23,7 +23,7 @@ import java.util.Locale;
 import org.apache.freemarker.core.Template;
 
 /**
- * Used for the return value of {@link TemplateResolver#getTemplate(String, Locale, Object, String, boolean)}.
+ * Used for the return value of {@link TemplateResolver#getTemplate(String, Locale, Object, String)}.
  * 
  * @since 3.0.0
  */

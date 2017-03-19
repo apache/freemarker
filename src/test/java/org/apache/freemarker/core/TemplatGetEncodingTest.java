@@ -23,6 +23,8 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
+import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
 import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.StrongCacheStorage;
 import org.junit.Test;
@@ -36,7 +38,11 @@ public class TemplatGetEncodingTest {
             cfg.setDefaultEncoding("ISO-8859-2");
             ByteArrayTemplateLoader tl = new ByteArrayTemplateLoader();
             tl.putTemplate("t", "test".getBytes(StandardCharsets.UTF_8));
-            tl.putTemplate("tnp", "<#test>".getBytes(StandardCharsets.UTF_8));
+            tl.putTemplate("static", "<#test>".getBytes(StandardCharsets.UTF_8));
+            TemplateConfiguration staticTextTC = new TemplateConfiguration();
+            staticTextTC.setTemplateLanguage(TemplateLanguage.STATIC_TEXT);
+            cfg.setTemplateConfigurations(
+                    new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("static"), staticTextTC));
             cfg.setTemplateLoader(tl);
             cfg.setCacheStorage(new StrongCacheStorage());
         }
@@ -57,13 +63,13 @@ public class TemplatGetEncodingTest {
         }
 
         {
-            Template tDefEnc = cfg.getTemplate("tnp", null, null, false);
+            Template tDefEnc = cfg.getTemplate("static", null, null, false);
             assertEquals("ISO-8859-2", tDefEnc.getEncoding());
-            assertSame(tDefEnc, cfg.getTemplate("tnp", null, null, false));
+            assertSame(tDefEnc, cfg.getTemplate("static", null, null, false));
 
-            Template tUTF8 = cfg.getTemplate("tnp", null, "UTF-8", false);
+            Template tUTF8 = cfg.getTemplate("static", null, "UTF-8", false);
             assertEquals("UTF-8", tUTF8.getEncoding());
-            assertSame(tUTF8, cfg.getTemplate("tnp", null, "UTF-8", false));
+            assertSame(tUTF8, cfg.getTemplate("static", null, "UTF-8", false));
             assertNotSame(tDefEnc, tUTF8);
         }
         

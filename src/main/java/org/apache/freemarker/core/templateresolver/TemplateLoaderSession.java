@@ -28,7 +28,7 @@ import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
  * Stores shared state between {@link TemplateLoader} operations that are executed close to each other in the same
  * thread. For example, a {@link TemplateLoader} that reads from a database might wants to store the database
  * connection in it for reuse. The goal of sessions is mostly to increase performance. However, because a
- * {@link DefaultTemplateResolver#getTemplate(String, java.util.Locale, Object, String, boolean)} call is executed inside a single
+ * {@link DefaultTemplateResolver#getTemplate(String, java.util.Locale, Object, String)} call is executed inside a single
  * session, sessions can be also be utilized to ensure that the template lookup (see {@link TemplateLookupStrategy})
  * happens on a consistent view (a snapshot) of the backing storage, if the backing storage mechanism supports such
  * thing.

@@ -216,6 +216,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final String AUTO_INCLUDE_KEY = AUTO_INCLUDE_KEY_SNAKE_CASE;
 
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+    public static final String TEMPLATE_LANGUAGE_KEY_SNAKE_CASE = "template_language";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+    public static final String TEMPLATE_LANGUAGE_KEY_CAMEL_CASE = "templateLanguage";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String TEMPLATE_LANGUAGE_KEY = TEMPLATE_LANGUAGE_KEY_SNAKE_CASE;
+
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String TAG_SYNTAX_KEY_SNAKE_CASE = "tag_syntax";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
     public static final String TAG_SYNTAX_KEY_CAMEL_CASE = "tagSyntax";
@@ -285,6 +292,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         TAB_SIZE_KEY_SNAKE_CASE,
         TAG_SYNTAX_KEY_SNAKE_CASE,
         TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE,
+        TEMPLATE_LANGUAGE_KEY_SNAKE_CASE,
         TEMPLATE_LOADER_KEY_SNAKE_CASE,
         TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE,
         TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE,
@@ -306,6 +314,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         TAB_SIZE_KEY_CAMEL_CASE,
         TAG_SYNTAX_KEY_CAMEL_CASE,
         TEMPLATE_CONFIGURATIONS_KEY_CAMEL_CASE,
+        TEMPLATE_LANGUAGE_KEY_CAMEL_CASE,
         TEMPLATE_LOADER_KEY_CAMEL_CASE,
         TEMPLATE_LOOKUP_STRATEGY_KEY_CAMEL_CASE,
         TEMPLATE_NAME_FORMAT_KEY_CAMEL_CASE,
@@ -401,6 +410,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private Boolean recognizeStandardFileExtensions;
     private Map<String, ? extends OutputFormat> registeredCustomOutputFormats = Collections.emptyMap(); 
     private Version incompatibleImprovements;
+    private TemplateLanguage templateLanguage = TemplateLanguage.FTL;
     private int tagSyntax = ANGLE_BRACKET_TAG_SYNTAX;
     private int namingConvention = AUTO_DETECT_NAMING_CONVENTION;
     private int tabSize = 8;  // Default from JavaCC 3.x 
@@ -1712,6 +1722,23 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
+     * Getter pair of {@link #setTemplateLanguage(TemplateLanguage)}.
+     */
+    @Override
+    public TemplateLanguage getTemplateLanguage() {
+        return templateLanguage;
+    }
+
+    /**
+     * Sets the template language used; this is often overridden for certain file extension with
+     * {@link #setTemplateConfigurations(TemplateConfigurationFactory)}.
+     */
+    public void setTemplateLanguage(TemplateLanguage templateLanguage) {
+        _NullArgumentException.check("templateLanguage", templateLanguage);
+        this.templateLanguage = templateLanguage;
+    }
+
+    /**
      * Determines the syntax of the template files (angle bracket VS square bracket)
      * that has no {@code #ftl} in it. The {@code tagSyntax}
      * parameter must be one of:
@@ -1867,62 +1894,53 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * missing/staled.
      * 
      * <p>
-     * This is a shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
-     * getTemplate(name, null, null, null, true, false)}; see more details there.
+     * This is a shorthand for {@link #getTemplate(String, Locale, Object, String, boolean)
+     * getTemplate(name, null, null, null, false)}; see more details there.
      * 
      * <p>
      * See {@link Configuration} for an example of basic usage.
      */
     public Template getTemplate(String name)
             throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
-        return getTemplate(name, null, null, null, true, false);
+        return getTemplate(name, null, null, null, false);
     }
 
     /**
-     * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
-     * getTemplate(name, locale, null, null, true, false)}.
+     * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean)
+     * getTemplate(name, locale, null, null, false)}.
      */
     public Template getTemplate(String name, Locale locale)
             throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
-        return getTemplate(name, locale, null, null, true, false);
+        return getTemplate(name, locale, null, null, false);
     }
 
     /**
-     * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
-     * getTemplate(name, null, null, encoding, true, false)}.
+     * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean)
+     * getTemplate(name, null, null, encoding, false)}.
      */
     public Template getTemplate(String name, String encoding)
             throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
-        return getTemplate(name, null, null, encoding, true, false);
+        return getTemplate(name, null, null, encoding, false);
     }
 
     /**
-     * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
-     * getTemplate(name, locale, null, encoding, true, false)}.
+     * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean)
+     * getTemplate(name, locale, null, encoding, false)}.
      */
     public Template getTemplate(String name, Locale locale, String encoding)
             throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
-        return getTemplate(name, locale, null, encoding, true, false);
-    }
-    
-    /**
-     * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
-     * getTemplate(name, locale, null, encoding, parseAsFTL, false)}.
-     */
-    public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL)
-            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
-        return getTemplate(name, locale, null, encoding, parseAsFTL, false);
+        return getTemplate(name, locale, null, encoding, false);
     }
 
     /**
-     * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean, boolean)
-     * getTemplate(name, locale, null, encoding, parseAsFTL, ignoreMissing)}.
+     * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean)
+     * getTemplate(name, locale, null, encoding, ignoreMissing)}.
      * 
      * @since 2.3.21
      */
-    public Template getTemplate(String name, Locale locale, String encoding, boolean parseAsFTL, boolean ignoreMissing)
+    public Template getTemplate(String name, Locale locale, String encoding, boolean ignoreMissing)
             throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
-        return getTemplate(name, locale, null, encoding, parseAsFTL, ignoreMissing);
+        return getTemplate(name, locale, null, encoding, ignoreMissing);
     }
     
     /**
@@ -1991,11 +2009,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *            extension, etc.). The encoding associated with the templates that way overrides the encoding that you
      *            specify here.
      *
-     * @param parseAsFTL
-     *            If {@code true}, the loaded template is parsed and interpreted normally, as a regular FreeMarker
-     *            template. If {@code false}, the loaded template is treated as a static text, so <code>${...}</code>,
-     *            {@code <#...>} etc. will not have special meaning in it.
-     * 
      * @param ignoreMissing
      *            If {@code true}, the method won't throw {@link TemplateNotFoundException} if the template doesn't
      *            exist, instead it returns {@code null}. Other kind of exceptions won't be suppressed.
@@ -2017,7 +2030,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.22
      */
     public Template getTemplate(String name, Locale locale, Object customLookupCondition,
-            String encoding, boolean parseAsFTL, boolean ignoreMissing)
+            String encoding, boolean ignoreMissing)
             throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
         if (locale == null) {
             locale = getLocale();
@@ -2026,7 +2039,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             encoding = getEncoding(locale);
         }
         
-        final GetTemplateResult maybeTemp = templateResolver.getTemplate(name, locale, customLookupCondition, encoding, parseAsFTL);
+        final GetTemplateResult maybeTemp = templateResolver.getTemplate(name, locale, customLookupCondition, encoding);
         final Template temp = maybeTemp.getTemplate();
         if (temp == null) {
             if (ignoreMissing) {
@@ -2365,7 +2378,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     public void removeTemplateFromCache(String name) throws IOException {
         Locale loc = getLocale();
-        removeTemplateFromCache(name, loc, getEncoding(loc), true);
+        removeTemplateFromCache(name, loc, getEncoding(loc));
     }
 
     /**
@@ -2373,7 +2386,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.19
      */
     public void removeTemplateFromCache(String name, Locale locale) throws IOException {
-        removeTemplateFromCache(name, locale, getEncoding(locale), true);
+        removeTemplateFromCache(name, locale, getEncoding(locale));
     }
 
     /**
@@ -2381,17 +2394,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.19
      */
     public void removeTemplateFromCache(String name, String encoding) throws IOException {
-        removeTemplateFromCache(name, getLocale(), encoding, true);
+        removeTemplateFromCache(name, getLocale(), encoding);
     }
 
-    /**
-     * Equivalent to <tt>removeTemplateFromCache(name, locale, encoding, true)</tt>.
-     * @since 2.3.19
-     */
-    public void removeTemplateFromCache(String name, Locale locale, String encoding) throws IOException {
-        removeTemplateFromCache(name, locale, encoding, true);
-    }
-    
     /**
      * Removes a template from the template templateResolver, hence forcing the re-loading
      * of it when it's next time requested. This is to give the application
@@ -2405,10 +2410,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.19
      */
-    public void removeTemplateFromCache(
-            String name, Locale locale, String encoding, boolean parse)
-    throws IOException {
-        templateResolver.removeTemplateFromCache(name, locale, encoding, parse);
+    public void removeTemplateFromCache(String name, Locale locale, String encoding) throws IOException {
+        templateResolver.removeTemplateFromCache(name, locale, encoding);
     }    
     
     /**
@@ -2570,6 +2573,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 }
                 
                 setTemplateUpdateDelayMilliseconds(parsedValue * multipier);
+            } else if (TEMPLATE_LANGUAGE_KEY_SNAKE_CASE.equals(name) || TEMPLATE_LANGUAGE_KEY_CAMEL_CASE.equals(name)) {
+                if ("FTL".equals(value)) {
+                    setTemplateLanguage(TemplateLanguage.FTL);
+                } else if ("static_text".equals(value) || "staticText".equals(value)) {
+                    setTemplateLanguage(TemplateLanguage.STATIC_TEXT);
+                } else {
+                    throw invalidSettingValueException(name, value);
+                }
             } else if (TAG_SYNTAX_KEY_SNAKE_CASE.equals(name) || TAG_SYNTAX_KEY_CAMEL_CASE.equals(name)) {
                 if ("auto_detect".equals(value) || "autoDetect".equals(value)) {
                     setTagSyntax(AUTO_DETECT_TAG_SYNTAX);

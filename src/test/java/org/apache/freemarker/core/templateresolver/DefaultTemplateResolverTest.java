@@ -55,13 +55,13 @@ public class DefaultTemplateResolverTest {
         tr.setTemplateUpdateDelayMilliseconds(1000L);
         loader.setThrowException(true);
         try {
-            tr.getTemplate("t", Locale.getDefault(), null, "", true).getTemplate();
+            tr.getTemplate("t", Locale.getDefault(), null, "").getTemplate();
             fail();
         } catch (IOException e) {
             assertEquals("mock IO exception", e.getMessage());
             assertEquals(1, loader.getLoadAttemptCount());
             try {
-                tr.getTemplate("t", Locale.getDefault(), null, "", true).getTemplate();
+                tr.getTemplate("t", Locale.getDefault(), null, "").getTemplate();
                 fail();
             } catch (IOException e2) {
                 // Still 1 - returned cached exception
@@ -72,7 +72,7 @@ public class DefaultTemplateResolverTest {
                 assertEquals(1, loader.getLoadAttemptCount());
                 try {
                     Thread.sleep(1100L);
-                    tr.getTemplate("t", Locale.getDefault(), null, "", true).getTemplate();
+                    tr.getTemplate("t", Locale.getDefault(), null, "").getTemplate();
                     fail();
                 } catch (IOException e3) {
                     // Cache had to retest
@@ -91,13 +91,13 @@ public class DefaultTemplateResolverTest {
                 DefaultTemplateNameFormat.INSTANCE, new Configuration());
         cache.setTemplateUpdateDelayMilliseconds(1000L);
         cache.setLocalizedLookup(false);
-        assertNull(cache.getTemplate("t", Locale.getDefault(), null, "", true).getTemplate());
+        assertNull(cache.getTemplate("t", Locale.getDefault(), null, "").getTemplate());
         assertEquals(1, loader.getLoadAttemptCount());
-        assertNull(cache.getTemplate("t", Locale.getDefault(), null, "", true).getTemplate());
+        assertNull(cache.getTemplate("t", Locale.getDefault(), null, "").getTemplate());
         // Still 1 - returned cached exception
         assertEquals(1, loader.getLoadAttemptCount());
         Thread.sleep(1100L);
-        assertNull(cache.getTemplate("t", Locale.getDefault(), null, "", true).getTemplate());
+        assertNull(cache.getTemplate("t", Locale.getDefault(), null, "").getTemplate());
         // Cache had to retest
         assertEquals(2, loader.getLoadAttemptCount());
     }
@@ -455,7 +455,7 @@ public class DefaultTemplateResolverTest {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
         try {
-            cfg.getTemplate("../x", null, null, null, true, true);
+            cfg.getTemplate("../x", null, null, null, true);
             fail();
         } catch (MalformedTemplateNameException e) {
             // expected

@@ -52,7 +52,6 @@ final class ParameterRole {
     static final ParameterRole LIST_SOURCE = new ParameterRole("list source");
     static final ParameterRole TARGET_LOOP_VARIABLE = new ParameterRole("target loop variable");
     static final ParameterRole TEMPLATE_NAME = new ParameterRole("template name");
-    static final ParameterRole PARSE_PARAMETER = new ParameterRole("\"parse\" parameter");
     static final ParameterRole ENCODING_PARAMETER = new ParameterRole("\"encoding\" parameter");
     static final ParameterRole IGNORE_MISSING_PARAMETER = new ParameterRole("\"ignore_missing\" parameter");
     static final ParameterRole PARAMETER_NAME = new ParameterRole("parameter name");

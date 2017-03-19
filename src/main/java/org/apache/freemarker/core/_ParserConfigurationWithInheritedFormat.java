@@ -48,6 +48,11 @@ public final class _ParserConfigurationWithInheritedFormat implements ParserConf
     }
 
     @Override
+    public TemplateLanguage getTemplateLanguage() {
+        return wrappedPCfg.getTemplateLanguage();
+    }
+
+    @Override
     public OutputFormat getOutputFormat() {
         return outputFormat != null ? outputFormat : wrappedPCfg.getOutputFormat();
     }

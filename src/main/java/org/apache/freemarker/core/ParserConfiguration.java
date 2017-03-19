@@ -30,6 +30,8 @@ import org.apache.freemarker.core.outputformat.OutputFormat;
  */
 public interface ParserConfiguration {
 
+    TemplateLanguage getTemplateLanguage();
+
     /**
      * See {@link Configuration#getTagSyntax()}.
      */

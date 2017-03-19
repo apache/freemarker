@@ -156,4 +156,9 @@ the FreeMarer 3 changelog here:
 - Removed DefaultObjectWrapper.methodsShadowItems setting, in effect defaulting it to true. This has decided if the generic
   get method (`get(String)`) had priority over methods of similar name. The generic get method is only recognized from its
   name and parameter type, so it's a quite consfusing feature, and might will be removed alltogether.
-- DefaultObjectWrapper is not immutable (has no setter methods), and can only be constructed with DefaultObjectWrapper.Builder.n
+- DefaultObjectWrapper is not immutable (has no setter methods), and can only be constructed with DefaultObjectWrapper.Builder
+- Configuration.getTemplate has no "parse" parameter anymore. Similarly #include has no "parse" parameter anymore. Whether a
+  template is parsed can be specified via Configuration.templateConfigurations, for example based on the file extension. Thus,
+  a certain template is either always parsed or never parsed, and whoever gets or include it need not know about that.
+  Also added a new setting, "templateLanguge", which decides this; the two available values are
+  TemplateLanguage.FTL and TemplateLanguage.STATIC_TEXT.

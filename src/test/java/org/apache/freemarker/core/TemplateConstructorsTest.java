@@ -87,7 +87,7 @@ public class TemplateConstructorsTest {
             try {
                 new Template(name, sourceName, createReaderForceUTF8(), cfg, encoding);
                 fail();
-            } catch (Template.WrongEncodingException e) {
+            } catch (WrongTemplateCharsetException e) {
                 assertThat(e.getMessage(), containsString("utf-8"));
                 assertThat(e.getMessage(), containsString(encoding));
             }

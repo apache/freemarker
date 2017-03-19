@@ -176,7 +176,7 @@ public class Template extends Configurable {
      *            This is the encoding that we are supposed to be using. At the first glance it's unnecessary because we
      *            already have a {@link Reader} (so decoding with the charset has already happened), however, if this is
      *            non-{@code null} and there's an {@code #ftl} header with {@code encoding} parameter, they must match,
-     *            or else a {@link WrongEncodingException} is thrown. Thus, it should be set if to decode the template,
+     *            or else a {@link WrongTemplateCharsetException} is thrown. Thus, it should be set if to decode the template,
      *            we were using an encoding (a charset), otherwise it should be {@code null}. It's also kept as
      *            meta-info (returned by {@link #getEncoding()}). It also has an impact when {@code #include}-ing or
      *            {@code #import}-ing another template from this template, as its default encoding will be this. But
@@ -224,16 +224,16 @@ public class Template extends Configurable {
      *
      * @param streamToUnmarkWhenEncEstabd
      *         If not {@code null}, when during the parsing we reach a point where we know that no {@link
-     *         WrongEncodingException} will be thrown, {@link InputStream#mark(int) mark(0)} will be called on this.
+     *         WrongTemplateCharsetException} will be thrown, {@link InputStream#mark(int) mark(0)} will be called on this.
      *         This is meant to be used when the reader parameter is a {@link InputStreamReader}, and this parameter is
      *         the underlying {@link InputStream}, and you have a mark at the beginning of the {@link InputStream} so
-     *         that you can retry if a {@link WrongEncodingException} is thrown without extra I/O. As keeping that
+     *         that you can retry if a {@link WrongTemplateCharsetException} is thrown without extra I/O. As keeping that
      *         mark consumes some resources, so you may want to release it as soon as possible.
      */
    public Template(
            String name, String sourceName, Reader reader,
            Configuration cfg, ParserConfiguration customParserConfiguration,
-           String encoding, InputStream streamToUnmarkWhenEncEstabd) throws IOException {
+           String encoding, InputStream streamToUnmarkWhenEncEstabd) throws IOException, ParseException {
         this(name, sourceName, cfg, customParserConfiguration);
 
        setEncoding(encoding);
@@ -585,7 +585,7 @@ public class Template extends Configurable {
     
     /**
      * Gets the custom lookup condition with which this template was found. See the {@code customLookupCondition}
-     * parameter of {@link Configuration#getTemplate(String, java.util.Locale, Object, String, boolean, boolean)} for
+     * parameter of {@link Configuration#getTemplate(String, java.util.Locale, Object, String, boolean)} for
      * more explanation.
      * 
      * @since 2.3.22
@@ -929,58 +929,6 @@ public class Template extends Configurable {
             return null;
         }
         return prefix + ":" + localName;
-    }
-
-    /**
-     * Thrown by the {@link Template} constructors that specify a non-{@code null} encoding whoch doesn't match the
-     * encoding specified in the {@code #ftl} header of the template.
-     */
-    static public class WrongEncodingException extends ParseException {
-        private static final long serialVersionUID = 1L;
-
-        /** @deprecated Use {@link #getTemplateSpecifiedEncoding()} instead. */
-        @Deprecated
-        public String templateSpecifiedEncoding;
-        
-        private final String constructorSpecifiedEncoding;
-
-        /**
-         * @deprecated Use {@link #WrongEncodingException(String, String)}.
-         */
-        @Deprecated
-        public WrongEncodingException(String templateSpecifiedEncoding) {
-            this(templateSpecifiedEncoding, null);
-        }
-
-        /**
-         * @since 2.3.22
-         */
-        public WrongEncodingException(String templateSpecifiedEncoding, String constructorSpecifiedEncoding) {
-            this.templateSpecifiedEncoding = templateSpecifiedEncoding;
-            this.constructorSpecifiedEncoding = constructorSpecifiedEncoding;
-        }
-        
-        @Override
-        public String getMessage() {
-            return "Encoding specified inside the template (" + templateSpecifiedEncoding
-                    + ") doesn't match the encoding specified for the Template constructor"
-                    + (constructorSpecifiedEncoding != null ? " (" + constructorSpecifiedEncoding + ")." : ".");
-        }
-
-        /**
-         * @since 2.3.22
-         */
-        public String getTemplateSpecifiedEncoding() {
-            return templateSpecifiedEncoding;
-        }
-
-        /**
-         * @since 2.3.22
-         */
-        public String getConstructorSpecifiedEncoding() {
-            return constructorSpecifiedEncoding;
-        }
-
     }
 
 }

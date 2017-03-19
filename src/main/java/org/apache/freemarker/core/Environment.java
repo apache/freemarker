@@ -2377,12 +2377,12 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Same as {@link #getTemplateForInclusion(String, String, boolean, boolean)} with {@code false}
+     * Same as {@link #getTemplateForInclusion(String, String, boolean)} with {@code false}
      * {@code ignoreMissing} argument.
      */
-    public Template getTemplateForInclusion(String name, String encoding, boolean parse)
+    public Template getTemplateForInclusion(String name, String encoding)
             throws IOException {
-        return getTemplateForInclusion(name, encoding, parse, false);
+        return getTemplateForInclusion(name, encoding, false);
     }
 
     /**
@@ -2396,7 +2396,7 @@ public final class Environment extends Configurable {
      *            currently executing template file). (Note that you can use
      *            {@link TemplateResolver#toRootBasedName(String, String)} to convert paths to template root based
      *            paths.) For more details see the identical parameter of
-     *            {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
+     *            {@link Configuration#getTemplate(String, Locale, String, boolean)}
      * 
      * @param encoding
      *            the charset of the obtained template. If {@code null}, the encoding of the top template that is
@@ -2404,26 +2404,22 @@ public final class Environment extends Configurable {
      *            using {@code null} is not recommended. In most applications, the value of
      *            {@link Configuration#getEncoding(Locale)} (or {@link Configuration#getDefaultEncoding()}) should be
      *            used here.
-     * 
-     * @param parseAsFTL
-     *            See identical parameter of {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
-     * 
+     *
      * @param ignoreMissing
-     *            See identical parameter of {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
+     *            See identical parameter of {@link Configuration#getTemplate(String, Locale, String, boolean)}
      * 
-     * @return Same as {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
+     * @return Same as {@link Configuration#getTemplate(String, Locale, String, boolean)}
      * @throws IOException
      *             Same as exceptions thrown by
-     *             {@link Configuration#getTemplate(String, Locale, String, boolean, boolean)}
+     *             {@link Configuration#getTemplate(String, Locale, String, boolean)}
      * 
      * @since 2.3.21
      */
-    public Template getTemplateForInclusion(String name, String encoding, boolean parseAsFTL, boolean ignoreMissing)
+    public Template getTemplateForInclusion(String name, String encoding, boolean ignoreMissing)
             throws IOException {
         return configuration.getTemplate(
                 name, getLocale(), getIncludedTemplateCustomLookupCondition(),
                 encoding != null ? encoding : getIncludedTemplateEncoding(),
-                parseAsFTL,
                 ignoreMissing);
     }
 
@@ -2827,7 +2823,7 @@ public final class Environment extends Configurable {
         private void initialize() throws IOException, TemplateException {
             setTemplate(configuration.getTemplate(
                     templateName, locale, customLookupCondition, encoding,
-                    true, false));
+                    false));
             Locale lastLocale = getLocale();
             try {
                 setLocale(locale);

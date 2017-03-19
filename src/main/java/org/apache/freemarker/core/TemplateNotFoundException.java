@@ -54,7 +54,7 @@ public final class TemplateNotFoundException extends FileNotFoundException {
     /**
      * The custom lookup condition with which the template was requested, or {@code null} if there's no such condition.
      * See the {@code customLookupCondition} parameter of
-     * {@link Configuration#getTemplate(String, java.util.Locale, Object, String, boolean, boolean)}.
+     * {@link Configuration#getTemplate(String, java.util.Locale, Object, String, boolean)}.
      */
     public Object getCustomLookupCondition() {
         return customLookupCondition;
