@@ -1816,17 +1816,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Shorthand for {@link #getTemplate(String, Locale, Serializable, boolean)
-     * getTemplate(name, locale, null, ignoreMissing)}.
-     * 
-     * @since 2.3.21
-     */
-    public Template getTemplate(String name, Locale locale, boolean ignoreMissing)
-            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
-        return getTemplate(name, locale, null, ignoreMissing);
-    }
-    
-    /**
      * Retrieves the template with the given name (and according the specified further parameters) from the template
      * templateResolver, loading it into the templateResolver first if it's missing/staled.
      * 
@@ -1899,8 +1888,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.22
      */
-    public Template getTemplate(String name, Locale locale, Serializable customLookupCondition, boolean
-            ignoreMissing)
+    public Template getTemplate(String name, Locale locale, Serializable customLookupCondition,
+            boolean ignoreMissing)
             throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
         if (locale == null) {
             locale = getLocale();
@@ -2197,22 +2186,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         templateResolver.clearTemplateCache();
     }
     
-    /**
-     * Equivalent to <tt>removeTemplateFromCache(name, thisCfg.getLocale(), thisCfg.getEncoding(thisCfg.getLocale()), true)</tt>.
-     * @since 2.3.19
-     */
-    public void removeTemplateFromCache(String name) throws IOException {
-        removeTemplateFromCache(name, getLocale());
-    }
-
-    /**
-     * Equivalent to <tt>removeTemplateFromCache(name, locale, thisCfg.getEncoding(locale), true)</tt>.
-     * @since 2.3.19
-     */
-    public void removeTemplateFromCache(String name, Locale locale) throws IOException {
-        removeTemplateFromCache(name, locale, null);
-    }
-
     /**
      * Removes a template from the template templateResolver, hence forcing the re-loading
      * of it when it's next time requested. This is to give the application

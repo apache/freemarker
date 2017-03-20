@@ -342,33 +342,6 @@ public class ConfigurationTest extends TestCase {
             assertEquals(utf8, t.getEncoding());
         }
 
-        // 3 args:
-        try {
-            cfg.getTemplate("missing.ftl", hu, false);
-            fail();
-        } catch (TemplateNotFoundException e) {
-            // Expected
-        }
-        assertNull(cfg.getTemplate("missing.ftl", hu, true));
-        {
-            Template t = cfg.getTemplate(tFtl, null, true);
-            assertEquals(tFtl, t.getName());
-            assertEquals(tFtl, t.getSourceName());
-            assertEquals(Locale.GERMAN, t.getLocale());
-            assertNull(t.getCustomLookupCondition());
-            assertEquals(latin1, t.getEncoding());
-            assertOutputEquals("1", t);
-        }
-        {
-            Template t = cfg.getTemplate(tFtl, hu, true);
-            assertEquals(tFtl, t.getName());
-            assertEquals(tHuFtl, t.getSourceName());
-            assertEquals(hu, t.getLocale());
-            assertNull(t.getCustomLookupCondition());
-            assertEquals(latin2, t.getEncoding());
-            assertOutputEquals("1", t);
-        }
-
         // 4 args:
         try {
             cfg.getTemplate("missing.ftl", hu, custLookupCond, false);
