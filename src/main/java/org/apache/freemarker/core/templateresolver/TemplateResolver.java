@@ -19,6 +19,7 @@
 package org.apache.freemarker.core.templateresolver;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Locale;
 
 import org.apache.freemarker.core.Configuration;
@@ -62,7 +63,7 @@ public abstract class TemplateResolver {
      * 
      * <p>
      * All parameters must be non-{@code null}, except {@code customLookupCondition}. For the meaning of the parameters
-     * see {@link Configuration#getTemplate(String, Locale, String, boolean)}.
+     * see {@link Configuration#getTemplate(String, Locale, Serializable, boolean)}.
      *
      * @return A {@link GetTemplateResult} object that contains the {@link Template}, or a
      *         {@link GetTemplateResult} object that contains {@code null} as the {@link Template} and information
@@ -82,8 +83,7 @@ public abstract class TemplateResolver {
      *             value.
      */
     // [FM3] This parameters will be removed: String encoding
-    public abstract GetTemplateResult getTemplate(String name, Locale locale, Object customLookupCondition,
-            String encoding)
+    public abstract GetTemplateResult getTemplate(String name, Locale locale, Serializable customLookupCondition)
             throws MalformedTemplateNameException, ParseException, IOException;
 
     /**
@@ -108,7 +108,7 @@ public abstract class TemplateResolver {
      * {@link Configuration#setTemplateUpdateDelayMilliseconds(long)} alone does.
      * 
      * <p>
-     * For the meaning of the parameters, see {@link #getTemplate(String, Locale, Object, String)}
+     * For the meaning of the parameters, see {@link #getTemplate(String, Locale, Serializable)}
      * 
      * <p>
      * This method is thread-safe and can be called while the engine processes templates.
@@ -116,7 +116,7 @@ public abstract class TemplateResolver {
      * @throws UnsupportedOperationException If the {@link TemplateResolver} implementation doesn't support this
      *        operation.
      */
-    public abstract void removeTemplateFromCache(String name, Locale locale, String encoding)
+    public abstract void removeTemplateFromCache(String name, Locale locale, Serializable customLookupCondition)
             throws IOException, UnsupportedOperationException;
 
     /**

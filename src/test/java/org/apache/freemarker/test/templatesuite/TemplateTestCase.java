@@ -146,10 +146,6 @@ public class TemplateTestCase extends FileTestCase {
             if (!st.hasMoreTokens()) fail("Expecting alias after 'as' in autoimport");
             String alias = st.nextToken();
             conf.addAutoImport(alias, libname);
-        } else if ("clear_encoding_map".equals(param)) {
-            if (_StringUtil.getYesNo(value)) {
-                conf.clearEncodingMap();
-            }
         } else if ("input_encoding".equals(param)) {
             conf.setDefaultEncoding(value);
         // INCOMPATIBLE_IMPROVEMENTS is a list here, and was already set in the constructor.

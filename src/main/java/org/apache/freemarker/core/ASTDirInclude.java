@@ -21,52 +21,26 @@ package org.apache.freemarker.core;
 
 import java.io.IOException;
 
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._StringUtil;
-
 
 /**
  * AST directive node: {@code #include} 
  */
 final class ASTDirInclude extends ASTDirective {
 
-    private final ASTExpression includedTemplateNameExp, encodingExp, ignoreMissingExp;
-    private final String encoding;
+    private final ASTExpression includedTemplateNameExp, ignoreMissingExp;
     private final Boolean ignoreMissingExpPrecalcedValue;
 
     /**
      * @param template the template that this <tt>#include</tt> is a part of.
      * @param includedTemplateNameExp the path of the template to be included.
-     * @param encodingExp the encoding to be used or null, if it's the default.
      */
     ASTDirInclude(Template template,
             ASTExpression includedTemplateNameExp,
-            ASTExpression encodingExp, ASTExpression ignoreMissingExp) throws ParseException {
+            ASTExpression ignoreMissingExp) throws ParseException {
         this.includedTemplateNameExp = includedTemplateNameExp;
-        
-        this.encodingExp = encodingExp;
-        if (encodingExp == null) {
-            encoding = null;
-        } else {
-            if (encodingExp.isLiteral()) {
-                try {
-                    TemplateModel tm = encodingExp.eval(null);
-                    if (!(tm instanceof TemplateScalarModel)) {
-                        throw new ParseException("Expected a string as the value of the \"encoding\" argument",
-                                encodingExp);
-                    }
-                    encoding = ((TemplateScalarModel) tm).getAsString();
-                } catch (TemplateException e) {
-                    // evaluation of literals must not throw a TemplateException
-                    throw new BugException(e);
-                }
-            } else {
-                encoding = null;
-            }
-        }
 
         this.ignoreMissingExp = ignoreMissingExp;
         if (ignoreMissingExp != null && ignoreMissingExp.isLiteral()) {
@@ -99,12 +73,6 @@ final class ASTDirInclude extends ASTDirective {
                     e.getMalformednessDescription());
         }
         
-        final String encoding = this.encoding != null
-                ? this.encoding
-                : (encodingExp != null
-                        ? encodingExp.evalAndCoerceToPlainText(env)
-                        : null);
-        
         final boolean ignoreMissing;
         if (ignoreMissingExpPrecalcedValue != null) {
             ignoreMissing = ignoreMissingExpPrecalcedValue.booleanValue();
@@ -116,7 +84,7 @@ final class ASTDirInclude extends ASTDirective {
         
         final Template includedTemplate;
         try {
-            includedTemplate = env.getTemplateForInclusion(fullIncludedTemplateName, encoding, ignoreMissing);
+            includedTemplate = env.getTemplateForInclusion(fullIncludedTemplateName, ignoreMissing);
         } catch (IOException e) {
             throw new _MiscTemplateException(e, env,
                     "Template inclusion failed (for parameter value ",
@@ -137,9 +105,6 @@ final class ASTDirInclude extends ASTDirective {
         buf.append(getNodeTypeSymbol());
         buf.append(' ');
         buf.append(includedTemplateNameExp.getCanonicalForm());
-        if (encodingExp != null) {
-            buf.append(" encoding=").append(encodingExp.getCanonicalForm());
-        }
         if (ignoreMissingExp != null) {
             buf.append(" ignore_missing=").append(ignoreMissingExp.getCanonicalForm());
         }
@@ -154,15 +119,14 @@ final class ASTDirInclude extends ASTDirective {
     
     @Override
     int getParameterCount() {
-        return 3;
+        return 2;
     }
 
     @Override
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0: return includedTemplateNameExp;
-        case 1: return encodingExp;
-        case 2: return ignoreMissingExp;
+        case 1: return ignoreMissingExp;
         default: throw new IndexOutOfBoundsException();
         }
     }
@@ -171,8 +135,7 @@ final class ASTDirInclude extends ASTDirective {
     ParameterRole getParameterRole(int idx) {
         switch (idx) {
         case 0: return ParameterRole.TEMPLATE_NAME;
-        case 1: return ParameterRole.ENCODING_PARAMETER;
-        case 2: return ParameterRole.IGNORE_MISSING_PARAMETER;
+        case 1: return ParameterRole.IGNORE_MISSING_PARAMETER;
         default: throw new IndexOutOfBoundsException();
         }
     }

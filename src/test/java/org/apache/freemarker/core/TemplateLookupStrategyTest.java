@@ -22,6 +22,7 @@ package org.apache.freemarker.core;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.Locale;
 
@@ -295,7 +296,7 @@ public class TemplateLookupStrategyTest {
             cfg.clearTemplateCache();
         }
     }
-    
+
     @Test
     public void testCustomLookupCondition() throws IOException, TemplateException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
@@ -331,8 +332,8 @@ public class TemplateLookupStrategyTest {
         
         {
             final Locale locale = new Locale("xx");
-            final String domain = "foo.com";
-            final Template t = cfg.getTemplate("t.ftl", locale, domain, "utf-8", false);
+            final Domain domain = new Domain("foo.com");
+            final Template t = cfg.getTemplate("t.ftl", locale, domain);
             assertEquals("t.ftl", t.getName());
             assertEquals("@foo.com/t.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
@@ -354,8 +355,8 @@ public class TemplateLookupStrategyTest {
 
         {
             final Locale locale = new Locale("xx");
-            final String domain = "bar.com";
-            final Template t = cfg.getTemplate("t.ftl", locale, domain, "utf-8", false);
+            final Domain domain = new Domain("bar.com");
+            final Template t = cfg.getTemplate("t.ftl", locale, domain);
             assertEquals("t.ftl", t.getName());
             assertEquals("@bar.com/t.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
@@ -379,8 +380,8 @@ public class TemplateLookupStrategyTest {
         
         {
             final Locale locale = new Locale("xx", "YY");
-            final String domain = "baaz.com";
-            final Template t = cfg.getTemplate("t.ftl", locale, domain, "utf-8", false);
+            final Domain domain = new Domain("baaz.com");
+            final Template t = cfg.getTemplate("t.ftl", locale, domain);
             assertEquals("t.ftl", t.getName());
             assertEquals("@default/t.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
@@ -404,8 +405,8 @@ public class TemplateLookupStrategyTest {
         
         {
             final Locale locale = new Locale("xx", "YY");
-            final String domain = "nosuch.com";
-            final Template t = cfg.getTemplate("i.ftl", locale, domain, "utf-8", false);
+            final Domain domain = new Domain("nosuch.com");
+            final Template t = cfg.getTemplate("i.ftl", locale, domain);
             assertEquals("i.ftl", t.getName());
             assertEquals("@default/i_xx.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
@@ -424,8 +425,8 @@ public class TemplateLookupStrategyTest {
         {
             cfg.setLocalizedLookup(false);
             final Locale locale = new Locale("xx", "YY");
-            final String domain = "nosuch.com";
-            final Template t = cfg.getTemplate("i.ftl", locale, domain, "utf-8", false);
+            final Domain domain = new Domain("nosuch.com");
+            final Template t = cfg.getTemplate("i.ftl", locale, domain);
             assertEquals("i.ftl", t.getName());
             assertEquals("@default/i.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
@@ -442,8 +443,8 @@ public class TemplateLookupStrategyTest {
         
         {
             final Locale locale = new Locale("xx");
-            final String domain = "foo.com";
-            final Template t = cfg.getTemplate("t2.ftl", locale, domain, "utf-8", false);
+            final Domain domain = new Domain("foo.com");
+            final Template t = cfg.getTemplate("t2.ftl", locale, domain);
             assertOutputEquals(t2XxLocaleExpectedOutput, t);
             assertEquals(
                     ImmutableList.of(
@@ -458,8 +459,8 @@ public class TemplateLookupStrategyTest {
         
         {
             final Locale locale = new Locale("yy");
-            final String domain = "foo.com";
-            final Template t = cfg.getTemplate("t2.ftl", locale, domain, "utf-8", false);
+            final Domain domain = new Domain("foo.com");
+            final Template t = cfg.getTemplate("t2.ftl", locale, domain);
             assertOutputEquals(t2OtherLocaleExpectedOutput, t);
             assertEquals(
                     ImmutableList.of(
@@ -475,8 +476,8 @@ public class TemplateLookupStrategyTest {
         {
             cfg.setLocalizedLookup(false);
             final Locale locale = new Locale("xx");
-            final String domain = "foo.com";
-            final Template t = cfg.getTemplate("t2.ftl", locale, domain, "utf-8", false);
+            final Domain domain = new Domain("foo.com");
+            final Template t = cfg.getTemplate("t2.ftl", locale, domain);
             assertOutputEquals(t2OtherLocaleExpectedOutput, t);
             assertEquals(
                     ImmutableList.of(
@@ -492,8 +493,8 @@ public class TemplateLookupStrategyTest {
         
         {
             final Locale locale = new Locale("xx");
-            final String domain = "foo.com";
-            cfg.getTemplate("i3.ftl", locale, domain, "utf-8", false);
+            final Domain domain = new Domain("foo.com");
+            cfg.getTemplate("i3.ftl", locale, domain);
             assertEquals(
                     ImmutableList.of("@foo.com/i3_xx.ftl"),
                     tl.getLoadNames());
@@ -504,9 +505,9 @@ public class TemplateLookupStrategyTest {
         
         {
             final Locale locale = new Locale("xx");
-            final String domain = "bar.com";
+            final Domain domain = new Domain("bar.com");
             try {
-                cfg.getTemplate("i3.ftl", locale, domain, "utf-8", false);
+                cfg.getTemplate("i3.ftl", locale, domain);
             } catch (TemplateNotFoundException e) {
                 assertEquals("i3.ftl", e.getTemplateName());
                 assertEquals(domain, e.getCustomLookupCondition());
@@ -521,6 +522,29 @@ public class TemplateLookupStrategyTest {
             cfg.clearTemplateCache();
         }
         
+    }
+
+    public static class Domain implements Serializable {
+        private final String name;
+
+        public Domain(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Domain domain = (Domain) o;
+
+            return name != null ? name.equals(domain.name) : domain.name == null;
+        }
+
+        @Override
+        public int hashCode() {
+            return name != null ? name.hashCode() : 0;
+        }
     }
     
     @Test
@@ -594,9 +618,9 @@ public class TemplateLookupStrategyTest {
         private MyTemplateLookupStrategy() { }
 
         @Override
-        public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
+        public <R extends TemplateLookupResult> R lookup(TemplateLookupContext<R> ctx) throws IOException {
             String lang = ctx.getTemplateLocale().getLanguage().toLowerCase();
-            TemplateLookupResult lookupResult = ctx.lookupWithAcquisitionStrategy(lang + "/" + ctx.getTemplateName());
+            R lookupResult = ctx.lookupWithAcquisitionStrategy(lang + "/" + ctx.getTemplateName());
             if (lookupResult.isPositive()) {
                 return lookupResult;
             }
@@ -611,8 +635,8 @@ public class TemplateLookupStrategyTest {
         public static final DomainTemplateLookupStrategy INSTANCE = new DomainTemplateLookupStrategy();
 
         @Override
-        public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
-            String domain = (String) ctx.getCustomLookupCondition();
+        public <R extends TemplateLookupResult> R lookup(TemplateLookupContext<R> ctx) throws IOException {
+            Domain domain = (Domain) ctx.getCustomLookupCondition();
             if (domain == null) {
                 throw new NullPointerException("The domain wasn't specified");
             }
@@ -624,8 +648,8 @@ public class TemplateLookupStrategyTest {
                 return ctx.createNegativeLookupResult();
             }
             
-            TemplateLookupResult lookupResult = ctx.lookupWithLocalizedThenAcquisitionStrategy(
-                    "@" + domain + "/" + templateName,
+            R lookupResult = ctx.lookupWithLocalizedThenAcquisitionStrategy(
+                    "@" + domain.name + "/" + templateName,
                     ctx.getTemplateLocale());
             if (lookupResult.isPositive()) {
                 return lookupResult;

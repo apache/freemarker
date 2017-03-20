@@ -21,6 +21,7 @@ package org.apache.freemarker.core;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.Time;
@@ -2368,21 +2369,19 @@ public final class Environment extends Configurable {
      * separately call these two methods, so you can determine the source of exceptions more precisely, and thus achieve
      * more intelligent error handling.
      *
-     * @see #getTemplateForInclusion(String name, String encoding, boolean parse)
+     * @see #getTemplateForInclusion(String, boolean)
      * @see #include(Template includedTemplate)
      */
-    public void include(String name, String encoding, boolean parse)
-            throws IOException, TemplateException {
-        include(getTemplateForInclusion(name, encoding, parse));
+    public void include(String name, boolean parse) throws IOException, TemplateException {
+        include(getTemplateForInclusion(name, parse));
     }
 
     /**
-     * Same as {@link #getTemplateForInclusion(String, String, boolean)} with {@code false}
+     * Same as {@link #getTemplateForInclusion(String, boolean)} with {@code false}
      * {@code ignoreMissing} argument.
      */
-    public Template getTemplateForInclusion(String name, String encoding)
-            throws IOException {
-        return getTemplateForInclusion(name, encoding, false);
+    public Template getTemplateForInclusion(String name) throws IOException {
+        return getTemplateForInclusion(name, false);
     }
 
     /**
@@ -2396,45 +2395,25 @@ public final class Environment extends Configurable {
      *            currently executing template file). (Note that you can use
      *            {@link TemplateResolver#toRootBasedName(String, String)} to convert paths to template root based
      *            paths.) For more details see the identical parameter of
-     *            {@link Configuration#getTemplate(String, Locale, String, boolean)}
-     * 
-     * @param encoding
-     *            the charset of the obtained template. If {@code null}, the encoding of the top template that is
-     *            currently being processed in this {@link Environment} is used, which can lead to odd situations, so
-     *            using {@code null} is not recommended. In most applications, the value of
-     *            {@link Configuration#getEncoding(Locale)} (or {@link Configuration#getDefaultEncoding()}) should be
-     *            used here.
+     *            {@link Configuration#getTemplate(String, Locale, Serializable, boolean)}
      *
      * @param ignoreMissing
-     *            See identical parameter of {@link Configuration#getTemplate(String, Locale, String, boolean)}
+     *            See identical parameter of {@link Configuration#getTemplate(String, Locale, Serializable, boolean)}
      * 
-     * @return Same as {@link Configuration#getTemplate(String, Locale, String, boolean)}
+     * @return Same as {@link Configuration#getTemplate(String, Locale, Serializable, boolean)}
      * @throws IOException
      *             Same as exceptions thrown by
-     *             {@link Configuration#getTemplate(String, Locale, String, boolean)}
+     *             {@link Configuration#getTemplate(String, Locale, Serializable, boolean)}
      * 
      * @since 2.3.21
      */
-    public Template getTemplateForInclusion(String name, String encoding, boolean ignoreMissing)
+    public Template getTemplateForInclusion(String name, boolean ignoreMissing)
             throws IOException {
-        return configuration.getTemplate(
-                name, getLocale(), getIncludedTemplateCustomLookupCondition(),
-                encoding != null ? encoding : getIncludedTemplateEncoding(),
-                ignoreMissing);
+        return configuration.getTemplate(name, getLocale(), getIncludedTemplateCustomLookupCondition(), ignoreMissing);
     }
 
-    private Object getIncludedTemplateCustomLookupCondition() {
+    private Serializable getIncludedTemplateCustomLookupCondition() {
         return getCurrentTemplate().getCustomLookupCondition();
-    }
-
-    private String getIncludedTemplateEncoding() {
-        String encoding;
-        // [FM3] This branch shouldn't exist, as it doesn't make much sense to inherit encoding. But we have to keep BC.
-        encoding = getCurrentTemplate().getEncoding();
-        if (encoding == null) {
-            encoding = configuration.getEncoding(getLocale());
-        }
-        return encoding;
     }
 
     /**
@@ -2443,7 +2422,7 @@ public final class Environment extends Configurable {
      *
      * @param includedTemplate
      *            the template to process. Note that it does <em>not</em> need to be a template returned by
-     *            {@link #getTemplateForInclusion(String name, String encoding, boolean parse)}.
+     *            {@link #getTemplateForInclusion(String, boolean)}.
      */
     public void include(Template includedTemplate)
             throws TemplateException, IOException {
@@ -2522,7 +2501,7 @@ public final class Environment extends Configurable {
      *            paths.)
      */
     public Template getTemplateForImporting(String name) throws IOException {
-        return getTemplateForInclusion(name, null, true);
+        return getTemplateForInclusion(name, true);
     }
 
     /**
@@ -2767,8 +2746,7 @@ public final class Environment extends Configurable {
         
         private final String templateName;
         private final Locale locale;
-        private final String encoding;
-        private final Object customLookupCondition;
+        private final Serializable customLookupCondition;
         
         private InitializationStatus status = InitializationStatus.UNINITIALIZED;
         
@@ -2782,7 +2760,6 @@ public final class Environment extends Configurable {
             this.templateName = templateName;
             // Make snapshot of all settings that influence template resolution:
             locale = getLocale();
-            encoding = getIncludedTemplateEncoding();
             customLookupCondition = getIncludedTemplateCustomLookupCondition();
         }
 
@@ -2821,9 +2798,7 @@ public final class Environment extends Configurable {
         }
 
         private void initialize() throws IOException, TemplateException {
-            setTemplate(configuration.getTemplate(
-                    templateName, locale, customLookupCondition, encoding,
-                    false));
+            setTemplate(configuration.getTemplate(templateName, locale, customLookupCondition, false));
             Locale lastLocale = getLocale();
             try {
                 setLocale(locale);

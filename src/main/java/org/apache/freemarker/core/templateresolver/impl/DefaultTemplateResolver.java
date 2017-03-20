@@ -198,7 +198,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
      * 
      * <p>
      * All parameters must be non-{@code null}, except {@code customLookupCondition}. For the meaning of the parameters
-     * see {@link Configuration#getTemplate(String, Locale, String, boolean)}.
+     * see {@link Configuration#getTemplate(String, Locale, Serializable, boolean)}.
      *
      * @return A {@link GetTemplateResult} object that contains the {@link Template}, or a
      *         {@link GetTemplateResult} object that contains {@code null} as the {@link Template} and information
@@ -223,20 +223,18 @@ public class DefaultTemplateResolver extends TemplateResolver {
      * @since 2.3.22
      */
     @Override
-    public GetTemplateResult getTemplate(String name, Locale locale, Object customLookupCondition,
-            String encoding)
+    public GetTemplateResult getTemplate(String name, Locale locale, Serializable customLookupCondition)
     throws IOException {
         _NullArgumentException.check("name", name);
         _NullArgumentException.check("locale", locale);
-        _NullArgumentException.check("encoding", encoding);
-        
+
         name = templateNameFormat.normalizeRootBasedName(name);
         
         if (templateLoader == null) {
             return new GetTemplateResult(name, "The TemplateLoader (and TemplateLoader2) was null.");
         }
         
-        Template template = getTemplateInternal(name, locale, customLookupCondition, encoding);
+        Template template = getTemplateInternal(name, locale, customLookupCondition);
         return template != null ? new GetTemplateResult(template) : new GetTemplateResult(name, (String) null);
     }
 
@@ -251,14 +249,13 @@ public class DefaultTemplateResolver extends TemplateResolver {
     }
 
     private Template getTemplateInternal(
-            final String name, final Locale locale, final Object customLookupCondition,
-            final String encoding)
+            final String name, final Locale locale, final Serializable customLookupCondition)
     throws IOException {
         final boolean debug = LOG.isDebugEnabled();
         final String debugPrefix = debug
-                ? getDebugPrefix("getTemplate", name, locale, customLookupCondition, encoding)
+                ? getDebugPrefix("getTemplate", name, locale, customLookupCondition)
                 : null;
-        final CachedResultKey cacheKey = new CachedResultKey(name, locale, customLookupCondition, encoding);
+        final CachedResultKey cacheKey = new CachedResultKey(name, locale, customLookupCondition);
         
         CachedResult oldCachedResult = (CachedResult) cacheStorage.get(cacheKey);
         
@@ -387,8 +384,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
             
             Template template = loadTemplate(
                     templateLoaderResult,
-                    name, newLookupResult.getTemplateSourceName(), locale, customLookupCondition,
-                    encoding);
+                    name, newLookupResult.getTemplateSourceName(), locale, customLookupCondition);
             if (session != null) {
                 session.close();
                 if (debug) {
@@ -524,8 +520,8 @@ public class DefaultTemplateResolver extends TemplateResolver {
     @SuppressWarnings("deprecation")
     private Template loadTemplate(
             TemplateLoadingResult templateLoaderResult,
-            final String name, final String sourceName, Locale locale, final Object customLookupCondition,
-            String initialEncoding) throws IOException {
+            final String name, final String sourceName, Locale locale, final Serializable customLookupCondition)
+            throws IOException {
         TemplateConfiguration tc;
         {
             TemplateConfiguration cfgTC;
@@ -552,23 +548,13 @@ public class DefaultTemplateResolver extends TemplateResolver {
             }
         }
 
-        TemplateLanguage templateLanguage = null;
-        if (tc != null) {
-            // TC.{encoding,locale} is stronger than the cfg.getTemplate arguments by design.
-            if (tc.isEncodingSet()) {
-                initialEncoding = tc.getEncoding();
-            }
-            if (tc.isLocaleSet()) {
-                locale = tc.getLocale();
-            }
-            if (tc.isTemplateLanguageSet()) {
-                templateLanguage = tc.getTemplateLanguage();
-            }
+        if (tc != null && tc.isLocaleSet()) {
+            locale = tc.getLocale();
         }
 
-        if (templateLanguage == null) {
-            templateLanguage = config.getTemplateLanguage();
-        }
+        String initialEncoding = tc != null && tc.isEncodingSet() ? tc.getEncoding() : config.getDefaultEncoding();
+        TemplateLanguage templateLanguage = tc != null && tc.isTemplateLanguageSet() ? tc.getTemplateLanguage()
+                : config .getTemplateLanguage();
 
         Template template;
         {
@@ -689,7 +675,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
 
     /**
      * Removes all entries from the cache, forcing reloading of templates on subsequent
-     * {@link #getTemplate(String, Locale, Object, String)} calls.
+     * {@link #getTemplate(String, Locale, Serializable)} calls.
      * 
      * @param resetTemplateLoader
      *            Whether to call {@link TemplateLoader#resetState()}. on the template loader.
@@ -717,25 +703,16 @@ public class DefaultTemplateResolver extends TemplateResolver {
     }
 
     /**
-     * Same as {@link #removeTemplateFromCache(String, Locale, Object, String)} with {@code null}
-     * {@code customLookupCondition}.
-     */
-    @Override
-    public void removeTemplateFromCache(
-            String name, Locale locale, String encoding) throws IOException {
-        removeTemplateFromCache(name, locale, null, encoding);
-    }
-    
-    /**
      * Removes an entry from the cache, hence forcing the re-loading of it when it's next time requested. (It doesn't
      * delete the template file itself.) This is to give the application finer control over cache updating than
      * {@link #setTemplateUpdateDelayMilliseconds(long)} alone does.
      * 
      * For the meaning of the parameters, see
-     * {@link Configuration#getTemplate(String, Locale, Object, String, boolean)}
+     * {@link Configuration#getTemplate(String, Locale, Serializable, boolean)}
      */
+    @Override
     public void removeTemplateFromCache(
-            String name, Locale locale, Object customLookupCondition, String encoding)
+            String name, Locale locale, Serializable customLookupCondition)
     throws IOException {
         if (name == null) {
             throw new IllegalArgumentException("Argument \"name\" can't be null");
@@ -743,16 +720,13 @@ public class DefaultTemplateResolver extends TemplateResolver {
         if (locale == null) {
             throw new IllegalArgumentException("Argument \"locale\" can't be null");
         }
-        if (encoding == null) {
-            throw new IllegalArgumentException("Argument \"encoding\" can't be null");
-        }
         name = templateNameFormat.normalizeRootBasedName(name);
         if (name != null && templateLoader != null) {
             boolean debug = LOG.isDebugEnabled();
             String debugPrefix = debug
-                    ? getDebugPrefix("removeTemplate", name, locale, customLookupCondition, encoding)
+                    ? getDebugPrefix("removeTemplate", name, locale, customLookupCondition)
                     : null;
-            CachedResultKey tk = new CachedResultKey(name, locale, customLookupCondition, encoding);
+            CachedResultKey tk = new CachedResultKey(name, locale, customLookupCondition);
             
             cacheStorage.remove(tk);
             if (debug) {
@@ -761,11 +735,10 @@ public class DefaultTemplateResolver extends TemplateResolver {
         }
     }
 
-    private String getDebugPrefix(String operation, String name, Locale locale, Object customLookupCondition, String encoding) {
+    private String getDebugPrefix(String operation, String name, Locale locale, Object customLookupCondition) {
         return operation + " " + _StringUtil.jQuoteNoXSS(name) + "("
                 + _StringUtil.jQuoteNoXSS(locale)
                 + (customLookupCondition != null ? ", cond=" + _StringUtil.jQuoteNoXSS(customLookupCondition) : "")
-                + ", " + encoding
                 + "): ";
     }    
 
@@ -813,41 +786,38 @@ public class DefaultTemplateResolver extends TemplateResolver {
     private static final class CachedResultKey implements Serializable {
         private final String name;
         private final Locale locale;
-        private final Object customLookupCondition;
-        private final String encoding;
+        private final Serializable customLookupCondition;
 
-        CachedResultKey(String name, Locale locale, Object customLookupCondition, String encoding) {
+        CachedResultKey(String name, Locale locale, Serializable customLookupCondition) {
             this.name = name;
             this.locale = locale;
             this.customLookupCondition = customLookupCondition;
-            this.encoding = encoding;
         }
 
         @Override
         public boolean equals(Object o) {
-            if (o instanceof CachedResultKey) {
-                CachedResultKey tk = (CachedResultKey) o;
-                return
+            if (!(o instanceof CachedResultKey)) {
+                return false;
+            }
+            CachedResultKey tk = (CachedResultKey) o;
+            return
                     name.equals(tk.name) &&
                     locale.equals(tk.locale) &&
-                    nullSafeEquals(customLookupCondition, tk.customLookupCondition) &&
-                    encoding.equals(tk.encoding);
-            }
-            return false;
+                    nullSafeEquals(customLookupCondition, tk.customLookupCondition);
         }
 
         @Override
         public int hashCode() {
-            return
-                name.hashCode() ^
-                locale.hashCode() ^
-                encoding.hashCode() ^
-                (customLookupCondition != null ? customLookupCondition.hashCode() : 0);
+            int result = name.hashCode();
+            result = 31 * result + locale.hashCode();
+            result = 31 * result + (customLookupCondition != null ? customLookupCondition.hashCode() : 0);
+            return result;
         }
+
     }
 
     /**
-     * Hold the a cached {@link #getTemplate(String, Locale, Object, String)} result and the associated
+     * Hold the a cached {@link #getTemplate(String, Locale, Serializable)} result and the associated
      * information needed to check if the cached value is up to date.
      * 
      * <p>

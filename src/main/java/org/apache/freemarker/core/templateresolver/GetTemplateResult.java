@@ -18,12 +18,13 @@
  */
 package org.apache.freemarker.core.templateresolver;
 
+import java.io.Serializable;
 import java.util.Locale;
 
 import org.apache.freemarker.core.Template;
 
 /**
- * Used for the return value of {@link TemplateResolver#getTemplate(String, Locale, Object, String)}.
+ * Used for the return value of {@link TemplateResolver#getTemplate(String, Locale, Serializable)} .
  * 
  * @since 3.0.0
  */

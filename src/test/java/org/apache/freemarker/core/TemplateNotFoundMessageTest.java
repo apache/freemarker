@@ -25,6 +25,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
@@ -161,7 +162,12 @@ public class TemplateNotFoundMessageTest {
         }
         
         try {
-            cfg.getTemplate("./missing", null, "example.com", null, false);
+            cfg.getTemplate("./missing", null, new Serializable() {
+                @Override
+                public String toString() {
+                    return "example.com";
+                }
+            });
             fail();
         } catch (TemplateNotFoundException e) {
             showErrorMessage(e.getMessage());

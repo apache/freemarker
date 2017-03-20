@@ -22,6 +22,7 @@ package org.apache.freemarker.core;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
@@ -38,8 +39,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
@@ -439,8 +438,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private HashMap<String, Object> rewrappableSharedVariables = null;
     
     private String defaultEncoding = getDefaultDefaultEncoding();
-    private ConcurrentMap localeToCharsetMap = new ConcurrentHashMap();
-    
+
     /**
      * @deprecated Use {@link #Configuration(Version)} instead. Note that the version can be still modified later with
      *     {@link Configuration#setIncompatibleImprovements(Version)} (or
@@ -580,7 +578,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         try {
             Configuration copy = (Configuration) super.clone();
             copy.sharedVariables = new HashMap(sharedVariables);
-            copy.localeToCharsetMap = new ConcurrentHashMap(localeToCharsetMap);
             copy.recreateTemplateResolverWith(
                     templateResolver.getTemplateLoader(), templateResolver.getCacheStorage(),
                     templateResolver.getTemplateLookupStrategy(), templateResolver.getTemplateNameFormat(),
@@ -598,112 +595,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         sharedVariables.put("normalize_newlines", new NormalizeNewlines());
         sharedVariables.put("xml_escape", new XmlEscape());
     }
-    
-    /**
-     * Loads a preset language-to-encoding map, similarly as if you have called
-     * {@link #clearEncodingMap()} and then did multiple {@link #setEncoding(Locale, String)} calls.
-     * It assumes the usual character encodings for most languages.
-     * The previous content of the encoding map will be lost.
-     * This default map currently contains the following mappings:
-     * 
-     * <table style="width: auto; border-collapse: collapse" border="1" summary="preset language to encoding mapping">
-     *   <tr><td>ar</td><td>ISO-8859-6</td></tr>
-     *   <tr><td>be</td><td>ISO-8859-5</td></tr>
-     *   <tr><td>bg</td><td>ISO-8859-5</td></tr>
-     *   <tr><td>ca</td><td>ISO-8859-1</td></tr>
-     *   <tr><td>cs</td><td>ISO-8859-2</td></tr>
-     *   <tr><td>da</td><td>ISO-8859-1</td></tr>
-     *   <tr><td>de</td><td>ISO-8859-1</td></tr>
-     *   <tr><td>el</td><td>ISO-8859-7</td></tr>
-     *   <tr><td>en</td><td>ISO-8859-1</td></tr>
-     *   <tr><td>es</td><td>ISO-8859-1</td></tr>
-     *   <tr><td>et</td><td>ISO-8859-1</td></tr>
-     *   <tr><td>fi</td><td>ISO-8859-1</td></tr>
-     *   <tr><td>fr</td><td>ISO-8859-1</td></tr>
-     *   <tr><td>hr</td><td>ISO-8859-2</td></tr>
-     *   <tr><td>hu</td><td>ISO-8859-2</td></tr>
-     *   <tr><td>is</td><td>ISO-8859-1</td></tr>
-     *   <tr><td>it</td><td>ISO-8859-1</td></tr>
-     *   <tr><td>iw</td><td>ISO-8859-8</td></tr>
-     *   <tr><td>ja</td><td>Shift_JIS</td></tr>
-     *   <tr><td>ko</td><td>EUC-KR</td></tr>    
-     *   <tr><td>lt</td><td>ISO-8859-2</td></tr>
-     *   <tr><td>lv</td><td>ISO-8859-2</td></tr>
-     *   <tr><td>mk</td><td>ISO-8859-5</td></tr>
-     *   <tr><td>nl</td><td>ISO-8859-1</td></tr>
-     *   <tr><td>no</td><td>ISO-8859-1</td></tr>
-     *   <tr><td>pl</td><td>ISO-8859-2</td></tr>
-     *   <tr><td>pt</td><td>ISO-8859-1</td></tr>
-     *   <tr><td>ro</td><td>ISO-8859-2</td></tr>
-     *   <tr><td>ru</td><td>ISO-8859-5</td></tr>
-     *   <tr><td>sh</td><td>ISO-8859-5</td></tr>
-     *   <tr><td>sk</td><td>ISO-8859-2</td></tr>
-     *   <tr><td>sl</td><td>ISO-8859-2</td></tr>
-     *   <tr><td>sq</td><td>ISO-8859-2</td></tr>
-     *   <tr><td>sr</td><td>ISO-8859-5</td></tr>
-     *   <tr><td>sv</td><td>ISO-8859-1</td></tr>
-     *   <tr><td>tr</td><td>ISO-8859-9</td></tr>
-     *   <tr><td>uk</td><td>ISO-8859-5</td></tr>
-     *   <tr><td>zh</td><td>GB2312</td></tr>
-     *   <tr><td>zh_TW</td><td>Big5</td></tr>
-     * </table>
-     * 
-     * @see #clearEncodingMap()
-     * @see #setEncoding(Locale, String)
-     * @see #setDefaultEncoding(String)
-     */
-    public void loadBuiltInEncodingMap() {
-        localeToCharsetMap.clear();
-        localeToCharsetMap.put("ar", "ISO-8859-6");
-        localeToCharsetMap.put("be", "ISO-8859-5");
-        localeToCharsetMap.put("bg", "ISO-8859-5");
-        localeToCharsetMap.put("ca", "ISO-8859-1");
-        localeToCharsetMap.put("cs", "ISO-8859-2");
-        localeToCharsetMap.put("da", "ISO-8859-1");
-        localeToCharsetMap.put("de", "ISO-8859-1");
-        localeToCharsetMap.put("el", "ISO-8859-7");
-        localeToCharsetMap.put("en", "ISO-8859-1");
-        localeToCharsetMap.put("es", "ISO-8859-1");
-        localeToCharsetMap.put("et", "ISO-8859-1");
-        localeToCharsetMap.put("fi", "ISO-8859-1");
-        localeToCharsetMap.put("fr", "ISO-8859-1");
-        localeToCharsetMap.put("hr", "ISO-8859-2");
-        localeToCharsetMap.put("hu", "ISO-8859-2");
-        localeToCharsetMap.put("is", "ISO-8859-1");
-        localeToCharsetMap.put("it", "ISO-8859-1");
-        localeToCharsetMap.put("iw", "ISO-8859-8");
-        localeToCharsetMap.put("ja", "Shift_JIS");
-        localeToCharsetMap.put("ko", "EUC-KR");    
-        localeToCharsetMap.put("lt", "ISO-8859-2");
-        localeToCharsetMap.put("lv", "ISO-8859-2");
-        localeToCharsetMap.put("mk", "ISO-8859-5");
-        localeToCharsetMap.put("nl", "ISO-8859-1");
-        localeToCharsetMap.put("no", "ISO-8859-1");
-        localeToCharsetMap.put("pl", "ISO-8859-2");
-        localeToCharsetMap.put("pt", "ISO-8859-1");
-        localeToCharsetMap.put("ro", "ISO-8859-2");
-        localeToCharsetMap.put("ru", "ISO-8859-5");
-        localeToCharsetMap.put("sh", "ISO-8859-5");
-        localeToCharsetMap.put("sk", "ISO-8859-2");
-        localeToCharsetMap.put("sl", "ISO-8859-2");
-        localeToCharsetMap.put("sq", "ISO-8859-2");
-        localeToCharsetMap.put("sr", "ISO-8859-5");
-        localeToCharsetMap.put("sv", "ISO-8859-1");
-        localeToCharsetMap.put("tr", "ISO-8859-9");
-        localeToCharsetMap.put("uk", "ISO-8859-5");
-        localeToCharsetMap.put("zh", "GB2312");
-        localeToCharsetMap.put("zh_TW", "Big5");
-    }
 
-    /**
-     * Clears language-to-encoding map.
-     * @see #loadBuiltInEncodingMap
-     * @see #setEncoding
-     */
-    public void clearEncodingMap() {
-        localeToCharsetMap.clear();
-    }
-    
     /**
      * Sets a {@link TemplateLoader} that is used to look up and load templates;
      * as a side effect the template templateResolver will be emptied.
@@ -1894,53 +1786,44 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * missing/staled.
      * 
      * <p>
-     * This is a shorthand for {@link #getTemplate(String, Locale, Object, String, boolean)
-     * getTemplate(name, null, null, null, false)}; see more details there.
+     * This is a shorthand for {@link #getTemplate(String, Locale, Serializable, boolean)
+     * getTemplate(name, null, null, false)}; see more details there.
      * 
      * <p>
      * See {@link Configuration} for an example of basic usage.
      */
     public Template getTemplate(String name)
             throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
-        return getTemplate(name, null, null, null, false);
+        return getTemplate(name, null, null, false);
     }
 
     /**
-     * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean)
+     * Shorthand for {@link #getTemplate(String, Locale, Serializable, boolean)
      * getTemplate(name, locale, null, null, false)}.
      */
     public Template getTemplate(String name, Locale locale)
             throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
-        return getTemplate(name, locale, null, null, false);
+        return getTemplate(name, locale, null, false);
     }
 
     /**
-     * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean)
-     * getTemplate(name, null, null, encoding, false)}.
+     * Shorthand for {@link #getTemplate(String, Locale, Serializable, boolean)
+     * getTemplate(name, locale, customLookupCondition, false)}.
      */
-    public Template getTemplate(String name, String encoding)
+    public Template getTemplate(String name, Locale locale, Serializable customLookupCondition)
             throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
-        return getTemplate(name, null, null, encoding, false);
+        return getTemplate(name, locale, customLookupCondition, false);
     }
 
     /**
-     * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean)
-     * getTemplate(name, locale, null, encoding, false)}.
-     */
-    public Template getTemplate(String name, Locale locale, String encoding)
-            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
-        return getTemplate(name, locale, null, encoding, false);
-    }
-
-    /**
-     * Shorthand for {@link #getTemplate(String, Locale, Object, String, boolean)
-     * getTemplate(name, locale, null, encoding, ignoreMissing)}.
+     * Shorthand for {@link #getTemplate(String, Locale, Serializable, boolean)
+     * getTemplate(name, locale, null, ignoreMissing)}.
      * 
      * @since 2.3.21
      */
-    public Template getTemplate(String name, Locale locale, String encoding, boolean ignoreMissing)
+    public Template getTemplate(String name, Locale locale, boolean ignoreMissing)
             throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
-        return getTemplate(name, locale, null, encoding, ignoreMissing);
+        return getTemplate(name, locale, null, ignoreMissing);
     }
     
     /**
@@ -1996,19 +1879,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *            custom {@link TemplateLookupStrategy}. See also:
      *            {@link TemplateLookupContext#getCustomLookupCondition()}.
      *
-     * @param encoding
-     *            Deprecated mechanism, {@code null} is the recommended; the charset used to interpret the template
-     *            source code bytes (if it's read from a binary source). Can be {@code null} since 2.3.22, in which case
-     *            it will default to {@link Configuration#getEncoding(Locale)} where {@code Locale} is the
-     *            {@code locale} parameter (when {@code locale} was {@code null} too, the its default value is used
-     *            instead). Why is this deprecated: It doesn't make sense to get the <em>same</em> template with
-     *            different encodings, hence, it's error prone to specify the encoding where you get the template.
-     *            Instead, if you have template "files" with different charsets, you should use
-     *            {@link #setTemplateConfigurations(TemplateConfigurationFactory)}, where you can associate encodings to
-     *            individual templates based on their names (like which "directory" are they in, what's their file
-     *            extension, etc.). The encoding associated with the templates that way overrides the encoding that you
-     *            specify here.
-     *
      * @param ignoreMissing
      *            If {@code true}, the method won't throw {@link TemplateNotFoundException} if the template doesn't
      *            exist, instead it returns {@code null}. Other kind of exceptions won't be suppressed.
@@ -2029,17 +1899,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * @since 2.3.22
      */
-    public Template getTemplate(String name, Locale locale, Object customLookupCondition,
-            String encoding, boolean ignoreMissing)
+    public Template getTemplate(String name, Locale locale, Serializable customLookupCondition, boolean
+            ignoreMissing)
             throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
         if (locale == null) {
             locale = getLocale();
         }
-        if (encoding == null) {
-            encoding = getEncoding(locale);
-        }
-        
-        final GetTemplateResult maybeTemp = templateResolver.getTemplate(name, locale, customLookupCondition, encoding);
+        final GetTemplateResult maybeTemp = templateResolver.getTemplate(name, locale, customLookupCondition);
         final Template temp = maybeTemp.getTemplate();
         if (temp == null) {
             if (ignoreMissing) {
@@ -2112,18 +1978,19 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Sets the charset used for decoding byte sequences to character sequences when
-     * reading template files in a locale for which no explicit encoding
-     * was specified via {@link #setEncoding(Locale, String)}. Note that by default there is no locale specified for
-     * any locale, so the default encoding is always in effect.
-     * 
+     * Sets the charset used for decoding template files when there's no matching
+     * {@linkplain #getTemplateConfigurations() template configuration} that specifies
+     * the charset of the template.
+     *
+     * <p>Individual templates may specify their own charset by starting with
+     * <tt>&lt;#ftl encoding="..."&gt;</tt>. However, before that's detected, at least part of template must be
+     * decoded with some charset first, so this setting and {@linkplain #getTemplateConfigurations() template
+     * configuration} still has a role.
+     *
      * <p>Defaults to the default system encoding, which can change from one server to
      * another, so <b>you should always set this setting</b>. If you don't know what charset your should chose,
      * {@code "UTF-8"} is usually a good choice.
-     * 
-     * <p>Note that individual templates may specify their own charset by starting with
-     * <tt>&lt;#ftl encoding="..."&gt;</tt>
-     * 
+     *
      * @param encoding The name of the charset, such as {@code "UTF-8"} or {@code "ISO-8859-1"}
      */
     public void setDefaultEncoding(String encoding) {
@@ -2168,48 +2035,6 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
 
     static private String getJVMDefaultEncoding() {
         return _SecurityUtil.getSystemProperty("file.encoding", "utf-8");
-    }
-
-    /**
-     * Gets the preferred character encoding for the given locale, or the 
-     * default encoding if no encoding is set explicitly for the specified
-     * locale. You can associate encodings with locales using 
-     * {@link #setEncoding(Locale, String)} or {@link #loadBuiltInEncodingMap()}.
-     */
-    public String getEncoding(Locale locale) {
-        if (localeToCharsetMap.isEmpty()) {
-            return defaultEncoding;
-        } else {
-            // Try for a full name match (may include country and variant)
-            String charset = (String) localeToCharsetMap.get(locale.toString());
-            if (charset == null) {
-                if (locale.getVariant().length() > 0) {
-                    Locale l = new Locale(locale.getLanguage(), locale.getCountry());
-                    charset = (String) localeToCharsetMap.get(l.toString());
-                    if (charset != null) {
-                        localeToCharsetMap.put(locale.toString(), charset);
-                    }
-                } 
-                charset = (String) localeToCharsetMap.get(locale.getLanguage());
-                if (charset != null) {
-                    localeToCharsetMap.put(locale.toString(), charset);
-                }
-            }
-            return charset != null ? charset : defaultEncoding;
-        }
-    }
-
-    /**
-     * Sets the character set encoding to use for templates of
-     * a given locale. If there is no explicit encoding set for some
-     * locale, then the default encoding will be used, what you can
-     * set with {@link #setDefaultEncoding}.
-     *
-     * @see #clearEncodingMap
-     * @see #loadBuiltInEncodingMap
-     */
-    public void setEncoding(Locale locale, String encoding) {
-        localeToCharsetMap.put(locale.toString(), encoding);
     }
 
     /**
@@ -2377,8 +2202,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.19
      */
     public void removeTemplateFromCache(String name) throws IOException {
-        Locale loc = getLocale();
-        removeTemplateFromCache(name, loc, getEncoding(loc));
+        removeTemplateFromCache(name, getLocale());
     }
 
     /**
@@ -2386,15 +2210,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @since 2.3.19
      */
     public void removeTemplateFromCache(String name, Locale locale) throws IOException {
-        removeTemplateFromCache(name, locale, getEncoding(locale));
-    }
-
-    /**
-     * Equivalent to <tt>removeTemplateFromCache(name, thisCfg.getLocale(), encoding, true)</tt>.
-     * @since 2.3.19
-     */
-    public void removeTemplateFromCache(String name, String encoding) throws IOException {
-        removeTemplateFromCache(name, getLocale(), encoding);
+        removeTemplateFromCache(name, locale, null);
     }
 
     /**
@@ -2404,14 +2220,15 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * alone does.
      * 
      * <p>For the meaning of the parameters, see
-     * {@link #getTemplate(String, Locale, String, boolean)}.
+     * {@link #getTemplate(String, Locale, Serializable, boolean)}.
      * 
      * <p>This method is thread-safe and can be called while the engine processes templates.
      * 
      * @since 2.3.19
      */
-    public void removeTemplateFromCache(String name, Locale locale, String encoding) throws IOException {
-        templateResolver.removeTemplateFromCache(name, locale, encoding);
+    public void removeTemplateFromCache(String name, Locale locale, Serializable customLookupCondition)
+            throws IOException {
+        templateResolver.removeTemplateFromCache(name, locale, customLookupCondition);
     }    
     
     /**

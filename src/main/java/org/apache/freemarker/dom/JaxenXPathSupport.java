@@ -194,15 +194,11 @@ class JaxenXPathSupport implements XPathSupport {
     // [FM3] Look into this "hidden" feature
     static Template getTemplate(String systemId) throws IOException {
         Environment env = Environment.getCurrentEnvironment();
-        String encoding = env.getCurrentTemplate().getEncoding(); // [FM3] Encoding shouldn't be inherited anymore
-        if (encoding == null) {
-            encoding = env.getConfiguration().getEncoding(env.getLocale());
-        }
         String templatePath = env.getCurrentTemplate().getName();
         int lastSlash = templatePath.lastIndexOf('/');
         templatePath = lastSlash == -1 ? "" : templatePath.substring(0, lastSlash + 1);
         systemId = env.toFullTemplateName(templatePath, systemId);
-        return env.getConfiguration().getTemplate(systemId, env.getLocale(), encoding, false);
+        return env.getConfiguration().getTemplate(systemId, env.getLocale(), false);
     }
 
     private static InputSource createInputSource(String publicId, Template raw) throws IOException, SAXException {

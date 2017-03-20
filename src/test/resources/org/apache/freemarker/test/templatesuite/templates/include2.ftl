@@ -20,12 +20,6 @@
 <#assign s = "de">
 <#include "inclu" + s + "2-included.ftl">
 
-<#assign sEncoding="ISO-8859-1">
-<#include "include2-included.ftl" encoding="ISO-8859-1">
-<#include "include2-included.ftl" encoding=sEncoding>
-<#include "include2-included-encoding.ftl" encoding="ISO-8859-1">
-<#include "include2-included-encoding.ftl" encoding=sEncoding>
-
 <#assign bTrue=true>
 <#assign bFalse=false>
 <#include "include2-included.ftl" ignore_missing=true>

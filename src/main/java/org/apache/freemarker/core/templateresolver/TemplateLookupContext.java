@@ -92,7 +92,7 @@ public abstract class TemplateLookupContext<R extends TemplateLookupResult> {
 
     /**
      * Returns the value of the {@code customLookupCondition} parameter of
-     * {@link Configuration#getTemplate(String, Locale, Object, String, boolean)}; see requirements there, such
+     * {@link Configuration#getTemplate(String, Locale, Serializable, boolean)}; see requirements there, such
      * as having a proper {@link Object#equals(Object)} and {@link Object#hashCode()} method. The interpretation of this
      * value is up to the custom {@link TemplateLookupStrategy}. Usually, it's used similarly to as the default lookup
      * strategy uses {@link #getTemplateLocale()}, that is, to look for a template variation that satisfies the

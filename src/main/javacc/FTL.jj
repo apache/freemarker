@@ -2935,7 +2935,7 @@ ASTDirInclude Include() :
 {
     ASTExpression nameExp;
     Token att, start, end;
-    ASTExpression exp, encodingExp = null, ignoreMissingExp = null;
+    ASTExpression exp, ignoreMissingExp = null;
 }
 {
     start = <_INCLUDE>
@@ -2947,16 +2947,14 @@ ASTDirInclude Include() :
         exp = ASTExpression()
         {
             String attString = att.image;
-            if (attString.equalsIgnoreCase("encoding")) {
-            	encodingExp = exp;
-            } else if (attString.equalsIgnoreCase("ignore_missing") || attString.equals("ignoreMissing")) {
+            if (attString.equalsIgnoreCase("ignore_missing") || attString.equals("ignoreMissing")) {
                 token_source.checkNamingConvention(att);
             	ignoreMissingExp = exp;
             } else {
                 String correctedName = attString.equals("ignoreMissing") ? "ignore_missing" : null;
                 throw new ParseException(
                 		"Unsupported named #include parameter: \"" + attString + "\". Supported parameters are: "
-                		+ "\"encoding\", \"ignore_missing\"."
+                		+ "\"ignore_missing\"."
                 		+ (correctedName == null
                 		      ? ""
                 		      : " Supporting camelCase parameter names is planned for FreeMarker 2.4.0; "
@@ -2968,7 +2966,7 @@ ASTDirInclude Include() :
     )*
     end = LooseDirectiveEnd()
     {
-        ASTDirInclude result = new ASTDirInclude(template, nameExp, encodingExp, ignoreMissingExp);
+        ASTDirInclude result = new ASTDirInclude(template, nameExp, ignoreMissingExp);
         result.setLocation(template, start, end);
         return result;
     }

@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
 
@@ -80,7 +82,7 @@ public class Template extends Configurable {
     private List imports = new Vector();
     private ASTElement rootElement;
     private String encoding, defaultNS;
-    private Object customLookupCondition;
+    private Serializable customLookupCondition;
     private int actualTagSyntax;
     private int actualNamingConvention;
     private boolean autoEscaping;
@@ -567,17 +569,16 @@ public class Template extends Configurable {
 
     /**
      * @param encoding
-     *            The encoding that was used to read this template. When this template {@code #include}-s or
-     *            {@code #import}-s another template, by default it will use this encoding for those. For backward
-     *            compatibility, this can be {@code null}, which will unset this setting.
+     *            The encoding that was used to read this template, or {@code null} if the source of the template
+     *            already gives back text (as opposed to binary data), so no decoding with a charset was needed.
      */
     void setEncoding(String encoding) {
         this.encoding = encoding;
     }
 
     /**
-     * Returns the default character encoding used for reading included/imported files; if {@code null}, then
-     * the encoding returned by {@link Configuration#getEncoding(java.util.Locale)} should be used instead.
+     * The encoding that was used to read this template, or {@code null} if the source of the template
+     * already gives back text (as opposed to binary data), so no decoding with a charset was needed.
      */
     public String getEncoding() {
         return encoding;
@@ -585,12 +586,10 @@ public class Template extends Configurable {
     
     /**
      * Gets the custom lookup condition with which this template was found. See the {@code customLookupCondition}
-     * parameter of {@link Configuration#getTemplate(String, java.util.Locale, Object, String, boolean)} for
-     * more explanation.
-     * 
-     * @since 2.3.22
+     * parameter of {@link Configuration#getTemplate(String, Locale, Serializable, boolean)} for more
+     * explanation.
      */
-    public Object getCustomLookupCondition() {
+    public Serializable getCustomLookupCondition() {
         return customLookupCondition;
     }
 
@@ -599,10 +598,8 @@ public class Template extends Configurable {
      * after instantiating the template with its constructor, after a successfull lookup that used this condition. So
      * this should only be called from code that deals with creating new {@code Template} objects, like from
      * {@link DefaultTemplateResolver}.
-     * 
-     * @since 2.3.22
      */
-    public void setCustomLookupCondition(Object customLookupCondition) {
+    public void setCustomLookupCondition(Serializable customLookupCondition) {
         this.customLookupCondition = customLookupCondition;
     }
 

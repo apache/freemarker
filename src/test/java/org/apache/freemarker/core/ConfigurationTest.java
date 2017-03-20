@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
@@ -51,6 +52,8 @@ import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
 import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
+import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
+import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
 import org.apache.freemarker.core.templateresolver.TemplateLookupContext;
 import org.apache.freemarker.core.templateresolver.TemplateLookupResult;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
@@ -249,18 +252,25 @@ public class ConfigurationTest extends TestCase {
         final String latin2 = "ISO-8859-2";
         final String utf8 = "utf-8";
         final String tFtl = "t.ftl";
+        final String tHuFtl = "t_hu.ftl";
         final String tEnFtl = "t_en.ftl";
         final String tUtf8Ftl = "t-utf8.ftl";
-        final Integer custLookupCond = 123;
+        final Serializable custLookupCond = new Serializable() { };
         
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setLocale(Locale.GERMAN);
         cfg.setDefaultEncoding(latin1);
-        cfg.setEncoding(hu, latin2);
-        
+
+        TemplateConfiguration huTC = new TemplateConfiguration();
+        huTC.setEncoding(latin2);
+        cfg.setTemplateConfigurations(
+                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*_hu.*"),
+                huTC));
+
         ByteArrayTemplateLoader tl = new ByteArrayTemplateLoader();
         tl.putTemplate(tFtl, "${1}".getBytes(StandardCharsets.UTF_8));
         tl.putTemplate(tEnFtl, "${1}".getBytes(StandardCharsets.UTF_8));
+        tl.putTemplate(tHuFtl, "${1}".getBytes(StandardCharsets.UTF_8));
         tl.putTemplate(tUtf8Ftl, "<#ftl encoding='utf-8'>".getBytes(StandardCharsets.UTF_8));
         cfg.setTemplateLoader(tl);
         
@@ -282,7 +292,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(utf8, t.getEncoding());
         }
         
-        // 2 args overload 1:
+        // 2 args:
         {
             Template t = cfg.getTemplate(tFtl, Locale.GERMAN);
             assertEquals(tFtl, t.getName());
@@ -318,7 +328,7 @@ public class ConfigurationTest extends TestCase {
         {
             Template t = cfg.getTemplate(tFtl, hu);
             assertEquals(tFtl, t.getName());
-            assertEquals(tFtl, t.getSourceName());
+            assertEquals(tHuFtl, t.getSourceName());
             assertEquals(hu, t.getLocale());
             assertNull(t.getCustomLookupCondition());
             assertEquals(latin2, t.getEncoding());
@@ -331,55 +341,17 @@ public class ConfigurationTest extends TestCase {
             assertNull(t.getCustomLookupCondition());
             assertEquals(utf8, t.getEncoding());
         }
-        
-        // 2 args overload 2:
-        {
-            Template t = cfg.getTemplate(tFtl, utf8);
-            assertEquals(tFtl, t.getName());
-            assertEquals(tFtl, t.getSourceName());
-            assertEquals(Locale.GERMAN, t.getLocale());
-            assertNull(t.getCustomLookupCondition());
-            assertEquals(utf8, t.getEncoding());
-        }
-        {
-            Template t = cfg.getTemplate(tFtl, (String) null);
-            assertEquals(tFtl, t.getName());
-            assertEquals(tFtl, t.getSourceName());
-            assertEquals(Locale.GERMAN, t.getLocale());
-            assertNull(t.getCustomLookupCondition());
-            assertEquals(latin1, t.getEncoding());
-        }
-        
+
         // 3 args:
-        {
-            Template t = cfg.getTemplate(tFtl, hu, utf8);
-            assertEquals(tFtl, t.getName());
-            assertEquals(tFtl, t.getSourceName());
-            assertEquals(hu, t.getLocale());
-            assertNull(t.getCustomLookupCondition());
-            assertEquals(utf8, t.getEncoding());
-            assertOutputEquals("1", t);
+        try {
+            cfg.getTemplate("missing.ftl", hu, false);
+            fail();
+        } catch (TemplateNotFoundException e) {
+            // Expected
         }
+        assertNull(cfg.getTemplate("missing.ftl", hu, true));
         {
-            Template t = cfg.getTemplate(tFtl, hu, null);
-            assertEquals(tFtl, t.getName());
-            assertEquals(tFtl, t.getSourceName());
-            assertEquals(hu, t.getLocale());
-            assertNull(t.getCustomLookupCondition());
-            assertEquals(latin2, t.getEncoding());
-            assertOutputEquals("1", t);
-        }
-        {
-            Template t = cfg.getTemplate(tFtl, null, utf8);
-            assertEquals(tFtl, t.getName());
-            assertEquals(tFtl, t.getSourceName());
-            assertEquals(Locale.GERMAN, t.getLocale());
-            assertNull(t.getCustomLookupCondition());
-            assertEquals(utf8, t.getEncoding());
-            assertOutputEquals("1", t);
-        }
-        {
-            Template t = cfg.getTemplate(tFtl, null, null);
+            Template t = cfg.getTemplate(tFtl, null, true);
             assertEquals(tFtl, t.getName());
             assertEquals(tFtl, t.getSourceName());
             assertEquals(Locale.GERMAN, t.getLocale());
@@ -387,80 +359,42 @@ public class ConfigurationTest extends TestCase {
             assertEquals(latin1, t.getEncoding());
             assertOutputEquals("1", t);
         }
-        
-        // 4 args:
         {
-            Template t = cfg.getTemplate(tFtl, hu, utf8, true);
+            Template t = cfg.getTemplate(tFtl, hu, true);
             assertEquals(tFtl, t.getName());
-            assertEquals(tFtl, t.getSourceName());
-            assertEquals(hu, t.getLocale());
-            assertNull(t.getCustomLookupCondition());
-            assertEquals(utf8, t.getEncoding());
-            assertOutputEquals("1", t);
-        }
-        {
-            Template t = cfg.getTemplate(tFtl, null, utf8, true);
-            assertEquals(tFtl, t.getName());
-            assertEquals(tFtl, t.getSourceName());
-            assertEquals(Locale.GERMAN, t.getLocale());
-            assertNull(t.getCustomLookupCondition());
-            assertEquals(utf8, t.getEncoding());
-            assertOutputEquals("1", t);
-        }
-        {
-            Template t = cfg.getTemplate(tFtl, hu, null, true);
-            assertEquals(tFtl, t.getName());
-            assertEquals(tFtl, t.getSourceName());
+            assertEquals(tHuFtl, t.getSourceName());
             assertEquals(hu, t.getLocale());
             assertNull(t.getCustomLookupCondition());
             assertEquals(latin2, t.getEncoding());
             assertOutputEquals("1", t);
         }
 
-        // Ignore missing
+        // 4 args:
         try {
-            cfg.getTemplate("missing.ftl", hu, utf8, false);
+            cfg.getTemplate("missing.ftl", hu, custLookupCond, false);
             fail();
         } catch (TemplateNotFoundException e) {
             // Expected
         }
-        assertNull(cfg.getTemplate("missing.ftl", hu, utf8, true));
-        
-        // 5 args:
+        assertNull(cfg.getTemplate("missing.ftl", hu, custLookupCond, true));
         {
-            Template t = cfg.getTemplate(tFtl, hu, custLookupCond, utf8, false);
+            Template t = cfg.getTemplate(tFtl, hu, custLookupCond, false);
             assertEquals(tFtl, t.getName());
-            assertEquals(tFtl, t.getSourceName());
-            assertEquals(hu, t.getLocale());
-            assertEquals(custLookupCond, t.getCustomLookupCondition());
-            assertEquals(utf8, t.getEncoding());
-            assertOutputEquals("1", t);
-        }
-        {
-            Template t = cfg.getTemplate(tFtl, null, custLookupCond, utf8, false);
-            assertEquals(tFtl, t.getName());
-            assertEquals(tFtl, t.getSourceName());
-            assertEquals(Locale.GERMAN, t.getLocale());
-            assertEquals(custLookupCond, t.getCustomLookupCondition());
-            assertEquals(utf8, t.getEncoding());
-            assertOutputEquals("1", t);
-        }
-        {
-            Template t = cfg.getTemplate(tFtl, hu, custLookupCond, null, false);
-            assertEquals(tFtl, t.getName());
-            assertEquals(tFtl, t.getSourceName());
+            assertEquals(tHuFtl, t.getSourceName());
             assertEquals(hu, t.getLocale());
             assertEquals(custLookupCond, t.getCustomLookupCondition());
             assertEquals(latin2, t.getEncoding());
             assertOutputEquals("1", t);
         }
-        try {
-            cfg.getTemplate("missing.ftl", hu, custLookupCond, utf8, false);
-            fail();
-        } catch (TemplateNotFoundException e) {
-            // Expected
+        {
+            Template t = cfg.getTemplate(tFtl, null, custLookupCond, false);
+            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getSourceName());
+            assertEquals(Locale.GERMAN, t.getLocale());
+            assertEquals(custLookupCond, t.getCustomLookupCondition());
+            assertEquals(latin1, t.getEncoding());
+            assertOutputEquals("1", t);
         }
-        assertNull(cfg.getTemplate("missing.ftl", hu, custLookupCond, utf8, true));
     }
 
     private void assertOutputEquals(final String expectedContent, final Template t) throws ConfigurationException,

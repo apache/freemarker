@@ -23,7 +23,6 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
@@ -55,13 +54,13 @@ public class DefaultTemplateResolverTest {
         tr.setTemplateUpdateDelayMilliseconds(1000L);
         loader.setThrowException(true);
         try {
-            tr.getTemplate("t", Locale.getDefault(), null, "").getTemplate();
+            tr.getTemplate("t", Locale.getDefault(), null).getTemplate();
             fail();
         } catch (IOException e) {
             assertEquals("mock IO exception", e.getMessage());
             assertEquals(1, loader.getLoadAttemptCount());
             try {
-                tr.getTemplate("t", Locale.getDefault(), null, "").getTemplate();
+                tr.getTemplate("t", Locale.getDefault(), null).getTemplate();
                 fail();
             } catch (IOException e2) {
                 // Still 1 - returned cached exception
@@ -72,7 +71,7 @@ public class DefaultTemplateResolverTest {
                 assertEquals(1, loader.getLoadAttemptCount());
                 try {
                     Thread.sleep(1100L);
-                    tr.getTemplate("t", Locale.getDefault(), null, "").getTemplate();
+                    tr.getTemplate("t", Locale.getDefault(), null).getTemplate();
                     fail();
                 } catch (IOException e3) {
                     // Cache had to retest
@@ -91,13 +90,13 @@ public class DefaultTemplateResolverTest {
                 DefaultTemplateNameFormat.INSTANCE, new Configuration());
         cache.setTemplateUpdateDelayMilliseconds(1000L);
         cache.setLocalizedLookup(false);
-        assertNull(cache.getTemplate("t", Locale.getDefault(), null, "").getTemplate());
+        assertNull(cache.getTemplate("t", Locale.getDefault(), null).getTemplate());
         assertEquals(1, loader.getLoadAttemptCount());
-        assertNull(cache.getTemplate("t", Locale.getDefault(), null, "").getTemplate());
+        assertNull(cache.getTemplate("t", Locale.getDefault(), null).getTemplate());
         // Still 1 - returned cached exception
         assertEquals(1, loader.getLoadAttemptCount());
         Thread.sleep(1100L);
-        assertNull(cache.getTemplate("t", Locale.getDefault(), null, "").getTemplate());
+        assertNull(cache.getTemplate("t", Locale.getDefault(), null).getTemplate());
         // Cache had to retest
         assertEquals(2, loader.getLoadAttemptCount());
     }
@@ -274,6 +273,7 @@ public class DefaultTemplateResolverTest {
     public void testWrongEncodingReload() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setLocale(Locale.US);
+        cfg.setDefaultEncoding("utf-8");
         
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putBinaryTemplate("utf-8_en.ftl", "<#ftl encoding='utf-8'>Béka");
@@ -283,25 +283,7 @@ public class DefaultTemplateResolverTest {
         cfg.setTemplateLoader(tl);
         
         {
-            Template t = cfg.getTemplate("utf-8.ftl", "Utf-8");
-            assertEquals("utf-8.ftl", t.getName());
-            assertEquals("utf-8_en.ftl", t.getSourceName());
-            assertEquals("Utf-8", t.getEncoding());
-            assertEquals("Béka", t.toString());
-            
-            assertEquals(
-                    ImmutableList.of(
-                            CreateSessionEvent.INSTANCE,
-                            new LoadEvent("utf-8_en_US.ftl", TemplateLoadingResultStatus.NOT_FOUND),
-                            new LoadEvent("utf-8_en.ftl", TemplateLoadingResultStatus.OPENED),
-                            CloseSessionEvent.INSTANCE),
-                    tl.getEvents());
-        }
-        
-        {
-            tl.clearEvents();
-            
-            Template t = cfg.getTemplate("utf-8.ftl", "ISO-8859-5");
+            Template t = cfg.getTemplate("utf-8.ftl");
             assertEquals("utf-8.ftl", t.getName());
             assertEquals("utf-8_en.ftl", t.getSourceName());
             assertEquals("utf-8", t.getEncoding());
@@ -315,11 +297,11 @@ public class DefaultTemplateResolverTest {
                             CloseSessionEvent.INSTANCE),
                     tl.getEvents());
         }
-        
+
         {
             tl.clearEvents();
             
-            Template t = cfg.getTemplate("iso-8859-1.ftl", "utf-8");
+            Template t = cfg.getTemplate("iso-8859-1.ftl");
             assertEquals("iso-8859-1.ftl", t.getName());
             assertEquals("iso-8859-1_en_US.ftl", t.getSourceName());
             assertEquals("ISO-8859-1", t.getEncoding());
@@ -338,6 +320,7 @@ public class DefaultTemplateResolverTest {
     public void testNoWrongEncodingForTemplateLoader2WithReader() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setLocale(Locale.US);
+        cfg.setDefaultEncoding("utf-8");
         
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTextTemplate("foo_en.ftl", "<#ftl encoding='utf-8'>ő");
@@ -345,25 +328,7 @@ public class DefaultTemplateResolverTest {
         cfg.setTemplateLoader(tl);
         
         {
-            Template t = cfg.getTemplate("foo.ftl", "Utf-8");
-            assertEquals("foo.ftl", t.getName());
-            assertEquals("foo_en.ftl", t.getSourceName());
-            assertNull(t.getEncoding());
-            assertEquals("ő", t.toString());
-            
-            assertEquals(
-                    ImmutableList.of(
-                            CreateSessionEvent.INSTANCE,
-                            new LoadEvent("foo_en_US.ftl", TemplateLoadingResultStatus.NOT_FOUND),
-                            new LoadEvent("foo_en.ftl", TemplateLoadingResultStatus.OPENED),
-                            CloseSessionEvent.INSTANCE),                
-                    tl.getEvents());
-        }
-        
-        {
-            tl.clearEvents();
-            
-            Template t = cfg.getTemplate("foo.ftl", "iso-8859-1");
+            Template t = cfg.getTemplate("foo.ftl");
             assertEquals("foo.ftl", t.getName());
             assertEquals("foo_en.ftl", t.getSourceName());
             assertNull(t.getEncoding());
@@ -378,88 +343,11 @@ public class DefaultTemplateResolverTest {
                     tl.getEvents());
         }
     }
-    
-    @Test
-    public void testEncodingSelection() throws IOException {
-        Locale hungary = new Locale("hu", "HU"); 
-                
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        cfg.setDefaultEncoding("utf-8");
-        
-        MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
-        tl.putBinaryTemplate("t.ftl", "Foo");
-        tl.putBinaryTemplate("t_de.ftl", "Vuu");
-        tl.putBinaryTemplate("t2.ftl", "<#ftl encoding='ISO-8859-5'>пример", Charset.forName("ISO-8859-5"), "v1");
-        tl.putBinaryTemplate("t2_de.ftl", "<#ftl encoding='ISO-8859-5'>пример", Charset.forName("ISO-8859-5"), "v1");
-        cfg.setTemplateLoader(tl);
 
-        // No locale-to-encoding mapping exists yet:
-        {
-            Template t = cfg.getTemplate("t.ftl", Locale.GERMANY);
-            assertEquals("t.ftl", t.getName());
-            assertEquals("t_de.ftl", t.getSourceName());
-            assertEquals("utf-8", t.getEncoding());
-            assertEquals("Vuu", t.toString());
-        }
-        
-        cfg.setEncoding(Locale.GERMANY, "ISO-8859-1");
-        cfg.setEncoding(hungary, "ISO-8859-2");
-        {
-            Template t = cfg.getTemplate("t.ftl", Locale.CHINESE);
-            assertEquals("t.ftl", t.getName());
-            assertEquals("t.ftl", t.getSourceName());
-            assertEquals("utf-8", t.getEncoding());
-            assertEquals("Foo", t.toString());
-        }
-        {
-            Template t = cfg.getTemplate("t.ftl", Locale.GERMANY);
-            assertEquals("t.ftl", t.getName());
-            assertEquals("t_de.ftl", t.getSourceName());
-            assertEquals("ISO-8859-1", t.getEncoding());
-            assertEquals("Vuu", t.toString());
-        }
-        {
-            Template t = cfg.getTemplate("t.ftl", hungary);
-            assertEquals("t.ftl", t.getName());
-            assertEquals("t.ftl", t.getSourceName());
-            assertEquals("ISO-8859-2", t.getEncoding());
-            assertEquals("Foo", t.toString());
-        }
-        
-        // #ftl header overrides:
-        {
-            Template t = cfg.getTemplate("t2.ftl", Locale.CHINESE);
-            assertEquals("t2.ftl", t.getName());
-            assertEquals("t2.ftl", t.getSourceName());
-            assertEquals("ISO-8859-5", t.getEncoding());
-            assertEquals("пример", t.toString());
-        }
-        {
-            Template t = cfg.getTemplate("t2.ftl", Locale.GERMANY);
-            assertEquals("t2.ftl", t.getName());
-            assertEquals("t2_de.ftl", t.getSourceName());
-            assertEquals("ISO-8859-5", t.getEncoding());
-            assertEquals("пример", t.toString());
-        }
-        {
-            Template t = cfg.getTemplate("t2.ftl", hungary);
-            assertEquals("t2.ftl", t.getName());
-            assertEquals("t2.ftl", t.getSourceName());
-            assertEquals("ISO-8859-5", t.getEncoding());
-            assertEquals("пример", t.toString());
-        }
-    }
-    
     @Test
     public void testTemplateNameFormatException() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
-        try {
-            cfg.getTemplate("../x", null, null, null, true);
-            fail();
-        } catch (MalformedTemplateNameException e) {
-            // expected
-        }
         try {
             cfg.getTemplate("../x");
             fail();

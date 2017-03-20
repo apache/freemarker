@@ -20,6 +20,7 @@
 package org.apache.freemarker.core;
 
 import java.io.FileNotFoundException;
+import java.io.Serializable;
 
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 
@@ -54,7 +55,7 @@ public final class TemplateNotFoundException extends FileNotFoundException {
     /**
      * The custom lookup condition with which the template was requested, or {@code null} if there's no such condition.
      * See the {@code customLookupCondition} parameter of
-     * {@link Configuration#getTemplate(String, java.util.Locale, Object, String, boolean)}.
+     * {@link Configuration#getTemplate(String, java.util.Locale, Serializable, boolean)}.
      */
     public Object getCustomLookupCondition() {
         return customLookupCondition;

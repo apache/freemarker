@@ -539,11 +539,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
 
     /**
      * When the standard template loading/caching mechanism is used, this forces the charset used for reading the
-     * template "file", overriding everything but the encoding coming from the {@code #ftl} header. This setting
-     * overrides the locale-specific encodings set via {@link Configuration#setEncoding(java.util.Locale, String)}. It
-     * also overrides the {@code encoding} parameter of {@link Configuration#getTemplate(String, String)} (and of its
-     * overloads) and the {@code encoding} parameter of the {@code #include} directive. This works like that because
-     * specifying the encoding where you are requesting the template is error prone and deprecated.
+     * template "file", overriding everything but the encoding coming from the {@code #ftl} header.
      * 
      * <p>
      * If you are developing your own template loading/caching mechanism instead of the standard one, note that the

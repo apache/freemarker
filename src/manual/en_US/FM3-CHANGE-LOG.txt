@@ -133,7 +133,7 @@ the FreeMarer 3 changelog here:
     In FM2, such overloads has used the global static default DefaltObjectWrapper, but that was removed.
   - If the ObjectWrapper is not a DefaultObjectWrapper (or a subclass of it), `className?new(args)` will only accept 0 arguments.
     (Earlier we have fallen back to using the global static default DefaultObjectWrapper instance to handle argument unwrapping
-    and overloaded constructors.) Note that ?new is only used to instantiate TemplateModel-s, typically, tempalte language
+    and overloaded constructors.) Note that ?new is only used to instantiate TemplateModel-s, typically, template language
     functions/directives implemented in Java, and so they hardly ever has an argument.
   - FreemarkerServlet now requires that the ObjectWrapper it uses implements ObjectWrapperAndUnwrapper. (Thus, the return type
     of FreemarerServlet.createDefaultObjectWrapper() has changed to ObjectWrapperAndUnwrapper.) The unwrapping functionality is
@@ -156,9 +156,18 @@ the FreeMarer 3 changelog here:
 - Removed DefaultObjectWrapper.methodsShadowItems setting, in effect defaulting it to true. This has decided if the generic
   get method (`get(String)`) had priority over methods of similar name. The generic get method is only recognized from its
   name and parameter type, so it's a quite consfusing feature, and might will be removed alltogether.
-- DefaultObjectWrapper is not immutable (has no setter methods), and can only be constructed with DefaultObjectWrapper.Builder
+- DefaultObjectWrapper is now immutable (has no setter methods), and can only be constructed with DefaultObjectWrapper.Builder
 - Configuration.getTemplate has no "parse" parameter anymore. Similarly #include has no "parse" parameter anymore. Whether a
   template is parsed can be specified via Configuration.templateConfigurations, for example based on the file extension. Thus,
   a certain template is either always parsed or never parsed, and whoever gets or include it need not know about that.
-  Also added a new setting, "templateLanguge", which decides this; the two available values are
+  Also added a new setting, "templateLanguage", which decides this; the two available values are
   TemplateLanguage.FTL and TemplateLanguage.STATIC_TEXT.
+- Configuration.getTemplate has no "encoding" parameter anymore. Similarly #include has no "encoding" parameter either. The charset
+  of templates can be specified via Configuration.defaultEncoding and Configuration.templateConfigurations (for example based on the
+  directory it is in), or wirh the #ftl directive inside the template. Thus, a given template always has the same charset, no mater how
+  it's accessed.
+- #include-d/#import-ed templates don't inheirit the charset (encoding) of the #include-ing/#import-ing template. (Because,
+  again, the charset of a template file is independent of how you access it.)
+- Removed Configuration.setEncoding(java.util.Locale, String) and the related other methods. Because of the new logic of template
+  encodings, the locale to encoding mapping doesn't make much sense anymore.
+- Require customLookupCondition-s to be Serializable.

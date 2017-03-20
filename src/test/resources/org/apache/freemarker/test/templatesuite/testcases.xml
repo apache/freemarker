@@ -34,7 +34,6 @@
  <!ELEMENT setting EMPTY>
      <!ATTLIST setting 
             auto_import CDATA #IMPLIED
-            clear_encoding_map (Y|N) #IMPLIED
             input_encoding CDATA #IMPLIED
             locale CDATA #IMPLIED
             object_wrapper CDATA #IMPLIED
@@ -61,9 +60,7 @@ Note that for the incompatible_improvements setting you can specify a list of ve
    <testCase name="arithmetic" />
    <testCase name="assignments" noOutput="true" />
    <testCase name="boolean" />
-   <testCase name="charset-in-header">
-      <setting clear_encoding_map="Y" input_encoding="ISO-8859-5" />
-   </testCase>
+   <testCase name="charset-in-header" />
    <testCase name="comment" />
    <testCase name="comparisons" />
    <testCase name="compress" />
