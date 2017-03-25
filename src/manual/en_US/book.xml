@@ -3122,7 +3122,7 @@ CDEF</programlisting>
             sequence (<literal><replaceable>seq</replaceable></literal>) whose
             indexes are in the range. For example:</para>
 
-            <programlisting role="template">&lt;#assert seq = ["A", "B", "C", "D", "E"]&gt;
+            <programlisting role="template">&lt;#assign seq = ["A", "B", "C", "D", "E"]&gt;
 &lt;#list seq[1..3] as i&gt;${i}&lt;/#list&gt;</programlisting>
 
             <para>will print</para>
