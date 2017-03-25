@@ -1796,7 +1796,7 @@ public class Configurable {
                 Object value = entry.getValue();
                 if (!(value instanceof String)) {
                     throw new IllegalArgumentException(
-                            "Value in Map wasn't a String, but a(n) " + key.getClass().getName() + ".");
+                            "Value in Map wasn't a String, but a(n) " + value.getClass().getName() + ".");
                 }
                 
                 addAutoImport((String) key, (String) value);
