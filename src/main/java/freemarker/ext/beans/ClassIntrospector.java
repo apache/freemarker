@@ -436,7 +436,7 @@ class ClassIntrospector {
                             mergeInPropertyReaderMethod(mergedPRMPs, propName, method);
                         } else { // It's an indexed property reader method
                             mergeInPropertyReaderMethodPair(mergedPRMPs, propName,
-                                    new PropertyReaderedMethodPair(null, method));
+                                    new PropertyReaderMethodPair(null, method));
                         }
                     }
                 }
@@ -465,8 +465,8 @@ class ClassIntrospector {
                 if (propDescObj instanceof Method) {
                     readMethod = (Method) propDescObj;
                     indexedReadMethod = null;
-                } else if (propDescObj instanceof PropertyReaderedMethodPair) {
-                    PropertyReaderedMethodPair prmp = (PropertyReaderedMethodPair) propDescObj;
+                } else if (propDescObj instanceof PropertyReaderMethodPair) {
+                    PropertyReaderMethodPair prmp = (PropertyReaderMethodPair) propDescObj;
                     readMethod = prmp.readMethod;
                     indexedReadMethod = prmp.indexedReadMethod;
                     if (readMethod != null && indexedReadMethod != null
@@ -495,36 +495,36 @@ class ClassIntrospector {
         return mergedPDs;
     }
 
-    private static class PropertyReaderedMethodPair {
+    private static class PropertyReaderMethodPair {
         private final Method readMethod;
         private final Method indexedReadMethod;
         
-        PropertyReaderedMethodPair(Method readerMethod, Method indexedReaderMethod) {
+        PropertyReaderMethodPair(Method readerMethod, Method indexedReaderMethod) {
             this.readMethod = readerMethod;
             this.indexedReadMethod = indexedReaderMethod;
         }
         
-        PropertyReaderedMethodPair(PropertyDescriptor pd) {
+        PropertyReaderMethodPair(PropertyDescriptor pd) {
             this(
                     pd.getReadMethod(),
                     pd instanceof IndexedPropertyDescriptor
                             ? ((IndexedPropertyDescriptor) pd).getIndexedReadMethod() : null);
         }
     
-        static PropertyReaderedMethodPair from(Object obj) {
-            if (obj instanceof PropertyReaderedMethodPair) {
-                return (PropertyReaderedMethodPair) obj;
+        static PropertyReaderMethodPair from(Object obj) {
+            if (obj instanceof PropertyReaderMethodPair) {
+                return (PropertyReaderMethodPair) obj;
             } else if (obj instanceof PropertyDescriptor) {
-                return new PropertyReaderedMethodPair((PropertyDescriptor) obj);
+                return new PropertyReaderMethodPair((PropertyDescriptor) obj);
             } else if (obj instanceof Method) {
-                return new PropertyReaderedMethodPair((Method) obj, null);
+                return new PropertyReaderMethodPair((Method) obj, null);
             } else {
                 throw new BugException("Unexpected obj type: " + obj.getClass().getName());
             }
         }
         
-        static PropertyReaderedMethodPair merge(PropertyReaderedMethodPair oldMethods, PropertyReaderedMethodPair newMethods) {
-            return new PropertyReaderedMethodPair(
+        static PropertyReaderMethodPair merge(PropertyReaderMethodPair oldMethods, PropertyReaderMethodPair newMethods) {
+            return new PropertyReaderMethodPair(
                     newMethods.readMethod != null ? newMethods.readMethod : oldMethods.readMethod,
                     newMethods.indexedReadMethod != null ? newMethods.indexedReadMethod
                             : oldMethods.indexedReadMethod);
@@ -544,7 +544,7 @@ class ClassIntrospector {
             if (this == obj) return true;
             if (obj == null) return false;
             if (getClass() != obj.getClass()) return false;
-            PropertyReaderedMethodPair other = (PropertyReaderedMethodPair) obj;
+            PropertyReaderMethodPair other = (PropertyReaderMethodPair) obj;
             return other.readMethod == readMethod && other.indexedReadMethod == indexedReadMethod;
         }
         
@@ -554,13 +554,13 @@ class ClassIntrospector {
         String propName = pd.getName();
         Object replaced = mergedPRMPs.put(propName, pd);
         if (replaced != null) {
-            PropertyReaderedMethodPair newPRMP = new PropertyReaderedMethodPair(pd);
+            PropertyReaderMethodPair newPRMP = new PropertyReaderMethodPair(pd);
             putIfMergedPropertyReaderMethodPairDiffers(mergedPRMPs, propName, replaced, newPRMP);
         }
     }
 
     private void mergeInPropertyReaderMethodPair(LinkedHashMap<String, Object> mergedPRMPs,
-            String propName, PropertyReaderedMethodPair newPRM) {
+            String propName, PropertyReaderMethodPair newPRM) {
         Object replaced = mergedPRMPs.put(propName, newPRM);
         if (replaced != null) {
             putIfMergedPropertyReaderMethodPairDiffers(mergedPRMPs, propName, replaced, newPRM);
@@ -572,14 +572,14 @@ class ClassIntrospector {
         Object replaced = mergedPRMPs.put(propName, readerMethod);
         if (replaced != null) {
             putIfMergedPropertyReaderMethodPairDiffers(mergedPRMPs, propName,
-                    replaced, new PropertyReaderedMethodPair(readerMethod, null));
+                    replaced, new PropertyReaderMethodPair(readerMethod, null));
         }
     }
 
     private void putIfMergedPropertyReaderMethodPairDiffers(LinkedHashMap<String, Object> mergedPRMPs,
-            String propName, Object replaced, PropertyReaderedMethodPair newPRMP) {
-        PropertyReaderedMethodPair replacedPRMP = PropertyReaderedMethodPair.from(replaced);
-        PropertyReaderedMethodPair mergedPRMP = PropertyReaderedMethodPair.merge(replacedPRMP, newPRMP);
+            String propName, Object replaced, PropertyReaderMethodPair newPRMP) {
+        PropertyReaderMethodPair replacedPRMP = PropertyReaderMethodPair.from(replaced);
+        PropertyReaderMethodPair mergedPRMP = PropertyReaderMethodPair.merge(replacedPRMP, newPRMP);
         if (!mergedPRMP.equals(newPRMP)) {
             mergedPRMPs.put(propName, mergedPRMP);
         }
