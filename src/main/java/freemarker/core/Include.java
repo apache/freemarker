@@ -200,7 +200,7 @@ final class Include extends TemplateElement {
     
     @Override
     int getParameterCount() {
-        return 3;
+        return 4;
     }
 
     @Override

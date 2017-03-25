@@ -619,8 +619,10 @@ public class Configurable {
     }
     
     /**
-     * Sets the default locale used for number and date formatting (among others), also the locale used for searching
-     * localized template variations when no locale was explicitly requested.
+     * Sets the locale used for number and date formatting (among others), also the locale used for searching
+     * localized template variations when no locale was explicitly requested. On the {@link Configuration} level it
+     * defaults to the default locale of system (of the JVM), for server-side application usually you should set it
+     * explicitly in the {@link Configuration} to use the preferred locale of your application instead.  
      * 
      * @see Configuration#getTemplate(String, Locale)
      */
@@ -631,8 +633,7 @@ public class Configurable {
     }
 
     /**
-     * Returns the assumed locale when searching for template files with no
-     * explicit requested locale. Defaults to system locale.
+     * Getter pair of {@link #setLocale(Locale)}. Not {@code null}.
      */
     public Locale getLocale() {
         return locale != null ? locale : parent.getLocale();
@@ -840,8 +841,7 @@ public class Configurable {
     }
 
     /**
-     * Like {@link #getCustomNumberFormats()}, but doesn't fall back to the parent {@link Configurable}, nor does it
-     * provide a non-{@code null} default when called as the method of a {@link Configuration}.
+     * Like {@link #getCustomNumberFormats()}, but doesn't fall back to the parent {@link Configurable}.
      * 
      * @since 2.3.25
      */
@@ -1796,7 +1796,7 @@ public class Configurable {
                 Object value = entry.getValue();
                 if (!(value instanceof String)) {
                     throw new IllegalArgumentException(
-                            "Value in Map wasn't a String, but a(n) " + key.getClass().getName() + ".");
+                            "Value in Map wasn't a String, but a(n) " + value.getClass().getName() + ".");
                 }
                 
                 addAutoImport((String) key, (String) value);
