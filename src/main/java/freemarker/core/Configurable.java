@@ -841,8 +841,7 @@ public class Configurable {
     }
 
     /**
-     * Like {@link #getCustomNumberFormats()}, but doesn't fall back to the parent {@link Configurable}, nor does it
-     * provide a non-{@code null} default when called as the method of a {@link Configuration}.
+     * Like {@link #getCustomNumberFormats()}, but doesn't fall back to the parent {@link Configurable}.
      * 
      * @since 2.3.25
      */
