@@ -52,15 +52,13 @@ import freemarker.ext.beans.BeansWrapper;
  * from a plain Java method to which it had to be passed adapted to a {@link List}).
  * 
  * <p>
- * If regardless of which of the above two cases stand, you just need to (or more convenient to) create the sequence
- * from a {@link List} (via {@link DefaultListAdapter#adapt(List, freemarker.template.utility.RichObjectWrapper)} or
- * {@link SimpleSequence#SimpleSequence(Collection)}), which will be the faster depends on how many times will the
- * <em>same</em> {@link List} entry be read from the template(s) later, on average. If, on average, you read each entry
- * for more than 4 times, {@link SimpleSequence} will be most certainly faster, but if for 2 times or less (and
- * especially if not at all) then {@link DefaultMapAdapter} will be. Before choosing based on performance though, pay
- * attention to the behavioral differences; {@link SimpleSequence} will shallow-copy the original {@link List} at
- * construction time, so it won't reflect {@link List} content changes after the {@link SimpleSequence} construction,
- * also {@link SimpleSequence} can't be unwrapped to the original wrapped instance.
+ * It also matters if for how many times will the <em>same</em> {@link List} entry be read from the template(s) later,
+ * on average. If, on average, you read each entry for more than 4 times, {@link SimpleSequence} will be most
+ * certainly faster, but if for 2 times or less (and especially if not at all) then {@link DefaultMapAdapter} will
+ * be faster. Before choosing based on performance though, pay attention to the behavioral differences;
+ * {@link SimpleSequence} will shallow-copy the original {@link List} at construction time, so it won't reflect
+ * {@link List} content changes after the {@link SimpleSequence} construction, also {@link SimpleSequence} can't be
+ * unwrapped to the original wrapped instance.
  *
  * @see DefaultListAdapter
  * @see DefaultArrayAdapter

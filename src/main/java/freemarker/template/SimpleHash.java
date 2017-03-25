@@ -58,15 +58,13 @@ import freemarker.ext.beans.BeansWrapper;
  * to which it had to be passed adapted to a {@link Map}).
  * 
  * <p>
- * If regardless of which of the above two cases stand, you just need to (or more convenient to) create the hash from a
- * {@link Map} (via {@link SimpleHash#SimpleHash(Map, ObjectWrapper)} or
- * {@link SimpleHash#SimpleHash(Map, ObjectWrapper)}), which will be the faster depends on how many times will the
- * <em>same</em> {@link Map} entry be read from the template(s) later, on average. If, on average, you read each entry
- * for more than 4 times, {@link SimpleHash} will be most certainly faster, but if for 2 times or less (and especially
- * if not at all) then {@link DefaultMapAdapter} will be. Before choosing based on performance though, pay attention to
- * the behavioral differences; {@link SimpleHash} will shallow-copy the original {@link Map} at construction time, so
- * key order will be lost in some cases, and it won't reflect {@link Map} content changes after the {@link SimpleHash}
- * construction, also {@link SimpleHash} can't be unwrapped to the original {@link Map} instance.
+ * It also matters if for how many times will the <em>same</em> {@link Map} entry be read from the template(s) later, on
+ * average. If, on average, you read each entry for more than 4 times, {@link SimpleHash} will be most certainly faster,
+ * but if for 2 times or less (and especially if not at all) then {@link DefaultMapAdapter} will be faster. Before 
+ * choosing based on performance though, pay attention to the behavioral differences; {@link SimpleHash} will 
+ * shallow-copy the original {@link Map} at construction time, so key order will be lost in some cases, and it won't 
+ * reflect {@link Map} content changes after the {@link SimpleHash} construction, also {@link SimpleHash} can't be 
+ * unwrapped to the original {@link Map} instance.
  *
  * @see DefaultMapAdapter
  * @see TemplateHashModelEx
