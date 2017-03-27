@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.apache.freemarker.core.CustomStateKey;
 import org.apache.freemarker.core.MutableProcessingConfiguration;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Environment;
@@ -77,7 +78,7 @@ public abstract class TemplateDateFormatFactory extends TemplateValueFormatFacto
      *            says.
      * @param env
      *            The runtime environment from which the formatting was called. This is mostly meant to be used for
-     *            {@link Environment#setCustomState(Object, Object)}/{@link Environment#getCustomState(Object)}.
+     *            {@link Environment#getCustomState(CustomStateKey)}.
      * 
      * @throws TemplateValueFormatException
      *             If any problem occurs while parsing/getting the format. Notable subclasses:

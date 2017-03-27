@@ -25,7 +25,7 @@ package org.apache.freemarker.core;
  *
  * <pre>
  *     static final CustomStateKey MY_STATE = new CustomStateKey() {
- *         @Override
+ *         &#x40;Override
  *         protected Object create() {
  *             return new ...;
  *         }

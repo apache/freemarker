@@ -20,6 +20,7 @@ package org.apache.freemarker.core.valueformat;
 
 import java.util.Locale;
 
+import org.apache.freemarker.core.CustomStateKey;
 import org.apache.freemarker.core.MutableProcessingConfiguration;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Environment;
@@ -54,7 +55,7 @@ public abstract class TemplateNumberFormatFactory extends TemplateValueFormatFac
      *            forever (i.e. locale changes in the {@link Environment} must not be followed).
      * @param env
      *            The runtime environment from which the formatting was called. This is mostly meant to be used for
-     *            {@link Environment#setCustomState(Object, Object)}/{@link Environment#getCustomState(Object)}.
+     *            {@link Environment#getCustomState(CustomStateKey)}.
      *            
      * @throws TemplateValueFormatException
      *             if any problem occurs while parsing/getting the format. Notable subclasses:
