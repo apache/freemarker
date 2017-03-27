@@ -464,8 +464,7 @@
   <!-- Generate docs                                                     -->
   <!-- ================================================================= -->
 
-  <target depends="javacc" name="_rawJavadoc">
-    <!-- depends="javacc" is needed as its output is referred in the docs. -->
+  <target name="_rawJavadoc" depends="compile">
     <mkdir dir="build/api" />
     <delete includeEmptyDirs="yes">
       <fileset dir="build/api" includes="**/*" />
