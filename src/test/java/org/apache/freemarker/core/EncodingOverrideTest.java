@@ -59,7 +59,7 @@ public class EncodingOverrideTest {
     private Configuration createConfig(String charset) {
        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
        cfg.setClassForTemplateLoading(EncodingOverrideTest.class, "");
-       cfg.setDefaultEncoding(charset);
+       cfg.setEncoding(charset);
        return cfg;
     }
 

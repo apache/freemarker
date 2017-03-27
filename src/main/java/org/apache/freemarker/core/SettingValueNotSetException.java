@@ -16,28 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core.util;
 
-import java.util.Locale;
+package org.apache.freemarker.core;
 
-/**
- * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
- */
-public class _LocaleUtil {
+import org.apache.freemarker.core.util._StringUtil;
 
-    /**
-     * Returns a locale that's one less specific, or {@code null} if there's no less specific locale.
-     */
-    public static Locale getLessSpecificLocale(Locale locale) {
-        String country = locale.getCountry();
-        if (locale.getVariant().length() != 0) {
-            String language = locale.getLanguage();
-            return country != null ? new Locale(language, country) : new Locale(language);
-        }
-        if (country.length() != 0) {
-            return new Locale(locale.getLanguage());
-        }
-        return null;
+public class SettingValueNotSetException extends IllegalStateException {
+
+    private final String settingName;
+
+    public SettingValueNotSetException(String settingName) {
+        super("Setting " + _StringUtil.jQuote(settingName)
+                + " is not set in this layer and has no default here either.");
+        this.settingName = settingName;
     }
-    
 }

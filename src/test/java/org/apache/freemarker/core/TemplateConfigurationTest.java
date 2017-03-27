@@ -30,6 +30,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -50,6 +51,7 @@ import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.FileExtensionMatcher;
+import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.core.userpkg.BaseNTemplateNumberFormatFactory;
 import org.apache.freemarker.core.userpkg.EpochMillisDivTemplateDateFormatFactory;
@@ -60,6 +62,7 @@ import org.apache.freemarker.core.userpkg.LocaleSensitiveTemplateNumberFormatFac
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
+import org.apache.freemarker.test.MonitoredTemplateLoader;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -146,7 +149,7 @@ public class TemplateConfigurationTest {
     private static final String NON_DEFAULT_ENCODING;
 
     static {
-        String defaultEncoding = DEFAULT_CFG.getDefaultEncoding();
+        String defaultEncoding = DEFAULT_CFG.getEncoding();
         String encoding = "UTF-16";
         if (encoding.equals(defaultEncoding)) {
             encoding = "UTF-8";
@@ -162,7 +165,7 @@ public class TemplateConfigurationTest {
     static {
         SETTING_ASSIGNMENTS = new HashMap<>();
 
-        // "Configurable" settings:
+        // "MutableProcessingConfiguration" settings:
         SETTING_ASSIGNMENTS.put("APIBuiltinEnabled", true);
         SETTING_ASSIGNMENTS.put("SQLDateAndTimeTimeZone", NON_DEFAULT_TZ);
         SETTING_ASSIGNMENTS.put("URLEscapingCharset", "utf-16");
@@ -185,6 +188,7 @@ public class TemplateConfigurationTest {
                 ImmutableMap.of("dummy", HexTemplateNumberFormatFactory.INSTANCE));
         SETTING_ASSIGNMENTS.put("customDateFormats",
                 ImmutableMap.of("dummy", EpochMillisTemplateDateFormatFactory.INSTANCE));
+        SETTING_ASSIGNMENTS.put("customAttributes", ImmutableMap.of("dummy", 123));
 
         // Parser-only settings:
         SETTING_ASSIGNMENTS.put("templateLanguage", TemplateLanguage.STATIC_TEXT);
@@ -256,7 +260,7 @@ public class TemplateConfigurationTest {
     static {
         CONFIGURABLE_PROP_NAMES = new HashSet<>();
         try {
-            for (PropertyDescriptor propDesc : Introspector.getBeanInfo(Configurable.class).getPropertyDescriptors()) {
+            for (PropertyDescriptor propDesc : Introspector.getBeanInfo(MutableProcessingConfiguration.class).getPropertyDescriptors()) {
                 String propName = propDesc.getName();
                 if (!IGNORED_PROP_NAMES.contains(propName)) {
                     CONFIGURABLE_PROP_NAMES.add(propName);
@@ -273,10 +277,11 @@ public class TemplateConfigurationTest {
         // It's an interface; can't use standard Inrospector
         for (Method m : ParserConfiguration.class.getMethods()) {
             String propertyName;
-            if (m.getName().startsWith("get")) {
-                propertyName = m.getName().substring(3);
-            } else if (m.getName().startsWith("is")) {
-                propertyName = m.getName().substring(2);
+            String name = m.getName();
+            if (name.startsWith("get")) {
+                propertyName = name.substring(3);
+            } else if (name.startsWith("is") && !name.endsWith("Set")) {
+                propertyName = name.substring(2);
             } else {
                 propertyName = null;
             }
@@ -295,10 +300,10 @@ public class TemplateConfigurationTest {
         SPECIAL_PROP_NAMES.add("encoding");
     }
     
-    private static final CustomAttribute CA1 = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE); 
-    private static final CustomAttribute CA2 = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE); 
-    private static final CustomAttribute CA3 = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE); 
-    private static final CustomAttribute CA4 = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE); 
+    private static final Object CA1 = new Object();
+    private static final Object CA2 = new Object();
+    private static final Object CA3 = new Object();
+    private static final Object CA4 = new Object();
 
     @Test
     public void testMergeBasicFunctionality() throws Exception {
@@ -415,19 +420,19 @@ public class TemplateConfigurationTest {
         tc1.setCustomAttribute("k1", "v1");
         tc1.setCustomAttribute("k2", "v1");
         tc1.setCustomAttribute("k3", "v1");
-        CA1.set("V1", tc1);
-        CA2.set("V1", tc1);
-        CA3.set("V1", tc1);
+        tc1.setCustomAttribute(CA1, "V1");
+        tc1.setCustomAttribute(CA2, "V1");
+        tc1.setCustomAttribute(CA3, "V1");
 
         TemplateConfiguration tc2 = new TemplateConfiguration();
         tc2.setCustomAttribute("k1", "v2");
         tc2.setCustomAttribute("k2", "v2");
-        CA1.set("V2", tc2);
-        CA2.set("V2", tc2);
+        tc2.setCustomAttribute(CA1, "V2");
+        tc2.setCustomAttribute(CA2, "V2");
 
         TemplateConfiguration tc3 = new TemplateConfiguration();
         tc3.setCustomAttribute("k1", "v3");
-        CA1.set("V3", tc2);
+        tc3.setCustomAttribute(CA1, "V3");
 
         tc1.merge(tc2);
         tc1.merge(tc3);
@@ -435,37 +440,35 @@ public class TemplateConfigurationTest {
         assertEquals("v3", tc1.getCustomAttribute("k1"));
         assertEquals("v2", tc1.getCustomAttribute("k2"));
         assertEquals("v1", tc1.getCustomAttribute("k3"));
-        assertEquals("V3", CA1.get(tc1));
-        assertEquals("V2", CA2.get(tc1));
-        assertEquals("V1", CA3.get(tc1));
+        assertEquals("V3", tc1.getCustomAttribute(CA1));
+        assertEquals("V2", tc1.getCustomAttribute(CA2));
+        assertEquals("V1", tc1.getCustomAttribute(CA3));
     }
-    
+
     @Test
     public void testMergeNullCustomAttributes() throws Exception {
         TemplateConfiguration tc1 = new TemplateConfiguration();
         tc1.setCustomAttribute("k1", "v1");
         tc1.setCustomAttribute("k2", "v1");
-        tc1.setCustomAttribute(null, "v1");
-        CA1.set("V1", tc1);
-        CA2.set("V1", tc1);
-        CA3.set(null, tc1);
-        
+        tc1.setCustomAttribute(CA1, "V1");
+        tc1.setCustomAttribute(CA2,"V1");
+
         assertEquals("v1", tc1.getCustomAttribute("k1"));
         assertEquals("v1", tc1.getCustomAttribute("k2"));
         assertNull("v1", tc1.getCustomAttribute("k3"));
-        assertEquals("V1", CA1.get(tc1));
-        assertEquals("V1", CA2.get(tc1));
-        assertNull(CA3.get(tc1));
+        assertEquals("V1", tc1.getCustomAttribute(CA1));
+        assertEquals("V1", tc1.getCustomAttribute(CA2));
+        assertNull(tc1.getCustomAttribute(CA3));
 
         TemplateConfiguration tc2 = new TemplateConfiguration();
         tc2.setCustomAttribute("k1", "v2");
         tc2.setCustomAttribute("k2", null);
-        CA1.set("V2", tc2);
-        CA2.set(null, tc2);
+        tc2.setCustomAttribute(CA1, "V2");
+        tc2.setCustomAttribute(CA2, null);
 
         TemplateConfiguration tc3 = new TemplateConfiguration();
         tc3.setCustomAttribute("k1", null);
-        CA1.set(null, tc2);
+        tc2.setCustomAttribute(CA1, null);
 
         tc1.merge(tc2);
         tc1.merge(tc3);
@@ -473,24 +476,24 @@ public class TemplateConfigurationTest {
         assertNull(tc1.getCustomAttribute("k1"));
         assertNull(tc1.getCustomAttribute("k2"));
         assertNull(tc1.getCustomAttribute("k3"));
-        assertNull(CA1.get(tc1));
-        assertNull(CA2.get(tc1));
-        assertNull(CA3.get(tc1));
-        
+        assertNull(tc1.getCustomAttribute(CA1));
+        assertNull(tc1.getCustomAttribute(CA2));
+        assertNull(tc1.getCustomAttribute(CA3));
+
         TemplateConfiguration tc4 = new TemplateConfiguration();
         tc4.setCustomAttribute("k1", "v4");
-        CA1.set("V4", tc4);
-        
+        tc4.setCustomAttribute(CA1, "V4");
+
         tc1.merge(tc4);
-        
+
         assertEquals("v4", tc1.getCustomAttribute("k1"));
         assertNull(tc1.getCustomAttribute("k2"));
         assertNull(tc1.getCustomAttribute("k3"));
-        assertEquals("V4", CA1.get(tc1));
-        assertNull(CA2.get(tc1));
-        assertNull(CA3.get(tc1));
+        assertEquals("V4", tc1.getCustomAttribute(CA1));
+        assertNull(tc1.getCustomAttribute(CA2));
+        assertNull(tc1.getCustomAttribute(CA3));
     }
-    
+
     @Test
     public void applyOrder() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
@@ -567,17 +570,17 @@ public class TemplateConfigurationTest {
         tc.setCustomAttribute("k4", "tc");
         tc.setCustomAttribute("k5", "tc");
         tc.setCustomAttribute("k6", "tc");
-        CA1.set("tc", tc);
-        CA2.set("tc", tc);
-        CA3.set("tc", tc);
+        tc.setCustomAttribute(CA1, "tc");
+        tc.setCustomAttribute(CA2,"tc");
+        tc.setCustomAttribute(CA3,"tc");
 
         Template t = new Template(null, "", cfg);
         t.setCustomAttribute("k5", "t");
         t.setCustomAttribute("k6", null);
         t.setCustomAttribute("k7", "t");
-        CA2.set("t", t);
-        CA3.set(null, t);
-        CA4.set("t", t);
+        t.setCustomAttribute(CA2, "t");
+        t.setCustomAttribute(CA3, null);
+        t.setCustomAttribute(CA4, "t");
         
         tc.setParentConfiguration(cfg);
         tc.apply(t);
@@ -589,10 +592,10 @@ public class TemplateConfigurationTest {
         assertEquals("t", t.getCustomAttribute("k5"));
         assertNull(t.getCustomAttribute("k6"));
         assertEquals("t", t.getCustomAttribute("k7"));
-        assertEquals("tc", CA1.get(t));
-        assertEquals("t", CA2.get(t));
-        assertNull(CA3.get(t));
-        assertEquals("t", CA4.get(t));
+        assertEquals("tc", t.getCustomAttribute(CA1));
+        assertEquals("t", t.getCustomAttribute(CA2));
+        assertNull(t.getCustomAttribute(CA3));
+        assertEquals("t", t.getCustomAttribute(CA4));
     }
     
     @Test
@@ -711,7 +714,42 @@ public class TemplateConfigurationTest {
             testedProps.add(Configuration.TEMPLATE_LANGUAGE_KEY_CAMEL_CASE);
         }
 
-        assertEquals("Check that you have tested all parser settings; ", PARSER_PROP_NAMES, testedProps);
+        {
+            // As the TemplateLanguage-based parser selection happens in the TemplateResolver, we can't use
+            // assertOutput here, as that hard-coded to create an FTL Template.
+
+            TemplateConfiguration tc = new TemplateConfiguration();
+            tc.setEncoding("ISO-8859-1");
+
+            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+            cfg.setEncoding("utf-8");
+            cfg.setTemplateConfigurations(new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher
+                    ("latin1.ftl"), tc));
+
+            MonitoredTemplateLoader templateLoader = new MonitoredTemplateLoader();
+            templateLoader.putBinaryTemplate("utf8.ftl", "próba", StandardCharsets.UTF_8, 1);
+            templateLoader.putBinaryTemplate("latin1.ftl", "próba", StandardCharsets.ISO_8859_1, 1);
+            cfg.setTemplateLoader(templateLoader);
+
+            {
+                StringWriter out = new StringWriter();
+                cfg.getTemplate("utf8.ftl").process(null, out);
+                assertEquals("próba", out.toString());
+            }
+            {
+                StringWriter out = new StringWriter();
+                cfg.getTemplate("latin1.ftl").process(null, out);
+                assertEquals("próba", out.toString());
+            }
+
+            testedProps.add(Configuration.ENCODING_KEY_CAMEL_CASE);
+        }
+
+        if (!PARSER_PROP_NAMES.equals(testedProps)) {
+            Set<String> diff = new HashSet<>(PARSER_PROP_NAMES);
+            diff.removeAll(testedProps);
+            fail("Some settings weren't checked: " + diff);
+        }
     }
     
     @Test
@@ -940,7 +978,7 @@ public class TemplateConfigurationTest {
             String cfgMethodName = readMethod.getName();
             if (cfgMethodName.equals("getEncoding")) {
                 // Because Configuration has local-to-encoding map too, this has a different name there.
-                cfgMethodName = "getDefaultEncoding";
+                cfgMethodName = "getEncoding";
             }
             Method cfgMethod = DEFAULT_CFG.getClass().getMethod(cfgMethodName, readMethod.getParameterTypes());
             Object defaultSettingValue = cfgMethod.invoke(DEFAULT_CFG);

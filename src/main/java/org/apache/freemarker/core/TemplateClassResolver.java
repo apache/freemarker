@@ -29,7 +29,7 @@ import org.apache.freemarker.core.util._ClassUtil;
  * The implementation should be thread-safe, unless an
  * instance is always only used in a single {@link Environment} object.
  * 
- * @see Configurable#setNewBuiltinClassResolver(TemplateClassResolver)
+ * @see MutableProcessingConfiguration#setNewBuiltinClassResolver(TemplateClassResolver)
  * 
  * @since 2.3.17
  */

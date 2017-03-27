@@ -147,7 +147,7 @@ public class TemplateTestCase extends FileTestCase {
             String alias = st.nextToken();
             conf.addAutoImport(alias, libname);
         } else if ("input_encoding".equals(param)) {
-            conf.setDefaultEncoding(value);
+            conf.setEncoding(value);
         // INCOMPATIBLE_IMPROVEMENTS is a list here, and was already set in the constructor.
         } else if (!Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY.equals(param)) {
             try {

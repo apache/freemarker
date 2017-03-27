@@ -41,7 +41,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.freemarker.core.Configurable;
+import org.apache.freemarker.core.MutableProcessingConfiguration;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.ConfigurationException;
 import org.apache.freemarker.core.Environment;
@@ -199,16 +199,16 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * {@value #INIT_PARAM_VALUE_FROM_TEMPLATE} (or some of the other options) instead. {@value #INIT_PARAM_VALUE_LEGACY}
  * will use the charset of the template file to set the charset of the servlet response. Except, if the
  * {@value #INIT_PARAM_CONTENT_TYPE} init-param contains a charset, it will use that instead. A quirk of this legacy
- * mode is that it's not aware of the {@link Configurable#getOutputEncoding()} FreeMarker setting, and thus never reads
+ * mode is that it's not aware of the {@link MutableProcessingConfiguration#getOutputEncoding()} FreeMarker setting, and thus never reads
  * or writes it (though very few applications utilize that setting anyway). Also, it sets the charset of the servlet
  * response by adding it to the response content type via calling {@link HttpServletResponse#setContentType(String)} (as
  * that was the only way before Servlet 2.4), not via the more modern
  * {@link HttpServletResponse#setCharacterEncoding(String)} method. Note that the charset of a template usually comes
- * from {@link Configuration#getDefaultEncoding()} (i.e., from the {@code default_encoding} FreeMarker setting),
+ * from {@link Configuration#getEncoding()} (i.e., from the {@code encoding} FreeMarker setting),
  * or occasionally from {@link Configuration#getTemplateConfigurations()} (when FreeMarker was
  * configured to use a specific charset for certain templates).
  * <li>{@value #INIT_PARAM_VALUE_FROM_TEMPLATE}: This should be used in most applications, but it's not the default for
- * backward compatibility. It reads the {@link Configurable#getOutputEncoding()} setting of the template (note that the
+ * backward compatibility. It reads the {@link MutableProcessingConfiguration#getOutputEncoding()} setting of the template (note that the
  * template usually just inherits that from the {@link Configuration}), and if that's not set, then reads the source
  * charset of the template, just like {@value #INIT_PARAM_VALUE_LEGACY}, and if that's {@code null} (which happens if
  * the template was loaded from a non-binary source) then it will be UTF-8. Then it passes the charset acquired this way
@@ -622,16 +622,16 @@ public class FreemarkerServlet extends HttpServlet {
             
             try {
                 if (name.equals(DEPR_INITPARAM_OBJECT_WRAPPER)
-                        || name.equals(Configurable.OBJECT_WRAPPER_KEY)
+                        || name.equals(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY)
                         || name.equals(INIT_PARAM_TEMPLATE_PATH)
                         || name.equals(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY)) {
                     // ignore: we have already processed these
                 } else if (name.equals(DEPR_INITPARAM_ENCODING)) { // BC
-                    if (getInitParameter(Configuration.DEFAULT_ENCODING_KEY) != null) {
+                    if (getInitParameter(Configuration.ENCODING_KEY) != null) {
                         throw new ConflictingInitParamsException(
-                                Configuration.DEFAULT_ENCODING_KEY, DEPR_INITPARAM_ENCODING);
+                                Configuration.ENCODING_KEY, DEPR_INITPARAM_ENCODING);
                     }
-                    config.setDefaultEncoding(value);
+                    config.setEncoding(value);
                 } else if (name.equals(DEPR_INITPARAM_TEMPLATE_DELAY)) { // BC
                     if (getInitParameter(Configuration.TEMPLATE_UPDATE_DELAY_KEY) != null) {
                         throw new ConflictingInitParamsException(
@@ -643,9 +643,9 @@ public class FreemarkerServlet extends HttpServlet {
                         // Intentionally ignored
                     }
                 } else if (name.equals(DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER)) { // BC
-                    if (getInitParameter(Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY) != null) {
+                    if (getInitParameter(MutableProcessingConfiguration.TEMPLATE_EXCEPTION_HANDLER_KEY) != null) {
                         throw new ConflictingInitParamsException(
-                                Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY, DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER);
+                                MutableProcessingConfiguration.TEMPLATE_EXCEPTION_HANDLER_KEY, DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER);
                     }
     
                     if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_RETHROW.equals(value)) {
@@ -1279,13 +1279,13 @@ public class FreemarkerServlet extends HttpServlet {
      * should override {@link #createDefaultObjectWrapper()} instead. Overriding this method is necessary when you want
      * to customize how the {@link ObjectWrapper} is created <em>from the init-param values</em>, or you want to do some
      * post-processing (like checking) on the created {@link ObjectWrapper}. To customize init-param interpretation,
-     * call {@link #getInitParameter(String)} with {@link Configurable#OBJECT_WRAPPER_KEY} as argument, and see if it
+     * call {@link #getInitParameter(String)} with {@link MutableProcessingConfiguration#OBJECT_WRAPPER_KEY} as argument, and see if it
      * returns a value that you want to interpret yourself. If was {@code null} or you don't want to interpret the
      * value, fall back to the super method.
      * 
      * <p>
      * The default implementation interprets the {@code object_wrapper} servlet init-param with
-     * calling {@link Configurable#setSetting(String, String)} (see valid values there), or if there's no such servlet
+     * calling {@link MutableProcessingConfiguration#setSetting(String, String)} (see valid values there), or if there's no such servlet
      * init-param, then it calls {@link #createDefaultObjectWrapper()}.
      * 
      * @return The {@link ObjectWrapper} that will be used for adapting request, session, and servlet context attributes
@@ -1294,9 +1294,9 @@ public class FreemarkerServlet extends HttpServlet {
     protected ObjectWrapperAndUnwrapper createObjectWrapper() {
         String wrapper = getServletConfig().getInitParameter(DEPR_INITPARAM_OBJECT_WRAPPER);
         if (wrapper != null) { // BC
-            if (getInitParameter(Configurable.OBJECT_WRAPPER_KEY) != null) {
+            if (getInitParameter(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY) != null) {
                 throw new RuntimeException("Conflicting init-params: "
-                        + Configurable.OBJECT_WRAPPER_KEY + " and "
+                        + MutableProcessingConfiguration.OBJECT_WRAPPER_KEY + " and "
                         + DEPR_INITPARAM_OBJECT_WRAPPER);
             }
             if (DEPR_INITPARAM_WRAPPER_RESTRICTED.equals(wrapper)) {
@@ -1304,7 +1304,7 @@ public class FreemarkerServlet extends HttpServlet {
             }
             return createDefaultObjectWrapper();
         } else {
-            wrapper = getInitParameter(Configurable.OBJECT_WRAPPER_KEY);
+            wrapper = getInitParameter(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY);
             if (wrapper == null) {
                 if (!config.isObjectWrapperExplicitlySet()) {
                     return createDefaultObjectWrapper();
@@ -1313,9 +1313,9 @@ public class FreemarkerServlet extends HttpServlet {
                 }
             } else {
                 try {
-                    config.setSetting(Configurable.OBJECT_WRAPPER_KEY, wrapper);
+                    config.setSetting(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY, wrapper);
                 } catch (ConfigurationException e) {
-                    throw new RuntimeException("Failed to set " + Configurable.OBJECT_WRAPPER_KEY, e);
+                    throw new RuntimeException("Failed to set " + MutableProcessingConfiguration.OBJECT_WRAPPER_KEY, e);
                 }
                 return asObjectWrapperAndUnwrapper(config.getObjectWrapper());
             }

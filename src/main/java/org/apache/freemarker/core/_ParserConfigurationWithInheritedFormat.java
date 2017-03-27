@@ -43,8 +43,18 @@ public final class _ParserConfigurationWithInheritedFormat implements ParserConf
     }
 
     @Override
+    public boolean isWhitespaceStrippingSet() {
+        return wrappedPCfg.isWhitespaceStrippingSet();
+    }
+
+    @Override
     public int getTagSyntax() {
         return wrappedPCfg.getTagSyntax();
+    }
+
+    @Override
+    public boolean isTagSyntaxSet() {
+        return wrappedPCfg.isTagSyntaxSet();
     }
 
     @Override
@@ -58,13 +68,28 @@ public final class _ParserConfigurationWithInheritedFormat implements ParserConf
     }
 
     @Override
+    public boolean isOutputFormatSet() {
+        return wrappedPCfg.isOutputFormatSet();
+    }
+
+    @Override
     public boolean getRecognizeStandardFileExtensions() {
         return false;
     }
 
     @Override
+    public boolean isRecognizeStandardFileExtensionsSet() {
+        return wrappedPCfg.isRecognizeStandardFileExtensionsSet();
+    }
+
+    @Override
     public int getNamingConvention() {
         return wrappedPCfg.getNamingConvention();
+    }
+
+    @Override
+    public boolean isNamingConventionSet() {
+        return wrappedPCfg.isNamingConventionSet();
     }
 
     @Override
@@ -78,13 +103,33 @@ public final class _ParserConfigurationWithInheritedFormat implements ParserConf
     }
 
     @Override
+    public boolean isAutoEscapingPolicySet() {
+        return wrappedPCfg.isAutoEscapingPolicySet();
+    }
+
+    @Override
     public ArithmeticEngine getArithmeticEngine() {
         return wrappedPCfg.getArithmeticEngine();
+    }
+
+    @Override
+    public boolean isArithmeticEngineSet() {
+        return wrappedPCfg.isArithmeticEngineSet();
     }
 
     @Override
     public int getTabSize() {
         return wrappedPCfg.getTabSize();
     }
-    
+
+    @Override
+    public boolean isTabSizeSet() {
+        return wrappedPCfg.isTabSizeSet();
+    }
+
+    @Override
+    public String getEncoding() {
+        return wrappedPCfg.getEncoding();
+    }
+
 }

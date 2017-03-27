@@ -31,7 +31,7 @@ import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.freemarker.core.CustomAttribute;
+import org.apache.freemarker.core.CustomStateKey;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
@@ -42,6 +42,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
+import org.apache.freemarker.core.util._ObjectHolder;
 import org.jaxen.BaseXPath;
 import org.jaxen.Function;
 import org.jaxen.FunctionCallException;
@@ -62,14 +63,14 @@ import org.xml.sax.SAXException;
 /**
  */
 class JaxenXPathSupport implements XPathSupport {
-    
-    private static final CustomAttribute XPATH_CACHE_ATTR = 
-        new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE) {
-            @Override
-            protected Object create() {
-                return new HashMap<String, BaseXPath>();
-            }
-        };
+
+    private static final CustomStateKey<Map<String, BaseXPath>> XPATH_CACHE_ATTR
+            = new CustomStateKey<Map<String, BaseXPath>>() {
+        @Override
+        protected Map<String, BaseXPath> create() {
+            return new HashMap<String, BaseXPath>();
+        }
+    };
 
         // [2.4] Can't we just use Collections.emptyList()? 
     private final static ArrayList EMPTY_ARRAYLIST = new ArrayList();
@@ -78,7 +79,8 @@ class JaxenXPathSupport implements XPathSupport {
     public TemplateModel executeQuery(Object context, String xpathQuery) throws TemplateModelException {
         try {
             BaseXPath xpath;
-            Map<String, BaseXPath> xpathCache = (Map<String, BaseXPath>) XPATH_CACHE_ATTR.get();
+            Map<String, BaseXPath> xpathCache = Environment.getCurrentEnvironmentNotNull().getCurrentTemplateNotNull()
+                    .getCustomState(XPATH_CACHE_ATTR);
             synchronized (xpathCache) {
                 xpath = xpathCache.get(xpathQuery);
                 if (xpath == null) {
@@ -162,29 +164,38 @@ class JaxenXPathSupport implements XPathSupport {
     /**
      * Stores the the template parsed as {@link Document} in the template itself.
      */
-    private static final CustomAttribute FM_DOM_NAVIAGOTOR_CACHED_DOM
-            = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE);
+    private static final CustomStateKey<_ObjectHolder<Document>> FM_DOM_NAVIAGOTOR_CACHED_DOM
+            = new CustomStateKey<_ObjectHolder<Document>>() {
+        @Override
+        protected _ObjectHolder<Document> create() {
+            return new _ObjectHolder<>(null);
+        }
+    };
      
     private static final Navigator FM_DOM_NAVIGATOR = new DocumentNavigator() {
         @Override
         public Object getDocument(String uri) throws FunctionCallException {
             try {
                 Template raw = getTemplate(uri);
-                Document doc = (Document) FM_DOM_NAVIAGOTOR_CACHED_DOM.get(raw);
-                if (doc == null) {
-                    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                    factory.setNamespaceAware(true);
-                    DocumentBuilder builder = factory.newDocumentBuilder();
-                    FmEntityResolver er = new FmEntityResolver();
-                    builder.setEntityResolver(er);
-                    doc = builder.parse(createInputSource(null, raw));
-                    // If the entity resolver got called 0 times, the document
-                    // is standalone, so we can safely cache it
-                    if (er.getCallCount() == 0) {
-                        FM_DOM_NAVIAGOTOR_CACHED_DOM.set(doc, raw);
+                _ObjectHolder<Document> docHolder = Environment.getCurrentEnvironmentNotNull()
+                        .getCurrentTemplateNotNull().getCustomState(FM_DOM_NAVIAGOTOR_CACHED_DOM);
+                synchronized (docHolder) {
+                    Document doc = docHolder.get();
+                    if (doc == null) {
+                        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                        factory.setNamespaceAware(true);
+                        DocumentBuilder builder = factory.newDocumentBuilder();
+                        FmEntityResolver er = new FmEntityResolver();
+                        builder.setEntityResolver(er);
+                        doc = builder.parse(createInputSource(null, raw));
+                        // If the entity resolver got called 0 times, the document
+                        // is standalone, so we can safely cache it
+                        if (er.getCallCount() == 0) {
+                            docHolder.set(doc);
+                        }
                     }
+                    return doc;
                 }
-                return doc;
             } catch (Exception e) {
                 throw new FunctionCallException("Failed to parse document for URI: " + uri, e);
             }

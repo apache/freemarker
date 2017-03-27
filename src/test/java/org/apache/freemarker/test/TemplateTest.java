@@ -78,7 +78,7 @@ public abstract class TemplateTest {
             configuration.setLocale(Locale.US);
         }
         if (!configuration.isDefaultEncodingExplicitlySet()) {
-            configuration.setDefaultEncoding(StandardCharsets.UTF_8.name());
+            configuration.setEncoding(StandardCharsets.UTF_8.name());
         }
         if (!configuration.isTimeZoneExplicitlySet()) {
             configuration.setTimeZone(TimeZone.getTimeZone("GMT+1"));

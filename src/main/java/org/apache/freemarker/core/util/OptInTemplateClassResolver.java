@@ -26,7 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.freemarker.core.Configurable;
+import org.apache.freemarker.core.MutableProcessingConfiguration;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateClassResolver;
@@ -104,7 +104,7 @@ public class OptInTemplateClassResolver implements TemplateClassResolver {
                 throw new _MiscTemplateException(env,
                         "Instantiating ", className, " is not allowed in the template for security reasons. (If you "
                         + "run into this problem when using ?new in a template, you may want to check the \"",
-                        Configurable.NEW_BUILTIN_CLASS_RESOLVER_KEY,
+                        MutableProcessingConfiguration.NEW_BUILTIN_CLASS_RESOLVER_KEY,
                         "\" setting in the FreeMarker configuration.)");
             } else {
                 try {

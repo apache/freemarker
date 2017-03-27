@@ -59,11 +59,11 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
  * you should be aware of a few more details:
  * 
  * <ul>
- * <li>This class implements both {@link Configurable} and {@link ParserConfiguration}. This means that it can influence
+ * <li>This class implements both {@link MutableProcessingConfiguration} and {@link ParserConfiguration}. This means that it can influence
  * both the template parsing phase and the runtime settings. For both aspects (i.e., {@link ParserConfiguration} and
- * {@link Configurable}) to take effect, you have first pass this object to the {@link Template} constructor
+ * {@link MutableProcessingConfiguration}) to take effect, you have first pass this object to the {@link Template} constructor
  * (this is where the {@link ParserConfiguration} interface is used), and then you have to call {@link #apply(Template)}
- * on the resulting {@link Template} object (this is where the {@link Configurable} aspect is used).
+ * on the resulting {@link Template} object (this is where the {@link MutableProcessingConfiguration} aspect is used).
  * 
  * <li>{@link #apply(Template)} only change the settings that weren't yet set on the {@link Template} (but are inherited
  * from the {@link Configuration}). This is primarily because if the template configures itself via the {@code #ftl}
@@ -77,7 +77,8 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
  * 
  * @since 2.3.24
  */
-public final class TemplateConfiguration extends Configurable implements ParserConfiguration {
+public final class TemplateConfiguration extends MutableProcessingConfiguration<TemplateConfiguration>
+        implements ParserConfiguration {
 
     private TemplateLanguage templateLanguage;
     private Integer tagSyntax;
@@ -102,13 +103,13 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      * Same as {@link #setParentConfiguration(Configuration)}.
      */
     @Override
-    void setParent(Configurable cfg) {
+    void setParent(MutableProcessingConfiguration cfg) {
         _NullArgumentException.check("cfg", cfg);
         if (!(cfg instanceof Configuration)) {
             throw new IllegalArgumentException("The parent of a TemplateConfiguration can only be a Configuration");
         }
         
-        Configurable parent = getParent();
+        MutableProcessingConfiguration parent = getParent();
         if (parent != null) {
             if (parent != cfg) {
                 throw new IllegalStateException(
@@ -144,7 +145,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     }
 
     private Configuration getNonNullParentConfiguration() {
-        Configurable parent = getParent();
+        MutableProcessingConfiguration parent = getParent();
         if (parent == null) {
             throw new IllegalStateException("The TemplateConfiguration wasn't associated with a Configuration yet.");
         }
@@ -253,13 +254,23 @@ public final class TemplateConfiguration extends Configurable implements ParserC
             setLazyAutoImports(tc.getLazyAutoImports());
         }
         if (tc.isAutoImportsSet()) {
-            setAutoImports(mergeMaps(getAutoImportsWithoutFallback(), tc.getAutoImportsWithoutFallback(),true));
+            setAutoImports(mergeMaps(
+                    isAutoImportsSet() ? getAutoImports() : null,
+                    tc.isAutoImportsSet() ? tc.getAutoImports() : null,
+                    true));
         }
         if (tc.isAutoIncludesSet()) {
-            setAutoIncludes(mergeLists(getAutoIncludesWithoutFallback(), tc.getAutoIncludesWithoutFallback()));
+            setAutoIncludes(mergeLists(
+                    isAutoIncludesSet() ? getAutoIncludes() : null,
+                    tc.isAutoIncludesSet() ? tc.getAutoIncludes() : null));
         }
-        
-        tc.copyDirectCustomAttributes(this, true);
+
+        if (tc.isCustomAttributesSet()) {
+            setCustomAttributes(mergeMaps(
+                    isCustomAttributesSet() ? getCustomAttributes() : null,
+                    tc.isCustomAttributesSet() ? tc.getCustomAttributes() : null,
+                    true));
+        }
     }
 
     /**
@@ -301,11 +312,17 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         }
         if (isCustomDateFormatsSet()) {
             template.setCustomDateFormats(
-                    mergeMaps(getCustomDateFormats(), template.getCustomDateFormatsWithoutFallback(), false));
+                    mergeMaps(
+                            getCustomDateFormats(),
+                            template.isCustomDateFormatsSet() ? template.getCustomDateFormats() : null,
+                            false));
         }
         if (isCustomNumberFormatsSet()) {
             template.setCustomNumberFormats(
-                    mergeMaps(getCustomNumberFormats(), template.getCustomNumberFormatsWithoutFallback(), false));
+                    mergeMaps(
+                            getCustomNumberFormats(),
+                            template.isCustomNumberFormatsSet() ? template.getCustomNumberFormats() : null,
+                            false));
         }
         if (isDateFormatSet() && !template.isDateFormatSet()) {
             template.setDateFormat(getDateFormat());
@@ -363,10 +380,15 @@ public final class TemplateConfiguration extends Configurable implements ParserC
             // - Existing template-level imports have precedence over those coming from the TC (just as with the others
             //   apply()-ed settings), thus for clashing import prefixes they must win.
             // - Template-level imports count as more specific, and so come after the more generic ones from TC.
-            template.setAutoImports(mergeMaps(getAutoImports(), template.getAutoImportsWithoutFallback(), true));
+            template.setAutoImports(mergeMaps(
+                    getAutoImports(),
+                    template.isAutoImportsSet() ? template.getAutoImports() : null,
+                    true));
         }
         if (isAutoIncludesSet()) {
-            template.setAutoIncludes(mergeLists(getAutoIncludes(), template.getAutoIncludesWithoutFallback()));
+            template.setAutoIncludes(mergeLists(
+                    getAutoIncludes(),
+                    template.isAutoIncludesSet() ? template.getAutoIncludes() : null));
         }
         
         copyDirectCustomAttributes(template, false);
@@ -388,9 +410,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         return tagSyntax != null ? tagSyntax : getNonNullParentConfiguration().getTagSyntax();
     }
 
-    /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
-     */
+    @Override
     public boolean isTagSyntaxSet() {
         return tagSyntax != null;
     }
@@ -435,6 +455,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
      */
+    @Override
     public boolean isNamingConventionSet() {
         return namingConvention != null;
     }
@@ -458,6 +479,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
      */
+    @Override
     public boolean isWhitespaceStrippingSet() {
         return whitespaceStripping != null;
     }
@@ -483,6 +505,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
      */
+    @Override
     public boolean isAutoEscapingPolicySet() {
         return autoEscapingPolicy != null;
     }
@@ -506,6 +529,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
      */
+    @Override
     public boolean isOutputFormatSet() {
         return outputFormat != null;
     }
@@ -529,12 +553,14 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
      */
+    @Override
     public boolean isRecognizeStandardFileExtensionsSet() {
         return recognizeStandardFileExtensions != null;
     }
 
+    @Override
     public String getEncoding() {
-        return encoding != null ? encoding : getNonNullParentConfiguration().getDefaultEncoding();
+        return encoding != null ? encoding : getNonNullParentConfiguration().getEncoding();
     }
 
     /**
@@ -580,6 +606,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
      * 
      * @since 2.3.25
      */
+    @Override
     public boolean isTabSizeSet() {
         return tabSize != null;
     }
@@ -596,8 +623,6 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         return getNonNullParentConfiguration().getIncompatibleImprovements();
     }
     
-    
-
     @Override
     public Locale getLocale() {
         try {
@@ -879,7 +904,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     }
 
     @Override
-    public Object getCustomAttribute(String name) {
+    public Object getCustomAttribute(Object name) {
         try {
             return super.getCustomAttribute(name);
         } catch (NullPointerException e) {
@@ -888,34 +913,6 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         }
     }
 
-    private boolean hasAnyConfigurableSet() {
-        return
-                isAPIBuiltinEnabledSet()
-                || isArithmeticEngineSet()
-                || isAutoFlushSet()
-                || isAutoImportsSet()
-                || isAutoIncludesSet()
-                || isBooleanFormatSet()
-                || isCustomDateFormatsSet()
-                || isCustomNumberFormatsSet()
-                || isDateFormatSet()
-                || isDateTimeFormatSet()
-                || isLazyImportsSet()
-                || isLazyAutoImportsSet()
-                || isLocaleSet()
-                || isLogTemplateExceptionsSet()
-                || isNewBuiltinClassResolverSet()
-                || isNumberFormatSet()
-                || isObjectWrapperSet()
-                || isOutputEncodingSet()
-                || isShowErrorTipsSet()
-                || isSQLDateAndTimeTimeZoneSet()
-                || isTemplateExceptionHandlerSet()
-                || isTimeFormatSet()
-                || isTimeZoneSet()
-                || isURLEscapingCharsetSet();
-    }
-    
     private Map mergeMaps(Map m1, Map m2, boolean overwriteUpdatesOrder) {
         if (m1 == null) return m2;
         if (m2 == null) return m1;

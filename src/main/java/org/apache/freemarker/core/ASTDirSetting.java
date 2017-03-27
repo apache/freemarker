@@ -37,25 +37,25 @@ final class ASTDirSetting extends ASTDirective {
     
     static final String[] SETTING_NAMES = new String[] {
             // Must be sorted alphabetically!
-            Configurable.BOOLEAN_FORMAT_KEY_CAMEL_CASE,
-            Configurable.BOOLEAN_FORMAT_KEY_SNAKE_CASE,
-            Configurable.DATE_FORMAT_KEY_CAMEL_CASE,
-            Configurable.DATE_FORMAT_KEY_SNAKE_CASE,
-            Configurable.DATETIME_FORMAT_KEY_CAMEL_CASE,
-            Configurable.DATETIME_FORMAT_KEY_SNAKE_CASE,
-            Configurable.LOCALE_KEY,
-            Configurable.NUMBER_FORMAT_KEY_CAMEL_CASE,
-            Configurable.NUMBER_FORMAT_KEY_SNAKE_CASE,
-            Configurable.OUTPUT_ENCODING_KEY_CAMEL_CASE,
-            Configurable.OUTPUT_ENCODING_KEY_SNAKE_CASE,
-            Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE,
-            Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY,
-            Configurable.TIME_FORMAT_KEY_CAMEL_CASE,
-            Configurable.TIME_ZONE_KEY_CAMEL_CASE,
-            Configurable.TIME_FORMAT_KEY_SNAKE_CASE,
-            Configurable.TIME_ZONE_KEY_SNAKE_CASE,
-            Configurable.URL_ESCAPING_CHARSET_KEY_CAMEL_CASE,
-            Configurable.URL_ESCAPING_CHARSET_KEY_SNAKE_CASE
+            MutableProcessingConfiguration.BOOLEAN_FORMAT_KEY_CAMEL_CASE,
+            MutableProcessingConfiguration.BOOLEAN_FORMAT_KEY_SNAKE_CASE,
+            MutableProcessingConfiguration.DATE_FORMAT_KEY_CAMEL_CASE,
+            MutableProcessingConfiguration.DATE_FORMAT_KEY_SNAKE_CASE,
+            MutableProcessingConfiguration.DATETIME_FORMAT_KEY_CAMEL_CASE,
+            MutableProcessingConfiguration.DATETIME_FORMAT_KEY_SNAKE_CASE,
+            MutableProcessingConfiguration.LOCALE_KEY,
+            MutableProcessingConfiguration.NUMBER_FORMAT_KEY_CAMEL_CASE,
+            MutableProcessingConfiguration.NUMBER_FORMAT_KEY_SNAKE_CASE,
+            MutableProcessingConfiguration.OUTPUT_ENCODING_KEY_CAMEL_CASE,
+            MutableProcessingConfiguration.OUTPUT_ENCODING_KEY_SNAKE_CASE,
+            MutableProcessingConfiguration.SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE,
+            MutableProcessingConfiguration.SQL_DATE_AND_TIME_TIME_ZONE_KEY,
+            MutableProcessingConfiguration.TIME_FORMAT_KEY_CAMEL_CASE,
+            MutableProcessingConfiguration.TIME_ZONE_KEY_CAMEL_CASE,
+            MutableProcessingConfiguration.TIME_FORMAT_KEY_SNAKE_CASE,
+            MutableProcessingConfiguration.TIME_ZONE_KEY_SNAKE_CASE,
+            MutableProcessingConfiguration.URL_ESCAPING_CHARSET_KEY_CAMEL_CASE,
+            MutableProcessingConfiguration.URL_ESCAPING_CHARSET_KEY_SNAKE_CASE
     };
 
     ASTDirSetting(Token keyTk, FMParserTokenManager tokenManager, ASTExpression value, Configuration cfg)

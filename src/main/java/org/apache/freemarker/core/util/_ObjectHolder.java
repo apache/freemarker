@@ -16,28 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core.util;
 
-import java.util.Locale;
+package org.apache.freemarker.core.util;
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
  */
-public class _LocaleUtil {
+public class _ObjectHolder<T> {
 
-    /**
-     * Returns a locale that's one less specific, or {@code null} if there's no less specific locale.
-     */
-    public static Locale getLessSpecificLocale(Locale locale) {
-        String country = locale.getCountry();
-        if (locale.getVariant().length() != 0) {
-            String language = locale.getLanguage();
-            return country != null ? new Locale(language, country) : new Locale(language);
-        }
-        if (country.length() != 0) {
-            return new Locale(locale.getLanguage());
-        }
-        return null;
+    private T object;
+
+    public _ObjectHolder(T object) {
+        this.object = object;
     }
-    
+
+    public T get() {
+        return object;
+    }
+
+    public void set(T object) {
+        this.object = object;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        _ObjectHolder<?> that = (_ObjectHolder<?>) o;
+
+        return object != null ? object.equals(that.object) : that.object == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return object != null ? object.hashCode() : 0;
+    }
 }

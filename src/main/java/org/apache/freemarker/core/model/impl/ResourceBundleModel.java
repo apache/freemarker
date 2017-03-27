@@ -63,7 +63,7 @@ public class ResourceBundleModel
     }
 
     /**
-     * Overridden to invoke the getObject method of the resource bundle.
+     * Overridden to invoke the get method of the resource bundle.
      */
     @Override
     protected TemplateModel invokeGenericGet(Map keyMap, Class clazz, String key)

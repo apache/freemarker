@@ -16,28 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core.util;
 
-import java.util.Locale;
+package org.apache.freemarker.core;
 
 /**
- * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
+ * An object that's a scope that can store custom state objects.
  */
-public class _LocaleUtil {
+public interface CustomStateScope {
 
     /**
-     * Returns a locale that's one less specific, or {@code null} if there's no less specific locale.
+     * Gets the custom state belonging to the key, automatically creating it if it doesn't yet exists in the scope.
+     * If the scope is {@link Configuration} or {@link Template}, then this method is thread safe. If the scope is
+     * {@link Environment}, then this method is not thread safe ({@link Environment} is not thread safe either).
      */
-    public static Locale getLessSpecificLocale(Locale locale) {
-        String country = locale.getCountry();
-        if (locale.getVariant().length() != 0) {
-            String language = locale.getLanguage();
-            return country != null ? new Locale(language, country) : new Locale(language);
-        }
-        if (country.length() != 0) {
-            return new Locale(locale.getLanguage());
-        }
-        return null;
-    }
-    
+    <T> T getCustomState(CustomStateKey<T> customStateKey);
+
 }

@@ -32,9 +32,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.freemarker.core.Configurable;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.MutableProcessingConfiguration;
+import org.apache.freemarker.core.ProcessingConfiguration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
@@ -164,17 +165,17 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
     
     private static class DebugConfigurableModel extends DebugMapModel {
         static final List KEYS = Arrays.asList(
-                Configurable.ARITHMETIC_ENGINE_KEY,
-                Configurable.BOOLEAN_FORMAT_KEY,
-                Configurable.LOCALE_KEY,
-                Configurable.NUMBER_FORMAT_KEY,
-                Configurable.OBJECT_WRAPPER_KEY,
-                Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY);
+                MutableProcessingConfiguration.ARITHMETIC_ENGINE_KEY,
+                MutableProcessingConfiguration.BOOLEAN_FORMAT_KEY,
+                MutableProcessingConfiguration.LOCALE_KEY,
+                MutableProcessingConfiguration.NUMBER_FORMAT_KEY,
+                MutableProcessingConfiguration.OBJECT_WRAPPER_KEY,
+                MutableProcessingConfiguration.TEMPLATE_EXCEPTION_HANDLER_KEY);
 
-        final Configurable configurable;
+        final ProcessingConfiguration ProcessingConfiguration;
         
-        DebugConfigurableModel(Configurable configurable) {
-            this.configurable = configurable;
+        DebugConfigurableModel(ProcessingConfiguration processingConfiguration) {
+            this.ProcessingConfiguration = processingConfiguration;
         }
         
         @Override
@@ -196,12 +197,12 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
         {
             @Override
             Collection keySet() {
-                return ((Configuration) configurable).getSharedVariableNames();
+                return ((Configuration) ProcessingConfiguration).getSharedVariableNames();
             }
         
             @Override
             public TemplateModel get(String key) {
-                return ((Configuration) configurable).getSharedVariable(key);
+                return ((Configuration) ProcessingConfiguration).getSharedVariable(key);
             }
         };
         
@@ -244,7 +245,7 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
         public TemplateModel get(String key) throws TemplateModelException {
             if ("configuration".equals(key)) {
                 try {
-                    return (TemplateModel) getCachedWrapperFor(((Template) configurable).getConfiguration());
+                    return (TemplateModel) getCachedWrapperFor(((Template) ProcessingConfiguration).getConfiguration());
                 } catch (RemoteException e) {
                     throw new TemplateModelException(e);
                 }
@@ -271,7 +272,7 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
             @Override
             Collection keySet() {
                 try {
-                    return ((Environment) configurable).getKnownVariableNames();
+                    return ((Environment) ProcessingConfiguration).getKnownVariableNames();
                 } catch (TemplateModelException e) {
                     throw new UndeclaredThrowableException(e);
                 }
@@ -279,7 +280,7 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
         
             @Override
             public TemplateModel get(String key) throws TemplateModelException {
-                return ((Environment) configurable).getVariable(key);
+                return ((Environment) ProcessingConfiguration).getVariable(key);
             }
         };
          
@@ -295,30 +296,30 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
         @Override
         public TemplateModel get(String key) throws TemplateModelException {
             if ("currentNamespace".equals(key)) {
-                return ((Environment) configurable).getCurrentNamespace();
+                return ((Environment) ProcessingConfiguration).getCurrentNamespace();
             }
             if ("dataModel".equals(key)) {
-                return ((Environment) configurable).getDataModel();
+                return ((Environment) ProcessingConfiguration).getDataModel();
             }
             if ("globalNamespace".equals(key)) {
-                return ((Environment) configurable).getGlobalNamespace();
+                return ((Environment) ProcessingConfiguration).getGlobalNamespace();
             }
             if ("knownVariables".equals(key)) {
                 return knownVariables;
             }
             if ("mainNamespace".equals(key)) {
-                return ((Environment) configurable).getMainNamespace();
+                return ((Environment) ProcessingConfiguration).getMainNamespace();
             }
             if ("mainTemplate".equals(key)) {
                 try {
-                    return (TemplateModel) getCachedWrapperFor(((Environment) configurable).getMainTemplate());
+                    return (TemplateModel) getCachedWrapperFor(((Environment) ProcessingConfiguration).getMainTemplate());
                 } catch (RemoteException e) {
                     throw new TemplateModelException(e);
                 }
             }
             if ("currentTemplate".equals(key)) {
                 try {
-                    return (TemplateModel) getCachedWrapperFor(((Environment) configurable).getCurrentTemplate());
+                    return (TemplateModel) getCachedWrapperFor(((Environment) ProcessingConfiguration).getCurrentTemplate());
                 } catch (RemoteException e) {
                     throw new TemplateModelException(e);
                 }

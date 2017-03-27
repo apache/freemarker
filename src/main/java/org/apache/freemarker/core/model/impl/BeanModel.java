@@ -125,7 +125,7 @@ public class BeanModel
      * <tt>non-void-return-type get(java.lang.String)</tt>,
      * then <tt>non-void-return-type get(java.lang.Object)</tt>, or 
      * alternatively (if the wrapped object is a resource bundle) 
-     * <tt>Object getObject(java.lang.String)</tt>.
+     * <tt>Object get(java.lang.String)</tt>.
      * @throws TemplateModelException if there was no property nor method nor
      * a generic <tt>get</tt> method to invoke.
      */

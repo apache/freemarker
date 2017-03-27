@@ -38,7 +38,7 @@ public class GettingStartedExample {
         /* Create and adjust the configuration singleton */
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setClassForTemplateLoading(GettingStartedExample.class, "");
-        cfg.setDefaultEncoding("UTF-8");
+        cfg.setEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
         cfg.setLogTemplateExceptions(false);
 

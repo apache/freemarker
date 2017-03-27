@@ -34,7 +34,7 @@ public class TemplateGetEncodingTest {
     public void test() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         {
-            cfg.setDefaultEncoding("ISO-8859-2");
+            cfg.setEncoding("ISO-8859-2");
             MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
             tl.putBinaryTemplate("bin", "test");
             tl.putBinaryTemplate("bin-static", "<#test>");

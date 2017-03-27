@@ -115,7 +115,7 @@ public class TemplateConfigurationExamples extends ExamplesTest {
     @Test
     public void example3() throws Exception {
         Configuration cfg = getConfiguration();
-        cfg.setDefaultEncoding("ISO-8859-1");
+        cfg.setEncoding("ISO-8859-1");
         cfg.setSharedVariable("ts", new Date(1440431606011L));
         
         addTemplate("t.stats.html", "${ts?datetime} ${ts?date} ${ts?time}");

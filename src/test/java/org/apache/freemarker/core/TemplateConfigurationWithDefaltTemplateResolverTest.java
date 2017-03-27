@@ -37,8 +37,8 @@ public class TemplateConfigurationWithDefaltTemplateResolverTest {
 
     private static final String TEXT_WITH_ACCENTS = "pr\u00F3ba";
 
-    private static final CustomAttribute CUST_ATT_1 = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE);
-    private static final CustomAttribute CUST_ATT_2 = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE);
+    private static final Object CUST_ATT_1 = new Object();
+    private static final Object CUST_ATT_2 = new Object();
 
     @Test
     public void testEncoding() throws Exception {
@@ -168,12 +168,12 @@ public class TemplateConfigurationWithDefaltTemplateResolverTest {
         tc1.setCustomAttribute("a1", "a1tc1");
         tc1.setCustomAttribute("a2", "a2tc1");
         tc1.setCustomAttribute("a3", "a3tc1");
-        CUST_ATT_1.set("ca1tc1", tc1);
-        CUST_ATT_2.set("ca2tc1", tc1);
+        tc1.setCustomAttribute(CUST_ATT_1, "ca1tc1");
+        tc1.setCustomAttribute(CUST_ATT_2, "ca2tc1");
         
         TemplateConfiguration tc2 = new TemplateConfiguration();
         tc2.setCustomAttribute("a1", "a1tc2");
-        CUST_ATT_1.set("ca1tc2", tc2);
+        tc2.setCustomAttribute(CUST_ATT_1, "ca1tc2");
         
         cfg.setTemplateConfigurations(
                 new MergingTemplateConfigurationFactory(
@@ -195,32 +195,32 @@ public class TemplateConfigurationWithDefaltTemplateResolverTest {
             assertEquals("a1tc1", t.getCustomAttribute("a1"));
             assertEquals("a2tc1", t.getCustomAttribute("a2"));
             assertEquals("a3temp", t.getCustomAttribute("a3"));
-            assertEquals("ca1tc1", CUST_ATT_1.get(t));
-            assertEquals("ca2tc1", CUST_ATT_2.get(t));
+            assertEquals("ca1tc1", t.getCustomAttribute(CUST_ATT_1));
+            assertEquals("ca2tc1", t.getCustomAttribute(CUST_ATT_2));
         }
         {
             Template t = cfg.getTemplate("(tc1)noHeader");
             assertEquals("a1tc1", t.getCustomAttribute("a1"));
             assertEquals("a2tc1", t.getCustomAttribute("a2"));
             assertEquals("a3tc1", t.getCustomAttribute("a3"));
-            assertEquals("ca1tc1", CUST_ATT_1.get(t));
-            assertEquals("ca2tc1", CUST_ATT_2.get(t));
+            assertEquals("ca1tc1", t.getCustomAttribute(CUST_ATT_1));
+            assertEquals("ca2tc1", t.getCustomAttribute(CUST_ATT_2));
         }
         {
             Template t = cfg.getTemplate("(tc2)");
             assertEquals("a1tc2", t.getCustomAttribute("a1"));
             assertNull(t.getCustomAttribute("a2"));
             assertEquals("a3temp", t.getCustomAttribute("a3"));
-            assertEquals("ca1tc2", CUST_ATT_1.get(t));
-            assertNull(CUST_ATT_2.get(t));
+            assertEquals("ca1tc2", t.getCustomAttribute(CUST_ATT_1));
+            assertNull(t.getCustomAttribute(CUST_ATT_2));
         }
         {
             Template t = cfg.getTemplate("(tc1)(tc2)");
             assertEquals("a1tc2", t.getCustomAttribute("a1"));
             assertEquals("a2tc1", t.getCustomAttribute("a2"));
             assertEquals("a3temp", t.getCustomAttribute("a3"));
-            assertEquals("ca1tc2", CUST_ATT_1.get(t));
-            assertEquals("ca2tc1", CUST_ATT_2.get(t));
+            assertEquals("ca1tc2", t.getCustomAttribute(CUST_ATT_1));
+            assertEquals("ca2tc1", t.getCustomAttribute(CUST_ATT_2));
         }
     }
     
@@ -232,7 +232,7 @@ public class TemplateConfigurationWithDefaltTemplateResolverTest {
 
     private Configuration createCommonEncodingTesterConfig() throws UnsupportedEncodingException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        cfg.setDefaultEncoding("iso-8859-1");
+        cfg.setEncoding("iso-8859-1");
         cfg.setLocale(Locale.US);
         
         ByteArrayTemplateLoader tl = new ByteArrayTemplateLoader();

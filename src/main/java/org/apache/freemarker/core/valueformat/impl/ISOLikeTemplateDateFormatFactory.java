@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core.valueformat.impl;
 
+import org.apache.freemarker.core.CustomStateKey;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.util._DateUtil.CalendarFieldsToDateConverter;
 import org.apache.freemarker.core.util._DateUtil.DateToISO8601CalendarFactory;
@@ -28,27 +29,29 @@ import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 
 abstract class ISOLikeTemplateDateFormatFactory extends TemplateDateFormatFactory {
     
-    private static final Object DATE_TO_CAL_CONVERTER_KEY = new Object();
-    private static final Object CAL_TO_DATE_CONVERTER_KEY = new Object();
+    private static final CustomStateKey<TrivialDateToISO8601CalendarFactory> DATE_TO_CAL_CONVERTER_KEY
+            = new CustomStateKey<TrivialDateToISO8601CalendarFactory>() {
+        @Override
+        protected TrivialDateToISO8601CalendarFactory create() {
+            return new TrivialDateToISO8601CalendarFactory();
+        }
+    };
+    private static final CustomStateKey<TrivialCalendarFieldsToDateConverter> CAL_TO_DATE_CONVERTER_KEY
+            = new CustomStateKey<TrivialCalendarFieldsToDateConverter>() {
+        @Override
+        protected TrivialCalendarFieldsToDateConverter create() {
+            return new TrivialCalendarFieldsToDateConverter();
+        }
+    };
     
     protected ISOLikeTemplateDateFormatFactory() { }
 
     public DateToISO8601CalendarFactory getISOBuiltInCalendar(Environment env) {
-        DateToISO8601CalendarFactory r = (DateToISO8601CalendarFactory) env.getCustomState(DATE_TO_CAL_CONVERTER_KEY);
-        if (r == null) {
-            r = new TrivialDateToISO8601CalendarFactory();
-            env.setCustomState(DATE_TO_CAL_CONVERTER_KEY, r);
-        }
-        return r;
+        return (DateToISO8601CalendarFactory) env.getCustomState(DATE_TO_CAL_CONVERTER_KEY);
     }
 
     public CalendarFieldsToDateConverter getCalendarFieldsToDateCalculator(Environment env) {
-        CalendarFieldsToDateConverter r = (CalendarFieldsToDateConverter) env.getCustomState(CAL_TO_DATE_CONVERTER_KEY);
-        if (r == null) {
-            r = new TrivialCalendarFieldsToDateConverter();
-            env.setCustomState(CAL_TO_DATE_CONVERTER_KEY, r);
-        }
-        return r;
+        return (CalendarFieldsToDateConverter) env.getCustomState(CAL_TO_DATE_CONVERTER_KEY);
     }
     
 }

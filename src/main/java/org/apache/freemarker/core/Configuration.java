@@ -39,6 +39,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
@@ -125,7 +126,7 @@ import org.apache.freemarker.core.util._UnmodifiableCompositeSet;
  *       useless. (For the most common cases you can use the convenience methods,
  *       {@link #setDirectoryForTemplateLoading(File)} and {@link #setClassForTemplateLoading(Class, String)} and
  *       {@link #setClassLoaderForTemplateLoading(ClassLoader, String)} too.)
- *   <li>{@link #setDefaultEncoding(String) default_encoding}: The default value is system dependent, which makes it
+ *   <li>{@link #setEncoding(String) encoding}: The default value is system dependent, which makes it
  *       fragile on servers, so it should be set explicitly, like to "UTF-8" nowadays. 
  *   <li>{@link #setTemplateExceptionHandler(TemplateExceptionHandler) template_exception_handler}: For developing
  *       HTML pages, the most convenient value is {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}. For production,
@@ -139,16 +140,17 @@ import org.apache.freemarker.core.util._UnmodifiableCompositeSet;
  * anymore, so then it's safe to make it accessible (again, via a "safe publication" technique) from multiple threads.
  * The methods that aren't for modifying settings, like {@link #getTemplate(String)}, are thread-safe.
  */
-public class Configuration extends Configurable implements Cloneable, ParserConfiguration {
+public final class Configuration extends MutableProcessingConfiguration<Configuration>
+        implements Cloneable, ParserConfiguration, ProcessingConfiguration, CustomStateScope {
     
     private static final String VERSION_PROPERTIES_PATH = "org/apache/freemarker/core/version.properties";
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
-    public static final String DEFAULT_ENCODING_KEY_SNAKE_CASE = "default_encoding"; 
+    public static final String ENCODING_KEY_SNAKE_CASE = "encoding";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
-    public static final String DEFAULT_ENCODING_KEY_CAMEL_CASE = "defaultEncoding"; 
+    public static final String ENCODING_KEY_CAMEL_CASE = "encoding";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String DEFAULT_ENCODING_KEY = DEFAULT_ENCODING_KEY_SNAKE_CASE;
+    public static final String ENCODING_KEY = ENCODING_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String LOCALIZED_LOOKUP_KEY_SNAKE_CASE = "localized_lookup";
@@ -281,7 +283,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         // Must be sorted alphabetically!
         AUTO_ESCAPING_POLICY_KEY_SNAKE_CASE,
         CACHE_STORAGE_KEY_SNAKE_CASE,
-        DEFAULT_ENCODING_KEY_SNAKE_CASE,
+            ENCODING_KEY_SNAKE_CASE,
         INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE,
         LOCALIZED_LOOKUP_KEY_SNAKE_CASE,
         NAMING_CONVENTION_KEY_SNAKE_CASE,
@@ -303,7 +305,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         // Must be sorted alphabetically!
         AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE,
         CACHE_STORAGE_KEY_CAMEL_CASE,
-        DEFAULT_ENCODING_KEY_CAMEL_CASE,
+            ENCODING_KEY_CAMEL_CASE,
         INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE,
         LOCALIZED_LOOKUP_KEY_CAMEL_CASE,
         NAMING_CONVENTION_KEY_CAMEL_CASE,
@@ -430,6 +432,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
 
     private HashMap/*<String, TemplateModel>*/ sharedVariables = new HashMap();
 
+    private final ConcurrentHashMap<CustomStateKey, Object> customStateMap = new ConcurrentHashMap<>(0);
+    private final Object customStateMapLock = new Object();
+
     /**
      * Needed so that it doesn't mater in what order do you call {@link #setSharedVaribles(Map)}
      * and {@link #setObjectWrapper(ObjectWrapper)}. When the user configures FreeMarker from Spring XML, he has no
@@ -437,7 +442,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     private HashMap<String, Object> rewrappableSharedVariables = null;
     
-    private String defaultEncoding = getDefaultDefaultEncoding();
+    private String encoding = getDefaultEncoding();
 
     /**
      * @deprecated Use {@link #Configuration(Version)} instead. Note that the version can be still modified later with
@@ -560,7 +565,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         }
         return new DefaultSoftCacheStorage(); 
     }
-    
+
     private static class DefaultSoftCacheStorage extends SoftCacheStorage {
         // Nothing to override
     }
@@ -1236,6 +1241,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         return whitespaceStripping;
     }
 
+    @Override
+    public boolean isWhitespaceStrippingSet() {
+        return true;
+    }
+
     /**
      * Sets when auto-escaping should be enabled depending on the current {@linkplain OutputFormat output format};
      * default is {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY}. Note that the default output format,
@@ -1312,7 +1322,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public int getAutoEscapingPolicy() {
         return autoEscapingPolicy;
     }
-    
+
+    @Override
+    public boolean isAutoEscapingPolicySet() {
+        return true;
+    }
+
     /**
      * Sets the default output format. Usually, you should leave this on its default, which is
      * {@link UndefinedOutputFormat#INSTANCE}, and then use standard file extensions like "ftlh" (for HTML) or "ftlx"
@@ -1358,7 +1373,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public OutputFormat getOutputFormat() {
         return outputFormat;
     }
-    
+
+    @Override
+    public boolean isOutputFormatSet() {
+        return true;
+    }
+
     /**
      * Tells if {@link #setOutputFormat(OutputFormat)} (or equivalent) was already called on this instance.
      * 
@@ -1613,6 +1633,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 : recognizeStandardFileExtensions.booleanValue();
     }
 
+    @Override
+    public boolean isRecognizeStandardFileExtensionsSet() {
+        return true;
+    }
+
     /**
      * Getter pair of {@link #setTemplateLanguage(TemplateLanguage)}.
      */
@@ -1675,6 +1700,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     @Override
     public int getTagSyntax() {
         return tagSyntax;
+    }
+
+    @Override
+    public boolean isTagSyntaxSet() {
+        return true;
     }
 
     /**
@@ -1747,7 +1777,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public int getNamingConvention() {
         return namingConvention;
     }
-    
+
+    @Override
+    public boolean isNamingConventionSet() {
+        return true;
+    }
+
     /**
      * Sets the assumed display width of the tab character (ASCII 9), which influences the column number shown in error
      * messages (or the column number you get through other API-s). So for example if the users edit templates in an
@@ -1779,6 +1814,31 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     @Override
     public int getTabSize() {
         return tabSize;
+    }
+
+    @Override
+    public boolean isTabSizeSet() {
+        return true;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T getCustomState(CustomStateKey<T> customStateKey) {
+        T customState = (T) customStateMap.get(customStateKey);
+        if (customState == null) {
+            synchronized (customStateMapLock) {
+                customState = (T) customStateMap.get(customStateKey);
+                if (customState == null) {
+                    customState = customStateKey.create();
+                    if (customState == null) {
+                        throw new IllegalStateException("CustomStateKey.create() must not return null (for key: "
+                                + customStateKey + ")");
+                    }
+                    customStateMap.put(customStateKey, customState);
+                }
+            }
+        }
+        return customState;
     }
     
     /**
@@ -1982,18 +2042,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *
      * @param encoding The name of the charset, such as {@code "UTF-8"} or {@code "ISO-8859-1"}
      */
-    public void setDefaultEncoding(String encoding) {
-        defaultEncoding = encoding;
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
         defaultEncodingExplicitlySet = true;
     }
 
-    /**
-     * Gets the default encoding for converting bytes to characters when
-     * reading template files in a locale for which no explicit encoding
-     * was specified. Defaults to the default system encoding.
-     */
-    public String getDefaultEncoding() {
-        return defaultEncoding;
+    @Override
+    public String getEncoding() {
+        return encoding;
     }
 
     /**
@@ -2003,13 +2059,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     public void unsetDefaultEncoding() {
         if (defaultEncodingExplicitlySet) {
-            setDefaultEncoding(getDefaultDefaultEncoding());
+            setEncoding(getDefaultEncoding());
             defaultEncodingExplicitlySet = false;
         }
     }
 
     /**
-     * Tells if {@link #setDefaultEncoding(String)} (or equivalent) was already called on this instance, or it just holds the
+     * Tells if {@link #setEncoding(String)} (or equivalent) was already called on this instance, or it just holds the
      * default value.
      *
      * @since 2.3.26
@@ -2018,7 +2074,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         return defaultEncodingExplicitlySet;
     }
 
-    static private String getDefaultDefaultEncoding() {
+    static private String getDefaultEncoding() {
         return getJVMDefaultEncoding();
     }
 
@@ -2063,7 +2119,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Adds shared variable to the configuration; It uses {@link Configurable#getObjectWrapper()} to wrap the 
+     * Adds shared variable to the configuration; It uses {@link MutableProcessingConfiguration#getObjectWrapper()} to wrap the
      * {@code value}, so it's important that the object wrapper is set before this.
      * 
      * <p>This method is <b>not</b> thread safe; use it with the same restrictions as those that modify setting values.
@@ -2245,14 +2301,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             if ("TemplateUpdateInterval".equalsIgnoreCase(name)) {
                 name = TEMPLATE_UPDATE_DELAY_KEY;
             } else if ("DefaultEncoding".equalsIgnoreCase(name)) {
-                name = DEFAULT_ENCODING_KEY;
+                name = ENCODING_KEY;
             }
             
-            if (DEFAULT_ENCODING_KEY_SNAKE_CASE.equals(name) || DEFAULT_ENCODING_KEY_CAMEL_CASE.equals(name)) {
-                if (JVM_DEFAULT.equalsIgnoreCase(value)) {
-                    setDefaultEncoding(getJVMDefaultEncoding());
+            if (ENCODING_KEY_SNAKE_CASE.equals(name) || ENCODING_KEY_CAMEL_CASE.equals(name)) {
+                if (JVM_DEFAULT_VALUE.equalsIgnoreCase(value)) {
+                    setEncoding(getJVMDefaultEncoding());
                 } else {
-                    setDefaultEncoding(value);
+                    setEncoding(value);
                 }
             } else if (LOCALIZED_LOOKUP_KEY_SNAKE_CASE.equals(name) || LOCALIZED_LOOKUP_KEY_CAMEL_CASE.equals(name)) {
                 setLocalizedLookup(_StringUtil.getYesNo(value));
@@ -2270,7 +2326,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     throw invalidSettingValueException(name, value);
                 }
             } else if (OUTPUT_FORMAT_KEY_SNAKE_CASE.equals(name) || OUTPUT_FORMAT_KEY_CAMEL_CASE.equals(name)) {
-                if (value.equalsIgnoreCase(DEFAULT)) {
+                if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
                     unsetOutputFormat();
                 } else {
                     setOutputFormat((OutputFormat) _ObjectBuilderSettingEvaluator.eval(
@@ -2290,13 +2346,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 setRegisteredCustomOutputFormats(list);
             } else if (RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE.equals(name)
                     || RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE.equals(name)) {
-                if (value.equalsIgnoreCase(DEFAULT)) {
+                if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
                     unsetRecognizeStandardFileExtensions();
                 } else {
                     setRecognizeStandardFileExtensions(_StringUtil.getYesNo(value));
                 }
             } else if (CACHE_STORAGE_KEY_SNAKE_CASE.equals(name) || CACHE_STORAGE_KEY_CAMEL_CASE.equals(name)) {
-                if (value.equalsIgnoreCase(DEFAULT)) {
+                if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
                     unsetCacheStorage();
                 } if (value.indexOf('.') == -1) {
                     int strongSize = 0;
@@ -2397,7 +2453,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     || INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE.equals(name)) {
                 setIncompatibleImprovements(new Version(value));
             } else if (TEMPLATE_LOADER_KEY_SNAKE_CASE.equals(name) || TEMPLATE_LOADER_KEY_CAMEL_CASE.equals(name)) {
-                if (value.equalsIgnoreCase(DEFAULT)) {
+                if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
                     unsetTemplateLoader();
                 } else {
                     setTemplateLoader((TemplateLoader) _ObjectBuilderSettingEvaluator.eval(
@@ -2405,7 +2461,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 }
             } else if (TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE.equals(name)
                     || TEMPLATE_LOOKUP_STRATEGY_KEY_CAMEL_CASE.equals(name)) {
-                if (value.equalsIgnoreCase(DEFAULT)) {
+                if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
                     unsetTemplateLookupStrategy();
                 } else {
                     setTemplateLookupStrategy((TemplateLookupStrategy) _ObjectBuilderSettingEvaluator.eval(
@@ -2413,7 +2469,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 }
             } else if (TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE.equals(name)
                     || TEMPLATE_NAME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
-                if (value.equalsIgnoreCase(DEFAULT)) {
+                if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
                     unsetTemplateNameFormat();
                 } else if (value.equalsIgnoreCase("default_2_3_0")) {
                     setTemplateNameFormat(DefaultTemplateNameFormatFM2.INSTANCE);
@@ -2424,7 +2480,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 }
             } else if (TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE.equals(name)
                     || TEMPLATE_CONFIGURATIONS_KEY_CAMEL_CASE.equals(name)) {
-                if (value.equals(NULL)) {
+                if (value.equals(NULL_VALUE)) {
                     setTemplateConfigurations(null);
                 } else {
                     setTemplateConfigurations((TemplateConfigurationFactory) _ObjectBuilderSettingEvaluator.eval(
@@ -2450,14 +2506,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Returns the valid {@link Configuration} setting names. Naturally, this includes the {@link Configurable} setting
+     * Returns the valid {@link Configuration} setting names. Naturally, this includes the {@link MutableProcessingConfiguration} setting
      * names too.
      * 
      * @param camelCase
      *            If we want the setting names with camel case naming convention, or with snake case (legacy) naming
      *            convention.
      * 
-     * @see Configurable#getSettingNames(boolean)
+     * @see MutableProcessingConfiguration#getSettingNames(boolean)
      * 
      * @since 2.3.24
      */
@@ -2480,10 +2536,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     protected String getCorrectedNameForUnknownSetting(String name) {
         if ("encoding".equals(name) || "charset".equals(name) || "default_charset".equals(name)) {
             // [2.4] Default might changes to camel-case
-            return DEFAULT_ENCODING_KEY;
+            return ENCODING_KEY;
         }
         if ("defaultCharset".equals(name)) {
-            return DEFAULT_ENCODING_KEY_CAMEL_CASE;
+            return ENCODING_KEY_CAMEL_CASE;
         }
         if (name.equals("incompatible_enhancements")) {
             return INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE;
@@ -2503,13 +2559,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     private void doAutoImports(Environment env, Template t) throws IOException, TemplateException {
-        Map<String, String> envAutoImports = env.getAutoImportsWithoutFallback();
-        Map<String, String> tAutoImports = t.getAutoImportsWithoutFallback();
+        Map<String, String> envAutoImports = env.isAutoImportsSet() ? env.getAutoImports() : null;
+        Map<String, String> tAutoImports = t.isAutoImportsSet() ? t.getAutoImports() : null;
         
-        boolean lazyAutoImports = env.getLazyAutoImports() != null ? env.getLazyAutoImports().booleanValue()
-                : env.getLazyImports();
+        boolean lazyAutoImports = env.getLazyAutoImports() != null ? env.getLazyAutoImports() : env.getLazyImports();
         
-        for (Map.Entry<String, String> autoImport : getAutoImportsWithoutFallback().entrySet()) {
+        for (Map.Entry<String, String> autoImport : getAutoImports().entrySet()) {
             String nsVarName = autoImport.getKey();
             if ((tAutoImports == null || !tAutoImports.containsKey(nsVarName))
                     && (envAutoImports == null || !envAutoImports.containsKey(nsVarName))) {
@@ -2536,11 +2591,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         // We can't store autoIncludes in LinkedHashSet-s because setAutoIncludes(List) allows duplicates,
         // unfortunately. Yet we have to prevent duplicates among Configuration levels, with the lowest levels having
         // priority. So we build some Set-s to do that, but we avoid the most common cases where they aren't needed.
+
+        List<String> tAutoIncludes = t.isAutoIncludesSet() ? t.getAutoIncludes() : null;
+        List<String> envAutoIncludes = env.isAutoIncludesSet() ? env.getAutoIncludes() : null;
         
-        List<String> tAutoIncludes = t.getAutoIncludesWithoutFallback();
-        List<String> envAutoIncludes = env.getAutoIncludesWithoutFallback();
-        
-        for (String templateName : getAutoIncludesWithoutFallback()) {
+        for (String templateName : getAutoIncludes()) {
             if ((tAutoIncludes == null || !tAutoIncludes.contains(templateName))
                     && (envAutoIncludes == null || !envAutoIncludes.contains(templateName))) {
                 env.include(getTemplate(templateName, env.getLocale()));

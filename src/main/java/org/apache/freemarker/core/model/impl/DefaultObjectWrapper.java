@@ -1275,6 +1275,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          * Returns a {@link DefaultObjectWrapper} instance that matches the settings of this builder. This will be possibly
          * a singleton that is also in use elsewhere.
          */
+        @Override
         public DefaultObjectWrapper build() {
             return DefaultObjectWrapperTCCLSingletonUtil.getSingleton(
                     this, INSTANCE_CACHE, INSTANCE_CACHE_REF_QUEUE, ConstructorInvoker.INSTANCE);

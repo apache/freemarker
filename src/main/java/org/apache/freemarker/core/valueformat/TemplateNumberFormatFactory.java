@@ -20,7 +20,7 @@ package org.apache.freemarker.core.valueformat;
 
 import java.util.Locale;
 
-import org.apache.freemarker.core.Configurable;
+import org.apache.freemarker.core.MutableProcessingConfiguration;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Environment;
 
@@ -28,7 +28,7 @@ import org.apache.freemarker.core.Environment;
  * Factory for a certain kind of number formatting ({@link TemplateNumberFormat}). Usually a singleton (one-per-VM or
  * one-per-{@link Configuration}), and so must be thread-safe.
  * 
- * @see Configurable#setCustomNumberFormats(java.util.Map)
+ * @see MutableProcessingConfiguration#setCustomNumberFormats(java.util.Map)
  * 
  * @since 2.3.24
  */
@@ -46,7 +46,7 @@ public abstract class TemplateNumberFormatFactory extends TemplateValueFormatFac
      * 
      * @param params
      *            The string that further describes how the format should look. For example, when the
-     *            {@link Configurable#getNumberFormat() numberFormat} is {@code "@fooBar 1, 2"}, then it will be
+     *            {@link MutableProcessingConfiguration#getNumberFormat() numberFormat} is {@code "@fooBar 1, 2"}, then it will be
      *            {@code "1, 2"} (and {@code "@fooBar"} selects the factory). The format of this string is up to the
      *            {@link TemplateNumberFormatFactory} implementation. Not {@code null}, often an empty string.
      * @param locale

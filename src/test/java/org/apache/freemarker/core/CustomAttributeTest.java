@@ -24,7 +24,6 @@ import static org.junit.Assert.*;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
-import org.apache.freemarker.core.util._NullWriter;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -44,13 +43,8 @@ public class CustomAttributeTest {
             "s", BigDecimal.valueOf(2), Boolean.TRUE, ImmutableMap.of("a", "A"));
     private static final Object VALUE_BIGDECIMAL = BigDecimal.valueOf(22);
 
-    private static final CustomAttribute CUST_ATT_TMP_1 = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE);
-    private static final CustomAttribute CUST_ATT_TMP_2 = new CustomAttribute(CustomAttribute.SCOPE_TEMPLATE);
-    private static final CustomAttribute CUST_ATT_ENV_1 = new CustomAttribute(CustomAttribute.SCOPE_ENVIRONMENT);
-    private static final CustomAttribute CUST_ATT_ENV_2 = new CustomAttribute(CustomAttribute.SCOPE_ENVIRONMENT);
-    private static final CustomAttribute CUST_ATT_CFG_1 = new CustomAttribute(CustomAttribute.SCOPE_CONFIGURATION);
-    private static final CustomAttribute CUST_ATT_CFG_2 = new CustomAttribute(CustomAttribute.SCOPE_CONFIGURATION);
-    
+    private static final Object CUST_ATT_KEY = new Object();
+
     @Test
     public void testStringKey() throws Exception {
         Template t = new Template(null, "", new Configuration(Configuration.VERSION_3_0_0));
@@ -160,65 +154,13 @@ public class CustomAttributeTest {
 
     @Test
     public void testObjectKey() throws Exception {
-        Template t = new Template(null, "", new Configuration(Configuration.VERSION_3_0_0));
-        assertNull(CUST_ATT_TMP_1.get(t));
-        
-        CUST_ATT_TMP_1.set(VALUE_1, t);
-        assertSame(VALUE_1, CUST_ATT_TMP_1.get(t));
-        assertEquals(0, t.getCustomAttributeNames().length);
-        
-        t.setCustomAttribute(KEY_2, VALUE_2);
-        assertArrayEquals(new String[] { KEY_2 }, t.getCustomAttributeNames());        
-        assertSame(VALUE_1, CUST_ATT_TMP_1.get(t));
-        assertSame(VALUE_2, t.getCustomAttribute(KEY_2));
-        
-        CUST_ATT_TMP_2.set(VALUE_3, t);
-        assertSame(VALUE_3, CUST_ATT_TMP_2.get(t));
-        assertArrayEquals(new String[] { KEY_2 }, t.getCustomAttributeNames());        
+        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+        Template t = new Template(null, "", cfg);
+        assertNull(t.getCustomAttribute(CUST_ATT_KEY));
+        cfg.setCustomAttribute(CUST_ATT_KEY, "cfg");
+        assertEquals("cfg", t.getCustomAttribute(CUST_ATT_KEY));
+        t.setCustomAttribute(CUST_ATT_KEY, "t");
+        assertEquals("t", t.getCustomAttribute(CUST_ATT_KEY));
     }
 
-    @Test
-    public void testScopes() throws Exception {
-        try {
-            assertNull(CUST_ATT_ENV_1.get());
-            fail();
-        } catch (IllegalStateException e) {
-            // Expected
-        }
-        try {
-            assertNull(CUST_ATT_CFG_1.get());
-            fail();
-        } catch (IllegalStateException e) {
-            // Expected
-        }
-        
-        final Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        
-        final Template t = new Template(null, "${testScopesFromTemplateStep1()}", cfg);
-        Environment env = t.createProcessingEnvironment(this, _NullWriter.INSTANCE);
-        CUST_ATT_TMP_2.set(123, env);
-        CUST_ATT_ENV_2.set(1234, env);
-        CUST_ATT_CFG_2.set(12345, env);
-        env.process();
-    }
-
-    public void testScopesFromTemplateStep1() throws Exception {
-        assertNull(CUST_ATT_TMP_1.get());
-        assertEquals(123, CUST_ATT_TMP_2.get());
-        
-        assertNull(CUST_ATT_ENV_1.get());
-        assertEquals(1234, CUST_ATT_ENV_2.get());
-        
-        assertNull(CUST_ATT_CFG_1.get());
-        assertEquals(12345, CUST_ATT_CFG_2.get());
-    }
-
-    public void testScopesFromTemplateStep2() throws Exception {
-        
-    }
-
-    public void testScopesFromTemplateStep3() throws Exception {
-        
-    }
-    
 }

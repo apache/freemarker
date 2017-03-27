@@ -259,7 +259,7 @@ public class ConfigurationTest extends TestCase {
         
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setLocale(Locale.GERMAN);
-        cfg.setDefaultEncoding(latin1);
+        cfg.setEncoding(latin1);
 
         TemplateConfiguration huTC = new TemplateConfiguration();
         huTC.setEncoding(latin2);
@@ -489,14 +489,14 @@ public class ConfigurationTest extends TestCase {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
         {
-            cfg.setSetting(Configurable.OBJECT_WRAPPER_KEY, "defAult");
+            cfg.setSetting(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY, "defAult");
             assertSame(Configuration.getDefaultObjectWrapper(Configuration.VERSION_3_0_0), cfg.getObjectWrapper());
             DefaultObjectWrapper dow = (DefaultObjectWrapper) cfg.getObjectWrapper();
             assertEquals(Configuration.VERSION_3_0_0, dow.getIncompatibleImprovements());
         }
         
         {
-            cfg.setSetting(Configurable.OBJECT_WRAPPER_KEY, "restricted");
+            cfg.setSetting(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY, "restricted");
             assertThat(cfg.getObjectWrapper(), instanceOf(RestrictedObjectWrapper.class));
         }
     }
@@ -780,13 +780,13 @@ public class ConfigurationTest extends TestCase {
             
             Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
             assertEquals(sysDefTZ, cfg.getTimeZone());
-            cfg.setSetting(Configurable.TIME_ZONE_KEY, "JVM default");
+            cfg.setSetting(MutableProcessingConfiguration.TIME_ZONE_KEY, "JVM default");
             assertEquals(sysDefTZ, cfg.getTimeZone());
             
             TimeZone newSysDefTZ = TimeZone.getTimeZone("GMT+09");
             TimeZone.setDefault(newSysDefTZ);
             assertEquals(sysDefTZ, cfg.getTimeZone());
-            cfg.setSetting(Configurable.TIME_ZONE_KEY, "JVM default");
+            cfg.setSetting(MutableProcessingConfiguration.TIME_ZONE_KEY, "JVM default");
             assertEquals(newSysDefTZ, cfg.getTimeZone());
         } finally {
             TimeZone.setDefault(origSysDefTZ);
@@ -805,10 +805,10 @@ public class ConfigurationTest extends TestCase {
             cfg.setSQLDateAndTimeTimeZone(null);
             assertNull(cfg.getSQLDateAndTimeTimeZone());
             
-            cfg.setSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY, "JVM default");
+            cfg.setSetting(MutableProcessingConfiguration.SQL_DATE_AND_TIME_TIME_ZONE_KEY, "JVM default");
             assertEquals(sysDefTZ, cfg.getSQLDateAndTimeTimeZone());
             
-            cfg.setSetting(Configurable.SQL_DATE_AND_TIME_TIME_ZONE_KEY, "null");
+            cfg.setSetting(MutableProcessingConfiguration.SQL_DATE_AND_TIME_TIME_ZONE_KEY, "null");
             assertNull(cfg.getSQLDateAndTimeTimeZone());
         } finally {
             TimeZone.setDefault(origSysDefTZ);
@@ -891,7 +891,7 @@ public class ConfigurationTest extends TestCase {
     public void testSetLogTemplateExceptionsViaSetSettingAPI() throws ConfigurationException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         assertFalse(cfg.getLogTemplateExceptions());
-        cfg.setSetting(Configurable.LOG_TEMPLATE_EXCEPTIONS_KEY, "true");
+        cfg.setSetting(MutableProcessingConfiguration.LOG_TEMPLATE_EXCEPTIONS_KEY, "true");
         assertTrue(cfg.getLogTemplateExceptions());
     }
     
@@ -952,7 +952,7 @@ public class ConfigurationTest extends TestCase {
             new Template(null, "${1?api}", cfg).process(null, _NullWriter.INSTANCE);
             fail();
         } catch (TemplateException e) {
-            assertThat(e.getMessage(), containsString(Configurable.API_BUILTIN_ENABLED_KEY));
+            assertThat(e.getMessage(), containsString(MutableProcessingConfiguration.API_BUILTIN_ENABLED_KEY));
         }
             
         cfg.setAPIBuiltinEnabled(true);
@@ -1050,13 +1050,13 @@ public class ConfigurationTest extends TestCase {
             assertThat(e.getMessage(), containsString("@wrong"));
         }
         
-        cfg.setSetting(Configurable.CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE,
+        cfg.setSetting(MutableProcessingConfiguration.CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE,
                 "{ 'base': " + BaseNTemplateNumberFormatFactory.class.getName() + "() }");
         assertEquals(
                 Collections.singletonMap("base", BaseNTemplateNumberFormatFactory.INSTANCE),
                 cfg.getCustomNumberFormats());
         
-        cfg.setSetting(Configurable.CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE,
+        cfg.setSetting(MutableProcessingConfiguration.CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE,
                 "{ "
                 + "'base': " + BaseNTemplateNumberFormatFactory.class.getName() + "(), "
                 + "'hex': " + HexTemplateNumberFormatFactory.class.getName() + "()"
@@ -1067,11 +1067,11 @@ public class ConfigurationTest extends TestCase {
                         "hex", HexTemplateNumberFormatFactory.INSTANCE),
                 cfg.getCustomNumberFormats());
         
-        cfg.setSetting(Configurable.CUSTOM_NUMBER_FORMATS_KEY, "{}");
+        cfg.setSetting(MutableProcessingConfiguration.CUSTOM_NUMBER_FORMATS_KEY, "{}");
         assertEquals(Collections.emptyMap(), cfg.getCustomNumberFormats());
         
         try {
-            cfg.setSetting(Configurable.CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE,
+            cfg.setSetting(MutableProcessingConfiguration.CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE,
                     "{ 'x': " + EpochMillisTemplateDateFormatFactory.class.getName() + "() }");
             fail();
         } catch (ConfigurationException e) {
@@ -1176,13 +1176,13 @@ public class ConfigurationTest extends TestCase {
             assertThat(e.getMessage(), containsString("@wrong"));
         }
         
-        cfg.setSetting(Configurable.CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE,
+        cfg.setSetting(MutableProcessingConfiguration.CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE,
                 "{ 'epoch': " + EpochMillisTemplateDateFormatFactory.class.getName() + "() }");
         assertEquals(
                 Collections.singletonMap("epoch", EpochMillisTemplateDateFormatFactory.INSTANCE),
                 cfg.getCustomDateFormats());
         
-        cfg.setSetting(Configurable.CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE,
+        cfg.setSetting(MutableProcessingConfiguration.CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE,
                 "{ "
                 + "'epoch': " + EpochMillisTemplateDateFormatFactory.class.getName() + "(), "
                 + "'epochDiv': " + EpochMillisDivTemplateDateFormatFactory.class.getName() + "()"
@@ -1193,11 +1193,11 @@ public class ConfigurationTest extends TestCase {
                         "epochDiv", EpochMillisDivTemplateDateFormatFactory.INSTANCE),
                 cfg.getCustomDateFormats());
         
-        cfg.setSetting(Configurable.CUSTOM_DATE_FORMATS_KEY, "{}");
+        cfg.setSetting(MutableProcessingConfiguration.CUSTOM_DATE_FORMATS_KEY, "{}");
         assertEquals(Collections.emptyMap(), cfg.getCustomDateFormats());
         
         try {
-            cfg.setSetting(Configurable.CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE,
+            cfg.setSetting(MutableProcessingConfiguration.CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE,
                     "{ 'x': " + HexTemplateNumberFormatFactory.class.getName() + "() }");
             fail();
         } catch (ConfigurationException e) {
@@ -1339,20 +1339,20 @@ public class ConfigurationTest extends TestCase {
         String defaultFileEncoding = System.getProperty("file.encoding");
         assertNotNull(defaultFileEncoding);
 
-        assertEquals(defaultFileEncoding, cfg.getDefaultEncoding());
+        assertEquals(defaultFileEncoding, cfg.getEncoding());
         assertFalse(cfg.isDefaultEncodingExplicitlySet());
 
         String nonDefault = defaultFileEncoding.equalsIgnoreCase("UTF-8") ? "ISO-8859-1" : "UTF-8";
-        cfg.setDefaultEncoding(nonDefault);
+        cfg.setEncoding(nonDefault);
         assertTrue(cfg.isDefaultEncodingExplicitlySet());
-        assertEquals(nonDefault, cfg.getDefaultEncoding());
+        assertEquals(nonDefault, cfg.getEncoding());
 
         cfg.unsetDefaultEncoding();
-        assertEquals(defaultFileEncoding, cfg.getDefaultEncoding());
+        assertEquals(defaultFileEncoding, cfg.getEncoding());
         assertFalse(cfg.isDefaultEncodingExplicitlySet());
 
-        cfg.setSetting(Configuration.DEFAULT_ENCODING_KEY, "JVM default");
-        assertEquals(defaultFileEncoding, cfg.getDefaultEncoding());
+        cfg.setSetting(Configuration.ENCODING_KEY, "JVM default");
+        assertEquals(defaultFileEncoding, cfg.getEncoding());
         assertTrue(cfg.isDefaultEncodingExplicitlySet());
     }
 
@@ -1421,7 +1421,7 @@ public class ConfigurationTest extends TestCase {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         Collection<String> names = cfg.getSettingNames(false);
         
-        for (Class<? extends Configurable> cfgableClass : new Class[] { Configuration.class, Configurable.class }) {
+        for (Class<? extends MutableProcessingConfiguration> cfgableClass : new Class[] { Configuration.class, MutableProcessingConfiguration.class }) {
             for (Field f : cfgableClass.getFields()) {
                 if (f.getName().endsWith("_KEY")) {
                     final Object name = f.get(null);
@@ -1441,7 +1441,7 @@ public class ConfigurationTest extends TestCase {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         Collection<String> names = cfg.getSettingNames(false);
         
-        for (Field f : Configurable.class.getFields()) {
+        for (Field f : MutableProcessingConfiguration.class.getFields()) {
             if (f.getName().endsWith("_KEY")) {
                 final Object name = f.get(null);
                 assertTrue("Missing setting name: " + name, names.contains(name));
@@ -1453,10 +1453,10 @@ public class ConfigurationTest extends TestCase {
     public void testSetSettingSupportsBothNamingConventions() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
-        cfg.setSetting(Configuration.DEFAULT_ENCODING_KEY_CAMEL_CASE, "UTF-16LE");
-        assertEquals("UTF-16LE", cfg.getDefaultEncoding());
-        cfg.setSetting(Configuration.DEFAULT_ENCODING_KEY_SNAKE_CASE, "UTF-8");
-        assertEquals("UTF-8", cfg.getDefaultEncoding());
+        cfg.setSetting(Configuration.ENCODING_KEY_CAMEL_CASE, "UTF-16LE");
+        assertEquals("UTF-16LE", cfg.getEncoding());
+        cfg.setSetting(Configuration.ENCODING_KEY_SNAKE_CASE, "UTF-8");
+        assertEquals("UTF-8", cfg.getEncoding());
         
         for (String nameCC : cfg.getSettingNames(true)) {
             for (String value : new String[] { "1", "default", "true" }) {

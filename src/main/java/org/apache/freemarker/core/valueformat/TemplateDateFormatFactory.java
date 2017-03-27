@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.apache.freemarker.core.Configurable;
+import org.apache.freemarker.core.MutableProcessingConfiguration;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.model.TemplateDateModel;
@@ -32,7 +32,7 @@ import org.apache.freemarker.core.model.TemplateDateModel;
  * Factory for a certain kind of date/time/dateTime formatting ({@link TemplateDateFormat}). Usually a singleton
  * (one-per-VM or one-per-{@link Configuration}), and so must be thread-safe.
  * 
- * @see Configurable#setCustomDateFormats(java.util.Map)
+ * @see MutableProcessingConfiguration#setCustomDateFormats(java.util.Map)
  * 
  * @since 2.3.24
  */
@@ -50,7 +50,7 @@ public abstract class TemplateDateFormatFactory extends TemplateValueFormatFacto
      * 
      * @param params
      *            The string that further describes how the format should look. For example, when the
-     *            {@link Configurable#getDateFormat() dateFormat} is {@code "@fooBar 1, 2"}, then it will be
+     *            {@link MutableProcessingConfiguration#getDateFormat() dateFormat} is {@code "@fooBar 1, 2"}, then it will be
      *            {@code "1, 2"} (and {@code "@fooBar"} selects the factory). The format of this string is up to the
      *            {@link TemplateDateFormatFactory} implementation. Not {@code null}, often an empty string.
      * @param dateType

@@ -35,7 +35,7 @@ public class TemplateConstructorsTest {
     @Test
     public void test() throws IOException {
         final Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        //cfg.setDefaultEncoding("ISO-8859-1");
+        //cfg.setEncoding("ISO-8859-1");
         
         final String name = "foo/bar.ftl";
         final String sourceName = "foo/bar_de.ftl";

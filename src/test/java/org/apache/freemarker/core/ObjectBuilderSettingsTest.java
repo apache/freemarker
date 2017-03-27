@@ -357,17 +357,17 @@ public class ObjectBuilderSettingsTest {
         
         {
             Properties props = new Properties();
-            props.setProperty(Configurable.OBJECT_WRAPPER_KEY,
+            props.setProperty(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY,
                     "org.apache.freemarker.core.model.impl.DefaultObjectWrapper(3.0.0)");
-            props.setProperty(Configurable.ARITHMETIC_ENGINE_KEY,
+            props.setProperty(MutableProcessingConfiguration.ARITHMETIC_ENGINE_KEY,
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyArithmeticEngine");
-            props.setProperty(Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY,
+            props.setProperty(MutableProcessingConfiguration.TEMPLATE_EXCEPTION_HANDLER_KEY,
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyTemplateExceptionHandler");
             props.setProperty(Configuration.CACHE_STORAGE_KEY,
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyCacheStorage()");
-            props.setProperty(Configurable.NEW_BUILTIN_CLASS_RESOLVER_KEY,
+            props.setProperty(MutableProcessingConfiguration.NEW_BUILTIN_CLASS_RESOLVER_KEY,
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyNewBuiltinClassResolver()");
-            props.setProperty(Configuration.DEFAULT_ENCODING_KEY, "utf-8");
+            props.setProperty(Configuration.ENCODING_KEY, "utf-8");
             props.setProperty(Configuration.TEMPLATE_LOADER_KEY,
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyTemplateLoader()");
             cfg.setSettings(props);
@@ -379,19 +379,19 @@ public class ObjectBuilderSettingsTest {
             assertEquals(DummyCacheStorage.class, cfg.getCacheStorage().getClass());
             assertEquals(DummyNewBuiltinClassResolver.class, cfg.getNewBuiltinClassResolver().getClass());
             assertEquals(DummyTemplateLoader.class, cfg.getTemplateLoader().getClass());
-            assertEquals("utf-8", cfg.getDefaultEncoding());
+            assertEquals("utf-8", cfg.getEncoding());
         }
         
         {
             Properties props = new Properties();
-            props.setProperty(Configurable.OBJECT_WRAPPER_KEY, "defAult");
-            props.setProperty(Configurable.ARITHMETIC_ENGINE_KEY,
+            props.setProperty(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY, "defAult");
+            props.setProperty(MutableProcessingConfiguration.ARITHMETIC_ENGINE_KEY,
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyArithmeticEngine(x = 1)");
-            props.setProperty(Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY,
+            props.setProperty(MutableProcessingConfiguration.TEMPLATE_EXCEPTION_HANDLER_KEY,
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyTemplateExceptionHandler(x = 1)");
             props.setProperty(Configuration.CACHE_STORAGE_KEY,
                     "soft: 500, strong: 100");
-            props.setProperty(Configurable.NEW_BUILTIN_CLASS_RESOLVER_KEY,
+            props.setProperty(MutableProcessingConfiguration.NEW_BUILTIN_CLASS_RESOLVER_KEY,
                     "allows_nothing");
             cfg.setSettings(props);
             assertEquals(DefaultObjectWrapper.class, cfg.getObjectWrapper().getClass());
@@ -401,14 +401,14 @@ public class ObjectBuilderSettingsTest {
                     ((DefaultObjectWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
             assertEquals(500, ((MruCacheStorage) cfg.getCacheStorage()).getSoftSizeLimit());
             assertEquals(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER, cfg.getNewBuiltinClassResolver());
-            assertEquals("utf-8", cfg.getDefaultEncoding());
+            assertEquals("utf-8", cfg.getEncoding());
         }
 
         {
             Properties props = new Properties();
-            props.setProperty(Configurable.OBJECT_WRAPPER_KEY, "Default");
-            props.setProperty(Configurable.ARITHMETIC_ENGINE_KEY, "bigdecimal");
-            props.setProperty(Configurable.TEMPLATE_EXCEPTION_HANDLER_KEY, "rethrow");
+            props.setProperty(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY, "Default");
+            props.setProperty(MutableProcessingConfiguration.ARITHMETIC_ENGINE_KEY, "bigdecimal");
+            props.setProperty(MutableProcessingConfiguration.TEMPLATE_EXCEPTION_HANDLER_KEY, "rethrow");
             cfg.setSettings(props);
             assertEquals(DefaultObjectWrapper.class, cfg.getObjectWrapper().getClass());
             assertSame(BigDecimalArithmeticEngine.INSTANCE, cfg.getArithmeticEngine());
@@ -419,7 +419,7 @@ public class ObjectBuilderSettingsTest {
         
         {
             Properties props = new Properties();
-            props.setProperty(Configurable.OBJECT_WRAPPER_KEY, "DefaultObjectWrapper(3.0.0)");
+            props.setProperty(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY, "DefaultObjectWrapper(3.0.0)");
             cfg.setSettings(props);
             assertEquals(DefaultObjectWrapper.class, cfg.getObjectWrapper().getClass());
             assertEquals(

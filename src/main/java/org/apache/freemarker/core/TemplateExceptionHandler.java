@@ -27,7 +27,7 @@ import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Used for the {@code template_exception_handler} configuration setting;
- * see {@link Configurable#setTemplateExceptionHandler(TemplateExceptionHandler)} for more.
+ * see {@link MutableProcessingConfiguration#setTemplateExceptionHandler(TemplateExceptionHandler)} for more.
  */
 public interface TemplateExceptionHandler {
     

@@ -273,7 +273,7 @@ public class DefaultTemplateResolverTest {
     public void testWrongEncodingReload() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setLocale(Locale.US);
-        cfg.setDefaultEncoding("utf-8");
+        cfg.setEncoding("utf-8");
         
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putBinaryTemplate("utf-8_en.ftl", "<#ftl encoding='utf-8'>Béka");
@@ -320,7 +320,7 @@ public class DefaultTemplateResolverTest {
     public void testNoWrongEncodingForTemplateLoader2WithReader() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setLocale(Locale.US);
-        cfg.setDefaultEncoding("utf-8");
+        cfg.setEncoding("utf-8");
         
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTextTemplate("foo_en.ftl", "<#ftl encoding='utf-8'>ő");

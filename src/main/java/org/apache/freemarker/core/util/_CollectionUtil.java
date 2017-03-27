@@ -25,8 +25,8 @@ public class _CollectionUtil {
     private _CollectionUtil() { }
 
     public static final Object[] EMPTY_OBJECT_ARRAY = new Object[] { };
-
     public static final Class[] EMPTY_CLASS_ARRAY = new Class[] { };
+    public static final String[] EMPTY_STRING_ARRAY = new String[] { };
 
     /**
      * @since 2.3.22

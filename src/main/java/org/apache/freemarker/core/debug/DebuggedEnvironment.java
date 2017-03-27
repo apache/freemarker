@@ -21,6 +21,8 @@ package org.apache.freemarker.core.debug;
 
 import java.rmi.RemoteException;
 
+import org.apache.freemarker.core.MutableProcessingConfiguration;
+
 /**
  * Represents the debugger-side mirror of a debugged 
  * {@link org.apache.freemarker.core.Environment} object in the remote VM. This interface
@@ -32,7 +34,7 @@ import java.rmi.RemoteException;
  * <p>The debug model for the configuration supports key "sharedVariables".
  * <p>Additionally, all of the debug models for environment, template, and 
  * configuration also support all the setting keys of 
- * {@link org.apache.freemarker.core.Configurable} objects. 
+ * {@link MutableProcessingConfiguration} objects.
 
  */
 public interface DebuggedEnvironment extends DebugModel {

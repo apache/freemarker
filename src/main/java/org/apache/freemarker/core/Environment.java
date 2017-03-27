@@ -99,9 +99,9 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * If you need to modify or read this object before or after the <tt>process</tt> call, use
  * {@link Template#createProcessingEnvironment(Object rootMap, Writer out, ObjectWrapper wrapper)}
  */
-public final class Environment extends Configurable {
+public final class Environment extends MutableProcessingConfiguration<Environment> implements CustomStateScope {
     
-    private static final ThreadLocal threadEnv = new ThreadLocal();
+    private static final ThreadLocal<Environment> TLS_ENVIRONMENT = new ThreadLocal();
 
     private static final Logger LOG = _CoreLogs.RUNTIME;
     private static final Logger LOG_ATTEMPT = _CoreLogs.ATTEMPT;
@@ -125,6 +125,7 @@ public final class Environment extends Configurable {
 
     private TemplateNumberFormat cachedTemplateNumberFormat;
     private Map<String, TemplateNumberFormat> cachedTemplateNumberFormats;
+    private Map<CustomStateKey, Object> customStateMap;
 
     /**
      * Stores the date/time/date-time formatters that are used when no format is explicitly given at the place of
@@ -196,11 +197,19 @@ public final class Environment extends Configurable {
      * current thread.
      */
     public static Environment getCurrentEnvironment() {
-        return (Environment) threadEnv.get();
+        return TLS_ENVIRONMENT.get();
+    }
+
+    public static Environment getCurrentEnvironmentNotNull() {
+        Environment currentEnvironment = getCurrentEnvironment();
+        if (currentEnvironment == null) {
+            throw new IllegalStateException("There's no FreeMarker Environemnt in this this thread.");
+        }
+        return currentEnvironment;
     }
 
     static void setCurrentEnvironment(Environment env) {
-        threadEnv.set(env);
+        TLS_ENVIRONMENT.set(env);
     }
 
     public Environment(Template template, final TemplateHashModel rootDataModel, Writer out) {
@@ -242,6 +251,14 @@ public final class Environment extends Configurable {
         return ln == 0 ? getMainTemplate() : instructionStack[ln - 1].getTemplate();
     }
 
+    public Template getCurrentTemplateNotNull() {
+        Template currentTemplate = getCurrentTemplate();
+        if (currentTemplate == null) {
+            throw new IllegalStateException("There's no current template at the moment.");
+        }
+        return currentTemplate;
+    }
+
     /**
      * Gets the currently executing <em>custom</em> directive's call place information, or {@code null} if there's no
      * executing custom directive. This currently only works for calls made from templates with the {@code <@...>}
@@ -281,8 +298,8 @@ public final class Environment extends Configurable {
      * Processes the template to which this environment belongs to.
      */
     public void process() throws TemplateException, IOException {
-        Object savedEnv = threadEnv.get();
-        threadEnv.set(this);
+        Environment savedEnv = TLS_ENVIRONMENT.get();
+        TLS_ENVIRONMENT.set(this);
         try {
             // Cached values from a previous execution are possibly outdated.
             clearCachedValues();
@@ -298,7 +315,7 @@ public final class Environment extends Configurable {
                 clearCachedValues();
             }
         } finally {
-            threadEnv.set(savedEnv);
+            TLS_ENVIRONMENT.set(savedEnv);
         }
     }
 
@@ -1534,15 +1551,15 @@ public final class Environment extends Configurable {
             String settingValue;
             switch (dateType) {
             case TemplateDateModel.TIME:
-                settingName = Configurable.TIME_FORMAT_KEY;
+                settingName = MutableProcessingConfiguration.TIME_FORMAT_KEY;
                 settingValue = getTimeFormat();
                 break;
             case TemplateDateModel.DATE:
-                settingName = Configurable.DATE_FORMAT_KEY;
+                settingName = MutableProcessingConfiguration.DATE_FORMAT_KEY;
                 settingValue = getDateFormat();
                 break;
             case TemplateDateModel.DATETIME:
-                settingName = Configurable.DATETIME_FORMAT_KEY;
+                settingName = MutableProcessingConfiguration.DATETIME_FORMAT_KEY;
                 settingValue = getDateTimeFormat();
                 break;
             default:
@@ -2647,44 +2664,22 @@ public final class Environment extends Configurable {
         return currentNamespace.getTemplate().getDefaultNS();
     }
 
-    private IdentityHashMap<Object, Object> customStateVariables;
-
-    /**
-     * Returns the value of a custom state variable, or {@code null} if it's missing; see
-     * {@link #setCustomState(Object, Object)} for more.
-     * 
-     * @since 2.3.24
-     */
-    public Object getCustomState(Object identityKey) {
-        if (customStateVariables == null) {
-            return null;
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T getCustomState(CustomStateKey<T> customStateKey) {
+        if (customStateMap == null) {
+            customStateMap = new IdentityHashMap<>();
         }
-        return customStateVariables.get(identityKey);
-    }
-
-    /**
-     * Sets the value of a custom state variable. Custom state variables meant to be used by
-     * {@link TemplateNumberFormatFactory}-es, {@link TemplateDateFormatFactory}-es, and similar user-implementable,
-     * pluggable objects, which want to maintain an {@link Environment}-scoped state (such as a cache).
-     * 
-     * @param identityKey
-     *            The key that identifies the variable, by its object identity (not by {@link Object#equals(Object)}).
-     *            This should be something like a {@code private static final Object CUSTOM_STATE_KEY = new Object();}
-     *            in the class that needs this state variable.
-     * @param value
-     *            The value of the variable. Can be anything, even {@code null}.
-     * 
-     * @return The previous value of the variable, or {@code null} if the variable didn't exist.
-     * 
-     * @since 2.3.24
-     */
-    public Object setCustomState(Object identityKey, Object value) {
-        IdentityHashMap<Object, Object> customStateVariables = this.customStateVariables;
-        if (customStateVariables == null) {
-            customStateVariables = new IdentityHashMap<>();
-            this.customStateVariables = customStateVariables;
+        T customState = (T) customStateMap.get(customStateKey);
+        if (customState == null) {
+            customState = customStateKey.create();
+            if (customState == null) {
+                throw new IllegalStateException("CustomStateKey.create() must not return null (for key: "
+                        + customStateKey + ")");
+            }
+            customStateMap.put(customStateKey, customState);
         }
-        return customStateVariables.put(identityKey, value);
+        return customState;
     }
 
     final class NestedElementTemplateDirectiveBody implements TemplateDirectiveBody {

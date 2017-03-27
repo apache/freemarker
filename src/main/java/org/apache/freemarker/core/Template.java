@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.freemarker.core.debug._DebuggerService;
 import org.apache.freemarker.core.model.ObjectWrapper;
@@ -72,7 +73,7 @@ import org.apache.freemarker.core.util._NullArgumentException;
  * shared {@link Configuration}, and you are using {@link Configuration#getTemplate(String)} (or its overloads), then
  * use {@link Configuration#setTemplateConfigurations(org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory)} to achieve that.
  */
-public class Template extends Configurable {
+public class Template extends MutableProcessingConfiguration<Template> implements CustomStateScope {
     public static final String DEFAULT_NAMESPACE_PREFIX = "D";
     public static final String NO_NS_PREFIX = "N";
 
@@ -94,6 +95,9 @@ public class Template extends Configurable {
     private Map prefixToNamespaceURILookup = new HashMap();
     private Map namespaceURIToPrefixLookup = new HashMap();
     private Version templateLanguageVersion;
+
+    private final Object lock = new Object();
+    private final ConcurrentHashMap<CustomStateKey, Object> customStateMap = new ConcurrentHashMap<>(0);
 
     /**
      * A prime constructor to which all other constructors should
@@ -206,7 +210,7 @@ public class Template extends Configurable {
      *            practically just overrides some of the parser settings, as the others are inherited from the
      *            {@link Configuration}. Note that if this is a {@link TemplateConfiguration}, you will also want to
      *            call {@link TemplateConfiguration#apply(Template)} on the resulting {@link Template} so that
-     *            {@link Configurable} settings will be set too, because this constructor only uses it as a
+     *            {@link MutableProcessingConfiguration} settings will be set too, because this constructor only uses it as a
      *            {@link ParserConfiguration}.
      * @param encoding
      *            Same as in {@link #Template(String, String, Reader, Configuration, String)}.
@@ -425,7 +429,7 @@ public class Template extends Configurable {
     * @param dataModel the holder of the variables visible from all templates; see {@link #process(Object, Writer)} for
     *     more details.
     * @param wrapper The {@link ObjectWrapper} to use to wrap objects into {@link TemplateModel}
-    *     instances. Normally you left it {@code null}, in which case {@link Configurable#getObjectWrapper()} will be
+    *     instances. Normally you left it {@code null}, in which case {@link MutableProcessingConfiguration#getObjectWrapper()} will be
     *     used.
     * @param out The {@link Writer} where the output of the template will go; see {@link #process(Object, Writer)} for
     *     more details.
@@ -926,6 +930,26 @@ public class Template extends Configurable {
             return null;
         }
         return prefix + ":" + localName;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T getCustomState(CustomStateKey<T> customStateKey) {
+        T customState = (T) customStateMap.get(customStateKey);
+        if (customState == null) {
+            synchronized (lock) {
+                customState = (T) customStateMap.get(customStateKey);
+                if (customState == null) {
+                    customState = customStateKey.create();
+                    if (customState == null) {
+                        throw new IllegalStateException("CustomStateKey.create() must not return null (for key: "
+                                + customStateKey + ")");
+                    }
+                    customStateMap.put(customStateKey, customState);
+                }
+            }
+        }
+        return customState;
     }
 
 }

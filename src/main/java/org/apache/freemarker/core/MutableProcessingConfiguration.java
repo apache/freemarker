@@ -68,6 +68,7 @@ import org.apache.freemarker.core.util.FTLUtil;
 import org.apache.freemarker.core.util.GenericParseException;
 import org.apache.freemarker.core.util.OptInTemplateClassResolver;
 import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._CollectionUtil;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._SortedArraySet;
 import org.apache.freemarker.core.util._StringUtil;
@@ -80,19 +81,20 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
  * {@link org.apache.freemarker.core.Template}, and {@link Environment} classes.
  * It provides settings that are common to each of them. FreeMarker
  * uses a three-level setting hierarchy - the return value of every setting
- * getter method on <code>Configurable</code> objects inherits its value from its parent 
- * <code>Configurable</code> object, unless explicitly overridden by a call to a 
+ * getter method on <code>MutableProcessingConfiguration</code> objects inherits its value from its parent
+ * <code>MutableProcessingConfiguration</code> object, unless explicitly overridden by a call to a
  * corresponding setter method on the object itself. The parent of an 
  * <code>Environment</code> object is a <code>Template</code> object, the
  * parent of a <code>Template</code> object is a <code>Configuration</code>
  * object.
  */
-public class Configurable {
+public abstract class MutableProcessingConfiguration<SelfT extends MutableProcessingConfiguration<SelfT>>
+        implements ProcessingConfiguration {
     static final String C_TRUE_FALSE = "true,false";
     
-    static final String NULL = "null";
-    static final String DEFAULT = "default";
-    static final String JVM_DEFAULT = "JVM default";
+    public static final String NULL_VALUE = "null";
+    public static final String DEFAULT_VALUE = "default";
+    public static final String JVM_DEFAULT_VALUE = "JVM default";
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String LOCALE_KEY_SNAKE_CASE = "locale";
@@ -318,8 +320,8 @@ public class Configurable {
         URL_ESCAPING_CHARSET_KEY_CAMEL_CASE
     };
 
-    private Configurable parent;
-    private HashMap<Object, Object> customAttributes;
+    private MutableProcessingConfiguration parent;
+    private Map<Object, Object> customAttributes;
     
     private Locale locale;
     private String numberFormat;
@@ -357,7 +359,7 @@ public class Configurable {
      * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
      * Called by the {@link Configuration} constructor.
      */
-    protected Configurable(Version incompatibleImprovements) {
+    protected MutableProcessingConfiguration(Version incompatibleImprovements) {
         _CoreAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         parent = null;
         locale = Configuration.getDefaultLocale();
@@ -378,9 +380,7 @@ public class Configurable {
         // outputEncoding and urlEscapingCharset defaults to null,
         // which means "not specified"
         setBooleanFormat(C_TRUE_FALSE);
-        
-        customAttributes = new HashMap();
-        
+
         customDateFormats = Collections.emptyMap();
         customNumberFormats = Collections.emptyMap();
         
@@ -393,19 +393,18 @@ public class Configurable {
 
     /**
      * Creates a new instance. Normally you do not need to use this constructor,
-     * as you don't use <code>Configurable</code> directly, but its subclasses.
+     * as you don't use <code>MutableProcessingConfiguration</code> directly, but its subclasses.
      */
-    protected Configurable(Configurable parent) {
+    protected MutableProcessingConfiguration(MutableProcessingConfiguration parent) {
         this.parent = parent;
         locale = null;
         numberFormat = null;
         templateExceptionHandler = null;
-        customAttributes = new HashMap(0);
     }
     
     /**
-     * Returns the parent {@link Configurable} object of this object. The parent stores the default setting values for
-     * this {@link Configurable}. For example, the parent of a {@link org.apache.freemarker.core.Template} object is a
+     * Returns the parent {@link MutableProcessingConfiguration} object of this object. The parent stores the default setting values for
+     * this {@link MutableProcessingConfiguration}. For example, the parent of a {@link org.apache.freemarker.core.Template} object is a
      * {@link Configuration} object, so values not specified on {@link Template}-level are get from the
      * {@link Configuration} object.
      * 
@@ -418,10 +417,10 @@ public class Configurable {
      * {@link Environment} is during template execution, unless you set {@code incompatible_improvements} to 2.3.22 or
      * higher.
      *
-     * @return The parent {@link Configurable} object, or {@code null} if this is the root {@link Configurable} object
+     * @return The parent {@link MutableProcessingConfiguration} object, or {@code null} if this is the root {@link MutableProcessingConfiguration} object
      *         (i.e, if it's the {@link Configuration} object).
      */
-    public final Configurable getParent() {
+    public final MutableProcessingConfiguration getParent() {
         return parent;
     }
     
@@ -430,7 +429,7 @@ public class Configurable {
      * template - the included template becomes the parent configurable during
      * its evaluation.
      */
-    void setParent(Configurable parent) {
+    void setParent(MutableProcessingConfiguration parent) {
         this.parent = parent;
     }
     
@@ -446,9 +445,14 @@ public class Configurable {
     }
 
     /**
-     * Returns the assumed locale when searching for template files with no
-     * explicit requested locale. Defaults to system locale.
+     * Fluent API equivalent of {@link #setLocale(Locale)}
      */
+    public SelfT locale(Locale value) {
+        setLocale(value);
+        return self();
+    }
+
+    @Override
     public Locale getLocale() {
         return locale != null ? locale : parent.getLocale();
     }
@@ -458,6 +462,7 @@ public class Configurable {
      *  
      * @since 2.3.24
      */
+    @Override
     public boolean isLocaleSet() {
         return locale != null;
     }
@@ -479,8 +484,17 @@ public class Configurable {
     }
 
     /**
+     * Fluent API equivalent of {@link #setTimeZone(TimeZone)}
+     */
+    public SelfT timeZone(TimeZone value) {
+        setTimeZone(value);
+        return self();
+    }
+
+    /**
      * The getter pair of {@link #setTimeZone(TimeZone)}. 
      */
+    @Override
     public TimeZone getTimeZone() {
         return timeZone != null ? timeZone : parent.getTimeZone();
     }
@@ -490,6 +504,7 @@ public class Configurable {
      *  
      * @since 2.3.24
      */
+    @Override
     public boolean isTimeZoneSet() {
         return timeZone != null;
     }
@@ -559,7 +574,16 @@ public class Configurable {
         sqlDataAndTimeTimeZone = tz;
         sqlDataAndTimeTimeZoneSet = true;
     }
-    
+
+    /**
+     * Fluent API equivalent of {@link #setSQLDateAndTimeTimeZone(TimeZone)}
+     */
+    public SelfT sqlDateAndTimeTimeZone(TimeZone value) {
+        setSQLDateAndTimeTimeZone(value);
+        return self();
+    }
+
+
     /**
      * The getter pair of {@link #setSQLDateAndTimeTimeZone(TimeZone)}.
      * 
@@ -569,6 +593,7 @@ public class Configurable {
      * 
      * @since 2.3.21
      */
+    @Override
     public TimeZone getSQLDateAndTimeTimeZone() {
         return sqlDataAndTimeTimeZoneSet
                 ? sqlDataAndTimeTimeZone
@@ -580,6 +605,7 @@ public class Configurable {
      *  
      * @since 2.3.24
      */
+    @Override
     public boolean isSQLDateAndTimeTimeZoneSet() {
         return sqlDataAndTimeTimeZoneSet;
     }
@@ -613,10 +639,19 @@ public class Configurable {
         _NullArgumentException.check("numberFormat", numberFormat);
         this.numberFormat = numberFormat;
     }
-    
+
+    /**
+     * Fluent API equivalent of {@link #setNumberFormat(String)}
+     */
+    public SelfT numberFormat(String value) {
+        setNumberFormat(value);
+        return self();
+    }
+
     /**
      * Getter pair of {@link #setNumberFormat(String)}. 
      */
+    @Override
     public String getNumberFormat() {
         return numberFormat != null ? numberFormat : parent.getNumberFormat();
     }
@@ -626,41 +661,31 @@ public class Configurable {
      *  
      * @since 2.3.24
      */
+    @Override
     public boolean isNumberFormatSet() {
         return numberFormat != null;
     }
     
     /**
      * Getter pair of {@link #setCustomNumberFormats(Map)}; do not modify the returned {@link Map}! To be consistent
-     * with other setting getters, if this setting was set directly on this {@link Configurable} object, this simply
-     * returns that value, otherwise it returns the value from the parent {@link Configurable}. So beware, the returned
+     * with other setting getters, if this setting was set directly on this {@link MutableProcessingConfiguration} object, this simply
+     * returns that value, otherwise it returns the value from the parent {@link MutableProcessingConfiguration}. So beware, the returned
      * value doesn't reflect the {@link Map} key granularity fallback logic that FreeMarker actually uses for this
      * setting (for that, use {@link #getCustomNumberFormat(String)}). The returned value isn't a snapshot; it may or
-     * may not shows the changes later made to this setting on this {@link Configurable} level (but usually it's well
+     * may not shows the changes later made to this setting on this {@link MutableProcessingConfiguration} level (but usually it's well
      * defined if until what point settings are possibly modified).
      * 
      * <p>
      * The return value is never {@code null}; called on the {@link Configuration} (top) level, it defaults to an empty
      * {@link Map}.
-     * 
-     * @see #getCustomNumberFormatsWithoutFallback()
-     * 
+     *
      * @since 2.3.24
      */
+    @Override
     public Map<String, ? extends TemplateNumberFormatFactory> getCustomNumberFormats() {
         return customNumberFormats == null ? parent.getCustomNumberFormats() : customNumberFormats;
     }
 
-    /**
-     * Like {@link #getCustomNumberFormats()}, but doesn't fall back to the parent {@link Configurable}, nor does it
-     * provide a non-{@code null} default when called as the method of a {@link Configuration}.
-     * 
-     * @since 2.3.25
-     */
-    public Map<String, ? extends TemplateNumberFormatFactory> getCustomNumberFormatsWithoutFallback() {
-        return customNumberFormats;
-    }
-    
     /**
      * Associates names with formatter factories, which then can be referred by the {@link #setNumberFormat(String)
      * number_format} setting with values starting with <code>@<i>name</i></code>. Beware, if you specify any custom
@@ -680,7 +705,15 @@ public class Configurable {
         validateFormatNames(customNumberFormats.keySet());
         this.customNumberFormats = customNumberFormats;
     }
-    
+
+    /**
+     * Fluent API equivalent of {@link #setCustomNumberFormats(Map)}
+     */
+    public SelfT customNumberFormats(Map<String, ? extends TemplateNumberFormatFactory> value) {
+        setCustomNumberFormats(value);
+        return self();
+    }
+
     private void validateFormatNames(Set<String> keySet) {
         for (String name : keySet) {
             if (name.length() == 0) {
@@ -709,6 +742,7 @@ public class Configurable {
      *  
      * @since 2.3.24
      */
+    @Override
     public boolean isCustomNumberFormatsSet() {
         return customNumberFormats != null;
     }
@@ -774,10 +808,19 @@ public class Configurable {
             falseStringValue = booleanFormat.substring(commaIdx + 1);
         }
     }
+
+    /**
+     * Fluent API equivalent of {@link #setBooleanFormat(String)}
+     */
+    public SelfT booleanFormat(String value) {
+        setBooleanFormat(value);
+        return self();
+    }
     
     /**
      * The getter pair of {@link #setBooleanFormat(String)}.
      */
+    @Override
     public String getBooleanFormat() {
         return booleanFormat != null ? booleanFormat : parent.getBooleanFormat(); 
     }
@@ -787,6 +830,7 @@ public class Configurable {
      *  
      * @since 2.3.24
      */
+    @Override
     public boolean isBooleanFormatSet() {
         return booleanFormat != null;
     }
@@ -874,8 +918,17 @@ public class Configurable {
     }
 
     /**
+     * Fluent API equivalent of {@link #setTimeFormat(String)}
+     */
+    public SelfT timeFormat(String value) {
+        setTimeFormat(value);
+        return self();
+    }
+
+    /**
      * The getter pair of {@link #setTimeFormat(String)}.
      */
+    @Override
     public String getTimeFormat() {
         return timeFormat != null ? timeFormat : parent.getTimeFormat();
     }
@@ -885,6 +938,7 @@ public class Configurable {
      *  
      * @since 2.3.24
      */
+    @Override
     public boolean isTimeFormatSet() {
         return timeFormat != null;
     }
@@ -903,8 +957,17 @@ public class Configurable {
     }
 
     /**
+     * Fluent API equivalent of {@link #setDateFormat(String)}
+     */
+    public SelfT dateFormat(String value) {
+        setDateFormat(value);
+        return self();
+    }
+
+    /**
      * The getter pair of {@link #setDateFormat(String)}.
      */
+    @Override
     public String getDateFormat() {
         return dateFormat != null ? dateFormat : parent.getDateFormat();
     }
@@ -914,6 +977,7 @@ public class Configurable {
      *  
      * @since 2.3.24
      */
+    @Override
     public boolean isDateFormatSet() {
         return dateFormat != null;
     }
@@ -1010,8 +1074,17 @@ public class Configurable {
     }
 
     /**
+     * Fluent API equivalent of {@link #setDateTimeFormat(String)}
+     */
+    public SelfT dateTimeFormat(String value) {
+        setDateTimeFormat(value);
+        return self();
+    }
+
+    /**
      * The getter pair of {@link #setDateTimeFormat(String)}.
      */
+    @Override
     public String getDateTimeFormat() {
         return dateTimeFormat != null ? dateTimeFormat : parent.getDateTimeFormat();
     }
@@ -1021,41 +1094,31 @@ public class Configurable {
      *  
      * @since 2.3.24
      */
+    @Override
     public boolean isDateTimeFormatSet() {
         return dateTimeFormat != null;
     }
     
     /**
      * Getter pair of {@link #setCustomDateFormats(Map)}; do not modify the returned {@link Map}! To be consistent with
-     * other setting getters, if this setting was set directly on this {@link Configurable} object, this simply returns
-     * that value, otherwise it returns the value from the parent {@link Configurable}. So beware, the returned value
+     * other setting getters, if this setting was set directly on this {@link MutableProcessingConfiguration} object, this simply returns
+     * that value, otherwise it returns the value from the parent {@link MutableProcessingConfiguration}. So beware, the returned value
      * doesn't reflect the {@link Map} key granularity fallback logic that FreeMarker actually uses for this setting
      * (for that, use {@link #getCustomDateFormat(String)}). The returned value isn't a snapshot; it may or may not
-     * shows the changes later made to this setting on this {@link Configurable} level (but usually it's well defined if
+     * shows the changes later made to this setting on this {@link MutableProcessingConfiguration} level (but usually it's well defined if
      * until what point settings are possibly modified).
      * 
      * <p>
      * The return value is never {@code null}; called on the {@link Configuration} (top) level, it defaults to an empty
      * {@link Map}.
      * 
-     * @see #getCustomDateFormatsWithoutFallback()
-     * 
      * @since 2.3.24
      */
+    @Override
     public Map<String, ? extends TemplateDateFormatFactory> getCustomDateFormats() {
         return customDateFormats == null ? parent.getCustomDateFormats() : customDateFormats;
     }
 
-    /**
-     * Like {@link #getCustomDateFormats()}, but doesn't fall back to the parent {@link Configurable}, nor does it
-     * provide a non-{@code null} default when called as the method of a {@link Configuration}.
-     * 
-     * @since 2.3.25
-     */
-    public Map<String, ? extends TemplateDateFormatFactory> getCustomDateFormatsWithoutFallback() {
-        return customDateFormats;
-    }
-    
     /**
      * Associates names with formatter factories, which then can be referred by the {@link #setDateTimeFormat(String)
      * date_format}, {@link #setDateTimeFormat(String) time_format}, and {@link #setDateTimeFormat(String)
@@ -1076,12 +1139,21 @@ public class Configurable {
         validateFormatNames(customDateFormats.keySet());
         this.customDateFormats = customDateFormats;
     }
-    
+
+    /**
+     * Fluent API equivalent of {@link #setCustomDateFormats(Map)}
+     */
+    public SelfT customDateFormats(Map<String, ? extends TemplateDateFormatFactory> value) {
+        setCustomDateFormats(value);
+        return self();
+    }
+
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
      * 
      * @since 2.3.24
      */
+    @Override
     public boolean isCustomDateFormatsSet() {
         return customDateFormats != null;
     }
@@ -1128,8 +1200,17 @@ public class Configurable {
     }
 
     /**
+     * Fluent API equivalent of {@link #setTemplateExceptionHandler(TemplateExceptionHandler)}
+     */
+    public SelfT templateExceptionHandler(TemplateExceptionHandler value) {
+        setTemplateExceptionHandler(value);
+        return self();
+    }
+
+    /**
      * The getter pair of {@link #setTemplateExceptionHandler(TemplateExceptionHandler)}.
      */
+    @Override
     public TemplateExceptionHandler getTemplateExceptionHandler() {
         return templateExceptionHandler != null
                 ? templateExceptionHandler : parent.getTemplateExceptionHandler();
@@ -1140,6 +1221,7 @@ public class Configurable {
      *  
      * @since 2.3.24
      */
+    @Override
     public boolean isTemplateExceptionHandlerSet() {
         return templateExceptionHandler != null;
     }
@@ -1154,8 +1236,17 @@ public class Configurable {
     }
 
     /**
+     * Fluent API equivalent of {@link #setArithmeticEngine(ArithmeticEngine)}
+     */
+    public SelfT arithmeticEngine(ArithmeticEngine value) {
+        setArithmeticEngine(value);
+        return self();
+    }
+
+    /**
      * The getter pair of {@link #setArithmeticEngine(ArithmeticEngine)}.
      */
+    @Override
     public ArithmeticEngine getArithmeticEngine() {
         return arithmeticEngine != null
                 ? arithmeticEngine : parent.getArithmeticEngine();
@@ -1166,6 +1257,7 @@ public class Configurable {
      *  
      * @since 2.3.24
      */
+    @Override
     public boolean isArithmeticEngineSet() {
         return arithmeticEngine != null;
     }
@@ -1180,8 +1272,17 @@ public class Configurable {
     }
 
     /**
+     * Fluent API equivalent of {@link #setObjectWrapper(ObjectWrapper)}
+     */
+    public SelfT objectWrapper(ObjectWrapper value) {
+        setObjectWrapper(value);
+        return self();
+    }
+
+    /**
      * The getter pair of {@link #setObjectWrapper(ObjectWrapper)}.
      */
+    @Override
     public ObjectWrapper getObjectWrapper() {
         return objectWrapper != null
                 ? objectWrapper : parent.getObjectWrapper();
@@ -1192,6 +1293,7 @@ public class Configurable {
      *  
      * @since 2.3.24
      */
+    @Override
     public boolean isObjectWrapperSet() {
         return objectWrapper != null;
     }
@@ -1208,7 +1310,16 @@ public class Configurable {
         this.outputEncoding = outputEncoding;
         outputEncodingSet = true;
     }
-    
+
+    /**
+     * Fluent API equivalent of {@link #setOutputEncoding(String)}
+     */
+    public SelfT outputEncoding(String value) {
+        setOutputEncoding(value);
+        return self();
+    }
+
+    @Override
     public String getOutputEncoding() {
         return outputEncodingSet
                 ? outputEncoding
@@ -1220,6 +1331,7 @@ public class Configurable {
      *  
      * @since 2.3.24
      */
+    @Override
     public boolean isOutputEncodingSet() {
         return outputEncodingSet;
     }
@@ -1234,7 +1346,16 @@ public class Configurable {
         this.urlEscapingCharset = urlEscapingCharset;
         urlEscapingCharsetSet = true;
     }
-    
+
+    /**
+     * Fluent API equivalent of {@link #setURLEscapingCharset(String)}
+     */
+    public SelfT urlEscapingCharset(String value) {
+        setURLEscapingCharset(value);
+        return self();
+    }
+
+    @Override
     public String getURLEscapingCharset() {
         return urlEscapingCharsetSet
                 ? urlEscapingCharset
@@ -1246,6 +1367,7 @@ public class Configurable {
      *  
      * @since 2.3.24
      */
+    @Override
     public boolean isURLEscapingCharsetSet() {
         return urlEscapingCharsetSet;
     }
@@ -1268,6 +1390,14 @@ public class Configurable {
     }
 
     /**
+     * Fluent API equivalent of {@link #setNewBuiltinClassResolver(TemplateClassResolver)}
+     */
+    public SelfT newBuiltinClassResolver(TemplateClassResolver value) {
+        setNewBuiltinClassResolver(value);
+        return self();
+    }
+
+    /**
      * Retrieves the {@link TemplateClassResolver} used
      * to resolve classes when "SomeClassName"?new is called in a template.
      * 
@@ -1275,6 +1405,7 @@ public class Configurable {
      * 
      * @since 2.3.17
      */
+    @Override
     public TemplateClassResolver getNewBuiltinClassResolver() {
         return newBuiltinClassResolver != null
                 ? newBuiltinClassResolver : parent.getNewBuiltinClassResolver();
@@ -1285,6 +1416,7 @@ public class Configurable {
      *  
      * @since 2.3.24
      */
+    @Override
     public boolean isNewBuiltinClassResolverSet() {
         return newBuiltinClassResolver != null;
     }
@@ -1308,12 +1440,21 @@ public class Configurable {
     public void setAutoFlush(boolean autoFlush) {
         this.autoFlush = Boolean.valueOf(autoFlush);
     }
-    
+
+    /**
+     * Fluent API equivalent of {@link #setAutoFlush(boolean)}
+     */
+    public SelfT autoFlush(boolean value) {
+        setAutoFlush(value);
+        return self();
+    }
+
     /**
      * See {@link #setAutoFlush(boolean)}
      * 
      * @since 2.3.17
      */
+    @Override
     public boolean getAutoFlush() {
         return autoFlush != null 
             ? autoFlush.booleanValue()
@@ -1325,6 +1466,7 @@ public class Configurable {
      *  
      * @since 2.3.24
      */
+    @Override
     public boolean isAutoFlushSet() {
         return autoFlush != null;
     }
@@ -1338,12 +1480,21 @@ public class Configurable {
     public void setShowErrorTips(boolean showTips) {
         showErrorTips = Boolean.valueOf(showTips);
     }
-    
+
+    /**
+     * Fluent API equivalent of {@link #setShowErrorTips(boolean)}
+     */
+    public SelfT showErrorTips(boolean value) {
+        setShowErrorTips(value);
+        return self();
+    }
+
     /**
      * See {@link #setShowErrorTips(boolean)}
      * 
      * @since 2.3.21
      */
+    @Override
     public boolean getShowErrorTips() {
         return showErrorTips != null 
             ? showErrorTips.booleanValue()
@@ -1355,6 +1506,7 @@ public class Configurable {
      *  
      * @since 2.3.24
      */
+    @Override
     public boolean isShowErrorTipsSet() {
         return showErrorTips != null;
     }
@@ -1367,6 +1519,14 @@ public class Configurable {
      */
     public void setAPIBuiltinEnabled(boolean value) {
         apiBuiltinEnabled = Boolean.valueOf(value);
+    }
+
+    /**
+     * Fluent API equivalent of {@link #setAPIBuiltinEnabled(boolean)}
+     */
+    public SelfT apiBuiltinEnabled(boolean value) {
+        setAPIBuiltinEnabled(value);
+        return self();
     }
 
     /**
@@ -1409,6 +1569,7 @@ public class Configurable {
      * 
      * @since 2.3.22
      */
+    @Override
     public boolean getLogTemplateExceptions() {
         return logTemplateExceptions != null 
                 ? logTemplateExceptions.booleanValue()
@@ -1420,6 +1581,7 @@ public class Configurable {
      *  
      * @since 2.3.24
      */
+    @Override
     public boolean isLogTemplateExceptionsSet() {
         return logTemplateExceptions != null;
     }
@@ -1429,6 +1591,7 @@ public class Configurable {
      * 
      * @since 2.3.25
      */
+    @Override
     public boolean getLazyImports() {
         return lazyImports != null ? lazyImports.booleanValue() : parent.getLazyImports();
     }
@@ -1440,7 +1603,7 @@ public class Configurable {
      * broken template will be successful, and the problem will remain hidden until (and if) the namespace content is
      * actually used. Also, you lose the strict control over when the namespace initializing code in the imported
      * template will be executed, though it shouldn't mater for well written imported templates anyway. Note that the
-     * namespace initializing code will run with the same {@linkplain Configurable#getLocale() locale} as it was at the
+     * namespace initializing code will run with the same {@linkplain MutableProcessingConfiguration#getLocale() locale} as it was at the
      * point of the {@code <#import ...>} call (other settings won't be handled specially like that).
      * 
      * <p>
@@ -1464,6 +1627,7 @@ public class Configurable {
      *  
      * @since 2.3.25
      */
+    @Override
     public boolean isLazyImportsSet() {
         return lazyImports != null;
     }
@@ -1473,6 +1637,7 @@ public class Configurable {
      * 
      * @since 2.3.25
      */
+    @Override
     public Boolean getLazyAutoImports() {
         return lazyAutoImportsSet ? lazyAutoImports : parent.getLazyAutoImports();
     }
@@ -1495,6 +1660,7 @@ public class Configurable {
      *  
      * @since 2.3.25
      */
+    @Override
     public boolean isLazyAutoImportsSet() {
         return lazyAutoImportsSet;
     }
@@ -1517,9 +1683,9 @@ public class Configurable {
      * of the auto-import order.)
      * 
      * <p>
-     * The auto-import is added directly to the {@link Configurable} on which this method is called (not to the parents
+     * The auto-import is added directly to the {@link MutableProcessingConfiguration} on which this method is called (not to the parents
      * or children), but when the main template is processed, the auto-imports are collected from all the
-     * {@link Configurable} levels, in parent-to-child order: {@link Configuration}, {@link Template} (the main
+     * {@link MutableProcessingConfiguration} levels, in parent-to-child order: {@link Configuration}, {@link Template} (the main
      * template), {@link Environment}. If the same {@code namespaceVarName} occurs on multiple levels, the one on the
      * child level is used, and the clashing import from the parent level is skipped.
      * 
@@ -1546,7 +1712,7 @@ public class Configurable {
     }
     
     /**
-     * Removes an auto-import from this {@link Configurable} level (not from the parents or children);
+     * Removes an auto-import from this {@link MutableProcessingConfiguration} level (not from the parents or children);
      * see {@link #addAutoImport(String, String)}. Does nothing if the auto-import doesn't exist.
      */
     public void removeAutoImport(String namespaceVarName) {
@@ -1584,7 +1750,7 @@ public class Configurable {
                 Object value = entry.getValue();
                 if (!(value instanceof String)) {
                     throw new IllegalArgumentException(
-                            "Value in Map wasn't a String, but a(n) " + key.getClass().getName() + ".");
+                            "Value in Map wasn't a String, but a(n) " + value.getClass().getName() + ".");
                 }
                 
                 addAutoImport((String) key, (String) value);
@@ -1594,22 +1760,21 @@ public class Configurable {
     
     /**
      * Getter pair of {@link #setAutoImports(Map)}; do not modify the returned {@link Map}! To be consistent with other
-     * setting getters, if this setting was set directly on this {@link Configurable} object, this simply returns that
-     * value, otherwise it returns the value from the parent {@link Configurable}. So beware, the returned value doesn't
+     * setting getters, if this setting was set directly on this {@link MutableProcessingConfiguration} object, this simply returns that
+     * value, otherwise it returns the value from the parent {@link MutableProcessingConfiguration}. So beware, the returned value doesn't
      * reflect the {@link Map} key granularity fallback logic that FreeMarker actually uses for this setting. The
      * returned value is not the same {@link Map} object that was set with {@link #setAutoImports(Map)}, only its
      * content is the same. The returned value isn't a snapshot; it may or may not shows the changes later made to this
-     * setting on this {@link Configurable} level (but usually it's well defined if until what point settings are
+     * setting on this {@link MutableProcessingConfiguration} level (but usually it's well defined if until what point settings are
      * possibly modified).
      * 
      * <p>
      * The return value is never {@code null}; called on the {@link Configuration} (top) level, it defaults to an empty
      * {@link Map}.
-     * 
-     * @see #getAutoImportsWithoutFallback()
-     * 
+     *
      * @since 2.3.25
      */
+    @Override
     public Map<String, String> getAutoImports() {
         return autoImports != null ? autoImports : parent.getAutoImports();
     }
@@ -1619,20 +1784,11 @@ public class Configurable {
      * 
      * @since 2.3.25
      */
+    @Override
     public boolean isAutoImportsSet() {
         return autoImports != null;
     }
 
-    /**
-     * Like {@link #getAutoImports()}, but doesn't fall back to the parent {@link Configurable} (and so it can be
-     * {@code null}).
-     *  
-     * @since 2.3.25
-     */
-    public Map<String, String> getAutoImportsWithoutFallback() {
-        return autoImports;
-    }
-    
     /**
      * Adds an invisible <code>#include <i>templateName</i></code> at the beginning of the main template (that's the
      * top-level template that wasn't included/imported from another template).
@@ -1641,9 +1797,9 @@ public class Configurable {
      * The order of the inclusions will be the same as the order in which they were added with this method.
      * 
      * <p>
-     * The auto-include is added directly to the {@link Configurable} on which this method is called (not to the parents
+     * The auto-include is added directly to the {@link MutableProcessingConfiguration} on which this method is called (not to the parents
      * or children), but when the main template is processed, the auto-includes are collected from all the
-     * {@link Configurable} levels, in parent-to-child order: {@link Configuration}, {@link Template} (the main
+     * {@link MutableProcessingConfiguration} levels, in parent-to-child order: {@link Configuration}, {@link Template} (the main
      * template), {@link Environment}.
      * 
      * <p>
@@ -1652,8 +1808,8 @@ public class Configurable {
      * 
      * <p>
      * Calling {@link #addAutoInclude(String)} with an already added template name will just move that to the end of the
-     * auto-include list (within the same {@link Configurable} level). This works even if the same template name appears
-     * on different {@link Configurable} levels, in which case only the inclusion on the lowest (child) level will be
+     * auto-include list (within the same {@link MutableProcessingConfiguration} level). This works even if the same template name appears
+     * on different {@link MutableProcessingConfiguration} levels, in which case only the inclusion on the lowest (child) level will be
      * executed.
      * 
      * @see #setAutoIncludes(List)
@@ -1698,22 +1854,21 @@ public class Configurable {
     
     /**
      * Getter pair of {@link #setAutoIncludes(List)}; do not modify the returned {@link List}! To be consistent with
-     * other setting getters, if this setting was set directly on this {@link Configurable} object, this simply returns
-     * that value, otherwise it returns the value from the parent {@link Configurable}. So beware, the returned value
+     * other setting getters, if this setting was set directly on this {@link MutableProcessingConfiguration} object, this simply returns
+     * that value, otherwise it returns the value from the parent {@link MutableProcessingConfiguration}. So beware, the returned value
      * doesn't reflect the {@link List} concatenation logic that FreeMarker actually uses for this setting. The returned
      * value is not the same {@link List} object that was set with {@link #setAutoIncludes(List)}, only its content is
      * the same (except that duplicate are removed). The returned value isn't a snapshot; it may or may not shows the
-     * changes later made to this setting on this {@link Configurable} level (but usually it's well defined if until
+     * changes later made to this setting on this {@link MutableProcessingConfiguration} level (but usually it's well defined if until
      * what point settings are possibly modified).
      * 
      * <p>
      * The return value is never {@code null}; called on the {@link Configuration} (top) level, it defaults to an empty
      * {@link List}.
-     * 
-     * @see #getAutoIncludesWithoutFallback()
-     * 
+     *
      * @since 2.3.25
      */
+    @Override
     public List<String> getAutoIncludes() {
         return autoIncludes != null ? autoIncludes : parent.getAutoIncludes();
     }
@@ -1723,22 +1878,13 @@ public class Configurable {
      * 
      * @since 2.3.25
      */
+    @Override
     public boolean isAutoIncludesSet() {
         return autoIncludes != null;
     }
     
     /**
-     * Like {@link #getAutoIncludes()}, but doesn't fall back to the parent {@link Configurable} (and so it can be
-     * {@code null}).
-     *  
-     * @since 2.3.25
-     */
-    public List<String> getAutoIncludesWithoutFallback() {
-        return autoIncludes;
-    }
-    
-    /**
-     * Removes the auto-include from this {@link Configurable} level (not from the parents or children); see
+     * Removes the auto-include from this {@link MutableProcessingConfiguration} level (not from the parents or children); see
      * {@link #addAutoInclude(String)}. Does nothing if the template is not there.
      */
     public void removeAutoInclude(String templateName) {
@@ -1764,7 +1910,7 @@ public class Configurable {
      * {@code date_format} you can also use {@code dateFormat}. It's likely that camel case will become to the
      * recommended convention in the future.
      * 
-     * <p>The list of settings commonly supported in all {@link Configurable} subclasses:
+     * <p>The list of settings commonly supported in all {@link MutableProcessingConfiguration} subclasses:
      * <ul>
      *   <li><p>{@code "locale"}:
      *       See {@link #setLocale(Locale)}.
@@ -1932,7 +2078,7 @@ public class Configurable {
      *       
      * </ul>
      * 
-     * <p>{@link Configuration} (a subclass of {@link Configurable}) also understands these:</p>
+     * <p>{@link Configuration} (a subclass of {@link MutableProcessingConfiguration}) also understands these:</p>
      * <ul>
      *   <li><p>{@code "auto_escaping"}:
      *       See {@link Configuration#setAutoEscapingPolicy(int)}
@@ -1942,8 +2088,8 @@ public class Configurable {
      *       {@link Configuration#ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY}
      *       {@code "disable"} for {@link Configuration#DISABLE_AUTO_ESCAPING_POLICY}.
      *       
-     *   <li><p>{@code "default_encoding"}:
-     *       See {@link Configuration#setDefaultEncoding(String)}; since 2.3.26 also accepts value "JVM default"
+     *   <li><p>{@code "encoding"}:
+     *       See {@link Configuration#setEncoding(String)}; since 2.3.26 also accepts value "JVM default"
      *       (not case sensitive) to set the Java environment default value.
      *       <br>As the default value is the system default, which can change
      *       from one server to another, <b>you should always set this!</b>
@@ -2137,7 +2283,7 @@ public class Configurable {
         boolean unknown = false;
         try {
             if (LOCALE_KEY.equals(name)) {
-                if (JVM_DEFAULT.equalsIgnoreCase(value)) {
+                if (JVM_DEFAULT_VALUE.equalsIgnoreCase(value)) {
                     setLocale(Locale.getDefault());
                 } else {
                     setLocale(_StringUtil.deduceLocale(value));
@@ -2184,7 +2330,7 @@ public class Configurable {
                     } else if ("rethrow".equalsIgnoreCase(value)) {
                         setTemplateExceptionHandler(
                                 TemplateExceptionHandler.RETHROW_HANDLER);
-                    } else if (DEFAULT.equalsIgnoreCase(value) && this instanceof Configuration) {
+                    } else if (DEFAULT_VALUE.equalsIgnoreCase(value) && this instanceof Configuration) {
                         ((Configuration) this).unsetTemplateExceptionHandler();
                     } else {
                         throw invalidSettingValueException(name, value);
@@ -2207,7 +2353,7 @@ public class Configurable {
                             value, ArithmeticEngine.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (OBJECT_WRAPPER_KEY_SNAKE_CASE.equals(name) || OBJECT_WRAPPER_KEY_CAMEL_CASE.equals(name)) {
-                if (DEFAULT.equalsIgnoreCase(value)) {
+                if (DEFAULT_VALUE.equalsIgnoreCase(value)) {
                     if (this instanceof Configuration) {
                         ((Configuration) this).unsetObjectWrapper();
                     } else {
@@ -2270,7 +2416,7 @@ public class Configurable {
                     || LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE.equals(name)) {
                 setLogTemplateExceptions(_StringUtil.getYesNo(value));
             } else if (LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE.equals(name) || LAZY_AUTO_IMPORTS_KEY_CAMEL_CASE.equals(name)) {
-                setLazyAutoImports(value.equals(NULL) ? null : Boolean.valueOf(_StringUtil.getYesNo(value)));
+                setLazyAutoImports(value.equals(NULL_VALUE) ? null : Boolean.valueOf(_StringUtil.getYesNo(value)));
             } else if (LAZY_IMPORTS_KEY_SNAKE_CASE.equals(name) || LAZY_IMPORTS_KEY_CAMEL_CASE.equals(name)) {
                 setLazyImports(_StringUtil.getYesNo(value));
             } else if (AUTO_INCLUDE_KEY_SNAKE_CASE.equals(name)
@@ -2322,7 +2468,7 @@ public class Configurable {
 
     private TimeZone parseTimeZoneSettingValue(String value) {
         TimeZone tz;
-        if (JVM_DEFAULT.equalsIgnoreCase(value)) {
+        if (JVM_DEFAULT_VALUE.equalsIgnoreCase(value)) {
             tz = TimeZone.getDefault();
         } else {
             tz = TimeZone.getTimeZone(value);
@@ -2399,55 +2545,44 @@ public class Configurable {
         }
     }
 
-    /**
-     * Internal entry point for setting unnamed custom attributes.
-     * 
-     * @see CustomAttribute
-     */
-    void setCustomAttribute(Object key, Object value) {
-        synchronized (customAttributes) {
-            customAttributes.put(key, value);
-        }
+    @Override
+    public Map<Object, Object> getCustomAttributes() {
+        return customAttributes;
     }
 
-    /**
-     * Internal entry point for getting unnamed custom attributes.
-     * 
-     * @see CustomAttribute
-     */
-    Object getCustomAttribute(Object key, CustomAttribute attr) {
-        synchronized (customAttributes) {
-            Object o = customAttributes.get(key);
-            if (o == null && !customAttributes.containsKey(key)) {
-                o = attr.create();
-                customAttributes.put(key, o);
-            }
-            return o;
-        }
+    public void setCustomAttributes(Map<Object, Object> customAttributes) {
+        _NullArgumentException.check("customAttributes", customAttributes);
+        this.customAttributes = customAttributes;
     }
-    
+
+    @Override
+    public boolean isCustomAttributesSet() {
+        return customAttributes != null;
+    }
+
     boolean isCustomAttributeSet(Object key) {
-        return customAttributes.containsKey(key);
+        return customAttributes != null && customAttributes.containsKey(key);
     }
     
     /**
      * For internal usage only, copies the custom attributes set directly on this objects into another
-     * {@link Configurable}. The target {@link Configurable} is assumed to be not seen be other thread than the current
-     * one yet. (That is, the operation is not synchronized on the target {@link Configurable}, only on the source 
-     * {@link Configurable})
+     * {@link MutableProcessingConfiguration}. The target {@link MutableProcessingConfiguration} is assumed to be not seen be other thread than the current
+     * one yet. (That is, the operation is not synchronized on the target {@link MutableProcessingConfiguration}, only on the source
+     * {@link MutableProcessingConfiguration})
      * 
      * @since 2.3.24
      */
-    void copyDirectCustomAttributes(Configurable target, boolean overwriteExisting) {
-        synchronized (customAttributes) {
-            for (Entry<?, ?> custAttrEnt : customAttributes.entrySet()) {
-                Object custAttrKey = custAttrEnt.getKey();
-                if (overwriteExisting || !target.isCustomAttributeSet(custAttrKey)) {
-                    if (custAttrKey instanceof String) {
-                        target.setCustomAttribute((String) custAttrKey, custAttrEnt.getValue());
-                    } else {
-                        target.setCustomAttribute(custAttrKey, custAttrEnt.getValue());
-                    }
+    void copyDirectCustomAttributes(MutableProcessingConfiguration target, boolean overwriteExisting) {
+        if (customAttributes == null) {
+            return;
+        }
+        for (Entry<?, ?> custAttrEnt : customAttributes.entrySet()) {
+            Object custAttrKey = custAttrEnt.getKey();
+            if (overwriteExisting || !target.isCustomAttributeSet(custAttrKey)) {
+                if (custAttrKey instanceof String) {
+                    target.setCustomAttribute((String) custAttrKey, custAttrEnt.getValue());
+                } else {
+                    target.setCustomAttribute(custAttrKey, custAttrEnt.getValue());
                 }
             }
         }
@@ -2462,10 +2597,11 @@ public class Configurable {
      * attribute set to null and an attribute that is not present, see
      * {@link #removeCustomAttribute(String)}.
      */
-    public void setCustomAttribute(String name, Object value) {
-        synchronized (customAttributes) {
-            customAttributes.put(name, value);
+    public void setCustomAttribute(Object name, Object value) {
+        if (customAttributes == null) {
+            customAttributes = new LinkedHashMap<>();
         }
+        customAttributes.put(name, value);
     }
     
     /**
@@ -2476,32 +2612,37 @@ public class Configurable {
      * The order of elements in the returned array is not defined and can change
      * between invocations.  
      */
+    // TODO env only?
+    // TODO should return List<String>?
     public String[] getCustomAttributeNames() {
-        synchronized (customAttributes) {
-            Collection names = new LinkedList(customAttributes.keySet());
-            for (Iterator iter = names.iterator(); iter.hasNext(); ) {
-                if (!(iter.next() instanceof String)) {
-                    iter.remove();
-                }
-            }
-            return (String[]) names.toArray(new String[names.size()]);
+        if (customAttributes == null) {
+            return _CollectionUtil.EMPTY_STRING_ARRAY;
         }
+        Collection names = new LinkedList(customAttributes.keySet());
+        for (Iterator iter = names.iterator(); iter.hasNext(); ) {
+            if (!(iter.next() instanceof String)) {
+                iter.remove();
+            }
+        }
+        return (String[]) names.toArray(new String[names.size()]);
     }
     
     /**
      * Removes a named custom attribute for this configurable. Note that this
      * is different than setting the custom attribute value to null. If you
-     * set the value to null, {@link #getCustomAttribute(String)} will return
+     * set the value to null, {@link #getCustomAttribute(Object)} will return
      * null, while if you remove the attribute, it will return the value of
      * the attribute in the parent configurable (if there is a parent 
      * configurable, that is). 
      *
      * @param name the name of the custom attribute
      */
+    // TODO doesn't work properly, remove?
     public void removeCustomAttribute(String name) {
-        synchronized (customAttributes) {
-            customAttributes.remove(name);
+        if (customAttributes == null) {
+            return;
         }
+        customAttributes.remove(name);
     }
 
     /**
@@ -2516,18 +2657,21 @@ public class Configurable {
      * unwrapped (i.e. it's a <code>String</code>, or a <code>List</code>, or a
      * <code>Map</code>, ...etc., not a FreeMarker specific class).
      */
-    public Object getCustomAttribute(String name) {
-        Object retval;
-        synchronized (customAttributes) {
-            retval = customAttributes.get(name);
-            if (retval == null && customAttributes.containsKey(name)) {
+    @Override
+    public Object getCustomAttribute(Object name) {
+        Object r;
+        if (customAttributes != null) {
+            r = customAttributes.get(name);
+            if (r == null && customAttributes.containsKey(name)) {
                 return null;
             }
+        } else {
+            r = null;
         }
-        if (retval == null && parent != null) {
+        if (r == null && parent != null) {
             return parent.getCustomAttribute(name);
         }
-        return retval;
+        return r;
     }
     
     /**
@@ -2568,6 +2712,11 @@ public class Configurable {
         V getValue() {
             return value;
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected SelfT self() {
+        return (SelfT) this;
     }
     
     /**

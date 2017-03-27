@@ -301,7 +301,7 @@ public class IncludeAndImportConfigurableLayersTest extends TemplateTest {
         assertEquals(expectedOutput, sw.toString());
     }
 
-    private void setLazynessOfConfigurable(Configurable cfg, Boolean lazyImports, Boolean lazyAutoImports,
+    private void setLazynessOfConfigurable(MutableProcessingConfiguration cfg, Boolean lazyImports, Boolean lazyAutoImports,
             boolean setLazyAutoImports) {
         if (lazyImports != null) {
             cfg.setLazyImports(lazyImports);

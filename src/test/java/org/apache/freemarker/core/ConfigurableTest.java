@@ -37,7 +37,7 @@ public class ConfigurableTest {
 
     @Test
     public void testGetSettingNamesAreSorted() throws Exception {
-        Configurable cfgable = createConfigurable();
+        MutableProcessingConfiguration cfgable = createConfigurable();
         for (boolean camelCase : new boolean[] { false, true }) {
             Collection<String> names = cfgable.getSettingNames(camelCase);
             String prevName = null;
@@ -52,7 +52,7 @@ public class ConfigurableTest {
 
     @Test
     public void testStaticFieldKeysCoverAllGetSettingNames() throws Exception {
-        Configurable cfgable = createConfigurable();
+        MutableProcessingConfiguration cfgable = createConfigurable();
         Collection<String> names = cfgable.getSettingNames(false);
         for (String name : names) {
                 assertTrue("No field was found for " + name, keyFieldExists(name));
@@ -61,10 +61,10 @@ public class ConfigurableTest {
     
     @Test
     public void testGetSettingNamesCoversAllStaticKeyFields() throws Exception {
-        Configurable cfgable = createConfigurable();
+        MutableProcessingConfiguration cfgable = createConfigurable();
         Collection<String> names = cfgable.getSettingNames(false);
         
-        for (Field f : Configurable.class.getFields()) {
+        for (Field f : MutableProcessingConfiguration.class.getFields()) {
             if (f.getName().endsWith("_KEY")) {
                 final Object name = f.get(null);
                 assertTrue("Missing setting name: " + name, names.contains(name));
@@ -74,19 +74,19 @@ public class ConfigurableTest {
 
     @Test
     public void testKeyStaticFieldsHasAllVariationsAndCorrectFormat() throws IllegalArgumentException, IllegalAccessException {
-        ConfigurableTest.testKeyStaticFieldsHasAllVariationsAndCorrectFormat(Configurable.class);
+        ConfigurableTest.testKeyStaticFieldsHasAllVariationsAndCorrectFormat(MutableProcessingConfiguration.class);
     }
     
     @Test
     public void testGetSettingNamesNameConventionsContainTheSame() throws Exception {
-        Configurable cfgable = createConfigurable();
+        MutableProcessingConfiguration cfgable = createConfigurable();
         ConfigurableTest.testGetSettingNamesNameConventionsContainTheSame(
                 new ArrayList<>(cfgable.getSettingNames(false)),
                 new ArrayList<>(cfgable.getSettingNames(true)));
     }
 
     public static void testKeyStaticFieldsHasAllVariationsAndCorrectFormat(
-            Class<? extends Configurable> confClass) throws IllegalArgumentException, IllegalAccessException {
+            Class<? extends MutableProcessingConfiguration> confClass) throws IllegalArgumentException, IllegalAccessException {
         // For all _KEY fields there must be a _KEY_CAMEL_CASE and a _KEY_SNAKE_CASE field.
         // Their content must not contradict the expected naming convention.
         // They _KEY filed value must be deducable from the field name
@@ -160,13 +160,13 @@ public class ConfigurableTest {
         }
     }
     
-    private Configurable createConfigurable() throws IOException {
+    private MutableProcessingConfiguration createConfigurable() throws IOException {
         return new Template(null, "", new Configuration(Configuration.VERSION_3_0_0));
     }
 
     private boolean keyFieldExists(String name) throws Exception {
         try {
-            Configurable.class.getField(name.toUpperCase() + "_KEY");
+            MutableProcessingConfiguration.class.getField(name.toUpperCase() + "_KEY");
         } catch (NoSuchFieldException e) {
             return false;
         }

@@ -412,7 +412,7 @@ public class FreemarkerServletTest {
         }
 
         MockServletConfig servletConfig = new MockServletConfig(servletContext);
-        servletConfig.addInitParameter(Configuration.DEFAULT_ENCODING_KEY, "UTF-8");
+        servletConfig.addInitParameter(Configuration.ENCODING_KEY, "UTF-8");
         if (ctInitParam != null) {
             servletConfig.addInitParameter(INIT_PARAM_CONTENT_TYPE, ctInitParam);
         }
@@ -540,7 +540,7 @@ public class FreemarkerServletTest {
 
             // Set a test runner environment independent default locale:
             cfg.setLocale(DEFAULT_LOCALE);
-            cfg.setDefaultEncoding(CFG_DEFAULT_ENCODING);
+            cfg.setEncoding(CFG_DEFAULT_ENCODING);
 
             {
                 TemplateConfiguration outUtf8TC = new TemplateConfiguration();

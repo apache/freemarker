@@ -171,3 +171,18 @@ the FreeMarer 3 changelog here:
 - Removed Configuration.setEncoding(java.util.Locale, String) and the related other methods. Because of the new logic of template
   encodings, the locale to encoding mapping doesn't make much sense anymore.
 - Require customLookupCondition-s to be Serializable.
+- Various refactorings of Configurable and its subclasses. This is part of the preparation for making such classes immutable, and offer
+  builders to create them.
+  - Removed CustomAttribute class. Custom attribute keys can be anything at the moment (this will be certainly restricted later)
+  - As customAttributes won't be modifiable after Builder.build(), they can't be used for on-demand created data structures anymore (such as
+    Template-scoped caches) anymore. To fulfill that role, the CustomStateKey class and the CustomStateScope interface was introduced, which
+    is somewhat similar to the now removed CustomAttribute. CustomStateScope contains one method, Object getCustomState(CustomStateKey), which
+    may calls CustomStateKey.create() to lazily create the state object for the key. Configuration, Template and Environment implements
+    CustomStateScope.
+  - Added getter/setter to access custom attributes as a Map. (This is to make it less an exceptional setting.)
+  - Environment.setCustomState(Object, Object) and getCustomState(Object) was replaced with CustomStateScope.getCustomState(CustomStateKey).
+  - Added ProcessingConfiguration interface for the read-only access of template processing settings. This is similar to the
+    already existing (in FM2) ParserConfiguration interface.
+  - Renamed Configurable to MutableProcessingAndParserConfiguration. Made it abstract too.
+  - Renamed Configuration.defaultEncoding to encoding, also added encoding ParserConfiguration. Before this, defaultEncoding was exclusive
+    to Configuration, but now it's like any other ParserConfiguration setting.
