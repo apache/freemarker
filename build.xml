@@ -363,7 +363,7 @@
   <!-- Generate docs                                                     -->
   <!-- ================================================================= -->
 
-  <target depends="compile" name="_rawJavadoc">
+  <target name="_rawJavadoc" depends="compile">
     <mkdir dir="build/api" />
     <delete includeEmptyDirs="yes">
       <fileset dir="build/api" includes="**/*" />
