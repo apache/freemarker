@@ -48,7 +48,7 @@ public class TemplateConfigurationExamples extends ExamplesTest {
         addTemplate("t.xml", "");
         
         TemplateConfiguration tcUTF8XML = new TemplateConfiguration();
-        tcUTF8XML.setEncoding("utf-8");
+        tcUTF8XML.setSourceEncoding("utf-8");
         tcUTF8XML.setOutputFormat(XMLOutputFormat.INSTANCE);
 
         {
@@ -56,7 +56,7 @@ public class TemplateConfigurationExamples extends ExamplesTest {
                     new FileExtensionMatcher("xml"), tcUTF8XML));
             
             Template t = cfg.getTemplate("t.xml");
-            assertEquals("utf-8", t.getEncoding());
+            assertEquals("utf-8", t.getSourceEncoding());
             assertEquals(XMLOutputFormat.INSTANCE, t.getOutputFormat());
         }
 
@@ -65,7 +65,7 @@ public class TemplateConfigurationExamples extends ExamplesTest {
             cfg.setSettings(loadPropertiesFile("TemplateConfigurationExamples1.properties"));
             
             Template t = cfg.getTemplate("t.xml");
-            assertEquals("utf-8", t.getEncoding());
+            assertEquals("utf-8", t.getSourceEncoding());
             assertEquals(XMLOutputFormat.INSTANCE, t.getOutputFormat());
         }
     }
@@ -131,7 +131,7 @@ public class TemplateConfigurationExamples extends ExamplesTest {
         tcStats.setTimeZone(_DateUtil.UTC);
 
         TemplateConfiguration tcMail = new TemplateConfiguration();
-        tcMail.setEncoding("utf-8");
+        tcMail.setSourceEncoding("utf-8");
         
         TemplateConfiguration tcHTML = new TemplateConfiguration();
         tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
@@ -161,12 +161,12 @@ public class TemplateConfigurationExamples extends ExamplesTest {
         );
         
         assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.html").getOutputFormat());
-        assertEquals("ISO-8859-1", cfg.getTemplate("t.html").getEncoding());
+        assertEquals("ISO-8859-1", cfg.getTemplate("t.html").getSourceEncoding());
         assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.htm").getOutputFormat());
         assertEquals(XMLOutputFormat.INSTANCE, cfg.getTemplate("t.xml").getOutputFormat());
         assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.stats.html").getOutputFormat());
         assertOutputForNamed("t.stats.html", "2015-08-24T15:53:26.011Z 2015-08-24 15:53:26.011Z");
-        assertEquals("utf-8", cfg.getTemplate("mail/t.html").getEncoding());
+        assertEquals("utf-8", cfg.getTemplate("mail/t.html").getSourceEncoding());
         
         // From properties:
         
@@ -174,12 +174,12 @@ public class TemplateConfigurationExamples extends ExamplesTest {
         cfg.setSettings(loadPropertiesFile("TemplateConfigurationExamples3.properties"));
         
         assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.html").getOutputFormat());
-        assertEquals("ISO-8859-1", cfg.getTemplate("t.html").getEncoding());
+        assertEquals("ISO-8859-1", cfg.getTemplate("t.html").getSourceEncoding());
         assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.htm").getOutputFormat());
         assertEquals(XMLOutputFormat.INSTANCE, cfg.getTemplate("t.xml").getOutputFormat());
         assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.stats.html").getOutputFormat());
         assertOutputForNamed("t.stats.html", "2015-08-24T15:53:26.011Z 2015-08-24 15:53:26.011Z");
-        assertEquals("utf-8", cfg.getTemplate("mail/t.html").getEncoding());
+        assertEquals("utf-8", cfg.getTemplate("mail/t.html").getSourceEncoding());
     }
     
 }

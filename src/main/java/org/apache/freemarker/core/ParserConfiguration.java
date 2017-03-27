@@ -144,6 +144,6 @@ public interface ParserConfiguration {
      * reading template files in a locale for which no explicit encoding
      * was specified. Defaults to the default system encoding.
      */
-    String getEncoding();
+    String getSourceEncoding();
 
 }

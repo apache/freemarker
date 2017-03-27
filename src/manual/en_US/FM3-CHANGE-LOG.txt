@@ -184,5 +184,6 @@ the FreeMarer 3 changelog here:
   - Added ProcessingConfiguration interface for the read-only access of template processing settings. This is similar to the
     already existing (in FM2) ParserConfiguration interface.
   - Renamed Configurable to MutableProcessingAndParserConfiguration. Made it abstract too.
-  - Renamed Configuration.defaultEncoding to encoding, also added encoding ParserConfiguration. Before this, defaultEncoding was exclusive
-    to Configuration, but now it's like any other ParserConfiguration setting.
+  - Renamed Configuration.defaultEncoding to sourceEncoding, also added sourceEncoding to ParserConfiguration, and renamed
+    TemplateConfiguration.encoding and Template.encoding to sourceEncoding. (Before this, defaultEncoding was exclusive
+    to Configuration, but now it's like any other ParserConfiguration setting that can be overidden on the 3 levels.)

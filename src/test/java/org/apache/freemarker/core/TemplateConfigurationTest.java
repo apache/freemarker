@@ -149,7 +149,7 @@ public class TemplateConfigurationTest {
     private static final String NON_DEFAULT_ENCODING;
 
     static {
-        String defaultEncoding = DEFAULT_CFG.getEncoding();
+        String defaultEncoding = DEFAULT_CFG.getSourceEncoding();
         String encoding = "UTF-16";
         if (encoding.equals(defaultEncoding)) {
             encoding = "UTF-8";
@@ -206,7 +206,7 @@ public class TemplateConfigurationTest {
         SETTING_ASSIGNMENTS.put("autoIncludes", ImmutableList.of("/lib/b.ftl"));
         
         // Special settings:
-        SETTING_ASSIGNMENTS.put("encoding", NON_DEFAULT_ENCODING);
+        SETTING_ASSIGNMENTS.put("sourceEncoding", NON_DEFAULT_ENCODING);
     }
     
     public static String getIsSetMethodName(String readMethodName) {
@@ -215,8 +215,7 @@ public class TemplateConfigurationTest {
                 + "Set";
     }
 
-    public static List<PropertyDescriptor> getTemplateConfigurationSettingPropDescs(
-            boolean includeCompilerSettings, boolean includeSpecialSettings)
+    public static List<PropertyDescriptor> getTemplateConfigurationSettingPropDescs(boolean includeCompilerSettings)
             throws IntrospectionException {
         List<PropertyDescriptor> settingPropDescs = new ArrayList<>();
 
@@ -225,9 +224,7 @@ public class TemplateConfigurationTest {
             String name = pd.getName();
             if (pd.getWriteMethod() != null && !IGNORED_PROP_NAMES.contains(name)
                     && (includeCompilerSettings
-                            || (CONFIGURABLE_PROP_NAMES.contains(name) || !PARSER_PROP_NAMES.contains(name)))
-                    && (includeSpecialSettings
-                            || !SPECIAL_PROP_NAMES.contains(name))) {
+                            || (CONFIGURABLE_PROP_NAMES.contains(name) || !PARSER_PROP_NAMES.contains(name)))) {
                 if (pd.getReadMethod() == null) {
                     throw new AssertionError("Property has no read method: " + pd);
                 }
@@ -294,12 +291,6 @@ public class TemplateConfigurationTest {
         }
     }
 
-    private static final Set<String> SPECIAL_PROP_NAMES;
-    static {
-        SPECIAL_PROP_NAMES = new HashSet<>();
-        SPECIAL_PROP_NAMES.add("encoding");
-    }
-    
     private static final Object CA1 = new Object();
     private static final Object CA2 = new Object();
     private static final Object CA3 = new Object();
@@ -307,8 +298,8 @@ public class TemplateConfigurationTest {
 
     @Test
     public void testMergeBasicFunctionality() throws Exception {
-        for (PropertyDescriptor propDesc1 : getTemplateConfigurationSettingPropDescs(true, true)) {
-            for (PropertyDescriptor propDesc2 : getTemplateConfigurationSettingPropDescs(true, true)) {
+        for (PropertyDescriptor propDesc1 : getTemplateConfigurationSettingPropDescs(true)) {
+            for (PropertyDescriptor propDesc2 : getTemplateConfigurationSettingPropDescs(true)) {
                 TemplateConfiguration tc1 = new TemplateConfiguration();
                 TemplateConfiguration tc2 = new TemplateConfiguration();
 
@@ -541,7 +532,7 @@ public class TemplateConfigurationTest {
 
     @Test
     public void testConfigureNonParserConfig() throws Exception {
-        for (PropertyDescriptor pd : getTemplateConfigurationSettingPropDescs(false, true)) {
+        for (PropertyDescriptor pd : getTemplateConfigurationSettingPropDescs(false)) {
             TemplateConfiguration tc = new TemplateConfiguration();
             tc.setParentConfiguration(DEFAULT_CFG);
     
@@ -719,7 +710,7 @@ public class TemplateConfigurationTest {
             // assertOutput here, as that hard-coded to create an FTL Template.
 
             TemplateConfiguration tc = new TemplateConfiguration();
-            tc.setEncoding("ISO-8859-1");
+            tc.setSourceEncoding("ISO-8859-1");
 
             Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
             cfg.setEncoding("utf-8");
@@ -742,7 +733,7 @@ public class TemplateConfigurationTest {
                 assertEquals("próba", out.toString());
             }
 
-            testedProps.add(Configuration.ENCODING_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.SOURCE_ENCODING_KEY_CAMEL_CASE);
         }
 
         if (!PARSER_PROP_NAMES.equals(testedProps)) {
@@ -936,7 +927,7 @@ public class TemplateConfigurationTest {
 
     @Test
     public void testIsSet() throws Exception {
-        for (PropertyDescriptor pd : getTemplateConfigurationSettingPropDescs(true, true)) {
+        for (PropertyDescriptor pd : getTemplateConfigurationSettingPropDescs(true)) {
             TemplateConfiguration tc = new TemplateConfiguration();
             checkAllIsSetFalseExcept(tc, null);
             pd.getWriteMethod().invoke(tc, SETTING_ASSIGNMENTS.get(pd.getName()));
@@ -947,7 +938,7 @@ public class TemplateConfigurationTest {
     private void checkAllIsSetFalseExcept(TemplateConfiguration tc, String setSetting)
             throws SecurityException, IntrospectionException,
             IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        for (PropertyDescriptor pd : getTemplateConfigurationSettingPropDescs(true, true)) {
+        for (PropertyDescriptor pd : getTemplateConfigurationSettingPropDescs(true)) {
             String isSetMethodName = getIsSetMethodName(pd.getReadMethod().getName());
             Method isSetMethod;
             try {
@@ -969,16 +960,16 @@ public class TemplateConfigurationTest {
      */
     @Test
     public void checkTestAssignments() throws Exception {
-        for (PropertyDescriptor pd : getTemplateConfigurationSettingPropDescs(true, true)) {
+        for (PropertyDescriptor pd : getTemplateConfigurationSettingPropDescs(true)) {
             String propName = pd.getName();
             if (!SETTING_ASSIGNMENTS.containsKey(propName)) {
                 fail("Test case doesn't cover all settings in SETTING_ASSIGNMENTS. Missing: " + propName);
             }
             Method readMethod = pd.getReadMethod();
             String cfgMethodName = readMethod.getName();
-            if (cfgMethodName.equals("getEncoding")) {
+            if (cfgMethodName.equals("getSourceEncoding")) {
                 // Because Configuration has local-to-encoding map too, this has a different name there.
-                cfgMethodName = "getEncoding";
+                cfgMethodName = "getSourceEncoding";
             }
             Method cfgMethod = DEFAULT_CFG.getClass().getMethod(cfgMethodName, readMethod.getParameterTypes());
             Object defaultSettingValue = cfgMethod.invoke(DEFAULT_CFG);

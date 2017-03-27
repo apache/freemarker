@@ -3887,13 +3887,13 @@ void HeaderElement() :
                         } catch (TemplateModelException tme) {}
                     }
                     if (template != null) {
-                        if (ks.equalsIgnoreCase("encoding")) {
+                        if (ks.equalsIgnoreCase("sourceEncoding")) {
                             if (vs == null) {
                                 throw new ParseException("Expected a string constant for \"" + ks + "\".", exp);
                             }
-                            if (template.getEncoding() != null && vs != null
-                                    && !template.getEncoding().equalsIgnoreCase(vs)) {
-                                throw new WrongTemplateCharsetException(vs, template.getEncoding());
+                            if (template.getSourceEncoding() != null && vs != null
+                                    && !template.getSourceEncoding().equalsIgnoreCase(vs)) {
+                                throw new WrongTemplateCharsetException(vs, template.getSourceEncoding());
                             }
                             // There will be no WrongTemplateCharsetException exception, release mark buffer:
                             if (streamToUnmarkWhenEncEstabd != null) {
@@ -3965,7 +3965,7 @@ void HeaderElement() :
                             }
                         } else {
                             String correctName;
-	                        if (ks.equals("charset")) {
+	                        if (ks.equals("charset") || ks.equals("source_encoding") || ks.equals("sourceEncoding")) {
 	                            correctName = "encoding";
 	                        } else if (ks.equals("xmlns")) {
 	                            // [2.4] If camel case will be the default, update this

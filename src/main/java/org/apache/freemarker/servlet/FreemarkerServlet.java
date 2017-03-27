@@ -204,7 +204,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * response by adding it to the response content type via calling {@link HttpServletResponse#setContentType(String)} (as
  * that was the only way before Servlet 2.4), not via the more modern
  * {@link HttpServletResponse#setCharacterEncoding(String)} method. Note that the charset of a template usually comes
- * from {@link Configuration#getEncoding()} (i.e., from the {@code encoding} FreeMarker setting),
+ * from {@link Configuration#getSourceEncoding()} (i.e., from the {@code encoding} FreeMarker setting),
  * or occasionally from {@link Configuration#getTemplateConfigurations()} (when FreeMarker was
  * configured to use a specific charset for certain templates).
  * <li>{@value #INIT_PARAM_VALUE_FROM_TEMPLATE}: This should be used in most applications, but it's not the default for
@@ -627,9 +627,9 @@ public class FreemarkerServlet extends HttpServlet {
                         || name.equals(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY)) {
                     // ignore: we have already processed these
                 } else if (name.equals(DEPR_INITPARAM_ENCODING)) { // BC
-                    if (getInitParameter(Configuration.ENCODING_KEY) != null) {
+                    if (getInitParameter(Configuration.SOURCE_ENCODING_KEY) != null) {
                         throw new ConflictingInitParamsException(
-                                Configuration.ENCODING_KEY, DEPR_INITPARAM_ENCODING);
+                                Configuration.SOURCE_ENCODING_KEY, DEPR_INITPARAM_ENCODING);
                     }
                     config.setEncoding(value);
                 } else if (name.equals(DEPR_INITPARAM_TEMPLATE_DELAY)) { // BC
@@ -920,9 +920,9 @@ public class FreemarkerServlet extends HttpServlet {
     private String getOutputEncodingForTemplate(Template template) {
         String outputEncoding = responseCharacterEncoding == ResponseCharacterEncoding.LEGACY ? null
                 : template.getOutputEncoding();
-        // [FM3] Don't use template.getEncoding() here; it might can't encode the dynamic values inserted.
+        // [FM3] Don't use template.getSourceEncoding() here; it might can't encode the dynamic values inserted.
         return outputEncoding != null ? outputEncoding
-                : template.getEncoding() != null ? template.getEncoding()
+                : template.getSourceEncoding() != null ? template.getSourceEncoding()
                 : StandardCharsets.UTF_8.name();
     }
 

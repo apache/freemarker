@@ -551,7 +551,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
         if (tc != null && tc.isLocaleSet()) {
             locale = tc.getLocale();
         }
-        String initialEncoding = tc != null ? tc.getEncoding() : config.getEncoding();
+        String initialEncoding = tc != null ? tc.getSourceEncoding() : config.getSourceEncoding();
         TemplateLanguage templateLanguage = tc != null ? tc.getTemplateLanguage() : config .getTemplateLanguage();
 
         Template template;

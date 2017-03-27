@@ -47,7 +47,7 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
  * already found.
  * 
  * <p>
- * Note on the encoding setting {@code encoding}: See {@link #setEncoding(String)}.
+ * Note on the sourceEncoding setting {@code sourceEncoding}: See {@link #setSourceEncoding(String)}.
  * 
  * <p>
  * Note that the result value of the reader methods (getter and "is" methods) is usually not useful unless the value of
@@ -87,7 +87,7 @@ public final class TemplateConfiguration extends MutableProcessingConfiguration<
     private Integer autoEscapingPolicy;
     private Boolean recognizeStandardFileExtensions;
     private OutputFormat outputFormat;
-    private String encoding;
+    private String sourceEncoding;
     private Integer tabSize;
 
     /**
@@ -187,8 +187,8 @@ public final class TemplateConfiguration extends MutableProcessingConfiguration<
         if (tc.isDateTimeFormatSet()) {
             setDateTimeFormat(tc.getDateTimeFormat());
         }
-        if (tc.isEncodingSet()) {
-            setEncoding(tc.getEncoding());
+        if (tc.isSourceEncodingSet()) {
+            setSourceEncoding(tc.getSourceEncoding());
         }
         if (tc.isLocaleSet()) {
             setLocale(tc.getLocale());
@@ -284,8 +284,8 @@ public final class TemplateConfiguration extends MutableProcessingConfiguration<
      * point via the {@link ParserConfiguration}. 
      * 
      * <p>
-     * Note that the {@code encoding} setting of the {@link Template} counts as unset if it's {@code null},
-     * even if {@code null} was set via {@link Template#setEncoding(String)}.
+     * Note that the {@code sourceEncoding} setting of the {@link Template} counts as unset if it's {@code null},
+     * even if {@code null} was set via {@link Template#setSourceEncoding(String)}.
      *
      * @throws IllegalStateException
      *             If the parent configuration wasn't yet set.
@@ -330,8 +330,8 @@ public final class TemplateConfiguration extends MutableProcessingConfiguration<
         if (isDateTimeFormatSet() && !template.isDateTimeFormatSet()) {
             template.setDateTimeFormat(getDateTimeFormat());
         }
-        if (isEncodingSet() && template.getEncoding() == null) {
-            template.setEncoding(getEncoding());
+        if (isSourceEncodingSet() && template.getSourceEncoding() == null) {
+            template.setSourceEncoding(getSourceEncoding());
         }
         if (isLocaleSet() && !template.isLocaleSet()) {
             template.setLocale(getLocale());
@@ -558,9 +558,8 @@ public final class TemplateConfiguration extends MutableProcessingConfiguration<
         return recognizeStandardFileExtensions != null;
     }
 
-    @Override
-    public String getEncoding() {
-        return encoding != null ? encoding : getNonNullParentConfiguration().getEncoding();
+    public String getSourceEncoding() {
+        return sourceEncoding != null ? sourceEncoding : getNonNullParentConfiguration().getSourceEncoding();
     }
 
     /**
@@ -570,15 +569,15 @@ public final class TemplateConfiguration extends MutableProcessingConfiguration<
      * <p>
      * If you are developing your own template loading/caching mechanism instead of the standard one, note that the
      * above behavior is not guaranteed by this class alone; you have to ensure it. Also, read the note on
-     * {@code encoding} in the documentation of {@link #apply(Template)}.
+     * {@code sourceEncoding} in the documentation of {@link #apply(Template)}.
      */
-    public void setEncoding(String encoding) {
-        _NullArgumentException.check("encoding", encoding);
-        this.encoding = encoding;
+    public void setSourceEncoding(String sourceEncoding) {
+        _NullArgumentException.check("sourceEncoding", sourceEncoding);
+        this.sourceEncoding = sourceEncoding;
     }
 
-    public boolean isEncodingSet() {
-        return encoding != null;
+    public boolean isSourceEncodingSet() {
+        return sourceEncoding != null;
     }
     
     /**

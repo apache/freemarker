@@ -46,27 +46,27 @@ public class TemplateConfigurationWithDefaltTemplateResolverTest {
         
         {
             Template t = cfg.getTemplate("utf8.ftl");
-            assertEquals("utf-8", t.getEncoding());
+            assertEquals("utf-8", t.getSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
         {
             Template t = cfg.getTemplate("utf16.ftl");
-            assertEquals("utf-16", t.getEncoding());
+            assertEquals("utf-16", t.getSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
         {
             Template t = cfg.getTemplate("default.ftl");
-            assertEquals("iso-8859-1", t.getEncoding());
+            assertEquals("iso-8859-1", t.getSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
         {
             Template t = cfg.getTemplate("utf8-latin2.ftl");
-            assertEquals("iso-8859-2", t.getEncoding());
+            assertEquals("iso-8859-2", t.getSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
         {
             Template t = cfg.getTemplate("default-latin2.ftl");
-            assertEquals("iso-8859-2", t.getEncoding());
+            assertEquals("iso-8859-2", t.getSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
     }
@@ -246,9 +246,9 @@ public class TemplateConfigurationWithDefaltTemplateResolverTest {
         cfg.setTemplateLoader(tl);
         
         TemplateConfiguration tcUtf8 = new TemplateConfiguration();
-        tcUtf8.setEncoding("utf-8");
+        tcUtf8.setSourceEncoding("utf-8");
         TemplateConfiguration tcUtf16 = new TemplateConfiguration();
-        tcUtf16.setEncoding("utf-16");
+        tcUtf16.setSourceEncoding("utf-16");
         cfg.setTemplateConfigurations(
                 new FirstMatchTemplateConfigurationFactory(
                         new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*utf8*"), tcUtf8),

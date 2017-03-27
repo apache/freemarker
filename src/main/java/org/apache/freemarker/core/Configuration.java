@@ -146,11 +146,11 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
     private static final String VERSION_PROPERTIES_PATH = "org/apache/freemarker/core/version.properties";
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
-    public static final String ENCODING_KEY_SNAKE_CASE = "encoding";
+    public static final String SOURCE_ENCODING_KEY_SNAKE_CASE = "source_encoding";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
-    public static final String ENCODING_KEY_CAMEL_CASE = "encoding";
+    public static final String SOURCE_ENCODING_KEY_CAMEL_CASE = "sourceEncoding";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String ENCODING_KEY = ENCODING_KEY_SNAKE_CASE;
+    public static final String SOURCE_ENCODING_KEY = SOURCE_ENCODING_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String LOCALIZED_LOOKUP_KEY_SNAKE_CASE = "localized_lookup";
@@ -283,13 +283,13 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
         // Must be sorted alphabetically!
         AUTO_ESCAPING_POLICY_KEY_SNAKE_CASE,
         CACHE_STORAGE_KEY_SNAKE_CASE,
-            ENCODING_KEY_SNAKE_CASE,
         INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE,
         LOCALIZED_LOOKUP_KEY_SNAKE_CASE,
         NAMING_CONVENTION_KEY_SNAKE_CASE,
         OUTPUT_FORMAT_KEY_SNAKE_CASE,
         RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE,
         REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE,
+        SOURCE_ENCODING_KEY_SNAKE_CASE,
         TAB_SIZE_KEY_SNAKE_CASE,
         TAG_SYNTAX_KEY_SNAKE_CASE,
         TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE,
@@ -305,13 +305,13 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
         // Must be sorted alphabetically!
         AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE,
         CACHE_STORAGE_KEY_CAMEL_CASE,
-            ENCODING_KEY_CAMEL_CASE,
         INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE,
         LOCALIZED_LOOKUP_KEY_CAMEL_CASE,
         NAMING_CONVENTION_KEY_CAMEL_CASE,
         OUTPUT_FORMAT_KEY_CAMEL_CASE,
         RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE,
         REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE,
+        SOURCE_ENCODING_KEY_CAMEL_CASE,
         TAB_SIZE_KEY_CAMEL_CASE,
         TAG_SYNTAX_KEY_CAMEL_CASE,
         TEMPLATE_CONFIGURATIONS_KEY_CAMEL_CASE,
@@ -442,7 +442,7 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
      */
     private HashMap<String, Object> rewrappableSharedVariables = null;
     
-    private String encoding = getDefaultEncoding();
+    private String encoding = getDefaultSourceEncoding();
 
     /**
      * @deprecated Use {@link #Configuration(Version)} instead. Note that the version can be still modified later with
@@ -2047,8 +2047,7 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
         defaultEncodingExplicitlySet = true;
     }
 
-    @Override
-    public String getEncoding() {
+    public String getSourceEncoding() {
         return encoding;
     }
 
@@ -2059,7 +2058,7 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
      */
     public void unsetDefaultEncoding() {
         if (defaultEncodingExplicitlySet) {
-            setEncoding(getDefaultEncoding());
+            setEncoding(getDefaultSourceEncoding());
             defaultEncodingExplicitlySet = false;
         }
     }
@@ -2074,7 +2073,7 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
         return defaultEncodingExplicitlySet;
     }
 
-    static private String getDefaultEncoding() {
+    static private String getDefaultSourceEncoding() {
         return getJVMDefaultEncoding();
     }
 
@@ -2301,10 +2300,10 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
             if ("TemplateUpdateInterval".equalsIgnoreCase(name)) {
                 name = TEMPLATE_UPDATE_DELAY_KEY;
             } else if ("DefaultEncoding".equalsIgnoreCase(name)) {
-                name = ENCODING_KEY;
+                name = SOURCE_ENCODING_KEY;
             }
             
-            if (ENCODING_KEY_SNAKE_CASE.equals(name) || ENCODING_KEY_CAMEL_CASE.equals(name)) {
+            if (SOURCE_ENCODING_KEY_SNAKE_CASE.equals(name) || SOURCE_ENCODING_KEY_CAMEL_CASE.equals(name)) {
                 if (JVM_DEFAULT_VALUE.equalsIgnoreCase(value)) {
                     setEncoding(getJVMDefaultEncoding());
                 } else {
@@ -2534,12 +2533,13 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
 
     @Override
     protected String getCorrectedNameForUnknownSetting(String name) {
-        if ("encoding".equals(name) || "charset".equals(name) || "default_charset".equals(name)) {
+        if ("encoding".equals(name) || "default_encoding".equals(name) || "charset".equals(name) || "default_charset"
+                .equals(name)) {
             // [2.4] Default might changes to camel-case
-            return ENCODING_KEY;
+            return SOURCE_ENCODING_KEY;
         }
-        if ("defaultCharset".equals(name)) {
-            return ENCODING_KEY_CAMEL_CASE;
+        if ("defaultEncoding".equals(name) || "defaultCharset".equals(name)) {
+            return SOURCE_ENCODING_KEY_CAMEL_CASE;
         }
         if (name.equals("incompatible_enhancements")) {
             return INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE;

@@ -38,7 +38,7 @@ public abstract class MutableProcessingAndParseConfiguration<
     private Integer autoEscapingPolicy;
     private Boolean recognizeStandardFileExtensions;
     private OutputFormat outputFormat;
-    private String encoding;
+    private String sourceEncoding;
     private Integer tabSize;
 
     protected MutableProcessingAndParseConfiguration(Version incompatibleImprovements) {
@@ -227,24 +227,23 @@ public abstract class MutableProcessingAndParseConfiguration<
         return recognizeStandardFileExtensions != null;
     }
 
-    @Override
-    public String getEncoding() {
-        return encoding != null ? encoding : getDefaultEncoding();
+    public String getSourceEncoding() {
+        return sourceEncoding != null ? sourceEncoding : getDefaultSourceEncoding();
     }
 
-    protected abstract String getDefaultEncoding();
+    protected abstract String getDefaultSourceEncoding();
 
     /**
      * The charset to be used when reading the template "file" that the {@link TemplateLoader} returns as binary
-     * ({@link InputStream}). If the {@code #ftl} header sepcifies an encoding, that will override this.
+     * ({@link InputStream}). If the {@code #ftl} header specifies an charset, that will override this.
      */
-    public void setEncoding(String encoding) {
-        _NullArgumentException.check("encoding", encoding);
-        this.encoding = encoding;
+    public void setSourceEncoding(String sourceEncoding) {
+        _NullArgumentException.check("sourceEncoding", sourceEncoding);
+        this.sourceEncoding = sourceEncoding;
     }
 
-    public boolean isEncodingSet() {
-        return encoding != null;
+    public boolean isSourceEncodingSet() {
+        return sourceEncoding != null;
     }
 
     /**

@@ -367,7 +367,7 @@ public class ObjectBuilderSettingsTest {
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyCacheStorage()");
             props.setProperty(MutableProcessingConfiguration.NEW_BUILTIN_CLASS_RESOLVER_KEY,
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyNewBuiltinClassResolver()");
-            props.setProperty(Configuration.ENCODING_KEY, "utf-8");
+            props.setProperty(Configuration.SOURCE_ENCODING_KEY, "utf-8");
             props.setProperty(Configuration.TEMPLATE_LOADER_KEY,
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyTemplateLoader()");
             cfg.setSettings(props);
@@ -379,7 +379,7 @@ public class ObjectBuilderSettingsTest {
             assertEquals(DummyCacheStorage.class, cfg.getCacheStorage().getClass());
             assertEquals(DummyNewBuiltinClassResolver.class, cfg.getNewBuiltinClassResolver().getClass());
             assertEquals(DummyTemplateLoader.class, cfg.getTemplateLoader().getClass());
-            assertEquals("utf-8", cfg.getEncoding());
+            assertEquals("utf-8", cfg.getSourceEncoding());
         }
         
         {
@@ -401,7 +401,7 @@ public class ObjectBuilderSettingsTest {
                     ((DefaultObjectWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
             assertEquals(500, ((MruCacheStorage) cfg.getCacheStorage()).getSoftSizeLimit());
             assertEquals(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER, cfg.getNewBuiltinClassResolver());
-            assertEquals("utf-8", cfg.getEncoding());
+            assertEquals("utf-8", cfg.getSourceEncoding());
         }
 
         {

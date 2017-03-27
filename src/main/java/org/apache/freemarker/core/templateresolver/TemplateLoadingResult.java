@@ -94,7 +94,7 @@ public final class TemplateLoadingResult {
      * @param templateConfiguration
      *            Usually {@code null}, as usually the backing storage mechanism doesn't store such information; see
      *            {@link #getTemplateConfiguration()}. The most probable application is supplying the charset (encoding)
-     *            used by the {@link InputStream} (via {@link TemplateConfiguration#setEncoding(String)}), but only
+     *            used by the {@link InputStream} (via {@link TemplateConfiguration#setSourceEncoding(String)}), but only
      *            do that if the storage mechanism really knows what the charset is.
      */
     public TemplateLoadingResult(TemplateLoadingSource source, Serializable version, InputStream inputStream,

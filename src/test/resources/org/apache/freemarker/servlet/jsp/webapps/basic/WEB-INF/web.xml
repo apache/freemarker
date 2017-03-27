@@ -71,7 +71,7 @@
 			<param-value>0</param-value> <!-- 0 is for development only! Use higher value otherwise. -->
 		</init-param>
 		<init-param>
-			<param-name>encoding</param-name>
+			<param-name>sourceEncoding</param-name>
 			<param-value>UTF-8</param-value> <!-- The encoding of the template files. -->
 		</init-param>
         <init-param>
@@ -110,7 +110,7 @@
             <param-value>en_US</param-value>
         </init-param>
         <init-param>
-            <param-name>encoding</param-name>
+            <param-name>sourceEncoding</param-name>
             <param-value>UTF-8</param-value> <!-- The encoding of the template files. -->
         </init-param>
         <init-param>

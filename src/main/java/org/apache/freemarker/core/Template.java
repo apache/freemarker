@@ -82,7 +82,7 @@ public class Template extends MutableProcessingConfiguration<Template> implement
     private Map macros = new HashMap();
     private List imports = new Vector();
     private ASTElement rootElement;
-    private String encoding, defaultNS;
+    private String sourceEncoding, defaultNS;
     private Serializable customLookupCondition;
     private int actualTagSyntax;
     private int actualNamingConvention;
@@ -131,7 +131,7 @@ public class Template extends MutableProcessingConfiguration<Template> implement
 
     /**
      * Convenience constructor for {@link #Template(String, String, Reader, Configuration, String) Template(name, null,
-     * reader, cfg, encoding)}.
+     * reader, cfg, sourceEncoding)}.
      */
     public Template(String name, Reader reader, Configuration cfg, String encoding) throws IOException {
         this(name, null, reader, cfg, encoding);
@@ -175,24 +175,20 @@ public class Template extends MutableProcessingConfiguration<Template> implement
    }
     
     /**
-     * Same as {@link #Template(String, String, Reader, Configuration)}, but also specifies the template's encoding (not
-     * recommended).
+     * Same as {@link #Template(String, String, Reader, Configuration)}, but also specifies the template's source
+     * encoding.
      *
-     * @param encoding
-     *            This is the encoding that we are supposed to be using. At the first glance it's unnecessary because we
-     *            already have a {@link Reader} (so decoding with the charset has already happened), however, if this is
-     *            non-{@code null} and there's an {@code #ftl} header with {@code encoding} parameter, they must match,
-     *            or else a {@link WrongTemplateCharsetException} is thrown. Thus, it should be set if to decode the template,
-     *            we were using an encoding (a charset), otherwise it should be {@code null}. It's also kept as
-     *            meta-info (returned by {@link #getEncoding()}). It also has an impact when {@code #include}-ing or
-     *            {@code #import}-ing another template from this template, as its default encoding will be this. But
-     *            this behavior of said directives is considered to be harmful, and will be probably phased out.
+     * @param sourceEncoding
+     *            This is the charset that was used to read the template. This can be {@code null} if the template
+     *            was loaded from a source that returns it already as text. If this is not {@code null} and there's an
+     *            {@code #ftl} header with {@code encoding} parameter, they must match, or else a
+     *            {@link WrongTemplateCharsetException} is thrown.
      * 
      * @since 2.3.22
      */
    public Template(
-           String name, String sourceName, Reader reader, Configuration cfg, String encoding) throws IOException {
-       this(name, sourceName, reader, cfg, null, encoding);
+           String name, String sourceName, Reader reader, Configuration cfg, String sourceEncoding) throws IOException {
+       this(name, sourceName, reader, cfg, null, sourceEncoding);
    }
    
     /**
@@ -239,10 +235,10 @@ public class Template extends MutableProcessingConfiguration<Template> implement
    public Template(
            String name, String sourceName, Reader reader,
            Configuration cfg, ParserConfiguration customParserConfiguration,
-           String encoding, InputStream streamToUnmarkWhenEncEstabd) throws IOException, ParseException {
+           String sourceEncoding, InputStream streamToUnmarkWhenEncEstabd) throws IOException, ParseException {
         this(name, sourceName, cfg, customParserConfiguration);
 
-       setEncoding(encoding);
+       setSourceEncoding(sourceEncoding);
         LineTableBuilder ltbReader;
         try {
             ParserConfiguration actualParserConfiguration = getParserConfiguration();
@@ -310,11 +306,11 @@ public class Template extends MutableProcessingConfiguration<Template> implement
      * @param config
      *            the configuration to which this template belongs
      *
-     * @param encoding
+     * @param sourceEncoding
      * @since 2.3.22
      */
     static public Template createPlainTextTemplate(String name, String sourceName, String content, Configuration config,
-               String encoding) {
+               String sourceEncoding) {
         Template template;
         try {
             template = new Template(name, sourceName, new StringReader("X"), config);
@@ -322,7 +318,7 @@ public class Template extends MutableProcessingConfiguration<Template> implement
             throw new BugException("Plain text template creation failed", e);
         }
         ((ASTStaticText) template.rootElement).replaceText(content);
-        template.setEncoding(encoding);
+        template.setSourceEncoding(sourceEncoding);
 
         _DebuggerService.registerTemplate(template);
 
@@ -572,20 +568,20 @@ public class Template extends MutableProcessingConfiguration<Template> implement
     }
 
     /**
-     * @param encoding
-     *            The encoding that was used to read this template, or {@code null} if the source of the template
+     * @param sourceEncoding
+     *            The sourceEncoding that was used to read this template, or {@code null} if the source of the template
      *            already gives back text (as opposed to binary data), so no decoding with a charset was needed.
      */
-    void setEncoding(String encoding) {
-        this.encoding = encoding;
+    void setSourceEncoding(String sourceEncoding) {
+        this.sourceEncoding = sourceEncoding;
     }
 
     /**
-     * The encoding that was used to read this template, or {@code null} if the source of the template
+     * The sourceEncoding that was used to read this template, or {@code null} if the source of the template
      * already gives back text (as opposed to binary data), so no decoding with a charset was needed.
      */
-    public String getEncoding() {
-        return encoding;
+    public String getSourceEncoding() {
+        return sourceEncoding;
     }
     
     /**

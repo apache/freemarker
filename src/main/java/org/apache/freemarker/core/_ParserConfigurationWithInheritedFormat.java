@@ -127,9 +127,8 @@ public final class _ParserConfigurationWithInheritedFormat implements ParserConf
         return wrappedPCfg.isTabSizeSet();
     }
 
-    @Override
-    public String getEncoding() {
-        return wrappedPCfg.getEncoding();
+    public String getSourceEncoding() {
+        return wrappedPCfg.getSourceEncoding();
     }
 
 }

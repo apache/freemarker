@@ -412,7 +412,7 @@ public class FreemarkerServletTest {
         }
 
         MockServletConfig servletConfig = new MockServletConfig(servletContext);
-        servletConfig.addInitParameter(Configuration.ENCODING_KEY, "UTF-8");
+        servletConfig.addInitParameter(Configuration.SOURCE_ENCODING_KEY, "UTF-8");
         if (ctInitParam != null) {
             servletConfig.addInitParameter(INIT_PARAM_CONTENT_TYPE, ctInitParam);
         }
@@ -547,7 +547,7 @@ public class FreemarkerServletTest {
                 outUtf8TC.setOutputEncoding("UTF-8");
                 
                 TemplateConfiguration srcUtf8TC = new TemplateConfiguration();
-                srcUtf8TC.setEncoding("UTF-8");
+                srcUtf8TC.setSourceEncoding("UTF-8");
                 
                 cfg.setTemplateConfigurations(
                         new FirstMatchTemplateConfigurationFactory(

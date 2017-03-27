@@ -32,21 +32,21 @@ public class EncodingOverrideTest {
     @Test
     public void testExactMarchingCharset() throws Exception {
         Template t = createConfig("UTF-8").getTemplate("encodingOverride-UTF-8.ftl");
-        assertEquals("UTF-8", t.getEncoding());
+        assertEquals("UTF-8", t.getSourceEncoding());
         checkTempateOutput(t);
     }
 
     @Test
     public void testCaseDiffCharset() throws Exception {
         Template t = createConfig("utf-8").getTemplate("encodingOverride-UTF-8.ftl");
-        assertEquals("utf-8", t.getEncoding());
+        assertEquals("utf-8", t.getSourceEncoding());
         checkTempateOutput(t);
     }
 
     @Test
     public void testReallyDiffCharset() throws Exception {
         Template t = createConfig("utf-8").getTemplate("encodingOverride-ISO-8859-1.ftl");
-        assertEquals("ISO-8859-1", t.getEncoding());
+        assertEquals("ISO-8859-1", t.getSourceEncoding());
         checkTempateOutput(t);
     }
 

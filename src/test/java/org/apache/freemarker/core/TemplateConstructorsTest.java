@@ -35,7 +35,7 @@ public class TemplateConstructorsTest {
     @Test
     public void test() throws IOException {
         final Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        //cfg.setEncoding("ISO-8859-1");
+        //cfg.setSourceEncoding("ISO-8859-1");
         
         final String name = "foo/bar.ftl";
         final String sourceName = "foo/bar_de.ftl";
@@ -46,42 +46,42 @@ public class TemplateConstructorsTest {
             assertEquals(name, t.getName());
             assertEquals(name, t.getSourceName());
             assertEquals(READER_CONTENT, t.toString());
-            assertNull(t.getEncoding());
+            assertNull(t.getSourceEncoding());
         }
         {
             Template t = new Template(name, content, cfg);
             assertEquals(name, t.getName());
             assertEquals(name, t.getSourceName());
             assertEquals(content, t.toString());
-            assertNull(t.getEncoding());
+            assertNull(t.getSourceEncoding());
         }
         {
             Template t = new Template(name, createReader(), cfg, encoding);
             assertEquals(name, t.getName());
             assertEquals(name, t.getSourceName());
             assertEquals(READER_CONTENT, t.toString());
-            assertEquals("UTF-16LE", t.getEncoding());
+            assertEquals("UTF-16LE", t.getSourceEncoding());
         }
         {
             Template t = new Template(name, sourceName, createReader(), cfg);
             assertEquals(name, t.getName());
             assertEquals(sourceName, t.getSourceName());
             assertEquals(READER_CONTENT, t.toString());
-            assertNull(t.getEncoding());
+            assertNull(t.getSourceEncoding());
         }
         {
             Template t = new Template(name, sourceName, createReader(), cfg, encoding);
             assertEquals(name, t.getName());
             assertEquals(sourceName, t.getSourceName());
             assertEquals(READER_CONTENT, t.toString());
-            assertEquals("UTF-16LE", t.getEncoding());
+            assertEquals("UTF-16LE", t.getSourceEncoding());
         }
         {
             Template t = Template.createPlainTextTemplate(name, content, cfg);
             assertEquals(name, t.getName());
             assertEquals(name, t.getSourceName());
             assertEquals(content, t.toString());
-            assertNull(t.getEncoding());
+            assertNull(t.getSourceEncoding());
         }
         {
             try {

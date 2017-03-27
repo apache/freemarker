@@ -286,7 +286,7 @@ public class DefaultTemplateResolverTest {
             Template t = cfg.getTemplate("utf-8.ftl");
             assertEquals("utf-8.ftl", t.getName());
             assertEquals("utf-8_en.ftl", t.getSourceName());
-            assertEquals("utf-8", t.getEncoding());
+            assertEquals("utf-8", t.getSourceEncoding());
             assertEquals("Béka", t.toString());
             
             assertEquals(
@@ -304,7 +304,7 @@ public class DefaultTemplateResolverTest {
             Template t = cfg.getTemplate("iso-8859-1.ftl");
             assertEquals("iso-8859-1.ftl", t.getName());
             assertEquals("iso-8859-1_en_US.ftl", t.getSourceName());
-            assertEquals("ISO-8859-1", t.getEncoding());
+            assertEquals("ISO-8859-1", t.getSourceEncoding());
             assertEquals("Béka", t.toString());
             
             assertEquals(
@@ -331,7 +331,7 @@ public class DefaultTemplateResolverTest {
             Template t = cfg.getTemplate("foo.ftl");
             assertEquals("foo.ftl", t.getName());
             assertEquals("foo_en.ftl", t.getSourceName());
-            assertNull(t.getEncoding());
+            assertNull(t.getSourceEncoding());
             assertEquals("ő", t.toString());
             
             assertEquals(
