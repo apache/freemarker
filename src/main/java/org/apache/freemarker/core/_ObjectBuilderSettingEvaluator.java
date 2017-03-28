@@ -681,8 +681,18 @@ public class _ObjectBuilderSettingEvaluator {
             addWithSimpleName(SHORTHANDS, UndefinedOutputFormat.class);
             
             addWithSimpleName(SHORTHANDS, Locale.class);
-            String tzbClassName = _TimeZoneBuilder.class.getName();
-            SHORTHANDS.put("TimeZone", tzbClassName.substring(0, tzbClassName.length() - 7));
+
+            {
+                String tzbClassName = _TimeZoneBuilder.class.getName();
+                SHORTHANDS.put("TimeZone",
+                        tzbClassName.substring(0, tzbClassName.length() - BUILDER_CLASS_POSTFIX_2.length()));
+            }
+
+            {
+                String csClassName = _CharsetBuilder.class.getName();
+                SHORTHANDS.put("Charset",
+                        csClassName.substring(0, csClassName.length() - BUILDER_CLASS_POSTFIX_2.length()));
+            }
 
             // For accessing static fields:
             addWithSimpleName(SHORTHANDS, Configuration.class);

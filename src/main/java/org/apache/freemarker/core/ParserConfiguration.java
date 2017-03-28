@@ -19,6 +19,7 @@
 package org.apache.freemarker.core;
 
 import java.io.Writer;
+import java.nio.charset.Charset;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.outputformat.OutputFormat;
@@ -144,6 +145,6 @@ public interface ParserConfiguration {
      * reading template files in a locale for which no explicit encoding
      * was specified. Defaults to the default system encoding.
      */
-    String getSourceEncoding();
+    Charset getSourceEncoding();
 
 }

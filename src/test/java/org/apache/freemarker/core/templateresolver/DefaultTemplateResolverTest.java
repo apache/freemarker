@@ -273,7 +273,7 @@ public class DefaultTemplateResolverTest {
     public void testWrongEncodingReload() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setLocale(Locale.US);
-        cfg.setEncoding("utf-8");
+        cfg.setSourceEncoding(StandardCharsets.UTF_8);
         
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putBinaryTemplate("utf-8_en.ftl", "<#ftl encoding='utf-8'>Béka");
@@ -286,7 +286,7 @@ public class DefaultTemplateResolverTest {
             Template t = cfg.getTemplate("utf-8.ftl");
             assertEquals("utf-8.ftl", t.getName());
             assertEquals("utf-8_en.ftl", t.getSourceName());
-            assertEquals("utf-8", t.getSourceEncoding());
+            assertEquals(StandardCharsets.UTF_8, t.getSourceEncoding());
             assertEquals("Béka", t.toString());
             
             assertEquals(
@@ -304,7 +304,7 @@ public class DefaultTemplateResolverTest {
             Template t = cfg.getTemplate("iso-8859-1.ftl");
             assertEquals("iso-8859-1.ftl", t.getName());
             assertEquals("iso-8859-1_en_US.ftl", t.getSourceName());
-            assertEquals("ISO-8859-1", t.getSourceEncoding());
+            assertEquals(StandardCharsets.ISO_8859_1, t.getSourceEncoding());
             assertEquals("Béka", t.toString());
             
             assertEquals(
@@ -320,7 +320,7 @@ public class DefaultTemplateResolverTest {
     public void testNoWrongEncodingForTemplateLoader2WithReader() throws IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setLocale(Locale.US);
-        cfg.setEncoding("utf-8");
+        cfg.setSourceEncoding(StandardCharsets.UTF_8);
         
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTextTemplate("foo_en.ftl", "<#ftl encoding='utf-8'>ő");

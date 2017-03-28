@@ -24,6 +24,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.rmi.server.RemoteObject;
 import java.security.MessageDigest;
@@ -71,7 +72,7 @@ public class DebuggerClient {
                 }
                 byte[] challenge = (byte[]) in.readObject();
                 MessageDigest md = MessageDigest.getInstance("SHA");
-                md.update(password.getBytes("UTF-8"));
+                md.update(password.getBytes(StandardCharsets.UTF_8));
                 md.update(challenge);
                 out.writeObject(md.digest());
                 return new LocalDebuggerProxy((Debugger) in.readObject());

@@ -20,6 +20,7 @@
 package org.apache.freemarker.core;
 
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
@@ -38,7 +39,7 @@ public abstract class MutableProcessingAndParseConfiguration<
     private Integer autoEscapingPolicy;
     private Boolean recognizeStandardFileExtensions;
     private OutputFormat outputFormat;
-    private String sourceEncoding;
+    private Charset sourceEncoding;
     private Integer tabSize;
 
     protected MutableProcessingAndParseConfiguration(Version incompatibleImprovements) {
@@ -227,17 +228,17 @@ public abstract class MutableProcessingAndParseConfiguration<
         return recognizeStandardFileExtensions != null;
     }
 
-    public String getSourceEncoding() {
+    public Charset getSourceEncoding() {
         return sourceEncoding != null ? sourceEncoding : getDefaultSourceEncoding();
     }
 
-    protected abstract String getDefaultSourceEncoding();
+    protected abstract Charset getDefaultSourceEncoding();
 
     /**
      * The charset to be used when reading the template "file" that the {@link TemplateLoader} returns as binary
      * ({@link InputStream}). If the {@code #ftl} header specifies an charset, that will override this.
      */
-    public void setSourceEncoding(String sourceEncoding) {
+    public void setSourceEncoding(Charset sourceEncoding) {
         _NullArgumentException.check("sourceEncoding", sourceEncoding);
         this.sourceEncoding = sourceEncoding;
     }
@@ -263,10 +264,10 @@ public abstract class MutableProcessingAndParseConfiguration<
     @Override
     public int getTabSize() {
         return tabSize != null ? tabSize.intValue()
-                : getDefailtTabSize();
+                : getDefaultTabSize();
     }
 
-    protected abstract int getDefailtTabSize();
+    protected abstract int getDefaultTabSize();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.

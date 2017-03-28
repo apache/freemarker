@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -125,7 +126,7 @@ public class WebAppTestCase {
             if (responseCode == 200) {
                 InputStream in = httpCon.getInputStream();
                 try {
-                    content = IOUtils.toString(in, "UTF-8");
+                    content = IOUtils.toString(in, StandardCharsets.UTF_8.name());
                 } finally {
                     in.close();
                 }
@@ -191,7 +192,9 @@ public class WebAppTestCase {
                 throw new IOException("Test resource not found: " + expectedResource);
             }
             try {
-                expected = TestUtil.removeTxtCopyrightComment(normalizeWS(IOUtils.toString(in, "utf-8"), compressWS));
+                expected = TestUtil.removeTxtCopyrightComment(normalizeWS(
+                        IOUtils.toString(in, StandardCharsets.UTF_8.name()),
+                        compressWS));
             } finally {
                 in.close();
             }

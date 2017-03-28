@@ -212,16 +212,16 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * template usually just inherits that from the {@link Configuration}), and if that's not set, then reads the source
  * charset of the template, just like {@value #INIT_PARAM_VALUE_LEGACY}, and if that's {@code null} (which happens if
  * the template was loaded from a non-binary source) then it will be UTF-8. Then it passes the charset acquired this way
- * to {@link HttpServletResponse#setCharacterEncoding(String)} and {@link Environment#setOutputEncoding(String)}. (It
+ * to {@link HttpServletResponse#setCharacterEncoding(String)} and {@link Environment#setOutputEncoding(Charset)}. (It
  * doesn't call the legacy {@link HttpServletResponse#setContentType(String)} API to set the charset.) (Note that if the
  * template has a {@code content_type} template attribute (which is deprecated) that specifies a charset, it will be
  * used as the output charset of that template.)
  * <li>{@value #INIT_PARAM_VALUE_DO_NOT_SET}: {@link FreemarkerServlet} will not set the {@link HttpServletResponse}
- * "character encoding". It will still call {@link Environment#setOutputEncoding(String)}, so that the running template
+ * "character encoding". It will still call {@link Environment#setOutputEncoding(Charset)}, so that the running template
  * will be aware of the charset used for the output.
  * <li>{@value #INIT_PARAM_VALUE_FORCE_PREFIX} + charset name, for example {@code force UTF-8}: The output charset will
  * be the one specified after "force" + space, regardless of everything. The charset specified this way is passed to
- * {@link HttpServletResponse#setCharacterEncoding(String)} and {@link Environment#setOutputEncoding(String)}. If the
+ * {@link HttpServletResponse#setCharacterEncoding(String)} and {@link Environment#setOutputEncoding(Charset)}. If the
  * charset name is not recognized by Java, the servlet initialization will fail.
  * </ul>
  *
@@ -631,7 +631,7 @@ public class FreemarkerServlet extends HttpServlet {
                         throw new ConflictingInitParamsException(
                                 Configuration.SOURCE_ENCODING_KEY, DEPR_INITPARAM_ENCODING);
                     }
-                    config.setEncoding(value);
+                    config.setSourceEncoding(Charset.forName(value));
                 } else if (name.equals(DEPR_INITPARAM_TEMPLATE_DELAY)) { // BC
                     if (getInitParameter(Configuration.TEMPLATE_UPDATE_DELAY_KEY) != null) {
                         throw new ConflictingInitParamsException(
@@ -857,7 +857,7 @@ public class FreemarkerServlet extends HttpServlet {
             // Using the Servlet 2.4 way of setting character encoding.
             if (responseCharacterEncoding != ResponseCharacterEncoding.FORCE_CHARSET) {
                 if (!tempSpecContentTypeContainsCharset) {
-                    response.setCharacterEncoding(getOutputEncodingForTemplate(template));
+                    response.setCharacterEncoding(getOutputEncodingForTemplate(template).name());
                 }
             } else {
                 response.setCharacterEncoding(forcedResponseCharacterEncoding.name());
@@ -878,8 +878,18 @@ public class FreemarkerServlet extends HttpServlet {
                     // Process the template
                     Environment env = template.createProcessingEnvironment(model, response.getWriter());
                     if (responseCharacterEncoding != ResponseCharacterEncoding.LEGACY) {
-                        String actualOutputCharset = response.getCharacterEncoding();
-                        if (actualOutputCharset != null) {
+                        String actualOutputCharsetName = response.getCharacterEncoding();
+                        if (actualOutputCharsetName != null) {
+                            Charset actualOutputCharset = null;
+                            try {
+                                actualOutputCharset = Charset.forName(actualOutputCharsetName);
+                            } catch (Exception e) {
+                                throw new IllegalStateException(
+                                        "Failed to resolve charset name returned by "
+                                        + " HttpServletResponse.getCharacterEncoding(): "
+                                        + _StringUtil.jQuote(actualOutputCharsetName),
+                                        e);
+                            }
                             env.setOutputEncoding(actualOutputCharset);
                         }
                     }
@@ -917,13 +927,13 @@ public class FreemarkerServlet extends HttpServlet {
         env.process();
     }
 
-    private String getOutputEncodingForTemplate(Template template) {
-        String outputEncoding = responseCharacterEncoding == ResponseCharacterEncoding.LEGACY ? null
+    private Charset getOutputEncodingForTemplate(Template template) {
+        Charset outputEncoding = responseCharacterEncoding == ResponseCharacterEncoding.LEGACY ? null
                 : template.getOutputEncoding();
         // [FM3] Don't use template.getSourceEncoding() here; it might can't encode the dynamic values inserted.
         return outputEncoding != null ? outputEncoding
                 : template.getSourceEncoding() != null ? template.getSourceEncoding()
-                : StandardCharsets.UTF_8.name();
+                : StandardCharsets.UTF_8;
     }
 
     private ContentType getTemplateSpecificContentType(final Template template) {

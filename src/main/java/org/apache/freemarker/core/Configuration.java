@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
@@ -88,7 +90,6 @@ import org.apache.freemarker.core.util.StandardCompress;
 import org.apache.freemarker.core.util.XmlEscape;
 import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.core.util._NullArgumentException;
-import org.apache.freemarker.core.util._SecurityUtil;
 import org.apache.freemarker.core.util._SortedArraySet;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.core.util._UnmodifiableCompositeSet;
@@ -126,7 +127,7 @@ import org.apache.freemarker.core.util._UnmodifiableCompositeSet;
  *       useless. (For the most common cases you can use the convenience methods,
  *       {@link #setDirectoryForTemplateLoading(File)} and {@link #setClassForTemplateLoading(Class, String)} and
  *       {@link #setClassLoaderForTemplateLoading(ClassLoader, String)} too.)
- *   <li>{@link #setEncoding(String) encoding}: The default value is system dependent, which makes it
+ *   <li>{@link #setSourceEncoding(Charset) sourceEncoding}: The default value is system dependent, which makes it
  *       fragile on servers, so it should be set explicitly, like to "UTF-8" nowadays. 
  *   <li>{@link #setTemplateExceptionHandler(TemplateExceptionHandler) template_exception_handler}: For developing
  *       HTML pages, the most convenient value is {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}. For production,
@@ -427,7 +428,7 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
     private boolean templateExceptionHandlerExplicitlySet;
     private boolean logTemplateExceptionsExplicitlySet;
     private boolean localeExplicitlySet;
-    private boolean defaultEncodingExplicitlySet;
+    private boolean sourceEncodingExplicitlySet;
     private boolean timeZoneExplicitlySet;
 
     private HashMap/*<String, TemplateModel>*/ sharedVariables = new HashMap();
@@ -442,7 +443,7 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
      */
     private HashMap<String, Object> rewrappableSharedVariables = null;
     
-    private String encoding = getDefaultSourceEncoding();
+    private Charset sourceEncoding = getDefaultSourceEncoding();
 
     /**
      * @deprecated Use {@link #Configuration(Version)} instead. Note that the version can be still modified later with
@@ -2032,23 +2033,23 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
      * the charset of the template.
      *
      * <p>Individual templates may specify their own charset by starting with
-     * <tt>&lt;#ftl encoding="..."&gt;</tt>. However, before that's detected, at least part of template must be
+     * <tt>&lt;#ftl sourceEncoding="..."&gt;</tt>. However, before that's detected, at least part of template must be
      * decoded with some charset first, so this setting and {@linkplain #getTemplateConfigurations() template
      * configuration} still has a role.
      *
-     * <p>Defaults to the default system encoding, which can change from one server to
+     * <p>Defaults to the default system sourceEncoding, which can change from one server to
      * another, so <b>you should always set this setting</b>. If you don't know what charset your should chose,
      * {@code "UTF-8"} is usually a good choice.
      *
-     * @param encoding The name of the charset, such as {@code "UTF-8"} or {@code "ISO-8859-1"}
+     * @param sourceEncoding The charset, for example {@link StandardCharsets#UTF_8}.
      */
-    public void setEncoding(String encoding) {
-        this.encoding = encoding;
-        defaultEncodingExplicitlySet = true;
+    public void setSourceEncoding(Charset sourceEncoding) {
+        this.sourceEncoding = sourceEncoding;
+        sourceEncodingExplicitlySet = true;
     }
 
-    public String getSourceEncoding() {
-        return encoding;
+    public Charset getSourceEncoding() {
+        return sourceEncoding;
     }
 
     /**
@@ -2056,29 +2057,25 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
      *
      * @since 2.3.26
      */
-    public void unsetDefaultEncoding() {
-        if (defaultEncodingExplicitlySet) {
-            setEncoding(getDefaultSourceEncoding());
-            defaultEncodingExplicitlySet = false;
+    public void unsetSourceEncoding() {
+        if (sourceEncodingExplicitlySet) {
+            setSourceEncoding(getDefaultSourceEncoding());
+            sourceEncodingExplicitlySet = false;
         }
     }
 
     /**
-     * Tells if {@link #setEncoding(String)} (or equivalent) was already called on this instance, or it just holds the
+     * Tells if {@link #setSourceEncoding(Charset)} (or equivalent) was already called on this instance, or it just holds the
      * default value.
      *
      * @since 2.3.26
      */
-    public boolean isDefaultEncodingExplicitlySet() {
-        return defaultEncodingExplicitlySet;
+    public boolean isSourceEncodingExplicitlySet() {
+        return sourceEncodingExplicitlySet;
     }
 
-    static private String getDefaultSourceEncoding() {
-        return getJVMDefaultEncoding();
-    }
-
-    static private String getJVMDefaultEncoding() {
-        return _SecurityUtil.getSystemProperty("file.encoding", "utf-8");
+    static private Charset getDefaultSourceEncoding() {
+        return Charset.defaultCharset();
     }
 
     /**
@@ -2305,9 +2302,9 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
             
             if (SOURCE_ENCODING_KEY_SNAKE_CASE.equals(name) || SOURCE_ENCODING_KEY_CAMEL_CASE.equals(name)) {
                 if (JVM_DEFAULT_VALUE.equalsIgnoreCase(value)) {
-                    setEncoding(getJVMDefaultEncoding());
+                    setSourceEncoding(Charset.defaultCharset());
                 } else {
-                    setEncoding(value);
+                    setSourceEncoding(Charset.forName(value));
                 }
             } else if (LOCALIZED_LOOKUP_KEY_SNAKE_CASE.equals(name) || LOCALIZED_LOOKUP_KEY_CAMEL_CASE.equals(name)) {
                 setLocalizedLookup(_StringUtil.getYesNo(value));

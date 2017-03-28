@@ -30,6 +30,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,6 +71,8 @@ import com.google.common.collect.ImmutableMap;
 
 @SuppressWarnings("boxing")
 public class TemplateConfigurationTest {
+
+    private static final Charset ISO_8859_2 = Charset.forName("ISO-8859-2");
 
     private final class DummyArithmeticEngine extends ArithmeticEngine {
 
@@ -133,33 +136,13 @@ public class TemplateConfigurationTest {
         NON_DEFAULT_TZ = tz;
     }
 
-    private static final Locale NON_DEFAULT_LOCALE;
-    static {
-        Locale defaultLocale = DEFAULT_CFG.getLocale();
-        Locale locale = Locale.GERMAN;
-        if (locale.equals(defaultLocale)) {
-            locale = Locale.US;
-            if (locale.equals(defaultLocale)) {
-                throw new AssertionError("Couldn't chose a non-default locale");
-            }
-        }
-        NON_DEFAULT_LOCALE = locale;
-    }
+    private static final Locale NON_DEFAULT_LOCALE =
+            DEFAULT_CFG.getLocale().equals(Locale.US) ? Locale.GERMAN : Locale.US;
 
-    private static final String NON_DEFAULT_ENCODING;
+    private static final Charset NON_DEFAULT_ENCODING =
+            DEFAULT_CFG.getSourceEncoding().equals(StandardCharsets.UTF_8) ? StandardCharsets.UTF_16LE
+                    : StandardCharsets.UTF_8;
 
-    static {
-        String defaultEncoding = DEFAULT_CFG.getSourceEncoding();
-        String encoding = "UTF-16";
-        if (encoding.equals(defaultEncoding)) {
-            encoding = "UTF-8";
-            if (encoding.equals(defaultEncoding)) {
-                throw new AssertionError("Couldn't chose a non-default locale");
-            }
-        }
-        NON_DEFAULT_ENCODING = encoding;
-    }
-    
     private static final Map<String, Object> SETTING_ASSIGNMENTS;
 
     static {
@@ -168,7 +151,7 @@ public class TemplateConfigurationTest {
         // "MutableProcessingConfiguration" settings:
         SETTING_ASSIGNMENTS.put("APIBuiltinEnabled", true);
         SETTING_ASSIGNMENTS.put("SQLDateAndTimeTimeZone", NON_DEFAULT_TZ);
-        SETTING_ASSIGNMENTS.put("URLEscapingCharset", "utf-16");
+        SETTING_ASSIGNMENTS.put("URLEscapingCharset", StandardCharsets.UTF_16);
         SETTING_ASSIGNMENTS.put("autoFlush", false);
         SETTING_ASSIGNMENTS.put("booleanFormat", "J,N");
         SETTING_ASSIGNMENTS.put("dateFormat", "yyyy-#DDD");
@@ -178,7 +161,7 @@ public class TemplateConfigurationTest {
         SETTING_ASSIGNMENTS.put("newBuiltinClassResolver", TemplateClassResolver.ALLOWS_NOTHING_RESOLVER);
         SETTING_ASSIGNMENTS.put("numberFormat", "0.0000");
         SETTING_ASSIGNMENTS.put("objectWrapper", new RestrictedObjectWrapper.Builder(ICI).build());
-        SETTING_ASSIGNMENTS.put("outputEncoding", "utf-16");
+        SETTING_ASSIGNMENTS.put("outputEncoding", StandardCharsets.UTF_16);
         SETTING_ASSIGNMENTS.put("showErrorTips", false);
         SETTING_ASSIGNMENTS.put("templateExceptionHandler", TemplateExceptionHandler.IGNORE_HANDLER);
         SETTING_ASSIGNMENTS.put("timeFormat", "@HH:mm");
@@ -710,10 +693,10 @@ public class TemplateConfigurationTest {
             // assertOutput here, as that hard-coded to create an FTL Template.
 
             TemplateConfiguration tc = new TemplateConfiguration();
-            tc.setSourceEncoding("ISO-8859-1");
+            tc.setSourceEncoding(StandardCharsets.ISO_8859_1);
 
             Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-            cfg.setEncoding("utf-8");
+            cfg.setSourceEncoding(StandardCharsets.UTF_8);
             cfg.setTemplateConfigurations(new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher
                     ("latin1.ftl"), tc));
 
@@ -819,24 +802,24 @@ public class TemplateConfigurationTest {
         {
             TemplateConfiguration tc = new TemplateConfiguration();
             tc.setParentConfiguration(DEFAULT_CFG);
-            String outputEncoding = "ISO-8859-2";
+            Charset outputEncoding = ISO_8859_2;
             tc.setOutputEncoding(outputEncoding);
 
             String legacyNCFtl = "${r'.output_encoding!\"null\"'?eval}";
             String camelCaseNCFtl = "${r'.outputEncoding!\"null\"'?eval}";
 
             // Default is re-auto-detecting in ?eval:
-            assertOutputWithoutAndWithTC(tc, legacyNCFtl, "null", outputEncoding);
-            assertOutputWithoutAndWithTC(tc, camelCaseNCFtl, "null", outputEncoding);
+            assertOutputWithoutAndWithTC(tc, legacyNCFtl, "null", outputEncoding.name());
+            assertOutputWithoutAndWithTC(tc, camelCaseNCFtl, "null", outputEncoding.name());
             
             // Force camelCase:
             tc.setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
             assertOutputWithoutAndWithTC(tc, legacyNCFtl, "null", null);
-            assertOutputWithoutAndWithTC(tc, camelCaseNCFtl, "null", outputEncoding);
+            assertOutputWithoutAndWithTC(tc, camelCaseNCFtl, "null", outputEncoding.name());
             
             // Force legacy:
             tc.setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
-            assertOutputWithoutAndWithTC(tc, legacyNCFtl, "null", outputEncoding);
+            assertOutputWithoutAndWithTC(tc, legacyNCFtl, "null", outputEncoding.name());
             assertOutputWithoutAndWithTC(tc, camelCaseNCFtl, "null", null);
         }
     }

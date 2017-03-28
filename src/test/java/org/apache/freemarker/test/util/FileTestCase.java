@@ -30,6 +30,8 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.freemarker.core.util._StringUtil;
 
@@ -60,7 +62,7 @@ public abstract class FileTestCase extends TestCase {
         try {
             final File expectedFile = getExpectedFileFor(expectedFileName);
             
-            AssertionFailedError assertionExcepton = null;
+            AssertionFailedError assertionException = null;
             boolean successful = false;
             try {
                 if (expectedFile.exists()) {
@@ -68,7 +70,7 @@ public abstract class FileTestCase extends TestCase {
                     successful = true;
                 }
             } catch (AssertionFailedError e) {
-                assertionExcepton = e;
+                assertionException = e;
             }
             
             if (!successful) {
@@ -76,8 +78,8 @@ public abstract class FileTestCase extends TestCase {
                 saveString(actualFile, actualContent);
                 reportActualFileSaved(actualFile);
                 
-                if (assertionExcepton != null) {
-                    throw assertionExcepton;
+                if (assertionException != null) {
+                    throw assertionException;
                 } else {
                     throw new FileNotFoundException(expectedFile.getPath());
                 }
@@ -106,7 +108,7 @@ public abstract class FileTestCase extends TestCase {
     }
 
     private void saveString(File actualFile, String actualContents) throws IOException {
-        Writer w = new OutputStreamWriter(new FileOutputStream(actualFile), "UTF-8");
+        Writer w = new OutputStreamWriter(new FileOutputStream(actualFile), StandardCharsets.UTF_8);
         try {
             w.write(actualContents);
         } finally {
@@ -145,30 +147,30 @@ public abstract class FileTestCase extends TestCase {
     }
 
     protected String loadFile(File f) throws IOException {
-        return TestUtil.removeTxtCopyrightComment(loadFile(f, getDefaultCharset()));
+        return TestUtil.removeTxtCopyrightComment(loadFile(f, getFileCharset()));
     }
     
-    protected String loadFile(File f, String charset) throws IOException {
+    protected String loadFile(File f, Charset charset) throws IOException {
         return loadString(new FileInputStream(f), charset);
     }
 
     protected String loadResource(String resourceName) throws IOException {
-        return loadResource(resourceName, getDefaultCharset());
+        return loadResource(resourceName, getFileCharset());
     }
     
-    protected String loadResource(String resourceName, String charset) throws IOException {
+    protected String loadResource(String resourceName, Charset charset) throws IOException {
         return loadString(new FileInputStream(new File(getTestClassDirectory(), resourceName)), charset);
     }
     
-    protected String getDefaultCharset() {
-        return "UTF-8";
+    protected Charset getFileCharset() {
+        return StandardCharsets.UTF_8;
     }
     
     protected void reportActualFileSaved(File f) {
         System.out.println("Note: Saved actual output of the failed test to here: " + f.getAbsolutePath());
     }
    
-    private static String loadString(InputStream in, String charset) throws IOException {
+    private static String loadString(InputStream in, Charset charset) throws IOException {
         Reader r = new InputStreamReader(in, charset);
         StringBuilder sb = new StringBuilder(1024);
         try {

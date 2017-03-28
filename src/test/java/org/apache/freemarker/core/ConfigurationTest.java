@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -87,6 +88,8 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import junit.framework.TestCase;
 
 public class ConfigurationTest extends TestCase {
+
+    private static final Charset ISO_8859_2 = Charset.forName("ISO-8859-2");
 
     public ConfigurationTest(String name) {
         super(name);
@@ -248,21 +251,18 @@ public class ConfigurationTest extends TestCase {
     @SuppressWarnings("boxing")
     public void testGetTemplateOverloads() throws Exception {
         final Locale hu = new Locale("hu", "HU");
-        final String latin1 = "ISO-8859-1";
-        final String latin2 = "ISO-8859-2";
-        final String utf8 = "utf-8";
         final String tFtl = "t.ftl";
         final String tHuFtl = "t_hu.ftl";
         final String tEnFtl = "t_en.ftl";
-        final String tUtf8Ftl = "t-utf8.ftl";
+        final String tUtf8Ftl = "utf8.ftl";
         final Serializable custLookupCond = new Serializable() { };
         
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         cfg.setLocale(Locale.GERMAN);
-        cfg.setEncoding(latin1);
+        cfg.setSourceEncoding(StandardCharsets.ISO_8859_1);
 
         TemplateConfiguration huTC = new TemplateConfiguration();
-        huTC.setSourceEncoding(latin2);
+        huTC.setSourceEncoding(ISO_8859_2);
         cfg.setTemplateConfigurations(
                 new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*_hu.*"),
                 huTC));
@@ -281,7 +281,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tFtl, t.getSourceName());
             assertEquals(Locale.GERMAN, t.getLocale());
             assertNull(t.getCustomLookupCondition());
-            assertEquals(latin1, t.getSourceEncoding());
+            assertEquals(StandardCharsets.ISO_8859_1, t.getSourceEncoding());
         }
         {
             Template t = cfg.getTemplate(tUtf8Ftl);
@@ -289,7 +289,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tUtf8Ftl, t.getSourceName());
             assertEquals(Locale.GERMAN, t.getLocale());
             assertNull(t.getCustomLookupCondition());
-            assertEquals(utf8, t.getSourceEncoding());
+            assertEquals(StandardCharsets.UTF_8, t.getSourceEncoding());
         }
         
         // 2 args:
@@ -299,7 +299,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tFtl, t.getSourceName());
             assertEquals(Locale.GERMAN, t.getLocale());
             assertNull(t.getCustomLookupCondition());
-            assertEquals(latin1, t.getSourceEncoding());
+            assertEquals(StandardCharsets.ISO_8859_1, t.getSourceEncoding());
         }
         {
             Template t = cfg.getTemplate(tFtl, (Locale) null);
@@ -307,7 +307,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tFtl, t.getSourceName());
             assertEquals(Locale.GERMAN, t.getLocale());
             assertNull(t.getCustomLookupCondition());
-            assertEquals(latin1, t.getSourceEncoding());
+            assertEquals(StandardCharsets.ISO_8859_1, t.getSourceEncoding());
         }
         {
             Template t = cfg.getTemplate(tFtl, Locale.US);
@@ -315,7 +315,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tEnFtl, t.getSourceName());
             assertEquals(Locale.US, t.getLocale());
             assertNull(t.getCustomLookupCondition());
-            assertEquals(latin1, t.getSourceEncoding());
+            assertEquals(StandardCharsets.ISO_8859_1, t.getSourceEncoding());
         }
         {
             Template t = cfg.getTemplate(tUtf8Ftl, Locale.US);
@@ -323,7 +323,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tUtf8Ftl, t.getSourceName());
             assertEquals(Locale.US, t.getLocale());
             assertNull(t.getCustomLookupCondition());
-            assertEquals(utf8, t.getSourceEncoding());
+            assertEquals(StandardCharsets.UTF_8, t.getSourceEncoding());
         }
         {
             Template t = cfg.getTemplate(tFtl, hu);
@@ -331,7 +331,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tHuFtl, t.getSourceName());
             assertEquals(hu, t.getLocale());
             assertNull(t.getCustomLookupCondition());
-            assertEquals(latin2, t.getSourceEncoding());
+            assertEquals(ISO_8859_2, t.getSourceEncoding());
         }
         {
             Template t = cfg.getTemplate(tUtf8Ftl, hu);
@@ -339,7 +339,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tUtf8Ftl, t.getSourceName());
             assertEquals(hu, t.getLocale());
             assertNull(t.getCustomLookupCondition());
-            assertEquals(utf8, t.getSourceEncoding());
+            assertEquals(StandardCharsets.UTF_8, t.getSourceEncoding());
         }
 
         // 4 args:
@@ -356,7 +356,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tHuFtl, t.getSourceName());
             assertEquals(hu, t.getLocale());
             assertEquals(custLookupCond, t.getCustomLookupCondition());
-            assertEquals(latin2, t.getSourceEncoding());
+            assertEquals(ISO_8859_2, t.getSourceEncoding());
             assertOutputEquals("1", t);
         }
         {
@@ -365,7 +365,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tFtl, t.getSourceName());
             assertEquals(Locale.GERMAN, t.getLocale());
             assertEquals(custLookupCond, t.getCustomLookupCondition());
-            assertEquals(latin1, t.getSourceEncoding());
+            assertEquals(StandardCharsets.ISO_8859_1, t.getSourceEncoding());
             assertOutputEquals("1", t);
         }
     }
@@ -1336,24 +1336,22 @@ public class ConfigurationTest extends TestCase {
     public void testDefaultEncodingSetting() throws TemplateException, ConfigurationException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
 
-        String defaultFileEncoding = System.getProperty("file.encoding");
-        assertNotNull(defaultFileEncoding);
+        assertEquals(Charset.defaultCharset(), cfg.getSourceEncoding());
+        assertFalse(cfg.isSourceEncodingExplicitlySet());
 
-        assertEquals(defaultFileEncoding, cfg.getSourceEncoding());
-        assertFalse(cfg.isDefaultEncodingExplicitlySet());
-
-        String nonDefault = defaultFileEncoding.equalsIgnoreCase("UTF-8") ? "ISO-8859-1" : "UTF-8";
-        cfg.setEncoding(nonDefault);
-        assertTrue(cfg.isDefaultEncodingExplicitlySet());
+        Charset nonDefault = Charset.defaultCharset().equals(StandardCharsets.UTF_8) ? StandardCharsets.ISO_8859_1
+                : StandardCharsets.UTF_8;
+        cfg.setSourceEncoding(nonDefault);
+        assertTrue(cfg.isSourceEncodingExplicitlySet());
         assertEquals(nonDefault, cfg.getSourceEncoding());
 
-        cfg.unsetDefaultEncoding();
-        assertEquals(defaultFileEncoding, cfg.getSourceEncoding());
-        assertFalse(cfg.isDefaultEncodingExplicitlySet());
+        cfg.unsetSourceEncoding();
+        assertEquals(Charset.defaultCharset(), cfg.getSourceEncoding());
+        assertFalse(cfg.isSourceEncodingExplicitlySet());
 
         cfg.setSetting(Configuration.SOURCE_ENCODING_KEY, "JVM default");
-        assertEquals(defaultFileEncoding, cfg.getSourceEncoding());
-        assertTrue(cfg.isDefaultEncodingExplicitlySet());
+        assertEquals(Charset.defaultCharset(), cfg.getSourceEncoding());
+        assertTrue(cfg.isSourceEncodingExplicitlySet());
     }
 
     public void testTimeZoneSetting() throws TemplateException, ConfigurationException {
@@ -1453,10 +1451,10 @@ public class ConfigurationTest extends TestCase {
     public void testSetSettingSupportsBothNamingConventions() throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
-        cfg.setSetting(Configuration.SOURCE_ENCODING_KEY_CAMEL_CASE, "UTF-16LE");
-        assertEquals("UTF-16LE", cfg.getSourceEncoding());
-        cfg.setSetting(Configuration.SOURCE_ENCODING_KEY_SNAKE_CASE, "UTF-8");
-        assertEquals("UTF-8", cfg.getSourceEncoding());
+        cfg.setSetting(Configuration.SOURCE_ENCODING_KEY_CAMEL_CASE, StandardCharsets.UTF_16LE.name());
+        assertEquals(StandardCharsets.UTF_16LE, cfg.getSourceEncoding());
+        cfg.setSetting(Configuration.SOURCE_ENCODING_KEY_SNAKE_CASE, StandardCharsets.UTF_8.name());
+        assertEquals(StandardCharsets.UTF_8, cfg.getSourceEncoding());
         
         for (String nameCC : cfg.getSettingNames(true)) {
             for (String value : new String[] { "1", "default", "true" }) {

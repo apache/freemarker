@@ -24,6 +24,7 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.Collator;
@@ -185,7 +186,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     private int nodeNamespaceIndex;
     private String currentNodeName, currentNodeNS;
 
-    private String cachedURLEscapingCharset;
+    private Charset cachedURLEscapingCharset;
     private boolean cachedURLEscapingCharsetSet;
 
     private boolean fastInvalidReferenceExceptions;
@@ -941,7 +942,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     @Override
-    public void setURLEscapingCharset(String urlEscapingCharset) {
+    public void setURLEscapingCharset(Charset urlEscapingCharset) {
         cachedURLEscapingCharsetSet = false;
         super.setURLEscapingCharset(urlEscapingCharset);
     }
@@ -952,7 +953,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * change the output encoding on-the-fly.
      */
     @Override
-    public void setOutputEncoding(String outputEncoding) {
+    public void setOutputEncoding(Charset outputEncoding) {
         cachedURLEscapingCharsetSet = false;
         super.setOutputEncoding(outputEncoding);
     }
@@ -961,7 +962,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * Returns the name of the charset that should be used for URL encoding. This will be <code>null</code> if the
      * information is not available. The function caches the return value, so it's quick to call it repeatedly.
      */
-    String getEffectiveURLEscapingCharset() {
+    Charset getEffectiveURLEscapingCharset() {
         if (!cachedURLEscapingCharsetSet) {
             cachedURLEscapingCharset = getURLEscapingCharset();
             if (cachedURLEscapingCharset == null) {

@@ -23,16 +23,16 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
 
 import org.apache.freemarker.core._CoreLogs;
-import org.apache.freemarker.core.debug.Debugger;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.apache.freemarker.core.util._SecurityUtil;
 import org.slf4j.Logger;
@@ -56,8 +56,9 @@ class DebuggerServer {
     public DebuggerServer(Serializable debuggerStub) {
         port = _SecurityUtil.getSystemProperty("org.apache.freemarker.core.debug.port", Debugger.DEFAULT_PORT).intValue();
         try {
-            password = _SecurityUtil.getSystemProperty("org.apache.freemarker.core.debug.password", "").getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
+            password = _SecurityUtil.getSystemProperty("org.apache.freemarker.core.debug.password", "").getBytes(
+                    StandardCharsets.UTF_8);
+        } catch (UnsupportedCharsetException e) {
             throw new UndeclaredThrowableException(e);
         }
         this.debuggerStub = debuggerStub;

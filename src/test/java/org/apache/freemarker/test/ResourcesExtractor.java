@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.jar.JarOutputStream;
 import java.util.zip.ZipEntry;
 
@@ -99,7 +100,7 @@ public final class ResourcesExtractor {
             deleteDstRootDir = !dstRootDir.exists();
         }
         try {
-            BufferedReader contR = new BufferedReader(new InputStreamReader(contIn, "UTF-8"));
+            BufferedReader contR = new BufferedReader(new InputStreamReader(contIn, StandardCharsets.UTF_8));
             try {
                 String contLine;
                 while ((contLine = contR.readLine()) != null) {

@@ -25,81 +25,89 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.Test;
 public class TemplateConstructorsTest {
 
-    private static final String READER_CONTENT = "From a reader...";
-    private static final String READER_CONTENT_FORCE_UTF8 = "<#ftl encoding='utf-8'>From a reader...";
+    private static final String CONTENT = "From a reader...";
+    private static final String CONTENT_FORCE_UTF8 = "<#ftl encoding='utf-8'>From a reader...";
     
     @Test
     public void test() throws IOException {
         final Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        //cfg.setSourceEncoding("ISO-8859-1");
+        cfg.setSourceEncoding(StandardCharsets.ISO_8859_1);
         
         final String name = "foo/bar.ftl";
         final String sourceName = "foo/bar_de.ftl";
-        final String content = "From a String...";
-        final String encoding = "UTF-16LE";
+        final Charset sourceEncoding = StandardCharsets.UTF_16LE;
         {
             Template t = new Template(name, createReader(), cfg);
             assertEquals(name, t.getName());
             assertEquals(name, t.getSourceName());
-            assertEquals(READER_CONTENT, t.toString());
+            assertEquals(CONTENT, t.toString());
             assertNull(t.getSourceEncoding());
         }
         {
-            Template t = new Template(name, content, cfg);
+            Template t = new Template(name, CONTENT, cfg);
             assertEquals(name, t.getName());
             assertEquals(name, t.getSourceName());
-            assertEquals(content, t.toString());
+            assertEquals(CONTENT, t.toString());
             assertNull(t.getSourceEncoding());
         }
         {
-            Template t = new Template(name, createReader(), cfg, encoding);
+            Template t = new Template(name, CONTENT_FORCE_UTF8, cfg);
             assertEquals(name, t.getName());
             assertEquals(name, t.getSourceName());
-            assertEquals(READER_CONTENT, t.toString());
-            assertEquals("UTF-16LE", t.getSourceEncoding());
+            // assertEquals(CONTENT_FORCE_UTF8, t.toString()); // FIXME the #ftl header is missing from the dump, why?
+            assertNull(t.getSourceEncoding()); // Because it was created from a String
+        }
+        {
+            Template t = new Template(name, createReader(), cfg, sourceEncoding);
+            assertEquals(name, t.getName());
+            assertEquals(name, t.getSourceName());
+            assertEquals(CONTENT, t.toString());
+            assertEquals(StandardCharsets.UTF_16LE, t.getSourceEncoding());
         }
         {
             Template t = new Template(name, sourceName, createReader(), cfg);
             assertEquals(name, t.getName());
             assertEquals(sourceName, t.getSourceName());
-            assertEquals(READER_CONTENT, t.toString());
+            assertEquals(CONTENT, t.toString());
             assertNull(t.getSourceEncoding());
         }
         {
-            Template t = new Template(name, sourceName, createReader(), cfg, encoding);
+            Template t = new Template(name, sourceName, createReader(), cfg, sourceEncoding);
             assertEquals(name, t.getName());
             assertEquals(sourceName, t.getSourceName());
-            assertEquals(READER_CONTENT, t.toString());
-            assertEquals("UTF-16LE", t.getSourceEncoding());
+            assertEquals(CONTENT, t.toString());
+            assertEquals(StandardCharsets.UTF_16LE, t.getSourceEncoding());
         }
         {
-            Template t = Template.createPlainTextTemplate(name, content, cfg);
+            Template t = Template.createPlainTextTemplate(name, CONTENT, cfg);
             assertEquals(name, t.getName());
             assertEquals(name, t.getSourceName());
-            assertEquals(content, t.toString());
+            assertEquals(CONTENT, t.toString());
             assertNull(t.getSourceEncoding());
         }
         {
             try {
-                new Template(name, sourceName, createReaderForceUTF8(), cfg, encoding);
+                new Template(name, sourceName, createReaderForceUTF8(), cfg, sourceEncoding);
                 fail();
             } catch (WrongTemplateCharsetException e) {
-                assertThat(e.getMessage(), containsString("utf-8"));
-                assertThat(e.getMessage(), containsString(encoding));
+                assertThat(e.getMessage(), containsString(StandardCharsets.UTF_8.name()));
+                assertThat(e.getMessage(), containsString(sourceEncoding.name()));
             }
         }
     }
     
     private Reader createReader() {
-        return new StringReader(READER_CONTENT);
+        return new StringReader(CONTENT);
     }
 
     private Reader createReaderForceUTF8() {
-        return new StringReader(READER_CONTENT_FORCE_UTF8);
+        return new StringReader(CONTENT_FORCE_UTF8);
     }
     
 }

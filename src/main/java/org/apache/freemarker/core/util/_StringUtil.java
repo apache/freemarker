@@ -22,6 +22,7 @@ package org.apache.freemarker.core.util;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -314,23 +315,23 @@ public class _StringUtil {
      * URL encoding (like%20this) for query parameter values, path <em>segments</em>, fragments; this encodes all
      * characters that are reserved anywhere.
      */
-    public static String URLEnc(String s, String charset) throws UnsupportedEncodingException {
+    public static String URLEnc(String s, Charset charset) throws UnsupportedEncodingException {
         return URLEnc(s, charset, false);
     }
     
     /**
-     * Like {@link #URLEnc(String, String)} but doesn't escape the slash character ({@code /}).
+     * Like {@link #URLEnc(String, Charset)} but doesn't escape the slash character ({@code /}).
      * This can be used to encode a path only if you know that no folder or file name will contain {@code /}
      * character (not in the path, but in the name itself), which usually stands, as the commonly used OS-es don't
      * allow that.
      * 
      * @since 2.3.21
      */
-    public static String URLPathEnc(String s, String charset) throws UnsupportedEncodingException {
+    public static String URLPathEnc(String s, Charset charset) throws UnsupportedEncodingException {
         return URLEnc(s, charset, true);
     }
     
-    private static String URLEnc(String s, String charset, boolean keepSlash)
+    private static String URLEnc(String s, Charset charset, boolean keepSlash)
             throws UnsupportedEncodingException {
         int ln = s.length();
         int i;

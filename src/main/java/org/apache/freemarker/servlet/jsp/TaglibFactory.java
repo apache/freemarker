@@ -37,6 +37,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -71,7 +72,6 @@ import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.core.util._NullArgumentException;
-import org.apache.freemarker.core.util._SecurityUtil;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.servlet.FreemarkerServlet;
 import org.apache.freemarker.servlet.HttpRequestHashModel;
@@ -121,8 +121,6 @@ public class TaglibFactory implements TemplateHashModel {
     private static final String META_INF_ABS_PATH = "/META-INF/";
     private static final String DEFAULT_TLD_RESOURCE_PATH = META_INF_ABS_PATH + "taglib.tld";
     private static final String JAR_URL_ENTRY_PATH_START = "!/";
-
-    private static final String PLATFORM_FILE_ENCODING = _SecurityUtil.getSystemProperty("file.encoding", "utf-8");
 
     private final ServletContext servletContext;
 
@@ -971,7 +969,7 @@ public class TaglibFactory implements TemplateHashModel {
             relativeEntryPath = relativeEntryPath.substring(1);
         }
         try {
-            return new URL(jarBaseEntryUrl, _StringUtil.URLPathEnc(relativeEntryPath, PLATFORM_FILE_ENCODING));
+            return new URL(jarBaseEntryUrl, _StringUtil.URLPathEnc(relativeEntryPath, Charset.defaultCharset()));
         } catch (UnsupportedEncodingException e) {
             throw new BugException();
         }
@@ -999,7 +997,7 @@ public class TaglibFactory implements TemplateHashModel {
     }
 
     /**
-     * Converts an URL to a {@code File} object, if the URL format (scheme) makes is possible.
+     * Converts an URL to a {@code File} object, if the URL format (scheme) makes it possible.
      */
     private File urlToFileOrNull(URL url) {
         if (test_emulateNoUrlToFileConversions) {
@@ -1018,7 +1016,7 @@ public class TaglibFactory implements TemplateHashModel {
             // URL.getFile() doesn't decode %XX-s (used for spaces and non-US-ASCII letters usually), so we do.
             // As it was originally created for a file somewhere, we hope that it uses the platform default encoding.
             try {
-                filePath = URLDecoder.decode(url.getFile(), PLATFORM_FILE_ENCODING);
+                filePath = URLDecoder.decode(url.getFile(), Charset.defaultCharset().name());
             } catch (UnsupportedEncodingException e2) {
                 throw new BugException(e2);
             }
@@ -1066,7 +1064,7 @@ public class TaglibFactory implements TemplateHashModel {
                     + JAR_URL_ENTRY_PATH_START
                     + URLEncoder.encode(
                             entryPath.startsWith("/") ? entryPath.substring(1) : entryPath,
-                            PLATFORM_FILE_ENCODING));
+                            Charset.defaultCharset().name()));
         } catch (Exception e) {
             LOG.error("Couldn't get URL for serlvetContext resource "
                         + _StringUtil.jQuoteNoXSS(servletContextJarFilePath)
@@ -1350,7 +1348,7 @@ public class TaglibFactory implements TemplateHashModel {
                 entryPath = normalizeJarEntryPath(
                         URLDecoder.decode(
                                 urlEF.substring(sepIdx + JAR_URL_ENTRY_PATH_START.length()),
-                                PLATFORM_FILE_ENCODING),
+                                Charset.defaultCharset().name()),
                         false);
             }
             

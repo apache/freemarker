@@ -20,6 +20,7 @@ package org.apache.freemarker.manualtest;
 
 import static org.junit.Assert.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import org.apache.freemarker.core.Configuration;
@@ -48,7 +49,7 @@ public class TemplateConfigurationExamples extends ExamplesTest {
         addTemplate("t.xml", "");
         
         TemplateConfiguration tcUTF8XML = new TemplateConfiguration();
-        tcUTF8XML.setSourceEncoding("utf-8");
+        tcUTF8XML.setSourceEncoding(StandardCharsets.UTF_8);
         tcUTF8XML.setOutputFormat(XMLOutputFormat.INSTANCE);
 
         {
@@ -56,7 +57,7 @@ public class TemplateConfigurationExamples extends ExamplesTest {
                     new FileExtensionMatcher("xml"), tcUTF8XML));
             
             Template t = cfg.getTemplate("t.xml");
-            assertEquals("utf-8", t.getSourceEncoding());
+            assertEquals(StandardCharsets.UTF_8, t.getSourceEncoding());
             assertEquals(XMLOutputFormat.INSTANCE, t.getOutputFormat());
         }
 
@@ -65,7 +66,7 @@ public class TemplateConfigurationExamples extends ExamplesTest {
             cfg.setSettings(loadPropertiesFile("TemplateConfigurationExamples1.properties"));
             
             Template t = cfg.getTemplate("t.xml");
-            assertEquals("utf-8", t.getSourceEncoding());
+            assertEquals(StandardCharsets.UTF_8, t.getSourceEncoding());
             assertEquals(XMLOutputFormat.INSTANCE, t.getOutputFormat());
         }
     }
@@ -115,7 +116,7 @@ public class TemplateConfigurationExamples extends ExamplesTest {
     @Test
     public void example3() throws Exception {
         Configuration cfg = getConfiguration();
-        cfg.setEncoding("ISO-8859-1");
+        cfg.setSourceEncoding(StandardCharsets.ISO_8859_1);
         cfg.setSharedVariable("ts", new Date(1440431606011L));
         
         addTemplate("t.stats.html", "${ts?datetime} ${ts?date} ${ts?time}");
@@ -131,7 +132,7 @@ public class TemplateConfigurationExamples extends ExamplesTest {
         tcStats.setTimeZone(_DateUtil.UTC);
 
         TemplateConfiguration tcMail = new TemplateConfiguration();
-        tcMail.setSourceEncoding("utf-8");
+        tcMail.setSourceEncoding(StandardCharsets.UTF_8);
         
         TemplateConfiguration tcHTML = new TemplateConfiguration();
         tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
@@ -161,12 +162,12 @@ public class TemplateConfigurationExamples extends ExamplesTest {
         );
         
         assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.html").getOutputFormat());
-        assertEquals("ISO-8859-1", cfg.getTemplate("t.html").getSourceEncoding());
+        assertEquals(StandardCharsets.ISO_8859_1, cfg.getTemplate("t.html").getSourceEncoding());
         assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.htm").getOutputFormat());
         assertEquals(XMLOutputFormat.INSTANCE, cfg.getTemplate("t.xml").getOutputFormat());
         assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.stats.html").getOutputFormat());
         assertOutputForNamed("t.stats.html", "2015-08-24T15:53:26.011Z 2015-08-24 15:53:26.011Z");
-        assertEquals("utf-8", cfg.getTemplate("mail/t.html").getSourceEncoding());
+        assertEquals(StandardCharsets.UTF_8, cfg.getTemplate("mail/t.html").getSourceEncoding());
         
         // From properties:
         
@@ -174,12 +175,12 @@ public class TemplateConfigurationExamples extends ExamplesTest {
         cfg.setSettings(loadPropertiesFile("TemplateConfigurationExamples3.properties"));
         
         assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.html").getOutputFormat());
-        assertEquals("ISO-8859-1", cfg.getTemplate("t.html").getSourceEncoding());
+        assertEquals(StandardCharsets.ISO_8859_1, cfg.getTemplate("t.html").getSourceEncoding());
         assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.htm").getOutputFormat());
         assertEquals(XMLOutputFormat.INSTANCE, cfg.getTemplate("t.xml").getOutputFormat());
         assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.stats.html").getOutputFormat());
         assertOutputForNamed("t.stats.html", "2015-08-24T15:53:26.011Z 2015-08-24 15:53:26.011Z");
-        assertEquals("utf-8", cfg.getTemplate("mail/t.html").getSourceEncoding());
+        assertEquals(StandardCharsets.UTF_8, cfg.getTemplate("mail/t.html").getSourceEncoding());
     }
     
 }

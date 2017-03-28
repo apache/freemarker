@@ -34,7 +34,7 @@
  <!ELEMENT setting EMPTY>
      <!ATTLIST setting 
             auto_import CDATA #IMPLIED
-            input_encoding CDATA #IMPLIED
+            source_encoding CDATA #IMPLIED
             locale CDATA #IMPLIED
             object_wrapper CDATA #IMPLIED
             output_encoding CDATA #IMPLIED
@@ -52,7 +52,7 @@ Note that for the incompatible_improvements setting you can specify a list of ve
 -->
 
 <testCases>
-   <setting input_encoding="UTF-8" output_encoding="UTF-8" />
+   <setting source_encoding="UTF-8" output_encoding="UTF-8" />
    
    <testCase name="api-builtins" noOutput="true">
       <setting api_builtin_enabled="true" />
@@ -84,7 +84,7 @@ Note that for the incompatible_improvements setting you can specify a list of ve
    </testCase>
    <testCase name="include" />
    <testCase name="include2">
-      <setting input_encoding="utf-8" />
+      <setting source_encoding="utf-8" />
    </testCase>
    <testCase name="interpret"/>
    <testCase name="iterators"/>

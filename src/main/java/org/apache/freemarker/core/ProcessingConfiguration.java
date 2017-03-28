@@ -20,6 +20,7 @@
 package org.apache.freemarker.core;
 
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -202,9 +203,9 @@ public interface ProcessingConfiguration {
     boolean isObjectWrapperSet();
 
     /**
-     * Getter pair of {@link MutableProcessingConfiguration#setOutputEncoding(String)}.
+     * Getter pair of {@link MutableProcessingConfiguration#setOutputEncoding(Charset)}.
      */
-    String getOutputEncoding();
+    Charset getOutputEncoding();
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
@@ -214,9 +215,9 @@ public interface ProcessingConfiguration {
     boolean isOutputEncodingSet();
 
     /**
-     * Getter pair of {@link MutableProcessingConfiguration#setURLEscapingCharset(String)}.
+     * Getter pair of {@link MutableProcessingConfiguration#setURLEscapingCharset(Charset)}.
      */
-    String getURLEscapingCharset();
+    Charset getURLEscapingCharset();
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading

@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core;
 
+import java.nio.charset.Charset;
+
 /**
  * Thrown by the {@link Template} constructors that specify a non-{@code null} encoding whoch doesn't match the
  * encoding specified in the {@code #ftl} header of the template.
@@ -26,13 +28,13 @@ package org.apache.freemarker.core;
 public class WrongTemplateCharsetException extends ParseException {
     private static final long serialVersionUID = 1L;
 
-    private final String templateSpecifiedEncoding;
-    private final String constructorSpecifiedEncoding;
+    private final Charset templateSpecifiedEncoding;
+    private final Charset constructorSpecifiedEncoding;
 
     /**
      * @since 2.3.22
      */
-    public WrongTemplateCharsetException(String templateSpecifiedEncoding, String constructorSpecifiedEncoding) {
+    public WrongTemplateCharsetException(Charset templateSpecifiedEncoding, Charset constructorSpecifiedEncoding) {
         this.templateSpecifiedEncoding = templateSpecifiedEncoding;
         this.constructorSpecifiedEncoding = constructorSpecifiedEncoding;
     }
@@ -47,14 +49,14 @@ public class WrongTemplateCharsetException extends ParseException {
     /**
      * @since 2.3.22
      */
-    public String getTemplateSpecifiedEncoding() {
+    public Charset getTemplateSpecifiedEncoding() {
         return templateSpecifiedEncoding;
     }
 
     /**
      * @since 2.3.22
      */
-    public String getConstructorSpecifiedEncoding() {
+    public Charset getConstructorSpecifiedEncoding() {
         return constructorSpecifiedEncoding;
     }
 

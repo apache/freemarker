@@ -21,6 +21,7 @@ package org.apache.freemarker.core;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
@@ -30,11 +31,14 @@ import org.junit.Test;
 
 public class TemplateGetEncodingTest {
 
+    private static final Charset ISO_8859_2 = Charset.forName("ISO-8859-2");
+
     @Test
     public void test() throws IOException {
+
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         {
-            cfg.setEncoding("ISO-8859-2");
+            cfg.setSourceEncoding(ISO_8859_2);
             MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
             tl.putBinaryTemplate("bin", "test");
             tl.putBinaryTemplate("bin-static", "<#test>");
@@ -48,8 +52,8 @@ public class TemplateGetEncodingTest {
             cfg.setCacheStorage(new StrongCacheStorage());
         }
 
-        assertEquals("ISO-8859-2", cfg.getTemplate("bin").getSourceEncoding());
-        assertEquals("ISO-8859-2", cfg.getTemplate("bin-static").getSourceEncoding());
+        assertEquals(ISO_8859_2, cfg.getTemplate("bin").getSourceEncoding());
+        assertEquals(ISO_8859_2, cfg.getTemplate("bin-static").getSourceEncoding());
         assertNull(cfg.getTemplate("text").getSourceEncoding());
         assertNull(cfg.getTemplate("text-static").getSourceEncoding());
         assertNull(new Template(null, "test", cfg).getSourceEncoding());

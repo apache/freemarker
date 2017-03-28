@@ -25,6 +25,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -146,8 +148,8 @@ public class TemplateTestCase extends FileTestCase {
             if (!st.hasMoreTokens()) fail("Expecting alias after 'as' in autoimport");
             String alias = st.nextToken();
             conf.addAutoImport(alias, libname);
-        } else if ("input_encoding".equals(param)) {
-            conf.setEncoding(value);
+        } else if ("source_encoding".equals(param)) {
+            conf.setSourceEncoding(Charset.forName(value));
         // INCOMPATIBLE_IMPROVEMENTS is a list here, and was already set in the constructor.
         } else if (!Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY.equals(param)) {
             try {
@@ -425,8 +427,8 @@ public class TemplateTestCase extends FileTestCase {
     }
 
     @Override
-    protected String getDefaultCharset() {
-        return conf.getOutputEncoding() != null ? conf.getOutputEncoding() : "UTF-8";
+    protected Charset getFileCharset() {
+        return conf.getOutputEncoding() != null ? conf.getOutputEncoding() : StandardCharsets.UTF_8;
     }
     
     @Override

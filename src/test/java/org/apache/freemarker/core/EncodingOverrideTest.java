@@ -23,6 +23,8 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
 import org.junit.Test;
@@ -30,36 +32,29 @@ import org.junit.Test;
 public class EncodingOverrideTest {
 
     @Test
-    public void testExactMarchingCharset() throws Exception {
-        Template t = createConfig("UTF-8").getTemplate("encodingOverride-UTF-8.ftl");
-        assertEquals("UTF-8", t.getSourceEncoding());
-        checkTempateOutput(t);
+    public void testMarchingCharset() throws Exception {
+        Template t = createConfig(StandardCharsets.UTF_8).getTemplate("encodingOverride-UTF-8.ftl");
+        assertEquals(StandardCharsets.UTF_8, t.getSourceEncoding());
+        checkTemplateOutput(t);
     }
 
     @Test
-    public void testCaseDiffCharset() throws Exception {
-        Template t = createConfig("utf-8").getTemplate("encodingOverride-UTF-8.ftl");
-        assertEquals("utf-8", t.getSourceEncoding());
-        checkTempateOutput(t);
+    public void testDifferentCharset() throws Exception {
+        Template t = createConfig(StandardCharsets.UTF_8).getTemplate("encodingOverride-ISO-8859-1.ftl");
+        assertEquals(StandardCharsets.ISO_8859_1, t.getSourceEncoding());
+        checkTemplateOutput(t);
     }
 
-    @Test
-    public void testReallyDiffCharset() throws Exception {
-        Template t = createConfig("utf-8").getTemplate("encodingOverride-ISO-8859-1.ftl");
-        assertEquals("ISO-8859-1", t.getSourceEncoding());
-        checkTempateOutput(t);
-    }
-
-    private void checkTempateOutput(Template t) throws TemplateException, IOException {
+    private void checkTemplateOutput(Template t) throws TemplateException, IOException {
         StringWriter out = new StringWriter(); 
         t.process(Collections.emptyMap(), out);
         assertEquals("Béka", out.toString());
     }
     
-    private Configuration createConfig(String charset) {
+    private Configuration createConfig(Charset charset) {
        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
        cfg.setClassForTemplateLoading(EncodingOverrideTest.class, "");
-       cfg.setEncoding(charset);
+       cfg.setSourceEncoding(charset);
        return cfg;
     }
 

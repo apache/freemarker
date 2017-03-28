@@ -77,8 +77,8 @@ public abstract class TemplateTest {
         if (!configuration.isLocaleExplicitlySet()) {
             configuration.setLocale(Locale.US);
         }
-        if (!configuration.isDefaultEncodingExplicitlySet()) {
-            configuration.setEncoding(StandardCharsets.UTF_8.name());
+        if (!configuration.isSourceEncodingExplicitlySet()) {
+            configuration.setSourceEncoding(StandardCharsets.UTF_8);
         }
         if (!configuration.isTimeZoneExplicitlySet()) {
             configuration.setTimeZone(TimeZone.getTimeZone("GMT+1"));
@@ -115,7 +115,7 @@ public abstract class TemplateTest {
                 throw new IOException("Reference output resource not found: " + getClass() + ", " + resName);
             }
             try {
-                expectedOut = TestUtil.removeTxtCopyrightComment(IOUtils.toString(in, "utf-8"));
+                expectedOut = TestUtil.removeTxtCopyrightComment(IOUtils.toString(in, StandardCharsets.UTF_8.name()));
             } finally {
                 in.close();
             }

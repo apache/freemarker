@@ -20,6 +20,7 @@
 package org.apache.freemarker.test.servlet;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -52,7 +53,7 @@ public class Model2TesterServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String CHARSET = "UTF-8";
+    private static final String CHARSET = StandardCharsets.UTF_8.name();
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException,

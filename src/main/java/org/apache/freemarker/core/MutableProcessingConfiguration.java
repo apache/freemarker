@@ -21,6 +21,7 @@ package org.apache.freemarker.core;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -337,9 +338,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     private TemplateExceptionHandler templateExceptionHandler;
     private ArithmeticEngine arithmeticEngine;
     private ObjectWrapper objectWrapper;
-    private String outputEncoding;
+    private Charset outputEncoding;
     private boolean outputEncodingSet;
-    private String urlEscapingCharset;
+    private Charset urlEscapingCharset;
     private boolean urlEscapingCharsetSet;
     private Boolean autoFlush;
     private TemplateClassResolver newBuiltinClassResolver;
@@ -1306,21 +1307,21 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * 
      * <p>Defaults to {@code null} (unknown).
      */
-    public void setOutputEncoding(String outputEncoding) {
+    public void setOutputEncoding(Charset outputEncoding) {
         this.outputEncoding = outputEncoding;
         outputEncodingSet = true;
     }
 
     /**
-     * Fluent API equivalent of {@link #setOutputEncoding(String)}
+     * Fluent API equivalent of {@link #setOutputEncoding(Charset)}
      */
-    public SelfT outputEncoding(String value) {
+    public SelfT outputEncoding(Charset value) {
         setOutputEncoding(value);
         return self();
     }
 
     @Override
-    public String getOutputEncoding() {
+    public Charset getOutputEncoding() {
         return outputEncodingSet
                 ? outputEncoding
                 : (parent != null ? parent.getOutputEncoding() : null);
@@ -1338,25 +1339,25 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     
     /**
      * Sets the URL escaping charset. If not set ({@code null}), the output encoding
-     * ({@link #setOutputEncoding(String)}) will be used for URL escaping.
+     * ({@link #setOutputEncoding(Charset)}) will be used for URL escaping.
      * 
      * Defaults to {@code null}.
      */
-    public void setURLEscapingCharset(String urlEscapingCharset) {
+    public void setURLEscapingCharset(Charset urlEscapingCharset) {
         this.urlEscapingCharset = urlEscapingCharset;
         urlEscapingCharsetSet = true;
     }
 
     /**
-     * Fluent API equivalent of {@link #setURLEscapingCharset(String)}
+     * Fluent API equivalent of {@link #setURLEscapingCharset(Charset)}
      */
-    public SelfT urlEscapingCharset(String value) {
+    public SelfT urlEscapingCharset(Charset value) {
         setURLEscapingCharset(value);
         return self();
     }
 
     @Override
-    public String getURLEscapingCharset() {
+    public Charset getURLEscapingCharset() {
         return urlEscapingCharsetSet
                 ? urlEscapingCharset
                 : (parent != null ? parent.getURLEscapingCharset() : null);
@@ -1982,10 +1983,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       as {@link #setSQLDateAndTimeTimeZone(TimeZone) setSQLDateAndTimeTimeZone(null)}.
      *       
      *   <li><p>{@code "output_encoding"}:
-     *       See {@link #setOutputEncoding(String)}.
+     *       See {@link #setOutputEncoding(Charset)}.
      *       
      *   <li><p>{@code "url_escaping_charset"}:
-     *       See {@link #setURLEscapingCharset(String)}.
+     *       See {@link #setURLEscapingCharset(Charset)}.
      *       
      *   <li><p>{@code "auto_flush"}:
      *       See {@link #setAutoFlush(boolean)}.
@@ -2088,8 +2089,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       {@link Configuration#ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY}
      *       {@code "disable"} for {@link Configuration#DISABLE_AUTO_ESCAPING_POLICY}.
      *       
-     *   <li><p>{@code "encoding"}:
-     *       See {@link Configuration#setEncoding(String)}; since 2.3.26 also accepts value "JVM default"
+     *   <li><p>{@code "sourceEncoding"}:
+     *       See {@link Configuration#setSourceEncoding(Charset)}; since 2.3.26 also accepts value "JVM default"
      *       (not case sensitive) to set the Java environment default value.
      *       <br>As the default value is the system default, which can change
      *       from one server to another, <b>you should always set this!</b>
@@ -2266,7 +2267,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *   </li>
      *   <li>
      *     <p>{@link TimeZone} objects can be created like {@code TimeZone("UTC")}, despite that there's no a such
-     *     constructor (since 2.3.24).
+     *     constructor.
+     *   </li>
+     *   <li>
+     *     <p>{@link Charset} objects can be created like {@code Charset("ISO-8859-5")}, despite that there's no a such
+     *     constructor.
      *   </li>
      *   <li>
      *     <p>The classes and methods that the expression meant to access must be all public.
@@ -2368,10 +2373,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
             } else if (BOOLEAN_FORMAT_KEY_SNAKE_CASE.equals(name) || BOOLEAN_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setBooleanFormat(value);
             } else if (OUTPUT_ENCODING_KEY_SNAKE_CASE.equals(name) || OUTPUT_ENCODING_KEY_CAMEL_CASE.equals(name)) {
-                setOutputEncoding(value);
+                setOutputEncoding(Charset.forName(value));
             } else if (URL_ESCAPING_CHARSET_KEY_SNAKE_CASE.equals(name)
                     || URL_ESCAPING_CHARSET_KEY_CAMEL_CASE.equals(name)) {
-                setURLEscapingCharset(value);
+                setURLEscapingCharset(Charset.forName(value));
             } else if (AUTO_FLUSH_KEY_SNAKE_CASE.equals(name) || AUTO_FLUSH_KEY_CAMEL_CASE.equals(name)) {
                 setAutoFlush(_StringUtil.getYesNo(value));
             } else if (SHOW_ERROR_TIPS_KEY_SNAKE_CASE.equals(name) || SHOW_ERROR_TIPS_KEY_CAMEL_CASE.equals(name)) {

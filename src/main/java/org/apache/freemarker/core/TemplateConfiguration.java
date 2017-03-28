@@ -19,6 +19,7 @@
 package org.apache.freemarker.core;
 
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -47,7 +48,7 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
  * already found.
  * 
  * <p>
- * Note on the sourceEncoding setting {@code sourceEncoding}: See {@link #setSourceEncoding(String)}.
+ * Note on the sourceEncoding setting {@code sourceEncoding}: See {@link #setSourceEncoding(Charset)}.
  * 
  * <p>
  * Note that the result value of the reader methods (getter and "is" methods) is usually not useful unless the value of
@@ -73,7 +74,7 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
  * precedence.
  * </ul>
  * 
- * @see Template#Template(String, String, Reader, Configuration, ParserConfiguration, String)
+ * @see Template#Template(String, String, Reader, Configuration, ParserConfiguration, Charset)
  * 
  * @since 2.3.24
  */
@@ -87,7 +88,7 @@ public final class TemplateConfiguration extends MutableProcessingConfiguration<
     private Integer autoEscapingPolicy;
     private Boolean recognizeStandardFileExtensions;
     private OutputFormat outputFormat;
-    private String sourceEncoding;
+    private Charset sourceEncoding;
     private Integer tabSize;
 
     /**
@@ -285,7 +286,7 @@ public final class TemplateConfiguration extends MutableProcessingConfiguration<
      * 
      * <p>
      * Note that the {@code sourceEncoding} setting of the {@link Template} counts as unset if it's {@code null},
-     * even if {@code null} was set via {@link Template#setSourceEncoding(String)}.
+     * even if {@code null} was set via {@link Template#setSourceEncoding(Charset)}.
      *
      * @throws IllegalStateException
      *             If the parent configuration wasn't yet set.
@@ -558,7 +559,7 @@ public final class TemplateConfiguration extends MutableProcessingConfiguration<
         return recognizeStandardFileExtensions != null;
     }
 
-    public String getSourceEncoding() {
+    public Charset getSourceEncoding() {
         return sourceEncoding != null ? sourceEncoding : getNonNullParentConfiguration().getSourceEncoding();
     }
 
@@ -571,7 +572,7 @@ public final class TemplateConfiguration extends MutableProcessingConfiguration<
      * above behavior is not guaranteed by this class alone; you have to ensure it. Also, read the note on
      * {@code sourceEncoding} in the documentation of {@link #apply(Template)}.
      */
-    public void setSourceEncoding(String sourceEncoding) {
+    public void setSourceEncoding(Charset sourceEncoding) {
         _NullArgumentException.check("sourceEncoding", sourceEncoding);
         this.sourceEncoding = sourceEncoding;
     }
@@ -783,7 +784,7 @@ public final class TemplateConfiguration extends MutableProcessingConfiguration<
     }
 
     @Override
-    public String getOutputEncoding() {
+    public Charset getOutputEncoding() {
         try {
             return super.getOutputEncoding();
         } catch (NullPointerException e) {
@@ -793,7 +794,7 @@ public final class TemplateConfiguration extends MutableProcessingConfiguration<
     }
 
     @Override
-    public String getURLEscapingCharset() {
+    public Charset getURLEscapingCharset() {
         try {
             return super.getURLEscapingCharset();
         } catch (NullPointerException e) {

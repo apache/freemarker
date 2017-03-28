@@ -26,6 +26,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -551,7 +552,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
         if (tc != null && tc.isLocaleSet()) {
             locale = tc.getLocale();
         }
-        String initialEncoding = tc != null ? tc.getSourceEncoding() : config.getSourceEncoding();
+        Charset initialEncoding = tc != null ? tc.getSourceEncoding() : config.getSourceEncoding();
         TemplateLanguage templateLanguage = tc != null ? tc.getTemplateLanguage() : config .getTemplateLanguage();
 
         Template template;
@@ -592,7 +593,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
                     template = templateLanguage.parse(name, sourceName, reader, config, tc,
                             initialEncoding, markedInputStream);
                 } catch (WrongTemplateCharsetException charsetException) {
-                    final String templateSpecifiedEncoding = charsetException.getTemplateSpecifiedEncoding();
+                    final Charset templateSpecifiedEncoding = charsetException.getTemplateSpecifiedEncoding();
 
                     if (inputStream != null) {
                         // We restart InputStream to re-decode it with the new charset.

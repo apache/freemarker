@@ -20,6 +20,8 @@
 package org.apache.freemarker.core;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.List;
 
 import org.apache.freemarker.core.model.TemplateMethodModel;
@@ -77,8 +79,8 @@ class BuiltInsForStringsEncoding {
             }
     
             @Override
-            protected String encodeWithCharset(String cs) throws UnsupportedEncodingException {
-                return _StringUtil.URLEnc(targetAsString, cs);
+            protected String encodeWithCharset(Charset charset) throws UnsupportedEncodingException {
+                return _StringUtil.URLEnc(targetAsString, charset);
             }
             
         }
@@ -99,8 +101,8 @@ class BuiltInsForStringsEncoding {
             }
     
             @Override
-            protected String encodeWithCharset(String cs) throws UnsupportedEncodingException {
-                return _StringUtil.URLPathEnc(targetAsString, cs);
+            protected String encodeWithCharset(Charset charset) throws UnsupportedEncodingException {
+                return _StringUtil.URLPathEnc(targetAsString, charset);
             }
             
         }
@@ -143,14 +145,22 @@ class BuiltInsForStringsEncoding {
             this.env = env;
         }
         
-        protected abstract String encodeWithCharset(String cs) throws UnsupportedEncodingException;
+        protected abstract String encodeWithCharset(Charset charset) throws UnsupportedEncodingException;
     
         @Override
         public Object exec(List args) throws TemplateModelException {
             parent.checkMethodArgCount(args.size(), 1);
             try {
-                return new SimpleScalar(encodeWithCharset((String) args.get(0)));
-            } catch (UnsupportedEncodingException e) {
+                String charsetName = (String) args.get(0);
+                Charset charset = null;
+                try {
+                    charset = Charset.forName(charsetName);
+                } catch (UnsupportedCharsetException e) {
+                    throw new _TemplateModelException(e, "Wrong charset name, or charset is unsupported by the runtime "
+                            + "environment: " + _StringUtil.jQuote(charsetName));
+                }
+                return new SimpleScalar(encodeWithCharset(charset));
+            } catch (Exception e) {
                 throw new _TemplateModelException(e, "Failed to execute URL encoding.");
             }
         }
@@ -158,8 +168,8 @@ class BuiltInsForStringsEncoding {
         @Override
         public String getAsString() throws TemplateModelException {
             if (cachedResult == null) {
-                String cs = env.getEffectiveURLEscapingCharset();
-                if (cs == null) {
+                Charset charset = env.getEffectiveURLEscapingCharset();
+                if (charset == null) {
                     throw new _TemplateModelException(
                             "To do URL encoding, the framework that encloses "
                             + "FreeMarker must specify the output encoding "
@@ -172,7 +182,7 @@ class BuiltInsForStringsEncoding {
                             + "foo?url('ISO-8859-1').");
                 }
                 try {
-                    cachedResult = encodeWithCharset(cs);
+                    cachedResult = encodeWithCharset(charset);
                 } catch (UnsupportedEncodingException e) {
                     throw new _TemplateModelException(e, "Failed to execute URL encoding.");
                 }

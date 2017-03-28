@@ -34,6 +34,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -180,9 +181,9 @@ public class ASTPrinter {
         }
         
         try {
-            return decode(buffer, Charset.forName("UTF-8"));
+            return decode(buffer, StandardCharsets.UTF_8);
         } catch (CharacterCodingException e) {
-            return decode(buffer, Charset.forName("ISO-8859-1"));
+            return decode(buffer, StandardCharsets.ISO_8859_1);
         }
     }
 

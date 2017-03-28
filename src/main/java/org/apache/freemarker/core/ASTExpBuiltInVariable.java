@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core;
 
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -210,12 +211,12 @@ final class ASTExpBuiltInVariable extends ASTExpression {
             return ASTDirMacro.DO_NOTHING_MACRO;
         }
         if (name == OUTPUT_ENCODING || name == OUTPUT_ENCODING_CC) {
-            String s = env.getOutputEncoding();
-            return SimpleScalar.newInstanceOrNull(s);
+            Charset encoding = env.getOutputEncoding();
+            return encoding != null ? new SimpleScalar(encoding.name()) : null;
         }
         if (name == URL_ESCAPING_CHARSET || name == URL_ESCAPING_CHARSET_CC) {
-            String s = env.getURLEscapingCharset();
-            return SimpleScalar.newInstanceOrNull(s);
+            Charset charset = env.getURLEscapingCharset();
+            return charset != null ? new SimpleScalar(charset.name()) : null;
         }
         if (name == ERROR) {
             return new SimpleScalar(env.getCurrentRecoveredErrorMessage());

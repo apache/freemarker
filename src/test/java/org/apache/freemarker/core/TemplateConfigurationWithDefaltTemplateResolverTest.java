@@ -23,6 +23,8 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
@@ -40,33 +42,35 @@ public class TemplateConfigurationWithDefaltTemplateResolverTest {
     private static final Object CUST_ATT_1 = new Object();
     private static final Object CUST_ATT_2 = new Object();
 
+    private static final Charset ISO_8859_2 = Charset.forName("ISO-8859-2");
+
     @Test
     public void testEncoding() throws Exception {
         Configuration cfg = createCommonEncodingTesterConfig();
         
         {
             Template t = cfg.getTemplate("utf8.ftl");
-            assertEquals("utf-8", t.getSourceEncoding());
+            assertEquals(StandardCharsets.UTF_8, t.getSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
         {
             Template t = cfg.getTemplate("utf16.ftl");
-            assertEquals("utf-16", t.getSourceEncoding());
+            assertEquals(StandardCharsets.UTF_16LE, t.getSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
         {
             Template t = cfg.getTemplate("default.ftl");
-            assertEquals("iso-8859-1", t.getSourceEncoding());
+            assertEquals(StandardCharsets.ISO_8859_1, t.getSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
         {
             Template t = cfg.getTemplate("utf8-latin2.ftl");
-            assertEquals("iso-8859-2", t.getSourceEncoding());
+            assertEquals(ISO_8859_2, t.getSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
         {
             Template t = cfg.getTemplate("default-latin2.ftl");
-            assertEquals("iso-8859-2", t.getSourceEncoding());
+            assertEquals(ISO_8859_2, t.getSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
     }
@@ -80,7 +84,7 @@ public class TemplateConfigurationWithDefaltTemplateResolverTest {
                         + "<#include 'utf16.ftl'>"
                         + "<#include 'default.ftl'>"
                         + "<#include 'utf8-latin2.ftl'>"
-                ).getBytes("iso-8859-1"));
+                ).getBytes(StandardCharsets.ISO_8859_1));
         assertEquals(
                 TEXT_WITH_ACCENTS + TEXT_WITH_ACCENTS + TEXT_WITH_ACCENTS + TEXT_WITH_ACCENTS,
                 getTemplateOutput(cfg.getTemplate("main.ftl")));
@@ -232,23 +236,23 @@ public class TemplateConfigurationWithDefaltTemplateResolverTest {
 
     private Configuration createCommonEncodingTesterConfig() throws UnsupportedEncodingException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        cfg.setEncoding("iso-8859-1");
+        cfg.setSourceEncoding(StandardCharsets.ISO_8859_1);
         cfg.setLocale(Locale.US);
         
         ByteArrayTemplateLoader tl = new ByteArrayTemplateLoader();
-        tl.putTemplate("utf8.ftl", TEXT_WITH_ACCENTS.getBytes("utf-8"));
-        tl.putTemplate("utf16.ftl", TEXT_WITH_ACCENTS.getBytes("utf-16"));
-        tl.putTemplate("default.ftl", TEXT_WITH_ACCENTS.getBytes("iso-8859-2"));
+        tl.putTemplate("utf8.ftl", TEXT_WITH_ACCENTS.getBytes(StandardCharsets.UTF_8));
+        tl.putTemplate("utf16.ftl", TEXT_WITH_ACCENTS.getBytes(StandardCharsets.UTF_16LE));
+        tl.putTemplate("default.ftl", TEXT_WITH_ACCENTS.getBytes(ISO_8859_2));
         tl.putTemplate("utf8-latin2.ftl",
-                ("<#ftl encoding='iso-8859-2'>" + TEXT_WITH_ACCENTS).getBytes("iso-8859-2"));
+                ("<#ftl encoding='iso-8859-2'>" + TEXT_WITH_ACCENTS).getBytes(ISO_8859_2));
         tl.putTemplate("default-latin2.ftl",
-                ("<#ftl encoding='iso-8859-2'>" + TEXT_WITH_ACCENTS).getBytes("iso-8859-2"));
+                ("<#ftl encoding='iso-8859-2'>" + TEXT_WITH_ACCENTS).getBytes(ISO_8859_2));
         cfg.setTemplateLoader(tl);
         
         TemplateConfiguration tcUtf8 = new TemplateConfiguration();
-        tcUtf8.setSourceEncoding("utf-8");
+        tcUtf8.setSourceEncoding(StandardCharsets.UTF_8);
         TemplateConfiguration tcUtf16 = new TemplateConfiguration();
-        tcUtf16.setSourceEncoding("utf-16");
+        tcUtf16.setSourceEncoding(StandardCharsets.UTF_16LE);
         cfg.setTemplateConfigurations(
                 new FirstMatchTemplateConfigurationFactory(
                         new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*utf8*"), tcUtf8),

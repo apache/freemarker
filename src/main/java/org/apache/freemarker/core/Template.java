@@ -31,6 +31,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -82,7 +83,8 @@ public class Template extends MutableProcessingConfiguration<Template> implement
     private Map macros = new HashMap();
     private List imports = new Vector();
     private ASTElement rootElement;
-    private String sourceEncoding, defaultNS;
+    private Charset sourceEncoding;
+    String defaultNS;
     private Serializable customLookupCondition;
     private int actualTagSyntax;
     private int actualNamingConvention;
@@ -130,11 +132,11 @@ public class Template extends MutableProcessingConfiguration<Template> implement
     }
 
     /**
-     * Convenience constructor for {@link #Template(String, String, Reader, Configuration, String) Template(name, null,
+     * Convenience constructor for {@link #Template(String, String, Reader, Configuration, Charset) Template(name, null,
      * reader, cfg, sourceEncoding)}.
      */
-    public Template(String name, Reader reader, Configuration cfg, String encoding) throws IOException {
-        this(name, null, reader, cfg, encoding);
+    public Template(String name, Reader reader, Configuration cfg, Charset sourceEncoding) throws IOException {
+        this(name, null, reader, cfg, sourceEncoding);
     }
 
     /**
@@ -144,7 +146,7 @@ public class Template extends MutableProcessingConfiguration<Template> implement
      * 
      * @param name
      *            The path of the template file relatively to the (virtual) directory that you use to store the
-     *            templates (except if {@link #Template(String, String, Reader, Configuration, String) sourceName}
+     *            templates (except if {@link #Template(String, String, Reader, Configuration, Charset) sourceName}
      *            differs from it). Shouldn't start with {@code '/'}. Should use {@code '/'}, not {@code '\'}. Check
      *            {@link #getName()} to see how the name will be used. The name should be independent of the actual
      *            storage mechanism and physical location as far as possible. Even when the templates are stored
@@ -187,12 +189,13 @@ public class Template extends MutableProcessingConfiguration<Template> implement
      * @since 2.3.22
      */
    public Template(
-           String name, String sourceName, Reader reader, Configuration cfg, String sourceEncoding) throws IOException {
+           String name, String sourceName, Reader reader, Configuration cfg, Charset sourceEncoding) throws
+           IOException {
        this(name, sourceName, reader, cfg, null, sourceEncoding);
    }
    
     /**
-     * Same as {@link #Template(String, String, Reader, Configuration, String)}, but also specifies a
+     * Same as {@link #Template(String, String, Reader, Configuration, Charset)}, but also specifies a
      * {@link TemplateConfiguration}. This is mostly meant to be used by FreeMarker internally, but advanced users might
      * still find this useful.
      * 
@@ -208,20 +211,20 @@ public class Template extends MutableProcessingConfiguration<Template> implement
      *            call {@link TemplateConfiguration#apply(Template)} on the resulting {@link Template} so that
      *            {@link MutableProcessingConfiguration} settings will be set too, because this constructor only uses it as a
      *            {@link ParserConfiguration}.
-     * @param encoding
-     *            Same as in {@link #Template(String, String, Reader, Configuration, String)}.
+     * @param sourceEncoding
+     *            Same as in {@link #Template(String, String, Reader, Configuration, Charset)}.
      * 
      * @since 2.3.24
      */
    public Template(
            String name, String sourceName, Reader reader,
            Configuration cfg, ParserConfiguration customParserConfiguration,
-           String encoding) throws IOException {
-       this(name, sourceName, reader, cfg, customParserConfiguration, encoding, null);
+           Charset sourceEncoding) throws IOException {
+       this(name, sourceName, reader, cfg, customParserConfiguration, sourceEncoding, null);
     }
 
     /**
-     * Same as {@link #Template(String, String, Reader, Configuration, ParserConfiguration, String)}, but allows
+     * Same as {@link #Template(String, String, Reader, Configuration, ParserConfiguration, Charset)}, but allows
      * specifying the {@code streamToUnmarkWhenEncEstabd} {@link InputStream}.
      *
      * @param streamToUnmarkWhenEncEstabd
@@ -235,7 +238,7 @@ public class Template extends MutableProcessingConfiguration<Template> implement
    public Template(
            String name, String sourceName, Reader reader,
            Configuration cfg, ParserConfiguration customParserConfiguration,
-           String sourceEncoding, InputStream streamToUnmarkWhenEncEstabd) throws IOException, ParseException {
+           Charset sourceEncoding, InputStream streamToUnmarkWhenEncEstabd) throws IOException, ParseException {
         this(name, sourceName, cfg, customParserConfiguration);
 
        setSourceEncoding(sourceEncoding);
@@ -287,7 +290,7 @@ public class Template extends MutableProcessingConfiguration<Template> implement
     }
 
     /**
-     * Same as {@link #createPlainTextTemplate(String, String, String, Configuration, String)} with {@code null}
+     * Same as {@link #createPlainTextTemplate(String, String, String, Configuration, Charset)} with {@code null}
      * {@code sourceName} argument.
      */
     static public Template createPlainTextTemplate(String name, String content, Configuration config) {
@@ -310,7 +313,7 @@ public class Template extends MutableProcessingConfiguration<Template> implement
      * @since 2.3.22
      */
     static public Template createPlainTextTemplate(String name, String sourceName, String content, Configuration config,
-               String sourceEncoding) {
+               Charset sourceEncoding) {
         Template template;
         try {
             template = new Template(name, sourceName, new StringReader("X"), config);
@@ -572,7 +575,7 @@ public class Template extends MutableProcessingConfiguration<Template> implement
      *            The sourceEncoding that was used to read this template, or {@code null} if the source of the template
      *            already gives back text (as opposed to binary data), so no decoding with a charset was needed.
      */
-    void setSourceEncoding(String sourceEncoding) {
+    void setSourceEncoding(Charset sourceEncoding) {
         this.sourceEncoding = sourceEncoding;
     }
 
@@ -580,7 +583,7 @@ public class Template extends MutableProcessingConfiguration<Template> implement
      * The sourceEncoding that was used to read this template, or {@code null} if the source of the template
      * already gives back text (as opposed to binary data), so no decoding with a charset was needed.
      */
-    public String getSourceEncoding() {
+    public Charset getSourceEncoding() {
         return sourceEncoding;
     }
     

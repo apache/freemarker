@@ -21,6 +21,7 @@ package org.apache.freemarker.core;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
@@ -36,8 +37,8 @@ public class CamelCaseTest extends TemplateTest {
 
     @Test
     public void camelCaseSpecialVars() throws IOException, TemplateException {
-        getConfiguration().setOutputEncoding("utf-8");
-        getConfiguration().setURLEscapingCharset("iso-8859-1");
+        getConfiguration().setOutputEncoding(StandardCharsets.UTF_8);
+        getConfiguration().setURLEscapingCharset(StandardCharsets.ISO_8859_1);
         getConfiguration().setLocale(Locale.GERMANY);
         assertOutput("${.dataModel?isHash?c}", "true");
         assertOutput("${.data_model?is_hash?c}", "true");
@@ -49,12 +50,12 @@ public class CamelCaseTest extends TemplateTest {
         assertOutput("${.current_template_name!'null'}", "null");
         assertOutput("${.mainTemplateName!'null'}", "null");
         assertOutput("${.main_template_name!'null'}", "null");
-        assertOutput("${.outputEncoding}", "utf-8");
-        assertOutput("${.output_encoding}", "utf-8");
+        assertOutput("${.outputEncoding}", StandardCharsets.UTF_8.name());
+        assertOutput("${.output_encoding}", StandardCharsets.UTF_8.name());
         assertOutput("${.outputFormat}", UndefinedOutputFormat.INSTANCE.getName());
         assertOutput("${.output_format}", UndefinedOutputFormat.INSTANCE.getName());
-        assertOutput("${.urlEscapingCharset}", "iso-8859-1");
-        assertOutput("${.url_escaping_charset}", "iso-8859-1");
+        assertOutput("${.urlEscapingCharset}", StandardCharsets.ISO_8859_1.name());
+        assertOutput("${.url_escaping_charset}", StandardCharsets.ISO_8859_1.name());
         assertOutput("${.currentNode!'-'}", "-");
         assertOutput("${.current_node!'-'}", "-");
     }
@@ -86,7 +87,7 @@ public class CamelCaseTest extends TemplateTest {
     
     @Test
     public void camelCaseFtlHeaderParameters() throws IOException, TemplateException {
-        getConfiguration().setOutputEncoding("utf-8");
+        getConfiguration().setOutputEncoding(StandardCharsets.UTF_8);
         
         assertOutput(
                 "<#ftl "
@@ -118,18 +119,18 @@ public class CamelCaseTest extends TemplateTest {
         
         getConfiguration().setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
         assertErrorContains("<#ftl strip_whitespace=true>", "naming convention");
-        assertOutput("<#ftl stripWhitespace=true>${.outputEncoding}", "utf-8");
+        assertOutput("<#ftl stripWhitespace=true>${.outputEncoding}", StandardCharsets.UTF_8.name());
         
         getConfiguration().setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
         assertErrorContains("<#ftl stripWhitespace=true>", "naming convention");
-        assertOutput("<#ftl strip_whitespace=true>${.output_encoding}", "utf-8");
+        assertOutput("<#ftl strip_whitespace=true>${.output_encoding}", StandardCharsets.UTF_8.name());
         
         getConfiguration().setNamingConvention(Configuration.AUTO_DETECT_NAMING_CONVENTION);
-        assertOutput("<#ftl stripWhitespace=true>${.outputEncoding}", "utf-8");
-        assertOutput("<#ftl encoding='iso-8859-1' stripWhitespace=true>${.outputEncoding}", "utf-8");
-        assertOutput("<#ftl stripWhitespace=true encoding='iso-8859-1'>${.outputEncoding}", "utf-8");
-        assertOutput("<#ftl encoding='iso-8859-1' strip_whitespace=true>${.output_encoding}", "utf-8");
-        assertOutput("<#ftl strip_whitespace=true encoding='iso-8859-1'>${.output_encoding}", "utf-8");
+        assertOutput("<#ftl stripWhitespace=true>${.outputEncoding}", StandardCharsets.UTF_8.name());
+        assertOutput("<#ftl encoding='iso-8859-1' stripWhitespace=true>${.outputEncoding}", StandardCharsets.UTF_8.name());
+        assertOutput("<#ftl stripWhitespace=true encoding='iso-8859-1'>${.outputEncoding}", StandardCharsets.UTF_8.name());
+        assertOutput("<#ftl encoding='iso-8859-1' strip_whitespace=true>${.output_encoding}", StandardCharsets.UTF_8.name());
+        assertOutput("<#ftl strip_whitespace=true encoding='iso-8859-1'>${.output_encoding}", StandardCharsets.UTF_8.name());
     }
     
     @Test

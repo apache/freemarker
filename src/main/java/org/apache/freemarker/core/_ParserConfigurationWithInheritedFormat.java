@@ -18,6 +18,8 @@
  */
 package org.apache.freemarker.core;
 
+import java.nio.charset.Charset;
+
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 
@@ -127,7 +129,7 @@ public final class _ParserConfigurationWithInheritedFormat implements ParserConf
         return wrappedPCfg.isTabSizeSet();
     }
 
-    public String getSourceEncoding() {
+    public Charset getSourceEncoding() {
         return wrappedPCfg.getSourceEncoding();
     }
 

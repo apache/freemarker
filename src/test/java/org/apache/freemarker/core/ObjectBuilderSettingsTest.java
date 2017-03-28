@@ -28,6 +28,9 @@ import java.io.Serializable;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -379,7 +382,7 @@ public class ObjectBuilderSettingsTest {
             assertEquals(DummyCacheStorage.class, cfg.getCacheStorage().getClass());
             assertEquals(DummyNewBuiltinClassResolver.class, cfg.getNewBuiltinClassResolver().getClass());
             assertEquals(DummyTemplateLoader.class, cfg.getTemplateLoader().getClass());
-            assertEquals("utf-8", cfg.getSourceEncoding());
+            assertEquals(StandardCharsets.UTF_8, cfg.getSourceEncoding());
         }
         
         {
@@ -401,7 +404,7 @@ public class ObjectBuilderSettingsTest {
                     ((DefaultObjectWrapper) cfg.getObjectWrapper()).getIncompatibleImprovements());
             assertEquals(500, ((MruCacheStorage) cfg.getCacheStorage()).getSoftSizeLimit());
             assertEquals(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER, cfg.getNewBuiltinClassResolver());
-            assertEquals("utf-8", cfg.getSourceEncoding());
+            assertEquals(StandardCharsets.UTF_8, cfg.getSourceEncoding());
         }
 
         {
@@ -449,7 +452,27 @@ public class ObjectBuilderSettingsTest {
                     allOf(containsStringIgnoringCase("unrecognized"), containsString("foobar")));
         }
     }
-    
+
+    @Test
+    public void charsetTest() throws _ObjectBuilderSettingEvaluationException, ClassNotFoundException,
+            InstantiationException, IllegalAccessException {
+        for (String timeZoneId : new String[] { "uTf-8", "GMT", "UTC" }) {
+            TestBean8 result = (TestBean8) _ObjectBuilderSettingEvaluator.eval(
+                    "org.apache.freemarker.core.ObjectBuilderSettingsTest$TestBean8(charset=Charset('iso-8859-1'))",
+                    TestBean8.class, false, new _SettingEvaluationEnvironment());
+            assertEquals(StandardCharsets.ISO_8859_1, result.getCharset());
+        }
+
+        try {
+            _ObjectBuilderSettingEvaluator.eval(
+                    "org.apache.freemarker.core.ObjectBuilderSettingsTest$TestBean8(charset=Charset('noSuchCS'))",
+                    TestBean8.class, false, new _SettingEvaluationEnvironment());
+            fail();
+        } catch (_ObjectBuilderSettingEvaluationException e) {
+            assertThat(e.getCause(), instanceOf(UnsupportedCharsetException.class));
+        }
+    }
+
     @Test
     public void configureBeanTest() throws Exception {
         final TestBean7 bean = new TestBean7();
@@ -1263,6 +1286,7 @@ public class ObjectBuilderSettingsTest {
     
     public static class TestBean8 {
         private TimeZone timeZone;
+        private Charset charset;
         private Object anyObject;
         private List<?> list;
         
@@ -1273,7 +1297,15 @@ public class ObjectBuilderSettingsTest {
         public void setTimeZone(TimeZone timeZone) {
             this.timeZone = timeZone;
         }
-        
+
+        public Charset getCharset() {
+            return charset;
+        }
+
+        public void setCharset(Charset charset) {
+            this.charset = charset;
+        }
+
         public Object getAnyObject() {
             return anyObject;
         }
