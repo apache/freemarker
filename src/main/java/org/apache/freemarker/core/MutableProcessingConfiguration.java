@@ -356,11 +356,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     private boolean lazyAutoImportsSet;
     
     /**
-     * Intended to be called from inside FreeMarker only.
-     * Creates a top-level configurable, one that doesn't inherit from a parent, and thus stores the default values.
-     * Called by the {@link Configuration} constructor.
+     * Called by the {@link Configuration} constructor, initializes the fields to their {@link Configuration}-level
+     * default without marking them as set.
      */
-    protected MutableProcessingConfiguration(Version incompatibleImprovements) {
+    MutableProcessingConfiguration(Version incompatibleImprovements) {
         _CoreAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         parent = null;
         locale = Configuration.getDefaultLocale();
@@ -2263,7 +2262,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *     {@link AndMatcher}, {@link OrMatcher}, {@link NotMatcher}, {@link ConditionalTemplateConfigurationFactory},
      *     {@link MergingTemplateConfigurationFactory}, {@link FirstMatchTemplateConfigurationFactory},
      *     {@link HTMLOutputFormat}, {@link XMLOutputFormat}, {@link RTFOutputFormat}, {@link PlainTextOutputFormat},
-     *     {@link UndefinedOutputFormat}, {@link Configuration}.
+     *     {@link UndefinedOutputFormat}, {@link Configuration}, {@link TemplateLanguage}.
      *   </li>
      *   <li>
      *     <p>{@link TimeZone} objects can be created like {@code TimeZone("UTC")}, despite that there's no a such

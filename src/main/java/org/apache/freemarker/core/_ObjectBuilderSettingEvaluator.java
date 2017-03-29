@@ -679,7 +679,9 @@ public class _ObjectBuilderSettingEvaluator {
             addWithSimpleName(SHORTHANDS, RTFOutputFormat.class);
             addWithSimpleName(SHORTHANDS, PlainTextOutputFormat.class);
             addWithSimpleName(SHORTHANDS, UndefinedOutputFormat.class);
-            
+
+            addWithSimpleName(SHORTHANDS, TemplateLanguage.class);
+
             addWithSimpleName(SHORTHANDS, Locale.class);
 
             {
