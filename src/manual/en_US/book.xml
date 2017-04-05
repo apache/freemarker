@@ -1012,7 +1012,7 @@ All Rights Reserved.
  |   |
  |   +- (1st) = 20
  |   |
- |   +- (2st) = 14
+ |   +- (2nd) = 14
  |   |
  |   +- (3rd) = 42
  |   |
@@ -20852,7 +20852,7 @@ All rights reserved.</emphasis></programlisting>
             <literal>list</literal> accepts a scalar too and treats it as a
             single-element sequence.</phrase></para>
 
-            <para><phrase role="forProgrammers">If you pass an collection that
+            <para><phrase role="forProgrammers">If you pass a collection that
             wraps an <literal>java.util.Iterator</literal> to the
             <literal>list</literal>, you can iterate over its elements only
             once, since <literal>Iterator</literal>s are by their nature
@@ -22975,7 +22975,7 @@ There was no specific handler for node y
               <primary>incomplatible_improvements</primary>
             </indexterm><literal>incompatible_improvements</literal> (since
           FreeMarker 2.3.24): The <link
-          linkend="pgui_config_incompatible_improvements"><literal>incompatbile_improvements</literal>
+          linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
           setting</link> of the current FreeMarker configuration, as a
           string.</para>
         </listitem>
@@ -23783,12 +23783,12 @@ or
           linkend="ref.setting.number_format"><literal>number_format</literal>
           setting</link>. This is actually a backward compatibility quirk, but
           it can be useful when you print numbers in situations like
-          <literal>&lt;a href="quertyDatabase?id=#{id}"&gt;</literal>, where
+          <literal>&lt;a href="queryDatabase?id=#{id}"&gt;</literal>, where
           you surely don't want grouping separators or something fancy like
           that. However, starting from FreeMarker 2.3.3 rather use the <link
           linkend="ref_builtin_c"><literal>?c</literal> built-in</link> for
           this purpose, like <literal>&lt;a
-          href="quertyDatabase?id=${id?c}"&gt;</literal>.</para>
+          href="queryDatabase?id=${id?c}"&gt;</literal>.</para>
 
           <para>Examples. Assume that <literal>x</literal> is
           <literal>2.582</literal> and <literal>y</literal> is
@@ -24944,7 +24944,7 @@ Test Book</programlisting>
             level, and there's no other element or non-whitespace character
             data (text or CDATA) between the two elements. For example in
             <literal>&lt;a/&gt;&lt;!-- comment
-            --&gt;#&amp;x20;&lt;b/&gt;</literal> the two elements are
+            --&gt;&amp;#x20;&lt;b/&gt;</literal> the two elements are
             siblings, but not in <literal>&lt;a/&gt;text&lt;b/&gt;</literal>
             or <literal>&lt;a/&gt;&lt;x/&gt;&lt;b/&gt;</literal>.</para>
           </listitem>
@@ -25067,7 +25067,7 @@ Test Book</programlisting>
         in the previous chapter -- you write an FTL program that walks the
         tree to find the different kind of nodes. With the declarative
         approach, you rather define how to handle the different kind of nodes,
-        and then let FreeMarker walk the tree an call the handlers you have
+        and then let FreeMarker walk the tree and call the handlers you have
         defined. This approach is useful for complex XML schemas, where the
         same element can occur as the child of many other elements. Examples
         of such schemas are XHTML and XDocBook.</para>
@@ -27464,7 +27464,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Added new special variable:
               <literal>.incompatible_improvements</literal>, which returns the
               <link
-              linkend="pgui_config_incompatible_improvements"><literal>incompatbile_improvements</literal>
+              linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
               setting</link> of the current FreeMarker configuration, as a
               string.</para>
             </listitem>
@@ -30749,7 +30749,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                       <literal>f(Object[])</literal>, the last will always
                       win. This might sounds controversial, but as we can't
                       efficiently tell the common type of all the items in a
-                      sequence or <literal>List</literal>, an so we don't know
+                      sequence or <literal>List</literal>, and so we don't know
                       if both arrays are indeed valid targets, we go for the
                       safest choice.</para>
                     </listitem>
