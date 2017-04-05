@@ -20,20 +20,17 @@
 package org.apache.freemarker.core.util;
 
 /**
- * A builder that encloses an already built product. {@link #build()} will always return the same product object.
+ * Common superclass for implementing {@link CommonBuilder}; adds helper method to implement a fluent API.
  */
-public class ProductWrappingBuilder<ProductT, SelfT extends ProductWrappingBuilder<ProductT, SelfT>>
-        extends FluentBuilder<ProductT, SelfT> {
-
-    private final ProductT product;
-
-    public ProductWrappingBuilder(ProductT product) {
-        _NullArgumentException.check("product", product);
-        this.product = product;
-    }
+public abstract class FluentBuilder<ProductT, SelfT extends FluentBuilder<ProductT, SelfT>>
+        implements CommonBuilder<ProductT> {
 
     @Override
-    public ProductT build() {
-        return product;
+    public abstract ProductT build();
+
+    @SuppressWarnings("unchecked")
+    protected SelfT self() {
+        return (SelfT) this;
     }
+
 }

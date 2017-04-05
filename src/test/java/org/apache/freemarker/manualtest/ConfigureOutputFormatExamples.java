@@ -46,13 +46,13 @@ public class ConfigureOutputFormatExamples extends ExamplesTest {
         
         // Example 2/a:
         {
-            TemplateConfiguration tcHTML = new TemplateConfiguration();
+            TemplateConfiguration.Builder tcHTML = new TemplateConfiguration.Builder();
             tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
             
             cfg.setTemplateConfigurations(
                     new ConditionalTemplateConfigurationFactory(
                             new PathGlobMatcher("mail/**"),
-                            tcHTML));
+                            tcHTML.build()));
             
             assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("mail/t.ftl").getOutputFormat());
         }
@@ -68,28 +68,28 @@ public class ConfigureOutputFormatExamples extends ExamplesTest {
         
         // Example 3/a:
         {
-            TemplateConfiguration tcHTML = new TemplateConfiguration();
+            TemplateConfiguration.Builder tcHTML = new TemplateConfiguration.Builder();
             tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
             
-            TemplateConfiguration tcXML = new TemplateConfiguration();
+            TemplateConfiguration.Builder tcXML = new TemplateConfiguration.Builder();
             tcXML.setOutputFormat(XMLOutputFormat.INSTANCE);
 
-            TemplateConfiguration tcRTF = new TemplateConfiguration();
+            TemplateConfiguration.Builder tcRTF = new TemplateConfiguration.Builder();
             tcRTF.setOutputFormat(RTFOutputFormat.INSTANCE);
             
             cfg.setTemplateConfigurations(
                     new FirstMatchTemplateConfigurationFactory(
                             new ConditionalTemplateConfigurationFactory(
                                     new FileExtensionMatcher("xml"),
-                                    tcXML),
+                                    tcXML.build()),
                             new ConditionalTemplateConfigurationFactory(
                                     new OrMatcher(
                                             new FileExtensionMatcher("html"),
                                             new FileExtensionMatcher("htm")),
-                                    tcHTML),
+                                    tcHTML.build()),
                             new ConditionalTemplateConfigurationFactory(
                                     new FileExtensionMatcher("rtf"),
-                                    tcRTF)
+                                    tcRTF.build())
                     ).allowNoMatch(true)
             );
             

@@ -31,11 +31,12 @@ import org.apache.freemarker.core.outputformat.OutputFormat;
  * implementation.
  *
  * @see ProcessingConfiguration
- * @since 2.3.24
  */
 public interface ParserConfiguration {
 
     TemplateLanguage getTemplateLanguage();
+
+    boolean isTemplateLanguageSet();
 
     /**
      * See {@link Configuration#getTagSyntax()}.
@@ -146,5 +147,7 @@ public interface ParserConfiguration {
      * was specified. Defaults to the default system encoding.
      */
     Charset getSourceEncoding();
+
+    boolean isSourceEncodingSet();
 
 }

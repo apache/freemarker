@@ -333,11 +333,12 @@ public class DateFormatTest extends TemplateTest {
                 "m", new AliasTemplateDateFormatFactory("yyyy-MMM"),
                 "epoch", EpochMillisTemplateDateFormatFactory.INSTANCE));
         
-        TemplateConfiguration tc = new TemplateConfiguration();
-        tc.setCustomDateFormats(ImmutableMap.of(
+        TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+        tcb.setCustomDateFormats(ImmutableMap.of(
                 "m", new AliasTemplateDateFormatFactory("yyyy-MMMM"),
                 "i", new AliasTemplateDateFormatFactory("@epoch")));
-        cfg.setTemplateConfigurations(new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*2*"), tc));
+        cfg.setTemplateConfigurations(new ConditionalTemplateConfigurationFactory(
+                new FileNameGlobMatcher("*2*"), tcb.build()));
         
         addToDataModel("d", TM);
         String commonFtl = "${d?string.@d} ${d?string.@m} "

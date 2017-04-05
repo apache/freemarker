@@ -30,7 +30,7 @@ import org.apache.freemarker.core.util._NullArgumentException;
 public abstract class MutableProcessingAndParseConfiguration<
         SelfT extends MutableProcessingAndParseConfiguration<SelfT>>
         extends MutableProcessingConfiguration<SelfT>
-        implements ParserConfiguration {
+        implements ParserAndProcessingConfiguration {
 
     private TemplateLanguage templateLanguage;
     private Integer tagSyntax;
@@ -63,10 +63,10 @@ public abstract class MutableProcessingAndParseConfiguration<
      */
     @Override
     public int getTagSyntax() {
-        return tagSyntax != null ? tagSyntax : getDefaultTagSyntax();
+        return tagSyntax != null ? tagSyntax : getInheritedTagSyntax();
     }
 
-    protected abstract int getDefaultTagSyntax();
+    protected abstract int getInheritedTagSyntax();
 
     @Override
     public boolean isTagSyntaxSet() {
@@ -78,10 +78,10 @@ public abstract class MutableProcessingAndParseConfiguration<
      */
     @Override
     public TemplateLanguage getTemplateLanguage() {
-        return templateLanguage != null ? templateLanguage : getDefaultTemplateLanguage();
+         return isTemplateLanguageSet() ? templateLanguage : getInheritedTemplateLanguage();
     }
 
-    protected abstract TemplateLanguage getDefaultTemplateLanguage();
+    protected abstract TemplateLanguage getInheritedTemplateLanguage();
 
     /**
      * See {@link Configuration#setTemplateLanguage(TemplateLanguage)}
@@ -108,11 +108,11 @@ public abstract class MutableProcessingAndParseConfiguration<
      */
     @Override
     public int getNamingConvention() {
-        return namingConvention != null ? namingConvention
-                : getDefaultNamingConvention();
+         return isNamingConventionSet() ? namingConvention
+                : getInheritedNamingConvention();
     }
 
-    protected abstract int getDefaultNamingConvention();
+    protected abstract int getInheritedNamingConvention();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
@@ -134,11 +134,11 @@ public abstract class MutableProcessingAndParseConfiguration<
      */
     @Override
     public boolean getWhitespaceStripping() {
-        return whitespaceStripping != null ? whitespaceStripping.booleanValue()
-                : getDefaultWhitespaceStripping();
+         return isWhitespaceStrippingSet() ? whitespaceStripping.booleanValue()
+                : getInheritedWhitespaceStripping();
     }
 
-    protected abstract boolean getDefaultWhitespaceStripping();
+    protected abstract boolean getInheritedWhitespaceStripping();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
@@ -162,11 +162,11 @@ public abstract class MutableProcessingAndParseConfiguration<
      */
     @Override
     public int getAutoEscapingPolicy() {
-        return autoEscapingPolicy != null ? autoEscapingPolicy.intValue()
-                : getDefaultAutoEscapingPolicy();
+         return isAutoEscapingPolicySet() ? autoEscapingPolicy.intValue()
+                : getInheritedAutoEscapingPolicy();
     }
 
-    protected abstract int getDefaultAutoEscapingPolicy();
+    protected abstract int getInheritedAutoEscapingPolicy();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
@@ -189,10 +189,10 @@ public abstract class MutableProcessingAndParseConfiguration<
      */
     @Override
     public OutputFormat getOutputFormat() {
-        return outputFormat != null ? outputFormat : getDefaultOutputFormat();
+         return isOutputFormatSet() ? outputFormat : getInheritedOutputFormat();
     }
 
-    protected abstract OutputFormat getDefaultOutputFormat();
+    protected abstract OutputFormat getInheritedOutputFormat();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
@@ -214,11 +214,11 @@ public abstract class MutableProcessingAndParseConfiguration<
      */
     @Override
     public boolean getRecognizeStandardFileExtensions() {
-        return recognizeStandardFileExtensions != null ? recognizeStandardFileExtensions.booleanValue()
-                : getDefaultRecognizeStandardFileExtensions();
+         return isRecognizeStandardFileExtensionsSet() ? recognizeStandardFileExtensions.booleanValue()
+                : getInheritedRecognizeStandardFileExtensions();
     }
 
-    protected abstract boolean getDefaultRecognizeStandardFileExtensions();
+    protected abstract boolean getInheritedRecognizeStandardFileExtensions();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
@@ -228,11 +228,12 @@ public abstract class MutableProcessingAndParseConfiguration<
         return recognizeStandardFileExtensions != null;
     }
 
+    @Override
     public Charset getSourceEncoding() {
-        return sourceEncoding != null ? sourceEncoding : getDefaultSourceEncoding();
+         return isSourceEncodingSet() ? sourceEncoding : getInheritedSourceEncoding();
     }
 
-    protected abstract Charset getDefaultSourceEncoding();
+    protected abstract Charset getInheritedSourceEncoding();
 
     /**
      * The charset to be used when reading the template "file" that the {@link TemplateLoader} returns as binary
@@ -263,11 +264,10 @@ public abstract class MutableProcessingAndParseConfiguration<
      */
     @Override
     public int getTabSize() {
-        return tabSize != null ? tabSize.intValue()
-                : getDefaultTabSize();
+         return isTabSizeSet() ? tabSize.intValue() : getInheritedTabSize();
     }
 
-    protected abstract int getDefaultTabSize();
+    protected abstract int getInheritedTabSize();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.

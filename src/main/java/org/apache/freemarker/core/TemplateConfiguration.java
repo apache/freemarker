@@ -31,6 +31,7 @@ import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
+import org.apache.freemarker.core.util.CommonBuilder;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
@@ -48,7 +49,7 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
  * already found.
  * 
  * <p>
- * Note on the sourceEncoding setting {@code sourceEncoding}: See {@link #setSourceEncoding(Charset)}.
+ * Note on the sourceEncoding setting {@code sourceEncoding}: See {@link Builder#setSourceEncoding(Charset)}.
  * 
  * <p>
  * Note that the result value of the reader methods (getter and "is" methods) is usually not useful unless the value of
@@ -70,208 +71,134 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
  * from the {@link Configuration}). This is primarily because if the template configures itself via the {@code #ftl}
  * header, those values should have precedence. A consequence of this is that if you want to configure the same
  * {@link Template} with multiple {@link TemplateConfiguration}-s, you either should merge them to a single one before
- * that (with {@link #merge(TemplateConfiguration)}), or you have to apply them in reverse order of their intended
- * precedence.
+ * that (with {@link Builder#merge(ParserAndProcessingConfiguration)}), or you have to apply them in reverse order of
+ * their intended precedence.
  * </ul>
  * 
  * @see Template#Template(String, String, Reader, Configuration, ParserConfiguration, Charset)
  * 
  * @since 2.3.24
  */
-public final class TemplateConfiguration extends MutableProcessingConfiguration<TemplateConfiguration>
-        implements ParserConfiguration {
+public final class TemplateConfiguration implements ParserAndProcessingConfiguration {
+    private Configuration configuration;
 
-    private TemplateLanguage templateLanguage;
-    private Integer tagSyntax;
-    private Integer namingConvention;
-    private Boolean whitespaceStripping;
-    private Integer autoEscapingPolicy;
-    private Boolean recognizeStandardFileExtensions;
-    private OutputFormat outputFormat;
-    private Charset sourceEncoding;
-    private Integer tabSize;
+    private final Locale locale;
+    private final String numberFormat;
+    private final String timeFormat;
+    private final String dateFormat;
+    private final String dateTimeFormat;
+    private final TimeZone timeZone;
+    private final TimeZone sqlDateAndTimeTimeZone;
+    private final boolean sqlDateAndTimeTimeZoneSet;
+    private final String booleanFormat;
+    private final TemplateExceptionHandler templateExceptionHandler;
+    private final ArithmeticEngine arithmeticEngine;
+    private final ObjectWrapper objectWrapper;
+    private final Charset outputEncoding;
+    private final boolean outputEncodingSet;
+    private final Charset urlEscapingCharset;
+    private final boolean urlEscapingCharsetSet;
+    private final Boolean autoFlush;
+    private final TemplateClassResolver newBuiltinClassResolver;
+    private final Boolean showErrorTips;
+    private final Boolean apiBuiltinEnabled;
+    private final Boolean logTemplateExceptions;
+    private final Map<String, TemplateDateFormatFactory> customDateFormats;
+    private final Map<String, TemplateNumberFormatFactory> customNumberFormats;
+    private final Map<String, String> autoImports;
+    private final List<String> autoIncludes;
+    private final Boolean lazyImports;
+    private final Boolean lazyAutoImports;
+    private final boolean lazyAutoImportsSet;
+    private final Map<Object, Object> customAttributes;
+    
+    private final TemplateLanguage templateLanguage;
+    private final Integer tagSyntax;
+    private final Integer namingConvention;
+    private final Boolean whitespaceStripping;
+    private final Integer autoEscapingPolicy;
+    private final Boolean recognizeStandardFileExtensions;
+    private final OutputFormat outputFormat;
+    private final Charset sourceEncoding;
+    private final Integer tabSize;
 
-    /**
-     * Creates a new instance. The parent will be {@code null} initially, but it will
-     * be changed to the real parent {@link Configuration} when this object is added to the {@link Configuration}. (It's
-     * not allowed to add the same instance to multiple {@link Configuration}-s).
-     */
-    public TemplateConfiguration() {
-        super((Configuration) null);
-    }
+    private TemplateConfiguration(Builder builder) {
+        locale = builder.isLocaleSet() ? builder.getLocale() : null;
+        numberFormat = builder.isNumberFormatSet() ? builder.getNumberFormat() : null;
+        timeFormat = builder.isTimeFormatSet() ? builder.getTimeFormat() : null;
+        dateFormat = builder.isDateFormatSet() ? builder.getDateFormat() : null;
+        dateTimeFormat = builder.isDateTimeFormatSet() ? builder.getDateTimeFormat() : null;
+        timeZone = builder.isTimeZoneSet() ? builder.getTimeZone() : null;
+        sqlDateAndTimeTimeZoneSet = builder.isSQLDateAndTimeTimeZoneSet();
+        sqlDateAndTimeTimeZone = sqlDateAndTimeTimeZoneSet ? builder.getSQLDateAndTimeTimeZone() : null;
+        booleanFormat = builder.isBooleanFormatSet() ? builder.getBooleanFormat() : null;
+        templateExceptionHandler = builder.isTemplateExceptionHandlerSet() ? builder.getTemplateExceptionHandler() : null;
+        arithmeticEngine = builder.isArithmeticEngineSet() ? builder.getArithmeticEngine() : null;
+        objectWrapper = builder.isObjectWrapperSet() ? builder.getObjectWrapper() : null;
+        outputEncodingSet = builder.isOutputEncodingSet();
+        outputEncoding = outputEncodingSet ? builder.getOutputEncoding() : null;
+        urlEscapingCharsetSet = builder.isURLEscapingCharsetSet();
+        urlEscapingCharset = urlEscapingCharsetSet ? builder.getURLEscapingCharset() : null;
+        autoFlush = builder.isAutoFlushSet() ? builder.getAutoFlush() : null;
+        newBuiltinClassResolver = builder.isNewBuiltinClassResolverSet() ? builder.getNewBuiltinClassResolver() : null;
+        showErrorTips = builder.isShowErrorTipsSet() ? builder.getShowErrorTips() : null;
+        apiBuiltinEnabled = builder.isAPIBuiltinEnabledSet() ? builder.getAPIBuiltinEnabled() : null;
+        logTemplateExceptions = builder.isLogTemplateExceptionsSet() ? builder.getLogTemplateExceptions() : null;
+        customDateFormats = builder.isCustomDateFormatsSet() ? builder.getCustomDateFormats() : null;
+        customNumberFormats = builder.isCustomNumberFormatsSet() ? builder.getCustomNumberFormats() : null;
+        autoImports = builder.isAutoImportsSet() ? builder.getAutoImports() : null;
+        autoIncludes = builder.isAutoIncludesSet() ? builder.getAutoIncludes() : null;
+        lazyImports = builder.isLazyImportsSet() ? builder.getLazyImports() : null;
+        lazyAutoImportsSet = builder.isLazyAutoImportsSet();
+        lazyAutoImports = lazyAutoImportsSet ? builder.getLazyAutoImports() : null;
+        customAttributes = builder.isCustomAttributesSet() ? builder.getCustomAttributes() : null;
 
-    /**
-     * Same as {@link #setParentConfiguration(Configuration)}.
-     */
-    @Override
-    void setParent(MutableProcessingConfiguration cfg) {
-        _NullArgumentException.check("cfg", cfg);
-        if (!(cfg instanceof Configuration)) {
-            throw new IllegalArgumentException("The parent of a TemplateConfiguration can only be a Configuration");
-        }
-        
-        MutableProcessingConfiguration parent = getParent();
-        if (parent != null) {
-            if (parent != cfg) {
-                throw new IllegalStateException(
-                        "This TemplateConfiguration is already associated with a different Configuration instance.");
-            }
-            return;
-        }
-        
-        super.setParent(cfg);
+        templateLanguage = builder.isTemplateLanguageSet() ? builder.getTemplateLanguage() : null;
+        tagSyntax = builder.isTagSyntaxSet() ? builder.getTagSyntax() : null;
+        namingConvention = builder.isNamingConventionSet() ? builder.getNamingConvention() : null;
+        whitespaceStripping = builder.isWhitespaceStrippingSet() ? builder.getWhitespaceStripping() : null;
+        autoEscapingPolicy = builder.isAutoEscapingPolicySet() ? builder.getAutoEscapingPolicy() : null;
+        recognizeStandardFileExtensions = builder.isRecognizeStandardFileExtensionsSet() ? builder.getRecognizeStandardFileExtensions() : null;
+        outputFormat = builder.isOutputFormatSet() ? builder.getOutputFormat() : null;
+        sourceEncoding = builder.isSourceEncodingSet() ? builder.getSourceEncoding() : null;
+        tabSize = builder.isTabSizeSet() ? builder.getTabSize() : null;
     }
 
     /**
      * Associates this instance with a {@link Configuration}; usually you don't call this, as it's called internally
      * when this instance is added to a {@link Configuration}. This method can be called only once (except with the same
      * {@link Configuration} parameter again, as that changes nothing anyway).
-     * 
+     *
      * @throws IllegalArgumentException
      *             if the argument is {@code null} or not a {@link Configuration}
      * @throws IllegalStateException
      *             if this object is already associated to a different {@link Configuration} object,
      *             or if the {@code Configuration} has {@code #getIncompatibleImprovements()} less than 2.3.22 and
-     *             this object tries to change any non-parser settings  
+     *             this object tries to change any non-parser settings
      */
-    public void setParentConfiguration(Configuration cfg) {
-        setParent(cfg);
+    public void setParentConfiguration(Configuration configuration) {
+        _NullArgumentException.check(configuration);
+        synchronized (this) {
+            if (this.configuration != null && this.configuration != configuration) {
+                throw new IllegalStateException(
+                        "This TemplateConfiguration was already associated to another Configuration");
+            }
+            this.configuration = configuration;
+        }
     }
 
     /**
      * Returns the parent {@link Configuration}, or {@code null} if none was associated yet.
      */
     public Configuration getParentConfiguration() {
-        return (Configuration) getParent();
+        return configuration;
     }
 
     private Configuration getNonNullParentConfiguration() {
-        MutableProcessingConfiguration parent = getParent();
-        if (parent == null) {
+        if (configuration == null) {
             throw new IllegalStateException("The TemplateConfiguration wasn't associated with a Configuration yet.");
         }
-        return (Configuration) parent;
-    }
-    
-    /**
-     * Set all settings in this {@link TemplateConfiguration} that were set in the parameter
-     * {@link TemplateConfiguration}, possibly overwriting the earlier value in this object. (A setting is said to be
-     * set in a {@link TemplateConfiguration} if it was explicitly set via a setter method, as opposed to be inherited.)
-     */
-    public void merge(TemplateConfiguration tc) {
-        if (tc.isAPIBuiltinEnabledSet()) {
-            setAPIBuiltinEnabled(tc.isAPIBuiltinEnabled());
-        }
-        if (tc.isArithmeticEngineSet()) {
-            setArithmeticEngine(tc.getArithmeticEngine());
-        }
-        if (tc.isAutoEscapingPolicySet()) {
-            setAutoEscapingPolicy(tc.getAutoEscapingPolicy());
-        }
-        if (tc.isAutoFlushSet()) {
-            setAutoFlush(tc.getAutoFlush());
-        }
-        if (tc.isBooleanFormatSet()) {
-            setBooleanFormat(tc.getBooleanFormat());
-        }
-        if (tc.isCustomDateFormatsSet()) {
-            setCustomDateFormats(mergeMaps(
-                    isCustomDateFormatsSet() ? getCustomDateFormats() : null, tc.getCustomDateFormats(), false));
-        }
-        if (tc.isCustomNumberFormatsSet()) {
-            setCustomNumberFormats(mergeMaps(
-                    isCustomNumberFormatsSet() ? getCustomNumberFormats() : null, tc.getCustomNumberFormats(), false));
-        }
-        if (tc.isDateFormatSet()) {
-            setDateFormat(tc.getDateFormat());
-        }
-        if (tc.isDateTimeFormatSet()) {
-            setDateTimeFormat(tc.getDateTimeFormat());
-        }
-        if (tc.isSourceEncodingSet()) {
-            setSourceEncoding(tc.getSourceEncoding());
-        }
-        if (tc.isLocaleSet()) {
-            setLocale(tc.getLocale());
-        }
-        if (tc.isLogTemplateExceptionsSet()) {
-            setLogTemplateExceptions(tc.getLogTemplateExceptions());
-        }
-        if (tc.isNamingConventionSet()) {
-            setNamingConvention(tc.getNamingConvention());
-        }
-        if (tc.isNewBuiltinClassResolverSet()) {
-            setNewBuiltinClassResolver(tc.getNewBuiltinClassResolver());
-        }
-        if (tc.isNumberFormatSet()) {
-            setNumberFormat(tc.getNumberFormat());
-        }
-        if (tc.isObjectWrapperSet()) {
-            setObjectWrapper(tc.getObjectWrapper());
-        }
-        if (tc.isOutputEncodingSet()) {
-            setOutputEncoding(tc.getOutputEncoding());
-        }
-        if (tc.isOutputFormatSet()) {
-            setOutputFormat(tc.getOutputFormat());
-        }
-        if (tc.isRecognizeStandardFileExtensionsSet()) {
-            setRecognizeStandardFileExtensions(tc.getRecognizeStandardFileExtensions());
-        }
-        if (tc.isShowErrorTipsSet()) {
-            setShowErrorTips(tc.getShowErrorTips());
-        }
-        if (tc.isSQLDateAndTimeTimeZoneSet()) {
-            setSQLDateAndTimeTimeZone(tc.getSQLDateAndTimeTimeZone());
-        }
-        if (tc.isTagSyntaxSet()) {
-            setTagSyntax(tc.getTagSyntax());
-        }
-        if (tc.isTemplateLanguageSet()) {
-            setTemplateLanguage(tc.getTemplateLanguage());
-        }
-        if (tc.isTemplateExceptionHandlerSet()) {
-            setTemplateExceptionHandler(tc.getTemplateExceptionHandler());
-        }
-        if (tc.isTimeFormatSet()) {
-            setTimeFormat(tc.getTimeFormat());
-        }
-        if (tc.isTimeZoneSet()) {
-            setTimeZone(tc.getTimeZone());
-        }
-        if (tc.isURLEscapingCharsetSet()) {
-            setURLEscapingCharset(tc.getURLEscapingCharset());
-        }
-        if (tc.isWhitespaceStrippingSet()) {
-            setWhitespaceStripping(tc.getWhitespaceStripping());
-        }
-        if (tc.isTabSizeSet()) {
-            setTabSize(tc.getTabSize());
-        }
-        if (tc.isLazyImportsSet()) {
-            setLazyImports(tc.getLazyImports());
-        }
-        if (tc.isLazyAutoImportsSet()) {
-            setLazyAutoImports(tc.getLazyAutoImports());
-        }
-        if (tc.isAutoImportsSet()) {
-            setAutoImports(mergeMaps(
-                    isAutoImportsSet() ? getAutoImports() : null,
-                    tc.isAutoImportsSet() ? tc.getAutoImports() : null,
-                    true));
-        }
-        if (tc.isAutoIncludesSet()) {
-            setAutoIncludes(mergeLists(
-                    isAutoIncludesSet() ? getAutoIncludes() : null,
-                    tc.isAutoIncludesSet() ? tc.getAutoIncludes() : null));
-        }
-
-        if (tc.isCustomAttributesSet()) {
-            setCustomAttributes(mergeMaps(
-                    isCustomAttributesSet() ? getCustomAttributes() : null,
-                    tc.isCustomAttributesSet() ? tc.getCustomAttributes() : null,
-                    true));
-        }
+        return configuration;
     }
 
     /**
@@ -300,7 +227,7 @@ public final class TemplateConfiguration extends MutableProcessingConfiguration<
         }
 
         if (isAPIBuiltinEnabledSet() && !template.isAPIBuiltinEnabledSet()) {
-            template.setAPIBuiltinEnabled(isAPIBuiltinEnabled());
+            template.setAPIBuiltinEnabled(getAPIBuiltinEnabled());
         }
         if (isArithmeticEngineSet() && !template.isArithmeticEngineSet()) {
             template.setArithmeticEngine(getArithmeticEngine());
@@ -393,19 +320,58 @@ public final class TemplateConfiguration extends MutableProcessingConfiguration<
         }
         
         copyDirectCustomAttributes(template, false);
+
+    }
+
+    private static <K,V> Map<K,V> mergeMaps(Map<K,V> m1, Map<K,V> m2, boolean overwriteUpdatesOrder) {
+        if (m1 == null) return m2;
+        if (m2 == null) return m1;
+        if (m1.isEmpty()) return m2;
+        if (m2.isEmpty()) return m1;
+
+        LinkedHashMap<K, V> mergedM = new LinkedHashMap<>((m1.size() + m2.size()) * 4 / 3 + 1, 0.75f);
+        mergedM.putAll(m1);
+        if (overwriteUpdatesOrder) {
+            for (K m2Key : m2.keySet()) {
+                mergedM.remove(m2Key); // So that duplicate keys are moved after m1 keys
+            }
+        }
+        mergedM.putAll(m2);
+        return mergedM;
+    }
+
+    private static List<String> mergeLists(List<String> list1, List<String> list2) {
+        if (list1 == null) return list2;
+        if (list2 == null) return list1;
+        if (list1.isEmpty()) return list2;
+        if (list2.isEmpty()) return list1;
+
+        ArrayList<String> mergedList = new ArrayList<>(list1.size() + list2.size());
+        mergedList.addAll(list1);
+        mergedList.addAll(list2);
+        return mergedList;
     }
 
     /**
-     * See {@link Configuration#setTagSyntax(int)}.
+     * For internal usage only, copies the custom attributes set directly on this objects into another
+     * {@link MutableProcessingConfiguration}. The target {@link MutableProcessingConfiguration} is assumed to be not seen be other thread than the current
+     * one yet. (That is, the operation is not synchronized on the target {@link MutableProcessingConfiguration}, only on the source
+     * {@link MutableProcessingConfiguration})
+     *
+     * @since 2.3.24
      */
-    public void setTagSyntax(int tagSyntax) {
-        Configuration.valideTagSyntaxValue(tagSyntax);
-        this.tagSyntax = tagSyntax;
+    private void copyDirectCustomAttributes(MutableProcessingConfiguration<?> target, boolean overwriteExisting) {
+        if (customAttributes == null) {
+            return;
+        }
+        for (Map.Entry<?, ?> custAttrEnt : customAttributes.entrySet()) {
+            Object custAttrKey = custAttrEnt.getKey();
+            if (overwriteExisting || !target.isCustomAttributeSet(custAttrKey)) {
+                target.setCustomAttribute(custAttrKey, custAttrEnt.getValue());
+            }
+        }
     }
 
-    /**
-     * The getter pair of {@link #setTagSyntax(int)}.
-     */
     @Override
     public int getTagSyntax() {
         return tagSyntax != null ? tagSyntax : getNonNullParentConfiguration().getTagSyntax();
@@ -416,196 +382,96 @@ public final class TemplateConfiguration extends MutableProcessingConfiguration<
         return tagSyntax != null;
     }
 
-    /**
-     * See {@link Configuration#getTemplateLanguage()}
-     */
     @Override
     public TemplateLanguage getTemplateLanguage() {
         return templateLanguage != null ? templateLanguage : getNonNullParentConfiguration().getTemplateLanguage();
     }
 
-    /**
-     * See {@link Configuration#setTemplateLanguage(TemplateLanguage)}
-     */
-    public void setTemplateLanguage(TemplateLanguage templateLanguage) {
-        _NullArgumentException.check("templateLanguage", templateLanguage);
-        this.templateLanguage = templateLanguage;
-    }
-
+    @Override
     public boolean isTemplateLanguageSet() {
         return templateLanguage != null;
     }
 
-    /**
-     * See {@link Configuration#setNamingConvention(int)}.
-     */
-    public void setNamingConvention(int namingConvention) {
-        Configuration.validateNamingConventionValue(namingConvention);
-        this.namingConvention = namingConvention;
-    }
-
-    /**
-     * The getter pair of {@link #setNamingConvention(int)}.
-     */
     @Override
     public int getNamingConvention() {
         return namingConvention != null ? namingConvention
                 : getNonNullParentConfiguration().getNamingConvention();
     }
 
-    /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
-     */
     @Override
     public boolean isNamingConventionSet() {
         return namingConvention != null;
     }
 
-    /**
-     * See {@link Configuration#setWhitespaceStripping(boolean)}.
-     */
-    public void setWhitespaceStripping(boolean whitespaceStripping) {
-        this.whitespaceStripping = Boolean.valueOf(whitespaceStripping);
-    }
-
-    /**
-     * The getter pair of {@link #getWhitespaceStripping()}.
-     */
     @Override
     public boolean getWhitespaceStripping() {
-        return whitespaceStripping != null ? whitespaceStripping.booleanValue()
+        return whitespaceStripping != null ? whitespaceStripping
                 : getNonNullParentConfiguration().getWhitespaceStripping();
     }
 
-    /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
-     */
     @Override
     public boolean isWhitespaceStrippingSet() {
         return whitespaceStripping != null;
     }
 
-    /**
-     * Sets the output format of the template; see {@link Configuration#setAutoEscapingPolicy(int)} for more.
-     */
-    public void setAutoEscapingPolicy(int autoEscapingPolicy) {
-        Configuration.validateAutoEscapingPolicyValue(autoEscapingPolicy);
-
-        this.autoEscapingPolicy = Integer.valueOf(autoEscapingPolicy);
-    }
-
-    /**
-     * The getter pair of {@link #setAutoEscapingPolicy(int)}.
-     */
     @Override
     public int getAutoEscapingPolicy() {
-        return autoEscapingPolicy != null ? autoEscapingPolicy.intValue()
+        return autoEscapingPolicy != null ? autoEscapingPolicy
                 : getNonNullParentConfiguration().getAutoEscapingPolicy();
     }
 
-    /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
-     */
     @Override
     public boolean isAutoEscapingPolicySet() {
         return autoEscapingPolicy != null;
     }
 
-    /**
-     * Sets the output format of the template; see {@link Configuration#setOutputFormat(OutputFormat)} for more.
-     */
-    public void setOutputFormat(OutputFormat outputFormat) {
-        _NullArgumentException.check("outputFormat", outputFormat);
-        this.outputFormat = outputFormat;
-    }
-
-    /**
-     * The getter pair of {@link #setOutputFormat(OutputFormat)}.
-     */
     @Override
     public OutputFormat getOutputFormat() {
         return outputFormat != null ? outputFormat : getNonNullParentConfiguration().getOutputFormat();
     }
 
-    /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
-     */
+    @Override
+    public ArithmeticEngine getArithmeticEngine() {
+        return isArithmeticEngineSet() ? arithmeticEngine : getNonNullParentConfiguration().getArithmeticEngine();
+    }
+
+    @Override
+    public boolean isArithmeticEngineSet() {
+        return arithmeticEngine != null;
+    }
+
     @Override
     public boolean isOutputFormatSet() {
         return outputFormat != null;
     }
     
-    /**
-     * See {@link Configuration#setRecognizeStandardFileExtensions(boolean)}. 
-     */
-    public void setRecognizeStandardFileExtensions(boolean recognizeStandardFileExtensions) {
-        this.recognizeStandardFileExtensions = Boolean.valueOf(recognizeStandardFileExtensions);
-    }
-
-    /**
-     * Getter pair of {@link #setRecognizeStandardFileExtensions(boolean)}.
-     */
     @Override
     public boolean getRecognizeStandardFileExtensions() {
-        return recognizeStandardFileExtensions != null ? recognizeStandardFileExtensions.booleanValue()
+        return isRecognizeStandardFileExtensionsSet() ? recognizeStandardFileExtensions
                 : getNonNullParentConfiguration().getRecognizeStandardFileExtensions();
     }
     
-    /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
-     */
     @Override
     public boolean isRecognizeStandardFileExtensionsSet() {
         return recognizeStandardFileExtensions != null;
     }
 
+    @Override
     public Charset getSourceEncoding() {
-        return sourceEncoding != null ? sourceEncoding : getNonNullParentConfiguration().getSourceEncoding();
+        return isSourceEncodingSet() ? sourceEncoding : getNonNullParentConfiguration().getSourceEncoding();
     }
 
-    /**
-     * When the standard template loading/caching mechanism is used, this forces the charset used for reading the
-     * template "file", overriding everything but the encoding coming from the {@code #ftl} header.
-     * 
-     * <p>
-     * If you are developing your own template loading/caching mechanism instead of the standard one, note that the
-     * above behavior is not guaranteed by this class alone; you have to ensure it. Also, read the note on
-     * {@code sourceEncoding} in the documentation of {@link #apply(Template)}.
-     */
-    public void setSourceEncoding(Charset sourceEncoding) {
-        _NullArgumentException.check("sourceEncoding", sourceEncoding);
-        this.sourceEncoding = sourceEncoding;
-    }
-
+    @Override
     public boolean isSourceEncodingSet() {
         return sourceEncoding != null;
     }
     
-    /**
-     * See {@link Configuration#setTabSize(int)}. 
-     * 
-     * @since 2.3.25
-     */
-    public void setTabSize(int tabSize) {
-        this.tabSize = Integer.valueOf(tabSize);
-    }
-
-    /**
-     * Getter pair of {@link #setTabSize(int)}.
-     * 
-     * @since 2.3.25
-     */
     @Override
     public int getTabSize() {
-        return tabSize != null ? tabSize.intValue()
+        return isTabSizeSet() ? tabSize
                 : getNonNullParentConfiguration().getTabSize();
     }
     
-    /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
-     * 
-     * @since 2.3.25
-     */
     @Override
     public boolean isTabSizeSet() {
         return tabSize != null;
@@ -622,322 +488,617 @@ public final class TemplateConfiguration extends MutableProcessingConfiguration<
     public Version getIncompatibleImprovements() {
         return getNonNullParentConfiguration().getIncompatibleImprovements();
     }
-    
+
     @Override
     public Locale getLocale() {
-        try {
-            return super.getLocale();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isLocaleSet() ? locale : getNonNullParentConfiguration().getLocale();
+    }
+
+    @Override
+    public boolean isLocaleSet() {
+        return locale != null;
     }
 
     @Override
     public TimeZone getTimeZone() {
-        try {
-            return super.getTimeZone();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isTimeZoneSet() ? timeZone : getNonNullParentConfiguration().getTimeZone();
+    }
+
+    @Override
+    public boolean isTimeZoneSet() {
+        return timeZone != null;
     }
 
     @Override
     public TimeZone getSQLDateAndTimeTimeZone() {
-        try {
-            return super.getSQLDateAndTimeTimeZone();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isSQLDateAndTimeTimeZoneSet() ? sqlDateAndTimeTimeZone : getNonNullParentConfiguration()
+                .getSQLDateAndTimeTimeZone();
+    }
+
+    @Override
+    public boolean isSQLDateAndTimeTimeZoneSet() {
+        return sqlDateAndTimeTimeZoneSet;
     }
 
     @Override
     public String getNumberFormat() {
-        try {
-            return super.getNumberFormat();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isNumberFormatSet() ? numberFormat : getNonNullParentConfiguration().getNumberFormat();
     }
 
     @Override
-    public Map<String, ? extends TemplateNumberFormatFactory> getCustomNumberFormats() {
-        try {
-            return super.getCustomNumberFormats();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+    public boolean isNumberFormatSet() {
+        return numberFormat != null;
+    }
+
+    @Override
+    public Map<String, TemplateNumberFormatFactory> getCustomNumberFormats() {
+        return isCustomNumberFormatsSet() ? customNumberFormats : getNonNullParentConfiguration().getCustomNumberFormats();
     }
 
     @Override
     public TemplateNumberFormatFactory getCustomNumberFormat(String name) {
-        try {
-            return super.getCustomNumberFormat(name);
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
+        if (isCustomNumberFormatsSet()) {
+            TemplateNumberFormatFactory format = customNumberFormats.get(name);
+            if (format != null) {
+                return  format;
+            }
         }
+        return getNonNullParentConfiguration().getCustomNumberFormat(name);
+    }
+
+    @Override
+    public boolean isCustomNumberFormatsSet() {
+        return customNumberFormats != null;
     }
 
     @Override
     public boolean hasCustomFormats() {
-        try {
-            return super.hasCustomFormats();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isCustomNumberFormatsSet() ? !customNumberFormats.isEmpty()
+                : getNonNullParentConfiguration().hasCustomFormats();
     }
 
     @Override
     public String getBooleanFormat() {
-        try {
-            return super.getBooleanFormat();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isBooleanFormatSet() ? booleanFormat : getNonNullParentConfiguration().getBooleanFormat();
+    }
+
+    @Override
+    public boolean isBooleanFormatSet() {
+        return booleanFormat != null;
     }
 
     @Override
     public String getTimeFormat() {
-        try {
-            return super.getTimeFormat();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isTimeFormatSet() ? timeFormat : getNonNullParentConfiguration().getTimeFormat();
+    }
+
+    @Override
+    public boolean isTimeFormatSet() {
+        return timeFormat != null;
     }
 
     @Override
     public String getDateFormat() {
-        try {
-            return super.getDateFormat();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isDateFormatSet() ? dateFormat : getNonNullParentConfiguration().getDateFormat();
+    }
+
+    @Override
+    public boolean isDateFormatSet() {
+        return dateFormat != null;
     }
 
     @Override
     public String getDateTimeFormat() {
-        try {
-            return super.getDateTimeFormat();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isDateTimeFormatSet() ? dateTimeFormat : getNonNullParentConfiguration().getDateTimeFormat();
     }
 
     @Override
-    public Map<String, ? extends TemplateDateFormatFactory> getCustomDateFormats() {
-        try {
-            return super.getCustomDateFormats();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+    public boolean isDateTimeFormatSet() {
+        return dateTimeFormat != null;
+    }
+
+    @Override
+    public Map<String, TemplateDateFormatFactory> getCustomDateFormats() {
+        return isCustomDateFormatsSet() ? customDateFormats : getNonNullParentConfiguration().getCustomDateFormats();
     }
 
     @Override
     public TemplateDateFormatFactory getCustomDateFormat(String name) {
-        try {
-            return super.getCustomDateFormat(name);
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
+        if (isCustomDateFormatsSet()) {
+            TemplateDateFormatFactory format = customDateFormats.get(name);
+            if (format != null) {
+                return  format;
+            }
         }
+        return getNonNullParentConfiguration().getCustomDateFormat(name);
+    }
+
+    @Override
+    public boolean isCustomDateFormatsSet() {
+        return customDateFormats != null;
     }
 
     @Override
     public TemplateExceptionHandler getTemplateExceptionHandler() {
-        try {
-            return super.getTemplateExceptionHandler();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isTemplateExceptionHandlerSet() ? templateExceptionHandler : getNonNullParentConfiguration().getTemplateExceptionHandler();
     }
 
     @Override
-    public ArithmeticEngine getArithmeticEngine() {
-        try {
-            return super.getArithmeticEngine();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+    public boolean isTemplateExceptionHandlerSet() {
+        return templateExceptionHandler != null;
     }
 
     @Override
     public ObjectWrapper getObjectWrapper() {
-        try {
-            return super.getObjectWrapper();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isObjectWrapperSet() ? objectWrapper : getNonNullParentConfiguration().getObjectWrapper();
+    }
+
+    @Override
+    public boolean isObjectWrapperSet() {
+        return objectWrapper != null;
     }
 
     @Override
     public Charset getOutputEncoding() {
-        try {
-            return super.getOutputEncoding();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isOutputEncodingSet() ? outputEncoding : getNonNullParentConfiguration().getOutputEncoding();
+    }
+
+    @Override
+    public boolean isOutputEncodingSet() {
+        return outputEncodingSet;
     }
 
     @Override
     public Charset getURLEscapingCharset() {
-        try {
-            return super.getURLEscapingCharset();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isURLEscapingCharsetSet() ? urlEscapingCharset : getNonNullParentConfiguration().getURLEscapingCharset();
+    }
+
+    @Override
+    public boolean isURLEscapingCharsetSet() {
+        return urlEscapingCharsetSet;
     }
 
     @Override
     public TemplateClassResolver getNewBuiltinClassResolver() {
-        try {
-            return super.getNewBuiltinClassResolver();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isNewBuiltinClassResolverSet() ? newBuiltinClassResolver : getNonNullParentConfiguration().getNewBuiltinClassResolver();
+    }
+
+    @Override
+    public boolean isNewBuiltinClassResolverSet() {
+        return newBuiltinClassResolver != null;
+    }
+
+    @Override
+    public boolean getAPIBuiltinEnabled() {
+        return isAPIBuiltinEnabledSet() ? apiBuiltinEnabled : getNonNullParentConfiguration().getAPIBuiltinEnabled();
+    }
+
+    @Override
+    public boolean isAPIBuiltinEnabledSet() {
+        return apiBuiltinEnabled != null;
     }
 
     @Override
     public boolean getAutoFlush() {
-        try {
-            return super.getAutoFlush();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isAutoFlushSet() ? autoFlush : getNonNullParentConfiguration().getAutoFlush();
+    }
+
+    @Override
+    public boolean isAutoFlushSet() {
+        return autoFlush != null;
     }
 
     @Override
     public boolean getShowErrorTips() {
-        try {
-            return super.getShowErrorTips();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isShowErrorTipsSet() ? showErrorTips : getNonNullParentConfiguration().getShowErrorTips();
     }
 
     @Override
-    public boolean isAPIBuiltinEnabled() {
-        try {
-            return super.isAPIBuiltinEnabled();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+    public boolean isShowErrorTipsSet() {
+        return showErrorTips != null;
     }
 
     @Override
     public boolean getLogTemplateExceptions() {
-        try {
-            return super.getLogTemplateExceptions();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isLogTemplateExceptionsSet() ? logTemplateExceptions : getNonNullParentConfiguration().getLogTemplateExceptions();
+    }
+
+    @Override
+    public boolean isLogTemplateExceptionsSet() {
+        return logTemplateExceptions != null;
     }
 
     @Override
     public boolean getLazyImports() {
-        try {
-            return super.getLazyImports();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isLazyImportsSet() ? lazyImports : getNonNullParentConfiguration().getLazyImports();
+    }
+
+    @Override
+    public boolean isLazyImportsSet() {
+        return lazyImports != null;
     }
 
     @Override
     public Boolean getLazyAutoImports() {
-        try {
-            return super.getLazyAutoImports();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isLazyAutoImportsSet() ? lazyAutoImports : getNonNullParentConfiguration().getLazyAutoImports();
+    }
+
+    @Override
+    public boolean isLazyAutoImportsSet() {
+        return lazyAutoImportsSet;
     }
 
     @Override
     public Map<String, String> getAutoImports() {
-        try {
-            return super.getAutoImports();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isAutoImportsSet() ? autoImports : getNonNullParentConfiguration().getAutoImports();
+    }
+
+    @Override
+    public boolean isAutoImportsSet() {
+        return autoImports != null;
     }
 
     @Override
     public List<String> getAutoIncludes() {
-        try {
-            return super.getAutoIncludes();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+        return isAutoIncludesSet() ? autoIncludes : getNonNullParentConfiguration().getAutoIncludes();
     }
 
     @Override
-    public String[] getCustomAttributeNames() {
-        try {
-            return super.getCustomAttributeNames();
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
-        }
+    public boolean isAutoIncludesSet() {
+        return autoIncludes != null;
+    }
+
+    @Override
+    public Map<Object, Object> getCustomAttributes() {
+        return isCustomAttributesSet() ? customAttributes : getNonNullParentConfiguration().getCustomAttributes();
+    }
+
+    @Override
+    public boolean isCustomAttributesSet() {
+        return customAttributes != null;
     }
 
     @Override
     public Object getCustomAttribute(Object name) {
-        try {
-            return super.getCustomAttribute(name);
-        } catch (NullPointerException e) {
-            getNonNullParentConfiguration();
-            throw e;
+        Object attValue;
+        if (isCustomAttributesSet()) {
+            attValue = customAttributes.get(name);
+            if (attValue != null || customAttributes.containsKey(name)) {
+                return attValue;
+            }
         }
+        return getNonNullParentConfiguration().getCustomAttribute(name);
     }
 
-    private Map mergeMaps(Map m1, Map m2, boolean overwriteUpdatesOrder) {
-        if (m1 == null) return m2;
-        if (m2 == null) return m1;
-        if (m1.isEmpty()) return m2 != null ? m2 : m1;
-        if (m2.isEmpty()) return m1 != null ? m1 : m2;
-        
-        LinkedHashMap mergedM = new LinkedHashMap((m1.size() + m2.size()) * 4 / 3 + 1, 0.75f);
-        mergedM.putAll(m1);
-        for (Object m2Key : m2.keySet()) {
-            mergedM.remove(m2Key); // So that duplicate keys are moved after m1 keys
+    public static final class Builder extends MutableProcessingAndParseConfiguration<Builder>
+            implements CommonBuilder<TemplateConfiguration> {
+
+        public Builder() {
+            super((Configuration) null);
         }
-        mergedM.putAll(m2);
-        return mergedM;
+
+        @Override
+        public TemplateConfiguration build() {
+            return new TemplateConfiguration(this);
+        }
+
+        // TODO This will be removed
+        @Override
+        void setParent(ProcessingConfiguration cfg) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        protected Locale getInheritedLocale() {
+            throw new SettingValueNotSetException("locale");
+        }
+
+        @Override
+        protected TimeZone getInheritedTimeZone() {
+            throw new SettingValueNotSetException("timeZone");
+        }
+
+        @Override
+        protected TimeZone getInheritedSQLDateAndTimeTimeZone() {
+            throw new SettingValueNotSetException("SQLDateAndTimeTimeZone");
+        }
+
+        @Override
+        protected String getInheritedNumberFormat() {
+            throw new SettingValueNotSetException("numberFormat");
+        }
+
+        @Override
+        protected Map<String, TemplateNumberFormatFactory> getInheritedCustomNumberFormats() {
+            throw new SettingValueNotSetException("customNumberFormats");
+        }
+
+        @Override
+        protected TemplateNumberFormatFactory getInheritedCustomNumberFormat(String name) {
+            return null;
+        }
+
+        @Override
+        protected boolean getInheritedHasCustomFormats() {
+            return false;
+        }
+
+        @Override
+        protected String getInheritedBooleanFormat() {
+            throw new SettingValueNotSetException("booleanFormat");
+        }
+
+        @Override
+        protected String getInheritedTimeFormat() {
+            throw new SettingValueNotSetException("timeFormat");
+        }
+
+        @Override
+        protected String getInheritedDateFormat() {
+            throw new SettingValueNotSetException("dateFormat");
+        }
+
+        @Override
+        protected String getInheritedDateTimeFormat() {
+            throw new SettingValueNotSetException("dateTimeFormat");
+        }
+
+        @Override
+        protected Map<String, TemplateDateFormatFactory> getInheritedCustomDateFormats() {
+            throw new SettingValueNotSetException("customDateFormats");
+        }
+
+        @Override
+        protected TemplateDateFormatFactory getInheritedCustomDateFormat(String name) {
+            throw new SettingValueNotSetException("customDateFormat");
+        }
+
+        @Override
+        protected TemplateExceptionHandler getInheritedTemplateExceptionHandler() {
+            throw new SettingValueNotSetException("templateExceptionHandler");
+        }
+
+        @Override
+        protected ArithmeticEngine getInheritedArithmeticEngine() {
+            throw new SettingValueNotSetException("arithmeticEngine");
+        }
+
+        @Override
+        protected ObjectWrapper getInheritedObjectWrapper() {
+            throw new SettingValueNotSetException("objectWrapper");
+        }
+
+        @Override
+        protected Charset getInheritedOutputEncoding() {
+            throw new SettingValueNotSetException("outputEncoding");
+        }
+
+        @Override
+        protected Charset getInheritedURLEscapingCharset() {
+            throw new SettingValueNotSetException("URLEscapingCharset");
+        }
+
+        @Override
+        protected TemplateClassResolver getInheritedNewBuiltinClassResolver() {
+            throw new SettingValueNotSetException("newBuiltinClassResolver");
+        }
+
+        @Override
+        protected boolean getInheritedAutoFlush() {
+            throw new SettingValueNotSetException("autoFlush");
+        }
+
+        @Override
+        protected boolean getInheritedShowErrorTips() {
+            throw new SettingValueNotSetException("showErrorTips");
+        }
+
+        @Override
+        protected boolean getInheritedAPIBuiltinEnabled() {
+            throw new SettingValueNotSetException("APIBuiltinEnabled");
+        }
+
+        @Override
+        protected boolean getInheritedLogTemplateExceptions() {
+            throw new SettingValueNotSetException("logTemplateExceptions");
+        }
+
+        @Override
+        protected boolean getInheritedLazyImports() {
+            throw new SettingValueNotSetException("lazyImports");
+        }
+
+        @Override
+        protected Boolean getInheritedLazyAutoImports() {
+            throw new SettingValueNotSetException("lazyAutoImports");
+        }
+
+        @Override
+        protected Map<String, String> getInheritedAutoImports() {
+            throw new SettingValueNotSetException("autoImports");
+        }
+
+        @Override
+        protected List<String> getInheritedAutoIncludes() {
+            throw new SettingValueNotSetException("autoIncludes");
+        }
+
+        @Override
+        protected Object getInheritedCustomAttribute(Object name) {
+            return null;
+        }
+
+        /**
+         * Set all settings in this {@link Builder} that were set in the parameter
+         * {@link TemplateConfiguration}, possibly overwriting the earlier value in this object. (A setting is said to be
+         * set in a {@link TemplateConfiguration} if it was explicitly set via a setter method, as opposed to be inherited.)
+         */
+        public void merge(ParserAndProcessingConfiguration tc) {
+            if (tc.isAPIBuiltinEnabledSet()) {
+                setAPIBuiltinEnabled(tc.getAPIBuiltinEnabled());
+            }
+            if (tc.isArithmeticEngineSet()) {
+                setArithmeticEngine(tc.getArithmeticEngine());
+            }
+            if (tc.isAutoEscapingPolicySet()) {
+                setAutoEscapingPolicy(tc.getAutoEscapingPolicy());
+            }
+            if (tc.isAutoFlushSet()) {
+                setAutoFlush(tc.getAutoFlush());
+            }
+            if (tc.isBooleanFormatSet()) {
+                setBooleanFormat(tc.getBooleanFormat());
+            }
+            if (tc.isCustomDateFormatsSet()) {
+                setCustomDateFormats(mergeMaps(
+                        isCustomDateFormatsSet() ? getCustomDateFormats() : null, tc.getCustomDateFormats(), false));
+            }
+            if (tc.isCustomNumberFormatsSet()) {
+                setCustomNumberFormats(mergeMaps(
+                        isCustomNumberFormatsSet() ? getCustomNumberFormats() : null, tc.getCustomNumberFormats(), false));
+            }
+            if (tc.isDateFormatSet()) {
+                setDateFormat(tc.getDateFormat());
+            }
+            if (tc.isDateTimeFormatSet()) {
+                setDateTimeFormat(tc.getDateTimeFormat());
+            }
+            if (tc.isSourceEncodingSet()) {
+                setSourceEncoding(tc.getSourceEncoding());
+            }
+            if (tc.isLocaleSet()) {
+                setLocale(tc.getLocale());
+            }
+            if (tc.isLogTemplateExceptionsSet()) {
+                setLogTemplateExceptions(tc.getLogTemplateExceptions());
+            }
+            if (tc.isNamingConventionSet()) {
+                setNamingConvention(tc.getNamingConvention());
+            }
+            if (tc.isNewBuiltinClassResolverSet()) {
+                setNewBuiltinClassResolver(tc.getNewBuiltinClassResolver());
+            }
+            if (tc.isNumberFormatSet()) {
+                setNumberFormat(tc.getNumberFormat());
+            }
+            if (tc.isObjectWrapperSet()) {
+                setObjectWrapper(tc.getObjectWrapper());
+            }
+            if (tc.isOutputEncodingSet()) {
+                setOutputEncoding(tc.getOutputEncoding());
+            }
+            if (tc.isOutputFormatSet()) {
+                setOutputFormat(tc.getOutputFormat());
+            }
+            if (tc.isRecognizeStandardFileExtensionsSet()) {
+                setRecognizeStandardFileExtensions(tc.getRecognizeStandardFileExtensions());
+            }
+            if (tc.isShowErrorTipsSet()) {
+                setShowErrorTips(tc.getShowErrorTips());
+            }
+            if (tc.isSQLDateAndTimeTimeZoneSet()) {
+                setSQLDateAndTimeTimeZone(tc.getSQLDateAndTimeTimeZone());
+            }
+            if (tc.isTagSyntaxSet()) {
+                setTagSyntax(tc.getTagSyntax());
+            }
+            if (tc.isTemplateLanguageSet()) {
+                setTemplateLanguage(tc.getTemplateLanguage());
+            }
+            if (tc.isTemplateExceptionHandlerSet()) {
+                setTemplateExceptionHandler(tc.getTemplateExceptionHandler());
+            }
+            if (tc.isTimeFormatSet()) {
+                setTimeFormat(tc.getTimeFormat());
+            }
+            if (tc.isTimeZoneSet()) {
+                setTimeZone(tc.getTimeZone());
+            }
+            if (tc.isURLEscapingCharsetSet()) {
+                setURLEscapingCharset(tc.getURLEscapingCharset());
+            }
+            if (tc.isWhitespaceStrippingSet()) {
+                setWhitespaceStripping(tc.getWhitespaceStripping());
+            }
+            if (tc.isTabSizeSet()) {
+                setTabSize(tc.getTabSize());
+            }
+            if (tc.isLazyImportsSet()) {
+                setLazyImports(tc.getLazyImports());
+            }
+            if (tc.isLazyAutoImportsSet()) {
+                setLazyAutoImports(tc.getLazyAutoImports());
+            }
+            if (tc.isAutoImportsSet()) {
+                setAutoImports(mergeMaps(
+                        isAutoImportsSet() ? getAutoImports() : null,
+                        tc.isAutoImportsSet() ? tc.getAutoImports() : null,
+                        true));
+            }
+            if (tc.isAutoIncludesSet()) {
+                setAutoIncludes(mergeLists(
+                        isAutoIncludesSet() ? getAutoIncludes() : null,
+                        tc.isAutoIncludesSet() ? tc.getAutoIncludes() : null));
+            }
+
+            if (tc.isCustomAttributesSet()) {
+                setCustomAttributes(mergeMaps(
+                        isCustomAttributesSet() ? getCustomAttributes() : null,
+                        tc.isCustomAttributesSet() ? tc.getCustomAttributes() : null,
+                        true));
+            }
+        }
+
+        @Override
+        public Version getIncompatibleImprovements() {
+            throw new SettingValueNotSetException("incompatibleImprovements");
+        }
+
+        @Override
+        protected int getInheritedTagSyntax() {
+            throw new SettingValueNotSetException("tagSyntax");
+        }
+
+        @Override
+        protected TemplateLanguage getInheritedTemplateLanguage() {
+            throw new SettingValueNotSetException("templateLanguage");
+        }
+
+        @Override
+        protected int getInheritedNamingConvention() {
+            throw new SettingValueNotSetException("namingConvention");
+        }
+
+        @Override
+        protected boolean getInheritedWhitespaceStripping() {
+            throw new SettingValueNotSetException("whitespaceStripping");
+        }
+
+        @Override
+        protected int getInheritedAutoEscapingPolicy() {
+            throw new SettingValueNotSetException("autoEscapingPolicy");
+        }
+
+        @Override
+        protected OutputFormat getInheritedOutputFormat() {
+            throw new SettingValueNotSetException("outputFormat");
+        }
+
+        @Override
+        protected boolean getInheritedRecognizeStandardFileExtensions() {
+            throw new SettingValueNotSetException("recognizeStandardFileExtensions");
+        }
+
+        @Override
+        protected Charset getInheritedSourceEncoding() {
+            throw new SettingValueNotSetException("sourceEncoding");
+        }
+
+        @Override
+        protected int getInheritedTabSize() {
+            throw new SettingValueNotSetException("tabSize");
+        }
+
     }
 
-    private List<String> mergeLists(List<String> list1, List<String> list2) {
-        if (list1 == null) return list2;
-        if (list2 == null) return list1;
-        if (list1.isEmpty()) return list2 != null ? list2 : list1;
-        if (list2.isEmpty()) return list1 != null ? list1 : list2;
-        
-        ArrayList<String> mergedList = new ArrayList<>(list1.size() + list2.size());
-        mergedList.addAll(list1);
-        mergedList.addAll(list2);
-        return mergedList;
-    }
-    
 }

@@ -48,13 +48,13 @@ public class TemplateConfigurationExamples extends ExamplesTest {
 
         addTemplate("t.xml", "");
         
-        TemplateConfiguration tcUTF8XML = new TemplateConfiguration();
-        tcUTF8XML.setSourceEncoding(StandardCharsets.UTF_8);
-        tcUTF8XML.setOutputFormat(XMLOutputFormat.INSTANCE);
+        TemplateConfiguration.Builder tcbUTF8XML = new TemplateConfiguration.Builder();
+        tcbUTF8XML.setSourceEncoding(StandardCharsets.UTF_8);
+        tcbUTF8XML.setOutputFormat(XMLOutputFormat.INSTANCE);
 
         {
             cfg.setTemplateConfigurations(new ConditionalTemplateConfigurationFactory(
-                    new FileExtensionMatcher("xml"), tcUTF8XML));
+                    new FileExtensionMatcher("xml"), tcbUTF8XML.build()));
             
             Template t = cfg.getTemplate("t.xml");
             assertEquals(StandardCharsets.UTF_8, t.getSourceEncoding());
@@ -79,11 +79,11 @@ public class TemplateConfigurationExamples extends ExamplesTest {
         addTemplate("mail/t.subject.ftl", "");
         addTemplate("mail/t.body.ftl", "");
 
-        TemplateConfiguration tcSubject = new TemplateConfiguration();
-        tcSubject.setOutputFormat(PlainTextOutputFormat.INSTANCE);
+        TemplateConfiguration.Builder tcbSubject = new TemplateConfiguration.Builder();
+        tcbSubject.setOutputFormat(PlainTextOutputFormat.INSTANCE);
         
-        TemplateConfiguration tcBody = new TemplateConfiguration();
-        tcBody.setOutputFormat(HTMLOutputFormat.INSTANCE);
+        TemplateConfiguration.Builder tcbBody = new TemplateConfiguration.Builder();
+        tcbBody.setOutputFormat(HTMLOutputFormat.INSTANCE);
         
         cfg.setTemplateConfigurations(
                 new ConditionalTemplateConfigurationFactory(
@@ -91,10 +91,10 @@ public class TemplateConfigurationExamples extends ExamplesTest {
                         new FirstMatchTemplateConfigurationFactory(
                                 new ConditionalTemplateConfigurationFactory(
                                         new FileNameGlobMatcher("*.subject.*"),
-                                        tcSubject),
+                                        tcbSubject.build()),
                                 new ConditionalTemplateConfigurationFactory(
                                         new FileNameGlobMatcher("*.body.*"),
-                                        tcBody)
+                                        tcbBody.build())
                                 )
                                 .noMatchErrorDetails("Mail template names must contain \".subject.\" or \".body.\"!")
                         ));
@@ -125,38 +125,38 @@ public class TemplateConfigurationExamples extends ExamplesTest {
         addTemplate("t.xml", "");
         addTemplate("mail/t.html", "");
 
-        TemplateConfiguration tcStats = new TemplateConfiguration();
-        tcStats.setDateTimeFormat("iso");
-        tcStats.setDateFormat("iso");
-        tcStats.setTimeFormat("iso");
-        tcStats.setTimeZone(_DateUtil.UTC);
+        TemplateConfiguration.Builder tcbStats = new TemplateConfiguration.Builder();
+        tcbStats.setDateTimeFormat("iso");
+        tcbStats.setDateFormat("iso");
+        tcbStats.setTimeFormat("iso");
+        tcbStats.setTimeZone(_DateUtil.UTC);
 
-        TemplateConfiguration tcMail = new TemplateConfiguration();
-        tcMail.setSourceEncoding(StandardCharsets.UTF_8);
+        TemplateConfiguration.Builder tcbMail = new TemplateConfiguration.Builder();
+        tcbMail.setSourceEncoding(StandardCharsets.UTF_8);
         
-        TemplateConfiguration tcHTML = new TemplateConfiguration();
-        tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
+        TemplateConfiguration.Builder tcbHTML = new TemplateConfiguration.Builder();
+        tcbHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
         
-        TemplateConfiguration tcXML = new TemplateConfiguration();
-        tcXML.setOutputFormat(XMLOutputFormat.INSTANCE);
+        TemplateConfiguration.Builder tcbXML = new TemplateConfiguration.Builder();
+        tcbXML.setOutputFormat(XMLOutputFormat.INSTANCE);
         
         cfg.setTemplateConfigurations(
                 new MergingTemplateConfigurationFactory(
                         new ConditionalTemplateConfigurationFactory(
                                 new FileNameGlobMatcher("*.stats.*"),
-                                tcStats),
+                                tcbStats.build()),
                         new ConditionalTemplateConfigurationFactory(
                                 new PathGlobMatcher("mail/**"),
-                                tcMail),
+                                tcbMail.build()),
                         new FirstMatchTemplateConfigurationFactory(
                                 new ConditionalTemplateConfigurationFactory(
                                         new FileExtensionMatcher("xml"),
-                                        tcXML),
+                                        tcbXML.build()),
                                 new ConditionalTemplateConfigurationFactory(
                                         new OrMatcher(
                                                 new FileExtensionMatcher("html"),
                                                 new FileExtensionMatcher("htm")),
-                                        tcHTML)
+                                        tcbHTML.build())
                         ).allowNoMatch(true)
                 )
         );

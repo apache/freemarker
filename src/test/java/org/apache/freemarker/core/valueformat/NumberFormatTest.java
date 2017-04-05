@@ -245,11 +245,12 @@ public class NumberFormatTest extends TemplateTest {
                 "d", new AliasTemplateNumberFormatFactory("0.0#"),
                 "hex", HexTemplateNumberFormatFactory.INSTANCE));
         
-        TemplateConfiguration tc = new TemplateConfiguration();
-        tc.setCustomNumberFormats(ImmutableMap.of(
+        TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+        tcb.setCustomNumberFormats(ImmutableMap.of(
                 "d", new AliasTemplateNumberFormatFactory("0.#'d'"),
                 "i", new AliasTemplateNumberFormatFactory("@hex")));
-        cfg.setTemplateConfigurations(new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*2*"), tc));
+        cfg.setTemplateConfigurations(
+                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*2*"), tcb.build()));
         
         String commonFtl = "${1?string.@f} ${1?string.@d} "
                 + "<#setting locale='fr_FR'>${1.5?string.@d} "

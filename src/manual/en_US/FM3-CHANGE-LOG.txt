@@ -187,6 +187,7 @@ the FreeMarer 3 changelog here:
   - Renamed Configuration.defaultEncoding to sourceEncoding, also added sourceEncoding to ParserConfiguration, and renamed
     TemplateConfiguration.encoding and Template.encoding to sourceEncoding. (Before this, defaultEncoding was exclusive
     to Configuration, but now it's like any other ParserConfiguration setting that can be overidden on the 3 levels.)
+  - Made TemplateConfiguration immutable, added a TemplateConfiguration.Builder.
 - Settings that have contained a charset name (sourceEncoding, outputEncoding, URLEscapingCharset) are now of type Charset,
   not String. For string based configuration sources (such as .properties files) this means that:
   - Unrecognized charset names are now errors

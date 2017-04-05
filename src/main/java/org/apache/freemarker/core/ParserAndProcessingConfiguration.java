@@ -17,23 +17,13 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.util;
+package org.apache.freemarker.core;
 
 /**
- * A builder that encloses an already built product. {@link #build()} will always return the same product object.
+ * <b>Don't implement this interface yourself</b>; use the existing implementation(s). This interface is the union of
+ * {@link ProcessingConfiguration} and {@link ParserConfiguration}, which is useful for declaring types for values
+ * that must implement both interfaces.
  */
-public class ProductWrappingBuilder<ProductT, SelfT extends ProductWrappingBuilder<ProductT, SelfT>>
-        extends FluentBuilder<ProductT, SelfT> {
-
-    private final ProductT product;
-
-    public ProductWrappingBuilder(ProductT product) {
-        _NullArgumentException.check("product", product);
-        this.product = product;
-    }
-
-    @Override
-    public ProductT build() {
-        return product;
-    }
+public interface ParserAndProcessingConfiguration extends ParserConfiguration, ProcessingConfiguration {
+    // No additional method
 }

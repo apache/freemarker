@@ -22,7 +22,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.freemarker.core.Configuration;
@@ -159,8 +159,9 @@ public class TemplateConfigurationFactoryTest {
 
     @Test
     public void testSetConfiguration() {
-        TemplateConfiguration tc = new TemplateConfiguration();
-        ConditionalTemplateConfigurationFactory tcf = new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*"), tc);
+        TemplateConfiguration tc = new TemplateConfiguration.Builder().build();
+        ConditionalTemplateConfigurationFactory tcf = new ConditionalTemplateConfigurationFactory(
+                new FileNameGlobMatcher("*"), tc);
         assertNull(tcf.getConfiguration());
         assertNull(tc.getParentConfiguration());
         
@@ -181,10 +182,10 @@ public class TemplateConfigurationFactoryTest {
 
     @SuppressWarnings("boxing")
     private TemplateConfiguration newTemplateConfiguration(int id) {
-        TemplateConfiguration tc = new TemplateConfiguration();
-        tc.setCustomAttribute("id", id);
-        tc.setCustomAttribute("contains" + id, true);
-        return tc;
+        TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+        tcb.setCustomAttribute("id", id);
+        tcb.setCustomAttribute("contains" + id, true);
+        return tcb.build();
     }
 
     private void assertNotApplicable(TemplateConfigurationFactory tcf, String sourceName)
@@ -196,7 +197,7 @@ public class TemplateConfigurationFactoryTest {
             throws IOException, TemplateConfigurationFactoryException {
         TemplateConfiguration mergedTC = tcf.get(sourceName, DummyTemplateLoadingSource.INSTANCE);
         assertNotNull("TC should have its parents Configuration set", mergedTC.getParentConfiguration());
-        List<String> mergedTCAttNames = Arrays.asList(mergedTC.getCustomAttributeNames());
+        List<Object> mergedTCAttNames = new ArrayList<Object>(mergedTC.getCustomAttributes().keySet());
 
         for (TemplateConfiguration expectedTC : expectedTCs) {
             Integer tcId = (Integer) expectedTC.getCustomAttribute("id");
@@ -208,18 +209,18 @@ public class TemplateConfigurationFactoryTest {
             }
         }
         
-        for (String attName: mergedTCAttNames) {
-            if (!containsCustomAttr(attName, expectedTCs)) {
-                fail("The asserted TemplateConfiguration contains an unexpected custom attribute: " + attName);
+        for (Object attKey: mergedTCAttNames) {
+            if (!containsCustomAttr(attKey, expectedTCs)) {
+                fail("The asserted TemplateConfiguration contains an unexpected custom attribute: " + attKey);
             }
         }
         
         assertEquals(expectedTCs[expectedTCs.length - 1].getCustomAttribute("id"), mergedTC.getCustomAttribute("id"));
     }
 
-    private boolean containsCustomAttr(String attName, TemplateConfiguration... expectedTCs) {
+    private boolean containsCustomAttr(Object attKey, TemplateConfiguration... expectedTCs) {
         for (TemplateConfiguration expectedTC : expectedTCs) {
-            if (expectedTC.getCustomAttribute(attName) != null) {
+            if (expectedTC.getCustomAttribute(attKey) != null) {
                 return true;
             }
         }

@@ -46,13 +46,13 @@ class BuiltInsForStringsMisc {
         @Override
         TemplateModel calculateResult(String s, Environment env)  throws TemplateException {
             final boolean b;
-            if (s.equals("true")) {
+            if (s.equals(MiscUtil.C_TRUE)) {
                 b = true;
-            } else if (s.equals("false")) {
+            } else if (s.equals(MiscUtil.C_FALSE)) {
                 b = false;
-            } else if (s.equals(env.getTrueStringValue())) {
+            } else if (s.equals(env.getTemplateBooleanFormat().getTrueStringValue())) {
                 b = true;
-            } else if (s.equals(env.getFalseStringValue())) {
+            } else if (s.equals(env.getTemplateBooleanFormat().getFalseStringValue())) {
                 b = false;
             } else {
                 throw new _MiscTemplateException(this, env,

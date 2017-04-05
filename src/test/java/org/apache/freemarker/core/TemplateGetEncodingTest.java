@@ -44,10 +44,11 @@ public class TemplateGetEncodingTest {
             tl.putBinaryTemplate("bin-static", "<#test>");
             tl.putTextTemplate("text", "test");
             tl.putTextTemplate("text-static", "<#test>");
-            TemplateConfiguration staticTextTC = new TemplateConfiguration();
-            staticTextTC.setTemplateLanguage(TemplateLanguage.STATIC_TEXT);
+            TemplateConfiguration.Builder staticTextTCB = new TemplateConfiguration.Builder();
+            staticTextTCB.setTemplateLanguage(TemplateLanguage.STATIC_TEXT);
             cfg.setTemplateConfigurations(
-                    new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*-static*"), staticTextTC));
+                    new ConditionalTemplateConfigurationFactory(
+                            new FileNameGlobMatcher("*-static*"), staticTextTCB.build()));
             cfg.setTemplateLoader(tl);
             cfg.setCacheStorage(new StrongCacheStorage());
         }

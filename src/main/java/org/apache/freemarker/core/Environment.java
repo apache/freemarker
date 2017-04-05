@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
@@ -127,6 +128,8 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     private TemplateNumberFormat cachedTemplateNumberFormat;
     private Map<String, TemplateNumberFormat> cachedTemplateNumberFormats;
     private Map<CustomStateKey, Object> customStateMap;
+
+    private TemplateBooleanFormat cachedTemplateBooleanFormat;
 
     /**
      * Stores the date/time/date-time formatters that are used when no format is explicitly given at the place of
@@ -317,6 +320,75 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             }
         } finally {
             TLS_ENVIRONMENT.set(savedEnv);
+        }
+    }
+
+    /**
+     * Executes the auto-imports and auto-includes for the main template of this environment.
+     * This is not meant to be called or overridden by code outside of FreeMarker.
+     */
+    private void doAutoImportsAndIncludes(Environment env) throws TemplateException, IOException {
+        Template t = getMainTemplate();
+        doAutoImports(t);
+        doAutoIncludes(t);
+    }
+
+    private void doAutoImports(Template t) throws IOException, TemplateException {
+        Map<String, String> envAutoImports = isAutoImportsSet() ? getAutoImports() : null;
+        Map<String, String> tAutoImports = t.isAutoImportsSet() ? t.getAutoImports() : null;
+
+        boolean lazyAutoImports = getLazyAutoImports() != null ? getLazyAutoImports() : getLazyImports();
+
+        for (Map.Entry<String, String> autoImport : configuration.getAutoImports().entrySet()) {
+            String nsVarName = autoImport.getKey();
+            if ((tAutoImports == null || !tAutoImports.containsKey(nsVarName))
+                    && (envAutoImports == null || !envAutoImports.containsKey(nsVarName))) {
+                importLib(autoImport.getValue(), nsVarName, lazyAutoImports);
+            }
+        }
+        if (tAutoImports != null) {
+            for (Map.Entry<String, String> autoImport : tAutoImports.entrySet()) {
+                String nsVarName = autoImport.getKey();
+                if (envAutoImports == null || !envAutoImports.containsKey(nsVarName)) {
+                    importLib(autoImport.getValue(), nsVarName, lazyAutoImports);
+                }
+            }
+        }
+        if (envAutoImports != null) {
+            for (Map.Entry<String, String> autoImport : envAutoImports.entrySet()) {
+                String nsVarName = autoImport.getKey();
+                importLib(autoImport.getValue(), nsVarName, lazyAutoImports);
+            }
+        }
+    }
+
+    private void doAutoIncludes(Template t) throws TemplateException, IOException {
+        // We can't store autoIncludes in LinkedHashSet-s because setAutoIncludes(List) allows duplicates,
+        // unfortunately. Yet we have to prevent duplicates among Configuration levels, with the lowest levels having
+        // priority. So we build some Set-s to do that, but we avoid the most common cases where they aren't needed.
+
+        List<String> tAutoIncludes = t.isAutoIncludesSet() ? t.getAutoIncludes() : null;
+        List<String> envAutoIncludes = isAutoIncludesSet() ? getAutoIncludes() : null;
+
+        for (String templateName : configuration.getAutoIncludes()) {
+            if ((tAutoIncludes == null || !tAutoIncludes.contains(templateName))
+                    && (envAutoIncludes == null || !envAutoIncludes.contains(templateName))) {
+                include(configuration.getTemplate(templateName, getLocale()));
+            }
+        }
+
+        if (tAutoIncludes != null) {
+            for (String templateName : tAutoIncludes) {
+                if (envAutoIncludes == null || !envAutoIncludes.contains(templateName)) {
+                    include(configuration.getTemplate(templateName, getLocale()));
+                }
+            }
+        }
+
+        if (envAutoIncludes != null) {
+            for (String templateName : envAutoIncludes) {
+                include(configuration.getTemplate(templateName, getLocale()));
+            }
         }
     }
 
@@ -849,6 +921,21 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     @Override
+    protected TemplateExceptionHandler getInheritedTemplateExceptionHandler() {
+        return getParent().getTemplateExceptionHandler();
+    }
+
+    @Override
+    protected ArithmeticEngine getInheritedArithmeticEngine() {
+        return getParent().getArithmeticEngine();
+    }
+
+    @Override
+    protected ObjectWrapper getInheritedObjectWrapper() {
+        return getParent().getObjectWrapper();
+    }
+
+    @Override
     public void setLocale(Locale locale) {
         Locale prevLocale = getLocale();
         super.setLocale(locale);
@@ -871,6 +958,11 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
             cachedCollator = null;
         }
+    }
+
+    @Override
+    protected Locale getInheritedLocale() {
+        return getParent().getLocale();
     }
 
     @Override
@@ -898,6 +990,11 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     @Override
+    protected TimeZone getInheritedTimeZone() {
+        return getParent().getTimeZone();
+    }
+
+    @Override
     public void setSQLDateAndTimeTimeZone(TimeZone timeZone) {
         TimeZone prevTimeZone = getSQLDateAndTimeTimeZone();
         super.setSQLDateAndTimeTimeZone(timeZone);
@@ -919,6 +1016,11 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
             cachedSQLDateAndTimeTimeZoneSameAsNormal = null;
         }
+    }
+
+    @Override
+    protected TimeZone getInheritedSQLDateAndTimeTimeZone() {
+        return getParent().getSQLDateAndTimeTimeZone();
     }
 
     // Replace with Objects.equals in Java 7
@@ -947,6 +1049,61 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         super.setURLEscapingCharset(urlEscapingCharset);
     }
 
+    @Override
+    protected Charset getInheritedURLEscapingCharset() {
+        return getParent().getURLEscapingCharset();
+    }
+
+    @Override
+    protected TemplateClassResolver getInheritedNewBuiltinClassResolver() {
+        return getParent().getNewBuiltinClassResolver();
+    }
+
+    @Override
+    protected boolean getInheritedAutoFlush() {
+        return getParent().getAutoFlush();
+    }
+
+    @Override
+    protected boolean getInheritedShowErrorTips() {
+        return getParent().getShowErrorTips();
+    }
+
+    @Override
+    protected boolean getInheritedAPIBuiltinEnabled() {
+        return getParent().getAPIBuiltinEnabled();
+    }
+
+    @Override
+    protected boolean getInheritedLogTemplateExceptions() {
+        return getParent().getLogTemplateExceptions();
+    }
+
+    @Override
+    protected boolean getInheritedLazyImports() {
+        return getParent().getLazyImports();
+    }
+
+    @Override
+    protected Boolean getInheritedLazyAutoImports() {
+        return getParent().getLazyAutoImports();
+    }
+
+    @Override
+    protected Map<String, String> getInheritedAutoImports() {
+        return getParent().getAutoImports();
+    }
+
+    @Override
+    protected List<String> getInheritedAutoIncludes() {
+        return getParent().getAutoIncludes();
+    }
+
+    @Override
+    protected Object getInheritedCustomAttribute(Object name) {
+        return getParent().getCustomAttribute(name);
+    }
+
     /*
      * Note that altough it's not allowed to set this setting with the <tt>setting</tt> directive, it still must be
      * allowed to set it from Java code while the template executes, since some frameworks allow templates to actually
@@ -956,6 +1113,11 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     public void setOutputEncoding(Charset outputEncoding) {
         cachedURLEscapingCharsetSet = false;
         super.setOutputEncoding(outputEncoding);
+    }
+
+    @Override
+    protected Charset getInheritedOutputEncoding() {
+        return getParent().getOutputEncoding();
     }
 
     /**
@@ -1054,6 +1216,93 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     public void setNumberFormat(String formatName) {
         super.setNumberFormat(formatName);
         cachedTemplateNumberFormat = null;
+    }
+
+    @Override
+    protected String getInheritedNumberFormat() {
+        return getParent().getNumberFormat();
+    }
+
+    @Override
+    protected Map<String, TemplateNumberFormatFactory> getInheritedCustomNumberFormats() {
+        return getParent().getCustomNumberFormats();
+    }
+
+    @Override
+    protected TemplateNumberFormatFactory getInheritedCustomNumberFormat(String name) {
+        return getParent().getCustomNumberFormat(name);
+    }
+
+    @Override
+    protected boolean getInheritedHasCustomFormats() {
+        return getParent().hasCustomFormats();
+    }
+
+    @Override
+    protected String getInheritedBooleanFormat() {
+        return getParent().getBooleanFormat();
+    }
+
+    String formatBoolean(boolean value, boolean fallbackToTrueFalse) throws TemplateException {
+        TemplateBooleanFormat templateBooleanFormat = getTemplateBooleanFormat();
+        if (value) {
+            String s = templateBooleanFormat.getTrueStringValue();
+            if (s == null) {
+                if (fallbackToTrueFalse) {
+                    return MiscUtil.C_TRUE;
+                } else {
+                    throw new _MiscTemplateException(getNullBooleanFormatErrorDescription());
+                }
+            } else {
+                return s;
+            }
+        } else {
+            String s = templateBooleanFormat.getFalseStringValue();
+            if (s == null) {
+                if (fallbackToTrueFalse) {
+                    return MiscUtil.C_FALSE;
+                } else {
+                    throw new _MiscTemplateException(getNullBooleanFormatErrorDescription());
+                }
+            } else {
+                return s;
+            }
+        }
+    }
+
+    TemplateBooleanFormat getTemplateBooleanFormat() {
+        TemplateBooleanFormat format = cachedTemplateBooleanFormat;
+        if (format == null) {
+            format = TemplateBooleanFormat.getInstance(getBooleanFormat());
+            cachedTemplateBooleanFormat = format;
+        }
+        return format;
+    }
+
+    @Override
+    public void setBooleanFormat(String booleanFormat) {
+        String previousFormat = getBooleanFormat();
+        super.setBooleanFormat(booleanFormat);
+        if (!booleanFormat.equals(previousFormat)) {
+            cachedTemplateBooleanFormat = null;
+        }
+    }
+
+    private _ErrorDescriptionBuilder getNullBooleanFormatErrorDescription() {
+        return new _ErrorDescriptionBuilder(
+                "Can't convert boolean to string automatically, because the \"", BOOLEAN_FORMAT_KEY ,"\" setting was ",
+                new _DelayedJQuote(getBooleanFormat()),
+                (getBooleanFormat().equals(TemplateBooleanFormat.C_TRUE_FALSE)
+                        ? ", which is the legacy default computer-language format, and hence isn't accepted."
+                        : ".")
+        ).tips(
+                "If you just want \"true\"/\"false\" result as you are generting computer-language output, "
+                        + "use \"?c\", like ${myBool?c}.",
+                "You can write myBool?string('yes', 'no') and like to specify boolean formatting in place.",
+                new Object[] {
+                        "If you need the same two values on most places, the programmers should set the \"",
+                        BOOLEAN_FORMAT_KEY ,"\" setting to something like \"yes,no\"." }
+        );
     }
 
     /**
@@ -1285,6 +1534,11 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     @Override
+    protected String getInheritedTimeFormat() {
+        return getParent().getTimeFormat();
+    }
+
+    @Override
     public void setDateFormat(String dateFormat) {
         String prevDateFormat = getDateFormat();
         super.setDateFormat(dateFormat);
@@ -1298,6 +1552,11 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     @Override
+    protected String getInheritedDateFormat() {
+        return getParent().getDateFormat();
+    }
+
+    @Override
     public void setDateTimeFormat(String dateTimeFormat) {
         String prevDateTimeFormat = getDateTimeFormat();
         super.setDateTimeFormat(dateTimeFormat);
@@ -1308,6 +1567,21 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                 }
             }
         }
+    }
+
+    @Override
+    protected String getInheritedDateTimeFormat() {
+        return getParent().getDateTimeFormat();
+    }
+
+    @Override
+    protected Map<String, TemplateDateFormatFactory> getInheritedCustomDateFormats() {
+        return getParent().getCustomDateFormats();
+    }
+
+    @Override
+    protected TemplateDateFormatFactory getInheritedCustomDateFormat(String name) {
+        return getParent().getCustomDateFormat(name);
     }
 
     public Configuration getConfiguration() {

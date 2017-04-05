@@ -34,10 +34,10 @@ public class IncludeAndImportConfigurableLayersTest extends TemplateTest {
         Configuration cfg = getConfiguration();
         cfg.addAutoImport("t1", "t1.ftl");
 
-        TemplateConfiguration tc = new TemplateConfiguration();
-        tc.addAutoImport("t2", "t2.ftl");
+        TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+        tcb.addAutoImport("t2", "t2.ftl");
         cfg.setTemplateConfigurations(
-                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("main.ftl"), tc));
+                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("main.ftl"), tcb.build()));
 
         {
             Template t = cfg.getTemplate("main.ftl");
@@ -88,10 +88,10 @@ public class IncludeAndImportConfigurableLayersTest extends TemplateTest {
         cfg.addAutoImport("t2", "t2.ftl");
         cfg.addAutoImport("t3", "t3.ftl");
 
-        TemplateConfiguration tc = new TemplateConfiguration();
-        tc.addAutoImport("t2", "t2b.ftl");
+        TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+        tcb.addAutoImport("t2", "t2b.ftl");
         cfg.setTemplateConfigurations(
-                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("main.ftl"), tc));
+                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("main.ftl"), tcb.build()));
 
         {
             Template t = cfg.getTemplate("main.ftl");
@@ -128,10 +128,10 @@ public class IncludeAndImportConfigurableLayersTest extends TemplateTest {
         Configuration cfg = getConfiguration();
         cfg.addAutoInclude("t1.ftl");
 
-        TemplateConfiguration tc = new TemplateConfiguration();
-        tc.addAutoInclude("t2.ftl");
+        TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+        tcb.addAutoInclude("t2.ftl");
         cfg.setTemplateConfigurations(
-                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("main.ftl"), tc));
+                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("main.ftl"), tcb.build()));
 
         {
             Template t = cfg.getTemplate("main.ftl");
@@ -182,10 +182,10 @@ public class IncludeAndImportConfigurableLayersTest extends TemplateTest {
         cfg.addAutoInclude("t2.ftl");
         cfg.addAutoInclude("t3.ftl");
 
-        TemplateConfiguration tc = new TemplateConfiguration();
-        tc.addAutoInclude("t2.ftl");
+        TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+        tcb.addAutoInclude("t2.ftl");
         cfg.setTemplateConfigurations(
-                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("main.ftl"), tc));
+                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("main.ftl"), tcb.build()));
 
         {
             Template t = cfg.getTemplate("main.ftl");
@@ -233,11 +233,11 @@ public class IncludeAndImportConfigurableLayersTest extends TemplateTest {
         cfg.addAutoInclude("t1.ftl");
         cfg.addAutoInclude("t1.ftl");
 
-        TemplateConfiguration tc = new TemplateConfiguration();
-        tc.addAutoInclude("t2.ftl");
-        tc.addAutoInclude("t2.ftl");
+        TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+        tcb.addAutoInclude("t2.ftl");
+        tcb.addAutoInclude("t2.ftl");
         cfg.setTemplateConfigurations(
-                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("main.ftl"), tc));
+                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("main.ftl"), tcb.build()));
 
         {
             Template t = cfg.getTemplate("main.ftl");
@@ -301,8 +301,9 @@ public class IncludeAndImportConfigurableLayersTest extends TemplateTest {
         assertEquals(expectedOutput, sw.toString());
     }
 
-    private void setLazynessOfConfigurable(MutableProcessingConfiguration cfg, Boolean lazyImports, Boolean lazyAutoImports,
-            boolean setLazyAutoImports) {
+    private void setLazynessOfConfigurable(
+            MutableProcessingConfiguration<?> cfg,
+            Boolean lazyImports, Boolean lazyAutoImports, boolean setLazyAutoImports) {
         if (lazyImports != null) {
             cfg.setLazyImports(lazyImports);
         }

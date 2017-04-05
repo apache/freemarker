@@ -229,11 +229,11 @@ class BuiltInsForMultipleTypes {
     static class apiBI extends ASTExpBuiltIn {
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
-            if (!env.isAPIBuiltinEnabled()) {
+            if (!env.getAPIBuiltinEnabled()) {
                 throw new _MiscTemplateException(this,
                         "Can't use ?api, because the \"", MutableProcessingConfiguration.API_BUILTIN_ENABLED_KEY,
                         "\" configuration setting is false. Think twice before you set it to true though. Especially, "
-                        + "it shouldn't abussed for modifying Map-s and Collection-s.");
+                        + "it shouldn't abused for modifying Map-s and Collection-s.");
             }
             final TemplateModel tm = target.eval(env);
             if (!(tm instanceof TemplateModelWithAPISupport)) {

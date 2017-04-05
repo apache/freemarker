@@ -261,11 +261,11 @@ public class ConfigurationTest extends TestCase {
         cfg.setLocale(Locale.GERMAN);
         cfg.setSourceEncoding(StandardCharsets.ISO_8859_1);
 
-        TemplateConfiguration huTC = new TemplateConfiguration();
-        huTC.setSourceEncoding(ISO_8859_2);
+        TemplateConfiguration.Builder huTCB = new TemplateConfiguration.Builder();
+        huTCB.setSourceEncoding(ISO_8859_2);
         cfg.setTemplateConfigurations(
                 new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*_hu.*"),
-                huTC));
+                huTCB.build()));
 
         ByteArrayTemplateLoader tl = new ByteArrayTemplateLoader();
         tl.putTemplate(tFtl, "${1}".getBytes(StandardCharsets.UTF_8));

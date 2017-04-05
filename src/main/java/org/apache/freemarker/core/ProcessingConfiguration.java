@@ -97,7 +97,9 @@ public interface ProcessingConfiguration {
     /**
      * Getter pair of {@link MutableProcessingConfiguration#setCustomNumberFormats(Map)}.
      */
-    Map<String, ? extends TemplateNumberFormatFactory> getCustomNumberFormats();
+    Map<String, TemplateNumberFormatFactory> getCustomNumberFormats();
+
+    TemplateNumberFormatFactory getCustomNumberFormat(String name);
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
@@ -105,6 +107,8 @@ public interface ProcessingConfiguration {
      * an {@link SettingValueNotSetException}.
      */
     boolean isCustomNumberFormatsSet();
+
+    boolean hasCustomFormats();
 
     /**
      * Getter pair of {@link MutableProcessingConfiguration#setBooleanFormat(String)}.
@@ -157,7 +161,9 @@ public interface ProcessingConfiguration {
     /**
      * Getter pair of {@link MutableProcessingConfiguration#setCustomDateFormats(Map)}.
      */
-    Map<String, ? extends TemplateDateFormatFactory> getCustomDateFormats();
+    Map<String, TemplateDateFormatFactory> getCustomDateFormats();
+
+    TemplateDateFormatFactory getCustomDateFormat(String name);
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
@@ -237,6 +243,10 @@ public interface ProcessingConfiguration {
      * an {@link SettingValueNotSetException}.
      */
     boolean isNewBuiltinClassResolverSet();
+
+    boolean getAPIBuiltinEnabled();
+
+    boolean isAPIBuiltinEnabledSet();
 
     /**
      * Getter pair of {@link MutableProcessingConfiguration#setAutoFlush(boolean)}.

@@ -64,7 +64,7 @@ import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.util.BugException;
-import org.apache.freemarker.core.util.BuilderBase;
+import org.apache.freemarker.core.util.FluentBuilder;
 import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.dom.NodeModel;
 import org.slf4j.Logger;
@@ -1326,7 +1326,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      */
     protected abstract static class ExtendableBuilder<
             ProductT extends DefaultObjectWrapper, SelfT extends ExtendableBuilder<ProductT, SelfT>>
-            extends BuilderBase<ProductT, SelfT> implements Cloneable {
+            extends FluentBuilder<ProductT, SelfT> implements Cloneable {
 
         private final Version incompatibleImprovements;
 

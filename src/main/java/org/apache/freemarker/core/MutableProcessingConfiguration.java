@@ -19,7 +19,6 @@
 
 package org.apache.freemarker.core;
 
-import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.text.NumberFormat;
@@ -35,7 +34,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
@@ -91,8 +89,6 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
  */
 public abstract class MutableProcessingConfiguration<SelfT extends MutableProcessingConfiguration<SelfT>>
         implements ProcessingConfiguration {
-    static final String C_TRUE_FALSE = "true,false";
-    
     public static final String NULL_VALUE = "null";
     public static final String DEFAULT_VALUE = "default";
     public static final String JVM_DEFAULT_VALUE = "JVM default";
@@ -321,20 +317,17 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         URL_ESCAPING_CHARSET_KEY_CAMEL_CASE
     };
 
-    private MutableProcessingConfiguration parent;
-    private Map<Object, Object> customAttributes;
-    
+    private ProcessingConfiguration parent;
+
     private Locale locale;
     private String numberFormat;
     private String timeFormat;
     private String dateFormat;
     private String dateTimeFormat;
     private TimeZone timeZone;
-    private TimeZone sqlDataAndTimeTimeZone;
-    private boolean sqlDataAndTimeTimeZoneSet;
+    private TimeZone sqlDateAndTimeTimeZone;
+    private boolean sqlDateAndTimeTimeZoneSet;
     private String booleanFormat;
-    private String trueStringValue;  // deduced from booleanFormat
-    private String falseStringValue;  // deduced from booleanFormat
     private TemplateExceptionHandler templateExceptionHandler;
     private ArithmeticEngine arithmeticEngine;
     private ObjectWrapper objectWrapper;
@@ -347,24 +340,27 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     private Boolean showErrorTips;
     private Boolean apiBuiltinEnabled;
     private Boolean logTemplateExceptions;
-    private Map<String, ? extends TemplateDateFormatFactory> customDateFormats;
-    private Map<String, ? extends TemplateNumberFormatFactory> customNumberFormats;
+    private Map<String, TemplateDateFormatFactory> customDateFormats;
+    private Map<String, TemplateNumberFormatFactory> customNumberFormats;
     private LinkedHashMap<String, String> autoImports;
     private ArrayList<String> autoIncludes;
     private Boolean lazyImports;
     private Boolean lazyAutoImports;
     private boolean lazyAutoImportsSet;
-    
+    private Map<Object, Object> customAttributes;
+
     /**
      * Called by the {@link Configuration} constructor, initializes the fields to their {@link Configuration}-level
      * default without marking them as set.
      */
+    // TODO Move to Configuration(Builder) constructor
     MutableProcessingConfiguration(Version incompatibleImprovements) {
         _CoreAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
         parent = null;
         locale = Configuration.getDefaultLocale();
         timeZone = Configuration.getDefaultTimeZone();
-        sqlDataAndTimeTimeZone = null;
+        sqlDateAndTimeTimeZone = null;
+        sqlDateAndTimeTimeZoneSet = true;
         numberFormat = "number";
         timeFormat = "";
         dateFormat = "";
@@ -379,14 +375,14 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         logTemplateExceptions = Boolean.FALSE;
         // outputEncoding and urlEscapingCharset defaults to null,
         // which means "not specified"
-        setBooleanFormat(C_TRUE_FALSE);
-
+        setBooleanFormat(TemplateBooleanFormat.C_TRUE_FALSE);
         customDateFormats = Collections.emptyMap();
         customNumberFormats = Collections.emptyMap();
-        
+        outputEncodingSet = true;
+        urlEscapingCharsetSet = true;
+
         lazyImports = false;
         lazyAutoImportsSet = true;
-        
         initAutoImportsMap();
         initAutoIncludesList();
     }
@@ -420,7 +416,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * @return The parent {@link MutableProcessingConfiguration} object, or {@code null} if this is the root {@link MutableProcessingConfiguration} object
      *         (i.e, if it's the {@link Configuration} object).
      */
-    public final MutableProcessingConfiguration getParent() {
+    public final ProcessingConfiguration getParent() {
         return parent;
     }
     
@@ -429,7 +425,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * template - the included template becomes the parent configurable during
      * its evaluation.
      */
-    void setParent(MutableProcessingConfiguration parent) {
+    void setParent(ProcessingConfiguration parent) {
         this.parent = parent;
     }
     
@@ -454,8 +450,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     @Override
     public Locale getLocale() {
-        return locale != null ? locale : parent.getLocale();
+         return isLocaleSet() ? locale : getInheritedLocale();
     }
+
+    protected abstract Locale getInheritedLocale();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
@@ -496,9 +494,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     @Override
     public TimeZone getTimeZone() {
-        return timeZone != null ? timeZone : parent.getTimeZone();
+         return isTimeZoneSet() ? timeZone : getInheritedTimeZone();
     }
-    
+
+    protected abstract TimeZone getInheritedTimeZone();
+
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
      *  
@@ -571,8 +571,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * @since 2.3.21
      */
     public void setSQLDateAndTimeTimeZone(TimeZone tz) {
-        sqlDataAndTimeTimeZone = tz;
-        sqlDataAndTimeTimeZoneSet = true;
+        sqlDateAndTimeTimeZone = tz;
+        sqlDateAndTimeTimeZoneSet = true;
     }
 
     /**
@@ -595,11 +595,13 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     @Override
     public TimeZone getSQLDateAndTimeTimeZone() {
-        return sqlDataAndTimeTimeZoneSet
-                ? sqlDataAndTimeTimeZone
-                : (parent != null ? parent.getSQLDateAndTimeTimeZone() : null);
+        return sqlDateAndTimeTimeZoneSet
+                ? sqlDateAndTimeTimeZone
+                : getInheritedSQLDateAndTimeTimeZone();
     }
-    
+
+    protected abstract TimeZone getInheritedSQLDateAndTimeTimeZone();
+
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
      *  
@@ -607,7 +609,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     @Override
     public boolean isSQLDateAndTimeTimeZoneSet() {
-        return sqlDataAndTimeTimeZoneSet;
+        return sqlDateAndTimeTimeZoneSet;
     }
 
     /**
@@ -653,8 +655,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     @Override
     public String getNumberFormat() {
-        return numberFormat != null ? numberFormat : parent.getNumberFormat();
+         return isNumberFormatSet() ? numberFormat : getInheritedNumberFormat();
     }
+
+    protected abstract String getInheritedNumberFormat();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
@@ -682,9 +686,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * @since 2.3.24
      */
     @Override
-    public Map<String, ? extends TemplateNumberFormatFactory> getCustomNumberFormats() {
-        return customNumberFormats == null ? parent.getCustomNumberFormats() : customNumberFormats;
+    public Map<String, TemplateNumberFormatFactory> getCustomNumberFormats() {
+         return isCustomNumberFormatsSet() ? customNumberFormats : getInheritedCustomNumberFormats();
     }
+
+    protected abstract Map<String, TemplateNumberFormatFactory> getInheritedCustomNumberFormats();
 
     /**
      * Associates names with formatter factories, which then can be referred by the {@link #setNumberFormat(String)
@@ -700,7 +706,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * 
      * @since 2.3.24
      */
-    public void setCustomNumberFormats(Map<String, ? extends TemplateNumberFormatFactory> customNumberFormats) {
+    public void setCustomNumberFormats(Map<String, TemplateNumberFormatFactory> customNumberFormats) {
         _NullArgumentException.check("customNumberFormats", customNumberFormats);
         validateFormatNames(customNumberFormats.keySet());
         this.customNumberFormats = customNumberFormats;
@@ -709,7 +715,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     /**
      * Fluent API equivalent of {@link #setCustomNumberFormats(Map)}
      */
-    public SelfT customNumberFormats(Map<String, ? extends TemplateNumberFormatFactory> value) {
+    public SelfT customNumberFormats(Map<String, TemplateNumberFormatFactory> value) {
         setCustomNumberFormats(value);
         return self();
     }
@@ -752,6 +758,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * 
      * @since 2.3.24
      */
+    @Override
     public TemplateNumberFormatFactory getCustomNumberFormat(String name) {
         TemplateNumberFormatFactory r;
         if (customNumberFormats != null) {
@@ -760,20 +767,24 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                 return r;
             }
         }
-        return parent != null ? parent.getCustomNumberFormat(name) : null;
+        return getInheritedCustomNumberFormat(name);
     }
-    
+
+    protected abstract TemplateNumberFormatFactory getInheritedCustomNumberFormat(String name);
+
     /**
      * Tells if this configurable object or its parent defines any custom formats.
      * 
      * @since 2.3.24
      */
     public boolean hasCustomFormats() {
-        return customNumberFormats != null && !customNumberFormats.isEmpty()
-                || customDateFormats != null && !customDateFormats.isEmpty()
-                || getParent() != null && getParent().hasCustomFormats(); 
+        return isCustomNumberFormatsSet() && !customNumberFormats.isEmpty()
+                || isCustomDateFormatsSet() && !customDateFormats.isEmpty()
+                || getInheritedHasCustomFormats();
     }
-    
+
+    protected abstract boolean getInheritedHasCustomFormats();
+
     /**
      * The string value for the boolean {@code true} and {@code false} values, intended for human audience (not for a
      * computer language), separated with comma. For example, {@code "yes,no"}. Note that white-space is significant,
@@ -797,16 +808,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         }
         
         this.booleanFormat = booleanFormat; 
-        
-        if (booleanFormat.equals(C_TRUE_FALSE)) {
-            // C_TRUE_FALSE is the default for BC, but it's not a good default for human audience formatting, so we
-            // pretend that it wasn't set.
-            trueStringValue = null; 
-            falseStringValue = null;
-        } else {
-            trueStringValue = booleanFormat.substring(0, commaIdx); 
-            falseStringValue = booleanFormat.substring(commaIdx + 1);
-        }
     }
 
     /**
@@ -822,9 +823,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     @Override
     public String getBooleanFormat() {
-        return booleanFormat != null ? booleanFormat : parent.getBooleanFormat(); 
+         return isBooleanFormatSet() ? booleanFormat : getInheritedBooleanFormat();
     }
-    
+
+    protected abstract String getInheritedBooleanFormat();
+
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
      *  
@@ -833,75 +836,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     @Override
     public boolean isBooleanFormatSet() {
         return booleanFormat != null;
-    }
-        
-    String formatBoolean(boolean value, boolean fallbackToTrueFalse) throws TemplateException {
-        if (value) {
-            String s = getTrueStringValue();
-            if (s == null) {
-                if (fallbackToTrueFalse) {
-                    return MiscUtil.C_TRUE;
-                } else {
-                    throw new _MiscTemplateException(getNullBooleanFormatErrorDescription());
-                }
-            } else {
-                return s;
-            }
-        } else {
-            String s = getFalseStringValue();
-            if (s == null) {
-                if (fallbackToTrueFalse) {
-                    return MiscUtil.C_FALSE;
-                } else {
-                    throw new _MiscTemplateException(getNullBooleanFormatErrorDescription());
-                }
-            } else {
-                return s;
-            }
-        }
-    }
-
-    private _ErrorDescriptionBuilder getNullBooleanFormatErrorDescription() {
-        return new _ErrorDescriptionBuilder(
-                "Can't convert boolean to string automatically, because the \"", BOOLEAN_FORMAT_KEY ,"\" setting was ",
-                new _DelayedJQuote(getBooleanFormat()), 
-                (getBooleanFormat().equals(C_TRUE_FALSE)
-                    ? ", which is the legacy default computer-language format, and hence isn't accepted."
-                    : ".")
-                ).tips(
-                     "If you just want \"true\"/\"false\" result as you are generting computer-language output, "
-                     + "use \"?c\", like ${myBool?c}.",
-                     "You can write myBool?string('yes', 'no') and like to specify boolean formatting in place.",
-                     new Object[] {
-                         "If you need the same two values on most places, the programmers should set the \"",
-                         BOOLEAN_FORMAT_KEY ,"\" setting to something like \"yes,no\"." }
-                 );
-    }
-
-    /**
-     * Returns the string to which {@code true} is converted to for human audience, or {@code null} if automatic
-     * coercion to string is not allowed. The default value is {@code null}.
-     * 
-     * <p>This value is deduced from the {@code "boolean_format"} setting.
-     * Confusingly, for backward compatibility (at least until 2.4) that defaults to {@code "true,false"}, yet this
-     * defaults to {@code null}. That's so because {@code "true,false"} is treated exceptionally, as that default is a
-     * historical mistake in FreeMarker, since it targets computer language output, not human writing. Thus it's
-     * ignored.
-     * 
-     * @since 2.3.20
-     */
-    String getTrueStringValue() {
-        // The first step deliberately tests booleanFormat instead of trueStringValue! 
-        return booleanFormat != null ? trueStringValue : (parent != null ? parent.getTrueStringValue() : null); 
-    }
-
-    /**
-     * Same as {@link #getTrueStringValue()} but with {@code false}. 
-     * @since 2.3.20
-     */
-    String getFalseStringValue() {
-        // The first step deliberately tests booleanFormat instead of falseStringValue! 
-        return booleanFormat != null ? falseStringValue : (parent != null ? parent.getFalseStringValue() : null); 
     }
 
     /**
@@ -930,8 +864,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     @Override
     public String getTimeFormat() {
-        return timeFormat != null ? timeFormat : parent.getTimeFormat();
+         return isTimeFormatSet() ? timeFormat : getInheritedTimeFormat();
     }
+
+    protected abstract String getInheritedTimeFormat();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
@@ -969,8 +905,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     @Override
     public String getDateFormat() {
-        return dateFormat != null ? dateFormat : parent.getDateFormat();
+         return isDateFormatSet() ? dateFormat : getInheritedDateFormat();
     }
+
+    protected abstract String getInheritedDateFormat();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
@@ -1086,9 +1024,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     @Override
     public String getDateTimeFormat() {
-        return dateTimeFormat != null ? dateTimeFormat : parent.getDateTimeFormat();
+         return isDateTimeFormatSet() ? dateTimeFormat : getInheritedDateTimeFormat();
     }
-    
+
+    protected abstract String getInheritedDateTimeFormat();
+
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
      *  
@@ -1115,9 +1055,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * @since 2.3.24
      */
     @Override
-    public Map<String, ? extends TemplateDateFormatFactory> getCustomDateFormats() {
-        return customDateFormats == null ? parent.getCustomDateFormats() : customDateFormats;
+    public Map<String, TemplateDateFormatFactory> getCustomDateFormats() {
+         return isCustomDateFormatsSet() ? customDateFormats : getInheritedCustomDateFormats();
     }
+
+    protected abstract Map<String, TemplateDateFormatFactory> getInheritedCustomDateFormats();
 
     /**
      * Associates names with formatter factories, which then can be referred by the {@link #setDateTimeFormat(String)
@@ -1134,7 +1076,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * 
      * @since 2.3.24
      */
-    public void setCustomDateFormats(Map<String, ? extends TemplateDateFormatFactory> customDateFormats) {
+    public void setCustomDateFormats(Map<String, TemplateDateFormatFactory> customDateFormats) {
         _NullArgumentException.check("customDateFormats", customDateFormats);
         validateFormatNames(customDateFormats.keySet());
         this.customDateFormats = customDateFormats;
@@ -1143,7 +1085,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     /**
      * Fluent API equivalent of {@link #setCustomDateFormats(Map)}
      */
-    public SelfT customDateFormats(Map<String, ? extends TemplateDateFormatFactory> value) {
+    public SelfT customDateFormats(Map<String, TemplateDateFormatFactory> value) {
         setCustomDateFormats(value);
         return self();
     }
@@ -1163,6 +1105,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * 
      * @since 2.3.24
      */
+    @Override
     public TemplateDateFormatFactory getCustomDateFormat(String name) {
         TemplateDateFormatFactory r;
         if (customDateFormats != null) {
@@ -1171,9 +1114,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                 return r;
             }
         }
-        return parent != null ? parent.getCustomDateFormat(name) : null;
+        return getInheritedCustomDateFormat(name);
     }
-    
+
+    protected abstract TemplateDateFormatFactory getInheritedCustomDateFormat(String name);
+
     /**
      * Sets the exception handler used to handle exceptions occurring inside templates.
      * The default is {@link TemplateExceptionHandler#DEBUG_HANDLER}. The recommended values are:
@@ -1212,9 +1157,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     @Override
     public TemplateExceptionHandler getTemplateExceptionHandler() {
-        return templateExceptionHandler != null
-                ? templateExceptionHandler : parent.getTemplateExceptionHandler();
+         return isTemplateExceptionHandlerSet()
+                ? templateExceptionHandler : getInheritedTemplateExceptionHandler();
     }
+
+    protected abstract TemplateExceptionHandler getInheritedTemplateExceptionHandler();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
@@ -1248,9 +1195,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     @Override
     public ArithmeticEngine getArithmeticEngine() {
-        return arithmeticEngine != null
-                ? arithmeticEngine : parent.getArithmeticEngine();
+         return isArithmeticEngineSet()
+                ? arithmeticEngine : getInheritedArithmeticEngine();
     }
+
+    protected abstract ArithmeticEngine getInheritedArithmeticEngine();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
@@ -1284,9 +1233,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     @Override
     public ObjectWrapper getObjectWrapper() {
-        return objectWrapper != null
-                ? objectWrapper : parent.getObjectWrapper();
+         return isObjectWrapperSet()
+                ? objectWrapper : getInheritedObjectWrapper();
     }
+
+    protected abstract ObjectWrapper getInheritedObjectWrapper();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
@@ -1321,10 +1272,12 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     @Override
     public Charset getOutputEncoding() {
-        return outputEncodingSet
+        return isOutputEncodingSet()
                 ? outputEncoding
-                : (parent != null ? parent.getOutputEncoding() : null);
+                : getInheritedOutputEncoding();
     }
+
+    protected abstract Charset getInheritedOutputEncoding();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
@@ -1357,10 +1310,12 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     @Override
     public Charset getURLEscapingCharset() {
-        return urlEscapingCharsetSet
+        return isURLEscapingCharsetSet()
                 ? urlEscapingCharset
-                : (parent != null ? parent.getURLEscapingCharset() : null);
+                : getInheritedURLEscapingCharset();
     }
+
+    protected abstract Charset getInheritedURLEscapingCharset();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
@@ -1407,9 +1362,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     @Override
     public TemplateClassResolver getNewBuiltinClassResolver() {
-        return newBuiltinClassResolver != null
-                ? newBuiltinClassResolver : parent.getNewBuiltinClassResolver();
+         return isNewBuiltinClassResolverSet()
+                ? newBuiltinClassResolver : getInheritedNewBuiltinClassResolver();
     }
+
+    protected abstract TemplateClassResolver getInheritedNewBuiltinClassResolver();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
@@ -1456,10 +1413,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     @Override
     public boolean getAutoFlush() {
-        return autoFlush != null 
-            ? autoFlush.booleanValue()
-            : (parent != null ? parent.getAutoFlush() : true);
+         return isAutoFlushSet() ? autoFlush.booleanValue() : getInheritedAutoFlush();
     }
+
+    protected abstract boolean getInheritedAutoFlush();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
@@ -1496,10 +1453,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     @Override
     public boolean getShowErrorTips() {
-        return showErrorTips != null 
-            ? showErrorTips.booleanValue()
-            : (parent != null ? parent.getShowErrorTips() : true);
+         return isShowErrorTipsSet() ? showErrorTips : getInheritedShowErrorTips();
     }
+
+    protected abstract boolean getInheritedShowErrorTips();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
@@ -1534,17 +1491,19 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * 
      * @since 2.3.22
      */
-    public boolean isAPIBuiltinEnabled() {
-        return apiBuiltinEnabled != null 
-                ? apiBuiltinEnabled.booleanValue()
-                : (parent != null ? parent.isAPIBuiltinEnabled() : false);
+    @Override
+    public boolean getAPIBuiltinEnabled() {
+         return isAPIBuiltinEnabledSet() ? apiBuiltinEnabled : getInheritedAPIBuiltinEnabled();
     }
+
+    protected abstract boolean getInheritedAPIBuiltinEnabled();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
      *  
      * @since 2.3.24
      */
+    @Override
     public boolean isAPIBuiltinEnabledSet() {
         return apiBuiltinEnabled != null;
     }
@@ -1561,7 +1520,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * @since 2.3.22
      */
     public void setLogTemplateExceptions(boolean value) {
-        logTemplateExceptions = Boolean.valueOf(value);
+        logTemplateExceptions = value;
     }
 
     /**
@@ -1571,10 +1530,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     @Override
     public boolean getLogTemplateExceptions() {
-        return logTemplateExceptions != null 
-                ? logTemplateExceptions.booleanValue()
-                : (parent != null ? parent.getLogTemplateExceptions() : true);
+         return isLogTemplateExceptionsSet() ? logTemplateExceptions : getInheritedLogTemplateExceptions();
     }
+
+    protected abstract boolean getInheritedLogTemplateExceptions();
 
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
@@ -1593,9 +1552,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     @Override
     public boolean getLazyImports() {
-        return lazyImports != null ? lazyImports.booleanValue() : parent.getLazyImports();
+         return isLazyImportsSet() ? lazyImports : getInheritedLazyImports();
     }
-    
+
+    protected abstract boolean getInheritedLazyImports();
+
     /**
      * Specifies if {@code <#import ...>} (and {@link Environment#importLib(String, String)}) should delay the loading
      * and processing of the imported templates until the content of the imported namespace is actually accessed. This
@@ -1619,7 +1580,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * @since 2.3.25
      */
     public void setLazyImports(boolean lazyImports) {
-        this.lazyImports = Boolean.valueOf(lazyImports);
+        this.lazyImports = lazyImports;
     }
 
     /**
@@ -1639,8 +1600,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     @Override
     public Boolean getLazyAutoImports() {
-        return lazyAutoImportsSet ? lazyAutoImports : parent.getLazyAutoImports();
+        return isLazyAutoImportsSet() ? lazyAutoImports : getInheritedLazyAutoImports();
     }
+
+    protected abstract Boolean getInheritedLazyAutoImports();
 
     /**
      * Specifies if {@linkplain #setAutoImports(Map) auto-imports} will be
@@ -1776,9 +1739,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     @Override
     public Map<String, String> getAutoImports() {
-        return autoImports != null ? autoImports : parent.getAutoImports();
+         return isAutoImportsSet() ? autoImports : getInheritedAutoImports();
     }
-    
+
+    protected abstract Map<String,String> getInheritedAutoImports();
+
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
      * 
@@ -1870,9 +1835,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     @Override
     public List<String> getAutoIncludes() {
-        return autoIncludes != null ? autoIncludes : parent.getAutoIncludes();
+         return isAutoIncludesSet() ? autoIncludes : getInheritedAutoIncludes();
     }
-    
+
+    protected abstract List<String> getInheritedAutoIncludes();
+
     /**
      * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
      * 
@@ -2491,14 +2458,14 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     protected final UnknownConfigurationSettingException unknownSettingException(String name) {
         Version removalVersion = getRemovalVersionForUnknownSetting(name);
-        return removalVersion != null
+         return removalVersion != null
                 ? new UnknownConfigurationSettingException(name, removalVersion)
                 : new UnknownConfigurationSettingException(name, getCorrectedNameForUnknownSetting(name));
     }
 
     /**
-     * If a setting name is unknown because it was removed over time, then returns the version where it was removed,
-     * otherwise returns {@code null}.
+     * If a setting name is unknown because it was removed over time (not just renamed), then returns the version where
+     * it was removed, otherwise returns {@code null}.
      */
     protected Version getRemovalVersionForUnknownSetting(String name) {
         if (name.equals("classic_compatible") || name.equals("classicCompatible")) {
@@ -2565,31 +2532,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     boolean isCustomAttributeSet(Object key) {
-        return customAttributes != null && customAttributes.containsKey(key);
-    }
-    
-    /**
-     * For internal usage only, copies the custom attributes set directly on this objects into another
-     * {@link MutableProcessingConfiguration}. The target {@link MutableProcessingConfiguration} is assumed to be not seen be other thread than the current
-     * one yet. (That is, the operation is not synchronized on the target {@link MutableProcessingConfiguration}, only on the source
-     * {@link MutableProcessingConfiguration})
-     * 
-     * @since 2.3.24
-     */
-    void copyDirectCustomAttributes(MutableProcessingConfiguration target, boolean overwriteExisting) {
-        if (customAttributes == null) {
-            return;
-        }
-        for (Entry<?, ?> custAttrEnt : customAttributes.entrySet()) {
-            Object custAttrKey = custAttrEnt.getKey();
-            if (overwriteExisting || !target.isCustomAttributeSet(custAttrKey)) {
-                if (custAttrKey instanceof String) {
-                    target.setCustomAttribute((String) custAttrKey, custAttrEnt.getValue());
-                } else {
-                    target.setCustomAttribute(custAttrKey, custAttrEnt.getValue());
-                }
-            }
-        }
+         return isCustomAttributesSet() && customAttributes.containsKey(key);
     }
     
     /**
@@ -2673,19 +2616,12 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
             r = null;
         }
         if (r == null && parent != null) {
-            return parent.getCustomAttribute(name);
+            return getInheritedCustomAttribute(name);
         }
         return r;
     }
-    
-    /**
-     * Executes the auto-imports and auto-includes for the main template of this environment.
-     * This is not meant to be called or overridden by code outside of FreeMarker. 
-     */
-    protected void doAutoImportsAndIncludes(Environment env)
-    throws TemplateException, IOException {
-        if (parent != null) parent.doAutoImportsAndIncludes(env);
-    }
+
+    protected abstract Object getInheritedCustomAttribute(Object name);
 
     protected final List<String> parseAsList(String text) throws GenericParseException {
         return new SettingStringParser(text).parseAsList();

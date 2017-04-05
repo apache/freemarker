@@ -20,15 +20,10 @@
 package org.apache.freemarker.core.util;
 
 /**
- * Common superclass of builders (used for implementing the builder pattern).
+ * Interface of builders (used for implementing the builder pattern).
  */
-public abstract class BuilderBase<ProductT, SelfT extends BuilderBase<ProductT, SelfT>> {
+public interface CommonBuilder<ProductT> {
 
-    public abstract ProductT build();
-
-    @SuppressWarnings("unchecked")
-    protected SelfT self() {
-        return (SelfT) this;
-    }
+    ProductT build();
 
 }

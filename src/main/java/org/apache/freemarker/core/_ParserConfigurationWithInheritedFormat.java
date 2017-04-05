@@ -65,6 +65,11 @@ public final class _ParserConfigurationWithInheritedFormat implements ParserConf
     }
 
     @Override
+    public boolean isTemplateLanguageSet() {
+        return wrappedPCfg.isTemplateLanguageSet();
+    }
+
+    @Override
     public OutputFormat getOutputFormat() {
         return outputFormat != null ? outputFormat : wrappedPCfg.getOutputFormat();
     }
@@ -101,7 +106,7 @@ public final class _ParserConfigurationWithInheritedFormat implements ParserConf
 
     @Override
     public int getAutoEscapingPolicy() {
-        return autoEscapingPolicy != null ? autoEscapingPolicy.intValue() : wrappedPCfg.getAutoEscapingPolicy();
+        return autoEscapingPolicy != null ? autoEscapingPolicy : wrappedPCfg.getAutoEscapingPolicy();
     }
 
     @Override
@@ -129,8 +134,14 @@ public final class _ParserConfigurationWithInheritedFormat implements ParserConf
         return wrappedPCfg.isTabSizeSet();
     }
 
+    @Override
     public Charset getSourceEncoding() {
         return wrappedPCfg.getSourceEncoding();
+    }
+
+    @Override
+    public boolean isSourceEncodingSet() {
+        return wrappedPCfg.isSourceEncodingSet();
     }
 
 }

@@ -41,31 +41,37 @@ public class MergingTemplateConfigurationFactory extends TemplateConfigurationFa
     @Override
     public TemplateConfiguration get(String sourceName, TemplateLoadingSource templateLoadingSource)
             throws IOException, TemplateConfigurationFactoryException {
-        TemplateConfiguration mergedTC = null;
-        TemplateConfiguration resultTC = null;
+        TemplateConfiguration.Builder mergedTCBuilder = null;
+        TemplateConfiguration firstResultTC = null;
         for (TemplateConfigurationFactory tcf : templateConfigurationFactories) {
             TemplateConfiguration tc = tcf.get(sourceName, templateLoadingSource);
             if (tc != null) {
-                if (resultTC == null) {
-                    resultTC = tc;
+                if (firstResultTC == null) {
+                    firstResultTC = tc;
                 } else {
-                    if (mergedTC == null) {
-                        Configuration cfg = getConfiguration();
-                        if (cfg == null) {
-                            throw new IllegalStateException(
-                                    "The TemplateConfigurationFactory wasn't associated to a Configuration yet.");
-                        }
-                        
-                        mergedTC = new TemplateConfiguration();
-                        mergedTC.setParentConfiguration(cfg);
-                        mergedTC.merge(resultTC);
-                        resultTC = mergedTC;
+                    if (mergedTCBuilder == null) {
+                        mergedTCBuilder = new TemplateConfiguration.Builder();
+                        mergedTCBuilder.merge(firstResultTC);
                     }
-                    mergedTC.merge(tc);
+                    mergedTCBuilder.merge(tc);
                 }
             }
         }
-        return resultTC;
+
+        if (mergedTCBuilder == null) {
+            return firstResultTC; // Maybe null
+        } else {
+            TemplateConfiguration mergedTC = mergedTCBuilder.build();
+
+            Configuration cfg = getConfiguration();
+            if (cfg == null) {
+                throw new IllegalStateException(
+                        "The TemplateConfigurationFactory wasn't associated to a Configuration yet.");
+            }
+            mergedTC.setParentConfiguration(cfg);
+
+            return mergedTC;
+        }
     }
     
     @Override

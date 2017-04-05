@@ -43,6 +43,7 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
@@ -93,6 +94,8 @@ import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._SortedArraySet;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.core.util._UnmodifiableCompositeSet;
+import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
+import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 
 /**
  * <b>The main entry point into the FreeMarker API</b>; encapsulates the configuration settings of FreeMarker,
@@ -142,7 +145,7 @@ import org.apache.freemarker.core.util._UnmodifiableCompositeSet;
  * The methods that aren't for modifying settings, like {@link #getTemplate(String)}, are thread-safe.
  */
 public final class Configuration extends MutableProcessingConfiguration<Configuration>
-        implements Cloneable, ParserConfiguration, ProcessingConfiguration, CustomStateScope {
+        implements Cloneable, ParserAndProcessingConfiguration, CustomStateScope {
     
     private static final String VERSION_PROPERTIES_PATH = "org/apache/freemarker/core/version.properties";
     
@@ -522,6 +525,16 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
         return super.getTemplateExceptionHandler();
     }
 
+    @Override
+    protected TemplateExceptionHandler getInheritedTemplateExceptionHandler() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected ArithmeticEngine getInheritedArithmeticEngine() {
+        throw new BugException("Missing property value");
+    }
+
     private void recreateTemplateResolverWith(
             TemplateLoader loader, CacheStorage storage,
             TemplateLookupStrategy templateLookupStrategy, TemplateNameFormat templateNameFormat,
@@ -767,8 +780,8 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
     /**
      * Sets a {@link TemplateConfigurationFactory} that will configure individual templates where their settings differ
      * from those coming from the common {@link Configuration} object. A typical use case for that is specifying the
-     * {@link TemplateConfiguration#setOutputFormat(OutputFormat) outputFormat} for templates based on their file
-     * extension or parent directory.
+     * {@link TemplateConfiguration.Builder#setOutputFormat(OutputFormat) outputFormat} for templates based on their
+     * file extension or parent directory.
      * 
      * <p>
      * Note that the settings suggested by standard file extensions are stronger than that you set here. See
@@ -1003,7 +1016,42 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
             }
         }
     }
-    
+
+    @Override
+    protected ObjectWrapper getInheritedObjectWrapper() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected Charset getInheritedOutputEncoding() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected Charset getInheritedURLEscapingCharset() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected TemplateClassResolver getInheritedNewBuiltinClassResolver() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected boolean getInheritedAutoFlush() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected boolean getInheritedShowErrorTips() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected boolean getInheritedAPIBuiltinEnabled() {
+        throw new BugException("Missing property value");
+    }
+
     /**
      * Resets the setting to its default, as if it was never set. This means that when you change the
      * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
@@ -1031,6 +1079,11 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
     public void setLocale(Locale locale) {
         super.setLocale(locale);
         localeExplicitlySet = true;
+    }
+
+    @Override
+    protected Locale getInheritedLocale() {
+        throw new BugException("Missing property value");
     }
 
     /**
@@ -1063,6 +1116,66 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
     public void setTimeZone(TimeZone timeZone) {
         super.setTimeZone(timeZone);
         timeZoneExplicitlySet = true;
+    }
+
+    @Override
+    protected TimeZone getInheritedTimeZone() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected TimeZone getInheritedSQLDateAndTimeTimeZone() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected String getInheritedNumberFormat() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected Map<String, TemplateNumberFormatFactory> getInheritedCustomNumberFormats() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected TemplateNumberFormatFactory getInheritedCustomNumberFormat(String name) {
+        return null;
+    }
+
+    @Override
+    protected boolean getInheritedHasCustomFormats() {
+        return false;
+    }
+
+    @Override
+    protected String getInheritedBooleanFormat() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected String getInheritedTimeFormat() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected String getInheritedDateFormat() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected String getInheritedDateTimeFormat() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected Map<String, TemplateDateFormatFactory> getInheritedCustomDateFormats() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected TemplateDateFormatFactory getInheritedCustomDateFormat(String name) {
+        return null;
     }
 
     /**
@@ -1128,6 +1241,31 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
     public void setLogTemplateExceptions(boolean value) {
         super.setLogTemplateExceptions(value);
         logTemplateExceptionsExplicitlySet = true;
+    }
+
+    @Override
+    protected boolean getInheritedLogTemplateExceptions() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected boolean getInheritedLazyImports() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected Boolean getInheritedLazyAutoImports() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected Map<String, String> getInheritedAutoImports() {
+        throw new BugException("Missing property value");
+    }
+
+    @Override
+    protected List<String> getInheritedAutoIncludes() {
+        throw new BugException("Missing property value");
     }
 
     /**
@@ -1260,8 +1398,8 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
      * Auto-escaping has significance when a value is printed with <code>${...}</code> (or <code>#{...}</code>). If
      * auto-escaping is on, FreeMarker will assume that the value is plain text (as opposed to markup or some kind of
      * rich text), so it will escape it according the current output format (see {@link #setOutputFormat(OutputFormat)}
-     * and {@link TemplateConfiguration#setOutputFormat(OutputFormat)}). If auto-escaping is off, FreeMarker will assume
-     * that the string value is already in the output format, so it prints it as is to the output.
+     * and {@link TemplateConfiguration.Builder#setOutputFormat(OutputFormat)}). If auto-escaping is off, FreeMarker
+     * will assume that the string value is already in the output format, so it prints it as is to the output.
      *
      * <p>Further notes on auto-escaping:
      * <ul>
@@ -1286,9 +1424,9 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
      *          One of the {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY},
      *          {@link #ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY}, and {@link #DISABLE_AUTO_ESCAPING_POLICY} constants.  
      * 
-     * @see TemplateConfiguration#setAutoEscapingPolicy(int)
+     * @see TemplateConfiguration.Builder#setAutoEscapingPolicy(int)
      * @see Configuration#setOutputFormat(OutputFormat)
-     * @see TemplateConfiguration#setOutputFormat(OutputFormat)
+     * @see TemplateConfiguration.Builder#setOutputFormat(OutputFormat)
      * 
      * @since 2.3.24
      */
@@ -1573,15 +1711,15 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
      * 2.3.24, it defaults to {@code true}, so the following standard file extensions take their effect:
      * 
      * <ul>
-     *   <li>{@code ftlh}: Sets {@link TemplateConfiguration#setOutputFormat(OutputFormat) outputFormat} to
+     *   <li>{@code ftlh}: Sets {@link TemplateConfiguration.Builder#setOutputFormat(OutputFormat) outputFormat} to
      *       {@code "HTML"} (i.e., {@link HTMLOutputFormat#INSTANCE}, unless the {@code "HTML"} name is overridden by
      *       {@link #setRegisteredCustomOutputFormats(Collection)}) and
-     *       {@link TemplateConfiguration#setAutoEscapingPolicy(int) autoEscapingPolicy} to
+     *       {@link TemplateConfiguration.Builder#setAutoEscapingPolicy(int) autoEscapingPolicy} to
      *       {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY}.
-     *   <li>{@code ftlx}: Sets {@link TemplateConfiguration#setOutputFormat(OutputFormat) outputFormat} to
+     *   <li>{@code ftlx}: Sets {@link TemplateConfiguration.Builder#setOutputFormat(OutputFormat) outputFormat} to
      *       {@code "XML"} (i.e., {@link XMLOutputFormat#INSTANCE}, unless the {@code "XML"} name is overridden by
      *       {@link #setRegisteredCustomOutputFormats(Collection)}) and
-     *       {@link TemplateConfiguration#setAutoEscapingPolicy(int) autoEscapingPolicy} to
+     *       {@link TemplateConfiguration.Builder#setAutoEscapingPolicy(int) autoEscapingPolicy} to
      *       {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY}.
      * </ul>
      * 
@@ -1645,6 +1783,11 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
     @Override
     public TemplateLanguage getTemplateLanguage() {
         return templateLanguage;
+    }
+
+    @Override
+    public boolean isTemplateLanguageSet() {
+        return true;
     }
 
     /**
@@ -2041,7 +2184,7 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
      * another, so <b>you should always set this setting</b>. If you don't know what charset your should chose,
      * {@code "UTF-8"} is usually a good choice.
      *
-     * @param sourceEncoding The charset, for example {@link StandardCharsets#UTF_8}.
+     * @param sourceEncoding The charset, for example such as {@link StandardCharsets#UTF_8}.
      */
     public void setSourceEncoding(Charset sourceEncoding) {
         this.sourceEncoding = sourceEncoding;
@@ -2052,10 +2195,13 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
         return sourceEncoding;
     }
 
+    @Override
+    public boolean isSourceEncodingSet() {
+        return true;
+    }
+
     /**
      * Resets the setting to its default, as if it was never set.
-     *
-     * @since 2.3.26
      */
     public void unsetSourceEncoding() {
         if (sourceEncodingExplicitlySet) {
@@ -2547,73 +2693,12 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
         
         return super.getCorrectedNameForUnknownSetting(name);
     }
-    
+
     @Override
-    protected void doAutoImportsAndIncludes(Environment env) throws TemplateException, IOException {
-        Template t = env.getMainTemplate();
-        doAutoImports(env, t);
-        doAutoIncludes(env, t);
+    protected Object getInheritedCustomAttribute(Object name) {
+        return null;
     }
 
-    private void doAutoImports(Environment env, Template t) throws IOException, TemplateException {
-        Map<String, String> envAutoImports = env.isAutoImportsSet() ? env.getAutoImports() : null;
-        Map<String, String> tAutoImports = t.isAutoImportsSet() ? t.getAutoImports() : null;
-        
-        boolean lazyAutoImports = env.getLazyAutoImports() != null ? env.getLazyAutoImports() : env.getLazyImports();
-        
-        for (Map.Entry<String, String> autoImport : getAutoImports().entrySet()) {
-            String nsVarName = autoImport.getKey();
-            if ((tAutoImports == null || !tAutoImports.containsKey(nsVarName))
-                    && (envAutoImports == null || !envAutoImports.containsKey(nsVarName))) {
-                env.importLib(autoImport.getValue(), nsVarName, lazyAutoImports);
-            }
-        }
-        if (tAutoImports != null) {
-            for (Map.Entry<String, String> autoImport : tAutoImports.entrySet()) {
-                String nsVarName = autoImport.getKey();
-                if (envAutoImports == null || !envAutoImports.containsKey(nsVarName)) {
-                    env.importLib(autoImport.getValue(), nsVarName, lazyAutoImports);
-                }
-            }
-        }
-        if (envAutoImports != null) {
-            for (Map.Entry<String, String> autoImport : envAutoImports.entrySet()) {
-                String nsVarName = autoImport.getKey();
-                env.importLib(autoImport.getValue(), nsVarName, lazyAutoImports);
-            }
-        }
-    }
-    
-    private void doAutoIncludes(Environment env, Template t) throws TemplateException, IOException {
-        // We can't store autoIncludes in LinkedHashSet-s because setAutoIncludes(List) allows duplicates,
-        // unfortunately. Yet we have to prevent duplicates among Configuration levels, with the lowest levels having
-        // priority. So we build some Set-s to do that, but we avoid the most common cases where they aren't needed.
-
-        List<String> tAutoIncludes = t.isAutoIncludesSet() ? t.getAutoIncludes() : null;
-        List<String> envAutoIncludes = env.isAutoIncludesSet() ? env.getAutoIncludes() : null;
-        
-        for (String templateName : getAutoIncludes()) {
-            if ((tAutoIncludes == null || !tAutoIncludes.contains(templateName))
-                    && (envAutoIncludes == null || !envAutoIncludes.contains(templateName))) {
-                env.include(getTemplate(templateName, env.getLocale()));
-            }
-        }
-        
-        if (tAutoIncludes != null) {
-            for (String templateName : tAutoIncludes) {
-                if (envAutoIncludes == null || !envAutoIncludes.contains(templateName)) {
-                    env.include(getTemplate(templateName, env.getLocale()));
-                }
-            }
-        }
-        
-        if (envAutoIncludes != null) {
-            for (String templateName : envAutoIncludes) {
-                env.include(getTemplate(templateName, env.getLocale()));
-            }
-        }
-    }
-    
     /**
      * Returns the FreeMarker version information, most importantly the major.minor.micro version numbers.
      * 

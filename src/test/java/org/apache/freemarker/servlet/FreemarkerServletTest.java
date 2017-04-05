@@ -547,18 +547,18 @@ public class FreemarkerServletTest {
             cfg.setSourceEncoding(CFG_DEFAULT_ENCODING);
 
             {
-                TemplateConfiguration outUtf8TC = new TemplateConfiguration();
-                outUtf8TC.setOutputEncoding(StandardCharsets.UTF_8);
+                TemplateConfiguration.Builder outUtf8TCB = new TemplateConfiguration.Builder();
+                outUtf8TCB.setOutputEncoding(StandardCharsets.UTF_8);
                 
-                TemplateConfiguration srcUtf8TC = new TemplateConfiguration();
-                srcUtf8TC.setSourceEncoding(StandardCharsets.UTF_8);
+                TemplateConfiguration.Builder srcUtf8TCB = new TemplateConfiguration.Builder();
+                srcUtf8TCB.setSourceEncoding(StandardCharsets.UTF_8);
                 
                 cfg.setTemplateConfigurations(
                         new FirstMatchTemplateConfigurationFactory(
                                 new ConditionalTemplateConfigurationFactory(
-                                        new FileNameGlobMatcher(FOO_SRC_UTF8_FTL), srcUtf8TC),
+                                        new FileNameGlobMatcher(FOO_SRC_UTF8_FTL), srcUtf8TCB.build()),
                                 new ConditionalTemplateConfigurationFactory(
-                                        new FileNameGlobMatcher(FOO_OUT_UTF8_FTL), outUtf8TC)
+                                        new FileNameGlobMatcher(FOO_OUT_UTF8_FTL), outUtf8TCB.build())
                         )
                         .allowNoMatch(true)
                 );

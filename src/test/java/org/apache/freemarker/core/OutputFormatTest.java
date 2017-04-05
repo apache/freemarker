@@ -115,15 +115,15 @@ public class OutputFormatTest extends TemplateTest {
             case 3:
                 cfgOutputFormat = UndefinedOutputFormat.INSTANCE;
                 cfg.unsetOutputFormat();
-                TemplateConfiguration tcXml = new TemplateConfiguration();
-                tcXml.setOutputFormat(XMLOutputFormat.INSTANCE);
+                TemplateConfiguration.Builder tcbXML = new TemplateConfiguration.Builder();
+                tcbXML.setOutputFormat(XMLOutputFormat.INSTANCE);
                 cfg.setTemplateConfigurations(
                         new ConditionalTemplateConfigurationFactory(
                                 new OrMatcher(
                                         new FileNameGlobMatcher("*.ftlh"),
                                         new FileNameGlobMatcher("*.FTLH"),
                                         new FileNameGlobMatcher("*.fTlH")),
-                                tcXml));
+                                tcbXML.build()));
                 ftlhOutputFormat = HTMLOutputFormat.INSTANCE; // can't be overidden
                 ftlxOutputFormat = XMLOutputFormat.INSTANCE;
                 break;
@@ -174,15 +174,15 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("t.ftl",
                 "${'{}'} ${'{}'?esc} ${'{}'?noEsc}");
         
-        TemplateConfiguration tcHTML = new TemplateConfiguration();
-        tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
+        TemplateConfiguration.Builder tcbHTML = new TemplateConfiguration.Builder();
+        tcbHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
         ConditionalTemplateConfigurationFactory tcfHTML = new ConditionalTemplateConfigurationFactory(
-                new FileNameGlobMatcher("t.*"), tcHTML);
+                new FileNameGlobMatcher("t.*"), tcbHTML.build());
 
-        TemplateConfiguration tcNoAutoEsc = new TemplateConfiguration();
-        tcNoAutoEsc.setAutoEscapingPolicy(Configuration.DISABLE_AUTO_ESCAPING_POLICY);
+        TemplateConfiguration.Builder tcbNoAutoEsc = new TemplateConfiguration.Builder();
+        tcbNoAutoEsc.setAutoEscapingPolicy(Configuration.DISABLE_AUTO_ESCAPING_POLICY);
         ConditionalTemplateConfigurationFactory tcfNoAutoEsc = new ConditionalTemplateConfigurationFactory(
-                new FileNameGlobMatcher("t.*"), tcNoAutoEsc);
+                new FileNameGlobMatcher("t.*"), tcbNoAutoEsc.build());
 
         Configuration cfg = getConfiguration();
         cfg.setOutputFormat(HTMLOutputFormat.INSTANCE);
@@ -1007,10 +1007,10 @@ public class OutputFormatTest extends TemplateTest {
     protected Configuration createConfiguration() throws TemplateModelException {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         
-        TemplateConfiguration xmlTC = new TemplateConfiguration();
-        xmlTC.setOutputFormat(XMLOutputFormat.INSTANCE);
+        TemplateConfiguration.Builder tcbXML = new TemplateConfiguration.Builder();
+        tcbXML.setOutputFormat(XMLOutputFormat.INSTANCE);
         cfg.setTemplateConfigurations(
-                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*.xml"), xmlTC));
+                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*.xml"), tcbXML.build()));
 
         cfg.setSharedVariable("rtfPlain", RTFOutputFormat.INSTANCE.fromPlainTextByEscaping("\\par a & b"));
         cfg.setSharedVariable("rtfMarkup", RTFOutputFormat.INSTANCE.fromMarkup("\\par c"));

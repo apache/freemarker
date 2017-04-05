@@ -50,7 +50,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.util.BugException;
-import org.apache.freemarker.core.util.BuilderBase;
+import org.apache.freemarker.core.util.FluentBuilder;
 import org.apache.freemarker.core.util._JavaVersions;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.slf4j.Logger;
@@ -1073,7 +1073,7 @@ class ClassIntrospector {
         }
     }
 
-    static final class Builder extends BuilderBase<ClassIntrospector, Builder> implements Cloneable {
+    static final class Builder extends FluentBuilder<ClassIntrospector, Builder> implements Cloneable {
 
         private static final Map/*<PropertyAssignments, Reference<ClassIntrospector>>*/ INSTANCE_CACHE = new HashMap();
         private static final ReferenceQueue INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue();

@@ -38,9 +38,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.debug._DebuggerService;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
@@ -53,6 +55,8 @@ import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._NullArgumentException;
+import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
+import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 
 /**
  * <p>
@@ -111,6 +115,10 @@ public class Template extends MutableProcessingConfiguration<Template> implement
         this.name = name;
         this.sourceName = sourceName;
         templateLanguageVersion = normalizeTemplateLanguageVersion(cfg.getIncompatibleImprovements());
+        if (customParserConfiguration instanceof TemplateConfiguration.Builder) {
+            throw new IllegalArgumentException("Using TemplateConfiguration.Builder as Template constructor "
+                    + "argument is not allowed; the TemplateConfiguration that it has built is needed instead.");
+        }
         parserConfiguration = customParserConfiguration != null ? customParserConfiguration : getConfiguration();
     }
 
@@ -730,6 +738,146 @@ public class Template extends MutableProcessingConfiguration<Template> implement
         buf.delete(0, beginColumn);
         buf.delete(buf.length() - trailingCharsToDelete, buf.length());
         return buf.toString();
+    }
+
+    @Override
+    protected Locale getInheritedLocale() {
+        return getParent().getLocale();
+    }
+
+    @Override
+    protected TimeZone getInheritedTimeZone() {
+        return getParent().getTimeZone();
+    }
+
+    @Override
+    protected TimeZone getInheritedSQLDateAndTimeTimeZone() {
+        return getParent().getSQLDateAndTimeTimeZone();
+    }
+
+    @Override
+    protected String getInheritedNumberFormat() {
+        return getParent().getNumberFormat();
+    }
+
+    @Override
+    protected Map<String, TemplateNumberFormatFactory> getInheritedCustomNumberFormats() {
+        return getParent().getCustomNumberFormats();
+    }
+
+    @Override
+    protected TemplateNumberFormatFactory getInheritedCustomNumberFormat(String name) {
+        return getParent().getCustomNumberFormat(name);
+    }
+
+    @Override
+    protected boolean getInheritedHasCustomFormats() {
+        return getParent().hasCustomFormats();
+    }
+
+    @Override
+    protected String getInheritedBooleanFormat() {
+        return getParent().getBooleanFormat();
+    }
+
+    @Override
+    protected String getInheritedTimeFormat() {
+        return getParent().getTimeFormat();
+    }
+
+    @Override
+    protected String getInheritedDateFormat() {
+        return getParent().getDateFormat();
+    }
+
+    @Override
+    protected String getInheritedDateTimeFormat() {
+        return getParent().getDateTimeFormat();
+    }
+
+    @Override
+    protected Map<String, TemplateDateFormatFactory> getInheritedCustomDateFormats() {
+        return getParent().getCustomDateFormats();
+    }
+
+    @Override
+    protected TemplateDateFormatFactory getInheritedCustomDateFormat(String name) {
+        return getParent().getCustomDateFormat(name);
+    }
+
+    @Override
+    protected TemplateExceptionHandler getInheritedTemplateExceptionHandler() {
+        return getParent().getTemplateExceptionHandler();
+    }
+
+    @Override
+    protected ArithmeticEngine getInheritedArithmeticEngine() {
+        return getParent().getArithmeticEngine();
+    }
+
+    @Override
+    protected ObjectWrapper getInheritedObjectWrapper() {
+        return getParent().getObjectWrapper();
+    }
+
+    @Override
+    protected Charset getInheritedOutputEncoding() {
+        return getParent().getOutputEncoding();
+    }
+
+    @Override
+    protected Charset getInheritedURLEscapingCharset() {
+        return getParent().getURLEscapingCharset();
+    }
+
+    @Override
+    protected TemplateClassResolver getInheritedNewBuiltinClassResolver() {
+        return getParent().getNewBuiltinClassResolver();
+    }
+
+    @Override
+    protected boolean getInheritedAutoFlush() {
+        return getParent().getAutoFlush();
+    }
+
+    @Override
+    protected boolean getInheritedShowErrorTips() {
+        return getParent().getShowErrorTips();
+    }
+
+    @Override
+    protected boolean getInheritedAPIBuiltinEnabled() {
+        return getParent().getAPIBuiltinEnabled();
+    }
+
+    @Override
+    protected boolean getInheritedLogTemplateExceptions() {
+        return getParent().getLogTemplateExceptions();
+    }
+
+    @Override
+    protected boolean getInheritedLazyImports() {
+        return getParent().getLazyImports();
+    }
+
+    @Override
+    protected Boolean getInheritedLazyAutoImports() {
+        return getParent().getLazyAutoImports();
+    }
+
+    @Override
+    protected Map<String, String> getInheritedAutoImports() {
+        return getParent().getAutoImports();
+    }
+
+    @Override
+    protected List<String> getInheritedAutoIncludes() {
+        return getParent().getAutoIncludes();
+    }
+
+    @Override
+    protected Object getInheritedCustomAttribute(Object name) {
+        return getParent().getCustomAttribute(name);
     }
 
     /**

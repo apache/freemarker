@@ -534,16 +534,14 @@ public class DefaultTemplateResolver extends TemplateResolver {
             }
             TemplateConfiguration resultTC = templateLoaderResult.getTemplateConfiguration();
             if (resultTC != null) {
-                TemplateConfiguration mergedTC = new TemplateConfiguration();
+                TemplateConfiguration.Builder mergedTCBuilder = new TemplateConfiguration.Builder();
                 if (cfgTC != null) {
-                    mergedTC.merge(cfgTC);
+                    mergedTCBuilder.merge(cfgTC);
                 }
-                if (resultTC != null) {
-                    mergedTC.merge(resultTC);
-                }
-                mergedTC.setParentConfiguration(config);
-                
-                tc = mergedTC;
+                mergedTCBuilder.merge(resultTC);
+
+                tc = mergedTCBuilder.build();
+                tc.setParentConfiguration(config);
             } else {
                 tc = cfgTC;
             }
