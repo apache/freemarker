@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
@@ -85,10 +84,10 @@ public class Template extends MutableProcessingConfiguration<Template> implement
     private static final int READER_BUFFER_SIZE = 8192;
     
     private Map macros = new HashMap();
-    private List imports = new Vector();
+    private List imports = new ArrayList();
     private ASTElement rootElement;
     private Charset sourceEncoding;
-    String defaultNS;
+    private String defaultNS;
     private Serializable customLookupCondition;
     private int actualTagSyntax;
     private int actualNamingConvention;
@@ -100,7 +99,6 @@ public class Template extends MutableProcessingConfiguration<Template> implement
     private final ParserConfiguration parserConfiguration;
     private Map prefixToNamespaceURILookup = new HashMap();
     private Map namespaceURIToPrefixLookup = new HashMap();
-    private Version templateLanguageVersion;
 
     private final Object lock = new Object();
     private final ConcurrentHashMap<CustomStateKey, Object> customStateMap = new ConcurrentHashMap<>(0);
@@ -114,7 +112,6 @@ public class Template extends MutableProcessingConfiguration<Template> implement
         _NullArgumentException.check("cfg", cfg);
         this.name = name;
         this.sourceName = sourceName;
-        templateLanguageVersion = normalizeTemplateLanguageVersion(cfg.getIncompatibleImprovements());
         if (customParserConfiguration instanceof TemplateConfiguration.Builder) {
             throw new IllegalArgumentException("Using TemplateConfiguration.Builder as Template constructor "
                     + "argument is not allowed; the TemplateConfiguration that it has built is needed instead.");
@@ -334,11 +331,6 @@ public class Template extends MutableProcessingConfiguration<Template> implement
         _DebuggerService.registerTemplate(template);
 
         return template;
-    }
-
-    private static Version normalizeTemplateLanguageVersion(Version incompatibleImprovements) {
-        _CoreAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
-        return Configuration.VERSION_3_0_0;
     }
 
     /**
@@ -567,15 +559,6 @@ public class Template extends MutableProcessingConfiguration<Template> implement
      */
     public ParserConfiguration getParserConfiguration() {
         return parserConfiguration;
-    }
-    
-    /**
-     * Return the template language (FTL) version used by this template.
-     * For now (2.3.21) this is the same as {@link Configuration#getIncompatibleImprovements()}, except
-     * that it's normalized to the lowest version where the template language was changed.
-     */
-    Version getTemplateLanguageVersion() {
-        return templateLanguageVersion;
     }
 
     /**

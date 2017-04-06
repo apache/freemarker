@@ -3901,7 +3901,7 @@ void HeaderElement() :
                                         + "charset is known by the runtime environment): " + vs,
                                         exp);
                             } catch (Exception e) {
-                                throw new ParseException("Failed resolve charset name: " + vs, exp, e
+                                throw new ParseException("Failed to resolve charset name: " + vs, exp, e
                                         .getCause());
                             }
                             if (template.getSourceEncoding() != null

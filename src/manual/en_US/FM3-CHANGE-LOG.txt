@@ -195,3 +195,4 @@ the FreeMarer 3 changelog here:
   - In "object builder expressions" Charset values can now be constructed like `Charset("ISO-8859-5")`.
     Note that as the type of the settings have changed, now you can't just write something like
     `TemplateConfiguration(sourceEncoding = "UTF-8")`, but `TemplateConfiguration(sourceEncoding = Charset("UTF-8"))`.
+- Removed Template.templateLanguageVersion, as we solely rely on incompatibleImprovements instead.
