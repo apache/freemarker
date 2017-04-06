@@ -213,7 +213,7 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
      * 
      * <p>
      * Note that the {@code sourceEncoding} setting of the {@link Template} counts as unset if it's {@code null},
-     * even if {@code null} was set via {@link Template#setSourceEncoding(Charset)}.
+     * even if {@code null} was set via {@link Template#setActualSourceEncoding(Charset)}.
      *
      * @throws IllegalStateException
      *             If the parent configuration wasn't yet set.
@@ -257,9 +257,6 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
         }
         if (isDateTimeFormatSet() && !template.isDateTimeFormatSet()) {
             template.setDateTimeFormat(getDateTimeFormat());
-        }
-        if (isSourceEncodingSet() && template.getSourceEncoding() == null) {
-            template.setSourceEncoding(getSourceEncoding());
         }
         if (isLocaleSet() && !template.isLocaleSet()) {
             template.setLocale(getLocale());

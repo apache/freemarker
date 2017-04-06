@@ -86,7 +86,7 @@ public class Template extends MutableProcessingConfiguration<Template> implement
     private Map macros = new HashMap();
     private List imports = new ArrayList();
     private ASTElement rootElement;
-    private Charset sourceEncoding;
+    private Charset actualSourceEncoding;
     private String defaultNS;
     private Serializable customLookupCondition;
     private int actualTagSyntax;
@@ -246,7 +246,7 @@ public class Template extends MutableProcessingConfiguration<Template> implement
            Charset sourceEncoding, InputStream streamToUnmarkWhenEncEstabd) throws IOException, ParseException {
         this(name, sourceName, cfg, customParserConfiguration);
 
-       setSourceEncoding(sourceEncoding);
+       setActualSourceEncoding(sourceEncoding);
         LineTableBuilder ltbReader;
         try {
             ParserConfiguration actualParserConfiguration = getParserConfiguration();
@@ -314,7 +314,10 @@ public class Template extends MutableProcessingConfiguration<Template> implement
      * @param config
      *            the configuration to which this template belongs
      *
-     * @param sourceEncoding
+     * @param sourceEncoding The charset used to decode the template content to the {@link String} passed in with the
+     *            {@code content} parameter. If that information is not known or irrelevant, this should be
+     *            {@link null}.
+     *
      * @since 2.3.22
      */
     static public Template createPlainTextTemplate(String name, String sourceName, String content, Configuration config,
@@ -326,7 +329,7 @@ public class Template extends MutableProcessingConfiguration<Template> implement
             throw new BugException("Plain text template creation failed", e);
         }
         ((ASTStaticText) template.rootElement).replaceText(content);
-        template.setSourceEncoding(sourceEncoding);
+        template.setActualSourceEncoding(sourceEncoding);
 
         _DebuggerService.registerTemplate(template);
 
@@ -562,20 +565,23 @@ public class Template extends MutableProcessingConfiguration<Template> implement
     }
 
     /**
-     * @param sourceEncoding
+     * @param actualSourceEncoding
      *            The sourceEncoding that was used to read this template, or {@code null} if the source of the template
      *            already gives back text (as opposed to binary data), so no decoding with a charset was needed.
      */
-    void setSourceEncoding(Charset sourceEncoding) {
-        this.sourceEncoding = sourceEncoding;
+    void setActualSourceEncoding(Charset actualSourceEncoding) {
+        this.actualSourceEncoding = actualSourceEncoding;
     }
 
     /**
-     * The sourceEncoding that was used to read this template, or {@code null} if the source of the template
-     * already gives back text (as opposed to binary data), so no decoding with a charset was needed.
+     * The charset that was actually used to read this template from the binary source, or {@code null} if that
+     * information is not known.
+     * When using {@link DefaultTemplateResolver}, this is {@code null} exactly if the {@link TemplateLoader}
+     * returns text instead of binary content, which should only be the case for data sources that naturally return
+     * text (such as varchar and CLOB columns in a database).
      */
-    public Charset getSourceEncoding() {
-        return sourceEncoding;
+    public Charset getActualSourceEncoding() {
+        return actualSourceEncoding;
     }
     
     /**

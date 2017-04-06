@@ -196,3 +196,7 @@ the FreeMarer 3 changelog here:
     Note that as the type of the settings have changed, now you can't just write something like
     `TemplateConfiguration(sourceEncoding = "UTF-8")`, but `TemplateConfiguration(sourceEncoding = Charset("UTF-8"))`.
 - Removed Template.templateLanguageVersion, as we solely rely on incompatibleImprovements instead.
+- Template.sourceEncoding was renamed to Template.actualSourceEncoding, to emphasize that it's not the template-layer
+  equivalent of the sourceEncoding ParserConfiguration setting. This is in line with Template.actualTagSyntax and the
+  other "actual" properties. (Just as in FM2, Template.getParserConfiguration() still can be used get the
+  sourceEncoding used during parsing.)

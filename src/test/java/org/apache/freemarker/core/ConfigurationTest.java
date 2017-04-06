@@ -281,7 +281,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tFtl, t.getSourceName());
             assertEquals(Locale.GERMAN, t.getLocale());
             assertNull(t.getCustomLookupCondition());
-            assertEquals(StandardCharsets.ISO_8859_1, t.getSourceEncoding());
+            assertEquals(StandardCharsets.ISO_8859_1, t.getActualSourceEncoding());
         }
         {
             Template t = cfg.getTemplate(tUtf8Ftl);
@@ -289,7 +289,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tUtf8Ftl, t.getSourceName());
             assertEquals(Locale.GERMAN, t.getLocale());
             assertNull(t.getCustomLookupCondition());
-            assertEquals(StandardCharsets.UTF_8, t.getSourceEncoding());
+            assertEquals(StandardCharsets.UTF_8, t.getActualSourceEncoding());
         }
         
         // 2 args:
@@ -299,7 +299,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tFtl, t.getSourceName());
             assertEquals(Locale.GERMAN, t.getLocale());
             assertNull(t.getCustomLookupCondition());
-            assertEquals(StandardCharsets.ISO_8859_1, t.getSourceEncoding());
+            assertEquals(StandardCharsets.ISO_8859_1, t.getActualSourceEncoding());
         }
         {
             Template t = cfg.getTemplate(tFtl, (Locale) null);
@@ -307,7 +307,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tFtl, t.getSourceName());
             assertEquals(Locale.GERMAN, t.getLocale());
             assertNull(t.getCustomLookupCondition());
-            assertEquals(StandardCharsets.ISO_8859_1, t.getSourceEncoding());
+            assertEquals(StandardCharsets.ISO_8859_1, t.getActualSourceEncoding());
         }
         {
             Template t = cfg.getTemplate(tFtl, Locale.US);
@@ -315,7 +315,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tEnFtl, t.getSourceName());
             assertEquals(Locale.US, t.getLocale());
             assertNull(t.getCustomLookupCondition());
-            assertEquals(StandardCharsets.ISO_8859_1, t.getSourceEncoding());
+            assertEquals(StandardCharsets.ISO_8859_1, t.getActualSourceEncoding());
         }
         {
             Template t = cfg.getTemplate(tUtf8Ftl, Locale.US);
@@ -323,7 +323,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tUtf8Ftl, t.getSourceName());
             assertEquals(Locale.US, t.getLocale());
             assertNull(t.getCustomLookupCondition());
-            assertEquals(StandardCharsets.UTF_8, t.getSourceEncoding());
+            assertEquals(StandardCharsets.UTF_8, t.getActualSourceEncoding());
         }
         {
             Template t = cfg.getTemplate(tFtl, hu);
@@ -331,7 +331,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tHuFtl, t.getSourceName());
             assertEquals(hu, t.getLocale());
             assertNull(t.getCustomLookupCondition());
-            assertEquals(ISO_8859_2, t.getSourceEncoding());
+            assertEquals(ISO_8859_2, t.getActualSourceEncoding());
         }
         {
             Template t = cfg.getTemplate(tUtf8Ftl, hu);
@@ -339,7 +339,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tUtf8Ftl, t.getSourceName());
             assertEquals(hu, t.getLocale());
             assertNull(t.getCustomLookupCondition());
-            assertEquals(StandardCharsets.UTF_8, t.getSourceEncoding());
+            assertEquals(StandardCharsets.UTF_8, t.getActualSourceEncoding());
         }
 
         // 4 args:
@@ -356,7 +356,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tHuFtl, t.getSourceName());
             assertEquals(hu, t.getLocale());
             assertEquals(custLookupCond, t.getCustomLookupCondition());
-            assertEquals(ISO_8859_2, t.getSourceEncoding());
+            assertEquals(ISO_8859_2, t.getActualSourceEncoding());
             assertOutputEquals("1", t);
         }
         {
@@ -365,7 +365,7 @@ public class ConfigurationTest extends TestCase {
             assertEquals(tFtl, t.getSourceName());
             assertEquals(Locale.GERMAN, t.getLocale());
             assertEquals(custLookupCond, t.getCustomLookupCondition());
-            assertEquals(StandardCharsets.ISO_8859_1, t.getSourceEncoding());
+            assertEquals(StandardCharsets.ISO_8859_1, t.getActualSourceEncoding());
             assertOutputEquals("1", t);
         }
     }

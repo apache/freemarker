@@ -932,7 +932,7 @@ public class FreemarkerServlet extends HttpServlet {
                 : template.getOutputEncoding();
         // [FM3] Don't use template.getSourceEncoding() here; it might can't encode the dynamic values inserted.
         return outputEncoding != null ? outputEncoding
-                : template.getSourceEncoding() != null ? template.getSourceEncoding()
+                : template.getActualSourceEncoding() != null ? template.getActualSourceEncoding()
                 : StandardCharsets.UTF_8;
     }
 

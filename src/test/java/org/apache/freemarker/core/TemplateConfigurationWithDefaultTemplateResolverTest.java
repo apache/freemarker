@@ -50,27 +50,27 @@ public class TemplateConfigurationWithDefaultTemplateResolverTest {
         
         {
             Template t = cfg.getTemplate("utf8.ftl");
-            assertEquals(StandardCharsets.UTF_8, t.getSourceEncoding());
+            assertEquals(StandardCharsets.UTF_8, t.getActualSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
         {
             Template t = cfg.getTemplate("utf16.ftl");
-            assertEquals(StandardCharsets.UTF_16LE, t.getSourceEncoding());
+            assertEquals(StandardCharsets.UTF_16LE, t.getActualSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
         {
             Template t = cfg.getTemplate("default.ftl");
-            assertEquals(StandardCharsets.ISO_8859_1, t.getSourceEncoding());
+            assertEquals(StandardCharsets.ISO_8859_1, t.getActualSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
         {
             Template t = cfg.getTemplate("utf8-latin2.ftl");
-            assertEquals(ISO_8859_2, t.getSourceEncoding());
+            assertEquals(ISO_8859_2, t.getActualSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
         {
             Template t = cfg.getTemplate("default-latin2.ftl");
-            assertEquals(ISO_8859_2, t.getSourceEncoding());
+            assertEquals(ISO_8859_2, t.getActualSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
     }

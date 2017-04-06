@@ -59,7 +59,7 @@ public abstract class TemplateLanguage {
 
         @Override
         public Template parse(String name, String sourceName, Reader reader, Configuration cfg, ParserConfiguration
-                customParserConfiguration, Charset encoding, InputStream streamToUnmarkWhenEncEstabd)
+                customParserConfiguration, Charset sourceEncoding, InputStream streamToUnmarkWhenEncEstabd)
                 throws IOException, ParseException {
             // Read the contents into a StringWriter, then construct a single-text-block template from it.
             final StringBuilder sb = new StringBuilder();
@@ -69,7 +69,7 @@ public abstract class TemplateLanguage {
                 sb.append(buf, 0, charsRead);
             }
             return Template.createPlainTextTemplate(name, sourceName, sb.toString(), cfg,
-                    encoding);
+                    sourceEncoding);
         }
     };
 

@@ -53,12 +53,12 @@ public class TemplateGetEncodingTest {
             cfg.setCacheStorage(new StrongCacheStorage());
         }
 
-        assertEquals(ISO_8859_2, cfg.getTemplate("bin").getSourceEncoding());
-        assertEquals(ISO_8859_2, cfg.getTemplate("bin-static").getSourceEncoding());
-        assertNull(cfg.getTemplate("text").getSourceEncoding());
-        assertNull(cfg.getTemplate("text-static").getSourceEncoding());
-        assertNull(new Template(null, "test", cfg).getSourceEncoding());
-        assertNull(Template.createPlainTextTemplate(null, "<#test>", cfg).getSourceEncoding());
+        assertEquals(ISO_8859_2, cfg.getTemplate("bin").getActualSourceEncoding());
+        assertEquals(ISO_8859_2, cfg.getTemplate("bin-static").getActualSourceEncoding());
+        assertNull(cfg.getTemplate("text").getActualSourceEncoding());
+        assertNull(cfg.getTemplate("text-static").getActualSourceEncoding());
+        assertNull(new Template(null, "test", cfg).getActualSourceEncoding());
+        assertNull(Template.createPlainTextTemplate(null, "<#test>", cfg).getActualSourceEncoding());
     }
 
 }
