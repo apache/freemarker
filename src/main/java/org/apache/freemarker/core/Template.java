@@ -316,7 +316,7 @@ public class Template extends MutableProcessingConfiguration<Template> implement
      *
      * @param sourceEncoding The charset used to decode the template content to the {@link String} passed in with the
      *            {@code content} parameter. If that information is not known or irrelevant, this should be
-     *            {@link null}.
+     *            {@code null}.
      *
      * @since 2.3.22
      */

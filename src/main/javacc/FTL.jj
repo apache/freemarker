@@ -3904,9 +3904,9 @@ void HeaderElement() :
                                 throw new ParseException("Failed to resolve charset name: " + vs, exp, e
                                         .getCause());
                             }
-                            if (template.getSourceEncoding() != null
-                                    && !template.getSourceEncoding().equals(encoding)) {
-                                throw new WrongTemplateCharsetException(encoding, template.getSourceEncoding());
+                            if (template.getActualSourceEncoding() != null
+                                    && !template.getActualSourceEncoding().equals(encoding)) {
+                                throw new WrongTemplateCharsetException(encoding, template.getActualSourceEncoding());
                             }
                             // There will be no WrongTemplateCharsetException exception, release mark buffer:
                             if (streamToUnmarkWhenEncEstabd != null) {
