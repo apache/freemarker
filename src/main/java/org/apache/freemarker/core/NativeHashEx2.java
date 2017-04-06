@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -36,7 +37,7 @@ import org.apache.freemarker.core.model.impl.SimpleScalar;
  * <p>While this class allows adding items, doing so is not thread-safe, and thus only meant to be done during the
  * initialization of the sequence.
  */
-class NativeHashEx2 implements TemplateHashModelEx2 {
+class NativeHashEx2 implements TemplateHashModelEx2, Serializable {
 
     private final LinkedHashMap<String, TemplateModel> map;
 

@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core.model.impl;
 
+import java.io.Serializable;
+
 import org.apache.freemarker.core.model.TemplateDateModel;
 
 /**
@@ -26,7 +28,7 @@ import org.apache.freemarker.core.model.TemplateDateModel;
  * interface. Note that this class is immutable.
  * <p>This class is thread-safe.
  */
-public class SimpleDate implements TemplateDateModel {
+public class SimpleDate implements TemplateDateModel, Serializable {
     private final java.util.Date date;
     private final int type;
     

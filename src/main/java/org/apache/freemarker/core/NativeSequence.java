@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -33,7 +34,7 @@ import org.apache.freemarker.core.model.TemplateSequenceModel;
  * <p>While this class allows adding items, doing so is not thread-safe, and thus only meant to be done during the
  * initialization of the sequence.
  */
-class NativeSequence implements TemplateSequenceModel {
+class NativeSequence implements TemplateSequenceModel, Serializable {
 
     private final ArrayList<TemplateModel> items;
 

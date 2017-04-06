@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core.model;
 
+import java.io.Serializable;
+
 /**
  * "boolean" template language data type; same as in Java; either {@code true} or {@code false}.
  * 
@@ -26,7 +28,7 @@ package org.apache.freemarker.core.model;
  * Objects of this type should be immutable, that is, calling {@link #getAsBoolean()} should always return the same
  * value as for the first time.
  */
-public interface TemplateBooleanModel extends TemplateModel {
+public interface TemplateBooleanModel extends TemplateModel, Serializable {
 
     /**
      * @return whether to interpret this object as true or false in a boolean context
