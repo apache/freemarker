@@ -18670,9 +18670,11 @@ or
 
             <listitem>
               <para><literal><replaceable>namespacehash</replaceable></literal>:
-              a hash that was created for a namespace (by <link
+              a hash that was created for a <link
+              linkend="dgui_misc_namespace">namespace</link> (by <link
               linkend="ref.directive.import"><literal>import</literal></link>).
-              Expression.</para>
+              Expression. If not specified, it defaults to the namespace that
+              belongs to the containing template.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -18688,6 +18690,20 @@ or
 
           <para>For more information about variables, read this: <xref
           linkend="dgui_misc_var"/></para>
+
+          <note>
+            <para>A frequent mistake is trying to use
+            <literal>assign</literal> to change a local variable like:
+            <literal>&lt;#macro m&gt;&lt;#local x = 1&gt;${x}&lt;#assign x =
+            2&gt;${x}&lt;/#macro&gt;</literal>. This prints
+            <literal>11</literal>, not <literal>12</literal>, because
+            <literal>assign</literal> creates/replaces the
+            <literal>x</literal> of the namespace that the template belongs
+            to, and doesn't change the <literal>x</literal> local variable.
+            Local variables should be always set with the <link
+            linkend="ref.directive.local"><literal>local</literal>
+            directive</link>, not just for the fist time.</para>
+          </note>
 
           <para>Example: variable <literal>seq</literal> will store a
           sequence:</para>
@@ -18709,7 +18725,7 @@ or
 &gt;</programlisting>
 
           <para>If you know what namespaces are: <literal>assign</literal>
-          directive creates variables in namespaces. Normally it creates the
+          directive creates variables in a namespace. Normally it creates the
           variable in the current namespace (i.e. in the namespace associated
           with the template where the tag is). However, if you use <literal>in
           <replaceable>namespacehash</replaceable></literal> then you can
@@ -20919,10 +20935,24 @@ or
 
           <para>It is similar to <link linkend="ref.directive.assign">assign
           directive</link>, but it creates or replaces local variables. This
-          only works inside macro definitions and function definitons.</para>
+          only works inside macro definitions and function definitions.</para>
 
           <para>For more information about variables, read this: <xref
           linkend="dgui_misc_var"/></para>
+
+          <note>
+            <para>A frequent mistake is trying to use
+            <literal>assign</literal> to change a local variable like:
+            <literal>&lt;#macro m&gt;&lt;#local x = 1&gt;${x}&lt;#assign x =
+            2&gt;${x}&lt;/#macro&gt;</literal>. This prints
+            <literal>11</literal>, not <literal>12</literal>, because
+            <literal>assign</literal> creates/replaces the
+            <literal>x</literal> of the namespace that the template belongs
+            to, and doesn't change the <literal>x</literal> local variable.
+            Local variables should be always set with the <link
+            linkend="ref.directive.local"><literal>local</literal>
+            directive</link>, not just for the fist time.</para>
+          </note>
         </section>
       </section>
 
@@ -30749,9 +30779,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                       <literal>f(Object[])</literal>, the last will always
                       win. This might sounds controversial, but as we can't
                       efficiently tell the common type of all the items in a
-                      sequence or <literal>List</literal>, and so we don't know
-                      if both arrays are indeed valid targets, we go for the
-                      safest choice.</para>
+                      sequence or <literal>List</literal>, and so we don't
+                      know if both arrays are indeed valid targets, we go for
+                      the safest choice.</para>
                     </listitem>
                   </itemizedlist>
                 </listitem>
