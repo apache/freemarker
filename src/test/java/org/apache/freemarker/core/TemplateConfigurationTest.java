@@ -18,7 +18,6 @@
  */
 package org.apache.freemarker.core;
 
-import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.beans.BeanInfo;
@@ -60,7 +59,6 @@ import org.apache.freemarker.core.userpkg.EpochMillisTemplateDateFormatFactory;
 import org.apache.freemarker.core.userpkg.HexTemplateNumberFormatFactory;
 import org.apache.freemarker.core.userpkg.LocAndTZSensitiveTemplateDateFormatFactory;
 import org.apache.freemarker.core.userpkg.LocaleSensitiveTemplateNumberFormatFactory;
-import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 import org.apache.freemarker.test.MonitoredTemplateLoader;
@@ -276,9 +274,9 @@ public class TemplateConfigurationTest {
     }
 
     private static final Object CA1 = new Object();
-    private static final Object CA2 = new Object();
-    private static final Object CA3 = new Object();
-    private static final Object CA4 = new Object();
+    private static final String CA2 = "ca2";
+    private static final String CA3 = "ca3";
+    private static final String CA4 = "ca4";
 
     @Test
     public void testMergeBasicFunctionality() throws Exception {
@@ -472,52 +470,6 @@ public class TemplateConfigurationTest {
     }
 
     @Test
-    public void applyOrder() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        Template t = new Template(null, "", cfg);
-        
-        {
-            TemplateConfiguration.Builder  tcb = new TemplateConfiguration.Builder();
-            tcb.setBooleanFormat("Y,N");
-            tcb.setAutoImports(ImmutableMap.of("a", "a.ftl", "b", "b.ftl", "c", "c.ftl"));
-            tcb.setAutoIncludes(ImmutableList.of("i1.ftl", "i2.ftl", "i3.ftl"));
-            tcb.setCustomNumberFormats(ImmutableMap.of(
-                    "a", HexTemplateNumberFormatFactory.INSTANCE,
-                    "b", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE));
-
-            TemplateConfiguration tc = tcb.build();
-            tc.setParentConfiguration(cfg);
-            tc.apply(t);
-        }
-        assertEquals("Y,N", t.getBooleanFormat());
-        assertEquals(ImmutableMap.of("a", "a.ftl", "b", "b.ftl", "c", "c.ftl"), t.getAutoImports());
-        assertEquals(ImmutableList.of("a", "b", "c"), new ArrayList<>(t.getAutoImports().keySet()));
-        assertEquals(ImmutableList.of("i1.ftl", "i2.ftl", "i3.ftl"), t.getAutoIncludes());
-        
-        {
-            TemplateConfiguration.Builder  tcb = new TemplateConfiguration.Builder();
-            tcb.setBooleanFormat("J,N");
-            tcb.setAutoImports(ImmutableMap.of("b", "b2.ftl", "d", "d.ftl"));
-            tcb.setAutoIncludes(ImmutableList.of("i2.ftl", "i4.ftl"));
-            tcb.setCustomNumberFormats(ImmutableMap.of(
-                    "b", BaseNTemplateNumberFormatFactory.INSTANCE,
-                    "c", BaseNTemplateNumberFormatFactory.INSTANCE));
-            TemplateConfiguration tc = tcb.build();
-            tc.setParentConfiguration(cfg);
-            tc.apply(t);
-        }
-        assertEquals("Y,N", t.getBooleanFormat());
-        assertEquals(ImmutableMap.of("d", "d.ftl", "a", "a.ftl", "b", "b.ftl", "c", "c.ftl"), t.getAutoImports());
-        assertEquals(ImmutableList.of("d", "a", "b", "c"), new ArrayList<>(t.getAutoImports().keySet()));
-        assertEquals(ImmutableList.of("i4.ftl", "i1.ftl", "i2.ftl", "i3.ftl"), t.getAutoIncludes());
-        assertEquals(ImmutableMap.of( //
-                "b", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE, //
-                "c", BaseNTemplateNumberFormatFactory.INSTANCE, //
-                "a", HexTemplateNumberFormatFactory.INSTANCE), //
-                t.getCustomNumberFormats());
-    }
-
-    @Test
     public void testConfigureNonParserConfig() throws Exception {
         for (PropertyDescriptor pd : getTemplateConfigurationSettingPropDescs(
                 TemplateConfiguration.Builder.class, false)) {
@@ -526,14 +478,16 @@ public class TemplateConfigurationTest {
             Object newValue = SETTING_ASSIGNMENTS.get(pd.getName());
             pd.getWriteMethod().invoke(tcb, newValue);
             
-            Template t = new Template(null, "", DEFAULT_CFG);
-            Method tReaderMethod = t.getClass().getMethod(pd.getReadMethod().getName());
-            
-            assertNotEquals("For \"" + pd.getName() + "\"", newValue, tReaderMethod.invoke(t));
             TemplateConfiguration tc = tcb.build();
-            tc.setParentConfiguration(DEFAULT_CFG);
-            tc.apply(t);
-            assertEquals("For \"" + pd.getName() + "\"", newValue, tReaderMethod.invoke(t));
+
+            Method tReaderMethod = Template.class.getMethod(pd.getReadMethod().getName());
+
+            // Without TC
+            assertNotEquals("For \"" + pd.getName() + "\"", newValue,
+                    tReaderMethod.invoke(new Template(null, "", DEFAULT_CFG)));
+            // With TC
+            assertEquals("For \"" + pd.getName() + "\"", newValue,
+                    tReaderMethod.invoke(new Template(null, "", DEFAULT_CFG, tc)));
         }
     }
     
@@ -554,7 +508,8 @@ public class TemplateConfigurationTest {
         tcb.setCustomAttribute(CA2,"tc");
         tcb.setCustomAttribute(CA3,"tc");
 
-        Template t = new Template(null, "", cfg);
+        TemplateConfiguration tc = tcb.build();
+        Template t = new Template(null, "", cfg, tc);
         t.setCustomAttribute("k5", "t");
         t.setCustomAttribute("k6", null);
         t.setCustomAttribute("k7", "t");
@@ -562,10 +517,6 @@ public class TemplateConfigurationTest {
         t.setCustomAttribute(CA3, null);
         t.setCustomAttribute(CA4, "t");
 
-        TemplateConfiguration tc = tcb.build();
-        tc.setParentConfiguration(cfg);
-        tc.apply(t);
-        
         assertEquals("c", t.getCustomAttribute("k1"));
         assertEquals("tc", t.getCustomAttribute("k2"));
         assertNull(t.getCustomAttribute("k3"));
@@ -587,7 +538,6 @@ public class TemplateConfigurationTest {
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
             tcb.setTagSyntax(Configuration.SQUARE_BRACKET_TAG_SYNTAX);
             TemplateConfiguration tc = tcb.build();
-            tc.setParentConfiguration(DEFAULT_CFG);
             assertOutputWithoutAndWithTC(tc, "[#if true]y[/#if]", "[#if true]y[/#if]", "y");
             testedProps.add(Configuration.TAG_SYNTAX_KEY_CAMEL_CASE);
         }
@@ -596,7 +546,6 @@ public class TemplateConfigurationTest {
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
             tcb.setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
             TemplateConfiguration tc = tcb.build();
-            tc.setParentConfiguration(DEFAULT_CFG);
             assertOutputWithoutAndWithTC(tc, "<#if true>y<#elseif false>n</#if>", "y", null);
             testedProps.add(Configuration.NAMING_CONVENTION_KEY_CAMEL_CASE);
         }
@@ -605,7 +554,6 @@ public class TemplateConfigurationTest {
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
             tcb.setWhitespaceStripping(false);
             TemplateConfiguration tc = tcb.build();
-            tc.setParentConfiguration(DEFAULT_CFG);
             assertOutputWithoutAndWithTC(tc, "<#if true>\nx\n</#if>\n", "x\n", "\nx\n\n");
             testedProps.add(Configuration.WHITESPACE_STRIPPING_KEY_CAMEL_CASE);
         }
@@ -614,7 +562,6 @@ public class TemplateConfigurationTest {
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
             tcb.setArithmeticEngine(new DummyArithmeticEngine());
             TemplateConfiguration tc = tcb.build();
-            tc.setParentConfiguration(DEFAULT_CFG);
             assertOutputWithoutAndWithTC(tc, "${1} ${1+1}", "1 2", "11 22");
             testedProps.add(Configuration.ARITHMETIC_ENGINE_KEY_CAMEL_CASE);
         }
@@ -623,7 +570,6 @@ public class TemplateConfigurationTest {
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
             tcb.setOutputFormat(XMLOutputFormat.INSTANCE);
             TemplateConfiguration tc = tcb.build();
-            tc.setParentConfiguration(DEFAULT_CFG);
             assertOutputWithoutAndWithTC(tc, "${.outputFormat} ${\"a'b\"}",
                     UndefinedOutputFormat.INSTANCE.getName() + " a'b",
                     XMLOutputFormat.INSTANCE.getName() + " a&apos;b");
@@ -635,7 +581,6 @@ public class TemplateConfigurationTest {
             tcb.setOutputFormat(XMLOutputFormat.INSTANCE);
             tcb.setAutoEscapingPolicy(Configuration.DISABLE_AUTO_ESCAPING_POLICY);
             TemplateConfiguration tc = tcb.build();
-            tc.setParentConfiguration(DEFAULT_CFG);
             assertOutputWithoutAndWithTC(tc, "${'a&b'}", "a&b", "a&b");
             testedProps.add(Configuration.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE);
         }
@@ -654,7 +599,6 @@ public class TemplateConfigurationTest {
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
             tcb.setRecognizeStandardFileExtensions(false);
             TemplateConfiguration tc = tcb.build();
-            tc.setParentConfiguration(DEFAULT_CFG);
             assertOutputWithoutAndWithTC(tc, "adhoc.ftlh", "${.outputFormat}",
                     HTMLOutputFormat.INSTANCE.getName(), UndefinedOutputFormat.INSTANCE.getName());
             testedProps.add(Configuration.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE);
@@ -665,7 +609,6 @@ public class TemplateConfigurationTest {
             tcb.setLogTemplateExceptions(false);
             tcb.setTabSize(3);
             TemplateConfiguration tc = tcb.build();
-            tc.setParentConfiguration(DEFAULT_CFG);
             assertOutputWithoutAndWithTC(tc,
                     "<#attempt><@'\\t$\\{1+}'?interpret/><#recover>"
                     + "${.error?replace('(?s).*?column ([0-9]+).*', '$1', 'r')}"
@@ -744,17 +687,16 @@ public class TemplateConfigurationTest {
     
     @Test
     public void testArithmeticEngine() throws TemplateException, IOException {
-        TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
-        tcb.setArithmeticEngine(new DummyArithmeticEngine());
-        TemplateConfiguration tc = tcb.build();
-        tc.setParentConfiguration(DEFAULT_CFG);
+        TemplateConfiguration tc = new TemplateConfiguration.Builder()
+                .arithmeticEngine(new DummyArithmeticEngine())
+                .build();
         assertOutputWithoutAndWithTC(tc,
                 "<#setting locale='en_US'>${1} ${1+1} ${1*3} <#assign x = 1>${x + x} ${x * 3}",
                 "1 2 3 2 3", "11 22 33 22 33");
         
-        // Doesn't affect template.arithmeticEngine, only affects the parsing:
+        // Does affect template.arithmeticEngine (unlike in FM2)
         Template t = new Template(null, null, new StringReader(""), DEFAULT_CFG, tc, null);
-        assertEquals(DEFAULT_CFG.getArithmeticEngine(), t.getArithmeticEngine());
+        assertEquals(tc.getArithmeticEngine(), t.getArithmeticEngine());
     }
 
     @Test
@@ -762,7 +704,6 @@ public class TemplateConfigurationTest {
         TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
         tcb.setAutoImports(ImmutableMap.of("t1", "t1.ftl", "t2", "t2.ftl"));
         TemplateConfiguration tc = tcb.build();
-        tc.setParentConfiguration(DEFAULT_CFG);
         assertOutputWithoutAndWithTC(tc, "<#import 't3.ftl' as t3>${loaded}", "t3;", "t1;t2;t3;");
     }
 
@@ -771,23 +712,21 @@ public class TemplateConfigurationTest {
         TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
         tcb.setAutoIncludes(ImmutableList.of("t1.ftl", "t2.ftl"));
         TemplateConfiguration tc = tcb.build();
-        tc.setParentConfiguration(DEFAULT_CFG);
         assertOutputWithoutAndWithTC(tc, "<#include 't3.ftl'>", "In t3;", "In t1;In t2;In t3;");
     }
     
     @Test
     public void testStringInterpolate() throws TemplateException, IOException {
-        TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
-        tcb.setArithmeticEngine(new DummyArithmeticEngine());
-        TemplateConfiguration tc = tcb.build();
-        tc.setParentConfiguration(DEFAULT_CFG);
+        TemplateConfiguration tc = new TemplateConfiguration.Builder()
+                .arithmeticEngine(new DummyArithmeticEngine())
+                .build();
         assertOutputWithoutAndWithTC(tc,
                 "<#setting locale='en_US'>${'${1} ${1+1} ${1*3}'} <#assign x = 1>${'${x + x} ${x * 3}'}",
                 "1 2 3 2 3", "11 22 33 22 33");
         
-        // Doesn't affect template.arithmeticEngine, only affects the parsing:
+        // Does affect template.arithmeticEngine (unlike in FM2):
         Template t = new Template(null, null, new StringReader(""), DEFAULT_CFG, tc, null);
-        assertEquals(DEFAULT_CFG.getArithmeticEngine(), t.getArithmeticEngine());
+        assertEquals(tc.getArithmeticEngine(), t.getArithmeticEngine());
     }
     
     @Test
@@ -796,7 +735,6 @@ public class TemplateConfigurationTest {
         tcb.setArithmeticEngine(new DummyArithmeticEngine());
         {
             TemplateConfiguration tc = tcb.build();
-            tc.setParentConfiguration(DEFAULT_CFG);
             assertOutputWithoutAndWithTC(tc,
                     "<#setting locale='en_US'><#assign src = r'${1} <#assign x = 1>${x + x}'><@src?interpret />",
                     "1 2", "11 22");
@@ -804,7 +742,6 @@ public class TemplateConfigurationTest {
         tcb.setWhitespaceStripping(false);
         {
             TemplateConfiguration tc = tcb.build();
-            tc.setParentConfiguration(DEFAULT_CFG);
             assertOutputWithoutAndWithTC(tc,
                     "<#if true>\nX</#if><#assign src = r'<#if true>\nY</#if>'><@src?interpret />",
                     "XY", "\nX\nY");
@@ -817,7 +754,6 @@ public class TemplateConfigurationTest {
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
             tcb.setArithmeticEngine(new DummyArithmeticEngine());
             TemplateConfiguration tc = tcb.build();
-            tc.setParentConfiguration(DEFAULT_CFG);
             assertOutputWithoutAndWithTC(tc,
                     "<#assign x = 1>${r'1 + x'?eval?c}",
                     "2", "22");
@@ -836,7 +772,6 @@ public class TemplateConfigurationTest {
 
             {
                 TemplateConfiguration tc = tcb.build();
-                tc.setParentConfiguration(DEFAULT_CFG);
 
                 // Default is re-auto-detecting in ?eval:
                 assertOutputWithoutAndWithTC(tc, legacyNCFtl, "null", outputEncoding.name());
@@ -848,7 +783,6 @@ public class TemplateConfigurationTest {
                 tcb.setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
 
                 TemplateConfiguration tc = tcb.build();
-                tc.setParentConfiguration(DEFAULT_CFG);
 
                 assertOutputWithoutAndWithTC(tc, legacyNCFtl, "null", null);
                 assertOutputWithoutAndWithTC(tc, camelCaseNCFtl, "null", outputEncoding.name());
@@ -859,7 +793,6 @@ public class TemplateConfigurationTest {
                 tcb.setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
 
                 TemplateConfiguration tc = tcb.build();
-                tc.setParentConfiguration(DEFAULT_CFG);
 
                 assertOutputWithoutAndWithTC(tc, legacyNCFtl, "null", outputEncoding.name());
                 assertOutputWithoutAndWithTC(tc, camelCaseNCFtl, "null", null);
@@ -867,40 +800,6 @@ public class TemplateConfigurationTest {
         }
     }
     
-    @Test
-    public void testSetParentConfiguration() throws IOException {
-        TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
-        TemplateConfiguration tc = tcb.build();
-
-        Template t = new Template(null, "", DEFAULT_CFG);
-        try {
-            tc.apply(t);
-            fail();
-        } catch (IllegalStateException e) {
-            assertThat(e.getMessage(), containsString("Configuration"));
-        }
-        
-        tc.setParentConfiguration(DEFAULT_CFG);
-        
-        try {
-            tc.setParentConfiguration(new Configuration());
-            fail();
-        } catch (IllegalStateException e) {
-            assertThat(e.getMessage(), containsString("Configuration"));
-        }
-
-        try {
-            tc.setParentConfiguration(null);
-            fail();
-        } catch (_NullArgumentException e) {
-            // expected
-        }
-        
-        tc.setParentConfiguration(DEFAULT_CFG);
-        
-        tc.apply(t);
-    }
-
     private void assertOutputWithoutAndWithTC(
             TemplateConfiguration tc, String ftl, String expectedDefaultOutput,
             String expectedConfiguredOutput) throws TemplateException, IOException {
@@ -917,24 +816,17 @@ public class TemplateConfigurationTest {
         assertOutput(tc, templateName, ftl, expectedConfiguredOutput);
     }
 
-    private void assertOutput(TemplateConfiguration tc, String templateName, String ftl, String expectedConfiguredOutput)
+    private void assertOutput(TemplateConfiguration tc, String templateName, String ftl, String
+            expectedConfiguredOutput)
             throws TemplateException, IOException {
         StringWriter sw = new StringWriter();
         try {
-            Configuration cfg = tc != null ? tc.getParentConfiguration() : DEFAULT_CFG;
-            Template t = new Template(templateName, null, new StringReader(ftl), cfg, tc, null);
-            if (tc != null) {
-                tc.apply(t);
-            }
+            Template t = new Template(templateName, null, new StringReader(ftl), DEFAULT_CFG, tc, null);
             t.process(null, sw);
             if (expectedConfiguredOutput == null) {
                 fail("Template should have fail.");
             }
-        } catch (TemplateException e) {
-            if (expectedConfiguredOutput != null) {
-                throw e;
-            }
-        } catch (ParseException e) {
+        } catch (TemplateException|ParseException e) {
             if (expectedConfiguredOutput != null) {
                 throw e;
             }

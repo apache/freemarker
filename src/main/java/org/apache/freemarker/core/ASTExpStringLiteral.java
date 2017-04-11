@@ -54,19 +54,21 @@ final class ASTExpStringLiteral extends ASTExpression implements TemplateScalarM
         if (value.length() > 3 && (value.indexOf("${") >= 0 || value.indexOf("#{") >= 0)) {
             
             Template parentTemplate = getTemplate();
-            ParserConfiguration pcfg = parentTemplate.getParserConfiguration();
+            ParserConfiguration pCfg = parentTemplate.getParserConfiguration();
 
             try {
                 SimpleCharStream simpleCharacterStream = new SimpleCharStream(
                         new StringReader(value),
                         beginLine, beginColumn + 1,
                         value.length());
-                simpleCharacterStream.setTabSize(pcfg.getTabSize());
+                simpleCharacterStream.setTabSize(pCfg.getTabSize());
                 
                 FMParserTokenManager tkMan = new FMParserTokenManager(
                         simpleCharacterStream);
                 
-                FMParser parser = new FMParser(parentTemplate, false, tkMan, pcfg, null);
+                FMParser parser = new FMParser(parentTemplate, false,
+                        tkMan, pCfg, null, null,
+                        null);
                 // We continue from the parent parser's current state:
                 parser.setupStringLiteralMode(parentTkMan, outputFormat);
                 try {

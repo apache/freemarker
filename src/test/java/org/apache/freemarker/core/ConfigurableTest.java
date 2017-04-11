@@ -161,7 +161,7 @@ public class ConfigurableTest {
     }
     
     private MutableProcessingConfiguration createConfigurable() throws IOException {
-        return new Template(null, "", new Configuration(Configuration.VERSION_3_0_0));
+        return new TemplateConfiguration.Builder();
     }
 
     private boolean keyFieldExists(String name) throws Exception {

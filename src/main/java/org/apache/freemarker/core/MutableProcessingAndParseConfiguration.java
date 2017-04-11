@@ -46,8 +46,8 @@ public abstract class MutableProcessingAndParseConfiguration<
         super(incompatibleImprovements);
     }
 
-    protected MutableProcessingAndParseConfiguration(MutableProcessingConfiguration parent) {
-        super(parent);
+    protected MutableProcessingAndParseConfiguration() {
+        super();
     }
 
     /**
@@ -56,6 +56,14 @@ public abstract class MutableProcessingAndParseConfiguration<
     public void setTagSyntax(int tagSyntax) {
         Configuration.valideTagSyntaxValue(tagSyntax);
         this.tagSyntax = tagSyntax;
+    }
+
+    /**
+     * Fluent API equivalent of {@link #tagSyntax(int)}
+     */
+    public SelfT tagSyntax(int tagSyntax) {
+        setTagSyntax(tagSyntax);
+        return self();
     }
 
     /**
@@ -91,6 +99,14 @@ public abstract class MutableProcessingAndParseConfiguration<
         this.templateLanguage = templateLanguage;
     }
 
+    /**
+     * Fluent API equivalent of {@link #setTemplateLanguage(TemplateLanguage)}
+     */
+    public SelfT templateLanguage(TemplateLanguage templateLanguage) {
+        setTemplateLanguage(templateLanguage);
+        return self();
+    }
+
     public boolean isTemplateLanguageSet() {
         return templateLanguage != null;
     }
@@ -101,6 +117,14 @@ public abstract class MutableProcessingAndParseConfiguration<
     public void setNamingConvention(int namingConvention) {
         Configuration.validateNamingConventionValue(namingConvention);
         this.namingConvention = namingConvention;
+    }
+
+    /**
+     * Fluent API equivalent of {@link #setNamingConvention(int)}
+     */
+    public SelfT namingConvention(int namingConvention) {
+        setNamingConvention(namingConvention);
+        return self();
     }
 
     /**
@@ -115,7 +139,7 @@ public abstract class MutableProcessingAndParseConfiguration<
     protected abstract int getInheritedNamingConvention();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from the parent parsing configuration..
      */
     @Override
     public boolean isNamingConventionSet() {
@@ -130,6 +154,14 @@ public abstract class MutableProcessingAndParseConfiguration<
     }
 
     /**
+     * Fluent API equivalent of {@link #setWhitespaceStripping(boolean)}
+     */
+    public SelfT whitespaceStripping(boolean whitespaceStripping) {
+        setWhitespaceStripping(whitespaceStripping);
+        return self();
+    }
+
+    /**
      * The getter pair of {@link #getWhitespaceStripping()}.
      */
     @Override
@@ -141,7 +173,7 @@ public abstract class MutableProcessingAndParseConfiguration<
     protected abstract boolean getInheritedWhitespaceStripping();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from the parent parsing configuration..
      */
     @Override
     public boolean isWhitespaceStrippingSet() {
@@ -158,6 +190,14 @@ public abstract class MutableProcessingAndParseConfiguration<
     }
 
     /**
+     * Fluent API equivalent of {@link #setAutoEscapingPolicy(int)}
+     */
+    public SelfT autoEscapingPolicy(int autoEscapingPolicy) {
+        setAutoEscapingPolicy(autoEscapingPolicy);
+        return self();
+    }
+
+    /**
      * The getter pair of {@link #setAutoEscapingPolicy(int)}.
      */
     @Override
@@ -169,7 +209,7 @@ public abstract class MutableProcessingAndParseConfiguration<
     protected abstract int getInheritedAutoEscapingPolicy();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from the parent parsing configuration..
      */
     @Override
     public boolean isAutoEscapingPolicySet() {
@@ -185,6 +225,14 @@ public abstract class MutableProcessingAndParseConfiguration<
     }
 
     /**
+     * Fluent API equivalent of {@link #setOutputFormat(OutputFormat)}
+     */
+    public SelfT outputFormat(OutputFormat outputFormat) {
+        setOutputFormat(outputFormat);
+        return self();
+    }
+
+    /**
      * The getter pair of {@link #setOutputFormat(OutputFormat)}.
      */
     @Override
@@ -195,7 +243,7 @@ public abstract class MutableProcessingAndParseConfiguration<
     protected abstract OutputFormat getInheritedOutputFormat();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from the parent parsing configuration..
      */
     @Override
     public boolean isOutputFormatSet() {
@@ -210,6 +258,14 @@ public abstract class MutableProcessingAndParseConfiguration<
     }
 
     /**
+     * Fluent API equivalent of {@link #setRecognizeStandardFileExtensions(boolean)}
+     */
+    public SelfT recognizeStandardFileExtensions(boolean recognizeStandardFileExtensions) {
+        setRecognizeStandardFileExtensions(recognizeStandardFileExtensions);
+        return self();
+    }
+
+    /**
      * Getter pair of {@link #setRecognizeStandardFileExtensions(boolean)}.
      */
     @Override
@@ -221,7 +277,7 @@ public abstract class MutableProcessingAndParseConfiguration<
     protected abstract boolean getInheritedRecognizeStandardFileExtensions();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from the parent parsing configuration..
      */
     @Override
     public boolean isRecognizeStandardFileExtensionsSet() {
@@ -244,6 +300,14 @@ public abstract class MutableProcessingAndParseConfiguration<
         this.sourceEncoding = sourceEncoding;
     }
 
+    /**
+     * Fluent API equivalent of {@link #setSourceEncoding(Charset)}
+     */
+    public SelfT sourceEncoding(Charset sourceEncoding) {
+        setSourceEncoding(sourceEncoding);
+        return self();
+    }
+
     public boolean isSourceEncodingSet() {
         return sourceEncoding != null;
     }
@@ -255,6 +319,14 @@ public abstract class MutableProcessingAndParseConfiguration<
      */
     public void setTabSize(int tabSize) {
         this.tabSize = Integer.valueOf(tabSize);
+    }
+
+    /**
+     * Fluent API equivalent of {@link #setTabSize(int)}
+     */
+    public SelfT tabSize(int tabSize) {
+        setTabSize(tabSize);
+        return self();
     }
 
     /**
@@ -270,7 +342,7 @@ public abstract class MutableProcessingAndParseConfiguration<
     protected abstract int getInheritedTabSize();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from the parent parsing configuration..
      *
      * @since 2.3.25
      */

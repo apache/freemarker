@@ -20,7 +20,6 @@ package org.apache.freemarker.core.templateresolver;
 
 import java.io.IOException;
 
-import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateConfiguration;
 import org.apache.freemarker.core.util._StringUtil;
 
@@ -108,11 +107,4 @@ public class FirstMatchTemplateConfigurationFactory extends TemplateConfiguratio
         return this;
     }
 
-    @Override
-    protected void setConfigurationOfChildren(Configuration cfg) {
-        for (TemplateConfigurationFactory templateConfigurationFactory : templateConfigurationFactories) {
-            templateConfigurationFactory.setConfiguration(cfg);
-        }
-    }
-    
 }

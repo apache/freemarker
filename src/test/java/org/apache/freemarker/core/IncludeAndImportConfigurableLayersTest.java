@@ -282,21 +282,28 @@ public class IncludeAndImportConfigurableLayersTest extends TemplateTest {
         dropConfiguration();
         Configuration cfg = getConfiguration();
         cfg.addAutoImport("t1", "t1.ftl");
-        Template t = new Template(null, "<#import 't2.ftl' as t2>${loaded!}", cfg);
 
+        TemplateConfiguration tc;
+        if (layer == Template.class) {
+            TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+            setLazynessOfConfigurable(tcb, lazyImports, lazyAutoImports, setLazyAutoImports);
+            tc = tcb.build();
+        } else {
+            tc = null;
+        }
+
+        Template t = new Template(null, "<#import 't2.ftl' as t2>${loaded!}", cfg, tc);
         StringWriter sw = new StringWriter();
         Environment env = t.createProcessingEnvironment(null, sw);
-        
+
         if (layer == Configuration.class) {
             setLazynessOfConfigurable(cfg, lazyImports, lazyAutoImports, setLazyAutoImports);
-        } else if (layer == Template.class) {
-            setLazynessOfConfigurable(t, lazyImports, lazyAutoImports, setLazyAutoImports);
         } else if (layer == Environment.class) {
             setLazynessOfConfigurable(env, lazyImports, lazyAutoImports, setLazyAutoImports);
-        } else {
+        } else if (layer != Template.class) {
             throw new IllegalArgumentException();
         }
-        
+
         env.process();
         assertEquals(expectedOutput, sw.toString());
     }

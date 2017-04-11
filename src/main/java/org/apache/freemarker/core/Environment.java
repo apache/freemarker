@@ -173,6 +173,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     private Writer out;
     private ASTDirMacro.Context currentMacroContext;
     private LocalContextStack localContextStack;
+    private final Template mainTemplate;
     private final Namespace mainNamespace;
     private Namespace currentNamespace, globalNamespace;
     private HashMap<String, Namespace> loadedLibs;
@@ -217,10 +218,10 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     public Environment(Template template, final TemplateHashModel rootDataModel, Writer out) {
-        super(template);
+        mainTemplate = template;
         configuration = template.getConfiguration();
         globalNamespace = new Namespace(null);
-        currentNamespace = mainNamespace = new Namespace(template);
+        currentNamespace = mainNamespace = new Namespace(mainTemplate);
         this.out = out;
         this.rootDataModel = rootDataModel;
         importMacros(template);
@@ -235,7 +236,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * @since 2.3.22
      */
     public Template getMainTemplate() {
-        return mainNamespace.getTemplate();
+        return mainTemplate;
     }
 
     /**
@@ -922,17 +923,17 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     @Override
     protected TemplateExceptionHandler getInheritedTemplateExceptionHandler() {
-        return getParent().getTemplateExceptionHandler();
+        return getMainTemplate().getTemplateExceptionHandler();
     }
 
     @Override
     protected ArithmeticEngine getInheritedArithmeticEngine() {
-        return getParent().getArithmeticEngine();
+        return getMainTemplate().getArithmeticEngine();
     }
 
     @Override
     protected ObjectWrapper getInheritedObjectWrapper() {
-        return getParent().getObjectWrapper();
+        return getMainTemplate().getObjectWrapper();
     }
 
     @Override
@@ -962,7 +963,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     @Override
     protected Locale getInheritedLocale() {
-        return getParent().getLocale();
+        return getMainTemplate().getLocale();
     }
 
     @Override
@@ -991,7 +992,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     @Override
     protected TimeZone getInheritedTimeZone() {
-        return getParent().getTimeZone();
+        return getMainTemplate().getTimeZone();
     }
 
     @Override
@@ -1020,7 +1021,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     @Override
     protected TimeZone getInheritedSQLDateAndTimeTimeZone() {
-        return getParent().getSQLDateAndTimeTimeZone();
+        return getMainTemplate().getSQLDateAndTimeTimeZone();
     }
 
     // Replace with Objects.equals in Java 7
@@ -1051,57 +1052,57 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     @Override
     protected Charset getInheritedURLEscapingCharset() {
-        return getParent().getURLEscapingCharset();
+        return getMainTemplate().getURLEscapingCharset();
     }
 
     @Override
     protected TemplateClassResolver getInheritedNewBuiltinClassResolver() {
-        return getParent().getNewBuiltinClassResolver();
+        return getMainTemplate().getNewBuiltinClassResolver();
     }
 
     @Override
     protected boolean getInheritedAutoFlush() {
-        return getParent().getAutoFlush();
+        return getMainTemplate().getAutoFlush();
     }
 
     @Override
     protected boolean getInheritedShowErrorTips() {
-        return getParent().getShowErrorTips();
+        return getMainTemplate().getShowErrorTips();
     }
 
     @Override
     protected boolean getInheritedAPIBuiltinEnabled() {
-        return getParent().getAPIBuiltinEnabled();
+        return getMainTemplate().getAPIBuiltinEnabled();
     }
 
     @Override
     protected boolean getInheritedLogTemplateExceptions() {
-        return getParent().getLogTemplateExceptions();
+        return getMainTemplate().getLogTemplateExceptions();
     }
 
     @Override
     protected boolean getInheritedLazyImports() {
-        return getParent().getLazyImports();
+        return getMainTemplate().getLazyImports();
     }
 
     @Override
     protected Boolean getInheritedLazyAutoImports() {
-        return getParent().getLazyAutoImports();
+        return getMainTemplate().getLazyAutoImports();
     }
 
     @Override
     protected Map<String, String> getInheritedAutoImports() {
-        return getParent().getAutoImports();
+        return getMainTemplate().getAutoImports();
     }
 
     @Override
     protected List<String> getInheritedAutoIncludes() {
-        return getParent().getAutoIncludes();
+        return getMainTemplate().getAutoIncludes();
     }
 
     @Override
     protected Object getInheritedCustomAttribute(Object name) {
-        return getParent().getCustomAttribute(name);
+        return getMainTemplate().getCustomAttribute(name);
     }
 
     /*
@@ -1117,7 +1118,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     @Override
     protected Charset getInheritedOutputEncoding() {
-        return getParent().getOutputEncoding();
+        return getMainTemplate().getOutputEncoding();
     }
 
     /**
@@ -1220,27 +1221,27 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     @Override
     protected String getInheritedNumberFormat() {
-        return getParent().getNumberFormat();
+        return getMainTemplate().getNumberFormat();
     }
 
     @Override
     protected Map<String, TemplateNumberFormatFactory> getInheritedCustomNumberFormats() {
-        return getParent().getCustomNumberFormats();
+        return getMainTemplate().getCustomNumberFormats();
     }
 
     @Override
     protected TemplateNumberFormatFactory getInheritedCustomNumberFormat(String name) {
-        return getParent().getCustomNumberFormat(name);
+        return getMainTemplate().getCustomNumberFormat(name);
     }
 
     @Override
     protected boolean getInheritedHasCustomFormats() {
-        return getParent().hasCustomFormats();
+        return getMainTemplate().hasCustomFormats();
     }
 
     @Override
     protected String getInheritedBooleanFormat() {
-        return getParent().getBooleanFormat();
+        return getMainTemplate().getBooleanFormat();
     }
 
     String formatBoolean(boolean value, boolean fallbackToTrueFalse) throws TemplateException {
@@ -1535,7 +1536,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     @Override
     protected String getInheritedTimeFormat() {
-        return getParent().getTimeFormat();
+        return getMainTemplate().getTimeFormat();
     }
 
     @Override
@@ -1553,7 +1554,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     @Override
     protected String getInheritedDateFormat() {
-        return getParent().getDateFormat();
+        return getMainTemplate().getDateFormat();
     }
 
     @Override
@@ -1571,17 +1572,17 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     @Override
     protected String getInheritedDateTimeFormat() {
-        return getParent().getDateTimeFormat();
+        return getMainTemplate().getDateTimeFormat();
     }
 
     @Override
     protected Map<String, TemplateDateFormatFactory> getInheritedCustomDateFormats() {
-        return getParent().getCustomDateFormats();
+        return getMainTemplate().getCustomDateFormats();
     }
 
     @Override
     protected TemplateDateFormatFactory getInheritedCustomDateFormat(String name) {
-        return getParent().getCustomDateFormat(name);
+        return getMainTemplate().getCustomDateFormat(name);
     }
 
     public Configuration getConfiguration() {
@@ -2986,6 +2987,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
         private Template template;
 
+        // TODO [FM3] #macro etc. uses this, so the NS is associated to the main temp., even if #macro is elsewhere.
         Namespace() {
             this(Environment.this.getMainTemplate());
         }
@@ -3001,9 +3003,15 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         public Template getTemplate() {
             return template == null ? Environment.this.getMainTemplate() : template;
         }
-        
+
+        /**
+         * Used when initializing a lazily initialized namespace.
+         */
         void setTemplate(Template template) {
-            this.template = template; 
+            if (this.template != null) {
+                throw new IllegalStateException("Can't change the template of a namespace once it was established.");
+            }
+            this.template = template;
         }
         
     }

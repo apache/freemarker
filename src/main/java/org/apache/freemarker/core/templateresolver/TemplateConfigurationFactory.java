@@ -20,7 +20,6 @@ package org.apache.freemarker.core.templateresolver;
 
 import java.io.IOException;
 
-import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateConfiguration;
 
@@ -30,8 +29,6 @@ import org.apache.freemarker.core.TemplateConfiguration;
  * @since 2.3.24
  */
 public abstract class TemplateConfigurationFactory {
-    
-    private Configuration cfg;
 
     /**
      * Returns (maybe creates) the {@link TemplateConfiguration} for the given template source.
@@ -53,38 +50,5 @@ public abstract class TemplateConfigurationFactory {
      */
     public abstract TemplateConfiguration get(String sourceName, TemplateLoadingSource templateLoadingSource)
             throws IOException, TemplateConfigurationFactoryException;
-    
-    /**
-     * Binds this {@link TemplateConfigurationFactory} to a {@link Configuration}. Once it's bound, it can't be bound to
-     * another {@link Configuration} any more. This is automatically called by
-     * {@link Configuration#setTemplateConfigurations(TemplateConfigurationFactory)}.
-     */
-    public final void setConfiguration(Configuration cfg) {
-        if (this.cfg != null) {
-            if (cfg != this.cfg) {
-                throw new IllegalStateException(
-                        "The TemplateConfigurationFactory is already bound to another Configuration");
-            }
-        } else {
-            this.cfg = cfg;
-            setConfigurationOfChildren(cfg);
-        }
-    }
-    
-    /**
-     * Returns the configuration this object belongs to, or {@code null} if it isn't yet bound to a
-     * {@link Configuration}.
-     */
-    public Configuration getConfiguration() {
-        return cfg;
-    }
-    
-    /**
-     * Calls {@link TemplateConfiguration#setParentConfiguration(Configuration)} on each enclosed
-     * {@link TemplateConfiguration} and {@link TemplateConfigurationFactory#setConfiguration(Configuration)}
-     * on each enclosed {@link TemplateConfigurationFactory} objects. It only supposed to call these on the direct
-     * "children" of this object, not on the children of the children.
-     */
-    protected abstract void setConfigurationOfChildren(Configuration cfg);
 
 }

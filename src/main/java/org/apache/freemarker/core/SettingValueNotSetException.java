@@ -26,8 +26,8 @@ public class SettingValueNotSetException extends IllegalStateException {
     private final String settingName;
 
     public SettingValueNotSetException(String settingName) {
-        super("Setting " + _StringUtil.jQuote(settingName)
-                + " is not set in this layer and has no default here either.");
+        super("The " + _StringUtil.jQuote(settingName)
+                + " setting is not set in this layer and has no default here either.");
         this.settingName = settingName;
     }
 }

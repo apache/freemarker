@@ -20,7 +20,6 @@ package org.apache.freemarker.core.templateresolver;
 
 import java.io.IOException;
 
-import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateConfiguration;
 
 /**
@@ -63,14 +62,4 @@ public class ConditionalTemplateConfigurationFactory extends TemplateConfigurati
         }
     }
 
-    @Override
-    protected void setConfigurationOfChildren(Configuration cfg) {
-        if (templateConfiguration != null) {
-            templateConfiguration.setParentConfiguration(cfg);
-        }
-        if (templateConfigurationFactory != null) {
-            templateConfigurationFactory.setConfiguration(cfg);
-        }
-    }
-    
 }

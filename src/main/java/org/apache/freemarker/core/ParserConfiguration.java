@@ -123,7 +123,8 @@ public interface ParserConfiguration {
     boolean isRecognizeStandardFileExtensionsSet();
 
     /**
-     * See {@link Configuration#getIncompatibleImprovements()}.
+     * See {@link Configuration#getIncompatibleImprovements()}; as this is normally directly delegates to
+     * {@link Configuration#getIncompatibleImprovements()}, it's always set.
      */
     Version getIncompatibleImprovements();
 

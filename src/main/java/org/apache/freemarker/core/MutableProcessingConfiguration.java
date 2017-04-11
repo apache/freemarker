@@ -317,8 +317,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         URL_ESCAPING_CHARSET_KEY_CAMEL_CASE
     };
 
-    private ProcessingConfiguration parent;
-
     private Locale locale;
     private String numberFormat;
     private String timeFormat;
@@ -354,9 +352,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * default without marking them as set.
      */
     // TODO Move to Configuration(Builder) constructor
-    MutableProcessingConfiguration(Version incompatibleImprovements) {
-        _CoreAPI.checkVersionNotNullAndSupported(incompatibleImprovements);
-        parent = null;
+    MutableProcessingConfiguration(Version iciForDefaults) {
+        _CoreAPI.checkVersionNotNullAndSupported(iciForDefaults);
         locale = Configuration.getDefaultLocale();
         timeZone = Configuration.getDefaultTimeZone();
         sqlDateAndTimeTimeZone = null;
@@ -367,7 +364,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         dateTimeFormat = "";
         templateExceptionHandler = Configuration.getDefaultTemplateExceptionHandler();
         arithmeticEngine = BigDecimalArithmeticEngine.INSTANCE;
-        objectWrapper = Configuration.getDefaultObjectWrapper(incompatibleImprovements);
+        objectWrapper = Configuration.getDefaultObjectWrapper(iciForDefaults);
         autoFlush = Boolean.TRUE;
         newBuiltinClassResolver = TemplateClassResolver.UNRESTRICTED_RESOLVER;
         showErrorTips = Boolean.TRUE;
@@ -391,44 +388,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * Creates a new instance. Normally you do not need to use this constructor,
      * as you don't use <code>MutableProcessingConfiguration</code> directly, but its subclasses.
      */
-    protected MutableProcessingConfiguration(MutableProcessingConfiguration parent) {
-        this.parent = parent;
-        locale = null;
-        numberFormat = null;
-        templateExceptionHandler = null;
+    protected MutableProcessingConfiguration() {
+        // Empty
     }
-    
-    /**
-     * Returns the parent {@link MutableProcessingConfiguration} object of this object. The parent stores the default setting values for
-     * this {@link MutableProcessingConfiguration}. For example, the parent of a {@link org.apache.freemarker.core.Template} object is a
-     * {@link Configuration} object, so values not specified on {@link Template}-level are get from the
-     * {@link Configuration} object.
-     * 
-     * <p>
-     * Note on the parent of {@link Environment}: If you set {@link Configuration#setIncompatibleImprovements(Version)
-     * incompatible_improvements} to at least 2.3.22, it will be always the "main" {@link Template}, that is, the
-     * template for whose processing the {@link Environment} was created. With lower {@code incompatible_improvements},
-     * the current parent can temporary change <em>during template execution</em>, for example when your are inside an
-     * {@code #include}-d template (among others). Thus, don't build on which {@link Template} the parent of
-     * {@link Environment} is during template execution, unless you set {@code incompatible_improvements} to 2.3.22 or
-     * higher.
-     *
-     * @return The parent {@link MutableProcessingConfiguration} object, or {@code null} if this is the root {@link MutableProcessingConfiguration} object
-     *         (i.e, if it's the {@link Configuration} object).
-     */
-    public final ProcessingConfiguration getParent() {
-        return parent;
-    }
-    
-    /**
-     * Reparenting support. This is used by Environment when it includes a
-     * template - the included template becomes the parent configurable during
-     * its evaluation.
-     */
-    void setParent(ProcessingConfiguration parent) {
-        this.parent = parent;
-    }
-    
+
     /**
      * Sets the default locale used for number and date formatting (among others), also the locale used for searching
      * localized template variations when no locale was explicitly requested.
@@ -456,7 +419,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract Locale getInheritedLocale();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.24
      */
@@ -500,7 +463,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract TimeZone getInheritedTimeZone();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.24
      */
@@ -603,7 +566,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract TimeZone getInheritedSQLDateAndTimeTimeZone();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.24
      */
@@ -661,7 +624,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract String getInheritedNumberFormat();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.24
      */
@@ -744,7 +707,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.24
      */
@@ -829,7 +792,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract String getInheritedBooleanFormat();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.24
      */
@@ -870,7 +833,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract String getInheritedTimeFormat();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.24
      */
@@ -911,7 +874,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract String getInheritedDateFormat();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.24
      */
@@ -1030,7 +993,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract String getInheritedDateTimeFormat();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.24
      */
@@ -1091,7 +1054,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      * 
      * @since 2.3.24
      */
@@ -1164,7 +1127,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract TemplateExceptionHandler getInheritedTemplateExceptionHandler();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.24
      */
@@ -1202,7 +1165,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract ArithmeticEngine getInheritedArithmeticEngine();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.24
      */
@@ -1240,7 +1203,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract ObjectWrapper getInheritedObjectWrapper();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.24
      */
@@ -1280,7 +1243,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract Charset getInheritedOutputEncoding();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.24
      */
@@ -1318,7 +1281,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract Charset getInheritedURLEscapingCharset();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.24
      */
@@ -1369,7 +1332,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract TemplateClassResolver getInheritedNewBuiltinClassResolver();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.24
      */
@@ -1419,7 +1382,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract boolean getInheritedAutoFlush();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.24
      */
@@ -1459,7 +1422,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract boolean getInheritedShowErrorTips();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.24
      */
@@ -1499,7 +1462,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract boolean getInheritedAPIBuiltinEnabled();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.24
      */
@@ -1536,7 +1499,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract boolean getInheritedLogTemplateExceptions();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.24
      */
@@ -1584,7 +1547,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.25
      */
@@ -1619,7 +1582,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
     
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      *  
      * @since 2.3.25
      */
@@ -1745,7 +1708,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract Map<String,String> getInheritedAutoImports();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      * 
      * @since 2.3.25
      */
@@ -1841,7 +1804,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract List<String> getInheritedAutoIncludes();
 
     /**
-     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
      * 
      * @since 2.3.25
      */
@@ -2597,7 +2560,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * attribute is not present in the configurable, and the configurable has
      * a parent, then the parent is looked up as well.
      *
-     * @param name the name of the custom attribute
+     * @param key the name of the custom attribute
      *
      * @return the value of the custom attribute. Note that if the custom attribute
      * was created with <tt>&lt;#ftl&nbsp;attributes={...}&gt;</tt>, then this value is already
@@ -2605,20 +2568,17 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * <code>Map</code>, ...etc., not a FreeMarker specific class).
      */
     @Override
-    public Object getCustomAttribute(Object name) {
-        Object r;
+    public Object getCustomAttribute(Object key) {
+        Object value;
         if (customAttributes != null) {
-            r = customAttributes.get(name);
-            if (r == null && customAttributes.containsKey(name)) {
+            value = customAttributes.get(key);
+            if (value == null && customAttributes.containsKey(key)) {
                 return null;
             }
         } else {
-            r = null;
+            value = null;
         }
-        if (r == null && parent != null) {
-            return getInheritedCustomAttribute(name);
-        }
-        return r;
+        return value != null ? value : getInheritedCustomAttribute(key);
     }
 
     protected abstract Object getInheritedCustomAttribute(Object name);

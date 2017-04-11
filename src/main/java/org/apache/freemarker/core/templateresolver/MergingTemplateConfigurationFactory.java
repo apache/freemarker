@@ -20,7 +20,6 @@ package org.apache.freemarker.core.templateresolver;
 
 import java.io.IOException;
 
-import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateConfiguration;
 
 /**
@@ -58,27 +57,7 @@ public class MergingTemplateConfigurationFactory extends TemplateConfigurationFa
             }
         }
 
-        if (mergedTCBuilder == null) {
-            return firstResultTC; // Maybe null
-        } else {
-            TemplateConfiguration mergedTC = mergedTCBuilder.build();
-
-            Configuration cfg = getConfiguration();
-            if (cfg == null) {
-                throw new IllegalStateException(
-                        "The TemplateConfigurationFactory wasn't associated to a Configuration yet.");
-            }
-            mergedTC.setParentConfiguration(cfg);
-
-            return mergedTC;
-        }
-    }
-    
-    @Override
-    protected void setConfigurationOfChildren(Configuration cfg) {
-        for (TemplateConfigurationFactory templateConfigurationFactory : templateConfigurationFactories) {
-            templateConfigurationFactory.setConfiguration(cfg);
-        }
+        return mergedTCBuilder == null ? firstResultTC /* Maybe null */ : mergedTCBuilder.build();
     }
 
 }

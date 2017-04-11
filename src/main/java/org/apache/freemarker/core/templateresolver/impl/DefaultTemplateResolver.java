@@ -532,16 +532,15 @@ public class DefaultTemplateResolver extends TemplateResolver {
             } catch (TemplateConfigurationFactoryException e) {
                 throw newIOException("Error while getting TemplateConfiguration; see cause exception.", e);
             }
-            TemplateConfiguration resultTC = templateLoaderResult.getTemplateConfiguration();
-            if (resultTC != null) {
+            TemplateConfiguration templateLoaderResultTC = templateLoaderResult.getTemplateConfiguration();
+            if (templateLoaderResultTC != null) {
                 TemplateConfiguration.Builder mergedTCBuilder = new TemplateConfiguration.Builder();
                 if (cfgTC != null) {
                     mergedTCBuilder.merge(cfgTC);
                 }
-                mergedTCBuilder.merge(resultTC);
+                mergedTCBuilder.merge(templateLoaderResultTC);
 
                 tc = mergedTCBuilder.build();
-                tc.setParentConfiguration(config);
             } else {
                 tc = cfgTC;
             }
@@ -550,8 +549,10 @@ public class DefaultTemplateResolver extends TemplateResolver {
         if (tc != null && tc.isLocaleSet()) {
             locale = tc.getLocale();
         }
-        Charset initialEncoding = tc != null ? tc.getSourceEncoding() : config.getSourceEncoding();
-        TemplateLanguage templateLanguage = tc != null ? tc.getTemplateLanguage() : config .getTemplateLanguage();
+        Charset initialEncoding = tc != null && tc.isSourceEncodingSet() ? tc.getSourceEncoding()
+                : config.getSourceEncoding();
+        TemplateLanguage templateLanguage = tc != null && tc.isTemplateLanguageSet() ? tc.getTemplateLanguage()
+                : config.getTemplateLanguage();
 
         Template template;
         {
@@ -614,11 +615,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
             }
         }
 
-        if (tc != null) {
-            tc.apply(template);
-        }
-        
-        template.setLocale(locale);
+        template.setLookupLocale(locale);
         template.setCustomLookupCondition(customLookupCondition);
         return template;
     }

@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 @SuppressWarnings("boxing")
 public class CustomAttributeTest {
@@ -35,10 +36,12 @@ public class CustomAttributeTest {
     private static final String KEY_1 = "key1";
     private static final String KEY_2 = "key2";
     private static final String KEY_3 = "key3";
-    
-    private static final Object VALUE_1 = new Object();
+    private static final Integer KEY_4 = 4;
+
+    private static final Integer VALUE_1 = 1; // Serializable
     private static final Object VALUE_2 = new Object();
     private static final Object VALUE_3 = new Object();
+    private static final Object VALUE_4 = new Object();
     private static final Object VALUE_LIST = ImmutableList.<Object>of(
             "s", BigDecimal.valueOf(2), Boolean.TRUE, ImmutableMap.of("a", "A"));
     private static final Object VALUE_BIGDECIMAL = BigDecimal.valueOf(22);
@@ -47,120 +50,114 @@ public class CustomAttributeTest {
 
     @Test
     public void testStringKey() throws Exception {
-        Template t = new Template(null, "", new Configuration(Configuration.VERSION_3_0_0));
-        assertEquals(0, t.getCustomAttributeNames().length);        
-        assertNull(t.getCustomAttribute(KEY_1));
+        // Need some MutableProcessingConfiguration:
+        TemplateConfiguration.Builder mpc = new TemplateConfiguration.Builder();
+
+        assertEquals(0, mpc.getCustomAttributeNames().length);
+        assertNull(mpc.getCustomAttribute(KEY_1));
         
-        t.setCustomAttribute(KEY_1, VALUE_1);
-        assertArrayEquals(new String[] { KEY_1 }, t.getCustomAttributeNames());        
-        assertSame(VALUE_1, t.getCustomAttribute(KEY_1));
+        mpc.setCustomAttribute(KEY_1, VALUE_1);
+        assertArrayEquals(new String[] { KEY_1 }, mpc.getCustomAttributeNames());
+        assertSame(VALUE_1, mpc.getCustomAttribute(KEY_1));
         
-        t.setCustomAttribute(KEY_2, VALUE_2);
-        assertArrayEquals(new String[] { KEY_1, KEY_2 }, sort(t.getCustomAttributeNames()));        
-        assertSame(VALUE_1, t.getCustomAttribute(KEY_1));
-        assertSame(VALUE_2, t.getCustomAttribute(KEY_2));
-        
-        t.setCustomAttribute(KEY_1, VALUE_2);
-        assertArrayEquals(new String[] { KEY_1, KEY_2 }, sort(t.getCustomAttributeNames()));        
-        assertSame(VALUE_2, t.getCustomAttribute(KEY_1));
-        assertSame(VALUE_2, t.getCustomAttribute(KEY_2));
-        
-        t.setCustomAttribute(KEY_1, null);
-        assertArrayEquals(new String[] { KEY_1, KEY_2 }, sort(t.getCustomAttributeNames()));        
-        assertNull(t.getCustomAttribute(KEY_1));
-        assertSame(VALUE_2, t.getCustomAttribute(KEY_2));
-        
-        t.removeCustomAttribute(KEY_1);
-        assertArrayEquals(new String[] { KEY_2 }, t.getCustomAttributeNames());        
-        assertNull(t.getCustomAttribute(KEY_1));
-        assertSame(VALUE_2, t.getCustomAttribute(KEY_2));
+        mpc.setCustomAttribute(KEY_2, VALUE_2);
+        assertArrayEquals(new String[] { KEY_1, KEY_2 }, sort(mpc.getCustomAttributeNames()));
+        assertSame(VALUE_1, mpc.getCustomAttribute(KEY_1));
+        assertSame(VALUE_2, mpc.getCustomAttribute(KEY_2));
+
+        mpc.setCustomAttribute(KEY_1, VALUE_2);
+        assertArrayEquals(new String[] { KEY_1, KEY_2 }, sort(mpc.getCustomAttributeNames()));
+        assertSame(VALUE_2, mpc.getCustomAttribute(KEY_1));
+        assertSame(VALUE_2, mpc.getCustomAttribute(KEY_2));
+
+        mpc.setCustomAttribute(KEY_1, null);
+        assertArrayEquals(new String[] { KEY_1, KEY_2 }, sort(mpc.getCustomAttributeNames()));
+        assertNull(mpc.getCustomAttribute(KEY_1));
+        assertSame(VALUE_2, mpc.getCustomAttribute(KEY_2));
+
+        mpc.removeCustomAttribute(KEY_1);
+        assertArrayEquals(new String[] { KEY_2 }, mpc.getCustomAttributeNames());
+        assertNull(mpc.getCustomAttribute(KEY_1));
+        assertSame(VALUE_2, mpc.getCustomAttribute(KEY_2));
     }
 
     @Test
     public void testRemoveFromEmptySet() throws Exception {
-        Template t = new Template(null, "", new Configuration(Configuration.VERSION_3_0_0));
-        t.removeCustomAttribute(KEY_1);
-        assertEquals(0, t.getCustomAttributeNames().length);        
-        assertNull(t.getCustomAttribute(KEY_1));
-        
-        t.setCustomAttribute(KEY_1, VALUE_1);
-        assertArrayEquals(new String[] { KEY_1 }, t.getCustomAttributeNames());        
-        assertSame(VALUE_1, t.getCustomAttribute(KEY_1));
+        // Need some MutableProcessingConfiguration:
+        TemplateConfiguration.Builder mpc = new TemplateConfiguration.Builder();
+
+        mpc.removeCustomAttribute(KEY_1);
+        assertEquals(0, mpc.getCustomAttributeNames().length);
+        assertNull(mpc.getCustomAttribute(KEY_1));
+
+        mpc.setCustomAttribute(KEY_1, VALUE_1);
+        assertArrayEquals(new String[] { KEY_1 }, mpc.getCustomAttributeNames());
+        assertSame(VALUE_1, mpc.getCustomAttribute(KEY_1));
     }
-    
+
     @Test
-    public void testFtlHeader() throws Exception {
+    public void testAttrsFromFtlHeaderOnly() throws Exception {
         Template t = new Template(null, "<#ftl attributes={"
                 + "'" + KEY_1 + "': [ 's', 2, true, {  'a': 'A' } ], "
                 + "'" + KEY_2 + "': " + VALUE_BIGDECIMAL + " "
                 + "}>",
                 new Configuration(Configuration.VERSION_3_0_0));
-        
-        assertArrayEquals(new String[] { KEY_1, KEY_2 }, sort(t.getCustomAttributeNames()));
+
+        assertEquals(ImmutableSet.of(KEY_1, KEY_2), t.getCustomAttributes().keySet());
         assertEquals(VALUE_LIST, t.getCustomAttribute(KEY_1));
         assertEquals(VALUE_BIGDECIMAL, t.getCustomAttribute(KEY_2));
-        
+
         t.setCustomAttribute(KEY_1, VALUE_1);
         assertEquals(VALUE_1, t.getCustomAttribute(KEY_1));
         assertEquals(VALUE_BIGDECIMAL, t.getCustomAttribute(KEY_2));
-    }
-    
-    @Test
-    public void testFtl2Header() throws Exception {
-        Template t = new Template(null, "<#ftl attributes={"
-                + "'" + KEY_1 + "': 'a', "
-                + "'" + KEY_2 + "': 'b', "
-                + "'" + KEY_3 + "': 'c' "
-                + "}>",
-                new Configuration(Configuration.VERSION_3_0_0));
-        
-        assertArrayEquals(new String[] { KEY_1, KEY_2, KEY_3 }, sort(t.getCustomAttributeNames()));
-        assertEquals("a", t.getCustomAttribute(KEY_1));
-        assertEquals("b", t.getCustomAttribute(KEY_2));
-        assertEquals("c", t.getCustomAttribute(KEY_3));
-        
-        t.removeCustomAttribute(KEY_2);
-        assertArrayEquals(new String[] { KEY_1, KEY_3 }, sort(t.getCustomAttributeNames()));
-        assertEquals("a", t.getCustomAttribute(KEY_1));
-        assertNull(t.getCustomAttribute(KEY_2));
-        assertEquals("c", t.getCustomAttribute(KEY_3));
+
+        t.setCustomAttribute(KEY_1, null);
+        assertEquals(ImmutableSet.of(KEY_1, KEY_2), t.getCustomAttributes().keySet());
+        assertNull(t.getCustomAttribute(KEY_1));
     }
 
     @Test
-    public void testFtl3Header() throws Exception {
+    public void testAttrsFromFtlHeaderAndFromTemplateConfiguration() throws Exception {
+        TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+        tcb.setCustomAttribute(KEY_3, VALUE_3);
+        tcb.setCustomAttribute(KEY_4, VALUE_4);
         Template t = new Template(null, "<#ftl attributes={"
                 + "'" + KEY_1 + "': 'a', "
                 + "'" + KEY_2 + "': 'b', "
                 + "'" + KEY_3 + "': 'c' "
                 + "}>",
-                new Configuration(Configuration.VERSION_3_0_0));
-        
-        assertArrayEquals(new String[] { KEY_1, KEY_2, KEY_3 }, sort(t.getCustomAttributeNames()));
+                new Configuration(Configuration.VERSION_3_0_0),
+                tcb.build());
+
+        assertEquals(ImmutableSet.of(KEY_1, KEY_2, KEY_3, KEY_4), t.getCustomAttributes().keySet());
         assertEquals("a", t.getCustomAttribute(KEY_1));
         assertEquals("b", t.getCustomAttribute(KEY_2));
-        assertEquals("c", t.getCustomAttribute(KEY_3));
-        
-        t.setCustomAttribute(KEY_2, null);
-        assertArrayEquals(new String[] { KEY_1, KEY_2, KEY_3 }, sort(t.getCustomAttributeNames()));
-        assertEquals("a", t.getCustomAttribute(KEY_1));
-        assertNull(t.getCustomAttribute(KEY_2));
-        assertEquals("c", t.getCustomAttribute(KEY_3));
+        assertEquals("c", t.getCustomAttribute(KEY_3)); // Has overridden TC attribute
+        assertEquals(VALUE_4, t.getCustomAttribute(KEY_4)); // Inherited TC attribute
+
+        t.setCustomAttribute(KEY_3, null);
+        assertEquals(ImmutableSet.of(KEY_1, KEY_2, KEY_3, KEY_4), t.getCustomAttributes().keySet());
+        assertNull("null value shouldn't cause fallback to TC attribute", t.getCustomAttribute(KEY_3));
     }
-    
+
+
+    @Test
+    public void testAttrsFromTemplateConfigurationOnly() throws Exception {
+        TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+        tcb.setCustomAttribute(KEY_3, VALUE_3);
+        tcb.setCustomAttribute(KEY_4, VALUE_4);
+        Template t = new Template(null, "",
+                new Configuration(Configuration.VERSION_3_0_0),
+                tcb.build());
+
+        assertEquals(ImmutableSet.of(KEY_3, KEY_4), t.getCustomAttributes().keySet());
+        assertEquals(VALUE_3, t.getCustomAttribute(KEY_3));
+        assertEquals(VALUE_4, t.getCustomAttribute(KEY_4));
+    }
+
     private Object[] sort(String[] customAttributeNames) {
         Arrays.sort(customAttributeNames);
         return customAttributeNames;
-    }
-
-    @Test
-    public void testObjectKey() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        Template t = new Template(null, "", cfg);
-        assertNull(t.getCustomAttribute(CUST_ATT_KEY));
-        cfg.setCustomAttribute(CUST_ATT_KEY, "cfg");
-        assertEquals("cfg", t.getCustomAttribute(CUST_ATT_KEY));
-        t.setCustomAttribute(CUST_ATT_KEY, "t");
-        assertEquals("t", t.getCustomAttribute(CUST_ATT_KEY));
     }
 
 }

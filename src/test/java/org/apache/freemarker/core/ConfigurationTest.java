@@ -1209,67 +1209,121 @@ public class ConfigurationTest extends TestCase {
     
     @Test
     public void testHasCustomFormats() throws IOException, TemplateException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        Template t = new Template(null, "", cfg);
-        Environment env = t.createProcessingEnvironment(null, null);
-        assertFalse(cfg.hasCustomFormats());
-        assertFalse(t.hasCustomFormats());
-        assertFalse(env.hasCustomFormats());
-        
-        env.setCustomDateFormats(Collections.singletonMap("f", EpochMillisTemplateDateFormatFactory.INSTANCE));
-        assertFalse(t.hasCustomFormats());
-        assertTrue(env.hasCustomFormats());
-        t.setCustomDateFormats(Collections.singletonMap("f", EpochMillisTemplateDateFormatFactory.INSTANCE));
-        assertFalse(cfg.hasCustomFormats());
-        assertTrue(t.hasCustomFormats());
-        cfg.setCustomDateFormats(Collections.singletonMap("f", EpochMillisTemplateDateFormatFactory.INSTANCE));
-        assertTrue(cfg.hasCustomFormats());
-        assertTrue(t.hasCustomFormats());
-        assertTrue(env.hasCustomFormats());
-        
-        cfg.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>emptyMap());
-        t.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>emptyMap());
-        env.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>emptyMap());
-        assertFalse(cfg.hasCustomFormats());
-        assertFalse(t.hasCustomFormats());
-        assertFalse(env.hasCustomFormats());
-        
-        cfg.setCustomDateFormats(Collections.singletonMap("f", EpochMillisTemplateDateFormatFactory.INSTANCE));
-        assertTrue(cfg.hasCustomFormats());
-        assertTrue(t.hasCustomFormats());
-        assertTrue(env.hasCustomFormats());
-        
-        cfg.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>emptyMap());
-        t.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>emptyMap());
-        env.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>emptyMap());
-        assertFalse(cfg.hasCustomFormats());
-        assertFalse(t.hasCustomFormats());
-        assertFalse(env.hasCustomFormats());
-        
+        {
+            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+            Template t = new Template(null, "", cfg, null);
+            Environment env = t.createProcessingEnvironment(null, null);
+
+            assertFalse(cfg.hasCustomFormats());
+            assertFalse(t.hasCustomFormats());
+            assertFalse(env.hasCustomFormats());
+        }
+
+        {
+            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+            TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+            Template t = new Template(null, "", cfg, tcb.build());
+            Environment env = t.createProcessingEnvironment(null, null);
+
+            assertFalse(cfg.hasCustomFormats());
+            assertFalse(t.hasCustomFormats());
+            assertFalse(env.hasCustomFormats());
+        }
+
+        {
+            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+            TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+            Template t = new Template(null, "", cfg, tcb.build());
+            Environment env = t.createProcessingEnvironment(null, null);
+            env.setCustomDateFormats(Collections.singletonMap("f", EpochMillisTemplateDateFormatFactory.INSTANCE));
+
+            assertFalse(cfg.hasCustomFormats());
+            assertFalse(t.hasCustomFormats());
+            assertTrue(env.hasCustomFormats());
+        }
+
+        {
+            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+            TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+            tcb.setCustomDateFormats(Collections.singletonMap("f", EpochMillisTemplateDateFormatFactory.INSTANCE));
+            Template t = new Template(null, "", cfg, tcb.build());
+            Environment env = t.createProcessingEnvironment(null, null);
+
+            assertFalse(cfg.hasCustomFormats());
+            assertTrue(t.hasCustomFormats());
+            assertTrue(env.hasCustomFormats());
+        }
+
+        {
+            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+            cfg.setCustomDateFormats(Collections.singletonMap("f", EpochMillisTemplateDateFormatFactory.INSTANCE));
+            TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+            Template t = new Template(null, "", cfg, tcb.build());
+            Environment env = t.createProcessingEnvironment(null, null);
+
+            assertTrue(cfg.hasCustomFormats());
+            assertTrue(t.hasCustomFormats());
+            assertTrue(env.hasCustomFormats());
+        }
+
         // Same with number formats:
-        
-        env.setCustomNumberFormats(Collections.singletonMap("f", HexTemplateNumberFormatFactory.INSTANCE));
-        assertFalse(t.hasCustomFormats());
-        assertTrue(env.hasCustomFormats());
-        t.setCustomNumberFormats(Collections.singletonMap("f", HexTemplateNumberFormatFactory.INSTANCE));
-        assertFalse(cfg.hasCustomFormats());
-        assertTrue(t.hasCustomFormats());
-        cfg.setCustomNumberFormats(Collections.singletonMap("f", HexTemplateNumberFormatFactory.INSTANCE));
-        assertTrue(cfg.hasCustomFormats());
-        assertTrue(t.hasCustomFormats());
-        assertTrue(env.hasCustomFormats());
-        
-        cfg.setCustomNumberFormats(Collections.<String, TemplateNumberFormatFactory>emptyMap());
-        t.setCustomNumberFormats(Collections.<String, TemplateNumberFormatFactory>emptyMap());
-        env.setCustomNumberFormats(Collections.<String, TemplateNumberFormatFactory>emptyMap());
-        assertFalse(cfg.hasCustomFormats());
-        assertFalse(t.hasCustomFormats());
-        assertFalse(env.hasCustomFormats());
-        
-        cfg.setCustomNumberFormats(Collections.singletonMap("f", HexTemplateNumberFormatFactory.INSTANCE));
-        assertTrue(cfg.hasCustomFormats());
-        assertTrue(t.hasCustomFormats());
-        assertTrue(env.hasCustomFormats());
+
+        {
+            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+            Template t = new Template(null, "", cfg, null);
+            Environment env = t.createProcessingEnvironment(null, null);
+
+            assertFalse(cfg.hasCustomFormats());
+            assertFalse(t.hasCustomFormats());
+            assertFalse(env.hasCustomFormats());
+        }
+
+        {
+            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+            TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+            Template t = new Template(null, "", cfg, tcb.build());
+            Environment env = t.createProcessingEnvironment(null, null);
+
+            assertFalse(cfg.hasCustomFormats());
+            assertFalse(t.hasCustomFormats());
+            assertFalse(env.hasCustomFormats());
+        }
+
+        {
+            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+            TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+            Template t = new Template(null, "", cfg, tcb.build());
+            Environment env = t.createProcessingEnvironment(null, null);
+            env.setCustomNumberFormats(Collections.singletonMap("f", HexTemplateNumberFormatFactory.INSTANCE));
+
+            assertFalse(cfg.hasCustomFormats());
+            assertFalse(t.hasCustomFormats());
+            assertTrue(env.hasCustomFormats());
+        }
+
+        {
+            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+            TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+            tcb.setCustomNumberFormats(Collections.singletonMap("f", HexTemplateNumberFormatFactory.INSTANCE));
+            Template t = new Template(null, "", cfg, tcb.build());
+            Environment env = t.createProcessingEnvironment(null, null);
+
+            assertFalse(cfg.hasCustomFormats());
+            assertTrue(t.hasCustomFormats());
+            assertTrue(env.hasCustomFormats());
+        }
+
+        {
+            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+            cfg.setCustomNumberFormats(Collections.singletonMap("f", HexTemplateNumberFormatFactory.INSTANCE));
+            TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+            Template t = new Template(null, "", cfg, tcb.build());
+            Environment env = t.createProcessingEnvironment(null, null);
+
+            assertTrue(cfg.hasCustomFormats());
+            assertTrue(t.hasCustomFormats());
+            assertTrue(env.hasCustomFormats());
+        }
     }
     
     public void testNamingConventionSetSetting() throws ConfigurationException {
@@ -1379,11 +1433,13 @@ public class ConfigurationTest extends TestCase {
         Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         for (boolean camelCase : new boolean[] { false, true }) {
             List<String> names = new ArrayList<>(cfg.getSettingNames(camelCase));
-            List<String> cfgableNames = new ArrayList<>(new Template(null, "", cfg).getSettingNames(camelCase));
-            assertStartsWith(names, cfgableNames);
+            List<String> procCfgNames = new ArrayList<>(new Template(null, "", cfg)
+                    .createProcessingEnvironment(null, _NullWriter.INSTANCE)
+                    .getSettingNames(camelCase));
+            assertStartsWith(names, procCfgNames);
             
             String prevName = null;
-            for (int i = cfgableNames.size(); i < names.size(); i++) {
+            for (int i = procCfgNames.size(); i < names.size(); i++) {
                 String name = names.get(i);
                 if (prevName != null) {
                     assertThat(name, greaterThan(prevName));

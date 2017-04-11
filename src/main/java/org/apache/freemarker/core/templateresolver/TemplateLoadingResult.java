@@ -198,10 +198,7 @@ public final class TemplateLoadingResult {
      * merged with them, with properties coming from the returned {@link TemplateConfiguration} having the highest
      * priority.
      * 
-     * @return {@code null}, or a {@link TemplateConfiguration}. The parent configuration of the
-     *         {@link TemplateConfiguration} need not be set. The returned {@link TemplateConfiguration} won't be
-     *         modified. (If the caller needs to modify it, such as to call
-     *         {@link TemplateConfiguration#setParentConfiguration(Configuration)}, it has to copy it first.)
+     * @return {@code null}, or a {@link TemplateConfiguration}.
      */
     public TemplateConfiguration getTemplateConfiguration() {
         return templateConfiguration;

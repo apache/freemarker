@@ -30,57 +30,28 @@ import java.util.TimeZone;
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.outputformat.OutputFormat;
-import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.util.CommonBuilder;
-import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 
 /**
- * Used for customizing the configuration settings for individual {@link Template}-s (or rather groups of templates),
- * relatively to the common setting values coming from the {@link Configuration}. This was designed with the standard
- * template loading mechanism of FreeMarker in mind ({@link Configuration#getTemplate(String)}
- * and {@link DefaultTemplateResolver}), though can also be reused for custom template loading and caching solutions.
- * 
+ * A partial set of configuration settings used for customizing the {@link Configuration}-level settings for individual
+ * {@link Template}-s (or rather, for a group of templates). That it's partial means that you should call the
+ * corresponding {@code isXxxSet()} before getting a settings, or else you may cause
+ * {@link SettingValueNotSetException}. (The fallback to the {@link Configuration} setting isn't automatic to keep
+ * the dependency graph of configuration related beans non-cyclic. As user code seldom reads settings from here anyway,
+ * this compromise was chosen.)
  * <p>
- * Note on the {@code locale} setting: When used with the standard template loading/caching mechanism (
- * {@link Configuration#getTemplate(String)} and its overloads), localized lookup happens before the {@code locale}
- * specified here could have effect. The {@code locale} will be only set in the template that the localized lookup has
- * already found.
- * 
+ * Note on the {@code locale} setting: When used with the standard template loading/caching mechanism ({@link
+ * Configuration#getTemplate(String)} and its overloads), localized lookup happens before the {@code locale} specified
+ * here could have effect. The {@code locale} will be only set in the template that the localized lookup has already
+ * found.
  * <p>
- * Note on the sourceEncoding setting {@code sourceEncoding}: See {@link Builder#setSourceEncoding(Charset)}.
- * 
- * <p>
- * Note that the result value of the reader methods (getter and "is" methods) is usually not useful unless the value of
- * that setting was already set on this object. Otherwise you will get the value from the parent {@link Configuration},
- * or an {@link IllegalStateException} before this object is associated to a {@link Configuration}.
- * 
- * <p>
- * If you are using this class for your own template loading and caching solution, rather than with the standard one,
- * you should be aware of a few more details:
- * 
- * <ul>
- * <li>This class implements both {@link MutableProcessingConfiguration} and {@link ParserConfiguration}. This means that it can influence
- * both the template parsing phase and the runtime settings. For both aspects (i.e., {@link ParserConfiguration} and
- * {@link MutableProcessingConfiguration}) to take effect, you have first pass this object to the {@link Template} constructor
- * (this is where the {@link ParserConfiguration} interface is used), and then you have to call {@link #apply(Template)}
- * on the resulting {@link Template} object (this is where the {@link MutableProcessingConfiguration} aspect is used).
- * 
- * <li>{@link #apply(Template)} only change the settings that weren't yet set on the {@link Template} (but are inherited
- * from the {@link Configuration}). This is primarily because if the template configures itself via the {@code #ftl}
- * header, those values should have precedence. A consequence of this is that if you want to configure the same
- * {@link Template} with multiple {@link TemplateConfiguration}-s, you either should merge them to a single one before
- * that (with {@link Builder#merge(ParserAndProcessingConfiguration)}), or you have to apply them in reverse order of
- * their intended precedence.
- * </ul>
- * 
- * @see Template#Template(String, String, Reader, Configuration, ParserConfiguration, Charset)
- * 
- * @since 2.3.24
+ * This class is immutable. Use {@link TemplateConfiguration.Builder} to create a new instance.
+ *
+ * @see Template#Template(String, String, Reader, Configuration, TemplateConfiguration, Charset)
  */
 public final class TemplateConfiguration implements ParserAndProcessingConfiguration {
-    private Configuration configuration;
 
     private final Locale locale;
     private final String numberFormat;
@@ -164,162 +135,6 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
         tabSize = builder.isTabSizeSet() ? builder.getTabSize() : null;
     }
 
-    /**
-     * Associates this instance with a {@link Configuration}; usually you don't call this, as it's called internally
-     * when this instance is added to a {@link Configuration}. This method can be called only once (except with the same
-     * {@link Configuration} parameter again, as that changes nothing anyway).
-     *
-     * @throws IllegalArgumentException
-     *             if the argument is {@code null} or not a {@link Configuration}
-     * @throws IllegalStateException
-     *             if this object is already associated to a different {@link Configuration} object,
-     *             or if the {@code Configuration} has {@code #getIncompatibleImprovements()} less than 2.3.22 and
-     *             this object tries to change any non-parser settings
-     */
-    public void setParentConfiguration(Configuration configuration) {
-        _NullArgumentException.check(configuration);
-        synchronized (this) {
-            if (this.configuration != null && this.configuration != configuration) {
-                throw new IllegalStateException(
-                        "This TemplateConfiguration was already associated to another Configuration");
-            }
-            this.configuration = configuration;
-        }
-    }
-
-    /**
-     * Returns the parent {@link Configuration}, or {@code null} if none was associated yet.
-     */
-    public Configuration getParentConfiguration() {
-        return configuration;
-    }
-
-    private Configuration getNonNullParentConfiguration() {
-        if (configuration == null) {
-            throw new IllegalStateException("The TemplateConfiguration wasn't associated with a Configuration yet.");
-        }
-        return configuration;
-    }
-
-    /**
-     * Sets those settings of the {@link Template} which aren't yet set in the {@link Template} and are set in this
-     * {@link TemplateConfiguration}, leaves the other settings as is. A setting is said to be set in a
-     * {@link TemplateConfiguration} or {@link Template} if it was explicitly set via a setter method on that object, as
-     * opposed to be inherited from the {@link Configuration}.
-     * 
-     * <p>
-     * Note that this method doesn't deal with settings that influence the parser, as those are already baked in at this
-     * point via the {@link ParserConfiguration}. 
-     * 
-     * <p>
-     * Note that the {@code sourceEncoding} setting of the {@link Template} counts as unset if it's {@code null},
-     * even if {@code null} was set via {@link Template#setActualSourceEncoding(Charset)}.
-     *
-     * @throws IllegalStateException
-     *             If the parent configuration wasn't yet set.
-     */
-    public void apply(Template template) {
-        Configuration cfg = getNonNullParentConfiguration();
-        if (template.getConfiguration() != cfg) {
-            // This is actually not a problem right now, but for future BC we enforce this.
-            throw new IllegalArgumentException(
-                    "The argument Template doesn't belong to the same Configuration as the TemplateConfiguration");
-        }
-
-        if (isAPIBuiltinEnabledSet() && !template.isAPIBuiltinEnabledSet()) {
-            template.setAPIBuiltinEnabled(getAPIBuiltinEnabled());
-        }
-        if (isArithmeticEngineSet() && !template.isArithmeticEngineSet()) {
-            template.setArithmeticEngine(getArithmeticEngine());
-        }
-        if (isAutoFlushSet() && !template.isAutoFlushSet()) {
-            template.setAutoFlush(getAutoFlush());
-        }
-        if (isBooleanFormatSet() && !template.isBooleanFormatSet()) {
-            template.setBooleanFormat(getBooleanFormat());
-        }
-        if (isCustomDateFormatsSet()) {
-            template.setCustomDateFormats(
-                    mergeMaps(
-                            getCustomDateFormats(),
-                            template.isCustomDateFormatsSet() ? template.getCustomDateFormats() : null,
-                            false));
-        }
-        if (isCustomNumberFormatsSet()) {
-            template.setCustomNumberFormats(
-                    mergeMaps(
-                            getCustomNumberFormats(),
-                            template.isCustomNumberFormatsSet() ? template.getCustomNumberFormats() : null,
-                            false));
-        }
-        if (isDateFormatSet() && !template.isDateFormatSet()) {
-            template.setDateFormat(getDateFormat());
-        }
-        if (isDateTimeFormatSet() && !template.isDateTimeFormatSet()) {
-            template.setDateTimeFormat(getDateTimeFormat());
-        }
-        if (isLocaleSet() && !template.isLocaleSet()) {
-            template.setLocale(getLocale());
-        }
-        if (isLogTemplateExceptionsSet() && !template.isLogTemplateExceptionsSet()) {
-            template.setLogTemplateExceptions(getLogTemplateExceptions());
-        }
-        if (isNewBuiltinClassResolverSet() && !template.isNewBuiltinClassResolverSet()) {
-            template.setNewBuiltinClassResolver(getNewBuiltinClassResolver());
-        }
-        if (isNumberFormatSet() && !template.isNumberFormatSet()) {
-            template.setNumberFormat(getNumberFormat());
-        }
-        if (isObjectWrapperSet() && !template.isObjectWrapperSet()) {
-            template.setObjectWrapper(getObjectWrapper());
-        }
-        if (isOutputEncodingSet() && !template.isOutputEncodingSet()) {
-            template.setOutputEncoding(getOutputEncoding());
-        }
-        if (isShowErrorTipsSet() && !template.isShowErrorTipsSet()) {
-            template.setShowErrorTips(getShowErrorTips());
-        }
-        if (isSQLDateAndTimeTimeZoneSet() && !template.isSQLDateAndTimeTimeZoneSet()) {
-            template.setSQLDateAndTimeTimeZone(getSQLDateAndTimeTimeZone());
-        }
-        if (isTemplateExceptionHandlerSet() && !template.isTemplateExceptionHandlerSet()) {
-            template.setTemplateExceptionHandler(getTemplateExceptionHandler());
-        }
-        if (isTimeFormatSet() && !template.isTimeFormatSet()) {
-            template.setTimeFormat(getTimeFormat());
-        }
-        if (isTimeZoneSet() && !template.isTimeZoneSet()) {
-            template.setTimeZone(getTimeZone());
-        }
-        if (isURLEscapingCharsetSet() && !template.isURLEscapingCharsetSet()) {
-            template.setURLEscapingCharset(getURLEscapingCharset());
-        }
-        if (isLazyImportsSet() && !template.isLazyImportsSet()) {
-            template.setLazyImports(getLazyImports());
-        }
-        if (isLazyAutoImportsSet() && !template.isLazyAutoImportsSet()) {
-            template.setLazyAutoImports(getLazyAutoImports());
-        }
-        if (isAutoImportsSet()) {
-            // Regarding the order of the maps in the merge:
-            // - Existing template-level imports have precedence over those coming from the TC (just as with the others
-            //   apply()-ed settings), thus for clashing import prefixes they must win.
-            // - Template-level imports count as more specific, and so come after the more generic ones from TC.
-            template.setAutoImports(mergeMaps(
-                    getAutoImports(),
-                    template.isAutoImportsSet() ? template.getAutoImports() : null,
-                    true));
-        }
-        if (isAutoIncludesSet()) {
-            template.setAutoIncludes(mergeLists(
-                    getAutoIncludes(),
-                    template.isAutoIncludesSet() ? template.getAutoIncludes() : null));
-        }
-        
-        copyDirectCustomAttributes(template, false);
-
-    }
-
     private static <K,V> Map<K,V> mergeMaps(Map<K,V> m1, Map<K,V> m2, boolean overwriteUpdatesOrder) {
         if (m1 == null) return m2;
         if (m2 == null) return m1;
@@ -371,7 +186,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public int getTagSyntax() {
-        return tagSyntax != null ? tagSyntax : getNonNullParentConfiguration().getTagSyntax();
+        if (!isTagSyntaxSet()) {
+            throw new SettingValueNotSetException("tagSyntax");
+        }
+        return tagSyntax;
     }
 
     @Override
@@ -381,7 +199,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public TemplateLanguage getTemplateLanguage() {
-        return templateLanguage != null ? templateLanguage : getNonNullParentConfiguration().getTemplateLanguage();
+        if (!isTemplateLanguageSet()) {
+            throw new SettingValueNotSetException("templateLanguage");
+        }
+        return templateLanguage;
     }
 
     @Override
@@ -391,8 +212,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public int getNamingConvention() {
-        return namingConvention != null ? namingConvention
-                : getNonNullParentConfiguration().getNamingConvention();
+        if (!isNamingConventionSet()) {
+            throw new SettingValueNotSetException("namingConvention");
+        }
+        return namingConvention;
     }
 
     @Override
@@ -402,8 +225,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public boolean getWhitespaceStripping() {
-        return whitespaceStripping != null ? whitespaceStripping
-                : getNonNullParentConfiguration().getWhitespaceStripping();
+        if (!isWhitespaceStrippingSet()) {
+            throw new SettingValueNotSetException("whitespaceStripping");
+        }
+        return whitespaceStripping;
     }
 
     @Override
@@ -413,8 +238,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public int getAutoEscapingPolicy() {
-        return autoEscapingPolicy != null ? autoEscapingPolicy
-                : getNonNullParentConfiguration().getAutoEscapingPolicy();
+        if (!isAutoEscapingPolicySet()) {
+            throw new SettingValueNotSetException("autoEscapingPolicy");
+        }
+        return autoEscapingPolicy;
     }
 
     @Override
@@ -424,12 +251,18 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public OutputFormat getOutputFormat() {
-        return outputFormat != null ? outputFormat : getNonNullParentConfiguration().getOutputFormat();
+        if (!isOutputFormatSet()) {
+            throw new SettingValueNotSetException("outputFormat");
+        }
+        return outputFormat;
     }
 
     @Override
     public ArithmeticEngine getArithmeticEngine() {
-        return isArithmeticEngineSet() ? arithmeticEngine : getNonNullParentConfiguration().getArithmeticEngine();
+        if (!isArithmeticEngineSet()) {
+            throw new SettingValueNotSetException("arithmeticEngine");
+        }
+        return arithmeticEngine;
     }
 
     @Override
@@ -444,8 +277,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
     
     @Override
     public boolean getRecognizeStandardFileExtensions() {
-        return isRecognizeStandardFileExtensionsSet() ? recognizeStandardFileExtensions
-                : getNonNullParentConfiguration().getRecognizeStandardFileExtensions();
+        if (!isRecognizeStandardFileExtensionsSet()) {
+            throw new SettingValueNotSetException("recognizeStandardFileExtensions");
+        }
+        return recognizeStandardFileExtensions;
     }
     
     @Override
@@ -455,7 +290,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public Charset getSourceEncoding() {
-        return isSourceEncodingSet() ? sourceEncoding : getNonNullParentConfiguration().getSourceEncoding();
+        if (!isSourceEncodingSet()) {
+            throw new SettingValueNotSetException("sourceEncoding");
+        }
+        return sourceEncoding;
     }
 
     @Override
@@ -465,8 +303,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
     
     @Override
     public int getTabSize() {
-        return isTabSizeSet() ? tabSize
-                : getNonNullParentConfiguration().getTabSize();
+        if (!isTabSizeSet()) {
+            throw new SettingValueNotSetException("tabSize");
+        }
+        return tabSize;
     }
     
     @Override
@@ -475,20 +315,20 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
     }
     
     /**
-     * Returns {@link Configuration#getIncompatibleImprovements()} from the parent {@link Configuration}. This mostly
-     * just exist to satisfy the {@link ParserConfiguration} interface.
-     * 
-     * @throws IllegalStateException
-     *             If the parent configuration wasn't yet set.
+     * Always throws {@link SettingValueNotSetException}, as this can't be set on the {@link TemplateConfiguration}
+     * level.
      */
     @Override
     public Version getIncompatibleImprovements() {
-        return getNonNullParentConfiguration().getIncompatibleImprovements();
+        throw new SettingValueNotSetException("incompatibleImprovements");
     }
 
     @Override
     public Locale getLocale() {
-        return isLocaleSet() ? locale : getNonNullParentConfiguration().getLocale();
+        if (!isLocaleSet()) {
+            throw new SettingValueNotSetException("locale");
+        }
+        return locale;
     }
 
     @Override
@@ -498,7 +338,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public TimeZone getTimeZone() {
-        return isTimeZoneSet() ? timeZone : getNonNullParentConfiguration().getTimeZone();
+        if (!isTimeZoneSet()) {
+            throw new SettingValueNotSetException("timeZone");
+        }
+        return timeZone;
     }
 
     @Override
@@ -508,8 +351,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public TimeZone getSQLDateAndTimeTimeZone() {
-        return isSQLDateAndTimeTimeZoneSet() ? sqlDateAndTimeTimeZone : getNonNullParentConfiguration()
-                .getSQLDateAndTimeTimeZone();
+        if (!isSQLDateAndTimeTimeZoneSet()) {
+            throw new SettingValueNotSetException("sqlDateAndTimeTimeZone");
+        }
+        return sqlDateAndTimeTimeZone;
     }
 
     @Override
@@ -519,7 +364,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public String getNumberFormat() {
-        return isNumberFormatSet() ? numberFormat : getNonNullParentConfiguration().getNumberFormat();
+        if (!isNumberFormatSet()) {
+            throw new SettingValueNotSetException("numberFormat");
+        }
+        return numberFormat;
     }
 
     @Override
@@ -529,18 +377,15 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public Map<String, TemplateNumberFormatFactory> getCustomNumberFormats() {
-        return isCustomNumberFormatsSet() ? customNumberFormats : getNonNullParentConfiguration().getCustomNumberFormats();
+        if (!isCustomNumberFormatsSet()) {
+            throw new SettingValueNotSetException("customNumberFormats");
+        }
+        return customNumberFormats;
     }
 
     @Override
     public TemplateNumberFormatFactory getCustomNumberFormat(String name) {
-        if (isCustomNumberFormatsSet()) {
-            TemplateNumberFormatFactory format = customNumberFormats.get(name);
-            if (format != null) {
-                return  format;
-            }
-        }
-        return getNonNullParentConfiguration().getCustomNumberFormat(name);
+        return getCustomNumberFormats().get(name);
     }
 
     @Override
@@ -550,13 +395,16 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public boolean hasCustomFormats() {
-        return isCustomNumberFormatsSet() ? !customNumberFormats.isEmpty()
-                : getNonNullParentConfiguration().hasCustomFormats();
+        return isCustomNumberFormatsSet() && !customNumberFormats.isEmpty()
+                || isCustomDateFormatsSet() && !customDateFormats.isEmpty();
     }
 
     @Override
     public String getBooleanFormat() {
-        return isBooleanFormatSet() ? booleanFormat : getNonNullParentConfiguration().getBooleanFormat();
+        if (!isBooleanFormatSet()) {
+            throw new SettingValueNotSetException("booleanFormat");
+        }
+        return booleanFormat;
     }
 
     @Override
@@ -566,7 +414,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public String getTimeFormat() {
-        return isTimeFormatSet() ? timeFormat : getNonNullParentConfiguration().getTimeFormat();
+        if (!isTimeFormatSet()) {
+            throw new SettingValueNotSetException("timeFormat");
+        }
+        return timeFormat;
     }
 
     @Override
@@ -576,7 +427,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public String getDateFormat() {
-        return isDateFormatSet() ? dateFormat : getNonNullParentConfiguration().getDateFormat();
+        if (!isDateFormatSet()) {
+            throw new SettingValueNotSetException("dateFormat");
+        }
+        return dateFormat;
     }
 
     @Override
@@ -586,7 +440,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public String getDateTimeFormat() {
-        return isDateTimeFormatSet() ? dateTimeFormat : getNonNullParentConfiguration().getDateTimeFormat();
+        if (!isDateTimeFormatSet()) {
+            throw new SettingValueNotSetException("dateTimeFormat");
+        }
+        return dateTimeFormat;
     }
 
     @Override
@@ -596,7 +453,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public Map<String, TemplateDateFormatFactory> getCustomDateFormats() {
-        return isCustomDateFormatsSet() ? customDateFormats : getNonNullParentConfiguration().getCustomDateFormats();
+        if (!isCustomDateFormatsSet()) {
+            throw new SettingValueNotSetException("customDateFormats");
+        }
+        return customDateFormats;
     }
 
     @Override
@@ -607,7 +467,7 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
                 return  format;
             }
         }
-        return getNonNullParentConfiguration().getCustomDateFormat(name);
+        return null;
     }
 
     @Override
@@ -617,7 +477,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public TemplateExceptionHandler getTemplateExceptionHandler() {
-        return isTemplateExceptionHandlerSet() ? templateExceptionHandler : getNonNullParentConfiguration().getTemplateExceptionHandler();
+        if (!isTemplateExceptionHandlerSet()) {
+            throw new SettingValueNotSetException("templateExceptionHandler");
+        }
+        return templateExceptionHandler;
     }
 
     @Override
@@ -627,7 +490,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public ObjectWrapper getObjectWrapper() {
-        return isObjectWrapperSet() ? objectWrapper : getNonNullParentConfiguration().getObjectWrapper();
+        if (!isObjectWrapperSet()) {
+            throw new SettingValueNotSetException("objectWrapper");
+        }
+        return objectWrapper;
     }
 
     @Override
@@ -637,7 +503,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public Charset getOutputEncoding() {
-        return isOutputEncodingSet() ? outputEncoding : getNonNullParentConfiguration().getOutputEncoding();
+        if (!isOutputEncodingSet()) {
+            throw new SettingValueNotSetException("");
+        }
+        return outputEncoding;
     }
 
     @Override
@@ -647,7 +516,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public Charset getURLEscapingCharset() {
-        return isURLEscapingCharsetSet() ? urlEscapingCharset : getNonNullParentConfiguration().getURLEscapingCharset();
+        if (!isURLEscapingCharsetSet()) {
+            throw new SettingValueNotSetException("urlEscapingCharset");
+        }
+        return urlEscapingCharset;
     }
 
     @Override
@@ -657,7 +529,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public TemplateClassResolver getNewBuiltinClassResolver() {
-        return isNewBuiltinClassResolverSet() ? newBuiltinClassResolver : getNonNullParentConfiguration().getNewBuiltinClassResolver();
+        if (!isNewBuiltinClassResolverSet()) {
+            throw new SettingValueNotSetException("newBuiltinClassResolver");
+        }
+        return newBuiltinClassResolver;
     }
 
     @Override
@@ -667,7 +542,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public boolean getAPIBuiltinEnabled() {
-        return isAPIBuiltinEnabledSet() ? apiBuiltinEnabled : getNonNullParentConfiguration().getAPIBuiltinEnabled();
+        if (!isAPIBuiltinEnabledSet()) {
+            throw new SettingValueNotSetException("apiBuiltinEnabled");
+        }
+        return apiBuiltinEnabled;
     }
 
     @Override
@@ -677,7 +555,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public boolean getAutoFlush() {
-        return isAutoFlushSet() ? autoFlush : getNonNullParentConfiguration().getAutoFlush();
+        if (!isAutoFlushSet()) {
+            throw new SettingValueNotSetException("autoFlush");
+        }
+        return autoFlush;
     }
 
     @Override
@@ -687,7 +568,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public boolean getShowErrorTips() {
-        return isShowErrorTipsSet() ? showErrorTips : getNonNullParentConfiguration().getShowErrorTips();
+        if (!isShowErrorTipsSet()) {
+            throw new SettingValueNotSetException("showErrorTips");
+        }
+        return showErrorTips;
     }
 
     @Override
@@ -697,7 +581,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public boolean getLogTemplateExceptions() {
-        return isLogTemplateExceptionsSet() ? logTemplateExceptions : getNonNullParentConfiguration().getLogTemplateExceptions();
+        if (!isLogTemplateExceptionsSet()) {
+            throw new SettingValueNotSetException("logTemplateExceptions");
+        }
+        return logTemplateExceptions;
     }
 
     @Override
@@ -707,7 +594,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public boolean getLazyImports() {
-        return isLazyImportsSet() ? lazyImports : getNonNullParentConfiguration().getLazyImports();
+        if (!isLazyImportsSet()) {
+            throw new SettingValueNotSetException("lazyImports");
+        }
+        return lazyImports;
     }
 
     @Override
@@ -717,7 +607,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public Boolean getLazyAutoImports() {
-        return isLazyAutoImportsSet() ? lazyAutoImports : getNonNullParentConfiguration().getLazyAutoImports();
+        if (!isLazyAutoImportsSet()) {
+            throw new SettingValueNotSetException("lazyAutoImports");
+        }
+        return lazyAutoImports;
     }
 
     @Override
@@ -727,7 +620,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public Map<String, String> getAutoImports() {
-        return isAutoImportsSet() ? autoImports : getNonNullParentConfiguration().getAutoImports();
+        if (!isAutoImportsSet()) {
+            throw new SettingValueNotSetException("");
+        }
+        return autoImports;
     }
 
     @Override
@@ -737,7 +633,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public List<String> getAutoIncludes() {
-        return isAutoIncludesSet() ? autoIncludes : getNonNullParentConfiguration().getAutoIncludes();
+        if (!isAutoIncludesSet()) {
+            throw new SettingValueNotSetException("autoIncludes");
+        }
+        return autoIncludes;
     }
 
     @Override
@@ -747,7 +646,10 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
 
     @Override
     public Map<Object, Object> getCustomAttributes() {
-        return isCustomAttributesSet() ? customAttributes : getNonNullParentConfiguration().getCustomAttributes();
+        if (!isCustomAttributesSet()) {
+            throw new SettingValueNotSetException("customAttributes");
+        }
+        return customAttributes;
     }
 
     @Override
@@ -764,25 +666,19 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
                 return attValue;
             }
         }
-        return getNonNullParentConfiguration().getCustomAttribute(name);
+        return null;
     }
 
     public static final class Builder extends MutableProcessingAndParseConfiguration<Builder>
             implements CommonBuilder<TemplateConfiguration> {
 
         public Builder() {
-            super((Configuration) null);
+            super();
         }
 
         @Override
         public TemplateConfiguration build() {
             return new TemplateConfiguration(this);
-        }
-
-        // TODO This will be removed
-        @Override
-        void setParent(ProcessingConfiguration cfg) {
-            throw new UnsupportedOperationException();
         }
 
         @Override

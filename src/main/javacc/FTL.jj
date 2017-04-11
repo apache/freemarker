@@ -95,8 +95,12 @@ public class FMParser {
     private LinkedList escapes = new LinkedList();
     private int mixedContentNesting; // for stripText
 
-    FMParser(Template template, Reader reader, ParserConfiguration pCfg, InputStream streamToUnmarkWhenEncEstabd) {
-        this(template, true, readerToTokenManager(reader, pCfg), pCfg, streamToUnmarkWhenEncEstabd);
+    FMParser(Template template, Reader reader,
+            ParserConfiguration pCfg, OutputFormat outputFormat, Integer autoEscapingPolicy,
+            InputStream streamToUnmarkWhenEncEstabd) {
+        this(template, true, readerToTokenManager(reader, pCfg),
+                pCfg, outputFormat, autoEscapingPolicy,
+                streamToUnmarkWhenEncEstabd);
     }
 
     private static FMParserTokenManager readerToTokenManager(Reader reader, ParserConfiguration pCfg) {
@@ -105,7 +109,8 @@ public class FMParser {
         return new FMParserTokenManager(simpleCharStream);
     }
 
-    FMParser(Template template, boolean newTemplate, FMParserTokenManager tkMan, ParserConfiguration pCfg,
+    FMParser(Template template, boolean newTemplate, FMParserTokenManager tkMan,
+            ParserConfiguration pCfg, OutputFormat contextOutputFormat, Integer contextAutoEscapingPolicy,
     		InputStream streamToUnmarkWhenEncEstabd) {
         this(tkMan);
 
@@ -122,16 +127,14 @@ public class FMParser {
         this.incompatibleImprovements = incompatibleImprovements;
 
         {
-            OutputFormat outputFormatFromExt;
-            if (!pCfg.getRecognizeStandardFileExtensions()
-                    || (outputFormatFromExt = getFormatFromStdFileExt()) == null) {
-                autoEscapingPolicy = pCfg.getAutoEscapingPolicy();
-                outputFormat = pCfg.getOutputFormat();
-            } else {
-                // Override it
-                autoEscapingPolicy = Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY;
-                outputFormat = outputFormatFromExt;
-            }
+            OutputFormat outputFormatFromExt = pCfg.getRecognizeStandardFileExtensions() ? getFormatFromStdFileExt()
+                    : null;
+            outputFormat = contextOutputFormat != null ? contextOutputFormat
+                    : outputFormatFromExt != null ? outputFormatFromExt
+                    : pCfg.getOutputFormat();
+            autoEscapingPolicy = contextAutoEscapingPolicy != null ? contextAutoEscapingPolicy
+                    : outputFormatFromExt != null ? Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY
+                    : pCfg.getAutoEscapingPolicy();
         }
         recalculateAutoEscapingField();
 
@@ -169,7 +172,7 @@ public class FMParser {
         // If this is a Template under construction, we do the below.
         // If this is just the enclosing Template for ?eval or such, we must not modify it.
         if (newTemplate) {
-            template.setAutoEscaping(autoEscaping);
+            template.setAutoEscapingPolicy(autoEscapingPolicy);
             template.setOutputFormat(outputFormat);
         }
     }
@@ -192,7 +195,7 @@ public class FMParser {
     private OutputFormat getFormatFromStdFileExt() {
         String sourceName = template.getSourceName();
         if (sourceName == null) {
-            return null; // Not possible anyway...
+            return null;
         }
 
         int ln = sourceName.length();
@@ -3925,7 +3928,8 @@ void HeaderElement() :
                                 autoEscapingPolicy = Configuration.DISABLE_AUTO_ESCAPING_POLICY;
                             }
                             recalculateAutoEscapingField();
-                            template.setAutoEscaping(autoEscaping);
+
+                            template.setAutoEscapingPolicy(autoEscapingPolicy);
                         } else if (ks.equalsIgnoreCase("output_format") || ks.equals("outputFormat")) {
                             if (vs == null) {
                                 throw new ParseException("Expected a string constant for \"" + ks + "\".", exp);
@@ -3937,9 +3941,9 @@ void HeaderElement() :
 					        } catch (UnregisteredOutputFormatException e) {
 					            throw new ParseException(e.getMessage(), exp, e.getCause());
 					        }
-                            recalculateAutoEscapingField();                                
+                            recalculateAutoEscapingField();
+
                             template.setOutputFormat(outputFormat);
-                            template.setAutoEscaping(autoEscaping);
                         } else if (ks.equalsIgnoreCase("ns_prefixes") || ks.equals("nsPrefixes")) {
                             if (!(value instanceof TemplateHashModelEx)) {
                                 throw new ParseException("Expecting a hash of prefixes to namespace URI's.", exp);
@@ -3972,7 +3976,13 @@ void HeaderElement() :
                                 for (TemplateModelIterator it = keys.iterator(); it.hasNext();) {
                                         String attName = ((TemplateScalarModel) it.next()).getAsString();
                                         Object attValue = DeepUnwrap.unwrap(attributeMap.get(attName));
-                                        template.setCustomAttribute(attName, attValue);
+                                        if (attValue != null && !(attValue instanceof Serializable)) {
+                                            throw new ParseException(
+                                                    "Value of attribute " + _StringUtil.jQuote(attName)
+                                                    + " should implement java.io.Serializable.",
+                                                    exp);
+                                        }
+                                        template.setCustomAttribute(attName, (Serializable) attValue);
                                 }
                             } catch (TemplateModelException tme) {
                             }

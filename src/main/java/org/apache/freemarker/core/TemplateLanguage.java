@@ -43,10 +43,11 @@ public abstract class TemplateLanguage {
         }
 
         @Override
-        public Template parse(String name, String sourceName, Reader reader, Configuration cfg, ParserConfiguration
-                customParserConfiguration, Charset encoding, InputStream streamToUnmarkWhenEncEstabd) throws
+        public Template parse(String name, String sourceName, Reader reader, Configuration cfg,
+                TemplateConfiguration templateConfiguration, Charset encoding,
+                InputStream streamToUnmarkWhenEncEstabd) throws
                 IOException, ParseException {
-            return new Template(name, sourceName, reader, cfg, customParserConfiguration,
+            return new Template(name, sourceName, reader, cfg, templateConfiguration,
                     encoding, streamToUnmarkWhenEncEstabd);
         }
     };
@@ -58,8 +59,9 @@ public abstract class TemplateLanguage {
         }
 
         @Override
-        public Template parse(String name, String sourceName, Reader reader, Configuration cfg, ParserConfiguration
-                customParserConfiguration, Charset sourceEncoding, InputStream streamToUnmarkWhenEncEstabd)
+        public Template parse(String name, String sourceName, Reader reader, Configuration cfg,
+                TemplateConfiguration templateConfiguration, Charset sourceEncoding,
+                InputStream streamToUnmarkWhenEncEstabd)
                 throws IOException, ParseException {
             // Read the contents into a StringWriter, then construct a single-text-block template from it.
             final StringBuilder sb = new StringBuilder();
@@ -82,17 +84,18 @@ public abstract class TemplateLanguage {
 
     /**
      * Returns if the template can specify its own charset inside the template. If so, {@link #parse(String, String,
-     * Reader, Configuration, ParserConfiguration, Charset, InputStream)} can throw
+     * Reader, Configuration, TemplateConfiguration, Charset, InputStream)} can throw
      * {@link WrongTemplateCharsetException}, and it might gets a non-{@code null} for the {@link InputStream}
      * parameter.
      */
     public abstract boolean getCanSpecifyCharsetInContent();
 
     /**
-     * See {@link Template#Template(String, String, Reader, Configuration, ParserConfiguration, Charset, InputStream)}.
+     * See {@link Template#Template(String, String, Reader, Configuration, TemplateConfiguration, Charset,
+     * InputStream)}.
      */
     public abstract Template parse(String name, String sourceName, Reader reader,
-                                   Configuration cfg, ParserConfiguration customParserConfiguration,
+                                   Configuration cfg, TemplateConfiguration templateConfiguration,
                                    Charset encoding, InputStream streamToUnmarkWhenEncEstabd)
             throws IOException, ParseException;
 

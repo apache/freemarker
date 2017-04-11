@@ -276,23 +276,23 @@ public class OutputFormatTest extends TemplateTest {
             {
                 Template t = cfg.getTemplate("t");
                 if (cfgAutoEscaping) {
-                    assertTrue(t.getAutoEscaping());
+                    assertEquals(Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, t.getAutoEscapingPolicy());
                     assertOutput(t, "a&amp;b");
                 } else {
-                    assertFalse(t.getAutoEscaping());
+                    assertEquals(Configuration.DISABLE_AUTO_ESCAPING_POLICY, t.getAutoEscapingPolicy());
                     assertOutput(t, "a&b");
                 }
             }
             
             {
                 Template t = cfg.getTemplate("tWithHeaderFalse");
-                assertFalse(t.getAutoEscaping());
+                assertEquals(Configuration.DISABLE_AUTO_ESCAPING_POLICY, t.getAutoEscapingPolicy());
                 assertOutput(t, "a&b");
             }
             
             {
                 Template t = cfg.getTemplate("tWithHeaderTrue");
-                assertTrue(t.getAutoEscaping());
+                assertEquals(Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY, t.getAutoEscapingPolicy());
                 assertOutput(t, "a&amp;b");
             }
             

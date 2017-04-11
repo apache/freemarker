@@ -35,6 +35,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -77,47 +78,49 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
  * shared {@link Configuration}, and you are using {@link Configuration#getTemplate(String)} (or its overloads), then
  * use {@link Configuration#setTemplateConfigurations(org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory)} to achieve that.
  */
-public class Template extends MutableProcessingConfiguration<Template> implements CustomStateScope {
+// TODO [FM3] Try to make Template serializable for distributed caching. Transient fields will have to be restored.
+public class Template implements ProcessingConfiguration, CustomStateScope {
     public static final String DEFAULT_NAMESPACE_PREFIX = "D";
     public static final String NO_NS_PREFIX = "N";
 
     private static final int READER_BUFFER_SIZE = 8192;
-    
-    private Map macros = new HashMap();
-    private List imports = new ArrayList();
+
     private ASTElement rootElement;
-    private Charset actualSourceEncoding;
-    private String defaultNS;
-    private Serializable customLookupCondition;
-    private int actualTagSyntax;
-    private int actualNamingConvention;
-    private boolean autoEscaping;
-    private OutputFormat outputFormat;
-    private final String name;
+    private Map macros = new HashMap(); // TODO Don't create new object if it remains empty.
+    private List imports = new ArrayList(); // TODO Don't create new object if it remains empty.
+
+    // Source (TemplateLoader) related information:
     private final String sourceName;
     private final ArrayList lines = new ArrayList();
-    private final ParserConfiguration parserConfiguration;
+
+    // TODO [FM3] We want to get rid of these, thenthe same Template object could be reused for different lookups.
+    // Template lookup parameters:
+    private final String name;
+    private Locale lookupLocale;
+    private Serializable customLookupCondition;
+
+    // Inherited settings:
+    private final transient Configuration cfg;
+    private final transient TemplateConfiguration tCfg;
+    private final transient ParserConfiguration parserConfiguration;
+
+    // Values from the template content (#ftl header parameters usually), as opposed to from the TemplateConfiguration:
+    private transient OutputFormat outputFormat; // TODO Deserialization: use the name of the output format
+    private String defaultNS;
     private Map prefixToNamespaceURILookup = new HashMap();
     private Map namespaceURIToPrefixLookup = new HashMap();
+    private Map<String, Serializable> customAttributes;
+    private transient Map<Object, Object> mergedCustomAttributes;
 
+    private Integer autoEscapingPolicy;
+    // Values from template content that are detected automatically:
+    private Charset actualSourceEncoding;
+    private int actualTagSyntax;
+
+    private int actualNamingConvention;
+    // Custom state:
     private final Object lock = new Object();
     private final ConcurrentHashMap<CustomStateKey, Object> customStateMap = new ConcurrentHashMap<>(0);
-
-    /**
-     * A prime constructor to which all other constructors should
-     * delegate directly or indirectly.
-     */
-    private Template(String name, String sourceName, Configuration cfg, ParserConfiguration customParserConfiguration) {
-        super(cfg);
-        _NullArgumentException.check("cfg", cfg);
-        this.name = name;
-        this.sourceName = sourceName;
-        if (customParserConfiguration instanceof TemplateConfiguration.Builder) {
-            throw new IllegalArgumentException("Using TemplateConfiguration.Builder as Template constructor "
-                    + "argument is not allowed; the TemplateConfiguration that it has built is needed instead.");
-        }
-        parserConfiguration = customParserConfiguration != null ? customParserConfiguration : getConfiguration();
-    }
 
     /**
      * Same as {@link #Template(String, String, Reader, Configuration)} with {@code null} {@code sourceName} parameter.
@@ -134,6 +137,16 @@ public class Template extends MutableProcessingConfiguration<Template> implement
      */
     public Template(String name, String sourceCode, Configuration cfg) throws IOException {
         this(name, new StringReader(sourceCode), cfg);
+    }
+
+    /**
+     * Convenience constructor for {@link #Template(String, String, Reader, Configuration, TemplateConfiguration,
+     * Charset) Template(name, null, new StringReader(reader), cfg), tc, null}.
+     *
+     * @since 2.3.20
+     */
+    public Template(String name, String sourceCode, Configuration cfg, TemplateConfiguration tc) throws IOException {
+        this(name, null, new StringReader(sourceCode), cfg, tc, null);
     }
 
     /**
@@ -180,12 +193,12 @@ public class Template extends MutableProcessingConfiguration<Template> implement
            String name, String sourceName, Reader reader, Configuration cfg) throws IOException {
        this(name, sourceName, reader, cfg, null);
    }
-    
+
     /**
      * Same as {@link #Template(String, String, Reader, Configuration)}, but also specifies the template's source
      * encoding.
      *
-     * @param sourceEncoding
+     * @param actualSourceEncoding
      *            This is the charset that was used to read the template. This can be {@code null} if the template
      *            was loaded from a source that returns it already as text. If this is not {@code null} and there's an
      *            {@code #ftl} header with {@code encoding} parameter, they must match, or else a
@@ -194,43 +207,37 @@ public class Template extends MutableProcessingConfiguration<Template> implement
      * @since 2.3.22
      */
    public Template(
-           String name, String sourceName, Reader reader, Configuration cfg, Charset sourceEncoding) throws
+           String name, String sourceName, Reader reader, Configuration cfg, Charset actualSourceEncoding) throws
            IOException {
-       this(name, sourceName, reader, cfg, null, sourceEncoding);
+       this(name, sourceName, reader, cfg, null, actualSourceEncoding);
    }
-   
+
     /**
      * Same as {@link #Template(String, String, Reader, Configuration, Charset)}, but also specifies a
      * {@link TemplateConfiguration}. This is mostly meant to be used by FreeMarker internally, but advanced users might
      * still find this useful.
      * 
-     * @param customParserConfiguration
-     *            Overrides the parsing related configuration settings of the {@link Configuration} parameter; can be
+     * @param templateConfiguration
+     *            Overrides the configuration settings of the {@link Configuration} parameter; can be
      *            {@code null}. This is useful as the {@link Configuration} is normally a singleton shared by all
-     *            templates, and so it's not good for specifying template-specific settings. (While {@link Template}
-     *            itself has methods to specify settings just for that template, those don't influence the parsing, and
-     *            you only have opportunity to call them after the parsing anyway.) This objects is often a
-     *            {@link TemplateConfiguration} whose parent is the {@link Configuration} parameter, and then it
-     *            practically just overrides some of the parser settings, as the others are inherited from the
-     *            {@link Configuration}. Note that if this is a {@link TemplateConfiguration}, you will also want to
-     *            call {@link TemplateConfiguration#apply(Template)} on the resulting {@link Template} so that
-     *            {@link MutableProcessingConfiguration} settings will be set too, because this constructor only uses it as a
-     *            {@link ParserConfiguration}.
-     * @param sourceEncoding
+     *            templates, and so it's not good for specifying template-specific settings. Settings that influence
+     *            parsing always have an effect, while settings that influence processing only have effect when the
+     *            template is the main template of the {@link Environment}.
+     * @param actualSourceEncoding
      *            Same as in {@link #Template(String, String, Reader, Configuration, Charset)}.
      * 
      * @since 2.3.24
      */
    public Template(
            String name, String sourceName, Reader reader,
-           Configuration cfg, ParserConfiguration customParserConfiguration,
-           Charset sourceEncoding) throws IOException {
-       this(name, sourceName, reader, cfg, customParserConfiguration, sourceEncoding, null);
+           Configuration cfg, TemplateConfiguration templateConfiguration,
+           Charset actualSourceEncoding) throws IOException {
+       this(name, sourceName, reader, cfg, templateConfiguration, actualSourceEncoding, null);
     }
 
     /**
-     * Same as {@link #Template(String, String, Reader, Configuration, ParserConfiguration, Charset)}, but allows
-     * specifying the {@code streamToUnmarkWhenEncEstabd} {@link InputStream}.
+     * Same as {@link #Template(String, String, Reader, Configuration, TemplateConfiguration, Charset)}, but allows
+     * specifying the {@code streamToUnmarkWhenEncEstabd}.
      *
      * @param streamToUnmarkWhenEncEstabd
      *         If not {@code null}, when during the parsing we reach a point where we know that no {@link
@@ -240,29 +247,61 @@ public class Template extends MutableProcessingConfiguration<Template> implement
      *         that you can retry if a {@link WrongTemplateCharsetException} is thrown without extra I/O. As keeping that
      *         mark consumes some resources, so you may want to release it as soon as possible.
      */
-   public Template(
-           String name, String sourceName, Reader reader,
-           Configuration cfg, ParserConfiguration customParserConfiguration,
-           Charset sourceEncoding, InputStream streamToUnmarkWhenEncEstabd) throws IOException, ParseException {
-        this(name, sourceName, cfg, customParserConfiguration);
+    public Template(
+            String name, String sourceName, Reader reader,
+            Configuration cfg, TemplateConfiguration templateConfiguration,
+            Charset actualSourceEncoding, InputStream streamToUnmarkWhenEncEstabd) throws IOException, ParseException {
+        this(name, sourceName, reader,
+                cfg, templateConfiguration,
+                null, null,
+                actualSourceEncoding, streamToUnmarkWhenEncEstabd);
+    }
 
-       setActualSourceEncoding(sourceEncoding);
+    /**
+     * Same as {@link #Template(String, String, Reader, Configuration, TemplateConfiguration, Charset, InputStream)},
+     * but allows specifying the output format and the auto escaping policy, with similar effect as if they were
+     * specified in the template content (like in the #ftl header).
+     * <p>
+     * <p>This method is currently only used internally, as it's not generalized enough and so it carries too much
+     * backward compatibility risk. Also, the same functionality can be achieved by constructing an appropriate
+     * {@link TemplateConfiguration}, only that's somewhat slower.
+     *
+     * @param contextOutputFormat
+     *         The output format of the enclosing lexical context, used when a template snippet is parsed on runtime. If
+     *         not {@code null}, this will override the value coming from the {@link TemplateConfiguration} or the
+     *         {@link Configuration}.
+     * @param contextAutoEscapingPolicy
+     *         Similar to {@code contextOutputFormat}; usually this and the that is set together.
+     */
+   Template(
+            String name, String sourceName, Reader reader,
+            Configuration configuration, TemplateConfiguration templateConfiguration,
+            OutputFormat contextOutputFormat, Integer contextAutoEscapingPolicy,
+            Charset actualSourceEncoding, InputStream streamToUnmarkWhenEncEstabd) throws IOException, ParseException {
+        _NullArgumentException.check("configuration", configuration);
+        this.cfg = configuration;
+        this.tCfg = templateConfiguration;
+        this.parserConfiguration = tCfg != null ? new TemplateParserConfigurationWithFallback(cfg, tCfg) : cfg;
+        this.name = name;
+        this.sourceName = sourceName;
+
+        setActualSourceEncoding(actualSourceEncoding);
         LineTableBuilder ltbReader;
         try {
-            ParserConfiguration actualParserConfiguration = getParserConfiguration();
-            
             // Ensure that the parameter Reader is only read in bigger chunks, as we don't know if the it's buffered.
             // In particular, inside the FreeMarker code, we assume that the stream stages need not be buffered.
             if (!(reader instanceof BufferedReader) && !(reader instanceof StringReader)) {
                 reader = new BufferedReader(reader, READER_BUFFER_SIZE);
             }
             
-            ltbReader = new LineTableBuilder(reader, actualParserConfiguration);
+            ltbReader = new LineTableBuilder(reader, parserConfiguration);
             reader = ltbReader;
             
             try {
                 FMParser parser = new FMParser(
-                        this, reader, actualParserConfiguration, streamToUnmarkWhenEncEstabd);
+                        this, reader,
+                        parserConfiguration, contextOutputFormat, contextAutoEscapingPolicy,
+                        streamToUnmarkWhenEncEstabd);
                 try {
                     rootElement = parser.Root();
                 } catch (IndexOutOfBoundsException exc) {
@@ -550,19 +589,20 @@ public class Template extends MutableProcessingConfiguration<Template> implement
      * Returns the Configuration object associated with this template.
      */
     public Configuration getConfiguration() {
-        return (Configuration) getParent();
+        return cfg;
     }
-    
+
     /**
-     * Returns the {@link ParserConfiguration} that was used for parsing this template. This is most often the same
-     * object as {@link #getConfiguration()}, but sometimes it's a {@link TemplateConfiguration}, or something else.
-     * It's never {@code null}.
-     * 
-     * @since 2.3.24
+     * The {@link TemplateConfiguration} associated to this template, or {@code null} if there was none.
      */
+    public TemplateConfiguration getTemplateConfiguration() {
+        return tCfg;
+    }
+
     public ParserConfiguration getParserConfiguration() {
         return parserConfiguration;
     }
+
 
     /**
      * @param actualSourceEncoding
@@ -633,40 +673,39 @@ public class Template extends MutableProcessingConfiguration<Template> implement
      * Returns the output format (see {@link Configuration#setOutputFormat(OutputFormat)}) used for this template.
      * The output format of a template can come from various places, in order of increasing priority:
      * {@link Configuration#getOutputFormat()}, {@link ParserConfiguration#getOutputFormat()} (which is usually
-     * provided by {@link Configuration#getTemplateConfigurations()}) and the {@code #ftl} header's {@code output_format}
-     * option in the template.
+     * provided by {@link Configuration#getTemplateConfigurations()}) and the {@code #ftl} header's
+     * {@code output_format} option in the template.
      * 
      * @since 2.3.24
      */
     public OutputFormat getOutputFormat() {
         return outputFormat;
     }
-    
+
     /**
-     * Meant to be called by the parser only. 
+     * Should be called by the parser, for example to apply the output format specified in the #ftl header.
      */
     void setOutputFormat(OutputFormat outputFormat) {
         this.outputFormat = outputFormat;
     }
     
     /**
-     * Returns if the template actually uses auto-escaping (see {@link Configuration#setAutoEscapingPolicy(int)}). This value
-     * is decided by the parser based on the actual {@link OutputFormat}, and the auto-escaping enums, in order of
-     * increasing priority: {@link Configuration#getAutoEscapingPolicy()}, {@link ParserConfiguration#getAutoEscapingPolicy()}
-     * (which is usually provided by {@link Configuration#getTemplateConfigurations()}), and finally on the {@code #ftl}
-     * header's {@code auto_esc} option in the template.
-     * 
-     * @since 2.3.24
+     * Returns if the auto-escaping policy (see {@link Configuration#setAutoEscapingPolicy(int)}) that this template
+     * uses. This is decided from these, in increasing priority:
+     * {@link Configuration#getAutoEscapingPolicy()}, {@link ParserConfiguration#getAutoEscapingPolicy()},
+     * {@code #ftl} header's {@code auto_esc} option in the template.
      */
-    public boolean getAutoEscaping() {
-        return autoEscaping;
+    public int getAutoEscapingPolicy() {
+        return autoEscapingPolicy != null ? autoEscapingPolicy
+                : tCfg != null && tCfg.isAutoEscapingPolicySet() ? tCfg.getAutoEscapingPolicy()
+                : cfg.getAutoEscapingPolicy();
     }
 
     /**
-     * Meant to be called by the parser only. 
+     * Should be called by the parser, for example to apply the auto escaping policy specified in the #ftl header.
      */
-    void setAutoEscaping(boolean autoEscaping) {
-        this.autoEscaping = autoEscaping;
+    void setAutoEscapingPolicy(int autoEscapingPolicy) {
+        this.autoEscapingPolicy = autoEscapingPolicy;
     }
     
     /**
@@ -680,7 +719,7 @@ public class Template extends MutableProcessingConfiguration<Template> implement
      * Dump the raw template in canonical form.
      */
     public void dump(Writer out) throws IOException {
-        out.write(rootElement.getCanonicalForm());
+        out.write(rootElement != null ? rootElement.getCanonicalForm() : "Unfinished template");
     }
 
     void addMacro(ASTDirMacro macro) {
@@ -730,143 +769,346 @@ public class Template extends MutableProcessingConfiguration<Template> implement
     }
 
     @Override
-    protected Locale getInheritedLocale() {
-        return getParent().getLocale();
+    public Locale getLocale() {
+        // TODO [FM3] Temporary hack; See comment above the locale field
+        if (lookupLocale != null) {
+            return lookupLocale;
+        }
+
+        return tCfg != null && tCfg.isLocaleSet() ? tCfg.getLocale() : cfg.getLocale();
+    }
+
+    // TODO [FM3] Temporary hack; See comment above the locale field
+    public void setLookupLocale(Locale lookupLocale) {
+        this.lookupLocale = lookupLocale;
     }
 
     @Override
-    protected TimeZone getInheritedTimeZone() {
-        return getParent().getTimeZone();
+    public boolean isLocaleSet() {
+        return tCfg != null && tCfg.isLocaleSet();
     }
 
     @Override
-    protected TimeZone getInheritedSQLDateAndTimeTimeZone() {
-        return getParent().getSQLDateAndTimeTimeZone();
+    public TimeZone getTimeZone() {
+        return tCfg != null && tCfg.isTimeZoneSet() ? tCfg.getTimeZone() : cfg.getTimeZone();
     }
 
     @Override
-    protected String getInheritedNumberFormat() {
-        return getParent().getNumberFormat();
+    public boolean isTimeZoneSet() {
+        return tCfg != null && tCfg.isTimeZoneSet();
     }
 
     @Override
-    protected Map<String, TemplateNumberFormatFactory> getInheritedCustomNumberFormats() {
-        return getParent().getCustomNumberFormats();
+    public TimeZone getSQLDateAndTimeTimeZone() {
+        return tCfg != null && tCfg.isSQLDateAndTimeTimeZoneSet() ? tCfg.getSQLDateAndTimeTimeZone() : cfg.getSQLDateAndTimeTimeZone();
     }
 
     @Override
-    protected TemplateNumberFormatFactory getInheritedCustomNumberFormat(String name) {
-        return getParent().getCustomNumberFormat(name);
+    public boolean isSQLDateAndTimeTimeZoneSet() {
+        return tCfg != null && tCfg.isSQLDateAndTimeTimeZoneSet();
     }
 
     @Override
-    protected boolean getInheritedHasCustomFormats() {
-        return getParent().hasCustomFormats();
+    public String getNumberFormat() {
+        return tCfg != null && tCfg.isNumberFormatSet() ? tCfg.getNumberFormat() : cfg.getNumberFormat();
     }
 
     @Override
-    protected String getInheritedBooleanFormat() {
-        return getParent().getBooleanFormat();
+    public boolean isNumberFormatSet() {
+        return tCfg != null && tCfg.isNumberFormatSet();
     }
 
     @Override
-    protected String getInheritedTimeFormat() {
-        return getParent().getTimeFormat();
+    public Map<String, TemplateNumberFormatFactory> getCustomNumberFormats() {
+        return tCfg != null && tCfg.isCustomNumberFormatsSet() ? tCfg.getCustomNumberFormats()
+                : cfg.getCustomNumberFormats();
     }
 
     @Override
-    protected String getInheritedDateFormat() {
-        return getParent().getDateFormat();
+    public TemplateNumberFormatFactory getCustomNumberFormat(String name) {
+        if (tCfg != null && tCfg.isCustomNumberFormatsSet()) {
+            TemplateNumberFormatFactory value = tCfg.getCustomNumberFormats().get(name);
+            if (value != null) {
+                return value;
+            }
+        }
+        return cfg.getCustomNumberFormat(name);
     }
 
     @Override
-    protected String getInheritedDateTimeFormat() {
-        return getParent().getDateTimeFormat();
+    public boolean isCustomNumberFormatsSet() {
+        return tCfg != null && tCfg.isCustomNumberFormatsSet();
     }
 
     @Override
-    protected Map<String, TemplateDateFormatFactory> getInheritedCustomDateFormats() {
-        return getParent().getCustomDateFormats();
+    public boolean hasCustomFormats() {
+        if (tCfg != null && tCfg.hasCustomFormats()) {
+            return true;
+        }
+        return cfg.hasCustomFormats();
     }
 
     @Override
-    protected TemplateDateFormatFactory getInheritedCustomDateFormat(String name) {
-        return getParent().getCustomDateFormat(name);
+    public String getBooleanFormat() {
+        return tCfg != null && tCfg.isBooleanFormatSet() ? tCfg.getBooleanFormat() : cfg.getBooleanFormat();
     }
 
     @Override
-    protected TemplateExceptionHandler getInheritedTemplateExceptionHandler() {
-        return getParent().getTemplateExceptionHandler();
+    public boolean isBooleanFormatSet() {
+        return tCfg != null && tCfg.isBooleanFormatSet();
     }
 
     @Override
-    protected ArithmeticEngine getInheritedArithmeticEngine() {
-        return getParent().getArithmeticEngine();
+    public String getTimeFormat() {
+        return tCfg != null && tCfg.isTimeFormatSet() ? tCfg.getTimeFormat() : cfg.getTimeFormat();
     }
 
     @Override
-    protected ObjectWrapper getInheritedObjectWrapper() {
-        return getParent().getObjectWrapper();
+    public boolean isTimeFormatSet() {
+        return tCfg != null && tCfg.isTimeFormatSet();
     }
 
     @Override
-    protected Charset getInheritedOutputEncoding() {
-        return getParent().getOutputEncoding();
+    public String getDateFormat() {
+        return tCfg != null && tCfg.isDateFormatSet() ? tCfg.getDateFormat() : cfg.getDateFormat();
     }
 
     @Override
-    protected Charset getInheritedURLEscapingCharset() {
-        return getParent().getURLEscapingCharset();
+    public boolean isDateFormatSet() {
+        return tCfg != null && tCfg.isDateFormatSet();
     }
 
     @Override
-    protected TemplateClassResolver getInheritedNewBuiltinClassResolver() {
-        return getParent().getNewBuiltinClassResolver();
+    public String getDateTimeFormat() {
+        return tCfg != null && tCfg.isDateTimeFormatSet() ? tCfg.getDateTimeFormat() : cfg.getDateTimeFormat();
     }
 
     @Override
-    protected boolean getInheritedAutoFlush() {
-        return getParent().getAutoFlush();
+    public boolean isDateTimeFormatSet() {
+        return tCfg != null && tCfg.isDateTimeFormatSet();
     }
 
     @Override
-    protected boolean getInheritedShowErrorTips() {
-        return getParent().getShowErrorTips();
+    public Map<String, TemplateDateFormatFactory> getCustomDateFormats() {
+        return tCfg != null && tCfg.isCustomDateFormatsSet() ? tCfg.getCustomDateFormats() : cfg.getCustomDateFormats();
     }
 
     @Override
-    protected boolean getInheritedAPIBuiltinEnabled() {
-        return getParent().getAPIBuiltinEnabled();
+    public TemplateDateFormatFactory getCustomDateFormat(String name) {
+        if (tCfg != null && tCfg.isCustomDateFormatsSet()) {
+            TemplateDateFormatFactory value = tCfg.getCustomDateFormats().get(name);
+            if (value != null) {
+                return value;
+            }
+        }
+        return cfg.getCustomDateFormat(name);
     }
 
     @Override
-    protected boolean getInheritedLogTemplateExceptions() {
-        return getParent().getLogTemplateExceptions();
+    public boolean isCustomDateFormatsSet() {
+        return tCfg != null && tCfg.isCustomDateFormatsSet();
     }
 
     @Override
-    protected boolean getInheritedLazyImports() {
-        return getParent().getLazyImports();
+    public TemplateExceptionHandler getTemplateExceptionHandler() {
+        return tCfg != null && tCfg.isTemplateExceptionHandlerSet() ? tCfg.getTemplateExceptionHandler() : cfg.getTemplateExceptionHandler();
     }
 
     @Override
-    protected Boolean getInheritedLazyAutoImports() {
-        return getParent().getLazyAutoImports();
+    public boolean isTemplateExceptionHandlerSet() {
+        return tCfg != null && tCfg.isTemplateExceptionHandlerSet();
     }
 
     @Override
-    protected Map<String, String> getInheritedAutoImports() {
-        return getParent().getAutoImports();
+    public ArithmeticEngine getArithmeticEngine() {
+        return tCfg != null && tCfg.isArithmeticEngineSet() ? tCfg.getArithmeticEngine() : cfg.getArithmeticEngine();
     }
 
     @Override
-    protected List<String> getInheritedAutoIncludes() {
-        return getParent().getAutoIncludes();
+    public boolean isArithmeticEngineSet() {
+        return tCfg != null && tCfg.isArithmeticEngineSet();
     }
 
     @Override
-    protected Object getInheritedCustomAttribute(Object name) {
-        return getParent().getCustomAttribute(name);
+    public ObjectWrapper getObjectWrapper() {
+        return tCfg != null && tCfg.isObjectWrapperSet() ? tCfg.getObjectWrapper() : cfg.getObjectWrapper();
+    }
+
+    @Override
+    public boolean isObjectWrapperSet() {
+        return tCfg != null && tCfg.isObjectWrapperSet();
+    }
+
+    @Override
+    public Charset getOutputEncoding() {
+        return tCfg != null && tCfg.isOutputEncodingSet() ? tCfg.getOutputEncoding() : cfg.getOutputEncoding();
+    }
+
+    @Override
+    public boolean isOutputEncodingSet() {
+        return tCfg != null && tCfg.isOutputEncodingSet();
+    }
+
+    @Override
+    public Charset getURLEscapingCharset() {
+        return tCfg != null && tCfg.isURLEscapingCharsetSet() ? tCfg.getURLEscapingCharset() : cfg.getURLEscapingCharset();
+    }
+
+    @Override
+    public boolean isURLEscapingCharsetSet() {
+        return tCfg != null && tCfg.isURLEscapingCharsetSet();
+    }
+
+    @Override
+    public TemplateClassResolver getNewBuiltinClassResolver() {
+        return tCfg != null && tCfg.isNewBuiltinClassResolverSet() ? tCfg.getNewBuiltinClassResolver() : cfg.getNewBuiltinClassResolver();
+    }
+
+    @Override
+    public boolean isNewBuiltinClassResolverSet() {
+        return tCfg != null && tCfg.isNewBuiltinClassResolverSet();
+    }
+
+    @Override
+    public boolean getAPIBuiltinEnabled() {
+        return tCfg != null && tCfg.isAPIBuiltinEnabledSet() ? tCfg.getAPIBuiltinEnabled() : cfg.getAPIBuiltinEnabled();
+    }
+
+    @Override
+    public boolean isAPIBuiltinEnabledSet() {
+        return tCfg != null && tCfg.isAPIBuiltinEnabledSet();
+    }
+
+    @Override
+    public boolean getAutoFlush() {
+        return tCfg != null && tCfg.isAutoFlushSet() ? tCfg.getAutoFlush() : cfg.getAutoFlush();
+    }
+
+    @Override
+    public boolean isAutoFlushSet() {
+        return tCfg != null && tCfg.isAutoFlushSet();
+    }
+
+    @Override
+    public boolean getShowErrorTips() {
+        return tCfg != null && tCfg.isShowErrorTipsSet() ? tCfg.getShowErrorTips() : cfg.getShowErrorTips();
+    }
+
+    @Override
+    public boolean isShowErrorTipsSet() {
+        return tCfg != null && tCfg.isShowErrorTipsSet();
+    }
+
+    @Override
+    public boolean getLogTemplateExceptions() {
+        return tCfg != null && tCfg.isLogTemplateExceptionsSet() ? tCfg.getLogTemplateExceptions() : cfg.getLogTemplateExceptions();
+    }
+
+    @Override
+    public boolean isLogTemplateExceptionsSet() {
+        return tCfg != null && tCfg.isLogTemplateExceptionsSet();
+    }
+
+    @Override
+    public boolean getLazyImports() {
+        return tCfg != null && tCfg.isLazyImportsSet() ? tCfg.getLazyImports() : cfg.getLazyImports();
+    }
+
+    @Override
+    public boolean isLazyImportsSet() {
+        return tCfg != null && tCfg.isLazyImportsSet();
+    }
+
+    @Override
+    public Boolean getLazyAutoImports() {
+        return tCfg != null && tCfg.isLazyAutoImportsSet() ? tCfg.getLazyAutoImports() : cfg.getLazyAutoImports();
+    }
+
+    @Override
+    public boolean isLazyAutoImportsSet() {
+        return tCfg != null && tCfg.isLazyAutoImportsSet();
+    }
+
+    @Override
+    public Map<String, String> getAutoImports() {
+        return tCfg != null && tCfg.isAutoImportsSet() ? tCfg.getAutoImports() : cfg.getAutoImports();
+    }
+
+    @Override
+    public boolean isAutoImportsSet() {
+        return tCfg != null && tCfg.isAutoImportsSet();
+    }
+
+    @Override
+    public List<String> getAutoIncludes() {
+        return tCfg != null && tCfg.isAutoIncludesSet() ? tCfg.getAutoIncludes() : cfg.getAutoIncludes();
+    }
+
+    @Override
+    public boolean isAutoIncludesSet() {
+        return tCfg != null && tCfg.isAutoIncludesSet();
+    }
+
+    /**
+     * This exists to provide the functionality required by {@link ProcessingConfiguration}, but try not call it
+     * too frequently as it has some overhead compared to an usual getter.
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public Map<Object, Object> getCustomAttributes() {
+        if (mergedCustomAttributes != null) {
+            return Collections.unmodifiableMap(mergedCustomAttributes);
+        } else if (customAttributes != null) {
+            return (Map) Collections.unmodifiableMap(customAttributes);
+        } else if (tCfg != null && tCfg.isCustomAttributesSet()) {
+            return tCfg.getCustomAttributes();
+        } else {
+            return cfg.getCustomAttributes();
+        }
+    }
+
+    @Override
+    public boolean isCustomAttributesSet() {
+        return customAttributes != null || tCfg != null && tCfg.isCustomAttributesSet();
+    }
+
+    @Override
+    public Object getCustomAttribute(Object name) {
+        // Extra step for custom attributes specified in the #ftl header:
+        if (mergedCustomAttributes != null) {
+            Object value = mergedCustomAttributes.get(name);
+            if (value != null || mergedCustomAttributes.containsKey(name)) {
+                return value;
+            }
+        } else if (customAttributes != null) {
+            Object value = customAttributes.get(name);
+            if (value != null || customAttributes.containsKey(name)) {
+                return value;
+            }
+        } else if (tCfg != null && tCfg.isCustomAttributesSet()) {
+            Object value = tCfg.getCustomAttributes().get(name);
+            if (value != null || tCfg.getCustomAttributes().containsKey(name)) {
+                return value;
+            }
+        }
+        return cfg.getCustomAttribute(name);
+    }
+
+    /**
+     * Should be called by the parser, for example to add the attributes specified in the #ftl header.
+     */
+    void setCustomAttribute(String attName, Serializable attValue) {
+        if (customAttributes == null) {
+            customAttributes = new LinkedHashMap<>();
+        }
+        customAttributes.put(attName, attValue);
+
+        if (tCfg != null && tCfg.isCustomAttributesSet()) {
+            if (mergedCustomAttributes == null) {
+                mergedCustomAttributes = new LinkedHashMap<>(tCfg.getCustomAttributes());
+            }
+            mergedCustomAttributes.put(attName, attValue);
+        }
     }
 
     /**

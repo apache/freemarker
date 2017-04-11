@@ -793,9 +793,6 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
      */
     public void setTemplateConfigurations(TemplateConfigurationFactory templateConfigurations) {
         if (templateResolver.getTemplateConfigurations() != templateConfigurations) {
-            if (templateConfigurations != null) {
-                templateConfigurations.setConfiguration(this);
-            }
             recreateTemplateResolverWith(templateResolver.getTemplateLoader(), templateResolver.getCacheStorage(),
                     templateResolver.getTemplateLookupStrategy(), templateResolver.getTemplateNameFormat(),
                     templateConfigurations);

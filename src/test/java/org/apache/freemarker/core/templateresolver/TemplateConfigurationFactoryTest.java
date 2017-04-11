@@ -38,8 +38,7 @@ public class TemplateConfigurationFactoryTest {
         TemplateConfiguration tc = newTemplateConfiguration(1);
         
         TemplateConfigurationFactory tcf = new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*.ftlx"), tc);
-        tcf.setConfiguration(cfg);
-        
+
         assertNotApplicable(tcf, "x.ftl");
         assertApplicable(tcf, "x.ftlx", tc);
     }
@@ -52,8 +51,7 @@ public class TemplateConfigurationFactoryTest {
                 new FileNameGlobMatcher("*.ftlx"),
                 new ConditionalTemplateConfigurationFactory(
                         new FileNameGlobMatcher("x.*"), tc));
-        tcf.setConfiguration(cfg);
-        
+
         assertNotApplicable(tcf, "x.ftl");
         assertNotApplicable(tcf, "y.ftlx");
         assertApplicable(tcf, "x.ftlx", tc);
@@ -69,8 +67,7 @@ public class TemplateConfigurationFactoryTest {
                 new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*.ftlx"), tc1),
                 new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*a*.*"), tc2),
                 new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*b*.*"), tc3));
-        tcf.setConfiguration(cfg);
-        
+
         assertNotApplicable(tcf, "x.ftl");
         assertApplicable(tcf, "x.ftlx", tc1);
         assertApplicable(tcf, "a.ftl", tc2);
@@ -93,7 +90,6 @@ public class TemplateConfigurationFactoryTest {
                 new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*.ftlx"), tc1),
                 new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*a*.*"), tc2),
                 new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*b*.*"), tc3));
-        tcf.setConfiguration(cfg);
 
         try {
             assertNotApplicable(tcf, "x.ftl");
@@ -145,8 +141,7 @@ public class TemplateConfigurationFactoryTest {
                         new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*.*x"), tcXml))
                         .allowNoMatch(true),
                 new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*.nws.*"), tcNWS));
-        tcf.setConfiguration(cfg);
-        
+
         assertNotApplicable(tcf, "x.ftl");
         assertApplicable(tcf, "b/x.ftl", tcBCommon);
         assertApplicable(tcf, "b/x.s.ftl", tcBCommon, tcBSpec);
@@ -155,29 +150,6 @@ public class TemplateConfigurationFactoryTest {
         assertApplicable(tcf, "a/x.s.nws.ftlx", tcA, tcXml, tcNWS);
         assertApplicable(tcf, "a.hh", tcHH);
         assertApplicable(tcf, "a.nws.hh", tcHH, tcNWS);
-    }
-
-    @Test
-    public void testSetConfiguration() {
-        TemplateConfiguration tc = new TemplateConfiguration.Builder().build();
-        ConditionalTemplateConfigurationFactory tcf = new ConditionalTemplateConfigurationFactory(
-                new FileNameGlobMatcher("*"), tc);
-        assertNull(tcf.getConfiguration());
-        assertNull(tc.getParentConfiguration());
-        
-        tcf.setConfiguration(cfg);
-        assertEquals(cfg, tcf.getConfiguration());
-        assertEquals(cfg, tc.getParentConfiguration());
-        
-        // Ignored:
-        tcf.setConfiguration(cfg);
-        
-        try {
-            tcf.setConfiguration(new Configuration(Configuration.VERSION_3_0_0));
-            fail();
-        } catch (IllegalStateException e) {
-            assertThat(e.getMessage(), containsString("TemplateConfigurationFactory"));
-        }
     }
 
     @SuppressWarnings("boxing")
@@ -196,7 +168,6 @@ public class TemplateConfigurationFactoryTest {
     private void assertApplicable(TemplateConfigurationFactory tcf, String sourceName, TemplateConfiguration... expectedTCs)
             throws IOException, TemplateConfigurationFactoryException {
         TemplateConfiguration mergedTC = tcf.get(sourceName, DummyTemplateLoadingSource.INSTANCE);
-        assertNotNull("TC should have its parents Configuration set", mergedTC.getParentConfiguration());
         List<Object> mergedTCAttNames = new ArrayList<Object>(mergedTC.getCustomAttributes().keySet());
 
         for (TemplateConfiguration expectedTC : expectedTCs) {

@@ -86,14 +86,11 @@ class BuiltInsForStringsMisc {
                             simpleCharStream);
                     tkMan.SwitchTo(FMParserConstants.FM_EXPRESSION);
 
-                    // pCfg.outputFormat is exceptional: it's inherited from the lexical context
-                    if (pCfg.getOutputFormat() != outputFormat) {
-                        pCfg = new _ParserConfigurationWithInheritedFormat(
-                                pCfg, outputFormat, Integer.valueOf(autoEscapingPolicy));
-                    }
-                    
+                    // pCfg.outputFormat+autoEscapingPolicy is exceptional: it's inherited from the lexical context
                     FMParser parser = new FMParser(
-                            parentTemplate, false, tkMan, pCfg, null);
+                            parentTemplate, false, tkMan,
+                            pCfg, outputFormat, autoEscapingPolicy,
+                            null);
                     
                     exp = parser.ASTExpression();
                 } catch (TokenMgrError e) {
@@ -172,17 +169,14 @@ class BuiltInsForStringsMisc {
             final Template interpretedTemplate;
             try {
                 ParserConfiguration pCfg = parentTemplate.getParserConfiguration();
-                // pCfg.outputFormat is exceptional: it's inherited from the lexical context
-                if (pCfg.getOutputFormat() != outputFormat) {
-                    pCfg = new _ParserConfigurationWithInheritedFormat(
-                            pCfg, outputFormat, Integer.valueOf(autoEscapingPolicy));
-                }
+                // pCfg.outputFormat+autoEscapingPolicy is exceptional: it's inherited from the lexical context
                 interpretedTemplate = new Template(
                         (parentTemplate.getName() != null ? parentTemplate.getName() : "nameless_template") + "->" + id,
                         null,
                         new StringReader(templateSource),
-                        parentTemplate.getConfiguration(), pCfg,
-                        null);
+                        parentTemplate.getConfiguration(), parentTemplate.getTemplateConfiguration(),
+                        outputFormat, autoEscapingPolicy,
+                        null, null);
             } catch (IOException e) {
                 throw new _MiscTemplateException(this, e, env,
                         "Template parsing with \"?", key, "\" has failed with this error:\n\n",
@@ -192,7 +186,6 @@ class BuiltInsForStringsMisc {
                         "\n\nThe failed expression:");
             }
             
-            interpretedTemplate.setLocale(env.getLocale());
             return new TemplateProcessorModel(interpretedTemplate);
         }
 
