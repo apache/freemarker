@@ -205,3 +205,4 @@ the FreeMarer 3 changelog here:
   sourceEncoding used during parsing.)
 - Made TemplateModel classes used by the parser for literals Serializable. (Without this attribute values set in the #ftl
   header wouldn't be always Serializable, which in turn will sabotage making Template-s Serializable in the future.)
+- Removed hasCustomFormats() from configuration related API-s (we don't need it anymore)

@@ -1235,11 +1235,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     @Override
-    protected boolean getInheritedHasCustomFormats() {
-        return getMainTemplate().hasCustomFormats();
-    }
-
-    @Override
     protected String getInheritedBooleanFormat() {
         return getMainTemplate().getBooleanFormat();
     }

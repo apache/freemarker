@@ -394,12 +394,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     }
 
     @Override
-    public boolean hasCustomFormats() {
-        return isCustomNumberFormatsSet() && !customNumberFormats.isEmpty()
-                || isCustomDateFormatsSet() && !customDateFormats.isEmpty();
-    }
-
-    @Override
     public String getBooleanFormat() {
         if (!isBooleanFormatSet()) {
             throw new SettingValueNotSetException("booleanFormat");
@@ -709,11 +703,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         @Override
         protected TemplateNumberFormatFactory getInheritedCustomNumberFormat(String name) {
             return null;
-        }
-
-        @Override
-        protected boolean getInheritedHasCustomFormats() {
-            return false;
         }
 
         @Override

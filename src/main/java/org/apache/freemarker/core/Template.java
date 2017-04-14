@@ -841,14 +841,6 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     }
 
     @Override
-    public boolean hasCustomFormats() {
-        if (tCfg != null && tCfg.hasCustomFormats()) {
-            return true;
-        }
-        return cfg.hasCustomFormats();
-    }
-
-    @Override
     public String getBooleanFormat() {
         return tCfg != null && tCfg.isBooleanFormatSet() ? tCfg.getBooleanFormat() : cfg.getBooleanFormat();
     }

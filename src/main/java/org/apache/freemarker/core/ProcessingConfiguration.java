@@ -211,13 +211,6 @@ public interface ProcessingConfiguration {
     boolean isCustomNumberFormatsSet();
 
     /**
-     * Tells if {@link #getCustomNumberFormat(String)} or {@link #getCustomDateFormat(String)} (or any other future
-     * method that returns custom formats) will return a custom format for some name. (Knowing that it's not the case
-     * allows certain optimizations.)
-     */
-    boolean hasCustomFormats();
-
-    /**
      * The string value for the boolean {@code true} and {@code false} values, intended for human audience (not for a
      * computer language), separated with comma. For example, {@code "yes,no"}. Note that white-space is significant,
      * so {@code "yes, no"} is WRONG (unless you want that leading space before "no").

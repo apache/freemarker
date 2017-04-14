@@ -594,15 +594,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     protected abstract TemplateNumberFormatFactory getInheritedCustomNumberFormat(String name);
 
-    @Override
-    public boolean hasCustomFormats() {
-        return isCustomNumberFormatsSet() && !customNumberFormats.isEmpty()
-                || isCustomDateFormatsSet() && !customDateFormats.isEmpty()
-                || getInheritedHasCustomFormats();
-    }
-
-    protected abstract boolean getInheritedHasCustomFormats();
-
     /**
      * Setter pair of {@link #getBooleanFormat()}.
      */

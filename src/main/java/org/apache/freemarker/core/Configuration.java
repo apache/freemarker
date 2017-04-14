@@ -1141,11 +1141,6 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
     }
 
     @Override
-    protected boolean getInheritedHasCustomFormats() {
-        return false;
-    }
-
-    @Override
     protected String getInheritedBooleanFormat() {
         throw new BugException("Missing property value");
     }
