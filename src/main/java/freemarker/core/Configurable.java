@@ -684,7 +684,7 @@ public class Configurable {
     /**
      * Sets the time zone used when dealing with {@link java.sql.Date java.sql.Date} and
      * {@link java.sql.Time java.sql.Time} values. It defaults to {@code null} for backward compatibility, but in most
-     * application this should be set to the JVM default time zone (server default time zone), because that's what
+     * applications this should be set to the JVM default time zone (server default time zone), because that's what
      * most JDBC drivers will use when constructing the {@link java.sql.Date java.sql.Date} and
      * {@link java.sql.Time java.sql.Time} values. If this setting is {@code null}, FreeMarker will use the value of
      * ({@link #getTimeZone()}) for {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values,
@@ -695,7 +695,7 @@ public class Configurable {
      * 
      * <p>To decide what value you need, a few things has to be understood:
      * <ul>
-     *   <li>Date-only and time-only values in SQL-oriented databases are usually store calendar and clock field
+     *   <li>Date-only and time-only values in SQL-oriented databases usually store calendar and clock field
      *   values directly (year, month, day, or hour, minute, seconds (with decimals)), as opposed to a set of points
      *   on the physical time line. Thus, unlike SQL timestamps, these values usually aren't meant to be shown
      *   differently depending on the time zone of the audience.
@@ -709,7 +709,7 @@ public class Configurable {
      *   Then, 2014-07-12 in the database will be translated to physical time 2014-07-11 22:00:00 UTC, because that
      *   rendered in GMT+02:00 gives 2014-07-12 00:00:00. Similarly, 11:57:00 in the database will be translated to
      *   physical time 1970-01-01 09:57:00 UTC. Thus, the physical time stored in the returned value depends on the
-     *   default system time zone of the JDBC client, not just on the content in the database. (This used to be the
+     *   default system time zone of the JDBC client, not just on the content of the database. (This used to be the
      *   default behavior of ORM-s, like Hibernate, too.)
      *   
      *   <li>The value of the {@code time_zone} FreeMarker configuration setting sets the time zone used for the
@@ -725,11 +725,12 @@ public class Configurable {
      *   values from the earlier examples will be shown as 2014-07-11 (one day off) and 09:57:00 (2 hours off). While
      *   those are the time zone correct renderings, those values are probably meant to be shown "as is".
      *   
-     *   <li>You may wonder why this setting isn't simply "SQL time zone", since the time zone related behavior of JDBC
-     *   applies to {@link java.sql.Timestamp java.sql.Timestamp} too. FreeMarker assumes that you have set up your
-     *   application so that time stamps coming from the database go through the necessary conversion to store the
-     *   correct distance from the epoch (1970-01-01 00:00:00 UTC), as requested by {@link java.util.Date}. In that case
-     *   the time stamp can be safely rendered in different time zones, and thus it needs no special treatment.
+     *   <li>You may wonder why this setting isn't simply "SQL time zone", that is, why's this time zone not applied to
+     *   {@link java.sql.Timestamp java.sql.Timestamp} values as well. Timestamps in databases refer to a point on
+     *   the physical time line, and thus doesn't have the inherent problem of date-only and time-only values.
+     *   FreeMarker assumes that the JDBC driver converts time stamps coming from the database so that they store
+     *   the distance from the epoch (1970-01-01 00:00:00 UTC), as requested by the {@link java.util.Date} API.
+     *   Then time stamps can be safely rendered in different time zones, and thus need no special treatment.
      * </ul>
      * 
      * @param tz Maybe {@code null}, in which case {@link java.sql.Date java.sql.Date} and
@@ -779,8 +780,8 @@ public class Configurable {
      *   <li>{@code "currency"}: The number format returned by {@link NumberFormat#getCurrencyInstance(Locale)}</li>
      *   <li>{@code "percent"}: The number format returned by {@link NumberFormat#getPercentInstance(Locale)}</li>
      *   <li>{@code "computer"}: The number format used by FTL's {@code c} built-in (like in {@code someNumber?c}).</li>
-     *   <li>{@link java.text.DecimalFormat} pattern (like {@code "0.##"}). This syntax has a FreeMarker-specific
-     *       extension, so that you can specify options like the rounding mode and the symbols used in this string. For
+     *   <li>{@link java.text.DecimalFormat} pattern (like {@code "0.##"}). This syntax is extended by FreeMarker
+     *       so that you can specify options like the rounding mode and the symbols used after a 2nd semicolon. For
      *       example, {@code ",000;; roundingMode=halfUp groupingSeparator=_"} will format numbers like {@code ",000"}
      *       would, but with half-up rounding mode, and {@code _} as the group separator. See more about "extended Java
      *       decimal format" in the FreeMarker Manual.
@@ -1050,12 +1051,12 @@ public class Configurable {
     }
 
     /**
-     * Sets the format used to convert {@link java.util.Date}-s to string-s that are time (no date part) values,
-     * also the format that {@code someString?time} will use to parse strings.
-     * 
+     * Sets the format used to convert {@link java.util.Date}-s that are time (no date part) values to string-s, also
+     * the format that {@code someString?time} will use to parse strings.
+     *
      * <p>For the possible values see {@link #setDateTimeFormat(String)}.
-     *   
-     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "medium"}.
+     *
+     * <p>Defaults to {@code ""}, which is equivalent to {@code "medium"}.
      */
     public void setTimeFormat(String timeFormat) {
         NullArgumentException.check("timeFormat", timeFormat);
@@ -1080,12 +1081,12 @@ public class Configurable {
     }
     
     /**
-     * Sets the format used to convert {@link java.util.Date}-s to string-s that are date (no time part) values,
+     * Sets the format used to convert {@link java.util.Date}-s that are date-only (no time part) values to string-s,
      * also the format that {@code someString?date} will use to parse strings.
      * 
      * <p>For the possible values see {@link #setDateTimeFormat(String)}.
      *   
-     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "medium"}.
+     * <p>Defaults to {@code ""} which is equivalent to {@code "medium"}.
      */
     public void setDateFormat(String dateFormat) {
         NullArgumentException.check("dateFormat", dateFormat);
@@ -1110,7 +1111,7 @@ public class Configurable {
     }
     
     /**
-     * Sets the format used to convert {@link java.util.Date}-s to string-s that are date-time (timestamp) values,
+     * Sets the format used to convert {@link java.util.Date}-s that are date-time (timestamp) values to string-s,
      * also the format that {@code someString?datetime} will use to parse strings.
      * 
      * <p>The possible setting values are (the quotation marks aren't part of the value itself):
@@ -1193,7 +1194,7 @@ public class Configurable {
      *       
      * </ul> 
      * 
-     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "medium_medium"}.
+     * <p>Defaults to {@code ""}, which is equivalent to {@code "medium_medium"}.
      */
     public void setDateTimeFormat(String dateTimeFormat) {
         NullArgumentException.check("dateTimeFormat", dateTimeFormat);
