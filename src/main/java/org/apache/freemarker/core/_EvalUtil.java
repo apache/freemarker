@@ -539,7 +539,7 @@ public class _EvalUtil {
     static ArithmeticEngine getArithmeticEngine(Environment env, ASTNode tObj) {
         return env != null
                 ? env.getArithmeticEngine()
-                : tObj.getTemplate().getParserConfiguration().getArithmeticEngine();
+                : tObj.getTemplate().getParsingConfiguration().getArithmeticEngine();
     }
     
 }

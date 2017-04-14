@@ -190,6 +190,7 @@ the FreeMarer 3 changelog here:
   - Made TemplateConfiguration immutable, added a TemplateConfiguration.Builder.
   - Made Template immutable (via public API-s). Template-specific settings now can only come from the TemplateConfiguration associated
     to the template, or from the #ftl header for some settings (most notably for custom attributes).
+  - Renamed ParserConfiguration to ParsingConfiguration, so that the name is more consistent with the new ProcessingConfiguration.
 - Settings that have contained a charset name (sourceEncoding, outputEncoding, URLEscapingCharset) are now of type Charset,
   not String. For string based configuration sources (such as .properties files) this means that:
   - Unrecognized charset names are now errors

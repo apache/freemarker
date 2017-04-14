@@ -25,14 +25,14 @@ import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 
 /**
- * Adds {@link Configuration} fallback to the {@link ParserConfiguration} part of a {@link TemplateConfiguration}.
+ * Adds {@link Configuration} fallback to the {@link ParsingConfiguration} part of a {@link TemplateConfiguration}.
  */
-final class TemplateParserConfigurationWithFallback implements ParserConfiguration {
+final class TemplateParsingConfigurationWithFallback implements ParsingConfiguration {
 
     private final Configuration cfg;
     private final TemplateConfiguration tCfg;
 
-    TemplateParserConfigurationWithFallback(Configuration cfg, TemplateConfiguration tCfg) {
+    TemplateParsingConfigurationWithFallback(Configuration cfg, TemplateConfiguration tCfg) {
         this.cfg = cfg;
         this.tCfg = tCfg;
     }

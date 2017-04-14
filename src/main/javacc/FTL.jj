@@ -80,7 +80,7 @@ public class FMParser {
     private OutputFormat outputFormat;
     private int autoEscapingPolicy;
     private boolean autoEscaping;
-    private ParserConfiguration pCfg;
+    private ParsingConfiguration pCfg;
     private InputStream streamToUnmarkWhenEncEstabd;
 
     /** Keeps track of #list nesting. */
@@ -96,21 +96,21 @@ public class FMParser {
     private int mixedContentNesting; // for stripText
 
     FMParser(Template template, Reader reader,
-            ParserConfiguration pCfg, OutputFormat outputFormat, Integer autoEscapingPolicy,
+            ParsingConfiguration pCfg, OutputFormat outputFormat, Integer autoEscapingPolicy,
             InputStream streamToUnmarkWhenEncEstabd) {
         this(template, true, readerToTokenManager(reader, pCfg),
                 pCfg, outputFormat, autoEscapingPolicy,
                 streamToUnmarkWhenEncEstabd);
     }
 
-    private static FMParserTokenManager readerToTokenManager(Reader reader, ParserConfiguration pCfg) {
+    private static FMParserTokenManager readerToTokenManager(Reader reader, ParsingConfiguration pCfg) {
         SimpleCharStream simpleCharStream = new SimpleCharStream(reader, 1, 1);
         simpleCharStream.setTabSize(pCfg.getTabSize());
         return new FMParserTokenManager(simpleCharStream);
     }
 
     FMParser(Template template, boolean newTemplate, FMParserTokenManager tkMan,
-            ParserConfiguration pCfg, OutputFormat contextOutputFormat, Integer contextAutoEscapingPolicy,
+            ParsingConfiguration pCfg, OutputFormat contextOutputFormat, Integer contextAutoEscapingPolicy,
     		InputStream streamToUnmarkWhenEncEstabd) {
         this(tkMan);
 

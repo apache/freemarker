@@ -145,7 +145,7 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
  * The methods that aren't for modifying settings, like {@link #getTemplate(String)}, are thread-safe.
  */
 public final class Configuration extends MutableProcessingConfiguration<Configuration>
-        implements Cloneable, ParserAndProcessingConfiguration, CustomStateScope {
+        implements Cloneable, ParsingAndProcessingConfiguration, CustomStateScope {
     
     private static final String VERSION_PROPERTIES_PATH = "org/apache/freemarker/core/version.properties";
     

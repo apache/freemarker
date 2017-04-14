@@ -21,9 +21,9 @@ package org.apache.freemarker.core;
 
 /**
  * <b>Don't implement this interface yourself</b>; use the existing implementation(s). This interface is the union of
- * {@link ProcessingConfiguration} and {@link ParserConfiguration}, which is useful for declaring types for values
+ * {@link ProcessingConfiguration} and {@link ParsingConfiguration}, which is useful for declaring types for values
  * that must implement both interfaces.
  */
-public interface ParserAndProcessingConfiguration extends ParserConfiguration, ProcessingConfiguration {
+public interface ParsingAndProcessingConfiguration extends ParsingConfiguration, ProcessingConfiguration {
     // No additional method
 }

@@ -54,7 +54,7 @@ final class ASTExpStringLiteral extends ASTExpression implements TemplateScalarM
         if (value.length() > 3 && (value.indexOf("${") >= 0 || value.indexOf("#{") >= 0)) {
             
             Template parentTemplate = getTemplate();
-            ParserConfiguration pCfg = parentTemplate.getParserConfiguration();
+            ParsingConfiguration pCfg = parentTemplate.getParsingConfiguration();
 
             try {
                 SimpleCharStream simpleCharacterStream = new SimpleCharStream(

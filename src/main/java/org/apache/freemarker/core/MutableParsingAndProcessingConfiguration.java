@@ -27,10 +27,10 @@ import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.util._NullArgumentException;
 
 // TODO This will be the superclass of TemplateConfiguration.Builder and Configuration.Builder
-public abstract class MutableProcessingAndParseConfiguration<
-        SelfT extends MutableProcessingAndParseConfiguration<SelfT>>
+public abstract class MutableParsingAndProcessingConfiguration<
+        SelfT extends MutableParsingAndProcessingConfiguration<SelfT>>
         extends MutableProcessingConfiguration<SelfT>
-        implements ParserAndProcessingConfiguration {
+        implements ParsingAndProcessingConfiguration {
 
     private TemplateLanguage templateLanguage;
     private Integer tagSyntax;
@@ -42,11 +42,11 @@ public abstract class MutableProcessingAndParseConfiguration<
     private Charset sourceEncoding;
     private Integer tabSize;
 
-    protected MutableProcessingAndParseConfiguration(Version incompatibleImprovements) {
+    protected MutableParsingAndProcessingConfiguration(Version incompatibleImprovements) {
         super(incompatibleImprovements);
     }
 
-    protected MutableProcessingAndParseConfiguration() {
+    protected MutableParsingAndProcessingConfiguration() {
         super();
     }
 

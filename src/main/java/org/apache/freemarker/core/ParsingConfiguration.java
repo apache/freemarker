@@ -18,21 +18,20 @@
  */
 package org.apache.freemarker.core;
 
-import java.io.Writer;
 import java.nio.charset.Charset;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 
 /**
- * <b>Don't implement this interface yourself</b>; use the existing implementation(s). This interface is implemented by
- * classes that hold settings that affect template parsing (as opposed to {@linkplain Template#process(Object, Writer)
- * template processing}). New parser settings can be added in new FreeMarker versions, which will break your
- * implementation.
+ * Implemented by FreeMarker core classes (not by you) that provide configuration settings that affect template parsing
+ * (as opposed to {@linkplain Template#process (Object, Writer) template processing}). <b>New methods may be added
+ * anytime in future FreeMarker versions, so don't try to implement this interface yourself!</b>
  *
  * @see ProcessingConfiguration
  */
-public interface ParserConfiguration {
+// TODO Clean up API docs like in ProcessingConfiguration, when Configuration is done
+public interface ParsingConfiguration {
 
     TemplateLanguage getTemplateLanguage();
 
@@ -45,8 +44,8 @@ public interface ParserConfiguration {
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * the setting might returns a default value, or returns the value of the setting from a parent parsing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     boolean isTagSyntaxSet();
 
@@ -57,8 +56,8 @@ public interface ParserConfiguration {
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * the setting might returns a default value, or returns the value of the setting from a parent parsing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     boolean isNamingConventionSet();
 
@@ -69,20 +68,21 @@ public interface ParserConfiguration {
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * the setting might returns a default value, or returns the value of the setting from a parent parsing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     boolean isWhitespaceStrippingSet();
 
     /**
-     * Overlaps with {@link MutableProcessingConfiguration#getArithmeticEngine()}; the parser needs this for creating numerical literals.
+     * Overlaps with {@link ProcessingConfiguration#getArithmeticEngine()}; the parser needs this for creating numerical
+     * literals.
      */
     ArithmeticEngine getArithmeticEngine();
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * the setting might returns a default value, or returns the value of the setting from a parent parsing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     boolean isArithmeticEngineSet();
 
@@ -93,8 +93,8 @@ public interface ParserConfiguration {
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * the setting might returns a default value, or returns the value of the setting from a parent parsing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     boolean isAutoEscapingPolicySet();
 
@@ -105,8 +105,8 @@ public interface ParserConfiguration {
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * the setting might returns a default value, or returns the value of the setting from a parent parsing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     boolean isOutputFormatSet();
 
@@ -117,8 +117,8 @@ public interface ParserConfiguration {
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * the setting might returns a default value, or returns the value of the setting from a parent parsing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     boolean isRecognizeStandardFileExtensionsSet();
 
@@ -137,8 +137,8 @@ public interface ParserConfiguration {
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * the setting might returns a default value, or returns the value of the setting from a parent parsing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     boolean isTabSizeSet();
 

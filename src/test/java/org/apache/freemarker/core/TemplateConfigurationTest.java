@@ -254,7 +254,7 @@ public class TemplateConfigurationTest {
     static {
         PARSER_PROP_NAMES = new HashSet<>();
         // It's an interface; can't use standard Inrospector
-        for (Method m : ParserConfiguration.class.getMethods()) {
+        for (Method m : ParsingConfiguration.class.getMethods()) {
             String propertyName;
             String name = m.getName();
             if (name.startsWith("get")) {

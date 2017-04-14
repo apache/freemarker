@@ -102,7 +102,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     // Inherited settings:
     private final transient Configuration cfg;
     private final transient TemplateConfiguration tCfg;
-    private final transient ParserConfiguration parserConfiguration;
+    private final transient ParsingConfiguration parsingConfiguration;
 
     // Values from the template content (#ftl header parameters usually), as opposed to from the TemplateConfiguration:
     private transient OutputFormat outputFormat; // TODO Deserialization: use the name of the output format
@@ -281,7 +281,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         _NullArgumentException.check("configuration", configuration);
         this.cfg = configuration;
         this.tCfg = templateConfiguration;
-        this.parserConfiguration = tCfg != null ? new TemplateParserConfigurationWithFallback(cfg, tCfg) : cfg;
+        this.parsingConfiguration = tCfg != null ? new TemplateParsingConfigurationWithFallback(cfg, tCfg) : cfg;
         this.name = name;
         this.sourceName = sourceName;
 
@@ -294,13 +294,13 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
                 reader = new BufferedReader(reader, READER_BUFFER_SIZE);
             }
             
-            ltbReader = new LineTableBuilder(reader, parserConfiguration);
+            ltbReader = new LineTableBuilder(reader, parsingConfiguration);
             reader = ltbReader;
             
             try {
                 FMParser parser = new FMParser(
                         this, reader,
-                        parserConfiguration, contextOutputFormat, contextAutoEscapingPolicy,
+                        parsingConfiguration, contextOutputFormat, contextAutoEscapingPolicy,
                         streamToUnmarkWhenEncEstabd);
                 try {
                     rootElement = parser.Root();
@@ -599,8 +599,8 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         return tCfg;
     }
 
-    public ParserConfiguration getParserConfiguration() {
-        return parserConfiguration;
+    public ParsingConfiguration getParsingConfiguration() {
+        return parsingConfiguration;
     }
 
 
@@ -672,7 +672,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     /**
      * Returns the output format (see {@link Configuration#setOutputFormat(OutputFormat)}) used for this template.
      * The output format of a template can come from various places, in order of increasing priority:
-     * {@link Configuration#getOutputFormat()}, {@link ParserConfiguration#getOutputFormat()} (which is usually
+     * {@link Configuration#getOutputFormat()}, {@link ParsingConfiguration#getOutputFormat()} (which is usually
      * provided by {@link Configuration#getTemplateConfigurations()}) and the {@code #ftl} header's
      * {@code output_format} option in the template.
      * 
@@ -692,7 +692,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     /**
      * Returns if the auto-escaping policy (see {@link Configuration#setAutoEscapingPolicy(int)}) that this template
      * uses. This is decided from these, in increasing priority:
-     * {@link Configuration#getAutoEscapingPolicy()}, {@link ParserConfiguration#getAutoEscapingPolicy()},
+     * {@link Configuration#getAutoEscapingPolicy()}, {@link ParsingConfiguration#getAutoEscapingPolicy()},
      * {@code #ftl} header's {@code auto_esc} option in the template.
      */
     public int getAutoEscapingPolicy() {
@@ -733,7 +733,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     /**
      * Returns the template source at the location specified by the coordinates given, or {@code null} if unavailable.
      * A strange legacy in the behavior of this method is that it replaces tab characters with spaces according the
-     * value of {@link Template#getParserConfiguration()}/{@link ParserConfiguration#getTabSize()} (which usually
+     * value of {@link Template#getParsingConfiguration()}/{@link ParsingConfiguration#getTabSize()} (which usually
      * comes from {@link Configuration#getTabSize()}), because tab characters move the column number with more than
      * 1 in error messages. However, if you set the tab size to 1, this method leaves the tab characters as is.
      * 
@@ -1128,7 +1128,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         /**
          * @param r the character stream to wrap
          */
-        LineTableBuilder(Reader r, ParserConfiguration parserConfiguration) {
+        LineTableBuilder(Reader r, ParsingConfiguration parserConfiguration) {
             super(r);
             tabSize = parserConfiguration.getTabSize();
         }

@@ -75,7 +75,7 @@ class BuiltInsForStringsMisc {
             ASTExpression exp = null;
             try {
                 try {
-                    ParserConfiguration pCfg = parentTemplate.getParserConfiguration();
+                    ParsingConfiguration pCfg = parentTemplate.getParsingConfiguration();
                     
                     SimpleCharStream simpleCharStream = new SimpleCharStream(
                             new StringReader("(" + s + ")"),
@@ -168,7 +168,7 @@ class BuiltInsForStringsMisc {
             
             final Template interpretedTemplate;
             try {
-                ParserConfiguration pCfg = parentTemplate.getParserConfiguration();
+                ParsingConfiguration pCfg = parentTemplate.getParsingConfiguration();
                 // pCfg.outputFormat+autoEscapingPolicy is exceptional: it's inherited from the lexical context
                 interpretedTemplate = new Template(
                         (parentTemplate.getName() != null ? parentTemplate.getName() : "nameless_template") + "->" + id,

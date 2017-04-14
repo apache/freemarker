@@ -51,7 +51,7 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
  *
  * @see Template#Template(String, String, Reader, Configuration, TemplateConfiguration, Charset)
  */
-public final class TemplateConfiguration implements ParserAndProcessingConfiguration {
+public final class TemplateConfiguration implements ParsingAndProcessingConfiguration {
 
     private final Locale locale;
     private final String numberFormat;
@@ -669,7 +669,7 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
         return null;
     }
 
-    public static final class Builder extends MutableProcessingAndParseConfiguration<Builder>
+    public static final class Builder extends MutableParsingAndProcessingConfiguration<Builder>
             implements CommonBuilder<TemplateConfiguration> {
 
         public Builder() {
@@ -826,7 +826,7 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
          * {@link TemplateConfiguration}, possibly overwriting the earlier value in this object. (A setting is said to be
          * set in a {@link TemplateConfiguration} if it was explicitly set via a setter method, as opposed to be inherited.)
          */
-        public void merge(ParserAndProcessingConfiguration tc) {
+        public void merge(ParsingAndProcessingConfiguration tc) {
             if (tc.isAPIBuiltinEnabledSet()) {
                 setAPIBuiltinEnabled(tc.getAPIBuiltinEnabled());
             }
@@ -935,7 +935,7 @@ public final class TemplateConfiguration implements ParserAndProcessingConfigura
             }
 
             if (tc.isCustomAttributesSet()) {
-                setCustomAttributes(mergeMaps(
+                setCustomAttributesWithoutCopying(mergeMaps(
                         isCustomAttributesSet() ? getCustomAttributes() : null,
                         tc.isCustomAttributesSet() ? tc.getCustomAttributes() : null,
                         true));

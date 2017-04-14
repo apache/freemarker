@@ -19,10 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import java.io.Writer;
 import java.nio.charset.Charset;
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,7 +39,6 @@ import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine;
 import org.apache.freemarker.core.arithmetic.impl.ConservativeArithmeticEngine;
 import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.outputformat.OutputFormat;
@@ -68,24 +64,17 @@ import org.apache.freemarker.core.util.GenericParseException;
 import org.apache.freemarker.core.util.OptInTemplateClassResolver;
 import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.core.util._CollectionUtil;
+import org.apache.freemarker.core.util._KeyValuePair;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._SortedArraySet;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
-import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 
 /**
- * This is a common superclass of {@link org.apache.freemarker.core.Configuration},
- * {@link org.apache.freemarker.core.Template}, and {@link Environment} classes.
- * It provides settings that are common to each of them. FreeMarker
- * uses a three-level setting hierarchy - the return value of every setting
- * getter method on <code>MutableProcessingConfiguration</code> objects inherits its value from its parent
- * <code>MutableProcessingConfiguration</code> object, unless explicitly overridden by a call to a
- * corresponding setter method on the object itself. The parent of an 
- * <code>Environment</code> object is a <code>Template</code> object, the
- * parent of a <code>Template</code> object is a <code>Configuration</code>
- * object.
+ * Extended by FreeMarker core classes (not by you) that support specifying {@link ProcessingConfiguration} setting
+ * values. <b>New abstract methods may be added anytime in future FreeMarker versions, so don't try to implement this
+ * interface yourself!</b>
  */
 public abstract class MutableProcessingConfiguration<SelfT extends MutableProcessingConfiguration<SelfT>>
         implements ProcessingConfiguration {
@@ -393,10 +382,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Sets the default locale used for number and date formatting (among others), also the locale used for searching
-     * localized template variations when no locale was explicitly requested.
-     * 
-     * @see Configuration#getTemplate(String, Locale)
+     * Setter pair of {@link ProcessingConfiguration#getLocale()}.
      */
     public void setLocale(Locale locale) {
         _NullArgumentException.check("locale", locale);
@@ -419,25 +405,17 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract Locale getInheritedLocale();
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
-     *  
-     * @since 2.3.24
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     @Override
     public boolean isLocaleSet() {
         return locale != null;
     }
-    
+
     /**
-     * Sets the time zone to use when formatting date/time values.
-     * Defaults to the system time zone ({@link TimeZone#getDefault()}), regardless of the "locale" FreeMarker setting,
-     * so in a server application you probably want to set it explicitly in the {@link Environment} to match the
-     * preferred time zone of target audience (like the Web page visitor).
-     * 
-     * <p>If you or the templates set the time zone, you should probably also set
-     * {@link #setSQLDateAndTimeTimeZone(TimeZone)}!
-     * 
-     * @see #setSQLDateAndTimeTimeZone(TimeZone)
+     * Setter pair of {@link ProcessingConfiguration#getTimeZone()}.
      */
     public void setTimeZone(TimeZone timeZone) {
         _NullArgumentException.check("timeZone", timeZone);
@@ -452,9 +430,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    /**
-     * The getter pair of {@link #setTimeZone(TimeZone)}. 
-     */
     @Override
     public TimeZone getTimeZone() {
          return isTimeZoneSet() ? timeZone : getInheritedTimeZone();
@@ -463,9 +438,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract TimeZone getInheritedTimeZone();
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
-     *  
-     * @since 2.3.24
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     @Override
     public boolean isTimeZoneSet() {
@@ -473,65 +448,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
     
     /**
-     * Sets the time zone used when dealing with {@link java.sql.Date java.sql.Date} and
-     * {@link java.sql.Time java.sql.Time} values. It defaults to {@code null} for backward compatibility, but in most
-     * application this should be set to the JVM default time zone (server default time zone), because that's what
-     * most JDBC drivers will use when constructing the {@link java.sql.Date java.sql.Date} and
-     * {@link java.sql.Time java.sql.Time} values. If this setting is {@code null}, FreeMarker will use the value of
-     * ({@link #getTimeZone()}) for {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values,
-     * which often gives bad results.
-     * 
-     * <p>This setting doesn't influence the formatting of other kind of values (like of
-     * {@link java.sql.Timestamp java.sql.Timestamp} or plain {@link java.util.Date java.util.Date} values).
-     * 
-     * <p>To decide what value you need, a few things has to be understood:
-     * <ul>
-     *   <li>Date-only and time-only values in SQL-oriented databases are usually store calendar and clock field
-     *   values directly (year, month, day, or hour, minute, seconds (with decimals)), as opposed to a set of points
-     *   on the physical time line. Thus, unlike SQL timestamps, these values usually aren't meant to be shown
-     *   differently depending on the time zone of the audience.
-     *   
-     *   <li>When a JDBC query has to return a date-only or time-only value, it has to convert it to a point on the
-     *   physical time line, because that's what {@link java.util.Date} and its subclasses store (milliseconds since
-     *   the epoch). Obviously, this is impossible to do. So JDBC just chooses a physical time which, when rendered
-     *   <em>with the JVM default time zone</em>, will give the same field values as those stored
-     *   in the database. (Actually, you can give JDBC a calendar, and so it can use other time zones too, but most
-     *   application won't care using those overloads.) For example, assume that the system time zone is GMT+02:00.
-     *   Then, 2014-07-12 in the database will be translated to physical time 2014-07-11 22:00:00 UTC, because that
-     *   rendered in GMT+02:00 gives 2014-07-12 00:00:00. Similarly, 11:57:00 in the database will be translated to
-     *   physical time 1970-01-01 09:57:00 UTC. Thus, the physical time stored in the returned value depends on the
-     *   default system time zone of the JDBC client, not just on the content in the database. (This used to be the
-     *   default behavior of ORM-s, like Hibernate, too.)
-     *   
-     *   <li>The value of the {@code time_zone} FreeMarker configuration setting sets the time zone used for the
-     *   template output. For example, when a web page visitor has a preferred time zone, the web application framework
-     *   may calls {@link Environment#setTimeZone(TimeZone)} with that time zone. Thus, the visitor will
-     *   see {@link java.sql.Timestamp java.sql.Timestamp} and plain {@link java.util.Date java.util.Date} values as
-     *   they look in his own time zone. While
-     *   this is desirable for those types, as they meant to represent physical points on the time line, this is not
-     *   necessarily desirable for date-only and time-only values. When {@code sql_date_and_time_time_zone} is
-     *   {@code null}, {@code time_zone} is used for rendering all kind of date/time/dateTime values, including
-     *   {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time}, and then if, for example,
-     *   {@code time_zone} is GMT+00:00, the
-     *   values from the earlier examples will be shown as 2014-07-11 (one day off) and 09:57:00 (2 hours off). While
-     *   those are the time zone correct renderings, those values are probably meant to be shown "as is".
-     *   
-     *   <li>You may wonder why this setting isn't simply "SQL time zone", since the time zone related behavior of JDBC
-     *   applies to {@link java.sql.Timestamp java.sql.Timestamp} too. FreeMarker assumes that you have set up your
-     *   application so that time stamps coming from the database go through the necessary conversion to store the
-     *   correct distance from the epoch (1970-01-01 00:00:00 UTC), as requested by {@link java.util.Date}. In that case
-     *   the time stamp can be safely rendered in different time zones, and thus it needs no special treatment.
-     * </ul>
-     * 
-     * @param tz Maybe {@code null}, in which case {@link java.sql.Date java.sql.Date} and
-     *          {@link java.sql.Time java.sql.Time} values will be formatted in the time zone returned by
-     *          {@link #getTimeZone()}.
-     *          (Note that since {@code null} is an allowed value for this setting, it will not cause
-     *          {@link #getSQLDateAndTimeTimeZone()} to fall back to the parent configuration.)
-     * 
-     * @see #setTimeZone(TimeZone)
-     * 
-     * @since 2.3.21
+     * Setter pair of {@link ProcessingConfiguration#getSQLDateAndTimeTimeZone()}.
      */
     public void setSQLDateAndTimeTimeZone(TimeZone tz) {
         sqlDateAndTimeTimeZone = tz;
@@ -546,16 +463,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-
-    /**
-     * The getter pair of {@link #setSQLDateAndTimeTimeZone(TimeZone)}.
-     * 
-     * @return {@code null} if the value of {@link #getTimeZone()} should be used for formatting
-     *     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values, otherwise the time zone
-     *     that should be used to format the values of those two types.  
-     * 
-     * @since 2.3.21
-     */
     @Override
     public TimeZone getSQLDateAndTimeTimeZone() {
         return sqlDateAndTimeTimeZoneSet
@@ -576,29 +483,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Sets the default number format used to convert numbers to strings. Currently, this is one of these:
-     * <ul>
-     *   <li>{@code "number"}: The number format returned by {@link NumberFormat#getNumberInstance(Locale)}</li>
-     *   <li>{@code "currency"}: The number format returned by {@link NumberFormat#getCurrencyInstance(Locale)}</li>
-     *   <li>{@code "percent"}: The number format returned by {@link NumberFormat#getPercentInstance(Locale)}</li>
-     *   <li>{@code "computer"}: The number format used by FTL's {@code c} built-in (like in {@code someNumber?c}).</li>
-     *   <li>{@link java.text.DecimalFormat} pattern (like {@code "0.##"}). This syntax has a FreeMarker-specific
-     *       extension, so that you can specify options like the rounding mode and the symbols used in this string. For
-     *       example, {@code ",000;; roundingMode=halfUp groupingSeparator=_"} will format numbers like {@code ",000"}
-     *       would, but with half-up rounding mode, and {@code _} as the group separator. See more about "extended Java
-     *       decimal format" in the FreeMarker Manual.
-     *       </li>
-     *   <li>If the string starts with {@code @} character followed by a letter then it's interpreted as a custom number
-     *       format, but only if either {@link Configuration#getIncompatibleImprovements()} is at least 2.3.24, or
-     *       there's any custom formats defined (even if custom date/time/dateTime format). The format of a such string
-     *       is <code>"@<i>name</i>"</code> or <code>"@<i>name</i> <i>parameters</i>"</code>, where
-     *       <code><i>name</i></code> is the key in the {@link Map} set by {@link #setCustomNumberFormats(Map)}, and
-     *       <code><i>parameters</i></code> is parsed by the custom {@link TemplateNumberFormat}.
-     *   </li>
-     * </ul>
-     * 
-     *   
-     * <p>Defaults to <tt>"number"</tt>.
+     * Setter pair of {@link #getNumberFormat()}
      */
     public void setNumberFormat(String numberFormat) {
         _NullArgumentException.check("numberFormat", numberFormat);
@@ -613,9 +498,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    /**
-     * Getter pair of {@link #setNumberFormat(String)}. 
-     */
     @Override
     public String getNumberFormat() {
          return isNumberFormatSet() ? numberFormat : getInheritedNumberFormat();
@@ -624,30 +506,15 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract String getInheritedNumberFormat();
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
-     *  
-     * @since 2.3.24
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     @Override
     public boolean isNumberFormatSet() {
         return numberFormat != null;
     }
     
-    /**
-     * Getter pair of {@link #setCustomNumberFormats(Map)}; do not modify the returned {@link Map}! To be consistent
-     * with other setting getters, if this setting was set directly on this {@link MutableProcessingConfiguration} object, this simply
-     * returns that value, otherwise it returns the value from the parent {@link MutableProcessingConfiguration}. So beware, the returned
-     * value doesn't reflect the {@link Map} key granularity fallback logic that FreeMarker actually uses for this
-     * setting (for that, use {@link #getCustomNumberFormat(String)}). The returned value isn't a snapshot; it may or
-     * may not shows the changes later made to this setting on this {@link MutableProcessingConfiguration} level (but usually it's well
-     * defined if until what point settings are possibly modified).
-     * 
-     * <p>
-     * The return value is never {@code null}; called on the {@link Configuration} (top) level, it defaults to an empty
-     * {@link Map}.
-     *
-     * @since 2.3.24
-     */
     @Override
     public Map<String, TemplateNumberFormatFactory> getCustomNumberFormats() {
          return isCustomNumberFormatsSet() ? customNumberFormats : getInheritedCustomNumberFormats();
@@ -656,18 +523,13 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract Map<String, TemplateNumberFormatFactory> getInheritedCustomNumberFormats();
 
     /**
-     * Associates names with formatter factories, which then can be referred by the {@link #setNumberFormat(String)
-     * number_format} setting with values starting with <code>@<i>name</i></code>. Beware, if you specify any custom
-     * formats here, an initial {@code @} followed by a letter will have special meaning in number/date/time/datetime
-     * format strings, even if {@link Configuration#getIncompatibleImprovements() incompatible_improvements} is less
-     * than 2.3.24 (starting with {@link Configuration#getIncompatibleImprovements() incompatible_improvements} 2.3.24
-     * {@code @} always has special meaning).
-     * 
+     * Setter pair of {@link #getCustomNumberFormats()}. Note that custom number formats are get through
+     * {@link #getCustomNumberFormat(String)}, not directly though this {@link Map}, so number formats from
+     * {@link ProcessingConfiguration}-s on less specific levels are inherited without you copying them into this
+     * {@link Map}.
+     *
      * @param customNumberFormats
-     *            Can't be {@code null}. The name must start with an UNICODE letter, and can only contain UNICODE
-     *            letters and digits (not {@code _}).
-     * 
-     * @since 2.3.24
+     *      Not {@code null}.
      */
     public void setCustomNumberFormats(Map<String, TemplateNumberFormatFactory> customNumberFormats) {
         _NullArgumentException.check("customNumberFormats", customNumberFormats);
@@ -707,7 +569,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      *  
      * @since 2.3.24
      */
@@ -716,11 +580,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return customNumberFormats != null;
     }
 
-    /**
-     * Gets the custom name format registered for the name.
-     * 
-     * @since 2.3.24
-     */
     @Override
     public TemplateNumberFormatFactory getCustomNumberFormat(String name) {
         TemplateNumberFormatFactory r;
@@ -735,11 +594,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     protected abstract TemplateNumberFormatFactory getInheritedCustomNumberFormat(String name);
 
-    /**
-     * Tells if this configurable object or its parent defines any custom formats.
-     * 
-     * @since 2.3.24
-     */
+    @Override
     public boolean hasCustomFormats() {
         return isCustomNumberFormatsSet() && !customNumberFormats.isEmpty()
                 || isCustomDateFormatsSet() && !customDateFormats.isEmpty()
@@ -749,16 +604,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract boolean getInheritedHasCustomFormats();
 
     /**
-     * The string value for the boolean {@code true} and {@code false} values, intended for human audience (not for a
-     * computer language), separated with comma. For example, {@code "yes,no"}. Note that white-space is significant,
-     * so {@code "yes, no"} is WRONG (unless you want that leading space before "no").
-     * 
-     * <p>For backward compatibility the default is {@code "true,false"}, but using that value is denied for automatic
-     * boolean-to-string conversion (like <code>${myBoolean}</code> will fail with it), only {@code myBool?string} will
-     * allow it, which is deprecated since FreeMarker 2.3.20.
-     * 
-     * <p>Note that automatic boolean-to-string conversion only exists since FreeMarker 2.3.20. Earlier this setting
-     * only influenced the result of {@code myBool?string}. 
+     * Setter pair of {@link #getBooleanFormat()}.
      */
     public void setBooleanFormat(String booleanFormat) {
         _NullArgumentException.check("booleanFormat", booleanFormat);
@@ -781,9 +627,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
     
-    /**
-     * The getter pair of {@link #setBooleanFormat(String)}.
-     */
     @Override
     public String getBooleanFormat() {
          return isBooleanFormatSet() ? booleanFormat : getInheritedBooleanFormat();
@@ -792,7 +635,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract String getInheritedBooleanFormat();
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      *  
      * @since 2.3.24
      */
@@ -802,12 +647,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Sets the format used to convert {@link java.util.Date}-s to string-s that are time (no date part) values,
-     * also the format that {@code someString?time} will use to parse strings.
-     * 
-     * <p>For the possible values see {@link #setDateTimeFormat(String)}.
-     *   
-     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "medium"}.
+     * Setter pair of {@link #getTimeFormat()}
      */
     public void setTimeFormat(String timeFormat) {
         _NullArgumentException.check("timeFormat", timeFormat);
@@ -822,9 +662,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    /**
-     * The getter pair of {@link #setTimeFormat(String)}.
-     */
     @Override
     public String getTimeFormat() {
          return isTimeFormatSet() ? timeFormat : getInheritedTimeFormat();
@@ -833,22 +670,17 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract String getInheritedTimeFormat();
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
-     *  
-     * @since 2.3.24
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     @Override
     public boolean isTimeFormatSet() {
         return timeFormat != null;
     }
-    
+
     /**
-     * Sets the format used to convert {@link java.util.Date}-s to string-s that are date (no time part) values,
-     * also the format that {@code someString?date} will use to parse strings.
-     * 
-     * <p>For the possible values see {@link #setDateTimeFormat(String)}.
-     *   
-     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "medium"}.
+     * Setter pair of {@link #getDateFormat()}.
      */
     public void setDateFormat(String dateFormat) {
         _NullArgumentException.check("dateFormat", dateFormat);
@@ -863,9 +695,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    /**
-     * The getter pair of {@link #setDateFormat(String)}.
-     */
     @Override
     public String getDateFormat() {
          return isDateFormatSet() ? dateFormat : getInheritedDateFormat();
@@ -874,100 +703,17 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract String getInheritedDateFormat();
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
-     *  
-     * @since 2.3.24
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     @Override
     public boolean isDateFormatSet() {
         return dateFormat != null;
     }
-    
+
     /**
-     * Sets the format used to convert {@link java.util.Date}-s to string-s that are date-time (timestamp) values,
-     * also the format that {@code someString?datetime} will use to parse strings.
-     * 
-     * <p>The possible setting values are (the quotation marks aren't part of the value itself):
-     * 
-     * <ul>
-     *   <li><p>Patterns accepted by Java's {@link SimpleDateFormat}, for example {@code "dd.MM.yyyy HH:mm:ss"} (where
-     *       {@code HH} means 24 hours format) or {@code "MM/dd/yyyy hh:mm:ss a"} (where {@code a} prints AM or PM, if
-     *       the current language is English).
-     *   
-     *   <li><p>{@code "xs"} for XML Schema format, or {@code "iso"} for ISO 8601:2004 format.
-     *       These formats allow various additional options, separated with space, like in
-     *       {@code "iso m nz"} (or with {@code _}, like in {@code "iso_m_nz"}; this is useful in a case like
-     *       {@code lastModified?string.iso_m_nz}). The options and their meanings are:
-     *       
-     *       <ul>
-     *         <li><p>Accuracy options:<br>
-     *             {@code ms} = Milliseconds, always shown with all 3 digits, even if it's all 0-s.
-     *                     Example: {@code 13:45:05.800}<br>
-     *             {@code s} = Seconds (fraction seconds are dropped even if non-0), like {@code 13:45:05}<br>
-     *             {@code m} = Minutes, like {@code 13:45}. This isn't allowed for "xs".<br>
-     *             {@code h} = Hours, like {@code 13}. This isn't allowed for "xs".<br>
-     *             Neither = Up to millisecond accuracy, but trailing millisecond 0-s are removed, also the whole
-     *                     milliseconds part if it would be 0 otherwise. Example: {@code 13:45:05.8}
-     *                     
-     *         <li><p>Time zone offset visibility options:<br>
-     *             {@code fz} = "Force Zone", always show time zone offset (even for for
-     *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values).
-     *                     But, because ISO 8601 doesn't allow for dates (means date without time of the day) to
-     *                     show the zone offset, this option will have no effect in the case of {@code "iso"} with
-     *                     dates.<br>
-     *             {@code nz} = "No Zone", never show time zone offset<br>
-     *             Neither = always show time zone offset, except for {@link java.sql.Date java.sql.Date}
-     *                     and {@link java.sql.Time java.sql.Time}, and for {@code "iso"} date values.
-     *                     
-     *         <li><p>Time zone options:<br>
-     *             {@code u} = Use UTC instead of what the {@code time_zone} setting suggests. However,
-     *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} aren't affected
-     *                     by this (see {@link #setSQLDateAndTimeTimeZone(TimeZone)} to understand why)<br>
-     *             {@code fu} = "Force UTC", that is, use UTC instead of what the {@code time_zone} or the
-     *                     {@code sql_date_and_time_time_zone} setting suggests. This also effects
-     *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values<br>
-     *             Neither = Use the time zone suggested by the {@code time_zone} or the
-     *                     {@code sql_date_and_time_time_zone} configuration setting ({@link #setTimeZone(TimeZone)} and
-     *                     {@link #setSQLDateAndTimeTimeZone(TimeZone)}).
-     *       </ul>
-     *       
-     *       <p>The options can be specified in any order.</p>
-     *       
-     *       <p>Options from the same category are mutually exclusive, like using {@code m} and {@code s}
-     *       together is an error.
-     *       
-     *       <p>The accuracy and time zone offset visibility options don't influence parsing, only formatting.
-     *       For example, even if you use "iso m nz", "2012-01-01T15:30:05.125+01" will be parsed successfully and with
-     *       milliseconds accuracy.
-     *       The time zone options (like "u") influence what time zone is chosen only when parsing a string that doesn't
-     *       contain time zone offset.
-     *       
-     *       <p>Parsing with {@code "iso"} understands both extend format and basic format, like
-     *       {@code 20141225T235018}. It doesn't, however, support the parsing of all kind of ISO 8601 strings: if
-     *       there's a date part, it must use year, month and day of the month values (not week of the year), and the
-     *       day can't be omitted.
-     *       
-     *       <p>The output of {@code "iso"} is deliberately so that it's also a good representation of the value with
-     *       XML Schema format, except for 0 and negative years, where it's impossible. Also note that the time zone
-     *       offset is omitted for date values in the {@code "iso"} format, while it's preserved for the {@code "xs"}
-     *       format.
-     *       
-     *   <li><p>{@code "short"}, {@code "medium"}, {@code "long"}, or {@code "full"}, which that has locale-dependent
-     *       meaning defined by the Java platform (see in the documentation of {@link java.text.DateFormat}).
-     *       For date-time values, you can specify the length of the date and time part independently, be separating
-     *       them with {@code _}, like {@code "short_medium"}. ({@code "medium"} means
-     *       {@code "medium_medium"} for date-time values.)
-     *       
-     *   <li><p>Anything that starts with {@code "@"} followed by a letter is interpreted as a custom
-     *       date/time/dateTime format, but only if either {@link Configuration#getIncompatibleImprovements()}
-     *       is at least 2.3.24, or there's any custom formats defined (even if custom number format). The format of
-     *       such string is <code>"@<i>name</i>"</code> or <code>"@<i>name</i> <i>parameters</i>"</code>, where
-     *       <code><i>name</i></code> is the key in the {@link Map} set by {@link #setCustomDateFormats(Map)}, and
-     *       <code><i>parameters</i></code> is parsed by the custom number format.
-     *       
-     * </ul> 
-     * 
-     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "medium_medium"}.
+     * Setter pair of {@link #getDateTimeFormat()}
      */
     public void setDateTimeFormat(String dateTimeFormat) {
         _NullArgumentException.check("dateTimeFormat", dateTimeFormat);
@@ -982,9 +728,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    /**
-     * The getter pair of {@link #setDateTimeFormat(String)}.
-     */
     @Override
     public String getDateTimeFormat() {
          return isDateTimeFormatSet() ? dateTimeFormat : getInheritedDateTimeFormat();
@@ -993,30 +736,15 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract String getInheritedDateTimeFormat();
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
-     *  
-     * @since 2.3.24
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     @Override
     public boolean isDateTimeFormatSet() {
         return dateTimeFormat != null;
     }
-    
-    /**
-     * Getter pair of {@link #setCustomDateFormats(Map)}; do not modify the returned {@link Map}! To be consistent with
-     * other setting getters, if this setting was set directly on this {@link MutableProcessingConfiguration} object, this simply returns
-     * that value, otherwise it returns the value from the parent {@link MutableProcessingConfiguration}. So beware, the returned value
-     * doesn't reflect the {@link Map} key granularity fallback logic that FreeMarker actually uses for this setting
-     * (for that, use {@link #getCustomDateFormat(String)}). The returned value isn't a snapshot; it may or may not
-     * shows the changes later made to this setting on this {@link MutableProcessingConfiguration} level (but usually it's well defined if
-     * until what point settings are possibly modified).
-     * 
-     * <p>
-     * The return value is never {@code null}; called on the {@link Configuration} (top) level, it defaults to an empty
-     * {@link Map}.
-     * 
-     * @since 2.3.24
-     */
+
     @Override
     public Map<String, TemplateDateFormatFactory> getCustomDateFormats() {
          return isCustomDateFormatsSet() ? customDateFormats : getInheritedCustomDateFormats();
@@ -1025,19 +753,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract Map<String, TemplateDateFormatFactory> getInheritedCustomDateFormats();
 
     /**
-     * Associates names with formatter factories, which then can be referred by the {@link #setDateTimeFormat(String)
-     * date_format}, {@link #setDateTimeFormat(String) time_format}, and {@link #setDateTimeFormat(String)
-     * datetime_format} settings with values starting with <code>@<i>name</i></code>. Beware, if you specify any custom
-     * formats here, an initial {@code @} followed by a letter will have special meaning in number/date/time/datetime
-     * format strings, even if {@link Configuration#getIncompatibleImprovements() incompatible_improvements} is less
-     * than 2.3.24 (starting with {@link Configuration#getIncompatibleImprovements() incompatible_improvements} 2.3.24
-     * {@code @} always has special meaning).
-     *
-     * @param customDateFormats
-     *            Can't be {@code null}. The name must start with an UNICODE letter, and can only contain UNICODE
-     *            letters and digits.
-     * 
-     * @since 2.3.24
+     * Setter pair of {@link #getCustomDateFormat(String)}.
      */
     public void setCustomDateFormats(Map<String, TemplateDateFormatFactory> customDateFormats) {
         _NullArgumentException.check("customDateFormats", customDateFormats);
@@ -1054,20 +770,15 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
-     * 
-     * @since 2.3.24
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     @Override
     public boolean isCustomDateFormatsSet() {
         return customDateFormats != null;
     }
 
-    /**
-     * Gets the custom name format registered for the name.
-     * 
-     * @since 2.3.24
-     */
     @Override
     public TemplateDateFormatFactory getCustomDateFormat(String name) {
         TemplateDateFormatFactory r;
@@ -1083,24 +794,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract TemplateDateFormatFactory getInheritedCustomDateFormat(String name);
 
     /**
-     * Sets the exception handler used to handle exceptions occurring inside templates.
-     * The default is {@link TemplateExceptionHandler#DEBUG_HANDLER}. The recommended values are:
-     * 
-     * <ul>
-     *   <li>In production systems: {@link TemplateExceptionHandler#RETHROW_HANDLER}
-     *   <li>During development of HTML templates: {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}
-     *   <li>During development of non-HTML templates: {@link TemplateExceptionHandler#DEBUG_HANDLER}
-     * </ul>
-     * 
-     * <p>All of these will let the exception propagate further, so that you can catch it around
-     * {@link Template#process(Object, Writer)} for example. The difference is in what they print on the output before
-     * they do that.
-     * 
-     * <p>Note that the {@link TemplateExceptionHandler} is not meant to be used for generating HTTP error pages.
-     * Neither is it meant to be used to roll back the printed output. These should be solved outside template
-     * processing when the exception raises from {@link Template#process(Object, Writer) Template.process}.
-     * {@link TemplateExceptionHandler} meant to be used if you want to include special content <em>in</em> the template
-     * output, or if you want to suppress certain exceptions. 
+     * Setter pair of {@link #getTemplateExceptionHandler()}
      */
     public void setTemplateExceptionHandler(TemplateExceptionHandler templateExceptionHandler) {
         _NullArgumentException.check("templateExceptionHandler", templateExceptionHandler);
@@ -1115,9 +809,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    /**
-     * The getter pair of {@link #setTemplateExceptionHandler(TemplateExceptionHandler)}.
-     */
     @Override
     public TemplateExceptionHandler getTemplateExceptionHandler() {
          return isTemplateExceptionHandlerSet()
@@ -1127,9 +818,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract TemplateExceptionHandler getInheritedTemplateExceptionHandler();
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
-     *  
-     * @since 2.3.24
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     @Override
     public boolean isTemplateExceptionHandlerSet() {
@@ -1137,8 +828,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Sets the arithmetic engine used to perform arithmetic operations.
-     * The default is {@link BigDecimalArithmeticEngine#INSTANCE}.
+     * Setter pair of {@link #getArithmeticEngine()}
      */
     public void setArithmeticEngine(ArithmeticEngine arithmeticEngine) {
         _NullArgumentException.check("arithmeticEngine", arithmeticEngine);
@@ -1153,21 +843,17 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    /**
-     * The getter pair of {@link #setArithmeticEngine(ArithmeticEngine)}.
-     */
     @Override
     public ArithmeticEngine getArithmeticEngine() {
-         return isArithmeticEngineSet()
-                ? arithmeticEngine : getInheritedArithmeticEngine();
+         return isArithmeticEngineSet() ? arithmeticEngine : getInheritedArithmeticEngine();
     }
 
     protected abstract ArithmeticEngine getInheritedArithmeticEngine();
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
-     *  
-     * @since 2.3.24
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     @Override
     public boolean isArithmeticEngineSet() {
@@ -1175,8 +861,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Sets the object wrapper used to wrap objects to {@link TemplateModel}-s.
-     * The default is {@link DefaultObjectWrapper.Builder#build()}.
+     * Setter pair of {@link #getObjectWrapper()}
      */
     public void setObjectWrapper(ObjectWrapper objectWrapper) {
         _NullArgumentException.check("objectWrapper", objectWrapper);
@@ -1191,9 +876,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    /**
-     * The getter pair of {@link #setObjectWrapper(ObjectWrapper)}.
-     */
     @Override
     public ObjectWrapper getObjectWrapper() {
          return isObjectWrapperSet()
@@ -1203,22 +885,17 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract ObjectWrapper getInheritedObjectWrapper();
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
-     *  
-     * @since 2.3.24
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     @Override
     public boolean isObjectWrapperSet() {
         return objectWrapper != null;
     }
-    
+
     /**
-     * Informs FreeMarker about the charset used for the output. As FreeMarker outputs character stream (not
-     * byte stream), it's not aware of the output charset unless the software that encloses it tells it
-     * with this setting. Some templates may use FreeMarker features that require this information.
-     * Setting this to {@code null} means that the output encoding is not known.
-     * 
-     * <p>Defaults to {@code null} (unknown).
+     * The setter pair of {@link #getOutputEncoding()}
      */
     public void setOutputEncoding(Charset outputEncoding) {
         this.outputEncoding = outputEncoding;
@@ -1243,20 +920,17 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract Charset getInheritedOutputEncoding();
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
-     *  
-     * @since 2.3.24
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     @Override
     public boolean isOutputEncodingSet() {
         return outputEncodingSet;
     }
-    
+
     /**
-     * Sets the URL escaping charset. If not set ({@code null}), the output encoding
-     * ({@link #setOutputEncoding(Charset)}) will be used for URL escaping.
-     * 
-     * Defaults to {@code null}.
+     * The setter pair of {@link #getURLEscapingCharset()}.
      */
     public void setURLEscapingCharset(Charset urlEscapingCharset) {
         this.urlEscapingCharset = urlEscapingCharset;
@@ -1273,17 +947,15 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     @Override
     public Charset getURLEscapingCharset() {
-        return isURLEscapingCharsetSet()
-                ? urlEscapingCharset
-                : getInheritedURLEscapingCharset();
+        return isURLEscapingCharsetSet() ? urlEscapingCharset : getInheritedURLEscapingCharset();
     }
 
     protected abstract Charset getInheritedURLEscapingCharset();
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
-     *  
-     * @since 2.3.24
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     @Override
     public boolean isURLEscapingCharsetSet() {
@@ -1291,16 +963,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Sets the {@link TemplateClassResolver} that is used when the
-     * <code>new</code> built-in is called in a template. That is, when
-     * a template contains the <code>"com.example.SomeClassName"?new</code>
-     * expression, this object will be called to resolve the
-     * <code>"com.example.SomeClassName"</code> string to a class. The default
-     * value is {@link TemplateClassResolver#UNRESTRICTED_RESOLVER}. If you allow
-     * users to upload templates, it's important to use a custom restrictive
-     * {@link TemplateClassResolver} or {@link TemplateClassResolver#ALLOWS_NOTHING_RESOLVER}.
-     * 
-     * @since 2.3.17
+     * Setter pair of {@link #getNewBuiltinClassResolver()}
      */
     public void setNewBuiltinClassResolver(TemplateClassResolver newBuiltinClassResolver) {
         _NullArgumentException.check("newBuiltinClassResolver", newBuiltinClassResolver);
@@ -1315,14 +978,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    /**
-     * Retrieves the {@link TemplateClassResolver} used
-     * to resolve classes when "SomeClassName"?new is called in a template.
-     * 
-     * @see #setNewBuiltinClassResolver(TemplateClassResolver)
-     * 
-     * @since 2.3.17
-     */
     @Override
     public TemplateClassResolver getNewBuiltinClassResolver() {
          return isNewBuiltinClassResolverSet()
@@ -1332,7 +987,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract TemplateClassResolver getInheritedNewBuiltinClassResolver();
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      *  
      * @since 2.3.24
      */
@@ -1340,22 +997,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     public boolean isNewBuiltinClassResolverSet() {
         return newBuiltinClassResolver != null;
     }
-    
+
     /**
-     * Sets whether the output {@link Writer} is automatically flushed at
-     * the end of {@link Template#process(Object, Writer)} (and its
-     * overloads). The default is {@code true}.
-     * 
-     * <p>Using {@code false} is needed for example when a Web page is composed
-     * from several boxes (like portlets, GUI panels, etc.) that aren't inserted
-     * with <tt>#include</tt> (or with similar directives) into a master
-     * FreeMarker template, rather they are all processed with a separate
-     * {@link Template#process(Object, Writer)} call. In a such scenario the
-     * automatic flushes would commit the HTTP response after each box, hence
-     * interfering with full-page buffering, and also possibly decreasing
-     * performance with too frequent and too early response buffer flushes.
-     * 
-     * @since 2.3.17
+     * Setter pair of {@link #getAutoFlush()}
      */
     public void setAutoFlush(boolean autoFlush) {
         this.autoFlush = Boolean.valueOf(autoFlush);
@@ -1369,11 +1013,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    /**
-     * See {@link #setAutoFlush(boolean)}
-     * 
-     * @since 2.3.17
-     */
     @Override
     public boolean getAutoFlush() {
          return isAutoFlushSet() ? autoFlush.booleanValue() : getInheritedAutoFlush();
@@ -1382,7 +1021,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract boolean getInheritedAutoFlush();
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      *  
      * @since 2.3.24
      */
@@ -1390,12 +1031,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     public boolean isAutoFlushSet() {
         return autoFlush != null;
     }
-    
+
     /**
-     * Sets if tips should be shown in error messages of errors arising during template processing.
-     * The default is {@code true}. 
-     * 
-     * @since 2.3.21
+     * Setter pair of {@link #getShowErrorTips()}
      */
     public void setShowErrorTips(boolean showTips) {
         showErrorTips = Boolean.valueOf(showTips);
@@ -1409,11 +1047,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    /**
-     * See {@link #setShowErrorTips(boolean)}
-     * 
-     * @since 2.3.21
-     */
     @Override
     public boolean getShowErrorTips() {
          return isShowErrorTipsSet() ? showErrorTips : getInheritedShowErrorTips();
@@ -1422,20 +1055,17 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract boolean getInheritedShowErrorTips();
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
-     *  
-     * @since 2.3.24
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     @Override
     public boolean isShowErrorTipsSet() {
         return showErrorTips != null;
     }
-    
+
     /**
-     * Specifies if {@code ?api} can be used in templates. Defaults to {@code false} so that updating FreeMarker won't
-     * decrease the security of existing applications.
-     * 
-     * @since 2.3.22
+     * Setter pair of {@link #getAPIBuiltinEnabled()}
      */
     public void setAPIBuiltinEnabled(boolean value) {
         apiBuiltinEnabled = Boolean.valueOf(value);
@@ -1449,11 +1079,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    /**
-     * See {@link #setAPIBuiltinEnabled(boolean)}
-     * 
-     * @since 2.3.22
-     */
     @Override
     public boolean getAPIBuiltinEnabled() {
          return isAPIBuiltinEnabledSet() ? apiBuiltinEnabled : getInheritedAPIBuiltinEnabled();
@@ -1462,7 +1087,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract boolean getInheritedAPIBuiltinEnabled();
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      *  
      * @since 2.3.24
      */
@@ -1470,27 +1097,14 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     public boolean isAPIBuiltinEnabledSet() {
         return apiBuiltinEnabled != null;
     }
-    
+
     /**
-     * Specifies if {@link TemplateException}-s thrown by template processing are logged by FreeMarker or not. The
-     * default is {@code true} for backward compatibility, but that results in logging the exception twice in properly
-     * written applications, because there the {@link TemplateException} thrown by the public FreeMarker API is also
-     * logged by the caller (even if only as the cause exception of a higher level exception). Hence, in modern
-     * applications it should be set to {@code false}. Note that this setting has no effect on the logging of exceptions
-     * caught by {@code #attempt}; those are always logged, no mater what (because those exceptions won't bubble up
-     * until the API caller).
-     * 
-     * @since 2.3.22
+     * Setter pair of {@link #getLogTemplateExceptions()}
      */
     public void setLogTemplateExceptions(boolean value) {
         logTemplateExceptions = value;
     }
 
-    /**
-     * See {@link #setLogTemplateExceptions(boolean)}
-     * 
-     * @since 2.3.22
-     */
     @Override
     public boolean getLogTemplateExceptions() {
          return isLogTemplateExceptionsSet() ? logTemplateExceptions : getInheritedLogTemplateExceptions();
@@ -1499,20 +1113,15 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract boolean getInheritedLogTemplateExceptions();
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
-     *  
-     * @since 2.3.24
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     @Override
     public boolean isLogTemplateExceptionsSet() {
         return logTemplateExceptions != null;
     }
     
-    /**
-     * The getter pair of {@link #setLazyImports(boolean)}.
-     * 
-     * @since 2.3.25
-     */
     @Override
     public boolean getLazyImports() {
          return isLazyImportsSet() ? lazyImports : getInheritedLazyImports();
@@ -1521,46 +1130,22 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract boolean getInheritedLazyImports();
 
     /**
-     * Specifies if {@code <#import ...>} (and {@link Environment#importLib(String, String)}) should delay the loading
-     * and processing of the imported templates until the content of the imported namespace is actually accessed. This
-     * makes the overhead of <em>unused</em> imports negligible. A drawback is that importing a missing or otherwise
-     * broken template will be successful, and the problem will remain hidden until (and if) the namespace content is
-     * actually used. Also, you lose the strict control over when the namespace initializing code in the imported
-     * template will be executed, though it shouldn't mater for well written imported templates anyway. Note that the
-     * namespace initializing code will run with the same {@linkplain MutableProcessingConfiguration#getLocale() locale} as it was at the
-     * point of the {@code <#import ...>} call (other settings won't be handled specially like that).
-     * 
-     * <p>
-     * The default is {@code false} (and thus imports are eager) for backward compatibility, which can cause
-     * perceivable overhead if you have many imports and only a few of them is used.
-     * 
-     * <p>
-     * This setting also affects {@linkplain #setAutoImports(Map) auto-imports}, unless you have set a non-{@code null}
-     * value with {@link #setLazyAutoImports(Boolean)}.
-     * 
-     * @see #setLazyAutoImports(Boolean)
-     * 
-     * @since 2.3.25
+     * Setter pair of {@link #getLazyImports()}
      */
     public void setLazyImports(boolean lazyImports) {
         this.lazyImports = lazyImports;
     }
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
-     *  
-     * @since 2.3.25
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     @Override
     public boolean isLazyImportsSet() {
         return lazyImports != null;
     }
     
-    /**
-     * The getter pair of {@link #setLazyAutoImports(Boolean)}.
-     * 
-     * @since 2.3.25
-     */
     @Override
     public Boolean getLazyAutoImports() {
         return isLazyAutoImportsSet() ? lazyAutoImports : getInheritedLazyAutoImports();
@@ -1569,12 +1154,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract Boolean getInheritedLazyAutoImports();
 
     /**
-     * Specifies if {@linkplain #setAutoImports(Map) auto-imports} will be
-     * {@link #setLazyImports(boolean) lazy imports}. This is useful to make the overhead of <em>unused</em>
-     * auto-imports negligible. If this is set to {@code null}, {@link #getLazyImports()} specifies the behavior of
-     * auto-imports too. The default value is {@code null}.
-     * 
-     * @since 2.3.25
+     * Setter pair of {@link #getLazyAutoImports()}
      */
     public void setLazyAutoImports(Boolean lazyAutoImports) {
         this.lazyAutoImports = lazyAutoImports;
@@ -1582,9 +1162,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
     
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
-     *  
-     * @since 2.3.25
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     @Override
     public boolean isLazyAutoImportsSet() {
@@ -1592,45 +1172,17 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
     
     /**
-     * Adds an invisible <code>#import <i>templateName</i> as <i>namespaceVarName</i></code> at the beginning of the
-     * main template (that's the top-level template that wasn't included/imported from another template). While it only
-     * affects the main template directly, as the imports will invoke a global variable there, the imports will be
-     * visible from the further imported templates too (note that {@link Configuration#getIncompatibleImprovements()}
-     * set to 2.3.24 fixes a rarely surfacing bug with that).
-     * 
-     * <p>
-     * It's recommended to set the {@code auto_impots_lazy} setting ({@link Configuration#setLazyAutoImports(Boolean)})
-     * to {@code true} when using this, so that auto-imports that are unused in a template won't degrade performance by
-     * unnecessary loading and initializing the imported library.
-     * 
-     * <p>
-     * If the imports aren't lazy, the order of the imports will be the same as the order in which they were added with
-     * this method. (Calling this method with an already added {@code namespaceVarName} will move that to the end
-     * of the auto-import order.)
-     * 
-     * <p>
-     * The auto-import is added directly to the {@link MutableProcessingConfiguration} on which this method is called (not to the parents
-     * or children), but when the main template is processed, the auto-imports are collected from all the
-     * {@link MutableProcessingConfiguration} levels, in parent-to-child order: {@link Configuration}, {@link Template} (the main
-     * template), {@link Environment}. If the same {@code namespaceVarName} occurs on multiple levels, the one on the
-     * child level is used, and the clashing import from the parent level is skipped.
-     * 
-     * <p>If there are also auto-includes (see {@link #addAutoInclude(String)}), those will be executed after
-     * the auto-imports.
-     * 
-     * @see #setAutoImports(Map)
+     * Adds the auto-import at the end of {@link #getAutoImports()}. If an auto-import with the same namespace variable
+     * name already exists in the {@link Map}, it will be removed before the new one is added.
      */
     public void addAutoImport(String namespaceVarName, String templateName) {
-        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
-        synchronized (this) {
-            if (autoImports == null) {
-                initAutoImportsMap();
-            } else {
-                // This was a List earlier, so re-inserted items must go to the end, hence we remove() before put().
-                autoImports.remove(namespaceVarName);
-            }
-            autoImports.put(namespaceVarName, templateName);
+        if (autoImports == null) {
+            initAutoImportsMap();
+        } else {
+            // This was a List earlier, so re-inserted items must go to the end, hence we remove() before put().
+            autoImports.remove(namespaceVarName);
         }
+        autoImports.put(namespaceVarName, templateName);
     }
 
     private void initAutoImportsMap() {
@@ -1638,68 +1190,45 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
     
     /**
-     * Removes an auto-import from this {@link MutableProcessingConfiguration} level (not from the parents or children);
-     * see {@link #addAutoImport(String, String)}. Does nothing if the auto-import doesn't exist.
+     * Removes an auto-import from {@link #getAutoImports()} (but doesn't affect auto-imports inherited from another
+     * {@link ParsingConfiguration}). Does nothing if the auto-import doesn't exist.
      */
     public void removeAutoImport(String namespaceVarName) {
-        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
-        synchronized (this) {
-            if (autoImports != null) {
-                autoImports.remove(namespaceVarName);
-            }
+        if (autoImports != null) {
+            autoImports.remove(namespaceVarName);
         }
     }
     
     /**
-     * Removes all auto-imports, then calls {@link #addAutoImport(String, String)} for each {@link Map}-entry (the entry
-     * key is the {@code namespaceVarName}). The order of the auto-imports will be the same as {@link Map#keySet()}
-     * returns the keys (but the order of imports doesn't mater for properly designed libraries anyway).
+     * Setter pair of {@link #getAutoImports()}.
      * 
      * @param map
-     *            Maps the namespace variable names to the template names; not {@code null}
+     *            Maps the namespace variable names to the template names; not {@code null}. The content of the
+     *            {@link Map} is copied into another {@link Map}, to avoid aliasing problems.
      */
     public void setAutoImports(Map map) {
         _NullArgumentException.check("map", map);
         
-        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
-        synchronized (this) {
-            if (autoImports != null) {
-                autoImports.clear();
+        if (autoImports != null) {
+            autoImports.clear();
+        }
+        for (Map.Entry<?, ?> entry : ((Map<?, ?>) map).entrySet()) {
+            Object key = entry.getKey();
+            if (!(key instanceof String)) {
+                throw new IllegalArgumentException(
+                        "Key in Map wasn't a String, but a(n) " + key.getClass().getName() + ".");
             }
-            for (Map.Entry<?, ?> entry : ((Map<?, ?>) map).entrySet()) {
-                Object key = entry.getKey();
-                if (!(key instanceof String)) {
-                    throw new IllegalArgumentException(
-                            "Key in Map wasn't a String, but a(n) " + key.getClass().getName() + ".");
-                }
-                
-                Object value = entry.getValue();
-                if (!(value instanceof String)) {
-                    throw new IllegalArgumentException(
-                            "Value in Map wasn't a String, but a(n) " + value.getClass().getName() + ".");
-                }
-                
-                addAutoImport((String) key, (String) value);
+
+            Object value = entry.getValue();
+            if (!(value instanceof String)) {
+                throw new IllegalArgumentException(
+                        "Value in Map wasn't a String, but a(n) " + value.getClass().getName() + ".");
             }
+
+            addAutoImport((String) key, (String) value);
         }
     }
     
-    /**
-     * Getter pair of {@link #setAutoImports(Map)}; do not modify the returned {@link Map}! To be consistent with other
-     * setting getters, if this setting was set directly on this {@link MutableProcessingConfiguration} object, this simply returns that
-     * value, otherwise it returns the value from the parent {@link MutableProcessingConfiguration}. So beware, the returned value doesn't
-     * reflect the {@link Map} key granularity fallback logic that FreeMarker actually uses for this setting. The
-     * returned value is not the same {@link Map} object that was set with {@link #setAutoImports(Map)}, only its
-     * content is the same. The returned value isn't a snapshot; it may or may not shows the changes later made to this
-     * setting on this {@link MutableProcessingConfiguration} level (but usually it's well defined if until what point settings are
-     * possibly modified).
-     * 
-     * <p>
-     * The return value is never {@code null}; called on the {@link Configuration} (top) level, it defaults to an empty
-     * {@link Map}.
-     *
-     * @since 2.3.25
-     */
     @Override
     public Map<String, String> getAutoImports() {
          return isAutoImportsSet() ? autoImports : getInheritedAutoImports();
@@ -1708,7 +1237,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract Map<String,String> getInheritedAutoImports();
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      * 
      * @since 2.3.25
      */
@@ -1718,40 +1249,16 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Adds an invisible <code>#include <i>templateName</i></code> at the beginning of the main template (that's the
-     * top-level template that wasn't included/imported from another template).
-     * 
-     * <p>
-     * The order of the inclusions will be the same as the order in which they were added with this method.
-     * 
-     * <p>
-     * The auto-include is added directly to the {@link MutableProcessingConfiguration} on which this method is called (not to the parents
-     * or children), but when the main template is processed, the auto-includes are collected from all the
-     * {@link MutableProcessingConfiguration} levels, in parent-to-child order: {@link Configuration}, {@link Template} (the main
-     * template), {@link Environment}.
-     * 
-     * <p>
-     * If there are also auto-imports ({@link #addAutoImport(String, String)}), those imports will be executed before
-     * the auto-includes, hence the namespace variables are accessible for the auto-included templates.
-     * 
-     * <p>
-     * Calling {@link #addAutoInclude(String)} with an already added template name will just move that to the end of the
-     * auto-include list (within the same {@link MutableProcessingConfiguration} level). This works even if the same template name appears
-     * on different {@link MutableProcessingConfiguration} levels, in which case only the inclusion on the lowest (child) level will be
-     * executed.
-     * 
-     * @see #setAutoIncludes(List)
+     * Adds an auto-include to {@link #getAutoIncludes()}. If the template name is already in the {@link List}, then it
+     * will be removed before it's added again (so in effect it's moved to the end of the {@link List}).
      */
     public void addAutoInclude(String templateName) {
-        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
-        synchronized (this) {
-            if (autoIncludes == null) {
-                initAutoIncludesList();
-            } else {
-                autoIncludes.remove(templateName);
-            }
-            autoIncludes.add(templateName);
+        if (autoIncludes == null) {
+            initAutoIncludesList();
+        } else {
+            autoIncludes.remove(templateName);
         }
+        autoIncludes.add(templateName);
     }
 
     private void initAutoIncludesList() {
@@ -1759,43 +1266,23 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
     
     /**
-     * Removes all auto-includes, then calls {@link #addAutoInclude(String)} for each {@link List} items.
-     * 
-     * <p>Before {@linkplain Configuration#Configuration(Version) incompatible improvements} 2.3.25 it doesn't filter
-     * out duplicates from the list if this method was called on a {@link Configuration} instance.
+     * Setter pair of {@link #getAutoIncludes()}
+     *
+     * @param templateNames Not {@code null}. The {@link List} will be copied to avoid aliasing problems.
      */
     public void setAutoIncludes(List templateNames) {
         _NullArgumentException.check("templateNames", templateNames);
-        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
-        synchronized (this) {
-            if (autoIncludes != null) {
-                autoIncludes.clear();
+        if (autoIncludes != null) {
+            autoIncludes.clear();
+        }
+        for (Object templateName : templateNames) {
+            if (!(templateName instanceof String)) {
+                throw new IllegalArgumentException("List items must be String-s.");
             }
-            for (Object templateName : templateNames) {
-                if (!(templateName instanceof String)) {
-                    throw new IllegalArgumentException("List items must be String-s.");
-                }
-                addAutoInclude((String) templateName);
-            }
+            addAutoInclude((String) templateName);
         }
     }
-    
-    /**
-     * Getter pair of {@link #setAutoIncludes(List)}; do not modify the returned {@link List}! To be consistent with
-     * other setting getters, if this setting was set directly on this {@link MutableProcessingConfiguration} object, this simply returns
-     * that value, otherwise it returns the value from the parent {@link MutableProcessingConfiguration}. So beware, the returned value
-     * doesn't reflect the {@link List} concatenation logic that FreeMarker actually uses for this setting. The returned
-     * value is not the same {@link List} object that was set with {@link #setAutoIncludes(List)}, only its content is
-     * the same (except that duplicate are removed). The returned value isn't a snapshot; it may or may not shows the
-     * changes later made to this setting on this {@link MutableProcessingConfiguration} level (but usually it's well defined if until
-     * what point settings are possibly modified).
-     * 
-     * <p>
-     * The return value is never {@code null}; called on the {@link Configuration} (top) level, it defaults to an empty
-     * {@link List}.
-     *
-     * @since 2.3.25
-     */
+
     @Override
     public List<String> getAutoIncludes() {
          return isAutoIncludesSet() ? autoIncludes : getInheritedAutoIncludes();
@@ -1804,9 +1291,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract List<String> getInheritedAutoIncludes();
 
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
-     * 
-     * @since 2.3.25
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent processing
+     * configuration or throws a {@link SettingValueNotSetException}.
      */
     @Override
     public boolean isAutoIncludesSet() {
@@ -1814,8 +1301,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
     
     /**
-     * Removes the auto-include from this {@link MutableProcessingConfiguration} level (not from the parents or children); see
-     * {@link #addAutoInclude(String)}. Does nothing if the template is not there.
+     * Removes the auto-include from the {@link #getAutoIncludes()} {@link List} (but it doesn't affect the
+     * {@link List}-s inherited from other {@link ProcessingConfiguration}-s). Does nothing if the template is not
+     * in the {@link List}.
      */
     public void removeAutoInclude(String templateName) {
         // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
@@ -2320,10 +1808,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                 } else if ("allows_nothing".equals(value) || "allowsNothing".equals(value)) {
                     setNewBuiltinClassResolver(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER);
                 } else if (value.indexOf(":") != -1) {
-                    List<KeyValuePair<List<String>>> segments = parseAsSegmentedList(value);
+                    List<_KeyValuePair<String, List<String>>> segments = parseAsSegmentedList(value);
                     Set allowedClasses = null;
                     List<String> trustedTemplates = null;
-                    for (KeyValuePair<List<String>> segment : segments) {
+                    for (_KeyValuePair<String, List<String>> segment : segments) {
                         String segmentKey = segment.getKey();
                         List<String> segmentValue = segment.getValue();
                         if (segmentKey.equals(ALLOWED_CLASSES)) {
@@ -2484,7 +1972,20 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return customAttributes;
     }
 
+    /**
+     * Setter pair of {@link #getCustomAttributes()}
+     *
+     * @param customAttributes Not {@code null}. The {@link Map} is copied to prevent aliasing problems.
+     */
     public void setCustomAttributes(Map<Object, Object> customAttributes) {
+        setCustomAttributesWithoutCopying(new LinkedHashMap<>(customAttributes));
+    }
+
+    /**
+     * Used internally instead of {@link #setCustomAttributes(Map)} to speed up use cases where we know that there
+     * won't be aliasing problems.
+     */
+    void setCustomAttributesWithoutCopying(Map<Object, Object> customAttributes) {
         _NullArgumentException.check("customAttributes", customAttributes);
         this.customAttributes = customAttributes;
     }
@@ -2497,15 +1998,16 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     boolean isCustomAttributeSet(Object key) {
          return isCustomAttributesSet() && customAttributes.containsKey(key);
     }
-    
+
     /**
-     * Sets a named custom attribute for this configurable.
+     * Sets a {@linkplain #getCustomAttributes() custom attribute} for this configurable.
      *
-     * @param name the name of the custom attribute
-     * @param value the value of the custom attribute. You can set the value to
-     * null, however note that there is a semantic difference between an
-     * attribute set to null and an attribute that is not present, see
-     * {@link #removeCustomAttribute(String)}.
+     * @param name
+     *         the name of the custom attribute
+     * @param value
+     *         the value of the custom attribute. You can set the value to {@code null}, however note that there is a
+     *         semantic difference between an attribute set to {@code null} and an attribute that is not present (see
+     *         {@link #removeCustomAttribute(Object)}).
      */
     public void setCustomAttribute(Object name, Object value) {
         if (customAttributes == null) {
@@ -2513,14 +2015,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         }
         customAttributes.put(name, value);
     }
-    
+
     /**
-     * Returns an array with names of all custom attributes defined directly 
-     * on this configurable. (That is, it doesn't contain the names of custom attributes
-     * defined indirectly on its parent configurables.) The returned array is never null,
-     * but can be zero-length.
-     * The order of elements in the returned array is not defined and can change
-     * between invocations.  
+     * Returns an array with names of all custom attributes defined directly on this {@link ProcessingConfiguration}.
+     * (That is, it doesn't contain the names of custom attributes inherited from other {@link
+     * ProcessingConfiguration}-s.) The returned array is never {@code null}, but can be zero-length.
      */
     // TODO env only?
     // TODO should return List<String>?
@@ -2548,25 +2047,13 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * @param name the name of the custom attribute
      */
     // TODO doesn't work properly, remove?
-    public void removeCustomAttribute(String name) {
+    public void removeCustomAttribute(Object name) {
         if (customAttributes == null) {
             return;
         }
         customAttributes.remove(name);
     }
 
-    /**
-     * Retrieves a named custom attribute for this configurable. If the 
-     * attribute is not present in the configurable, and the configurable has
-     * a parent, then the parent is looked up as well.
-     *
-     * @param key the name of the custom attribute
-     *
-     * @return the value of the custom attribute. Note that if the custom attribute
-     * was created with <tt>&lt;#ftl&nbsp;attributes={...}&gt;</tt>, then this value is already
-     * unwrapped (i.e. it's a <code>String</code>, or a <code>List</code>, or a
-     * <code>Map</code>, ...etc., not a FreeMarker specific class).
-     */
     @Override
     public Object getCustomAttribute(Object key) {
         Object value;
@@ -2587,31 +2074,13 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return new SettingStringParser(text).parseAsList();
     }
 
-    protected final List<KeyValuePair<List<String>>> parseAsSegmentedList(String text)
+    protected final List<_KeyValuePair<String, List<String>>> parseAsSegmentedList(String text)
     throws GenericParseException {
         return new SettingStringParser(text).parseAsSegmentedList();
     }
     
-    protected final HashMap parseAsImportList(String text) throws GenericParseException {
+    private final HashMap parseAsImportList(String text) throws GenericParseException {
         return new SettingStringParser(text).parseAsImportList();
-    }
-    
-    private static class KeyValuePair<V> {
-        private final String key;
-        private final V value;
-        
-        KeyValuePair(String key, V value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        String getKey() {
-            return key;
-        }
-
-        V getValue() {
-            return value;
-        }
     }
 
     @SuppressWarnings("unchecked")
@@ -2633,8 +2102,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
             ln = text.length();
         }
 
-        List<KeyValuePair<List<String>>> parseAsSegmentedList() throws GenericParseException {
-            List<KeyValuePair<List<String>>> segments = new ArrayList();
+        List<_KeyValuePair<String, List<String>>> parseAsSegmentedList() throws GenericParseException {
+            List<_KeyValuePair<String, List<String>>> segments = new ArrayList();
             List<String> currentSegment = null;
             
             char c;
@@ -2646,7 +2115,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                 
                 if (c == ':') {
                     currentSegment = new ArrayList();
-                    segments.add(new KeyValuePair<List<String>>(item, currentSegment));
+                    segments.add(new _KeyValuePair<>(item, currentSegment));
                 } else {
                     if (currentSegment == null) {
                         throw new GenericParseException(

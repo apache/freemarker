@@ -827,8 +827,9 @@ public class OutputFormatTest extends TemplateTest {
     
     @Test
     public void testDynamicParsingBIsInherticContextOutputFormat() throws Exception {
-        // Dynamic parser BI-s are supposed to use the parserConfiguration of the calling template, and ignore anything
-        // inside the calling template itself. Except, the outputFormat has to come from the calling lexical context.
+        // Dynamic parser BI-s are supposed to use the ParsingConfiguration of the calling template, and ignore anything
+        // inside the calling template itself. Except, the outputFormat and autoEscapingPolicy has to come from the
+        // calling lexical context.
         
         String commonFTL
                 = "Eval: ${'.outputFormat'?eval}; "
