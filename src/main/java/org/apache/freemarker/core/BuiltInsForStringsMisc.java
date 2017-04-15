@@ -124,7 +124,7 @@ class BuiltInsForStringsMisc {
      * transform model that evaluates the template in place.
      * The template inherits the configuration and environment of the executing
      * template. By default, its name will be equal to 
-     * <tt>executingTemplate.getName() + "$anonymous_interpreted"</tt>. You can
+     * <tt>executingTemplate.getLookupName() + "$anonymous_interpreted"</tt>. You can
      * specify another parameter to the method call in which case the
      * template name suffix is the specified id instead of "anonymous_interpreted".
      */
@@ -171,7 +171,7 @@ class BuiltInsForStringsMisc {
                 ParsingConfiguration pCfg = parentTemplate.getParsingConfiguration();
                 // pCfg.outputFormat+autoEscapingPolicy is exceptional: it's inherited from the lexical context
                 interpretedTemplate = new Template(
-                        (parentTemplate.getName() != null ? parentTemplate.getName() : "nameless_template") + "->" + id,
+                        (parentTemplate.getLookupName() != null ? parentTemplate.getLookupName() : "nameless_template") + "->" + id,
                         null,
                         new StringReader(templateSource),
                         parentTemplate.getConfiguration(), parentTemplate.getTemplateConfiguration(),

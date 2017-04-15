@@ -80,7 +80,8 @@ public class ExceptionTest extends TestCase {
             t.process(null, _NullWriter.INSTANCE);
             fail();
         } catch (TemplateException e) {
-            assertEquals("foo.ftl", t.getName());
+            assertEquals("foo.ftl", t.getLookupName());
+            assertEquals("foo.ftl", e.getTemplateLookupName());
             assertEquals("foo_en.ftl", e.getTemplateSourceName());
             assertEquals(3, (int) e.getLineNumber());
             assertEquals(6, (int) e.getColumnNumber());
@@ -104,7 +105,8 @@ public class ExceptionTest extends TestCase {
             fail();
         } catch (ParseException e) {
             System.out.println(e.getMessage());
-            assertEquals("foo_en.ftl", e.getTemplateName());
+            assertEquals("foo_en.ftl", e.getTemplateSourceName());
+            assertEquals("foo.ftl", e.getTemplateLookupName());
             assertEquals(3, e.getLineNumber());
             assertEquals(5, e.getColumnNumber());
             assertEquals(3, e.getEndLineNumber());

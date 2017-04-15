@@ -277,7 +277,7 @@ public class ConfigurationTest extends TestCase {
         // 1 args:
         {
             Template t = cfg.getTemplate(tFtl);
-            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getLookupName());
             assertEquals(tFtl, t.getSourceName());
             assertEquals(Locale.GERMAN, t.getLocale());
             assertNull(t.getCustomLookupCondition());
@@ -285,7 +285,7 @@ public class ConfigurationTest extends TestCase {
         }
         {
             Template t = cfg.getTemplate(tUtf8Ftl);
-            assertEquals(tUtf8Ftl, t.getName());
+            assertEquals(tUtf8Ftl, t.getLookupName());
             assertEquals(tUtf8Ftl, t.getSourceName());
             assertEquals(Locale.GERMAN, t.getLocale());
             assertNull(t.getCustomLookupCondition());
@@ -295,7 +295,7 @@ public class ConfigurationTest extends TestCase {
         // 2 args:
         {
             Template t = cfg.getTemplate(tFtl, Locale.GERMAN);
-            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getLookupName());
             assertEquals(tFtl, t.getSourceName());
             assertEquals(Locale.GERMAN, t.getLocale());
             assertNull(t.getCustomLookupCondition());
@@ -303,7 +303,7 @@ public class ConfigurationTest extends TestCase {
         }
         {
             Template t = cfg.getTemplate(tFtl, (Locale) null);
-            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getLookupName());
             assertEquals(tFtl, t.getSourceName());
             assertEquals(Locale.GERMAN, t.getLocale());
             assertNull(t.getCustomLookupCondition());
@@ -311,7 +311,7 @@ public class ConfigurationTest extends TestCase {
         }
         {
             Template t = cfg.getTemplate(tFtl, Locale.US);
-            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getLookupName());
             assertEquals(tEnFtl, t.getSourceName());
             assertEquals(Locale.US, t.getLocale());
             assertNull(t.getCustomLookupCondition());
@@ -319,7 +319,7 @@ public class ConfigurationTest extends TestCase {
         }
         {
             Template t = cfg.getTemplate(tUtf8Ftl, Locale.US);
-            assertEquals(tUtf8Ftl, t.getName());
+            assertEquals(tUtf8Ftl, t.getLookupName());
             assertEquals(tUtf8Ftl, t.getSourceName());
             assertEquals(Locale.US, t.getLocale());
             assertNull(t.getCustomLookupCondition());
@@ -327,7 +327,7 @@ public class ConfigurationTest extends TestCase {
         }
         {
             Template t = cfg.getTemplate(tFtl, hu);
-            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getLookupName());
             assertEquals(tHuFtl, t.getSourceName());
             assertEquals(hu, t.getLocale());
             assertNull(t.getCustomLookupCondition());
@@ -335,7 +335,7 @@ public class ConfigurationTest extends TestCase {
         }
         {
             Template t = cfg.getTemplate(tUtf8Ftl, hu);
-            assertEquals(tUtf8Ftl, t.getName());
+            assertEquals(tUtf8Ftl, t.getLookupName());
             assertEquals(tUtf8Ftl, t.getSourceName());
             assertEquals(hu, t.getLocale());
             assertNull(t.getCustomLookupCondition());
@@ -352,7 +352,7 @@ public class ConfigurationTest extends TestCase {
         assertNull(cfg.getTemplate("missing.ftl", hu, custLookupCond, true));
         {
             Template t = cfg.getTemplate(tFtl, hu, custLookupCond, false);
-            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getLookupName());
             assertEquals(tHuFtl, t.getSourceName());
             assertEquals(hu, t.getLocale());
             assertEquals(custLookupCond, t.getCustomLookupCondition());
@@ -361,7 +361,7 @@ public class ConfigurationTest extends TestCase {
         }
         {
             Template t = cfg.getTemplate(tFtl, null, custLookupCond, false);
-            assertEquals(tFtl, t.getName());
+            assertEquals(tFtl, t.getLookupName());
             assertEquals(tFtl, t.getSourceName());
             assertEquals(Locale.GERMAN, t.getLocale());
             assertEquals(custLookupCond, t.getCustomLookupCondition());
@@ -459,7 +459,7 @@ public class ConfigurationTest extends TestCase {
         {
             cfg.setTemplateNameFormat(DefaultTemplateNameFormatFM2.INSTANCE);
             final Template template = cfg.getTemplate("a/./../b.ftl");
-            assertEquals("a/b.ftl", template.getName());
+            assertEquals("a/b.ftl", template.getLookupName());
             assertEquals("a/b.ftl", template.getSourceName());
             assertEquals("In a/b.ftl", template.toString());
         }
@@ -467,7 +467,7 @@ public class ConfigurationTest extends TestCase {
         {
             cfg.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
             final Template template = cfg.getTemplate("a/./../b.ftl");
-            assertEquals("b.ftl", template.getName());
+            assertEquals("b.ftl", template.getLookupName());
             assertEquals("b.ftl", template.getSourceName());
             assertEquals("In b.ftl", template.toString());
         }

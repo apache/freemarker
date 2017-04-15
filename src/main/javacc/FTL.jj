@@ -193,27 +193,27 @@ public class FMParser {
     }
 
     private OutputFormat getFormatFromStdFileExt() {
-        String sourceName = template.getSourceName();
-        if (sourceName == null) {
+        String name = template.getSourceOrLookupName();
+        if (name == null) {
             return null;
         }
 
-        int ln = sourceName.length();
+        int ln = name.length();
         if (ln < 5) return null;
 
-        char c = sourceName.charAt(ln - 5);
+        char c = name.charAt(ln - 5);
         if (c != '.') return null;
 
-        c = sourceName.charAt(ln - 4);
+        c = name.charAt(ln - 4);
         if (c != 'f' && c != 'F') return null;
 
-        c = sourceName.charAt(ln - 3);
+        c = name.charAt(ln - 3);
         if (c != 't' && c != 'T') return null;
 
-        c = sourceName.charAt(ln - 2);
+        c = name.charAt(ln - 2);
         if (c != 'l' && c != 'L') return null;
 
-        c = sourceName.charAt(ln - 1);
+        c = name.charAt(ln - 1);
         try {
             // Note: We get the output formats by name, so that custom overrides take effect.
             if (c == 'h' || c == 'H') {

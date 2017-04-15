@@ -233,7 +233,7 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
 
         DebugTemplateModel(Template template) {
             super(template);
-            name = new SimpleScalar(template.getName());
+            name = new SimpleScalar(template.getLookupName());
         }
 
         @Override

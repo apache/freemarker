@@ -38,7 +38,7 @@ import org.apache.freemarker.core.Template;
  * <li>A template lookup strategy meant to operate solely with template names, not with {@link TemplateLoader}-s
  * directly. Basically, it's a mapping between the template names that templates and API-s like
  * {@link Configuration#getTemplate(String)} see, and those that the underlying {@link TemplateLoader} sees.
- * <li>A template lookup strategy doesn't influence the template's name ({@link Template#getName()}), which is the
+ * <li>A template lookup strategy doesn't influence the template's name ({@link Template#getLookupName()}), which is the
  * normalized form of the template name as it was requested (with {@link Configuration#getTemplate(String)}, etc.). It
  * only influences the so called source name of the template ({@link Template#getSourceName()}). The template's name is
  * used as the basis for resolving relative inclusions/imports in the template. The source name is pretty much only used

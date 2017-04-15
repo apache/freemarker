@@ -200,12 +200,12 @@ final class ASTExpBuiltInVariable extends ASTExpression {
             return env.getCurrentVisitorNode();
         }
         if (name == MAIN_TEMPLATE_NAME || name == MAIN_TEMPLATE_NAME_CC) {
-            return SimpleScalar.newInstanceOrNull(env.getMainTemplate().getName());
+            return SimpleScalar.newInstanceOrNull(env.getMainTemplate().getLookupName());
         }
         // [FM3] Some of these two should be removed.
         if (name == CURRENT_TEMPLATE_NAME || name == CURRENT_TEMPLATE_NAME_CC
                 || name == TEMPLATE_NAME || name == TEMPLATE_NAME_CC) {
-            return SimpleScalar.newInstanceOrNull(env.getCurrentTemplate().getName());
+            return SimpleScalar.newInstanceOrNull(env.getCurrentTemplate().getLookupName());
         }
         if (name == PASS) {
             return ASTDirMacro.DO_NOTHING_MACRO;

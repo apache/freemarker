@@ -74,7 +74,7 @@ public class TemplateLookupStrategyTest {
         
         {
             final Template t = cfg.getTemplate("test.ftl", locale);
-            assertEquals("test.ftl", t.getName());
+            assertEquals("test.ftl", t.getLookupName());
             assertEquals("aa/test.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
             assertNull(t.getCustomLookupCondition());
@@ -156,7 +156,7 @@ public class TemplateLookupStrategyTest {
             {
                 final Locale locale = new Locale("aa", "BB", "CC_DD");
                 final Template t = cfg.getTemplate("test.ftl", locale);
-                assertEquals("test.ftl", t.getName());
+                assertEquals("test.ftl", t.getLookupName());
                 assertEquals("test_aa_BB_CC_DD.ftl", t.getSourceName());
                 assertEquals(locale, t.getLocale());
                 assertNull(t.getCustomLookupCondition());
@@ -169,7 +169,7 @@ public class TemplateLookupStrategyTest {
             {
                 final Locale locale = new Locale("aa", "BB", "CC_XX");
                 final Template t = cfg.getTemplate(templateName, locale);
-                assertEquals("test.ftl", t.getName());
+                assertEquals("test.ftl", t.getLookupName());
                 assertEquals("test_aa_BB_CC.ftl", t.getSourceName());
                 assertEquals(locale, t.getLocale());
                 assertNull(t.getCustomLookupCondition());
@@ -181,7 +181,7 @@ public class TemplateLookupStrategyTest {
             {
                 final Locale locale = new Locale("aa", "BB", "XX_XX");
                 final Template t = cfg.getTemplate(templateName, locale);
-                assertEquals("test.ftl", t.getName());
+                assertEquals("test.ftl", t.getLookupName());
                 assertEquals("test_aa_BB.ftl", t.getSourceName());
                 assertEquals(locale, t.getLocale());
                 assertNull(t.getCustomLookupCondition());
@@ -196,7 +196,7 @@ public class TemplateLookupStrategyTest {
                 cfg.setLocalizedLookup(false);
                 final Locale locale = new Locale("aa", "BB", "XX_XX");
                 final Template t = cfg.getTemplate(templateName, locale);
-                assertEquals("test.ftl", t.getName());
+                assertEquals("test.ftl", t.getLookupName());
                 assertEquals("test.ftl", t.getSourceName());
                 assertEquals(locale, t.getLocale());
                 assertNull(t.getCustomLookupCondition());
@@ -211,7 +211,7 @@ public class TemplateLookupStrategyTest {
             {
                 final Locale locale = new Locale("aa", "XX", "XX_XX");
                 final Template t = cfg.getTemplate(templateName, locale);
-                assertEquals("test.ftl", t.getName());
+                assertEquals("test.ftl", t.getLookupName());
                 assertEquals("test_aa.ftl", t.getSourceName());
                 assertEquals(locale, t.getLocale());
                 assertNull(t.getCustomLookupCondition());
@@ -225,7 +225,7 @@ public class TemplateLookupStrategyTest {
             {
                 final Locale locale = new Locale("xx", "XX", "XX_XX");
                 final Template t = cfg.getTemplate(templateName, locale);
-                assertEquals("test.ftl", t.getName());
+                assertEquals("test.ftl", t.getLookupName());
                 assertEquals("test.ftl", t.getSourceName());
                 assertEquals(locale, t.getLocale());
                 assertNull(t.getCustomLookupCondition());
@@ -240,7 +240,7 @@ public class TemplateLookupStrategyTest {
             {
                 final Locale locale = new Locale("xx", "BB", "CC_DD");
                 final Template t = cfg.getTemplate(templateName, locale);
-                assertEquals("test.ftl", t.getName());
+                assertEquals("test.ftl", t.getLookupName());
                 assertEquals("test.ftl", t.getSourceName());
                 assertEquals(locale, t.getLocale());
                 assertNull(t.getCustomLookupCondition());
@@ -268,7 +268,7 @@ public class TemplateLookupStrategyTest {
         
         {
             final Template t = cfg.getTemplate("/./moo/../x/y/*/sub/i.ftl", locale);
-            assertEquals("x/y/*/sub/i.ftl", t.getName());
+            assertEquals("x/y/*/sub/i.ftl", t.getLookupName());
             assertEquals("x/sub/i.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
             assertNull(t.getCustomLookupCondition());
@@ -283,7 +283,7 @@ public class TemplateLookupStrategyTest {
 
         {
             final Template t = cfg.getTemplate("a/b/*/./sub/i.ftl", locale);
-            assertEquals("a/b/*/sub/i.ftl", t.getName());
+            assertEquals("a/b/*/sub/i.ftl", t.getLookupName());
             assertEquals("sub/i.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
             assertNull(t.getCustomLookupCondition());
@@ -334,7 +334,7 @@ public class TemplateLookupStrategyTest {
             final Locale locale = new Locale("xx");
             final Domain domain = new Domain("foo.com");
             final Template t = cfg.getTemplate("t.ftl", locale, domain);
-            assertEquals("t.ftl", t.getName());
+            assertEquals("t.ftl", t.getLookupName());
             assertEquals("@foo.com/t.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
             assertEquals(domain, t.getCustomLookupCondition());
@@ -357,7 +357,7 @@ public class TemplateLookupStrategyTest {
             final Locale locale = new Locale("xx");
             final Domain domain = new Domain("bar.com");
             final Template t = cfg.getTemplate("t.ftl", locale, domain);
-            assertEquals("t.ftl", t.getName());
+            assertEquals("t.ftl", t.getLookupName());
             assertEquals("@bar.com/t.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
             assertEquals(domain, t.getCustomLookupCondition());
@@ -382,7 +382,7 @@ public class TemplateLookupStrategyTest {
             final Locale locale = new Locale("xx", "YY");
             final Domain domain = new Domain("baaz.com");
             final Template t = cfg.getTemplate("t.ftl", locale, domain);
-            assertEquals("t.ftl", t.getName());
+            assertEquals("t.ftl", t.getLookupName());
             assertEquals("@default/t.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
             assertEquals(domain, t.getCustomLookupCondition());
@@ -407,7 +407,7 @@ public class TemplateLookupStrategyTest {
             final Locale locale = new Locale("xx", "YY");
             final Domain domain = new Domain("nosuch.com");
             final Template t = cfg.getTemplate("i.ftl", locale, domain);
-            assertEquals("i.ftl", t.getName());
+            assertEquals("i.ftl", t.getLookupName());
             assertEquals("@default/i_xx.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
             assertEquals(domain, t.getCustomLookupCondition());
@@ -427,7 +427,7 @@ public class TemplateLookupStrategyTest {
             final Locale locale = new Locale("xx", "YY");
             final Domain domain = new Domain("nosuch.com");
             final Template t = cfg.getTemplate("i.ftl", locale, domain);
-            assertEquals("i.ftl", t.getName());
+            assertEquals("i.ftl", t.getLookupName());
             assertEquals("@default/i.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
             assertEquals(domain, t.getCustomLookupCondition());
@@ -573,7 +573,7 @@ public class TemplateLookupStrategyTest {
         
         {
             Template t = cfg.getTemplate("test.txt", new Locale("aa", "BB"), null, false);
-            assertEquals("test.txt", t.getName());
+            assertEquals("test.txt", t.getLookupName());
             assertEquals("test_aa.txt", t.getSourceName());
             assertEquals(
                     ImmutableList.of(
@@ -596,7 +596,8 @@ public class TemplateLookupStrategyTest {
             cfg.getTemplate("test.ftl", new Locale("aa", "BB"));
             fail();
         } catch (ParseException e) {
-            assertEquals("test_aa.ftl", e.getTemplateName());
+            assertEquals("test_aa.ftl", e.getTemplateSourceName());
+            assertEquals("test.ftl", e.getTemplateLookupName());
         }
     }
     

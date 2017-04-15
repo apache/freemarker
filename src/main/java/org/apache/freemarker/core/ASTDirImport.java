@@ -49,7 +49,7 @@ final class ASTDirImport extends ASTDirective {
         final String importedTemplateName = importedTemplateNameExp.evalAndCoerceToPlainText(env);
         final String fullImportedTemplateName;
         try {
-            fullImportedTemplateName = env.toFullTemplateName(getTemplate().getName(), importedTemplateName);
+            fullImportedTemplateName = env.toFullTemplateName(getTemplate().getLookupName(), importedTemplateName);
         } catch (MalformedTemplateNameException e) {
             throw new _MiscTemplateException(e, env,
                     "Malformed template name ", new _DelayedJQuote(e.getTemplateName()), ":\n",

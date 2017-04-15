@@ -44,50 +44,50 @@ public class TemplateConstructorsTest {
         final Charset sourceEncoding = StandardCharsets.UTF_16LE;
         {
             Template t = new Template(name, createReader(), cfg);
-            assertEquals(name, t.getName());
-            assertEquals(name, t.getSourceName());
+            assertEquals(name, t.getLookupName());
+            assertNull(t.getSourceName());
             assertEquals(CONTENT, t.toString());
             assertNull(t.getActualSourceEncoding());
         }
         {
             Template t = new Template(name, CONTENT, cfg);
-            assertEquals(name, t.getName());
-            assertEquals(name, t.getSourceName());
+            assertEquals(name, t.getLookupName());
+            assertNull(t.getSourceName());
             assertEquals(CONTENT, t.toString());
             assertNull(t.getActualSourceEncoding());
         }
         {
             Template t = new Template(name, CONTENT_FORCE_UTF8, cfg);
-            assertEquals(name, t.getName());
-            assertEquals(name, t.getSourceName());
+            assertEquals(name, t.getLookupName());
+            assertNull(t.getSourceName());
             // assertEquals(CONTENT_FORCE_UTF8, t.toString()); // FIXME the #ftl header is missing from the dump, why?
             assertNull(t.getActualSourceEncoding()); // Because it was created from a String
         }
         {
             Template t = new Template(name, createReader(), cfg, sourceEncoding);
-            assertEquals(name, t.getName());
-            assertEquals(name, t.getSourceName());
+            assertEquals(name, t.getLookupName());
+            assertNull(t.getSourceName());
             assertEquals(CONTENT, t.toString());
             assertEquals(StandardCharsets.UTF_16LE, t.getActualSourceEncoding());
         }
         {
             Template t = new Template(name, sourceName, createReader(), cfg);
-            assertEquals(name, t.getName());
+            assertEquals(name, t.getLookupName());
             assertEquals(sourceName, t.getSourceName());
             assertEquals(CONTENT, t.toString());
             assertNull(t.getActualSourceEncoding());
         }
         {
             Template t = new Template(name, sourceName, createReader(), cfg, sourceEncoding);
-            assertEquals(name, t.getName());
+            assertEquals(name, t.getLookupName());
             assertEquals(sourceName, t.getSourceName());
             assertEquals(CONTENT, t.toString());
             assertEquals(StandardCharsets.UTF_16LE, t.getActualSourceEncoding());
         }
         {
             Template t = Template.createPlainTextTemplate(name, CONTENT, cfg);
-            assertEquals(name, t.getName());
-            assertEquals(name, t.getSourceName());
+            assertEquals(name, t.getLookupName());
+            assertNull(t.getSourceName());
             assertEquals(CONTENT, t.toString());
             assertNull(t.getActualSourceEncoding());
         }

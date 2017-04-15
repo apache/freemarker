@@ -201,8 +201,8 @@ public class EnvironmentGetTemplateVariantsTest extends TemplateTest {
             public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
                     throws TemplateException, IOException {
                 Writer out = env.getOut();
-                final String r = "<ct=" + env.getCurrentTemplate().getName() + " mt="
-                        + env.getMainTemplate().getName() + ">";
+                final String r = "<ct=" + env.getCurrentTemplate().getLookupName() + " mt="
+                        + env.getMainTemplate().getLookupName() + ">";
                 out.write(r);
                 env.setGlobalVariable("lastTNamesResult", new SimpleScalar(r));
             }

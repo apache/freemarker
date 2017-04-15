@@ -53,6 +53,7 @@ public class TemplateException extends Exception {
     private boolean blamedExpressionStringCalculated;
     private String blamedExpressionString;
     private boolean positionsCalculated;
+    private String templateLookupName;
     private String templateSourceName;
     private Integer lineNumber; 
     private Integer columnNumber; 
@@ -195,7 +196,8 @@ public class TemplateException extends Exception {
                 // Line number blow 0 means no info, negative means position in ?eval-ed value that we won't use here.
                 if (templateObject != null && templateObject.getBeginLine() > 0) {
                     final Template template = templateObject.getTemplate();
-                    templateSourceName = template != null ? template.getSourceName() : null;
+                    templateLookupName = template.getLookupName();
+                    templateSourceName = template.getSourceName();
                     lineNumber = Integer.valueOf(templateObject.getBeginLine());
                     columnNumber = Integer.valueOf(templateObject.getBeginColumn());
                     endLineNumber = Integer.valueOf(templateObject.getEndLine());
@@ -453,9 +455,9 @@ public class TemplateException extends Exception {
     }
 
     /**
-     * Returns the source name ({@link Template#getSourceName()}) of the template where the error has occurred, or
+     * Returns the {@linkplain Template#getSourceName() source name} of the template where the error has occurred, or
      * {@code null} if the information isn't available. This is what should be used for showing the error position.
-     * 
+     *
      * @since 2.3.22
      */
     public String getTemplateSourceName() {
@@ -466,7 +468,30 @@ public class TemplateException extends Exception {
             return templateSourceName;
         }
     }
-    
+
+    /**
+     * Returns the {@linkplain Template#getLookupName()} () lookup name} of the template where the error has
+     * occurred, or {@code null} if the information isn't available. Do not use this for showing the error position;
+     * use {@link #getTemplateSourceName()}.
+     */
+    public String getTemplateLookupName() {
+        synchronized (lock) {
+            if (!positionsCalculated) {
+                calculatePosition();
+            }
+            return templateLookupName;
+        }
+    }
+
+    /**
+     * Returns the {@linkplain #getTemplateSourceName() template source name}, or if that's {@code null} then the
+     * {@linkplain #getTemplateLookupName() template lookup name}. This name is primarily meant to be used in error
+     * messages.
+     */
+    public String getTemplateSourceOrLookupName() {
+        return getTemplateSourceName() != null ? getTemplateSourceName() : getTemplateLookupName();
+    }
+
     /**
      * 1-based column number of the failing section, or {@code null} if the information is not available.
      * 

@@ -123,7 +123,7 @@ public class OptInTemplateClassResolver implements TemplateClassResolver {
     protected String safeGetTemplateName(Template template) {
         if (template == null) return null;
         
-        String name = template.getName();
+        String name = template.getLookupName();
         if (name == null) return null;
 
         // Detect exploits, return null if one is suspected:

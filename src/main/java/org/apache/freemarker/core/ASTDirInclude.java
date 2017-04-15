@@ -66,7 +66,7 @@ final class ASTDirInclude extends ASTDirective {
         final String includedTemplateName = includedTemplateNameExp.evalAndCoerceToPlainText(env);
         final String fullIncludedTemplateName;
         try {
-            fullIncludedTemplateName = env.toFullTemplateName(getTemplate().getName(), includedTemplateName);
+            fullIncludedTemplateName = env.toFullTemplateName(getTemplate().getLookupName(), includedTemplateName);
         } catch (MalformedTemplateNameException e) {
             throw new _MiscTemplateException(e, env,
                     "Malformed template name ", new _DelayedJQuote(e.getTemplateName()), ":\n",

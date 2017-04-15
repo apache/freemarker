@@ -205,7 +205,7 @@ class JaxenXPathSupport implements XPathSupport {
     // [FM3] Look into this "hidden" feature
     static Template getTemplate(String systemId) throws IOException {
         Environment env = Environment.getCurrentEnvironment();
-        String templatePath = env.getCurrentTemplate().getName();
+        String templatePath = env.getCurrentTemplate().getLookupName();
         int lastSlash = templatePath.lastIndexOf('/');
         templatePath = lastSlash == -1 ? "" : templatePath.substring(0, lastSlash + 1);
         systemId = env.toFullTemplateName(templatePath, systemId);
@@ -221,7 +221,7 @@ class JaxenXPathSupport implements XPathSupport {
         }
         InputSource is = new InputSource();
         is.setPublicId(publicId);
-        is.setSystemId(raw.getName());
+        is.setSystemId(raw.getLookupName());
         is.setCharacterStream(new StringReader(sw.toString()));
         return is;
     }

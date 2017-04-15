@@ -125,7 +125,7 @@ extends
     
     @Override
     void registerTemplateSpi(Template template) {
-        String templateName = template.getName();
+        String templateName = template.getLookupName();
         synchronized (templateDebugInfos) {
             TemplateDebugInfo tdi = createTemplateDebugInfo(templateName);
             tdi.templates.add(new TemplateReference(templateName, template, refQueue));

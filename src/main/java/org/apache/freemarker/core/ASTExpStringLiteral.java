@@ -78,7 +78,7 @@ final class ASTExpStringLiteral extends ASTExpression implements TemplateScalarM
                     parser.tearDownStringLiteralMode(parentTkMan);
                 }
             } catch (ParseException e) {
-                e.setTemplateName(parentTemplate.getSourceName());
+                e.setTemplate(parentTemplate);
                 throw e;
             }
             constantValue = null;

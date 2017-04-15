@@ -95,7 +95,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
 
     // TODO [FM3] We want to get rid of these, thenthe same Template object could be reused for different lookups.
     // Template lookup parameters:
-    private final String name;
+    private final String lookupName;
     private Locale lookupLocale;
     private Serializable customLookupCondition;
 
@@ -125,36 +125,36 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     /**
      * Same as {@link #Template(String, String, Reader, Configuration)} with {@code null} {@code sourceName} parameter.
      */
-    public Template(String name, Reader reader, Configuration cfg) throws IOException {
-        this(name, null, reader, cfg);
+    public Template(String lookupName, Reader reader, Configuration cfg) throws IOException {
+        this(lookupName, null, reader, cfg);
     }
 
     /**
      * Convenience constructor for {@link #Template(String, Reader, Configuration)
-     * Template(name, new StringReader(reader), cfg)}.
+     * Template(lookupName, new StringReader(reader), cfg)}.
      * 
      * @since 2.3.20
      */
-    public Template(String name, String sourceCode, Configuration cfg) throws IOException {
-        this(name, new StringReader(sourceCode), cfg);
+    public Template(String lookupName, String sourceCode, Configuration cfg) throws IOException {
+        this(lookupName, new StringReader(sourceCode), cfg);
     }
 
     /**
      * Convenience constructor for {@link #Template(String, String, Reader, Configuration, TemplateConfiguration,
-     * Charset) Template(name, null, new StringReader(reader), cfg), tc, null}.
+     * Charset) Template(lookupName, null, new StringReader(reader), cfg), tc, null}.
      *
      * @since 2.3.20
      */
-    public Template(String name, String sourceCode, Configuration cfg, TemplateConfiguration tc) throws IOException {
-        this(name, null, new StringReader(sourceCode), cfg, tc, null);
+    public Template(String lookupName, String sourceCode, Configuration cfg, TemplateConfiguration tc) throws IOException {
+        this(lookupName, null, new StringReader(sourceCode), cfg, tc, null);
     }
 
     /**
-     * Convenience constructor for {@link #Template(String, String, Reader, Configuration, Charset) Template(name, null,
+     * Convenience constructor for {@link #Template(String, String, Reader, Configuration, Charset) Template(lookupName, null,
      * reader, cfg, sourceEncoding)}.
      */
-    public Template(String name, Reader reader, Configuration cfg, Charset sourceEncoding) throws IOException {
-        this(name, null, reader, cfg, sourceEncoding);
+    public Template(String lookupName, Reader reader, Configuration cfg, Charset sourceEncoding) throws IOException {
+        this(lookupName, null, reader, cfg, sourceEncoding);
     }
 
     /**
@@ -162,11 +162,15 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * performance matters, you should re-use (cache) {@link Template} instances instead of re-creating them from the
      * same source again and again. ({@link Configuration#getTemplate(String) and its overloads already do such reuse.})
      * 
-     * @param name
-     *            The path of the template file relatively to the (virtual) directory that you use to store the
-     *            templates (except if {@link #Template(String, String, Reader, Configuration, Charset) sourceName}
-     *            differs from it). Shouldn't start with {@code '/'}. Should use {@code '/'}, not {@code '\'}. Check
-     *            {@link #getName()} to see how the name will be used. The name should be independent of the actual
+     * @param lookupName
+     *            The name (path) with which the template was get (usually via
+     *            {@link Configuration#getTemplate(String)}), after basic normalization. (Basic normalization means
+     *            things that doesn't require accessing the backing storage, such as {@code "/a/../b/foo.ftl"}
+     *            becomes to {@code "b/foo.ftl"}).
+     *            This is usually the path of the template file relatively to the (virtual) directory that you use to
+     *            store the templates (except if the {@link #getSourceName()}  sourceName} differs from it).
+     *            Shouldn't start with {@code '/'}. Should use {@code '/'}, not {@code '\'}. Check
+     *            {@link #getLookupName()} to see how the name will be used. The name should be independent of the actual
      *            storage mechanism and physical location as far as possible. Even when the templates are stored
      *            straightforwardly in real files (they often aren't; see {@link TemplateLoader}), the name shouldn't be
      *            an absolute file path. Like if the template is stored in {@code "/www/templates/forum/main.ftl"}, and
@@ -177,8 +181,8 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      *            the template root directory (and here again, it's the {@link TemplateLoader} that knows what that
      *            "physically" means).
      * @param sourceName
-     *            See {@link #getSourceName()} for the meaning. Can be {@code null}, in which case
-     *            {@link #getSourceName()} will return the same as {@link #getName()}.
+     *            Often the same as the {@code lookupName}; see {@link #getSourceName()} for more. Can be
+     *            {@code null}, in which case error messages will fall back to use {@link #getLookupName()}.
      * @param reader
      *            The character stream to read from. The {@link Reader} is <em>not</em> closed by this method (unlike
      *            in FreeMarker 2.x.x), so be sure that it's closed somewhere. (Except of course, readers like
@@ -190,8 +194,8 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * @since 2.3.22
      */
    public Template(
-           String name, String sourceName, Reader reader, Configuration cfg) throws IOException {
-       this(name, sourceName, reader, cfg, null);
+           String lookupName, String sourceName, Reader reader, Configuration cfg) throws IOException {
+       this(lookupName, sourceName, reader, cfg, null);
    }
 
     /**
@@ -207,9 +211,9 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * @since 2.3.22
      */
    public Template(
-           String name, String sourceName, Reader reader, Configuration cfg, Charset actualSourceEncoding) throws
+           String lookupName, String sourceName, Reader reader, Configuration cfg, Charset actualSourceEncoding) throws
            IOException {
-       this(name, sourceName, reader, cfg, null, actualSourceEncoding);
+       this(lookupName, sourceName, reader, cfg, null, actualSourceEncoding);
    }
 
     /**
@@ -229,10 +233,10 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * @since 2.3.24
      */
    public Template(
-           String name, String sourceName, Reader reader,
+           String lookupName, String sourceName, Reader reader,
            Configuration cfg, TemplateConfiguration templateConfiguration,
            Charset actualSourceEncoding) throws IOException {
-       this(name, sourceName, reader, cfg, templateConfiguration, actualSourceEncoding, null);
+       this(lookupName, sourceName, reader, cfg, templateConfiguration, actualSourceEncoding, null);
     }
 
     /**
@@ -248,10 +252,10 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      *         mark consumes some resources, so you may want to release it as soon as possible.
      */
     public Template(
-            String name, String sourceName, Reader reader,
+            String lookupName, String sourceName, Reader reader,
             Configuration cfg, TemplateConfiguration templateConfiguration,
             Charset actualSourceEncoding, InputStream streamToUnmarkWhenEncEstabd) throws IOException, ParseException {
-        this(name, sourceName, reader,
+        this(lookupName, sourceName, reader,
                 cfg, templateConfiguration,
                 null, null,
                 actualSourceEncoding, streamToUnmarkWhenEncEstabd);
@@ -274,7 +278,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      *         Similar to {@code contextOutputFormat}; usually this and the that is set together.
      */
    Template(
-            String name, String sourceName, Reader reader,
+            String lookupName, String sourceName, Reader reader,
             Configuration configuration, TemplateConfiguration templateConfiguration,
             OutputFormat contextOutputFormat, Integer contextAutoEscapingPolicy,
             Charset actualSourceEncoding, InputStream streamToUnmarkWhenEncEstabd) throws IOException, ParseException {
@@ -282,7 +286,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         this.cfg = configuration;
         this.tCfg = templateConfiguration;
         this.parsingConfiguration = tCfg != null ? new TemplateParsingConfigurationWithFallback(cfg, tCfg) : cfg;
-        this.name = name;
+        this.lookupName = lookupName;
         this.sourceName = sourceName;
 
         setActualSourceEncoding(actualSourceEncoding);
@@ -321,7 +325,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
                 throw exc.toParseException(this);
             }
         } catch (ParseException e) {
-            e.setTemplateName(getSourceName());
+            e.setTemplate(this);
             throw e;
         }
         
@@ -337,15 +341,15 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * Same as {@link #createPlainTextTemplate(String, String, String, Configuration, Charset)} with {@code null}
      * {@code sourceName} argument.
      */
-    static public Template createPlainTextTemplate(String name, String content, Configuration config) {
-        return createPlainTextTemplate(name, null, content, config, null);
+    static public Template createPlainTextTemplate(String lookupName, String content, Configuration config) {
+        return createPlainTextTemplate(lookupName, null, content, config, null);
     }
 
     /**
      * Creates a {@link Template} that only contains a single block of static text, no dynamic content.
      * 
-     * @param name
-     *            See {@link #getName} for more details.
+     * @param lookupName
+     *            See {@link #getLookupName} for more details.
      * @param sourceName
      *            See {@link #getSourceName} for more details. If {@code null}, it will be the same as the {@code name}.
      * @param content
@@ -359,11 +363,11 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      *
      * @since 2.3.22
      */
-    static public Template createPlainTextTemplate(String name, String sourceName, String content, Configuration config,
+    static public Template createPlainTextTemplate(String lookupName, String sourceName, String content, Configuration config,
                Charset sourceEncoding) {
         Template template;
         try {
-            template = new Template(name, sourceName, new StringReader("X"), config);
+            template = new Template(lookupName, sourceName, new StringReader("X"), config);
         } catch (IOException e) {
             throw new BugException("Plain text template creation failed", e);
         }
@@ -538,8 +542,9 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
 
 
     /**
-     * The usually path-like (or URL-like) identifier of the template, or possibly {@code null} for non-stored
-     * templates. It usually looks like a relative UN*X path; it should use {@code /}, not {@code \}, and shouldn't
+     * The usually path-like (or URL-like) normalized identifier of the template, with which the template was get
+     * (usually via {@link Configuration#getTemplate(String)}), or possibly {@code null} for non-stored templates.
+     * It usually looks like a relative UN*X path; it should use {@code /}, not {@code \}, and shouldn't
      * start with {@code /} (but there are no hard guarantees). It's not a real path in a file-system, it's just a name
      * that a {@link TemplateLoader} used to load the backing resource (in simple cases; actually that name is
      * {@link #getSourceName()}, but see it there). Or, it can also be a name that was never used to load the template
@@ -564,25 +569,31 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * notation, so an absolute path like {@code "/baaz.ftl"} in that template will be resolved too
      * {@code "someSchema://baaz.ftl"}.
      */
-    public String getName() {
-        return name;
+    public String getLookupName() {
+        return lookupName;
     }
 
     /**
      * The name that was actually used to load this template from the {@link TemplateLoader} (or from other custom
      * storage mechanism). This is what should be shown in error messages as the error location. This is usually the
-     * same as {@link #getName()}, except when localized lookup, template acquisition ({@code *} step in the name), or
-     * other {@link TemplateLookupStrategy} transforms the requested name ({@link #getName()}) to a different final
-     * {@link TemplateLoader}-level name. For example, when you get a template with name {@code "foo.ftl"} then because
-     * of localized lookup, it's possible that something like {@code "foo_en.ftl"} will be loaded behind the scenes.
-     * While the template name will be still the same as the requested template name ({@code "foo.ftl"}), errors should
-     * point to {@code "foo_de.ftl"}. Note that relative paths are always resolved relatively to the {@code name}, not
-     * to the {@code sourceName}.
-     * 
-     * @since 2.3.22
+     * same as {@link #getLookupName()}, except when localized lookup, template acquisition ({@code *} step in the
+     * name), or other {@link TemplateLookupStrategy} transforms the requested name ({@link #getLookupName()}) to a
+     * different final {@link TemplateLoader}-level name. For example, when you get a template with name {@code "foo
+     * .ftl"} then because of localized lookup, it's possible that something like {@code "foo_en.ftl"} will be loaded
+     * behind the scenes. While the template name will be still the same as the requested template name ({@code "foo
+     * .ftl"}), errors should point to {@code "foo_de.ftl"}. Note that relative paths are always resolved relatively
+     * to the {@code name}, not to the {@code sourceName}.
      */
     public String getSourceName() {
-        return sourceName != null ? sourceName : getName();
+        return sourceName;
+    }
+
+    /**
+     * Returns the {@linkplain #getSourceName() source name}, or if that's {@code null} then the
+     * {@linkplain #getLookupName() lookup name}. This name is primarily meant to be used in error messages.
+     */
+    public String getSourceOrLookupName() {
+        return getSourceName() != null ? getSourceName() : getLookupName();
     }
 
     /**

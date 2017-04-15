@@ -60,16 +60,8 @@ class MessageUtil {
         return formatLocation("in", template, line, column);
     }
 
-    static String formatLocationForSimpleParsingError(String templateSourceName, int line, int column) {
-        return formatLocation("in", templateSourceName, line, column);
-    }
-
-    static String formatLocationForDependentParsingError(Template template, int line, int column) {
-        return formatLocation("on", template, line, column);
-    }
-
-    static String formatLocationForDependentParsingError(String templateSourceName, int line, int column) {
-        return formatLocation("on", templateSourceName, line, column);
+    static String formatLocationForSimpleParsingError(String templateSourceOrLookupName, int line, int column) {
+        return formatLocation("in", templateSourceOrLookupName, line, column);
     }
 
     static String formatLocationForEvaluationError(Template template, int line, int column) {
@@ -78,15 +70,12 @@ class MessageUtil {
 
     static String formatLocationForEvaluationError(ASTDirMacro macro, int line, int column) {
         Template t = macro.getTemplate();
-        return formatLocation("at", t != null ? t.getSourceName() : null, macro.getName(), macro.isFunction(), line, column);
-    }
-
-    static String formatLocationForEvaluationError(String templateSourceName, int line, int column) {
-        return formatLocation("at", templateSourceName, line, column);
+        return formatLocation("at", t != null ? t.getSourceOrLookupName() : null, macro.getName(), macro.isFunction(),
+                line, column);
     }
 
     private static String formatLocation(String preposition, Template template, int line, int column) {
-        return formatLocation(preposition, template != null ? template.getSourceName() : null, line, column);
+        return formatLocation(preposition, template != null ? template.getSourceOrLookupName() : null, line, column);
     }
 
     private static String formatLocation(String preposition, String templateSourceName, int line, int column) {

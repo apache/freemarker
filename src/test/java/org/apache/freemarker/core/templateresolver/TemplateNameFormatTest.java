@@ -234,7 +234,7 @@ public class TemplateNameFormatTest {
             final String name = "foo\\bar.ftl";
             
             Template t = cfg.getTemplate(name, Locale.US);
-            assertEquals(name, t.getName());
+            assertEquals(name, t.getLookupName());
             assertEquals(name, t.getSourceName());
             assertEquals(
                     ImmutableList.of(

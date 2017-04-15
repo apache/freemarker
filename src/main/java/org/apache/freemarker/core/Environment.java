@@ -2808,7 +2808,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             // As we have an already normalized name, we use it. 2.3.x note: We should use the template.sourceName as
             // namespace key, but historically we use the looked up name (template.name); check what lazy import does if
             // that will be oms, as that can't do the template lookup, yet the keys must be the same.
-            templateName = loadedTemplate.getName();
+            templateName = loadedTemplate.getLookupName();
         } else {
             lazyImport = true;
             // We can't cause a template lookup here (see TemplateLookupStrategy), as that can be expensive. We exploit

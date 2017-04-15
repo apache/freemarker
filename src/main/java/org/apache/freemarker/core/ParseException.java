@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._SecurityUtil;
 import org.apache.freemarker.core.util._StringUtil;
 
@@ -77,7 +78,8 @@ public class ParseException extends IOException implements FMParserConstants {
      */
     protected String eol = _SecurityUtil.getSystemProperty("line.separator", "\n");
 
-    private String templateName;
+    private String templateSourceName;
+    private String templateLookupName;
 
     /**
      * This constructor is used by the method "generateParseException"
@@ -124,11 +126,21 @@ public class ParseException extends IOException implements FMParserConstants {
     public ParseException(String description, Template template,
             int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber,
             Throwable cause) {
-        this(description,
-                template == null ? null : template.getSourceName(),
-                        lineNumber, columnNumber,
-                        endLineNumber, endColumnNumber,
-                        cause);      
+        super(description);  // but we override getMessage, so it will be different
+        try {
+            initCause(cause);
+        } catch (Exception e) {
+            // Suppressed; we can't do more
+        }
+        this.description = description;
+        if (template != null) { // Allowed because sometimes the template is set later via setTemplate(Template)
+            templateSourceName = template.getSourceName();
+            templateLookupName = template.getLookupName();
+        }
+        this.lineNumber = lineNumber;
+        this.columnNumber = columnNumber;
+        this.endLineNumber = endLineNumber;
+        this.endColumnNumber = endColumnNumber;
     }
     
     /**
@@ -143,46 +155,28 @@ public class ParseException extends IOException implements FMParserConstants {
      */
     public ParseException(String description, Template template, Token tk, Throwable cause) {
         this(description,
-                template == null ? null : template.getSourceName(),
-                        tk.beginLine, tk.beginColumn,
-                        tk.endLine, tk.endColumn,
-                        cause);
+                template,
+                tk.beginLine, tk.beginColumn,
+                tk.endLine, tk.endColumn,
+                cause);
     }
 
     /**
      * @since 2.3.20
      */
-    public ParseException(String description, ASTNode tobj) {
-        this(description, tobj, null);
+    public ParseException(String description, ASTNode astNode) {
+        this(description, astNode, null);
     }
 
     /**
      * @since 2.3.20
      */
-    public ParseException(String description, ASTNode tobj, Throwable cause) {
+    public ParseException(String description, ASTNode astNode, Throwable cause) {
         this(description,
-                tobj.getTemplate() == null ? null : tobj.getTemplate().getSourceName(),
-                        tobj.beginLine, tobj.beginColumn,
-                        tobj.endLine, tobj.endColumn,
-                        cause);
-    }
-
-    private ParseException(String description, String templateName,
-            int lineNumber, int columnNumber,
-            int endLineNumber, int endColumnNumber,
-            Throwable cause) {
-        super(description);  // but we override getMessage, so it will be different
-        try {
-            initCause(cause);
-        } catch (Exception e) {
-            // Suppressed; we can't do more
-        }
-        this.description = description; 
-        this.templateName = templateName;
-        this.lineNumber = lineNumber;
-        this.columnNumber = columnNumber;
-        this.endLineNumber = endLineNumber;
-        this.endColumnNumber = endColumnNumber;
+                astNode.getTemplate(),
+                astNode.beginLine, astNode.beginColumn,
+                astNode.endLine, astNode.endColumn,
+                cause);
     }
 
     /**
@@ -190,8 +184,10 @@ public class ParseException extends IOException implements FMParserConstants {
      * This is needed as the constructor that JavaCC automatically calls doesn't pass in the template, so we
      * set it somewhere later in an exception handler. 
      */
-    public void setTemplateName(String templateName) {
-        this.templateName = templateName;
+    public void setTemplate(Template template) {
+        _NullArgumentException.check("template", template);
+        templateSourceName = template.getSourceName();
+        templateLookupName = template.getLookupName();
         synchronized (this) {
             messageAndDescriptionRendered = false;
             message = null;
@@ -202,7 +198,8 @@ public class ParseException extends IOException implements FMParserConstants {
      * Returns the error location plus the error description.
      * 
      * @see #getDescription()
-     * @see #getTemplateName()
+     * @see #getTemplateSourceName()
+     * @see #getTemplateLookupName()
      * @see #getLineNumber()
      * @see #getColumnNumber()
      */
@@ -237,13 +234,28 @@ public class ParseException extends IOException implements FMParserConstants {
     }
 
     /**
-     * Returns the name (template-root relative path) of the template whose parsing was failed.
-     * Maybe {@code null} if this is a non-stored template. 
-     * 
-     * @since 2.3.20
+     * Returns the {@linkplain Template#getLookupName()} lookup name} of the template whose parsing was failed.
+     * Maybe {@code null}, for example if this is a non-stored template.
      */
-    public String getTemplateName() {
-        return templateName;
+    public String getTemplateLookupName() {
+        return templateLookupName;
+    }
+
+    /**
+     * Returns the {@linkplain Template#getSourceName()} source name} of the template whose parsing was failed.
+     * Maybe {@code null}, for example if this is a non-stored template.
+     */
+    public String getTemplateSourceName() {
+        return templateSourceName;
+    }
+
+    /**
+     * Returns the {@linkplain #getTemplateSourceName() template source name}, or if that's {@code null} then the
+     * {@linkplain #getTemplateLookupName() template lookup name}. This name is primarily meant to be used in error
+     * messages.
+     */
+    public String getTemplateSourceOrLookupName() {
+        return getTemplateSourceName() != null ? getTemplateSourceName() : getTemplateLookupName();
     }
 
     /**
@@ -285,7 +297,8 @@ public class ParseException extends IOException implements FMParserConstants {
         String prefix;
         if (!isInJBossToolsMode()) {
             prefix = "Syntax error "
-                    + MessageUtil.formatLocationForSimpleParsingError(templateName, lineNumber, columnNumber)
+                    + MessageUtil.formatLocationForSimpleParsingError(getTemplateSourceOrLookupName(), lineNumber,
+                    columnNumber)
                     + ":\n";  
         } else {
             prefix = "[col. " + columnNumber + "] ";
