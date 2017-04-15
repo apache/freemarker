@@ -2457,7 +2457,8 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
                 } else if ("disable".equals(value)) {
                     setAutoEscapingPolicy(DISABLE_AUTO_ESCAPING_POLICY);
                 } else {
-                    throw invalidSettingValueException(name, value);
+                    throw new ConfigurationSettingValueException( name, value,
+                            "No such predefined auto escaping policy name");
                 }
             } else if (OUTPUT_FORMAT_KEY_SNAKE_CASE.equals(name) || OUTPUT_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
@@ -2472,9 +2473,8 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
                         value, List.class, true, _SettingEvaluationEnvironment.getCurrent());
                 for (Object item : list) {
                     if (!(item instanceof OutputFormat)) {
-                        throw new _MiscTemplateException(getEnvironment(),
-                                "Invalid value for setting ", new _DelayedJQuote(name), ": List items must be "
-                                + OutputFormat.class.getName() + " intances, in: ", value);
+                        throw new ConfigurationSettingValueException(name, value,
+                                "List items must be " + OutputFormat.class.getName() + " instances.");
                     }
                 }
                 setRegisteredCustomOutputFormats(list);
@@ -2496,23 +2496,27 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
                     Iterator it = map.entrySet().iterator();
                     while (it.hasNext()) {
                         Map.Entry ent = (Map.Entry) it.next();
-                        String pname = (String) ent.getKey();
-                        int pvalue;
+                        String pName = (String) ent.getKey();
+                        int pValue;
                         try {
-                            pvalue = Integer.parseInt((String) ent.getValue());
+                            pValue = Integer.parseInt((String) ent.getValue());
                         } catch (NumberFormatException e) {
-                            throw invalidSettingValueException(name, value);
+                            throw new ConfigurationSettingValueException(name, value,
+                                    "Malformed integer number (shown quoted): " + _StringUtil.jQuote(ent.getValue()));
                         }
-                        if ("soft".equalsIgnoreCase(pname)) {
-                            softSize = pvalue;
-                        } else if ("strong".equalsIgnoreCase(pname)) {
-                            strongSize = pvalue;
+                        if ("soft".equalsIgnoreCase(pName)) {
+                            softSize = pValue;
+                        } else if ("strong".equalsIgnoreCase(pName)) {
+                            strongSize = pValue;
                         } else {
-                            throw invalidSettingValueException(name, value);
+                            throw new ConfigurationSettingValueException(name, value,
+                                    "Unsupported cache parameter name (shown quoted): "
+                                    + _StringUtil.jQuote(ent.getValue()));
                         }
                     }
                     if (softSize == 0 && strongSize == 0) {
-                        throw invalidSettingValueException(name, value);
+                        throw new ConfigurationSettingValueException(name, value,
+                                "Either cache soft- or strong size must be set and non-0.");
                     }
                     setCacheStorage(new MruCacheStorage(strongSize, softSize));
                 } else {
@@ -2540,7 +2544,7 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
                 } else if (unit.equals("h")) {
                     multipier = 1000 * 60 * 60;
                 } else if (!unit.isEmpty()) {
-                    throw invalidSettingValueException(name, value,
+                    throw new ConfigurationSettingValueException(name, value,
                             "Unrecognized time unit " + _StringUtil.jQuote(unit) + ". Valid units are: ms, s, m, h");
                 } else {
                     multipier = 0;
@@ -2548,7 +2552,7 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
                 
                 int parsedValue = Integer.parseInt(valueWithoutUnit);
                 if (multipier == 0 && parsedValue != 0) {
-                    throw invalidSettingValueException(name, value,
+                    throw new ConfigurationSettingValueException(name, value,
                             "Time unit must be specified for a non-0 value (examples: 500 ms, 3 s, 2 m, 1 h).");
                 }
                 
@@ -2559,7 +2563,7 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
                 } else if ("static_text".equals(value) || "staticText".equals(value)) {
                     setTemplateLanguage(TemplateLanguage.STATIC_TEXT);
                 } else {
-                    throw invalidSettingValueException(name, value);
+                    throw new ConfigurationSettingValueException(name, value, "Unsupported template language name");
                 }
             } else if (TAG_SYNTAX_KEY_SNAKE_CASE.equals(name) || TAG_SYNTAX_KEY_CAMEL_CASE.equals(name)) {
                 if ("auto_detect".equals(value) || "autoDetect".equals(value)) {
@@ -2569,7 +2573,7 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
                 } else if ("square_bracket".equals(value) || "squareBracket".equals(value)) {
                     setTagSyntax(SQUARE_BRACKET_TAG_SYNTAX);
                 } else {
-                    throw invalidSettingValueException(name, value);
+                    throw new ConfigurationSettingValueException(name, value, "No such predefined tag syntax name");
                 }
             } else if (NAMING_CONVENTION_KEY_SNAKE_CASE.equals(name) || NAMING_CONVENTION_KEY_CAMEL_CASE.equals(name)) {
                 if ("auto_detect".equals(value) || "autoDetect".equals(value)) {
@@ -2579,7 +2583,8 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
                 } else if ("camel_case".equals(value) || "camelCase".equals(value)) {
                     setNamingConvention(CAMEL_CASE_NAMING_CONVENTION);
                 } else {
-                    throw invalidSettingValueException(name, value);
+                    throw new ConfigurationSettingValueException(name, value,
+                            "No such predefined naming convention name.");
                 }
             } else if (TAB_SIZE_KEY_SNAKE_CASE.equals(name) || TAB_SIZE_KEY_CAMEL_CASE.equals(name)) {
                 setTabSize(Integer.parseInt(value));
@@ -2610,7 +2615,8 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
                 } else if (value.equalsIgnoreCase("default_2_4_0")) {
                     setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
                 } else {
-                    throw invalidSettingValueException(name, value);
+                    throw new ConfigurationSettingValueException(name, value,
+                            "No such predefined template name format");
                 }
             } else if (TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE.equals(name)
                     || TEMPLATE_CONFIGURATIONS_KEY_CAMEL_CASE.equals(name)) {
@@ -2623,8 +2629,10 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
             } else {
                 unknown = true;
             }
+        } catch (ConfigurationSettingValueException e) {
+            throw e;
         } catch (Exception e) {
-            throw settingValueAssignmentException(name, value, e);
+            throw new ConfigurationSettingValueException(name, value, e);
         }
         if (unknown) {
             super.setSetting(name, value);

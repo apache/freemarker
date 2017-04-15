@@ -666,7 +666,7 @@ public class ConfigurationTest extends TestCase {
        
        try {
            cfg.setSetting(Configuration.OUTPUT_FORMAT_KEY, "null");
-       } catch (ConfigurationSettingValueStringException e) {
+       } catch (ConfigurationSettingValueException e) {
            assertThat(e.getCause().getMessage(), containsString(UndefinedOutputFormat.class.getSimpleName()));
        }
     }
@@ -740,8 +740,8 @@ public class ConfigurationTest extends TestCase {
         try {
             cfg.setSetting(Configuration.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE, "[TemplateConfiguration()]");
             fail();
-        } catch (Exception e) {
-            assertThat(e.getCause().getMessage(), containsString(OutputFormat.class.getSimpleName()));
+        } catch (ConfigurationSettingValueException e) {
+            assertThat(e.getMessage(), containsString(OutputFormat.class.getSimpleName()));
         }
     }
 
@@ -975,16 +975,16 @@ public class ConfigurationTest extends TestCase {
         try {
             cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "5");
             assertEquals(5000L, cfg.getTemplateUpdateDelayMilliseconds());
-        } catch (ConfigurationSettingValueStringException e) {
-            assertThat(e.getCause().getMessage(), containsStringIgnoringCase("unit must be specified"));
+        } catch (ConfigurationSettingValueException e) {
+            assertThat(e.getMessage(), containsStringIgnoringCase("unit must be specified"));
         }
         cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "0");
         assertEquals(0L, cfg.getTemplateUpdateDelayMilliseconds());
         try {
             cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "5 foo");
             assertEquals(5000L, cfg.getTemplateUpdateDelayMilliseconds());
-        } catch (ConfigurationSettingValueStringException e) {
-            assertThat(e.getCause().getMessage(), containsStringIgnoringCase("\"foo\""));
+        } catch (ConfigurationSettingValueException e) {
+            assertThat(e.getMessage(), containsStringIgnoringCase("\"foo\""));
         }
         
         cfg.setSetting(Configuration.TEMPLATE_UPDATE_DELAY_KEY, "3 ms");

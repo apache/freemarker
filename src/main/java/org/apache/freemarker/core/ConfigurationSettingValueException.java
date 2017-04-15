@@ -27,12 +27,21 @@ import org.apache.freemarker.core.util._StringUtil;
  * cause exception.
  */
 @SuppressWarnings("serial")
-public class ConfigurationSettingValueStringException extends ConfigurationException {
+public class ConfigurationSettingValueException extends ConfigurationException {
 
-    ConfigurationSettingValueStringException(String name, String value, Throwable cause) {
-        super("Failed to set FreeMarker configuration setting " + _StringUtil.jQuote(name)
-                + " to value " + _StringUtil.jQuote(value) + "; see cause exception.", cause);
+    ConfigurationSettingValueException(String name, String value, Throwable cause) {
+        super(createMessage(name, value, "; see cause exception.", ""), cause);
         _NullArgumentException.check("cause", cause);
+    }
+
+    ConfigurationSettingValueException(String name, String value, String reason) {
+        super(createMessage(name, value, ", because: ", reason));
+        _NullArgumentException.check("reason", reason);
+    }
+
+    private static String createMessage(String name, String value, String detail1, String detail2) {
+        return "Failed to set FreeMarker configuration setting " + _StringUtil.jQuote(name)
+                + " to value " + _StringUtil.jQuote(value) + detail1 + detail2;
     }
 
 }

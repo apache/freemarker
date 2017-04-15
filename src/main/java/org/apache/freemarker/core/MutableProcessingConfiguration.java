@@ -1690,7 +1690,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * @param value the string that describes the new value of the setting.
      * 
      * @throws UnknownConfigurationSettingException if the name is wrong.
-     * @throws ConfigurationSettingValueStringException if the new value of the setting can't be set for any other reasons.
+     * @throws ConfigurationSettingValueException if the new value of the setting can't be set for any other reasons.
      */
     public void setSetting(String name, String value) throws ConfigurationException {
         boolean unknown = false;
@@ -1746,7 +1746,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                     } else if (DEFAULT_VALUE.equalsIgnoreCase(value) && this instanceof Configuration) {
                         ((Configuration) this).unsetTemplateExceptionHandler();
                     } else {
-                        throw invalidSettingValueException(name, value);
+                        throw new ConfigurationSettingValueException(
+                                name, value,
+                                "No such predefined template exception handler name");
                     }
                 } else {
                     setTemplateExceptionHandler((TemplateExceptionHandler) _ObjectBuilderSettingEvaluator.eval(
@@ -1759,7 +1761,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                     } else if ("conservative".equalsIgnoreCase(value)) {
                         setArithmeticEngine(ConservativeArithmeticEngine.INSTANCE);
                     } else {
-                        throw invalidSettingValueException(name, value);
+                        throw new ConfigurationSettingValueException(
+                                name, value, "No such predefined arithmetical engine name");
                     }
                 } else {
                     setArithmeticEngine((ArithmeticEngine) _ObjectBuilderSettingEvaluator.eval(
@@ -1810,7 +1813,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                         } else if (segmentKey.equals(TRUSTED_TEMPLATES)) {
                             trustedTemplates = segmentValue;
                         } else {
-                            throw new GenericParseException(
+                            throw new ConfigurationSettingValueException(name, value,
                                     "Unrecognized list segment key: " + _StringUtil.jQuote(segmentKey) +
                                             ". Supported keys are: \"" + ALLOWED_CLASSES + "\", \"" +
                                             TRUSTED_TEMPLATES + "\"");
@@ -1823,7 +1826,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                                     value, TemplateClassResolver.class, false,
                                     _SettingEvaluationEnvironment.getCurrent()));
                 } else {
-                    throw invalidSettingValueException(name, value);
+                    throw new ConfigurationSettingValueException(
+                            name, value,
+                            "Not predefined class resolved name, nor follows class resolver definition syntax, nor "
+                            + "looks like class name");
                 }
             } else if (LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE.equals(name)
                     || LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE.equals(name)) {
@@ -1840,8 +1846,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
             } else {
                 unknown = true;
             }
+        } catch (ConfigurationSettingValueException e) {
+            throw e;
         } catch (Exception e) {
-            throw settingValueAssignmentException(name, value, e);
+            throw new ConfigurationSettingValueException(name, value, e);
         }
         if (unknown) {
             throw unknownSettingException(name);
@@ -1889,12 +1897,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return tz;
     }
     
-    protected Environment getEnvironment() {
-        return this instanceof Environment
-            ? (Environment) this
-            : Environment.getCurrentEnvironment();
-    }
-    
     /**
      * Creates the exception that should be thrown when a setting name isn't recognized.
      */
@@ -1925,21 +1927,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return null;
     }
     
-    protected final ConfigurationSettingValueStringException settingValueAssignmentException(
-            String name, String value, Throwable cause) {
-        return new ConfigurationSettingValueStringException(name, value, cause);
-    }
-
-    protected final TemplateException invalidSettingValueException(String name, String value) {
-        return invalidSettingValueException(name, value, null);
-    }
-    
-    protected final TemplateException invalidSettingValueException(String name, String value, String reason) {
-        return new _MiscTemplateException(getEnvironment(),
-                "Invalid value for setting ", new _DelayedJQuote(name), ": ", new _DelayedJQuote(value),
-                (reason != null ? ": " : null), (reason != null ? reason : null));
-    }
-
     /**
      * Set the settings stored in a <code>Properties</code> object.
      * 
