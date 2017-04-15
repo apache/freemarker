@@ -440,7 +440,7 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
     private final Object customStateMapLock = new Object();
 
     /**
-     * Needed so that it doesn't mater in what order do you call {@link #setSharedVaribles(Map)}
+     * Needed so that it doesn't mater in what order do you call {@link #setSharedVariables(Map)}
      * and {@link #setObjectWrapper(ObjectWrapper)}. When the user configures FreeMarker from Spring XML, he has no
      * control over the order, so it has to work on both ways.
      */
@@ -2263,7 +2263,7 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
      *
      * @throws TemplateModelException If some of the variables couldn't be wrapped via {@link #getObjectWrapper()}.
      *
-     * @see #setSharedVaribles(Map)
+     * @see #setSharedVariables(Map)
      * @see #setSharedVariable(String,TemplateModel)
      * @see #setAllSharedVariables(TemplateHashModelEx)
      */
@@ -2278,7 +2278,7 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
      * to {@link TemplateModel} with the {@link ObjectWrapper} returned by {@link #getObjectWrapper()}. If
      * {@link #setObjectWrapper(ObjectWrapper)} is called later, this conversion will be re-applied. Thus, ignoring some
      * extra resource usage, it doesn't mater if in what order are {@link #setObjectWrapper(ObjectWrapper)} and
-     * {@link #setSharedVaribles(Map)} called. This is essential when you don't have control over the order in which
+     * {@link #setSharedVariables(Map)} called. This is essential when you don't have control over the order in which
      * the setters are called. 
      *
      * <p>The values in the map must be thread safe, if you are running templates from multiple threads with
@@ -2293,7 +2293,7 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
      *  
      * @since 2.3.21
      */
-    public void setSharedVaribles(Map/*<String, Object>*/ map) throws TemplateModelException {
+    public void setSharedVariables(Map/*<String, Object>*/ map) throws TemplateModelException {
         rewrappableSharedVariables = new HashMap(map);
         sharedVariables.clear();
         setSharedVariablesFromRewrappableSharedVariables();
@@ -2330,7 +2330,7 @@ public final class Configuration extends MutableProcessingConfiguration<Configur
      * If a shared variable with these names already exist, it will be replaced
      * with those from the map.
      *
-     * @see #setSharedVaribles(Map)
+     * @see #setSharedVariables(Map)
      * @see #setSharedVariable(String,Object)
      * @see #setSharedVariable(String,TemplateModel)
      */

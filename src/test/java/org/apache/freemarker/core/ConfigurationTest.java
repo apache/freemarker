@@ -905,7 +905,7 @@ public class ConfigurationTest extends TestCase {
         vars.put("a", "aa");
         vars.put("b", "bb");
         vars.put("c", new MyScalarModel());
-        cfg.setSharedVaribles(vars);
+        cfg.setSharedVariables(vars);
 
         assertNull(cfg.getSharedVariable("erased"));
         
@@ -926,7 +926,7 @@ public class ConfigurationTest extends TestCase {
         // Legacy method: Keeps TemplateModel created on the time it was called. 
         cfg.setSharedVariable("b", "bbLegacy");
         
-        // Cause re-wrapping of variables added via setSharedVaribles:
+        // Cause re-wrapping of variables added via setSharedVariables:
         cfg.setObjectWrapper(new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
 
         {

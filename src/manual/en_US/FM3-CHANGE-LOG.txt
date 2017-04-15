@@ -212,3 +212,4 @@ the FreeMarer 3 changelog here:
   lookup and the source name, its meaning wasn't clean (but it meant the lookup name). TemplateException and ParseException 
   now also have the same properites: getTemplateSourceName(), getTemplateLookupName(), and even getSourceOrLookupName().
   Location information in error messages show getTemplateSourceOrLookupName().
+- Configuration.setSharedVaribles (not the typo in it) was renamed to setSharedVariables
