@@ -1,5 +1,7 @@
 language: java
 before_install: ant download-ivy
-install: ant
+install:
+  - ant
+  - ant javadoc
 jdk:
   - oraclejdk8
