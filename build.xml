@@ -146,7 +146,6 @@
   <!-- ================================================================= -->
   <!-- Compilation                                                       -->
   <!-- ================================================================= -->
-
   
   <target name="javacc" depends="init" unless="parser.uptodate"
     description="Build the parser from its grammar file"
@@ -992,7 +991,15 @@ Proceed? </input>
     <echo>Note that before releasing, voting is needed!</echo>
     <echo>*****************************************************************</echo>
   </target>
-  
+
+  <!-- ================================================================= -->
+  <!-- CI (like Travis).......................                           -->
+  <!-- ================================================================= -->
+	
+  <target name="ci"
+  	depends="clean, update-deps, jar, test, javadoc"
+  	description="CI should invoke this task"
+  />
   
   <!-- ================================================================== -->
   <!-- Dependency management (keep it exactly identical for all projects) -->
