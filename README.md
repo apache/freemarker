@@ -94,42 +94,32 @@ In the binary release, open documentation/index.html, and you will find the
 link.
 
 
-Local setup
-===========
+Building FreeMarker
+===================
 
-First of all, if you haven't yet, download the source release, or checkout
-FreeMarker from the source code repository.
+If you haven't yet, download the source release, or checkout FreeMarker from
+the source code repository. See repository locations here:
+http://freemarker.org/sourcecode.html
 
-You need JDK 8(!), Apache Ant and Ivy to be installed. (As of this writing
-it was tested with Ant 1.8.1 and Ivy 2.3.0.). 
-
-
-Ivy Installation
-----------------
-
-To install Ivy (but be sure it's not already installed). Issue
-`ant download-ivy` which will copy it under `~/.ant/lib`. Alternatively, you
-can copy `ivy-<version>.jar` into your Ant home directory `lib` subfolder
-manually.
-
-
-Building
---------
-
-To build `freemarker.jar`, just issue `ant` in the project root directory, and
-it should download all dependencies automatically and build freemarker.jar. 
+You need JDK 8, Apache Ant (tested with 1.8.1) and Ivy (tested with 2.3.0) to
+be installed. To install Ivy (but be sure it's not already installed), issue
+`ant download-ivy`; it will copy Ivy under `~/.ant/lib`. (Alternatively, you
+can copy `ivy-<version>.jar` into the Ant home `lib` subfolder manually.)
 
 It's recommended to copy `build.properties.sample` into `build.properties`,
 and edit its content to fit your system. (Although basic jar building should
 succeeds without the build.properties file too.)
 
-
-Managing dependencies
----------------------
+To build `freemarker.jar`, just issue `ant` in the project root directory, and
+it should download all dependencies automatically and build `freemarker.jar`. 
 
 If later you change the dependencies in `ivy.xml`, or otherwise want to
 re-download some of them, it will not happen automatically anymore, and you
 must issue `ant update-deps`.
+
+To test your build, issue `ant test`.
+
+To generate documentation, issue `ant javadoc` and `ant manualOffline`.
 
 
 Eclipse and other IDE setup
