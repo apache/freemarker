@@ -124,11 +124,15 @@
     <mkdir dir="build"/>
   </target>
 
+  <target name="download-ivy">
+    <mkdir dir="${ivy.jar.dir}"/>
+    <get src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
+         dest="${ivy.jar.file}" usetimestamp="true"/>
+  </target>  
   
   <!-- ================================================================= -->
   <!-- Compilation                                                       -->
   <!-- ================================================================= -->
-
   
   <target name="javacc" depends="init" unless="parser.uptodate"
     description="Build the parser from its grammar file"
