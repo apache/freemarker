@@ -558,7 +558,7 @@
     <!-- Copy txt-s -->
     <copy todir="${dist.bin.dir}" includeEmptyDirs="no">
       <fileset dir="." defaultexcludes="no">
-        <include name="README" />
+        <include name="README.md" />
         <!-- LICENSE is binary-distribution-specific, and is copied later. -->
         <include name="NOTICE" />
         <include name="DISCLAIMER" />
@@ -566,7 +566,7 @@
       </fileset>
     </copy>
     <replace
-      file="${dist.bin.dir}/README"
+      file="${dist.bin.dir}/README.md"
       token="{version}"
       value="${version}"
     />
@@ -607,7 +607,7 @@
     <!-- Copy extensionless files: -->
     <copy todir="${dist.src.dir}" includeEmptyDirs="no">
       <fileset dir="." defaultexcludes="no">
-        <include name="README" />
+        <include name="README.md" />
         <include name="LICENSE" />
         <include name="NOTICE" />
         <include name="DISCLAIMER" />
@@ -615,7 +615,7 @@
       </fileset>
     </copy>
     <replace
-      file="${dist.src.dir}/README"
+      file="${dist.src.dir}/README.md"
       token="{version}"
       value="${version}"
     />
