@@ -106,7 +106,7 @@ If you haven't yet, download the source release, or checkout FreeMarker from
 the source code repository. See repository locations here:
 http://freemarker.org/sourcecode.html
 
-You need JDK 8, Apache Ant (tested with 1.8.1) and Ivy (tested with 2.3.0) to
+You need JDK 8, Apache Ant (tested with 1.8.1) and Ivy (tested with 2.4.0) to
 be installed. To install Ivy (but be sure it's not already installed), issue
 `ant download-ivy`; it will copy Ivy under `~/.ant/lib`. (Alternatively, you
 can copy `ivy-<version>.jar` into the Ant home `lib` subfolder manually.)
