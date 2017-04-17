@@ -1,42 +1,23 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
+Apache FreeMarker {version}
+===========================
 
-===============================================================================
+[![Build Status](https://travis-ci.org/apache/incubator-freemarker.svg?branch=3)](https://travis-ci.org/apache/incubator-freemarker)
 
- Apache FreeMarker {version}
+For the latest version or to report bugs visit:
+http://freemarker.org/
 
- For the latest version or to report bugs visit:
 
- http://freemarker.org/
+DISCLAIMER
+----------
 
-===============================================================================
-
-  DISCLAIMER
-
-  Apache FreeMarker is an effort undergoing incubation at The Apache
-  Software Foundation (ASF). Incubation is required of all newly accepted
-  projects until a further review indicates that the infrastructure,
-  communications, and decision making process have stabilized in a manner
-  consistent with other successful ASF projects. While incubation status is
-  not necessarily a reflection of the completeness or stability of the
-  code, it does indicate that the project has yet to be fully endorsed by
-  the ASF.
+Apache FreeMarker is an effort undergoing incubation at The Apache
+Software Foundation (ASF). Incubation is required of all newly accepted
+projects until a further review indicates that the infrastructure,
+communications, and decision making process have stabilized in a manner
+consistent with other successful ASF projects. While incubation status is
+not necessarily a reflection of the completeness or stability of the
+code, it does indicate that the project has yet to be fully endorsed by
+the ASF.
 
 
 What is Apache FreeMarker?
@@ -72,8 +53,9 @@ in the documentation/index.html directory.
 Installing
 ----------
 
-If you are using Maven (or Gradle, etc.), just add this dependency:
+If you are using Maven, just add this dependency:
 
+```xml
   <!--
   Attention: Be sure nothing pulls in an old dependency with groupId
   "freemarker" (without the "org."), because then you will end up with
@@ -84,18 +66,22 @@ If you are using Maven (or Gradle, etc.), just add this dependency:
     <artifactId>freemarker</artifactId>
     <version>{version}</version>
   </dependency>
+```
 
 Otherwise simply copy freemarker.jar to a location where your Java
 application's ClassLoader will find it. For example, if you are using
 FreeMarker in a web application, you probably want to put
 freemarker.jar into the WEB-INF/lib directory of your web application.
 
-FreeMarker 3 has only one required dependency, slf4j-api. (Of course,
-it will be automatically downloaded by Maven, Gradle, and the like.)
-It has several optional dependencies, but usually you don't have
-to deal with them, because if you are using an optional feature
-that's certainly because your application already uses the related
-library.
+FreeMarker 3 has only one required dependency, org.slf4j:slf4j-api. (Of 
+course, it will be automatically downloaded by Maven, Gradle, and the like, 
+and is already there in almost all projects anyway. If it wasn't there, note 
+that adding slf4j-api is not enough, as it needs an implementation, which is 
+not downloaded automatically by Maven, etc. The most popular is 
+ch.qos.logback:logback-classic. FreeMarker has several optional dependencies,
+but usually you don't have to deal with them, because if you are using an
+optional feature that's certainly because your application already uses the
+related library. 
 
 The minimum required Java version is currently Java SE 7. (The presence
 of a later version may be detected on runtime and utilized by
@@ -113,39 +99,55 @@ In the binary release, open documentation/index.html, and you will find the
 link.
 
 
+Local setup
+===========
+
+First of all, if you haven't yet, download the source release, or checkout
+FreeMarker from the source code repository.
+
+You need JDK 8(!), Apache Ant and Ivy to be installed. (As of this writing
+it was tested with Ant 1.8.1 and Ivy 2.3.0.). 
+
+
+Ivy Installation
+----------------
+
+To install Ivy (but be sure it's not already installed). Issue
+`ant download-ivy` which will copy it under `~/.ant/lib`. Alternatively, you
+can copy `ivy-<version>.jar` into your Ant home directory `lib` subfolder
+manually.
+
+
 Building
 --------
 
-First of all, if you haven't yet, download the source release, or check
-out FreeMarker from the source code repository.
+To build `freemarker.jar`, just issue `ant` in the project root directory, and
+it should download all dependencies automatically and build freemarker.jar. 
 
-You need JDK 8(!), Apache Ant and Ivy to be installed. (As of this writing
-it was tested with Ant 1.8.1 and Ivy 2.3.0.) Note that the ivy-<version>.jar
-should be copied to your Ant home directory "lib" subfolder.
-
-It's recommended to copy build.properties.sample into build.properties, and
-edit its content to fit your system. (Although basic jar building should
+It's recommended to copy `build.properties.sample` into `build.properties`,
+and edit its content to fit your system. (Although basic jar building should
 succeeds without the build.properties file too.)
 
-To build freemarker.jar, just issue "ant" in the project root
-directory, and it should download all dependencies automatically and
-build freemarker.jar.
 
-If later you change the dependencies in ivy.xml, or otherwise want to
-re-download some of them, it will not happen automatically anymore.
-You have to issue "ant update-deps" for that.
+Managing dependencies
+---------------------
+
+If later you change the dependencies in `ivy.xml`, or otherwise want to
+re-download some of them, it will not happen automatically anymore, and you
+must issue `ant update-deps`.
 
 
 Eclipse and other IDE setup
----------------------------
+===========================
 
 Below you find the step-by-step setup for Eclipse Mars.1. If you are using a
 different version or an entierly different IDE, still read this, and try to
 apply it to your development environment:
 
 - Install Ant and Ivy, if you haven't yet; see earlier.
-- From the command line, run `ant clean jar ide-dependencies`. (Note that
-  now the folders "ide-dependencies", "build/generated-sources" and "META-INF" were created.)
+- From the command line, run  `ant clean jar ide-dependencies`
+  (Note that now the folders `ide-dependencies`, `build/generated-sources` and
+  `META-INF` were created.)
 - Start Eclipse
 - You may prefer to start a new workspace (File -> "Switch workspace"), but
   it's optional.
@@ -156,7 +158,7 @@ apply it to your development environment:
     - Insert space for tabs
     - Show print margin, 120 columns
   - Java -> Code Style -> Formatter -> Import...
-    Select src/ide-settings/Eclipse/Formatter-profile-FreeMarker.xml
+    Select src\ide-settings\Eclipse\Formatter-profile-FreeMarker.xml
     inside the FreeMarker project directory.
     (On IntelliJ IDEA, import
     src/ide-settings/IntelliJ-IDEA/Java-code-style-FreeMarker.xml instead)
@@ -195,6 +197,10 @@ apply it to your development environment:
       - Edit "JRE System Library [...]" to "Execution Environment" "JavaSE 1.8"
       - Add all jar-s that are directly under the "ide-dependencies" directory
         (use the "Add JARs..." and select all those files).
+    - On the "Order and Export" tab find dom4j-*.jar, and send it to the
+        bottom of the list (becase, an old org.jaxen is included inside
+        dom4j-*.jar, which casues compilation errors if it wins over
+        jaxen-*.jar).
    - Press "Finish"
 - Eclipse will indicate many errors at this point; it's expected, read on.
 - Project -> Properties -> Java Compiler -> Errors/Warnings:
