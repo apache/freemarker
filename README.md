@@ -56,13 +56,8 @@ Installing
 If you are using Maven, just add this dependency:
 
 ```xml
-  <!--
-  Attention: Be sure nothing pulls in an old dependency with groupId
-  "freemarker" (without the "org."), because then you will end up with
-  two freemarker.jar-s and unpredictable behavior on runtime!
-  -->
   <dependency>
-    <groupId>org.freemarker</groupId>
+    <groupId>org.apache</groupId>
     <artifactId>freemarker</artifactId>
     <version>{version}</version>
   </dependency>
