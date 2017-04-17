@@ -136,8 +136,7 @@
   <property name="ivy.jar.dir" value="${ivy.home}/lib" />
   <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
 
-  <target name="download-ivy" unless="offline">
-
+  <target name="download-ivy">
     <mkdir dir="${ivy.jar.dir}"/>
     <get src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
          dest="${ivy.jar.file}" usetimestamp="true"/>
