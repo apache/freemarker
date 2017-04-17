@@ -95,7 +95,7 @@ link.
 
 
 Building FreeMarker
-===================
+-------------------
 
 If you haven't yet, download the source release, or checkout FreeMarker from
 the source code repository. See repository locations here:
@@ -123,7 +123,7 @@ To generate documentation, issue `ant javadoc` and `ant manualOffline`.
 
 
 Eclipse and other IDE setup
-===========================
+---------------------------
 
 Below you find the step-by-step setup for Eclipse Mars.1. If you are using a
 different version or an entierly different IDE, still read this, and try to
