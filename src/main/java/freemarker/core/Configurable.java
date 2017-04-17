@@ -1427,7 +1427,7 @@ public class Configurable {
     }
     
     /**
-     * Sets the URL escaping charset. If not set ({@code null}), the output encoding
+     * Sets the URL escaping (URL encoding, percentage encoding) charset. If {@code null}, the output encoding
      * ({@link #setOutputEncoding(String)}) will be used for URL escaping.
      * 
      * Defaults to {@code null}.
@@ -1720,7 +1720,7 @@ public class Configurable {
      * set to 2.3.24 fixes a rarely surfacing bug with that).
      * 
      * <p>
-     * It's recommended to set the {@code auto_impots_lazy} setting ({@link Configuration#setLazyAutoImports(Boolean)})
+     * It's recommended to set the {@code lazy_auto_imports} setting ({@link Configuration#setLazyAutoImports(Boolean)})
      * to {@code true} when using this, so that auto-imports that are unused in a template won't degrade performance by
      * unnecessary loading and initializing the imported library.
      * 

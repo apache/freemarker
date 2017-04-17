@@ -2983,7 +2983,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     if (!(item instanceof OutputFormat)) {
                         throw new _MiscTemplateException(getEnvironment(),
                                 "Invalid value for setting ", new _DelayedJQuote(name), ": List items must be "
-                                + OutputFormat.class.getName() + " intances, in: ", value);
+                                + OutputFormat.class.getName() + " instances, in: ", value);
                     }
                 }
                 setRegisteredCustomOutputFormats(list);
