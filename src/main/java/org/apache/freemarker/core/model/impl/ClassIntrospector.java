@@ -50,7 +50,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.util.BugException;
-import org.apache.freemarker.core.util.FluentBuilder;
+import org.apache.freemarker.core.util.CommonBuilder;
 import org.apache.freemarker.core.util._JavaVersions;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.slf4j.Logger;
@@ -1073,18 +1073,18 @@ class ClassIntrospector {
         }
     }
 
-    static final class Builder extends FluentBuilder<ClassIntrospector, Builder> implements Cloneable {
+    static final class Builder implements CommonBuilder<ClassIntrospector>, Cloneable {
 
         private static final Map/*<PropertyAssignments, Reference<ClassIntrospector>>*/ INSTANCE_CACHE = new HashMap();
         private static final ReferenceQueue INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue();
 
         // Properties and their *defaults*:
         private int exposureLevel = DefaultObjectWrapper.EXPOSE_SAFE;
-        private boolean exposureLevelExplicitlySet;
+        private boolean exposureLevelSet;
         private boolean exposeFields;
-        private boolean exposeFieldsExplicitlySet;
+        private boolean exposeFieldsSet;
         private MethodAppearanceFineTuner methodAppearanceFineTuner;
-        private boolean methodAppearanceFineTunerExplicitlySet;
+        private boolean methodAppearanceFineTunerSet;
         private MethodSorter methodSorter;
         // Attention:
         // - This is also used as a cache key, so non-normalized field values should be avoided.
@@ -1151,11 +1151,14 @@ class ClassIntrospector {
             }
 
             this.exposureLevel = exposureLevel;
-            exposureLevelExplicitlySet = true;
+            exposureLevelSet = true;
         }
 
-        public boolean isExposureLevelExplicitlySet() {
-            return exposureLevelExplicitlySet;
+        /**
+         * Tells if the property was explicitly set, as opposed to just holding its default value.
+         */
+        public boolean isExposureLevelSet() {
+            return exposureLevelSet;
         }
 
         public boolean getExposeFields() {
@@ -1165,11 +1168,14 @@ class ClassIntrospector {
         /** See {@link DefaultObjectWrapper.ExtendableBuilder#setExposeFields(boolean)}. */
         public void setExposeFields(boolean exposeFields) {
             this.exposeFields = exposeFields;
-            exposeFieldsExplicitlySet = true;
+            exposeFieldsSet = true;
         }
 
-        public boolean isExposeFieldsExplicitlySet() {
-            return exposeFieldsExplicitlySet;
+        /**
+         * Tells if the property was explicitly set, as opposed to just holding its default value.
+         */
+        public boolean isExposeFieldsSet() {
+            return exposeFieldsSet;
         }
 
         public MethodAppearanceFineTuner getMethodAppearanceFineTuner() {
@@ -1178,11 +1184,14 @@ class ClassIntrospector {
 
         public void setMethodAppearanceFineTuner(MethodAppearanceFineTuner methodAppearanceFineTuner) {
             this.methodAppearanceFineTuner = methodAppearanceFineTuner;
-            methodAppearanceFineTunerExplicitlySet = true;
+            methodAppearanceFineTunerSet = true;
         }
 
-        public boolean isMethodAppearanceFineTunerExplicitlySet() {
-            return methodAppearanceFineTunerExplicitlySet;
+        /**
+         * Tells if the property was explicitly set, as opposed to just holding its default value.
+         */
+        public boolean isMethodAppearanceFineTunerSet() {
+            return methodAppearanceFineTunerSet;
         }
 
         public MethodSorter getMethodSorter() {

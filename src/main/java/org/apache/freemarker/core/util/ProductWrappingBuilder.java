@@ -22,8 +22,7 @@ package org.apache.freemarker.core.util;
 /**
  * A builder that encloses an already built product. {@link #build()} will always return the same product object.
  */
-public class ProductWrappingBuilder<ProductT, SelfT extends ProductWrappingBuilder<ProductT, SelfT>>
-        extends FluentBuilder<ProductT, SelfT> {
+public class ProductWrappingBuilder<ProductT> implements CommonBuilder<ProductT> {
 
     private final ProductT product;
 

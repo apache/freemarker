@@ -64,7 +64,7 @@ import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.util.BugException;
-import org.apache.freemarker.core.util.FluentBuilder;
+import org.apache.freemarker.core.util.CommonBuilder;
 import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.dom.NodeModel;
 import org.slf4j.Logger;
@@ -1326,7 +1326,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      */
     protected abstract static class ExtendableBuilder<
             ProductT extends DefaultObjectWrapper, SelfT extends ExtendableBuilder<ProductT, SelfT>>
-            extends FluentBuilder<ProductT, SelfT> implements Cloneable {
+            implements CommonBuilder<ProductT>, Cloneable {
 
         private final Version incompatibleImprovements;
 
@@ -1335,15 +1335,15 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
 
         // Properties and their *defaults*:
         private int defaultDateType = TemplateDateModel.UNKNOWN;
-        private boolean defaultDataTypeExplicitlySet;
+        private boolean defaultDataTypeSet;
         private ObjectWrapper outerIdentity;
-        private boolean outerIdentityExplicitlySet;
+        private boolean outerIdentitySet;
         private boolean strict;
-        private boolean strictExplicitlySet;
+        private boolean strictSet;
         private boolean useModelCache;
-        private boolean useModelCacheExplicitlySet;
+        private boolean useModelCacheSet;
         private boolean usePrivateCaches;
-        private boolean usePrivateCachesExplicitlySet;
+        private boolean usePrivateCachesSet;
         // Attention!
         // - As this object is a cache key, non-normalized field values should be avoided.
         // - Fields with default values must be set until the end of the constructor to ensure that when the lookup happens,
@@ -1393,6 +1393,11 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
             this.incompatibleImprovements = incompatibleImprovements;
 
             classIntrospectorBuilder = new ClassIntrospector.Builder(incompatibleImprovements);
+        }
+
+        @SuppressWarnings("unchecked")
+        protected SelfT self() {
+            return (SelfT) this;
         }
 
         /**
@@ -1490,7 +1495,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          */
         public void setDefaultDateType(int defaultDateType) {
             this.defaultDateType = defaultDateType;
-            defaultDataTypeExplicitlySet = true;
+            defaultDataTypeSet = true;
         }
 
         /**
@@ -1504,8 +1509,8 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         /**
          * Tells if the property was explicitly set, as opposed to just holding its default value.
          */
-        public boolean isDefaultDataTypeExplicitlySet() {
-            return defaultDataTypeExplicitlySet;
+        public boolean isDefaultDateTypeSet() {
+            return defaultDataTypeSet;
         }
 
         /**
@@ -1526,7 +1531,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          */
         public void setOuterIdentity(ObjectWrapper outerIdentity) {
             this.outerIdentity = outerIdentity;
-            outerIdentityExplicitlySet = true;
+            outerIdentitySet = true;
         }
 
         /**
@@ -1540,8 +1545,8 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         /**
          * Tells if the property was explicitly set, as opposed to just holding its default value.
          */
-        public boolean isOuterIdentityExplicitlySet() {
-            return outerIdentityExplicitlySet;
+        public boolean isOuterIdentitySet() {
+            return outerIdentitySet;
         }
 
         /**
@@ -1574,7 +1579,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          */
         public void setStrict(boolean strict) {
             this.strict = strict;
-            strictExplicitlySet = true;
+            strictSet = true;
         }
 
         /**
@@ -1588,8 +1593,8 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         /**
          * Tells if the property was explicitly set, as opposed to just holding its default value.
          */
-        public boolean isStrictExplicitlySet() {
-            return strictExplicitlySet;
+        public boolean isStrictSet() {
+            return strictSet;
         }
 
         public boolean getUseModelCache() {
@@ -1602,7 +1607,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         // [FM3] Remove
         public void setUseModelCache(boolean useModelCache) {
             this.useModelCache = useModelCache;
-            useModelCacheExplicitlySet = true;
+            useModelCacheSet = true;
         }
 
         /**
@@ -1617,8 +1622,8 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         /**
          * Tells if the property was explicitly set, as opposed to just holding its default value.
          */
-        public boolean isUseModelCacheExplicitlySet() {
-            return useModelCacheExplicitlySet;
+        public boolean isUseModelCacheSet() {
+            return useModelCacheSet;
         }
 
         /**
@@ -1634,14 +1639,14 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          * */
         public void setUsePrivateCaches(boolean usePrivateCaches) {
             this.usePrivateCaches = usePrivateCaches;
-            usePrivateCachesExplicitlySet = true;
+            usePrivateCachesSet = true;
         }
 
         /**
          * Tells if the property was explicitly set, as opposed to just holding its default value.
          */
-        public boolean isUsePrivateCachesExplicitlySet() {
-            return usePrivateCachesExplicitlySet;
+        public boolean isUsePrivateCachesSet() {
+            return usePrivateCachesSet;
         }
 
         /**
@@ -1673,8 +1678,8 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         /**
          * Tells if the property was explicitly set, as opposed to just holding its default value.
          */
-        public boolean setExposureLevelExplicitlySet() {
-            return classIntrospectorBuilder.isExposureLevelExplicitlySet();
+        public boolean setExposureLevelSet() {
+            return classIntrospectorBuilder.isExposureLevelSet();
         }
 
         /**
@@ -1706,8 +1711,11 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
             return self();
         }
 
-        public boolean isExposeFieldsExplicitlySet() {
-            return classIntrospectorBuilder.isExposeFieldsExplicitlySet();
+        /**
+         * Tells if the property was explicitly set, as opposed to just holding its default value.
+         */
+        public boolean isExposeFieldsSet() {
+            return classIntrospectorBuilder.isExposeFieldsSet();
         }
 
         /**
@@ -1735,8 +1743,11 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
             return self();
         }
 
-        public boolean isMethodAppearanceFineTunerExplicitlySet() {
-            return classIntrospectorBuilder.isMethodAppearanceFineTunerExplicitlySet();
+        /**
+         * Tells if the property was explicitly set, as opposed to just holding its default value.
+         */
+        public boolean isMethodAppearanceFineTunerSet() {
+            return classIntrospectorBuilder.isMethodAppearanceFineTunerSet();
         }
 
         /**

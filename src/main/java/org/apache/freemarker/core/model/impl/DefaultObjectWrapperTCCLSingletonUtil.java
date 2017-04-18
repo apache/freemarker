@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.freemarker.core.util.FluentBuilder;
+import org.apache.freemarker.core.util.CommonBuilder;
 
 /**
  * Utility method for caching {@link DefaultObjectWrapper} (and subclasses) sigletons per Thread Context Class
@@ -119,7 +119,7 @@ final class DefaultObjectWrapperTCCLSingletonUtil {
     /**
      * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
      * Used when the builder delegates the product creation to something else (typically, an instance cache). Calling
-     * {@link FluentBuilder#build()} would be infinite recursion in such cases.
+     * {@link CommonBuilder#build()} would be infinite recursion in such cases.
      */
     public interface _ConstructorInvoker<ProductT, BuilderT> {
 
