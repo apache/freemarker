@@ -115,7 +115,7 @@ import freemarker.template.utility.XmlEscape;
  * <pre>
  *  // Where the application is initialized; in general you do this ONLY ONCE in the application life-cycle!
  *  Configuration cfg = new Configuration(VERSION_<i>X</i>_<i>Y</i>_<i>Z</i>));
- *  // Where X, Y, Z enables the not-100%-backward-compatible fixes introduced in
+ *  // Where VERSION_<i>X</i>_<i>Y</i>_<i>Z</i> enables the not-100%-backward-compatible fixes introduced in
  *  // FreeMarker version X.Y.Z  and earlier (see {@link #Configuration(Version)}).
  *  cfg.set<i>SomeSetting</i>(...);
  *  cfg.set<i>OtherSetting</i>(...);
@@ -1219,7 +1219,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Sets a {@link TemplateLookupStrategy} that is used to look up templates based on the requested name; as a side
+     * Sets the {@link TemplateLookupStrategy} that is used to look up templates based on the requested name; as a side
      * effect the template cache will be emptied. The default value is {@link TemplateLookupStrategy#DEFAULT_2_3_0}.
      * 
      * @since 2.3.22
@@ -1530,7 +1530,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
 
     /**
      * Sets the time in milliseconds that must elapse before checking whether there is a newer version of a template
-     * "file" exists than the cached one. Defaults to 5000 ms.
+     * "file" than the cached one. Defaults to 5000 ms.
      * 
      * <p>
      * When you get a template via {@link #getTemplate(String)} (or some of its overloads). FreeMarker will try to get
@@ -1927,7 +1927,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * Where you can't use the standard extensions, templates still can be associated to output formats with
      * patterns matching their name (their path) using {@link #setTemplateConfigurations(TemplateConfigurationFactory)}.
      * But if all templates will have the same output format, you may use {@link #setOutputFormat(OutputFormat)} after
-     * all, to set a value like {@link HTMLOutputFormat#INSTANCE}, {@link XMLOutputFormat#INSTANCE}, etc. Also note
+     * all, to a value like {@link HTMLOutputFormat#INSTANCE}, {@link XMLOutputFormat#INSTANCE}, etc. Also note
      * that templates can specify their own output format like {@code 
      * <#ftl output_format="HTML">}, which overrides any configuration settings.
      * 
@@ -1992,7 +1992,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @param name
      *            Either the name of the output format as it was registered with
      *            {@link Configuration#setRegisteredCustomOutputFormats(Collection)}, or a combined output format name.
-     *            A output combined format is created ad-hoc from the registered formats. For example, if you need RTF
+     *            A combined output format is created ad-hoc from the registered formats. For example, if you need RTF
      *            embedded into HTML, the name will be <code>HTML{RTF}</code>, where "HTML" and "RTF" refer to the
      *            existing formats. This logic can be used recursively, so for example <code>XML{HTML{RTF}}</code> is
      *            also valid.
@@ -2337,7 +2337,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         }
         // To avoid integer overflows:
         if (tabSize > 256) {
-            throw new IllegalArgumentException("\"tabSize\" can be more than 256, but was " + tabSize);
+            throw new IllegalArgumentException("\"tabSize\" can't be more than 256, but was " + tabSize);
         }
         this.tabSize = tabSize;
     }
