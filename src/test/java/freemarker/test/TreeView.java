@@ -64,7 +64,7 @@ public class TreeView {
     }
 
     static void usage() {
-        System.err.println("little toy program to display a compiled template as a tree.");
-        System.err.println("Usage: java freemarker.test.TreeView <templatefile>");
+        System.err.println("Little toy program to display a compiled template as a tree.");
+        System.err.println("Usage: java freemarker.testcase.TreeView <templatefile>");
     }
 }

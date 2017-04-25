@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import javax.swing.tree.TreePath;
+
 import freemarker.cache.TemplateCache;
 import freemarker.cache.TemplateLoader;
 import freemarker.cache.TemplateLookupStrategy;
@@ -987,7 +989,7 @@ public class Template extends Configurable {
      * @deprecated Should only be used internally, and might will be removed later.
      */
     @Deprecated
-    public List containingElements(int column, int line) {
+    public TreePath containingElements(int column, int line) {
         final ArrayList elements = new ArrayList();
         TemplateElement element = rootElement;
         mainloop: while (element.contains(column, line)) {
@@ -1001,7 +1003,10 @@ public class Template extends Configurable {
             }
             break;
         }
-        return elements.isEmpty() ? null : elements;
+        if (elements.isEmpty()) {
+            return null;
+        }
+        return new TreePath(elements.toArray());
     }
 
     /**

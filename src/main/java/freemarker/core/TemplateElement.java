@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
 
+import javax.swing.tree.TreeNode;
+
 import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateNodeModel;
@@ -37,7 +39,7 @@ import freemarker.template.TemplateSequenceModel;
  *             it.
  */
 @Deprecated
-abstract public class TemplateElement extends TemplateObject {
+abstract public class TemplateElement extends TemplateObject implements TreeNode {
 
     private static final int INITIAL_REGULATED_CHILD_BUFFER_CAPACITY = 6;
 
@@ -191,7 +193,11 @@ abstract public class TemplateElement extends TemplateObject {
         return !isLeaf();
     }
 
-    public int getIndex(TemplateElement node) {
+    /**
+     * @deprecated Starting from 2.4, we won't use {@link TreeNode} API, as it requires Swing.
+     */
+    @Deprecated
+    public int getIndex(TreeNode node) {
         for (int i = 0; i < childCount; i++) {
             if (childBuffer[i].equals(node)) {
                 return i;
@@ -215,10 +221,11 @@ abstract public class TemplateElement extends TemplateObject {
     }
 
     /**
-     * @deprecated Internal API - even internally, use {@link #getChild(int)} instead.
+     * @deprecated This method will return {@link TemplateElement} starting from 2.4, as that doesn't require Swing;
+     * don't use it. Internally, use {@link #getChild(int)} instead.
      */
     @Deprecated
-    public TemplateElement getChildAt(int index) {
+    public TreeNode getChildAt(int index) {
         if (childCount == 0) {
             throw new IndexOutOfBoundsException("Template element has no children");
         }
@@ -243,10 +250,11 @@ abstract public class TemplateElement extends TemplateObject {
     /**
      * The element whose child this element is, or {@code null} if this is the root node.
      * 
-     * @deprecated Don't use in internal code either; use {@link #getParentElement()} there.
+     * @deprecated This method will return {@link TemplateElement} starting from 2.4, as that doesn't require Swing;
+     * don't use it. Don't use in internal code either; use {@link #getParentElement()} there.
      */
     @Deprecated
-    public TemplateElement getParent() {
+    public TreeNode getParent() {
         return parent;
     }
     
