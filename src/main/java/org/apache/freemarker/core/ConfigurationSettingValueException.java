@@ -18,30 +18,69 @@
  */
 package org.apache.freemarker.core;
 
-import org.apache.freemarker.core.util._NullArgumentException;
+import java.util.Date;
+
+import org.apache.freemarker.core.Configuration.ExtendableBuilder;
 import org.apache.freemarker.core.util._StringUtil;
 
 /**
- * Thrown by {@link Configuration#setSetting(String, String)}; The setting name was recognized, but its value
+ * Thrown by {@link ExtendableBuilder#setSetting(String, String)}; The setting name was recognized, but its value
  * couldn't be parsed or the setting couldn't be set for some other reason. This exception should always have a
  * cause exception.
  */
 @SuppressWarnings("serial")
 public class ConfigurationSettingValueException extends ConfigurationException {
 
-    ConfigurationSettingValueException(String name, String value, Throwable cause) {
-        super(createMessage(name, value, "; see cause exception.", ""), cause);
-        _NullArgumentException.check("cause", cause);
+    public ConfigurationSettingValueException(String name, String value, Throwable cause) {
+        this(name, value, true, null, cause);
     }
 
-    ConfigurationSettingValueException(String name, String value, String reason) {
-        super(createMessage(name, value, ", because: ", reason));
-        _NullArgumentException.check("reason", reason);
+    public ConfigurationSettingValueException(String name, String value, String reason) {
+        this(name, value, true, reason, null);
     }
 
-    private static String createMessage(String name, String value, String detail1, String detail2) {
-        return "Failed to set FreeMarker configuration setting " + _StringUtil.jQuote(name)
-                + " to value " + _StringUtil.jQuote(value) + detail1 + detail2;
+    /**
+     * @param name
+     *         The name of the setting
+     * @param value
+     *         The value of the setting
+     * @param showValue
+     *         Whether the value of the setting should be shown in the error message. Set to {@code false} if you want
+     *         to avoid {@link #toString()}-ing the {@code value}.
+     * @param reason
+     *         The explanation of why setting the setting has failed; maybe {@code null}, especially if you have a cause
+     *         exception anyway.
+     * @param cause
+     *         The cause exception of this exception (why setting the setting was failed)
+     */
+    public ConfigurationSettingValueException(String name, Object value, boolean showValue, String reason,
+            Throwable cause) {
+        super(
+                createMessage(
+                    name, value, true,
+                    reason != null ? ", because: " : (cause != null ? "; see cause exception." : null),
+                    reason),
+                cause);
+    }
+
+    private static String createMessage(String name, Object value, boolean showValue, String detail1, String detail2) {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append("Failed to set FreeMarker configuration setting ").append(_StringUtil.jQuote(name));
+        if (showValue) {
+            sb.append(" to value ")
+                    .append(
+                            value instanceof Number || value instanceof Boolean || value instanceof Date ? value
+                            : _StringUtil.jQuote(value));
+        } else {
+            sb.append(" to the specified value");
+        }
+        if (detail1 != null) {
+            sb.append(detail1);
+        }
+        if (detail2 != null) {
+            sb.append(detail2);
+        }
+        return sb.toString();
     }
 
 }

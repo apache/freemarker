@@ -18,9 +18,12 @@
  */
 package org.apache.freemarker.manualtest;
 
+import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.test.TemplateTest;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
-public class AutoEscapingExample extends ExamplesTest {
+public class AutoEscapingExample extends TemplateTest {
 
     @Test
     public void testInfoBox() throws Exception {
@@ -61,5 +64,9 @@ public class AutoEscapingExample extends ExamplesTest {
     public void testStringConcat() throws Exception {
         assertOutputForNamed("AutoEscapingExample-stringConcat.ftlh");
     }
-    
+
+    @Override
+    protected Configuration createDefaultConfiguration() throws Exception {
+        return new TestConfigurationBuilder(AutoEscapingExample.class).build();
+    }
 }

@@ -98,19 +98,17 @@ public class TemplateNotFoundMessageTest {
 
     @Test
     public void testDefaultTemplateLoader() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        String errMsg = failWith(cfg);
+        String errMsg = failWith(null);
         showErrorMessage(errMsg);
         assertThat(errMsg, allOf(containsString("setTemplateLoader"), containsString("null")));
     }
     
     @Test
     public void testOtherMessageDetails() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        cfg.setTemplateLoader(new StringTemplateLoader());
-        
+        // Non-null TemplateLoader:
+        StringTemplateLoader emptyLoader = new StringTemplateLoader();
         {
-            String errMsg = failWith("../x", cfg);
+            String errMsg = failWith(emptyLoader, "../x");
             showErrorMessage(errMsg);
             assertThat(errMsg,
                     allOf(
@@ -118,7 +116,7 @@ public class TemplateNotFoundMessageTest {
                             containsStringIgnoringCase("root directory")));
         }
         {
-            String errMsg = failWith("x\u0000y", cfg);
+            String errMsg = failWith(emptyLoader, "x\u0000y");
             showErrorMessage(errMsg);
             assertThat(errMsg,
                     allOf(
@@ -126,48 +124,54 @@ public class TemplateNotFoundMessageTest {
                             containsStringIgnoringCase("null character")));
         }
         {
-            String errMsg = failWith("x\\y", cfg);
+            String errMsg = failWith(emptyLoader, "x\\y");
             showErrorMessage(errMsg);
             assertThat(errMsg,
                     allOf(containsStringIgnoringCase("warning"), containsStringIgnoringCase("backslash")));
         }
         {
-            String errMsg = failWith("x/./y", cfg);
+            String errMsg = failWith(emptyLoader, "x/./y");
             showErrorMessage(errMsg);
             assertThat(errMsg,
                     allOf(containsStringIgnoringCase("normalized"), containsStringIgnoringCase("x/y")));
         }
         {
-            String errMsg = failWith("/x/y", cfg);
+            String errMsg = failWith(emptyLoader, "/x/y");
             showErrorMessage(errMsg);
             assertThat(errMsg, not(containsStringIgnoringCase("normalized")));
         }
         {
-            String errMsg = failWith("x/y", cfg);
+            String errMsg = failWith(emptyLoader, "x/y");
             showErrorMessage(errMsg);
             assertThat(errMsg, not(containsStringIgnoringCase("normalized")));
             assertThat(errMsg, not(containsStringIgnoringCase("lookup strategy")));
         }
-        
-        cfg.setTemplateLookupStrategy(new TemplateLookupStrategy() {
-            @Override
-            public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
-                return ctx.lookupWithAcquisitionStrategy(ctx.getTemplateName());
-            }
-        });
+
+        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0)
+                .templateLoader(new StringTemplateLoader())
+                .templateLookupStrategy(
+                        new TemplateLookupStrategy() {
+                            @Override
+                            public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
+                                return ctx.lookupWithAcquisitionStrategy(ctx.getTemplateName());
+                            }
+                        }
+        );
         {
-            String errMsg = failWith("x/y", cfg);
+            String errMsg = failWith(emptyLoader, "x/y",
+                    new TemplateLookupStrategy() {
+                        @Override
+                        public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
+                            return ctx.lookupWithAcquisitionStrategy(ctx.getTemplateName());
+                        }
+                    }
+            );
             showErrorMessage(errMsg);
             assertThat(errMsg, containsStringIgnoringCase("lookup strategy"));
         }
         
         try {
-            cfg.getTemplate("./missing", null, new Serializable() {
-                @Override
-                public String toString() {
-                    return "example.com";
-                }
-            });
+            cfgB.build().getTemplate("./missing", null, new DomainLookupCondition());
             fail();
         } catch (TemplateNotFoundException e) {
             showErrorMessage(e.getMessage());
@@ -179,12 +183,14 @@ public class TemplateNotFoundMessageTest {
         // System.out.println(errMsg);
     }
 
-    private String failWith(TemplateLoader tl, String name, Configuration cfg) {
-        if (tl != null) {
-            cfg.setTemplateLoader(tl);
-        }
+    private String failWith(TemplateLoader tl, String name, TemplateLookupStrategy templateLookupStrategy) {
         try {
-            cfg.getTemplate(name);
+            Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
+            cfgB.setTemplateLoader(tl);
+            if (templateLookupStrategy != null) {
+                cfgB.setTemplateLookupStrategy(templateLookupStrategy);
+            }
+            cfgB.build().getTemplate(name);
             fail();
         } catch (TemplateNotFoundException | MalformedTemplateNameException e) {
             return e.getMessage();
@@ -193,17 +199,21 @@ public class TemplateNotFoundMessageTest {
         }
         return null;
     }
-    
+
+    private String failWith(TemplateLoader tl, String name) {
+        return failWith(tl, name, null);
+    }
+
     private String failWith(TemplateLoader tl) {
-        return failWith(tl, "missing.ftl", new Configuration(Configuration.VERSION_3_0_0));
+        return failWith(tl, "missing.ftl", null);
     }
 
-    private String failWith(Configuration cfg) {
-        return failWith(null, "missing.ftl", cfg);
-    }
-
-    private String failWith(String name, Configuration cfg) {
-        return failWith(null, name, cfg);
+    @SuppressWarnings("serial")
+    private static final class DomainLookupCondition implements Serializable {
+        @Override
+        public String toString() {
+            return "example.com";
+        }
     }
 
 }

@@ -37,6 +37,7 @@ import org.apache.freemarker.test.MonitoredTemplateLoader;
 import org.apache.freemarker.test.MonitoredTemplateLoader.CloseSessionEvent;
 import org.apache.freemarker.test.MonitoredTemplateLoader.CreateSessionEvent;
 import org.apache.freemarker.test.MonitoredTemplateLoader.LoadEvent;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
@@ -48,10 +49,12 @@ public class DefaultTemplateResolverTest {
     public void testCachedException() throws Exception {
         MockTemplateLoader loader = new MockTemplateLoader();
         DefaultTemplateResolver tr = new DefaultTemplateResolver(
-                loader, new StrongCacheStorage(),
-                DefaultTemplateLookupStrategy.INSTANCE, DefaultTemplateNameFormat.INSTANCE,
-                new Configuration(Configuration.VERSION_3_0_0));
-        tr.setTemplateUpdateDelayMilliseconds(1000L);
+                loader,
+                new StrongCacheStorage(), 1000L,
+                DefaultTemplateLookupStrategy.INSTANCE, true,
+                DefaultTemplateNameFormat.INSTANCE,
+                null,
+                new TestConfigurationBuilder().build());
         loader.setThrowException(true);
         try {
             tr.getTemplate("t", Locale.getDefault(), null).getTemplate();
@@ -86,10 +89,11 @@ public class DefaultTemplateResolverTest {
     public void testCachedNotFound() throws Exception {
         MockTemplateLoader loader = new MockTemplateLoader();
         DefaultTemplateResolver cache = new DefaultTemplateResolver(
-                loader, new StrongCacheStorage(), DefaultTemplateLookupStrategy.INSTANCE,
-                DefaultTemplateNameFormat.INSTANCE, new Configuration());
-        cache.setTemplateUpdateDelayMilliseconds(1000L);
-        cache.setLocalizedLookup(false);
+                loader,
+                new StrongCacheStorage(), 1000L,
+                DefaultTemplateLookupStrategy.INSTANCE, false,
+                DefaultTemplateNameFormat.INSTANCE,
+                null, new TestConfigurationBuilder().build());
         assertNull(cache.getTemplate("t", Locale.getDefault(), null).getTemplate());
         assertEquals(1, loader.getLoadAttemptCount());
         assertNull(cache.getTemplate("t", Locale.getDefault(), null).getTemplate());
@@ -136,13 +140,14 @@ public class DefaultTemplateResolverTest {
     }
     
     @Test
-    public void testManualRemovalPlain() throws IOException {
-        Configuration cfg = new Configuration();
-        cfg.setCacheStorage(new StrongCacheStorage());
+    public void testManualRemovalPlain() throws Exception {
         StringTemplateLoader loader = new StringTemplateLoader();
-        cfg.setTemplateLoader(loader);
-        cfg.setTemplateUpdateDelayMilliseconds(Integer.MAX_VALUE);
-        
+        Configuration cfg = new TestConfigurationBuilder()
+                .cacheStorage(new StrongCacheStorage())
+                .templateLoader(loader)
+                .templateUpdateDelayMilliseconds(Long.MAX_VALUE)
+                .build();
+
         loader.putTemplate("1.ftl", "1 v1");
         loader.putTemplate("2.ftl", "2 v1");
         assertEquals("1 v1", cfg.getTemplate("1.ftl").toString()); 
@@ -163,14 +168,14 @@ public class DefaultTemplateResolverTest {
     }
 
     @Test
-    public void testManualRemovalI18ed() throws IOException {
-        Configuration cfg = new Configuration();
-        cfg.setCacheStorage(new StrongCacheStorage());
-        cfg.setLocale(Locale.US);
+    public void testManualRemovalI18ed() throws Exception {
         StringTemplateLoader loader = new StringTemplateLoader();
-        cfg.setTemplateLoader(loader);
-        cfg.setTemplateUpdateDelayMilliseconds(Integer.MAX_VALUE);
-        
+        Configuration cfg = new TestConfigurationBuilder()
+                .cacheStorage(new StrongCacheStorage())
+                .templateLoader(loader)
+                .templateUpdateDelayMilliseconds(Long.MAX_VALUE)
+                .build();
+
         loader.putTemplate("1_en_US.ftl", "1_en_US v1");
         loader.putTemplate("1_en.ftl", "1_en v1");
         loader.putTemplate("1.ftl", "1 v1");
@@ -204,13 +209,15 @@ public class DefaultTemplateResolverTest {
     }
 
     @Test
-    public void testZeroUpdateDelay() throws IOException, InterruptedException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        cfg.setLocale(Locale.US);
-        cfg.setCacheStorage(new StrongCacheStorage());
+    public void testZeroUpdateDelay() throws Exception {
         MonitoredTemplateLoader loader = new MonitoredTemplateLoader();
-        cfg.setTemplateLoader(loader);
-        cfg.setTemplateUpdateDelayMilliseconds(0);
+        TestConfigurationBuilder cfgB = new TestConfigurationBuilder()
+                .cacheStorage(new StrongCacheStorage())
+                .templateLoader(loader)
+                .templateUpdateDelayMilliseconds(0);
+
+        Configuration cfg = cfgB.build();
+
         for (int i = 1; i <= 3; i++) {
             loader.putTextTemplate("t.ftl", "v" + i);
             assertEquals("v" + i, cfg.getTemplate("t.ftl").toString());
@@ -243,7 +250,7 @@ public class DefaultTemplateResolverTest {
                 ),
                 loader.getEvents(LoadEvent.class));
         
-        cfg.setLocalizedLookup(false);
+        cfg = cfgB.localizedLookup(false).build();
         loader.clearEvents();
         loader.putTextTemplate("t.ftl", "v10");
         assertEquals("v10", cfg.getTemplate("t.ftl").toString());
@@ -270,18 +277,14 @@ public class DefaultTemplateResolverTest {
     }
     
     @Test
-    public void testWrongEncodingReload() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        cfg.setLocale(Locale.US);
-        cfg.setSourceEncoding(StandardCharsets.UTF_8);
-        
-        MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
-        tl.putBinaryTemplate("utf-8_en.ftl", "<#ftl encoding='utf-8'>Béka");
-        tl.putBinaryTemplate("utf-8.ftl", "Bar");
-        tl.putBinaryTemplate("iso-8859-1_en_US.ftl", "<#ftl encoding='ISO-8859-1'>Béka", StandardCharsets.ISO_8859_1,
-                "v1");
-        cfg.setTemplateLoader(tl);
-        
+    public void testWrongEncodingReload() throws Exception {
+        MonitoredTemplateLoader loader = new MonitoredTemplateLoader();
+        loader.putBinaryTemplate("utf-8_en.ftl", "<#ftl encoding='utf-8'>Béka");
+        loader.putBinaryTemplate("utf-8.ftl", "Bar");
+        loader.putBinaryTemplate("iso-8859-1_en_US.ftl", "<#ftl encoding='ISO-8859-1'>Béka",
+                StandardCharsets.ISO_8859_1, "v1");
+        Configuration cfg = new TestConfigurationBuilder().templateLoader(loader).build();
+
         {
             Template t = cfg.getTemplate("utf-8.ftl");
             assertEquals("utf-8.ftl", t.getLookupName());
@@ -295,11 +298,11 @@ public class DefaultTemplateResolverTest {
                             new LoadEvent("utf-8_en_US.ftl", TemplateLoadingResultStatus.NOT_FOUND),
                             new LoadEvent("utf-8_en.ftl", TemplateLoadingResultStatus.OPENED),
                             CloseSessionEvent.INSTANCE),
-                    tl.getEvents());
+                    loader.getEvents());
         }
 
         {
-            tl.clearEvents();
+            loader.clearEvents();
             
             Template t = cfg.getTemplate("iso-8859-1.ftl");
             assertEquals("iso-8859-1.ftl", t.getLookupName());
@@ -312,20 +315,16 @@ public class DefaultTemplateResolverTest {
                             CreateSessionEvent.INSTANCE,
                             new LoadEvent("iso-8859-1_en_US.ftl", TemplateLoadingResultStatus.OPENED),
                             CloseSessionEvent.INSTANCE),
-                    tl.getEvents());
+                    loader.getEvents());
         }
     }
 
     @Test
-    public void testNoWrongEncodingForTemplateLoader2WithReader() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        cfg.setLocale(Locale.US);
-        cfg.setSourceEncoding(StandardCharsets.UTF_8);
-        
-        MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
-        tl.putTextTemplate("foo_en.ftl", "<#ftl encoding='utf-8'>ő");
-        tl.putTextTemplate("foo.ftl", "B");
-        cfg.setTemplateLoader(tl);
+    public void testNoWrongEncodingForTemplateLoader2WithReader() throws Exception {
+        MonitoredTemplateLoader loader = new MonitoredTemplateLoader();
+        loader.putTextTemplate("foo_en.ftl", "<#ftl encoding='utf-8'>ő");
+        loader.putTextTemplate("foo.ftl", "B");
+        Configuration cfg = new TestConfigurationBuilder().templateLoader(loader).build();
         
         {
             Template t = cfg.getTemplate("foo.ftl");
@@ -340,14 +339,15 @@ public class DefaultTemplateResolverTest {
                             new LoadEvent("foo_en_US.ftl", TemplateLoadingResultStatus.NOT_FOUND),
                             new LoadEvent("foo_en.ftl", TemplateLoadingResultStatus.OPENED),
                             CloseSessionEvent.INSTANCE),                
-                    tl.getEvents());
+                    loader.getEvents());
         }
     }
 
     @Test
-    public void testTemplateNameFormatException() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        cfg.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
+    public void testTemplateNameFormatException() throws Exception {
+        Configuration cfg = new TestConfigurationBuilder()
+                .templateNameFormat(DefaultTemplateNameFormat.INSTANCE)
+                .build();
         try {
             cfg.getTemplate("../x");
             fail();

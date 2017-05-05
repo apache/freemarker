@@ -34,7 +34,7 @@ import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
  * {@link TemplateHashModel} implementation that will call {@link Map#get(Object)} or the getter method, transparently
  * to the template language.
  * 
- * @see Configuration#setObjectWrapper(ObjectWrapper)
+ * @see Configuration#getObjectWrapper()
  */
 public interface ObjectWrapper {
     
@@ -49,10 +49,10 @@ public interface ObjectWrapper {
      * 
      * @return a {@link TemplateModel} wrapper of the object passed in. To support un-wrapping, you may consider the
      *     return value to implement {@link WrapperTemplateModel} and {@link AdapterTemplateModel}.  
-     *     The default expectation is that the {@link TemplateModel} isn't less thread safe than the wrapped object.
-     *     If the {@link ObjectWrapper} returns less thread safe objects, that should be clearly documented, as it
-     *     restricts how it can be used, like, then it can't be used to wrap "shared variables"
-     *     ({@link Configuration#setSharedVariables(Map)}).
+     *     It's normally expectated that the {@link TemplateModel} isn't less thread safe than the wrapped object.
+     *     If the {@link ObjectWrapper} returns less thread safe objects that should be clearly documented, as it
+     *     restricts how it can be used, like, then it can't be used to wrap
+     *     {@linkplain Configuration#getSharedVariables() shared variables}).
      */
     TemplateModel wrap(Object obj) throws TemplateModelException;
     

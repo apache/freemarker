@@ -30,8 +30,8 @@ import org.apache.freemarker.core.outputformat.impl.TemplateHTMLOutputModel;
 /**
  * Superclass of {@link OutputFormat}-s that represent a "markup" format, which is any format where certain character
  * sequences have special meaning and thus may need escaping. (Escaping is important for FreeMarker, as typically it has
- * to insert non-markup text from the data-model into the output markup. See also:
- * {@link Configuration#setOutputFormat(OutputFormat)}.)
+ * to insert non-markup text from the data-model into the output markup. See also the
+ * {@link Configuration#getOutputFormat() outputFormat} configuration setting.)
  * 
  * <p>
  * A {@link MarkupOutputFormat} subclass always has a corresponding {@link TemplateMarkupOutputModel} subclass pair
@@ -128,7 +128,7 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
      * Tells if by default auto-escaping should be on for this format. It should be {@code true} if you need to escape
      * on most of the places where you insert values.
      * 
-     * @see Configuration#setAutoEscapingPolicy(int)
+     * @see Configuration#getAutoEscapingPolicy()
      */
     public abstract boolean isAutoEscapedByDefault();
     

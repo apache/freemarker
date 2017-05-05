@@ -31,15 +31,18 @@ import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.test.TemplateTest;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class CamelCaseTest extends TemplateTest {
 
     @Test
     public void camelCaseSpecialVars() throws IOException, TemplateException {
-        getConfiguration().setOutputEncoding(StandardCharsets.UTF_8);
-        getConfiguration().setURLEscapingCharset(StandardCharsets.ISO_8859_1);
-        getConfiguration().setLocale(Locale.GERMANY);
+        setConfiguration(new TestConfigurationBuilder()
+                .outputEncoding(StandardCharsets.UTF_8)
+                .urlEscapingCharset(StandardCharsets.ISO_8859_1)
+                .locale(Locale.GERMANY)
+                .build());
         assertOutput("${.dataModel?isHash?c}", "true");
         assertOutput("${.data_model?is_hash?c}", "true");
         assertOutput("${.localeObject.toString()}", "de_DE");
@@ -69,10 +72,11 @@ public class CamelCaseTest extends TemplateTest {
         
         assertErrorContains("<#if x><#elseIf y></#if>${.foo}", "dataModel", "\\!data_model");
         assertErrorContains("<#if x><#elseif y></#if>${.foo}", "data_model", "\\!dataModel");
-        
-        getConfiguration().setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+
+        setConfigurationToCamelCaseNamingConvention();
         assertErrorContains("${.foo}", "dataModel", "\\!data_model");
-        getConfiguration().setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
+
+        setConfigurationToLegacyCaseNamingConvention();
         assertErrorContains("${.foo}", "data_model", "\\!dataModel");
     }
     
@@ -87,8 +91,6 @@ public class CamelCaseTest extends TemplateTest {
     
     @Test
     public void camelCaseFtlHeaderParameters() throws IOException, TemplateException {
-        getConfiguration().setOutputEncoding(StandardCharsets.UTF_8);
-        
         assertOutput(
                 "<#ftl "
                 + "stripWhitespace=false "
@@ -116,16 +118,25 @@ public class CamelCaseTest extends TemplateTest {
         assertErrorContains("<#ftl strip_whitespace=true stripText=true>", "naming convention");
         assertErrorContains("<#ftl stripWhitespace=true>${.foo_bar}", "naming convention");
         assertErrorContains("<#ftl strip_whitespace=true>${.fooBar}", "naming convention");
-        
-        getConfiguration().setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+
+        setConfiguration(new TestConfigurationBuilder()
+                .namingConvention(ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION)
+                .outputEncoding(StandardCharsets.UTF_8)
+                .build());
         assertErrorContains("<#ftl strip_whitespace=true>", "naming convention");
         assertOutput("<#ftl stripWhitespace=true>${.outputEncoding}", StandardCharsets.UTF_8.name());
         
-        getConfiguration().setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
+        setConfiguration(new TestConfigurationBuilder()
+                .namingConvention(ParsingConfiguration.LEGACY_NAMING_CONVENTION)
+                .outputEncoding(StandardCharsets.UTF_8)
+                .build());
         assertErrorContains("<#ftl stripWhitespace=true>", "naming convention");
         assertOutput("<#ftl strip_whitespace=true>${.output_encoding}", StandardCharsets.UTF_8.name());
         
-        getConfiguration().setNamingConvention(Configuration.AUTO_DETECT_NAMING_CONVENTION);
+        setConfiguration(new TestConfigurationBuilder()
+                .namingConvention(ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION)
+                .outputEncoding(StandardCharsets.UTF_8)
+                .build());
         assertOutput("<#ftl stripWhitespace=true>${.outputEncoding}", StandardCharsets.UTF_8.name());
         assertOutput("<#ftl encoding='iso-8859-1' stripWhitespace=true>${.outputEncoding}", StandardCharsets.UTF_8.name());
         assertOutput("<#ftl stripWhitespace=true encoding='iso-8859-1'>${.outputEncoding}", StandardCharsets.UTF_8.name());
@@ -143,9 +154,10 @@ public class CamelCaseTest extends TemplateTest {
         assertErrorContains("<#if x><#elseIf y></#if><#setting foo=1>", "booleanFormat", "\\!boolean_format");
         assertErrorContains("<#if x><#elseif y></#if><#setting foo=1>", "boolean_format", "\\!booleanFormat");
 
-        getConfiguration().setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+        setConfigurationToCamelCaseNamingConvention();
         assertErrorContains("<#setting foo=1>", "booleanFormat", "\\!boolean_format");
-        getConfiguration().setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
+
+        setConfigurationToLegacyCaseNamingConvention();
         assertErrorContains("<#setting foo=1>", "boolean_format", "\\!booleanFormat");
     }
     
@@ -175,8 +187,8 @@ public class CamelCaseTest extends TemplateTest {
 
     @Test
     public void stringLiteralInterpolation() throws IOException, TemplateException {
-        assertEquals(Configuration.AUTO_DETECT_NAMING_CONVENTION, getConfiguration().getNamingConvention());
-        getConfiguration().setSharedVariable("x", "x");
+        assertEquals(ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION, getConfiguration().getNamingConvention());
+        addToDataModel("x", "x");
         
         assertOutput("${'-${x?upperCase}-'} ${x?upperCase}", "-X- X");
         assertOutput("${x?upperCase} ${'-${x?upperCase}-'}", "X -X-");
@@ -191,13 +203,13 @@ public class CamelCaseTest extends TemplateTest {
                 "naming convention", "camel", "upper_case");
         assertErrorContains("${x?upperCase} ${'-${x?upper_case}-'}",
                 "naming convention", "camel", "upper_case");
-        
-        getConfiguration().setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+
+        setConfigurationToCamelCaseNamingConvention();
         assertOutput("${'-${x?upperCase}-'} ${x?upperCase}", "-X- X");
         assertErrorContains("${'-${x?upper_case}-'}",
                 "naming convention", "camel", "upper_case", "\\!detection");
-        
-        getConfiguration().setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
+
+        setConfigurationToLegacyCaseNamingConvention();
         assertOutput("${'-${x?upper_case}-'} ${x?upper_case}", "-X- X");
         assertErrorContains("${'-${x?upperCase}-'}",
                 "naming convention", "legacy", "upperCase", "\\!detection");
@@ -205,7 +217,7 @@ public class CamelCaseTest extends TemplateTest {
     
     @Test
     public void evalAndInterpret() throws IOException, TemplateException {
-        assertEquals(Configuration.AUTO_DETECT_NAMING_CONVENTION, getConfiguration().getNamingConvention());
+        assertEquals(ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION, getConfiguration().getNamingConvention());
         // The naming convention detected doesn't affect the enclosing template's naming convention.
         // - ?eval:
         assertOutput("${\"'x'?upperCase\"?eval}${'x'?upper_case}", "XX");
@@ -221,7 +233,7 @@ public class CamelCaseTest extends TemplateTest {
                 "naming convention", "camel", "upperCase", "is_string", "line 2", "line 3");
         
         // Will be inherited by ?eval-ed/?interpreted fragments:
-        getConfiguration().setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+        setConfigurationToCamelCaseNamingConvention();
         // - ?eval:
         assertErrorContains("${\"'x'?upper_case\"?eval}", "naming convention", "camel", "upper_case");
         assertOutput("${\"'x'?upperCase\"?eval}", "X");
@@ -230,7 +242,7 @@ public class CamelCaseTest extends TemplateTest {
         assertOutput("<@r\"${'x'?upperCase}\"?interpret />", "X");
         
         // Again, will be inherited by ?eval-ed/?interpreted fragments:
-        getConfiguration().setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
+        setConfigurationToLegacyCaseNamingConvention();
         // - ?eval:
         assertErrorContains("${\"'x'?upperCase\"?eval}", "naming convention", "legacy", "upperCase");
         assertOutput("${\"'x'?upper_case\"?eval}", "X");
@@ -238,7 +250,13 @@ public class CamelCaseTest extends TemplateTest {
         assertErrorContains("<@r\"${'x'?upperCase}\"?interpret />", "naming convention", "legacy", "upperCase");
         assertOutput("<@r\"${'x'?upper_case}\"?interpret />", "X");
     }
-    
+
+    private void setConfigurationToLegacyCaseNamingConvention() {
+        setConfiguration(new TestConfigurationBuilder()
+                .namingConvention(ParsingConfiguration.LEGACY_NAMING_CONVENTION)
+                .build());
+    }
+
     @Test
     public void camelCaseBuiltInErrorMessage() throws IOException, TemplateException {
         assertErrorContains("${'x'?upperCasw}", "upperCase", "\\!upper_case");
@@ -248,13 +266,19 @@ public class CamelCaseTest extends TemplateTest {
         
         assertErrorContains("<#if x><#elseIf y></#if> ${'x'?foo}", "upperCase", "\\!upper_case");
         assertErrorContains("<#if x><#elseif y></#if>${'x'?foo}", "upper_case", "\\!upperCase");
-        
-        getConfiguration().setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+
+        setConfigurationToCamelCaseNamingConvention();
         assertErrorContains("${'x'?foo}", "upperCase", "\\!upper_case");
-        getConfiguration().setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
+        setConfigurationToLegacyCaseNamingConvention();
         assertErrorContains("${'x'?foo}", "upper_case", "\\!upperCase");
     }
-    
+
+    private void setConfigurationToCamelCaseNamingConvention() {
+        setConfiguration(new TestConfigurationBuilder()
+                .namingConvention(ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION)
+                .build());
+    }
+
     @Test
     public void builtInsHasBothNamingStyle() throws IOException, TemplateException {
         assertContainsBothNamingStyles(getConfiguration().getSupportedBuiltInNames(), new NamePairAssertion() {
@@ -273,7 +297,7 @@ public class CamelCaseTest extends TemplateTest {
     private void assertContainsBothNamingStyles(Set<String> names, NamePairAssertion namePairAssertion) {
         Set<String> underscoredNamesWithCamelCasePair = new HashSet<>();
         for (String name : names) {
-            if (_StringUtil.getIdentifierNamingConvention(name) == Configuration.CAMEL_CASE_NAMING_CONVENTION) {
+            if (_StringUtil.getIdentifierNamingConvention(name) == ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION) {
                 String underscoredName = correctIsoBIExceptions(_StringUtil.camelCaseToUnderscored(name)); 
                 assertTrue(
                         "Missing underscored variation \"" + underscoredName + "\" for \"" + name + "\".",
@@ -284,7 +308,7 @@ public class CamelCaseTest extends TemplateTest {
             }
         }
         for (String name : names) {
-            if (_StringUtil.getIdentifierNamingConvention(name) == Configuration.LEGACY_NAMING_CONVENTION) {
+            if (_StringUtil.getIdentifierNamingConvention(name) == ParsingConfiguration.LEGACY_NAMING_CONVENTION) {
                 assertTrue("Missing camel case variation for \"" + name + "\".",
                         underscoredNamesWithCamelCasePair.contains(name));
             }
@@ -298,7 +322,9 @@ public class CamelCaseTest extends TemplateTest {
     @Test
     public void camelCaseDirectives() throws IOException, TemplateException {
         camelCaseDirectives(false);
-        getConfiguration().setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX);
+        setConfiguration(new TestConfigurationBuilder()
+                .tagSyntax(ParsingConfiguration.AUTO_DETECT_TAG_SYNTAX)
+                .build());
         camelCaseDirectives(true);
     }
 
@@ -338,12 +364,13 @@ public class CamelCaseTest extends TemplateTest {
     }
     
     private void explicitNamingConvention(boolean squared) throws IOException, TemplateException {
-        if (squared) {
-            getConfiguration().setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX);
-        }
-        
-        getConfiguration().setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
-        
+        int tagSyntax = squared ? ParsingConfiguration.AUTO_DETECT_TAG_SYNTAX
+                : ParsingConfiguration.ANGLE_BRACKET_TAG_SYNTAX;
+        setConfiguration(new TestConfigurationBuilder()
+                .tagSyntax(tagSyntax)
+                .namingConvention(ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION)
+                .build());
+
         assertErrorContains(
                 squared("<#if true>t<#elseif false>f</#if>", squared),
                 "naming convention", "camel", "#elseif");
@@ -366,9 +393,12 @@ public class CamelCaseTest extends TemplateTest {
                 "1");
 
         // ---
-        
-        getConfiguration().setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
-        
+
+        setConfiguration(new TestConfigurationBuilder()
+                .tagSyntax(tagSyntax)
+                .namingConvention(ParsingConfiguration.LEGACY_NAMING_CONVENTION)
+                .build());
+
         assertErrorContains(
                 squared("<#if true>t<#elseIf false>f</#if>", squared),
                 "naming convention", "legacy", "#elseIf");

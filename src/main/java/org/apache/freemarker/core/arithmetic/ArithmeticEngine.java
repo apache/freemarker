@@ -26,7 +26,7 @@ import org.apache.freemarker.core.TemplateException;
 
 /**
  * Implements the arithmetic operations executed by the template language; see
- * {@link Configuration#setArithmeticEngine(ArithmeticEngine)}.
+ * {@link Configuration#getArithmeticEngine()}.
  */
 public abstract class ArithmeticEngine {
 

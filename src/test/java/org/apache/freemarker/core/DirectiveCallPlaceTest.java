@@ -36,12 +36,7 @@ import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
 
 public class DirectiveCallPlaceTest extends TemplateTest {
-    
-    @Override
-    protected Configuration createConfiguration() {
-        return new Configuration(Configuration.VERSION_3_0_0);
-    }
-    
+
     @Test
     public void testCustomDataBasics() throws IOException, TemplateException {
         addTemplate(

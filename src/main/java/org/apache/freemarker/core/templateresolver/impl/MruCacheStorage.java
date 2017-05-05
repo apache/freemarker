@@ -24,7 +24,7 @@ import java.lang.ref.SoftReference;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.freemarker.core.templateresolver.CacheStorage;
+import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
 
 /**
@@ -55,7 +55,7 @@ import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
  * memory-sensitive) most-recently-used caching through 
  * {@link SoftCacheStorage} as well.
  *
- * @see org.apache.freemarker.core.Configuration#setCacheStorage(CacheStorage)
+ * @see Configuration#getCacheStorage()
  */
 public class MruCacheStorage implements CacheStorageWithGetSize {
     private final MruEntry strongHead = new MruEntry();

@@ -155,7 +155,7 @@ public class WebAppTemplateLoader implements TemplateLoader {
      * workaround for the case when the servlet container doesn't show template modifications after the template was
      * already loaded earlier. But it's certainly better to counter this problem by disabling the URL connection cache
      * with {@link #setURLConnectionUsesCaches(Boolean)}, which is also the default behavior with
-     * {@link Configuration#setIncompatibleImprovements(org.apache.freemarker.core.Version) incompatible_improvements} 2.3.21
+     * {@link Configuration#getIncompatibleImprovements() incompatibleImprovements} 2.3.21
      * and later.
      * 
      * @since 2.3.23

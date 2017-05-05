@@ -32,6 +32,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.test.TemplateTest;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class EnvironmentGetTemplateVariantsTest extends TemplateTest {
@@ -187,10 +188,10 @@ public class EnvironmentGetTemplateVariantsTest extends TemplateTest {
     }
     
     private Configuration createConfiguration(Version iciVersion) {
-        Configuration cfg = new Configuration(iciVersion);
-        cfg.setTemplateLoader(TEMPLATES);
-        cfg.setWhitespaceStripping(false);
-        return cfg;
+        return new TestConfigurationBuilder(iciVersion)
+                .templateLoader(TEMPLATES)
+                .whitespaceStripping(false)
+                .build();
     }
 
     @Override

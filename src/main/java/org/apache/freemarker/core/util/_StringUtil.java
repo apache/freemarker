@@ -29,8 +29,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
-import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.ParsingConfiguration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.Version;
 
@@ -1604,21 +1604,21 @@ public class _StringUtil {
     }
 
     /**
-     * @return {@link Configuration#CAMEL_CASE_NAMING_CONVENTION}, or {@link Configuration#LEGACY_NAMING_CONVENTION}
-     *         or, {@link Configuration#AUTO_DETECT_NAMING_CONVENTION} when undecidable.
+     * @return {@link ParsingConfiguration#CAMEL_CASE_NAMING_CONVENTION}, or {@link ParsingConfiguration#LEGACY_NAMING_CONVENTION}
+     *         or, {@link ParsingConfiguration#AUTO_DETECT_NAMING_CONVENTION} when undecidable.
      */
     public static int getIdentifierNamingConvention(String name) {
         final int ln = name.length();
         for (int i = 0; i < ln; i++) {
             final char c = name.charAt(i);
             if (c == '_') {
-                return Configuration.LEGACY_NAMING_CONVENTION;
+                return ParsingConfiguration.LEGACY_NAMING_CONVENTION;
             }
             if (_StringUtil.isUpperUSASCII(c)) {
-                return Configuration.CAMEL_CASE_NAMING_CONVENTION;
+                return ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION;
             }
         }
-        return Configuration.AUTO_DETECT_NAMING_CONVENTION;
+        return ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION;
     }
 
     // [2.4] Won't be needed anymore

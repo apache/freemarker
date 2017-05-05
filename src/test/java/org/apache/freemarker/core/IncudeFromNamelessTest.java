@@ -24,6 +24,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 
 import junit.framework.TestCase;
 
@@ -34,13 +35,13 @@ public class IncudeFromNamelessTest extends TestCase {
     }
     
     public void test() throws IOException, TemplateException {
-        Configuration cfg = new Configuration();
-        StringTemplateLoader tl = new StringTemplateLoader();
-        tl.putTemplate("i.ftl", "[i]");
-        tl.putTemplate("sub/i.ftl", "[sub/i]");
-        tl.putTemplate("import.ftl", "<#assign x = 1>");
-        cfg.setTemplateLoader(tl);
-        
+        StringTemplateLoader loader = new StringTemplateLoader();
+        loader.putTemplate("i.ftl", "[i]");
+        loader.putTemplate("sub/i.ftl", "[sub/i]");
+        loader.putTemplate("import.ftl", "<#assign x = 1>");
+
+        Configuration cfg = new TestConfigurationBuilder().templateLoader(loader).build();
+
         Template t = new Template(null, new StringReader(
                     "<#include 'i.ftl'>\n"
                     + "<#include '/i.ftl'>\n"

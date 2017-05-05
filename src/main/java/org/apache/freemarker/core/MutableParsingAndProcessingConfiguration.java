@@ -23,10 +23,10 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 
 import org.apache.freemarker.core.outputformat.OutputFormat;
+import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.util._NullArgumentException;
 
-// TODO This will be the superclass of TemplateConfiguration.Builder and Configuration.Builder
 public abstract class MutableParsingAndProcessingConfiguration<
         SelfT extends MutableParsingAndProcessingConfiguration<SelfT>>
         extends MutableProcessingConfiguration<SelfT>
@@ -42,20 +42,28 @@ public abstract class MutableParsingAndProcessingConfiguration<
     private Charset sourceEncoding;
     private Integer tabSize;
 
-    protected MutableParsingAndProcessingConfiguration(Version incompatibleImprovements) {
-        super(incompatibleImprovements);
-    }
-
     protected MutableParsingAndProcessingConfiguration() {
         super();
     }
 
     /**
-     * See {@link Configuration#setTagSyntax(int)}.
+     * Setter pair of {@link #getTagSyntax()}.
      */
     public void setTagSyntax(int tagSyntax) {
-        Configuration.valideTagSyntaxValue(tagSyntax);
+        valideTagSyntaxValue(tagSyntax);
         this.tagSyntax = tagSyntax;
+    }
+
+    // [FM3] Use enum; won't be needed
+    static void valideTagSyntaxValue(int tagSyntax) {
+        if (tagSyntax != ParsingConfiguration.AUTO_DETECT_TAG_SYNTAX
+                && tagSyntax != ParsingConfiguration.SQUARE_BRACKET_TAG_SYNTAX
+                && tagSyntax != ParsingConfiguration.ANGLE_BRACKET_TAG_SYNTAX) {
+            throw new IllegalArgumentException(
+                    "\"tagSyntax\" can only be set to one of these: "
+                    + "Configuration.AUTO_DETECT_TAG_SYNTAX, Configuration.ANGLE_BRACKET_SYNTAX, "
+                    + "or Configuration.SQUARE_BRACKET_SYNTAX");
+        }
     }
 
     /**
@@ -67,32 +75,42 @@ public abstract class MutableParsingAndProcessingConfiguration<
     }
 
     /**
-     * The getter pair of {@link #setTagSyntax(int)}.
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ParsingConfiguration}).
      */
-    @Override
-    public int getTagSyntax() {
-        return tagSyntax != null ? tagSyntax : getInheritedTagSyntax();
+    public void unsetTagSyntax() {
+        this.tagSyntax = null;
     }
 
-    protected abstract int getInheritedTagSyntax();
+    @Override
+    public int getTagSyntax() {
+        return isTagSyntaxSet() ? tagSyntax : getDefaultTagSyntax();
+    }
+
+    /**
+     * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
+     * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
+     */
+    protected abstract int getDefaultTagSyntax();
 
     @Override
     public boolean isTagSyntaxSet() {
         return tagSyntax != null;
     }
 
-    /**
-     * See {@link Configuration#getTemplateLanguage()}
-     */
     @Override
     public TemplateLanguage getTemplateLanguage() {
-         return isTemplateLanguageSet() ? templateLanguage : getInheritedTemplateLanguage();
+         return isTemplateLanguageSet() ? templateLanguage : getDefaultTemplateLanguage();
     }
 
-    protected abstract TemplateLanguage getInheritedTemplateLanguage();
+    /**
+     * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
+     * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
+     */
+    protected abstract TemplateLanguage getDefaultTemplateLanguage();
 
     /**
-     * See {@link Configuration#setTemplateLanguage(TemplateLanguage)}
+     * Setter pair of {@link #getTemplateLanguage()}.
      */
     public void setTemplateLanguage(TemplateLanguage templateLanguage) {
         _NullArgumentException.check("templateLanguage", templateLanguage);
@@ -107,12 +125,21 @@ public abstract class MutableParsingAndProcessingConfiguration<
         return self();
     }
 
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ParsingConfiguration}).
+     */
+    public void unsetTemplateLanguage() {
+        this.templateLanguage = null;
+    }
+
+    @Override
     public boolean isTemplateLanguageSet() {
         return templateLanguage != null;
     }
 
     /**
-     * See {@link Configuration#setNamingConvention(int)}.
+     * Setter pair of {@link #getNamingConvention()}.
      */
     public void setNamingConvention(int namingConvention) {
         Configuration.validateNamingConventionValue(namingConvention);
@@ -128,15 +155,27 @@ public abstract class MutableParsingAndProcessingConfiguration<
     }
 
     /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ParsingConfiguration}).
+     */
+    public void unsetNamingConvention() {
+        this.namingConvention = null;
+    }
+
+    /**
      * The getter pair of {@link #setNamingConvention(int)}.
      */
     @Override
     public int getNamingConvention() {
          return isNamingConventionSet() ? namingConvention
-                : getInheritedNamingConvention();
+                : getDefaultNamingConvention();
     }
 
-    protected abstract int getInheritedNamingConvention();
+    /**
+     * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
+     * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
+     */
+    protected abstract int getDefaultNamingConvention();
 
     /**
      * Tells if this setting is set directly in this object or its value is inherited from the parent parsing configuration..
@@ -147,10 +186,10 @@ public abstract class MutableParsingAndProcessingConfiguration<
     }
 
     /**
-     * See {@link Configuration#setWhitespaceStripping(boolean)}.
+     * Setter pair of {@link ParsingConfiguration#getWhitespaceStripping()}.
      */
     public void setWhitespaceStripping(boolean whitespaceStripping) {
-        this.whitespaceStripping = Boolean.valueOf(whitespaceStripping);
+        this.whitespaceStripping = whitespaceStripping;
     }
 
     /**
@@ -162,15 +201,26 @@ public abstract class MutableParsingAndProcessingConfiguration<
     }
 
     /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ParsingConfiguration}).
+     */
+    public void unsetWhitespaceStripping() {
+        this.whitespaceStripping = null;
+    }
+
+    /**
      * The getter pair of {@link #getWhitespaceStripping()}.
      */
     @Override
     public boolean getWhitespaceStripping() {
-         return isWhitespaceStrippingSet() ? whitespaceStripping.booleanValue()
-                : getInheritedWhitespaceStripping();
+         return isWhitespaceStrippingSet() ? whitespaceStripping : getDefaultWhitespaceStripping();
     }
 
-    protected abstract boolean getInheritedWhitespaceStripping();
+    /**
+     * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
+     * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
+     */
+    protected abstract boolean getDefaultWhitespaceStripping();
 
     /**
      * Tells if this setting is set directly in this object or its value is inherited from the parent parsing configuration..
@@ -181,12 +231,24 @@ public abstract class MutableParsingAndProcessingConfiguration<
     }
 
     /**
-     * Sets the output format of the template; see {@link Configuration#setAutoEscapingPolicy(int)} for more.
+     * * Setter pair of {@link #getAutoEscapingPolicy()}.
      */
     public void setAutoEscapingPolicy(int autoEscapingPolicy) {
-        Configuration.validateAutoEscapingPolicyValue(autoEscapingPolicy);
+        validateAutoEscapingPolicyValue(autoEscapingPolicy);
+        this.autoEscapingPolicy = autoEscapingPolicy;
+    }
 
-        this.autoEscapingPolicy = Integer.valueOf(autoEscapingPolicy);
+    // [FM3] Use enum; won't be needed
+    static void validateAutoEscapingPolicyValue(int autoEscapingPolicy) {
+        if (autoEscapingPolicy != ParsingConfiguration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY
+                && autoEscapingPolicy != ParsingConfiguration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY
+                && autoEscapingPolicy != ParsingConfiguration.DISABLE_AUTO_ESCAPING_POLICY) {
+            throw new IllegalArgumentException(
+                    "\"tagSyntax\" can only be set to one of these: "
+                            + "Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY,"
+                            + "Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY, "
+                            + "or Configuration.DISABLE_AUTO_ESCAPING_POLICY");
+        }
     }
 
     /**
@@ -198,15 +260,26 @@ public abstract class MutableParsingAndProcessingConfiguration<
     }
 
     /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ParsingConfiguration}).
+     */
+    public void unsetAutoEscapingPolicy() {
+        this.autoEscapingPolicy = null;
+    }
+
+    /**
      * The getter pair of {@link #setAutoEscapingPolicy(int)}.
      */
     @Override
     public int getAutoEscapingPolicy() {
-         return isAutoEscapingPolicySet() ? autoEscapingPolicy.intValue()
-                : getInheritedAutoEscapingPolicy();
+         return isAutoEscapingPolicySet() ? autoEscapingPolicy : getDefaultAutoEscapingPolicy();
     }
 
-    protected abstract int getInheritedAutoEscapingPolicy();
+    /**
+     * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
+     * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
+     */
+    protected abstract int getDefaultAutoEscapingPolicy();
 
     /**
      * Tells if this setting is set directly in this object or its value is inherited from the parent parsing configuration..
@@ -217,11 +290,22 @@ public abstract class MutableParsingAndProcessingConfiguration<
     }
 
     /**
-     * Sets the output format of the template; see {@link Configuration#setOutputFormat(OutputFormat)} for more.
+     * Setter pair of {@link #getOutputFormat()}.
      */
     public void setOutputFormat(OutputFormat outputFormat) {
-        _NullArgumentException.check("outputFormat", outputFormat);
+        if (outputFormat == null) {
+            throw new _NullArgumentException(
+                    "outputFormat",
+                    "You may meant: " + UndefinedOutputFormat.class.getSimpleName() + ".INSTANCE");
+        }
         this.outputFormat = outputFormat;
+    }
+
+    /**
+     * Resets this setting to its initial state, as if it was never set.
+     */
+    public void unsetOutputFormat() {
+        this.outputFormat = null;
     }
 
     /**
@@ -232,15 +316,16 @@ public abstract class MutableParsingAndProcessingConfiguration<
         return self();
     }
 
-    /**
-     * The getter pair of {@link #setOutputFormat(OutputFormat)}.
-     */
     @Override
     public OutputFormat getOutputFormat() {
-         return isOutputFormatSet() ? outputFormat : getInheritedOutputFormat();
+         return isOutputFormatSet() ? outputFormat : getDefaultOutputFormat();
     }
 
-    protected abstract OutputFormat getInheritedOutputFormat();
+    /**
+     * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
+     * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
+     */
+    protected abstract OutputFormat getDefaultOutputFormat();
 
     /**
      * Tells if this setting is set directly in this object or its value is inherited from the parent parsing configuration..
@@ -251,10 +336,10 @@ public abstract class MutableParsingAndProcessingConfiguration<
     }
 
     /**
-     * See {@link Configuration#setRecognizeStandardFileExtensions(boolean)}.
+     * Setter pair of {@link ParsingConfiguration#getRecognizeStandardFileExtensions()}.
      */
     public void setRecognizeStandardFileExtensions(boolean recognizeStandardFileExtensions) {
-        this.recognizeStandardFileExtensions = Boolean.valueOf(recognizeStandardFileExtensions);
+        this.recognizeStandardFileExtensions = recognizeStandardFileExtensions;
     }
 
     /**
@@ -266,15 +351,26 @@ public abstract class MutableParsingAndProcessingConfiguration<
     }
 
     /**
+     * Resets this setting to its initial state, as if it was never set.
+     */
+    public void unsetRecognizeStandardFileExtensions() {
+        recognizeStandardFileExtensions = null;
+    }
+
+    /**
      * Getter pair of {@link #setRecognizeStandardFileExtensions(boolean)}.
      */
     @Override
     public boolean getRecognizeStandardFileExtensions() {
-         return isRecognizeStandardFileExtensionsSet() ? recognizeStandardFileExtensions.booleanValue()
-                : getInheritedRecognizeStandardFileExtensions();
+         return isRecognizeStandardFileExtensionsSet() ? recognizeStandardFileExtensions
+                : getDefaultRecognizeStandardFileExtensions();
     }
 
-    protected abstract boolean getInheritedRecognizeStandardFileExtensions();
+    /**
+     * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
+     * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
+     */
+    protected abstract boolean getDefaultRecognizeStandardFileExtensions();
 
     /**
      * Tells if this setting is set directly in this object or its value is inherited from the parent parsing configuration..
@@ -286,10 +382,14 @@ public abstract class MutableParsingAndProcessingConfiguration<
 
     @Override
     public Charset getSourceEncoding() {
-         return isSourceEncodingSet() ? sourceEncoding : getInheritedSourceEncoding();
+         return isSourceEncodingSet() ? sourceEncoding : getDefaultSourceEncoding();
     }
 
-    protected abstract Charset getInheritedSourceEncoding();
+    /**
+     * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
+     * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
+     */
+    protected abstract Charset getDefaultSourceEncoding();
 
     /**
      * The charset to be used when reading the template "file" that the {@link TemplateLoader} returns as binary
@@ -308,16 +408,30 @@ public abstract class MutableParsingAndProcessingConfiguration<
         return self();
     }
 
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ParsingConfiguration}).
+     */
+    public void unsetSourceEncoding() {
+        this.sourceEncoding = null;
+    }
+
+    @Override
     public boolean isSourceEncodingSet() {
         return sourceEncoding != null;
     }
 
     /**
-     * See {@link Configuration#setTabSize(int)}.
-     *
-     * @since 2.3.25
+     * Setter pair of {@link #getTabSize()}.
      */
     public void setTabSize(int tabSize) {
+        if (tabSize < 1) {
+            throw new IllegalArgumentException("\"tabSize\" must be at least 1, but was " + tabSize);
+        }
+        // To avoid integer overflows:
+        if (tabSize > 256) {
+            throw new IllegalArgumentException("\"tabSize\" can't be more than 256, but was " + tabSize);
+        }
         this.tabSize = Integer.valueOf(tabSize);
     }
 
@@ -330,16 +444,23 @@ public abstract class MutableParsingAndProcessingConfiguration<
     }
 
     /**
-     * Getter pair of {@link #setTabSize(int)}.
-     *
-     * @since 2.3.25
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ParsingConfiguration}).
      */
-    @Override
-    public int getTabSize() {
-         return isTabSizeSet() ? tabSize.intValue() : getInheritedTabSize();
+    public void unsetTabSize() {
+        this.tabSize = null;
     }
 
-    protected abstract int getInheritedTabSize();
+    @Override
+    public int getTabSize() {
+         return isTabSizeSet() ? tabSize.intValue() : getDefaultTabSize();
+    }
+
+    /**
+     * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
+     * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
+     */
+    protected abstract int getDefaultTabSize();
 
     /**
      * Tells if this setting is set directly in this object or its value is inherited from the parent parsing configuration..

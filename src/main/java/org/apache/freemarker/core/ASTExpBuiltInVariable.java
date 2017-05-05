@@ -123,8 +123,8 @@ final class ASTExpBuiltInVariable extends ASTExpression {
             int shownNamingConvention;
             {
                 int namingConvention = tokenManager.namingConvention;
-                shownNamingConvention = namingConvention != Configuration.AUTO_DETECT_NAMING_CONVENTION
-                        ? namingConvention : Configuration.LEGACY_NAMING_CONVENTION /* [2.4] CAMEL_CASE */; 
+                shownNamingConvention = namingConvention != ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION
+                        ? namingConvention : ParsingConfiguration.LEGACY_NAMING_CONVENTION /* [2.4] CAMEL_CASE */;
             }
             
             {
@@ -146,9 +146,9 @@ final class ASTExpBuiltInVariable extends ASTExpression {
             boolean first = true;
             for (final String correctName : SPEC_VAR_NAMES) {
                 int correctNameNamingConvention = _StringUtil.getIdentifierNamingConvention(correctName);
-                if (shownNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION
-                        ? correctNameNamingConvention != Configuration.LEGACY_NAMING_CONVENTION
-                        : correctNameNamingConvention != Configuration.CAMEL_CASE_NAMING_CONVENTION) {
+                if (shownNamingConvention == ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION
+                        ? correctNameNamingConvention != ParsingConfiguration.LEGACY_NAMING_CONVENTION
+                        : correctNameNamingConvention != ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION) {
                     if (first) {
                         first = false;
                     } else {

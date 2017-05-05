@@ -29,6 +29,7 @@ import org.apache.commons.lang.SystemUtils;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +40,7 @@ public class FileTemplateLoaderTest {
     
     private File templateRootDir;
     
-    private Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+    private Configuration cfg;
     
     @Before
     public void setup() throws IOException {
@@ -51,8 +52,8 @@ public class FileTemplateLoaderTest {
         }
         File tFile = new File(sub2Dir, "t.ftl");
         FileUtils.write(tFile, "foo");
-        
-        cfg.setDirectoryForTemplateLoading(templateRootDir);
+
+        cfg = new TestConfigurationBuilder().templateLoader(new FileTemplateLoader(templateRootDir)).build();
     }
     
     @Test

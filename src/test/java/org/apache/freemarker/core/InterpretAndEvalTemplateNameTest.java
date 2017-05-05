@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.test.TemplateTest;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 /**
@@ -48,8 +49,8 @@ public class InterpretAndEvalTemplateNameTest extends TemplateTest {
                     + "i{<@[r'" + getTemplateNames + " {<#include \"a.ftl\">','named_interpreted']?interpret />}}");
             tl.putTemplate("sub/a.ftl", "In sub/a.ftl, " + getTemplateNames);
             tl.putTemplate("a.ftl", "In a.ftl");
-            
-            getConfiguration().setTemplateLoader(tl);
+
+            setConfiguration(new TestConfigurationBuilder().templateLoader(tl).build());
             
             assertOutputForNamed("main.ftl",
                     "c=main.ftl, m=main.ftl "

@@ -22,7 +22,6 @@ package org.apache.freemarker.core;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -56,7 +55,6 @@ import org.apache.freemarker.core.templateresolver.NotMatcher;
 import org.apache.freemarker.core.templateresolver.OrMatcher;
 import org.apache.freemarker.core.templateresolver.PathGlobMatcher;
 import org.apache.freemarker.core.templateresolver.PathRegexMatcher;
-import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
 import org.apache.freemarker.core.util.FTLUtil;
@@ -73,7 +71,7 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 
 /**
  * Extended by FreeMarker core classes (not by you) that support specifying {@link ProcessingConfiguration} setting
- * values. <b>New abstract methods may be added anytime in future FreeMarker versions, so don't try to implement this
+ * values. <b>New abstract methods may be added any time in future FreeMarker versions, so don't try to implement this
  * interface yourself!</b>
  */
 public abstract class MutableProcessingConfiguration<SelfT extends MutableProcessingConfiguration<SelfT>>
@@ -337,48 +335,27 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     private Map<Object, Object> customAttributes;
 
     /**
-     * Called by the {@link Configuration} constructor, initializes the fields to their {@link Configuration}-level
-     * default without marking them as set.
-     */
-    // TODO Move to Configuration(Builder) constructor
-    MutableProcessingConfiguration(Version iciForDefaults) {
-        _CoreAPI.checkVersionNotNullAndSupported(iciForDefaults);
-        locale = Configuration.getDefaultLocale();
-        timeZone = Configuration.getDefaultTimeZone();
-        sqlDateAndTimeTimeZone = null;
-        sqlDateAndTimeTimeZoneSet = true;
-        numberFormat = "number";
-        timeFormat = "";
-        dateFormat = "";
-        dateTimeFormat = "";
-        templateExceptionHandler = Configuration.getDefaultTemplateExceptionHandler();
-        arithmeticEngine = BigDecimalArithmeticEngine.INSTANCE;
-        objectWrapper = Configuration.getDefaultObjectWrapper(iciForDefaults);
-        autoFlush = Boolean.TRUE;
-        newBuiltinClassResolver = TemplateClassResolver.UNRESTRICTED_RESOLVER;
-        showErrorTips = Boolean.TRUE;
-        apiBuiltinEnabled = Boolean.FALSE;
-        logTemplateExceptions = Boolean.FALSE;
-        // outputEncoding and urlEscapingCharset defaults to null,
-        // which means "not specified"
-        setBooleanFormat(TemplateBooleanFormat.C_TRUE_FALSE);
-        customDateFormats = Collections.emptyMap();
-        customNumberFormats = Collections.emptyMap();
-        outputEncodingSet = true;
-        urlEscapingCharsetSet = true;
-
-        lazyImports = false;
-        lazyAutoImportsSet = true;
-        initAutoImportsMap();
-        initAutoIncludesList();
-    }
-
-    /**
      * Creates a new instance. Normally you do not need to use this constructor,
      * as you don't use <code>MutableProcessingConfiguration</code> directly, but its subclasses.
      */
     protected MutableProcessingConfiguration() {
         // Empty
+    }
+
+    @Override
+    public Locale getLocale() {
+         return isLocaleSet() ? locale : getDefaultLocale();
+    }
+
+    /**
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     */
+    protected abstract Locale getDefaultLocale();
+
+    @Override
+    public boolean isLocaleSet() {
+        return locale != null;
     }
 
     /**
@@ -397,21 +374,12 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    @Override
-    public Locale getLocale() {
-         return isLocaleSet() ? locale : getInheritedLocale();
-    }
-
-    protected abstract Locale getInheritedLocale();
-
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
      */
-    @Override
-    public boolean isLocaleSet() {
-        return locale != null;
+    public void unsetLocale() {
+        locale = null;
     }
 
     /**
@@ -429,19 +397,25 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         setTimeZone(value);
         return self();
     }
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetTimeZone() {
+        this.timeZone = null;
+    }
 
     @Override
     public TimeZone getTimeZone() {
-         return isTimeZoneSet() ? timeZone : getInheritedTimeZone();
+         return isTimeZoneSet() ? timeZone : getDefaultTimeZone();
     }
 
-    protected abstract TimeZone getInheritedTimeZone();
-
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
      */
+    protected abstract TimeZone getDefaultTimeZone();
+
     @Override
     public boolean isTimeZoneSet() {
         return timeZone != null;
@@ -463,20 +437,28 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetSQLDateAndTimeTimeZone() {
+        sqlDateAndTimeTimeZone = null;
+        sqlDateAndTimeTimeZoneSet = false;
+    }
+
     @Override
     public TimeZone getSQLDateAndTimeTimeZone() {
         return sqlDateAndTimeTimeZoneSet
                 ? sqlDateAndTimeTimeZone
-                : getInheritedSQLDateAndTimeTimeZone();
+                : getDefaultSQLDateAndTimeTimeZone();
     }
 
-    protected abstract TimeZone getInheritedSQLDateAndTimeTimeZone();
-
     /**
-     * Tells if this setting is set directly in this object or its value is inherited from a parent processing configuration.
-     *  
-     * @since 2.3.24
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
      */
+    protected abstract TimeZone getDefaultSQLDateAndTimeTimeZone();
+
     @Override
     public boolean isSQLDateAndTimeTimeZoneSet() {
         return sqlDateAndTimeTimeZoneSet;
@@ -498,18 +480,25 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    @Override
-    public String getNumberFormat() {
-         return isNumberFormatSet() ? numberFormat : getInheritedNumberFormat();
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetNumberFormat() {
+        numberFormat = null;
     }
 
-    protected abstract String getInheritedNumberFormat();
+    @Override
+    public String getNumberFormat() {
+         return isNumberFormatSet() ? numberFormat : getDefaultNumberFormat();
+    }
 
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
      */
+    protected abstract String getDefaultNumberFormat();
+
     @Override
     public boolean isNumberFormatSet() {
         return numberFormat != null;
@@ -517,10 +506,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     
     @Override
     public Map<String, TemplateNumberFormatFactory> getCustomNumberFormats() {
-         return isCustomNumberFormatsSet() ? customNumberFormats : getInheritedCustomNumberFormats();
+         return isCustomNumberFormatsSet() ? customNumberFormats : getDefaultCustomNumberFormats();
     }
 
-    protected abstract Map<String, TemplateNumberFormatFactory> getInheritedCustomNumberFormats();
+    protected abstract Map<String, TemplateNumberFormatFactory> getDefaultCustomNumberFormats();
 
     /**
      * Setter pair of {@link #getCustomNumberFormats()}. Note that custom number formats are get through
@@ -543,6 +532,14 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     public SelfT customNumberFormats(Map<String, TemplateNumberFormatFactory> value) {
         setCustomNumberFormats(value);
         return self();
+    }
+
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetCustomNumberFormats() {
+        customNumberFormats = null;
     }
 
     private void validateFormatNames(Set<String> keySet) {
@@ -568,13 +565,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         }
     }
 
-    /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
-     *  
-     * @since 2.3.24
-     */
     @Override
     public boolean isCustomNumberFormatsSet() {
         return customNumberFormats != null;
@@ -589,10 +579,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                 return r;
             }
         }
-        return getInheritedCustomNumberFormat(name);
+        return getDefaultCustomNumberFormat(name);
     }
 
-    protected abstract TemplateNumberFormatFactory getInheritedCustomNumberFormat(String name);
+    protected abstract TemplateNumberFormatFactory getDefaultCustomNumberFormat(String name);
 
     /**
      * Setter pair of {@link #getBooleanFormat()}.
@@ -617,21 +607,26 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         setBooleanFormat(value);
         return self();
     }
+
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetBooleanFormat() {
+        booleanFormat = null;
+    }
     
     @Override
     public String getBooleanFormat() {
-         return isBooleanFormatSet() ? booleanFormat : getInheritedBooleanFormat();
+         return isBooleanFormatSet() ? booleanFormat : getDefaultBooleanFormat();
     }
 
-    protected abstract String getInheritedBooleanFormat();
-
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
-     *  
-     * @since 2.3.24
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
      */
+    protected abstract String getDefaultBooleanFormat();
+
     @Override
     public boolean isBooleanFormatSet() {
         return booleanFormat != null;
@@ -653,18 +648,25 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    @Override
-    public String getTimeFormat() {
-         return isTimeFormatSet() ? timeFormat : getInheritedTimeFormat();
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetTimeFormat() {
+        timeFormat = null;
     }
 
-    protected abstract String getInheritedTimeFormat();
+    @Override
+    public String getTimeFormat() {
+         return isTimeFormatSet() ? timeFormat : getDefaultTimeFormat();
+    }
 
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
      */
+    protected abstract String getDefaultTimeFormat();
+
     @Override
     public boolean isTimeFormatSet() {
         return timeFormat != null;
@@ -686,18 +688,25 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    @Override
-    public String getDateFormat() {
-         return isDateFormatSet() ? dateFormat : getInheritedDateFormat();
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetDateFormat() {
+        dateFormat = null;
     }
 
-    protected abstract String getInheritedDateFormat();
+    @Override
+    public String getDateFormat() {
+         return isDateFormatSet() ? dateFormat : getDefaultDateFormat();
+    }
 
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
      */
+    protected abstract String getDefaultDateFormat();
+
     @Override
     public boolean isDateFormatSet() {
         return dateFormat != null;
@@ -719,18 +728,25 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    @Override
-    public String getDateTimeFormat() {
-         return isDateTimeFormatSet() ? dateTimeFormat : getInheritedDateTimeFormat();
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetDateTimeFormat() {
+        this.dateTimeFormat = null;
     }
 
-    protected abstract String getInheritedDateTimeFormat();
+    @Override
+    public String getDateTimeFormat() {
+         return isDateTimeFormatSet() ? dateTimeFormat : getDefaultDateTimeFormat();
+    }
 
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
      */
+    protected abstract String getDefaultDateTimeFormat();
+
     @Override
     public boolean isDateTimeFormatSet() {
         return dateTimeFormat != null;
@@ -738,10 +754,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     @Override
     public Map<String, TemplateDateFormatFactory> getCustomDateFormats() {
-         return isCustomDateFormatsSet() ? customDateFormats : getInheritedCustomDateFormats();
+         return isCustomDateFormatsSet() ? customDateFormats : getDefaultCustomDateFormats();
     }
 
-    protected abstract Map<String, TemplateDateFormatFactory> getInheritedCustomDateFormats();
+    protected abstract Map<String, TemplateDateFormatFactory> getDefaultCustomDateFormats();
 
     /**
      * Setter pair of {@link #getCustomDateFormat(String)}.
@@ -761,10 +777,13 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
      */
+    public void unsetCustomDateFormats() {
+        this.customDateFormats = null;
+    }
+
     @Override
     public boolean isCustomDateFormatsSet() {
         return customDateFormats != null;
@@ -779,10 +798,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                 return r;
             }
         }
-        return getInheritedCustomDateFormat(name);
+        return getDefaultCustomDateFormat(name);
     }
 
-    protected abstract TemplateDateFormatFactory getInheritedCustomDateFormat(String name);
+    protected abstract TemplateDateFormatFactory getDefaultCustomDateFormat(String name);
 
     /**
      * Setter pair of {@link #getTemplateExceptionHandler()}
@@ -800,19 +819,26 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetTemplateExceptionHandler() {
+        templateExceptionHandler = null;
+    }
+
     @Override
     public TemplateExceptionHandler getTemplateExceptionHandler() {
          return isTemplateExceptionHandlerSet()
-                ? templateExceptionHandler : getInheritedTemplateExceptionHandler();
+                ? templateExceptionHandler : getDefaultTemplateExceptionHandler();
     }
 
-    protected abstract TemplateExceptionHandler getInheritedTemplateExceptionHandler();
-
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
      */
+    protected abstract TemplateExceptionHandler getDefaultTemplateExceptionHandler();
+
     @Override
     public boolean isTemplateExceptionHandlerSet() {
         return templateExceptionHandler != null;
@@ -834,18 +860,25 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    @Override
-    public ArithmeticEngine getArithmeticEngine() {
-         return isArithmeticEngineSet() ? arithmeticEngine : getInheritedArithmeticEngine();
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetArithmeticEngine() {
+        this.arithmeticEngine = null;
     }
 
-    protected abstract ArithmeticEngine getInheritedArithmeticEngine();
+    @Override
+    public ArithmeticEngine getArithmeticEngine() {
+         return isArithmeticEngineSet() ? arithmeticEngine : getDefaultArithmeticEngine();
+    }
 
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
      */
+    protected abstract ArithmeticEngine getDefaultArithmeticEngine();
+
     @Override
     public boolean isArithmeticEngineSet() {
         return arithmeticEngine != null;
@@ -860,6 +893,14 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetObjectWrapper() {
+        objectWrapper = null;
+    }
+
+    /**
      * Fluent API equivalent of {@link #setObjectWrapper(ObjectWrapper)}
      */
     public SelfT objectWrapper(ObjectWrapper value) {
@@ -870,16 +911,15 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     @Override
     public ObjectWrapper getObjectWrapper() {
          return isObjectWrapperSet()
-                ? objectWrapper : getInheritedObjectWrapper();
+                ? objectWrapper : getDefaultObjectWrapper();
     }
 
-    protected abstract ObjectWrapper getInheritedObjectWrapper();
-
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
      */
+    protected abstract ObjectWrapper getDefaultObjectWrapper();
+
     @Override
     public boolean isObjectWrapperSet() {
         return objectWrapper != null;
@@ -901,20 +941,28 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetOutputEncoding() {
+        this.outputEncoding = null;
+        outputEncodingSet = false;
+    }
+
     @Override
     public Charset getOutputEncoding() {
         return isOutputEncodingSet()
                 ? outputEncoding
-                : getInheritedOutputEncoding();
+                : getDefaultOutputEncoding();
     }
 
-    protected abstract Charset getInheritedOutputEncoding();
-
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
      */
+    protected abstract Charset getDefaultOutputEncoding();
+
     @Override
     public boolean isOutputEncodingSet() {
         return outputEncodingSet;
@@ -936,18 +984,26 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    @Override
-    public Charset getURLEscapingCharset() {
-        return isURLEscapingCharsetSet() ? urlEscapingCharset : getInheritedURLEscapingCharset();
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetURLEscapingCharset() {
+        this.urlEscapingCharset = null;
+        urlEscapingCharsetSet = false;
     }
 
-    protected abstract Charset getInheritedURLEscapingCharset();
+    @Override
+    public Charset getURLEscapingCharset() {
+        return isURLEscapingCharsetSet() ? urlEscapingCharset : getDefaultURLEscapingCharset();
+    }
 
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
      */
+    protected abstract Charset getDefaultURLEscapingCharset();
+
     @Override
     public boolean isURLEscapingCharsetSet() {
         return urlEscapingCharsetSet;
@@ -969,21 +1025,26 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetNewBuiltinClassResolver() {
+        this.newBuiltinClassResolver = null;
+    }
+
     @Override
     public TemplateClassResolver getNewBuiltinClassResolver() {
          return isNewBuiltinClassResolverSet()
-                ? newBuiltinClassResolver : getInheritedNewBuiltinClassResolver();
+                ? newBuiltinClassResolver : getDefaultNewBuiltinClassResolver();
     }
 
-    protected abstract TemplateClassResolver getInheritedNewBuiltinClassResolver();
-
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
-     *  
-     * @since 2.3.24
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
      */
+    protected abstract TemplateClassResolver getDefaultNewBuiltinClassResolver();
+
     @Override
     public boolean isNewBuiltinClassResolverSet() {
         return newBuiltinClassResolver != null;
@@ -993,7 +1054,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * Setter pair of {@link #getAutoFlush()}
      */
     public void setAutoFlush(boolean autoFlush) {
-        this.autoFlush = Boolean.valueOf(autoFlush);
+        this.autoFlush = autoFlush;
     }
 
     /**
@@ -1004,20 +1065,25 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    @Override
-    public boolean getAutoFlush() {
-         return isAutoFlushSet() ? autoFlush.booleanValue() : getInheritedAutoFlush();
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetAutoFlush() {
+        this.autoFlush = null;
     }
 
-    protected abstract boolean getInheritedAutoFlush();
+    @Override
+    public boolean getAutoFlush() {
+         return isAutoFlushSet() ? autoFlush : getDefaultAutoFlush();
+    }
 
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
-     *  
-     * @since 2.3.24
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
      */
+    protected abstract boolean getDefaultAutoFlush();
+
     @Override
     public boolean isAutoFlushSet() {
         return autoFlush != null;
@@ -1027,7 +1093,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * Setter pair of {@link #getShowErrorTips()}
      */
     public void setShowErrorTips(boolean showTips) {
-        showErrorTips = Boolean.valueOf(showTips);
+        showErrorTips = showTips;
     }
 
     /**
@@ -1038,18 +1104,25 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    @Override
-    public boolean getShowErrorTips() {
-         return isShowErrorTipsSet() ? showErrorTips : getInheritedShowErrorTips();
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetShowErrorTips() {
+        showErrorTips = null;
     }
 
-    protected abstract boolean getInheritedShowErrorTips();
+    @Override
+    public boolean getShowErrorTips() {
+         return isShowErrorTipsSet() ? showErrorTips : getDefaultShowErrorTips();
+    }
 
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
      */
+    protected abstract boolean getDefaultShowErrorTips();
+
     @Override
     public boolean isShowErrorTipsSet() {
         return showErrorTips != null;
@@ -1070,23 +1143,44 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    @Override
-    public boolean getAPIBuiltinEnabled() {
-         return isAPIBuiltinEnabledSet() ? apiBuiltinEnabled : getInheritedAPIBuiltinEnabled();
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetAPIBuiltinEnabled() {
+        apiBuiltinEnabled = null;
     }
 
-    protected abstract boolean getInheritedAPIBuiltinEnabled();
+    @Override
+    public boolean getAPIBuiltinEnabled() {
+         return isAPIBuiltinEnabledSet() ? apiBuiltinEnabled : getDefaultAPIBuiltinEnabled();
+    }
 
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
-     *  
-     * @since 2.3.24
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
      */
+    protected abstract boolean getDefaultAPIBuiltinEnabled();
+
     @Override
     public boolean isAPIBuiltinEnabledSet() {
         return apiBuiltinEnabled != null;
+    }
+
+    @Override
+    public boolean getLogTemplateExceptions() {
+         return isLogTemplateExceptionsSet() ? logTemplateExceptions : getDefaultLogTemplateExceptions();
+    }
+
+    /**
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     */
+    protected abstract boolean getDefaultLogTemplateExceptions();
+
+    @Override
+    public boolean isLogTemplateExceptionsSet() {
+        return logTemplateExceptions != null;
     }
 
     /**
@@ -1096,29 +1190,32 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         logTemplateExceptions = value;
     }
 
-    @Override
-    public boolean getLogTemplateExceptions() {
-         return isLogTemplateExceptionsSet() ? logTemplateExceptions : getInheritedLogTemplateExceptions();
+    /**
+     * Fluent API equivalent of {@link #setLogTemplateExceptions(boolean)}
+     */
+    public SelfT logTemplateExceptions(boolean value) {
+        setLogTemplateExceptions(value);
+        return self();
     }
-
-    protected abstract boolean getInheritedLogTemplateExceptions();
 
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
      */
-    @Override
-    public boolean isLogTemplateExceptionsSet() {
-        return logTemplateExceptions != null;
-    }
-    
-    @Override
-    public boolean getLazyImports() {
-         return isLazyImportsSet() ? lazyImports : getInheritedLazyImports();
+    public void unsetLogTemplateExceptions() {
+        logTemplateExceptions = null;
     }
 
-    protected abstract boolean getInheritedLazyImports();
+    @Override
+    public boolean getLazyImports() {
+         return isLazyImportsSet() ? lazyImports : getDefaultLazyImports();
+    }
+
+    /**
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     */
+    protected abstract boolean getDefaultLazyImports();
 
     /**
      * Setter pair of {@link #getLazyImports()}
@@ -1128,21 +1225,36 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
+     * Fluent API equivalent of {@link #setLazyImports(boolean)}
      */
+    public SelfT lazyImports(boolean lazyImports) {
+        setLazyImports(lazyImports);
+        return  self();
+    }
+
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetLazyImports() {
+        this.lazyImports = null;
+    }
+
     @Override
     public boolean isLazyImportsSet() {
         return lazyImports != null;
     }
-    
+
     @Override
     public Boolean getLazyAutoImports() {
-        return isLazyAutoImportsSet() ? lazyAutoImports : getInheritedLazyAutoImports();
+        return isLazyAutoImportsSet() ? lazyAutoImports : getDefaultLazyAutoImports();
     }
 
-    protected abstract Boolean getInheritedLazyAutoImports();
+    /**
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     */
+    protected abstract Boolean getDefaultLazyAutoImports();
 
     /**
      * Setter pair of {@link #getLazyAutoImports()}
@@ -1151,12 +1263,24 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         this.lazyAutoImports = lazyAutoImports;
         lazyAutoImportsSet = true;
     }
-    
+
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
+     * Fluent API equivalent of {@link #setLazyAutoImports(Boolean)}
      */
+    public SelfT lazyAutoImports(Boolean lazyAutoImports) {
+        setLazyAutoImports(lazyAutoImports);
+        return self();
+    }
+
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetLazyAutoImports() {
+        lazyAutoImports = null;
+        lazyAutoImportsSet = false;
+    }
+
     @Override
     public boolean isLazyAutoImportsSet() {
         return lazyAutoImportsSet;
@@ -1219,21 +1343,34 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
             addAutoImport((String) key, (String) value);
         }
     }
-    
-    @Override
-    public Map<String, String> getAutoImports() {
-         return isAutoImportsSet() ? autoImports : getInheritedAutoImports();
-    }
-
-    protected abstract Map<String,String> getInheritedAutoImports();
 
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
-     * 
-     * @since 2.3.25
+     * Fluent API equivalent of {@link #setAutoImports(Map)}
      */
+    public SelfT autoImports(Map map) {
+        setAutoImports(map);
+        return self();
+    }
+
+     /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetAutoImports() {
+        autoImports = null;
+    }
+
+    @Override
+    public Map<String, String> getAutoImports() {
+         return isAutoImportsSet() ? autoImports : getDefaultAutoImports();
+    }
+
+    /**
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     */
+    protected abstract Map<String,String> getDefaultAutoImports();
+
     @Override
     public boolean isAutoImportsSet() {
         return autoImports != null;
@@ -1274,18 +1411,25 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         }
     }
 
-    @Override
-    public List<String> getAutoIncludes() {
-         return isAutoIncludesSet() ? autoIncludes : getInheritedAutoIncludes();
+    /**
+     * Fluent API equivalent of {@link #setAutoIncludes(List)}
+     */
+    public SelfT autoIncludes(List templateNames) {
+        setAutoIncludes(templateNames);
+        return self();
     }
 
-    protected abstract List<String> getInheritedAutoIncludes();
+    @Override
+    public List<String> getAutoIncludes() {
+         return isAutoIncludesSet() ? autoIncludes : getDefaultAutoIncludes();
+    }
 
     /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent processing
-     * configuration or throws a {@link SettingValueNotSetException}.
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
      */
+    protected abstract List<String> getDefaultAutoIncludes();
+
     @Override
     public boolean isAutoIncludesSet() {
         return autoIncludes != null;
@@ -1402,22 +1546,22 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       <br>String value: {@code "true"}, {@code "false"}, {@code "y"},  etc.
      *       
      *   <li><p>{@code "auto_import"}:
-     *       See {@link Configuration#setAutoImports(Map)}
+     *       See {@link Configuration#getAutoImports()}
      *       <br>String value is something like:
      *       <br>{@code /lib/form.ftl as f, /lib/widget as w, "/lib/odd name.ftl" as odd}
      *       
      *   <li><p>{@code "auto_include"}: Sets the list of auto-includes.
-     *       See {@link Configuration#setAutoIncludes(List)}
+     *       See {@link Configuration#getAutoIncludes()}
      *       <br>String value is something like:
      *       <br>{@code /include/common.ftl, "/include/evil name.ftl"}
      *       
      *   <li><p>{@code "lazy_auto_imports"}:
-     *       See {@link Configuration#setLazyAutoImports(Boolean)}.
+     *       See {@link Configuration#getLazyAutoImports()}.
      *       <br>String value: {@code "true"}, {@code "false"} (also the equivalents: {@code "yes"}, {@code "no"},
      *       {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}), case insensitive. Also can be {@code "null"}.
 
      *   <li><p>{@code "lazy_imports"}:
-     *       See {@link Configuration#setLazyImports(boolean)}.
+     *       See {@link Configuration#getLazyImports()}.
      *       <br>String value: {@code "true"}, {@code "false"} (also the equivalents: {@code "yes"}, {@code "no"},
      *       {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}), case insensitive.
      *       
@@ -1490,43 +1634,43 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * <p>{@link Configuration} (a subclass of {@link MutableProcessingConfiguration}) also understands these:</p>
      * <ul>
      *   <li><p>{@code "auto_escaping"}:
-     *       See {@link Configuration#setAutoEscapingPolicy(int)}
+     *       See {@link Configuration#getAutoEscapingPolicy()}
      *       <br>String value: {@code "enable_if_default"} or {@code "enableIfDefault"} for
-     *       {@link Configuration#ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY},
+     *       {@link ParsingConfiguration#ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY},
      *       {@code "enable_if_supported"} or {@code "enableIfSupported"} for
-     *       {@link Configuration#ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY}
-     *       {@code "disable"} for {@link Configuration#DISABLE_AUTO_ESCAPING_POLICY}.
+     *       {@link ParsingConfiguration#ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY}
+     *       {@code "disable"} for {@link ParsingConfiguration#DISABLE_AUTO_ESCAPING_POLICY}.
      *       
      *   <li><p>{@code "sourceEncoding"}:
-     *       See {@link Configuration#setSourceEncoding(Charset)}; since 2.3.26 also accepts value "JVM default"
+     *       See {@link Configuration#getSourceEncoding()}; since 2.3.26 also accepts value "JVM default"
      *       (not case sensitive) to set the Java environment default value.
      *       <br>As the default value is the system default, which can change
      *       from one server to another, <b>you should always set this!</b>
      *       
      *   <li><p>{@code "localized_lookup"}:
-     *       See {@link Configuration#setLocalizedLookup}.
+     *       See {@link Configuration#getLocalizedLookup()}.
      *       <br>String value: {@code "true"}, {@code "false"} (also the equivalents: {@code "yes"}, {@code "no"},
      *       {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}).
      *       ASTDirCase insensitive.
      *       
      *   <li><p>{@code "output_format"}:
-     *       See {@link Configuration#setOutputFormat(OutputFormat)}.
+     *       See {@link ParsingConfiguration#getOutputFormat()}.
      *       <br>String value: {@code "default"} (case insensitive) for the default, or an
      *       <a href="#fm_obe">object builder expression</a> that gives an {@link OutputFormat}, for example
      *       {@code HTMLOutputFormat} or {@code XMLOutputFormat}.
      *       
      *   <li><p>{@code "registered_custom_output_formats"}:
-     *       See {@link Configuration#setRegisteredCustomOutputFormats(Collection)}.
+     *       See {@link Configuration#getRegisteredCustomOutputFormats()}.
      *       <br>String value: an <a href="#fm_obe">object builder expression</a> that gives a {@link List} of
      *       {@link OutputFormat}-s.
      *       Example: {@code [com.example.MyOutputFormat(), com.example.MyOtherOutputFormat()]}
      *       
      *   <li><p>{@code "whitespace_stripping"}:
-     *       See {@link Configuration#setWhitespaceStripping}.
+     *       See {@link ParsingConfiguration#getWhitespaceStripping()}.
      *       <br>String value: {@code "true"}, {@code "false"}, {@code yes}, etc.
      *       
      *   <li><p>{@code "cache_storage"}:
-     *       See {@link Configuration#setCacheStorage}.
+     *       See {@link Configuration#getCacheStorage()}.
      *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
      *       expression</a>.
      *       If the value does not contain dot,
@@ -1549,48 +1693,48 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       
      *   <li><p>{@code "template_update_delay"}:
      *       Template update delay in <b>seconds</b> (not in milliseconds) if no unit is specified; see
-     *       {@link Configuration#setTemplateUpdateDelayMilliseconds(long)} for more.
+     *       {@link Configuration#getTemplateUpdateDelayMilliseconds()} for more.
      *       <br>String value: Valid positive integer, optionally followed by a time unit (recommended). The default
      *       unit is seconds. It's strongly recommended to specify the unit for clarity, like in "500 ms" or "30 s".
      *       Supported units are: "s" (seconds), "ms" (milliseconds), "m" (minutes), "h" (hours). The whitespace between
      *       the unit and the number is optional. Units are only supported since 2.3.23.
      *       
      *   <li><p>{@code "tag_syntax"}:
-     *       See {@link Configuration#setTagSyntax(int)}.
+     *       See {@link ParsingConfiguration#getTagSyntax()}.
      *       <br>String value: Must be one of
      *       {@code "auto_detect"}, {@code "angle_bracket"}, and {@code "square_bracket"}. 
      *       
      *   <li><p>{@code "naming_convention"}:
-     *       See {@link Configuration#setNamingConvention(int)}.
+     *       See {@link ParsingConfiguration#getNamingConvention()}.
      *       <br>String value: Must be one of
      *       {@code "auto_detect"}, {@code "legacy"}, and {@code "camel_case"}.
      *       
      *   <li><p>{@code "incompatible_improvements"}:
-     *       See {@link Configuration#setIncompatibleImprovements(Version)}.
+     *       See {@link Configuration#getIncompatibleImprovements()}.
      *       <br>String value: version number like {@code 2.3.20}.
      *       
      *   <li><p>{@code "recognize_standard_file_extensions"}:
-     *       See {@link Configuration#setRecognizeStandardFileExtensions(boolean)}.
+     *       See {@link Configuration#getRecognizeStandardFileExtensions()}.
      *       <br>String value: {@code "default"} (case insensitive) for the default, or {@code "true"}, {@code "false"},
      *       {@code yes}, etc.
      *       
      *   <li><p>{@code "template_configurations"}:
-     *       See: {@link Configuration#setTemplateConfigurations(org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory)}.
+     *       See: {@link Configuration#getTemplateConfigurations()}.
      *       <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>,
      *       can be {@code null}.
      *       
      *   <li><p>{@code "template_loader"}:
-     *       See: {@link Configuration#setTemplateLoader(TemplateLoader)}.
+     *       See: {@link Configuration#getTemplateLoader()}.
      *       <br>String value: {@code "default"} (case insensitive) for the default, or else interpreted as an
      *       <a href="#fm_obe">object builder expression</a>. {@code "null"} is also allowed.
      *       
      *   <li><p>{@code "template_lookup_strategy"}:
-     *       See: {@link Configuration#setTemplateLookupStrategy(org.apache.freemarker.core.templateresolver.TemplateLookupStrategy)}.
+     *       See: {@link Configuration#getTemplateLookupStrategy()}.
      *       <br>String value: {@code "default"} (case insensitive) for the default, or else interpreted as an
      *       <a href="#fm_obe">object builder expression</a>.
      *       
      *   <li><p>{@code "template_name_format"}:
-     *       See: {@link Configuration#setTemplateNameFormat(org.apache.freemarker.core.templateresolver.TemplateNameFormat)}.
+     *       See: {@link Configuration#getTemplateNameFormat()}.
      *       <br>String value: {@code "default"} (case insensitive) for the default, {@code "default_2_3_0"}
      *       for {@link DefaultTemplateNameFormatFM2#INSTANCE}, {@code "default_2_4_0"} for
      *       {@link DefaultTemplateNameFormat#INSTANCE}.
@@ -1743,8 +1887,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                     } else if ("rethrow".equalsIgnoreCase(value)) {
                         setTemplateExceptionHandler(
                                 TemplateExceptionHandler.RETHROW_HANDLER);
-                    } else if (DEFAULT_VALUE.equalsIgnoreCase(value) && this instanceof Configuration) {
-                        ((Configuration) this).unsetTemplateExceptionHandler();
+                    } else if (DEFAULT_VALUE.equalsIgnoreCase(value)
+                            && this instanceof Configuration.ExtendableBuilder) {
+                        unsetTemplateExceptionHandler();
                     } else {
                         throw new ConfigurationSettingValueException(
                                 name, value,
@@ -1770,12 +1915,14 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                 }
             } else if (OBJECT_WRAPPER_KEY_SNAKE_CASE.equals(name) || OBJECT_WRAPPER_KEY_CAMEL_CASE.equals(name)) {
                 if (DEFAULT_VALUE.equalsIgnoreCase(value)) {
-                    if (this instanceof Configuration) {
-                        ((Configuration) this).unsetObjectWrapper();
+                    if (this instanceof Configuration.ExtendableBuilder) {
+                        this.unsetObjectWrapper();
                     } else {
-                        setObjectWrapper(Configuration.getDefaultObjectWrapper(Configuration.VERSION_3_0_0));
+                        // FM3 TODO should depend on IcI
+                        setObjectWrapper(new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
                     }
                 } else if ("restricted".equalsIgnoreCase(value)) {
+                    // FM3 TODO should depend on IcI
                     setObjectWrapper(new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
                 } else {
                     setObjectWrapper((ObjectWrapper) _ObjectBuilderSettingEvaluator.eval(
@@ -1857,6 +2004,14 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
+     * Fluent API equivalent of {@link #setSetting(String, String)}.
+     */
+    public SelfT setting(String name, String value) throws ConfigurationException {
+        setSetting(name, value);
+        return self();
+    }
+
+    /**
      * @throws IllegalArgumentException
      *             if the type of the some of the values isn't as expected
      */
@@ -1879,11 +2034,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *            If we want the setting names with camel case naming convention, or with snake case (legacy) naming
      *            convention.
      * 
-     * @see Configuration#getSettingNames(boolean)
+     * @see Configuration.ExtendableBuilder#getSettingNames(boolean)
      * 
      * @since 2.3.24
      */
-    public Set<String> getSettingNames(boolean camelCase) {
+    public static Set<String> getSettingNames(boolean camelCase) {
         return new _SortedArraySet<>(camelCase ? SETTING_NAMES_CAMEL_CASE : SETTING_NAMES_SNAKE_CASE);
     }
 
@@ -1945,10 +2100,20 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         }
     }
 
+    /**
+     * Fluent API equivalent of {@link #setSettings(Properties)}.
+     */
+    public SelfT settings(Properties props) {
+        setSettings(props);
+        return self();
+    }
+
     @Override
     public Map<Object, Object> getCustomAttributes() {
-        return customAttributes;
+        return isCustomAttributesSet() ? customAttributes : getDefaultCustomAttributes();
     }
+
+    protected abstract Map<Object,Object> getDefaultCustomAttributes();
 
     /**
      * Setter pair of {@link #getCustomAttributes()}
@@ -1957,6 +2122,14 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      */
     public void setCustomAttributes(Map<Object, Object> customAttributes) {
         setCustomAttributesWithoutCopying(new LinkedHashMap<>(customAttributes));
+    }
+
+    /**
+     * Fluent API equivalent of {@link #setCustomAttributes(Map)}
+     */
+    public SelfT customAttributes(Map<Object, Object> customAttributes) {
+        setCustomAttributes(customAttributes);
+        return self();
     }
 
     /**
@@ -1992,6 +2165,14 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
             customAttributes = new LinkedHashMap<>();
         }
         customAttributes.put(name, value);
+    }
+
+    /**
+     * Fluent API equivalent of {@link #setCustomAttribute(Object, Object)}
+     */
+    public SelfT customAttribute(Object name, Object value) {
+        setCustomAttribute(name, value);
+        return self();
     }
 
     /**
@@ -2043,10 +2224,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         } else {
             value = null;
         }
-        return value != null ? value : getInheritedCustomAttribute(key);
+        return value != null ? value : getDefaultCustomAttribute(key);
     }
 
-    protected abstract Object getInheritedCustomAttribute(Object name);
+    protected abstract Object getDefaultCustomAttribute(Object name);
 
     protected final List<String> parseAsList(String text) throws GenericParseException {
         return new SettingStringParser(text).parseAsList();

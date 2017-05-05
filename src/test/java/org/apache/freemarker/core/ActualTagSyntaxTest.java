@@ -19,48 +19,50 @@
 
 package org.apache.freemarker.core;
 
+import static org.apache.freemarker.core.ParsingConfiguration.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
 
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class ActualTagSyntaxTest {
 
     @Test
     public void testWithFtlHeader() throws IOException {
-        testWithFtlHeader(Configuration.AUTO_DETECT_TAG_SYNTAX);
-        testWithFtlHeader(Configuration.ANGLE_BRACKET_TAG_SYNTAX);
-        testWithFtlHeader(Configuration.SQUARE_BRACKET_TAG_SYNTAX);
+        testWithFtlHeader(AUTO_DETECT_TAG_SYNTAX);
+        testWithFtlHeader(ANGLE_BRACKET_TAG_SYNTAX);
+        testWithFtlHeader(SQUARE_BRACKET_TAG_SYNTAX);
     }
     
     private void testWithFtlHeader(int cfgTagSyntax) throws IOException {
-        assertEquals(getActualTagSyntax("[#ftl]foo", cfgTagSyntax), Configuration.SQUARE_BRACKET_TAG_SYNTAX);
-        assertEquals(getActualTagSyntax("<#ftl>foo", cfgTagSyntax), Configuration.ANGLE_BRACKET_TAG_SYNTAX);
+        assertEquals(getActualTagSyntax("[#ftl]foo", cfgTagSyntax), SQUARE_BRACKET_TAG_SYNTAX);
+        assertEquals(getActualTagSyntax("<#ftl>foo", cfgTagSyntax), ANGLE_BRACKET_TAG_SYNTAX);
     }
     
     @Test
     public void testUndecidable() throws IOException {
-        assertEquals(getActualTagSyntax("foo", Configuration.AUTO_DETECT_TAG_SYNTAX), Configuration.ANGLE_BRACKET_TAG_SYNTAX);
-        assertEquals(getActualTagSyntax("foo", Configuration.ANGLE_BRACKET_TAG_SYNTAX), Configuration.ANGLE_BRACKET_TAG_SYNTAX);
-        assertEquals(getActualTagSyntax("foo", Configuration.SQUARE_BRACKET_TAG_SYNTAX), Configuration.SQUARE_BRACKET_TAG_SYNTAX);
+        assertEquals(getActualTagSyntax("foo", AUTO_DETECT_TAG_SYNTAX), ANGLE_BRACKET_TAG_SYNTAX);
+        assertEquals(getActualTagSyntax("foo", ANGLE_BRACKET_TAG_SYNTAX), ANGLE_BRACKET_TAG_SYNTAX);
+        assertEquals(getActualTagSyntax("foo", SQUARE_BRACKET_TAG_SYNTAX), SQUARE_BRACKET_TAG_SYNTAX);
     }
 
     @Test
     public void testDecidableWithoutFtlHeader() throws IOException {
-        assertEquals(getActualTagSyntax("foo<#if true></#if>", Configuration.AUTO_DETECT_TAG_SYNTAX), Configuration.ANGLE_BRACKET_TAG_SYNTAX);
-        assertEquals(getActualTagSyntax("foo<#if true></#if>", Configuration.ANGLE_BRACKET_TAG_SYNTAX), Configuration.ANGLE_BRACKET_TAG_SYNTAX);
-        assertEquals(getActualTagSyntax("foo<#if true></#if>", Configuration.SQUARE_BRACKET_TAG_SYNTAX), Configuration.SQUARE_BRACKET_TAG_SYNTAX);
+        assertEquals(getActualTagSyntax("foo<#if true></#if>", AUTO_DETECT_TAG_SYNTAX), ANGLE_BRACKET_TAG_SYNTAX);
+        assertEquals(getActualTagSyntax("foo<#if true></#if>", ANGLE_BRACKET_TAG_SYNTAX), ANGLE_BRACKET_TAG_SYNTAX);
+        assertEquals(getActualTagSyntax("foo<#if true></#if>", SQUARE_BRACKET_TAG_SYNTAX), SQUARE_BRACKET_TAG_SYNTAX);
         
-        assertEquals(getActualTagSyntax("foo[#if true][/#if]", Configuration.AUTO_DETECT_TAG_SYNTAX), Configuration.SQUARE_BRACKET_TAG_SYNTAX);
-        assertEquals(getActualTagSyntax("foo[#if true][/#if]", Configuration.ANGLE_BRACKET_TAG_SYNTAX), Configuration.ANGLE_BRACKET_TAG_SYNTAX);
-        assertEquals(getActualTagSyntax("foo[#if true][/#if]", Configuration.SQUARE_BRACKET_TAG_SYNTAX), Configuration.SQUARE_BRACKET_TAG_SYNTAX);
+        assertEquals(getActualTagSyntax("foo[#if true][/#if]", AUTO_DETECT_TAG_SYNTAX), SQUARE_BRACKET_TAG_SYNTAX);
+        assertEquals(getActualTagSyntax("foo[#if true][/#if]", ANGLE_BRACKET_TAG_SYNTAX), ANGLE_BRACKET_TAG_SYNTAX);
+        assertEquals(getActualTagSyntax("foo[#if true][/#if]", SQUARE_BRACKET_TAG_SYNTAX), SQUARE_BRACKET_TAG_SYNTAX);
     }
     
     private int getActualTagSyntax(String ftl, int cfgTagSyntax) throws IOException {
-        Configuration cfg = new Configuration();
-        cfg.setTagSyntax(cfgTagSyntax);
-        return new Template(null, ftl, cfg).getActualTagSyntax();
+        return new Template(
+                null, ftl,
+                new TestConfigurationBuilder().tagSyntax(cfgTagSyntax).build()).getActualTagSyntax();
     }
     
 }

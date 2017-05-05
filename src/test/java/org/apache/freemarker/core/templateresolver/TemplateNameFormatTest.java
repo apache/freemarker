@@ -33,6 +33,7 @@ import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
 import org.apache.freemarker.test.MonitoredTemplateLoader;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -224,11 +225,10 @@ public class TemplateNameFormatTest {
     
     @Test
     public void assertBackslashNotSpecialWith23() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTextTemplate("foo\\bar.ftl", "");
-        cfg.setTemplateLoader(tl);
+
+        Configuration cfg = new TestConfigurationBuilder().templateLoader(tl).build();
 
         {
             final String name = "foo\\bar.ftl";
@@ -274,9 +274,10 @@ public class TemplateNameFormatTest {
 
     @Test
     public void assertBackslashNotAllowed() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        cfg.setTemplateLoader(new ByteArrayTemplateLoader());
-        cfg.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
+        Configuration cfg = new TestConfigurationBuilder()
+                .templateLoader(new ByteArrayTemplateLoader())
+                .templateNameFormat(DefaultTemplateNameFormat.INSTANCE)
+                .build();
         try {
             cfg.getTemplate("././foo\\bar.ftl", Locale.US);
             fail();

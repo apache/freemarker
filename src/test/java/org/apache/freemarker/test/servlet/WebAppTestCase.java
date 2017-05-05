@@ -276,6 +276,7 @@ public class WebAppTestCase {
         return temporaryDir.toURI().toString();
     }
 
+    @SuppressFBWarnings("UI_INHERITANCE_UNSAFE_GETRESOURCE")
     private ClassPathResource findWebAppDirectoryResource(String webAppName) throws IOException {
         final String appRelResPath = "webapps/" + webAppName + "/";
         final String relResPath = appRelResPath + "WEB-INF/web.xml";

@@ -41,21 +41,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.freemarker.core.MutableProcessingConfiguration;
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.Configuration.ExtendableBuilder;
 import org.apache.freemarker.core.ConfigurationException;
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.MutableProcessingConfiguration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.TemplateExceptionHandler;
 import org.apache.freemarker.core.TemplateNotFoundException;
-import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
@@ -267,12 +266,13 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * 
  * <li>The following init-params are supported only for backward compatibility, and their usage is discouraged:
  * {@code TemplateUpdateInterval}, {@code DefaultEncoding}, {@code ObjectWrapper}, {@code TemplateExceptionHandler}.
- * Instead, use init-params with the setting names documented at {@link Configuration#setSetting(String, String)}, such
- * as {@code object_wrapper}.
+ * Instead, use init-params with the setting names documented at
+ * {@link ExtendableBuilder#setSetting(String, String)}, such as {@code object_wrapper}.
  * 
  * <li><strong>Any other init-params</strong> will be interpreted as {@link Configuration}-level FreeMarker setting. See
- * the possible names and values at {@link Configuration#setSetting(String, String)}. Note that these init-param names
- * are starting with lower-case letter (upper-case init-params are used for FreemarkerSerlvet settings).</li>
+ * the possible names and values at {@link ExtendableBuilder#setSetting(String, String)}. Note that
+ * these init-param names are starting with lower-case letter (upper-case init-params are used for FreemarkerSerlvet
+ * settings).</li>
  * 
  * </ul>
  * 
@@ -412,7 +412,6 @@ public class FreemarkerServlet extends HttpServlet {
     private static final String DEPR_INITPARAM_TEMPLATE_DELAY = "TemplateDelay";
     private static final String DEPR_INITPARAM_ENCODING = "DefaultEncoding";
     private static final String DEPR_INITPARAM_OBJECT_WRAPPER = "ObjectWrapper";
-    private static final String DEPR_INITPARAM_WRAPPER_RESTRICTED = "restricted";
     private static final String DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER = "TemplateExceptionHandler";
     private static final String DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_RETHROW = "rethrow";
     private static final String DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_DEBUG = "debug";
@@ -508,7 +507,6 @@ public class FreemarkerServlet extends HttpServlet {
     }
 
     // Init-param values:
-    private String templatePath;
     private boolean noCache;
     private Integer bufferSize;
     private boolean exceptionOnMissingTemplate;
@@ -522,13 +520,10 @@ public class FreemarkerServlet extends HttpServlet {
     
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private Configuration config;
-    @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
-    private ObjectWrapperAndUnwrapper wrapper;
     private ContentType contentType;
     private OverrideResponseContentType overrideResponseContentType = initParamValueToEnum(
             getDefaultOverrideResponseContentType(), OverrideResponseContentType.values());
     private ResponseCharacterEncoding responseCharacterEncoding = ResponseCharacterEncoding.LEGACY;
-    @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private Charset forcedResponseCharacterEncoding;
     private OverrideResponseLocale overrideResponseLocale = OverrideResponseLocale.ALWAYS;
     private List/*<MetaInfTldSource>*/ metaInfTldSources;
@@ -544,7 +539,7 @@ public class FreemarkerServlet extends HttpServlet {
 
     /**
      * Don't override this method to adjust FreeMarker settings! Override the protected methods for that, such as
-     * {@link #createConfiguration()}, {@link #createTemplateLoader(String)}, {@link #createDefaultObjectWrapper()},
+     * {@link #createConfigurationBuilder()}, {@link #createTemplateLoader(String)},
      * etc. Also note that lot of things can be changed with init-params instead of overriding methods, so if you
      * override settings, usually you should only override their defaults.
      */
@@ -560,42 +555,34 @@ public class FreemarkerServlet extends HttpServlet {
         }
     }
     
-    private void initialize() throws InitParamValueException, MalformedWebXmlException, ConflictingInitParamsException {
-        config = createConfiguration();
+    private void initialize() throws InitParamValueException, MalformedWebXmlException, ConflictingInitParamsException,
+            ConfigurationException {
+        Configuration.ExtendableBuilder<?> cfgB = createConfigurationBuilder();
         
         // Only override what's coming from the config if it was explicitly specified: 
-        final String iciInitParamValue = getInitParameter(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY);
+        final String iciInitParamValue = getInitParameter(Configuration.ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY);
         if (iciInitParamValue != null) {
             try {
-                config.setSetting(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY, iciInitParamValue);
+                cfgB.setSetting(Configuration.ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY, iciInitParamValue);
             } catch (Exception e) {
-                throw new InitParamValueException(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY, iciInitParamValue, e);
+                throw new InitParamValueException(Configuration.ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY, iciInitParamValue, e);
             }
         }
-        
-        // Set FreemarkerServlet-specific defaults, except where createConfiguration() has already set them:
-        if (!config.isTemplateExceptionHandlerExplicitlySet()) {
-            config.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
-        }
-        if (!config.isLogTemplateExceptionsExplicitlySet()) {
-            config.setLogTemplateExceptions(false);
-        }
-        
+
         contentType = DEFAULT_CONTENT_TYPE;
         
-        // Process object_wrapper init-param out of order: 
-        wrapper = createObjectWrapper();
-        LOG.debug("Using object wrapper {}", wrapper);
-        config.setObjectWrapper(wrapper);
-        
-        // Process TemplatePath init-param out of order:
-        templatePath = getInitParameter(INIT_PARAM_TEMPLATE_PATH);
-        if (templatePath == null && !config.isTemplateLoaderExplicitlySet()) {
-            templatePath = InitParamParser.TEMPLATE_PATH_PREFIX_CLASS;
+        // Process object_wrapper init-param out of order:
+        String objectWrapperInitParamValue = getInitParameter(
+                MutableProcessingConfiguration.OBJECT_WRAPPER_KEY, DEPR_INITPARAM_OBJECT_WRAPPER);
+        if (objectWrapperInitParamValue != null) {
+            setObjectWrapperFromInitParam(cfgB, objectWrapperInitParamValue);
         }
+
+        // Process TemplatePath init-param out of order:
+        String templatePath = getInitParameter(INIT_PARAM_TEMPLATE_PATH);
         if (templatePath != null) {
             try {
-                config.setTemplateLoader(createTemplateLoader(templatePath));
+                cfgB.setTemplateLoader(createTemplateLoader(templatePath));
             } catch (Exception e) {
                 throw new InitParamValueException(INIT_PARAM_TEMPLATE_PATH, templatePath, e);
             }
@@ -605,9 +592,8 @@ public class FreemarkerServlet extends HttpServlet {
         classpathTlds = createDefaultClassPathTlds();
 
         // Process all other init-params:
-        Enumeration initpnames = getServletConfig().getInitParameterNames();
-        while (initpnames.hasMoreElements()) {
-            final String name = (String) initpnames.nextElement();
+        for (Enumeration initPNames = getServletConfig().getInitParameterNames(); initPNames.hasMoreElements();) {
+            final String name = (String) initPNames.nextElement();
             final String value = getInitParameter(name);
             if (name == null) {
                 throw new MalformedWebXmlException(
@@ -624,21 +610,21 @@ public class FreemarkerServlet extends HttpServlet {
                 if (name.equals(DEPR_INITPARAM_OBJECT_WRAPPER)
                         || name.equals(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY)
                         || name.equals(INIT_PARAM_TEMPLATE_PATH)
-                        || name.equals(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY)) {
+                        || name.equals(Configuration.ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY)) {
                     // ignore: we have already processed these
                 } else if (name.equals(DEPR_INITPARAM_ENCODING)) { // BC
-                    if (getInitParameter(Configuration.SOURCE_ENCODING_KEY) != null) {
+                    if (getInitParameter(Configuration.ExtendableBuilder.SOURCE_ENCODING_KEY) != null) {
                         throw new ConflictingInitParamsException(
-                                Configuration.SOURCE_ENCODING_KEY, DEPR_INITPARAM_ENCODING);
+                                Configuration.ExtendableBuilder.SOURCE_ENCODING_KEY, DEPR_INITPARAM_ENCODING);
                     }
-                    config.setSourceEncoding(Charset.forName(value));
+                    cfgB.setSourceEncoding(Charset.forName(value));
                 } else if (name.equals(DEPR_INITPARAM_TEMPLATE_DELAY)) { // BC
-                    if (getInitParameter(Configuration.TEMPLATE_UPDATE_DELAY_KEY) != null) {
+                    if (getInitParameter(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY) != null) {
                         throw new ConflictingInitParamsException(
-                                Configuration.TEMPLATE_UPDATE_DELAY_KEY, DEPR_INITPARAM_TEMPLATE_DELAY);
+                                Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, DEPR_INITPARAM_TEMPLATE_DELAY);
                     }
                     try {
-                        config.setTemplateUpdateDelayMilliseconds(Integer.parseInt(value) * 1000L);
+                        cfgB.setTemplateUpdateDelayMilliseconds(Integer.parseInt(value) * 1000L);
                     } catch (NumberFormatException e) {
                         // Intentionally ignored
                     }
@@ -649,13 +635,13 @@ public class FreemarkerServlet extends HttpServlet {
                     }
     
                     if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_RETHROW.equals(value)) {
-                        config.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+                        cfgB.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
                     } else if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_DEBUG.equals(value)) {
-                        config.setTemplateExceptionHandler(TemplateExceptionHandler.DEBUG_HANDLER);
+                        cfgB.setTemplateExceptionHandler(TemplateExceptionHandler.DEBUG_HANDLER);
                     } else if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_HTML_DEBUG.equals(value)) {
-                        config.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+                        cfgB.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
                     } else if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_IGNORE.equals(value)) {
-                        config.setTemplateExceptionHandler(TemplateExceptionHandler.IGNORE_HANDLER);
+                        cfgB.setTemplateExceptionHandler(TemplateExceptionHandler.IGNORE_HANDLER);
                     } else {
                         throw new InitParamValueException(DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER, value,
                                 "Not one of the supported values.");
@@ -695,21 +681,32 @@ public class FreemarkerServlet extends HttpServlet {
                     newClasspathTlds.addAll(InitParamParser.parseCommaSeparatedList(value));
                     classpathTlds = newClasspathTlds;
                 } else {
-                    config.setSetting(name, value);
+                    cfgB.setSetting(name, value);
                 }
             } catch (ConflictingInitParamsException e) {
                 throw e;
             } catch (Exception e) {
                 throw new InitParamValueException(name, value, e);
             }
-        } // while initpnames
+        } // for initPNames
         
         if (contentType.containsCharset && responseCharacterEncoding != ResponseCharacterEncoding.LEGACY) {
             throw new InitParamValueException(INIT_PARAM_CONTENT_TYPE, contentType.httpHeaderValue,
                     new IllegalStateException("You can't specify the charset in the content type, because the \"" +
                             INIT_PARAM_RESPONSE_CHARACTER_ENCODING + "\" init-param isn't set to "
                             + "\"" + INIT_PARAM_VALUE_LEGACY + "\"."));
-        }        
+        }
+
+        beforeConfigurationBuilt(cfgB);
+        config = cfgB.build();
+        afterConfigurationBuilt(config);
+
+        if (!(config.getObjectWrapper() instanceof ObjectWrapperAndUnwrapper)) {
+            throw new RuntimeException(FreemarkerServlet.class.getSimpleName() + " requires an ObjectWrapper that " +
+                    "implements " + ObjectWrapperAndUnwrapper.class.getName() + ", but this class doesn't do that: "
+                    + config.getObjectWrapper().getClass().getName());
+        }
+        LOG.debug("Using object wrapper {}", config.getObjectWrapper());
     }
     
     private List/*<MetaInfTldSource>*/ parseAsMetaInfTldLocations(String value) throws ParseException {
@@ -751,18 +748,18 @@ public class FreemarkerServlet extends HttpServlet {
     }
 
     /**
-     * Create the template loader. The default implementation will invoke a {@link ClassTemplateLoader} if the template
+     * Create the template loader. The default implementation will create a {@link ClassTemplateLoader} if the template
      * path starts with {@code "class://"}, a {@link FileTemplateLoader} if the template path starts with
      * {@code "file://"}, and a {@link WebAppTemplateLoader} otherwise. Also, if
-     * {@link Configuration#Configuration(org.apache.freemarker.core.Version) incompatible_improvements} is 2.3.22 or higher,
-     * it will invoke a {@link MultiTemplateLoader} if the template path starts with {@code "["}.
+     * {@link Configuration#getIncompatibleImprovements()}  incompatibleImprovements} is 2.3.22 or higher,
+     * it will create a {@link MultiTemplateLoader} if the template path starts with {@code "["}.
      * 
      * @param templatePath
-     *            the template path to invoke a loader for
+     *            the template path to create a loader for
      * @return a newly created template loader
      */
     protected TemplateLoader createTemplateLoader(String templatePath) throws IOException {
-        return InitParamParser.createTemplateLoader(templatePath, getConfiguration(), getClass(), getServletContext());
+        return InitParamParser.createTemplateLoader(templatePath, getClass(), getServletContext());
     }
     
     @Override
@@ -868,9 +865,9 @@ public class FreemarkerServlet extends HttpServlet {
 
         ServletContext servletContext = getServletContext();
         try {
-            logWarnOnObjectWrapperMismatch();
-            
-            TemplateModel model = createModel(wrapper, servletContext, request, response);
+            TemplateModel model = createModel(
+                    (ObjectWrapperAndUnwrapper) config.getObjectWrapper(), // This is checked in initialize()
+                    servletContext, request, response);
 
             // Give subclasses a chance to hook into preprocessing
             if (preTemplateProcess(request, response, template, model)) {
@@ -978,26 +975,6 @@ public class FreemarkerServlet extends HttpServlet {
         throw e;
     }
     
-    @SuppressFBWarnings(value={ "MSF_MUTABLE_SERVLET_FIELD", "DC_DOUBLECHECK" }, justification="Performance trick")
-    private void logWarnOnObjectWrapperMismatch() {
-        // Deliberately uses double check locking.
-        if (wrapper != config.getObjectWrapper() && !objectWrapperMismatchWarnLogged && LOG.isWarnEnabled()) {
-            final boolean logWarn;
-            synchronized (this) {
-                logWarn = !objectWrapperMismatchWarnLogged;
-                if (logWarn) {
-                    objectWrapperMismatchWarnLogged = true;
-                }
-            }
-            if (logWarn) {
-                LOG.warn(
-                        getClass().getName()
-                        + ".wrapper != config.getObjectWrapper(); possibly the result of incorrect extension of "
-                        + FreemarkerServlet.class.getName() + ".");
-            }
-        }
-    }
-    
     /**
      * Returns the locale used for the {@link Configuration#getTemplate(String, Locale)} call (as far as the
      * {@value #INIT_PARAM_OVERRIDE_RESPONSE_LOCALE} Servlet init-param allows that). The base implementation in
@@ -1091,7 +1068,7 @@ public class FreemarkerServlet extends HttpServlet {
     }
 
     /**
-     * Called to invoke the {@link TaglibFactory} once per servlet context.
+     * Called to create the {@link TaglibFactory} once per servlet context.
      * The default implementation configures it based on the servlet-init parameters and various other environmental
      * settings, so if you override this method, you should call super, then adjust the result.
      * 
@@ -1258,128 +1235,60 @@ public class FreemarkerServlet extends HttpServlet {
     }
 
     /**
-     * Creates the FreeMarker {@link Configuration} singleton and (when overidden) maybe sets its defaults. Servlet
-     * init-params will be applied later, and thus can overwrite the settings specified here.
-     * 
+     * Creates a new FreeMarker {@link Configuration} builder; by providing a custom builder, the configuration
+     * setting defaults can be specific to the {@link FreemarkerServlet} subclass.
      * <p>
-     * By overriding this method you can set your preferred {@link Configuration} setting defaults, as only the settings
-     * for which an init-param was specified will be overwritten later. (Note that {@link FreemarkerServlet} also has
-     * its own defaults for a few settings, but since 2.3.22, the servlet detects if those settings were already set
-     * here and then it won't overwrite them.)
-     * 
+     * The default implementation creates a new {@link FreemarkerServletConfigurationBuilder} instance (note that it's
+     * not the standard {@link Configuration} builder, as some setting defaults differ) with
+     * {@link Configuration#getIncompatibleImprovements() incompatibleImprovements}
+     * {@link Configuration#VERSION_3_0_0}.
      * <p>
-     * The default implementation simply creates a new instance with {@link Configuration#Configuration()} and returns
-     * it.
+     * By overriding this method you can use your own {@link FreemarkerServletConfigurationBuilder} subclass
+     * (or actually any {@link ExtendableBuilder} subclass) and hence specify what the defaults are.
      */
-    protected Configuration createConfiguration() {
-        // We can only set incompatible_improvements later, so ignore the deprecation warning here.
-        return new Configuration();
+    protected Configuration.ExtendableBuilder<?> createConfigurationBuilder() {
+        return new FreemarkerServletConfigurationBuilder(this, Configuration.VERSION_3_0_0);
     }
     
     /**
-     * Sets the defaults of the configuration that are specific to the {@link FreemarkerServlet} subclass.
-     * This is called after the common (wired in) {@link FreemarkerServlet} setting defaults was set, also the 
+     * Hook for {@link FreemarkerServlet} subclasses to modify the configuration builder just before the
+     * {@link Configuration} is created. Note that to change the defaults of some setting, you meant to use
+     * {@link #createConfigurationBuilder()} instead.
+     * <p>
+     * The implementation in {@link FreemarkerServlet} does nothing here.
      */
-    protected void setConfigurationDefaults() {
+    protected void beforeConfigurationBuilt(Configuration.ExtendableBuilder<?> cfgB) {
+        // do nothing
+    }
+
+    /**
+     * Hook for {@link FreemarkerServlet} subclasses to examine {@link Configuration} just after it was created.
+     * <p>
+     * The implementation in {@link FreemarkerServlet} does nothing here.
+     */
+    protected void afterConfigurationBuilt(Configuration cfg) {
         // do nothing
     }
     
     /**
-     * Called from {@link #init()} to invoke the {@link ObjectWrapper}; to customzie this aspect, in most cases you
-     * should override {@link #createDefaultObjectWrapper()} instead. Overriding this method is necessary when you want
-     * to customize how the {@link ObjectWrapper} is created <em>from the init-param values</em>, or you want to do some
-     * post-processing (like checking) on the created {@link ObjectWrapper}. To customize init-param interpretation,
-     * call {@link #getInitParameter(String)} with {@link MutableProcessingConfiguration#OBJECT_WRAPPER_KEY} as argument, and see if it
-     * returns a value that you want to interpret yourself. If was {@code null} or you don't want to interpret the
-     * value, fall back to the super method.
-     * 
+     * Called from {@link #init()} to set the {@link ObjectWrapper} in the {@link ExtendableBuilder}
+     * from the init-param value.
+     * To customize init-param interpretation, see if the init-param value argument is something that you want to
+     * interpret yourself, otherwise fall back to the super method. This method won't be called if there's not
+     * init-param that specifies the object wrapper.
      * <p>
      * The default implementation interprets the {@code object_wrapper} servlet init-param with
-     * calling {@link MutableProcessingConfiguration#setSetting(String, String)} (see valid values there), or if there's no such servlet
-     * init-param, then it calls {@link #createDefaultObjectWrapper()}.
-     * 
-     * @return The {@link ObjectWrapper} that will be used for adapting request, session, and servlet context attributes
-     *         to {@link TemplateModel}-s, and also as the object wrapper setting of {@link Configuration}.
+     * calling {@link MutableProcessingConfiguration#setSetting(String, String)}.
+     *
+     * @param initParamValue Not {@code null}
      */
-    protected ObjectWrapperAndUnwrapper createObjectWrapper() {
-        String wrapper = getServletConfig().getInitParameter(DEPR_INITPARAM_OBJECT_WRAPPER);
-        if (wrapper != null) { // BC
-            if (getInitParameter(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY) != null) {
-                throw new RuntimeException("Conflicting init-params: "
-                        + MutableProcessingConfiguration.OBJECT_WRAPPER_KEY + " and "
-                        + DEPR_INITPARAM_OBJECT_WRAPPER);
-            }
-            if (DEPR_INITPARAM_WRAPPER_RESTRICTED.equals(wrapper)) {
-                return new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
-            }
-            return createDefaultObjectWrapper();
-        } else {
-            wrapper = getInitParameter(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY);
-            if (wrapper == null) {
-                if (!config.isObjectWrapperExplicitlySet()) {
-                    return createDefaultObjectWrapper();
-                } else {
-                    return asObjectWrapperAndUnwrapper(config.getObjectWrapper());
-                }
-            } else {
-                try {
-                    config.setSetting(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY, wrapper);
-                } catch (ConfigurationException e) {
-                    throw new RuntimeException("Failed to set " + MutableProcessingConfiguration.OBJECT_WRAPPER_KEY, e);
-                }
-                return asObjectWrapperAndUnwrapper(config.getObjectWrapper());
-            }
-        }
+    protected void setObjectWrapperFromInitParam(Configuration.ExtendableBuilder<?> cb, String initParamValue)
+            throws ConfigurationException {
+        cb.setSetting(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY, initParamValue);
     }
 
-    private ObjectWrapperAndUnwrapper asObjectWrapperAndUnwrapper(ObjectWrapper objectWrapper) {
-        if (!(objectWrapper instanceof ObjectWrapperAndUnwrapper)) {
-            throw new RuntimeException(FreemarkerServlet.class.getSimpleName() + " requires an ObjectWrapper that " +
-                    "implements " + ObjectWrapperAndUnwrapper.class.getName() + ", but this class doesn't do that: "
-                    + objectWrapper.getClass().getName());
-        }
-        return (ObjectWrapperAndUnwrapper) objectWrapper;
-    }
-
-    /**
-     * Override this to specify what the default {@link ObjectWrapper} will be when the
-     * {@code object_wrapper} Servlet init-param wasn't specified. Note that this is called by
-     * {@link #createConfiguration()}, and so if that was also overidden but improperly then this method might won't be
-     * ever called. Also note that if you set the {@code object_wrapper} in {@link #createConfiguration()}, then this
-     * won't be called, since then that has already specified the default.
-     * 
-     * <p>
-     * The default implementation calls {@link Configuration#getDefaultObjectWrapper(Version)}. You
-     * should also pass in the version paramter when creating an {@link ObjectWrapper} that supports that. You can get
-     * the version by calling {@link #getConfiguration()} and then {@link Configuration#getIncompatibleImprovements()}.
-     * 
-     * @since 2.3.22
-     */
-    protected ObjectWrapperAndUnwrapper createDefaultObjectWrapper() {
-        return Configuration.getDefaultObjectWrapper(config.getIncompatibleImprovements());
-    }
-    
-    /**
-     * Should be final; don't override it. Override {@link #createObjectWrapper()} instead.
-     */
-    // [2.4] Make it final
-    protected ObjectWrapper getObjectWrapper() {
-        return wrapper;
-    }
-    
-    /**
-     * The value of the {@code TemplatePath} init-param. {@code null} if the {@code template_loader} setting was set in
-     * a custom {@link #createConfiguration()}.
-     * 
-     * @deprecated Not called by FreeMarker code, and there's no point to override this (unless to cause confusion).
-     */
-    @Deprecated
-    protected final String getTemplatePath() {
-        return templatePath;
-    }
-    
     protected HttpRequestParametersHashModel createRequestParametersHashModel(HttpServletRequest request) {
-        return new HttpRequestParametersHashModel(request, getObjectWrapper());
+        return new HttpRequestParametersHashModel(request, config.getObjectWrapper());
     }
 
     /**
@@ -1628,6 +1537,15 @@ public class FreemarkerServlet extends HttpServlet {
         throw new IllegalArgumentException(sb.toString());
     }
 
+    private String getInitParameter(String name1, String name2) {
+        String r1 = getServletConfig().getInitParameter(name1);
+        String r2 = getInitParameter(name2);
+        if (r1 != null && r2 != null) {
+            throw new RuntimeException("Conflicting init-params: " + name1 + " and " + name2);
+        }
+        return r2 != null ? r2 : r1;
+    }
+
     /**
      * Superclass of all (future) init-param value enums.
      * 
@@ -1688,5 +1606,6 @@ public class FreemarkerServlet extends HttpServlet {
             return initParamValue;
         }
     }
+
 
 }

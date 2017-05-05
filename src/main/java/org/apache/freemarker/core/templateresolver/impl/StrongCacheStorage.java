@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
 
@@ -31,7 +32,7 @@ import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
  * it was passed, therefore prevents the cache from being purged during garbage collection. This class is always
  * thread-safe since 2.3.24, before that if we are running on Java 5 or later.
  *
- * @see org.apache.freemarker.core.Configuration#setCacheStorage(CacheStorage)
+ * @see Configuration#getCacheStorage()
  */
 public class StrongCacheStorage implements CacheStorage, CacheStorageWithGetSize {
     

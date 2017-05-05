@@ -676,138 +676,143 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         }
 
         @Override
-        protected Locale getInheritedLocale() {
+        protected Locale getDefaultLocale() {
             throw new SettingValueNotSetException("locale");
         }
 
         @Override
-        protected TimeZone getInheritedTimeZone() {
+        protected TimeZone getDefaultTimeZone() {
             throw new SettingValueNotSetException("timeZone");
         }
 
         @Override
-        protected TimeZone getInheritedSQLDateAndTimeTimeZone() {
+        protected TimeZone getDefaultSQLDateAndTimeTimeZone() {
             throw new SettingValueNotSetException("SQLDateAndTimeTimeZone");
         }
 
         @Override
-        protected String getInheritedNumberFormat() {
+        protected String getDefaultNumberFormat() {
             throw new SettingValueNotSetException("numberFormat");
         }
 
         @Override
-        protected Map<String, TemplateNumberFormatFactory> getInheritedCustomNumberFormats() {
+        protected Map<String, TemplateNumberFormatFactory> getDefaultCustomNumberFormats() {
             throw new SettingValueNotSetException("customNumberFormats");
         }
 
         @Override
-        protected TemplateNumberFormatFactory getInheritedCustomNumberFormat(String name) {
+        protected TemplateNumberFormatFactory getDefaultCustomNumberFormat(String name) {
             return null;
         }
 
         @Override
-        protected String getInheritedBooleanFormat() {
+        protected String getDefaultBooleanFormat() {
             throw new SettingValueNotSetException("booleanFormat");
         }
 
         @Override
-        protected String getInheritedTimeFormat() {
+        protected String getDefaultTimeFormat() {
             throw new SettingValueNotSetException("timeFormat");
         }
 
         @Override
-        protected String getInheritedDateFormat() {
+        protected String getDefaultDateFormat() {
             throw new SettingValueNotSetException("dateFormat");
         }
 
         @Override
-        protected String getInheritedDateTimeFormat() {
+        protected String getDefaultDateTimeFormat() {
             throw new SettingValueNotSetException("dateTimeFormat");
         }
 
         @Override
-        protected Map<String, TemplateDateFormatFactory> getInheritedCustomDateFormats() {
+        protected Map<String, TemplateDateFormatFactory> getDefaultCustomDateFormats() {
             throw new SettingValueNotSetException("customDateFormats");
         }
 
         @Override
-        protected TemplateDateFormatFactory getInheritedCustomDateFormat(String name) {
+        protected TemplateDateFormatFactory getDefaultCustomDateFormat(String name) {
             throw new SettingValueNotSetException("customDateFormat");
         }
 
         @Override
-        protected TemplateExceptionHandler getInheritedTemplateExceptionHandler() {
+        protected TemplateExceptionHandler getDefaultTemplateExceptionHandler() {
             throw new SettingValueNotSetException("templateExceptionHandler");
         }
 
         @Override
-        protected ArithmeticEngine getInheritedArithmeticEngine() {
+        protected ArithmeticEngine getDefaultArithmeticEngine() {
             throw new SettingValueNotSetException("arithmeticEngine");
         }
 
         @Override
-        protected ObjectWrapper getInheritedObjectWrapper() {
+        protected ObjectWrapper getDefaultObjectWrapper() {
             throw new SettingValueNotSetException("objectWrapper");
         }
 
         @Override
-        protected Charset getInheritedOutputEncoding() {
+        protected Charset getDefaultOutputEncoding() {
             throw new SettingValueNotSetException("outputEncoding");
         }
 
         @Override
-        protected Charset getInheritedURLEscapingCharset() {
+        protected Charset getDefaultURLEscapingCharset() {
             throw new SettingValueNotSetException("URLEscapingCharset");
         }
 
         @Override
-        protected TemplateClassResolver getInheritedNewBuiltinClassResolver() {
+        protected TemplateClassResolver getDefaultNewBuiltinClassResolver() {
             throw new SettingValueNotSetException("newBuiltinClassResolver");
         }
 
         @Override
-        protected boolean getInheritedAutoFlush() {
+        protected boolean getDefaultAutoFlush() {
             throw new SettingValueNotSetException("autoFlush");
         }
 
         @Override
-        protected boolean getInheritedShowErrorTips() {
+        protected boolean getDefaultShowErrorTips() {
             throw new SettingValueNotSetException("showErrorTips");
         }
 
         @Override
-        protected boolean getInheritedAPIBuiltinEnabled() {
+        protected boolean getDefaultAPIBuiltinEnabled() {
             throw new SettingValueNotSetException("APIBuiltinEnabled");
         }
 
         @Override
-        protected boolean getInheritedLogTemplateExceptions() {
+        protected boolean getDefaultLogTemplateExceptions() {
             throw new SettingValueNotSetException("logTemplateExceptions");
         }
 
         @Override
-        protected boolean getInheritedLazyImports() {
+        protected boolean getDefaultLazyImports() {
             throw new SettingValueNotSetException("lazyImports");
         }
 
         @Override
-        protected Boolean getInheritedLazyAutoImports() {
+        protected Boolean getDefaultLazyAutoImports() {
             throw new SettingValueNotSetException("lazyAutoImports");
         }
 
         @Override
-        protected Map<String, String> getInheritedAutoImports() {
+        protected Map<String, String> getDefaultAutoImports() {
             throw new SettingValueNotSetException("autoImports");
         }
 
         @Override
-        protected List<String> getInheritedAutoIncludes() {
+        protected List<String> getDefaultAutoIncludes() {
             throw new SettingValueNotSetException("autoIncludes");
         }
 
         @Override
-        protected Object getInheritedCustomAttribute(Object name) {
+        protected Object getDefaultCustomAttribute(Object name) {
             return null;
+        }
+
+        @Override
+        protected Map<Object, Object> getDefaultCustomAttributes() {
+            throw new SettingValueNotSetException("customAttributes");
         }
 
         /**
@@ -937,47 +942,47 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         }
 
         @Override
-        protected int getInheritedTagSyntax() {
+        protected int getDefaultTagSyntax() {
             throw new SettingValueNotSetException("tagSyntax");
         }
 
         @Override
-        protected TemplateLanguage getInheritedTemplateLanguage() {
+        protected TemplateLanguage getDefaultTemplateLanguage() {
             throw new SettingValueNotSetException("templateLanguage");
         }
 
         @Override
-        protected int getInheritedNamingConvention() {
+        protected int getDefaultNamingConvention() {
             throw new SettingValueNotSetException("namingConvention");
         }
 
         @Override
-        protected boolean getInheritedWhitespaceStripping() {
+        protected boolean getDefaultWhitespaceStripping() {
             throw new SettingValueNotSetException("whitespaceStripping");
         }
 
         @Override
-        protected int getInheritedAutoEscapingPolicy() {
+        protected int getDefaultAutoEscapingPolicy() {
             throw new SettingValueNotSetException("autoEscapingPolicy");
         }
 
         @Override
-        protected OutputFormat getInheritedOutputFormat() {
+        protected OutputFormat getDefaultOutputFormat() {
             throw new SettingValueNotSetException("outputFormat");
         }
 
         @Override
-        protected boolean getInheritedRecognizeStandardFileExtensions() {
+        protected boolean getDefaultRecognizeStandardFileExtensions() {
             throw new SettingValueNotSetException("recognizeStandardFileExtensions");
         }
 
         @Override
-        protected Charset getInheritedSourceEncoding() {
+        protected Charset getDefaultSourceEncoding() {
             throw new SettingValueNotSetException("sourceEncoding");
         }
 
         @Override
-        protected int getInheritedTabSize() {
+        protected int getDefaultTabSize() {
             throw new SettingValueNotSetException("tabSize");
         }
 

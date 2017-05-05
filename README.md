@@ -187,7 +187,6 @@ apply it to your development environment:
         dom4j-*.jar, which casues compilation errors if it wins over
         jaxen-*.jar).
    - Press "Finish"
-- Eclipse will indicate many errors at this point; it's expected, read on.
 - Project -> Properties -> Java Compiler -> Errors/Warnings:
   Check in "Enable project specific settings", then set "Forbidden reference
   (access rules)" from "Error" to "Warning".

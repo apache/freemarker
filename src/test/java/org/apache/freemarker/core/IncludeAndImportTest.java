@@ -29,14 +29,17 @@ import org.apache.freemarker.core.Environment.LazilyInitializedNamespace;
 import org.apache.freemarker.core.Environment.Namespace;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
 import org.apache.freemarker.test.TemplateTest;
-import org.junit.Before;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 
 @SuppressWarnings("boxing")
 public class IncludeAndImportTest extends TemplateTest {
 
-    @Before
-    public void setup() {
+    @Override
+    protected void addCommonTemplates() {
         addTemplate("inc1.ftl", "[inc1]<#global inc1Cnt = (inc1Cnt!0) + 1><#global history = (history!) + 'I'>");
         addTemplate("inc2.ftl", "[inc2]");
         addTemplate("inc3.ftl", "[inc3]");
@@ -90,10 +93,15 @@ public class IncludeAndImportTest extends TemplateTest {
      */
     @Test
     public void autoIncludeAndAutoImport() throws IOException, TemplateException {
-        getConfiguration().addAutoInclude("inc1.ftl");
-        getConfiguration().addAutoInclude("inc2.ftl");
-        getConfiguration().addAutoImport("lib1", "lib1.ftl");
-        getConfiguration().addAutoImport("lib2", "lib2CallsLib1.ftl");
+        setConfiguration(new TestConfigurationBuilder()
+                .autoImports(ImmutableMap.of(
+                        "lib1", "lib1.ftl",
+                        "lib2", "lib2CallsLib1.ftl"
+                ))
+                .autoIncludes(ImmutableList.of(
+                        "inc1.ftl",
+                        "inc2.ftl"))
+                .build());
         assertOutput(
                 "<#include 'inc3.ftl'>[main] ${inc1Cnt}, ${history}, <@lib1.m/>, <@lib2.m/>",
                 "[inc1][inc2][inc3][main] 1, L1L2I, In lib1, In lib2 (In lib1)");
@@ -130,7 +138,7 @@ public class IncludeAndImportTest extends TemplateTest {
         
         assertOutput(ftl, "In lib2, In lib1; L1L2L3");
         
-        getConfiguration().setLazyImports(true);
+        setConfiguration(new TestConfigurationBuilder().lazyImports(true).build());
         assertOutput(ftl, "In lib2, In lib1; L2L1");
         
         assertOutput(ftlImports + "<@l3.m/>, " + ftlCalls, "In lib3 (In lib1), In lib2, In lib1; L3L1L2");
@@ -138,7 +146,7 @@ public class IncludeAndImportTest extends TemplateTest {
 
     @Test
     public void lazyImportAndLocale() throws IOException, TemplateException {
-        getConfiguration().setLazyImports(true);
+        setConfiguration(new TestConfigurationBuilder().lazyImports(true).build());
         assertOutput("<#setting locale = 'de_DE'><#import 'lib.ftl' as lib>"
                 + "[${history!}] "
                 + "<#setting locale = 'en'>"
@@ -148,47 +156,59 @@ public class IncludeAndImportTest extends TemplateTest {
 
     @Test
     public void lazyAutoImportSettings() throws IOException, TemplateException {
-        Configuration cfg = getConfiguration();
-        cfg.addAutoImport("l1", "lib1.ftl");
-        cfg.addAutoImport("l2", "lib2.ftl");
-        cfg.addAutoImport("l3", "lib3.ftl");
-        
+        TestConfigurationBuilder cfgB = new TestConfigurationBuilder()
+                .autoImports(ImmutableMap.of(
+                        "l1", "lib1.ftl",
+                        "l2", "lib2.ftl",
+                        "l3", "lib3.ftl"
+                ));
+
         String ftl = "<@l2.m/>, <@l1.m/>; ${history}";
         String expectedEagerOutput = "In lib2, In lib1; L1L2L3";
         String expecedLazyOutput = "In lib2, In lib1; L2L1";
-        
+
+        setConfiguration(cfgB.build());
         assertOutput(ftl, expectedEagerOutput);
-        cfg.setLazyImports(true);
+        cfgB.setLazyImports(true);
+        setConfiguration(cfgB.build());
         assertOutput(ftl, expecedLazyOutput);
-        cfg.setLazyImports(false);
+        cfgB.setLazyImports(false);
+        setConfiguration(cfgB.build());
         assertOutput(ftl, expectedEagerOutput);
-        cfg.setLazyAutoImports(true);
+        cfgB.setLazyAutoImports(true);
+        setConfiguration(cfgB.build());
         assertOutput(ftl, expecedLazyOutput);
-        cfg.setLazyAutoImports(null);
+        cfgB.setLazyAutoImports(null);
+        setConfiguration(cfgB.build());
         assertOutput(ftl, expectedEagerOutput);
-        cfg.setLazyImports(true);
-        cfg.setLazyAutoImports(false);
+        cfgB.setLazyImports(true);
+        cfgB.setLazyAutoImports(false);
+        setConfiguration(cfgB.build());
         assertOutput(ftl, expectedEagerOutput);
     }
     
     @Test
     public void lazyAutoImportMixedWithManualImport() throws IOException, TemplateException {
-        Configuration cfg = getConfiguration();
-        cfg.addAutoImport("l1", "lib1.ftl");
-        cfg.addAutoImport("l2", "/./lib2.ftl");
-        cfg.addAutoImport("l3", "lib3.ftl");
-        cfg.setLazyAutoImports(true);
+        TestConfigurationBuilder cfgB = new TestConfigurationBuilder()
+                .autoImports(ImmutableMap.of(
+                        "l1", "lib1.ftl",
+                        "l2", "/./lib2.ftl",
+                        "l3", "lib3.ftl"))
+                .lazyAutoImports(true);
 
         String ftl = "<@l2.m/>, <@l1.m/>; ${history}";
         String expectOutputWithoutHistory = "In lib2, In lib1; ";
         String expecedOutput = expectOutputWithoutHistory + "L2L1";
-        
+
+        setConfiguration(cfgB.build());
         assertOutput(ftl, expecedOutput);
         assertOutput("<#import 'lib1.ftl' as l1>" + ftl, expectOutputWithoutHistory + "L1L2");
         assertOutput("<#import './x/../lib1.ftl' as l1>" + ftl, expectOutputWithoutHistory + "L1L2");
         assertOutput("<#import 'lib2.ftl' as l2>" + ftl, expecedOutput);
         assertOutput("<#import 'lib3.ftl' as l3>" + ftl, expectOutputWithoutHistory + "L3L2L1");
-        cfg.setLazyImports(true);
+
+        cfgB.setLazyImports(true);
+        setConfiguration(cfgB.build());
         assertOutput("<#import 'lib1.ftl' as l1>" + ftl, expecedOutput);
         assertOutput("<#import './x/../lib1.ftl' as l1>" + ftl, expecedOutput);
         assertOutput("<#import 'lib2.ftl' as l2>" + ftl, expecedOutput);
@@ -197,12 +217,14 @@ public class IncludeAndImportTest extends TemplateTest {
 
     @Test
     public void lazyImportErrors() throws IOException, TemplateException {
-        Configuration cfg = getConfiguration();
-        cfg.setLazyImports(true);
-        
+        TestConfigurationBuilder cfgB = new TestConfigurationBuilder();
+        cfgB.setLazyImports(true);
+
+        setConfiguration(cfgB.build());
         assertOutput("<#import 'noSuchTemplate.ftl' as wrong>x", "x");
         
-        cfg.addAutoImport("wrong", "noSuchTemplate.ftl");
+        cfgB.addAutoImport("wrong", "noSuchTemplate.ftl");
+        setConfiguration(cfgB.build());
         assertOutput("x", "x");
 
         try {

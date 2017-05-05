@@ -32,7 +32,8 @@ import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
  * implementations.
  * 
  * <p>
- * To set the {@link TemplateLoader} used by FreeMaker, use {@link Configuration#setTemplateLoader(TemplateLoader)}.
+ * The {@link TemplateLoader} used by FreeMaker is specified by the {@link Configuration#getTemplateLoader()
+ * templateLoader} configuration setting.
  * 
  * <p>
  * Implementations of this interface should be thread-safe.

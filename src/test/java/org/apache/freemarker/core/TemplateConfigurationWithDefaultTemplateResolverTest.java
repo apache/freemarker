@@ -33,6 +33,7 @@ import org.apache.freemarker.core.templateresolver.FirstMatchTemplateConfigurati
 import org.apache.freemarker.core.templateresolver.MergingTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class TemplateConfigurationWithDefaultTemplateResolverTest {
@@ -92,23 +93,24 @@ public class TemplateConfigurationWithDefaultTemplateResolverTest {
 
     @Test
     public void testLocale() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        cfg.setLocale(Locale.US);
-        
-        StringTemplateLoader tl = new StringTemplateLoader();
-        tl.putTemplate("(de).ftl", "${.locale}");
-        tl.putTemplate("default.ftl", "${.locale}");
-        tl.putTemplate("(de)-fr.ftl",
+        StringTemplateLoader loader = new StringTemplateLoader();
+        loader.putTemplate("(de).ftl", "${.locale}");
+        loader.putTemplate("default.ftl", "${.locale}");
+        loader.putTemplate("(de)-fr.ftl",
                 ("<#ftl locale='fr_FR'>${.locale}"));
-        tl.putTemplate("default-fr.ftl",
+        loader.putTemplate("default-fr.ftl",
                 ("<#ftl locale='fr_FR'>${.locale}"));
-        cfg.setTemplateLoader(tl);
 
-        TemplateConfiguration.Builder tcDe = new TemplateConfiguration.Builder();
-        tcDe.setLocale(Locale.GERMANY);
-        cfg.setTemplateConfigurations(
-                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*(de)*"), tcDe.build()));
-        
+        Configuration cfg = new TestConfigurationBuilder()
+                .templateLoader(loader)
+                .templateConfigurations(
+                        new ConditionalTemplateConfigurationFactory(
+                                new FileNameGlobMatcher("*(de)*"),
+                                new TemplateConfiguration.Builder()
+                                        .locale(Locale.GERMANY)
+                                        .build()))
+                .build();
+
         {
             Template t = cfg.getTemplate("(de).ftl");
             assertEquals(Locale.GERMANY, t.getLocale());
@@ -133,31 +135,28 @@ public class TemplateConfigurationWithDefaultTemplateResolverTest {
 
     @Test
     public void testConfigurableSettings() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        cfg.setLocale(Locale.US);
-        
-        TemplateConfiguration.Builder tcFR = new TemplateConfiguration.Builder();
-        tcFR.setLocale(Locale.FRANCE);
-        TemplateConfiguration.Builder tcYN = new TemplateConfiguration.Builder();
-        tcYN.setBooleanFormat("Y,N");
-        TemplateConfiguration.Builder tc00 = new TemplateConfiguration.Builder();
-        tc00.setNumberFormat("0.00");
-        cfg.setTemplateConfigurations(
-                new MergingTemplateConfigurationFactory(
-                        new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*(fr)*"), tcFR.build()),
-                        new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*(yn)*"), tcYN.build()),
-                        new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*(00)*"), tc00.build())
-                )
-        );
-        
         String commonFTL = "${.locale} ${true?string} ${1.2}";
-        StringTemplateLoader tl = new StringTemplateLoader();
-        tl.putTemplate("default", commonFTL);
-        tl.putTemplate("(fr)", commonFTL);
-        tl.putTemplate("(yn)(00)", commonFTL);
-        tl.putTemplate("(00)(fr)", commonFTL);
-        cfg.setTemplateLoader(tl);
-        
+        StringTemplateLoader loader = new StringTemplateLoader();
+        loader.putTemplate("default", commonFTL);
+        loader.putTemplate("(fr)", commonFTL);
+        loader.putTemplate("(yn)(00)", commonFTL);
+        loader.putTemplate("(00)(fr)", commonFTL);
+
+        Configuration cfg = new TestConfigurationBuilder()
+                .templateConfigurations(
+                        new MergingTemplateConfigurationFactory(
+                                new ConditionalTemplateConfigurationFactory(
+                                        new FileNameGlobMatcher("*(fr)*"),
+                                        new TemplateConfiguration.Builder().locale(Locale.FRANCE).build()),
+                                new ConditionalTemplateConfigurationFactory(
+                                        new FileNameGlobMatcher("*(yn)*"),
+                                        new TemplateConfiguration.Builder().booleanFormat("Y,N").build()),
+                                new ConditionalTemplateConfigurationFactory(
+                                        new FileNameGlobMatcher("*(00)*"),
+                                        new TemplateConfiguration.Builder().numberFormat("0.00").build())))
+                .templateLoader(loader)
+                .build();
+
         assertEquals("en_US true 1.2", getTemplateOutput(cfg.getTemplate("default")));
         assertEquals("fr_FR true 1,2", getTemplateOutput(cfg.getTemplate("(fr)")));
         assertEquals("en_US Y 1.20", getTemplateOutput(cfg.getTemplate("(yn)(00)")));
@@ -166,33 +165,33 @@ public class TemplateConfigurationWithDefaultTemplateResolverTest {
     
     @Test
     public void testCustomAttributes() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        
-        TemplateConfiguration.Builder tc1 = new TemplateConfiguration.Builder();
-        tc1.setCustomAttribute("a1", "a1tc1");
-        tc1.setCustomAttribute("a2", "a2tc1");
-        tc1.setCustomAttribute("a3", "a3tc1");
-        tc1.setCustomAttribute(CUST_ATT_1, "ca1tc1");
-        tc1.setCustomAttribute(CUST_ATT_2, "ca2tc1");
-        
-        TemplateConfiguration.Builder tc2 = new TemplateConfiguration.Builder();
-        tc2.setCustomAttribute("a1", "a1tc2");
-        tc2.setCustomAttribute(CUST_ATT_1, "ca1tc2");
-        
-        cfg.setTemplateConfigurations(
-                new MergingTemplateConfigurationFactory(
-                        new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*(tc1)*"), tc1.build()),
-                        new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*(tc2)*"), tc2.build())
-                )
-        );
-        
         String commonFTL = "<#ftl attributes={ 'a3': 'a3temp' }>";
         StringTemplateLoader tl = new StringTemplateLoader();
         tl.putTemplate("(tc1)", commonFTL);
         tl.putTemplate("(tc1)noHeader", "");
         tl.putTemplate("(tc2)", commonFTL);
         tl.putTemplate("(tc1)(tc2)", commonFTL);
-        cfg.setTemplateLoader(tl);
+
+        Configuration cfg = new TestConfigurationBuilder()
+                .templateConfigurations(
+                        new MergingTemplateConfigurationFactory(
+                                new ConditionalTemplateConfigurationFactory(
+                                        new FileNameGlobMatcher("*(tc1)*"),
+                                        new TemplateConfiguration.Builder()
+                                                .customAttribute("a1", "a1tc1")
+                                                .customAttribute("a2", "a2tc1")
+                                                .customAttribute("a3", "a3tc1")
+                                                .customAttribute(CUST_ATT_1, "ca1tc1")
+                                                .customAttribute(CUST_ATT_2, "ca2tc1")
+                                                .build()),
+                                new ConditionalTemplateConfigurationFactory(
+                                        new FileNameGlobMatcher("*(tc2)*"),
+                                        new TemplateConfiguration.Builder()
+                                                .customAttribute("a1", "a1tc2")
+                                                .customAttribute(CUST_ATT_1, "ca1tc2")
+                                                .build())))
+                .templateLoader(tl)
+                .build();
 
         {
             Template t = cfg.getTemplate("(tc1)");
@@ -235,10 +234,6 @@ public class TemplateConfigurationWithDefaultTemplateResolverTest {
     }
 
     private Configuration createCommonEncodingTesterConfig() throws UnsupportedEncodingException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        cfg.setSourceEncoding(StandardCharsets.ISO_8859_1);
-        cfg.setLocale(Locale.US);
-        
         ByteArrayTemplateLoader tl = new ByteArrayTemplateLoader();
         tl.putTemplate("utf8.ftl", TEXT_WITH_ACCENTS.getBytes(StandardCharsets.UTF_8));
         tl.putTemplate("utf16.ftl", TEXT_WITH_ACCENTS.getBytes(StandardCharsets.UTF_16LE));
@@ -247,18 +242,26 @@ public class TemplateConfigurationWithDefaultTemplateResolverTest {
                 ("<#ftl encoding='iso-8859-2'>" + TEXT_WITH_ACCENTS).getBytes(ISO_8859_2));
         tl.putTemplate("default-latin2.ftl",
                 ("<#ftl encoding='iso-8859-2'>" + TEXT_WITH_ACCENTS).getBytes(ISO_8859_2));
-        cfg.setTemplateLoader(tl);
-        
-        TemplateConfiguration.Builder tcUtf8 = new TemplateConfiguration.Builder();
-        tcUtf8.setSourceEncoding(StandardCharsets.UTF_8);
-        TemplateConfiguration.Builder tcUtf16 = new TemplateConfiguration.Builder();
-        tcUtf16.setSourceEncoding(StandardCharsets.UTF_16LE);
-        cfg.setTemplateConfigurations(
-                new FirstMatchTemplateConfigurationFactory(
-                        new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*utf8*"), tcUtf8.build()),
-                        new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*utf16*"), tcUtf16.build())
-                ).allowNoMatch(true));
-        return cfg;
+
+        return new TestConfigurationBuilder()
+                .sourceEncoding(StandardCharsets.ISO_8859_1)
+                .locale(Locale.US)
+                .templateLoader(tl)
+                .templateConfigurations(
+                        new FirstMatchTemplateConfigurationFactory(
+                                new ConditionalTemplateConfigurationFactory(
+                                        new FileNameGlobMatcher("*utf8*"),
+                                        new TemplateConfiguration.Builder()
+                                                .sourceEncoding(StandardCharsets.UTF_8)
+                                                .build()),
+                                new ConditionalTemplateConfigurationFactory(
+                                        new FileNameGlobMatcher("*utf16*"),
+                                        new TemplateConfiguration.Builder()
+                                                .sourceEncoding(StandardCharsets.UTF_16LE)
+                                                .build())
+                        )
+                        .allowNoMatch(true))
+                .build();
     }
 
 }

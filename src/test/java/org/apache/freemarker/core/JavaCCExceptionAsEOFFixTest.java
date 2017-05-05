@@ -23,6 +23,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.Reader;
 
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -89,7 +90,7 @@ public class JavaCCExceptionAsEOFFixTest {
     @Test
     public void testIOException() throws IOException {
         try {
-            new Template(null, new FailingReader(new IOException("test")), new Configuration());
+            new Template(null, new FailingReader(new IOException("test")), new TestConfigurationBuilder().build());
             fail();
         } catch (IOException e) {
             assertEquals("test", e.getMessage());
@@ -99,7 +100,7 @@ public class JavaCCExceptionAsEOFFixTest {
     @Test
     public void testRuntimeException() throws IOException {
         try {
-            new Template(null, new FailingReader(new NullPointerException("test")), new Configuration());
+            new Template(null, new FailingReader(new NullPointerException("test")), new TestConfigurationBuilder().build());
             fail();
         } catch (NullPointerException e) {
             assertEquals("test", e.getMessage());
@@ -109,7 +110,7 @@ public class JavaCCExceptionAsEOFFixTest {
     @Test
     public void testError() throws IOException {
         try {
-            new Template(null, new FailingReader(new OutOfMemoryError("test")), new Configuration());
+            new Template(null, new FailingReader(new OutOfMemoryError("test")), new TestConfigurationBuilder().build());
             fail();
         } catch (OutOfMemoryError e) {
             assertEquals("test", e.getMessage());
@@ -118,7 +119,7 @@ public class JavaCCExceptionAsEOFFixTest {
 
     @Test
     public void testNoException() throws IOException {
-        Template t = new Template(null, new FailingReader(null), new Configuration());
+        Template t = new Template(null, new FailingReader(null), new TestConfigurationBuilder().build());
         assertEquals("abc", t.toString());
     }
 

@@ -34,6 +34,7 @@ import java.util.Locale;
 
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.core.util._NullWriter;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 
 import junit.framework.TestCase;
 public class ExceptionTest extends TestCase {
@@ -43,9 +44,8 @@ public class ExceptionTest extends TestCase {
     }
 
     public void testParseExceptionSerializable() throws IOException, ClassNotFoundException {
-        Configuration cfg = new Configuration();
         try {
-            new Template("<string>", new StringReader("<@>"), cfg);
+            new Template(null, new StringReader("<@>"), new TestConfigurationBuilder().build());
             fail();
         } catch (ParseException e) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -55,8 +55,8 @@ public class ExceptionTest extends TestCase {
     }
 
     public void testTemplateErrorSerializable() throws IOException, ClassNotFoundException {
-        Configuration cfg = new Configuration();
-        Template tmp = new Template("<string>", new StringReader("${noSuchVar}"), cfg);
+        Template tmp = new Template(null, new StringReader("${noSuchVar}"),
+                new TestConfigurationBuilder().build());
         try {
             tmp.process(Collections.EMPTY_MAP, new StringWriter());
             fail();
@@ -69,13 +69,11 @@ public class ExceptionTest extends TestCase {
     
     @SuppressWarnings("boxing")
     public void testTemplateExceptionLocationInformation() throws IOException {
-        Configuration cfg = new Configuration();
-        
         StringTemplateLoader tl = new StringTemplateLoader();
         tl.putTemplate("foo_en.ftl", "\n\nxxx${noSuchVariable}");
-        cfg.setTemplateLoader(tl);
-        
-        Template t = cfg.getTemplate("foo.ftl", Locale.US);
+
+        Template t = new TestConfigurationBuilder().templateLoader(tl).build()
+                .getTemplate("foo.ftl", Locale.US);
         try {
             t.process(null, _NullWriter.INSTANCE);
             fail();
@@ -94,14 +92,12 @@ public class ExceptionTest extends TestCase {
 
     @SuppressWarnings("cast")
     public void testParseExceptionLocationInformation() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        
         StringTemplateLoader tl = new StringTemplateLoader();
         tl.putTemplate("foo_en.ftl", "\n\nxxx<#noSuchDirective>");
-        cfg.setTemplateLoader(tl);
-        
+
         try {
-            cfg.getTemplate("foo.ftl", Locale.US);
+            new TestConfigurationBuilder().templateLoader(tl).build()
+                    .getTemplate("foo.ftl", Locale.US);
             fail();
         } catch (ParseException e) {
             System.out.println(e.getMessage());

@@ -35,10 +35,10 @@ import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
  * delegate some of those duties back to the {@link Configuration} setting:
  * 
  * <ul>
- * <li>{@link Configuration#setTemplateLoader(TemplateLoader) template_loader}
- * <li>{@link Configuration#setTemplateNameFormat(TemplateNameFormat) template_name_format}
- * <li>{@link Configuration#setTemplateLookupStrategy(TemplateLookupStrategy) template_lookup_strategy}
- * <li>{@link Configuration#setCacheStorage(CacheStorage) cache_storage}
+ * <li>{@link Configuration#getTemplateLoader() templateLoader}
+ * <li>{@link Configuration#getTemplateNameFormat() templateNameFormat}
+ * <li>{@link Configuration#getTemplateLookupStrategy() templateLookupStrategy}
+ * <li>{@link Configuration#getCacheStorage() cacheStorage}
  * </ul>
  * 
  * @since 3.0.0
@@ -104,8 +104,8 @@ public abstract class TemplateResolver {
 
     /**
      * Removes a template from the template cache, hence forcing the re-loading of it when it's next time requested;
-     * this is an optional operation. This is to give the application finer control over cache updating than
-     * {@link Configuration#setTemplateUpdateDelayMilliseconds(long)} alone does.
+     * this is an optional operation. This is to give the application finer control over cache updating than the
+     * {@link Configuration#getTemplateUpdateDelayMilliseconds() templateUpdateDelayMilliseconds} setting alone gives.
      * 
      * <p>
      * For the meaning of the parameters, see {@link #getTemplate(String, Locale, Serializable)}

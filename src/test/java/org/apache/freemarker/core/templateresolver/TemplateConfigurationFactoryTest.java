@@ -25,14 +25,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateConfiguration;
 import org.junit.Test;
 
 public class TemplateConfigurationFactoryTest {
     
-    private Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-
     @Test
     public void testCondition1() throws IOException, TemplateConfigurationFactoryException {
         TemplateConfiguration tc = newTemplateConfiguration(1);
@@ -168,7 +165,7 @@ public class TemplateConfigurationFactoryTest {
     private void assertApplicable(TemplateConfigurationFactory tcf, String sourceName, TemplateConfiguration... expectedTCs)
             throws IOException, TemplateConfigurationFactoryException {
         TemplateConfiguration mergedTC = tcf.get(sourceName, DummyTemplateLoadingSource.INSTANCE);
-        List<Object> mergedTCAttNames = new ArrayList<Object>(mergedTC.getCustomAttributes().keySet());
+        List<Object> mergedTCAttNames = new ArrayList<>(mergedTC.getCustomAttributes().keySet());
 
         for (TemplateConfiguration expectedTC : expectedTCs) {
             Integer tcId = (Integer) expectedTC.getCustomAttribute("id");

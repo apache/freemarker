@@ -18,10 +18,11 @@
  */
 package org.apache.freemarker.core;
 
+import org.apache.freemarker.core.Configuration.ExtendableBuilder;
 import org.apache.freemarker.core.util._StringUtil;
 
 /**
- * Thrown by {@link Configuration#setSetting(String, String)}; The setting name was not recognized.
+ * Thrown by {@link ExtendableBuilder#setSetting(String, String)} if the setting name was not recognized.
  */
 @SuppressWarnings("serial")
 public class UnknownConfigurationSettingException extends ConfigurationException {

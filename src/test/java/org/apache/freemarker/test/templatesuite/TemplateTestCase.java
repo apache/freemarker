@@ -68,6 +68,7 @@ import org.apache.freemarker.core.util._NullWriter;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.dom.NodeModel;
 import org.apache.freemarker.test.CopyrightCommentRemoverTemplateLoader;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.apache.freemarker.test.templatesuite.models.BooleanAndStringTemplateModel;
 import org.apache.freemarker.test.templatesuite.models.BooleanHash1;
 import org.apache.freemarker.test.templatesuite.models.BooleanHash2;
@@ -115,7 +116,7 @@ public class TemplateTestCase extends FileTestCase {
     private final String expectedFileName;
     private final boolean noOutput;
     
-    private final Configuration conf;
+    private final Configuration.ExtendableBuilder confB;
     private final HashMap<String, Object> dataModel = new HashMap<>();
     
     public TemplateTestCase(String testName, String simpleTestName, String templateName, String expectedFileName, boolean noOutput,
@@ -133,8 +134,8 @@ public class TemplateTestCase extends FileTestCase {
         this.expectedFileName = expectedFileName;
         
         this.noOutput = noOutput;
-        
-        conf = new Configuration(incompatibleImprovements);
+
+        confB = new TestConfigurationBuilder(incompatibleImprovements);
     }
     
     public void setSetting(String param, String value) throws IOException {
@@ -147,13 +148,13 @@ public class TemplateTestCase extends FileTestCase {
             if (!as.equals("as")) fail("Expecting 'as <alias>' in autoimport");
             if (!st.hasMoreTokens()) fail("Expecting alias after 'as' in autoimport");
             String alias = st.nextToken();
-            conf.addAutoImport(alias, libname);
+            confB.addAutoImport(alias, libname);
         } else if ("source_encoding".equals(param)) {
-            conf.setSourceEncoding(Charset.forName(value));
+            confB.setSourceEncoding(Charset.forName(value));
         // INCOMPATIBLE_IMPROVEMENTS is a list here, and was already set in the constructor.
-        } else if (!Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY.equals(param)) {
+        } else if (!Configuration.ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY.equals(param)) {
             try {
-                conf.setSetting(param, value);
+                confB.setSetting(param, value);
             } catch (ConfigurationException e) {
                 throw new RuntimeException(
                         "Failed to set setting " +
@@ -173,7 +174,7 @@ public class TemplateTestCase extends FileTestCase {
     @Override
     @SuppressWarnings("boxing")
     public void setUp() throws Exception {
-        conf.setTemplateLoader(new CopyrightCommentRemoverTemplateLoader(
+        confB.setTemplateLoader(new CopyrightCommentRemoverTemplateLoader(
                 new FileTemplateLoader(new File(getTestClassDirectory(), "templates"))));
         
         DefaultObjectWrapper dow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
@@ -185,7 +186,7 @@ public class TemplateTestCase extends FileTestCase {
 
         dataModel.put(JAVA_OBJECT_INFO_VAR_NAME, JavaObjectInfo.INSTANCE);
         dataModel.put(TEST_NAME_VAR_NAME, simpleTestName);
-        dataModel.put(ICI_INT_VALUE_VAR_NAME, conf.getIncompatibleImprovements().intValue());
+        dataModel.put(ICI_INT_VALUE_VAR_NAME, confB.getIncompatibleImprovements().intValue());
         
         dataModel.put("message", "Hello, world!");
 
@@ -300,7 +301,7 @@ public class TemplateTestCase extends FileTestCase {
         } else if (simpleTestName.equals("var-layers")) {
             dataModel.put("x", Integer.valueOf(4));
             dataModel.put("z", Integer.valueOf(4));
-            conf.setSharedVariable("y", Integer.valueOf(7));
+            confB.setSharedVariable("y", Integer.valueOf(7));
         } else if (simpleTestName.equals("xml-fragment")) {
             DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
             f.setNamespaceAware(true);
@@ -392,10 +393,10 @@ public class TemplateTestCase extends FileTestCase {
     }
     
     @Override
-    public void runTest() throws IOException {
+    public void runTest() throws IOException, ConfigurationException {
         Template template;
         try {
-            template = conf.getTemplate(templateName);
+            template = confB.build().getTemplate(templateName);
         } catch (IOException e) {
             throw new AssertionFailedError(
                     "Could not load template " + _StringUtil.jQuote(templateName) + ":\n" + getStackTrace(e));
@@ -428,7 +429,7 @@ public class TemplateTestCase extends FileTestCase {
 
     @Override
     protected Charset getFileCharset() {
-        return conf.getOutputEncoding() != null ? conf.getOutputEncoding() : StandardCharsets.UTF_8;
+        return confB.getOutputEncoding() != null ? confB.getOutputEncoding() : StandardCharsets.UTF_8;
     }
     
     @Override

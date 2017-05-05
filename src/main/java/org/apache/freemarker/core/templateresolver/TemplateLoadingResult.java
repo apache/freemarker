@@ -27,6 +27,7 @@ import java.nio.charset.Charset;
 import java.util.Date;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.Configuration.ExtendableBuilder;
 import org.apache.freemarker.core.TemplateConfiguration;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.util._NullArgumentException;
@@ -96,7 +97,7 @@ public final class TemplateLoadingResult {
      *            Usually {@code null}, as usually the backing storage mechanism doesn't store such information; see
      *            {@link #getTemplateConfiguration()}. The most probable application is supplying the charset (encoding)
      *            used by the {@link InputStream} (via
-     *            {@link TemplateConfiguration.Builder#setSourceEncoding(Charset)}), but only do that if the storage
+     *            {@link ExtendableBuilder#setSourceEncoding(Charset)}), but only do that if the storage
      *            mechanism really knows what the charset is.
      */
     public TemplateLoadingResult(TemplateLoadingSource source, Serializable version, InputStream inputStream,

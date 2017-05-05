@@ -25,6 +25,7 @@ import java.lang.ref.SoftReference;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.apache.freemarker.core.Configuration.ExtendableBuilder;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
 
@@ -34,7 +35,7 @@ import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
  * class is thread-safe to the extent that its underlying map is. The parameterless constructor uses a thread-safe map
  * since 2.3.24 or Java 5.
  *
- * @see org.apache.freemarker.core.Configuration#setCacheStorage(CacheStorage)
+ * @see ExtendableBuilder#setCacheStorage(CacheStorage)
  */
 public class SoftCacheStorage implements CacheStorage, CacheStorageWithGetSize {
     

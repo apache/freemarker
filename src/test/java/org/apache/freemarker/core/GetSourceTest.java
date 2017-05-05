@@ -20,30 +20,30 @@ package org.apache.freemarker.core;
 
 import static org.junit.Assert.*;
 
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class GetSourceTest {
 
     @Test
     public void testGetSource() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        
         {
             // Note: Default tab size is 8.
-            Template t = new Template(null, "a\n\tb\nc", cfg);
+            Template t = new Template(null, "a\n\tb\nc",
+                    new TestConfigurationBuilder().build());
             // A historical quirk we keep for B.C.: it repaces tabs with spaces.
             assertEquals("a\n        b\nc", t.getSource(1, 1, 1, 3));
         }
         
         {
-            cfg.setTabSize(4);
-            Template t = new Template(null, "a\n\tb\nc", cfg);
+            Template t = new Template(null, "a\n\tb\nc",
+                    new TestConfigurationBuilder().tabSize(4).build());
             assertEquals("a\n    b\nc", t.getSource(1, 1, 1, 3));
         }
         
         {
-            cfg.setTabSize(1);
-            Template t = new Template(null, "a\n\tb\nc", cfg);
+            Template t = new Template(null, "a\n\tb\nc",
+                    new TestConfigurationBuilder().tabSize(1).build());
             // If tab size is 1, it behaves as it always should have: it keeps the tab.
             assertEquals("a\n\tb\nc", t.getSource(1, 1, 1, 3));
         }

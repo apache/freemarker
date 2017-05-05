@@ -23,7 +23,7 @@ package org.apache.freemarker.core;
  * Error while configuring FreeMarker.
  */
 @SuppressWarnings("serial")
-public class ConfigurationException extends Exception {
+public class ConfigurationException extends RuntimeException {
 
     public ConfigurationException(String message, Throwable cause) {
         super(message, cause);

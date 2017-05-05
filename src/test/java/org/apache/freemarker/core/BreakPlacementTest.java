@@ -50,13 +50,7 @@ public class BreakPlacementTest extends TemplateTest {
         assertErrorContains("<#if false><#break></#if>", BREAK_NESTING_ERROR_MESSAGE_PART);
         assertErrorContains("<#list xs><#break></#list>", BREAK_NESTING_ERROR_MESSAGE_PART);
         assertErrorContains("<#list 1..2 as x>${x}<#else><#break></#list>", BREAK_NESTING_ERROR_MESSAGE_PART);
+        assertErrorContains("<#list 1..2 as x>${x}<#macro m><#break></#macro></#list>", BREAK_NESTING_ERROR_MESSAGE_PART);
     }
 
-    @Test
-    public void testInvalidPlacementInsideMacro() throws IOException, TemplateException {
-        final String ftl = "<#list 1..2 as x>${x}<#macro m><#break></#macro></#list>";
-        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_3_0_0);
-        assertErrorContains(ftl, BREAK_NESTING_ERROR_MESSAGE_PART);
-    }
-    
 }

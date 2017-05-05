@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core;
 
+import static org.apache.freemarker.core.Configuration.ExtendableBuilder.TEMPLATE_LOOKUP_STRATEGY_KEY;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -39,26 +40,35 @@ public class TemplateLookupStrategyTest {
 
     @Test
     public void testSetSetting() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        assertSame(DefaultTemplateLookupStrategy.INSTANCE, cfg.getTemplateLookupStrategy());
+        assertSame(
+                DefaultTemplateLookupStrategy.INSTANCE,
+                new Configuration.Builder(Configuration.VERSION_3_0_0).build()
+                        .getTemplateLookupStrategy());
 
-        cfg.setSetting(Configuration.TEMPLATE_LOOKUP_STRATEGY_KEY, MyTemplateLookupStrategy.class.getName() + "()");
-        assertTrue(cfg.getTemplateLookupStrategy() instanceof MyTemplateLookupStrategy);
+        assertTrue(
+                new Configuration.Builder(Configuration.VERSION_3_0_0)
+                        .setting(TEMPLATE_LOOKUP_STRATEGY_KEY, MyTemplateLookupStrategy.class.getName() + "()")
+                        .build()
+                        .getTemplateLookupStrategy() instanceof MyTemplateLookupStrategy);
         
-        cfg.setSetting(Configuration.TEMPLATE_LOOKUP_STRATEGY_KEY, "dEfault");
-        assertSame(DefaultTemplateLookupStrategy.INSTANCE, cfg.getTemplateLookupStrategy());
+        assertSame(
+                DefaultTemplateLookupStrategy.INSTANCE,
+                new Configuration.Builder(Configuration.VERSION_3_0_0)
+                        .setting(TEMPLATE_LOOKUP_STRATEGY_KEY, "dEfault")
+                        .build()
+                        .getTemplateLookupStrategy());
     }
     
     @Test
     public void testCustomStrategy() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTextTemplate("test.ftl", "");
         tl.putTextTemplate("aa/test.ftl", "");
-        cfg.setTemplateLoader(tl);
-        
-        cfg.setTemplateLookupStrategy(MyTemplateLookupStrategy.INSTANCE);
+
+        Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
+                .templateLoader(tl)
+                .templateLookupStrategy(MyTemplateLookupStrategy.INSTANCE)
+                .build();
         
         final Locale locale = new Locale("aa", "BB", "CC_DD");
         
@@ -86,18 +96,16 @@ public class TemplateLookupStrategyTest {
     
     @Test
     public void testDefaultStrategy() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTextTemplate("test.ftl", "");
         tl.putTextTemplate("test_aa.ftl", "");
         tl.putTextTemplate("test_aa_BB.ftl", "");
         tl.putTextTemplate("test_aa_BB_CC.ftl", "");
         tl.putTextTemplate("test_aa_BB_CC_DD.ftl", "");
-        cfg.setTemplateLoader(tl);
-        
+
         try {
-            cfg.getTemplate("missing.ftl", new Locale("aa", "BB", "CC_DD"));
+            new Configuration.Builder(Configuration.VERSION_3_0_0).templateLoader(tl).build()
+                    .getTemplate("missing.ftl", new Locale("aa", "BB", "CC_DD"));
             fail();
         } catch (TemplateNotFoundException e) {
             assertEquals("missing.ftl", e.getTemplateName());
@@ -110,12 +118,12 @@ public class TemplateLookupStrategyTest {
                             "missing.ftl"),
                     tl.getLoadNames());
             tl.clearEvents();
-            cfg.clearTemplateCache();
         }
-        
-        cfg.setLocale(new Locale("xx"));
+
         try {
-            cfg.getTemplate("missing.ftl");
+            new Configuration.Builder(Configuration.VERSION_3_0_0).templateLoader(tl)
+                    .locale(new Locale("xx")).build()
+                    .getTemplate("missing.ftl");
             fail();
         } catch (TemplateNotFoundException e) {
             assertEquals("missing.ftl", e.getTemplateName());
@@ -123,12 +131,13 @@ public class TemplateLookupStrategyTest {
                     ImmutableList.of("missing_xx.ftl", "missing.ftl"),
                     tl.getLoadNames());
             tl.clearEvents();
-            cfg.clearTemplateCache();
         }
         
-        cfg.setLocalizedLookup(false);
         try {
-            cfg.getTemplate("missing.ftl");
+            new Configuration.Builder(Configuration.VERSION_3_0_0).templateLoader(tl)
+                    .locale(new Locale("xx"))
+                    .localizedLookup(false).build()
+                    .getTemplate("missing.ftl");
             fail();
         } catch (TemplateNotFoundException e) {
             assertEquals("missing.ftl", e.getTemplateName());
@@ -136,12 +145,11 @@ public class TemplateLookupStrategyTest {
                     ImmutableList.of("missing.ftl"),
                     tl.getLoadNames());
             tl.clearEvents();
-            cfg.clearTemplateCache();
         }
-        cfg.setLocalizedLookup(true);
-        
+
         try {
-            cfg.getTemplate("_a_b_.ftl", new Locale("xx", "yy"));
+            new Configuration.Builder(Configuration.VERSION_3_0_0).templateLoader(tl).build()
+                    .getTemplate("_a_b_.ftl", new Locale("xx", "yy"));
             fail();
         } catch (TemplateNotFoundException e) {
             assertEquals("_a_b_.ftl", e.getTemplateName());
@@ -149,13 +157,13 @@ public class TemplateLookupStrategyTest {
                     ImmutableList.of("_a_b__xx_YY.ftl", "_a_b__xx.ftl", "_a_b_.ftl"),
                     tl.getLoadNames());
             tl.clearEvents();
-            cfg.clearTemplateCache();
         }
 
         for (String templateName : new String[] { "test.ftl", "./test.ftl", "/test.ftl", "x/foo/../../test.ftl" }) {
             {
                 final Locale locale = new Locale("aa", "BB", "CC_DD");
-                final Template t = cfg.getTemplate("test.ftl", locale);
+                final Template t = new Configuration.Builder(Configuration.VERSION_3_0_0).templateLoader(tl).build()
+                        .getTemplate("test.ftl", locale);
                 assertEquals("test.ftl", t.getLookupName());
                 assertEquals("test_aa_BB_CC_DD.ftl", t.getSourceName());
                 assertEquals(locale, t.getLocale());
@@ -163,24 +171,24 @@ public class TemplateLookupStrategyTest {
                 assertEquals(ImmutableList.of("test_aa_BB_CC_DD.ftl"), tl.getLoadNames());
                 assertNull(t.getCustomLookupCondition());
                 tl.clearEvents();
-                cfg.clearTemplateCache();
             }
             
             {
                 final Locale locale = new Locale("aa", "BB", "CC_XX");
-                final Template t = cfg.getTemplate(templateName, locale);
+                final Template t = new Configuration.Builder(Configuration.VERSION_3_0_0).templateLoader(tl).build()
+                        .getTemplate(templateName, locale);
                 assertEquals("test.ftl", t.getLookupName());
                 assertEquals("test_aa_BB_CC.ftl", t.getSourceName());
                 assertEquals(locale, t.getLocale());
                 assertNull(t.getCustomLookupCondition());
                 assertEquals(ImmutableList.of("test_aa_BB_CC_XX.ftl", "test_aa_BB_CC.ftl"), tl.getLoadNames());
                 tl.clearEvents();
-                cfg.clearTemplateCache();
             }
             
             {
                 final Locale locale = new Locale("aa", "BB", "XX_XX");
-                final Template t = cfg.getTemplate(templateName, locale);
+                final Template t = new Configuration.Builder(Configuration.VERSION_3_0_0).templateLoader(tl).build()
+                        .getTemplate(templateName, locale);
                 assertEquals("test.ftl", t.getLookupName());
                 assertEquals("test_aa_BB.ftl", t.getSourceName());
                 assertEquals(locale, t.getLocale());
@@ -189,13 +197,13 @@ public class TemplateLookupStrategyTest {
                         ImmutableList.of("test_aa_BB_XX_XX.ftl", "test_aa_BB_XX.ftl", "test_aa_BB.ftl"),
                         tl.getLoadNames());
                 tl.clearEvents();
-                cfg.clearTemplateCache();
             }
     
             {
-                cfg.setLocalizedLookup(false);
                 final Locale locale = new Locale("aa", "BB", "XX_XX");
-                final Template t = cfg.getTemplate(templateName, locale);
+                final Template t = new Configuration.Builder(Configuration.VERSION_3_0_0).templateLoader(tl)
+                        .localizedLookup(false).build()
+                        .getTemplate(templateName, locale);
                 assertEquals("test.ftl", t.getLookupName());
                 assertEquals("test.ftl", t.getSourceName());
                 assertEquals(locale, t.getLocale());
@@ -204,13 +212,12 @@ public class TemplateLookupStrategyTest {
                         ImmutableList.of("test.ftl"),
                         tl.getLoadNames());
                 tl.clearEvents();
-                cfg.clearTemplateCache();
-                cfg.setLocalizedLookup(true);
             }
     
             {
                 final Locale locale = new Locale("aa", "XX", "XX_XX");
-                final Template t = cfg.getTemplate(templateName, locale);
+                final Template t = new Configuration.Builder(Configuration.VERSION_3_0_0).templateLoader(tl).build()
+                        .getTemplate(templateName, locale);
                 assertEquals("test.ftl", t.getLookupName());
                 assertEquals("test_aa.ftl", t.getSourceName());
                 assertEquals(locale, t.getLocale());
@@ -219,12 +226,12 @@ public class TemplateLookupStrategyTest {
                         ImmutableList.of("test_aa_XX_XX_XX.ftl", "test_aa_XX_XX.ftl", "test_aa_XX.ftl", "test_aa.ftl"),
                         tl.getLoadNames());
                 tl.clearEvents();
-                cfg.clearTemplateCache();
             }
             
             {
                 final Locale locale = new Locale("xx", "XX", "XX_XX");
-                final Template t = cfg.getTemplate(templateName, locale);
+                final Template t = new Configuration.Builder(Configuration.VERSION_3_0_0).templateLoader(tl).build()
+                        .getTemplate(templateName, locale);
                 assertEquals("test.ftl", t.getLookupName());
                 assertEquals("test.ftl", t.getSourceName());
                 assertEquals(locale, t.getLocale());
@@ -234,12 +241,12 @@ public class TemplateLookupStrategyTest {
                                 "test_xx_XX_XX_XX.ftl", "test_xx_XX_XX.ftl", "test_xx_XX.ftl", "test_xx.ftl", "test.ftl"),
                         tl.getLoadNames());
                 tl.clearEvents();
-                cfg.clearTemplateCache();
             }
             
             {
                 final Locale locale = new Locale("xx", "BB", "CC_DD");
-                final Template t = cfg.getTemplate(templateName, locale);
+                final Template t = new Configuration.Builder(Configuration.VERSION_3_0_0).templateLoader(tl).build()
+                        .getTemplate(templateName, locale);
                 assertEquals("test.ftl", t.getLookupName());
                 assertEquals("test.ftl", t.getSourceName());
                 assertEquals(locale, t.getLocale());
@@ -249,20 +256,18 @@ public class TemplateLookupStrategyTest {
                             "test_xx_BB_CC_DD.ftl", "test_xx_BB_CC.ftl", "test_xx_BB.ftl", "test_xx.ftl", "test.ftl"),
                         tl.getLoadNames());
                 tl.clearEvents();
-                cfg.clearTemplateCache();
             }
         }
     }
     
     @Test
     public void testAcquisition() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTextTemplate("t.ftl", "");
         tl.putTextTemplate("sub/i.ftl", "");
         tl.putTextTemplate("x/sub/i.ftl", "");
-        cfg.setTemplateLoader(tl);
+
+        Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0).templateLoader(tl).build();
 
         final Locale locale = new Locale("xx");
         
@@ -299,8 +304,18 @@ public class TemplateLookupStrategyTest {
 
     @Test
     public void testCustomLookupCondition() throws IOException, TemplateException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        
+        MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
+
+        final Configuration cfg;
+        final Configuration cfgNoLocLU;
+        {
+            Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0)
+                    .templateLoader(tl)
+                    .templateLookupStrategy(new DomainTemplateLookupStrategy());
+            cfg = cfgB.build();
+            cfgNoLocLU = cfgB.localizedLookup(false).build();
+        }
+
         final String iAtDefaultContent = "i at default";
         final String iXxAtDefaultContent = "i_xx at default";
         final String iAtBaazComContent = "i at baaz.com";
@@ -314,7 +329,6 @@ public class TemplateLookupStrategyTest {
         final String t2XxLocaleExpectedOutput = "i3_xx at foo.com";
         final String t2OtherLocaleExpectedOutput = "i3 at foo.com";
         
-        MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTextTemplate("@foo.com/t.ftl", tAtFooComContent);
         tl.putTextTemplate("@bar.com/t.ftl", tAtBarComContent);
         tl.putTextTemplate("@default/t.ftl", tAtDefaultContent);
@@ -326,10 +340,7 @@ public class TemplateLookupStrategyTest {
         tl.putTextTemplate("@default/i2.ftl", "<#import 'i3.ftl' as i3 />");
         tl.putTextTemplate("@foo.com/i3.ftl", "<#global proof = '" + t2OtherLocaleExpectedOutput + "'>");
         tl.putTextTemplate("@foo.com/i3_xx.ftl", "<#global proof = '" + t2XxLocaleExpectedOutput + "'>");
-        cfg.setTemplateLoader(tl);
-        
-        cfg.setTemplateLookupStrategy(new DomainTemplateLookupStrategy());
-        
+
         {
             final Locale locale = new Locale("xx");
             final Domain domain = new Domain("foo.com");
@@ -423,10 +434,9 @@ public class TemplateLookupStrategyTest {
         }
 
         {
-            cfg.setLocalizedLookup(false);
             final Locale locale = new Locale("xx", "YY");
             final Domain domain = new Domain("nosuch.com");
-            final Template t = cfg.getTemplate("i.ftl", locale, domain);
+            final Template t = cfgNoLocLU.getTemplate("i.ftl", locale, domain);
             assertEquals("i.ftl", t.getLookupName());
             assertEquals("@default/i.ftl", t.getSourceName());
             assertEquals(locale, t.getLocale());
@@ -437,8 +447,7 @@ public class TemplateLookupStrategyTest {
                     tl.getLoadNames());
             
             tl.clearEvents();
-            cfg.setLocalizedLookup(true);
-            cfg.clearTemplateCache();
+            cfgNoLocLU.clearTemplateCache();
         }
         
         {
@@ -474,10 +483,9 @@ public class TemplateLookupStrategyTest {
         }
         
         {
-            cfg.setLocalizedLookup(false);
             final Locale locale = new Locale("xx");
             final Domain domain = new Domain("foo.com");
-            final Template t = cfg.getTemplate("t2.ftl", locale, domain);
+            final Template t = cfgNoLocLU.getTemplate("t2.ftl", locale, domain);
             assertOutputEquals(t2OtherLocaleExpectedOutput, t);
             assertEquals(
                     ImmutableList.of(
@@ -487,8 +495,7 @@ public class TemplateLookupStrategyTest {
                     tl.getLoadNames());
             
             tl.clearEvents();
-            cfg.setLocalizedLookup(true);
-            cfg.clearTemplateCache();
+            cfgNoLocLU.clearTemplateCache();
         }
         
         {
@@ -549,13 +556,12 @@ public class TemplateLookupStrategyTest {
     
     @Test
     public void testNonparsed() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTextTemplate("test.txt", "");
         tl.putTextTemplate("test_aa.txt", "");
-        cfg.setTemplateLoader(tl);
-        
+
+        Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0).templateLoader(tl).build();
+
         try {
             cfg.getTemplate("missing.txt", new Locale("aa", "BB"), null, false);
             fail();
@@ -585,12 +591,11 @@ public class TemplateLookupStrategyTest {
 
     @Test
     public void testParseError() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
         tl.putTextTemplate("test.ftl", "");
         tl.putTextTemplate("test_aa.ftl", "<#wrong>");
-        cfg.setTemplateLoader(tl);
+
+        Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0).templateLoader(tl).build();
         
         try {
             cfg.getTemplate("test.ftl", new Locale("aa", "BB"));

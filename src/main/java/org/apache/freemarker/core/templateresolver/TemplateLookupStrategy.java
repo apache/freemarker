@@ -50,7 +50,7 @@ import org.apache.freemarker.core.Template;
  * applications, yet it can be confusing.)
  * </ul>
  * 
- * @see Configuration#setTemplateLookupStrategy(TemplateLookupStrategy)
+ * @see Configuration#getTemplateLookupStrategy()
  * 
  * @since 2.3.22
  */

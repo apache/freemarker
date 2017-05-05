@@ -20,16 +20,15 @@ package org.apache.freemarker.core.templateresolver.impl;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateNotFoundException;
-import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
 import org.apache.freemarker.core.util._StringUtil;
 
 /**
- * The default template name format only when {@link Configuration#Configuration(Version) incompatible_improvements}
- * is set to 2.4.0 (or higher). This is not the out-of-the-box default format of FreeMarker 2.4.x, because the
- * default {@code incompatible_improvements} is still 2.3.0 there.
+ * The default template name format only when {@link Configuration#getIncompatibleImprovements()
+ * incompatible_improvements} is set to 2.4.0 (or higher). This is not the out-of-the-box default format of FreeMarker
+ * 2.4.x, because the default {@code incompatible_improvements} is still 2.3.0 there.
  * 
  * <p>
  * Differences to the {@link DefaultTemplateNameFormatFM2} format:

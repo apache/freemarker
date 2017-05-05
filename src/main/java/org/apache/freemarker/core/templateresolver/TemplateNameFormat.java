@@ -20,11 +20,9 @@
 package org.apache.freemarker.core.templateresolver;
 
 /**
- * Symbolized template name format. The API of this class isn't exposed as it's too immature, so custom
- * template name formats aren't possible yet.
- *
- * @since 2.3.22
+ * Symbolizes a template name format, which defines the basic syntax of names through algorithms such as normalization.
  */
+// TODO [FM3] Before it becomes a BC problem, shouldn't we add methods like splitting to directory name and file name?
 public abstract class TemplateNameFormat {
 
     protected TemplateNameFormat() {

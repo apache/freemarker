@@ -132,10 +132,12 @@ public class SQLTimeZoneTest extends TemplateTest {
         TimeZone prevSysDefTz = TimeZone.getDefault();
         TimeZone.setDefault(GMT_P02);
         try {
-            Configuration cfg = getConfiguration();
-            cfg.unsetTimeZone();
-            assertNull(cfg.getSQLDateAndTimeTimeZone());
-            assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
+            Configuration.ExtendableBuilder<?> cfgB = createConfigurationBuilder();
+            cfgB.unsetTimeZone();
+            setConfiguration(cfgB.build());
+
+            assertNull(getConfiguration().getSQLDateAndTimeTimeZone());
+            assertEquals(TimeZone.getDefault(), getConfiguration().getTimeZone());
             
             assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_SAME);
         } finally {
@@ -148,10 +150,10 @@ public class SQLTimeZoneTest extends TemplateTest {
         TimeZone prevSysDefTz = TimeZone.getDefault();
         TimeZone.setDefault(GMT_P02);
         try {
-            Configuration cfg = getConfiguration();
-            cfg.unsetTimeZone();
-            cfg.setSQLDateAndTimeTimeZone(GMT_P02);
-            
+            Configuration.ExtendableBuilder<?> cfgB = createConfigurationBuilder();
+            cfgB.sqlDateAndTimeTimeZone(GMT_P02).unsetTimeZone();
+            setConfiguration(cfgB.build());
+
             assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_DIFFERENT);
         } finally {
             TimeZone.setDefault(prevSysDefTz);
@@ -160,48 +162,53 @@ public class SQLTimeZoneTest extends TemplateTest {
     
     @Test
     public void testWithGMT1AndNullSQL() throws Exception {
-        Configuration cfg = getConfiguration();
-        assertNull(cfg.getSQLDateAndTimeTimeZone());
-        cfg.setTimeZone(TimeZone.getTimeZone("GMT+01:00"));
-        
+        setConfiguration(createConfigurationBuilder()
+                .timeZone(TimeZone.getTimeZone("GMT+01:00"))
+                .build());
+        assertNull(getConfiguration().getSQLDateAndTimeTimeZone());
+
         assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT1_SQL_SAME + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_SAME);
     }
 
     @Test
     public void testWithGMT1AndGMT2SQL() throws Exception {
-        Configuration cfg = getConfiguration();
-        cfg.setSQLDateAndTimeTimeZone(GMT_P02);
-        cfg.setTimeZone(TimeZone.getTimeZone("GMT+01:00"));
-        
+        setConfiguration(createConfigurationBuilder()
+                .sqlDateAndTimeTimeZone(GMT_P02)
+                .timeZone(TimeZone.getTimeZone("GMT+01:00"))
+                .build());
+
         assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT1_SQL_DIFFERENT + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_DIFFERENT);
     }
 
     @Test
     public void testWithGMT2AndNullSQL() throws Exception {
-        Configuration cfg = getConfiguration();
-        assertNull(cfg.getSQLDateAndTimeTimeZone());
-        cfg.setTimeZone(TimeZone.getTimeZone("GMT+02"));
-        
+        setConfiguration(createConfigurationBuilder()
+                .timeZone(TimeZone.getTimeZone("GMT+02"))
+                .build());
+        assertNull(getConfiguration().getSQLDateAndTimeTimeZone());
+
         assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_SAME);
     }
 
     @Test
     public void testWithGMT2AndGMT2SQL() throws Exception {
-        Configuration cfg = getConfiguration();
-        cfg.setSQLDateAndTimeTimeZone(GMT_P02);
-        cfg.setTimeZone(TimeZone.getTimeZone("GMT+02"));
+        setConfiguration(createConfigurationBuilder()
+            .sqlDateAndTimeTimeZone(GMT_P02)
+            .timeZone(TimeZone.getTimeZone("GMT+02"))
+            .build());
         
         assertOutput(FTL, OUTPUT_BEFORE_SETTING_GMT_CFG_GMT2 + OUTPUT_AFTER_SETTING_GMT_CFG_SQL_DIFFERENT);
     }
     
     @Test
     public void testCacheFlushings() throws Exception {
-        Configuration cfg = getConfiguration();
-        cfg.setTimeZone(_DateUtil.UTC);
-        cfg.setDateFormat("yyyy-MM-dd E");
-        cfg.setTimeFormat("HH:mm:ss E");
-        cfg.setDateTimeFormat("yyyy-MM-dd'T'HH:mm:ss E");
-        
+        Configuration.ExtendableBuilder<?> cfgB = createConfigurationBuilder()
+                .timeZone(_DateUtil.UTC)
+                .dateFormat("yyyy-MM-dd E")
+                .timeFormat("HH:mm:ss E")
+                .dateTimeFormat("yyyy-MM-dd'T'HH:mm:ss E");
+
+        setConfiguration(cfgB.build());
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
                 + "<#setting locale='de'>\n"
@@ -226,8 +233,8 @@ public class SQLTimeZoneTest extends TemplateTest {
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n",
                 "2014-07-11 Fri, 10:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
                 + "2014-07-11 Fri, 10:30:05 Thu, 2014-07-12T10:30:05, 2014-07-12T10:30:05, 2014-07-12 Sat, 10:30:05 Sat\n");
-        
-        cfg.setSQLDateAndTimeTimeZone(GMT_P02);
+
+        setConfiguration(cfgB.sqlDateAndTimeTimeZone(GMT_P02).build());
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
                 + "<#setting locale='de'>\n"
@@ -256,9 +263,11 @@ public class SQLTimeZoneTest extends TemplateTest {
 
     @Test
     public void testDateAndTimeBuiltInsHasNoEffect() throws Exception {
-        Configuration cfg = getConfiguration();
-        cfg.setTimeZone(_DateUtil.UTC);
-        cfg.setSQLDateAndTimeTimeZone(GMT_P02);
+        setConfiguration(createConfigurationBuilder()
+                .timeZone(_DateUtil.UTC)
+                .sqlDateAndTimeTimeZone(GMT_P02)
+                .build());
+
         assertOutput(
                 "${javaDayErrorDate?date} ${javaDayErrorDate?time} ${sqlTimestamp?date} ${sqlTimestamp?time} "
                 + "${sqlDate?date} ${sqlTime?time}\n"
@@ -275,10 +284,11 @@ public class SQLTimeZoneTest extends TemplateTest {
 
     @Test
     public void testChangeSettingInTemplate() throws Exception {
-        Configuration cfg = getConfiguration();
-        cfg.setTimeZone(_DateUtil.UTC);
-        
-        assertNull(cfg.getSQLDateAndTimeTimeZone());
+        setConfiguration(createConfigurationBuilder()
+                .timeZone(_DateUtil.UTC)
+                .build());
+
+        assertNull(getConfiguration().getSQLDateAndTimeTimeZone());
 
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n"
@@ -311,9 +321,10 @@ public class SQLTimeZoneTest extends TemplateTest {
     
     @Test
     public void testFormatUTCFlagHasNoEffect() throws Exception {
-        Configuration cfg = getConfiguration();
-        cfg.setSQLDateAndTimeTimeZone(GMT_P02);
-        cfg.setTimeZone(TimeZone.getTimeZone("GMT-01"));
+        setConfiguration(createConfigurationBuilder()
+                .sqlDateAndTimeTimeZone(GMT_P02)
+                .timeZone(TimeZone.getTimeZone("GMT-01"))
+                .build());
         
         assertOutput(
                 "<#setting date_format='xs fz'><#setting time_format='xs fz'>\n"
@@ -335,17 +346,15 @@ public class SQLTimeZoneTest extends TemplateTest {
                 + "2014-07-11-01:00, 09:30:05-01:00, 09:30:05-01:00\n"
                 + "2014-07-11Z, 10:30:05Z, 10:30:05Z\n");
     }
-    
-    @Override
-    protected Configuration createConfiguration() {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        cfg.setLocale(Locale.US);
-        cfg.setDateFormat("yyyy-MM-dd");
-        cfg.setTimeFormat("HH:mm:ss");
-        cfg.setDateTimeFormat("yyyy-MM-dd'T'HH:mm:ss");
-        return cfg;
+
+    private Configuration.ExtendableBuilder<?> createConfigurationBuilder() {
+        return new Configuration.Builder(Configuration.VERSION_3_0_0)
+                .locale(Locale.US)
+                .dateFormat("yyyy-MM-dd")
+                .timeFormat("HH:mm:ss")
+                .dateTimeFormat("yyyy-MM-dd'T'HH:mm:ss");
     }
-    
+
     @Override
     protected Object createDataModel() {
         return this;

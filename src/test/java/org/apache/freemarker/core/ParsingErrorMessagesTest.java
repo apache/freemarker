@@ -24,15 +24,15 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 
 import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class ParsingErrorMessagesTest {
 
-    private Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-    {
-        cfg.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX);
-    }
-    
+    private Configuration cfg = new TestConfigurationBuilder()
+            .tagSyntax(ParsingConfiguration.AUTO_DETECT_TAG_SYNTAX)
+            .build();
+
     @Test
     public void testNeedlessInterpolation() {
         assertErrorContains("<#if ${x} == 3></#if>", "instead of ${");
@@ -89,7 +89,7 @@ public class ParsingErrorMessagesTest {
                 ftl = ftl.replace('<', '[').replace('>', ']');
             }
             new Template("adhoc", ftl, cfg);
-            fail("The tempalte had to fail");
+            fail("The template had to fail");
         } catch (ParseException e) {
             String msg = e.getMessage();
             for (String needle: expectedSubstrings) {

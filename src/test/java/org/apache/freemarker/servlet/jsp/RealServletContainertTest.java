@@ -40,12 +40,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateExceptionHandler;
 import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.apache.freemarker.servlet.FreemarkerServlet;
+import org.apache.freemarker.servlet.FreemarkerServletConfigurationBuilder;
 import org.apache.freemarker.servlet.WebAppTemplateLoader;
 import org.apache.freemarker.test.servlet.DefaultModel2TesterAction;
 import org.apache.freemarker.test.servlet.WebAppTestCase;
@@ -406,15 +406,31 @@ public class RealServletContainertTest extends WebAppTestCase {
     public static class AssertCustomizedDefaultsFreemarkerServlet extends AssertingFreemarkerServlet {
 
         @Override
-        protected Configuration createConfiguration() {
-            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-            cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-            cfg.setLogTemplateExceptions(true);
-            DefaultObjectWrapper.Builder bwb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
-            bwb.setUseModelCache(true);
-            cfg.setObjectWrapper(bwb.build());
-            cfg.setTemplateLoader(new WebAppTemplateLoader(getServletContext()));
-            return cfg;
+        protected Configuration.ExtendableBuilder createConfigurationBuilder() {
+            return new FreemarkerServletConfigurationBuilder(
+                    AssertCustomizedDefaultsFreemarkerServlet.this, Configuration.VERSION_3_0_0) {
+                @Override
+                protected TemplateExceptionHandler getDefaultTemplateExceptionHandler() {
+                    return TemplateExceptionHandler.RETHROW_HANDLER;
+                }
+
+                @Override
+                protected boolean getDefaultLogTemplateExceptions() {
+                    return true;
+                }
+
+                @Override
+                protected ObjectWrapper getDefaultObjectWrapper() {
+                    DefaultObjectWrapper.Builder bwb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
+                    bwb.setUseModelCache(true);
+                    return bwb.build();
+                }
+
+                @Override
+                protected TemplateLoader getDefaultTemplateLoader() {
+                    return new WebAppTemplateLoader(getServletContext());
+                }
+            };
         }
 
         @Override
@@ -451,23 +467,30 @@ public class RealServletContainertTest extends WebAppTestCase {
         }
 
         @Override
-        protected ObjectWrapperAndUnwrapper createDefaultObjectWrapper() {
-            DefaultObjectWrapper.Builder bwb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
-            bwb.setUseModelCache(true);
-            assertEquals(Configuration.VERSION_3_0_0, bwb.getIncompatibleImprovements());
-            return bwb.build();
+        protected Configuration.ExtendableBuilder createConfigurationBuilder() {
+            return new FreemarkerServletConfigurationBuilder(
+                    AssertObjectWrapperDefaults1FreemarkerServlet.this, Configuration.VERSION_3_0_0) {
+                @Override
+                protected ObjectWrapper getDefaultObjectWrapper() {
+                    DefaultObjectWrapper.Builder bwb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
+                    bwb.setUseModelCache(true);
+                    assertEquals(Configuration.VERSION_3_0_0, bwb.getIncompatibleImprovements());
+                    return bwb.build();
+                }
+            };
         }
-        
+
     }
 
     public static class AssertObjectWrapperDefaults2FreemarkerServlet extends
             AssertObjectWrapperDefaults1FreemarkerServlet {
 
         @Override
-        protected Configuration createConfiguration() {
-            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-            cfg.setObjectWrapper(new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
-            return cfg;
+        protected Configuration.ExtendableBuilder createConfigurationBuilder() {
+            Configuration.ExtendableBuilder cfgB = super.createConfigurationBuilder();
+            // This is not a proper way of doing this, but consistent behavior still needs to be tested.
+            cfgB.setObjectWrapper(new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
+            return cfgB;
         }
         
         @Override

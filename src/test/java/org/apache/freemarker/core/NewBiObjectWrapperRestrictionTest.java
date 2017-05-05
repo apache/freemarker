@@ -22,16 +22,15 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.util.FullyCustomObjectWrapper;
+import org.apache.freemarker.test.TestConfigurationBuilder;
+import org.apache.freemarker.test.util.EntirelyCustomObjectWrapper;
 import org.junit.Test;
 
 public class NewBiObjectWrapperRestrictionTest extends TemplateTest {
 
     @Override
-    protected Configuration createConfiguration() throws Exception {
-        Configuration cfg = super.createConfiguration();
-        cfg.setObjectWrapper(new FullyCustomObjectWrapper());
-        return cfg;
+    protected Configuration createDefaultConfiguration() throws Exception {
+        return new TestConfigurationBuilder().objectWrapper(new EntirelyCustomObjectWrapper()).build();
     }
 
     @Test

@@ -21,36 +21,31 @@ package org.apache.freemarker.manualtest;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.userpkg.BaseNTemplateNumberFormatFactory;
-import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
-import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 import org.apache.freemarker.core.valueformat.impl.AliasTemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.impl.AliasTemplateNumberFormatFactory;
+import org.apache.freemarker.test.TemplateTest;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableMap;
+
 @SuppressWarnings("boxing")
-public class CustomFormatsExample extends ExamplesTest {
+public class CustomFormatsExample extends TemplateTest {
 
     @Test
     public void aliases1() throws IOException, TemplateException {
-        Configuration cfg = getConfiguration();
-
-        Map<String, TemplateNumberFormatFactory> customNumberFormats
-                = new HashMap<>();
-        customNumberFormats.put("price", new AliasTemplateNumberFormatFactory(",000.00"));
-        customNumberFormats.put("weight", new AliasTemplateNumberFormatFactory("0.##;; roundingMode=halfUp"));
-        cfg.setCustomNumberFormats(customNumberFormats);
-
-        Map<String, TemplateDateFormatFactory> customDateFormats
-                = new HashMap<>();
-        customDateFormats.put("fileDate", new AliasTemplateDateFormatFactory("dd/MMM/yy hh:mm a"));
-        customDateFormats.put("logEventTime", new AliasTemplateDateFormatFactory("iso ms u"));
-        cfg.setCustomDateFormats(customDateFormats);
+        setConfiguration(new TestConfigurationBuilder(this.getClass())
+            .customNumberFormats(ImmutableMap.of(
+                    "price", new AliasTemplateNumberFormatFactory(",000.00"),
+                    "weight", new AliasTemplateNumberFormatFactory("0.##;; roundingMode=halfUp")))
+            .customDateFormats(ImmutableMap.of(
+                    "fileDate", new AliasTemplateDateFormatFactory("dd/MMM/yy hh:mm a"),
+                    "logEventTime", new AliasTemplateDateFormatFactory("iso ms u")
+                    ))
+            .build());
 
         addToDataModel("p", 10000);
         addToDataModel("w", new BigDecimal("10.305"));
@@ -62,26 +57,22 @@ public class CustomFormatsExample extends ExamplesTest {
 
     @Test
     public void aliases2() throws IOException, TemplateException {
-        Configuration cfg = getConfiguration();
+        setConfiguration(new TestConfigurationBuilder(this.getClass())
+                .customNumberFormats(ImmutableMap.of(
+                        "base", BaseNTemplateNumberFormatFactory.INSTANCE,
+                        "oct", new AliasTemplateNumberFormatFactory("@base 8")))
+                .build());
 
-        Map<String, TemplateNumberFormatFactory> customNumberFormats
-                = new HashMap<>();
-        customNumberFormats.put("base", BaseNTemplateNumberFormatFactory.INSTANCE);
-        customNumberFormats.put("oct", new AliasTemplateNumberFormatFactory("@base 8"));
-        cfg.setCustomNumberFormats(customNumberFormats);
-        
         assertOutputForNamed("CustomFormatsExample-alias2.ftlh");
     }
 
     @Test
     public void modelAware() throws IOException, TemplateException {
-        Configuration cfg = getConfiguration();
-
-        Map<String, TemplateNumberFormatFactory> customNumberFormats
-                = new HashMap<>();
-        customNumberFormats.put("ua", UnitAwareTemplateNumberFormatFactory.INSTANCE);
-        cfg.setCustomNumberFormats(customNumberFormats);
-        cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");
+        setConfiguration(new TestConfigurationBuilder(this.getClass())
+                .customNumberFormats(ImmutableMap.of(
+                        "ua", UnitAwareTemplateNumberFormatFactory.INSTANCE))
+                .numberFormat("@ua 0.####;; roundingMode=halfUp")
+                .build());
 
         addToDataModel("weight", new UnitAwareTemplateNumberModel(1.5, "kg"));
         

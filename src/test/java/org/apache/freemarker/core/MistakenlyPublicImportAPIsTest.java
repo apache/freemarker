@@ -30,6 +30,7 @@ import org.apache.freemarker.core.Environment.Namespace;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.core.util._NullWriter;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 /**
@@ -39,11 +40,11 @@ public class MistakenlyPublicImportAPIsTest {
 
     @Test
     public void testImportCopying() throws IOException, TemplateException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
         StringTemplateLoader tl = new StringTemplateLoader();
         tl.putTemplate("imp1", "<#macro m>1</#macro>");
         tl.putTemplate("imp2", "<#assign x = 2><#macro m>${x}</#macro>");
-        cfg.setTemplateLoader(tl);
+
+        Configuration cfg = new TestConfigurationBuilder().templateLoader(tl).build();
         
         Template t1 = new Template(null, "<#import 'imp1' as i1><#import 'imp2' as i2>", cfg);
         List<ASTDirImport> imports = t1.getImports();

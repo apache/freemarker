@@ -24,6 +24,7 @@ import java.io.StringWriter;
 
 import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.apache.freemarker.test.CopyrightCommentRemoverTemplateLoader;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.apache.freemarker.test.util.FileTestCase;
 
 public class CanonicalFormTest extends FileTestCase {
@@ -54,13 +55,13 @@ public class CanonicalFormTest extends FileTestCase {
     
     private void assertCanonicalFormOf(String ftlFileName)
             throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        cfg.setTemplateLoader(
-                new CopyrightCommentRemoverTemplateLoader(
-                        new ClassTemplateLoader(CanonicalFormTest.class, "")));
+        Configuration cfg = new TestConfigurationBuilder()
+                .templateLoader(
+                        new CopyrightCommentRemoverTemplateLoader(
+                                new ClassTemplateLoader(CanonicalFormTest.class, "")))
+                .build();
         StringWriter sw = new StringWriter();
         cfg.getTemplate(ftlFileName).dump(sw);
-
         assertExpectedFileEqualsString(ftlFileName + ".out", sw.toString());
     }
 

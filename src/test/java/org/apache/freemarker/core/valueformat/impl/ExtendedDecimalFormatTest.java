@@ -28,9 +28,9 @@ import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.util.Locale;
 
-import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.test.TemplateTest;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class ExtendedDecimalFormatTest extends TemplateTest {
@@ -276,16 +276,15 @@ public class ExtendedDecimalFormatTest extends TemplateTest {
     
     @Test
     public void testTemplates() throws IOException, TemplateException {
-        Configuration cfg = getConfiguration();
-        cfg.setLocale(Locale.US);
-        
-        cfg.setNumberFormat(",000.#");
+        TestConfigurationBuilder cfgB = new TestConfigurationBuilder();
+
+        setConfiguration(cfgB.numberFormat(",000.#").build());
         assertOutput("${1000.15} ${1000.25}", "1,000.2 1,000.2");
-        cfg.setNumberFormat(",000.#;; roundingMode=halfUp groupingSeparator=_");
+        setConfiguration(cfgB.numberFormat(",000.#;; roundingMode=halfUp groupingSeparator=_").build());;
         assertOutput("${1000.15} ${1000.25}", "1_000.2 1_000.3");
-        cfg.setLocale(Locale.GERMANY);
+        setConfiguration(cfgB.locale(Locale.GERMANY).build());;
         assertOutput("${1000.15} ${1000.25}", "1_000,2 1_000,3");
-        cfg.setLocale(Locale.US);
+        setConfiguration(cfgB.locale(Locale.US).build());;
         assertOutput(
                 "${1000.15}; "
                 + "${1000.15?string(',##.#;;groupingSeparator=\" \"')}; "

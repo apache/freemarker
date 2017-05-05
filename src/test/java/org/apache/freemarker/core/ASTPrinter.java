@@ -43,6 +43,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util.FTLUtil;
 import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 
 /**
  * Static methods and command-line tool for printing the AST of a template. 
@@ -68,7 +69,7 @@ public class ASTPrinter {
     }
     
     private ASTPrinter() {
-        cfg = new Configuration(Configuration.VERSION_3_0_0);
+        cfg = new TestConfigurationBuilder(Configuration.VERSION_3_0_0).build();
     }
     
     private void mainSingleTemplate(String[] args) throws IOException, FileNotFoundException {
@@ -230,8 +231,7 @@ public class ASTPrinter {
     }
     
     public static String getASTAsString(String templateName, String ftl, Options opts) throws IOException {
-        Configuration cfg = new Configuration();
-        Template t = new Template(templateName, ftl, cfg);
+        Template t = new Template(templateName, ftl, new TestConfigurationBuilder().build());
         return getASTAsString(t, opts);
     }
 

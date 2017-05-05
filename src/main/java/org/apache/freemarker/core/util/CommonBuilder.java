@@ -19,11 +19,17 @@
 
 package org.apache.freemarker.core.util;
 
+import org.apache.freemarker.core.ConfigurationException;
+
 /**
  * Interface of builders (used for implementing the builder pattern).
  */
 public interface CommonBuilder<ProductT> {
 
-    ProductT build();
+    /**
+     * Creates an instance of the product class. This is usually a new instance, though if the product is stateless,
+     * it's possibly a shared object instead of a new one.
+     */
+    ProductT build() throws ConfigurationException;
 
 }

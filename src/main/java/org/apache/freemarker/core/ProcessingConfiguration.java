@@ -40,9 +40,10 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 /**
  * Implemented by FreeMarker core classes (not by you) that provide configuration settings that affect {@linkplain
  * Template#process(Object, Writer) template processing} (as opposed to template parsing). <b>New methods may be added
- * anytime in future FreeMarker versions, so don't try to implement this interface yourself!</b>
+ * any time in future FreeMarker versions, so don't try to implement this interface yourself!</b>
  *
  * @see ParsingConfiguration
+ * @see ParsingAndProcessingConfiguration
  */
 public interface ProcessingConfiguration {
 
@@ -608,9 +609,9 @@ public interface ProcessingConfiguration {
      * it only affects the main template directly, as the imports will create a global variable there, the imports
      * will be visible from the further imported templates too.
      * <p>
-     * It's recommended to set the {@code lazy_auto_imports} setting ({@link Configuration#setLazyAutoImports(Boolean)})
-     * to {@code true} when using this, so that auto-imports that are unused in a template won't degrade performance by
-     * unnecessary loading and initializing the imported library.
+     * It's recommended to set the {@link Configuration#getLazyAutoImports() lazyAutoImports} setting to {@code true}
+     * when using this, so that auto-imports that are unused in a template won't degrade performance by unnecessary
+     * loading and initializing the imported library.
      * <p>
      * If the imports aren't lazy, the order of the imports will be the same as the order in which the {@link Map}
      * iterates through its entries.

@@ -27,6 +27,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
+import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.junit.Test;
 
 public class EncodingOverrideTest {
@@ -52,10 +53,10 @@ public class EncodingOverrideTest {
     }
     
     private Configuration createConfig(Charset charset) {
-       Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-       cfg.setClassForTemplateLoading(EncodingOverrideTest.class, "");
-       cfg.setSourceEncoding(charset);
-       return cfg;
+       return new Configuration.Builder(Configuration.VERSION_3_0_0)
+               .templateLoader(new ClassTemplateLoader(EncodingOverrideTest.class, ""))
+               .sourceEncoding(charset)
+               .build();
     }
 
 }

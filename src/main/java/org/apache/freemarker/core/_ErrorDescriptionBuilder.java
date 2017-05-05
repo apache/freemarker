@@ -225,7 +225,7 @@ public class _ErrorDescriptionBuilder {
                                     || (partStr.charAt(1) == '/') && (partStr.charAt(2) == '#' || partStr.charAt(2) == '@')
                     )
                             && partStr.charAt(partStr.length() - 1) == '>') {
-                        if (template.getActualTagSyntax() == Configuration.SQUARE_BRACKET_TAG_SYNTAX) {
+                        if (template.getActualTagSyntax() == ParsingConfiguration.SQUARE_BRACKET_TAG_SYNTAX) {
                             sb.append('[');
                             sb.append(partStr.substring(1, partStr.length() - 1));
                             sb.append(']');

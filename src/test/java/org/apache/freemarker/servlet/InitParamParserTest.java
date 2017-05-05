@@ -24,7 +24,6 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.Collections;
 
-import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.MockServletContext;
 import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
@@ -62,12 +61,10 @@ public class InitParamParserTest {
 
     @Test
     public void testCreateTemplateLoader() throws IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-
         {
             ClassTemplateLoader ctl = (ClassTemplateLoader) InitParamParser.createTemplateLoader(
                     "classpath:templates",
-                    cfg, getClass(), null);
+                    getClass(), null);
             assertEquals("templates/", ctl.getBasePackagePath());
             assertEquals(Boolean.FALSE, ctl.getURLConnectionUsesCaches());
         }
@@ -75,7 +72,7 @@ public class InitParamParserTest {
         {
             ClassTemplateLoader ctl = (ClassTemplateLoader) InitParamParser.createTemplateLoader(
                     "classpath:templates?settings(URLConnectionUsesCaches=true)",
-                    cfg, getClass(), null);
+                    getClass(), null);
             assertEquals("templates/", ctl.getBasePackagePath());
             assertEquals(Boolean.TRUE, ctl.getURLConnectionUsesCaches());
         }
@@ -88,7 +85,7 @@ public class InitParamParserTest {
                     + "classpath:templates, "
                     + "classpath:foo/templates?settings(URLConnectionUsesCaches=true)"
                     + "]",
-                    cfg, getClass(), new MockServletContext());
+                    getClass(), new MockServletContext());
 
             assertEquals(4, mtl.getTemplateLoaderCount());
             

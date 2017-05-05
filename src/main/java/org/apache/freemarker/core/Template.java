@@ -53,10 +53,13 @@ import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
+import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * <p>
@@ -76,7 +79,7 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
  * changing FreeMarker settings. Those must not be used while the template is being processed, or if the template object
  * is already accessible from multiple threads. If some templates need different settings that those coming from the
  * shared {@link Configuration}, and you are using {@link Configuration#getTemplate(String)} (or its overloads), then
- * use {@link Configuration#setTemplateConfigurations(org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory)} to achieve that.
+ * use the {@link Configuration#getTemplateConfigurations() templateConfigurations} setting to achieve that.
  */
 // TODO [FM3] Try to make Template serializable for distributed caching. Transient fields will have to be restored.
 public class Template implements ProcessingConfiguration, CustomStateScope {
@@ -119,7 +122,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
 
     private int actualNamingConvention;
     // Custom state:
-    private final Object lock = new Object();
+    private final Object customStateMapLock = new Object();
     private final ConcurrentHashMap<CustomStateKey, Object> customStateMap = new ConcurrentHashMap<>(0);
 
     /**
@@ -175,7 +178,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      *            straightforwardly in real files (they often aren't; see {@link TemplateLoader}), the name shouldn't be
      *            an absolute file path. Like if the template is stored in {@code "/www/templates/forum/main.ftl"}, and
      *            you are using {@code "/www/templates/"} as the template root directory via
-     *            {@link Configuration#setDirectoryForTemplateLoading(java.io.File)}, then the template name will be
+     *            {@link FileTemplateLoader#FileTemplateLoader(java.io.File)}, then the template name will be
      *            {@code "forum/main.ftl"}. The name can be {@code null} (should be used for template made on-the-fly
      *            instead of being loaded from somewhere), in which case relative paths in it will be relative to
      *            the template root directory (and here again, it's the {@link TemplateLoader} that knows what that
@@ -393,10 +396,10 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      *            also use an object that already implements {@link TemplateHashModel}; in that case it won't be
      *            wrapped. If it's {@code null}, an empty data model is used.
      * @param out
-     *            The {@link Writer} where the output of the template will go. Note that unless you have used
-     *            {@link Configuration#setAutoFlush(boolean)} to disable this, {@link Writer#flush()} will be called at
-     *            the when the template processing was finished. {@link Writer#close()} is not called. Can't be
-     *            {@code null}.
+     *            The {@link Writer} where the output of the template will go. Note that unless you have set
+     *            {@link ProcessingConfiguration#getAutoFlush() autoFlush} to {@code false} to disable this,
+     *            {@link Writer#flush()} will be called at the when the template processing was finished.
+     *            {@link Writer#close()} is not called. Can't be {@code null}.
      * 
      * @throws TemplateException
      *             if an exception occurs during template processing
@@ -656,10 +659,10 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
 
     /**
      * Returns the tag syntax the parser has chosen for this template. If the syntax could be determined, it's
-     * {@link Configuration#SQUARE_BRACKET_TAG_SYNTAX} or {@link Configuration#ANGLE_BRACKET_TAG_SYNTAX}. If the syntax
+     * {@link ParsingConfiguration#SQUARE_BRACKET_TAG_SYNTAX} or {@link ParsingConfiguration#ANGLE_BRACKET_TAG_SYNTAX}. If the syntax
      * couldn't be determined (like because there was no tags in the template, or it was a plain text template), this
      * returns whatever the default is in the current configuration, so it's maybe
-     * {@link Configuration#AUTO_DETECT_TAG_SYNTAX}.
+     * {@link ParsingConfiguration#AUTO_DETECT_TAG_SYNTAX}.
      * 
      * @since 2.3.20
      */
@@ -669,10 +672,10 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     
     /**
      * Returns the naming convention the parser has chosen for this template. If it could be determined, it's
-     * {@link Configuration#LEGACY_NAMING_CONVENTION} or {@link Configuration#CAMEL_CASE_NAMING_CONVENTION}. If it
+     * {@link ParsingConfiguration#LEGACY_NAMING_CONVENTION} or {@link ParsingConfiguration#CAMEL_CASE_NAMING_CONVENTION}. If it
      * couldn't be determined (like because there no identifier that's part of the template language was used where
      * the naming convention matters), this returns whatever the default is in the current configuration, so it's maybe
-     * {@link Configuration#AUTO_DETECT_TAG_SYNTAX}.
+     * {@link ParsingConfiguration#AUTO_DETECT_TAG_SYNTAX}.
      * 
      * @since 2.3.23
      */
@@ -681,7 +684,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     }
     
     /**
-     * Returns the output format (see {@link Configuration#setOutputFormat(OutputFormat)}) used for this template.
+     * Returns the output format (see {@link Configuration#getOutputFormat()}) used for this template.
      * The output format of a template can come from various places, in order of increasing priority:
      * {@link Configuration#getOutputFormat()}, {@link ParsingConfiguration#getOutputFormat()} (which is usually
      * provided by {@link Configuration#getTemplateConfigurations()}) and the {@code #ftl} header's
@@ -701,8 +704,8 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     }
     
     /**
-     * Returns if the auto-escaping policy (see {@link Configuration#setAutoEscapingPolicy(int)}) that this template
-     * uses. This is decided from these, in increasing priority:
+     * Returns the {@link Configuration#getAutoEscapingPolicy()} autoEscapingPolicy) that this template uses.
+     * This is decided from these, in increasing priority:
      * {@link Configuration#getAutoEscapingPolicy()}, {@link ParsingConfiguration#getAutoEscapingPolicy()},
      * {@code #ftl} header's {@code auto_esc} option in the template.
      */
@@ -1315,10 +1318,11 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
 
     @Override
     @SuppressWarnings("unchecked")
+    @SuppressFBWarnings("AT_OPERATION_SEQUENCE_ON_CONCURRENT_ABSTRACTION")
     public <T> T getCustomState(CustomStateKey<T> customStateKey) {
         T customState = (T) customStateMap.get(customStateKey);
         if (customState == null) {
-            synchronized (lock) {
+            synchronized (customStateMapLock) {
                 customState = (T) customStateMap.get(customStateKey);
                 if (customState == null) {
                     customState = customStateKey.create();

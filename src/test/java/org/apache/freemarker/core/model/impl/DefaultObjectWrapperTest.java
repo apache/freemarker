@@ -68,6 +68,7 @@ import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -242,6 +243,7 @@ public class DefaultObjectWrapperTest {
         assertRoundtrip(ow, linkedList, DefaultListAdapter.class, LinkedList.class, linkedList.toString());
         assertRoundtrip(ow, intArray, DefaultArrayAdapter.class, int[].class, null);
         assertRoundtrip(ow, stringArray, DefaultArrayAdapter.class, String[].class, null);
+        assertRoundtrip(ow, pureIterable, DefaultIterableAdapter.class, PureIterable.class, pureIterable.toString());
         assertRoundtrip(ow, hashSet, DefaultNonListCollectionAdapter.class, HashSet.class, hashSet.toString());
     }
 
@@ -452,7 +454,7 @@ public class DefaultObjectWrapperTest {
             String expectedPojoToString)
             throws TemplateModelException {
         final TemplateModel objTM = dow.wrap(obj);
-        assertTrue(expectedTMClass.isAssignableFrom(objTM.getClass()));
+        assertThat(objTM.getClass(), typeCompatibleWith(expectedTMClass));
 
         final TemplateHashModel testBeanTM = (TemplateHashModel) dow.wrap(new RoundtripTesterBean());
 
@@ -460,7 +462,7 @@ public class DefaultObjectWrapperTest {
             TemplateMethodModelEx getClassM = (TemplateMethodModelEx) testBeanTM.get("getClass");
             Object r = getClassM.exec(Collections.singletonList(objTM));
             final Class rClass = (Class) ((WrapperTemplateModel) r).getWrappedObject();
-            assertTrue(rClass + " instanceof " + expectedPojoClass, expectedPojoClass.isAssignableFrom(rClass));
+            assertThat(rClass, typeCompatibleWith(expectedPojoClass));
         }
 
         if (expectedPojoToString != null) {
@@ -758,9 +760,10 @@ public class DefaultObjectWrapperTest {
     
     private String processTemplate(ObjectWrapper objectWrapper, Object value, String ftl)
             throws TemplateException, IOException {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        cfg.setLogTemplateExceptions(false);
-        cfg.setObjectWrapper(objectWrapper);
+        Configuration cfg = new TestConfigurationBuilder()
+                .logTemplateExceptions(false)
+                .objectWrapper(objectWrapper)
+                .build();
         StringWriter out = new StringWriter();
         new Template(null, ftl, cfg).process(ImmutableMap.of("value", value), out);
         return out.toString();

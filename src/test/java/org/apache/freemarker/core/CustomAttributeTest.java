@@ -101,7 +101,7 @@ public class CustomAttributeTest {
                 + "'" + KEY_1 + "': [ 's', 2, true, {  'a': 'A' } ], "
                 + "'" + KEY_2 + "': " + VALUE_BIGDECIMAL + " "
                 + "}>",
-                new Configuration(Configuration.VERSION_3_0_0));
+                new Configuration.Builder(Configuration.VERSION_3_0_0).build());
 
         assertEquals(ImmutableSet.of(KEY_1, KEY_2), t.getCustomAttributes().keySet());
         assertEquals(VALUE_LIST, t.getCustomAttribute(KEY_1));
@@ -126,7 +126,7 @@ public class CustomAttributeTest {
                 + "'" + KEY_2 + "': 'b', "
                 + "'" + KEY_3 + "': 'c' "
                 + "}>",
-                new Configuration(Configuration.VERSION_3_0_0),
+                new Configuration.Builder(Configuration.VERSION_3_0_0).build(),
                 tcb.build());
 
         assertEquals(ImmutableSet.of(KEY_1, KEY_2, KEY_3, KEY_4), t.getCustomAttributes().keySet());
@@ -147,7 +147,7 @@ public class CustomAttributeTest {
         tcb.setCustomAttribute(KEY_3, VALUE_3);
         tcb.setCustomAttribute(KEY_4, VALUE_4);
         Template t = new Template(null, "",
-                new Configuration(Configuration.VERSION_3_0_0),
+                new Configuration.Builder(Configuration.VERSION_3_0_0).build(),
                 tcb.build());
 
         assertEquals(ImmutableSet.of(KEY_3, KEY_4), t.getCustomAttributes().keySet());

@@ -63,16 +63,16 @@ import org.slf4j.Logger;
  * The actual template "file" loading is delegated to a {@link TemplateLoader} that you can specify in the constructor.
  * Some aspects of caching is delegated to a {@link CacheStorage} that you can also specify in the constructor.
  * 
- * <p>Typically you don't instantiate or otherwise use this class directly. The {@link Configuration} embeds an
- * instance of this class, that you access indirectly through {@link Configuration#getTemplate(String)} and other
- * {@link Configuration} API-s. Then {@link TemplateLoader} and {@link CacheStorage} can be set with
- * {@link Configuration#setTemplateLoader(TemplateLoader)} and
- * {@link Configuration#setCacheStorage(CacheStorage)}.
+ * <p>Typically you don't instantiate or otherwise use this class directly. By default the {@link Configuration} embeds
+ * an instance of this class, that you access indirectly through {@link Configuration#getTemplate(String)} and other
+ * {@link Configuration} API-s. When you set the {@link Configuration#getTemplateLoader() templateLoader} or
+ * {@link Configuration#getCacheStorage() cacheStorage} of the {@link Configuration}, you indirectly configure the
+ * {@link TemplateResolver}.
  */
 public class DefaultTemplateResolver extends TemplateResolver {
     
     /**
-     * The default template update delay; see {@link Configuration#setTemplateUpdateDelayMilliseconds(long)}.
+     * The default template update delay; see {@link Configuration#getTemplateUpdateDelayMilliseconds()}.
      * 
      * @since 2.3.23
      */
@@ -92,27 +92,11 @@ public class DefaultTemplateResolver extends TemplateResolver {
     private final TemplateLookupStrategy templateLookupStrategy;
     private final TemplateNameFormat templateNameFormat;
     private final TemplateConfigurationFactory templateConfigurations;
-    
-    /** {@link Configuration#setTemplateUpdateDelayMilliseconds(long)} */
-    private long templateUpdateDelayMilliseconds = DEFAULT_TEMPLATE_UPDATE_DELAY_MILLIS;
-    /** {@link Configuration#setLocalizedLookup(boolean)} */
-    private boolean localizedLookup = true;
+    private final long templateUpdateDelayMilliseconds;
+    private final boolean localizedLookup;
 
     private Configuration config;
     
-    /**
-     * Same as
-     * {@link #DefaultTemplateResolver(TemplateLoader, CacheStorage, TemplateLookupStrategy, TemplateNameFormat,
-     * TemplateConfigurationFactory, Configuration)} with {@code null} for {@code templateConfigurations}-s.
-     * 
-     * @since 2.3.22
-     */
-    public DefaultTemplateResolver(TemplateLoader templateLoader, CacheStorage cacheStorage,
-            TemplateLookupStrategy templateLookupStrategy, TemplateNameFormat templateNameFormat,
-            Configuration config) {
-        this(templateLoader, cacheStorage, templateLookupStrategy, templateNameFormat, null, config);
-    }
-
     /**
      * @param templateLoader
      *            The {@link TemplateLoader} to use. Can be {@code null}, though then every request will result in
@@ -121,6 +105,8 @@ public class DefaultTemplateResolver extends TemplateResolver {
      *            The {@link CacheStorage} to use. Can't be {@code null}.
      * @param templateLookupStrategy
      *            The {@link TemplateLookupStrategy} to use. Can't be {@code null}.
+     * @param templateUpdateDelayMilliseconds
+     *            See {@link Configuration#getTemplateUpdateDelayMilliseconds()}
      * @param templateNameFormat
      *            The {@link TemplateNameFormat} to use. Can't be {@code null}.
      * @param templateConfigurations
@@ -132,8 +118,11 @@ public class DefaultTemplateResolver extends TemplateResolver {
      * 
      * @since 2.3.24
      */
-    public DefaultTemplateResolver(TemplateLoader templateLoader, CacheStorage cacheStorage,
-            TemplateLookupStrategy templateLookupStrategy, TemplateNameFormat templateNameFormat,
+    public DefaultTemplateResolver(
+            TemplateLoader templateLoader,
+            CacheStorage cacheStorage, long templateUpdateDelayMilliseconds,
+            TemplateLookupStrategy templateLookupStrategy, boolean localizedLookup,
+            TemplateNameFormat templateNameFormat,
             TemplateConfigurationFactory templateConfigurations,
             Configuration config) {
         super(config);
@@ -142,6 +131,10 @@ public class DefaultTemplateResolver extends TemplateResolver {
         
         _NullArgumentException.check("cacheStorage", cacheStorage);
         this.cacheStorage = cacheStorage;
+        
+        this.templateUpdateDelayMilliseconds = templateUpdateDelayMilliseconds;
+        
+        this.localizedLookup = localizedLookup;
         
         _NullArgumentException.check("templateLookupStrategy", templateLookupStrategy);
         this.templateLookupStrategy = templateLookupStrategy;
@@ -518,7 +511,6 @@ public class DefaultTemplateResolver extends TemplateResolver {
         cacheStorage.put(cacheKey, cachedResult);
     }
 
-    @SuppressWarnings("deprecation")
     private Template loadTemplate(
             TemplateLoadingResult templateLoaderResult,
             final String name, final String sourceName, Locale locale, final Serializable customLookupCondition)
@@ -633,37 +625,12 @@ public class DefaultTemplateResolver extends TemplateResolver {
     }
 
     /**
-     * Sets the delay in milliseconds between checking for newer versions of a
-     * template sources.
-     * @param templateUpdateDelayMilliseconds the new value of the delay
-     */
-    public void setTemplateUpdateDelayMilliseconds(long templateUpdateDelayMilliseconds) {
-        // synchronized was moved here so that we don't advertise that it's thread-safe, as it's not.
-        synchronized (this) {
-            this.templateUpdateDelayMilliseconds = templateUpdateDelayMilliseconds;
-        }
-    }
-
-    /**
      * Returns if localized template lookup is enabled or not.
      */
     public boolean getLocalizedLookup() {
         // synchronized was moved here so that we don't advertise that it's thread-safe, as it's not.
         synchronized (this) {
             return localizedLookup;
-        }
-    }
-
-    /**
-     * Setis if localized template lookup is enabled or not.
-     */
-    public void setLocalizedLookup(boolean localizedLookup) {
-        // synchronized was moved here so that we don't advertise that it's thread-safe, as it's not.
-        synchronized (this) {
-            if (this.localizedLookup != localizedLookup) {
-                this.localizedLookup = localizedLookup;
-                clearTemplateCache();
-            }
         }
     }
 
@@ -698,8 +665,8 @@ public class DefaultTemplateResolver extends TemplateResolver {
 
     /**
      * Removes an entry from the cache, hence forcing the re-loading of it when it's next time requested. (It doesn't
-     * delete the template file itself.) This is to give the application finer control over cache updating than
-     * {@link #setTemplateUpdateDelayMilliseconds(long)} alone does.
+     * delete the template file itself.) This is to give the application finer control over cache updating than the
+     * update delay ({@link #getTemplateUpdateDelayMilliseconds()}) alone does.
      * 
      * For the meaning of the parameters, see
      * {@link Configuration#getTemplate(String, Locale, Serializable, boolean)}

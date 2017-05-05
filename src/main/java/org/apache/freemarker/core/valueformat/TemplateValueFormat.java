@@ -29,5 +29,14 @@ public abstract class TemplateValueFormat {
      * Meant to be used in error messages to tell what format the parsed string didn't fit.
      */
     public abstract String getDescription();
-    
+
+    /**
+     * The implementation in {@link TemplateValueFormat} returns {@code package.className(description)}, where
+     * description comes from {@link #getDescription()}.
+     */
+    @Override
+    public String toString() {
+        return getClass().getName() + "(" + getDescription() + ")";
+    }
+
 }

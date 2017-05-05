@@ -27,6 +27,7 @@ import java.util.Map;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateExceptionHandler;
+import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.junit.Test;
 
 public class GettingStartedExample {
@@ -36,18 +37,19 @@ public class GettingStartedExample {
         /* ------------------------------------------------------------------------ */    
         /* You should do this ONLY ONCE in the whole application life-cycle:        */    
     
-        /* Create and adjust the configuration singleton */
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        cfg.setClassForTemplateLoading(GettingStartedExample.class, "");
-        cfg.setSourceEncoding(StandardCharsets.UTF_8);
-        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-        cfg.setLogTemplateExceptions(false);
+        /* Create the configuration singleton (using builder pattern) */
+        Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
+                .templateLoader(new ClassTemplateLoader(GettingStartedExample.class, ""))
+                .sourceEncoding(StandardCharsets.UTF_8)
+                .templateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER)
+                .logTemplateExceptions(false)
+                .build();
 
         /* ------------------------------------------------------------------------ */    
         /* You usually do these for MULTIPLE TIMES in the application life-cycle:   */    
 
         /* Create a data-model */
-        Map root = new HashMap();
+        Map<String, Object> root = new HashMap();
         root.put("user", "Big Joe");
         Product latest = new Product();
         latest.setUrl("products/greenmouse.html");

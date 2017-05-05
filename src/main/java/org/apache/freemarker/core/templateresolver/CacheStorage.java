@@ -19,13 +19,15 @@
 
 package org.apache.freemarker.core.templateresolver;
 
+import org.apache.freemarker.core.Configuration;
+
 /**
  * Cache storage abstracts away the storage aspects of a cache - associating
  * an object with a key, retrieval and removal via the key. It is actually a
  * small subset of the {@link java.util.Map} interface. 
  * The implementations must be thread safe.
  *
- * @see org.apache.freemarker.core.Configuration#setCacheStorage(CacheStorage)
+ * @see Configuration#getCacheStorage()
  */
 public interface CacheStorage {
     Object get(Object key);

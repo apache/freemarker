@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core.templateresolver.impl;
 
+import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
 
@@ -26,7 +27,7 @@ import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
  * A cache storage that doesn't store anything. Use this if you
  * don't want caching.
  *
- * @see org.apache.freemarker.core.Configuration#setCacheStorage(CacheStorage)
+ * @see Configuration#getCacheStorage()
  * 
  * @since 2.3.17
  */

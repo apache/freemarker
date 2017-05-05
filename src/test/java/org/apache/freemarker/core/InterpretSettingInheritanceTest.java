@@ -21,6 +21,7 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 
 import org.apache.freemarker.test.TemplateTest;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 /**
@@ -40,21 +41,25 @@ public class InterpretSettingInheritanceTest  extends TemplateTest {
 
     @Test
     public void tagSyntaxTest() throws IOException, TemplateException {
-        Configuration cfg = getConfiguration();
-        
-        cfg.setTagSyntax(Configuration.ANGLE_BRACKET_TAG_SYNTAX);
+        setConfiguration(new TestConfigurationBuilder()
+                .tagSyntax(ParsingConfiguration.ANGLE_BRACKET_TAG_SYNTAX)
+                .build());
         assertOutput(FTL_S_A_S, OUT_A_S_WHEN_SYNTAX_IS_A);
         assertOutput(FTL_S_S_A, OUT_S_A_WHEN_SYNTAX_IS_A);
         assertOutput(FTL_A_A_S, OUT_A_S_WHEN_SYNTAX_IS_A);
         assertOutput(FTL_A_S_A, OUT_S_A_WHEN_SYNTAX_IS_A);
-        
-        cfg.setTagSyntax(Configuration.SQUARE_BRACKET_TAG_SYNTAX);
+
+        setConfiguration(new TestConfigurationBuilder()
+                .tagSyntax(ParsingConfiguration.SQUARE_BRACKET_TAG_SYNTAX)
+                .build());
         assertOutput(FTL_S_A_S, OUT_A_S_WHEN_SYNTAX_IS_S);
         assertOutput(FTL_S_S_A, OUT_S_A_WHEN_SYNTAX_IS_S);
         assertOutput(FTL_A_A_S, OUT_A_S_WHEN_SYNTAX_IS_S);
         assertOutput(FTL_A_S_A, OUT_S_A_WHEN_SYNTAX_IS_S);
-        
-        cfg.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX);
+
+        setConfiguration(new TestConfigurationBuilder()
+                .tagSyntax(ParsingConfiguration.AUTO_DETECT_TAG_SYNTAX)
+                .build());
         assertOutput(FTL_S_A_S, OUT_A_S_WHEN_SYNTAX_IS_A);
         assertOutput(FTL_S_S_A, OUT_S_A_WHEN_SYNTAX_IS_S);
         assertOutput(FTL_A_A_S, OUT_A_S_WHEN_SYNTAX_IS_A);
@@ -65,13 +70,17 @@ public class InterpretSettingInheritanceTest  extends TemplateTest {
     @Test
     public void whitespaceStrippingTest() throws IOException, TemplateException {
         Configuration cfg = getConfiguration();
-        
-        cfg.setWhitespaceStripping(true);
+
+        setConfiguration(new TestConfigurationBuilder()
+                .whitespaceStripping(true)
+                .build());
         assertOutput("<#assign x = 1>\nX<@'<#assign x = 1>\\nY'?interpret />", "XY");
         assertOutput("<#ftl stripWhitespace=false><#assign x = 1>\nX<@'<#assign x = 1>\\nY'?interpret />", "\nXY");
         assertOutput("<#assign x = 1>\nX<@'<#ftl stripWhitespace=false><#assign x = 1>\\nY'?interpret />", "X\nY");
-        
-        cfg.setWhitespaceStripping(false);
+
+        setConfiguration(new TestConfigurationBuilder()
+                .whitespaceStripping(false)
+                .build());
         assertOutput("<#assign x = 1>\nX<@'<#assign x = 1>\\nY'?interpret />", "\nX\nY");
         assertOutput("<#ftl stripWhitespace=true><#assign x = 1>\nX<@'<#assign x = 1>\\nY'?interpret />", "X\nY");
         assertOutput("<#assign x = 1>\nX<@'<#ftl stripWhitespace=true><#assign x = 1>\\nY'?interpret />", "\nXY");
@@ -79,13 +88,15 @@ public class InterpretSettingInheritanceTest  extends TemplateTest {
 
     @Test
     public void evalTest() throws IOException, TemplateException {
-        Configuration cfg = getConfiguration();
-        
-        cfg.setTagSyntax(Configuration.ANGLE_BRACKET_TAG_SYNTAX);
+        setConfiguration(new TestConfigurationBuilder()
+                .tagSyntax(ParsingConfiguration.ANGLE_BRACKET_TAG_SYNTAX)
+                .build());
         assertOutput("<@'\"[#if true]s[/#if]<#if true>a</#if>\"?interpret'?eval />", OUT_S_A_WHEN_SYNTAX_IS_A);
         assertOutput("[#ftl][@'\"[#if true]s[/#if]<#if true>a</#if>\"?interpret'?eval /]", OUT_S_A_WHEN_SYNTAX_IS_A);
-        
-        cfg.setTagSyntax(Configuration.SQUARE_BRACKET_TAG_SYNTAX);
+
+        setConfiguration(new TestConfigurationBuilder()
+                .tagSyntax(ParsingConfiguration.SQUARE_BRACKET_TAG_SYNTAX)
+                .build());
         assertOutput("[@'\"[#if true]s[/#if]<#if true>a</#if>\"?interpret'?eval /]", OUT_S_A_WHEN_SYNTAX_IS_S);
         assertOutput("<#ftl><@'\"[#if true]s[/#if]<#if true>a</#if>\"?interpret'?eval />", OUT_S_A_WHEN_SYNTAX_IS_S);
     }

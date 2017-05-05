@@ -28,6 +28,7 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 public class TemplateConstructorsTest {
 
@@ -36,8 +37,7 @@ public class TemplateConstructorsTest {
     
     @Test
     public void test() throws IOException {
-        final Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        cfg.setSourceEncoding(StandardCharsets.ISO_8859_1);
+        final Configuration cfg = new TestConfigurationBuilder().sourceEncoding(StandardCharsets.ISO_8859_1).build();
         
         final String name = "foo/bar.ftl";
         final String sourceName = "foo/bar_de.ftl";

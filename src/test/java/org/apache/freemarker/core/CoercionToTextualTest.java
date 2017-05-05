@@ -29,6 +29,7 @@ import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.userpkg.HTMLISOTemplateDateFormatFactory;
 import org.apache.freemarker.core.userpkg.PrintfGTemplateNumberFormatFactory;
 import org.apache.freemarker.test.TemplateTest;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -52,11 +53,11 @@ public class CoercionToTextualTest extends TemplateTest {
 
     @Test
     public void testEscBuiltin() throws IOException, TemplateException {
-        Configuration cfg = getConfiguration();
-        cfg.setOutputFormat(HTMLOutputFormat.INSTANCE);
-        cfg.setAutoEscapingPolicy(Configuration.DISABLE_AUTO_ESCAPING_POLICY);
-        cfg.setBooleanFormat("<y>,<n>");
-        
+        setConfiguration(createDefaultConfigurationBuilder()
+                .outputFormat(HTMLOutputFormat.INSTANCE)
+                .autoEscapingPolicy(ParsingConfiguration.DISABLE_AUTO_ESCAPING_POLICY)
+                .booleanFormat("<y>,<n>")
+                .build());
         assertOutput("${'a<b'?esc}", "a&lt;b");
         assertOutput("${n?string?esc}", "1.50E+03");
         assertOutput("${n?esc}", "1.50*10<sup>3</sup>");
@@ -117,16 +118,23 @@ public class CoercionToTextualTest extends TemplateTest {
         assertOutput("${'&' + b}", "&y");
         assertOutput("${'&' + m}", "&amp;<p>M</p>");
     }
-    
+
+    @Override
+    protected Configuration createDefaultConfiguration() throws Exception {
+        return createDefaultConfigurationBuilder().build();
+    }
+
+    private TestConfigurationBuilder createDefaultConfigurationBuilder() {
+        return new TestConfigurationBuilder()
+                .customNumberFormats(Collections.singletonMap("G", PrintfGTemplateNumberFormatFactory.INSTANCE))
+                .customDateFormats(Collections.singletonMap("HI", HTMLISOTemplateDateFormatFactory.INSTANCE))
+                .numberFormat("@G 3")
+                .dateTimeFormat("@HI")
+                .booleanFormat("y,n");
+    }
+
     @Before
     public void setup() throws TemplateModelException {
-        Configuration cfg = getConfiguration();
-        cfg.setCustomNumberFormats(Collections.singletonMap("G", PrintfGTemplateNumberFormatFactory.INSTANCE));
-        cfg.setCustomDateFormats(Collections.singletonMap("HI", HTMLISOTemplateDateFormatFactory.INSTANCE));
-        cfg.setNumberFormat("@G 3");
-        cfg.setDateTimeFormat("@HI");
-        cfg.setBooleanFormat("y,n");
-        
         addToDataModel("s", "abc");
         addToDataModel("n", 1500);
         addToDataModel("dt", TM);

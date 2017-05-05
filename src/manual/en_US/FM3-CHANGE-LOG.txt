@@ -213,3 +213,14 @@ the FreeMarer 3 changelog here:
   now also have the same properites: getTemplateSourceName(), getTemplateLookupName(), and even getSourceOrLookupName().
   Location information in error messages show getTemplateSourceOrLookupName().
 - Configuration.setSharedVaribles (not the typo in it) was renamed to setSharedVariables
+- Configuration is now immutable. Instead, you should use Configuration.Builder to set up the setting values, then create
+  the Configuration with the builder's build() method. Further notes:
+  - Most of the mutator methods (like setters) were moved from Configuration to Configuration.Builder. However,
+    setClassForTemplateLoader, setDirectoryForTemplateLoading and the like were removed, instead there's just
+    setTemplateLoader. So for example. instead of  setClassForTemplateLoader(Foo.class, "templates") now you have
+    to write setTemplateLoader(new ClassTemplateLoader(Foo.class, "templates")). While it's a bit longer, it shows
+    more clearly what's happening, and always supports all TemplateLoader constructor overloads.
+  - It's now possible to change the Configuration setting defaults by using a custom Configuration.ExtendableBuilder
+    subclass instead of Configuration.Builder (which is also an ExtendableBuilder subclass). FreemarkerServlet has
+    switched to this approach, using its own builder subclass to provide defaults that makes the sense in that particular
+    application. Its API-s which were used for customizing FreemarkerServlet has bean changed accordingly.

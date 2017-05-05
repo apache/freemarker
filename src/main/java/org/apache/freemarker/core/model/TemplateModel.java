@@ -30,7 +30,7 @@ import org.apache.freemarker.core.util.FTLUtil;
  * {@link TemplateModel}-s.
  * 
  * <p>Mapping the plain Java objects to {@link TemplateModel}-s (or the other way around sometimes) is the
- * responsibility of the {@link ObjectWrapper} (can be set via {@link Configuration#setObjectWrapper(ObjectWrapper)}).
+ * responsibility of the {@link ObjectWrapper} (see the {@link Configuration#getObjectWrapper objectWrapper} setting).
  * But not all {@link TemplateModel}-s are for wrapping a plain object. For example, a value created within a template
  * is not made to wrap an earlier existing object; it's a value that has always existed in the template language's
  * domain. Users can also write {@link TemplateModel} implementations and put them directly into the data-model for

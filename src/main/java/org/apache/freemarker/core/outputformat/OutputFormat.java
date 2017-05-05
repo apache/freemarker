@@ -27,8 +27,8 @@ import org.apache.freemarker.core.util._StringUtil;
 /**
  * Represents an output format. If you need auto-escaping, see its subclass, {@link MarkupOutputFormat}.
  * 
- * @see Configuration#setOutputFormat(OutputFormat)
- * @see Configuration#setRegisteredCustomOutputFormats(java.util.Collection)
+ * @see Configuration#getOutputFormat()
+ * @see Configuration#getRegisteredCustomOutputFormats()
  * @see MarkupOutputFormat
  * 
  * @since 2.3.24

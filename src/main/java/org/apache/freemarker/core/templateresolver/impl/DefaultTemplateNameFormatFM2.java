@@ -19,13 +19,12 @@
 package org.apache.freemarker.core.templateresolver.impl;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
 
 /**
- * The default template name format when {@link Configuration#Configuration(Version) incompatible_improvements} is
- * below 2.4.0. As of FreeMarker 2.4.0, the default {@code incompatible_improvements} is still {@code 2.3.0}, and it
+ * The default template name format when {@link Configuration#getIncompatibleImprovements() incompatible_improvements}
+ * is below 2.4.0. As of FreeMarker 2.4.0, the default {@code incompatible_improvements} is still {@code 2.3.0}, and it
  * will certainly remain so for a very long time. In new projects it's highly recommended to use
  * {@link DefaultTemplateNameFormat#INSTANCE} instead.
  * 

@@ -35,10 +35,9 @@ public class TemplateGetEncodingTest {
 
     @Test
     public void test() throws IOException {
-
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
         {
-            cfg.setSourceEncoding(ISO_8859_2);
+            cfgB.setSourceEncoding(ISO_8859_2);
             MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
             tl.putBinaryTemplate("bin", "test");
             tl.putBinaryTemplate("bin-static", "<#test>");
@@ -46,13 +45,14 @@ public class TemplateGetEncodingTest {
             tl.putTextTemplate("text-static", "<#test>");
             TemplateConfiguration.Builder staticTextTCB = new TemplateConfiguration.Builder();
             staticTextTCB.setTemplateLanguage(TemplateLanguage.STATIC_TEXT);
-            cfg.setTemplateConfigurations(
+            cfgB.setTemplateConfigurations(
                     new ConditionalTemplateConfigurationFactory(
                             new FileNameGlobMatcher("*-static*"), staticTextTCB.build()));
-            cfg.setTemplateLoader(tl);
-            cfg.setCacheStorage(new StrongCacheStorage());
+            cfgB.setTemplateLoader(tl);
+            cfgB.setCacheStorage(new StrongCacheStorage());
         }
 
+        Configuration cfg = cfgB.build();
         assertEquals(ISO_8859_2, cfg.getTemplate("bin").getActualSourceEncoding());
         assertEquals(ISO_8859_2, cfg.getTemplate("bin-static").getActualSourceEncoding());
         assertNull(cfg.getTemplate("text").getActualSourceEncoding());

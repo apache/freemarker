@@ -43,7 +43,6 @@ import java.util.WeakHashMap;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core._CoreAPI;
-import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core._DelayedFTLTypeDescription;
 import org.apache.freemarker.core._DelayedShortClassName;
 import org.apache.freemarker.core._TemplateModelException;
@@ -67,27 +66,24 @@ import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.CommonBuilder;
 import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.dom.NodeModel;
-import org.slf4j.Logger;
 import org.w3c.dom.Node;
 
 /**
  * The default implementation of the {@link ObjectWrapper} interface. Usually, you don't need to invoke instances of
  * this, as an instance of this is already the default value of the
- * {@link Configuration#setObjectWrapper(ObjectWrapper) object_wrapper setting}. Then the
+ * {@link Configuration#getObjectWrapper() objectWrapper} setting. Then the
  * {@link ExtendableBuilder#ExtendableBuilder(Version, boolean) incompatibleImprovements} of the
  * {@link DefaultObjectWrapper} will be the same that you have set for the {@link Configuration} itself.
  * 
  * <p>
  * If you still need to invoke an instance, that should be done with {@link Builder#build()} (or
- * with {@link Configuration#setSetting(String, String)} with {@code "objectWrapper"} key); the constructor isn't
- * public.
+ * with {@link org.apache.freemarker.core.Configuration.ExtendableBuilder#setSetting(String, String)} with
+ * {@code "objectWrapper"} key); the constructor isn't public.
  *
  * <p>
  * This class is thread-safe.
  */
 public class DefaultObjectWrapper implements RichObjectWrapper {
-
-    private static final Logger LOG = _CoreLogs.OBJECT_WRAPPER;
 
     /**
      * At this level of exposure, all methods and properties of the
@@ -1179,9 +1175,9 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
     }
 
     /**
-     * Gets/creates a {@link DefaultObjectWrapper} singleton instance that's already configured as specified in the properties of
-     * this object; this is recommended over using the {@link DefaultObjectWrapper} constructors. The returned instance can't be
-     * further configured (it's write protected).
+     * Gets/creates a {@link DefaultObjectWrapper} singleton instance that's already configured as specified in the
+     * properties of this object; this is recommended over using the {@link DefaultObjectWrapper} constructors. The
+     * returned instance can't be further configured (it's write protected).
      *
      * <p>The builder meant to be used as a drop-away object (not stored in a field), like in this example:
      * <pre>
@@ -1318,11 +1314,10 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
     }
 
     /**
-     * Holds {@link DefaultObjectWrapper} configuration settings and defines their defaults.
-     * You will not use this abstract class directly, but concrete subclasses like {@link Builder}.
-     * Unless, you are developing a builder for a custom {@link DefaultObjectWrapper} subclass. In that case, note that
-     * overriding the {@link #equals} and {@link #hashCode} is important, as these objects are used as {@link ObjectWrapper}
-     * singleton lookup keys.
+     * You will not use this abstract class directly, but concrete subclasses like {@link Builder}, unless you are
+     * developing a builder for a custom {@link DefaultObjectWrapper} subclass. In that case, note that overriding the
+     * {@link #equals} and {@link #hashCode} is important, as these objects are used as {@link ObjectWrapper} singleton
+     * lookup keys.
      */
     protected abstract static class ExtendableBuilder<
             ProductT extends DefaultObjectWrapper, SelfT extends ExtendableBuilder<ProductT, SelfT>>
@@ -1362,8 +1357,8 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          *         check the list of effects below. Increasing the 2nd or 1st version number possibly mean substantial
          *         changes with higher risk of breaking the application, but again, see the list of effects below.
          *         <p>
-         *         The reason it's separate from {@link Configuration#setIncompatibleImprovements(Version)} is that
-         *         {@link ObjectWrapper} objects are often shared among multiple {@link Configuration}-s, so the two
+         *         The reason it's separate from {@link Configuration#getIncompatibleImprovements()} is that
+         *         {@link ObjectWrapper} objects are sometimes shared among multiple {@link Configuration}-s, so the two
          *         version numbers are technically independent. But it's recommended to keep those two version numbers
          *         the same.
          *         <p>
@@ -1605,6 +1600,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          * @deprecated Does nothing in FreeMarker 3 - we kept it for now to postopne reworking some JUnit tests.
          */
         // [FM3] Remove
+        @Deprecated
         public void setUseModelCache(boolean useModelCache) {
             this.useModelCache = useModelCache;
             useModelCacheSet = true;
@@ -1614,6 +1610,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          * Fluent API equivalent of {@link #setUseModelCache(boolean)}.
          * @deprecated Does nothing in FreeMarker 3 - we kept it for now to postopne reworking some JUnit tests.
          */
+        @Deprecated
         public SelfT useModelCache(boolean useModelCache) {
             setUseModelCache(useModelCache);
             return self();

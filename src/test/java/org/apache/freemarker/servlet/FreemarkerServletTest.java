@@ -41,6 +41,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
 import org.apache.freemarker.core.templateresolver.FirstMatchTemplateConfigurationFactory;
+import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
 import org.junit.Before;
@@ -415,7 +416,7 @@ public class FreemarkerServletTest {
         }
 
         MockServletConfig servletConfig = new MockServletConfig(servletContext);
-        servletConfig.addInitParameter(Configuration.SOURCE_ENCODING_KEY, "UtF-8");
+        servletConfig.addInitParameter(Configuration.ExtendableBuilder.SOURCE_ENCODING_KEY, "UtF-8");
         if (ctInitParam != null) {
             servletConfig.addInitParameter(INIT_PARAM_CONTENT_TYPE, ctInitParam);
         }
@@ -537,34 +538,35 @@ public class FreemarkerServletTest {
         private Charset lastOutputEncoding;
 
         @Override
-        protected Configuration createConfiguration() {
-            Configuration cfg = super.createConfiguration();
-            // Needed for the TemplateConfiguration that sets outputEncoding:
-            cfg.setIncompatibleImprovements(Configuration.VERSION_3_0_0);
+        protected Configuration.ExtendableBuilder<?> createConfigurationBuilder() {
+            return new FreemarkerServletConfigurationBuilder(TestFreemarkerServlet.this, Configuration.VERSION_3_0_0) {
 
-            // Set a test runner environment independent default locale:
-            cfg.setLocale(DEFAULT_LOCALE);
-            cfg.setSourceEncoding(CFG_DEFAULT_ENCODING);
+                @Override
+                protected Locale getDefaultLocale() {
+                    return DEFAULT_LOCALE;
+                }
 
-            {
-                TemplateConfiguration.Builder outUtf8TCB = new TemplateConfiguration.Builder();
-                outUtf8TCB.setOutputEncoding(StandardCharsets.UTF_8);
-                
-                TemplateConfiguration.Builder srcUtf8TCB = new TemplateConfiguration.Builder();
-                srcUtf8TCB.setSourceEncoding(StandardCharsets.UTF_8);
-                
-                cfg.setTemplateConfigurations(
-                        new FirstMatchTemplateConfigurationFactory(
-                                new ConditionalTemplateConfigurationFactory(
-                                        new FileNameGlobMatcher(FOO_SRC_UTF8_FTL), srcUtf8TCB.build()),
-                                new ConditionalTemplateConfigurationFactory(
-                                        new FileNameGlobMatcher(FOO_OUT_UTF8_FTL), outUtf8TCB.build())
-                        )
-                        .allowNoMatch(true)
-                );
-            }
+                @Override
+                protected Charset getDefaultSourceEncoding() {
+                    return CFG_DEFAULT_ENCODING;
+                }
 
-            return cfg;
+                @Override
+                protected TemplateConfigurationFactory getDefaultTemplateConfigurations() {
+                    TemplateConfiguration.Builder outUtf8TCB = new TemplateConfiguration.Builder();
+                    outUtf8TCB.setOutputEncoding(StandardCharsets.UTF_8);
+
+                    TemplateConfiguration.Builder srcUtf8TCB = new TemplateConfiguration.Builder();
+                    srcUtf8TCB.setSourceEncoding(StandardCharsets.UTF_8);
+
+                    return new FirstMatchTemplateConfigurationFactory(
+                            new ConditionalTemplateConfigurationFactory(
+                                    new FileNameGlobMatcher(FOO_SRC_UTF8_FTL), srcUtf8TCB.build()),
+                            new ConditionalTemplateConfigurationFactory(
+                                    new FileNameGlobMatcher(FOO_OUT_UTF8_FTL), outUtf8TCB.build())
+                    ).allowNoMatch(true);
+                }
+            };
         }
 
         @Override

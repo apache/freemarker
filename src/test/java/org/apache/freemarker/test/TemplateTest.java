@@ -28,9 +28,8 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
+import java.util.Properties;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.freemarker.core.Configuration;
@@ -40,6 +39,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
+import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.test.templatesuite.TemplateTestSuite;
 import org.apache.freemarker.test.util.TestUtil;
@@ -56,43 +56,35 @@ public abstract class TemplateTest {
     private Configuration configuration;
     private boolean dataModelCreated;
     private Object dataModel;
+    private Map<String, String> addedTemplates = new HashMap<>();
 
+    /**
+     * Gets the {@link Configuration} used, automaticlly creating and setting if it wasn't yet.
+     */
     protected final Configuration getConfiguration() {
         if (configuration == null) {
             try {
-                configuration = createConfiguration();
-                addCommonTemplates();
-                applyEnvironmentIndependentDefaults();
+                setConfiguration(createDefaultConfiguration());
             } catch (Exception e) {
-                throw new RuntimeException("Failed to set up configuration for the test", e);
+                throw new RuntimeException("Failed to create configuration", e);
             }
         }
         return configuration;
     }
 
     /**
-     * Ensure that the configuration settings don't depend on the machine that runs the test.
+     * @param configuration Usually should be built using {@link TestConfigurationBuilder}; not {@code null}.
      */
-    private void applyEnvironmentIndependentDefaults() {
-        if (!configuration.isLocaleExplicitlySet()) {
-            configuration.setLocale(Locale.US);
-        }
-        if (!configuration.isSourceEncodingExplicitlySet()) {
-            configuration.setSourceEncoding(StandardCharsets.UTF_8);
-        }
-        if (!configuration.isTimeZoneExplicitlySet()) {
-            configuration.setTimeZone(TimeZone.getTimeZone("GMT+1"));
-        }
-    }
-
     protected final void setConfiguration(Configuration configuration) {
+        _NullArgumentException.check("configuration", configuration);
+        if (this.configuration == configuration) {
+            return;
+        }
+
         this.configuration = configuration;
+        afterConfigurationSet();
     }
 
-    protected final void dropConfiguration() {
-        configuration = null;
-    }
-    
     protected void assertOutput(String ftl, String expectedOut) throws IOException, TemplateException {
         assertOutput(createTemplate(ftl), expectedOut, false);
     }
@@ -148,10 +140,21 @@ public abstract class TemplateTest {
         return out.toString();
     }
     
-    protected Configuration createConfiguration() throws Exception {
-        return new Configuration(Configuration.VERSION_3_0_0);
+    protected Configuration createDefaultConfiguration() throws Exception {
+        return new TestConfigurationBuilder().build();
     }
-    
+
+    private void afterConfigurationSet() {
+        ensureAddedTemplatesPresent();
+        addCommonTemplates();
+    }
+
+    private void ensureAddedTemplatesPresent() {
+        for (Map.Entry<String, String> ent : addedTemplates.entrySet()) {
+            addTemplate(ent.getKey(), ent.getValue());
+        }
+    }
+
     protected void addCommonTemplates() {
         //
     }
@@ -179,20 +182,16 @@ public abstract class TemplateTest {
         dataModel.put("bean", new TestBean());
         return dataModel;
     }
-    
+
     protected void addTemplate(String name, String content) {
         Configuration cfg = getConfiguration();
         TemplateLoader tl = cfg.getTemplateLoader();
         ByteArrayTemplateLoader btl;
-        if (tl != null) {
-            btl = extractByteArrayTemplateLoader(tl);
-        } else {
-            btl = new ByteArrayTemplateLoader();
-            cfg.setTemplateLoader(btl);
-        }
+        btl = extractByteArrayTemplateLoader(tl);
         btl.putTemplate(name, content.getBytes(StandardCharsets.UTF_8));
+        addedTemplates.put(name, content);
     }
-    
+
     private ByteArrayTemplateLoader extractByteArrayTemplateLoader(TemplateLoader tl) {
         if (tl instanceof MultiTemplateLoader) {
             MultiTemplateLoader mtl = (MultiTemplateLoader) tl;
@@ -207,6 +206,8 @@ public abstract class TemplateTest {
                             + tl);
         } else if (tl instanceof ByteArrayTemplateLoader) {
             return (ByteArrayTemplateLoader) tl;
+        } else if (tl == null) {
+            throw new IllegalStateException("The templateLoader was null in the configuration");
         } else {
             throw new IllegalStateException(
                     "The template loader was already set to a non-ByteArrayTemplateLoader non-MultiTemplateLoader: "
@@ -226,7 +227,18 @@ public abstract class TemplateTest {
             throw new IllegalStateException("Can't add to non-Map data-model: " + dm);
         }
     }
-    
+
+    protected Properties loadPropertiesFile(String name) throws IOException {
+        Properties props = new Properties();
+        InputStream in = getClass().getResourceAsStream(name);
+        try {
+            props.load(in);
+        } finally {
+            in.close();
+        }
+        return props;
+    }
+
     protected Throwable assertErrorContains(String ftl, String... expectedSubstrings) {
         return assertErrorContains(null, ftl, null, expectedSubstrings);
     }
@@ -326,5 +338,5 @@ public abstract class TemplateTest {
         }
         
     }
-    
+
 }

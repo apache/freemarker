@@ -55,23 +55,19 @@ import org.w3c.dom.Text;
 
 /**
  * A base class for wrapping a single W3C DOM_WRAPPER Node as a FreeMarker template model.
- * 
  * <p>
  * Note that {@link DefaultObjectWrapper} automatically wraps W3C DOM_WRAPPER {@link Node}-s into this, so you may need do that
  * with this class manually. However, before dropping the {@link Node}-s into the data-model, you certainly want to
  * apply {@link NodeModel#simplify(Node)} on them.
- * 
  * <p>
- * This class is not guaranteed to be thread safe, so instances of this shouldn't be used as shared variable (
- * {@link Configuration#setSharedVariable(String, Object)}).
- * 
+ * This class is not guaranteed to be thread safe, so instances of this shouldn't be used as
+ * {@linkplain Configuration#getSharedVariables() shared variable}.
  * <p>
  * To represent a node sequence (such as a query result) of exactly 1 nodes, this class should be used instead of
  * {@link NodeListModel}, as it adds extra capabilities by utilizing that we have exactly 1 node. If you need to wrap a
  * node sequence of 0 or multiple nodes, you must use {@link NodeListModel}.
  */
-abstract public class NodeModel
-implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
+abstract public class NodeModel implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
     AdapterTemplateModel, WrapperTemplateModel, _UnexpectedTypeErrorExplainerTemplateModel {
 
     static private final Logger LOG = DomLog.LOG;

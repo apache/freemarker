@@ -29,6 +29,7 @@ import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util._NullWriter;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ public class TheadInterruptingSupportTest {
     private static final Logger LOG = LoggerFactory.getLogger(TheadInterruptingSupportTest.class);
 
     private static final int TEMPLATE_INTERRUPTION_TIMEOUT = 5000;
-    private final Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+    private final Configuration cfg = new TestConfigurationBuilder().build();
 
     @Test
     public void test() throws IOException, InterruptedException {

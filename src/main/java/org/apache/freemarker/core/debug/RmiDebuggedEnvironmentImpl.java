@@ -197,12 +197,12 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
         {
             @Override
             Collection keySet() {
-                return ((Configuration) ProcessingConfiguration).getSharedVariableNames();
+                return ((Configuration) ProcessingConfiguration).getSharedVariables().keySet();
             }
         
             @Override
             public TemplateModel get(String key) {
-                return ((Configuration) ProcessingConfiguration).getSharedVariable(key);
+                return ((Configuration) ProcessingConfiguration).getWrappedSharedVariable(key);
             }
         };
         

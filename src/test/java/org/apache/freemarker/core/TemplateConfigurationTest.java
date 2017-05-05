@@ -62,6 +62,7 @@ import org.apache.freemarker.core.userpkg.LocaleSensitiveTemplateNumberFormatFac
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 import org.apache.freemarker.test.MonitoredTemplateLoader;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
@@ -110,15 +111,18 @@ public class TemplateConfigurationTest {
         }
     }
 
-    private static final Version ICI = Configuration.VERSION_3_0_0;
-
-    private static final Configuration DEFAULT_CFG = new Configuration(ICI);
+    private static final Configuration DEFAULT_CFG;
     static {
+        TestConfigurationBuilder cfgB = new TestConfigurationBuilder();
         StringTemplateLoader stl = new StringTemplateLoader();
         stl.putTemplate("t1.ftl", "<#global loaded = (loaded!) + 't1;'>In t1;");
         stl.putTemplate("t2.ftl", "<#global loaded = (loaded!) + 't2;'>In t2;");
         stl.putTemplate("t3.ftl", "<#global loaded = (loaded!) + 't3;'>In t3;");
-        DEFAULT_CFG.setTemplateLoader(stl);
+        try {
+            DEFAULT_CFG = cfgB.templateLoader(stl).build();
+        } catch (ConfigurationException e) {
+            throw new IllegalStateException("Faild to create default configuration", e);
+        }
     }
 
     private static final TimeZone NON_DEFAULT_TZ;
@@ -158,7 +162,8 @@ public class TemplateConfigurationTest {
         SETTING_ASSIGNMENTS.put("logTemplateExceptions", true);
         SETTING_ASSIGNMENTS.put("newBuiltinClassResolver", TemplateClassResolver.ALLOWS_NOTHING_RESOLVER);
         SETTING_ASSIGNMENTS.put("numberFormat", "0.0000");
-        SETTING_ASSIGNMENTS.put("objectWrapper", new RestrictedObjectWrapper.Builder(ICI).build());
+        SETTING_ASSIGNMENTS.put("objectWrapper",
+                new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
         SETTING_ASSIGNMENTS.put("outputEncoding", StandardCharsets.UTF_16);
         SETTING_ASSIGNMENTS.put("showErrorTips", false);
         SETTING_ASSIGNMENTS.put("templateExceptionHandler", TemplateExceptionHandler.IGNORE_HANDLER);
@@ -173,11 +178,11 @@ public class TemplateConfigurationTest {
 
         // Parser-only settings:
         SETTING_ASSIGNMENTS.put("templateLanguage", TemplateLanguage.STATIC_TEXT);
-        SETTING_ASSIGNMENTS.put("tagSyntax", Configuration.SQUARE_BRACKET_TAG_SYNTAX);
-        SETTING_ASSIGNMENTS.put("namingConvention", Configuration.LEGACY_NAMING_CONVENTION);
+        SETTING_ASSIGNMENTS.put("tagSyntax", ParsingConfiguration.SQUARE_BRACKET_TAG_SYNTAX);
+        SETTING_ASSIGNMENTS.put("namingConvention", ParsingConfiguration.LEGACY_NAMING_CONVENTION);
         SETTING_ASSIGNMENTS.put("whitespaceStripping", false);
         SETTING_ASSIGNMENTS.put("strictSyntaxMode", false);
-        SETTING_ASSIGNMENTS.put("autoEscapingPolicy", Configuration.DISABLE_AUTO_ESCAPING_POLICY);
+        SETTING_ASSIGNMENTS.put("autoEscapingPolicy", ParsingConfiguration.DISABLE_AUTO_ESCAPING_POLICY);
         SETTING_ASSIGNMENTS.put("outputFormat", HTMLOutputFormat.INSTANCE);
         SETTING_ASSIGNMENTS.put("recognizeStandardFileExtensions", false);
         SETTING_ASSIGNMENTS.put("tabSize", 1);
@@ -215,7 +220,6 @@ public class TemplateConfigurationTest {
         }
 
         Collections.sort(settingPropDescs, new Comparator<PropertyDescriptor>() {
-
             @Override
             public int compare(PropertyDescriptor o1, PropertyDescriptor o2) {
                 return o1.getName().compareToIgnoreCase(o2.getName());
@@ -483,7 +487,7 @@ public class TemplateConfigurationTest {
             Method tReaderMethod = Template.class.getMethod(pd.getReadMethod().getName());
 
             // Without TC
-            assertNotEquals("For \"" + pd.getName() + "\"", newValue,
+            assertNotEquals("For \"" + pd.getName() + "\"",
                     tReaderMethod.invoke(new Template(null, "", DEFAULT_CFG)));
             // With TC
             assertEquals("For \"" + pd.getName() + "\"", newValue,
@@ -493,10 +497,11 @@ public class TemplateConfigurationTest {
     
     @Test
     public void testConfigureCustomAttributes() throws Exception {
-        Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-        cfg.setCustomAttribute("k1", "c");
-        cfg.setCustomAttribute("k2", "c");
-        cfg.setCustomAttribute("k3", "c");
+        Configuration cfg = new TestConfigurationBuilder()
+                .customAttribute("k1", "c")
+                .customAttribute("k2", "c")
+                .customAttribute("k3", "c")
+                .build();
 
         TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
         tcb.setCustomAttribute("k2", "tc");
@@ -536,18 +541,18 @@ public class TemplateConfigurationTest {
         
         {
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
-            tcb.setTagSyntax(Configuration.SQUARE_BRACKET_TAG_SYNTAX);
+            tcb.setTagSyntax(ParsingConfiguration.SQUARE_BRACKET_TAG_SYNTAX);
             TemplateConfiguration tc = tcb.build();
             assertOutputWithoutAndWithTC(tc, "[#if true]y[/#if]", "[#if true]y[/#if]", "y");
-            testedProps.add(Configuration.TAG_SYNTAX_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.TAG_SYNTAX_KEY_CAMEL_CASE);
         }
         
         {
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
-            tcb.setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+            tcb.setNamingConvention(ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION);
             TemplateConfiguration tc = tcb.build();
             assertOutputWithoutAndWithTC(tc, "<#if true>y<#elseif false>n</#if>", "y", null);
-            testedProps.add(Configuration.NAMING_CONVENTION_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.NAMING_CONVENTION_KEY_CAMEL_CASE);
         }
         
         {
@@ -555,7 +560,7 @@ public class TemplateConfigurationTest {
             tcb.setWhitespaceStripping(false);
             TemplateConfiguration tc = tcb.build();
             assertOutputWithoutAndWithTC(tc, "<#if true>\nx\n</#if>\n", "x\n", "\nx\n\n");
-            testedProps.add(Configuration.WHITESPACE_STRIPPING_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.WHITESPACE_STRIPPING_KEY_CAMEL_CASE);
         }
 
         {
@@ -563,7 +568,7 @@ public class TemplateConfigurationTest {
             tcb.setArithmeticEngine(new DummyArithmeticEngine());
             TemplateConfiguration tc = tcb.build();
             assertOutputWithoutAndWithTC(tc, "${1} ${1+1}", "1 2", "11 22");
-            testedProps.add(Configuration.ARITHMETIC_ENGINE_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.ARITHMETIC_ENGINE_KEY_CAMEL_CASE);
         }
 
         {
@@ -573,16 +578,16 @@ public class TemplateConfigurationTest {
             assertOutputWithoutAndWithTC(tc, "${.outputFormat} ${\"a'b\"}",
                     UndefinedOutputFormat.INSTANCE.getName() + " a'b",
                     XMLOutputFormat.INSTANCE.getName() + " a&apos;b");
-            testedProps.add(Configuration.OUTPUT_FORMAT_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.OUTPUT_FORMAT_KEY_CAMEL_CASE);
         }
 
         {
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
             tcb.setOutputFormat(XMLOutputFormat.INSTANCE);
-            tcb.setAutoEscapingPolicy(Configuration.DISABLE_AUTO_ESCAPING_POLICY);
+            tcb.setAutoEscapingPolicy(ParsingConfiguration.DISABLE_AUTO_ESCAPING_POLICY);
             TemplateConfiguration tc = tcb.build();
             assertOutputWithoutAndWithTC(tc, "${'a&b'}", "a&b", "a&b");
-            testedProps.add(Configuration.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE);
         }
         
         {
@@ -592,7 +597,7 @@ public class TemplateConfigurationTest {
             tc.setParentConfiguration(new Configuration(new Version(2, 3, 0)));
             assertOutputWithoutAndWithTC(tc, "<#foo>", null, "<#foo>");
             */
-            testedProps.add(Configuration.INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE);
         }
 
         {
@@ -601,7 +606,7 @@ public class TemplateConfigurationTest {
             TemplateConfiguration tc = tcb.build();
             assertOutputWithoutAndWithTC(tc, "adhoc.ftlh", "${.outputFormat}",
                     HTMLOutputFormat.INSTANCE.getName(), UndefinedOutputFormat.INSTANCE.getName());
-            testedProps.add(Configuration.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE);
         }
 
         {
@@ -614,7 +619,7 @@ public class TemplateConfigurationTest {
                     + "${.error?replace('(?s).*?column ([0-9]+).*', '$1', 'r')}"
                     + "</#attempt>",
                     "13", "8");
-            testedProps.add(Configuration.TAB_SIZE_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.TAB_SIZE_KEY_CAMEL_CASE);
         }
 
         {
@@ -624,15 +629,17 @@ public class TemplateConfigurationTest {
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
             tcb.setTemplateLanguage(TemplateLanguage.STATIC_TEXT);
 
-            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-            cfg.setTemplateConfigurations(new ConditionalTemplateConfigurationFactory(new FileExtensionMatcher
-                    ("txt"), tcb.build()));
+            TestConfigurationBuilder cfgB = new TestConfigurationBuilder();
+            cfgB.setTemplateConfigurations(
+                    new ConditionalTemplateConfigurationFactory(new FileExtensionMatcher("txt"), tcb.build()));
 
             StringTemplateLoader templateLoader = new StringTemplateLoader();
             templateLoader.putTemplate("adhoc.ftl", "${1+1}");
             templateLoader.putTemplate("adhoc.txt", "${1+1}");
-            cfg.setTemplateLoader(templateLoader);
+            cfgB.setTemplateLoader(templateLoader);
 
+            Configuration cfg = cfgB.build();
+            
             {
                 StringWriter out = new StringWriter();
                 cfg.getTemplate("adhoc.ftl").process(null, out);
@@ -644,7 +651,7 @@ public class TemplateConfigurationTest {
                 assertEquals("${1+1}", out.toString());
             }
 
-            testedProps.add(Configuration.TEMPLATE_LANGUAGE_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.TEMPLATE_LANGUAGE_KEY_CAMEL_CASE);
         }
 
         {
@@ -654,16 +661,18 @@ public class TemplateConfigurationTest {
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
             tcb.setSourceEncoding(StandardCharsets.ISO_8859_1);
 
-            Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
-            cfg.setSourceEncoding(StandardCharsets.UTF_8);
-            cfg.setTemplateConfigurations(new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher
-                    ("latin1.ftl"), tcb.build()));
+            TestConfigurationBuilder cfgB = new TestConfigurationBuilder();
+            cfgB.setSourceEncoding(StandardCharsets.UTF_8);
+            cfgB.setTemplateConfigurations(new ConditionalTemplateConfigurationFactory(
+                    new FileNameGlobMatcher("latin1.ftl"), tcb.build()));
 
             MonitoredTemplateLoader templateLoader = new MonitoredTemplateLoader();
             templateLoader.putBinaryTemplate("utf8.ftl", "próba", StandardCharsets.UTF_8, 1);
             templateLoader.putBinaryTemplate("latin1.ftl", "próba", StandardCharsets.ISO_8859_1, 1);
-            cfg.setTemplateLoader(templateLoader);
+            cfgB.setTemplateLoader(templateLoader);
 
+            Configuration cfg = cfgB.build();
+            
             {
                 StringWriter out = new StringWriter();
                 cfg.getTemplate("utf8.ftl").process(null, out);
@@ -675,7 +684,7 @@ public class TemplateConfigurationTest {
                 assertEquals("próba", out.toString());
             }
 
-            testedProps.add(Configuration.SOURCE_ENCODING_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.SOURCE_ENCODING_KEY_CAMEL_CASE);
         }
 
         if (!PARSER_PROP_NAMES.equals(testedProps)) {
@@ -780,7 +789,7 @@ public class TemplateConfigurationTest {
 
             {
                 // Force camelCase:
-                tcb.setNamingConvention(Configuration.CAMEL_CASE_NAMING_CONVENTION);
+                tcb.setNamingConvention(ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION);
 
                 TemplateConfiguration tc = tcb.build();
 
@@ -790,7 +799,7 @@ public class TemplateConfigurationTest {
 
             {
                 // Force legacy:
-                tcb.setNamingConvention(Configuration.LEGACY_NAMING_CONVENTION);
+                tcb.setNamingConvention(ParsingConfiguration.LEGACY_NAMING_CONVENTION);
 
                 TemplateConfiguration tc = tcb.build();
 

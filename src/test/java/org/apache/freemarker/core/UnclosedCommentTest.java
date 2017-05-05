@@ -28,7 +28,6 @@ public class UnclosedCommentTest extends TemplateTest {
     
     @Test
     public void test() throws IOException, TemplateException {
-        setConfiguration(new Configuration(Configuration.VERSION_3_0_0));
         assertErrorContains("foo<#--", "end of file");  // Not too good...
         assertErrorContains("foo<#-- ", "Unclosed", "<#--");
         assertErrorContains("foo<#--bar", "Unclosed", "<#--");

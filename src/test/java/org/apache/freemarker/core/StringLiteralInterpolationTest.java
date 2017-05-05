@@ -24,6 +24,7 @@ import java.util.Collections;
 import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
 import org.apache.freemarker.core.userpkg.PrintfGTemplateNumberFormatFactory;
 import org.apache.freemarker.test.TemplateTest;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 @SuppressWarnings("boxing")
@@ -103,10 +104,11 @@ public class StringLiteralInterpolationTest extends TemplateTest {
     
     @Test
     public void markup() throws IOException, TemplateException {
-        Configuration cfg = getConfiguration();
-        cfg.setCustomNumberFormats(Collections.singletonMap("G", PrintfGTemplateNumberFormatFactory.INSTANCE));
-        cfg.setNumberFormat("@G 3");
-        
+        setConfiguration(new TestConfigurationBuilder()
+                .customNumberFormats(Collections.singletonMap("G", PrintfGTemplateNumberFormatFactory.INSTANCE))
+                .numberFormat("@G 3")
+                .build());
+
         assertOutput("${\"${1000}\"}", "1.00*10<sup>3</sup>");
         assertOutput("${\"&_${1000}\"}", "&amp;_1.00*10<sup>3</sup>");
         assertOutput("${\"${1000}_&\"}", "1.00*10<sup>3</sup>_&amp;");

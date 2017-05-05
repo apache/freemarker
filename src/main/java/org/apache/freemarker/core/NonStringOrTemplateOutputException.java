@@ -30,7 +30,7 @@ import org.apache.freemarker.core.model.TemplateScalarModel;
 public class NonStringOrTemplateOutputException extends UnexpectedTypeException {
 
     static final String STRING_COERCABLE_TYPES_OR_TOM_DESC
-            = NonStringException.STRING_COERCABLE_TYPES_DESC + ", or \"template output\" ";
+            = NonStringException.STRING_COERCABLE_TYPES_DESC + ", or \"template output\"";
     
     static final Class[] STRING_COERCABLE_TYPES_AND_TOM;
     static {

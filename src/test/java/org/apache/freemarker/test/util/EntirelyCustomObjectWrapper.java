@@ -39,7 +39,7 @@ import org.apache.freemarker.core.model.impl.SimpleSequence;
 /**
  * An object wrapper that doesn't extend {@link DefaultObjectWrapper}.
  */
-public class FullyCustomObjectWrapper implements ObjectWrapper {
+public class EntirelyCustomObjectWrapper implements ObjectWrapper {
 
     @Override
     public TemplateModel wrap(Object obj) throws TemplateModelException {

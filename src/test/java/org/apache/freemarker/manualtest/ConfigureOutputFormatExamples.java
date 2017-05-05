@@ -20,7 +20,8 @@ package org.apache.freemarker.manualtest;
 
 import static org.junit.Assert.*;
 
-import org.apache.freemarker.core.Configuration;
+import java.io.IOException;
+
 import org.apache.freemarker.core.TemplateConfiguration;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
@@ -30,87 +31,75 @@ import org.apache.freemarker.core.templateresolver.FileExtensionMatcher;
 import org.apache.freemarker.core.templateresolver.FirstMatchTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.OrMatcher;
 import org.apache.freemarker.core.templateresolver.PathGlobMatcher;
+import org.apache.freemarker.test.TemplateTest;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
-public class ConfigureOutputFormatExamples extends ExamplesTest {
+public class ConfigureOutputFormatExamples extends TemplateTest {
     
     @Test
     public void test() throws Exception {
-        Configuration cfg = getConfiguration();
-        
         addTemplate("mail/t.ftl", "");
         addTemplate("t.html", "");
         addTemplate("t.htm", "");
         addTemplate("t.xml", "");
         addTemplate("t.rtf", "");
-        
-        // Example 2/a:
-        {
-            TemplateConfiguration.Builder tcHTML = new TemplateConfiguration.Builder();
-            tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
-            
-            cfg.setTemplateConfigurations(
-                    new ConditionalTemplateConfigurationFactory(
-                            new PathGlobMatcher("mail/**"),
-                            tcHTML.build()));
-            
-            assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("mail/t.ftl").getOutputFormat());
-        }
 
-        // Example 2/b:
-        {
-            cfg.setTemplateConfigurations(null); // Just to be sure...
-            
-            cfg.setSettings(loadPropertiesFile("ConfigureOutputFormatExamples1.properties"));
-                
-            assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("mail/t.ftl").getOutputFormat());
-        }
-        
-        // Example 3/a:
-        {
-            TemplateConfiguration.Builder tcHTML = new TemplateConfiguration.Builder();
-            tcHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
-            
-            TemplateConfiguration.Builder tcXML = new TemplateConfiguration.Builder();
-            tcXML.setOutputFormat(XMLOutputFormat.INSTANCE);
-
-            TemplateConfiguration.Builder tcRTF = new TemplateConfiguration.Builder();
-            tcRTF.setOutputFormat(RTFOutputFormat.INSTANCE);
-            
-            cfg.setTemplateConfigurations(
-                    new FirstMatchTemplateConfigurationFactory(
-                            new ConditionalTemplateConfigurationFactory(
-                                    new FileExtensionMatcher("xml"),
-                                    tcXML.build()),
-                            new ConditionalTemplateConfigurationFactory(
-                                    new OrMatcher(
-                                            new FileExtensionMatcher("html"),
-                                            new FileExtensionMatcher("htm")),
-                                    tcHTML.build()),
-                            new ConditionalTemplateConfigurationFactory(
-                                    new FileExtensionMatcher("rtf"),
-                                    tcRTF.build())
-                    ).allowNoMatch(true)
-            );
-            
-            assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.html").getOutputFormat());
-            assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.htm").getOutputFormat());
-            assertEquals(XMLOutputFormat.INSTANCE, cfg.getTemplate("t.xml").getOutputFormat());
-            assertEquals(RTFOutputFormat.INSTANCE, cfg.getTemplate("t.rtf").getOutputFormat());
-        }
-
-        // Example 3/b:
-        {
-            cfg.setTemplateConfigurations(null); // Just to be sure...
-            
-            cfg.setSettings(loadPropertiesFile("ConfigureOutputFormatExamples2.properties"));
-            
-            assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.html").getOutputFormat());
-            assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.htm").getOutputFormat());
-            assertEquals(XMLOutputFormat.INSTANCE, cfg.getTemplate("t.xml").getOutputFormat());
-            assertEquals(RTFOutputFormat.INSTANCE, cfg.getTemplate("t.rtf").getOutputFormat());
-        }
-        
+        example2(true);
+        example2(false);
+        example3(true);
+        example3(false);
     }
-    
+
+    private void example2(boolean javaCfg) throws IOException {
+        setConfiguration(
+                javaCfg
+                        ? new TestConfigurationBuilder()
+                                .templateConfigurations(
+                                        new ConditionalTemplateConfigurationFactory(
+                                                new PathGlobMatcher("mail/**"),
+                                                new TemplateConfiguration.Builder()
+                                                        .outputFormat(HTMLOutputFormat.INSTANCE)
+                                                        .build()))
+                                .build()
+                        : new TestConfigurationBuilder()
+                                .settings(loadPropertiesFile("ConfigureOutputFormatExamples1.properties"))
+                                .build());
+        assertEquals(HTMLOutputFormat.INSTANCE, getConfiguration().getTemplate("mail/t.ftl").getOutputFormat());
+    }
+
+    private void example3(boolean javaCfg) throws IOException {
+        setConfiguration(
+                javaCfg
+                        ? new TestConfigurationBuilder()
+                                .templateConfigurations(
+                                        new FirstMatchTemplateConfigurationFactory(
+                                                new ConditionalTemplateConfigurationFactory(
+                                                        new FileExtensionMatcher("xml"),
+                                                        new TemplateConfiguration.Builder()
+                                                                .outputFormat(XMLOutputFormat.INSTANCE)
+                                                                .build()),
+                                                new ConditionalTemplateConfigurationFactory(
+                                                        new OrMatcher(
+                                                                new FileExtensionMatcher("html"),
+                                                                new FileExtensionMatcher("htm")),
+                                                        new TemplateConfiguration.Builder()
+                                                                .outputFormat(HTMLOutputFormat.INSTANCE)
+                                                                .build()),
+                                                new ConditionalTemplateConfigurationFactory(
+                                                        new FileExtensionMatcher("rtf"),
+                                                        new TemplateConfiguration.Builder()
+                                                                .outputFormat(RTFOutputFormat.INSTANCE)
+                                                                .build()))
+                                        .allowNoMatch(true))
+                                .build()
+                        : new TestConfigurationBuilder()
+                                .settings(loadPropertiesFile("ConfigureOutputFormatExamples2.properties"))
+                                .build());
+        assertEquals(HTMLOutputFormat.INSTANCE, getConfiguration().getTemplate("t.html").getOutputFormat());
+        assertEquals(HTMLOutputFormat.INSTANCE, getConfiguration().getTemplate("t.htm").getOutputFormat());
+        assertEquals(XMLOutputFormat.INSTANCE, getConfiguration().getTemplate("t.xml").getOutputFormat());
+        assertEquals(RTFOutputFormat.INSTANCE, getConfiguration().getTemplate("t.rtf").getOutputFormat());
+    }
+
 }

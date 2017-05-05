@@ -19,7 +19,6 @@
 
 package org.apache.freemarker.core;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -107,7 +106,7 @@ final class ASTExpHashLiteral extends ASTExpression {
     	return new ASTExpHashLiteral(clonedKeys, clonedValues);
     }
 
-    private class SequenceHash implements TemplateHashModelEx2, Serializable {
+    private class SequenceHash implements TemplateHashModelEx2 {
 
         private HashMap<String, TemplateModel> map;
         private TemplateCollectionModel keyCollection, valueCollection; // ordered lists of keys and values
@@ -147,7 +146,7 @@ final class ASTExpHashLiteral extends ASTExpression {
 
         @Override
         public TemplateModel get(String key) {
-            return (TemplateModel) map.get(key);
+            return map.get(key);
         }
 
         @Override

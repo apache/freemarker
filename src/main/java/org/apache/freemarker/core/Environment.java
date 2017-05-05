@@ -922,17 +922,17 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     @Override
-    protected TemplateExceptionHandler getInheritedTemplateExceptionHandler() {
+    protected TemplateExceptionHandler getDefaultTemplateExceptionHandler() {
         return getMainTemplate().getTemplateExceptionHandler();
     }
 
     @Override
-    protected ArithmeticEngine getInheritedArithmeticEngine() {
+    protected ArithmeticEngine getDefaultArithmeticEngine() {
         return getMainTemplate().getArithmeticEngine();
     }
 
     @Override
-    protected ObjectWrapper getInheritedObjectWrapper() {
+    protected ObjectWrapper getDefaultObjectWrapper() {
         return getMainTemplate().getObjectWrapper();
     }
 
@@ -962,7 +962,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     @Override
-    protected Locale getInheritedLocale() {
+    protected Locale getDefaultLocale() {
         return getMainTemplate().getLocale();
     }
 
@@ -991,7 +991,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     @Override
-    protected TimeZone getInheritedTimeZone() {
+    protected TimeZone getDefaultTimeZone() {
         return getMainTemplate().getTimeZone();
     }
 
@@ -1020,7 +1020,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     @Override
-    protected TimeZone getInheritedSQLDateAndTimeTimeZone() {
+    protected TimeZone getDefaultSQLDateAndTimeTimeZone() {
         return getMainTemplate().getSQLDateAndTimeTimeZone();
     }
 
@@ -1051,58 +1051,63 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     @Override
-    protected Charset getInheritedURLEscapingCharset() {
+    protected Charset getDefaultURLEscapingCharset() {
         return getMainTemplate().getURLEscapingCharset();
     }
 
     @Override
-    protected TemplateClassResolver getInheritedNewBuiltinClassResolver() {
+    protected TemplateClassResolver getDefaultNewBuiltinClassResolver() {
         return getMainTemplate().getNewBuiltinClassResolver();
     }
 
     @Override
-    protected boolean getInheritedAutoFlush() {
+    protected boolean getDefaultAutoFlush() {
         return getMainTemplate().getAutoFlush();
     }
 
     @Override
-    protected boolean getInheritedShowErrorTips() {
+    protected boolean getDefaultShowErrorTips() {
         return getMainTemplate().getShowErrorTips();
     }
 
     @Override
-    protected boolean getInheritedAPIBuiltinEnabled() {
+    protected boolean getDefaultAPIBuiltinEnabled() {
         return getMainTemplate().getAPIBuiltinEnabled();
     }
 
     @Override
-    protected boolean getInheritedLogTemplateExceptions() {
+    protected boolean getDefaultLogTemplateExceptions() {
         return getMainTemplate().getLogTemplateExceptions();
     }
 
     @Override
-    protected boolean getInheritedLazyImports() {
+    protected boolean getDefaultLazyImports() {
         return getMainTemplate().getLazyImports();
     }
 
     @Override
-    protected Boolean getInheritedLazyAutoImports() {
+    protected Boolean getDefaultLazyAutoImports() {
         return getMainTemplate().getLazyAutoImports();
     }
 
     @Override
-    protected Map<String, String> getInheritedAutoImports() {
+    protected Map<String, String> getDefaultAutoImports() {
         return getMainTemplate().getAutoImports();
     }
 
     @Override
-    protected List<String> getInheritedAutoIncludes() {
+    protected List<String> getDefaultAutoIncludes() {
         return getMainTemplate().getAutoIncludes();
     }
 
     @Override
-    protected Object getInheritedCustomAttribute(Object name) {
+    protected Object getDefaultCustomAttribute(Object name) {
         return getMainTemplate().getCustomAttribute(name);
+    }
+
+    @Override
+    protected Map<Object, Object> getDefaultCustomAttributes() {
+        return getMainTemplate().getCustomAttributes();
     }
 
     /*
@@ -1117,7 +1122,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     @Override
-    protected Charset getInheritedOutputEncoding() {
+    protected Charset getDefaultOutputEncoding() {
         return getMainTemplate().getOutputEncoding();
     }
 
@@ -1220,22 +1225,22 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     @Override
-    protected String getInheritedNumberFormat() {
+    protected String getDefaultNumberFormat() {
         return getMainTemplate().getNumberFormat();
     }
 
     @Override
-    protected Map<String, TemplateNumberFormatFactory> getInheritedCustomNumberFormats() {
+    protected Map<String, TemplateNumberFormatFactory> getDefaultCustomNumberFormats() {
         return getMainTemplate().getCustomNumberFormats();
     }
 
     @Override
-    protected TemplateNumberFormatFactory getInheritedCustomNumberFormat(String name) {
+    protected TemplateNumberFormatFactory getDefaultCustomNumberFormat(String name) {
         return getMainTemplate().getCustomNumberFormat(name);
     }
 
     @Override
-    protected String getInheritedBooleanFormat() {
+    protected String getDefaultBooleanFormat() {
         return getMainTemplate().getBooleanFormat();
     }
 
@@ -1530,7 +1535,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     @Override
-    protected String getInheritedTimeFormat() {
+    protected String getDefaultTimeFormat() {
         return getMainTemplate().getTimeFormat();
     }
 
@@ -1548,7 +1553,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     @Override
-    protected String getInheritedDateFormat() {
+    protected String getDefaultDateFormat() {
         return getMainTemplate().getDateFormat();
     }
 
@@ -1566,17 +1571,17 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     @Override
-    protected String getInheritedDateTimeFormat() {
+    protected String getDefaultDateTimeFormat() {
         return getMainTemplate().getDateTimeFormat();
     }
 
     @Override
-    protected Map<String, TemplateDateFormatFactory> getInheritedCustomDateFormats() {
+    protected Map<String, TemplateDateFormatFactory> getDefaultCustomDateFormats() {
         return getMainTemplate().getCustomDateFormats();
     }
 
     @Override
-    protected TemplateDateFormatFactory getInheritedCustomDateFormat(String name) {
+    protected TemplateDateFormatFactory getDefaultCustomDateFormat(String name) {
         return getMainTemplate().getCustomDateFormat(name);
     }
 
@@ -2083,7 +2088,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         if (tm instanceof TemplateTransformModel) {
             ttm = (TemplateTransformModel) tm;
         } else if (exp instanceof ASTExpVariable) {
-            tm = configuration.getSharedVariable(exp.toString());
+            tm = configuration.getWrappedSharedVariable(exp.toString());
             if (tm instanceof TemplateTransformModel) {
                 ttm = (TemplateTransformModel) tm;
             }
@@ -2148,7 +2153,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             result = rootDataModel.get(name);
         }
         if (result == null) {
-            result = configuration.getSharedVariable(name);
+            result = configuration.getWrappedSharedVariable(name);
         }
         return result;
     }
@@ -2200,7 +2205,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      */
     public Set getKnownVariableNames() throws TemplateModelException {
         // shared vars.
-        Set set = configuration.getSharedVariableNames();
+        Set set = configuration.getSharedVariables().keySet();
 
         // root hash
         if (rootDataModel instanceof TemplateHashModelEx) {
@@ -2454,7 +2459,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             public TemplateModel get(String key) throws TemplateModelException {
                 TemplateModel value = rootDataModel.get(key);
                 if (value == null) {
-                    value = configuration.getSharedVariable(key);
+                    value = configuration.getWrappedSharedVariable(key);
                 }
                 return value;
             }
@@ -2515,7 +2520,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                     result = rootDataModel.get(key);
                 }
                 if (result == null) {
-                    result = configuration.getSharedVariable(key);
+                    result = configuration.getWrappedSharedVariable(key);
                 }
                 return result;
             }

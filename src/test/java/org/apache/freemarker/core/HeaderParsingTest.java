@@ -22,16 +22,14 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 
 import org.apache.freemarker.test.TemplateTest;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class HeaderParsingTest extends TemplateTest {
 
-    private final Configuration cfgStripWS = new Configuration(Configuration.VERSION_3_0_0);
-    private final Configuration cfgNoStripWS = new Configuration(Configuration.VERSION_3_0_0);
-    {
-        cfgNoStripWS.setWhitespaceStripping(false);
-    }
-    
+    private final Configuration cfgStripWS = new TestConfigurationBuilder().build();
+    private final Configuration cfgNoStripWS = new TestConfigurationBuilder().whitespaceStripping(false).build();
+
     @Test
     public void test() throws IOException, TemplateException {
         assertOutput("<#ftl>text", "text", "text");

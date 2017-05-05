@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 
-import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core._ObjectBuilderSettingEvaluator;
 import org.apache.freemarker.core._SettingEvaluationEnvironment;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
@@ -54,7 +53,7 @@ final class InitParamParser {
     }
 
     static TemplateLoader createTemplateLoader(
-            String templatePath, Configuration cfg, Class classLoaderClass, ServletContext srvCtx)
+            String templatePath, Class classLoaderClass, ServletContext srvCtx)
             throws IOException {
         final int settingAssignmentsStart = findTemplatePathSettingAssignmentsStart(templatePath);
         String pureTemplatePath = (settingAssignmentsStart == -1 ? templatePath : templatePath.substring(0, settingAssignmentsStart))
@@ -91,7 +90,7 @@ final class InitParamParser {
             TemplateLoader[] templateLoaders = new TemplateLoader[listItems.size()];
             for (int i = 0; i < listItems.size(); i++) {
                 String pathItem = (String) listItems.get(i);
-                templateLoaders[i] = createTemplateLoader(pathItem, cfg, classLoaderClass, srvCtx);
+                templateLoaders[i] = createTemplateLoader(pathItem, classLoaderClass, srvCtx);
             }
             templateLoader = new MultiTemplateLoader(templateLoaders);
         } else if (pureTemplatePath.startsWith("{")) {

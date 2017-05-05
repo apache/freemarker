@@ -28,6 +28,7 @@ import java.util.Map;
 
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util._NullWriter;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 /**
@@ -35,7 +36,7 @@ import org.junit.Test;
  */
 public class MistakenlyPublicMacroAPIsTest {
 
-    private final Configuration cfg = new Configuration(Configuration.VERSION_3_0_0);
+    private final Configuration cfg = new TestConfigurationBuilder().build();
     
     /**
      * Getting the macros from one template, and adding them to another.

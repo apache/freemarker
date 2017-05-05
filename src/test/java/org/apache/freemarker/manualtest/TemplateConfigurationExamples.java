@@ -38,142 +38,147 @@ import org.apache.freemarker.core.templateresolver.MergingTemplateConfigurationF
 import org.apache.freemarker.core.templateresolver.OrMatcher;
 import org.apache.freemarker.core.templateresolver.PathGlobMatcher;
 import org.apache.freemarker.core.util._DateUtil;
+import org.apache.freemarker.test.TemplateTest;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
-public class TemplateConfigurationExamples extends ExamplesTest {
+public class TemplateConfigurationExamples extends TemplateTest {
 
     @Test
-    public void example1() throws Exception {
-        Configuration cfg = getConfiguration();
-
-        addTemplate("t.xml", "");
-        
-        TemplateConfiguration.Builder tcbUTF8XML = new TemplateConfiguration.Builder();
-        tcbUTF8XML.setSourceEncoding(StandardCharsets.UTF_8);
-        tcbUTF8XML.setOutputFormat(XMLOutputFormat.INSTANCE);
-
-        {
-            cfg.setTemplateConfigurations(new ConditionalTemplateConfigurationFactory(
-                    new FileExtensionMatcher("xml"), tcbUTF8XML.build()));
-            
-            Template t = cfg.getTemplate("t.xml");
-            assertEquals(StandardCharsets.UTF_8, t.getActualSourceEncoding());
-            assertEquals(XMLOutputFormat.INSTANCE, t.getOutputFormat());
-        }
-
-        {
-            cfg.setTemplateConfigurations(null);
-            cfg.setSettings(loadPropertiesFile("TemplateConfigurationExamples1.properties"));
-            
-            Template t = cfg.getTemplate("t.xml");
-            assertEquals(StandardCharsets.UTF_8, t.getActualSourceEncoding());
-            assertEquals(XMLOutputFormat.INSTANCE, t.getOutputFormat());
-        }
+    public void example1JavaCfg() throws Exception {
+        example1(true);
     }
 
     @Test
-    public void example2() throws Exception {
-        Configuration cfg = getConfiguration();
-        
+    public void example1PropertiesCfg() throws Exception {
+        example1(false);
+    }
+
+    private void example1(boolean javaCfg) throws Exception {
+        TestConfigurationBuilder cfgB = new TestConfigurationBuilder(this.getClass());
+        if (javaCfg) {
+            cfgB.setTemplateConfigurations(new ConditionalTemplateConfigurationFactory(
+                    new FileExtensionMatcher("xml"),
+                    new TemplateConfiguration.Builder()
+                            .sourceEncoding(StandardCharsets.UTF_8)
+                            .outputFormat(XMLOutputFormat.INSTANCE)
+                            .build()));
+
+        } else {
+            cfgB.setTemplateConfigurations(null);
+            cfgB.setSettings(loadPropertiesFile("TemplateConfigurationExamples1.properties"));
+        }
+        setConfiguration(cfgB.build());
+
+        addTemplate("t.xml", "");
+
+        Template t = getConfiguration().getTemplate("t.xml");
+        assertEquals(StandardCharsets.UTF_8, t.getActualSourceEncoding());
+        assertEquals(XMLOutputFormat.INSTANCE, t.getOutputFormat());
+    }
+
+    @Test
+    public void example2JavaCfg() throws Exception {
+        example2(true);
+    }
+
+    @Test
+    public void example2PropertiesCfg() throws Exception {
+        example2(false);
+    }
+
+    private void example2(boolean javaCfg) throws Exception {
+        TestConfigurationBuilder cfgB = new TestConfigurationBuilder(this.getClass());
+        if (javaCfg) {
+            cfgB.setTemplateConfigurations(
+                    new ConditionalTemplateConfigurationFactory(
+                            new PathGlobMatcher("mail/**"),
+                            new FirstMatchTemplateConfigurationFactory(
+                                    new ConditionalTemplateConfigurationFactory(
+                                            new FileNameGlobMatcher("*.subject.*"),
+                                            new TemplateConfiguration.Builder()
+                                                    .outputFormat(PlainTextOutputFormat.INSTANCE)
+                                                    .build()),
+                                    new ConditionalTemplateConfigurationFactory(
+                                            new FileNameGlobMatcher("*.body.*"),
+                                            new TemplateConfiguration.Builder()
+                                                    .outputFormat(HTMLOutputFormat.INSTANCE)
+                                                    .build())
+                            )
+                            .noMatchErrorDetails(
+                                    "Mail template names must contain \".subject.\" or \".body.\"!")));
+        } else{
+            cfgB.setSettings(loadPropertiesFile("TemplateConfigurationExamples2.properties"));
+        }
+        setConfiguration(cfgB.build());
+
         addTemplate("t.subject.ftl", "");
         addTemplate("mail/t.subject.ftl", "");
         addTemplate("mail/t.body.ftl", "");
 
-        TemplateConfiguration.Builder tcbSubject = new TemplateConfiguration.Builder();
-        tcbSubject.setOutputFormat(PlainTextOutputFormat.INSTANCE);
-        
-        TemplateConfiguration.Builder tcbBody = new TemplateConfiguration.Builder();
-        tcbBody.setOutputFormat(HTMLOutputFormat.INSTANCE);
-        
-        cfg.setTemplateConfigurations(
-                new ConditionalTemplateConfigurationFactory(
-                        new PathGlobMatcher("mail/**"),
-                        new FirstMatchTemplateConfigurationFactory(
-                                new ConditionalTemplateConfigurationFactory(
-                                        new FileNameGlobMatcher("*.subject.*"),
-                                        tcbSubject.build()),
-                                new ConditionalTemplateConfigurationFactory(
-                                        new FileNameGlobMatcher("*.body.*"),
-                                        tcbBody.build())
-                                )
-                                .noMatchErrorDetails("Mail template names must contain \".subject.\" or \".body.\"!")
-                        ));
-        
-        assertEquals(UndefinedOutputFormat.INSTANCE, cfg.getTemplate("t.subject.ftl").getOutputFormat());
-        assertEquals(PlainTextOutputFormat.INSTANCE, cfg.getTemplate("mail/t.subject.ftl").getOutputFormat());
-        assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("mail/t.body.ftl").getOutputFormat());
-        
-        // From properties:
-        
-        cfg.setTemplateConfigurations(null);
-        cfg.setSettings(loadPropertiesFile("TemplateConfigurationExamples2.properties"));
-        
+        Configuration cfg = getConfiguration();
         assertEquals(UndefinedOutputFormat.INSTANCE, cfg.getTemplate("t.subject.ftl").getOutputFormat());
         assertEquals(PlainTextOutputFormat.INSTANCE, cfg.getTemplate("mail/t.subject.ftl").getOutputFormat());
         assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("mail/t.body.ftl").getOutputFormat());
     }
 
     @Test
-    public void example3() throws Exception {
-        Configuration cfg = getConfiguration();
-        cfg.setSourceEncoding(StandardCharsets.ISO_8859_1);
-        cfg.setSharedVariable("ts", new Date(1440431606011L));
-        
+    public void example3JavaCfg() throws Exception {
+        example3(true);
+    }
+
+    @Test
+    public void example3PropertiesCfg() throws Exception {
+        example3(false);
+    }
+
+    private void example3(boolean javaCfg) throws Exception {
+        TestConfigurationBuilder cfgB = new TestConfigurationBuilder(this.getClass())
+                .sourceEncoding(StandardCharsets.ISO_8859_1);
+        if (javaCfg) {
+            cfgB.setTemplateConfigurations(
+                    new MergingTemplateConfigurationFactory(
+                            new ConditionalTemplateConfigurationFactory(
+                                    new FileNameGlobMatcher("*.stats.*"),
+                                    new TemplateConfiguration.Builder()
+                                            .dateTimeFormat("iso")
+                                            .dateFormat("iso")
+                                            .timeFormat("iso")
+                                            .timeZone(_DateUtil.UTC)
+                                            .build()),
+                            new ConditionalTemplateConfigurationFactory(
+                                    new PathGlobMatcher("mail/**"),
+                                    new TemplateConfiguration.Builder()
+                                            .sourceEncoding(StandardCharsets.UTF_8)
+                                            .build()),
+                            new FirstMatchTemplateConfigurationFactory(
+                                    new ConditionalTemplateConfigurationFactory(
+                                            new FileExtensionMatcher("xml"),
+                                            new TemplateConfiguration.Builder()
+                                                    .outputFormat(XMLOutputFormat.INSTANCE)
+                                                    .build()),
+                                    new ConditionalTemplateConfigurationFactory(
+                                            new OrMatcher(
+                                                    new FileExtensionMatcher("html"),
+                                                    new FileExtensionMatcher("htm")),
+                                            new TemplateConfiguration.Builder()
+                                                    .outputFormat(HTMLOutputFormat.INSTANCE)
+                                                    .build())
+                            ).allowNoMatch(true)));
+        } else {
+            cfgB.setSettings(loadPropertiesFile("TemplateConfigurationExamples3.properties"));
+        }
+        setConfiguration(cfgB.build());
+
         addTemplate("t.stats.html", "${ts?datetime} ${ts?date} ${ts?time}");
         addTemplate("t.html", "");
         addTemplate("t.htm", "");
         addTemplate("t.xml", "");
         addTemplate("mail/t.html", "");
 
-        TemplateConfiguration.Builder tcbStats = new TemplateConfiguration.Builder();
-        tcbStats.setDateTimeFormat("iso");
-        tcbStats.setDateFormat("iso");
-        tcbStats.setTimeFormat("iso");
-        tcbStats.setTimeZone(_DateUtil.UTC);
+        addToDataModel("ts", new Date(1440431606011L));
 
-        TemplateConfiguration.Builder tcbMail = new TemplateConfiguration.Builder();
-        tcbMail.setSourceEncoding(StandardCharsets.UTF_8);
-        
-        TemplateConfiguration.Builder tcbHTML = new TemplateConfiguration.Builder();
-        tcbHTML.setOutputFormat(HTMLOutputFormat.INSTANCE);
-        
-        TemplateConfiguration.Builder tcbXML = new TemplateConfiguration.Builder();
-        tcbXML.setOutputFormat(XMLOutputFormat.INSTANCE);
-        
-        cfg.setTemplateConfigurations(
-                new MergingTemplateConfigurationFactory(
-                        new ConditionalTemplateConfigurationFactory(
-                                new FileNameGlobMatcher("*.stats.*"),
-                                tcbStats.build()),
-                        new ConditionalTemplateConfigurationFactory(
-                                new PathGlobMatcher("mail/**"),
-                                tcbMail.build()),
-                        new FirstMatchTemplateConfigurationFactory(
-                                new ConditionalTemplateConfigurationFactory(
-                                        new FileExtensionMatcher("xml"),
-                                        tcbXML.build()),
-                                new ConditionalTemplateConfigurationFactory(
-                                        new OrMatcher(
-                                                new FileExtensionMatcher("html"),
-                                                new FileExtensionMatcher("htm")),
-                                        tcbHTML.build())
-                        ).allowNoMatch(true)
-                )
-        );
-        
-        assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.html").getOutputFormat());
-        assertEquals(StandardCharsets.ISO_8859_1, cfg.getTemplate("t.html").getActualSourceEncoding());
-        assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.htm").getOutputFormat());
-        assertEquals(XMLOutputFormat.INSTANCE, cfg.getTemplate("t.xml").getOutputFormat());
-        assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.stats.html").getOutputFormat());
-        assertOutputForNamed("t.stats.html", "2015-08-24T15:53:26.011Z 2015-08-24 15:53:26.011Z");
-        assertEquals(StandardCharsets.UTF_8, cfg.getTemplate("mail/t.html").getActualSourceEncoding());
-        
-        // From properties:
-        
-        cfg.setTemplateConfigurations(null);
-        cfg.setSettings(loadPropertiesFile("TemplateConfigurationExamples3.properties"));
-        
+        Configuration cfg = getConfiguration();
         assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.html").getOutputFormat());
         assertEquals(StandardCharsets.ISO_8859_1, cfg.getTemplate("t.html").getActualSourceEncoding());
         assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("t.htm").getOutputFormat());

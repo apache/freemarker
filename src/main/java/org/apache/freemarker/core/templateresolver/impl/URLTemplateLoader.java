@@ -61,7 +61,7 @@ public abstract class URLTemplateLoader implements TemplateLoader {
     /**
      * Sets if {@link URLConnection#setUseCaches(boolean)} will be called, and with what value. By default this is
      * {@code false}, because FreeMarker has its own template cache with its own update delay setting
-     * ({@link Configuration#setTemplateUpdateDelayMilliseconds(long)}). If this is set to {@code null},
+     * ({@link Configuration#getTemplateUpdateDelayMilliseconds()}). If this is set to {@code null},
      * {@link URLConnection#setUseCaches(boolean)} won't be called.
      */
     public void setURLConnectionUsesCaches(Boolean urlConnectionUsesCaches) {
