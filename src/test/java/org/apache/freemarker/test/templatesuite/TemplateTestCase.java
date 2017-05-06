@@ -19,12 +19,12 @@
 
 package org.apache.freemarker.test.templatesuite;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ import org.apache.freemarker.core.model.impl.ResourceBundleModel;
 import org.apache.freemarker.core.model.impl.SimpleCollection;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
-import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._NullWriter;
 import org.apache.freemarker.core.util._StringUtil;
@@ -174,8 +174,9 @@ public class TemplateTestCase extends FileTestCase {
     @Override
     @SuppressWarnings("boxing")
     public void setUp() throws Exception {
-        confB.setTemplateLoader(new CopyrightCommentRemoverTemplateLoader(
-                new FileTemplateLoader(new File(getTestClassDirectory(), "templates"))));
+        confB.setTemplateLoader(
+                new CopyrightCommentRemoverTemplateLoader(
+                        new ClassTemplateLoader(TemplateTestCase.class, "templates")));
         
         DefaultObjectWrapper dow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         
@@ -423,18 +424,18 @@ public class TemplateTestCase extends FileTestCase {
     }
 
     @Override
-    protected File getExpectedFileDirectory() throws IOException {
-        return new File(super.getExpectedFileDirectory(), "expected");
+    protected URL getExpectedFileDirectory() throws IOException {
+        return new URL(super.getExpectedFileDirectory(), "expected/");
     }
 
     @Override
-    protected Charset getFileCharset() {
+    protected Charset getTestResourceCharset() {
         return confB.getOutputEncoding() != null ? confB.getOutputEncoding() : StandardCharsets.UTF_8;
     }
     
     @Override
-    protected File getExpectedFileFor(String testCaseFileName) throws IOException {
-        return new File(getExpectedFileDirectory(), expectedFileName);
+    protected URL getExpectedFileFor(String testCaseFileName) throws IOException {
+        return new URL(getExpectedFileDirectory(), expectedFileName);
     }
 
     static class TestBoolean implements TemplateBooleanModel, TemplateScalarModel {

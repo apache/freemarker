@@ -20,8 +20,6 @@
 package org.apache.freemarker.test.util;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +31,8 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.freemarker.core.util._StringUtil;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -48,41 +48,20 @@ public abstract class FileTestCase extends TestCase {
         super(name);
     }
 
-    protected void assertFilesEqual(String testCaseFileName) throws IOException {
-        try {
-            multilineAssertEquals(
-                    loadFile(getExpectedFileFor(testCaseFileName)),
-                    loadFile(getActualFileFor(testCaseFileName)));
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to do assertion", e);
-        }
-    }
-
     protected void assertExpectedFileEqualsString(String expectedFileName, String actualContent) {
         try {
-            final File expectedFile = getExpectedFileFor(expectedFileName);
+            final URL expectedFile = getExpectedFileFor(expectedFileName);
             
-            AssertionFailedError assertionException = null;
-            boolean successful = false;
             try {
-                if (expectedFile.exists()) {
-                    multilineAssertEquals(loadFile(expectedFile), actualContent);
-                    successful = true;
-                }
+                multilineAssertEquals(loadTestTextResource(expectedFile), actualContent);
             } catch (AssertionFailedError e) {
-                assertionException = e;
-            }
-            
-            if (!successful) {
                 File actualFile = getActualFileFor(expectedFileName);
-                saveString(actualFile, actualContent);
-                reportActualFileSaved(actualFile);
-                
-                if (assertionException != null) {
-                    throw assertionException;
-                } else {
-                    throw new FileNotFoundException(expectedFile.getPath());
+                if (actualFile == null) {
+                    saveString(actualFile, actualContent);
+                    reportActualFileSaved(actualFile);
                 }
+
+                throw e;
             }
         } catch (IOException e) {
             throw new RuntimeException("Failed to do assertion", e);
@@ -116,12 +95,19 @@ public abstract class FileTestCase extends TestCase {
         }
     }
 
-    protected File getExpectedFileFor(String testCaseFileName) throws IOException {
-        return new File(getExpectedFileDirectory(), testCaseFileName);
+    protected URL getExpectedFileFor(String testCaseFileName) throws IOException {
+        return new URL(getExpectedFileDirectory(), testCaseFileName);
     }
-    
+
+    /**
+     * @return {@code null} if there's no place to write the actual files to
+     */
     protected File getActualFileFor(String testCaseFileName) throws IOException {
-        return new File(getActualFileDirectory(), deduceActualFileName(testCaseFileName));
+        File actualFileDirectory = getActualFileDirectory();
+        if (actualFileDirectory == null) {
+            return null;
+        }
+        return new File(actualFileDirectory, deduceActualFileName(testCaseFileName));
     }
     
     private String deduceActualFileName(String testCaseFileName) {
@@ -131,38 +117,38 @@ public abstract class FileTestCase extends TestCase {
                 : testCaseFileName.substring(0, lastDotIdx) + "-actual" + testCaseFileName.substring(lastDotIdx);
     }
 
-    protected File getExpectedFileDirectory() throws IOException {
+    /**
+     * The URL of the directory that contains the expected files; must end with "/" or "/." or else relative paths won't
+     * be resolved correctly.
+     */
+    protected URL getExpectedFileDirectory() throws IOException {
         return getTestClassDirectory();
     }
 
+    /**
+     * @return {@code null} if there's no directory to write the actual files to
+     */
     protected File getActualFileDirectory() throws IOException {
-        return getExpectedFileDirectory();
+        return FileUtils.toFile(getExpectedFileDirectory());
     }
 
     @SuppressFBWarnings(value="UI_INHERITANCE_UNSAFE_GETRESOURCE", justification="By design relative to subclass")
-    protected final File getTestClassDirectory() throws IOException {
+    protected final URL getTestClassDirectory() throws IOException {
         URL url = getClass().getResource(".");
         if (url == null) throw new IOException("Couldn't get resource URL for \".\"");
-        return new File(url.getFile());
+        return url;
     }
 
-    protected String loadFile(File f) throws IOException {
-        return TestUtil.removeTxtCopyrightComment(loadFile(f, getFileCharset()));
+    protected String loadTestTextResource(URL resource) throws IOException {
+        return loadTestTextResource(resource, getTestResourceCharset());
     }
     
-    protected String loadFile(File f, Charset charset) throws IOException {
-        return loadString(new FileInputStream(f), charset);
-    }
-
-    protected String loadResource(String resourceName) throws IOException {
-        return loadResource(resourceName, getFileCharset());
+    protected String loadTestTextResource(URL resource, Charset charset) throws IOException {
+        return TestUtil.removeTxtCopyrightComment(
+                IOUtils.toString(resource, charset.name()));
     }
     
-    protected String loadResource(String resourceName, Charset charset) throws IOException {
-        return loadString(new FileInputStream(new File(getTestClassDirectory(), resourceName)), charset);
-    }
-    
-    protected Charset getFileCharset() {
+    protected Charset getTestResourceCharset() {
         return StandardCharsets.UTF_8;
     }
     
