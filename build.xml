@@ -992,6 +992,14 @@ Proceed? </input>
     <ivy:report todir="build/deps-report" />
   </target>
   
+  <target name="report-ide-deps"
+    description="Creates a HTML document that summarizes the dependencies."
+  >
+    <mkdir dir="build/ide-deps-report" />
+    <ivy:resolve conf="IDE" />
+    <ivy:report todir="build/ide-deps-report" />
+  </target>
+  
   <target name="ide-dependencies" depends="jar"
     description="If your IDE has no Ivy support, this generates ide-lib/*.jar for it">
     <mkdir dir="ide-dependencies" />
