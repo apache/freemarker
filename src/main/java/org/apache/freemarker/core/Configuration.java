@@ -98,12 +98,8 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  *
  * <p>This class is meant to be used in a singleton pattern. That is, you create an instance of this at the beginning of
  * the application life-cycle with {@link Configuration.Builder}, set its settings
- * (either
- * with
- * the
- * setter methods like {@link Configuration.Builder#setTemplateLoader(TemplateLoader)} or by loading a
- * {@code .properties} file and use that with {@link Configuration.Builder#setSettings(Properties)}}), and
- * then
+ * (either with the setter methods like {@link Configuration.Builder#setTemplateLoader(TemplateLoader)} or by loading a
+ * {@code .properties} file and use that with {@link Configuration.Builder#setSettings(Properties)}}), and then
  * use that single instance everywhere in your application. Frequently re-creating {@link Configuration} is a typical
  * and grave mistake from performance standpoint, as the {@link Configuration} holds the template cache, and often also
  * the class introspection cache, which then will be lost. (Note that, naturally, having multiple long-lived instances,

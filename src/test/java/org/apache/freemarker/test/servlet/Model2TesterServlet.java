@@ -22,6 +22,7 @@ package org.apache.freemarker.test.servlet;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import javax.el.ExpressionFactory;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -104,6 +105,8 @@ public class Model2TesterServlet extends HttpServlet {
         
         final String paramViewServlet = req.getParameter(VIEW_SERVLET_PARAM_NAME);
         if (paramViewServlet == null) {
+            LOG.info("Found ExpressionFactory at: {}", ExpressionFactory.class.getResource("ExpressionFactory"
+                    + ".class")); //!!T
             req.getRequestDispatcher(viewPath).forward(req, resp);
         } else {
             final RequestDispatcher requestDispatcher = getServletContext().getNamedDispatcher(paramViewServlet);

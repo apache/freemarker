@@ -388,5 +388,16 @@ public class StringUtilTest {
         _StringUtil.RTFEnc(in, sw);
         assertEquals(expected, sw.toString());
     }
+
+    @Test
+    public void testNormalizeEOLs() {
+        assertNull(_StringUtil.normalizeEOLs(null));
+        assertEquals("", _StringUtil.normalizeEOLs(""));
+        assertEquals("x", _StringUtil.normalizeEOLs("x"));
+        assertEquals("x\ny", _StringUtil.normalizeEOLs("x\ny"));
+        assertEquals("x\ny", _StringUtil.normalizeEOLs("x\r\ny"));
+        assertEquals("x\ny", _StringUtil.normalizeEOLs("x\ry"));
+        assertEquals("\n\n\n\n\n\n", _StringUtil.normalizeEOLs("\n\r\r\r\n\r\n\r"));
+    }
     
 }

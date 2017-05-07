@@ -1658,5 +1658,18 @@ public class _StringUtil {
     public static boolean isUpperUSASCII(char c) {
         return c >= 'A' && c <= 'Z';
     }
+
+    private static final Pattern NORMALIZE_EOLS_REGEXP = Pattern.compile("\\r\\n?+");
+
+    /**
+     * Converts all non UN*X End-Of-Line character sequences (CR and CRLF) to UN*X format (LF).
+     * Returns {@code null} for {@code null} input.
+     */
+    public static String normalizeEOLs(String s) {
+        if (s == null) {
+            return null;
+        }
+        return NORMALIZE_EOLS_REGEXP.matcher(s).replaceAll("\n");
+    }
     
 }

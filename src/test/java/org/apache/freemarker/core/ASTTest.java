@@ -21,7 +21,6 @@ package org.apache.freemarker.core;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
 
 import org.apache.freemarker.core.ASTPrinter.Options;
 import org.apache.freemarker.core.util._StringUtil;
@@ -91,8 +90,10 @@ public class ASTTest extends FileTestCase {
                 ASTPrinter.getASTAsString(templateName,
                         TestUtil.removeFTLCopyrightComment(
                                 normalizeLineBreaks(
-                                        loadTestTextResource(new URL(getTestClassDirectory(), templateName))
-                        )), ops));
+                                        loadTestTextResource(
+                                                getTestFileURL(
+                                                        getExpectedContentFileDirectoryResourcePath(), templateName)))
+                        ), ops));
     }
     
     private String normalizeLineBreaks(final String s) throws FileNotFoundException, IOException {

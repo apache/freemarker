@@ -24,7 +24,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -413,7 +412,7 @@ public class TemplateTestCase extends FileTestCase {
         }
         
         if (out != null) {
-            assertExpectedFileEqualsString(getName(), out.toString());
+            assertExpectedFileEqualsString(expectedFileName, out.toString());
         }
     }
 
@@ -424,18 +423,13 @@ public class TemplateTestCase extends FileTestCase {
     }
 
     @Override
-    protected URL getExpectedFileDirectory() throws IOException {
-        return new URL(super.getExpectedFileDirectory(), "expected/");
+    protected String getExpectedContentFileDirectoryResourcePath() throws IOException {
+        return joinResourcePaths(super.getExpectedContentFileDirectoryResourcePath(), "expected");
     }
 
     @Override
-    protected Charset getTestResourceCharset() {
+    protected Charset getTestResourceDefaultCharset() {
         return confB.getOutputEncoding() != null ? confB.getOutputEncoding() : StandardCharsets.UTF_8;
-    }
-    
-    @Override
-    protected URL getExpectedFileFor(String testCaseFileName) throws IOException {
-        return new URL(getExpectedFileDirectory(), expectedFileName);
     }
 
     static class TestBoolean implements TemplateBooleanModel, TemplateScalarModel {
@@ -449,40 +443,40 @@ public class TemplateTestCase extends FileTestCase {
             return "de";
         }
     }
-    
+
     static class TestMethod implements TemplateMethodModel {
-      @Override
-    public Object exec(List arguments) {
-          return "x";
-      }
+        @Override
+        public Object exec(List arguments) {
+            return "x";
+        }
     }
-    
+
     static class TestNode implements TemplateNodeModel {
-      
-      @Override
-    public String getNodeName() {
-          return "name";
-      }
-                    
-      @Override
-    public TemplateNodeModel getParentNode() {
-          return null;
-      }
-    
-      @Override
-    public String getNodeType() {
-          return "element";
-      }
-    
-      @Override
-    public TemplateSequenceModel getChildNodes() {
-          return null;
-      }
-      
-      @Override
-    public String getNodeNamespace() {
-          return null;
-      }
+
+        @Override
+        public String getNodeName() {
+            return "name";
+        }
+
+        @Override
+        public TemplateNodeModel getParentNode() {
+            return null;
+        }
+
+        @Override
+        public String getNodeType() {
+            return "element";
+        }
+
+        @Override
+        public TemplateSequenceModel getChildNodes() {
+            return null;
+        }
+
+        @Override
+        public String getNodeNamespace() {
+            return null;
+        }
     }
 
    public Object getTestMapBean() {

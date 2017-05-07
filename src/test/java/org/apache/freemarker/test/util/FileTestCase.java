@@ -20,22 +20,19 @@
 package org.apache.freemarker.test.util;
 
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
@@ -44,20 +41,22 @@ import junit.framework.TestCase;
  */
 public abstract class FileTestCase extends TestCase {
 
+    public static final Logger LOG = LoggerFactory.getLogger(FileTestCase.class);
+
     public FileTestCase(String name) {
         super(name);
     }
 
     protected void assertExpectedFileEqualsString(String expectedFileName, String actualContent) {
         try {
-            final URL expectedFile = getExpectedFileFor(expectedFileName);
+            final URL expectedFile = getExpectedContentFileURL(expectedFileName);
             
             try {
                 multilineAssertEquals(loadTestTextResource(expectedFile), actualContent);
-            } catch (AssertionFailedError e) {
-                File actualFile = getActualFileFor(expectedFileName);
-                if (actualFile == null) {
-                    saveString(actualFile, actualContent);
+            } catch (AssertionFailedError | FileNotFoundException e) {
+                File actualFile = getActualContentFileFor(expectedFile);
+                if (actualFile != null) {
+                    FileUtils.write(actualFile, actualContent);
                     reportActualFileSaved(actualFile);
                 }
 
@@ -69,8 +68,8 @@ public abstract class FileTestCase extends TestCase {
     }
 
     private void multilineAssertEquals(String expected, String actual) {
-        String normExpected = normalizeNewLines(expected);
-        final String normActual = normalizeNewLines(actual);
+        String normExpected = _StringUtil.normalizeEOLs(expected);
+        final String normActual = _StringUtil.normalizeEOLs(actual);
         
         // Ignore final line-break difference:
         if (normActual.endsWith("\n") && !normExpected.endsWith("\n")) {
@@ -82,65 +81,127 @@ public abstract class FileTestCase extends TestCase {
         assertEquals(normExpected, normActual);
     }
 
-    private String normalizeNewLines(String s) {
-        return _StringUtil.replace(s, "\r\n", "\n").replace('\r', '\n');
-    }
-
-    private void saveString(File actualFile, String actualContents) throws IOException {
-        Writer w = new OutputStreamWriter(new FileOutputStream(actualFile), StandardCharsets.UTF_8);
-        try {
-            w.write(actualContents);
-        } finally {
-            w.close();
-        }
-    }
-
-    protected URL getExpectedFileFor(String testCaseFileName) throws IOException {
-        return new URL(getExpectedFileDirectory(), testCaseFileName);
+    protected void reportActualFileSaved(File actualContentFile) {
+        LOG.info("Saved actual output of the failed test to here: {}", actualContentFile.getAbsolutePath());
     }
 
     /**
-     * @return {@code null} if there's no place to write the actual files to
+     * Convenience method for calling {@link #getTestFileURL(String, String)} with {@link
+     * #getExpectedContentFileDirectoryResourcePath()} as the first argument.
      */
-    protected File getActualFileFor(String testCaseFileName) throws IOException {
-        File actualFileDirectory = getActualFileDirectory();
-        if (actualFileDirectory == null) {
+    protected final URL getExpectedContentFileURL(String expectedContentFileName) throws IOException {
+        return getTestFileURL(getExpectedContentFileDirectoryResourcePath(), expectedContentFileName);
+    }
+
+    /**
+     * Gets the URL of the test file that contains the expected result.
+     *
+     * @param directoryResourcePath
+     *         The class-loader resource path of the containing directory; if relative, it's interpreted relatively to
+     *         the package of {@link #getTestResourcesBaseClass()}.
+     *
+     * @return Not {@code null}; if the file isn't found, throw {@link FileNotFoundException}
+     *
+     * @throws FileNotFoundException
+     *         If the requested file wasn't found.
+     */
+    protected final URL getTestFileURL(String directoryResourcePath, String fileName) throws IOException {
+        _NullArgumentException.check("directoryResourcePath", directoryResourcePath);
+        _NullArgumentException.check("testCaseFileName", fileName);
+
+        Class baseClass = getTestResourcesBaseClass();
+        String resourcePath = joinResourcePaths(directoryResourcePath, fileName);
+        // It's important that we only query an URL for the file (not for the parent package directory), because the
+        // parent URL can depend on the file name if the class loader uses multiple directories/jars.
+        URL resource = baseClass.getResource(resourcePath);
+        if (resource == null) {
+            throw new FileNotFoundException("Class-loader resource not found for: "
+                    + "baseClass: " + baseClass.getName() + "; "
+                    + "resourcePath (shown quoted): " + _StringUtil.jQuote(resourcePath));
+        }
+        return resource;
+    }
+
+    /**
+     * Concatenates two resource paths, taking care of the edge cases due to leading and trailing "/"
+     * characters in them.
+     */
+    protected final String joinResourcePaths(String dirPath, String tailPath) {
+        if (tailPath.startsWith("/") || dirPath.isEmpty()) {
+            return tailPath;
+        }
+        return dirPath.endsWith("/") ? dirPath + tailPath : dirPath + "/" + tailPath;
+    }
+
+    /**
+     * Gets the actual content file to create which belongs to an expected content file. Actual content files are
+     * created when the expected and the actual content differs.
+     *
+     * @return {@code null} if there's no place to write the files that contain the actual content
+     */
+    protected File getActualContentFileFor(URL expectedContentFile) throws IOException {
+        _NullArgumentException.check("expectedContentFile", expectedContentFile);
+
+        File actualContentFileDir = getActualContentFileDirectory(expectedContentFile);
+        if (actualContentFileDir == null) {
             return null;
         }
-        return new File(actualFileDirectory, deduceActualFileName(testCaseFileName));
-    }
-    
-    private String deduceActualFileName(String testCaseFileName) {
-        int lastDotIdx = testCaseFileName.lastIndexOf('.');
-        return lastDotIdx == -1
-                ? testCaseFileName + ".actual" 
-                : testCaseFileName.substring(0, lastDotIdx) + "-actual" + testCaseFileName.substring(lastDotIdx);
+
+        String expectedContentFileName = expectedContentFile.getPath();
+        int lastSlashIdx = expectedContentFileName.lastIndexOf('/');
+        if (lastSlashIdx != -1) {
+            expectedContentFileName = expectedContentFileName.substring(lastSlashIdx + 1);
+        }
+
+        return new File(actualContentFileDir, deduceActualContentFileName(expectedContentFileName));
     }
 
     /**
-     * The URL of the directory that contains the expected files; must end with "/" or "/." or else relative paths won't
-     * be resolved correctly.
+     * Deduces the actual content file name from the expected content file name.
+     *
+     * @return Not {@code null}
      */
-    protected URL getExpectedFileDirectory() throws IOException {
-        return getTestClassDirectory();
+    protected String deduceActualContentFileName(String expectedContentFileName) {
+        _NullArgumentException.check("expectedContentFileName", expectedContentFileName);
+
+        int lastDotIdx = expectedContentFileName.lastIndexOf('.');
+        return lastDotIdx == -1
+                ? expectedContentFileName + ".actual"
+                : expectedContentFileName.substring(0, lastDotIdx) + "-actual" + expectedContentFileName.substring(lastDotIdx);
+    }
+
+    /**
+     * The class loader resource path of the directory that contains the expected files; must start and end with "/"!
+     */
+    protected String getExpectedContentFileDirectoryResourcePath() throws IOException {
+        return getTestClassDirectoryResourcePath();
     }
 
     /**
      * @return {@code null} if there's no directory to write the actual files to
      */
-    protected File getActualFileDirectory() throws IOException {
-        return FileUtils.toFile(getExpectedFileDirectory());
+    protected File getActualContentFileDirectory(URL expectedFile) throws IOException {
+        return FileUtils.toFile(expectedFile).getParentFile();
     }
 
-    @SuppressFBWarnings(value="UI_INHERITANCE_UNSAFE_GETRESOURCE", justification="By design relative to subclass")
-    protected final URL getTestClassDirectory() throws IOException {
-        URL url = getClass().getResource(".");
-        if (url == null) throw new IOException("Couldn't get resource URL for \".\"");
-        return url;
+    /**
+     * The class loader resource path of the directory that contains the test files; must not end with "/"!
+     */
+    protected String getTestClassDirectoryResourcePath() throws IOException {
+        return "";
+    }
+
+    /**
+     * Resource paths are loaded using this class's {@link Class#getResourceAsStream(String)} method; thus, if
+     * {@link #getTestClassDirectoryResourcePath()} and such return a relative paths, they will be relative to the
+     * package of this class.
+     */
+    protected Class getTestResourcesBaseClass() {
+        return getClass();
     }
 
     protected String loadTestTextResource(URL resource) throws IOException {
-        return loadTestTextResource(resource, getTestResourceCharset());
+        return loadTestTextResource(resource, getTestResourceDefaultCharset());
     }
     
     protected String loadTestTextResource(URL resource, Charset charset) throws IOException {
@@ -148,27 +209,8 @@ public abstract class FileTestCase extends TestCase {
                 IOUtils.toString(resource, charset.name()));
     }
     
-    protected Charset getTestResourceCharset() {
+    protected Charset getTestResourceDefaultCharset() {
         return StandardCharsets.UTF_8;
     }
-    
-    protected void reportActualFileSaved(File f) {
-        System.out.println("Note: Saved actual output of the failed test to here: " + f.getAbsolutePath());
-    }
-   
-    private static String loadString(InputStream in, Charset charset) throws IOException {
-        Reader r = new InputStreamReader(in, charset);
-        StringBuilder sb = new StringBuilder(1024);
-        try {
-            char[] buf = new char[4096];
-            int ln;
-            while ((ln = r.read(buf)) != -1) {
-                sb.append(buf, 0, ln);
-            }
-        } finally {
-            r.close();
-        }
-        return sb.toString();
-    }
-    
+
 }
