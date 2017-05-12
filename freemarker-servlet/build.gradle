@@ -1,0 +1,80 @@
+String moduleNiceName = "Apache FreeMarker Core Servlet"
+
+dependencies {
+    compile project(":freemarker-core")
+
+    compileOnly "javax.servlet.jsp:jsp-api:2.1"
+    compileOnly "javax.servlet:servlet-api:2.5"
+
+    // ------------------------------------------------------------------------
+    // For tests
+
+    def jettyVersion = "7.6.16.v20140903"
+    testCompile "org.eclipse.jetty:jetty-server:$jettyVersion"
+    testCompile "org.eclipse.jetty:jetty-webapp:$jettyVersion"
+    testCompile "org.eclipse.jetty:jetty-jsp:$jettyVersion"
+    testCompile "org.eclipse.jetty:jetty-util:$jettyVersion"
+    // Jetty also contains the servlet-api and jsp-api classes
+
+    testCompile("displaytag:displaytag:1.2") {
+        exclude group: "com.lowagie", module: "itext"
+        // We manage logging centrally:
+        exclude group: "org.slf4j", module: "slf4j-log4j12"
+        exclude group: "org.slf4j", module: "jcl104-over-slf4j"
+        exclude group: "log4j", module: "log4j"
+    }
+
+    def springVersion = "2.5.6.SEC03"
+    testCompile("org.springframework:spring-core:$springVersion") {
+        exclude group: "commons-logging", module: "commons-logging"
+    }
+    testCompile("org.springframework:spring-test:$springVersion") {
+        exclude group: "commons-logging", module: "commons-logging"
+    }
+}
+
+jar {
+    manifest {
+        // This is needed for "a.class.from.another.Bundle"?new() to work.
+        instructionReplace 'DynamicImport-Package', '*'
+
+        instructionReplace 'Bundle-RequiredExecutionEnvironment', 'JavaSE-1.7'
+        // TODO Gradle adds a "Require-Capability"... is it a problem? If not, do we need the above?
+
+        attributes(
+                "Extension-name": moduleNiceName,
+                "Specification-Title": moduleNiceName,
+                "Implementation-Title": moduleNiceName
+        )
+    }
+}
+
+javadoc {
+    title "${moduleNiceName} ${versionCanonical} API"
+}
+
+// The identical parts of Maven "deployer" and "installer" configurations:
+def mavenCommons = { callerDelegate ->
+    delegate = callerDelegate
+
+    pom.project {
+        description "FreeMarker template engine, Servlet and JSP support. " +
+                "This is an optional module, mostly useful in frameworks based on JSP Model-2 architecture, or when custom JSP tags need to be called from templates."
+    }
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            mavenCommons(delegate)
+        }
+    }
+}
+
+install {
+    repositories {
+        mavenInstaller {
+            mavenCommons(delegate)
+        }
+    }
+}

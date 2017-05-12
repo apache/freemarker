@@ -1,131 +1,279 @@
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
+ * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
+ * regarding copyright ownership. The ASF licenses this file
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * with the License. You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
 
-plugins {
-    id "ca.coglinc.javacc" version "2.4.0"
+// TODO: Versions should come form src/main/resource/o/a/f/c/version.properties
+ext.versionCanonical = "3.0.0-nightly-incubating"
+ext.versionForMaven = "3.0.0-SNAPSHOT"
+ext.versionForOSGi = "3.0.0.nightly-incubating"
+ext.versionForMf = "2.97.0"
+ 
+allprojects {
+    group = "org.apache.freemarker"
+    version = "${versionCanonical}"
 }
 
-apply plugin: "java"
+// Libraries that are referred from multiple places:
+ext.libraries = [
+    findbugs: "com.google.code.findbugs:annotations:3.0.0"
+]
+ext.slf4jVersion = "1.7.25"
 
-version = "3.0.0-nightly"
+// Unwanted transitive dependencies that often get in accidentally:
+ext.bannedLibraries = [
+    // Note that the version must be omitted in these entres!
+    // We're using SLF4J + Logback Classic, and xxx-over-slf4j to mimic other logger libraries.
+    "org.slf4j:slf4j-log4j12",
+    "org.slf4j:slf4j-jdk14",
+    "log4j:log4j",
+    "commons-logging:commons-logging"
+] as Set
 
-repositories {
-    // mavenLocal()
-    mavenCentral()
-}
-
-configurations.all {
-    // We use SLF4J with Logback binding, so exclude any other SLF4J bindings:
-    exclude group: "org.slf4j", module: "slf4j-log4j12"
-    exclude group: "org.slf4j", module: "slf4j-jdk14"
-
-    // We use xxx-over-slf4j to substitute logging libraries, so exclude them:
-    exclude group: "log4j", module: "log4j"
-    exclude group: "commons-logging", module: "commons-logging"
-
-    // xml-apis is part of the Java SE version for a good while; prevent old libraries pulling it in:
-    exclude group: "xml-apis", module: "xml-apis"
-}
-
-configurations.testCompile {
-    // Jetty pulls in its own version of Servlet/JSP classes, so don't inherit these from the "compile" configuration:
-    exclude group: "javax.servlet.jsp", module: "jsp-api"
-    exclude group: "javax.servlet.jsp", module: "servlet-api"
-}
-
-dependencies {
-    def jettyVersion = "7.6.16.v20140903"
-    def slf4jVersion = "1.7.22"
-    def springVersion = "2.5.6.SEC03"
-
-    compile "com.google.guava:guava:20.0"
-
-    compile "jaxen:jaxen:1.0-FCS"
-    compile "saxpath:saxpath:1.0-FCS"
-    compile "xalan:xalan:2.7.0"
-
-    compile "org.slf4j:slf4j-api:$slf4jVersion"
-
-    compile "org.zeroturnaround:javarebel-sdk:1.2.2"
-
-    // TODO @SuppressFBWarnings-s should be removed before build, then this dependency is only needed for the IDE
-    compile "com.google.code.findbugs:annotations:3.0.0"
-
-    // TODO These will be moved to the freemarker-serlvet module:
-    compile "javax.servlet.jsp:jsp-api:2.1"
-    compile "javax.servlet:servlet-api:2.5"
-
-    // Test:
-
-    testCompile "junit:junit:4.12"
-    testCompile "org.hamcrest:hamcrest-library:1.3"
-
-    testCompile "ch.qos.logback:logback-classic:1.1.8"
-    testCompile "org.slf4j:jcl-over-slf4j:$slf4jVersion"
-
-    testCompile "commons-io:commons-io:2.2"
-    testCompile "com.google.guava:guava-jdk5:17.0"
-
-    testCompile "org.eclipse.jetty:jetty-server:$jettyVersion"
-    testCompile "org.eclipse.jetty:jetty-webapp:$jettyVersion"
-    testCompile "org.eclipse.jetty:jetty-jsp:$jettyVersion"
-    testCompile "org.eclipse.jetty:jetty-util:$jettyVersion"
-
-    testCompile("displaytag:displaytag:1.2") {
-        exclude group: "com.lowagie", module: "itext"
-    }
-
-    testCompile "org.springframework:spring-core:$springVersion"
-    testCompile "org.springframework:spring-test:$springVersion"
-}
-
-compileJava {
-    // TODO This will be 1.7 when freemarker-core-java8 is separated
-    sourceCompatibility = "1.8"
-    targetCompatibility = "1.8"
-
-    options.encoding = "UTF-8"
-}
-
-compileTestJava {
-    sourceCompatibility = "1.8"
-    targetCompatibility = "1.8"
-
-    options.encoding = "UTF-8"
-}
-
-compileJavacc {
-    arguments = [ grammar_encoding: "UTF-8" ]
-    doLast {
-        // TODO Some filtering is needed on the output - see in the original Ant build
-
-        // Note: The Gradle JavaCC plugin automatically removes generated java files that are already in
-        // src/main/java, so we don't need to get rid of ParseException.java and TokenMgrError.java (unlike in Ant)
+['bootClasspathJava7', 'bootClasspathJava8'].each {
+    if (!project.hasProperty(it)) {
+        throw new org.gradle.api.GradleScriptException("The ${it} property " +
+                "must be set. Maybe you have missed this step: Copy gradle.properties.sample into gradle.properties, and " +
+                "edit it to describe your environment. Alternatively, pass the properties to gradle with " +
+                "-P${it}=\"...\".",
+                null);
     }
 }
 
-jar {
-    // TODO Use bnd - see in the Ant build
-    manifest {
-        attributes(
-                // TODO There were more here in the Ant build
-                "Implementation-Title": "Apache FreeMarker",
-                "Implementation-Version": project.version)
+subprojects {
+    apply plugin: "java"
+    apply plugin: "maven"
+    apply plugin: "osgi"
+    apply plugin: "idea"
+
+    // Default java compiler configuration (might be overridden in subprojects):
+    sourceCompatibility = "1.7"
+    targetCompatibility = "1.7"
+    [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
+    [compileJava, compileTestJava]*.options*.bootClasspath = bootClasspathJava7
+    // TODO Remove SuppressFBWarning-s from compileJava output somehow
+    // TODO Ensure that JUnit tests run on Java 7, except for the modules that were made for later versions.
+
+    repositories {
+        // mavenLocal()
+        mavenCentral()
     }
-}
+    
+    // Dependencies used in all subprojects:
+    dependencies {
+        // All subprojects have access to SLF4J (regardless if they actually use it at the moment):
+        compile "org.slf4j:slf4j-api:$slf4jVersion"
+        // All subprojects might use Findbugs annotations:
+        compileOnly libraries.findbugs
+    
+        // Test libraries and utilities might come handy during testing:
+        testCompile project(":freemarker-test-utils")
+    }
+
+    // Like Maven's Enforcer plugin, make the build fail if certain libraries get in. (The problem with the
+    // customary `configurations.all { exclude ... }` soltion is that it bloats the genereated Maven POM-s a lot.)
+    test.doFirst {
+        configurations.testRuntime.getResolvedConfiguration().getResolvedArtifacts().each {
+            def artifactId = it.getModuleVersion().getId()
+            String artifactIdStr = "${artifactId.group}:${artifactId.name}"
+            if (artifactIdStr in bannedLibraries) {
+                throw new GradleScriptException(
+                        "Banned library in the dependency graph: ${artifactIdStr}. "
+                        + "Use `gradlew ${project.path}:dependencies` to find who pulls it in then exclude it there.",
+                        null);
+            }
+        }
+    }
+
+    jar {
+        manifest {   // org.gradle.api.plugins.osgi.OsgiManifest
+            version versionForOSGi
+            license "Apache License, Version 2.0" // TODO has no effect; bug?
+            vendor "Apache Software Foundation"
+            // TODO The autogenerated Bundle-SymbolicName is weird, esp. for freemarker-core-java8. How should it look?
+            
+            attributes(
+                "Bundle-License": "Apache License, Version 2.0",  // because `license "..."` above didn't work
+                "Specification-Version": versionForMf,
+                "Specification-Vendor": "Apache Software Foundation",
+                "Implementation-Version": versionForMf,
+                "Implementation-Vendor": "Apache Software Foundation"
+            )
+        }
+    }
+
+    // The identical parts of Maven "deployer" and "installer" configuration:
+    def mavenCommons = { callerDelegate ->
+        delegate = callerDelegate
+        
+        pom.version = versionForMaven
+        pom.project {
+            organization {
+                name "Apache Software Foundation"
+                url "http://apache.org"
+            }
+            licenses {
+                license {
+                    name "Apache License, Version 2.0"
+                    url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                    distribution "repo"
+                }
+            }
+            scm {
+                connection "scm:git:https://git-wip-us.apache.org/repos/asf/incubator-freemarker.git"
+                developerConnection "scm:git:https://git-wip-us.apache.org/repos/asf/incubator-freemarker.git"
+                url "https://git-wip-us.apache.org/repos/asf?p=incubator-freemarker.git"
+                if (versionForOSGi.contains('.stable')) {
+                    tag "v${version}"
+                }
+            }
+            issueManagement {
+                system "jira"
+                url "https://issues.apache.org/jira/browse/FREEMARKER/"
+            }
+            mailingLists {
+                mailingList {
+                    name "FreeMarker developer list"
+                    post "dev@freemarker.incubator.apache.org"
+                    subscribe "dev-subscribe@freemarker.incubator.apache.org"
+                    unsubscribe "dev-unsubscribe@freemarker.incubator.apache.org"
+                    archive "http://mail-archives.apache.org/mod_mbox/incubator-freemarker-dev/"
+                }
+                mailingList {
+                    name "FreeMarker commit and Jira notifications list"
+                    post "notifications@freemarker.incubator.apache.org"
+                    subscribe "notifications-subscribe@freemarker.incubator.apache.org"
+                    unsubscribe "notifications-unsubscribe@freemarker.incubator.apache.org"
+                    archive "http://mail-archives.apache.org/mod_mbox/incubator-freemarker-notifications/"
+                }
+                mailingList {
+                    name "FreeMarker management private"
+                    post "private@freemarker.incubator.apache.org"
+                }
+            }
+        }
+    } // end mavenCommons
+
+    uploadArchives {
+        repositories {
+            // TODO We must deploy source and javadoc artifact as well; see old Ant build.xml
+            mavenDeployer {
+                mavenCommons(delegate)
+                repository(
+                        // URL-s copy-pasted from the org.apacha:apache parent POM
+                        url: versionForMaven.contains('-SNAPSHOT')
+                                ? "https://repository.apache.org/content/repositories/snapshots/"
+                                : "https://repository.apache.org/service/local/staging/deploy/maven2"
+                )
+                // TODO Password authentication needed (can it use ~/.m2/settings.xml, like the real Maven?)
+                // TODO We must sign all artifacts with GPG; see old Ant build.xml
+            }
+        }
+    }    
+
+    install {
+        // TODO We must deploy source and javadoc artifact as well; see old Ant build.xml
+        repositories {
+            mavenInstaller {
+                mavenCommons(delegate)
+            }
+        }
+    }
+    
+    // Post-process fully generated POM-s to remove test scope dependencies, just for the sake of aesthetics.
+    [install.repositories.mavenInstaller, uploadArchives.repositories.mavenDeployer]*.pom*.whenConfigured { pom ->
+        pom.dependencies = pom.dependencies.findAll { dep -> dep.scope != "test" }        
+    }
+    
+    javadoc {
+        exclude "**/_*.java"
+        options.use = true
+        options.encoding = "UTF-8"
+        options.docEncoding = "UTF-8"
+        options.charSet = "UTF-8"
+        options.locale = "en_US"
+        options.links = [ "http://docs.oracle.com/javase/8/docs/api/" ]
+        doLast {
+            // We will fix low quality typography of JDK 8 Javadoc here. Bascially we make it look like JDK 7.
+            
+            File cssFile = new File(outputDirectory, "stylesheet.css")
+            assert cssFile.exists()
+            
+            // Tell that it's modified:
+            ant.replaceregexp(
+                file: cssFile, flags: "gs", encoding: "utf-8",
+                match: $//\* (Javadoc style sheet) \*//$, replace: $//\* \1 - JDK 8 usability fix regexp substitutions applied \*//$
+            )
+
+            // Remove broken link:
+            ant.replaceregexp(
+                file: cssFile, flags: "gs", encoding: "utf-8",
+                match: $/@import url\('resources/fonts/dejavu.css'\);\s*/$, replace: ""
+            )
+            
+            // Font family fixes:
+            ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/['"]DejaVu Sans['"]/$, replace: "Arial"
+            )
+            ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/['"]DejaVu Sans Mono['"]/$, replace: "'Courier New'"
+            )
+            ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/['"]DejaVu Serif['"]/$, replace: "Arial"
+            )
+            ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/(?<=[\s,:])serif\b/$, replace: "sans-serif"
+            )
+            ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/(?<=[\s,:])Georgia,\s*/$, replace: ""
+            )
+            ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/['"]Times New Roman['"],\s*/$, replace: ""
+            )
+            ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/(?<=[\s,:])Times,\s*/$, replace: ""
+            )
+            ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/(?<=[\s,:])Arial\s*,\s*Arial\b/$, replace: "Arial"
+            )
+            
+            // "Parameters:", "Returns:", "Throws:", "Since:", "See also:" etc. fixes:
+            String ddSelectorStart = $/(?:\.contentContainer\s+\.(?:details|description)|\.serializedFormContainer)\s+dl\s+dd\b.*?\{[^\}]*\b/$
+            String ddPropertyEnd = $/\b.+?;/$
+            // - Put back description (dd) indentation:
+            ant.replaceregexp(
+                file: cssFile, flags: "gs", encoding: "utf-8",
+                match: $/(${ddSelectorStart})margin${ddPropertyEnd}/$, replace: $/\1margin: 5px 0 10px 20px;/$
+            )
+            // - No monospace font for the description (dd) part:
+            ant.replaceregexp(
+                file: cssFile, flags: "gs", encoding: "utf-8",
+                match: $/(${ddSelectorStart})font-family${ddPropertyEnd}/$, replace: $/\1/$
+            )
+            
+        }
+    }
+
+} // end subprojects

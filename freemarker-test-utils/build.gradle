@@ -1,0 +1,53 @@
+String moduleNiceName = "Apache FreeMarker Test Utiltities"
+
+dependencies {
+    compile "junit:junit:4.12"
+    compile "org.hamcrest:hamcrest-library:1.3"
+    compile "commons-io:commons-io:2.2"
+    compile "org.apache.commons:commons-lang3:3.5"
+    compile "commons-collections:commons-collections:3.1"
+    compile "com.google.guava:guava-jdk5:17.0"
+    compile libraries.findbugs
+
+    // Logging during testing:
+    runtime "ch.qos.logback:logback-classic:1.1.8"
+    runtime "org.slf4j:jcl-over-slf4j:$slf4jVersion"
+    runtime "org.apache.logging.log4j:log4j-to-slf4j:2.8.2"
+}
+
+jar {
+    manifest {
+        // This is needed for "a.class.from.another.Bundle"?new() to work.
+        instructionReplace 'DynamicImport-Package', '*'
+        attributes(
+                "Extension-name": moduleNiceName,
+                "Specification-Title": moduleNiceName,
+                "Implementation-Title": moduleNiceName
+        )
+    }
+}
+
+javadoc {
+    title "${moduleNiceName} ${versionCanonical} API"
+}
+
+// The identical parts of Maven "deployer" and "installer" configurations:
+def mavenCommons = { callerDelegate ->
+    delegate = callerDelegate
+
+    pom.project {
+        description "FreeMarker template engine, Servlet and JSP support. " +
+                "This is an optional module, mostly useful in frameworks based on JSP Model-2 architecture, or when custom JSP tags need to be called from templates."
+    }
+}
+
+// Not a published module
+uploadArchives.enabled = false
+
+install {
+    repositories {
+        mavenInstaller {
+            mavenCommons(delegate)
+        }
+    }
+}

@@ -1,0 +1,155 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+plugins {
+    id "ca.coglinc.javacc" version "2.4.0"
+}
+
+String moduleNiceName = "Apache FreeMarker Core"
+
+dependencies {
+    // Note that commond dependencies are added in the root project.
+
+    // ------------------------------------------------------------------------
+    // For the main artifact
+
+    compileOnly "org.zeroturnaround:javarebel-sdk:1.2.2"
+
+    // TODO These will be moved to freemarker-dom module:
+    
+    compileOnly "jaxen:jaxen:1.0-FCS"
+    compileOnly "saxpath:saxpath:1.0-FCS"
+    compileOnly("xalan:xalan:2.7.0") {
+        // xml-apis is part of Java SE since version 1.4:
+        exclude group: "xml-apis", module: "xml-apis"
+    }
+
+    testRuntime "jaxen:jaxen:1.0-FCS"
+    testRuntime "saxpath:saxpath:1.0-FCS"
+    testRuntime("xalan:xalan:2.7.0") {
+        // xml-apis is part of Java SE since version 1.4:
+        exclude group: "xml-apis", module: "xml-apis"
+    }
+
+}
+
+compileJavacc {
+    arguments = [ grammar_encoding: "UTF-8" ]
+    outputDirectory = new File(outputDirectory, 'org/apache/freemarker/core')
+    doLast {
+        ant.replace(
+          file: "${outputDirectory}/FMParser.java",
+          token: "public class FMParser",
+          value: "class FMParser"
+        )
+        ant.replace(
+          file: "${outputDirectory}/FMParser.java",
+          token: "private final LookaheadSuccess",
+          value: "private static final LookaheadSuccess"
+        )
+        ant.replace(
+          file: "${outputDirectory}/FMParserConstants.java",
+          token: "public interface FMParserConstants",
+          value: "interface FMParserConstants"
+        )
+        ant.replace(
+          file: "${outputDirectory}/FMParserTokenManager.java",
+          token: "public class FMParserTokenManager",
+          value: "class FMParserTokenManager"
+        )
+        ant.replace(
+          file: "${outputDirectory}/Token.java",
+          token: "public class Token",
+          value: "class Token"
+        )
+        ant.replace(
+          file: "${outputDirectory}/SimpleCharStream.java",
+          token: "public class SimpleCharStream",
+          value: "class SimpleCharStream"
+        )
+
+        // Note: The Gradle JavaCC plugin automatically removes generated java files that are already in
+        // src/main/java, so we don't need to get rid of ParseException.java and TokenMgrError.java (unlike in Ant)
+    }
+}
+sourceSets.main.java.srcDir new File(buildDir, 'generated/javacc') // Wasn't needed for the build, but for IDE-s
+idea {
+    module {
+        generatedSourceDirs += file('build/generated/javacc') // Marks the already(!) added srcDir as "generated"
+    }
+}
+
+jar {
+    manifest {
+        // TODO Import exclusions has to be adjusted as we factor out to external modules!
+        instructionReplace 'Import-Package', '!org.apache.freemarker.*', 'org.slf4j.*', '*;resolution:="optional"'
+        // The above makes all imports optional (like servlet API-s, etc.),
+        // except those that were explicitly listed (or are inside java.*).
+        // Thus, even when the Java platfrom includes a package, it won't
+        // be automatically imported, unless bnd generates the import statement
+        // for them.
+
+        // This is needed for "a.class.from.another.Bundle"?new() to work.
+        instructionReplace 'DynamicImport-Package', '*'
+
+        // The required minimum is 1.7, but we utilize 1.8 if available.
+        // See also: http://wiki.eclipse.org/Execution_Environments, "Compiling
+        // against more than is required"
+        instructionReplace 'Bundle-RequiredExecutionEnvironment', 'JavaSE-1.8, JavaSE-1.7'
+        // TODO is this the right way in Require-Capability to specify a version range?
+        instructionReplace 'Require-Capability', 'osgi.ee;filter:="(&(osgi.ee=JavaSE)(version>=1.7))"'
+
+        attributes(
+            "Extension-name": moduleNiceName,
+            "Specification-Title": moduleNiceName,
+            "Implementation-Title": moduleNiceName
+        )
+    }
+}
+
+javadoc {
+    title "${moduleNiceName} ${versionCanonical} API"
+}
+
+// The identical parts of Maven "deployer" and "installer" configuration:
+def mavenCommons = { callerDelegate ->
+    delegate = callerDelegate
+    
+    pom.project {
+        description(
+                "FreeMarker template engine, core module. This module covers all basic functionality, "
+                + "and is all that's needed for many applications.")
+    }
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            mavenCommons(delegate)
+        }
+    }
+}
+
+install {
+    repositories {
+        mavenInstaller {
+            mavenCommons(delegate)
+        }
+    }
+}

@@ -1,14 +1,12 @@
-/.ivy/
-/.bin/
-/build/
-/build.properties
-/archive/
-/ide-dependencies/
-/META-INF
-
-/out/
+**/build/
+/.out/
 /bin/
+/.bin/
 /target/
+
+/gradle.properties
+/archive/
+/META-INF
 
 .classpath
 .project
@@ -19,7 +17,7 @@
 *.iws
 *.ipr
 .idea_modules/
-.out/
+/out/
 
 *.tmp
 *.bak

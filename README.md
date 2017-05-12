@@ -57,8 +57,8 @@ If you are using Maven, just add this dependency:
 
 ```xml
   <dependency>
-    <groupId>org.apache</groupId>
-    <artifactId>freemarker</artifactId>
+    <groupId>org.apache.freemarker</groupId>
+    <artifactId>freemarker-core</artifactId>
     <version>{version}</version>
   </dependency>
 ```
@@ -101,25 +101,30 @@ If you haven't yet, download the source release, or checkout FreeMarker from
 the source code repository. See repository locations here:
 http://freemarker.org/sourcecode.html
 
-You need JDK 8, Apache Ant (tested with 1.8.1) and Ivy (tested with 2.4.0) to
-be installed. To install Ivy (but be sure it's not already installed), issue
-`ant download-ivy`; it will copy Ivy under `~/.ant/lib`. (Alternatively, you
-can copy `ivy-<version>.jar` into the Ant home `lib` subfolder manually.)
+You need JDK 8 to be installed.
 
-It's recommended to copy `build.properties.sample` into `build.properties`,
-and edit its content to fit your system. (Although basic jar building should
-succeeds without the build.properties file too.)
+You must copy `gradle.properties.sample` into `gradle.properties`, and edit its
+content to fit your system.
 
-To build `freemarker.jar`, just issue `ant` in the project root directory, and
-it should download all dependencies automatically and build `freemarker.jar`. 
+To build `freemarker.jar`, just issue `./gradlew jar` in the project root
+directory (Windows users see the note below though), and it should download
+all dependencies (including Gradle itself) automatically and build the jar-s.
+You can found them in the build/libs subdirectory of each module
+(freemarker-core, freemarker-servlet, etc.). You can also install the jar-s
+into your local Maven repository with `./gradlew install`.
 
-If later you change the dependencies in `ivy.xml`, or otherwise want to
-re-download some of them, it will not happen automatically anymore, and you
-must issue `ant update-deps`.
+Note for Windows users: If you are using an Apache source release (as opposed
+to checking the project out from the Git repository), ./gradlew will fail as
+`gradle\wrapper\gradle-wrapper.jar` is missing. Due to Apache policy restricton
+we can't include that file in distributions, so you have to download that very
+common artifact from somewhere manually (like from out Git repository). (On
+UN*X-like systems you don't need that jar, as our custom `gradlew` shell script
+does everything itself.)
 
-To test your build, issue `ant test`.
+To test your build, issue `./gradlew test`.
 
-To generate documentation, issue `ant javadoc` and `ant manualOffline`.
+To generate documentation, issue `./gradlew javadoc` and
+`./gradlew manualOffline` (TODO: the last doesn't yet work).
 
 
 Eclipse and other IDE setup
@@ -129,10 +134,6 @@ Below you find the step-by-step setup for Eclipse Neon.1. If you are using a
 different version or an entierly different IDE, still read this, and try to
 apply it to your development environment:
 
-- Install Ant and Ivy, if you haven't yet; see earlier.
-- From the command line, run  `ant clean jar ide-dependencies`
-  (Note that now the folders `ide-dependencies`, `build/generated-sources` and
-  `META-INF` were created.)
 - Start Eclipse
 - You may prefer to start a new workspace (File -> "Switch workspace"), but
   it's optional.
@@ -156,8 +157,8 @@ apply it to your development environment:
     Number of imports required for .*: 99
     Number of static imports needed for .*: 1
   - Java -> Installed JRE-s:
-    Ensure that you have JDK 8 installed, and that it was added to Eclipse.
-    Note that it's not JRE, but JDK.
+    Ensure that you have JDK 7 and JDK 8 installed, and that it was added to
+    Eclipse. Note that it's not JRE, but JDK.
   - Java -> Compiler -> Javadoc:
     "Malformed Javadoc comments": Error
     "Only consider members as visible": Private
@@ -165,28 +166,14 @@ apply it to your development environment:
     "Missing tag descriptions": Validate @return tags
     "Missing Javadoc tags": Ignore
     "Missing Javadoc comments": Ignore
-- Create new "Java Project" in Eclipse:
-  - In the first window popping up:
-    - Change the "location" to the directory of the FreeMarker project
-    - Press "Next"
-  - In the next window, you see the build path settings:
-    - On "Source" tab, ensure that exactly these are marked as source
-      directories (be careful, Eclipse doesn't auto-detect these well):
-        build/generated-sources/java
-        src/main/java
-        src/main/resources
-        src/test/java
-        src/test/resources
-    - On the "Libraries" tab:
-      - Delete everyhing from there, except the "JRE System Library [...]"
-      - Edit "JRE System Library [...]" to "Execution Environment" "JavaSE 1.8"
-      - Add all jar-s that are directly under the "ide-dependencies" directory
-        (use the "Add JARs..." and select all those files).
-    - On the "Order and Export" tab find dom4j-*.jar, and send it to the
-        bottom of the list (becase, an old org.jaxen is included inside
-        dom4j-*.jar, which casues compilation errors if it wins over
-        jaxen-*.jar).
-   - Press "Finish"
+- TODO: How to import the Gradle project into Eclipse
+  On IntelliJ:
+  - Import the whole FreeMarker project as a Gradle project. There are things that you
+    will have to set manually, but first, build the project with Gradle if you haven't
+    (see earlier how).
+  - Open Project Structure (Alt+Ctrl+Shift+S), and in the "Dependencies" tab of each
+    module, set "Module SDK" to "1.7", except for freemarker-core-java8, where it should
+    be "1.8". [TODO: Check if now it happens automatically]
 - Project -> Properties -> Java Compiler -> Errors/Warnings:
   Check in "Enable project specific settings", then set "Forbidden reference
   (access rules)" from "Error" to "Warning".
@@ -198,7 +185,7 @@ apply it to your development environment:
   last should contain "Add missing @Override annotations",
   "Add missing @Override annotations to implementations of interface methods",
   "Add missing @Deprecated annotations", and "Remove unnecessary cast").
-- Right click on the project -> Run As -> JUnit Test
+- Right click on the root project -> Run As -> JUnit Test [TODO: Try this]
   It should run without problems (all green).
 - It's highly recommened to use the Eclipse FindBugs plugin.
   - Install it from Eclipse Marketplace (3.0.1 as of this writing)
