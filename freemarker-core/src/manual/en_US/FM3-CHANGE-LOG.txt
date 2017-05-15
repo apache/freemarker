@@ -224,3 +224,9 @@ the FreeMarer 3 changelog here:
     subclass instead of Configuration.Builder (which is also an ExtendableBuilder subclass). FreemarkerServlet has
     switched to this approach, using its own builder subclass to provide defaults that makes the sense in that particular
     application. Its API-s which were used for customizing FreemarkerServlet has bean changed accordingly.
+- Modularized the project. Now we have these published jar-s:
+  - org.apache.freemarker:freemarker-core
+  - org.apache.freemarker:freemarker-servlet
+  - [TODO] org.apache.freemarker:freemarker-dom
+  There are several other internal modules related to testing; these aren't published.
+- Migrated buiding from Ant to Gradle. [TODO: This is only partially done; jar building, testing and javadoc works.]
