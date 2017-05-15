@@ -46,10 +46,10 @@ ext.bannedLibraries = [
 
 ['bootClasspathJava7', 'bootClasspathJava8'].each {
     if (!project.hasProperty(it)) {
-        throw new org.gradle.api.GradleScriptException("The ${it} property " +
-                "must be set. Maybe you have missed this step: Copy gradle.properties.sample into gradle.properties, and " +
-                "edit it to describe your environment. Alternatively, pass the properties to gradle with " +
-                "-P${it}=\"...\".",
+        throw new org.gradle.api.GradleScriptException("The ${it} property must be set. " +
+                "This error usually occurs because you have missed this step (described in README.md): " +
+                "Copy gradle.properties.sample into gradle.properties and modify it to fit your environment. " +
+                "(Alternatively, you can pass the property to gradle with -P${it}=\"...\".)",
                 null);
     }
 }
@@ -63,8 +63,8 @@ subprojects {
     // Default java compiler configuration (might be overridden in subprojects):
     sourceCompatibility = "1.7"
     targetCompatibility = "1.7"
-    [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
     [compileJava, compileTestJava]*.options*.bootClasspath = bootClasspathJava7
+    [compileJava, compileTestJava]*.options*.encoding = "UTF-8"
     // TODO Remove SuppressFBWarning-s from compileJava output somehow
     // TODO Ensure that JUnit tests run on Java 7, except for the modules that were made for later versions.
 

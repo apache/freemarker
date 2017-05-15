@@ -36,8 +36,7 @@ def mavenCommons = { callerDelegate ->
     delegate = callerDelegate
 
     pom.project {
-        description "FreeMarker template engine, Servlet and JSP support. " +
-                "This is an optional module, mostly useful in frameworks based on JSP Model-2 architecture, or when custom JSP tags need to be called from templates."
+        description "FreeMarker template engine, testing utilities for internal use; this is not a published module. "
     }
 }
 
