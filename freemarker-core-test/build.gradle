@@ -1,0 +1,19 @@
+description = """\
+The unit tests of freemarker-core. These tests used to be in freemarker-core, but to avoid depenency loop \
+through freemarker-test-utils, they had to be moved into a separate project."""
+
+dependencies {
+    compile project(":freemarker-core")
+    compile project(":freemarker-test-utils")
+}
+
+// We have nothing to put into the jar, as we have test classes only
+jar.enabled = false
+
+javadoc.enabled = false
+
+// Must not be deployed to a public Maven repository
+uploadArchives.enabled = false
+
+// Doesn't make sense to Maven "install" this, as the artifact won't contain test classes
+install.enabled = false
