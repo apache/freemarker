@@ -281,3 +281,6 @@ subprojects {
     }
 
 } // end subprojects
+
+// TODO Build source distribution files
+// TODO Build binary distribution files (contains the binaries of all *published* modules)
