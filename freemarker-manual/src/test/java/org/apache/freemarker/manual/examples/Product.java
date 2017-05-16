@@ -16,28 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.manualtest;
+package org.apache.freemarker.manual.examples;
 
-import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.model.TemplateNumberModel;
+/**
+ * Product bean; note that it must be a public class!
+ */
+public class Product {
 
-public class UnitAwareTemplateNumberModel implements TemplateNumberModel {
+    private String url;
+    private String name;
 
-    private final Number value;
-    private final String unit;
-    
-    public UnitAwareTemplateNumberModel(Number value, String unit) {
-        this.value = value;
-        this.unit = unit;
+    // As per the JavaBeans spec., this defines the "url" bean property
+    // It must be public!
+    public String getUrl() {
+        return url;
     }
 
-    @Override
-    public Number getAsNumber() throws TemplateModelException {
-        return value;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
-    public String getUnit() {
-        return unit;
+    // As per the JavaBean spec., this defines the "name" bean property
+    // It must be public!
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
 }

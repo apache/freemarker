@@ -1,0 +1,26 @@
+description = "FreeMarker Manual (i.e., the documention)"
+
+dependencies {
+    compile project(":freemarker-core")
+    compile project(":freemarker-test-utils")
+
+    testRuntime "jaxen:jaxen:1.0-FCS"
+    testRuntime "saxpath:saxpath:1.0-FCS"
+    testRuntime("xalan:xalan:2.7.0") {
+        // xml-apis is part of Java SE since version 1.4:
+        exclude group: "xml-apis", module: "xml-apis"
+    }
+}
+
+// TODO Generate the HTML-s with Docgen; see in the old Ant build.
+
+// We have nothing to put into the jar, as we have test classes only
+jar.enabled = false
+
+javadoc.enabled = false
+
+// Must not be deployed to a public Maven repository
+uploadArchives.enabled = false
+
+// Doesn't make sense to Maven "install" this, as the artifact won't contain anything
+install.enabled = false

@@ -16,14 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.manualtest;
+package org.apache.freemarker.manual.examples;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;
 
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.userpkg.BaseNTemplateNumberFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 import org.apache.freemarker.core.valueformat.impl.AliasTemplateDateFormatFactory;

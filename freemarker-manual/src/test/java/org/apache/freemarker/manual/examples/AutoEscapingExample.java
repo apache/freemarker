@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.manualtest;
+package org.apache.freemarker.manual.examples;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.test.TemplateTest;
