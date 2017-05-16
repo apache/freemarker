@@ -22,6 +22,7 @@ package org.apache.freemarker.test;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -228,7 +229,12 @@ public abstract class TemplateTest {
 
     protected Properties loadPropertiesFile(String name) throws IOException {
         Properties props = new Properties();
-        InputStream in = getClass().getResourceAsStream(name);
+        Class<? extends TemplateTest> baseClass = getClass();
+        InputStream in = baseClass.getResourceAsStream(name);
+        if (in == null) {
+            throw new FileNotFoundException(
+                    "Classpath resource not found: baseClass=" + baseClass.getName() + ", name=" + name);
+        }
         try {
             props.load(in);
         } finally {
