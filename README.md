@@ -63,20 +63,20 @@ If you are using Maven, just add this dependency:
   </dependency>
 ```
 
-Otherwise simply copy freemarker.jar to a location where your Java
-application's ClassLoader will find it. For example, if you are using
-FreeMarker in a web application, you probably want to put
-freemarker.jar into the WEB-INF/lib directory of your web application.
+Otherwise simply copy freemarker-core-<version>.jar to a location where your
+Java application's ClassLoader will find it. For example, if you are using
+FreeMarker in a web application, you probably want to put the jar into the
+WEB-INF/lib directory of your web application.
 
 FreeMarker 3 has only one required dependency, `org.slf4j:slf4j-api`. (Of 
 course, it will be automatically downloaded by Maven, Gradle, and the like, 
 and is already there in almost all projects anyway. If it wasn't there, note 
 that adding slf4j-api is not enough, as it needs an implementation, which is 
-not downloaded automatically by Maven, etc. The most popular is 
+not downloaded automatically by Maven, Gradle, etc. The most popular is 
 `ch.qos.logback:logback-classic`. FreeMarker has several optional dependencies,
 but usually you don't have to deal with them, because if you are using an
 optional feature that's certainly because your application already uses the
-related library. 
+related library.
 
 The minimum required Java version is currently Java SE 7. (The presence
 of a later version may be detected on runtime and utilized by
@@ -103,28 +103,32 @@ http://freemarker.org/sourcecode.html
 
 You need JDK 8 to be installed.
 
-You must copy `gradle.properties.sample` into `gradle.properties`, and edit its
-content to fit your system.
+You must copy `gradle.properties.sample` into `gradle.properties`, and edit
+its content to fit your system.
 
-To build `freemarker.jar`, just issue `./gradlew jar` in the project root
-directory (Windows users see the note below though), and it should download
-all dependencies (including Gradle itself) automatically and build the jar-s.
-You can found them in the build/libs subdirectory of each module
-(freemarker-core, freemarker-servlet, etc.). You can also install the jar-s
-into your local Maven repository with `./gradlew install`.
+To build the jar-s of all modules (freemarker-core, freemarker-servlet, etc.),
+issue `./gradlew jar` in the project root directory (Windows users see the note
+below though). It will automatically download all dependencies on first run too
+(including the proper version of Gradle itself). The built jar-s will be in the
+build/libs subdirectory of each module (freemarker-core, freemarker-servlet,
+etc.). You can also install the jar-s into your local Maven repository with
+`./gradlew install`.
 
 Note for Windows users: If you are using an Apache source release (as opposed
 to checking the project out from the Git repository), ./gradlew will fail as
 `gradle\wrapper\gradle-wrapper.jar` is missing. Due to Apache policy restricton
 we can't include that file in distributions, so you have to download that very
-common artifact from somewhere manually (like from out Git repository). (On
-UN*X-like systems you don't need that jar, as our custom `gradlew` shell script
-does everything itself.)
+common artifact from somewhere manually (like from Git repository of
+FreeMarker). (On UN*X-like systems you don't need that jar, as our custom
+`gradlew` shell script does everything itself.)
 
-To test your build, issue `./gradlew test`.
+To test your build, issue `./gradlew test`. Issued from the top directory,
+this will run the tests of all modules.
 
-To generate documentation, issue `./gradlew javadoc` and
-`./gradlew manualOffline` (TODO: the last doesn't yet work).
+To generate API documentation, issue `./gradlew javadoc`; the output will
+appear in the build/docs/api subdirectory of each module. To generate the
+FreeMarker Manual, issue `./gradlew manualOffline` (TODO: not yet working);
+the output will appear under `freemarker-manual/build/docgen`.
 
 
 Eclipse and other IDE setup
