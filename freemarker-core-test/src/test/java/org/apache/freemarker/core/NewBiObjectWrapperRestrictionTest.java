@@ -50,14 +50,14 @@ public class NewBiObjectWrapperRestrictionTest extends TemplateTest {
     @Test
     public void testPositive() throws IOException, TemplateException {
         assertOutput(
-                "${'org.apache.freemarker.test.templatesuite.models.NewTestModel'?new()}",
+                "${'org.apache.freemarker.core.templatesuite.models.NewTestModel'?new()}",
                 "default constructor");
     }
 
     @Test
     public void testNegative() {
         assertErrorContains(
-                "${'org.apache.freemarker.test.templatesuite.models.NewTestModel'?new('s')}",
+                "${'org.apache.freemarker.core.templatesuite.models.NewTestModel'?new('s')}",
                 "only supports 0 argument");
     }
 

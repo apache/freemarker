@@ -23,7 +23,7 @@ import java.io.IOException;
 
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.templatesuite.models.Listables;
+import org.apache.freemarker.core.templatesuite.models.Listables;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableMap;

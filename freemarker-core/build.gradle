@@ -39,14 +39,6 @@ dependencies {
         // xml-apis is part of Java SE since version 1.4:
         exclude group: "xml-apis", module: "xml-apis"
     }
-
-    testRuntime "jaxen:jaxen:1.0-FCS"
-    testRuntime "saxpath:saxpath:1.0-FCS"
-    testRuntime("xalan:xalan:2.7.0") {
-        // xml-apis is part of Java SE since version 1.4:
-        exclude group: "xml-apis", module: "xml-apis"
-    }
-
 }
 
 compileJavacc {
