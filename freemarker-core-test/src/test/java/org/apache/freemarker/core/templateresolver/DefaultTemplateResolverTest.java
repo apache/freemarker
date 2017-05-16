@@ -50,7 +50,7 @@ public class DefaultTemplateResolverTest {
         MockTemplateLoader loader = new MockTemplateLoader();
         DefaultTemplateResolver tr = new DefaultTemplateResolver(
                 loader,
-                new StrongCacheStorage(), 1000L,
+                new StrongCacheStorage(), 100L,
                 DefaultTemplateLookupStrategy.INSTANCE, true,
                 DefaultTemplateNameFormat.INSTANCE,
                 null,
@@ -73,7 +73,7 @@ public class DefaultTemplateResolverTest {
                 assertSame(e, e2.getCause());
                 assertEquals(1, loader.getLoadAttemptCount());
                 try {
-                    Thread.sleep(1100L);
+                    Thread.sleep(132L);
                     tr.getTemplate("t", Locale.getDefault(), null).getTemplate();
                     fail();
                 } catch (IOException e3) {
@@ -90,7 +90,7 @@ public class DefaultTemplateResolverTest {
         MockTemplateLoader loader = new MockTemplateLoader();
         DefaultTemplateResolver cache = new DefaultTemplateResolver(
                 loader,
-                new StrongCacheStorage(), 1000L,
+                new StrongCacheStorage(), 100L,
                 DefaultTemplateLookupStrategy.INSTANCE, false,
                 DefaultTemplateNameFormat.INSTANCE,
                 null, new TestConfigurationBuilder().build());
@@ -99,7 +99,7 @@ public class DefaultTemplateResolverTest {
         assertNull(cache.getTemplate("t", Locale.getDefault(), null).getTemplate());
         // Still 1 - returned cached exception
         assertEquals(1, loader.getLoadAttemptCount());
-        Thread.sleep(1100L);
+        Thread.sleep(132L);
         assertNull(cache.getTemplate("t", Locale.getDefault(), null).getTemplate());
         // Cache had to retest
         assertEquals(2, loader.getLoadAttemptCount());
