@@ -1,4 +1,8 @@
-String moduleNiceName = "Apache FreeMarker Core Servlet"
+title = "Apache FreeMarker Servlet and JSP support"
+description = """\
+FreeMarker template engine, Servlet and JSP support. \
+This is an optional module, mostly useful in frameworks based on JSP Model-2 architecture, or when custom JSP tags \
+need to be called from templates."""
 
 dependencies {
     compile project(":freemarker-core")
@@ -42,15 +46,15 @@ jar {
         // TODO Gradle adds a "Require-Capability"... is it a problem? If not, do we need the above?
 
         attributes(
-                "Extension-name": moduleNiceName,
-                "Specification-Title": moduleNiceName,
-                "Implementation-Title": moduleNiceName
+                "Extension-name": "${project.group}:${project.name}",
+                "Specification-Title": project.title,
+                "Implementation-Title": project.title
         )
     }
 }
 
 javadoc {
-    title "${moduleNiceName} ${versionCanonical} API"
+    title "${project.title} ${versionCanonical} API"
 }
 
 // The identical parts of Maven "deployer" and "installer" configurations:
@@ -58,8 +62,7 @@ def mavenCommons = { callerDelegate ->
     delegate = callerDelegate
 
     pom.project {
-        description "FreeMarker template engine, Servlet and JSP support. " +
-                "This is an optional module, mostly useful in frameworks based on JSP Model-2 architecture, or when custom JSP tags need to be called from templates."
+        description project.description
     }
 }
 

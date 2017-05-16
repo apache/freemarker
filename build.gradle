@@ -26,7 +26,11 @@ ext.versionForMf = "2.97.0"
 allprojects {
     group = "org.apache.freemarker"
     version = "${versionCanonical}"
+    ext.title = null; // Title shown in JavaDoc and other documentation
 }
+
+title = "Apache FreeMarker"
+description = "Apache FreeMarker template engine, root project"
 
 // Libraries that are referred from multiple places:
 ext.libraries = [

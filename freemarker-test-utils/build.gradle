@@ -1,4 +1,6 @@
-String moduleNiceName = "Apache FreeMarker Test Utiltities"
+title = "Apache FreeMarker Test Utiltities"
+description = """\
+FreeMarker template engine, testing utilities for internal use; this is not a published module."""
 
 dependencies {
     compile project(":freemarker-core")
@@ -22,15 +24,15 @@ jar {
         // This is needed for "a.class.from.another.Bundle"?new() to work.
         instructionReplace 'DynamicImport-Package', '*'
         attributes(
-                "Extension-name": moduleNiceName,
-                "Specification-Title": moduleNiceName,
-                "Implementation-Title": moduleNiceName
+                "Extension-name": "${project.group}:${project.name}",
+                "Specification-Title": project.title,
+                "Implementation-Title": project.title
         )
     }
 }
 
 javadoc {
-    title "${moduleNiceName} ${versionCanonical} API"
+    title "${project.title} ${versionCanonical} API"
 }
 
 // The identical parts of Maven "deployer" and "installer" configurations:
@@ -38,7 +40,7 @@ def mavenCommons = { callerDelegate ->
     delegate = callerDelegate
 
     pom.project {
-        description "FreeMarker template engine, testing utilities for internal use; this is not a published module. "
+        description project.description
     }
 }
 
