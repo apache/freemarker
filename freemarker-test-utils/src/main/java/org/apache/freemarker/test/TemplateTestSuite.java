@@ -37,7 +37,8 @@ import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.dom.NodeModel;
-import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.AllTests;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -51,9 +52,8 @@ import junit.framework.TestSuite;
 /**
  * Abstract superclass for JUnit test suites where the test cases are defined in
  * {@code <suiteClassPackage>/testcases.xml}, and process templates and compare their output with the expected output.
- * It's important to add this static method like <code>public static TestSuite suite() { return new
- * SomeTemplateTestSuite(); }</code> to concrete subclasses, or else it won't be detected and run by build tools and
- * IDE-s.
+ * The concrete subclass must have a static method like <code>public static TestSuite suite() { return new
+ * SomeTemplateTestSuite(); }</code>!
  * <p>
  * If you only want to run certain tests, you can specify a regular expression for the test name in the
  * {@link #TEST_FILTER_PROPERTY_NAME} system property.
@@ -71,6 +71,7 @@ import junit.framework.TestSuite;
  * subclass.</li>
  * </ol>
  */
+@RunWith(AllTests.class)
 public abstract class TemplateTestSuite extends TestSuite {
     
     private static final String ELEM_TEST_CASE = "testCase";
@@ -140,15 +141,6 @@ public abstract class TemplateTestSuite extends TestSuite {
         } catch (Exception e) {
             throw new IllegalStateException("Failed to initialize test suite", e);
         }
-    }
-
-    /**
-     * At least with Gradle 3.5 TestSuite-s aren't run even if we explicitly include the class, unless we have a
-     * test method in them (which won't be run).
-     */
-    @Test
-    public final void gradleTestPluginWorkaround() {
-        // Does nothing
     }
 
     protected abstract void setUpTestCase(String simpleTestName, Map<String, Object> dataModel,
