@@ -1,3 +1,22 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 description = """\
 The unit tests of freemarker-core. These tests used to be in freemarker-core, but to avoid depenency loop \
 through freemarker-test-utils, they had to be moved into a separate project."""
@@ -5,13 +24,6 @@ through freemarker-test-utils, they had to be moved into a separate project."""
 dependencies {
     compile project(":freemarker-core")
     compile project(":freemarker-test-utils")
-
-    testRuntime "jaxen:jaxen:1.0-FCS"
-    testRuntime "saxpath:saxpath:1.0-FCS"
-    testRuntime("xalan:xalan:2.7.0") {
-        // xml-apis is part of Java SE since version 1.4:
-        exclude group: "xml-apis", module: "xml-apis"
-    }
 }
 
 // We have nothing to put into the jar, as we have test classes only

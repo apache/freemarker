@@ -17,7 +17,7 @@
  * under the License.
  */
  
-Because the Manual won't be updated for a good while, I will lead
+Because the Manual won't be updated for a good while, we will lead
 the FreeMarer 3 changelog here:
 
 - Increased version number to 3.0.0 (nightly aka. SNAPSHOT)
@@ -227,6 +227,21 @@ the FreeMarer 3 changelog here:
 - Modularized the project. Now we have these published jar-s:
   - org.apache.freemarker:freemarker-core
   - org.apache.freemarker:freemarker-servlet
-  - [TODO] org.apache.freemarker:freemarker-dom
+  - org.apache.freemarker:freemarker-dom
   There are several other internal modules related to testing; these aren't published.
 - Migrated buiding from Ant to Gradle. [TODO: This is only partially done; jar building, testing and javadoc works.]
+- `DefaultObjectWrapper` now has a configuration setting, `extensions`, to add `DefaultObjectWrapperExtension`-s, which
+  meant to be used for wrapping application-specific objects specially. Along with this, `DefaultObjectWrapper` now has
+  two protected methods to customze the wrapping logic, `wrapSpecialObject(Object)` and `wrapGenericObject(Object)`; the
+  last replaces the `handleUnknownType(Object)` method from FM2. `DefaultObjectWrapperExtension`-s are applied before or
+  after `wrapSpecialObject`, depending on what `DefaultObjectWrapperExtension.getPhase()` returns. See the JavaDoc of
+  `DefaultObjectWrapper.wrap(Object)` for more on wrapping phases.
+- `DefaultObjectWrapper` doesn't wrap W3C DOM nodes (XML) specially anymore, as DOM wrapping was factored out to a
+  separate jar (freemarker-dom) as part of modularizing FreeMarker. To ensure that DOM nodes are wrapped specially as
+  in FM2, the `extensions` setting of the `DefaultObjectWrapper` has to be so that it contains
+  `DOMDefaultObjectWrapperExtension.INSTANCE`. For example:
+  
+    cfgBuilder.objectWrapper(
+            new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .extensions(DOMDefaultObjectWrapperExtension.INSTANCE)
+                    .build())

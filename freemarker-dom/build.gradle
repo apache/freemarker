@@ -17,31 +17,34 @@
  * under the License.
  */
 
-title = "Apache FreeMarker Test Utiltities"
+title = "Apache FreeMarker DOM support"
 description = """\
-FreeMarker template engine, testing utilities for internal use; this is not a published module."""
+FreeMarker template engine, W3C DOM (XML) wrapping support. \
+This is an optional module, useful when the data-model can contain variables that are XML nodes."""
 
 dependencies {
     compile project(":freemarker-core")
 
-    compile "junit:junit:4.12"
-    compile "org.hamcrest:hamcrest-library:1.3"
-    compile "commons-io:commons-io:2.2"
-    compile "org.apache.commons:commons-lang3:3.5"
-    compile "commons-collections:commons-collections:3.1"
-    compile "com.google.guava:guava-jdk5:17.0"
-    compile libraries.findbugs
+    compileOnly "jaxen:jaxen:1.0-FCS"
+    compileOnly "saxpath:saxpath:1.0-FCS"
+    compileOnly("xalan:xalan:2.7.0") {
+        // xml-apis is part of Java SE since version 1.4:
+        exclude group: "xml-apis", module: "xml-apis"
+    }
 
-    // Logging during testing:
-    runtime "ch.qos.logback:logback-classic:1.1.8"
-    runtime "org.slf4j:jcl-over-slf4j:$slf4jVersion"
-    runtime "org.apache.logging.log4j:log4j-to-slf4j:2.8.2"
+    testCompile project(":freemarker-test-utils")
+    testRuntime "jaxen:jaxen:1.0-FCS"
+    testRuntime "saxpath:saxpath:1.0-FCS"
+    testRuntime("xalan:xalan:2.7.0") {
+        // xml-apis is part of Java SE since version 1.4:
+        exclude group: "xml-apis", module: "xml-apis"
+    }
 }
 
 jar {
     manifest {
-        // This is needed for "a.class.from.another.Bundle"?new() to work.
-        instructionReplace 'DynamicImport-Package', '*'
+        instructionReplace 'Bundle-RequiredExecutionEnvironment', 'JavaSE-1.7'
+
         attributes(
                 "Extension-name": "${project.group}:${project.name}",
                 "Specification-Title": project.title,
@@ -63,8 +66,13 @@ def mavenCommons = { callerDelegate ->
     }
 }
 
-// Not a published module
-uploadArchives.enabled = false
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            mavenCommons(delegate)
+        }
+    }
+}
 
 install {
     repositories {

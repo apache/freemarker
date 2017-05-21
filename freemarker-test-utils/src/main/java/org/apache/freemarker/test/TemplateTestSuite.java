@@ -36,7 +36,6 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.util._StringUtil;
-import org.apache.freemarker.dom.NodeModel;
 import org.junit.runner.RunWith;
 import org.junit.runners.AllTests;
 import org.w3c.dom.Attr;
@@ -108,8 +107,6 @@ public abstract class TemplateTestSuite extends TestSuite {
 
     public TemplateTestSuite() {
         try {
-            NodeModel.useJaxenXPathSupport();
-
             String filterStr = System.getProperty(TEST_FILTER_PROPERTY_NAME);
             testCaseNameFilter = filterStr != null ? Pattern.compile(filterStr) : null;
             if (testCaseNameFilter != null) {

@@ -27,21 +27,9 @@ FreeMarker template engine, core module. This module covers all basic functional
 many applications."""
 
 dependencies {
-    // Note that commond dependencies are added in the root project.
-
-    // ------------------------------------------------------------------------
-    // For the main artifact
+    // Note that common dependencies are added in the root project.
 
     compileOnly "org.zeroturnaround:javarebel-sdk:1.2.2"
-
-    // TODO These will be moved to freemarker-dom module:
-    
-    compileOnly "jaxen:jaxen:1.0-FCS"
-    compileOnly "saxpath:saxpath:1.0-FCS"
-    compileOnly("xalan:xalan:2.7.0") {
-        // xml-apis is part of Java SE since version 1.4:
-        exclude group: "xml-apis", module: "xml-apis"
-    }
 }
 
 compileJavacc {

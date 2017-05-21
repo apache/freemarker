@@ -19,30 +19,10 @@
 
 package org.apache.freemarker.core;
 
-import java.io.StringReader;
-import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 
 public class TypeErrorMessagesTest extends TemplateTest {
-
-    static final Document doc;
-    static {
-        try {
-            DocumentBuilder docBuilder;
-            docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            doc = docBuilder.parse(new InputSource(new StringReader(
-                    "<a><b>123</b><c a='true'>1</c><c a='false'>2</c></a>")));
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to build data-model", e);
-        }
-    }
 
     @Test
     public void testNumericalBinaryOperator() {
@@ -68,38 +48,9 @@ public class TypeErrorMessagesTest extends TemplateTest {
                 "string", "method", "obj.something(params)");
     }
 
-    @Test
-    public void testXMLTypeMismarches() throws Exception {
-        assertErrorContains("${doc.a.c}",
-                "used as string", "query result", "2", "multiple matches");
-        assertErrorContains("${doc.a.c?boolean}",
-                "used as string", "query result", "2", "multiple matches");
-        assertErrorContains("${doc.a.d}",
-                "used as string", "query result", "0", "no matches");
-        assertErrorContains("${doc.a.d?boolean}",
-                "used as string", "query result", "0", "no matches");
-        
-        assertErrorContains("${doc.a.c.@a}",
-                "used as string", "query result", "2", "multiple matches");
-        assertErrorContains("${doc.a.d.@b}",
-                "used as string", "query result", "x", "no matches");
-        
-        assertErrorContains("${doc.a.b * 2}",
-                "used as number", "text", "explicit conversion");
-        assertErrorContains("<#if doc.a.b></#if>",
-                "used as number", "text", "explicit conversion");
-
-        assertErrorContains("${doc.a.d?nodeName}",
-                "used as node", "query result", "0", "no matches");
-        assertErrorContains("${doc.a.c?nodeName}",
-                "used as node", "query result", "2", "multiple matches");
-    }
-
     @Override
     protected Object createDataModel() {
-        Map<String, Object> dataModel = createCommonTestValuesDataModel();
-        dataModel.put("doc", doc);
-        return dataModel;
+        return createCommonTestValuesDataModel();
     }
 
 }

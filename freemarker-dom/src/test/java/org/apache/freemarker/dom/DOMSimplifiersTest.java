@@ -24,7 +24,7 @@ import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.freemarker.test.XMLLoader;
+import org.apache.freemarker.dom.test.DOMLoader;
 import org.junit.Test;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Comment;
@@ -75,12 +75,12 @@ public class DOMSimplifiersTest {
         String expected = "<!DOCTYPE ...><?p?><a>%x<![CDATA[y]]><!--c--><?p?>%z<?p?><b><!--c--></b><c/>"
                    + "<d>%a<e>%c</e>%b<!--c--><!--c--><!--c--><?p?><?p?><?p?></d>"
                    + "<f><![CDATA[1]]>%2</f></a><!--c-->";
-        assertEquals(expected, toString(XMLLoader.toDOM(COMMON_TEST_XML)));
+        assertEquals(expected, toString(DOMLoader.toDOM(COMMON_TEST_XML)));
     }
 
     @Test
     public void testMergeAdjacentText() throws Exception {
-        Document dom = XMLLoader.toDOM(COMMON_TEST_XML);
+        Document dom = DOMLoader.toDOM(COMMON_TEST_XML);
         NodeModel.mergeAdjacentText(dom);
         assertEquals(
                 "<!DOCTYPE ...><?p?><a>%xy<!--c--><?p?>%z<?p?><b><!--c--></b><c/>"
@@ -91,7 +91,7 @@ public class DOMSimplifiersTest {
 
     @Test
     public void testRemoveComments() throws Exception {
-        Document dom = XMLLoader.toDOM(COMMON_TEST_XML);
+        Document dom = DOMLoader.toDOM(COMMON_TEST_XML);
         NodeModel.removeComments(dom);
         assertEquals(
                 "<!DOCTYPE ...><?p?><a>%x<![CDATA[y]]><?p?>%z<?p?><b/><c/>"
@@ -102,7 +102,7 @@ public class DOMSimplifiersTest {
 
     @Test
     public void testRemovePIs() throws Exception {
-        Document dom = XMLLoader.toDOM(COMMON_TEST_XML);
+        Document dom = DOMLoader.toDOM(COMMON_TEST_XML);
         NodeModel.removePIs(dom);
         assertEquals(
                 "<!DOCTYPE ...><a>%x<![CDATA[y]]><!--c-->%z<b><!--c--></b><c/>"
@@ -132,14 +132,14 @@ public class DOMSimplifiersTest {
     private void testSimplify(String expected, String content)
             throws SAXException, IOException, ParserConfigurationException {
         {
-            Document dom = XMLLoader.toDOM(content);
+            Document dom = DOMLoader.toDOM(content);
             NodeModel.simplify(dom);
             assertEquals(expected, toString(dom));
         }
         
         // Must be equivalent:
         {
-            Document dom = XMLLoader.toDOM(content);
+            Document dom = DOMLoader.toDOM(content);
             NodeModel.removeComments(dom);
             NodeModel.removePIs(dom);
             NodeModel.mergeAdjacentText(dom);
@@ -148,7 +148,7 @@ public class DOMSimplifiersTest {
         
         // Must be equivalent:
         {
-            Document dom = XMLLoader.toDOM(content);
+            Document dom = DOMLoader.toDOM(content);
             NodeModel.removeComments(dom);
             NodeModel.removePIs(dom);
             NodeModel.simplify(dom);

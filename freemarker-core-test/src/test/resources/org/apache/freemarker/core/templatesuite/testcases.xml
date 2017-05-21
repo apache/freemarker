@@ -73,7 +73,6 @@ Note that for the incompatible_improvements setting you can specify a list of ve
    <testCase name="default-object-wrapper">
       <setting api_builtin_enabled="true" />
    </testCase>
-   <testCase name="default-xmlns" />
    <testCase name="encoding-builtins" />
    <testCase name="escapes" />
    <testCase name="hashliteral" />
@@ -172,13 +171,6 @@ Note that for the incompatible_improvements setting you can specify a list of ve
    <testCase name="variables"/>
    <testCase name="whitespace-trim"/>
    <testCase name="wstrip-in-header"/>
-   <testCase name="xml-fragment" />
-   <testCase name="xmlns1" />
-   <testCase name="xmlns2" template="xmlns1.ftl"  expected="xmlns1.txt" />
-   <testCase name="xmlns3" />
-   <testCase name="xmlns4" />
-   <testCase name="xmlns5" />
-   <testCase name="xml-ns_prefix-scope" template="xml-ns_prefix-scope-main.ftl" />
    <testCase name="hashconcat"/>
    <testCase name="new-defaultresolver" />
    <testCase name="new-unrestricted" template="new-defaultresolver.ftl" expected="new-defaultresolver.txt">

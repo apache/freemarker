@@ -19,10 +19,8 @@
 
 package org.apache.freemarker.core.model;
 
-import org.apache.freemarker.dom.NodeModel;
-
 /**
- * A {@link NodeModel} that supports navigating to the previous and next sibling nodes.
+ * A {@link TemplateNodeModel} that supports navigating to the previous and next sibling nodes.
  * 
  * @since 2.3.26
  */

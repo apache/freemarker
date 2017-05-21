@@ -15,9 +15,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.apache.freemarker.core.ASTPrinter;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
@@ -44,10 +41,7 @@ import org.apache.freemarker.core.templatesuite.models.TestBoolean;
 import org.apache.freemarker.core.templatesuite.models.TestMethod;
 import org.apache.freemarker.core.templatesuite.models.TestNode;
 import org.apache.freemarker.core.templatesuite.models.VarArgTestModel;
-import org.apache.freemarker.dom.NodeModel;
 import org.apache.freemarker.test.TemplateTestSuite;
-import org.apache.freemarker.test.XMLLoader;
-import org.xml.sax.InputSource;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -155,10 +149,6 @@ public class CoreTemplateTestSuite extends TemplateTestSuite {
             mMixed.put("s2", "string2");
             mMixed.put("s2n", null);
             dataModel.put("mMixed", mMixed);
-        } else if (simpleTestName.equals("default-xmlns")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("models/defaultxmlns1.xml"));
-            NodeModel nm = XMLLoader.toModel(is);
-            dataModel.put("doc", nm);
         } else if (simpleTestName.equals("multimodels")) {
             dataModel.put("test", "selftest");
             dataModel.put("self", "self");
@@ -184,33 +174,6 @@ public class CoreTemplateTestSuite extends TemplateTestSuite {
             dataModel.put("x", Integer.valueOf(4));
             dataModel.put("z", Integer.valueOf(4));
             confB.setSharedVariable("y", Integer.valueOf(7));
-        } else if (simpleTestName.equals("xml-fragment")) {
-            DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
-            f.setNamespaceAware(true);
-            DocumentBuilder db = f.newDocumentBuilder();
-            org.w3c.dom.Document doc = db.parse(new InputSource(getClass().getResourceAsStream("models/xmlfragment.xml")));
-            NodeModel.simplify(doc);
-            dataModel.put("node", NodeModel.wrap(doc.getDocumentElement().getFirstChild().getFirstChild()));
-        } else if (simpleTestName.equals("xmlns1")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("models/xmlns.xml"));
-            NodeModel nm = XMLLoader.toModel(is);
-            dataModel.put("doc", nm);
-        } else if (simpleTestName.equals("xmlns2")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("models/xmlns2.xml"));
-            NodeModel nm = XMLLoader.toModel(is);
-            dataModel.put("doc", nm);
-        } else if (simpleTestName.equals("xmlns3") || simpleTestName.equals("xmlns4")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("models/xmlns3.xml"));
-            NodeModel nm = XMLLoader.toModel(is);
-            dataModel.put("doc", nm);
-        } else if (simpleTestName.equals("xmlns5")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("models/defaultxmlns1.xml"));
-            NodeModel nm = XMLLoader.toModel(is);
-            dataModel.put("doc", nm);
-        } else if (simpleTestName.equals("xml-ns_prefix-scope")) {
-            InputSource is = new InputSource(getClass().getResourceAsStream("models/xml-ns_prefix-scope.xml"));
-            NodeModel nm = XMLLoader.toModel(is);
-            dataModel.put("doc", nm);
         } else if (simpleTestName.startsWith("sequence-builtins")) {
             Set<String> abcSet = new TreeSet<>();
             abcSet.add("a");

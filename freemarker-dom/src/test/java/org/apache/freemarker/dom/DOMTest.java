@@ -29,8 +29,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.dom.test.DOMLoader;
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.test.XMLLoader;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -96,11 +96,11 @@ public class DOMTest extends TemplateTest {
     }
     
     private void addDocToDataModel(String xml) throws SAXException, IOException, ParserConfigurationException {
-        addToDataModel("doc", XMLLoader.toModel(new InputSource(new StringReader(xml))));
+        addToDataModel("doc", DOMLoader.toModel(new InputSource(new StringReader(xml))));
     }
 
     private void addDocToDataModelNoSimplification(String xml) throws SAXException, IOException, ParserConfigurationException {
-        addToDataModel("doc", XMLLoader.toModel(new InputSource(new StringReader(xml)), false));
+        addToDataModel("doc", DOMLoader.toModel(new InputSource(new StringReader(xml)), false));
     }
     
     private void addNSUnawareDocToDataModel(String xml) throws ParserConfigurationException, SAXException, IOException {
@@ -108,7 +108,7 @@ public class DOMTest extends TemplateTest {
         newFactory.setNamespaceAware(false);
         DocumentBuilder builder = newFactory.newDocumentBuilder();
         Document doc = builder.parse(new InputSource(new StringReader(xml)));
-        addToDataModel("doc", doc);
+        addToDataModel("doc", NodeModel.wrap(doc));
     }
 
     @Test

@@ -1,0 +1,65 @@
+<?xml version="1.0" ?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  The ASF licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing,
+  software distributed under the License is distributed on an
+  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  KIND, either express or implied.  See the License for the
+  specific language governing permissions and limitations
+  under the License.
+-->
+
+<!DOCTYPE testCases [
+  <!ELEMENT testCases (setting?, testCase*)>
+  <!ELEMENT testCase (setting?)>
+     <!ATTLIST testCase 
+               name CDATA #REQUIRED
+               template CDATA #IMPLIED
+               expected CDATA #IMPLIED
+               noOutput CDATA #IMPLIED
+     >
+     <!-- The default of `template` is "${name?keep_before('[#endTN]')}.ftl" -->
+     <!-- The default of `expected` is "${name}.txt" -->
+     <!-- The default of `noOutput` is false -->
+     
+ <!ELEMENT setting EMPTY>
+     <!ATTLIST setting 
+            auto_import CDATA #IMPLIED
+            source_encoding CDATA #IMPLIED
+            locale CDATA #IMPLIED
+            object_wrapper CDATA #IMPLIED
+            output_encoding CDATA #IMPLIED
+            output_dir CDATA #IMPLIED
+            new_builtin_class_resolver CDATA #IMPLIED
+            url_escaping_charset CDATA #IMPLIED
+            incompatible_improvements CDATA #IMPLIED
+            time_zone CDATA #IMPLIED
+            api_builtin_enabled CDATA #IMPLIED
+      >
+]>
+<!--
+Note that for the incompatible_improvements setting you can specify a list of versions, for example:
+<setting incompatible_improvements="min, 3.0.5, max" /> 
+-->
+
+<testCases>
+   <setting source_encoding="UTF-8" output_encoding="UTF-8" />
+
+   <testCase name="default-xmlns" />
+   <testCase name="xml-fragment" />
+   <testCase name="xmlns1" />
+   <testCase name="xmlns2" template="xmlns1.ftl"  expected="xmlns1.txt" />
+   <testCase name="xmlns3" />
+   <testCase name="xmlns4" />
+   <testCase name="xmlns5" />
+   <testCase name="xml-ns_prefix-scope" template="xml-ns_prefix-scope-main.ftl" />
+</testCases>

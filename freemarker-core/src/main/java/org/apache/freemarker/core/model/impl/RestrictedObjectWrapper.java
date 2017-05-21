@@ -45,7 +45,7 @@ public class RestrictedObjectWrapper extends DefaultObjectWrapper {
      * In this implementation, this just throws an exception.
      */
     @Override
-    protected TemplateModel handleNonBasicTypes(Object obj) throws TemplateModelException {
+    protected TemplateModel wrapGenericObject(Object obj) throws TemplateModelException {
         throw new TemplateModelException("RestrictedObjectWrapper deliberately won't wrap this type: "
                 + obj.getClass().getName());
     }

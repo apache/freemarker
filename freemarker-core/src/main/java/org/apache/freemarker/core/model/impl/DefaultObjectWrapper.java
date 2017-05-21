@@ -28,6 +28,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -65,8 +67,7 @@ import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.CommonBuilder;
 import org.apache.freemarker.core.util._ClassUtil;
-import org.apache.freemarker.dom.NodeModel;
-import org.w3c.dom.Node;
+import org.apache.freemarker.core.util._NullArgumentException;
 
 /**
  * The default implementation of the {@link ObjectWrapper} interface. Usually, you don't need to invoke instances of
@@ -157,6 +158,11 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
     @Deprecated // Only exists to keep some JUnit tests working... [FM3]
     private final boolean useModelCache;
 
+    /** Extensions applicable at the beginning of wrap(Object); null if it would be 0 length otherwise. */
+    private final DefaultObjectWrapperExtension[] extensionsBeforeWrapSpecialObject;
+    /** Extensions applicable at the end of wrap(Object); null if it would be 0 length otherwise. */
+    private final DefaultObjectWrapperExtension[] extensionsAfterWrapSpecialObject;
+
     private final Version incompatibleImprovements;
 
     /**
@@ -165,7 +171,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * @param finalizeConstruction Decides if the construction is finalized now, or the caller will do some more
      *     adjustments on the instance and then call {@link #finalizeConstruction()} itself.
      */
-    protected DefaultObjectWrapper(ExtendableBuilder builder, boolean finalizeConstruction) {
+    protected DefaultObjectWrapper(ExtendableBuilder<?, ?> builder, boolean finalizeConstruction) {
         incompatibleImprovements = builder.getIncompatibleImprovements();  // normalized
 
         defaultDateType = builder.getDefaultDateType();
@@ -188,6 +194,33 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         staticModels = new StaticModels(this);
         enumModels = new EnumModels(this);
         useModelCache = builder.getUseModelCache();
+
+        int extsAfterWSOCnt = 0;
+        int extsBeforeWSOCnt = 0;
+        for (DefaultObjectWrapperExtension ext : builder.getExtensions()) {
+            if (ext.getPhase() == DefaultObjectWrapperExtensionPhase.AFTER_WRAP_SPECIAL_OBJECT) {
+                extsAfterWSOCnt++;
+            } else if (ext.getPhase() == DefaultObjectWrapperExtensionPhase.BEFORE_WRAP_SPECIAL_OBJECT)  {
+                extsBeforeWSOCnt++;
+            } else {
+                throw new BugException();
+            }
+        }
+        extensionsAfterWrapSpecialObject = extsAfterWSOCnt != 0
+                ? new DefaultObjectWrapperExtension[extsAfterWSOCnt] : null;
+        extensionsBeforeWrapSpecialObject = extsBeforeWSOCnt != 0
+                ? new DefaultObjectWrapperExtension[extsBeforeWSOCnt] : null;
+        int extsAfterWSOIdx = 0;
+        int extsBeforeWSOIdx = 0;
+        for (DefaultObjectWrapperExtension ext : builder.getExtensions()) {
+            if (ext.getPhase() == DefaultObjectWrapperExtensionPhase.AFTER_WRAP_SPECIAL_OBJECT) {
+                extensionsAfterWrapSpecialObject[extsAfterWSOIdx++] = ext;
+            } else if (ext.getPhase() == DefaultObjectWrapperExtensionPhase.BEFORE_WRAP_SPECIAL_OBJECT)  {
+                extensionsBeforeWrapSpecialObject[extsBeforeWSOIdx++] = ext;
+            } else {
+                throw new BugException();
+            }
+        }
 
         finalizeConstruction();
     }
@@ -330,11 +363,20 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
     }
 
     /**
-     * Wraps the parameter object to {@link TemplateModel} interface(s). Simple types like numbers, strings, booleans
-     * and dates will be wrapped into the corresponding {@code SimpleXxx} classes (like {@link SimpleNumber}).
-     * {@link Map}-s, {@link List}-s, other {@link Collection}-s, arrays and {@link Iterator}-s will be wrapped into the
-     * corresponding {@code DefaultXxxAdapter} classes ({@link DefaultMapAdapter}), depending on). After that, the
-     * wrapping is handled by {@link #handleNonBasicTypes(Object)}, so see more there.
+     * Wraps the parameter object to {@link TemplateModel} interface(s). The wrapping logic uses several phases,
+     * where if a stage manages to wrap the object, this method immediately returns with the result. The stages are
+     * (executed in this order):
+     * <ol>
+     * <li>If the value is {@code null} or {@link TemplateModel} it's returned as is.</li>
+     * <li>If the value is a {@link TemplateModelAdapter}, {@link TemplateModelAdapter#getTemplateModel()} is
+     * returned.</li>
+     * <li>{@link ExtendableBuilder#extensions extensions} which subscribe to the
+     * {@link DefaultObjectWrapperExtensionPhase#BEFORE_WRAP_SPECIAL_OBJECT} phase try to wrap the object</li>
+     * <li>{@link #wrapSpecialObject(Object)} tries to wrap the object</li>
+     * <li>{@link ExtendableBuilder#extensions extensions} which subscribe to the
+     * {@link DefaultObjectWrapperExtensionPhase#AFTER_WRAP_SPECIAL_OBJECT} phase try to wrap the object</li>
+     * <li>{@link #wrapGenericObject(Object)} wraps the object (or if it can't, it must throw exception)</li>
+     * </ol>
      */
     @Override
     public TemplateModel wrap(Object obj) throws TemplateModelException {
@@ -348,6 +390,40 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
             return ((TemplateModelAdapter) obj).getTemplateModel();
         }
 
+        if (extensionsBeforeWrapSpecialObject != null) {
+            for (DefaultObjectWrapperExtension ext : extensionsBeforeWrapSpecialObject) {
+                TemplateModel tm = ext.wrap(obj);
+                if (tm != null) {
+                    return tm;
+                }
+            }
+        }
+
+        {
+            TemplateModel tm = wrapSpecialObject(obj);
+            if (tm != null) {
+                return tm;
+            }
+        }
+
+        if (extensionsAfterWrapSpecialObject != null) {
+            for (DefaultObjectWrapperExtension ext : extensionsAfterWrapSpecialObject) {
+                TemplateModel tm = ext.wrap(obj);
+                if (tm != null) {
+                    return tm;
+                }
+            }
+        }
+
+        return wrapGenericObject(obj);
+    }
+
+    /**
+     * Wraps non-generic objects; see {@link #wrap(Object)} for more.
+     *
+     * @return {@code null} if the object was not of a type that's wrapped "specially".
+     */
+    protected TemplateModel wrapSpecialObject(Object obj) {
         if (obj instanceof String) {
             return new SimpleScalar((String) obj);
         }
@@ -357,7 +433,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         if (obj instanceof Boolean) {
             return obj.equals(Boolean.TRUE) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
-        if (obj instanceof java.util.Date) {
+        if (obj instanceof Date) {
             if (obj instanceof java.sql.Date) {
                 return new SimpleDate((java.sql.Date) obj);
             }
@@ -367,7 +443,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
             if (obj instanceof java.sql.Timestamp) {
                 return new SimpleDate((java.sql.Timestamp) obj);
             }
-            return new SimpleDate((java.util.Date) obj, getDefaultDateType());
+            return new SimpleDate((Date) obj, getDefaultDateType());
         }
         final Class<?> objClass = obj.getClass();
         if (objClass.isArray()) {
@@ -390,30 +466,21 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         if (obj instanceof Enumeration) {
             return DefaultEnumerationAdapter.adapt((Enumeration<?>) obj, this);
         }
-
-        return handleNonBasicTypes(obj);
-    }
-
-    /**
-     * Called for an object that isn't considered to be of a "basic" Java type, like for all application specific types,
-     * but currently also for {@link Node}-s and {@link ResourceBundle}-s.
-     *
-     * <p>
-     * When you override this method, you should first decide if you want to wrap the object in a custom way (and if so
-     * then do it and return with the result), and if not, then you should call the super method (assuming the default
-     * behavior is fine with you).
-     */
-    // [FM3] This is an awkward temporary solution, rework it.
-    protected TemplateModel handleNonBasicTypes(Object obj) throws TemplateModelException {
-        // [FM3] Via plugin mechanism, not by default anymore
-        if (obj instanceof Node) {
-            return NodeModel.wrap((Node) obj);
-        }
-
         if (obj instanceof ResourceBundle) {
             return new ResourceBundleModel((ResourceBundle) obj, this);
         }
+        return null;
+    }
 
+    /**
+     * Called for an object that isn't treated specially by this {@link ObjectWrapper}; see {@link #wrap(Object)} for
+     * more. The implementation in {@link DefaultObjectWrapper} wraps the object into a {@link BeanAndStringModel}.
+     * <p>
+     * Note that if you want to wrap some classes in a custom way, you shouldn't override this method. Instead, either
+     * override {@link #wrapSpecialObject(Object)}}, or don't subclass the {@link ObjectWrapper} at all, and
+     * just set the {@link ExtendableBuilder#getExtensions() extensions} configuration setting of it.
+     */
+    protected TemplateModel wrapGenericObject(Object obj) throws TemplateModelException {
         return new BeanAndStringModel(obj, this);
     }
 
@@ -1339,10 +1406,12 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         private boolean useModelCacheSet;
         private boolean usePrivateCaches;
         private boolean usePrivateCachesSet;
+        private List<DefaultObjectWrapperExtension> extensions = Collections.emptyList();
+        private boolean extensionsSet;
         // Attention!
         // - As this object is a cache key, non-normalized field values should be avoided.
-        // - Fields with default values must be set until the end of the constructor to ensure that when the lookup happens,
-        //   there will be no unset fields.
+        // - Fields with default values must be set until the end of the constructor to ensure that when the lookup
+        //   happens, there will be no unset fields.
         // - If you add a new field, review all methods in this class
 
         /**
@@ -1415,6 +1484,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
             result = prime * result + (builder.getUseModelCache() ? 1231 : 1237);
             result = prime * result + (builder.getUsePrivateCaches() ? 1231 : 1237);
             result = prime * result + builder.classIntrospectorBuilder.hashCode();
+            result = prime * result + builder.getExtensions().hashCode();
             return result;
         }
 
@@ -1443,6 +1513,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
             if (thisBuilder.isStrict() != thatBuilder.isStrict()) return false;
             if (thisBuilder.getUseModelCache() != thatBuilder.getUseModelCache()) return false;
             if (thisBuilder.getUsePrivateCaches() != thatBuilder.getUsePrivateCaches()) return false;
+            if (!thisBuilder.getExtensions().equals(thatBuilder.getExtensions())) return false;
             return thisBuilder.classIntrospectorBuilder.equals(thatBuilder.classIntrospectorBuilder);
         }
 
@@ -1631,8 +1702,8 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         }
 
         /**
-         * Tells if the instance cerates should try to caches with other {@link DefaultObjectWrapper} instances (where
-         * possible), or it should always invoke its own caches and not share that with anyone else.
+         * Tells if the instance creates should share caches with other {@link DefaultObjectWrapper} instances
+         * (where possible), or it should always invoke its own caches and not share that with anyone else.
          * */
         public void setUsePrivateCaches(boolean usePrivateCaches) {
             this.usePrivateCaches = usePrivateCaches;
@@ -1652,6 +1723,56 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         public SelfT usePrivateCaches(boolean usePrivateCaches) {
             setUsePrivateCaches(usePrivateCaches);
             return self();
+        }
+
+        /**
+         * Extensions are  used for dynamically decorating the {@link #wrap(Object)} method. In effects this is very
+         * similar to extending {@link DefaultObjectWrapper} and overriding its {@link #wrap(Object)}, and adding
+         * some wrapping logic before and/or after calling {@code super.wrap(obj)} (often referred to as decorating).
+         * But with this approach instead of subclassing {@link DefaultObjectWrapper} and its builder class, you
+         * simply list the desired extensions when you build the {@link DefaultObjectWrapper}. This is usually more
+         * convenient, and more flexible (what extensions you add can be decided on runtime factors) than the
+         * subclassing approach.
+         *
+         * @return An unmodifiable {@link List}.
+         */
+        public List<? extends DefaultObjectWrapperExtension> getExtensions() {
+            return extensions;
+        }
+
+        /**
+         * Setter pair of {@link #getExtensions()}.
+         *
+         * @param extensions The list of extensions; can't be {@code null}.
+         *                   The {@link List} list is copied, so further changes to the
+         *                   {@link List} passed in won't affect the value of this setting.
+         */
+        public void setExtensions(List<? extends DefaultObjectWrapperExtension> extensions) {
+            _NullArgumentException.check("extensions", extensions);
+            this.extensions = Collections.unmodifiableList(new ArrayList(extensions));
+            this.extensionsSet = true;
+        }
+
+        /**
+         * Fluent API equivalent of {@link #setExtensions(List)}.
+         */
+        public SelfT extensions(List<? extends DefaultObjectWrapperExtension> extensions) {
+            setExtensions(extensions);
+            return self();
+        }
+
+        /**
+         * Convenience varargs overload for calling {@link #extensions(List)}.
+         */
+        public SelfT extensions(DefaultObjectWrapperExtension... extensions) {
+            return extensions(Arrays.asList(extensions));
+        }
+
+        /**
+         * Tells if the property was explicitly set, as opposed to just holding its default value.
+         */
+        public boolean isExtensionsSet() {
+            return extensionsSet;
         }
 
         public int getExposureLevel() {

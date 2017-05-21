@@ -17,13 +17,23 @@
  * under the License.
  */
 
-rootProject.name = 'freemarker'
+package org.apache.freemarker.core.model.impl;
 
-include 'freemarker-core'
-include 'freemarker-core-test'
-include 'freemarker-core-test-java8'
-include 'freemarker-servlet'
-include 'freemarker-test-utils'
-include 'freemarker-manual'
-include 'freemarker-dom'
+/**
+ * Used for the return value of {@link DefaultObjectWrapperExtension#getPhase()}.
+ */
+public enum DefaultObjectWrapperExtensionPhase {
 
+    /**
+     * Indicates that the {@link DefaultObjectWrapperExtension} should be invoked before
+     * {@link DefaultObjectWrapper#wrapSpecialObject(Object)}.
+     */
+    BEFORE_WRAP_SPECIAL_OBJECT,
+
+    /**
+     * Indicates that the {@link DefaultObjectWrapperExtension} should be invoked after
+     * {@link DefaultObjectWrapper#wrapSpecialObject(Object)}.
+     */
+    AFTER_WRAP_SPECIAL_OBJECT
+
+}

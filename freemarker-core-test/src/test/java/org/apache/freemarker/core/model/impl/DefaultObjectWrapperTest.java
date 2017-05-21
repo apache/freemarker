@@ -24,7 +24,6 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,10 +39,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
@@ -62,7 +57,6 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
-import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
@@ -70,9 +64,6 @@ import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
 import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -689,16 +680,6 @@ public class DefaultObjectWrapperTest {
     }
 
     @Test
-    public void assertCanWrapDOM() throws SAXException, IOException, ParserConfigurationException,
-            TemplateModelException {
-        DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        InputSource is = new InputSource();
-        is.setCharacterStream(new StringReader("<doc><sub a='1' /></doc>"));
-        Document doc = db.parse(is);        
-        assertTrue(OW.wrap(doc) instanceof TemplateNodeModel);
-    }
-
-    @Test
     public void testExposureLevel() throws Exception {
         TestBean bean = new TestBean();
 
@@ -857,12 +838,12 @@ public class DefaultObjectWrapperTest {
         }
         
         @Override
-        protected TemplateModel handleNonBasicTypes(final Object obj) throws TemplateModelException {
+        protected TemplateModel wrapGenericObject(final Object obj) throws TemplateModelException {
             if (obj instanceof Tupple) {
                 return new TuppleAdapter((Tupple<?, ?>) obj, this);
             }
             
-            return super.handleNonBasicTypes(obj);
+            return super.wrapGenericObject(obj);
         }
         
     }

@@ -17,10 +17,12 @@
  * under the License.
  */
 
-package org.apache.freemarker.test;
+package org.apache.freemarker.dom.test;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 
@@ -28,18 +30,23 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.dom.NodeModel;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-public final class XMLLoader {
+/**
+ * Utility to load XML resources into {@link Node}-s or {@link NodeModel}-s.
+ */
+public final class DOMLoader {
 
     private static final Object STATIC_LOCK = new Object();
     
     static private DocumentBuilderFactory docBuilderFactory;
     
-    private XMLLoader() {
+    private DOMLoader() {
         //
     }
     
@@ -76,28 +83,17 @@ public final class XMLLoader {
     static public NodeModel toModel(InputSource is) throws SAXException, IOException, ParserConfigurationException {
         return toModel(is, true);
     }
-    
-    /**
-     * Same as {@link #toModel(InputSource, boolean)}, but loads from a {@link File}; don't miss the security
-     * warnings documented there.
-     */
-    static public NodeModel toModel(File f, boolean simplify) 
-    throws SAXException, IOException, ParserConfigurationException {
-        DocumentBuilder builder = getDocumentBuilderFactory().newDocumentBuilder();
-        Document doc = builder.parse(f);
-        if (simplify) {
-            NodeModel.simplify(doc);
+
+    static public NodeModel toModel(Class<?> baseClass, String resourcePath)
+            throws ParserConfigurationException, SAXException, IOException {
+        InputStream in = baseClass.getResourceAsStream(resourcePath);
+        if (in == null) {
+            throw new FileNotFoundException("Class loader resource not found: baseClass=" + baseClass.getName()
+                    + "; path=" + _StringUtil.jQuote(resourcePath));
         }
-        return NodeModel.wrap(doc);
+        return toModel(new InputSource(in));
     }
-    
-    /**
-     * Same as {@link #toModel(InputSource, boolean) parse(source, true)}, but loads from a {@link String}.
-     */
-    static public NodeModel toModel(File f) throws SAXException, IOException, ParserConfigurationException {
-        return toModel(f, true);
-    }
-    
+
     /**
      * Same as {@link #toModel(InputSource, boolean)}, but loads from a {@link File}; don't miss the security
      * warnings documented there.
@@ -118,7 +114,18 @@ public final class XMLLoader {
         DocumentBuilder builder =  getDocumentBuilderFactory().newDocumentBuilder();
         return builder.parse(toInputSource(content));
     }
-    
+
+    public static Document toDOM(Class<?> baseClass, String resourcePath) throws SAXException, IOException,
+            ParserConfigurationException {
+        DocumentBuilder builder =  getDocumentBuilderFactory().newDocumentBuilder();
+        InputStream in = baseClass.getResourceAsStream(resourcePath);
+        if (in == null) {
+            throw new FileNotFoundException("Class loader resource not found: baseClass="
+                    + baseClass.getName() + "; " + "path=" + _StringUtil.jQuote(resourcePath));
+        }
+        return builder.parse(new InputSource(in));
+    }
+
     static private DocumentBuilderFactory getDocumentBuilderFactory() {
         synchronized (STATIC_LOCK) {
             if (docBuilderFactory == null) {
