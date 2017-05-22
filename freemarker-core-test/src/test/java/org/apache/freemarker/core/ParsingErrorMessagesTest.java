@@ -30,7 +30,7 @@ import org.junit.Test;
 public class ParsingErrorMessagesTest {
 
     private Configuration cfg = new TestConfigurationBuilder()
-            .tagSyntax(ParsingConfiguration.AUTO_DETECT_TAG_SYNTAX)
+            .tagSyntax(TagSyntax.AUTO_DETECT)
             .build();
 
     @Test

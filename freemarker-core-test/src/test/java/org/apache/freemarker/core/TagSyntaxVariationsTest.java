@@ -70,8 +70,8 @@ public class TagSyntaxVariationsTest extends TestCase {
             for (int angOrSqu = 0; angOrSqu < 2; angOrSqu++) {
                 Configuration cfg = new TestConfigurationBuilder()
                         .tagSyntax(angOrSqu == 0
-                                ? ParsingConfiguration.ANGLE_BRACKET_TAG_SYNTAX
-                                : ParsingConfiguration.SQUARE_BRACKET_TAG_SYNTAX)
+                                ? TagSyntax.ANGLE_BRACKET
+                                : TagSyntax.SQUARE_BRACKET)
                         .build();
 
                 String dir_xxx = angOrSqu == 0 ? dir_ang : dir_squ;
@@ -108,7 +108,7 @@ public class TagSyntaxVariationsTest extends TestCase {
 
             {
                 Configuration cfg = new TestConfigurationBuilder()
-                        .tagSyntax(ParsingConfiguration.AUTO_DETECT_TAG_SYNTAX)
+                        .tagSyntax(TagSyntax.AUTO_DETECT)
                         .build();
                 for (int perm = 0; perm < 4; perm++) {
                     // All 4 permutations
@@ -123,7 +123,7 @@ public class TagSyntaxVariationsTest extends TestCase {
 
             {
                 Configuration cfg = new TestConfigurationBuilder()
-                        .tagSyntax(ParsingConfiguration.AUTO_DETECT_TAG_SYNTAX)
+                        .tagSyntax(TagSyntax.AUTO_DETECT)
                         .build();
                 // Permutations
                 for (int angOrSquStart = 0; angOrSquStart < 2; angOrSquStart++) {

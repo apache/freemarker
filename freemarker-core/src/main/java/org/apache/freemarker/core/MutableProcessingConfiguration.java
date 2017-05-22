@@ -1636,10 +1636,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *   <li><p>{@code "auto_escaping"}:
      *       See {@link Configuration#getAutoEscapingPolicy()}
      *       <br>String value: {@code "enable_if_default"} or {@code "enableIfDefault"} for
-     *       {@link ParsingConfiguration#ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY},
+     *       {@link AutoEscapingPolicy#ENABLE_IF_DEFAULT},
      *       {@code "enable_if_supported"} or {@code "enableIfSupported"} for
-     *       {@link ParsingConfiguration#ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY}
-     *       {@code "disable"} for {@link ParsingConfiguration#DISABLE_AUTO_ESCAPING_POLICY}.
+     *       {@link AutoEscapingPolicy#ENABLE_IF_SUPPORTED}
+     *       {@code "disable"} for {@link AutoEscapingPolicy#DISABLE}.
      *       
      *   <li><p>{@code "sourceEncoding"}:
      *       See {@link Configuration#getSourceEncoding()}; since 2.3.26 also accepts value "JVM default"
@@ -1796,7 +1796,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *            The keys and values can be any kind of expression, like even object builder expressions.
      *            The resulting Java object will be a {@link Map} that keeps the item order ({@link LinkedHashMap} as
      *            of this writing).
-     *        <li>A reference to a public static filed, like {@code Configuration.AUTO_DETECT_TAG_SYNTAX} or
+     *        <li>A reference to a public static filed, like {@code Configuration.AUTO_DETECT} or
      *            {@code com.example.MyClass.MY_CONSTANT}.
      *        <li>An object builder expression. That is, object builder expressions can be nested into each other. 
      *      </ul>
@@ -1815,7 +1815,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *     {@link AndMatcher}, {@link OrMatcher}, {@link NotMatcher}, {@link ConditionalTemplateConfigurationFactory},
      *     {@link MergingTemplateConfigurationFactory}, {@link FirstMatchTemplateConfigurationFactory},
      *     {@link HTMLOutputFormat}, {@link XMLOutputFormat}, {@link RTFOutputFormat}, {@link PlainTextOutputFormat},
-     *     {@link UndefinedOutputFormat}, {@link Configuration}, {@link TemplateLanguage}.
+     *     {@link UndefinedOutputFormat}, {@link Configuration}, {@link TemplateLanguage}, {@link NamingConvention},
+     *     {@link TagSyntax}.
      *   </li>
      *   <li>
      *     <p>{@link TimeZone} objects can be created like {@code TimeZone("UTC")}, despite that there's no a such

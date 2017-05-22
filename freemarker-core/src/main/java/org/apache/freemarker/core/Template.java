@@ -115,12 +115,12 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     private Map<String, Serializable> customAttributes;
     private transient Map<Object, Object> mergedCustomAttributes;
 
-    private Integer autoEscapingPolicy;
+    private AutoEscapingPolicy autoEscapingPolicy;
     // Values from template content that are detected automatically:
     private Charset actualSourceEncoding;
-    private int actualTagSyntax;
+    private TagSyntax actualTagSyntax;
 
-    private int actualNamingConvention;
+    private NamingConvention actualNamingConvention;
     // Custom state:
     private final Object customStateMapLock = new Object();
     private final ConcurrentHashMap<CustomStateKey, Object> customStateMap = new ConcurrentHashMap<>(0);
@@ -283,7 +283,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
    Template(
             String lookupName, String sourceName, Reader reader,
             Configuration configuration, TemplateConfiguration templateConfiguration,
-            OutputFormat contextOutputFormat, Integer contextAutoEscapingPolicy,
+            OutputFormat contextOutputFormat, AutoEscapingPolicy contextAutoEscapingPolicy,
             Charset actualSourceEncoding, InputStream streamToUnmarkWhenEncEstabd) throws IOException, ParseException {
         _NullArgumentException.check("configuration", configuration);
         this.cfg = configuration;
@@ -659,27 +659,27 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
 
     /**
      * Returns the tag syntax the parser has chosen for this template. If the syntax could be determined, it's
-     * {@link ParsingConfiguration#SQUARE_BRACKET_TAG_SYNTAX} or {@link ParsingConfiguration#ANGLE_BRACKET_TAG_SYNTAX}. If the syntax
+     * {@link TagSyntax#SQUARE_BRACKET} or {@link TagSyntax#ANGLE_BRACKET}. If the syntax
      * couldn't be determined (like because there was no tags in the template, or it was a plain text template), this
      * returns whatever the default is in the current configuration, so it's maybe
-     * {@link ParsingConfiguration#AUTO_DETECT_TAG_SYNTAX}.
+     * {@link TagSyntax#AUTO_DETECT}.
      * 
      * @since 2.3.20
      */
-    public int getActualTagSyntax() {
+    public TagSyntax getActualTagSyntax() {
         return actualTagSyntax;
     }
     
     /**
      * Returns the naming convention the parser has chosen for this template. If it could be determined, it's
-     * {@link ParsingConfiguration#LEGACY_NAMING_CONVENTION} or {@link ParsingConfiguration#CAMEL_CASE_NAMING_CONVENTION}. If it
+     * {@link NamingConvention#LEGACY} or {@link NamingConvention#CAMEL_CASE}. If it
      * couldn't be determined (like because there no identifier that's part of the template language was used where
      * the naming convention matters), this returns whatever the default is in the current configuration, so it's maybe
-     * {@link ParsingConfiguration#AUTO_DETECT_TAG_SYNTAX}.
+     * {@link TagSyntax#AUTO_DETECT}.
      * 
      * @since 2.3.23
      */
-    public int getActualNamingConvention() {
+    public NamingConvention getActualNamingConvention() {
         return actualNamingConvention;
     }
     
@@ -709,7 +709,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * {@link Configuration#getAutoEscapingPolicy()}, {@link ParsingConfiguration#getAutoEscapingPolicy()},
      * {@code #ftl} header's {@code auto_esc} option in the template.
      */
-    public int getAutoEscapingPolicy() {
+    public AutoEscapingPolicy getAutoEscapingPolicy() {
         return autoEscapingPolicy != null ? autoEscapingPolicy
                 : tCfg != null && tCfg.isAutoEscapingPolicySet() ? tCfg.getAutoEscapingPolicy()
                 : cfg.getAutoEscapingPolicy();
@@ -718,7 +718,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     /**
      * Should be called by the parser, for example to apply the auto escaping policy specified in the #ftl header.
      */
-    void setAutoEscapingPolicy(int autoEscapingPolicy) {
+    void setAutoEscapingPolicy(AutoEscapingPolicy autoEscapingPolicy) {
         this.autoEscapingPolicy = autoEscapingPolicy;
     }
     

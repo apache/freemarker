@@ -697,7 +697,10 @@ public class _ObjectBuilderSettingEvaluator {
             }
 
             // For accessing static fields:
-            addWithSimpleName(SHORTHANDS, Configuration.class);
+            addWithSimpleName(SHORTHANDS, Configuration.class); // [FM3] Won't be needed
+            addWithSimpleName(SHORTHANDS, TagSyntax.class);
+            addWithSimpleName(SHORTHANDS, NamingConvention.class);
+
         }
         String fullClassName = SHORTHANDS.get(className);
         return fullClassName == null ? className : fullClassName;

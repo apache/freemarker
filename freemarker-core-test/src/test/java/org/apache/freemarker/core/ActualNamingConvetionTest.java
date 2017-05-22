@@ -32,32 +32,33 @@ public class ActualNamingConvetionTest {
     public void testUndetectable() throws IOException {
         final String ftl = "<#if true>${x?size}</#if>";
         assertEquals(getActualNamingConvention(ftl,
-                ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION), ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION);
+                NamingConvention.AUTO_DETECT), NamingConvention.AUTO_DETECT);
         assertEquals(getActualNamingConvention(ftl,
-                ParsingConfiguration.LEGACY_NAMING_CONVENTION), ParsingConfiguration.LEGACY_NAMING_CONVENTION);
+                NamingConvention.LEGACY), NamingConvention.LEGACY);
         assertEquals(getActualNamingConvention(ftl,
-                ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION), ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION);
+                NamingConvention.CAMEL_CASE), NamingConvention.CAMEL_CASE);
     }
 
     @Test
     public void testLegacyDetected() throws IOException {
         final String ftl = "${x?upper_case}";
         assertEquals(getActualNamingConvention(ftl,
-                ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION), ParsingConfiguration.LEGACY_NAMING_CONVENTION);
+                NamingConvention.AUTO_DETECT), NamingConvention.LEGACY);
         assertEquals(getActualNamingConvention(ftl,
-                ParsingConfiguration.LEGACY_NAMING_CONVENTION), ParsingConfiguration.LEGACY_NAMING_CONVENTION);
+                NamingConvention.LEGACY), NamingConvention.LEGACY);
     }
 
     @Test
     public void testCamelCaseDetected() throws IOException {
         final String ftl = "${x?upperCase}";
         assertEquals(getActualNamingConvention(ftl,
-                ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION), ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION);
+                NamingConvention.AUTO_DETECT), NamingConvention.CAMEL_CASE);
         assertEquals(getActualNamingConvention(ftl,
-                ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION), ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION);
+                NamingConvention.CAMEL_CASE), NamingConvention.CAMEL_CASE);
     }
 
-    private int getActualNamingConvention(String ftl, int namingConvention) throws IOException {
+    private NamingConvention getActualNamingConvention(String ftl, NamingConvention namingConvention)
+            throws IOException {
         return new Template(null, ftl,
                 new TestConfigurationBuilder().namingConvention(namingConvention).build())
                 .getActualNamingConvention();

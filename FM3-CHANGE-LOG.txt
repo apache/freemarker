@@ -245,3 +245,8 @@ the FreeMarer 3 changelog here:
             new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
                     .extensions(DOMDefaultObjectWrapperExtension.INSTANCE)
                     .build())
+
+- Configuration-related int constants were replaced with enums:
+  - FM2 Configuration.${c}_NAMING_CONVENTION with NamingConvention.${c}
+  - FM2 Configuration.${c}_TAG_SYNTAX with TagSyntax.${c}
+  - FM2 Configuration.${c}_AUTO_ESCAPING_POLICY with AutoEscapingPolicy.${c}

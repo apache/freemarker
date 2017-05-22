@@ -72,19 +72,19 @@ final class ASTDirSetting extends ASTDirective {
                 sb.append(_StringUtil.jQuote(key)).append(".");
                 sb.append(" The allowed setting names are: ");
 
-                int shownNamingConvention;
+                NamingConvention shownNamingConvention;
                 {
-                    int namingConvention = tokenManager.namingConvention;
-                    shownNamingConvention = namingConvention != ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION
-                            ? namingConvention : ParsingConfiguration.LEGACY_NAMING_CONVENTION /* [2.4] CAMEL_CASE */;
+                    NamingConvention namingConvention = tokenManager.namingConvention;
+                    shownNamingConvention = namingConvention != NamingConvention.AUTO_DETECT
+                            ? namingConvention : NamingConvention.LEGACY /* [2.4] CAMEL_CASE */;
                 }
                 
                 boolean first = true;
                 for (String correctName : SETTING_NAMES) {
-                    int correctNameNamingConvention = _StringUtil.getIdentifierNamingConvention(correctName);
-                    if (shownNamingConvention == ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION
-                            ? correctNameNamingConvention != ParsingConfiguration.LEGACY_NAMING_CONVENTION
-                            : correctNameNamingConvention != ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION) {
+                    NamingConvention correctNameNamingConvention = _StringUtil.getIdentifierNamingConvention(correctName);
+                    if (shownNamingConvention == NamingConvention.CAMEL_CASE
+                            ? correctNameNamingConvention != NamingConvention.LEGACY
+                            : correctNameNamingConvention != NamingConvention.CAMEL_CASE) {
                         if (first) {
                             first = false;
                         } else {

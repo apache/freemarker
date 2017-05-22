@@ -25,9 +25,9 @@ import org.apache.freemarker.core.util._NullArgumentException;
 abstract class OutputFormatBoundBuiltIn extends SpecialBuiltIn {
     
     protected OutputFormat outputFormat;
-    protected int autoEscapingPolicy;
+    protected AutoEscapingPolicy autoEscapingPolicy;
     
-    void bindToOutputFormat(OutputFormat outputFormat, int autoEscapingPolicy) {
+    void bindToOutputFormat(OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy) {
         _NullArgumentException.check(outputFormat);
         this.outputFormat = outputFormat;
         this.autoEscapingPolicy = autoEscapingPolicy;

@@ -30,7 +30,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.ParsingConfiguration;
+import org.apache.freemarker.core.NamingConvention;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.Version;
 
@@ -1604,21 +1604,21 @@ public class _StringUtil {
     }
 
     /**
-     * @return {@link ParsingConfiguration#CAMEL_CASE_NAMING_CONVENTION}, or {@link ParsingConfiguration#LEGACY_NAMING_CONVENTION}
-     *         or, {@link ParsingConfiguration#AUTO_DETECT_NAMING_CONVENTION} when undecidable.
+     * @return {@link NamingConvention#CAMEL_CASE}, or {@link NamingConvention#LEGACY}
+     *         or, {@link NamingConvention#AUTO_DETECT} when undecidable.
      */
-    public static int getIdentifierNamingConvention(String name) {
+    public static NamingConvention getIdentifierNamingConvention(String name) {
         final int ln = name.length();
         for (int i = 0; i < ln; i++) {
             final char c = name.charAt(i);
             if (c == '_') {
-                return ParsingConfiguration.LEGACY_NAMING_CONVENTION;
+                return NamingConvention.LEGACY;
             }
             if (_StringUtil.isUpperUSASCII(c)) {
-                return ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION;
+                return NamingConvention.CAMEL_CASE;
             }
         }
-        return ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION;
+        return NamingConvention.AUTO_DETECT;
     }
 
     // [2.4] Won't be needed anymore

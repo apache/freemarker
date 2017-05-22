@@ -64,8 +64,8 @@ public class SpecialVariableTest extends TemplateTest {
     public void testAutoEsc() throws Exception {
         Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
 
-        for (int autoEscaping : new int[] {
-                ParsingConfiguration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, ParsingConfiguration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY }) {
+        for (AutoEscapingPolicy autoEscaping : new AutoEscapingPolicy[] {
+                AutoEscapingPolicy.ENABLE_IF_DEFAULT, AutoEscapingPolicy.ENABLE_IF_SUPPORTED }) {
             cfgB.setAutoEscapingPolicy(autoEscaping);
             cfgB.setOutputFormat(HTMLOutputFormat.INSTANCE);
             setConfiguration(cfgB.build());
@@ -81,7 +81,7 @@ public class SpecialVariableTest extends TemplateTest {
             assertOutput("${.autoEsc?c}", "false");
         }
         
-        cfgB.setAutoEscapingPolicy(ParsingConfiguration.DISABLE_AUTO_ESCAPING_POLICY);
+        cfgB.setAutoEscapingPolicy(AutoEscapingPolicy.DISABLE);
         cfgB.setOutputFormat(HTMLOutputFormat.INSTANCE);
         setConfiguration(cfgB.build());
         assertOutput("${.autoEsc?c}", "false");
@@ -95,7 +95,7 @@ public class SpecialVariableTest extends TemplateTest {
         setConfiguration(cfgB.build());
         assertOutput("${.autoEsc?c}", "false");
 
-        cfgB.setAutoEscapingPolicy(ParsingConfiguration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY);
+        cfgB.setAutoEscapingPolicy(AutoEscapingPolicy.ENABLE_IF_DEFAULT);
         setConfiguration(cfgB.build());
         assertOutput(
                 "${.autoEsc?c} "

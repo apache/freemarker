@@ -96,7 +96,7 @@ public class ConfigurableTest {
             String fieldName = field.getName();
             if (fieldName.endsWith("_KEY")) {
                 String keyFieldValue = (String) field.get(null);
-                assertNotEquals(ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION,
+                assertNotEquals(NamingConvention.CAMEL_CASE,
                         _StringUtil.getIdentifierNamingConvention(keyFieldValue));
                 assertEquals(fieldName.substring(0, fieldName.length() - 4).toLowerCase(), keyFieldValue);
                 
@@ -109,7 +109,7 @@ public class ConfigurableTest {
                 
                 try {
                     String keyCCFieldValue = (String) confClass.getField(fieldName + "_CAMEL_CASE").get(null);
-                    assertNotEquals(ParsingConfiguration.LEGACY_NAMING_CONVENTION,
+                    assertNotEquals(NamingConvention.LEGACY,
                             _StringUtil.getIdentifierNamingConvention(keyCCFieldValue));
                     assertEquals(keyFieldValue, _StringUtil.camelCaseToUnderscored(keyCCFieldValue));
                 } catch (NoSuchFieldException e) {

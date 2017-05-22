@@ -33,10 +33,10 @@ public abstract class MutableParsingAndProcessingConfiguration<
         implements ParsingAndProcessingConfiguration {
 
     private TemplateLanguage templateLanguage;
-    private Integer tagSyntax;
-    private Integer namingConvention;
+    private TagSyntax tagSyntax;
+    private NamingConvention namingConvention;
     private Boolean whitespaceStripping;
-    private Integer autoEscapingPolicy;
+    private AutoEscapingPolicy autoEscapingPolicy;
     private Boolean recognizeStandardFileExtensions;
     private OutputFormat outputFormat;
     private Charset sourceEncoding;
@@ -48,28 +48,19 @@ public abstract class MutableParsingAndProcessingConfiguration<
 
     /**
      * Setter pair of {@link #getTagSyntax()}.
+     *
+     * @param tagSyntax
+     *         Can't be {@code null}
      */
-    public void setTagSyntax(int tagSyntax) {
-        valideTagSyntaxValue(tagSyntax);
+    public void setTagSyntax(TagSyntax tagSyntax) {
+        _NullArgumentException.check("tagSyntax", tagSyntax);
         this.tagSyntax = tagSyntax;
     }
 
-    // [FM3] Use enum; won't be needed
-    static void valideTagSyntaxValue(int tagSyntax) {
-        if (tagSyntax != ParsingConfiguration.AUTO_DETECT_TAG_SYNTAX
-                && tagSyntax != ParsingConfiguration.SQUARE_BRACKET_TAG_SYNTAX
-                && tagSyntax != ParsingConfiguration.ANGLE_BRACKET_TAG_SYNTAX) {
-            throw new IllegalArgumentException(
-                    "\"tagSyntax\" can only be set to one of these: "
-                    + "Configuration.AUTO_DETECT_TAG_SYNTAX, Configuration.ANGLE_BRACKET_SYNTAX, "
-                    + "or Configuration.SQUARE_BRACKET_SYNTAX");
-        }
-    }
-
     /**
-     * Fluent API equivalent of {@link #tagSyntax(int)}
+     * Fluent API equivalent of {@link #tagSyntax(TagSyntax)}
      */
-    public SelfT tagSyntax(int tagSyntax) {
+    public SelfT tagSyntax(TagSyntax tagSyntax) {
         setTagSyntax(tagSyntax);
         return self();
     }
@@ -83,7 +74,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
     }
 
     @Override
-    public int getTagSyntax() {
+    public TagSyntax getTagSyntax() {
         return isTagSyntaxSet() ? tagSyntax : getDefaultTagSyntax();
     }
 
@@ -91,7 +82,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
      * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
      * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
      */
-    protected abstract int getDefaultTagSyntax();
+    protected abstract TagSyntax getDefaultTagSyntax();
 
     @Override
     public boolean isTagSyntaxSet() {
@@ -140,16 +131,19 @@ public abstract class MutableParsingAndProcessingConfiguration<
 
     /**
      * Setter pair of {@link #getNamingConvention()}.
+     *
+     * @param namingConvention
+     *         Can't be {@code null}
      */
-    public void setNamingConvention(int namingConvention) {
-        Configuration.validateNamingConventionValue(namingConvention);
+    public void setNamingConvention(NamingConvention namingConvention) {
+        _NullArgumentException.check("namingConvention", namingConvention);
         this.namingConvention = namingConvention;
     }
 
     /**
-     * Fluent API equivalent of {@link #setNamingConvention(int)}
+     * Fluent API equivalent of {@link #setNamingConvention(NamingConvention)}
      */
-    public SelfT namingConvention(int namingConvention) {
+    public SelfT namingConvention(NamingConvention namingConvention) {
         setNamingConvention(namingConvention);
         return self();
     }
@@ -163,10 +157,10 @@ public abstract class MutableParsingAndProcessingConfiguration<
     }
 
     /**
-     * The getter pair of {@link #setNamingConvention(int)}.
+     * The getter pair of {@link #setNamingConvention(NamingConvention)}.
      */
     @Override
-    public int getNamingConvention() {
+    public NamingConvention getNamingConvention() {
          return isNamingConventionSet() ? namingConvention
                 : getDefaultNamingConvention();
     }
@@ -175,7 +169,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
      * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
      * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
      */
-    protected abstract int getDefaultNamingConvention();
+    protected abstract NamingConvention getDefaultNamingConvention();
 
     /**
      * Tells if this setting is set directly in this object or its value is inherited from the parent parsing configuration..
@@ -233,28 +227,15 @@ public abstract class MutableParsingAndProcessingConfiguration<
     /**
      * * Setter pair of {@link #getAutoEscapingPolicy()}.
      */
-    public void setAutoEscapingPolicy(int autoEscapingPolicy) {
-        validateAutoEscapingPolicyValue(autoEscapingPolicy);
+    public void setAutoEscapingPolicy(AutoEscapingPolicy autoEscapingPolicy) {
+        _NullArgumentException.check("autoEscapingPolicy", autoEscapingPolicy);
         this.autoEscapingPolicy = autoEscapingPolicy;
     }
 
-    // [FM3] Use enum; won't be needed
-    static void validateAutoEscapingPolicyValue(int autoEscapingPolicy) {
-        if (autoEscapingPolicy != ParsingConfiguration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY
-                && autoEscapingPolicy != ParsingConfiguration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY
-                && autoEscapingPolicy != ParsingConfiguration.DISABLE_AUTO_ESCAPING_POLICY) {
-            throw new IllegalArgumentException(
-                    "\"tagSyntax\" can only be set to one of these: "
-                            + "Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY,"
-                            + "Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY, "
-                            + "or Configuration.DISABLE_AUTO_ESCAPING_POLICY");
-        }
-    }
-
     /**
-     * Fluent API equivalent of {@link #setAutoEscapingPolicy(int)}
+     * Fluent API equivalent of {@link #setAutoEscapingPolicy(AutoEscapingPolicy)}
      */
-    public SelfT autoEscapingPolicy(int autoEscapingPolicy) {
+    public SelfT autoEscapingPolicy(AutoEscapingPolicy autoEscapingPolicy) {
         setAutoEscapingPolicy(autoEscapingPolicy);
         return self();
     }
@@ -268,10 +249,10 @@ public abstract class MutableParsingAndProcessingConfiguration<
     }
 
     /**
-     * The getter pair of {@link #setAutoEscapingPolicy(int)}.
+     * The getter pair of {@link #setAutoEscapingPolicy(AutoEscapingPolicy)}.
      */
     @Override
-    public int getAutoEscapingPolicy() {
+    public AutoEscapingPolicy getAutoEscapingPolicy() {
          return isAutoEscapingPolicySet() ? autoEscapingPolicy : getDefaultAutoEscapingPolicy();
     }
 
@@ -279,7 +260,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
      * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
      * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
      */
-    protected abstract int getDefaultAutoEscapingPolicy();
+    protected abstract AutoEscapingPolicy getDefaultAutoEscapingPolicy();
 
     /**
      * Tells if this setting is set directly in this object or its value is inherited from the parent parsing configuration..

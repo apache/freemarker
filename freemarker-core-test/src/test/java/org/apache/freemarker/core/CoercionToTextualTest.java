@@ -57,7 +57,7 @@ public class CoercionToTextualTest extends TemplateTest {
     public void testEscBuiltin() throws IOException, TemplateException {
         setConfiguration(createDefaultConfigurationBuilder()
                 .outputFormat(HTMLOutputFormat.INSTANCE)
-                .autoEscapingPolicy(ParsingConfiguration.DISABLE_AUTO_ESCAPING_POLICY)
+                .autoEscapingPolicy(AutoEscapingPolicy.DISABLE)
                 .booleanFormat("<y>,<n>")
                 .build());
         assertOutput("${'a<b'?esc}", "a&lt;b");

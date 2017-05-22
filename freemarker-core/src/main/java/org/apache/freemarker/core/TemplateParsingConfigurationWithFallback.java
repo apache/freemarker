@@ -48,7 +48,7 @@ final class TemplateParsingConfigurationWithFallback implements ParsingConfigura
     }
 
     @Override
-    public int getTagSyntax() {
+    public TagSyntax getTagSyntax() {
         return tCfg.isTagSyntaxSet() ? tCfg.getTagSyntax() : cfg.getTagSyntax();
     }
 
@@ -58,7 +58,7 @@ final class TemplateParsingConfigurationWithFallback implements ParsingConfigura
     }
 
     @Override
-    public int getNamingConvention() {
+    public NamingConvention getNamingConvention() {
         return tCfg.isNamingConventionSet() ? tCfg.getNamingConvention() : cfg.getNamingConvention();
     }
 
@@ -88,7 +88,7 @@ final class TemplateParsingConfigurationWithFallback implements ParsingConfigura
     }
 
     @Override
-    public int getAutoEscapingPolicy() {
+    public AutoEscapingPolicy getAutoEscapingPolicy() {
         return tCfg.isAutoEscapingPolicySet() ? tCfg.getAutoEscapingPolicy() : cfg.getAutoEscapingPolicy();
     }
 

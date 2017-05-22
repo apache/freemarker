@@ -42,7 +42,7 @@ public class InterpretSettingInheritanceTest  extends TemplateTest {
     @Test
     public void tagSyntaxTest() throws IOException, TemplateException {
         setConfiguration(new TestConfigurationBuilder()
-                .tagSyntax(ParsingConfiguration.ANGLE_BRACKET_TAG_SYNTAX)
+                .tagSyntax(TagSyntax.ANGLE_BRACKET)
                 .build());
         assertOutput(FTL_S_A_S, OUT_A_S_WHEN_SYNTAX_IS_A);
         assertOutput(FTL_S_S_A, OUT_S_A_WHEN_SYNTAX_IS_A);
@@ -50,7 +50,7 @@ public class InterpretSettingInheritanceTest  extends TemplateTest {
         assertOutput(FTL_A_S_A, OUT_S_A_WHEN_SYNTAX_IS_A);
 
         setConfiguration(new TestConfigurationBuilder()
-                .tagSyntax(ParsingConfiguration.SQUARE_BRACKET_TAG_SYNTAX)
+                .tagSyntax(TagSyntax.SQUARE_BRACKET)
                 .build());
         assertOutput(FTL_S_A_S, OUT_A_S_WHEN_SYNTAX_IS_S);
         assertOutput(FTL_S_S_A, OUT_S_A_WHEN_SYNTAX_IS_S);
@@ -58,7 +58,7 @@ public class InterpretSettingInheritanceTest  extends TemplateTest {
         assertOutput(FTL_A_S_A, OUT_S_A_WHEN_SYNTAX_IS_S);
 
         setConfiguration(new TestConfigurationBuilder()
-                .tagSyntax(ParsingConfiguration.AUTO_DETECT_TAG_SYNTAX)
+                .tagSyntax(TagSyntax.AUTO_DETECT)
                 .build());
         assertOutput(FTL_S_A_S, OUT_A_S_WHEN_SYNTAX_IS_A);
         assertOutput(FTL_S_S_A, OUT_S_A_WHEN_SYNTAX_IS_S);
@@ -89,13 +89,13 @@ public class InterpretSettingInheritanceTest  extends TemplateTest {
     @Test
     public void evalTest() throws IOException, TemplateException {
         setConfiguration(new TestConfigurationBuilder()
-                .tagSyntax(ParsingConfiguration.ANGLE_BRACKET_TAG_SYNTAX)
+                .tagSyntax(TagSyntax.ANGLE_BRACKET)
                 .build());
         assertOutput("<@'\"[#if true]s[/#if]<#if true>a</#if>\"?interpret'?eval />", OUT_S_A_WHEN_SYNTAX_IS_A);
         assertOutput("[#ftl][@'\"[#if true]s[/#if]<#if true>a</#if>\"?interpret'?eval /]", OUT_S_A_WHEN_SYNTAX_IS_A);
 
         setConfiguration(new TestConfigurationBuilder()
-                .tagSyntax(ParsingConfiguration.SQUARE_BRACKET_TAG_SYNTAX)
+                .tagSyntax(TagSyntax.SQUARE_BRACKET)
                 .build());
         assertOutput("[@'\"[#if true]s[/#if]<#if true>a</#if>\"?interpret'?eval /]", OUT_S_A_WHEN_SYNTAX_IS_S);
         assertOutput("<#ftl><@'\"[#if true]s[/#if]<#if true>a</#if>\"?interpret'?eval />", OUT_S_A_WHEN_SYNTAX_IS_S);

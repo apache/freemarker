@@ -178,11 +178,11 @@ public class TemplateConfigurationTest {
 
         // Parser-only settings:
         SETTING_ASSIGNMENTS.put("templateLanguage", TemplateLanguage.STATIC_TEXT);
-        SETTING_ASSIGNMENTS.put("tagSyntax", ParsingConfiguration.SQUARE_BRACKET_TAG_SYNTAX);
-        SETTING_ASSIGNMENTS.put("namingConvention", ParsingConfiguration.LEGACY_NAMING_CONVENTION);
+        SETTING_ASSIGNMENTS.put("tagSyntax", TagSyntax.SQUARE_BRACKET);
+        SETTING_ASSIGNMENTS.put("namingConvention", NamingConvention.LEGACY);
         SETTING_ASSIGNMENTS.put("whitespaceStripping", false);
         SETTING_ASSIGNMENTS.put("strictSyntaxMode", false);
-        SETTING_ASSIGNMENTS.put("autoEscapingPolicy", ParsingConfiguration.DISABLE_AUTO_ESCAPING_POLICY);
+        SETTING_ASSIGNMENTS.put("autoEscapingPolicy", AutoEscapingPolicy.DISABLE);
         SETTING_ASSIGNMENTS.put("outputFormat", HTMLOutputFormat.INSTANCE);
         SETTING_ASSIGNMENTS.put("recognizeStandardFileExtensions", false);
         SETTING_ASSIGNMENTS.put("tabSize", 1);
@@ -541,7 +541,7 @@ public class TemplateConfigurationTest {
         
         {
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
-            tcb.setTagSyntax(ParsingConfiguration.SQUARE_BRACKET_TAG_SYNTAX);
+            tcb.setTagSyntax(TagSyntax.SQUARE_BRACKET);
             TemplateConfiguration tc = tcb.build();
             assertOutputWithoutAndWithTC(tc, "[#if true]y[/#if]", "[#if true]y[/#if]", "y");
             testedProps.add(Configuration.ExtendableBuilder.TAG_SYNTAX_KEY_CAMEL_CASE);
@@ -549,7 +549,7 @@ public class TemplateConfigurationTest {
         
         {
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
-            tcb.setNamingConvention(ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION);
+            tcb.setNamingConvention(NamingConvention.CAMEL_CASE);
             TemplateConfiguration tc = tcb.build();
             assertOutputWithoutAndWithTC(tc, "<#if true>y<#elseif false>n</#if>", "y", null);
             testedProps.add(Configuration.ExtendableBuilder.NAMING_CONVENTION_KEY_CAMEL_CASE);
@@ -584,7 +584,7 @@ public class TemplateConfigurationTest {
         {
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
             tcb.setOutputFormat(XMLOutputFormat.INSTANCE);
-            tcb.setAutoEscapingPolicy(ParsingConfiguration.DISABLE_AUTO_ESCAPING_POLICY);
+            tcb.setAutoEscapingPolicy(AutoEscapingPolicy.DISABLE);
             TemplateConfiguration tc = tcb.build();
             assertOutputWithoutAndWithTC(tc, "${'a&b'}", "a&b", "a&b");
             testedProps.add(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE);
@@ -789,7 +789,7 @@ public class TemplateConfigurationTest {
 
             {
                 // Force camelCase:
-                tcb.setNamingConvention(ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION);
+                tcb.setNamingConvention(NamingConvention.CAMEL_CASE);
 
                 TemplateConfiguration tc = tcb.build();
 
@@ -799,7 +799,7 @@ public class TemplateConfigurationTest {
 
             {
                 // Force legacy:
-                tcb.setNamingConvention(ParsingConfiguration.LEGACY_NAMING_CONVENTION);
+                tcb.setNamingConvention(NamingConvention.LEGACY);
 
                 TemplateConfiguration tc = tcb.build();
 

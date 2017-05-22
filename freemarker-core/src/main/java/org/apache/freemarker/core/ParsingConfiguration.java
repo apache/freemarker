@@ -21,7 +21,6 @@ package org.apache.freemarker.core;
 import java.nio.charset.Charset;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
-import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
@@ -37,27 +36,6 @@ import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
  */
 public interface ParsingConfiguration {
 
-    int AUTO_DETECT_NAMING_CONVENTION = 10;
-    int LEGACY_NAMING_CONVENTION = 11;
-    int CAMEL_CASE_NAMING_CONVENTION = 12;
-
-    int AUTO_DETECT_TAG_SYNTAX = 0;
-    int ANGLE_BRACKET_TAG_SYNTAX = 1;
-    int SQUARE_BRACKET_TAG_SYNTAX = 2;
-
-    /**
-     * Don't enable auto-escaping, regardless of what the {@link OutputFormat} is. Note that a {@code
-     * <#ftl auto_esc=true>} in the template will override this.
-     */
-    int DISABLE_AUTO_ESCAPING_POLICY = 20;
-    /**
-     * Enable auto-escaping if the output format supports it and {@link MarkupOutputFormat#isAutoEscapedByDefault()} is
-     * {@code true}.
-     */
-    int ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY = 21;
-    /** Enable auto-escaping if the {@link OutputFormat} supports it. */
-    int ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY = 22;
-
     /**
      * The template language used; this is often overridden for certain file extension with the
      * {@link Configuration#getTemplateConfigurations() templateConfigurations} setting of the {@link Configuration}.
@@ -71,25 +49,25 @@ public interface ParsingConfiguration {
      * that has no {@code #ftl} in it. The {@code tagSyntax}
      * parameter must be one of:
      * <ul>
-     *   <li>{@link #AUTO_DETECT_TAG_SYNTAX}:
+     *   <li>{@link TagSyntax#AUTO_DETECT}:
      *     use the syntax of the first FreeMarker tag (can be anything, like <tt>#list</tt>,
      *     <tt>#include</tt>, user defined, etc.)
-     *   <li>{@link #ANGLE_BRACKET_TAG_SYNTAX}:
+     *   <li>{@link TagSyntax#ANGLE_BRACKET}:
      *     use the angle bracket syntax (the normal syntax)
-     *   <li>{@link #SQUARE_BRACKET_TAG_SYNTAX}:
+     *   <li>{@link TagSyntax#SQUARE_BRACKET}:
      *     use the square bracket syntax
      * </ul>
      *
-     * <p>In FreeMarker 2.3.x {@link #ANGLE_BRACKET_TAG_SYNTAX} is the
+     * <p>In FreeMarker 2.3.x {@link TagSyntax#ANGLE_BRACKET} is the
      * default for better backward compatibility. Starting from 2.4.x {@link
-     * ParsingConfiguration#AUTO_DETECT_TAG_SYNTAX} is the default, so it's recommended to use
+     * TagSyntax#AUTO_DETECT} is the default, so it's recommended to use
      * that even for 2.3.x.
      *
      * <p>This setting is ignored for the templates that have {@code ftl} directive in
      * it. For those templates the syntax used for the {@code ftl} directive determines
      * the syntax.
      */
-    int getTagSyntax();
+    TagSyntax getTagSyntax();
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
@@ -113,14 +91,15 @@ public interface ParsingConfiguration {
      *
      * <p>
      * Which convention to use: FreeMarker prior to 2.3.23 has only supported
-     * {@link #LEGACY_NAMING_CONVENTION}, so that's how most templates and examples out there are written
+     * {@link NamingConvention#LEGACY}, so that's how most templates and examples out there are
+     * written
      * as of 2015. But as templates today are mostly written by programmers and often access Java API-s which already
-     * use camel case, {@link #CAMEL_CASE_NAMING_CONVENTION} is the recommended option for most projects.
+     * use camel case, {@link NamingConvention#CAMEL_CASE} is the recommended option for most projects.
      * However, it's no necessary to make a application-wide decision; see auto-detection below.
      *
      * <p>
      * FreeMarker will decide the naming convention automatically for each template individually when this setting is
-     * set to {@link #AUTO_DETECT_NAMING_CONVENTION} (which is the default). The naming convention of a template is
+     * set to {@link NamingConvention#AUTO_DETECT} (which is the default). The naming convention of a template is
      * decided when the first core (non-user-defined) identifier is met during parsing (not during processing) where the
      * naming convention is relevant (like for {@code s?upperCase} or {@code s?upper_case} it's relevant, but for
      * {@code s?length} it isn't). At that point, the naming convention of the template is decided, and any later core
@@ -130,15 +109,15 @@ public interface ParsingConfiguration {
      *
      * <p>
      * FreeMarker always enforces the same naming convention to be used consistently within the same template "file".
-     * Additionally, when this setting is set to non-{@link #AUTO_DETECT_NAMING_CONVENTION}, the selected naming
+     * Additionally, when this setting is set to non-{@link NamingConvention#AUTO_DETECT}, the selected naming
      * convention is enforced on all templates. Thus such a setup can be used to enforce an application-wide naming
      * convention.
      *
      * @return
-     *            One of the {@link #AUTO_DETECT_NAMING_CONVENTION} or
-     *            {@link #LEGACY_NAMING_CONVENTION} or {@link #CAMEL_CASE_NAMING_CONVENTION}.
+     *            One of the {@link NamingConvention#AUTO_DETECT} or
+     *            {@link NamingConvention#LEGACY} or {@link NamingConvention#CAMEL_CASE}.
      */
-    int getNamingConvention();
+    NamingConvention getNamingConvention();
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
@@ -175,7 +154,7 @@ public interface ParsingConfiguration {
     /**
      * See {@link Configuration#getAutoEscapingPolicy()}.
      */
-    int getAutoEscapingPolicy();
+    AutoEscapingPolicy getAutoEscapingPolicy();
 
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
@@ -225,12 +204,12 @@ public interface ParsingConfiguration {
      *       (i.e., {@link HTMLOutputFormat#INSTANCE}, unless the {@code "HTML"} name is overridden by
      *       the {@link Configuration#getRegisteredCustomOutputFormats registeredOutputFormats} setting) and
      *       the {@link #getAutoEscapingPolicy() autoEscapingPolicy} setting to
-     *       {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY}.
+     *       {@link AutoEscapingPolicy#ENABLE_IF_DEFAULT}.
      *   <li>{@code ftlx}: Sets the {@link #getOutputFormat() outputFormat} setting to
      *       {@code "XML"} (i.e., {@link XMLOutputFormat#INSTANCE}, unless the {@code "XML"} name is overridden by
      *       the {@link Configuration#getRegisteredCustomOutputFormats registeredOutputFormats} setting) and
      *       the {@link #getAutoEscapingPolicy() autoEscapingPolicy} setting to
-     *       {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY}.
+     *       {@link AutoEscapingPolicy#ENABLE_IF_DEFAULT}.
      * </ul>
      *
      * <p>These file extensions are not case sensitive. The file extension is the part after the last dot in the source

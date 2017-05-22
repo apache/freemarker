@@ -18,7 +18,7 @@
  */
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core.ParsingConfiguration.*;
+import static org.apache.freemarker.core.AutoEscapingPolicy.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -189,7 +189,7 @@ public class OutputFormatTest extends TemplateTest {
         ConditionalTemplateConfigurationFactory tcfNoAutoEsc = new ConditionalTemplateConfigurationFactory(
                 new FileNameGlobMatcher("t.*"),
                 new TemplateConfiguration.Builder()
-                        .autoEscapingPolicy(DISABLE_AUTO_ESCAPING_POLICY)
+                        .autoEscapingPolicy(DISABLE)
                         .build());
 
         {
@@ -289,34 +289,34 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("tWithHeaderTrue", "<#ftl autoEsc=true>${'a&b'}");
         
         TestConfigurationBuilder cfgB = createDefaultConfigurationBuilder().outputFormat(XMLOutputFormat.INSTANCE);
-        assertEquals(ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, cfgB.getAutoEscapingPolicy());
+        assertEquals(ENABLE_IF_DEFAULT, cfgB.getAutoEscapingPolicy());
 
         for (boolean cfgAutoEscaping : new boolean[] { true, false }) {
             if (!cfgAutoEscaping) {
-                cfgB.setAutoEscapingPolicy(DISABLE_AUTO_ESCAPING_POLICY);
+                cfgB.setAutoEscapingPolicy(DISABLE);
             }
             setConfiguration(cfgB.build());
 
             {
                 Template t = getConfiguration().getTemplate("t");
                 if (cfgAutoEscaping) {
-                    assertEquals(ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, t.getAutoEscapingPolicy());
+                    assertEquals(ENABLE_IF_DEFAULT, t.getAutoEscapingPolicy());
                     assertOutput(t, "a&amp;b");
                 } else {
-                    assertEquals(DISABLE_AUTO_ESCAPING_POLICY, t.getAutoEscapingPolicy());
+                    assertEquals(DISABLE, t.getAutoEscapingPolicy());
                     assertOutput(t, "a&b");
                 }
             }
             
             {
                 Template t = getConfiguration().getTemplate("tWithHeaderFalse");
-                assertEquals(DISABLE_AUTO_ESCAPING_POLICY, t.getAutoEscapingPolicy());
+                assertEquals(DISABLE, t.getAutoEscapingPolicy());
                 assertOutput(t, "a&b");
             }
             
             {
                 Template t = getConfiguration().getTemplate("tWithHeaderTrue");
-                assertEquals(ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY, t.getAutoEscapingPolicy());
+                assertEquals(ENABLE_IF_SUPPORTED, t.getAutoEscapingPolicy());
                 assertOutput(t, "a&amp;b");
             }
 
@@ -364,7 +364,7 @@ public class OutputFormatTest extends TemplateTest {
                 assertOutput(commonAutoEscFtl, "&amp;");
             } else {
                 setConfiguration(createDefaultConfigurationBuilder()
-                        .autoEscapingPolicy(DISABLE_AUTO_ESCAPING_POLICY)
+                        .autoEscapingPolicy(DISABLE)
                         .build());
                 assertOutput(commonAutoEscFtl, "&");
             }
@@ -781,19 +781,19 @@ public class OutputFormatTest extends TemplateTest {
         TestConfigurationBuilder cfgB = createDefaultConfigurationBuilder();
         cfgB.setRegisteredCustomOutputFormats(ImmutableList.<OutputFormat>of(
                 SeldomEscapedOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE));
-        assertEquals(ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, cfgB.getAutoEscapingPolicy());
+        assertEquals(ENABLE_IF_DEFAULT, cfgB.getAutoEscapingPolicy());
         
         String commonFTL = "${'.'} ${.autoEsc?c}";
         String notEsced = ". false";
         String esced = "\\. true";
 
-        for (int autoEscPolicy : new int[] {
-                ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY,
-                ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY,
-                DISABLE_AUTO_ESCAPING_POLICY }) {
+        for (AutoEscapingPolicy autoEscPolicy : new AutoEscapingPolicy[] {
+                ENABLE_IF_DEFAULT,
+                ENABLE_IF_SUPPORTED,
+                DISABLE }) {
             cfgB.setAutoEscapingPolicy(autoEscPolicy);
             
-            String sExpted = autoEscPolicy == ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY ? esced : notEsced;
+            String sExpted = autoEscPolicy == ENABLE_IF_SUPPORTED ? esced : notEsced;
             cfgB.setOutputFormat(SeldomEscapedOutputFormat.INSTANCE);
             setConfiguration(cfgB.build());
             assertOutput(commonFTL, sExpted);
@@ -802,7 +802,7 @@ public class OutputFormatTest extends TemplateTest {
             assertOutput("<#ftl outputFormat='seldomEscaped'>" + commonFTL, sExpted);
             assertOutput("<#outputFormat 'seldomEscaped'>" + commonFTL + "</#outputFormat>", sExpted);
             
-            String dExpted = autoEscPolicy == DISABLE_AUTO_ESCAPING_POLICY ? notEsced : esced;
+            String dExpted = autoEscPolicy == DISABLE ? notEsced : esced;
             cfgB.setOutputFormat(DummyOutputFormat.INSTANCE);
             setConfiguration(cfgB.build());
             assertOutput(commonFTL, dExpted);

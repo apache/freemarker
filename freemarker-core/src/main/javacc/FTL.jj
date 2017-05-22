@@ -78,7 +78,7 @@ public class FMParser {
     private boolean stripWhitespace, stripText;
     private int incompatibleImprovements;
     private OutputFormat outputFormat;
-    private int autoEscapingPolicy;
+    private AutoEscapingPolicy autoEscapingPolicy;
     private boolean autoEscaping;
     private ParsingConfiguration pCfg;
     private InputStream streamToUnmarkWhenEncEstabd;
@@ -96,7 +96,7 @@ public class FMParser {
     private int mixedContentNesting; // for stripText
 
     FMParser(Template template, Reader reader,
-            ParsingConfiguration pCfg, OutputFormat outputFormat, Integer autoEscapingPolicy,
+            ParsingConfiguration pCfg, OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy,
             InputStream streamToUnmarkWhenEncEstabd) {
         this(template, true, readerToTokenManager(reader, pCfg),
                 pCfg, outputFormat, autoEscapingPolicy,
@@ -110,7 +110,7 @@ public class FMParser {
     }
 
     FMParser(Template template, boolean newTemplate, FMParserTokenManager tkMan,
-            ParsingConfiguration pCfg, OutputFormat contextOutputFormat, Integer contextAutoEscapingPolicy,
+            ParsingConfiguration pCfg, OutputFormat contextOutputFormat, AutoEscapingPolicy contextAutoEscapingPolicy,
     		InputStream streamToUnmarkWhenEncEstabd) {
         this(tkMan);
 
@@ -133,39 +133,30 @@ public class FMParser {
                     : outputFormatFromExt != null ? outputFormatFromExt
                     : pCfg.getOutputFormat();
             autoEscapingPolicy = contextAutoEscapingPolicy != null ? contextAutoEscapingPolicy
-                    : outputFormatFromExt != null ? Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY
+                    : outputFormatFromExt != null ? AutoEscapingPolicy.ENABLE_IF_DEFAULT
                     : pCfg.getAutoEscapingPolicy();
         }
         recalculateAutoEscapingField();
 
         token_source.setParser(this);
 
-        int tagSyntax = pCfg.getTagSyntax();
+        TagSyntax tagSyntax = pCfg.getTagSyntax();
         switch (tagSyntax) {
-        case Configuration.AUTO_DETECT_TAG_SYNTAX:
+        case AUTO_DETECT:
             token_source.autodetectTagSyntax = true;
             break;
-        case Configuration.ANGLE_BRACKET_TAG_SYNTAX:
+        case ANGLE_BRACKET:
             token_source.squBracTagSyntax = false;
             break;
-        case Configuration.SQUARE_BRACKET_TAG_SYNTAX:
+        case SQUARE_BRACKET:
             token_source.squBracTagSyntax = true;
             break;
         default:
-            throw new IllegalArgumentException("Illegal argument for tagSyntax: " + tagSyntax);
+            throw new BugException("Unsupported tagSyntax: " + tagSyntax);
         }
 
-        int namingConvention = pCfg.getNamingConvention();
-        switch (namingConvention) {
-        case Configuration.AUTO_DETECT_NAMING_CONVENTION:
-        case Configuration.CAMEL_CASE_NAMING_CONVENTION:
-        case Configuration.LEGACY_NAMING_CONVENTION:
-            token_source.initialNamingConvention = namingConvention;
-            token_source.namingConvention = namingConvention;
-            break;
-        default:
-            throw new IllegalArgumentException("Illegal argument for namingConvention: " + namingConvention);
-        }
+        token_source.initialNamingConvention = pCfg.getNamingConvention();
+        token_source.namingConvention = token_source.initialNamingConvention;
 
         this.stripWhitespace = pCfg.getWhitespaceStripping();
 
@@ -233,14 +224,14 @@ public class FMParser {
      */
     private void recalculateAutoEscapingField() {
         if (outputFormat instanceof MarkupOutputFormat) {
-            if (autoEscapingPolicy == Configuration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY) {
+            if (autoEscapingPolicy == AutoEscapingPolicy.ENABLE_IF_DEFAULT) {
                 autoEscaping = ((MarkupOutputFormat) outputFormat).isAutoEscapedByDefault();
-            } else if (autoEscapingPolicy == Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY) {
+            } else if (autoEscapingPolicy == AutoEscapingPolicy.ENABLE_IF_SUPPORTED) {
                 autoEscaping = true;
-            } else if (autoEscapingPolicy == Configuration.DISABLE_AUTO_ESCAPING_POLICY) {
+            } else if (autoEscapingPolicy == AutoEscapingPolicy.DISABLE) {
                 autoEscaping = false;
             } else {
-                throw new IllegalStateException("Unhandled autoEscaping enum: " + autoEscapingPolicy);
+                throw new BugException("Unhandled autoEscaping enum: " + autoEscapingPolicy);
             }
         } else {
             autoEscaping = false;
@@ -254,10 +245,8 @@ public class FMParser {
     /**
      * Don't use it, unless you are developing FreeMarker itself.
      */
-    public int _getLastTagSyntax() {
-        return token_source.squBracTagSyntax
-                ? Configuration.SQUARE_BRACKET_TAG_SYNTAX
-                : Configuration.ANGLE_BRACKET_TAG_SYNTAX;
+    public TagSyntax _getLastTagSyntax() {
+        return token_source.squBracTagSyntax ? TagSyntax.SQUARE_BRACKET : TagSyntax.ANGLE_BRACKET;
     }
     
     /**
@@ -265,7 +254,7 @@ public class FMParser {
      * The naming convention used by this template; if it couldn't be detected so far, it will be the most probable one.
      * This could be used for formatting error messages, but not for anything serious.
      */
-    public int _getLastNamingConvention() {
+    public NamingConvention _getLastNamingConvention() {
         return token_source.namingConvention;
     }
 
@@ -501,8 +490,8 @@ TOKEN_MGR_DECLS:
             autodetectTagSyntax,
             directiveSyntaxEstablished,
             inInvocation;
-    int initialNamingConvention;
-    int namingConvention;
+    NamingConvention initialNamingConvention;
+    NamingConvention namingConvention;
     Token namingConventionEstabilisher;
     int incompatibleImprovements;
 
@@ -514,7 +503,7 @@ TOKEN_MGR_DECLS:
      * This method handles tag syntax ('<' VS '['), and also participates in naming convention detection.
      * If you update this logic, take a look at the UNKNOWN_DIRECTIVE token too. 
      */
-    private void handleTagSyntaxAndSwitch(Token tok, int tokenNamingConvention, int newLexState) {
+    private void handleTagSyntaxAndSwitch(Token tok, NamingConvention tokenNamingConvention, int newLexState) {
         final String image = tok.image;
         
         char firstChar = image.charAt(0);
@@ -537,16 +526,16 @@ TOKEN_MGR_DECLS:
      * Used for tags whose name isn't affected by naming convention.
      */
     private void handleTagSyntaxAndSwitch(Token tok, int newLexState) {
-        handleTagSyntaxAndSwitch(tok, Configuration.AUTO_DETECT_NAMING_CONVENTION, newLexState);
+        handleTagSyntaxAndSwitch(tok, NamingConvention.AUTO_DETECT, newLexState);
     }
 
     void checkNamingConvention(Token tok) {
         checkNamingConvention(tok, _StringUtil.getIdentifierNamingConvention(tok.image)); 
     }
     
-    void checkNamingConvention(Token tok, int tokenNamingConvention) {
-        if (tokenNamingConvention != Configuration.AUTO_DETECT_NAMING_CONVENTION) {
-	        if (namingConvention == Configuration.AUTO_DETECT_NAMING_CONVENTION) {
+    void checkNamingConvention(Token tok, NamingConvention tokenNamingConvention) {
+        if (tokenNamingConvention != NamingConvention.AUTO_DETECT) {
+	        if (namingConvention == NamingConvention.AUTO_DETECT) {
 	            namingConvention = tokenNamingConvention;
 	            namingConventionEstabilisher = tok;
 	        } else if (namingConvention != tokenNamingConvention) {
@@ -559,12 +548,12 @@ TOKEN_MGR_DECLS:
         return new TokenMgrError(
                 "Naming convention mismatch. "
                 + "Identifiers that are part of the template language (not the user specified ones) "
-                + (initialNamingConvention == Configuration.AUTO_DETECT_NAMING_CONVENTION
+                + (initialNamingConvention == NamingConvention.AUTO_DETECT
                     ? "must consistently use the same naming convention within the same template. This template uses "
                     : "must use the configured naming convention, which is the ")
-                + (namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION
+                + (namingConvention == NamingConvention.CAMEL_CASE
                             ? "camel case naming convention (like: exampleName) "
-                            : (namingConvention == Configuration.LEGACY_NAMING_CONVENTION
+                            : (namingConvention == NamingConvention.LEGACY
                                     ? "legacy naming convention (directive (tag) names are like examplename, " 
                                       + "everything else is like example_name) "
                                     : "??? (internal error)"
@@ -587,9 +576,9 @@ TOKEN_MGR_DECLS:
      * @param charIdxInName
      *         The index of the deciding character relatively to the first letter of the name.
      */
-    private static int getTagNamingConvention(Token tok, int charIdxInName) {
+    private static NamingConvention getTagNamingConvention(Token tok, int charIdxInName) {
         return _StringUtil.isUpperUSASCII(getTagNameCharAt(tok, charIdxInName))
-                ? Configuration.CAMEL_CASE_NAMING_CONVENTION : Configuration.LEGACY_NAMING_CONVENTION;
+                ? NamingConvention.CAMEL_CASE : NamingConvention.LEGACY;
     }
 
     static char getTagNameCharAt(Token tok, int charIdxInName) {
@@ -803,9 +792,9 @@ TOKEN:
     <TERSE_COMMENT : ("<" | "[") "#--" > { noparseTag = "-->"; handleTagSyntaxAndSwitch(matchedToken, NO_PARSE); }
     |
     <NOPARSE: <START_TAG> "no" ("p" | "P") "arse" <CLOSE_TAG1>> {
-        int tagNamingConvention = getTagNamingConvention(matchedToken, 2);
+        NamingConvention tagNamingConvention = getTagNamingConvention(matchedToken, 2);
         handleTagSyntaxAndSwitch(matchedToken, tagNamingConvention, NO_PARSE);
-        noparseTag = tagNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION ? "noParse" : "noparse";
+        noparseTag = tagNamingConvention == NamingConvention.CAMEL_CASE ? "noParse" : "noparse";
     }
     |
     <END_IF : <END_TAG> "if" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
@@ -3503,14 +3492,14 @@ ASTDirAutoEsc AutoEsc() :
 {
     Token start, end;
     TemplateElements children;
-    int lastAutoEscapingPolicy;
+    AutoEscapingPolicy lastAutoEscapingPolicy;
 }
 {
     start = <AUTOESC>
     {
         checkCurrentOutputFormatCanEscape(start);
         lastAutoEscapingPolicy = autoEscapingPolicy;
-        autoEscapingPolicy = Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY;
+        autoEscapingPolicy = AutoEscapingPolicy.ENABLE_IF_SUPPORTED;
         recalculateAutoEscapingField();
     }
     children = MixedContentElements()
@@ -3529,13 +3518,13 @@ ASTDirNoAutoEsc NoAutoEsc() :
 {
     Token start, end;
     TemplateElements children;
-    int lastAutoEscapingPolicy;
+    AutoEscapingPolicy lastAutoEscapingPolicy;
 }
 {
     start = <NOAUTOESC>
     {
         lastAutoEscapingPolicy = autoEscapingPolicy;
-        autoEscapingPolicy = Configuration.DISABLE_AUTO_ESCAPING_POLICY;
+        autoEscapingPolicy = AutoEscapingPolicy.DISABLE;
         recalculateAutoEscapingField();
     }
     children = MixedContentElements()
@@ -3923,9 +3912,9 @@ void HeaderElement() :
                         } else if (ks.equalsIgnoreCase("auto_esc") || ks.equals("autoEsc")) {
                             if (getBoolean(exp, false)) {
                                 autoEscRequester = key;
-                                autoEscapingPolicy = Configuration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY;
+                                autoEscapingPolicy = AutoEscapingPolicy.ENABLE_IF_SUPPORTED;
                             } else {
-                                autoEscapingPolicy = Configuration.DISABLE_AUTO_ESCAPING_POLICY;
+                                autoEscapingPolicy = AutoEscapingPolicy.DISABLE;
                             }
                             recalculateAutoEscapingField();
 
@@ -3993,7 +3982,7 @@ void HeaderElement() :
 	                        } else if (ks.equals("xmlns")) {
 	                            // [2.4] If camel case will be the default, update this
                                 correctName
-                                        = token_source.namingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION
+                                        = token_source.namingConvention == NamingConvention.CAMEL_CASE
                                                 ? "nsPrefixes" : "ns_prefixes";
                             } else if (ks.equals("auto_escape") || ks.equals("auto_escaping") || ks.equals("autoesc")) {
                                 correctName = "auto_esc";

@@ -74,6 +74,7 @@ import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameForma
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.MruCacheStorage;
 import org.apache.freemarker.core.templateresolver.impl.SoftCacheStorage;
+import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.CaptureOutput;
 import org.apache.freemarker.core.util.CommonBuilder;
 import org.apache.freemarker.core.util.HtmlEscape;
@@ -242,10 +243,10 @@ public final class Configuration
     // ParsingConfiguration settings:
 
     private final TemplateLanguage templateLanguage;
-    private final int tagSyntax;
-    private final int namingConvention;
+    private final TagSyntax tagSyntax;
+    private final NamingConvention namingConvention;
     private final boolean whitespaceStripping;
-    private final int autoEscapingPolicy;
+    private final AutoEscapingPolicy autoEscapingPolicy;
     private final OutputFormat outputFormat;
     private final Boolean recognizeStandardFileExtensions;
     private final int tabSize;
@@ -581,7 +582,7 @@ public final class Configuration
 
     /**
      * When auto-escaping should be enabled depending on the current {@linkplain OutputFormat output format};
-     * default is {@link ParsingConfiguration#ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY}. Note that the default output
+     * default is {@link AutoEscapingPolicy#ENABLE_IF_DEFAULT}. Note that the default output
      * format, {@link UndefinedOutputFormat}, is a non-escaping format, so there auto-escaping will be off.
      * Note that the templates can turn auto-escaping on/off locally with directives like {@code <#ftl auto_esc=...>},
      * which will ignore the policy.
@@ -614,13 +615,13 @@ public final class Configuration
      * {@linkplain #getTemplateConfigurations() template configurations setting}. This setting is also overridden by
      * the standard file extensions; see them at {@link #getRecognizeStandardFileExtensions()}.
      *
-     * @see Configuration.Builder#setAutoEscapingPolicy(int)
-     * @see TemplateConfiguration.Builder#setAutoEscapingPolicy(int)
+     * @see Configuration.Builder#setAutoEscapingPolicy(AutoEscapingPolicy)
+     * @see TemplateConfiguration.Builder#setAutoEscapingPolicy(AutoEscapingPolicy)
      * @see Configuration.Builder#setOutputFormat(OutputFormat)
      * @see TemplateConfiguration.Builder#setOutputFormat(OutputFormat)
      */
     @Override
-    public int getAutoEscapingPolicy() {
+    public AutoEscapingPolicy getAutoEscapingPolicy() {
         return autoEscapingPolicy;
     }
 
@@ -779,7 +780,7 @@ public final class Configuration
     }
 
     @Override
-    public int getTagSyntax() {
+    public TagSyntax getTagSyntax() {
         return tagSyntax;
     }
 
@@ -795,20 +796,8 @@ public final class Configuration
         return true;
     }
 
-    // [FM3] Use enum; won't be needed
-    static void validateNamingConventionValue(int namingConvention) {
-        if (namingConvention != ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION
-                && namingConvention != ParsingConfiguration.LEGACY_NAMING_CONVENTION
-                && namingConvention != ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION) {
-            throw new IllegalArgumentException("\"naming_convention\" can only be set to one of these: "
-                    + "Configuration.AUTO_DETECT_NAMING_CONVENTION, "
-                    + "or Configuration.LEGACY_NAMING_CONVENTION"
-                    + "or Configuration.CAMEL_CASE_NAMING_CONVENTION");
-        }
-    }
-
     @Override
-    public int getNamingConvention() {
+    public NamingConvention getNamingConvention() {
         return namingConvention;
     }
 
@@ -1466,7 +1455,7 @@ public final class Configuration
     }
     
     /**
-     * Same as {@link #getSupportedBuiltInNames(int)} with argument {@link #getNamingConvention()}.
+     * Same as {@link #getSupportedBuiltInNames(NamingConvention)} with argument {@link #getNamingConvention()}.
      * 
      * @since 2.3.20
      */
@@ -1480,30 +1469,31 @@ public final class Configuration
      * to be future-proof, it's an instance method. 
      * 
      * @param namingConvention
-     *            One of {@link ParsingConfiguration#AUTO_DETECT_NAMING_CONVENTION},
-     *            {@link ParsingConfiguration#LEGACY_NAMING_CONVENTION}, and
-     *            {@link ParsingConfiguration#CAMEL_CASE_NAMING_CONVENTION}. If it's
-     *            {@link ParsingConfiguration#AUTO_DETECT_NAMING_CONVENTION} then the union
+     *            One of {@link NamingConvention#AUTO_DETECT},
+     *            {@link NamingConvention#LEGACY}, and
+     *            {@link NamingConvention#CAMEL_CASE}. If it's
+     *            {@link NamingConvention#AUTO_DETECT} then the union
      *            of the names in all the naming conventions is returned.
      * 
      * @since 2.3.24
      */
-    public Set<String> getSupportedBuiltInNames(int namingConvention) {
+    public Set<String> getSupportedBuiltInNames(NamingConvention namingConvention) {
         Set<String> names;
-        if (namingConvention == ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION) {
+        if (namingConvention == NamingConvention.AUTO_DETECT) {
             names = ASTExpBuiltIn.BUILT_INS_BY_NAME.keySet();
-        } else if (namingConvention == ParsingConfiguration.LEGACY_NAMING_CONVENTION) {
+        } else if (namingConvention == NamingConvention.LEGACY) {
             names = ASTExpBuiltIn.SNAKE_CASE_NAMES;
-        } else if (namingConvention == ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION) {
+        } else if (namingConvention == NamingConvention.CAMEL_CASE) {
             names = ASTExpBuiltIn.CAMEL_CASE_NAMES;
         } else {
-            throw new IllegalArgumentException("Unsupported naming convention constant: " + namingConvention);
+            throw new BugException("Unsupported naming convention constant: " + namingConvention);
         }
         return Collections.unmodifiableSet(names);
     }
     
     /**
-     * Same as {@link #getSupportedBuiltInDirectiveNames(int)} with argument {@link #getNamingConvention()}.
+     * Same as {@link #getSupportedBuiltInDirectiveNames(NamingConvention)} with argument
+     * {@link #getNamingConvention()}.
      * 
      * @since 2.3.21
      */
@@ -1516,23 +1506,23 @@ public final class Configuration
      * <tt>&lt;#directiveName ...&gt;</tt>.
      * 
      * @param namingConvention
-     *            One of {@link ParsingConfiguration#AUTO_DETECT_NAMING_CONVENTION},
-     *            {@link ParsingConfiguration#LEGACY_NAMING_CONVENTION}, and
-     *            {@link ParsingConfiguration#CAMEL_CASE_NAMING_CONVENTION}. If it's
-     *            {@link ParsingConfiguration#AUTO_DETECT_NAMING_CONVENTION} then the union
+     *            One of {@link NamingConvention#AUTO_DETECT},
+     *            {@link NamingConvention#LEGACY}, and
+     *            {@link NamingConvention#CAMEL_CASE}. If it's
+     *            {@link NamingConvention#AUTO_DETECT} then the union
      *            of the names in all the naming conventions is returned. 
      * 
      * @since 2.3.24
      */
-    public Set<String> getSupportedBuiltInDirectiveNames(int namingConvention) {
-        if (namingConvention == AUTO_DETECT_NAMING_CONVENTION) {
+    public Set<String> getSupportedBuiltInDirectiveNames(NamingConvention namingConvention) {
+        if (namingConvention == NamingConvention.AUTO_DETECT) {
             return ASTDirective.ALL_BUILT_IN_DIRECTIVE_NAMES;
-        } else if (namingConvention == LEGACY_NAMING_CONVENTION) {
+        } else if (namingConvention == NamingConvention.LEGACY) {
             return ASTDirective.LEGACY_BUILT_IN_DIRECTIVE_NAMES;
-        } else if (namingConvention == CAMEL_CASE_NAMING_CONVENTION) {
+        } else if (namingConvention == NamingConvention.CAMEL_CASE) {
             return ASTDirective.CAMEL_CASE_BUILT_IN_DIRECTIVE_NAMES;
         } else {
-            throw new IllegalArgumentException("Unsupported naming convention constant: " + namingConvention);
+            throw new BugException("Unsupported naming convention constant: " + namingConvention);
         }
     }
     
@@ -1732,11 +1722,11 @@ public final class Configuration
                     setWhitespaceStripping(_StringUtil.getYesNo(value));
                 } else if (AUTO_ESCAPING_POLICY_KEY_SNAKE_CASE.equals(name) || AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE.equals(name)) {
                     if ("enable_if_default".equals(value) || "enableIfDefault".equals(value)) {
-                        setAutoEscapingPolicy(ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY);
+                        setAutoEscapingPolicy(AutoEscapingPolicy.ENABLE_IF_DEFAULT);
                     } else if ("enable_if_supported".equals(value) || "enableIfSupported".equals(value)) {
-                        setAutoEscapingPolicy(ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY);
+                        setAutoEscapingPolicy(AutoEscapingPolicy.ENABLE_IF_SUPPORTED);
                     } else if ("disable".equals(value)) {
-                        setAutoEscapingPolicy(DISABLE_AUTO_ESCAPING_POLICY);
+                        setAutoEscapingPolicy(AutoEscapingPolicy.DISABLE);
                     } else {
                         throw new ConfigurationSettingValueException( name, value,
                                 "No such predefined auto escaping policy name");
@@ -1860,21 +1850,21 @@ public final class Configuration
                     }
                 } else if (TAG_SYNTAX_KEY_SNAKE_CASE.equals(name) || TAG_SYNTAX_KEY_CAMEL_CASE.equals(name)) {
                     if ("auto_detect".equals(value) || "autoDetect".equals(value)) {
-                        setTagSyntax(AUTO_DETECT_TAG_SYNTAX);
+                        setTagSyntax(TagSyntax.AUTO_DETECT);
                     } else if ("angle_bracket".equals(value) || "angleBracket".equals(value)) {
-                        setTagSyntax(ANGLE_BRACKET_TAG_SYNTAX);
+                        setTagSyntax(TagSyntax.ANGLE_BRACKET);
                     } else if ("square_bracket".equals(value) || "squareBracket".equals(value)) {
-                        setTagSyntax(SQUARE_BRACKET_TAG_SYNTAX);
+                        setTagSyntax(TagSyntax.SQUARE_BRACKET);
                     } else {
                         throw new ConfigurationSettingValueException(name, value, "No such predefined tag syntax name");
                     }
                 } else if (NAMING_CONVENTION_KEY_SNAKE_CASE.equals(name) || NAMING_CONVENTION_KEY_CAMEL_CASE.equals(name)) {
                     if ("auto_detect".equals(value) || "autoDetect".equals(value)) {
-                        setNamingConvention(AUTO_DETECT_NAMING_CONVENTION);
+                        setNamingConvention(NamingConvention.AUTO_DETECT);
                     } else if ("legacy".equals(value)) {
-                        setNamingConvention(LEGACY_NAMING_CONVENTION);
+                        setNamingConvention(NamingConvention.LEGACY);
                     } else if ("camel_case".equals(value) || "camelCase".equals(value)) {
-                        setNamingConvention(CAMEL_CASE_NAMING_CONVENTION);
+                        setNamingConvention(NamingConvention.CAMEL_CASE);
                     } else {
                         throw new ConfigurationSettingValueException(name, value,
                                 "No such predefined naming convention name.");
@@ -2339,8 +2329,8 @@ public final class Configuration
         }
 
         @Override
-        protected int getDefaultTagSyntax() {
-            return ANGLE_BRACKET_TAG_SYNTAX;
+        protected TagSyntax getDefaultTagSyntax() {
+            return TagSyntax.ANGLE_BRACKET;
         }
 
         @Override
@@ -2349,8 +2339,8 @@ public final class Configuration
         }
 
         @Override
-        protected int getDefaultNamingConvention() {
-            return AUTO_DETECT_NAMING_CONVENTION;
+        protected NamingConvention getDefaultNamingConvention() {
+            return NamingConvention.AUTO_DETECT;
         }
 
         @Override
@@ -2413,8 +2403,8 @@ public final class Configuration
         }
 
         @Override
-        protected int getDefaultAutoEscapingPolicy() {
-            return ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY;
+        protected AutoEscapingPolicy getDefaultAutoEscapingPolicy() {
+            return AutoEscapingPolicy.ENABLE_IF_DEFAULT;
         }
 
         @Override

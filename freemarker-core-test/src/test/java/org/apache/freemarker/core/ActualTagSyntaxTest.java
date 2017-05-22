@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core.ParsingConfiguration.*;
+import static org.apache.freemarker.core.TagSyntax.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -31,35 +31,35 @@ public class ActualTagSyntaxTest {
 
     @Test
     public void testWithFtlHeader() throws IOException {
-        testWithFtlHeader(AUTO_DETECT_TAG_SYNTAX);
-        testWithFtlHeader(ANGLE_BRACKET_TAG_SYNTAX);
-        testWithFtlHeader(SQUARE_BRACKET_TAG_SYNTAX);
+        testWithFtlHeader(AUTO_DETECT);
+        testWithFtlHeader(ANGLE_BRACKET);
+        testWithFtlHeader(SQUARE_BRACKET);
     }
     
-    private void testWithFtlHeader(int cfgTagSyntax) throws IOException {
-        assertEquals(getActualTagSyntax("[#ftl]foo", cfgTagSyntax), SQUARE_BRACKET_TAG_SYNTAX);
-        assertEquals(getActualTagSyntax("<#ftl>foo", cfgTagSyntax), ANGLE_BRACKET_TAG_SYNTAX);
+    private void testWithFtlHeader(TagSyntax cfgTagSyntax) throws IOException {
+        assertEquals(getActualTagSyntax("[#ftl]foo", cfgTagSyntax), SQUARE_BRACKET);
+        assertEquals(getActualTagSyntax("<#ftl>foo", cfgTagSyntax), ANGLE_BRACKET);
     }
     
     @Test
     public void testUndecidable() throws IOException {
-        assertEquals(getActualTagSyntax("foo", AUTO_DETECT_TAG_SYNTAX), ANGLE_BRACKET_TAG_SYNTAX);
-        assertEquals(getActualTagSyntax("foo", ANGLE_BRACKET_TAG_SYNTAX), ANGLE_BRACKET_TAG_SYNTAX);
-        assertEquals(getActualTagSyntax("foo", SQUARE_BRACKET_TAG_SYNTAX), SQUARE_BRACKET_TAG_SYNTAX);
+        assertEquals(getActualTagSyntax("foo", AUTO_DETECT), ANGLE_BRACKET);
+        assertEquals(getActualTagSyntax("foo", ANGLE_BRACKET), ANGLE_BRACKET);
+        assertEquals(getActualTagSyntax("foo", SQUARE_BRACKET), SQUARE_BRACKET);
     }
 
     @Test
     public void testDecidableWithoutFtlHeader() throws IOException {
-        assertEquals(getActualTagSyntax("foo<#if true></#if>", AUTO_DETECT_TAG_SYNTAX), ANGLE_BRACKET_TAG_SYNTAX);
-        assertEquals(getActualTagSyntax("foo<#if true></#if>", ANGLE_BRACKET_TAG_SYNTAX), ANGLE_BRACKET_TAG_SYNTAX);
-        assertEquals(getActualTagSyntax("foo<#if true></#if>", SQUARE_BRACKET_TAG_SYNTAX), SQUARE_BRACKET_TAG_SYNTAX);
+        assertEquals(getActualTagSyntax("foo<#if true></#if>", AUTO_DETECT), ANGLE_BRACKET);
+        assertEquals(getActualTagSyntax("foo<#if true></#if>", ANGLE_BRACKET), ANGLE_BRACKET);
+        assertEquals(getActualTagSyntax("foo<#if true></#if>", SQUARE_BRACKET), SQUARE_BRACKET);
         
-        assertEquals(getActualTagSyntax("foo[#if true][/#if]", AUTO_DETECT_TAG_SYNTAX), SQUARE_BRACKET_TAG_SYNTAX);
-        assertEquals(getActualTagSyntax("foo[#if true][/#if]", ANGLE_BRACKET_TAG_SYNTAX), ANGLE_BRACKET_TAG_SYNTAX);
-        assertEquals(getActualTagSyntax("foo[#if true][/#if]", SQUARE_BRACKET_TAG_SYNTAX), SQUARE_BRACKET_TAG_SYNTAX);
+        assertEquals(getActualTagSyntax("foo[#if true][/#if]", AUTO_DETECT), SQUARE_BRACKET);
+        assertEquals(getActualTagSyntax("foo[#if true][/#if]", ANGLE_BRACKET), ANGLE_BRACKET);
+        assertEquals(getActualTagSyntax("foo[#if true][/#if]", SQUARE_BRACKET), SQUARE_BRACKET);
     }
     
-    private int getActualTagSyntax(String ftl, int cfgTagSyntax) throws IOException {
+    private TagSyntax getActualTagSyntax(String ftl, TagSyntax cfgTagSyntax) throws IOException {
         return new Template(
                 null, ftl,
                 new TestConfigurationBuilder().tagSyntax(cfgTagSyntax).build()).getActualTagSyntax();

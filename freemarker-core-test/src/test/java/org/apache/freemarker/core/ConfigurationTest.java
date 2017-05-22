@@ -547,38 +547,31 @@ public class ConfigurationTest extends TestCase {
     public void testSetAutoEscaping() throws Exception {
        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
     
-       assertEquals(ParsingConfiguration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, cfgB.getAutoEscapingPolicy());
+       assertEquals(AutoEscapingPolicy.ENABLE_IF_DEFAULT, cfgB.getAutoEscapingPolicy());
 
-       cfgB.setAutoEscapingPolicy(ParsingConfiguration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY);
-       assertEquals(ParsingConfiguration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY, cfgB.getAutoEscapingPolicy());
+       cfgB.setAutoEscapingPolicy(AutoEscapingPolicy.ENABLE_IF_SUPPORTED);
+       assertEquals(AutoEscapingPolicy.ENABLE_IF_SUPPORTED, cfgB.getAutoEscapingPolicy());
 
-       cfgB.setAutoEscapingPolicy(ParsingConfiguration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY);
-       assertEquals(ParsingConfiguration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, cfgB.getAutoEscapingPolicy());
+       cfgB.setAutoEscapingPolicy(AutoEscapingPolicy.ENABLE_IF_DEFAULT);
+       assertEquals(AutoEscapingPolicy.ENABLE_IF_DEFAULT, cfgB.getAutoEscapingPolicy());
 
-       cfgB.setAutoEscapingPolicy(ParsingConfiguration.DISABLE_AUTO_ESCAPING_POLICY);
-       assertEquals(ParsingConfiguration.DISABLE_AUTO_ESCAPING_POLICY, cfgB.getAutoEscapingPolicy());
+       cfgB.setAutoEscapingPolicy(AutoEscapingPolicy.DISABLE);
+       assertEquals(AutoEscapingPolicy.DISABLE, cfgB.getAutoEscapingPolicy());
        
        cfgB.setSetting(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enableIfSupported");
-       assertEquals(ParsingConfiguration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY, cfgB.getAutoEscapingPolicy());
+       assertEquals(AutoEscapingPolicy.ENABLE_IF_SUPPORTED, cfgB.getAutoEscapingPolicy());
 
        cfgB.setSetting(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enable_if_supported");
-       assertEquals(ParsingConfiguration.ENABLE_IF_SUPPORTED_AUTO_ESCAPING_POLICY, cfgB.getAutoEscapingPolicy());
+       assertEquals(AutoEscapingPolicy.ENABLE_IF_SUPPORTED, cfgB.getAutoEscapingPolicy());
        
        cfgB.setSetting(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enableIfDefault");
-       assertEquals(ParsingConfiguration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, cfgB.getAutoEscapingPolicy());
+       assertEquals(AutoEscapingPolicy.ENABLE_IF_DEFAULT, cfgB.getAutoEscapingPolicy());
 
        cfgB.setSetting(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enable_if_default");
-       assertEquals(ParsingConfiguration.ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY, cfgB.getAutoEscapingPolicy());
+       assertEquals(AutoEscapingPolicy.ENABLE_IF_DEFAULT, cfgB.getAutoEscapingPolicy());
        
        cfgB.setSetting(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "disable");
-       assertEquals(ParsingConfiguration.DISABLE_AUTO_ESCAPING_POLICY, cfgB.getAutoEscapingPolicy());
-       
-       try {
-           cfgB.setAutoEscapingPolicy(ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION);
-           fail();
-       } catch (IllegalArgumentException e) {
-           // Expected
-       }
+       assertEquals(AutoEscapingPolicy.DISABLE, cfgB.getAutoEscapingPolicy());
     }
 
     public void testSetOutputFormat() throws Exception {
@@ -1180,16 +1173,16 @@ public class ConfigurationTest extends TestCase {
     public void testNamingConventionSetSetting() throws ConfigurationException {
         Configuration.Builder cfg = new Configuration.Builder(Configuration.VERSION_3_0_0);
 
-        assertEquals(ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION, cfg.getNamingConvention());
+        assertEquals(NamingConvention.AUTO_DETECT, cfg.getNamingConvention());
         
         cfg.setSetting("naming_convention", "legacy");
-        assertEquals(ParsingConfiguration.LEGACY_NAMING_CONVENTION, cfg.getNamingConvention());
+        assertEquals(NamingConvention.LEGACY, cfg.getNamingConvention());
         
         cfg.setSetting("naming_convention", "camel_case");
-        assertEquals(ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION, cfg.getNamingConvention());
+        assertEquals(NamingConvention.CAMEL_CASE, cfg.getNamingConvention());
         
         cfg.setSetting("naming_convention", "auto_detect");
-        assertEquals(ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION, cfg.getNamingConvention());
+        assertEquals(NamingConvention.AUTO_DETECT, cfg.getNamingConvention());
     }
 
     public void testLazyImportsSetSetting() throws ConfigurationException {
@@ -1400,9 +1393,9 @@ public class ConfigurationTest extends TestCase {
     public void testGetSupportedBuiltInDirectiveNames() {
         Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0).build();
         
-        Set<String> allNames = cfg.getSupportedBuiltInDirectiveNames(ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION);
-        Set<String> lNames = cfg.getSupportedBuiltInDirectiveNames(ParsingConfiguration.LEGACY_NAMING_CONVENTION);
-        Set<String> cNames = cfg.getSupportedBuiltInDirectiveNames(ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION);
+        Set<String> allNames = cfg.getSupportedBuiltInDirectiveNames(NamingConvention.AUTO_DETECT);
+        Set<String> lNames = cfg.getSupportedBuiltInDirectiveNames(NamingConvention.LEGACY);
+        Set<String> cNames = cfg.getSupportedBuiltInDirectiveNames(NamingConvention.CAMEL_CASE);
         
         checkNamingConventionNameSets(allNames, lNames, cNames);
         
@@ -1415,9 +1408,9 @@ public class ConfigurationTest extends TestCase {
     public void testGetSupportedBuiltInNames() {
         Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0).build();
         
-        Set<String> allNames = cfg.getSupportedBuiltInNames(ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION);
-        Set<String> lNames = cfg.getSupportedBuiltInNames(ParsingConfiguration.LEGACY_NAMING_CONVENTION);
-        Set<String> cNames = cfg.getSupportedBuiltInNames(ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION);
+        Set<String> allNames = cfg.getSupportedBuiltInNames(NamingConvention.AUTO_DETECT);
+        Set<String> lNames = cfg.getSupportedBuiltInNames(NamingConvention.LEGACY);
+        Set<String> cNames = cfg.getSupportedBuiltInNames(NamingConvention.CAMEL_CASE);
         
         checkNamingConventionNameSets(allNames, lNames, cNames);
     }

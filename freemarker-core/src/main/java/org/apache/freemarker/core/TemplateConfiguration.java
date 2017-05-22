@@ -84,10 +84,10 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     private final Map<Object, Object> customAttributes;
     
     private final TemplateLanguage templateLanguage;
-    private final Integer tagSyntax;
-    private final Integer namingConvention;
+    private final TagSyntax tagSyntax;
+    private final NamingConvention namingConvention;
     private final Boolean whitespaceStripping;
-    private final Integer autoEscapingPolicy;
+    private final AutoEscapingPolicy autoEscapingPolicy;
     private final Boolean recognizeStandardFileExtensions;
     private final OutputFormat outputFormat;
     private final Charset sourceEncoding;
@@ -185,7 +185,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     }
 
     @Override
-    public int getTagSyntax() {
+    public TagSyntax getTagSyntax() {
         if (!isTagSyntaxSet()) {
             throw new SettingValueNotSetException("tagSyntax");
         }
@@ -211,7 +211,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     }
 
     @Override
-    public int getNamingConvention() {
+    public NamingConvention getNamingConvention() {
         if (!isNamingConventionSet()) {
             throw new SettingValueNotSetException("namingConvention");
         }
@@ -237,7 +237,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     }
 
     @Override
-    public int getAutoEscapingPolicy() {
+    public AutoEscapingPolicy getAutoEscapingPolicy() {
         if (!isAutoEscapingPolicySet()) {
             throw new SettingValueNotSetException("autoEscapingPolicy");
         }
@@ -942,7 +942,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         }
 
         @Override
-        protected int getDefaultTagSyntax() {
+        protected TagSyntax getDefaultTagSyntax() {
             throw new SettingValueNotSetException("tagSyntax");
         }
 
@@ -952,7 +952,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         }
 
         @Override
-        protected int getDefaultNamingConvention() {
+        protected NamingConvention getDefaultNamingConvention() {
             throw new SettingValueNotSetException("namingConvention");
         }
 
@@ -962,7 +962,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         }
 
         @Override
-        protected int getDefaultAutoEscapingPolicy() {
+        protected AutoEscapingPolicy getDefaultAutoEscapingPolicy() {
             throw new SettingValueNotSetException("autoEscapingPolicy");
         }
 

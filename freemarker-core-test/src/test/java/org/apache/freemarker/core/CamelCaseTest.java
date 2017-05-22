@@ -120,21 +120,21 @@ public class CamelCaseTest extends TemplateTest {
         assertErrorContains("<#ftl strip_whitespace=true>${.fooBar}", "naming convention");
 
         setConfiguration(new TestConfigurationBuilder()
-                .namingConvention(ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION)
+                .namingConvention(NamingConvention.CAMEL_CASE)
                 .outputEncoding(StandardCharsets.UTF_8)
                 .build());
         assertErrorContains("<#ftl strip_whitespace=true>", "naming convention");
         assertOutput("<#ftl stripWhitespace=true>${.outputEncoding}", StandardCharsets.UTF_8.name());
         
         setConfiguration(new TestConfigurationBuilder()
-                .namingConvention(ParsingConfiguration.LEGACY_NAMING_CONVENTION)
+                .namingConvention(NamingConvention.LEGACY)
                 .outputEncoding(StandardCharsets.UTF_8)
                 .build());
         assertErrorContains("<#ftl stripWhitespace=true>", "naming convention");
         assertOutput("<#ftl strip_whitespace=true>${.output_encoding}", StandardCharsets.UTF_8.name());
         
         setConfiguration(new TestConfigurationBuilder()
-                .namingConvention(ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION)
+                .namingConvention(NamingConvention.AUTO_DETECT)
                 .outputEncoding(StandardCharsets.UTF_8)
                 .build());
         assertOutput("<#ftl stripWhitespace=true>${.outputEncoding}", StandardCharsets.UTF_8.name());
@@ -187,7 +187,7 @@ public class CamelCaseTest extends TemplateTest {
 
     @Test
     public void stringLiteralInterpolation() throws IOException, TemplateException {
-        assertEquals(ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION, getConfiguration().getNamingConvention());
+        assertEquals(NamingConvention.AUTO_DETECT, getConfiguration().getNamingConvention());
         addToDataModel("x", "x");
         
         assertOutput("${'-${x?upperCase}-'} ${x?upperCase}", "-X- X");
@@ -217,7 +217,7 @@ public class CamelCaseTest extends TemplateTest {
     
     @Test
     public void evalAndInterpret() throws IOException, TemplateException {
-        assertEquals(ParsingConfiguration.AUTO_DETECT_NAMING_CONVENTION, getConfiguration().getNamingConvention());
+        assertEquals(NamingConvention.AUTO_DETECT, getConfiguration().getNamingConvention());
         // The naming convention detected doesn't affect the enclosing template's naming convention.
         // - ?eval:
         assertOutput("${\"'x'?upperCase\"?eval}${'x'?upper_case}", "XX");
@@ -253,7 +253,7 @@ public class CamelCaseTest extends TemplateTest {
 
     private void setConfigurationToLegacyCaseNamingConvention() {
         setConfiguration(new TestConfigurationBuilder()
-                .namingConvention(ParsingConfiguration.LEGACY_NAMING_CONVENTION)
+                .namingConvention(NamingConvention.LEGACY)
                 .build());
     }
 
@@ -275,7 +275,7 @@ public class CamelCaseTest extends TemplateTest {
 
     private void setConfigurationToCamelCaseNamingConvention() {
         setConfiguration(new TestConfigurationBuilder()
-                .namingConvention(ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION)
+                .namingConvention(NamingConvention.CAMEL_CASE)
                 .build());
     }
 
@@ -297,7 +297,7 @@ public class CamelCaseTest extends TemplateTest {
     private void assertContainsBothNamingStyles(Set<String> names, NamePairAssertion namePairAssertion) {
         Set<String> underscoredNamesWithCamelCasePair = new HashSet<>();
         for (String name : names) {
-            if (_StringUtil.getIdentifierNamingConvention(name) == ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION) {
+            if (_StringUtil.getIdentifierNamingConvention(name) == NamingConvention.CAMEL_CASE) {
                 String underscoredName = correctIsoBIExceptions(_StringUtil.camelCaseToUnderscored(name)); 
                 assertTrue(
                         "Missing underscored variation \"" + underscoredName + "\" for \"" + name + "\".",
@@ -308,7 +308,7 @@ public class CamelCaseTest extends TemplateTest {
             }
         }
         for (String name : names) {
-            if (_StringUtil.getIdentifierNamingConvention(name) == ParsingConfiguration.LEGACY_NAMING_CONVENTION) {
+            if (_StringUtil.getIdentifierNamingConvention(name) == NamingConvention.LEGACY) {
                 assertTrue("Missing camel case variation for \"" + name + "\".",
                         underscoredNamesWithCamelCasePair.contains(name));
             }
@@ -323,7 +323,7 @@ public class CamelCaseTest extends TemplateTest {
     public void camelCaseDirectives() throws IOException, TemplateException {
         camelCaseDirectives(false);
         setConfiguration(new TestConfigurationBuilder()
-                .tagSyntax(ParsingConfiguration.AUTO_DETECT_TAG_SYNTAX)
+                .tagSyntax(TagSyntax.AUTO_DETECT)
                 .build());
         camelCaseDirectives(true);
     }
@@ -364,11 +364,11 @@ public class CamelCaseTest extends TemplateTest {
     }
     
     private void explicitNamingConvention(boolean squared) throws IOException, TemplateException {
-        int tagSyntax = squared ? ParsingConfiguration.AUTO_DETECT_TAG_SYNTAX
-                : ParsingConfiguration.ANGLE_BRACKET_TAG_SYNTAX;
+        TagSyntax tagSyntax = squared ? TagSyntax.AUTO_DETECT
+                : TagSyntax.ANGLE_BRACKET;
         setConfiguration(new TestConfigurationBuilder()
                 .tagSyntax(tagSyntax)
-                .namingConvention(ParsingConfiguration.CAMEL_CASE_NAMING_CONVENTION)
+                .namingConvention(NamingConvention.CAMEL_CASE)
                 .build());
 
         assertErrorContains(
@@ -396,7 +396,7 @@ public class CamelCaseTest extends TemplateTest {
 
         setConfiguration(new TestConfigurationBuilder()
                 .tagSyntax(tagSyntax)
-                .namingConvention(ParsingConfiguration.LEGACY_NAMING_CONVENTION)
+                .namingConvention(NamingConvention.LEGACY)
                 .build());
 
         assertErrorContains(
