@@ -26,8 +26,6 @@ import org.apache.freemarker.core.model.TemplateModelException;
 /**
  * Common superclass for implementing {@link MarkupOutputFormat}-s that use a {@link CommonTemplateMarkupOutputModel}
  * subclass.
- * 
- * @since 2.3.24
  */
 public abstract class CommonMarkupOutputFormat<MO extends CommonTemplateMarkupOutputModel>
         extends MarkupOutputFormat<MO> {

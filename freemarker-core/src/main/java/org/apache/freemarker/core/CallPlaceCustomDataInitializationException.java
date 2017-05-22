@@ -21,8 +21,6 @@ package org.apache.freemarker.core;
 
 /**
  * Thrown by {@link DirectiveCallPlace#getOrCreateCustomData(Object, org.apache.freemarker.core.util.ObjectFactory)}
- * 
- * @since 2.3.22
  */
 public class CallPlaceCustomDataInitializationException extends Exception {
 

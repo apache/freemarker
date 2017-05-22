@@ -113,7 +113,6 @@ public class ParseException extends IOException implements FMParserConstants {
     }
 
     /**
-     * @since 2.3.21
      */
     public ParseException(String description, Template template,
             int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber) {
@@ -121,7 +120,6 @@ public class ParseException extends IOException implements FMParserConstants {
     }
 
     /**
-     * @since 2.3.21
      */
     public ParseException(String description, Template template,
             int lineNumber, int columnNumber, int endLineNumber, int endColumnNumber,
@@ -144,14 +142,12 @@ public class ParseException extends IOException implements FMParserConstants {
     }
     
     /**
-     * @since 2.3.20
      */
     public ParseException(String description, Template template, Token tk) {
         this(description, template, tk, null);
     }
 
     /**
-     * @since 2.3.20
      */
     public ParseException(String description, Template template, Token tk, Throwable cause) {
         this(description,
@@ -162,14 +158,12 @@ public class ParseException extends IOException implements FMParserConstants {
     }
 
     /**
-     * @since 2.3.20
      */
     public ParseException(String description, ASTNode astNode) {
         this(description, astNode, null);
     }
 
     /**
-     * @since 2.3.20
      */
     public ParseException(String description, ASTNode astNode, Throwable cause) {
         this(description,
@@ -274,8 +268,6 @@ public class ParseException extends IOException implements FMParserConstants {
 
     /**
      * 1-based line number of the last line that contains the failing section, or 0 if the information is not available.
-     * 
-     * @since 2.3.21
      */
     public int getEndLineNumber() {
         return endLineNumber;
@@ -284,8 +276,6 @@ public class ParseException extends IOException implements FMParserConstants {
     /**
      * 1-based column number of the last character of the failing section, or 0 if the information is not available.
      * Note that unlike with Java string API-s, this column number is inclusive.
-     * 
-     * @since 2.3.21
      */
     public int getEndColumnNumber() {
         return endColumnNumber;

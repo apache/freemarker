@@ -30,7 +30,6 @@ public class UndeclaredThrowableException extends RuntimeException {
     }
 
     /**
-     * @since 2.3.22
      */
     public UndeclaredThrowableException(String message, Throwable t) {
         super(message, t);

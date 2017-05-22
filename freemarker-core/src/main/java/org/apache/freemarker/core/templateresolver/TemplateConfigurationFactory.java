@@ -25,8 +25,6 @@ import org.apache.freemarker.core.TemplateConfiguration;
 
 /**
  * Creates (or returns) {@link TemplateConfiguration}-s for template sources.
- * 
- * @since 2.3.24
  */
 public abstract class TemplateConfigurationFactory {
 

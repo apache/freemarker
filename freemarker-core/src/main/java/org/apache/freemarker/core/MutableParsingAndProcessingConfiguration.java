@@ -445,8 +445,6 @@ public abstract class MutableParsingAndProcessingConfiguration<
 
     /**
      * Tells if this setting is set directly in this object or its value is inherited from the parent parsing configuration..
-     *
-     * @since 2.3.25
      */
     @Override
     public boolean isTabSizeSet() {

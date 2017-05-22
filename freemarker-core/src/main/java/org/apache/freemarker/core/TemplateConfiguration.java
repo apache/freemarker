@@ -169,8 +169,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
      * {@link MutableProcessingConfiguration}. The target {@link MutableProcessingConfiguration} is assumed to be not seen be other thread than the current
      * one yet. (That is, the operation is not synchronized on the target {@link MutableProcessingConfiguration}, only on the source
      * {@link MutableProcessingConfiguration})
-     *
-     * @since 2.3.24
      */
     private void copyDirectCustomAttributes(MutableProcessingConfiguration<?> target, boolean overwriteExisting) {
         if (customAttributes == null) {

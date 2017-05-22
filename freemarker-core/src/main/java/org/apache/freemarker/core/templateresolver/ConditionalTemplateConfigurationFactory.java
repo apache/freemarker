@@ -25,8 +25,6 @@ import org.apache.freemarker.core.TemplateConfiguration;
 /**
  * Returns the given {@link TemplateConfiguration} directly, or another {@link TemplateConfigurationFactory}'s result, when
  * the specified matcher matches the template source.
- * 
- * @since 2.3.24
  */
 public class ConditionalTemplateConfigurationFactory extends TemplateConfigurationFactory {
 

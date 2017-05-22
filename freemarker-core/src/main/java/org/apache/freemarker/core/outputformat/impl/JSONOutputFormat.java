@@ -22,8 +22,6 @@ import org.apache.freemarker.core.outputformat.OutputFormat;
 
 /**
  * Represents the JSON output format (MIME type "application/json", name "JSON"). This format doesn't support escaping.
- * 
- * @since 2.3.24
  */
 public class JSONOutputFormat extends OutputFormat {
 

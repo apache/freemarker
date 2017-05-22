@@ -51,8 +51,6 @@ public abstract class URLTemplateLoader implements TemplateLoader {
     
     /**
      * Getter pair of {@link #setURLConnectionUsesCaches(Boolean)}.
-     * 
-     * @since 2.3.21
      */
     public Boolean getURLConnectionUsesCaches() {
         return urlConnectionUsesCaches;

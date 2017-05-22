@@ -29,8 +29,6 @@ import org.apache.freemarker.core.outputformat.OutputFormat;
  * output format into itself (unless they can be converted to plain text), while {@link UndefinedOutputFormat} would
  * just insert the foreign "markup" as is. Also, this format has {"text/plain"} MIME type, while
  * {@link UndefinedOutputFormat} has {@code null}.
- * 
- * @since 2.3.24
  */
 public final class PlainTextOutputFormat extends OutputFormat {
 

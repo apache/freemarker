@@ -40,8 +40,6 @@ import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
  * <li>{@link Configuration#getTemplateLookupStrategy() templateLookupStrategy}
  * <li>{@link Configuration#getCacheStorage() cacheStorage}
  * </ul>
- * 
- * @since 3.0.0
  */
 //TODO DRAFT only [FM3]
 public abstract class TemplateResolver {

@@ -255,8 +255,6 @@ public class FileTemplateLoader implements TemplateLoader {
     /**
      * Returns the base directory in which the templates are searched. This comes from the constructor argument, but
      * it's possibly a canonicalized version of that. 
-     *  
-     * @since 2.3.21
      */
     public File getBaseDirectory() {
         return baseDir;
@@ -272,8 +270,6 @@ public class FileTemplateLoader implements TemplateLoader {
      * 
      * <p>The default in {@link FileTemplateLoader} is {@code false}, but subclasses may change they by overriding
      * {@link #getEmulateCaseSensitiveFileSystemDefault()}.
-     * 
-     * @since 2.3.23
      */
     public void setEmulateCaseSensitiveFileSystem(boolean emulateCaseSensitiveFileSystem) {
         // Ensure that the cache exists exactly when needed:
@@ -290,8 +286,6 @@ public class FileTemplateLoader implements TemplateLoader {
 
     /**
      * Getter pair of {@link #setEmulateCaseSensitiveFileSystem(boolean)}.
-     * 
-     * @since 2.3.23
      */
     public boolean getEmulateCaseSensitiveFileSystem() {
         return emulateCaseSensitiveFileSystem;
@@ -302,8 +296,6 @@ public class FileTemplateLoader implements TemplateLoader {
      * {@code false}, unless the {@link #SYSTEM_PROPERTY_NAME_EMULATE_CASE_SENSITIVE_FILE_SYSTEM} system property was
      * set to {@code true}, but this can be overridden here in custom subclasses. For example, if your environment
      * defines something like developer mode, you may want to override this to return {@code true} on Windows.
-     * 
-     * @since 2.3.23
      */
     protected boolean getEmulateCaseSensitiveFileSystemDefault() {
         return EMULATE_CASE_SENSITIVE_FILE_SYSTEM_DEFAULT;
@@ -311,8 +303,6 @@ public class FileTemplateLoader implements TemplateLoader {
 
     /**
      * Show class name and some details that are useful in template-not-found errors.
-     * 
-     * @since 2.3.21
      */
     @Override
     public String toString() {

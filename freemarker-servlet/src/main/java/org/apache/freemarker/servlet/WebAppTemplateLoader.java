@@ -101,8 +101,6 @@ public class WebAppTemplateLoader implements TemplateLoader {
 
     /**
      * Getter pair of {@link #setURLConnectionUsesCaches(Boolean)}.
-     * 
-     * @since 2.3.21
      */
     public Boolean getURLConnectionUsesCaches() {
         return urlConnectionUsesCaches;
@@ -110,8 +108,6 @@ public class WebAppTemplateLoader implements TemplateLoader {
 
     /**
      * It does the same as {@link URLTemplateLoader#setURLConnectionUsesCaches(Boolean)}; see there.
-     * 
-     * @since 2.3.21
      */
     public void setURLConnectionUsesCaches(Boolean urlConnectionUsesCaches) {
         this.urlConnectionUsesCaches = urlConnectionUsesCaches;
@@ -119,8 +115,6 @@ public class WebAppTemplateLoader implements TemplateLoader {
 
     /**
      * Show class name and some details that are useful in template-not-found errors.
-     * 
-     * @since 2.3.21
      */
     @Override
     public String toString() {
@@ -142,8 +136,6 @@ public class WebAppTemplateLoader implements TemplateLoader {
 
     /**
      * Getter pair of {@link #setAttemptFileAccess(boolean)}.
-     * 
-     * @since 2.3.23
      */
     public boolean getAttemptFileAccess() {
         return attemptFileAccess;
@@ -157,8 +149,6 @@ public class WebAppTemplateLoader implements TemplateLoader {
      * with {@link #setURLConnectionUsesCaches(Boolean)}, which is also the default behavior with
      * {@link Configuration#getIncompatibleImprovements() incompatibleImprovements} 2.3.21
      * and later.
-     * 
-     * @since 2.3.23
      */
     public void setAttemptFileAccess(boolean attemptFileAccess) {
         this.attemptFileAccess = attemptFileAccess;

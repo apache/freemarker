@@ -27,8 +27,6 @@ import org.apache.freemarker.core.util._StringUtil;
 
 /**
  * Represents the HTML output format.
- * 
- * @since 2.3.24
  */
 public final class CustomHTMLOutputFormat extends CommonMarkupOutputFormat<CustomTemplateHTMLModel> {
 

@@ -93,8 +93,6 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
      * 
      * @param wrapper
      *            See the similar parameter of {@link SimpleSequence#SimpleSequence(ObjectWrapper)}.
-     * 
-     * @since 2.3.21
      */
     public SimpleSequence(int capacity, ObjectWrapper wrapper) {
         super(wrapper);

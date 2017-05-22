@@ -26,8 +26,6 @@ import org.apache.freemarker.core.model.TemplateTransformModel;
 /**
  * Indicates that a {@link TemplateDirectiveModel} or {@link TemplateTransformModel} or {@link ASTDirMacro} value was
  * expected, but the value had a different type.
- * 
- * @since 2.3.21
  */
 class NonUserDefinedDirectiveLikeException extends UnexpectedTypeException {
 

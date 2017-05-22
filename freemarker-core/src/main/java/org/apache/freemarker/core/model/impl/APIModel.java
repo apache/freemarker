@@ -29,8 +29,6 @@ package org.apache.freemarker.core.model.impl;
  * <li>But methods will always shadow properties and fields with identical name, regardless of {@link DefaultObjectWrapper}
  * settings</li>
  * </ul>
- * 
- * @since 2.3.22
  */
 final class APIModel extends BeanModel {
 

@@ -23,8 +23,6 @@ import org.apache.freemarker.core.model.TemplateModel;
 
 /**
  * The type of a value differs from what was expected.
- * 
- * @since 2.3.20
  */
 public class UnexpectedTypeException extends TemplateException {
     

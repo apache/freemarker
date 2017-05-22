@@ -48,8 +48,6 @@ import org.apache.freemarker.core.model.impl.BeanModel;
 /**
  * Static utility methods that perform tasks specific to the FreeMarker Template Language (FTL).
  * This is meant to be used from outside FreeMarker (i.e., it's an official, published API), not just from inside it.
- *
- * @since 3.0.0
  */
 public final class FTLUtil {
 
@@ -85,7 +83,6 @@ public final class FTLUtil {
      * @param quotation Either {@code '"'} or {@code '\''}. It's assumed that the string literal whose part we calculate is
      *                  enclosed within this kind of quotation mark. Thus, the other kind of quotation character will not be
      *                  escaped in the result.
-     * @since 2.3.22
      */
     public static String escapeStringLiteralPart(String s, char quotation) {
         return escapeStringLiteralPart(s, quotation, false);
@@ -295,7 +292,6 @@ public final class FTLUtil {
      * doesn't contain apostrophe-quote character.)
      *
      * @param s The value that should be converted to an FTL string literal whose evaluated value equals to {@code s}
-     * @since 2.3.22
      */
     public static String toStringLiteral(String s) {
         char quotation;
@@ -309,8 +305,6 @@ public final class FTLUtil {
 
     /**
      * Tells if a character can occur on the beginning of an FTL identifier expression (without escaping).
-     *
-     * @since 2.3.22
      */
     public static boolean isNonEscapedIdentifierStart(final char c) {
         // This code was generated on JDK 1.8.0_20 Win64 with src/main/misc/identifierChars/IdentifierCharGenerator.java
@@ -654,8 +648,6 @@ public final class FTLUtil {
      *
      * @param tm The value whose type we will describe. If {@code null}, then {@code "Null"} is returned (without the
      *           quotation marks).
-     *
-     * @since 2.3.20
      */
     public static String getTypeDescription(TemplateModel tm) {
         if (tm == null) {

@@ -28,8 +28,6 @@ import org.apache.freemarker.core.util._StringUtil;
  * the source name with the given glob. For example, the file name glob {@code *.ftlh} matches both {@code foo.ftlh} and
  * {@code foo/bar.ftlh}. With other words, that file name glob is equivalent with the {@code **}{@code /*.ftlh})
  * <em>path</em> glob ( {@link PathGlobMatcher}).
- * 
- * @since 2.3.24
  */
 public class FileNameGlobMatcher extends TemplateSourceMatcher {
 

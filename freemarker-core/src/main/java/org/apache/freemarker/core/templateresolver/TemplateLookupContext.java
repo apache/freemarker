@@ -29,8 +29,6 @@ import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateLookupStr
 /**
  * Used as the parameter of {@link TemplateLookupStrategy#lookup(TemplateLookupContext)}.
  * You can't invoke instances of this, only receive them from FreeMarker.
- * 
- * @since 2.3.22
  */
 public abstract class TemplateLookupContext<R extends TemplateLookupResult> {
     

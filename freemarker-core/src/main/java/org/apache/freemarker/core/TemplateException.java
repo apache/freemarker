@@ -96,8 +96,6 @@ public class TemplateException extends Exception {
      *
      * @param cause the underlying {@link Exception} that caused this
      * exception to be raised
-     * 
-     * @since 2.3.20
      */
     public TemplateException(Throwable cause, Environment env) {
         this(null, cause, env);
@@ -118,8 +116,6 @@ public class TemplateException extends Exception {
      *
      * @param description the description of the error that occurred
      * @param cause the underlying {@link Exception} that caused this exception to be raised
-     * 
-     * @since 2.3.20
      */
     public TemplateException(String description, Throwable cause, Environment env) {
         this(description, cause, env, null, null);
@@ -314,8 +310,6 @@ public class TemplateException extends Exception {
      * @param heading should the heading at the top be printed 
      * @param ftlStackTrace should the FTL stack trace be printed
      * @param javaStackTrace should the Java stack trace be printed
-     *  
-     * @since 2.3.20
      */
     public void printStackTrace(PrintWriter out, boolean heading, boolean ftlStackTrace, boolean javaStackTrace) {
         synchronized (out) {
@@ -327,8 +321,6 @@ public class TemplateException extends Exception {
      * @param heading should the heading at the top be printed 
      * @param ftlStackTrace should the FTL stack trace be printed
      * @param javaStackTrace should the Java stack trace be printed
-     *  
-     * @since 2.3.20
      */
     public void printStackTrace(PrintStream out, boolean heading, boolean ftlStackTrace, boolean javaStackTrace) {
         synchronized (out) {
@@ -401,7 +393,6 @@ public class TemplateException extends Exception {
     
     /**
      * Prints the stack trace as if wasn't overridden by {@link TemplateException}. 
-     * @since 2.3.20
      */
     public void printStandardStackTrace(PrintStream ps) {
         super.printStackTrace(ps);
@@ -409,7 +400,6 @@ public class TemplateException extends Exception {
 
     /**
      * Prints the stack trace as if wasn't overridden by {@link TemplateException}. 
-     * @since 2.3.20
      */
     public void printStandardStackTrace(PrintWriter pw) {
         super.printStackTrace(pw);
@@ -442,8 +432,6 @@ public class TemplateException extends Exception {
     
     /**
      * 1-based line number of the failing section, or {@code null} if the information is not available.
-     * 
-     * @since 2.3.21
      */
     public Integer getLineNumber() {
         synchronized (lock) {
@@ -457,8 +445,6 @@ public class TemplateException extends Exception {
     /**
      * Returns the {@linkplain Template#getSourceName() source name} of the template where the error has occurred, or
      * {@code null} if the information isn't available. This is what should be used for showing the error position.
-     *
-     * @since 2.3.22
      */
     public String getTemplateSourceName() {
         synchronized (lock) {
@@ -494,8 +480,6 @@ public class TemplateException extends Exception {
 
     /**
      * 1-based column number of the failing section, or {@code null} if the information is not available.
-     * 
-     * @since 2.3.21
      */
     public Integer getColumnNumber() {
         synchronized (lock) {
@@ -509,8 +493,6 @@ public class TemplateException extends Exception {
     /**
      * 1-based line number of the last line that contains the failing section, or {@code null} if the information is not
      * available.
-     * 
-     * @since 2.3.21
      */
     public Integer getEndLineNumber() {
         synchronized (lock) {
@@ -524,8 +506,6 @@ public class TemplateException extends Exception {
     /**
      * 1-based column number of the last character of the failing template section, or {@code null} if the information
      * is not available. Note that unlike with Java string API-s, this column number is inclusive.
-     * 
-     * @since 2.3.21
      */
     public Integer getEndColumnNumber() {
         synchronized (lock) {
@@ -541,8 +521,6 @@ public class TemplateException extends Exception {
      * {@code null}. This expression should always be inside the failing FTL instruction.
      *  
      * <p>The typical application of this is getting the undefined expression from {@link InvalidReferenceException}-s.
-     * 
-     * @since 2.3.21
      */
     public String getBlamedExpressionString() {
         synchronized (lock) {

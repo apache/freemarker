@@ -93,7 +93,6 @@ public class BeanModel
         this(object, wrapper, true);
     }
 
-    /** @since 2.3.21 */
     BeanModel(Object object, DefaultObjectWrapper wrapper, boolean inrospectNow) {
         this.object = object;
         this.wrapper = wrapper;

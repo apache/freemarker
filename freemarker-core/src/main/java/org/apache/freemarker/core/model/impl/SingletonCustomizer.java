@@ -43,8 +43,6 @@ import org.apache.freemarker.core.model.ObjectWrapper;
  *    }
  *     
  * }</pre>
- *
- * @since 2.3.21
  */
 public interface SingletonCustomizer {
 

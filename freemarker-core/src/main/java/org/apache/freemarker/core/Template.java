@@ -135,8 +135,6 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     /**
      * Convenience constructor for {@link #Template(String, Reader, Configuration)
      * Template(lookupName, new StringReader(reader), cfg)}.
-     * 
-     * @since 2.3.20
      */
     public Template(String lookupName, String sourceCode, Configuration cfg) throws IOException {
         this(lookupName, new StringReader(sourceCode), cfg);
@@ -145,8 +143,6 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     /**
      * Convenience constructor for {@link #Template(String, String, Reader, Configuration, TemplateConfiguration,
      * Charset) Template(lookupName, null, new StringReader(reader), cfg), tc, null}.
-     *
-     * @since 2.3.20
      */
     public Template(String lookupName, String sourceCode, Configuration cfg, TemplateConfiguration tc) throws IOException {
         this(lookupName, null, new StringReader(sourceCode), cfg, tc, null);
@@ -193,8 +189,6 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      *            method ensures that it will be read in few kilobyte chunks, not byte by byte.
      * @param cfg
      *            The Configuration object that this Template is associated with. Can't be {@code null}.
-     * 
-     * @since 2.3.22
      */
    public Template(
            String lookupName, String sourceName, Reader reader, Configuration cfg) throws IOException {
@@ -210,8 +204,6 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      *            was loaded from a source that returns it already as text. If this is not {@code null} and there's an
      *            {@code #ftl} header with {@code encoding} parameter, they must match, or else a
      *            {@link WrongTemplateCharsetException} is thrown.
-     * 
-     * @since 2.3.22
      */
    public Template(
            String lookupName, String sourceName, Reader reader, Configuration cfg, Charset actualSourceEncoding) throws
@@ -232,8 +224,6 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      *            template is the main template of the {@link Environment}.
      * @param actualSourceEncoding
      *            Same as in {@link #Template(String, String, Reader, Configuration, Charset)}.
-     * 
-     * @since 2.3.24
      */
    public Template(
            String lookupName, String sourceName, Reader reader,
@@ -363,8 +353,6 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * @param sourceEncoding The charset used to decode the template content to the {@link String} passed in with the
      *            {@code content} parameter. If that information is not known or irrelevant, this should be
      *            {@code null}.
-     *
-     * @since 2.3.22
      */
     static public Template createPlainTextTemplate(String lookupName, String sourceName, String content, Configuration config,
                Charset sourceEncoding) {
@@ -663,8 +651,6 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * couldn't be determined (like because there was no tags in the template, or it was a plain text template), this
      * returns whatever the default is in the current configuration, so it's maybe
      * {@link TagSyntax#AUTO_DETECT}.
-     * 
-     * @since 2.3.20
      */
     public TagSyntax getActualTagSyntax() {
         return actualTagSyntax;
@@ -676,8 +662,6 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * couldn't be determined (like because there no identifier that's part of the template language was used where
      * the naming convention matters), this returns whatever the default is in the current configuration, so it's maybe
      * {@link TagSyntax#AUTO_DETECT}.
-     * 
-     * @since 2.3.23
      */
     public NamingConvention getActualNamingConvention() {
         return actualNamingConvention;
@@ -689,8 +673,6 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * {@link Configuration#getOutputFormat()}, {@link ParsingConfiguration#getOutputFormat()} (which is usually
      * provided by {@link Configuration#getTemplateConfigurations()}) and the {@code #ftl} header's
      * {@code output_format} option in the template.
-     * 
-     * @since 2.3.24
      */
     public OutputFormat getOutputFormat() {
         return outputFormat;

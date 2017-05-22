@@ -44,8 +44,6 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
  * Thread safety: A {@link DefaultIterableAdapter} is as thread-safe as the {@link Iterable} that it wraps is. Normally
  * you only have to consider read-only access, as the FreeMarker template language doesn't provide mean to call
  * {@link Iterator} modifier methods (though of course, Java methods called from the template can violate this rule).
- *
- * @since 2.3.25
  */
 @SuppressWarnings("serial")
 public class DefaultIterableAdapter extends WrappingTemplateModel implements TemplateCollectionModel,

@@ -49,8 +49,6 @@ import org.apache.freemarker.core.util.ObjectFactory;
  * {@link TemplateDirectiveModel}, {@link TemplateTransformModel}, or a macro).
  * 
  * @see Environment#getCurrentDirectiveCallPlace()
- * 
- * @since 2.3.22
  */
 public interface DirectiveCallPlace {
 

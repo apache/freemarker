@@ -34,8 +34,6 @@ import org.apache.freemarker.core.util.DeepUnwrap;
  * 
  * <p>They are used in templates like {@code <@myDirective foo=1 bar="wombat">...</@myDirective>} (or as
  * {@code <@myDirective foo=1 bar="wombat" />} - the nested content is optional).
- *
- * @since 2.3.11
  */
 public interface TemplateDirectiveModel extends TemplateModel {
     /**

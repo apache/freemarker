@@ -860,8 +860,6 @@ class ClassIntrospector {
 
     /**
      * Corresponds to {@link DefaultObjectWrapper#clearClassIntrospecitonCache()}.
-     * 
-     * @since 2.3.20
      */
     void clearCache() {
         if (getHasSharedInstanceRestrictons()) {
@@ -895,8 +893,6 @@ class ClassIntrospector {
 
     /**
      * Corresponds to {@link DefaultObjectWrapper#removeFromClassIntrospectionCache(Class)}.
-     * 
-     * @since 2.3.20
      */
     void remove(Class<?> clazz) {
         synchronized (sharedLock) {

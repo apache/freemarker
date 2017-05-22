@@ -30,8 +30,6 @@ package org.apache.freemarker.core.model;
  * 
  * <p>See the <a href="http://freemarker.org/docs/xgui.html" target="_blank">XML
  * Processing Guide</a> for a concrete application.
- *
- * @since FreeMarker 2.3
  */
 public interface TemplateNodeModel extends TemplateModel {
     

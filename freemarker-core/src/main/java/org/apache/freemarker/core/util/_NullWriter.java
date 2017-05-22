@@ -24,8 +24,6 @@ import java.io.Writer;
 
 /**
  * A {@link Writer} that simply drops what it gets.
- * 
- * @since 2.3.20
  */
 public final class _NullWriter extends Writer {
     

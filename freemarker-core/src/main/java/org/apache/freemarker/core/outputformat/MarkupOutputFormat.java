@@ -44,8 +44,6 @@ import org.apache.freemarker.core.outputformat.impl.TemplateHTMLOutputModel;
  * 
  * @param <MO>
  *            The {@link TemplateMarkupOutputModel} class this output format can deal with.
- * 
- * @since 2.3.24
  */
 public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> extends OutputFormat {
 

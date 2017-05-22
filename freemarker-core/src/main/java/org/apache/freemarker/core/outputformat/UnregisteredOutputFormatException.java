@@ -22,8 +22,6 @@ import org.apache.freemarker.core.Configuration;
 
 /**
  * Thrown by {@link Configuration#getOutputFormat(String)}.
- * 
- * @since 2.3.24
  */
 @SuppressWarnings("serial")
 public class UnregisteredOutputFormatException extends Exception {

@@ -28,13 +28,10 @@ import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
  * don't want caching.
  *
  * @see Configuration#getCacheStorage()
- * 
- * @since 2.3.17
  */
 public class NullCacheStorage implements CacheStorage, CacheStorageWithGetSize {
     
     /**
-     * @since 2.3.22
      */
     public static final NullCacheStorage INSTANCE = new NullCacheStorage();
     
@@ -60,8 +57,6 @@ public class NullCacheStorage implements CacheStorage, CacheStorageWithGetSize {
 
     /**
      * Always returns 0.
-     * 
-     * @since 2.3.21
      */
     @Override
     public int getSize() {

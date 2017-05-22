@@ -32,8 +32,6 @@ import org.apache.freemarker.core.model.TemplateModelException;
 /**
  *  Implementation of {@link KeyValuePairIterator} for a {@link TemplateHashModelEx2} that wraps or otherwise uses a
  *  {@link Map} internally.
- *
- *  @since 2.3.25
  */
 public class MapKeyValuePairIterator implements KeyValuePairIterator {
 

@@ -230,8 +230,6 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * its last argument was {@code false}; makes the instance read-only if necessary, then registers the model
      * factories in the class introspector. No further changes should be done after calling this, if
      * {@code writeProtected} was {@code true}.
-     *
-     * @since 2.3.22
      */
     protected void finalizeConstruction() {
         // Attention! At this point, the DefaultObjectWrapper must be fully initialized, as when the model factories are
@@ -287,7 +285,6 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
     */
 
     /**
-     * @since 2.3.21
      */
     public int getExposureLevel() {
         return classIntrospector.getExposureLevel();
@@ -317,8 +314,6 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * was created; with a public constructor (then this is {@code false}), or with {@link Builder}
      * (then it's {@code true}). Note that in the last case it's possible that the introspection cache
      * will not be actually shared because there's no one to share with, but this will {@code true} even then.
-     *
-     * @since 2.3.21
      */
     public boolean isClassIntrospectionCacheRestricted() {
         return classIntrospector.getHasSharedInstanceRestrictons();
@@ -355,8 +350,6 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * Returns the version given with {@link Builder (Version)}, normalized to the lowest version
      * where a change has occurred. Thus, this is not necessarily the same version than that was given to the
      * constructor.
-     *
-     * @since 2.3.21
      */
     public Version getIncompatibleImprovements() {
         return incompatibleImprovements;
@@ -495,15 +488,12 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      *          This object will be used "as is", like without unwrapping it if it's a {@link TemplateModelAdapter}.
      * @param method The method to call, which must be an (inherited) member of the class of {@code object}, as
      *          described by {@link Method#invoke(Object, Object...)}
-     *
-     * @since 2.3.22
      */
     public TemplateMethodModelEx wrap(Object object, Method method) {
         return new JavaMethodModel(object, method, method.getParameterTypes(), this);
     }
 
     /**
-     * @since 2.3.22
      */
     @Override
     public TemplateHashModel wrapAsAPI(Object obj) throws TemplateModelException {
@@ -552,7 +542,6 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
     }
 
     /**
-     * @since 2.3.22
      */
     @Override
     public Object tryUnwrapTo(TemplateModel model, Class<?> targetClass) throws TemplateModelException {
@@ -1100,8 +1089,6 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * Use this if you know that a class is not used anymore in templates.
      * If the class will be still used, the cache entry will be silently
      * re-created, so this isn't a dangerous operation.
-     *
-     * @since 2.3.20
      */
     public void removeFromClassIntrospectionCache(Class<?> clazz) {
         classIntrospector.remove(clazz);
@@ -1114,8 +1101,6 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * the cache entries for the classes that will be used later in templates.
      *
      * @throws IllegalStateException if {@link #isClassIntrospectionCacheRestricted()} is {@code true}.
-     *
-     * @since 2.3.20
      */
     public void clearClassIntrospecitonCache() {
         classIntrospector.clearCache();
@@ -1204,8 +1189,6 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
 
     /**
      * Returns the lowest version number that is equivalent with the parameter version.
-     *
-     * @since 2.3.22
      */
     protected static Version normalizeIncompatibleImprovementsVersion(Version incompatibleImprovements) {
         _CoreAPI.checkVersionNotNullAndSupported(incompatibleImprovements);

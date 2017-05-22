@@ -19,7 +19,6 @@
 package org.apache.freemarker.core.valueformat;
 
 /**
- * @since 2.3.24
  */
 public class UndefinedCustomFormatException extends InvalidFormatStringException {
 

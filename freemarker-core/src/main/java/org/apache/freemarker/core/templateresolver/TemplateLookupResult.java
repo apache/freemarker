@@ -31,8 +31,6 @@ import org.apache.freemarker.core.templateresolver.impl.TemplateLoaderBasedTempl
  * Subclass this only if you are implementing a {@link TemplateLookupContext}; if the {@link TemplateLookupContext} that
  * you are implementing uses {@link TemplateLoader}-s, consider using {@link TemplateLoaderBasedTemplateLookupResult}
  * instead of writing your own subclass.
- * 
- * @since 2.3.22
  */
 public abstract class TemplateLookupResult {
 

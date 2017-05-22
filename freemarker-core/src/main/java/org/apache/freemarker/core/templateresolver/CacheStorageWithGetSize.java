@@ -21,8 +21,6 @@ package org.apache.freemarker.core.templateresolver;
 
 /**
  * A cache storage that has a {@code getSize()} method for returning the current number of cache entries.
- * 
- * @since 2.3.21
  */
 public interface CacheStorageWithGetSize extends CacheStorage {
     

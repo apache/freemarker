@@ -28,8 +28,6 @@ import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
  * Thread-safe after proper publishing. Calculated fields (typically, the markup calculated from plain text) might will
  * be re-calculated for multiple times if accessed from multiple threads (this only affects performance, not
  * functionality).
- * 
- * @since 2.3.24
  */
 public abstract class CommonTemplateMarkupOutputModel<MO extends CommonTemplateMarkupOutputModel<MO>>
         implements TemplateMarkupOutputModel<MO> {

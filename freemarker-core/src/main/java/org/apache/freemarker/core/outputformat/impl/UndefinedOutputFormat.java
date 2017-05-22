@@ -29,8 +29,6 @@ import org.apache.freemarker.core.outputformat.OutputFormat;
  * {@link TemplateMarkupOutputModel}-s as is (doesn't try to convert them).
  * 
  * @see PlainTextOutputFormat
- * 
- * @since 2.3.24
  */
 public final class UndefinedOutputFormat extends OutputFormat {
 

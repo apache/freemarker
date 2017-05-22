@@ -27,8 +27,6 @@ import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 
 /**
  * Represents two markup formats nested into each other. For example, markdown nested into HTML.
- * 
- * @since 2.3.24
  */
 public final class CombinedMarkupOutputFormat extends CommonMarkupOutputFormat<TemplateCombinedMarkupOutputModel> {
 

@@ -44,8 +44,6 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
  * Thread safety: A {@link DefaultNonListCollectionAdapter} is as thread-safe as the {@link Collection} that it wraps
  * is. Normally you only have to consider read-only access, as the FreeMarker template language doesn't allow writing
  * these collections (though of course, Java methods called from the template can violate this rule).
- *
- * @since 2.3.22
  */
 public class DefaultNonListCollectionAdapter extends WrappingTemplateModel implements TemplateCollectionModelEx,
         AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport, Serializable {

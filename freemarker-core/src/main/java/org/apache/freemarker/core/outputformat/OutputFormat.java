@@ -30,8 +30,6 @@ import org.apache.freemarker.core.util._StringUtil;
  * @see Configuration#getOutputFormat()
  * @see Configuration#getRegisteredCustomOutputFormats()
  * @see MarkupOutputFormat
- * 
- * @since 2.3.24
  */
 public abstract class OutputFormat {
 

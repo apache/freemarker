@@ -22,8 +22,6 @@ import org.apache.freemarker.core.outputformat.OutputFormat;
 
 /**
  * Represents the CSS output format (MIME type "text/css", name "CSS"). This format doesn't support escaping.
- * 
- * @since 2.3.24
  */
 public class CSSOutputFormat extends OutputFormat {
 

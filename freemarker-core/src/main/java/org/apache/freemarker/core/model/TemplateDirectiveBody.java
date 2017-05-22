@@ -29,8 +29,6 @@ import org.apache.freemarker.core.TemplateException;
  * class is passed to {@link TemplateDirectiveModel#execute(org.apache.freemarker.core.Environment, 
  * java.util.Map, TemplateModel[], TemplateDirectiveBody)}. The implementation of the method is 
  * free to invoke it for any number of times, with any writer.
- *
- * @since 2.3.11
  */
 public interface TemplateDirectiveBody {
     /**

@@ -232,8 +232,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * That template will never change, like {@code #include} or macro calls don't change it.
      * 
      * @see #getCurrentNamespace()
-     * 
-     * @since 2.3.22
      */
     public Template getMainTemplate() {
         return mainTemplate;
@@ -247,8 +245,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * 
      * @see #getMainTemplate()
      * @see #getCurrentNamespace()
-     * 
-     * @since 2.3.23
      */
     @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "False alarm")
     public Template getCurrentTemplate() {
@@ -269,8 +265,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * executing custom directive. This currently only works for calls made from templates with the {@code <@...>}
      * syntax. This should only be called from the {@link TemplateDirectiveModel} that was invoked with {@code <@...>},
      * otherwise its return value is not defined by this API (it's usually {@code null}).
-     * 
-     * @since 2.3.22
      */
     @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "False alarm")
     public DirectiveCallPlace getCurrentDirectiveCallPlace() {
@@ -420,8 +414,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     /**
      * @param elementBuffer
      *            The elements to visit; might contains trailing {@code null}-s. Can be {@code null}.
-     * 
-     * @since 2.3.24
      */
     final void visit(ASTElement[] elementBuffer) throws IOException, TemplateException {
         if (elementBuffer == null) {
@@ -611,8 +603,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * Tells if we are inside an <tt>#attempt</tt> block (but before <tt>#recover</tt>). This can be useful for
      * {@link TemplateExceptionHandler}-s, as then they may don't want to print the error to the output, as
      * <tt>#attempt</tt> will roll it back anyway.
-     * 
-     * @since 2.3.20
      */
     public boolean isInAttemptBlock() {
         return inAttemptBlock;
@@ -1150,8 +1140,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     /**
      * Compares two {@link TemplateModel}-s according the rules of the FTL "==" operator.
-     * 
-     * @since 2.3.20
      */
     public boolean applyEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
@@ -1162,8 +1150,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * Compares two {@link TemplateModel}-s according the rules of the FTL "==" operator, except that if the two types
      * are incompatible, they are treated as non-equal instead of throwing an exception. Comparing dates of different
      * types (date-only VS time-only VS date-time) will still throw an exception, however.
-     * 
-     * @since 2.3.20
      */
     public boolean applyEqualsOperatorLenient(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
@@ -1172,8 +1158,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     /**
      * Compares two {@link TemplateModel}-s according the rules of the FTL "&lt;" operator.
-     * 
-     * @since 2.3.20
      */
     public boolean applyLessThanOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
@@ -1182,8 +1166,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     /**
      * Compares two {@link TemplateModel}-s according the rules of the FTL "&lt;" operator.
-     * 
-     * @since 2.3.20
      */
     public boolean applyLessThanOrEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
@@ -1192,8 +1174,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     /**
      * Compares two {@link TemplateModel}-s according the rules of the FTL "&gt;" operator.
-     * 
-     * @since 2.3.20
      */
     public boolean applyGreaterThanOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
@@ -1202,8 +1182,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     /**
      * Compares two {@link TemplateModel}-s according the rules of the FTL "&gt;=" operator.
-     * 
-     * @since 2.3.20
      */
     public boolean applyWithGreaterThanOrEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
@@ -1342,8 +1320,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * However, at least as of this writing (2.3.24), changing the current locale {@link #setLocale(Locale)} or changing
      * the current number format ({@link #setNumberFormat(String)}) will drop the stored value, so it will have to be
      * recalculated.
-     * 
-     * @since 2.3.24
      */
     public TemplateNumberFormat getTemplateNumberFormat() throws TemplateValueFormatException {
         TemplateNumberFormat format = cachedTemplateNumberFormat;
@@ -1363,8 +1339,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * @param formatString
      *            A string that you could also use as the value of the {@code numberFormat} configuration setting. Can't
      *            be {@code null}.
-     * 
-     * @since 2.3.24
      */
     public TemplateNumberFormat getTemplateNumberFormat(String formatString) throws TemplateValueFormatException {
         return getTemplateNumberFormat(formatString, true);
@@ -1385,8 +1359,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      *            A string that you could also use as the value of the {@code numberFormat} configuration setting.
      * @param locale
      *            The locale of the number format; not {@code null}.
-     * 
-     * @since 2.3.24
      */
     public TemplateNumberFormat getTemplateNumberFormat(String formatString, Locale locale)
             throws TemplateValueFormatException {
@@ -1670,8 +1642,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * @param formatString
      *            Like {@code "iso m"} or {@code "dd.MM.yyyy HH:mm"} or {@code "@somethingCustom"} or
      *            {@code "@somethingCustom params"}
-     * 
-     * @since 2.3.24
      */
     public TemplateDateFormat getTemplateDateFormat(
             String formatString, int dateType, Class<? extends Date> dateClass)
@@ -1696,8 +1666,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      *            {@link TemplateDateFormatFactory#get(String, int, Locale, TimeZone, boolean, Environment)}
      * 
      * @see #getTemplateDateFormat(String, int, Class)
-     * 
-     * @since 2.4
      */
     public TemplateDateFormat getTemplateDateFormat(
             String formatString,
@@ -1728,8 +1696,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      *            {@code null}.
      * 
      * @see #getTemplateDateFormat(String, int, Class)
-     * 
-     * @since 2.4
      */
     public TemplateDateFormat getTemplateDateFormat(
             String formatString,
@@ -1774,8 +1740,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * @param zonelessInput
      *            See the similar parameter of
      *            {@link TemplateDateFormatFactory#get(String, int, Locale, TimeZone, boolean, Environment)}
-     * 
-     * @since 2.3.24
      */
     public TemplateDateFormat getTemplateDateFormat(
             String formatString,
@@ -2255,7 +2219,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * @param w
      *            If it's a {@link PrintWriter}, {@link PrintWriter#println()} will be used for line-breaks.
      * @see #getInstructionStackSnapshot()
-     * @since 2.3.21
      */
     static void outputInstructionStack(
             ASTElement[] instructionStackSnapshot, boolean terseMode, Writer w) {
@@ -2333,8 +2296,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     /**
      * Returns the snapshot of what would be printed as FTL stack trace.
-     * 
-     * @since 2.3.20
      */
     ASTElement[] getInstructionStackSnapshot() {
         int requiredLength = 0;
@@ -2697,8 +2658,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * @throws IOException
      *             Same as exceptions thrown by
      *             {@link Configuration#getTemplate(String, Locale, Serializable, boolean)}
-     * 
-     * @since 2.3.21
      */
     public Template getTemplateForInclusion(String name, boolean ignoreMissing)
             throws IOException {
@@ -2772,8 +2731,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * 
      * @return Not {@code null}. This is possibly a lazily self-initializing namespace, which mean that it will only try
      *         to get and process the imported template when you access its content.
-     * 
-     * @since 2.3.25
      */
     public Namespace importLib(String templateName, String targetNsVarName, boolean lazy)
             throws IOException, TemplateException {
@@ -2892,8 +2849,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      *            relatively to the {@code baseName}. Absolute names are simply returned as is, ignoring the
      *            {@code baseName}, except, when the {@code baseName} has scheme part while the {@code targetName}
      *            doesn't have, then the schema of the {@code baseName} is prepended to the {@code targetName}.
-     * 
-     * @since 2.3.22
      */
     public String toFullTemplateName(String baseName, String targetName)
             throws MalformedTemplateNameException {

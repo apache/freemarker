@@ -63,8 +63,6 @@ implements TemplateScalarModel, Serializable {
     
     /**
      * Same as calling the constructor, except that for a {@code null} parameter it returns null. 
-     * 
-     * @since 2.3.23
      */
     public static SimpleScalar newInstanceOrNull(String s) {
         return s != null ? new SimpleScalar(s) : null;

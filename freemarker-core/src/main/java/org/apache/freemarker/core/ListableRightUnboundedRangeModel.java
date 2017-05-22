@@ -29,8 +29,6 @@ import org.apache.freemarker.core.model.impl.SimpleNumber;
 
 /**
  * This is the model used for right-unbounded ranges since Incompatible Improvements 2.3.21.
- * 
- * @since 2.3.21
  */
 final class ListableRightUnboundedRangeModel extends RightUnboundedRangeModel implements TemplateCollectionModel {
 

@@ -21,8 +21,6 @@ package org.apache.freemarker.core.util;
 
 /**
  * An unexpected state was reached that is certainly caused by a bug in FreeMarker.
- * 
- * @since 2.3.21
  */
 public class BugException extends RuntimeException {
 

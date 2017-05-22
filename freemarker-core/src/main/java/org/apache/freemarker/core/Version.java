@@ -30,8 +30,6 @@ import org.apache.freemarker.core.util._StringUtil;
  * to parse the version strings of 3rd party libraries.
  * 
  * @see Configuration#getVersion()
- * 
- * @since 2.3.20
  */
 public final class Version implements Serializable {
     
@@ -130,8 +128,6 @@ public final class Version implements Serializable {
 
     /**
      * Creates an object based on the {@code int} value that uses the same kind of encoding as {@link #intValue()}.
-     * 
-     * @since 2.3.24
      */
     public Version(int intValue) {
         this.intValue = intValue;

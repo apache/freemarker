@@ -22,8 +22,6 @@ import org.apache.freemarker.core.valueformat.TemplateValueFormatException;
 
 /**
  * Can't invoke a template format that the template format refers to (typically thrown by alias template formats).
- * 
- * @since 2.3.24
  */
 class AliasTargetTemplateValueFormatException extends TemplateValueFormatException {
 

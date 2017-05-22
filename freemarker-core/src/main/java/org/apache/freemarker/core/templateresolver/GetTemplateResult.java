@@ -25,8 +25,6 @@ import org.apache.freemarker.core.Template;
 
 /**
  * Used for the return value of {@link TemplateResolver#getTemplate(String, Locale, Serializable)} .
- * 
- * @since 3.0.0
  */
 //TODO DRAFT only [FM3]
 public final class GetTemplateResult {

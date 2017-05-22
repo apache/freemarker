@@ -30,8 +30,6 @@ import org.apache.freemarker.core.Environment;
  * one-per-{@link Configuration}), and so must be thread-safe.
  * 
  * @see MutableProcessingConfiguration#setCustomNumberFormats(java.util.Map)
- * 
- * @since 2.3.24
  */
 public abstract class TemplateNumberFormatFactory extends TemplateValueFormatFactory {
 

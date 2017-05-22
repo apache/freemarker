@@ -52,8 +52,6 @@ abstract class ASTElement extends ASTNode {
 
     /**
      * The index of the element in the parent's {@link #childBuffer} array.
-     * 
-     * @since 2.3.23
      */
     private int index;
 
@@ -250,8 +248,6 @@ abstract class ASTElement extends ASTNode {
 
     /**
      * @param buffWithCnt Maybe {@code null}
-     * 
-     * @since 2.3.24
      */
     final void setChildren(TemplateElements buffWithCnt) {
         ASTElement[] childBuffer = buffWithCnt.getBuffer();

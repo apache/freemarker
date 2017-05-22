@@ -21,8 +21,6 @@ package org.apache.freemarker.core.valueformat;
 
 /**
  * Thrown when the {@link TemplateValueFormat} doesn't support parsing, and parsing was invoked.
- * 
- * @since 2.3.24
  */
 public class ParsingNotSupportedException extends TemplateValueFormatException {
 

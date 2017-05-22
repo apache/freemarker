@@ -30,8 +30,6 @@ import org.apache.freemarker.core.util._ClassUtil;
  * instance is always only used in a single {@link Environment} object.
  * 
  * @see MutableProcessingConfiguration#setNewBuiltinClassResolver(TemplateClassResolver)
- * 
- * @since 2.3.17
  */
 public interface TemplateClassResolver {
     

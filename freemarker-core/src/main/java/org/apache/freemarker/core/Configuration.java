@@ -1276,8 +1276,6 @@ public final class Configuration
      * @throws IOException
      *             If there was some other problem with reading the template "file". Note that the other exceptions
      *             extend {@link IOException}, so this should be catched the last.
-     * 
-     * @since 2.3.22
      */
     public Template getTemplate(String name, Locale locale, Serializable customLookupCondition,
             boolean ignoreMissing)
@@ -1447,17 +1445,13 @@ public final class Configuration
      *             Also, "pre" and "rc" was lowercase, and was followd by a number without 0-padding.</li>
      *       </ul>
      * </ul>
-     * 
-     * @since 2.3.20
-     */ 
+     */
     public static Version getVersion() {
         return VERSION;
     }
     
     /**
      * Same as {@link #getSupportedBuiltInNames(NamingConvention)} with argument {@link #getNamingConvention()}.
-     * 
-     * @since 2.3.20
      */
     public Set getSupportedBuiltInNames() {
         return getSupportedBuiltInNames(getNamingConvention());
@@ -1474,8 +1468,6 @@ public final class Configuration
      *            {@link NamingConvention#CAMEL_CASE}. If it's
      *            {@link NamingConvention#AUTO_DETECT} then the union
      *            of the names in all the naming conventions is returned.
-     * 
-     * @since 2.3.24
      */
     public Set<String> getSupportedBuiltInNames(NamingConvention namingConvention) {
         Set<String> names;
@@ -1494,8 +1486,6 @@ public final class Configuration
     /**
      * Same as {@link #getSupportedBuiltInDirectiveNames(NamingConvention)} with argument
      * {@link #getNamingConvention()}.
-     * 
-     * @since 2.3.21
      */
     public Set getSupportedBuiltInDirectiveNames() {
         return getSupportedBuiltInDirectiveNames(getNamingConvention());
@@ -1511,8 +1501,6 @@ public final class Configuration
      *            {@link NamingConvention#CAMEL_CASE}. If it's
      *            {@link NamingConvention#AUTO_DETECT} then the union
      *            of the names in all the naming conventions is returned. 
-     * 
-     * @since 2.3.24
      */
     public Set<String> getSupportedBuiltInDirectiveNames(NamingConvention namingConvention) {
         if (namingConvention == NamingConvention.AUTO_DETECT) {
@@ -1545,108 +1533,108 @@ public final class Configuration
             extends MutableParsingAndProcessingConfiguration<SelfT>
             implements TopLevelConfiguration, CommonBuilder<Configuration> {
 
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String SOURCE_ENCODING_KEY_SNAKE_CASE = "source_encoding";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String SOURCE_ENCODING_KEY = SOURCE_ENCODING_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String SOURCE_ENCODING_KEY_CAMEL_CASE = "sourceEncoding";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String LOCALIZED_LOOKUP_KEY_SNAKE_CASE = "localized_lookup";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String LOCALIZED_LOOKUP_KEY = LOCALIZED_LOOKUP_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String LOCALIZED_LOOKUP_KEY_CAMEL_CASE = "localizedLookup";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String WHITESPACE_STRIPPING_KEY_SNAKE_CASE = "whitespace_stripping";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String WHITESPACE_STRIPPING_KEY = WHITESPACE_STRIPPING_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String WHITESPACE_STRIPPING_KEY_CAMEL_CASE = "whitespaceStripping";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.24 */
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String OUTPUT_FORMAT_KEY_SNAKE_CASE = "output_format";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String OUTPUT_FORMAT_KEY = OUTPUT_FORMAT_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.24 */
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String OUTPUT_FORMAT_KEY_CAMEL_CASE = "outputFormat";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.24 */
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE = "recognize_standard_file_extensions";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY
                 = RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.24 */
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE = "recognizeStandardFileExtensions";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.24 */
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE = "registered_custom_output_formats";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY = REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.24 */
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE = "registeredCustomOutputFormats";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.24 */
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String AUTO_ESCAPING_POLICY_KEY_SNAKE_CASE = "auto_escaping_policy";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String AUTO_ESCAPING_POLICY_KEY = AUTO_ESCAPING_POLICY_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.24 */
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE = "autoEscapingPolicy";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String CACHE_STORAGE_KEY_SNAKE_CASE = "cache_storage";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String CACHE_STORAGE_KEY = CACHE_STORAGE_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String CACHE_STORAGE_KEY_CAMEL_CASE = "cacheStorage";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String TEMPLATE_UPDATE_DELAY_KEY_SNAKE_CASE = "template_update_delay";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String TEMPLATE_UPDATE_DELAY_KEY = TEMPLATE_UPDATE_DELAY_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String TEMPLATE_UPDATE_DELAY_KEY_CAMEL_CASE = "templateUpdateDelay";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String AUTO_INCLUDE_KEY_SNAKE_CASE = "auto_include";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String AUTO_INCLUDE_KEY = AUTO_INCLUDE_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String AUTO_INCLUDE_KEY_CAMEL_CASE = "autoInclude";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String TEMPLATE_LANGUAGE_KEY_SNAKE_CASE = "template_language";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String TEMPLATE_LANGUAGE_KEY = TEMPLATE_LANGUAGE_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String TEMPLATE_LANGUAGE_KEY_CAMEL_CASE = "templateLanguage";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String TAG_SYNTAX_KEY_SNAKE_CASE = "tag_syntax";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String TAG_SYNTAX_KEY = TAG_SYNTAX_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String TAG_SYNTAX_KEY_CAMEL_CASE = "tagSyntax";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String NAMING_CONVENTION_KEY_SNAKE_CASE = "naming_convention";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String NAMING_CONVENTION_KEY = NAMING_CONVENTION_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String NAMING_CONVENTION_KEY_CAMEL_CASE = "namingConvention";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.25 */
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String TAB_SIZE_KEY_SNAKE_CASE = "tab_size";
-        /** Alias to the {@code ..._SNAKE_CASE} variation. @since 2.3.25 */
+        /** Alias to the {@code ..._SNAKE_CASE} variation. */
         public static final String TAB_SIZE_KEY = TAB_SIZE_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.25 */
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String TAB_SIZE_KEY_CAMEL_CASE = "tabSize";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String TEMPLATE_LOADER_KEY_SNAKE_CASE = "template_loader";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String TEMPLATE_LOADER_KEY = TEMPLATE_LOADER_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String TEMPLATE_LOADER_KEY_CAMEL_CASE = "templateLoader";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE = "template_lookup_strategy";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String TEMPLATE_LOOKUP_STRATEGY_KEY = TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String TEMPLATE_LOOKUP_STRATEGY_KEY_CAMEL_CASE = "templateLookupStrategy";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE = "template_name_format";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String TEMPLATE_NAME_FORMAT_KEY = TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String TEMPLATE_NAME_FORMAT_KEY_CAMEL_CASE = "templateNameFormat";
         /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String SHARED_VARIABLES_KEY_SNAKE_CASE = "shared_variables";
@@ -1654,17 +1642,17 @@ public final class Configuration
         public static final String SHARED_VARIABLES_KEY = SHARED_VARIABLES_KEY_SNAKE_CASE;
         /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String SHARED_VARIABLES_KEY_CAMEL_CASE = "sharedVariables";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.24 */
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE = "template_configurations";
-        /** Alias to the {@code ..._SNAKE_CASE} variation. @since 2.3.24 */
+        /** Alias to the {@code ..._SNAKE_CASE} variation. */
         public static final String TEMPLATE_CONFIGURATIONS_KEY = TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.24 */
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String TEMPLATE_CONFIGURATIONS_KEY_CAMEL_CASE = "templateConfigurations";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE = "incompatible_improvements";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String INCOMPATIBLE_IMPROVEMENTS_KEY = INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.23 */
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE = "incompatibleImprovements";
         // Set early in the constructor to non-null
         private Version incompatibleImprovements = Configuration.VERSION_3_0_0;

@@ -49,8 +49,6 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
  * @see SimpleSequence
  * @see DefaultListAdapter
  * @see TemplateSequenceModel
- * 
- * @since 2.3.22
  */
 public abstract class DefaultArrayAdapter extends WrappingTemplateModel implements TemplateSequenceModel,
         AdapterTemplateModel, WrapperTemplateModel, Serializable {

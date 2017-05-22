@@ -32,8 +32,6 @@ import org.apache.freemarker.core.valueformat.TemplateValueFormatException;
 /**
  * Creates an alias to another format, so that the format can be referred to with a simple name in the template, rather
  * than as a concrete pattern or other kind of format string.
- * 
- * @since 2.3.24
  */
 public final class AliasTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
 

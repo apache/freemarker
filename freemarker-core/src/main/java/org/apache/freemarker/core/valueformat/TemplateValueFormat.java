@@ -20,8 +20,6 @@ package org.apache.freemarker.core.valueformat;
 
 /**
  * Superclass of all value format objects; objects that convert values to strings, or parse strings.
- * 
- * @since 2.3.24
  */
 public abstract class TemplateValueFormat {
 

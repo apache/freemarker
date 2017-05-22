@@ -27,8 +27,6 @@ import org.apache.freemarker.core.util._StringUtil;
  * Matches the whole template source name (also known as template source path) with the given regular expression.
  * Note that the template source name is relative to the template storage root defined by the {@link TemplateLoader};
  * it's not the full path of a file on the file system.
- * 
- * @since 2.3.24
  */
 public class PathRegexMatcher extends TemplateSourceMatcher {
     

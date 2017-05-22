@@ -32,7 +32,6 @@ public class WrongTemplateCharsetException extends ParseException {
     private final Charset constructorSpecifiedEncoding;
 
     /**
-     * @since 2.3.22
      */
     public WrongTemplateCharsetException(Charset templateSpecifiedEncoding, Charset constructorSpecifiedEncoding) {
         this.templateSpecifiedEncoding = templateSpecifiedEncoding;
@@ -47,14 +46,12 @@ public class WrongTemplateCharsetException extends ParseException {
     }
 
     /**
-     * @since 2.3.22
      */
     public Charset getTemplateSpecifiedEncoding() {
         return templateSpecifiedEncoding;
     }
 
     /**
-     * @since 2.3.22
      */
     public Charset getConstructorSpecifiedEncoding() {
         return constructorSpecifiedEncoding;

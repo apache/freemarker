@@ -96,8 +96,6 @@ public class TaglibFactory implements TemplateHashModel {
 
     /**
      * The default of {@link #getClasspathTlds()}; an empty list.
-     * 
-     * @since 2.3.22
      */
     public static final List DEFAULT_CLASSPATH_TLDS = Collections.EMPTY_LIST;
     
@@ -105,8 +103,6 @@ public class TaglibFactory implements TemplateHashModel {
      * The default of {@link #getMetaInfTldSources()}; a list that contains
      * {@link WebInfPerLibJarMetaInfTldSource#INSTANCE}, which gives the behavior described in the JSP 2.2
      * specification.
-     * 
-     * @since 2.3.22
      */
     public static final List/*<? extends MetaInfTldSource>*/ DEFAULT_META_INF_TLD_SOURCES
             = Collections.singletonList(WebInfPerLibJarMetaInfTldSource.INSTANCE);
@@ -292,8 +288,6 @@ public class TaglibFactory implements TemplateHashModel {
     
     /**
      * See {@link #setObjectWrapper(ObjectWrapper)}.
-     * 
-     * @since 2.3.22
      */
     public ObjectWrapper getObjectWrapper() {
         return objectWrapper;
@@ -304,8 +298,6 @@ public class TaglibFactory implements TemplateHashModel {
      * Usually, it should be the same {@link ObjectWrapper} that will be used inside the templates. {@code null} value
      * is only supported for backward compatibility. For custom EL functions to be exposed, it must be non-{@code null}
      * and an {@code intanceof} {@link DefaultObjectWrapper} (like typically, a {@link DefaultObjectWrapper}).
-     * 
-     * @since 2.3.22
      */
     public void setObjectWrapper(ObjectWrapper objectWrapper) {
         checkNotStarted();
@@ -314,8 +306,6 @@ public class TaglibFactory implements TemplateHashModel {
 
     /**
      * See {@link #setMetaInfTldSources(List)}.
-     * 
-     * @since 2.3.22
      */
     public List/*<Pattern>*/ getMetaInfTldSources() {
         return metaInfTldSources;
@@ -336,8 +326,6 @@ public class TaglibFactory implements TemplateHashModel {
      *            {@link MetaInfTldSource} wins.
      * 
      * @see #setClasspathTlds(List)
-     * 
-     * @since 2.3.22
      */
     public void setMetaInfTldSources(List/*<? extends MetaInfTldSource>*/ metaInfTldSources) {
         checkNotStarted();
@@ -347,8 +335,6 @@ public class TaglibFactory implements TemplateHashModel {
 
     /**
      * See {@link #setClasspathTlds(List)}.
-     * 
-     * @since 2.3.22
      */
     public List/*<String>*/ getClasspathTlds() {
         return classpathTlds;
@@ -367,8 +353,6 @@ public class TaglibFactory implements TemplateHashModel {
      *            {@code "/META-INF/my.tld"}. (Relative resource paths will be interpreted as root-relative.)
      * 
      * @see #setMetaInfTldSources(List)
-     * 
-     * @since 2.3.22
      */
     public void setClasspathTlds(List/*<String>*/ classpathTlds) {
         checkNotStarted();
@@ -1108,8 +1092,6 @@ public class TaglibFactory implements TemplateHashModel {
     /**
      * A location within which we will look for {@code META-INF/**}{@code /*.tld}-s. Used in the parameter to
      * {@link #setMetaInfTldSources}. See concrete subclasses for more.
-     * 
-     * @since 2.3.22
      */
     public static abstract class MetaInfTldSource {
         private MetaInfTldSource() { }
@@ -1119,8 +1101,6 @@ public class TaglibFactory implements TemplateHashModel {
      * To search TLD-s under <tt>sevletContext:/WEB-INF/lib/*.{jar,zip}/META-INF/**</tt><tt>/*.tld</tt>, as requested by
      * the JSP specification. Note that these also used to be in the classpath, so it's redundant to use this together
      * with a sufficiently permissive {@link ClasspathMetaInfTldSource}.
-     * 
-     * @since 2.3.22
      */
     public static final class WebInfPerLibJarMetaInfTldSource extends MetaInfTldSource {
         public final static WebInfPerLibJarMetaInfTldSource INSTANCE = new WebInfPerLibJarMetaInfTldSource();
@@ -1136,8 +1116,6 @@ public class TaglibFactory implements TemplateHashModel {
      * 
      * <p>
      * Note that this TLD discovery mechanism is not part of the JSP specification.
-     * 
-     * @since 2.3.22
      */
     public static final class ClasspathMetaInfTldSource extends MetaInfTldSource {
         

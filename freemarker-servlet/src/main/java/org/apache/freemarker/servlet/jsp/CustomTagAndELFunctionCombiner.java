@@ -40,8 +40,6 @@ import org.apache.freemarker.core.util._ClassUtil;
  * Used when a custom JSP tag and an EL function uses the same name in a tag library, to invoke a single FTL value from
  * the two. As FTL as no separate namespace for "tags" and functions, both aspect has to be implemented by the same
  * value.
- * 
- * @since 2.3.25
  */
 @SuppressWarnings("rawtypes")
 class CustomTagAndELFunctionCombiner {

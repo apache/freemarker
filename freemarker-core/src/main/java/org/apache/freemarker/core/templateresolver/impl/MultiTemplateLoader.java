@@ -73,8 +73,6 @@ public class MultiTemplateLoader implements TemplateLoader {
 
     /**
      * Show class name and some details that are useful in template-not-found errors.
-     * 
-     * @since 2.3.21
      */
     @Override
     public String toString() {
@@ -92,8 +90,6 @@ public class MultiTemplateLoader implements TemplateLoader {
 
     /**
      * Returns the number of {@link TemplateLoader}-s directly inside this {@link TemplateLoader}.
-     * 
-     * @since 2.3.23
      */
     public int getTemplateLoaderCount() {
         return templateLoaders.length;

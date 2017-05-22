@@ -51,8 +51,6 @@ import org.apache.freemarker.core.Template;
  * </ul>
  * 
  * @see Configuration#getTemplateLookupStrategy()
- * 
- * @since 2.3.22
  */
 public abstract class TemplateLookupStrategy {
 

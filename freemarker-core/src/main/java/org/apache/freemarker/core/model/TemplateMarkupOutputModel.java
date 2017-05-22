@@ -39,8 +39,6 @@ import org.apache.freemarker.core.outputformat.OutputFormat;
  * @param <MO>
  *            Refers to the interface's own type, which is useful in interfaces that extend
  *            {@link TemplateMarkupOutputModel} (Java Generics trick).
- * 
- * @since 2.3.24
  */
 public interface TemplateMarkupOutputModel<MO extends TemplateMarkupOutputModel<MO>> extends TemplateModel {
 

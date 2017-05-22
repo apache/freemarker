@@ -23,8 +23,6 @@ import java.io.IOException;
 /**
  * Matches the file extension; unlike other matchers, by default case <em>insensitive</em>. A name (a path) is
  * considered to have the given extension exactly if it ends with a dot plus the extension. 
- * 
- * @since 2.3.24
  */
 public class FileExtensionMatcher extends TemplateSourceMatcher {
 

@@ -55,8 +55,6 @@ public class StrongCacheStorage implements CacheStorage, CacheStorageWithGetSize
     
     /**
      * Returns a close approximation of the number of cache entries.
-     * 
-     * @since 2.3.21
      */
     @Override
     public int getSize() {

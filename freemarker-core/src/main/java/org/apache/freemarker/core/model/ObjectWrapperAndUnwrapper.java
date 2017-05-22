@@ -31,8 +31,6 @@ package org.apache.freemarker.core.model;
  * <p>
  * <b>Experimental status warning:</b> This interface is subject to change on non-backward compatible ways, hence, it
  * shouldn't be implemented outside FreeMarker yet.
- * 
- * @since 2.3.22
  */
 public interface ObjectWrapperAndUnwrapper extends ObjectWrapper {
 
@@ -41,8 +39,6 @@ public interface ObjectWrapperAndUnwrapper extends ObjectWrapper {
      * desired class, nor it can be {@code null}.
      * 
      * @see #tryUnwrapTo(TemplateModel, Class)
-     * 
-     * @since 2.3.22
      */
     Object CANT_UNWRAP_TO_TARGET_CLASS = new Object();
 
@@ -57,8 +53,6 @@ public interface ObjectWrapperAndUnwrapper extends ObjectWrapper {
      *             If the unwrapping fails from any reason.
      * 
      * @see #tryUnwrapTo(TemplateModel, Class)
-     * 
-     * @since 2.3.22
      */
     Object unwrap(TemplateModel tm) throws TemplateModelException;
 
@@ -82,8 +76,6 @@ public interface ObjectWrapperAndUnwrapper extends ObjectWrapper {
      *             {@link #CANT_UNWRAP_TO_TARGET_CLASS} return value.
      * 
      * @see #unwrap(TemplateModel)
-     * 
-     * @since 2.3.22
      */
     Object tryUnwrapTo(TemplateModel tm, Class<?> targetClass) throws TemplateModelException;
 

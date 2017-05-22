@@ -29,8 +29,7 @@ import org.apache.freemarker.core.templateresolver.MalformedTemplateNameExceptio
  * This extends {@link FileNotFoundException} for backward compatibility, but in fact has nothing to do with files, as
  * FreeMarker can load templates from many other sources.
  *
- * @since 2.3.22
- * 
+ *
  * @see MalformedTemplateNameException
  * @see Configuration#getTemplate(String)
  */

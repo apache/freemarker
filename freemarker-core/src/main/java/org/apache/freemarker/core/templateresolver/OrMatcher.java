@@ -22,8 +22,6 @@ import java.io.IOException;
 
 /**
  * Logical "or" operation among the given matchers.
- * 
- * @since 2.3.24
  */
 public class OrMatcher extends TemplateSourceMatcher {
     

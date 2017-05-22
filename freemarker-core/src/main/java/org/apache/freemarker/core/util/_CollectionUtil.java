@@ -29,7 +29,6 @@ public class _CollectionUtil {
     public static final String[] EMPTY_STRING_ARRAY = new String[] { };
 
     /**
-     * @since 2.3.22
      */
     public static final char[] EMPTY_CHAR_ARRAY = new char[] { };
     

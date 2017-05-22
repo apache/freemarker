@@ -24,8 +24,6 @@ import org.apache.freemarker.core.model.TemplateNodeModel;
 
 /**
  * Indicates that a {@link TemplateNodeModel} value was expected, but the value had a different type.
- * 
- * @since 2.3.21
  */
 public class NonNodeException extends UnexpectedTypeException {
 

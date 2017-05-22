@@ -24,8 +24,6 @@ import org.apache.freemarker.core.model.TemplateModel;
 
 /**
  * Indicates that a {@link TemplateHashModel} value was expected, but the value had a different type.
- * 
- * @since 2.3.21
  */
 public class NonHashException extends UnexpectedTypeException {
 

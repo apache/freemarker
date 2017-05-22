@@ -22,8 +22,6 @@ import org.apache.freemarker.core.outputformat.CommonTemplateMarkupOutputModel;
 
 /**
  * Stores combined markup to be printed; used with {@link CombinedMarkupOutputFormat}.
- * 
- * @since 2.3.24
  */
 public final class TemplateCombinedMarkupOutputModel
         extends CommonTemplateMarkupOutputModel<TemplateCombinedMarkupOutputModel> {

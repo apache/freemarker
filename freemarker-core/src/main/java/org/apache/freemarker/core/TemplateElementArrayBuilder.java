@@ -23,8 +23,6 @@ import org.apache.freemarker.core.util._CollectionUtil;
 /**
  * Holds an buffer (array) of {@link ASTElement}-s with the count of the utilized items in it. The un-utilized tail
  * of the array must only contain {@code null}-s.
- * 
- * @since 2.3.24
  */
 class TemplateElements {
     

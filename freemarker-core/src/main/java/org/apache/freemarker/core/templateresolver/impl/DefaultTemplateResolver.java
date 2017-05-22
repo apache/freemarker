@@ -73,8 +73,6 @@ public class DefaultTemplateResolver extends TemplateResolver {
     
     /**
      * The default template update delay; see {@link Configuration#getTemplateUpdateDelayMilliseconds()}.
-     * 
-     * @since 2.3.23
      */
     public static final long DEFAULT_TEMPLATE_UPDATE_DELAY_MILLIS = 5000L;
     
@@ -115,8 +113,6 @@ public class DefaultTemplateResolver extends TemplateResolver {
      *            {@link TemplateLoader} itself specifies a {@link TemplateConfiguration}).
      * @param config
      *            The {@link Configuration} this cache will be used for. Can't be {@code null}.
-     * 
-     * @since 2.3.24
      */
     public DefaultTemplateResolver(
             TemplateLoader templateLoader,
@@ -166,21 +162,18 @@ public class DefaultTemplateResolver extends TemplateResolver {
     }
     
     /**
-     * @since 2.3.22
      */
     public TemplateLookupStrategy getTemplateLookupStrategy() {
         return templateLookupStrategy;
     }
     
     /**
-     * @since 2.3.22
      */
     public TemplateNameFormat getTemplateNameFormat() {
         return templateNameFormat;
     }
     
     /**
-     * @since 2.3.24
      */
     public TemplateConfigurationFactory getTemplateConfigurations() {
         return templateConfigurations;
@@ -213,8 +206,6 @@ public class DefaultTemplateResolver extends TemplateResolver {
      *             If reading the template has failed from a reason other than the template is missing. This method
      *             should never be a {@link TemplateNotFoundException}, as that condition is indicated in the return
      *             value.
-     * 
-     * @since 2.3.22
      */
     @Override
     public GetTemplateResult getTemplate(String name, Locale locale, Serializable customLookupCondition)

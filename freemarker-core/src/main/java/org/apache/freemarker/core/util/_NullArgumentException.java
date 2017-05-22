@@ -21,8 +21,6 @@ package org.apache.freemarker.core.util;
 
 /**
  * Indicates that an argument that must be non-{@code null} was {@code null}. 
- * 
- * @since 2.3.20
  */
 public class _NullArgumentException extends IllegalArgumentException {
 
@@ -48,7 +46,6 @@ public class _NullArgumentException extends IllegalArgumentException {
     }
 
     /**
-     * @since 2.3.22
      */
     public static void check(Object argumentValue) {
         if (argumentValue == null) {

@@ -42,8 +42,6 @@ import org.apache.freemarker.core.util._StringUtil;
  * 
  * <p>By default the glob is case sensitive, but this can be changed with {@link #setCaseInsensitive(boolean)} (or
  * {@link #caseInsensitive(boolean)}).
- * 
- * @since 2.3.24
  */
 public class PathGlobMatcher extends TemplateSourceMatcher {
     

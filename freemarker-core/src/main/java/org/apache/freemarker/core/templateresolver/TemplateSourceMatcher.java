@@ -21,7 +21,6 @@ package org.apache.freemarker.core.templateresolver;
 import java.io.IOException;
 
 /**
- * @since 2.3.24
  */
 public abstract class TemplateSourceMatcher {
     

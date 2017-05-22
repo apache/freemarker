@@ -22,8 +22,6 @@ import org.apache.freemarker.core.outputformat.CommonTemplateMarkupOutputModel;
 
 /**
  * Stores HTML markup to be printed; used with {@link HTMLOutputFormat}.
- * 
- * @since 2.3.24
  */
 public final class TemplateHTMLOutputModel extends CommonTemplateMarkupOutputModel<TemplateHTMLOutputModel> {
     

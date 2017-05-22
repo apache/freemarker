@@ -28,8 +28,6 @@ import org.apache.freemarker.core.util._CollectionUtil;
 /**
  * Indicates that a {@link TemplateSequenceModel} or {@link TemplateCollectionModel} value was expected, but the value
  * had a different type.
- * 
- * @since 2.3.21
  */
 public class NonSequenceOrCollectionException extends UnexpectedTypeException {
 

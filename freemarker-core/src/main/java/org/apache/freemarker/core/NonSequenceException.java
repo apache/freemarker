@@ -24,8 +24,6 @@ import org.apache.freemarker.core.model.TemplateSequenceModel;
 
 /**
  * Indicates that a {@link TemplateSequenceModel} value was expected, but the value had a different type.
- * 
- * @since 2.3.21
  */
 public class NonSequenceException extends UnexpectedTypeException {
 

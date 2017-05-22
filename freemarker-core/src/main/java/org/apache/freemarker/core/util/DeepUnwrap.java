@@ -78,7 +78,6 @@ public class DeepUnwrap {
     /**
      * Same as {@link #unwrap(TemplateModel)}, but it doesn't throw exception 
      * if it doesn't know how to unwrap the model, but rather returns it as-is.
-     * @since 2.3.14
      */
     public static Object permissiveUnwrap(TemplateModel model) throws TemplateModelException {
         return unwrap(model, true);

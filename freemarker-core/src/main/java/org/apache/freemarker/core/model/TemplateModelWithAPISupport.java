@@ -25,8 +25,6 @@ package org.apache.freemarker.core.model;
  * <p>
  * <b>Experimental status warning:</b> This interface is subject to change on non-backward compatible ways, hence, it
  * shouldn't be implemented outside FreeMarker yet.
- * 
- * @since 2.3.22
  */
 public interface TemplateModelWithAPISupport extends TemplateModel {
 

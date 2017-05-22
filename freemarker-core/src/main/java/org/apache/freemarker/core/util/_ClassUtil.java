@@ -56,8 +56,6 @@ public class _ClassUtil {
     
     /**
      * Same as {@link #getShortClassName(Class, boolean) getShortClassName(pClass, false)}.
-     * 
-     * @since 2.3.20
      */
     public static String getShortClassName(Class pClass) {
         return getShortClassName(pClass, false);
@@ -71,8 +69,6 @@ public class _ClassUtil {
      * @param shortenFreeMarkerClasses if {@code true}, it will also shorten FreeMarker class names. The exact rules
      *     aren't specified and might change over time, but right now, {@link BeanModel} for
      *     example becomes to {@code o.a.f.c.m.BeanModel}.
-     * 
-     * @since 2.3.20
      */
     public static String getShortClassName(Class pClass, boolean shortenFreeMarkerClasses) {
         if (pClass == null) {
@@ -103,8 +99,6 @@ public class _ClassUtil {
 
     /**
      * Same as {@link #getShortClassNameOfObject(Object, boolean) getShortClassNameOfObject(pClass, false)}.
-     * 
-     * @since 2.3.20
      */
     public static String getShortClassNameOfObject(Object obj) {
         return getShortClassNameOfObject(obj, false);
@@ -113,8 +107,6 @@ public class _ClassUtil {
     /**
      * {@link #getShortClassName(Class, boolean)} called with {@code object.getClass()}, but returns the fictional
      * class name {@code Null} for a {@code null} value.
-     * 
-     * @since 2.3.20
      */
     public static String getShortClassNameOfObject(Object obj, boolean shortenFreeMarkerClasses) {
         if (obj == null) {
@@ -131,8 +123,6 @@ public class _ClassUtil {
      * @param primitiveClass A {@link Class} like {@code int.type}, {@code boolean.type}, etc. If it's not a primitive
      *     class, or it's {@code null}, then the parameter value is returned as is. Note that performance-wise the
      *     method assumes that it's a primitive class.
-     *     
-     * @since 2.3.21
      */
     public static Class primitiveClassToBoxingClass(Class primitiveClass) {
         // Tried to sort these with decreasing frequency in API-s:
@@ -150,8 +140,6 @@ public class _ClassUtil {
 
     /**
      * The exact reverse of {@link #primitiveClassToBoxingClass}.
-     *     
-     * @since 2.3.21
      */
     public static Class boxingClassToPrimitiveClass(Class boxingClass) {
         // Tried to sort these with decreasing frequency in API-s:
@@ -171,8 +159,6 @@ public class _ClassUtil {
      * Tells if a type is numerical; works both for primitive types and classes.
      * 
      * @param type can't be {@code null}
-     * 
-     * @since 2.3.21
      */
     public static boolean isNumerical(Class type) {
         return Number.class.isAssignableFrom(type)

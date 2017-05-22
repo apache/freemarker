@@ -36,8 +36,6 @@ import org.apache.freemarker.core.model.TemplateModelException;
  * Implementations need not be thread-safe if the {@link TemplateNumberFormatFactory} doesn't recycle them among
  * different {@link Environment}-s. As far as FreeMarker's concerned, instances are bound to a single
  * {@link Environment}, and {@link Environment}-s are thread-local objects.
- * 
- * @since 2.3.24
  */
 public abstract class TemplateDateFormat extends TemplateValueFormat {
     

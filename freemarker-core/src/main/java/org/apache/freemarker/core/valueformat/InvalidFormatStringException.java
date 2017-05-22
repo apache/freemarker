@@ -21,8 +21,6 @@ package org.apache.freemarker.core.valueformat;
 /**
  * Used when creating {@link TemplateDateFormat}-s and {@link TemplateNumberFormat}-s to indicate that the format
  * string (like the value of the {@code dateFormat} setting) is malformed.
- * 
- * @since 2.3.24
  */
 public abstract class InvalidFormatStringException extends TemplateValueFormatException {
     

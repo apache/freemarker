@@ -21,8 +21,6 @@ package org.apache.freemarker.core.valueformat;
 /**
  * Error while getting, creating or applying {@link TemplateValueFormat}-s (including its subclasses, like
  * {@link TemplateNumberFormat}).
- * 
- * @since 2.3.24
  */
 public abstract class TemplateValueFormatException extends Exception {
 

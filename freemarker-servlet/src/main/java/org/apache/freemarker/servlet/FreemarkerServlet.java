@@ -337,73 +337,53 @@ public class FreemarkerServlet extends HttpServlet {
     /**
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params. (This init-param
      * has existed long before 2.3.22, but this constant was only added then.)
-     * 
-     * @since 2.3.22
      */
     public static final String INIT_PARAM_TEMPLATE_PATH = "TemplatePath";
     
     /**
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params. (This init-param
      * has existed long before 2.3.22, but this constant was only added then.)
-     * 
-     * @since 2.3.22
      */
     public static final String INIT_PARAM_NO_CACHE = "NoCache";
 
     /**
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params. (This init-param
      * has existed long before 2.3.22, but this constant was only added then.)
-     * 
-     * @since 2.3.22
      */
     public static final String INIT_PARAM_CONTENT_TYPE = "ContentType";
 
     /**
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
-     *
-     * @since 2.3.24
      */
     public static final String INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE = "OverrideResponseContentType";
 
     /**
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
-     *
-     * @since 2.3.24
      */
     public static final String INIT_PARAM_RESPONSE_CHARACTER_ENCODING = "ResponseCharacterEncoding";
 
     /**
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
-     *
-     * @since 2.3.24
      */
     public static final String INIT_PARAM_OVERRIDE_RESPONSE_LOCALE = "OverrideResponseLocale";
 
     /**
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
-     * 
-     * @since 2.3.22
      */
     public static final String INIT_PARAM_BUFFER_SIZE = "BufferSize";
     
     /**
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
-     * 
-     * @since 2.3.22
      */
     public static final String INIT_PARAM_META_INF_TLD_LOCATIONS = "MetaInfTldSources";
 
     /**
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
-     * 
-     * @since 2.3.22
      */
     public static final String INIT_PARAM_EXCEPTION_ON_MISSING_TEMPLATE = "ExceptionOnMissingTemplate";
     
     /**
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
-     * 
-     * @since 2.3.22
      */
     public static final String INIT_PARAM_CLASSPATH_TLDS = "ClasspathTlds";
     
@@ -433,37 +413,27 @@ public class FreemarkerServlet extends HttpServlet {
      * When set, the items defined in it will be added after those coming from the
      * {@value #INIT_PARAM_META_INF_TLD_LOCATIONS} init-param. The value syntax is the same as of the init-param. Note
      * that {@value #META_INF_TLD_LOCATION_CLEAR} can be used to re-start the list, rather than continue it.
-     * 
-     * @since 2.3.22
      */
     public static final String SYSTEM_PROPERTY_META_INF_TLD_SOURCES = "org.freemarker.jsp.metaInfTldSources";
 
     /**
      * When set, the items defined in it will be added after those coming from the
      * {@value #INIT_PARAM_CLASSPATH_TLDS} init-param. The value syntax is the same as of the init-param.
-     * 
-     * @since 2.3.22
      */
     public static final String SYSTEM_PROPERTY_CLASSPATH_TLDS = "org.freemarker.jsp.classpathTlds";
     
     /**
      * Used as part of the value of the {@value #INIT_PARAM_META_INF_TLD_LOCATIONS} init-param.
-     * 
-     * @since 2.3.22
      */
     public static final String META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS = "webInfPerLibJars";
     
     /**
      * Used as part of the value of the {@value #INIT_PARAM_META_INF_TLD_LOCATIONS} init-param.
-     * 
-     * @since 2.3.22
      */
     public static final String META_INF_TLD_LOCATION_CLASSPATH = "classpath";
     
     /**
      * Used as part of the value of the {@value #INIT_PARAM_META_INF_TLD_LOCATIONS} init-param.
-     * 
-     * @since 2.3.22
      */
     public static final String META_INF_TLD_LOCATION_CLEAR = "clear";
 
@@ -916,8 +886,6 @@ public class FreemarkerServlet extends HttpServlet {
      * @param env
      *            The {@link Environment} object already set up to execute the template. You only have to call
      *            {@link Environment#process()} and the output will be produced by the template.
-     * 
-     * @since 2.3.24
      */
     protected void processEnvironment(Environment env, HttpServletRequest request, HttpServletResponse response)
             throws TemplateException, IOException {
@@ -1071,8 +1039,6 @@ public class FreemarkerServlet extends HttpServlet {
      * Called to create the {@link TaglibFactory} once per servlet context.
      * The default implementation configures it based on the servlet-init parameters and various other environmental
      * settings, so if you override this method, you should call super, then adjust the result.
-     * 
-     * @since 2.3.22
      */
     protected TaglibFactory createTaglibFactory(ObjectWrapper objectWrapper,
             ServletContext servletContext) throws TemplateModelException {
@@ -1151,8 +1117,6 @@ public class FreemarkerServlet extends HttpServlet {
      * The implementation in {@link FreemarkerServlet} returns {@link TaglibFactory#DEFAULT_CLASSPATH_TLDS}.
      * 
      * @return A {@link List} of {@link String}-s; not {@code null}.
-     * 
-     * @since 2.3.22
      */
     protected List/*<MetaInfTldSource>*/ createDefaultClassPathTlds() {
         return TaglibFactory.DEFAULT_CLASSPATH_TLDS;
@@ -1166,8 +1130,6 @@ public class FreemarkerServlet extends HttpServlet {
      * The implementation in {@link FreemarkerServlet} returns {@link TaglibFactory#DEFAULT_META_INF_TLD_SOURCES}.
      * 
      * @return A {@link List} of {@link MetaInfTldSource}-s; not {@code null}.
-     * 
-     * @since 2.3.22
      */
     protected List/*<MetaInfTldSource>*/ createDefaultMetaInfTldSources() {
         return TaglibFactory.DEFAULT_META_INF_TLD_SOURCES;
@@ -1384,8 +1346,6 @@ public class FreemarkerServlet extends HttpServlet {
      * Returns the default value of the {@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE} Servlet init-param.
      * The method inherited from {@link FreemarkerServlet} returns {@value #INIT_PARAM_VALUE_ALWAYS}; subclasses my
      * override this.
-     * 
-     * @since 2.3.24
      */
     protected String getDefaultOverrideResponseContentType() {
         return INIT_PARAM_VALUE_ALWAYS;

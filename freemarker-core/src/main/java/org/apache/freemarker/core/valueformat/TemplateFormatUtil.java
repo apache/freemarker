@@ -28,8 +28,6 @@ import org.apache.freemarker.core.model.TemplateNumberModel;
 
 /**
  * Utility classes for implementing {@link TemplateValueFormat}-s.
- * 
- * @since 2.3.24 
  */
 public final class TemplateFormatUtil {
     

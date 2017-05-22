@@ -210,8 +210,6 @@ public class MruCacheStorage implements CacheStorageWithGetSize {
     
     /**
      * Returns the configured upper limit of the number of strong cache entries.
-     *  
-     * @since 2.3.21
      */
     public int getStrongSizeLimit() {
         return strongSizeLimit;
@@ -219,8 +217,6 @@ public class MruCacheStorage implements CacheStorageWithGetSize {
 
     /**
      * Returns the configured upper limit of the number of soft cache entries.
-     * 
-     * @since 2.3.21
      */
     public int getSoftSizeLimit() {
         return softSizeLimit;
@@ -230,7 +226,6 @@ public class MruCacheStorage implements CacheStorageWithGetSize {
      * Returns the <em>current</em> number of strong cache entries.
      *  
      * @see #getStrongSizeLimit()
-     * @since 2.3.21
      */
     public int getStrongSize() {
         return strongSize;
@@ -240,7 +235,6 @@ public class MruCacheStorage implements CacheStorageWithGetSize {
      * Returns a close approximation of the <em>current</em> number of soft cache entries.
      * 
      * @see #getSoftSizeLimit()
-     * @since 2.3.21
      */
     public int getSoftSize() {
         removeClearedReferences();
@@ -252,7 +246,6 @@ public class MruCacheStorage implements CacheStorageWithGetSize {
      * 
      * @see #getStrongSize()
      * @see #getSoftSize()
-     * @since 2.3.21
      */
     @Override
     public int getSize() {

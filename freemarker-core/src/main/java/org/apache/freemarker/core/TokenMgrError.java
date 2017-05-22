@@ -159,7 +159,6 @@ public String getMessage() {
    }
    
    /**
-    * @since 2.3.21
     */
    public TokenMgrError(String detail, int reason,
            int errorLine, int errorColumn,
@@ -176,8 +175,6 @@ public String getMessage() {
 
    /**
     * Overload for JavaCC 6 compatibility.
-    * 
-    * @since 2.3.24
     */
    TokenMgrError(boolean EOFSeen, int lexState, int errorLine, int errorColumn, String errorAfter, int curChar, int reason) {
        this(EOFSeen, lexState, errorLine, errorColumn, errorAfter, (char) curChar, reason);
@@ -195,8 +192,6 @@ public String getMessage() {
 
    /**
     * 1-based line number of the unexpected character(s).
-    * 
-    * @since 2.3.20
     */
    public Integer getLineNumber() {
       return lineNumber;
@@ -204,8 +199,6 @@ public String getMessage() {
     
    /**
     * 1-based column number of the unexpected character(s).
-    * 
-    * @since 2.3.20
     */
    public Integer getColumnNumber() {
       return columnNumber;
@@ -215,8 +208,6 @@ public String getMessage() {
     * Returns the 1-based line at which the last character of the wrong section is. This will be usually (but not
     * always) the same as {@link #getLineNumber()} because the lexer can only point to the single character that
     * doesn't match any patterns.
-    * 
-    * @since 2.3.21
     */
    public Integer getEndLineNumber() {
       return endLineNumber;
@@ -226,8 +217,6 @@ public String getMessage() {
     * Returns the 1-based column at which the last character of the wrong section is. This will be usually (but not
     * always) the same as {@link #getColumnNumber()} because the lexer can only point to the single character that
     * doesn't match any patterns.
-    * 
-    * @since 2.3.21
     */
    public Integer getEndColumnNumber() {
       return endColumnNumber;

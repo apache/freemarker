@@ -26,8 +26,6 @@ package org.apache.freemarker.core.model;
  * <p>
  * <b>Experimental status warning:</b> This interface is subject to change on non-backward compatible ways, hence, it
  * shouldn't be implemented outside FreeMarker yet.
- * 
- * @since 2.3.22
  */
 public interface ObjectWrapperWithAPISupport extends ObjectWrapper {
 
@@ -38,8 +36,6 @@ public interface ObjectWrapperWithAPISupport extends ObjectWrapper {
      *            The object for which the API model has to be returned. Shouldn't be {@code null}.
      * 
      * @return The {@link TemplateModel} through which the API of the object can be accessed. Can't be {@code null}.
-     * 
-     * @since 2.3.22
      */
     TemplateHashModel wrapAsAPI(Object obj) throws TemplateModelException;
 

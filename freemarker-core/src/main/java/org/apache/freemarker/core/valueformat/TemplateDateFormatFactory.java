@@ -34,8 +34,6 @@ import org.apache.freemarker.core.model.TemplateDateModel;
  * (one-per-VM or one-per-{@link Configuration}), and so must be thread-safe.
  * 
  * @see MutableProcessingConfiguration#setCustomDateFormats(java.util.Map)
- * 
- * @since 2.3.24
  */
 public abstract class TemplateDateFormatFactory extends TemplateValueFormatFactory {
     

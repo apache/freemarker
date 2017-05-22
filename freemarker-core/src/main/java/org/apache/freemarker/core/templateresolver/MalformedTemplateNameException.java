@@ -32,8 +32,7 @@ import org.apache.freemarker.core.util._StringUtil;
  * backward compatibility, {@link DefaultTemplateNameFormatFM2} doesn't throw this exception,
  * {@link DefaultTemplateNameFormat} does. This exception extends {@link IOException} for backward compatibility.
  * 
- * @since 2.3.22
- * 
+ *
  * @see TemplateNotFoundException
  * @see Configuration#getTemplate(String)
  */

@@ -22,8 +22,6 @@ import java.io.IOException;
 
 /**
  * Logical "and" operation among the given matchers.
- * 
- * @since 2.3.24
  */
 public class AndMatcher extends TemplateSourceMatcher {
     

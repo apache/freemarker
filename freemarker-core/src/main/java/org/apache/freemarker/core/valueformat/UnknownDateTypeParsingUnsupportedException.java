@@ -24,8 +24,6 @@ import org.apache.freemarker.core.model.TemplateDateModel;
 /**
  * Thrown when a string can't be parsed to {@link TemplateDateModel}, because the provided target type is
  * {@link TemplateDateModel#UNKNOWN}.
- * 
- * @since 2.3.24
  */
 public final class UnknownDateTypeParsingUnsupportedException extends UnformattableValueException {
 

@@ -24,8 +24,6 @@ import org.apache.freemarker.core.model.TemplateModel;
 
 /**
  * Indicates that a {@link TemplateMarkupOutputModel} value was expected, but the value had a different type.
- * 
- * @since 2.3.24
  */
 public class NonMarkupOutputException extends UnexpectedTypeException {
 

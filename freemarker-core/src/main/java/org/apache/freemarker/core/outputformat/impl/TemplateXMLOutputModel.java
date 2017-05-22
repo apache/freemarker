@@ -22,8 +22,6 @@ import org.apache.freemarker.core.outputformat.CommonTemplateMarkupOutputModel;
 
 /**
  * Stores XML markup to be printed; used with {@link XMLOutputFormat}.
- * 
- * @since 2.3.24
  */
 public final class TemplateXMLOutputModel extends CommonTemplateMarkupOutputModel<TemplateXMLOutputModel> {
     

@@ -54,8 +54,6 @@ public class _StringUtil {
 
     /**
      * Like {@link #XMLEnc(String)}, but writes the result into a {@link Writer}.
-     * 
-     * @since 2.3.24
      */
     public static void XMLEnc(String s, Writer out) throws IOException {
         XMLOrHTMLEnc(s, XML_APOS, out);
@@ -74,8 +72,6 @@ public class _StringUtil {
 
     /**
      * Like {@link #XHTMLEnc(String)}, but writes the result into a {@link Writer}.
-     * 
-     * @since 2.3.24
      */
     public static void XHTMLEnc(String s, Writer out) throws IOException {
         XMLOrHTMLEnc(s, HTML_APOS, out);
@@ -288,8 +284,6 @@ public class _StringUtil {
     
     /**
      * Like {@link #RTFEnc(String)}, but writes the result into a {@link Writer}.
-     * 
-     * @since 2.3.24
      */
     public static void RTFEnc(String s, Writer out) throws IOException {
         int writtenEnd = 0;  // exclusive end
@@ -324,8 +318,6 @@ public class _StringUtil {
      * This can be used to encode a path only if you know that no folder or file name will contain {@code /}
      * character (not in the path, but in the name itself), which usually stands, as the commonly used OS-es don't
      * allow that.
-     * 
-     * @since 2.3.21
      */
     public static String URLPathEnc(String s, Charset charset) throws UnsupportedEncodingException {
         return URLEnc(s, charset, true);
@@ -507,7 +499,6 @@ public class _StringUtil {
 
     /**
      * Same as {@link #replace(String, String, String, boolean, boolean)} with two {@code false} parameters. 
-     * @since 2.3.20
      */
     public static String replace(String text, String oldSub, String newSub) {
         return replace(text, oldSub, newSub, false, false);
@@ -819,8 +810,6 @@ public class _StringUtil {
      *     u2029 (Paragraph separator - source code line-break in ECMAScript)<br>
      *   <td><tt>\<tt>u</tt><i>XXXX</i></tt>
      * </table>
-     * 
-     * @since 2.3.20
      */
     public static String jsStringEnc(String s, boolean json) {
         _NullArgumentException.check("s", s);
@@ -1304,8 +1293,6 @@ public class _StringUtil {
      * Tries to run {@code toString()}, but if that fails, returns a
      * {@code "[com.example.SomeClass.toString() failed: " + e + "]"} instead. Also, it returns {@code null} for
      * {@code null} parameter.
-     * 
-     * @since 2.3.20
      */
     public static String tryToString(Object object) {
         if (object == null) return null;
@@ -1334,8 +1321,6 @@ public class _StringUtil {
      * 
      * @throws IllegalArgumentException
      *             If the argument is 0 or less.
-     * 
-     * @since 2.3.22
      */
     public static String toUpperABC(int n) {
         return toABC(n, 'A');
@@ -1343,8 +1328,6 @@ public class _StringUtil {
 
     /**
      * Same as {@link #toUpperABC(int)}, but produces lower case result, like {@code "ab"}.
-     * 
-     * @since 2.3.22
      */
     public static String toLowerABC(int n) {
         return toABC(n, 'a');
@@ -1397,8 +1380,6 @@ public class _StringUtil {
      * Behaves exactly like {@link String#trim()}, but works on arrays. If the resulting array would have the same
      * content after trimming, it returns the original array instance. Otherwise it returns a new array instance (or
      * {@link _CollectionUtil#EMPTY_CHAR_ARRAY}).
-     * 
-     * @since 2.3.22
      */
     public static char[] trim(final char[] cs) {
         if (cs.length == 0) {
@@ -1428,8 +1409,6 @@ public class _StringUtil {
 
     /**
      * Tells if {@link String#trim()} will return a 0-length string for the {@link String} equivalent of the argument.
-     * 
-     * @since 2.3.22
      */
     public static boolean isTrimmableToEmpty(char[] text) {
         return isTrimmableToEmpty(text, 0, text.length);
@@ -1437,8 +1416,6 @@ public class _StringUtil {
 
     /**
      * Like {@link #isTrimmableToEmpty(char[])}, but acts on a sub-array that starts at {@code start} (inclusive index).
-     * 
-     * @since 2.3.23
      */
     public static boolean isTrimmableToEmpty(char[] text, int start) {
         return isTrimmableToEmpty(text, start, text.length);
@@ -1447,8 +1424,6 @@ public class _StringUtil {
     /**
      * Like {@link #isTrimmableToEmpty(char[])}, but acts on a sub-array that starts at {@code start} (inclusive index)
      * and ends at {@code end} (exclusive index).
-     * 
-     * @since 2.3.23
      */
     public static boolean isTrimmableToEmpty(char[] text, int start, int end) {
         for (int i = start; i < end; i++) {
@@ -1462,8 +1437,6 @@ public class _StringUtil {
 
     /**
      * Same as {@link #globToRegularExpression(String, boolean)} with {@code caseInsensitive} argument {@code false}.
-     * 
-     * @since 2.3.24
      */
     public static Pattern globToRegularExpression(String glob) {
         return globToRegularExpression(glob, false);
@@ -1488,8 +1461,6 @@ public class _StringUtil {
      *   <li>{@code [}: Reserved for future purposes; can't be used
      *   <li><code>{</code>: Reserved for future purposes; can't be used
      * </ul>
-     * 
-     * @since 2.3.24
      */
     public static Pattern globToRegularExpression(String glob, boolean caseInsensitive) {
         StringBuilder regex = new StringBuilder();
