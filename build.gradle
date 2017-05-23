@@ -48,37 +48,56 @@ ext.bannedLibraries = [
     "commons-logging:commons-logging"
 ] as Set
 
-['bootClasspathJava7', 'bootClasspathJava8'].each {
-    if (!project.hasProperty(it)) {
-        String allowEnvVarName = "freemarker_build_allow_no_boot_classpath"
-        def allow = System.getenv(allowEnvVarName)
-        if (allow != null && !allow.trim().isEmpty()) {
-            allow = allow.trim()
-            if (allow == "true") {
-                allow = true
-            } else if (allow == "false") {
-                allow = false
+// Java boot-classpath setup:
+[7, 8].each { javaVersion ->
+    // Name used in gradle.properties:
+    String propName = "bootClasspathJava${javaVersion}"
+
+    // Alternatively, it can be set with an OS environment variable:
+    String envVarName = "freemarker_build_boot_classpath_java_${javaVersion}"
+    String envVarVal = System.getenv(envVarName);
+    if (envVarVal != null && !envVarVal.isEmpty()) {
+        ext[propName] = envVarVal;
+    }
+
+    if (!project.hasProperty(propName)) {
+        String allowNullEnvVarName = "freemarker_build_allow_no_boot_classpath"
+        String allowNullEnvVarVal = System.getenv(allowNullEnvVarName)
+        boolean allowNull
+        if (allowNullEnvVarVal != null && !allowNullEnvVarVal.isEmpty()) {
+            if (allowNullEnvVarVal == "true") {
+                allowNull = true
+            } else if (allowNullEnvVarVal == "false") {
+                allowNull = false
             } else {
-                new GradleScriptException("The value of the ${allowEnvVarName} environment " +
-                        "variable must be \"true\" or \"false\" but was: " + allow, null)
+                throw new GradleScriptException("The value of the \"${allowNullEnvVarName}\" environment " +
+                        "variable must be \"true\" or \"false\" but was \"${allowNullEnvVarVal}\".", null)
             }
         } else {
-            allow = false;
+            allowNull = false;
         }
 
-        if (allow) {
-            ext[it] = null
-            logger.warn "Using null for ${it}; do NOT use this build for production!"
+        if (allowNull) {
+            ext[propName] = null
+            logger.warn "Using null for \"${propName}\"; do NOT use this build for production!"
         } else {
-            throw new GradleScriptException("The ${it} property must be set. " +
+            throw new GradleScriptException(
+                    "The ${propName} property must be set (and point to the rt.jar of Java ${javaVersion}). " +
                     "This error usually occurs because you have missed this step (described in README.md): " +
                     "Copy gradle.properties.sample into gradle.properties and modify it to fit your environment. " +
-                    "(Alternatively, you can pass the property to gradle with -P${it}=\"...\", or set the " +
-                    "${allowEnvVarName} environment variable to \"true\".)",
+                    "(Alternatively, you can pass the property to gradle with -P${propName}=\"...\", " +
+                    "or set the \"${envVarName}\" environment variable, " +
+                    "or as the last resort, set the \"${allowNullEnvVarName}\" environment variable to \"true\".)",
                     null);
         }
+    } else {
+        String bootClasspath = project.getProperties().get(propName);
+        if (!new File(bootClasspath).exists()) {
+            throw new GradleScriptException(
+                    "The file pointed by the ${propName} property doesn't exist: ${bootClasspath}", null);
+        }
     }
-}
+} // each Java version
 
 subprojects {
     apply plugin: "java"

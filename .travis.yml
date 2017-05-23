@@ -4,8 +4,7 @@ jdk:
 env:
   # TODO: The build compiles with the boot-classpath set to the rt.jar of specific Java SE versions. Until we can't do that on Travis:
   - freemarker_build_allow_no_boot_classpath=true  
-before_install:
-  - echo "Where's my output?" 1>&2
-  - ls /usr/lib/jvm/ 1>&2
+  - freemarker_build_boot_classpath_java_7=/usr/lib/jvm/java-7-oracle/jre/lib/rt.jar
+  - freemarker_build_boot_classpath_java_8=/usr/lib/jvm/java-8-oracle/jre/lib/rt.jar
 install:
   - ./gradlew assemble javadoc
