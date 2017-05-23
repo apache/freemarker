@@ -50,11 +50,33 @@ ext.bannedLibraries = [
 
 ['bootClasspathJava7', 'bootClasspathJava8'].each {
     if (!project.hasProperty(it)) {
-        throw new org.gradle.api.GradleScriptException("The ${it} property must be set. " +
-                "This error usually occurs because you have missed this step (described in README.md): " +
-                "Copy gradle.properties.sample into gradle.properties and modify it to fit your environment. " +
-                "(Alternatively, you can pass the property to gradle with -P${it}=\"...\".)",
-                null);
+        String allowEnvVarName = "freemarker_build_allow_no_boot_classpath"
+        def allow = System.getenv(allowEnvVarName)
+        if (allow != null && !allow.trim().isEmpty()) {
+            allow = allow.trim()
+            if (allow == "true") {
+                allow = true
+            } else if (allow == "false") {
+                allow = false
+            } else {
+                new GradleScriptException("The value of the ${allowEnvVarName} environment " +
+                        "variable must be \"true\" or \"false\" but was: " + allow, null)
+            }
+        } else {
+            allow = false;
+        }
+
+        if (allow) {
+            ext[it] = null
+            logger.warn "Using null for ${it}; do NOT use this build for production!"
+        } else {
+            throw new GradleScriptException("The ${it} property must be set. " +
+                    "This error usually occurs because you have missed this step (described in README.md): " +
+                    "Copy gradle.properties.sample into gradle.properties and modify it to fit your environment. " +
+                    "(Alternatively, you can pass the property to gradle with -P${it}=\"...\", or set the " +
+                    "${allowEnvVarName} environment variable to \"true\".)",
+                    null);
+        }
     }
 }
 
