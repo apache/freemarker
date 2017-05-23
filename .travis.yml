@@ -5,7 +5,7 @@ env:
   # TODO: The build compiles with the boot-classpath set to the rt.jar of specific Java SE versions. Until we can't do that on Travis:
   - freemarker_build_allow_no_boot_classpath=true  
 before_install:
-  - echo "Where's my output?"
-  - ls /usr/lib/jvm/
+  - echo "Where's my output?" 1>&2
+  - ls /usr/lib/jvm/ 1>&2
 install:
   - ./gradlew assemble javadoc
