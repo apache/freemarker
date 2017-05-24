@@ -42,6 +42,8 @@ import org.apache.freemarker.test.templateutil.AssertFailsDirective;
 import org.apache.freemarker.test.templateutil.NoOutputDirective;
 import org.junit.Ignore;
 
+import com.google.common.collect.ImmutableMap;
+
 import junit.framework.AssertionFailedError;
 
 /**
@@ -103,7 +105,7 @@ class TemplateTestCase extends FileTestCase {
             if (!as.equals("as")) fail("Expecting 'as <alias>' in autoimport");
             if (!st.hasMoreTokens()) fail("Expecting alias after 'as' in autoimport");
             String alias = st.nextToken();
-            confB.addAutoImport(alias, libname);
+            confB.setAutoImports(ImmutableMap.of(alias, libname));
         } else if ("source_encoding".equals(param)) {
             confB.setSourceEncoding(Charset.forName(value));
         // INCOMPATIBLE_IMPROVEMENTS is a list here, and was already set in the constructor.

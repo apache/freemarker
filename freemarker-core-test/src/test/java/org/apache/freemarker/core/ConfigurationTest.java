@@ -35,7 +35,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -852,51 +851,34 @@ public class ConfigurationTest extends TestCase {
     }
     
     public void testSharedVariables() throws TemplateException, IOException {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
+        Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
+                .sharedVariables(ImmutableMap.of(
+                        "a", "aa",
+                        "b", "bb",
+                        "c", new MyScalarModel()
+                ))
+                .build();
 
-        Map<String, Object> vars = new HashMap<>();
-        vars.put("a", "aa");
-        vars.put("b", "bb");
-        vars.put("c", new MyScalarModel());
-        cfgB.setSharedVariables(vars);
+        assertNull(cfg.getSharedVariables().get("noSuchVar"));
+        assertNull(cfg.getWrappedSharedVariable("noSuchVar"));
 
-        assertNull(cfgB.getSharedVariable("erased"));
-        
-        {
-            Configuration cfg = cfgB.build();
+        TemplateScalarModel aVal = (TemplateScalarModel) cfg.getWrappedSharedVariable("a");
+        assertEquals("aa", aVal.getAsString());
+        assertEquals(SimpleScalar.class, aVal.getClass());
 
-            TemplateScalarModel aVal = (TemplateScalarModel) cfg.getWrappedSharedVariable("a");
-            assertEquals("aa", aVal.getAsString());
-            assertEquals(SimpleScalar.class, aVal.getClass());
+        TemplateScalarModel bVal = (TemplateScalarModel) cfg.getWrappedSharedVariable("b");
+        assertEquals("bb", bVal.getAsString());
+        assertEquals(SimpleScalar.class, bVal.getClass());
 
-            TemplateScalarModel bVal = (TemplateScalarModel) cfg.getWrappedSharedVariable("b");
-            assertEquals("bb", bVal.getAsString());
-            assertEquals(SimpleScalar.class, bVal.getClass());
-            
-            TemplateScalarModel cVal = (TemplateScalarModel) cfg.getWrappedSharedVariable("c");
-            assertEquals("my", cVal.getAsString());
-            assertEquals(MyScalarModel.class, cfg.getWrappedSharedVariable("c").getClass());
+        TemplateScalarModel cVal = (TemplateScalarModel) cfg.getWrappedSharedVariable("c");
+        assertEquals("my", cVal.getAsString());
+        assertEquals(MyScalarModel.class, cfg.getWrappedSharedVariable("c").getClass());
 
-            // See if it actually works in templates:
-            StringWriter sw = new StringWriter();
-            new Template(null, "${a} ${b}", cfg)
-                    .process(ImmutableMap.of("a", "aaDM"), sw);
-            assertEquals("aaDM bb", sw.toString());
-        }
-        
-        cfgB.setSharedVariable("b", "bbLegacy");
-        
-        {
-            Configuration cfg = cfgB.build();
-
-            TemplateScalarModel aVal = (TemplateScalarModel) cfg.getWrappedSharedVariable("a");
-            assertEquals("aa", aVal.getAsString());
-            assertEquals(SimpleScalar.class, aVal.getClass());
-            
-            TemplateScalarModel bVal = (TemplateScalarModel) cfg.getWrappedSharedVariable("b");
-            assertEquals("bbLegacy", bVal.getAsString());
-            assertEquals(SimpleScalar.class, bVal.getClass());
-        }
+        // See if it actually works in templates:
+        StringWriter sw = new StringWriter();
+        new Template(null, "${a} ${b}", cfg)
+                .process(ImmutableMap.of("a", "aaDM"), sw);
+        assertEquals("aaDM bb", sw.toString());
     }
 
     @Test

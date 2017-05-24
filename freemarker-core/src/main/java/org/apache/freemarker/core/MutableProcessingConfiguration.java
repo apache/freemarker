@@ -21,11 +21,14 @@ package org.apache.freemarker.core;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -328,7 +331,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     private Map<String, TemplateDateFormatFactory> customDateFormats;
     private Map<String, TemplateNumberFormatFactory> customNumberFormats;
     private LinkedHashMap<String, String> autoImports;
-    private ArrayList<String> autoIncludes;
+    private List<String> autoIncludes;
     private Boolean lazyImports;
     private Boolean lazyAutoImports;
     private boolean lazyAutoImportsSet;
@@ -1287,67 +1290,23 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
     
     /**
-     * Adds the auto-import at the end of {@link #getAutoImports()}. If an auto-import with the same namespace variable
-     * name already exists in the {@link Map}, it will be removed before the new one is added.
-     */
-    public void addAutoImport(String namespaceVarName, String templateName) {
-        if (autoImports == null) {
-            initAutoImportsMap();
-        } else {
-            // This was a List earlier, so re-inserted items must go to the end, hence we remove() before put().
-            autoImports.remove(namespaceVarName);
-        }
-        autoImports.put(namespaceVarName, templateName);
-    }
-
-    private void initAutoImportsMap() {
-        autoImports = new LinkedHashMap<>(4);
-    }
-    
-    /**
-     * Removes an auto-import from {@link #getAutoImports()} (but doesn't affect auto-imports inherited from another
-     * {@link ParsingConfiguration}). Does nothing if the auto-import doesn't exist.
-     */
-    public void removeAutoImport(String namespaceVarName) {
-        if (autoImports != null) {
-            autoImports.remove(namespaceVarName);
-        }
-    }
-    
-    /**
      * Setter pair of {@link #getAutoImports()}.
      * 
      * @param map
-     *            Maps the namespace variable names to the template names; not {@code null}. The content of the
-     *            {@link Map} is copied into another {@link Map}, to avoid aliasing problems.
+     *            Maps the namespace variable names to the template names; not {@code null}, and can't contain {@code
+     *            null} keys of values. The content of the {@link Map} is copied into another {@link Map}, to avoid
+     *            aliasing problems. The iteration order of the original {@link Map} entries is kept.
      */
-    public void setAutoImports(Map map) {
+    public void setAutoImports(Map<String, String> map) {
         _NullArgumentException.check("map", map);
-        
-        if (autoImports != null) {
-            autoImports.clear();
-        }
-        for (Map.Entry<?, ?> entry : ((Map<?, ?>) map).entrySet()) {
-            Object key = entry.getKey();
-            if (!(key instanceof String)) {
-                throw new IllegalArgumentException(
-                        "Key in Map wasn't a String, but a(n) " + key.getClass().getName() + ".");
-            }
-
-            Object value = entry.getValue();
-            if (!(value instanceof String)) {
-                throw new IllegalArgumentException(
-                        "Value in Map wasn't a String, but a(n) " + value.getClass().getName() + ".");
-            }
-
-            addAutoImport((String) key, (String) value);
-        }
+        _CollectionUtil.safeCastMap("map", map, String.class, false, String.class, false);
+        autoImports = new LinkedHashMap<>(map);
     }
 
     /**
      * Fluent API equivalent of {@link #setAutoImports(Map)}
      */
-    public SelfT autoImports(Map map) {
+    public SelfT autoImports(Map<String, String> map) {
         setAutoImports(map);
         return self();
     }
@@ -1377,45 +1336,37 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Adds an auto-include to {@link #getAutoIncludes()}. If the template name is already in the {@link List}, then it
-     * will be removed before it's added again (so in effect it's moved to the end of the {@link List}).
-     */
-    public void addAutoInclude(String templateName) {
-        if (autoIncludes == null) {
-            initAutoIncludesList();
-        } else {
-            autoIncludes.remove(templateName);
-        }
-        autoIncludes.add(templateName);
-    }
-
-    private void initAutoIncludesList() {
-        autoIncludes = new ArrayList<>(4);
-    }
-    
-    /**
      * Setter pair of {@link #getAutoIncludes()}
      *
      * @param templateNames Not {@code null}. The {@link List} will be copied to avoid aliasing problems.
      */
-    public void setAutoIncludes(List templateNames) {
+    public void setAutoIncludes(List<String> templateNames) {
         _NullArgumentException.check("templateNames", templateNames);
-        if (autoIncludes != null) {
-            autoIncludes.clear();
-        }
-        for (Object templateName : templateNames) {
-            if (!(templateName instanceof String)) {
-                throw new IllegalArgumentException("List items must be String-s.");
+        _CollectionUtil.safeCastList("templateNames", templateNames, String.class, false);
+        Set<String> uniqueItems = new LinkedHashSet<>(templateNames.size() * 4 / 3, 1f);
+        for (String templateName : templateNames) {
+            if (!uniqueItems.add(templateName)) {
+                // Move clashing item at the end of the collection
+                uniqueItems.remove(templateName);
+                uniqueItems.add(templateName);
             }
-            addAutoInclude((String) templateName);
         }
+        autoIncludes = Collections.<String>unmodifiableList(new ArrayList<>(uniqueItems));
     }
 
     /**
      * Fluent API equivalent of {@link #setAutoIncludes(List)}
      */
-    public SelfT autoIncludes(List templateNames) {
+    public SelfT autoIncludes(List<String> templateNames) {
         setAutoIncludes(templateNames);
+        return self();
+    }
+
+    /**
+     * Varargs overload of {@link #autoIncludes(List)}.
+     */
+    public SelfT autoIncludes(String... templateNames) {
+        setAutoIncludes(Arrays.asList(templateNames));
         return self();
     }
 
@@ -1433,20 +1384,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     @Override
     public boolean isAutoIncludesSet() {
         return autoIncludes != null;
-    }
-    
-    /**
-     * Removes the auto-include from the {@link #getAutoIncludes()} {@link List} (but it doesn't affect the
-     * {@link List}-s inherited from other {@link ProcessingConfiguration}-s). Does nothing if the template is not
-     * in the {@link List}.
-     */
-    public void removeAutoInclude(String templateName) {
-        // "synchronized" is removed from the API as it's not safe to set anything after publishing the Configuration
-        synchronized (this) {
-            if (autoIncludes != null) {
-                autoIncludes.remove(templateName);
-            }
-        }
     }
     
     private static final String ALLOWED_CLASSES = "allowed_classes";

@@ -32,7 +32,6 @@ import org.apache.freemarker.test.TemplateTest;
 import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 @SuppressWarnings("boxing")
@@ -98,9 +97,7 @@ public class IncludeAndImportTest extends TemplateTest {
                         "lib1", "lib1.ftl",
                         "lib2", "lib2CallsLib1.ftl"
                 ))
-                .autoIncludes(ImmutableList.of(
-                        "inc1.ftl",
-                        "inc2.ftl"))
+                .autoIncludes("inc1.ftl", "inc2.ftl")
                 .build());
         assertOutput(
                 "<#include 'inc3.ftl'>[main] ${inc1Cnt}, ${history}, <@lib1.m/>, <@lib2.m/>",
@@ -112,7 +109,7 @@ public class IncludeAndImportTest extends TemplateTest {
      * already existing namespaces.
      */
     @Test
-    public void lookupSrategiesAreNotConsideredProperly() throws IOException, TemplateException {
+    public void lookupStrategiesAreNotConsideredProperly() throws IOException, TemplateException {
         // As only the name of the template is used for the finding the already existing namespace, the settings that
         // influence the lookup are erroneously ignored.
         assertOutput(
@@ -121,7 +118,7 @@ public class IncludeAndImportTest extends TemplateTest {
                 + "<@ns1.m/> <@ns2.m/> ${history}",
                 "en en LEn");
         
-        // The opposite of the prevous, where differn names refer to the same template after a lookup: 
+        // The opposite of the previous, where different names refer to the same template after a lookup:
         assertOutput(
                 "<#setting locale='en_US'>"
                 + "<#import '*/lib.ftl' as ns1>"
@@ -217,14 +214,15 @@ public class IncludeAndImportTest extends TemplateTest {
 
     @Test
     public void lazyImportErrors() throws IOException, TemplateException {
-        TestConfigurationBuilder cfgB = new TestConfigurationBuilder();
-        cfgB.setLazyImports(true);
-
-        setConfiguration(cfgB.build());
+        setConfiguration(new TestConfigurationBuilder()
+                .lazyImports(true)
+                .build());
         assertOutput("<#import 'noSuchTemplate.ftl' as wrong>x", "x");
         
-        cfgB.addAutoImport("wrong", "noSuchTemplate.ftl");
-        setConfiguration(cfgB.build());
+        setConfiguration(new TestConfigurationBuilder()
+                .lazyImports(true)
+                .autoImports(ImmutableMap.of("wrong", "noSuchTemplate.ftl"))
+                .build());
         assertOutput("x", "x");
 
         try {

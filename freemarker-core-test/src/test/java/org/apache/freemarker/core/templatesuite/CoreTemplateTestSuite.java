@@ -173,7 +173,7 @@ public class CoreTemplateTestSuite extends TemplateTestSuite {
         } else if (simpleTestName.equals("var-layers")) {
             dataModel.put("x", Integer.valueOf(4));
             dataModel.put("z", Integer.valueOf(4));
-            confB.setSharedVariable("y", Integer.valueOf(7));
+            confB.setSharedVariables(ImmutableMap.of("y", 7));
         } else if (simpleTestName.startsWith("sequence-builtins")) {
             Set<String> abcSet = new TreeSet<>();
             abcSet.add("a");

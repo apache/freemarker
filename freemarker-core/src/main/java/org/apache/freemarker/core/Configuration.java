@@ -82,6 +82,7 @@ import org.apache.freemarker.core.util.NormalizeNewlines;
 import org.apache.freemarker.core.util.StandardCompress;
 import org.apache.freemarker.core.util.XmlEscape;
 import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._CollectionUtil;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._SortedArraySet;
 import org.apache.freemarker.core.util._StringUtil;
@@ -282,7 +283,7 @@ public final class Configuration
 
     // CustomStateScope:
 
-    private final ConcurrentHashMap<CustomStateKey, Object> customStateMap = new ConcurrentHashMap<>(0);
+    private final ConcurrentHashMap<CustomStateKey<?>, Object> customStateMap = new ConcurrentHashMap<>(0);
     private final Object customStateMapLock = new Object();
 
     private <SelfT extends ExtendableBuilder<SelfT>> Configuration(ExtendableBuilder<SelfT> builder)
@@ -366,8 +367,8 @@ public final class Configuration
             }
 
             this.registeredCustomOutputFormatsByName = registeredCustomOutputFormatsByName;
-            this.registeredCustomOutputFormats = Collections.unmodifiableList(new
-                    ArrayList<OutputFormat>(registeredCustomOutputFormats));
+            this.registeredCustomOutputFormats = Collections.unmodifiableList(
+                    new ArrayList<> (registeredCustomOutputFormats));
         }
 
         ObjectWrapper objectWrapper = builder.getObjectWrapper();
@@ -427,13 +428,13 @@ public final class Configuration
         showErrorTips = builder.getShowErrorTips();
         apiBuiltinEnabled = builder.getAPIBuiltinEnabled();
         logTemplateExceptions = builder.getLogTemplateExceptions();
-        customDateFormats = Collections.unmodifiableMap(builder.getCustomDateFormats());
-        customNumberFormats = Collections.unmodifiableMap(builder.getCustomNumberFormats());
-        autoImports = Collections.unmodifiableMap(builder.getAutoImports());
-        autoIncludes = Collections.unmodifiableList(builder.getAutoIncludes());
+        customDateFormats = builder.getCustomDateFormats();
+        customNumberFormats = builder.getCustomNumberFormats();
+        autoImports = builder.getAutoImports();
+        autoIncludes = builder.getAutoIncludes();
         lazyImports = builder.getLazyImports();
         lazyAutoImports = builder.getLazyAutoImports();
-        customAttributes = Collections.unmodifiableMap(builder.getCustomAttributes());
+        customAttributes = builder.getCustomAttributes();
     }
 
     private <SelfT extends ExtendableBuilder<SelfT>> void wrapAndPutSharedVariables(
@@ -2286,29 +2287,23 @@ public final class Configuration
 
         /**
          * Setter pair of {@link Configuration#getSharedVariables()}.
+         *
+         * @param sharedVariables
+         *         Will be copied (to prevent aliasing effect); can't be {@code null}; the {@link Map} can't contain
+         *         {@code null} key, but can contain {@code null} value.
          */
-        public void setSharedVariables(Map<String, Object> sharedVariables) {
+        public void setSharedVariables(Map<String, ?> sharedVariables) {
             _NullArgumentException.check("sharedVariables", sharedVariables);
-            this.sharedVariables = sharedVariables;
+            _CollectionUtil.safeCastMap(
+                    "sharedVariables", sharedVariables, String.class, false, Object.class,true);
+            this.sharedVariables = new HashMap<>(sharedVariables);
         }
 
         /**
-         * Convenience method for {@link #getSharedVariables()} and then {@link Map#put(Object, Object)}, with the
-         * extra that it also creates an empty {@link HashMap} of shared variables if the shared variables {@link Map}
-         * wasn't set yet.
+         * Fluent API equivalent of {@link #setSharedVariables(Map)}
          */
-        public void setSharedVariable(String name, Object value) {
-            if (!isSharedVariablesSet()) {
-                setSharedVariables(new HashMap<String, Object>());
-            }
-            getSharedVariables().put(name, value);
-        }
-
-        /**
-         * Fluent API equivalent of {@link #setSharedVariable(String, Object)}
-         */
-        public SelfT sharedVariable(String name, Object value) {
-            setSharedVariable(name, value);
+        public SelfT sharedVariables(Map<String, ?> sharedVariables) {
+            setSharedVariables(sharedVariables);
             return self();
         }
 

@@ -19,6 +19,9 @@
 
 package org.apache.freemarker.core.util;
 
+import java.util.List;
+import java.util.Map;
+
 /** Don't use this; used internally by FreeMarker, might changes without notice. */
 public class _CollectionUtil {
     
@@ -27,9 +30,79 @@ public class _CollectionUtil {
     public static final Object[] EMPTY_OBJECT_ARRAY = new Object[] { };
     public static final Class[] EMPTY_CLASS_ARRAY = new Class[] { };
     public static final String[] EMPTY_STRING_ARRAY = new String[] { };
-
-    /**
-     */
     public static final char[] EMPTY_CHAR_ARRAY = new char[] { };
-    
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <T> List<? extends T> safeCastList(
+            String argName, List list,
+            Class<T> itemClass, boolean allowNullItem) {
+        if (list == null) {
+            return null;
+        }
+        for (int i = 0; i < list.size(); i++) {
+            Object it = list.get(i);
+            if (!itemClass.isInstance(it)) {
+                if (it == null) {
+                    if (!allowNullItem) {
+                        throw new IllegalArgumentException(
+                                (argName != null ? "Invalid value for argument \"" + argName + "\"" : "")
+                                + "List item at index " + i + " is null");
+                    }
+                } else {
+                    throw new IllegalArgumentException(
+                            (argName != null ? "Invalid value for argument \"" + argName + "\"" : "")
+                            + "List item at index " + i + " is not instance of " + itemClass.getName() + "; "
+                            + "its class is " + it.getClass().getName() + ".");
+                }
+            }
+        }
+
+        return list;
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static <K, V> Map<? extends K, ? extends V> safeCastMap(
+            String argName, Map map,
+            Class<K> keyClass, boolean allowNullKey,
+            Class<V> valueClass, boolean allowNullValue) {
+        if (map == null) {
+            return null;
+        }
+        for (Map.Entry<?, ?> ent : ((Map<?, ?>) map).entrySet()) {
+            Object key = ent.getKey();
+            if (!keyClass.isInstance(key)) {
+                if (key == null) {
+                    if (!allowNullKey) {
+                        throw new IllegalArgumentException(
+                                (argName != null ? "Invalid value for argument \"" + argName + "\"" : "")
+                                        + "The Map contains null key");
+                    }
+                } else {
+                    throw new IllegalArgumentException(
+                            (argName != null ? "Invalid value for argument \"" + argName + "\"" : "")
+                                    + "The Map contains a key that's not instance of " + keyClass.getName() +
+                                    "; its class is " + key.getClass().getName() + ".");
+                }
+            }
+
+            Object value = ent.getValue();
+            if (!valueClass.isInstance(value)) {
+                if (value == null) {
+                    if (!allowNullValue) {
+                        throw new IllegalArgumentException(
+                                (argName != null ? "Invalid value for argument \"" + argName + "\"" : "")
+                                        + "The Map contains null value");
+                    }
+                } else {
+                    throw new IllegalArgumentException(
+                            (argName != null ? "Invalid value for argument \"" + argName + "\"" : "")
+                                    + "The Map contains a value that's not instance of " + valueClass.getName() +
+                                    "; its class is " + value.getClass().getName() + ".");
+                }
+            }
+        }
+
+        return map;
+    }
+
 }

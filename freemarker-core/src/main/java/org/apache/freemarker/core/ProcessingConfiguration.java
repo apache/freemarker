@@ -655,6 +655,8 @@ public interface ProcessingConfiguration {
      * <p>
      * If there are also auto-imports ({@link #getAutoImports()}), those imports will be executed before
      * the auto-includes, hence the namespace variables are alrady accessible for the auto-included templates.
+     *
+     * @return An unmodifiable {@link List}; not {@code null}
      */
     List<String> getAutoIncludes();
 

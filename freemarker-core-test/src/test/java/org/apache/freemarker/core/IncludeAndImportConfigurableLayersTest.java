@@ -28,7 +28,6 @@ import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 public class IncludeAndImportConfigurableLayersTest {
@@ -48,43 +47,27 @@ public class IncludeAndImportConfigurableLayersTest {
         {
             Template t = cfg.getTemplate("main.ftl");
             StringWriter sw = new StringWriter();
-            Environment env = t.createProcessingEnvironment(null, sw);
-            env.addAutoImport("t3", "t3.ftl");
-    
-            env.process();
+            t.createProcessingEnvironment(null, sw)
+                    .autoImports(ImmutableMap.of("t3", "t3.ftl"))
+                    .process();
             assertEquals("In main: t1;t2;t3;", sw.toString());
         }
 
         {
             Template t = cfg.getTemplate("main.ftl");
             StringWriter sw = new StringWriter();
-            Environment env = t.createProcessingEnvironment(null, sw);
-    
-            env.process();
+            t.createProcessingEnvironment(null, sw)
+                    .process();
             assertEquals("In main: t1;t2;", sw.toString());
         }
         
         {
             Template t = cfg.getTemplate("main2.ftl");
             StringWriter sw = new StringWriter();
-            Environment env = t.createProcessingEnvironment(null, sw);
-            env.addAutoImport("t3", "t3.ftl");
-    
-            env.process();
+            t.createProcessingEnvironment(null, sw)
+                    .autoImports(ImmutableMap.of("t3", "t3.ftl"))
+                    .process();
             assertEquals("In main2: t1;t3;", sw.toString());
-        }
-        
-        cfgB.removeAutoImport("t1");
-        cfg = cfgB.build();
-
-        {
-            Template t = cfg.getTemplate("main.ftl");
-            StringWriter sw = new StringWriter();
-            Environment env = t.createProcessingEnvironment(null, sw);
-            env.addAutoImport("t3", "t3.ftl");
-    
-            env.process();
-            assertEquals("In main: t2;t3;", sw.toString());
         }
     }
     
@@ -106,139 +89,112 @@ public class IncludeAndImportConfigurableLayersTest {
         {
             Template t = cfg.getTemplate("main.ftl");
             StringWriter sw = new StringWriter();
-            Environment env = t.createProcessingEnvironment(null, sw);
-            env.addAutoImport("t3", "t3b.ftl");
-    
-            env.process();
+            t.createProcessingEnvironment(null, sw)
+                    .autoImports(ImmutableMap.of("t3", "t3b.ftl"))
+                    .process();
             assertEquals("In main: t1;t2b;t3b;", sw.toString());
         }
         
         {
             Template t = cfg.getTemplate("main2.ftl");
             StringWriter sw = new StringWriter();
-            Environment env = t.createProcessingEnvironment(null, sw);
-            env.addAutoImport("t3", "t3b.ftl");
-    
-            env.process();
+            t.createProcessingEnvironment(null, sw)
+                    .autoImports(ImmutableMap.of("t3", "t3b.ftl"))
+                    .process();
             assertEquals("In main2: t1;t2;t3b;", sw.toString());
         }
         
         {
             Template t = cfg.getTemplate("main.ftl");
             StringWriter sw = new StringWriter();
-            Environment env = t.createProcessingEnvironment(null, sw);
-    
-            env.process();
+            t.createProcessingEnvironment(null, sw)
+                    .process();
             assertEquals("In main: t1;t3;t2b;", sw.toString());
         }
     }
 
     @Test
     public void test3LayerIncludesNoClashes() throws Exception {
-        TestConfigurationBuilder cfgB = createConfigurationBuilder()
-                .autoIncludes(ImmutableList.of("t1.ftl"))
+        Configuration cfg = createConfigurationBuilder()
+                .autoIncludes("t1.ftl")
                 .templateConfigurations(
                         new ConditionalTemplateConfigurationFactory(
                                 new FileNameGlobMatcher("main.ftl"),
                                 new TemplateConfiguration.Builder()
-                                        .autoIncludes(ImmutableList.of("t2.ftl"))
-                                        .build()));
-
-        Configuration cfg = cfgB.build();
+                                        .autoIncludes("t2.ftl")
+                                        .build()))
+                .build();
 
         {
             Template t = cfg.getTemplate("main.ftl");
             StringWriter sw = new StringWriter();
-            Environment env = t.createProcessingEnvironment(null, sw);
-            env.addAutoInclude("t3.ftl");
-    
-            env.process();
+            t.createProcessingEnvironment(null, sw)
+                    .autoIncludes("t3.ftl")
+                    .process();
             assertEquals("T1;T2;T3;In main: t1;t2;t3;", sw.toString());
         }
 
         {
             Template t = cfg.getTemplate("main.ftl");
             StringWriter sw = new StringWriter();
-            Environment env = t.createProcessingEnvironment(null, sw);
-    
-            env.process();
+            t.createProcessingEnvironment(null, sw)
+                    .process();
             assertEquals("T1;T2;In main: t1;t2;", sw.toString());
         }
         
         {
             Template t = cfg.getTemplate("main2.ftl");
             StringWriter sw = new StringWriter();
-            Environment env = t.createProcessingEnvironment(null, sw);
-            env.addAutoInclude("t3.ftl");
-    
-            env.process();
+            t.createProcessingEnvironment(null, sw)
+                    .autoIncludes("t3.ftl")
+                    .process();
             assertEquals("T1;T3;In main2: t1;t3;", sw.toString());
-        }
-        
-        cfgB.removeAutoInclude("t1.ftl");
-        cfg = cfgB.build();
-
-        {
-            Template t = cfg.getTemplate("main.ftl");
-            StringWriter sw = new StringWriter();
-            Environment env = t.createProcessingEnvironment(null, sw);
-            env.addAutoInclude("t3.ftl");
-    
-            env.process();
-            assertEquals("T2;T3;In main: t2;t3;", sw.toString());
         }
     }
 
     @Test
     public void test3LayerIncludeClashes() throws Exception {
         Configuration cfg = createConfigurationBuilder()
-                .autoIncludes(ImmutableList.of(
-                        "t1.ftl",
-                        "t2.ftl",
-                        "t3.ftl"))
+                .autoIncludes("t1.ftl", "t2.ftl", "t3.ftl")
                 .templateConfigurations(new ConditionalTemplateConfigurationFactory(
                         new FileNameGlobMatcher("main.ftl"),
                         new TemplateConfiguration.Builder()
-                                .autoIncludes(ImmutableList.of("t2.ftl"))
+                                .autoIncludes("t2.ftl")
                                 .build()))
                 .build();
 
         {
             Template t = cfg.getTemplate("main.ftl");
             StringWriter sw = new StringWriter();
-            Environment env = t.createProcessingEnvironment(null, sw);
-            env.addAutoInclude("t3.ftl");
-    
-            env.process();
+            t.createProcessingEnvironment(null, sw)
+                    .autoIncludes("t3.ftl")
+                    .process();
             assertEquals("T1;T2;T3;In main: t1;t2;t3;", sw.toString());
         }
         
         {
             Template t = cfg.getTemplate("main2.ftl");
             StringWriter sw = new StringWriter();
-            Environment env = t.createProcessingEnvironment(null, sw);
-            env.addAutoInclude("t3.ftl");
-    
-            env.process();
+            t.createProcessingEnvironment(null, sw)
+                    .autoIncludes("t3.ftl")
+                    .process();
             assertEquals("T1;T2;T3;In main2: t1;t2;t3;", sw.toString());
         }
         
         {
             Template t = cfg.getTemplate("main.ftl");
             StringWriter sw = new StringWriter();
-            Environment env = t.createProcessingEnvironment(null, sw);
-    
-            env.process();
+            t.createProcessingEnvironment(null, sw)
+                    .process();
             assertEquals("T1;T3;T2;In main: t1;t3;t2;", sw.toString());
         }
         
         {
             Template t = cfg.getTemplate("main.ftl");
             StringWriter sw = new StringWriter();
-            Environment env = t.createProcessingEnvironment(null, sw);
-            env.addAutoInclude("t1.ftl");
-    
-            env.process();
+            t.createProcessingEnvironment(null, sw)
+                    .autoIncludes("t1.ftl")
+                    .process();
             assertEquals("T3;T2;T1;In main: t3;t2;t1;", sw.toString());
         }
     }
@@ -246,25 +202,21 @@ public class IncludeAndImportConfigurableLayersTest {
     @Test
     public void test3LayerIncludesClashes2() throws Exception {
         Configuration cfg = createConfigurationBuilder()
-                .autoIncludes(ImmutableList.of("t1.ftl", "t1.ftl"))
+                .autoIncludes("t1.ftl", "t1.ftl")
                 .templateConfigurations(
                         new ConditionalTemplateConfigurationFactory(
                                 new FileNameGlobMatcher("main.ftl"),
                                 new TemplateConfiguration.Builder()
-                                        .autoIncludes(ImmutableList.of("t2.ftl", "t2.ftl"))
+                                        .autoIncludes("t2.ftl", "t2.ftl")
                                         .build()))
                 .build();
 
         {
             Template t = cfg.getTemplate("main.ftl");
             StringWriter sw = new StringWriter();
-            Environment env = t.createProcessingEnvironment(null, sw);
-            env.addAutoInclude("t3.ftl");
-            env.addAutoInclude("t3.ftl");
-            env.addAutoInclude("t1.ftl");
-            env.addAutoInclude("t1.ftl");
-    
-            env.process();
+            t.createProcessingEnvironment(null, sw)
+                    .autoIncludes("t3.ftl", "t3.ftl", "t1.ftl", "t1.ftl")
+                    .process();
             assertEquals("T2;T3;T1;In main: t2;t3;t1;", sw.toString());
         }
     }

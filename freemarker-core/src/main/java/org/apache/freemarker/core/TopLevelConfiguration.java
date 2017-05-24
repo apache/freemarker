@@ -21,6 +21,7 @@ package org.apache.freemarker.core;
 
 import java.util.Map;
 
+import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
@@ -177,10 +178,12 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
 
     /**
      * Shared variables are variables that are visible as top-level variables for all templates, except where the data
-     * model contains a variable with the same name (which then shadows the shared variable).
+     * model contains a variable with the same name (which then shadows the shared variable). This setting value store
+     * the variables as they were originally added, that is, without being wrapped into {@link TemplateModel} interface
+     * (unless the original value was already a {@link TemplateModel}). The wrapped values can be accessed with
+     * {@link Configuration#getWrappedSharedVariable(String)}.
      *
-     * @return Not {@code null}; the {@link Map} is possibly mutable in builders, but immutable in
-     *      {@link Configuration}.
+     * @return Not {@code null}; immutable {@link Map}.
      *
      * @see Configuration.Builder#setSharedVariables(Map)
      */
