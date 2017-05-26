@@ -26858,12 +26858,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Bug fixed (<link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-52">FREEMARKER-52</link>):
               When setting the <literal>output_format</literal> with
-              <literal>Properties</literal>, the <literal>XHTML</literal>
-              abbreviation wasn't recognized. Like in a
-              <literal>.properties</literal> file,
-              <literal>output_format=XHTML</literal> didn't work, only
+              <literal>Properties</literal>, the
+              <literal>XHTMLOutputFormat</literal> abbreviation wasn't
+              recognized (for example in a <literal>.properties</literal>
+              file, <literal>output_format=XHTMLOutputFormat</literal> didn't
+              work, only
               <literal>output_format=freemarker.core.XHTMLOutputFormat()</literal>
-              did.</para>
+              did).</para>
             </listitem>
           </itemizedlist>
         </section>
