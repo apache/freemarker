@@ -683,6 +683,7 @@ public class _ObjectBuilderSettingEvaluator {
             addWithSimpleName(SHORTHANDS, FirstMatchTemplateConfigurationFactory.class);
 
             addWithSimpleName(SHORTHANDS, HTMLOutputFormat.class);
+            addWithSimpleName(SHORTHANDS, XHTMLOutputFormat.class);
             addWithSimpleName(SHORTHANDS, XMLOutputFormat.class);
             addWithSimpleName(SHORTHANDS, RTFOutputFormat.class);
             addWithSimpleName(SHORTHANDS, PlainTextOutputFormat.class);

@@ -30,7 +30,7 @@
 
     <titleabbrev>Manual</titleabbrev>
 
-    <productname>Freemarker 2.3.26</productname>
+    <productname>Freemarker 2.3.27</productname>
   </info>
 
   <preface role="index.html" xml:id="preface">
@@ -26839,6 +26839,35 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
     <appendix xml:id="app_versions">
       <title>Version history</title>
+
+      <section xml:id="versions_2_3_27">
+        <title>2.3.27 (incubating at Apache)</title>
+
+        <para>Release date: FIXME</para>
+
+        <para><emphasis role="bold">This is a stable, final
+        release.</emphasis> The <quote>incubating</quote> suffix is required
+        by the Apache Software Foundation until the project becomes a fully
+        accepted (graduated) Apache project.</para>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Bug fixed (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-52">FREEMARKER-52</link>):
+              When setting the <literal>output_format</literal> with
+              <literal>Properties</literal>, the <literal>XHTML</literal>
+              abbreviation wasn't recognized. Like in a
+              <literal>.properties</literal> file,
+              <literal>output_format=XHTML</literal> didn't work, only
+              <literal>output_format=freemarker.core.XHTMLOutputFormat()</literal>
+              did.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
 
       <section xml:id="versions_2_3_26">
         <title>2.3.26 (incubating at Apache)</title>
