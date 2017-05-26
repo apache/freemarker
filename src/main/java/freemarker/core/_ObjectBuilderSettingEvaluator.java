@@ -879,7 +879,7 @@ public class _ObjectBuilderSettingEvaluator {
                         throw new LegacyExceptionWrapperSettingEvaluationExpression(e);
                     }
                 } catch (LegacyExceptionWrapperSettingEvaluationExpression e) {
-                    if (!canBeStaticField) {
+                    if (!canBeStaticField || className.indexOf('.') == -1) {
                         throw e;
                     }
                     // Silently try to interpret className as static filed, throw the original exception if that fails. 
