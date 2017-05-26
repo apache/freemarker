@@ -45,6 +45,7 @@ import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.XHTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
 import org.apache.freemarker.core.templateresolver.AndMatcher;
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
@@ -675,6 +676,7 @@ public class _ObjectBuilderSettingEvaluator {
             addWithSimpleName(SHORTHANDS, FirstMatchTemplateConfigurationFactory.class);
 
             addWithSimpleName(SHORTHANDS, HTMLOutputFormat.class);
+            addWithSimpleName(SHORTHANDS, XHTMLOutputFormat.class);
             addWithSimpleName(SHORTHANDS, XMLOutputFormat.class);
             addWithSimpleName(SHORTHANDS, RTFOutputFormat.class);
             addWithSimpleName(SHORTHANDS, PlainTextOutputFormat.class);
@@ -887,7 +889,7 @@ public class _ObjectBuilderSettingEvaluator {
                         cl = _ClassUtil.forName(className);
                     } catch (Exception e2) {
                         boolean failedToGetAsStaticField;
-                        if (canBeStaticField) {
+                        if (canBeStaticField && className.indexOf('.') != -1) {
                             // Try to interpret className as static filed:
                             try {
                                 return getStaticFieldValue(className);
