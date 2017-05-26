@@ -19,10 +19,14 @@
 
 package org.apache.freemarker.core.util;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-/** Don't use this; used internally by FreeMarker, might changes without notice. */
+/**
+ * Don't use this; used internally by FreeMarker, might changes without notice.
+ * {@link Collection} and {@link Map}-related utilities.
+ */
 public class _CollectionUtil {
     
     private _CollectionUtil() { }
@@ -74,12 +78,12 @@ public class _CollectionUtil {
                 if (key == null) {
                     if (!allowNullKey) {
                         throw new IllegalArgumentException(
-                                (argName != null ? "Invalid value for argument \"" + argName + "\"" : "")
+                                (argName != null ? "Invalid value for argument \"" + argName + "\": " : "")
                                         + "The Map contains null key");
                     }
                 } else {
                     throw new IllegalArgumentException(
-                            (argName != null ? "Invalid value for argument \"" + argName + "\"" : "")
+                            (argName != null ? "Invalid value for argument \"" + argName + "\": " : "")
                                     + "The Map contains a key that's not instance of " + keyClass.getName() +
                                     "; its class is " + key.getClass().getName() + ".");
                 }

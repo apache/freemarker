@@ -296,7 +296,7 @@ public class TemplateConfigurationTest {
                 Object value2 = SETTING_ASSIGNMENTS.get(propDesc2.getName());
                 propDesc2.getWriteMethod().invoke(tcb2, value2);
 
-                tcb1.merge(tcb2);
+                tcb1.merge(tcb2.build());
                 if (propDesc1.getName().equals(propDesc2.getName()) && value1 instanceof List
                         && !propDesc1.getName().equals("autoIncludes")) {
                     assertEquals("For " + propDesc1.getName(),
@@ -311,86 +311,86 @@ public class TemplateConfigurationTest {
     
     @Test
     public void testMergeMapSettings() throws Exception {
-        TemplateConfiguration.Builder tc1 = new TemplateConfiguration.Builder();
-        tc1.setCustomDateFormats(ImmutableMap.of(
+        TemplateConfiguration.Builder tcb1 = new TemplateConfiguration.Builder();
+        tcb1.setCustomDateFormats(ImmutableMap.of(
                 "epoch", EpochMillisTemplateDateFormatFactory.INSTANCE,
                 "x", LocAndTZSensitiveTemplateDateFormatFactory.INSTANCE));
-        tc1.setCustomNumberFormats(ImmutableMap.of(
+        tcb1.setCustomNumberFormats(ImmutableMap.of(
                 "hex", HexTemplateNumberFormatFactory.INSTANCE,
                 "x", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE));
-        tc1.setAutoImports(ImmutableMap.of("a", "a1.ftl", "b", "b1.ftl"));
+        tcb1.setAutoImports(ImmutableMap.of("a", "a1.ftl", "b", "b1.ftl"));
         
-        TemplateConfiguration.Builder tc2 = new TemplateConfiguration.Builder();
-        tc2.setCustomDateFormats(ImmutableMap.of(
+        TemplateConfiguration.Builder tcb2 = new TemplateConfiguration.Builder();
+        tcb2.setCustomDateFormats(ImmutableMap.of(
                 "loc", LocAndTZSensitiveTemplateDateFormatFactory.INSTANCE,
                 "x", EpochMillisDivTemplateDateFormatFactory.INSTANCE));
-        tc2.setCustomNumberFormats(ImmutableMap.of(
+        tcb2.setCustomNumberFormats(ImmutableMap.of(
                 "loc", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE,
                 "x", BaseNTemplateNumberFormatFactory.INSTANCE));
-        tc2.setAutoImports(ImmutableMap.of("b", "b2.ftl", "c", "c2.ftl"));
+        tcb2.setAutoImports(ImmutableMap.of("b", "b2.ftl", "c", "c2.ftl"));
         
-        tc1.merge(tc2);
+        tcb1.merge(tcb2.build());
         
-        Map<String, ? extends TemplateDateFormatFactory> mergedCustomDateFormats = tc1.getCustomDateFormats();
+        Map<String, ? extends TemplateDateFormatFactory> mergedCustomDateFormats = tcb1.getCustomDateFormats();
         assertEquals(EpochMillisTemplateDateFormatFactory.INSTANCE, mergedCustomDateFormats.get("epoch"));
         assertEquals(LocAndTZSensitiveTemplateDateFormatFactory.INSTANCE, mergedCustomDateFormats.get("loc"));
         assertEquals(EpochMillisDivTemplateDateFormatFactory.INSTANCE, mergedCustomDateFormats.get("x"));
         
-        Map<String, ? extends TemplateNumberFormatFactory> mergedCustomNumberFormats = tc1.getCustomNumberFormats();
+        Map<String, ? extends TemplateNumberFormatFactory> mergedCustomNumberFormats = tcb1.getCustomNumberFormats();
         assertEquals(HexTemplateNumberFormatFactory.INSTANCE, mergedCustomNumberFormats.get("hex"));
         assertEquals(LocaleSensitiveTemplateNumberFormatFactory.INSTANCE, mergedCustomNumberFormats.get("loc"));
         assertEquals(BaseNTemplateNumberFormatFactory.INSTANCE, mergedCustomNumberFormats.get("x"));
 
-        Map<String, String> mergedAutoImports = tc1.getAutoImports();
+        Map<String, String> mergedAutoImports = tcb1.getAutoImports();
         assertEquals("a1.ftl", mergedAutoImports.get("a"));
         assertEquals("b2.ftl", mergedAutoImports.get("b"));
         assertEquals("c2.ftl", mergedAutoImports.get("c"));
         
         // Empty map merging optimization:
-        tc1.merge(new TemplateConfiguration.Builder());
-        assertSame(mergedCustomDateFormats, tc1.getCustomDateFormats());
-        assertSame(mergedCustomNumberFormats, tc1.getCustomNumberFormats());
+        tcb1.merge(new TemplateConfiguration.Builder().build());
+        assertSame(mergedCustomDateFormats, tcb1.getCustomDateFormats());
+        assertSame(mergedCustomNumberFormats, tcb1.getCustomNumberFormats());
         
         // Empty map merging optimization:
-        TemplateConfiguration.Builder tc3 = new TemplateConfiguration.Builder();
-        tc3.merge(tc1);
-        assertSame(mergedCustomDateFormats, tc3.getCustomDateFormats());
-        assertSame(mergedCustomNumberFormats, tc3.getCustomNumberFormats());
+        TemplateConfiguration.Builder tcb3 = new TemplateConfiguration.Builder();
+        tcb3.merge(tcb1.build());
+        assertSame(mergedCustomDateFormats, tcb3.getCustomDateFormats());
+        assertSame(mergedCustomNumberFormats, tcb3.getCustomNumberFormats());
     }
     
     @Test
     public void testMergeListSettings() throws Exception {
-        TemplateConfiguration.Builder tc1 = new TemplateConfiguration.Builder();
-        tc1.setAutoIncludes(ImmutableList.of("a.ftl", "x.ftl", "b.ftl"));
+        TemplateConfiguration.Builder tcb1 = new TemplateConfiguration.Builder();
+        tcb1.setAutoIncludes(ImmutableList.of("a.ftl", "x.ftl", "b.ftl"));
         
-        TemplateConfiguration.Builder tc2 = new TemplateConfiguration.Builder();
-        tc2.setAutoIncludes(ImmutableList.of("c.ftl", "x.ftl", "d.ftl"));
+        TemplateConfiguration.Builder tcb2 = new TemplateConfiguration.Builder();
+        tcb2.setAutoIncludes(ImmutableList.of("c.ftl", "x.ftl", "d.ftl"));
         
-        tc1.merge(tc2);
+        tcb1.merge(tcb2.build());
         
-        assertEquals(ImmutableList.of("a.ftl", "b.ftl", "c.ftl", "x.ftl", "d.ftl"), tc1.getAutoIncludes());
+        assertEquals(ImmutableList.of("a.ftl", "b.ftl", "c.ftl", "x.ftl", "d.ftl"), tcb1.getAutoIncludes());
     }
     
     @Test
     public void testMergePriority() throws Exception {
-        TemplateConfiguration.Builder tc1 = new TemplateConfiguration.Builder();
-        tc1.setDateFormat("1");
-        tc1.setTimeFormat("1");
-        tc1.setDateTimeFormat("1");
+        TemplateConfiguration.Builder tcb1 = new TemplateConfiguration.Builder();
+        tcb1.setDateFormat("1");
+        tcb1.setTimeFormat("1");
+        tcb1.setDateTimeFormat("1");
 
-        TemplateConfiguration.Builder tc2 = new TemplateConfiguration.Builder();
-        tc2.setDateFormat("2");
-        tc2.setTimeFormat("2");
+        TemplateConfiguration.Builder tcb2 = new TemplateConfiguration.Builder();
+        tcb2.setDateFormat("2");
+        tcb2.setTimeFormat("2");
 
-        TemplateConfiguration.Builder tc3 = new TemplateConfiguration.Builder();
-        tc3.setDateFormat("3");
+        TemplateConfiguration.Builder tcb3 = new TemplateConfiguration.Builder();
+        tcb3.setDateFormat("3");
 
-        tc1.merge(tc2);
-        tc1.merge(tc3);
+        tcb1.merge(tcb2.build());
+        tcb1.merge(tcb3.build());
 
-        assertEquals("3", tc1.getDateFormat());
-        assertEquals("2", tc1.getTimeFormat());
-        assertEquals("1", tc1.getDateTimeFormat());
+        assertEquals("3", tcb1.getDateFormat());
+        assertEquals("2", tcb1.getTimeFormat());
+        assertEquals("1", tcb1.getDateTimeFormat());
     }
     
     @Test
@@ -403,18 +403,18 @@ public class TemplateConfigurationTest {
         tc1.setCustomAttribute(CA2, "V1");
         tc1.setCustomAttribute(CA3, "V1");
 
-        TemplateConfiguration.Builder tc2 = new TemplateConfiguration.Builder();
-        tc2.setCustomAttribute("k1", "v2");
-        tc2.setCustomAttribute("k2", "v2");
-        tc2.setCustomAttribute(CA1, "V2");
-        tc2.setCustomAttribute(CA2, "V2");
+        TemplateConfiguration.Builder tcb2 = new TemplateConfiguration.Builder();
+        tcb2.setCustomAttribute("k1", "v2");
+        tcb2.setCustomAttribute("k2", "v2");
+        tcb2.setCustomAttribute(CA1, "V2");
+        tcb2.setCustomAttribute(CA2, "V2");
 
-        TemplateConfiguration.Builder tc3 = new TemplateConfiguration.Builder();
-        tc3.setCustomAttribute("k1", "v3");
-        tc3.setCustomAttribute(CA1, "V3");
+        TemplateConfiguration.Builder tcb3 = new TemplateConfiguration.Builder();
+        tcb3.setCustomAttribute("k1", "v3");
+        tcb3.setCustomAttribute(CA1, "V3");
 
-        tc1.merge(tc2);
-        tc1.merge(tc3);
+        tc1.merge(tcb2.build());
+        tc1.merge(tcb3.build());
 
         assertEquals("v3", tc1.getCustomAttribute("k1"));
         assertEquals("v2", tc1.getCustomAttribute("k2"));
@@ -426,51 +426,51 @@ public class TemplateConfigurationTest {
 
     @Test
     public void testMergeNullCustomAttributes() throws Exception {
-        TemplateConfiguration.Builder tc1 = new TemplateConfiguration.Builder();
-        tc1.setCustomAttribute("k1", "v1");
-        tc1.setCustomAttribute("k2", "v1");
-        tc1.setCustomAttribute(CA1, "V1");
-        tc1.setCustomAttribute(CA2,"V1");
+        TemplateConfiguration.Builder tcb1 = new TemplateConfiguration.Builder();
+        tcb1.setCustomAttribute("k1", "v1");
+        tcb1.setCustomAttribute("k2", "v1");
+        tcb1.setCustomAttribute(CA1, "V1");
+        tcb1.setCustomAttribute(CA2,"V1");
 
-        assertEquals("v1", tc1.getCustomAttribute("k1"));
-        assertEquals("v1", tc1.getCustomAttribute("k2"));
-        assertNull("v1", tc1.getCustomAttribute("k3"));
-        assertEquals("V1", tc1.getCustomAttribute(CA1));
-        assertEquals("V1", tc1.getCustomAttribute(CA2));
-        assertNull(tc1.getCustomAttribute(CA3));
+        assertEquals("v1", tcb1.getCustomAttribute("k1"));
+        assertEquals("v1", tcb1.getCustomAttribute("k2"));
+        assertNull("v1", tcb1.getCustomAttribute("k3"));
+        assertEquals("V1", tcb1.getCustomAttribute(CA1));
+        assertEquals("V1", tcb1.getCustomAttribute(CA2));
+        assertNull(tcb1.getCustomAttribute(CA3));
 
-        TemplateConfiguration.Builder tc2 = new TemplateConfiguration.Builder();
-        tc2.setCustomAttribute("k1", "v2");
-        tc2.setCustomAttribute("k2", null);
-        tc2.setCustomAttribute(CA1, "V2");
-        tc2.setCustomAttribute(CA2, null);
+        TemplateConfiguration.Builder tcb2 = new TemplateConfiguration.Builder();
+        tcb2.setCustomAttribute("k1", "v2");
+        tcb2.setCustomAttribute("k2", null);
+        tcb2.setCustomAttribute(CA1, "V2");
+        tcb2.setCustomAttribute(CA2, null);
 
-        TemplateConfiguration.Builder tc3 = new TemplateConfiguration.Builder();
-        tc3.setCustomAttribute("k1", null);
-        tc2.setCustomAttribute(CA1, null);
+        TemplateConfiguration.Builder tcb3 = new TemplateConfiguration.Builder();
+        tcb3.setCustomAttribute("k1", null);
+        tcb2.setCustomAttribute(CA1, null);
 
-        tc1.merge(tc2);
-        tc1.merge(tc3);
+        tcb1.merge(tcb2.build());
+        tcb1.merge(tcb3.build());
 
-        assertNull(tc1.getCustomAttribute("k1"));
-        assertNull(tc1.getCustomAttribute("k2"));
-        assertNull(tc1.getCustomAttribute("k3"));
-        assertNull(tc1.getCustomAttribute(CA1));
-        assertNull(tc1.getCustomAttribute(CA2));
-        assertNull(tc1.getCustomAttribute(CA3));
+        assertNull(tcb1.getCustomAttribute("k1"));
+        assertNull(tcb1.getCustomAttribute("k2"));
+        assertNull(tcb1.getCustomAttribute("k3"));
+        assertNull(tcb1.getCustomAttribute(CA1));
+        assertNull(tcb1.getCustomAttribute(CA2));
+        assertNull(tcb1.getCustomAttribute(CA3));
 
-        TemplateConfiguration.Builder tc4 = new TemplateConfiguration.Builder();
-        tc4.setCustomAttribute("k1", "v4");
-        tc4.setCustomAttribute(CA1, "V4");
+        TemplateConfiguration.Builder tcb4 = new TemplateConfiguration.Builder();
+        tcb4.setCustomAttribute("k1", "v4");
+        tcb4.setCustomAttribute(CA1, "V4");
 
-        tc1.merge(tc4);
+        tcb1.merge(tcb4.build());
 
-        assertEquals("v4", tc1.getCustomAttribute("k1"));
-        assertNull(tc1.getCustomAttribute("k2"));
-        assertNull(tc1.getCustomAttribute("k3"));
-        assertEquals("V4", tc1.getCustomAttribute(CA1));
-        assertNull(tc1.getCustomAttribute(CA2));
-        assertNull(tc1.getCustomAttribute(CA3));
+        assertEquals("v4", tcb1.getCustomAttribute("k1"));
+        assertNull(tcb1.getCustomAttribute("k2"));
+        assertNull(tcb1.getCustomAttribute("k3"));
+        assertEquals("V4", tcb1.getCustomAttribute(CA1));
+        assertNull(tcb1.getCustomAttribute(CA2));
+        assertNull(tcb1.getCustomAttribute(CA3));
     }
 
     @Test

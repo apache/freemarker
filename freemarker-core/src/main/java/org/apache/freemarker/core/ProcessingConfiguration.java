@@ -189,8 +189,7 @@ public interface ProcessingConfiguration {
      * inheritance. Thus, to get a custom format you shouldn't use this {@link Map} directly, but
      * {@link #getCustomNumberFormat(String)}, which will search the format in the inheritance chain.
      *
-     * @return Never {@code null}. Unless the method was called on a builder class, the returned {@link Map} shouldn't
-     * be modified.
+     * @return Never {@code null}; unmodifiable {@link Map}.
      */
     Map<String, TemplateNumberFormatFactory> getCustomNumberFormats();
 
@@ -372,8 +371,7 @@ public interface ProcessingConfiguration {
      * inheritance. Thus, to get a custom format you shouldn't use this {@link Map} directly, but {@link
      * #getCustomDateFormat(String)}, which will search the format in the inheritance chain.
      *
-     * @return Never {@code null}. Unless the method was called on a builder class, the returned {@link Map} shouldn't
-     * be modified.
+     * @return Never {@code null}; unmodifiable {@link Map}.
      */
     Map<String, TemplateDateFormatFactory> getCustomDateFormats();
 

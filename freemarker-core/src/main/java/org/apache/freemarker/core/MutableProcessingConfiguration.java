@@ -330,7 +330,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     private Boolean logTemplateExceptions;
     private Map<String, TemplateDateFormatFactory> customDateFormats;
     private Map<String, TemplateNumberFormatFactory> customNumberFormats;
-    private LinkedHashMap<String, String> autoImports;
+    private Map<String, String> autoImports;
     private List<String> autoIncludes;
     private Boolean lazyImports;
     private Boolean lazyAutoImports;
@@ -517,16 +517,37 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     /**
      * Setter pair of {@link #getCustomNumberFormats()}. Note that custom number formats are get through
      * {@link #getCustomNumberFormat(String)}, not directly though this {@link Map}, so number formats from
-     * {@link ProcessingConfiguration}-s on less specific levels are inherited without you copying them into this
+     * {@link ProcessingConfiguration}-s on less specific levels are inherited without being present in this
      * {@link Map}.
      *
      * @param customNumberFormats
-     *      Not {@code null}.
+     *         Not {@code null}; will be copied (to prevent aliasing effect); keys must conform to format name
+     *         syntactical restrictions  (see in {@link #getCustomNumberFormats()})
      */
     public void setCustomNumberFormats(Map<String, TemplateNumberFormatFactory> customNumberFormats) {
+        setCustomNumberFormats(customNumberFormats, false);
+    }
+
+    /**
+     * @param validatedImmutableUnchanging
+     *         {@code true} if we know that the 1st argument is already validated, immutable, and unchanging (means,
+     *         won't change later because of aliasing).
+     */
+    void setCustomNumberFormats(Map<String, TemplateNumberFormatFactory> customNumberFormats,
+            boolean validatedImmutableUnchanging) {
         _NullArgumentException.check("customNumberFormats", customNumberFormats);
-        validateFormatNames(customNumberFormats.keySet());
-        this.customNumberFormats = customNumberFormats;
+        if (!validatedImmutableUnchanging) {
+            if (customNumberFormats == this.customNumberFormats) {
+                return;
+            }
+            _CollectionUtil.safeCastMap("customNumberFormats", customNumberFormats,
+                    String.class, false,
+                    TemplateNumberFormatFactory.class, false);
+            validateFormatNames(customNumberFormats.keySet());
+            this.customNumberFormats = Collections.unmodifiableMap(new HashMap<>(customNumberFormats));
+        } else {
+            this.customNumberFormats = customNumberFormats;
+        }
     }
 
     /**
@@ -763,12 +784,40 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     protected abstract Map<String, TemplateDateFormatFactory> getDefaultCustomDateFormats();
 
     /**
-     * Setter pair of {@link #getCustomDateFormat(String)}.
+     * Setter pair of {@link #getCustomDateFormat(String)}. Note that custom date formats are get through
+     * {@link #getCustomNumberFormat(String)}, not directly though this {@link Map}, so date formats from
+     * {@link ProcessingConfiguration}-s on less specific levels are inherited without being present in this
+     * {@link Map}.
+     *
+     * @param customDateFormats
+     *         Not {@code null}; will be copied (to prevent aliasing effect); keys must conform to format name
+     *         syntactical restrictions (see in {@link #getCustomDateFormats()})
      */
     public void setCustomDateFormats(Map<String, TemplateDateFormatFactory> customDateFormats) {
+        setCustomDateFormats(customDateFormats, false);
+    }
+
+    /**
+     * @param validatedImmutableUnchanging
+     *         {@code true} if we know that the 1st argument is already validated, immutable, and unchanging (means,
+     *         won't change later because of aliasing).
+     */
+    void setCustomDateFormats(
+            Map<String, TemplateDateFormatFactory> customDateFormats,
+            boolean validatedImmutableUnchanging) {
         _NullArgumentException.check("customDateFormats", customDateFormats);
-        validateFormatNames(customDateFormats.keySet());
-        this.customDateFormats = customDateFormats;
+        if (!validatedImmutableUnchanging) {
+            if (customDateFormats == this.customDateFormats) {
+                return;
+            }
+            _CollectionUtil.safeCastMap("customDateFormats", customDateFormats,
+                    String.class, false,
+                    TemplateDateFormatFactory.class, false);
+            validateFormatNames(customDateFormats.keySet());
+            this.customDateFormats = Collections.unmodifiableMap(new HashMap(customDateFormats));
+        } else {
+            this.customDateFormats = customDateFormats;
+        }
     }
 
     /**
@@ -1292,15 +1341,31 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     /**
      * Setter pair of {@link #getAutoImports()}.
      * 
-     * @param map
+     * @param autoImports
      *            Maps the namespace variable names to the template names; not {@code null}, and can't contain {@code
      *            null} keys of values. The content of the {@link Map} is copied into another {@link Map}, to avoid
      *            aliasing problems. The iteration order of the original {@link Map} entries is kept.
      */
-    public void setAutoImports(Map<String, String> map) {
-        _NullArgumentException.check("map", map);
-        _CollectionUtil.safeCastMap("map", map, String.class, false, String.class, false);
-        autoImports = new LinkedHashMap<>(map);
+    public void setAutoImports(Map<String, String> autoImports) {
+        setAutoImports(autoImports, false);
+    }
+
+    /**
+     * @param validatedImmutableUnchanging
+     *         {@code true} if we know that the 1st argument is already validated, immutable, and unchanging (means,
+     *         won't change later because of aliasing).
+     */
+    void setAutoImports(Map<String, String> autoImports, boolean validatedImmutableUnchanging) {
+        _NullArgumentException.check("autoImports", autoImports);
+        if (!validatedImmutableUnchanging) {
+            if (autoImports == this.autoImports) {
+                return;
+            }
+            _CollectionUtil.safeCastMap("autoImports", autoImports, String.class, false, String.class, false);
+            this.autoImports = new LinkedHashMap<>(autoImports);
+        } else {
+            this.autoImports = autoImports;
+        }
     }
 
     /**
@@ -1338,20 +1403,36 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     /**
      * Setter pair of {@link #getAutoIncludes()}
      *
-     * @param templateNames Not {@code null}. The {@link List} will be copied to avoid aliasing problems.
+     * @param autoIncludes Not {@code null}. The {@link List} will be copied to avoid aliasing problems.
      */
-    public void setAutoIncludes(List<String> templateNames) {
-        _NullArgumentException.check("templateNames", templateNames);
-        _CollectionUtil.safeCastList("templateNames", templateNames, String.class, false);
-        Set<String> uniqueItems = new LinkedHashSet<>(templateNames.size() * 4 / 3, 1f);
-        for (String templateName : templateNames) {
-            if (!uniqueItems.add(templateName)) {
-                // Move clashing item at the end of the collection
-                uniqueItems.remove(templateName);
-                uniqueItems.add(templateName);
+    public void setAutoIncludes(List<String> autoIncludes) {
+        setAutoIncludes(autoIncludes, false);
+    }
+
+    /**
+     * @param validatedImmutableUnchanging
+     *         {@code true} if we know that the 1st argument is already validated, immutable, and unchanging (means,
+     *         won't change later because of aliasing).
+     */
+    void setAutoIncludes(List<String> autoIncludes, boolean validatedImmutableUnchanging) {
+        _NullArgumentException.check("autoIncludes", autoIncludes);
+        if (!validatedImmutableUnchanging) {
+            if (autoIncludes == this.autoIncludes) {
+                return;
             }
+            _CollectionUtil.safeCastList("autoIncludes", autoIncludes, String.class, false);
+            Set<String> uniqueItems = new LinkedHashSet<>(autoIncludes.size() * 4 / 3, 1f);
+            for (String templateName : autoIncludes) {
+                if (!uniqueItems.add(templateName)) {
+                    // Move clashing item at the end of the collection
+                    uniqueItems.remove(templateName);
+                    uniqueItems.add(templateName);
+                }
+            }
+            this.autoIncludes = Collections.<String>unmodifiableList(new ArrayList<>(uniqueItems));
+        } else {
+            this.autoIncludes = autoIncludes;
         }
-        autoIncludes = Collections.<String>unmodifiableList(new ArrayList<>(uniqueItems));
     }
 
     /**
@@ -2056,7 +2137,21 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * @param customAttributes Not {@code null}. The {@link Map} is copied to prevent aliasing problems.
      */
     public void setCustomAttributes(Map<Object, Object> customAttributes) {
-        setCustomAttributesWithoutCopying(new LinkedHashMap<>(customAttributes));
+        setCustomAttributes(customAttributes, false);
+    }
+
+    /**
+     * @param validatedImmutableUnchanging
+     *         {@code true} if we know that the 1st argument is already validated, immutable, and unchanging (means,
+     *         won't change later because of aliasing).
+     */
+    void setCustomAttributes(Map<Object, Object> customAttributes, boolean validatedImmutableUnchanging) {
+        _NullArgumentException.check("customAttributes", customAttributes);
+        if (!validatedImmutableUnchanging) {
+            this.customAttributes = new LinkedHashMap<>(customAttributes); // TODO mutable
+        } else {
+            this.customAttributes = customAttributes;
+        }
     }
 
     /**
@@ -2065,15 +2160,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     public SelfT customAttributes(Map<Object, Object> customAttributes) {
         setCustomAttributes(customAttributes);
         return self();
-    }
-
-    /**
-     * Used internally instead of {@link #setCustomAttributes(Map)} to speed up use cases where we know that there
-     * won't be aliasing problems.
-     */
-    void setCustomAttributesWithoutCopying(Map<Object, Object> customAttributes) {
-        _NullArgumentException.check("customAttributes", customAttributes);
-        this.customAttributes = customAttributes;
     }
 
     @Override

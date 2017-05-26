@@ -21,6 +21,7 @@ package org.apache.freemarker.core;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -135,6 +136,10 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         tabSize = builder.isTabSizeSet() ? builder.getTabSize() : null;
     }
 
+    /**
+     * Adds two {@link Map}-s (keeping the iteration order); assuming the inputs are already unmodifiable and
+     * unchanging, it returns an unmodifiable and unchanging {@link Map} itself.
+     */
     private static <K,V> Map<K,V> mergeMaps(Map<K,V> m1, Map<K,V> m2, boolean overwriteUpdatesOrder) {
         if (m1 == null) return m2;
         if (m2 == null) return m1;
@@ -149,9 +154,13 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
             }
         }
         mergedM.putAll(m2);
-        return mergedM;
+        return Collections.unmodifiableMap(mergedM);
     }
 
+    /**
+     * Adds two {@link List}-s; assuming the inputs are already unmodifiable and unchanging, it returns an
+     * unmodifiable and unchanging {@link List} itself.
+     */
     private static List<String> mergeLists(List<String> list1, List<String> list2) {
         if (list1 == null) return list2;
         if (list2 == null) return list1;
@@ -161,7 +170,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         ArrayList<String> mergedList = new ArrayList<>(list1.size() + list2.size());
         mergedList.addAll(list1);
         mergedList.addAll(list2);
-        return mergedList;
+        return Collections.unmodifiableList(mergedList);
     }
 
     /**
@@ -814,11 +823,12 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         }
 
         /**
-         * Set all settings in this {@link Builder} that were set in the parameter
-         * {@link TemplateConfiguration}, possibly overwriting the earlier value in this object. (A setting is said to be
-         * set in a {@link TemplateConfiguration} if it was explicitly set via a setter method, as opposed to be inherited.)
+         * Set all settings in this {@link Builder} that were set in the parameter {@link TemplateConfiguration} (or
+         * other {@link ParsingAndProcessingConfiguration}), possibly overwriting the earlier value in this object.
+         * (A setting is said to be set in a {@link ParsingAndProcessingConfiguration} if it was explicitly set via a
+         * setter method, as opposed to be inherited.)
          */
-        public void merge(ParsingAndProcessingConfiguration tc) {
+        public void merge(TemplateConfiguration tc) {
             if (tc.isAPIBuiltinEnabledSet()) {
                 setAPIBuiltinEnabled(tc.getAPIBuiltinEnabled());
             }
@@ -836,11 +846,14 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
             }
             if (tc.isCustomDateFormatsSet()) {
                 setCustomDateFormats(mergeMaps(
-                        isCustomDateFormatsSet() ? getCustomDateFormats() : null, tc.getCustomDateFormats(), false));
+                        isCustomDateFormatsSet() ? getCustomDateFormats() : null, tc.getCustomDateFormats(), false),
+                        true
+                );
             }
             if (tc.isCustomNumberFormatsSet()) {
                 setCustomNumberFormats(mergeMaps(
-                        isCustomNumberFormatsSet() ? getCustomNumberFormats() : null, tc.getCustomNumberFormats(), false));
+                        isCustomNumberFormatsSet() ? getCustomNumberFormats() : null, tc.getCustomNumberFormats(), false),
+                        true);
             }
             if (tc.isDateFormatSet()) {
                 setDateFormat(tc.getDateFormat());
@@ -927,10 +940,11 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
             }
 
             if (tc.isCustomAttributesSet()) {
-                setCustomAttributesWithoutCopying(mergeMaps(
+                setCustomAttributes(mergeMaps(
                         isCustomAttributesSet() ? getCustomAttributes() : null,
                         tc.isCustomAttributesSet() ? tc.getCustomAttributes() : null,
-                        true));
+                        true),
+                        true);
             }
         }
 
