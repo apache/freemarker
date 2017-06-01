@@ -18,9 +18,11 @@
  */
 package org.apache.freemarker.core;
 
+import static org.apache.freemarker.core.ProcessingConfiguration.MISSING_VALUE_MARKER;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -40,8 +42,8 @@ public class TemplateConfigurationWithDefaultTemplateResolverTest {
 
     private static final String TEXT_WITH_ACCENTS = "pr\u00F3ba";
 
-    private static final Object CUST_ATT_1 = new Object();
-    private static final Object CUST_ATT_2 = new Object();
+    private static final Serializable CUST_ATT_1 = Integer.valueOf(111);
+    private static final Serializable CUST_ATT_2 = Integer.valueOf(222);
 
     private static final Charset ISO_8859_2 = Charset.forName("ISO-8859-2");
 
@@ -212,10 +214,10 @@ public class TemplateConfigurationWithDefaultTemplateResolverTest {
         {
             Template t = cfg.getTemplate("(tc2)");
             assertEquals("a1tc2", t.getCustomAttribute("a1"));
-            assertNull(t.getCustomAttribute("a2"));
+            assertEquals(MISSING_VALUE_MARKER, t.getCustomAttribute("a2", MISSING_VALUE_MARKER));
             assertEquals("a3temp", t.getCustomAttribute("a3"));
             assertEquals("ca1tc2", t.getCustomAttribute(CUST_ATT_1));
-            assertNull(t.getCustomAttribute(CUST_ATT_2));
+            assertEquals(MISSING_VALUE_MARKER, t.getCustomAttribute(CUST_ATT_2, MISSING_VALUE_MARKER));
         }
         {
             Template t = cfg.getTemplate("(tc1)(tc2)");

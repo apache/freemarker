@@ -133,6 +133,9 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * </ul>
  * 
  * <p>{@link Configuration} is thread-safe and (as of 3.0.0) immutable (apart from internal caches).
+ *
+ * <p>The setting reader methods of this class don't throw {@link SettingValueNotSetException}, because all settings
+ * are set on the {@link Configuration} level (even if they were just initialized to a default value).
  */
 public final class Configuration
         implements TopLevelConfiguration, CustomStateScope {
@@ -279,7 +282,7 @@ public final class Configuration
     private final List<String> autoIncludes;
     private final Boolean lazyImports;
     private final Boolean lazyAutoImports;
-    private final Map<Object, Object> customAttributes;
+    private final Map<Serializable, Object> customAttributes;
 
     // CustomStateScope:
 
@@ -434,7 +437,7 @@ public final class Configuration
         autoIncludes = builder.getAutoIncludes();
         lazyImports = builder.getLazyImports();
         lazyAutoImports = builder.getLazyAutoImports();
-        customAttributes = builder.getCustomAttributes();
+        customAttributes = builder.getCustomAttributesSnapshot(false);
     }
 
     private <SelfT extends ExtendableBuilder<SelfT>> void wrapAndPutSharedVariables(
@@ -462,7 +465,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isTemplateExceptionHandlerSet() {
@@ -482,7 +486,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isTemplateLoaderSet() {
@@ -498,7 +503,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isTemplateLookupStrategySet() {
@@ -514,7 +520,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isTemplateNameFormatSet() {
@@ -530,7 +537,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isTemplateConfigurationsSet() {
@@ -543,7 +551,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isCacheStorageSet() {
@@ -556,7 +565,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isTemplateUpdateDelayMillisecondsSet() {
@@ -574,7 +584,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isWhitespaceStrippingSet() {
@@ -627,7 +638,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isAutoEscapingPolicySet() {
@@ -640,7 +652,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isOutputFormatSet() {
@@ -760,7 +773,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isRecognizeStandardFileExtensionsSet() {
@@ -773,7 +787,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isTemplateLanguageSet() {
@@ -786,11 +801,13 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isTagSyntaxSet() {
@@ -803,7 +820,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isNamingConventionSet() {
@@ -816,7 +834,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isTabSizeSet() {
@@ -829,7 +848,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isLocaleSet() {
@@ -842,7 +862,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isTimeZoneSet() {
@@ -855,7 +876,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isSQLDateAndTimeTimeZoneSet() {
@@ -868,7 +890,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isArithmeticEngineSet() {
@@ -881,7 +904,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isNumberFormatSet() {
@@ -899,7 +923,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isCustomNumberFormatsSet() {
@@ -912,7 +937,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isBooleanFormatSet() {
@@ -925,7 +951,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isTimeFormatSet() {
@@ -938,7 +965,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isDateFormatSet() {
@@ -951,7 +979,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isDateTimeFormatSet() {
@@ -969,7 +998,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isCustomDateFormatsSet() {
@@ -982,7 +1012,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isObjectWrapperSet() {
@@ -995,7 +1026,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isOutputEncodingSet() {
@@ -1008,7 +1040,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isURLEscapingCharsetSet() {
@@ -1021,7 +1054,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isNewBuiltinClassResolverSet() {
@@ -1034,7 +1068,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isAPIBuiltinEnabledSet() {
@@ -1047,7 +1082,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isAutoFlushSet() {
@@ -1060,7 +1096,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isShowErrorTipsSet() {
@@ -1073,7 +1110,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isLogTemplateExceptionsSet() {
@@ -1086,7 +1124,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isLazyImportsSet() {
@@ -1099,7 +1138,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isLazyAutoImportsSet() {
@@ -1112,7 +1152,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isAutoImportsSet() {
@@ -1125,29 +1166,56 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isAutoIncludesSet() {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Because {@link Configuration} has on parent, the {@code includeInherited} parameter is ignored.
+     */
     @Override
-    public Map<Object, Object> getCustomAttributes() {
+    public Map<Serializable, Object> getCustomAttributesSnapshot(boolean includeInherited) {
         return customAttributes;
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * {@inheritDoc}
+     * <p>
+     * Unlike the other isXxxSet methods of {@link Configuration}, this can return {@code false}, as at least the
+     * builders in FreeMarker Core can't provide defaults for custom attributes. Note that since
+     * {@link #getCustomAttribute(Serializable)} just returns {@code null} for unset custom attributes, it's usually not a
+     * problem.
      */
     @Override
-    public boolean isCustomAttributesSet() {
-        return true;
+    public boolean isCustomAttributeSet(Serializable key) {
+        return customAttributes.containsKey(key);
     }
 
     @Override
-    public Object getCustomAttribute(Object key) {
-        return customAttributes.get(key);
+    public Object getCustomAttribute(Serializable key) {
+        return getCustomAttribute(key, null, false);
+    }
+
+    @Override
+    public Object getCustomAttribute(Serializable key, Object defaultValue) {
+        return getCustomAttribute(key, defaultValue, true);
+    }
+
+    private Object getCustomAttribute(Serializable key, Object defaultValue, boolean useDefaultValue) {
+        Object value = customAttributes.get(key);
+        if (value != null || customAttributes.containsKey(key)) {
+            return value;
+        }
+        if (useDefaultValue) {
+            return defaultValue;
+        }
+        throw new CustomAttributeNotSetException(key);
     }
 
     @Override
@@ -1174,11 +1242,9 @@ public final class Configuration
     /**
      * Retrieves the template with the given name from the template cache, loading it into the cache first
      * if it's missing/staled.
-     * 
      * <p>
      * This is a shorthand for {@link #getTemplate(String, Locale, Serializable, boolean)
      * getTemplate(name, null, null, false)}; see more details there.
-     * 
      * <p>
      * See {@link Configuration} for an example of basic usage.
      */
@@ -1356,7 +1422,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isSourceEncodingSet() {
@@ -1414,7 +1481,8 @@ public final class Configuration
     }
 
     /**
-     * Always {@code true} in {@link Configuration}-s, so calling the corresponding getter is always safe.
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
      */
     @Override
     public boolean isLocalizedLookupSet() {
@@ -2558,15 +2626,17 @@ public final class Configuration
         }
 
         @Override
-        protected Object getDefaultCustomAttribute(Object name) {
-            return Collections.emptyMap();
+        protected Object getDefaultCustomAttribute(Serializable key, Object defaultValue, boolean useDefaultValue) {
+            if (useDefaultValue) {
+                return defaultValue;
+            }
+            throw new CustomAttributeNotSetException(key);
         }
 
         @Override
-        protected Map<Object, Object> getDefaultCustomAttributes() {
-            return Collections.emptyMap();
+        protected void collectDefaultCustomAttributesSnapshot(Map<Serializable, Object> target) {
+            // Doesn't inherit anything
         }
-
     }
 
     /**

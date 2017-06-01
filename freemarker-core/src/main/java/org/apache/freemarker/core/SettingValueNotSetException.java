@@ -21,13 +21,23 @@ package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.util._StringUtil;
 
+/**
+ * Thrown when you try to read a configuration setting which wasn't set and isn't inherited from a parent object and has
+ * no default either. Because {@link Configuration} specifies a default value for all settings, objects that has a
+ * {@link Configuration} in their inheritance chain (like {@link Environment}, {@link Template}) won't throw this.
+ */
 public class SettingValueNotSetException extends IllegalStateException {
 
     private final String settingName;
 
     public SettingValueNotSetException(String settingName) {
-        super("The " + _StringUtil.jQuote(settingName)
+        this(settingName, true);
+    }
+
+    public SettingValueNotSetException(String settingName, boolean quoteSettingName) {
+        super("The " + (quoteSettingName ? _StringUtil.jQuote(settingName) : settingName)
                 + " setting is not set in this layer and has no default here either.");
         this.settingName = settingName;
     }
+
 }

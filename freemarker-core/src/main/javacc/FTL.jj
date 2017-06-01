@@ -3971,7 +3971,7 @@ void HeaderElement() :
                                                     + " should implement java.io.Serializable.",
                                                     exp);
                                         }
-                                        template.setCustomAttribute(attName, (Serializable) attValue);
+                                        template.setHeaderCustomAttribute(attName, (Serializable) attValue);
                                 }
                             } catch (TemplateModelException tme) {
                             }

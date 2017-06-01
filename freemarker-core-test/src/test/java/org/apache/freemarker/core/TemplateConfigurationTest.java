@@ -18,6 +18,7 @@
  */
 package org.apache.freemarker.core;
 
+import static org.apache.freemarker.core.ProcessingConfiguration.MISSING_VALUE_MARKER;
 import static org.junit.Assert.*;
 
 import java.beans.BeanInfo;
@@ -174,7 +175,6 @@ public class TemplateConfigurationTest {
                 ImmutableMap.of("dummy", HexTemplateNumberFormatFactory.INSTANCE));
         SETTING_ASSIGNMENTS.put("customDateFormats",
                 ImmutableMap.of("dummy", EpochMillisTemplateDateFormatFactory.INSTANCE));
-        SETTING_ASSIGNMENTS.put("customAttributes", ImmutableMap.of("dummy", 123));
 
         // Parser-only settings:
         SETTING_ASSIGNMENTS.put("templateLanguage", TemplateLanguage.STATIC_TEXT);
@@ -237,6 +237,7 @@ public class TemplateConfigurationTest {
         IGNORED_PROP_NAMES.add("strictBeanModels");
         IGNORED_PROP_NAMES.add("parentConfiguration");
         IGNORED_PROP_NAMES.add("settings");
+        IGNORED_PROP_NAMES.add("customAttributes");
     }
 
     private static final Set<String> CONFIGURABLE_PROP_NAMES;
@@ -277,7 +278,7 @@ public class TemplateConfigurationTest {
         }
     }
 
-    private static final Object CA1 = new Object();
+    private static final Integer CA1 = Integer.valueOf(123);
     private static final String CA2 = "ca2";
     private static final String CA3 = "ca3";
     private static final String CA4 = "ca4";
@@ -434,10 +435,10 @@ public class TemplateConfigurationTest {
 
         assertEquals("v1", tcb1.getCustomAttribute("k1"));
         assertEquals("v1", tcb1.getCustomAttribute("k2"));
-        assertNull("v1", tcb1.getCustomAttribute("k3"));
+        assertEquals(MISSING_VALUE_MARKER, tcb1.getCustomAttribute("k3", MISSING_VALUE_MARKER));
         assertEquals("V1", tcb1.getCustomAttribute(CA1));
         assertEquals("V1", tcb1.getCustomAttribute(CA2));
-        assertNull(tcb1.getCustomAttribute(CA3));
+        assertEquals(MISSING_VALUE_MARKER, tcb1.getCustomAttribute(CA3, MISSING_VALUE_MARKER));
 
         TemplateConfiguration.Builder tcb2 = new TemplateConfiguration.Builder();
         tcb2.setCustomAttribute("k1", "v2");
@@ -454,10 +455,10 @@ public class TemplateConfigurationTest {
 
         assertNull(tcb1.getCustomAttribute("k1"));
         assertNull(tcb1.getCustomAttribute("k2"));
-        assertNull(tcb1.getCustomAttribute("k3"));
+        assertEquals(MISSING_VALUE_MARKER, tcb1.getCustomAttribute("k3", MISSING_VALUE_MARKER));
         assertNull(tcb1.getCustomAttribute(CA1));
         assertNull(tcb1.getCustomAttribute(CA2));
-        assertNull(tcb1.getCustomAttribute(CA3));
+        assertEquals(MISSING_VALUE_MARKER, tcb1.getCustomAttribute(CA3, MISSING_VALUE_MARKER));
 
         TemplateConfiguration.Builder tcb4 = new TemplateConfiguration.Builder();
         tcb4.setCustomAttribute("k1", "v4");
@@ -467,10 +468,10 @@ public class TemplateConfigurationTest {
 
         assertEquals("v4", tcb1.getCustomAttribute("k1"));
         assertNull(tcb1.getCustomAttribute("k2"));
-        assertNull(tcb1.getCustomAttribute("k3"));
+        assertEquals(MISSING_VALUE_MARKER, tcb1.getCustomAttribute("k3", MISSING_VALUE_MARKER));
         assertEquals("V4", tcb1.getCustomAttribute(CA1));
         assertNull(tcb1.getCustomAttribute(CA2));
-        assertNull(tcb1.getCustomAttribute(CA3));
+        assertEquals(MISSING_VALUE_MARKER, tcb1.getCustomAttribute(CA3, MISSING_VALUE_MARKER));
     }
 
     @Test
@@ -501,6 +502,7 @@ public class TemplateConfigurationTest {
                 .customAttribute("k1", "c")
                 .customAttribute("k2", "c")
                 .customAttribute("k3", "c")
+                .customAttribute("k8", "c")
                 .build();
 
         TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
@@ -509,30 +511,19 @@ public class TemplateConfigurationTest {
         tcb.setCustomAttribute("k4", "tc");
         tcb.setCustomAttribute("k5", "tc");
         tcb.setCustomAttribute("k6", "tc");
-        tcb.setCustomAttribute(CA1, "tc");
-        tcb.setCustomAttribute(CA2,"tc");
-        tcb.setCustomAttribute(CA3,"tc");
 
         TemplateConfiguration tc = tcb.build();
-        Template t = new Template(null, "", cfg, tc);
-        t.setCustomAttribute("k5", "t");
-        t.setCustomAttribute("k6", null);
-        t.setCustomAttribute("k7", "t");
-        t.setCustomAttribute(CA2, "t");
-        t.setCustomAttribute(CA3, null);
-        t.setCustomAttribute(CA4, "t");
+        Template t = new Template(null, "<#ftl attributes={'k5':'t', 'k7':'t', 'k8':'t'}>", cfg, tc);
 
         assertEquals("c", t.getCustomAttribute("k1"));
         assertEquals("tc", t.getCustomAttribute("k2"));
         assertNull(t.getCustomAttribute("k3"));
         assertEquals("tc", t.getCustomAttribute("k4"));
         assertEquals("t", t.getCustomAttribute("k5"));
-        assertNull(t.getCustomAttribute("k6"));
+        // TODO [FM3] when { ... 'k6': null ... } works in FTL, put this back.
+        // assertNull(t.getCustomAttribute("k6"));
         assertEquals("t", t.getCustomAttribute("k7"));
-        assertEquals("tc", t.getCustomAttribute(CA1));
-        assertEquals("t", t.getCustomAttribute(CA2));
-        assertNull(t.getCustomAttribute(CA3));
-        assertEquals("t", t.getCustomAttribute(CA4));
+        assertEquals("t", t.getCustomAttribute("k8"));
     }
     
     @Test

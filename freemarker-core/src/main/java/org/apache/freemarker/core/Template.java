@@ -55,6 +55,7 @@ import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
 import org.apache.freemarker.core.util.BugException;
+import org.apache.freemarker.core.util._CollectionUtil;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
@@ -65,7 +66,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * <p>
  * Stores an already parsed template, ready to be processed (rendered) for unlimited times, possibly from multiple
  * threads.
- * 
  * <p>
  * Typically, you will use {@link Configuration#getTemplate(String)} to invoke/get {@link Template} objects, so you
  * don't construct them directly. But you can also construct a template from a {@link Reader} or a {@link String} that
@@ -73,13 +73,11 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * efficient for later processing, creating a new {@link Template} itself is relatively expensive. So try to re-use
  * {@link Template} objects if possible. {@link Configuration#getTemplate(String)} (and its overloads) does that
  * (caching {@link Template}-s) for you, but the constructor of course doesn't, so it's up to you to solve then.
- * 
  * <p>
- * Objects of this class meant to be handled as immutable and thus thread-safe. However, it has some setter methods for
- * changing FreeMarker settings. Those must not be used while the template is being processed, or if the template object
- * is already accessible from multiple threads. If some templates need different settings that those coming from the
- * shared {@link Configuration}, and you are using {@link Configuration#getTemplate(String)} (or its overloads), then
- * use the {@link Configuration#getTemplateConfigurations() templateConfigurations} setting to achieve that.
+ * The {@link ProcessingConfiguration} reader methods of this class don't throw {@link SettingValueNotSetException}
+ * because unset settings are ultimately inherited from {@link Configuration}.
+ * <p>
+ * Objects of this class are immutable and thus thread-safe.
  */
 // TODO [FM3] Try to make Template serializable for distributed caching. Transient fields will have to be restored.
 public class Template implements ProcessingConfiguration, CustomStateScope {
@@ -96,7 +94,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     private final String sourceName;
     private final ArrayList lines = new ArrayList();
 
-    // TODO [FM3] We want to get rid of these, thenthe same Template object could be reused for different lookups.
+    // TODO [FM3] We want to get rid of these, then the same Template object could be reused for different lookups.
     // Template lookup parameters:
     private final String lookupName;
     private Locale lookupLocale;
@@ -112,8 +110,13 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     private String defaultNS;
     private Map prefixToNamespaceURILookup = new HashMap();
     private Map namespaceURIToPrefixLookup = new HashMap();
-    private Map<String, Serializable> customAttributes;
-    private transient Map<Object, Object> mergedCustomAttributes;
+    /** Custom attributes specified inside the template with the #ftl directive. Maybe {@code null}. */
+    private Map<String, Serializable> headerCustomAttributes;
+    /**
+     * In case {@link #headerCustomAttributes} is not {@code null} and the {@link TemplateConfiguration} also specifies
+     * custom attributes, this is the two set of custom attributes merged. Otherwise it's {@code null}.
+     */
+    private transient Map<Serializable, Object> tcAndHeaderCustomAttributes;
 
     private AutoEscapingPolicy autoEscapingPolicy;
     // Values from template content that are detected automatically:
@@ -124,6 +127,11 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     // Custom state:
     private final Object customStateMapLock = new Object();
     private final ConcurrentHashMap<CustomStateKey, Object> customStateMap = new ConcurrentHashMap<>(0);
+
+    /**
+     * Indicates that the Template constructor has run completely.
+     */
+    private boolean writeProtected;
 
     /**
      * Same as {@link #Template(String, String, Reader, Configuration)} with {@code null} {@code sourceName} parameter.
@@ -326,8 +334,26 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         ltbReader.throwFailure();
         
         _DebuggerService.registerTemplate(this);
-        namespaceURIToPrefixLookup = Collections.unmodifiableMap(namespaceURIToPrefixLookup);
-        prefixToNamespaceURILookup = Collections.unmodifiableMap(prefixToNamespaceURILookup);
+        namespaceURIToPrefixLookup = _CollectionUtil.unmodifiableMap(namespaceURIToPrefixLookup);
+        prefixToNamespaceURILookup = _CollectionUtil.unmodifiableMap(prefixToNamespaceURILookup);
+
+       finishConstruction();
+   }
+
+    /**
+     * {@link Template} is technically mutable (to simplify internals), but it has to be finalized and then write
+     * protected when construction is done.
+     */
+    private void finishConstruction() {
+        headerCustomAttributes = _CollectionUtil.unmodifiableMap(headerCustomAttributes);
+        tcAndHeaderCustomAttributes = _CollectionUtil.unmodifiableMap(tcAndHeaderCustomAttributes);
+        writeProtected = true;
+    }
+
+    private void checkWritable() {
+        if (writeProtected) {
+            throw new IllegalStateException("Template can't be modified anymore");
+        }
     }
 
     /**
@@ -358,12 +384,11 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
                Charset sourceEncoding) {
         Template template;
         try {
-            template = new Template(lookupName, sourceName, new StringReader("X"), config);
+            template = new Template(lookupName, sourceName, new StringReader(""), config, sourceEncoding);
         } catch (IOException e) {
             throw new BugException("Plain text template creation failed", e);
         }
         ((ASTStaticText) template.rootElement).replaceText(content);
-        template.setActualSourceEncoding(sourceEncoding);
 
         _DebuggerService.registerTemplate(template);
 
@@ -612,6 +637,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      *            already gives back text (as opposed to binary data), so no decoding with a charset was needed.
      */
     void setActualSourceEncoding(Charset actualSourceEncoding) {
+        checkWritable();
         this.actualSourceEncoding = actualSourceEncoding;
     }
 
@@ -635,6 +661,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         return customLookupCondition;
     }
 
+    // TODO [FM3] Should not be public, should be final field
     /**
      * Mostly only used internally; setter pair of {@link #getCustomLookupCondition()}. This meant to be called directly
      * after instantiating the template with its constructor, after a successfull lookup that used this condition. So
@@ -682,6 +709,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * Should be called by the parser, for example to apply the output format specified in the #ftl header.
      */
     void setOutputFormat(OutputFormat outputFormat) {
+        checkWritable();
         this.outputFormat = outputFormat;
     }
     
@@ -701,6 +729,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * Should be called by the parser, for example to apply the auto escaping policy specified in the #ftl header.
      */
     void setAutoEscapingPolicy(AutoEscapingPolicy autoEscapingPolicy) {
+        checkWritable();
         this.autoEscapingPolicy = autoEscapingPolicy;
     }
     
@@ -1037,65 +1066,103 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         return tCfg != null && tCfg.isAutoIncludesSet();
     }
 
-    /**
-     * This exists to provide the functionality required by {@link ProcessingConfiguration}, but try not call it
-     * too frequently as it has some overhead compared to an usual getter.
-     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public Map<Object, Object> getCustomAttributes() {
-        if (mergedCustomAttributes != null) {
-            return Collections.unmodifiableMap(mergedCustomAttributes);
-        } else if (customAttributes != null) {
-            return (Map) Collections.unmodifiableMap(customAttributes);
-        } else if (tCfg != null && tCfg.isCustomAttributesSet()) {
-            return tCfg.getCustomAttributes();
+    public Map<Serializable, Object> getCustomAttributesSnapshot(boolean includeInherited) {
+        boolean nonInheritedAttrsFinal;
+        Map<? extends Serializable, ? extends Object> nonInheritedAttrs;
+        if (tcAndHeaderCustomAttributes != null) {
+            nonInheritedAttrs = tcAndHeaderCustomAttributes;
+            nonInheritedAttrsFinal = writeProtected;
+        } else if (headerCustomAttributes != null) {
+            nonInheritedAttrs = headerCustomAttributes;
+            nonInheritedAttrsFinal = writeProtected;
+        } else if (tCfg != null) {
+            nonInheritedAttrs =  tCfg.getCustomAttributesSnapshot(false);
+            nonInheritedAttrsFinal = true;
         } else {
-            return cfg.getCustomAttributes();
+            nonInheritedAttrs = Collections.emptyMap();
+            nonInheritedAttrsFinal = true;
+        }
+
+        Map<Serializable, Object> inheritedAttrs = includeInherited ? cfg.getCustomAttributesSnapshot(true)
+                : Collections.<Serializable, Object>emptyMap();
+
+        LinkedHashMap<Serializable, Object> mergedAttrs;
+        if (nonInheritedAttrs.isEmpty()) {
+            return inheritedAttrs;
+        } else if (inheritedAttrs.isEmpty() && nonInheritedAttrsFinal) {
+            return (Map) nonInheritedAttrs;
+        } else {
+            LinkedHashMap<Serializable, Object> result = new LinkedHashMap<>(
+                    (inheritedAttrs.size() + nonInheritedAttrs.size()) * 4 / 3 + 1, 0.75f);
+            result.putAll(inheritedAttrs);
+            result.putAll(nonInheritedAttrs);
+            return Collections.unmodifiableMap(result);
         }
     }
 
     @Override
-    public boolean isCustomAttributesSet() {
-        return customAttributes != null || tCfg != null && tCfg.isCustomAttributesSet();
+    public boolean isCustomAttributeSet(Serializable key) {
+        if (tcAndHeaderCustomAttributes != null) {
+            return tcAndHeaderCustomAttributes.containsKey(key);
+        }
+        return headerCustomAttributes != null && headerCustomAttributes.containsKey(key)
+                || tCfg != null && tCfg.isCustomAttributeSet(key);
     }
 
     @Override
-    public Object getCustomAttribute(Object name) {
-        // Extra step for custom attributes specified in the #ftl header:
-        if (mergedCustomAttributes != null) {
-            Object value = mergedCustomAttributes.get(name);
-            if (value != null || mergedCustomAttributes.containsKey(name)) {
+    public Object getCustomAttribute(Serializable key) {
+        return getCustomAttribute(key, null, false);
+    }
+
+    @Override
+    public Object getCustomAttribute(Serializable key, Object defaultValue) {
+        return getCustomAttribute(key, defaultValue, true);
+    }
+
+    private Object getCustomAttribute(Serializable key, Object defaultValue, boolean useDefaultValue) {
+        if (tcAndHeaderCustomAttributes != null) {
+            Object value = tcAndHeaderCustomAttributes.get(key);
+            if (value != null || tcAndHeaderCustomAttributes.containsKey(key)) {
                 return value;
             }
-        } else if (customAttributes != null) {
-            Object value = customAttributes.get(name);
-            if (value != null || customAttributes.containsKey(name)) {
-                return value;
+        } else {
+            if (headerCustomAttributes != null) {
+                Object value = headerCustomAttributes.get(key);
+                if (value != null || headerCustomAttributes.containsKey(key)) {
+                    return value;
+                }
             }
-        } else if (tCfg != null && tCfg.isCustomAttributesSet()) {
-            Object value = tCfg.getCustomAttributes().get(name);
-            if (value != null || tCfg.getCustomAttributes().containsKey(name)) {
-                return value;
+            if (tCfg != null) {
+                Object value = tCfg.getCustomAttribute(key, MISSING_VALUE_MARKER);
+                if (value != MISSING_VALUE_MARKER) {
+                    return value;
+                }
             }
         }
-        return cfg.getCustomAttribute(name);
+        return useDefaultValue ? cfg.getCustomAttribute(key, defaultValue) : cfg.getCustomAttribute(key);
     }
 
     /**
      * Should be called by the parser, for example to add the attributes specified in the #ftl header.
      */
-    void setCustomAttribute(String attName, Serializable attValue) {
-        if (customAttributes == null) {
-            customAttributes = new LinkedHashMap<>();
-        }
-        customAttributes.put(attName, attValue);
+    void setHeaderCustomAttribute(String attName, Serializable attValue) {
+        checkWritable();
 
-        if (tCfg != null && tCfg.isCustomAttributesSet()) {
-            if (mergedCustomAttributes == null) {
-                mergedCustomAttributes = new LinkedHashMap<>(tCfg.getCustomAttributes());
+        if (headerCustomAttributes == null) {
+            headerCustomAttributes = new LinkedHashMap<>();
+        }
+        headerCustomAttributes.put(attName, attValue);
+
+        if (tCfg != null) {
+            Map<Serializable, Object> tcCustAttrs = tCfg.getCustomAttributesSnapshot(false);
+            if (!tcCustAttrs.isEmpty()) {
+                if (tcAndHeaderCustomAttributes == null) {
+                    tcAndHeaderCustomAttributes = new LinkedHashMap<>(tcCustAttrs);
+                }
+                tcAndHeaderCustomAttributes.put(attName, attValue);
             }
-            mergedCustomAttributes.put(attName, attValue);
         }
     }
 

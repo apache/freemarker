@@ -20,6 +20,8 @@
 package org.apache.freemarker.core.util;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -107,6 +109,27 @@ public class _CollectionUtil {
         }
 
         return map;
+    }
+
+    private static final Class<?> UNMODIFIABLE_MAP_CLASS_1 = Collections.emptyMap().getClass();
+    private static final Class<?> UNMODIFIABLE_MAP_CLASS_2 = Collections.unmodifiableMap(
+            new HashMap<Object, Object> (1)).getClass();
+
+    public static boolean isMapKnownToBeUnmodifiable(Map<?, ?> map) {
+        if (map == null) {
+            return true;
+        }
+        Class<? extends Map> mapClass = map.getClass();
+        return mapClass == UNMODIFIABLE_MAP_CLASS_1 || mapClass == UNMODIFIABLE_MAP_CLASS_2;
+    }
+
+    /**
+     * Optimized version of {@link Collections#unmodifiableMap(Map)} (avoids needless wrapping).
+     *
+     * @param map The map to return or wrap if not already unmodifiable, or {@code null} which is silently bypassed.
+     */
+    public static <K, V> Map<K, V> unmodifiableMap(Map<K, V> map) {
+        return isMapKnownToBeUnmodifiable(map) ? map : Collections.unmodifiableMap(map);
     }
 
 }

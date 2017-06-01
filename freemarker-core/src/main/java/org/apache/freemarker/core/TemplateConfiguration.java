@@ -19,6 +19,7 @@
 package org.apache.freemarker.core;
 
 import java.io.Reader;
+import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,9 +40,9 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
  * A partial set of configuration settings used for customizing the {@link Configuration}-level settings for individual
  * {@link Template}-s (or rather, for a group of templates). That it's partial means that you should call the
  * corresponding {@code isXxxSet()} before getting a settings, or else you may cause
- * {@link SettingValueNotSetException}. (The fallback to the {@link Configuration} setting isn't automatic to keep
- * the dependency graph of configuration related beans non-cyclic. As user code seldom reads settings from here anyway,
- * this compromise was chosen.)
+ * {@link SettingValueNotSetException}. (There's no fallback to the {@link Configuration}-level settings to keep the
+ * dependency graph of configuration related beans non-cyclic. As user code seldom reads settings directly from
+ * {@link TemplateConfiguration}-s anyway, this compromise was chosen.)
  * <p>
  * Note on the {@code locale} setting: When used with the standard template loading/caching mechanism ({@link
  * Configuration#getTemplate(String)} and its overloads), localized lookup happens before the {@code locale} specified
@@ -82,7 +83,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     private final Boolean lazyImports;
     private final Boolean lazyAutoImports;
     private final boolean lazyAutoImportsSet;
-    private final Map<Object, Object> customAttributes;
+    private final Map<Serializable, Object> customAttributes;
     
     private final TemplateLanguage templateLanguage;
     private final TagSyntax tagSyntax;
@@ -123,7 +124,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         lazyImports = builder.isLazyImportsSet() ? builder.getLazyImports() : null;
         lazyAutoImportsSet = builder.isLazyAutoImportsSet();
         lazyAutoImports = lazyAutoImportsSet ? builder.getLazyAutoImports() : null;
-        customAttributes = builder.isCustomAttributesSet() ? builder.getCustomAttributes() : null;
+        customAttributes = builder.getCustomAttributesSnapshot(false);
 
         templateLanguage = builder.isTemplateLanguageSet() ? builder.getTemplateLanguage() : null;
         tagSyntax = builder.isTagSyntaxSet() ? builder.getTagSyntax() : null;
@@ -171,24 +172,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         mergedList.addAll(list1);
         mergedList.addAll(list2);
         return Collections.unmodifiableList(mergedList);
-    }
-
-    /**
-     * For internal usage only, copies the custom attributes set directly on this objects into another
-     * {@link MutableProcessingConfiguration}. The target {@link MutableProcessingConfiguration} is assumed to be not seen be other thread than the current
-     * one yet. (That is, the operation is not synchronized on the target {@link MutableProcessingConfiguration}, only on the source
-     * {@link MutableProcessingConfiguration})
-     */
-    private void copyDirectCustomAttributes(MutableProcessingConfiguration<?> target, boolean overwriteExisting) {
-        if (customAttributes == null) {
-            return;
-        }
-        for (Map.Entry<?, ?> custAttrEnt : customAttributes.entrySet()) {
-            Object custAttrKey = custAttrEnt.getKey();
-            if (overwriteExisting || !target.isCustomAttributeSet(custAttrKey)) {
-                target.setCustomAttribute(custAttrKey, custAttrEnt.getValue());
-            }
-        }
     }
 
     @Override
@@ -645,29 +628,37 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         return autoIncludes != null;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Note that the {@code includeInherited} has no effect here, as {@link TemplateConfiguration}-s has no parent.
+     */
     @Override
-    public Map<Object, Object> getCustomAttributes() {
-        if (!isCustomAttributesSet()) {
-            throw new SettingValueNotSetException("customAttributes");
-        }
+    public Map<Serializable, Object> getCustomAttributesSnapshot(boolean includeInherited) {
         return customAttributes;
     }
 
     @Override
-    public boolean isCustomAttributesSet() {
-        return customAttributes != null;
+    public boolean isCustomAttributeSet(Serializable key) {
+        return customAttributes.containsKey(key);
     }
 
     @Override
-    public Object getCustomAttribute(Object name) {
-        Object attValue;
-        if (isCustomAttributesSet()) {
-            attValue = customAttributes.get(name);
-            if (attValue != null || customAttributes.containsKey(name)) {
-                return attValue;
-            }
+    public Object getCustomAttribute(Serializable key) {
+        Object result = getCustomAttribute(key, MISSING_VALUE_MARKER);
+        if (result == MISSING_VALUE_MARKER) {
+            throw new CustomAttributeNotSetException(key);
         }
-        return null;
+        return result;
+    }
+
+    @Override
+    public Object getCustomAttribute(Serializable key, Object defaultValue) {
+        Object attValue = customAttributes.get(key);
+        if (attValue != null || customAttributes.containsKey(key)) {
+            return attValue;
+        }
+        return defaultValue;
     }
 
     public static final class Builder extends MutableParsingAndProcessingConfiguration<Builder>
@@ -813,13 +804,17 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         }
 
         @Override
-        protected Object getDefaultCustomAttribute(Object name) {
-            return null;
+        protected Object getDefaultCustomAttribute(Serializable key, Object defaultValue, boolean useDefaultValue) {
+            // We don't inherit from anything.
+            if (useDefaultValue) {
+                return defaultValue;
+            }
+            throw new CustomAttributeNotSetException(key);
         }
 
         @Override
-        protected Map<Object, Object> getDefaultCustomAttributes() {
-            throw new SettingValueNotSetException("customAttributes");
+        protected void collectDefaultCustomAttributesSnapshot(Map<Serializable, Object> target) {
+            // We don't inherit from anything.
         }
 
         /**
@@ -939,13 +934,10 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
                         tc.isAutoIncludesSet() ? tc.getAutoIncludes() : null));
             }
 
-            if (tc.isCustomAttributesSet()) {
-                setCustomAttributes(mergeMaps(
-                        isCustomAttributesSet() ? getCustomAttributes() : null,
-                        tc.isCustomAttributesSet() ? tc.getCustomAttributes() : null,
-                        true),
-                        true);
-            }
+            setCustomAttributesMap(mergeMaps(
+                    getCustomAttributesSnapshot(false),
+                    tc.getCustomAttributesSnapshot(false),
+                    true));
         }
 
         @Override

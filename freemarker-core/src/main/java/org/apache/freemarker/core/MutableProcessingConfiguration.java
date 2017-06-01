@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core;
 
+import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,10 +27,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -335,7 +334,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     private Boolean lazyImports;
     private Boolean lazyAutoImports;
     private boolean lazyAutoImportsSet;
-    private Map<Object, Object> customAttributes;
+    private Map<Serializable, Object> customAttributes = Collections.emptyMap();
+    /** If {@code false}, we must use copy-on-write behavior for {@link #customAttributes}. */
+    private boolean customAttributesModifiable;
 
     /**
      * Creates a new instance. Normally you do not need to use this constructor,
@@ -2124,131 +2125,167 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return self();
     }
 
-    @Override
-    public Map<Object, Object> getCustomAttributes() {
-        return isCustomAttributesSet() ? customAttributes : getDefaultCustomAttributes();
-    }
-
-    protected abstract Map<Object,Object> getDefaultCustomAttributes();
-
     /**
-     * Setter pair of {@link #getCustomAttributes()}
+     * Setter pair of {@link #getCustomAttribute(Serializable)}.
      *
-     * @param customAttributes Not {@code null}. The {@link Map} is copied to prevent aliasing problems.
+     * @param key
+     *         The identifier of the the custom attribute; not {@code null}. Usually an enum or a {@link String}. Must
+     *         be usable as {@link HashMap} key.
+     * @param value
+     *         The value of the custom attribute. {@code null} is a legal attribute value. Thus, setting the value to
+     *         {@code null} doesn't unset (remove) the attribute; use {@link #unsetCustomAttribute(Serializable)} for
+     *         that. Also, {@link #MISSING_VALUE_MARKER} is not an allowed value.
+     *         The content of the object shouldn't be changed after it was added as an attribute (ideally, it should
+     *         be a true immutable object); if you need to change the content, certainly you should use the
+     *         {@link CustomStateScope} API.
      */
-    public void setCustomAttributes(Map<Object, Object> customAttributes) {
-        setCustomAttributes(customAttributes, false);
+    public void setCustomAttribute(Serializable key, Object value) {
+        _NullArgumentException.check("key", key);
+        if (value == MISSING_VALUE_MARKER) {
+            throw new IllegalArgumentException("MISSING_VALUE_MARKER can't be used as attribute value");
+        }
+        ensureCustomAttributesModifiable();
+        customAttributes.put(key, value);
     }
 
     /**
-     * @param validatedImmutableUnchanging
-     *         {@code true} if we know that the 1st argument is already validated, immutable, and unchanging (means,
-     *         won't change later because of aliasing).
+     * Fluent API equivalent of {@link #setCustomAttribute(Serializable, Object)}
      */
-    void setCustomAttributes(Map<Object, Object> customAttributes, boolean validatedImmutableUnchanging) {
-        _NullArgumentException.check("customAttributes", customAttributes);
-        if (!validatedImmutableUnchanging) {
-            this.customAttributes = new LinkedHashMap<>(customAttributes); // TODO mutable
-        } else {
-            this.customAttributes = customAttributes;
+    public SelfT customAttribute(Serializable key, Object value) {
+        setCustomAttribute(key, value);
+        return self();
+    }
+
+    @Override
+    public boolean isCustomAttributeSet(Serializable key) {
+        return customAttributes.containsKey(key);
+    }
+
+    /**
+     * Unset the custom attribute for this {@link ProcessingConfiguration} (but not from the parent
+     * {@link ProcessingConfiguration}, from where it will be possibly inherited after this), as if
+     * {@link #setCustomAttribute(Serializable, Object)} was never called for it on this
+     * {@link ProcessingConfiguration}. Note that this is different than setting the custom attribute value to {@code
+     * null}, as then {@link #getCustomAttribute(Serializable)} will just return that {@code null}, and won't look for the
+     * attribute in the parent {@link ProcessingConfiguration}.
+     *
+     * @param key As in {@link #getCustomAttribute(Serializable)}
+     */
+    public void unsetCustomAttribute(Serializable key) {
+        if (customAttributesModifiable) {
+            customAttributes.remove(key);
+        } else if (customAttributes.containsKey(key)) {
+            ensureCustomAttributesModifiable();
+            customAttributes.remove(key);
         }
+    }
+
+    @Override
+    public Object getCustomAttribute(Serializable key) throws CustomAttributeNotSetException {
+        return getCustomAttribute(key, null, false);
+    }
+
+    @Override
+    public Object getCustomAttribute(Serializable key, Object defaultValue) {
+        return getCustomAttribute(key, defaultValue, true);
+    }
+
+    private Object getCustomAttribute(Serializable key, Object defaultValue, boolean useDefaultValue) {
+        Object value = customAttributes.get(key);
+        if (value != null || customAttributes.containsKey(key)) {
+            return value;
+        }
+        return getDefaultCustomAttribute(key, defaultValue, useDefaultValue);
+    }
+
+    @Override
+    public Map<Serializable, Object> getCustomAttributesSnapshot(boolean includeInherited) {
+        if (includeInherited) {
+            LinkedHashMap<Serializable, Object> result = new LinkedHashMap<>();
+            collectDefaultCustomAttributesSnapshot(result);
+            if (!result.isEmpty()) {
+                if (customAttributes != null) {
+                    result.putAll(customAttributes);
+                }
+                return Collections.unmodifiableMap(result);
+            }
+        }
+
+        // When there's no need for inheritance:
+        customAttributesModifiable = false; // Copy-on-write on next modification
+        return _CollectionUtil.unmodifiableMap(customAttributes);
+    }
+
+    /**
+     * Called from {@link #getCustomAttributesSnapshot(boolean)}, adds the default (such as inherited) custom attributes
+     * to the argument {@link Map}.
+     */
+    protected abstract void collectDefaultCustomAttributesSnapshot(Map<Serializable, Object> target);
+
+    private void ensureCustomAttributesModifiable() {
+        if (!customAttributesModifiable) {
+            customAttributes = new LinkedHashMap<>(customAttributes);
+            customAttributesModifiable = true;
+        }
+    }
+
+    /**
+     * Called be {@link #getCustomAttribute(Serializable)} and {@link #getCustomAttribute(Serializable, Object)} if the
+     * attribute wasn't set in the current {@link ProcessingConfiguration}.
+     *
+     * @param useDefaultValue
+     *         If {@code true}, and the attribute is missing, then return {@code defaultValue}, otherwise throw {@link
+     *         CustomAttributeNotSetException}.
+     *
+     * @throws CustomAttributeNotSetException
+     *         if the attribute wasn't set in the parents, or has no default otherwise, and {@code useDefaultValue} was
+     *         {@code false}.
+     */
+    protected abstract Object getDefaultCustomAttribute(
+            Serializable key, Object defaultValue, boolean useDefaultValue) throws CustomAttributeNotSetException;
+
+    /**
+     * Convenience method for calling {@link #setCustomAttribute(Serializable, Object)} for each {@link Map} entry.
+     * Note that it won't remove the already existing custom attributes.
+     */
+    public void setCustomAttributes(Map<? extends Serializable, ?> customAttributes) {
+        _NullArgumentException.check("customAttributes", customAttributes);
+        for (Object value : customAttributes.values()) {
+            if (value == MISSING_VALUE_MARKER) {
+                throw new IllegalArgumentException("MISSING_VALUE_MARKER can't be used as attribute value");
+            }
+        }
+
+        ensureCustomAttributesModifiable();
+        this.customAttributes.putAll(customAttributes);
+        customAttributesModifiable = true;
     }
 
     /**
      * Fluent API equivalent of {@link #setCustomAttributes(Map)}
      */
-    public SelfT customAttributes(Map<Object, Object> customAttributes) {
+    public SelfT customAttributes(Map<Serializable, Object> customAttributes) {
         setCustomAttributes(customAttributes);
         return self();
     }
 
-    @Override
-    public boolean isCustomAttributesSet() {
-        return customAttributes != null;
-    }
-
-    boolean isCustomAttributeSet(Object key) {
-         return isCustomAttributesSet() && customAttributes.containsKey(key);
+    /**
+     * Used internally to avoid copying the {@link Map} when we know that its content won't change anymore.
+     */
+    void setCustomAttributesMap(Map<Serializable, Object> customAttributes) {
+        _NullArgumentException.check("customAttributes", customAttributes);
+        this.customAttributes = customAttributes;
+        this.customAttributesModifiable = false;
     }
 
     /**
-     * Sets a {@linkplain #getCustomAttributes() custom attribute} for this configurable.
-     *
-     * @param name
-     *         the name of the custom attribute
-     * @param value
-     *         the value of the custom attribute. You can set the value to {@code null}, however note that there is a
-     *         semantic difference between an attribute set to {@code null} and an attribute that is not present (see
-     *         {@link #removeCustomAttribute(Object)}).
+     * Unsets all custom attributes which were set in this {@link ProcessingConfiguration} (but doesn't unset
+     * those inherited from a parent {@link ProcessingConfiguration}).
      */
-    public void setCustomAttribute(Object name, Object value) {
-        if (customAttributes == null) {
-            customAttributes = new LinkedHashMap<>();
-        }
-        customAttributes.put(name, value);
+    public void unsetAllCustomAttributes() {
+        customAttributes = Collections.emptyMap();
+        customAttributesModifiable = false;
     }
-
-    /**
-     * Fluent API equivalent of {@link #setCustomAttribute(Object, Object)}
-     */
-    public SelfT customAttribute(Object name, Object value) {
-        setCustomAttribute(name, value);
-        return self();
-    }
-
-    /**
-     * Returns an array with names of all custom attributes defined directly on this {@link ProcessingConfiguration}.
-     * (That is, it doesn't contain the names of custom attributes inherited from other {@link
-     * ProcessingConfiguration}-s.) The returned array is never {@code null}, but can be zero-length.
-     */
-    // TODO env only?
-    // TODO should return List<String>?
-    public String[] getCustomAttributeNames() {
-        if (customAttributes == null) {
-            return _CollectionUtil.EMPTY_STRING_ARRAY;
-        }
-        Collection names = new LinkedList(customAttributes.keySet());
-        for (Iterator iter = names.iterator(); iter.hasNext(); ) {
-            if (!(iter.next() instanceof String)) {
-                iter.remove();
-            }
-        }
-        return (String[]) names.toArray(new String[names.size()]);
-    }
-    
-    /**
-     * Removes a named custom attribute for this configurable. Note that this
-     * is different than setting the custom attribute value to null. If you
-     * set the value to null, {@link #getCustomAttribute(Object)} will return
-     * null, while if you remove the attribute, it will return the value of
-     * the attribute in the parent configurable (if there is a parent 
-     * configurable, that is). 
-     *
-     * @param name the name of the custom attribute
-     */
-    // TODO doesn't work properly, remove?
-    public void removeCustomAttribute(Object name) {
-        if (customAttributes == null) {
-            return;
-        }
-        customAttributes.remove(name);
-    }
-
-    @Override
-    public Object getCustomAttribute(Object key) {
-        Object value;
-        if (customAttributes != null) {
-            value = customAttributes.get(key);
-            if (value == null && customAttributes.containsKey(key)) {
-                return null;
-            }
-        } else {
-            value = null;
-        }
-        return value != null ? value : getDefaultCustomAttribute(key);
-    }
-
-    protected abstract Object getDefaultCustomAttribute(Object name);
 
     protected final List<String> parseAsList(String text) throws GenericParseException {
         return new SettingStringParser(text).parseAsList();

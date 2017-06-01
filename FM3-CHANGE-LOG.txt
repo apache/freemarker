@@ -179,7 +179,11 @@ the FreeMarer 3 changelog here:
     is somewhat similar to the now removed CustomAttribute. CustomStateScope contains one method, Object getCustomState(CustomStateKey), which
     may calls CustomStateKey.create() to lazily create the state object for the key. Configuration, Template and Environment implements
     CustomStateScope.
-  - Added getter/setter to access custom attributes as a Map. (This is to make it less an exceptional setting.)
+  - Cleaned up customAttribute related API-s. Most notably, a new getCustomAttribute overload was added, `getCustomAttribute(Serializable key, Object default)`,
+    where the default value is used if the attribute wasn't set (not even to null). (There's a reserved ProcessingConfiguration.MISSING_VALUE_MARKER that
+    can be used as default but not as the value of a custom attribute). `getCustomAttribute(Serializable key)` now throws MissingCustomAttributeValue exception
+    if the attribute isn't set. Also, getCustomAttributesSnapshot(includeInherited) was added, which is mostly useful for debugging purposes. Also note that the
+    key of custom attributes now must be Serializable.
   - Environment.setCustomState(Object, Object) and getCustomState(Object) was replaced with CustomStateScope.getCustomState(CustomStateKey).
   - Added ProcessingConfiguration interface for the read-only access of template processing settings. This is similar to the
     already existing (in FM2) ParserConfiguration interface.

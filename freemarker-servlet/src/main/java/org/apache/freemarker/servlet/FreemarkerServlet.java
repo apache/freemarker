@@ -902,7 +902,7 @@ public class FreemarkerServlet extends HttpServlet {
     }
 
     private ContentType getTemplateSpecificContentType(final Template template) {
-        Object contentTypeAttr = template.getCustomAttribute("content_type");
+        Object contentTypeAttr = template.getCustomAttribute("content_type", null);
         if (contentTypeAttr != null) {
             // Converted with toString() for backward compatibility.
             return new ContentType(contentTypeAttr.toString());

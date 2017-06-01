@@ -22,9 +22,11 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.freemarker.core.ProcessingConfiguration;
 import org.apache.freemarker.core.TemplateConfiguration;
 import org.junit.Test;
 
@@ -165,7 +167,7 @@ public class TemplateConfigurationFactoryTest {
     private void assertApplicable(TemplateConfigurationFactory tcf, String sourceName, TemplateConfiguration... expectedTCs)
             throws IOException, TemplateConfigurationFactoryException {
         TemplateConfiguration mergedTC = tcf.get(sourceName, DummyTemplateLoadingSource.INSTANCE);
-        List<Object> mergedTCAttNames = new ArrayList<>(mergedTC.getCustomAttributes().keySet());
+        List<Serializable> mergedTCAttNames = new ArrayList<>(mergedTC.getCustomAttributesSnapshot(false).keySet());
 
         for (TemplateConfiguration expectedTC : expectedTCs) {
             Integer tcId = (Integer) expectedTC.getCustomAttribute("id");
@@ -177,7 +179,7 @@ public class TemplateConfigurationFactoryTest {
             }
         }
         
-        for (Object attKey: mergedTCAttNames) {
+        for (Serializable attKey: mergedTCAttNames) {
             if (!containsCustomAttr(attKey, expectedTCs)) {
                 fail("The asserted TemplateConfiguration contains an unexpected custom attribute: " + attKey);
             }
@@ -186,9 +188,10 @@ public class TemplateConfigurationFactoryTest {
         assertEquals(expectedTCs[expectedTCs.length - 1].getCustomAttribute("id"), mergedTC.getCustomAttribute("id"));
     }
 
-    private boolean containsCustomAttr(Object attKey, TemplateConfiguration... expectedTCs) {
+    private boolean containsCustomAttr(Serializable attKey, TemplateConfiguration... expectedTCs) {
         for (TemplateConfiguration expectedTC : expectedTCs) {
-            if (expectedTC.getCustomAttribute(attKey) != null) {
+            if (expectedTC.getCustomAttribute(attKey, ProcessingConfiguration.MISSING_VALUE_MARKER)
+                    != ProcessingConfiguration.MISSING_VALUE_MARKER) {
                 return true;
             }
         }

@@ -92,14 +92,15 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * <tt>process()</tt> returns. This object stores the set of temporary variables created by the template, the value of
  * settings set by the template, the reference to the data model root, etc. Everything that is needed to fulfill the
  * template processing job.
- *
  * <p>
  * Data models that need to access the <tt>Environment</tt> object that represents the template processing on the
  * current thread can use the {@link #getCurrentEnvironment()} method.
- *
  * <p>
  * If you need to modify or read this object before or after the <tt>process</tt> call, use
  * {@link Template#createProcessingEnvironment(Object rootMap, Writer out, ObjectWrapper wrapper)}
+ * <p>
+ * The {@link ProcessingConfiguration} reader methods of this class don't throw {@link SettingValueNotSetException}
+ * because unset settings are ultimately inherited from {@link Configuration}.
  */
 public final class Environment extends MutableProcessingConfiguration<Environment> implements CustomStateScope {
     
@@ -1091,17 +1092,18 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     @Override
-    protected Object getDefaultCustomAttribute(Object name) {
-        return getMainTemplate().getCustomAttribute(name);
+    protected Object getDefaultCustomAttribute(Serializable key, Object defaultValue, boolean useDefaultValue) {
+        return useDefaultValue ? getMainTemplate().getCustomAttribute(key, defaultValue)
+                : getMainTemplate().getCustomAttribute(key);
     }
 
     @Override
-    protected Map<Object, Object> getDefaultCustomAttributes() {
-        return getMainTemplate().getCustomAttributes();
+    protected void collectDefaultCustomAttributesSnapshot(Map<Serializable, Object> target) {
+        target.putAll(getMainTemplate().getCustomAttributesSnapshot(true));
     }
 
     /*
-     * Note that altough it's not allowed to set this setting with the <tt>setting</tt> directive, it still must be
+     * Note that although it's not allowed to set this setting with the <tt>setting</tt> directive, it still must be
      * allowed to set it from Java code while the template executes, since some frameworks allow templates to actually
      * change the output encoding on-the-fly.
      */
