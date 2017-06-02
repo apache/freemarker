@@ -237,7 +237,7 @@ public class TemplateConfigurationTest {
         IGNORED_PROP_NAMES.add("strictBeanModels");
         IGNORED_PROP_NAMES.add("parentConfiguration");
         IGNORED_PROP_NAMES.add("settings");
-        IGNORED_PROP_NAMES.add("customAttributes");
+        IGNORED_PROP_NAMES.add("customSettings");
     }
 
     private static final Set<String> CONFIGURABLE_PROP_NAMES;
@@ -395,83 +395,83 @@ public class TemplateConfigurationTest {
     }
     
     @Test
-    public void testMergeCustomAttributes() throws Exception {
+    public void testMergeCustomSettings() throws Exception {
         TemplateConfiguration.Builder tc1 = new TemplateConfiguration.Builder();
-        tc1.setCustomAttribute("k1", "v1");
-        tc1.setCustomAttribute("k2", "v1");
-        tc1.setCustomAttribute("k3", "v1");
-        tc1.setCustomAttribute(CA1, "V1");
-        tc1.setCustomAttribute(CA2, "V1");
-        tc1.setCustomAttribute(CA3, "V1");
+        tc1.setCustomSetting("k1", "v1");
+        tc1.setCustomSetting("k2", "v1");
+        tc1.setCustomSetting("k3", "v1");
+        tc1.setCustomSetting(CA1, "V1");
+        tc1.setCustomSetting(CA2, "V1");
+        tc1.setCustomSetting(CA3, "V1");
 
         TemplateConfiguration.Builder tcb2 = new TemplateConfiguration.Builder();
-        tcb2.setCustomAttribute("k1", "v2");
-        tcb2.setCustomAttribute("k2", "v2");
-        tcb2.setCustomAttribute(CA1, "V2");
-        tcb2.setCustomAttribute(CA2, "V2");
+        tcb2.setCustomSetting("k1", "v2");
+        tcb2.setCustomSetting("k2", "v2");
+        tcb2.setCustomSetting(CA1, "V2");
+        tcb2.setCustomSetting(CA2, "V2");
 
         TemplateConfiguration.Builder tcb3 = new TemplateConfiguration.Builder();
-        tcb3.setCustomAttribute("k1", "v3");
-        tcb3.setCustomAttribute(CA1, "V3");
+        tcb3.setCustomSetting("k1", "v3");
+        tcb3.setCustomSetting(CA1, "V3");
 
         tc1.merge(tcb2.build());
         tc1.merge(tcb3.build());
 
-        assertEquals("v3", tc1.getCustomAttribute("k1"));
-        assertEquals("v2", tc1.getCustomAttribute("k2"));
-        assertEquals("v1", tc1.getCustomAttribute("k3"));
-        assertEquals("V3", tc1.getCustomAttribute(CA1));
-        assertEquals("V2", tc1.getCustomAttribute(CA2));
-        assertEquals("V1", tc1.getCustomAttribute(CA3));
+        assertEquals("v3", tc1.getCustomSetting("k1"));
+        assertEquals("v2", tc1.getCustomSetting("k2"));
+        assertEquals("v1", tc1.getCustomSetting("k3"));
+        assertEquals("V3", tc1.getCustomSetting(CA1));
+        assertEquals("V2", tc1.getCustomSetting(CA2));
+        assertEquals("V1", tc1.getCustomSetting(CA3));
     }
 
     @Test
-    public void testMergeNullCustomAttributes() throws Exception {
+    public void testMergeNullCustomSettings() throws Exception {
         TemplateConfiguration.Builder tcb1 = new TemplateConfiguration.Builder();
-        tcb1.setCustomAttribute("k1", "v1");
-        tcb1.setCustomAttribute("k2", "v1");
-        tcb1.setCustomAttribute(CA1, "V1");
-        tcb1.setCustomAttribute(CA2,"V1");
+        tcb1.setCustomSetting("k1", "v1");
+        tcb1.setCustomSetting("k2", "v1");
+        tcb1.setCustomSetting(CA1, "V1");
+        tcb1.setCustomSetting(CA2,"V1");
 
-        assertEquals("v1", tcb1.getCustomAttribute("k1"));
-        assertEquals("v1", tcb1.getCustomAttribute("k2"));
-        assertEquals(MISSING_VALUE_MARKER, tcb1.getCustomAttribute("k3", MISSING_VALUE_MARKER));
-        assertEquals("V1", tcb1.getCustomAttribute(CA1));
-        assertEquals("V1", tcb1.getCustomAttribute(CA2));
-        assertEquals(MISSING_VALUE_MARKER, tcb1.getCustomAttribute(CA3, MISSING_VALUE_MARKER));
+        assertEquals("v1", tcb1.getCustomSetting("k1"));
+        assertEquals("v1", tcb1.getCustomSetting("k2"));
+        assertEquals(MISSING_VALUE_MARKER, tcb1.getCustomSetting("k3", MISSING_VALUE_MARKER));
+        assertEquals("V1", tcb1.getCustomSetting(CA1));
+        assertEquals("V1", tcb1.getCustomSetting(CA2));
+        assertEquals(MISSING_VALUE_MARKER, tcb1.getCustomSetting(CA3, MISSING_VALUE_MARKER));
 
         TemplateConfiguration.Builder tcb2 = new TemplateConfiguration.Builder();
-        tcb2.setCustomAttribute("k1", "v2");
-        tcb2.setCustomAttribute("k2", null);
-        tcb2.setCustomAttribute(CA1, "V2");
-        tcb2.setCustomAttribute(CA2, null);
+        tcb2.setCustomSetting("k1", "v2");
+        tcb2.setCustomSetting("k2", null);
+        tcb2.setCustomSetting(CA1, "V2");
+        tcb2.setCustomSetting(CA2, null);
 
         TemplateConfiguration.Builder tcb3 = new TemplateConfiguration.Builder();
-        tcb3.setCustomAttribute("k1", null);
-        tcb2.setCustomAttribute(CA1, null);
+        tcb3.setCustomSetting("k1", null);
+        tcb2.setCustomSetting(CA1, null);
 
         tcb1.merge(tcb2.build());
         tcb1.merge(tcb3.build());
 
-        assertNull(tcb1.getCustomAttribute("k1"));
-        assertNull(tcb1.getCustomAttribute("k2"));
-        assertEquals(MISSING_VALUE_MARKER, tcb1.getCustomAttribute("k3", MISSING_VALUE_MARKER));
-        assertNull(tcb1.getCustomAttribute(CA1));
-        assertNull(tcb1.getCustomAttribute(CA2));
-        assertEquals(MISSING_VALUE_MARKER, tcb1.getCustomAttribute(CA3, MISSING_VALUE_MARKER));
+        assertNull(tcb1.getCustomSetting("k1"));
+        assertNull(tcb1.getCustomSetting("k2"));
+        assertEquals(MISSING_VALUE_MARKER, tcb1.getCustomSetting("k3", MISSING_VALUE_MARKER));
+        assertNull(tcb1.getCustomSetting(CA1));
+        assertNull(tcb1.getCustomSetting(CA2));
+        assertEquals(MISSING_VALUE_MARKER, tcb1.getCustomSetting(CA3, MISSING_VALUE_MARKER));
 
         TemplateConfiguration.Builder tcb4 = new TemplateConfiguration.Builder();
-        tcb4.setCustomAttribute("k1", "v4");
-        tcb4.setCustomAttribute(CA1, "V4");
+        tcb4.setCustomSetting("k1", "v4");
+        tcb4.setCustomSetting(CA1, "V4");
 
         tcb1.merge(tcb4.build());
 
-        assertEquals("v4", tcb1.getCustomAttribute("k1"));
-        assertNull(tcb1.getCustomAttribute("k2"));
-        assertEquals(MISSING_VALUE_MARKER, tcb1.getCustomAttribute("k3", MISSING_VALUE_MARKER));
-        assertEquals("V4", tcb1.getCustomAttribute(CA1));
-        assertNull(tcb1.getCustomAttribute(CA2));
-        assertEquals(MISSING_VALUE_MARKER, tcb1.getCustomAttribute(CA3, MISSING_VALUE_MARKER));
+        assertEquals("v4", tcb1.getCustomSetting("k1"));
+        assertNull(tcb1.getCustomSetting("k2"));
+        assertEquals(MISSING_VALUE_MARKER, tcb1.getCustomSetting("k3", MISSING_VALUE_MARKER));
+        assertEquals("V4", tcb1.getCustomSetting(CA1));
+        assertNull(tcb1.getCustomSetting(CA2));
+        assertEquals(MISSING_VALUE_MARKER, tcb1.getCustomSetting(CA3, MISSING_VALUE_MARKER));
     }
 
     @Test
@@ -497,33 +497,33 @@ public class TemplateConfigurationTest {
     }
     
     @Test
-    public void testConfigureCustomAttributes() throws Exception {
+    public void testConfigureCustomSettings() throws Exception {
         Configuration cfg = new TestConfigurationBuilder()
-                .customAttribute("k1", "c")
-                .customAttribute("k2", "c")
-                .customAttribute("k3", "c")
-                .customAttribute("k8", "c")
+                .customSetting("k1", "c")
+                .customSetting("k2", "c")
+                .customSetting("k3", "c")
+                .customSetting("k8", "c")
                 .build();
 
         TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
-        tcb.setCustomAttribute("k2", "tc");
-        tcb.setCustomAttribute("k3", null);
-        tcb.setCustomAttribute("k4", "tc");
-        tcb.setCustomAttribute("k5", "tc");
-        tcb.setCustomAttribute("k6", "tc");
+        tcb.setCustomSetting("k2", "tc");
+        tcb.setCustomSetting("k3", null);
+        tcb.setCustomSetting("k4", "tc");
+        tcb.setCustomSetting("k5", "tc");
+        tcb.setCustomSetting("k6", "tc");
 
         TemplateConfiguration tc = tcb.build();
-        Template t = new Template(null, "<#ftl attributes={'k5':'t', 'k7':'t', 'k8':'t'}>", cfg, tc);
+        Template t = new Template(null, "<#ftl customSettings={'k5':'t', 'k7':'t', 'k8':'t'}>", cfg, tc);
 
-        assertEquals("c", t.getCustomAttribute("k1"));
-        assertEquals("tc", t.getCustomAttribute("k2"));
-        assertNull(t.getCustomAttribute("k3"));
-        assertEquals("tc", t.getCustomAttribute("k4"));
-        assertEquals("t", t.getCustomAttribute("k5"));
+        assertEquals("c", t.getCustomSetting("k1"));
+        assertEquals("tc", t.getCustomSetting("k2"));
+        assertNull(t.getCustomSetting("k3"));
+        assertEquals("tc", t.getCustomSetting("k4"));
+        assertEquals("t", t.getCustomSetting("k5"));
         // TODO [FM3] when { ... 'k6': null ... } works in FTL, put this back.
-        // assertNull(t.getCustomAttribute("k6"));
-        assertEquals("t", t.getCustomAttribute("k7"));
-        assertEquals("t", t.getCustomAttribute("k8"));
+        // assertNull(t.getCustomSetting("k6"));
+        assertEquals("t", t.getCustomSetting("k7"));
+        assertEquals("t", t.getCustomSetting("k8"));
     }
     
     @Test

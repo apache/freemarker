@@ -24,23 +24,24 @@ import java.io.Serializable;
 import org.apache.freemarker.core.util._StringUtil;
 
 /**
- * Thrown by {@link ProcessingConfiguration#getCustomAttribute(Serializable)} if the custom attribute is not set.
+ * Thrown by {@link ProcessingConfiguration#getCustomSetting(Serializable)} if the custom attribute is not set.
  */
-public class CustomAttributeNotSetException extends SettingValueNotSetException {
+public class CustomSettingNotSetException extends SettingValueNotSetException {
 
     private final Serializable key;
 
     /**
-     * @param key {@link ProcessingConfiguration#getCustomAttribute(Serializable)}
+     * @param key {@link ProcessingConfiguration#getCustomSetting(Serializable)}
      */
-    public CustomAttributeNotSetException(Serializable key) {
-        super("customAttributes[" + key instanceof String ? _StringUtil.jQuote(key) : _StringUtil.tryToString(key) +
-                        "]", false);
+    public CustomSettingNotSetException(Serializable key) {
+        super("custom[" + key instanceof String ? _StringUtil.jQuote(key)
+                : key.getClass().getName() + " " + _StringUtil.tryToString(key) + "]",
+                false);
         this.key = key;
     }
 
     /**
-     * The argument to {@link ProcessingConfiguration#getCustomAttribute(Serializable)}.
+     * The argument to {@link ProcessingConfiguration#getCustomSetting(Serializable)}.
      */
     public Serializable getKey() {
         return key;

@@ -282,7 +282,7 @@ public final class Configuration
     private final List<String> autoIncludes;
     private final Boolean lazyImports;
     private final Boolean lazyAutoImports;
-    private final Map<Serializable, Object> customAttributes;
+    private final Map<Serializable, Object> customSettings;
 
     // CustomStateScope:
 
@@ -437,7 +437,7 @@ public final class Configuration
         autoIncludes = builder.getAutoIncludes();
         lazyImports = builder.getLazyImports();
         lazyAutoImports = builder.getLazyAutoImports();
-        customAttributes = builder.getCustomAttributesSnapshot(false);
+        customSettings = builder.getCustomSettingsSnapshot(false);
     }
 
     private <SelfT extends ExtendableBuilder<SelfT>> void wrapAndPutSharedVariables(
@@ -1180,8 +1180,8 @@ public final class Configuration
      * Because {@link Configuration} has on parent, the {@code includeInherited} parameter is ignored.
      */
     @Override
-    public Map<Serializable, Object> getCustomAttributesSnapshot(boolean includeInherited) {
-        return customAttributes;
+    public Map<Serializable, Object> getCustomSettingsSnapshot(boolean includeInherited) {
+        return customSettings;
     }
 
     /**
@@ -1189,33 +1189,33 @@ public final class Configuration
      * <p>
      * Unlike the other isXxxSet methods of {@link Configuration}, this can return {@code false}, as at least the
      * builders in FreeMarker Core can't provide defaults for custom attributes. Note that since
-     * {@link #getCustomAttribute(Serializable)} just returns {@code null} for unset custom attributes, it's usually not a
+     * {@link #getCustomSetting(Serializable)} just returns {@code null} for unset custom attributes, it's usually not a
      * problem.
      */
     @Override
-    public boolean isCustomAttributeSet(Serializable key) {
-        return customAttributes.containsKey(key);
+    public boolean isCustomSettingSet(Serializable key) {
+        return customSettings.containsKey(key);
     }
 
     @Override
-    public Object getCustomAttribute(Serializable key) {
-        return getCustomAttribute(key, null, false);
+    public Object getCustomSetting(Serializable key) {
+        return getCustomSetting(key, null, false);
     }
 
     @Override
-    public Object getCustomAttribute(Serializable key, Object defaultValue) {
-        return getCustomAttribute(key, defaultValue, true);
+    public Object getCustomSetting(Serializable key, Object defaultValue) {
+        return getCustomSetting(key, defaultValue, true);
     }
 
-    private Object getCustomAttribute(Serializable key, Object defaultValue, boolean useDefaultValue) {
-        Object value = customAttributes.get(key);
-        if (value != null || customAttributes.containsKey(key)) {
+    private Object getCustomSetting(Serializable key, Object defaultValue, boolean useDefaultValue) {
+        Object value = customSettings.get(key);
+        if (value != null || customSettings.containsKey(key)) {
             return value;
         }
         if (useDefaultValue) {
             return defaultValue;
         }
-        throw new CustomAttributeNotSetException(key);
+        throw new CustomSettingNotSetException(key);
     }
 
     @Override
@@ -2626,15 +2626,15 @@ public final class Configuration
         }
 
         @Override
-        protected Object getDefaultCustomAttribute(Serializable key, Object defaultValue, boolean useDefaultValue) {
+        protected Object getDefaultCustomSetting(Serializable key, Object defaultValue, boolean useDefaultValue) {
             if (useDefaultValue) {
                 return defaultValue;
             }
-            throw new CustomAttributeNotSetException(key);
+            throw new CustomSettingNotSetException(key);
         }
 
         @Override
-        protected void collectDefaultCustomAttributesSnapshot(Map<Serializable, Object> target) {
+        protected void collectDefaultCustomSettingsSnapshot(Map<Serializable, Object> target) {
             // Doesn't inherit anything
         }
     }

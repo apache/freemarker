@@ -111,12 +111,12 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     private Map prefixToNamespaceURILookup = new HashMap();
     private Map namespaceURIToPrefixLookup = new HashMap();
     /** Custom attributes specified inside the template with the #ftl directive. Maybe {@code null}. */
-    private Map<String, Serializable> headerCustomAttributes;
+    private Map<String, Serializable> headerCustomSettings;
     /**
-     * In case {@link #headerCustomAttributes} is not {@code null} and the {@link TemplateConfiguration} also specifies
+     * In case {@link #headerCustomSettings} is not {@code null} and the {@link TemplateConfiguration} also specifies
      * custom attributes, this is the two set of custom attributes merged. Otherwise it's {@code null}.
      */
-    private transient Map<Serializable, Object> tcAndHeaderCustomAttributes;
+    private transient Map<Serializable, Object> tcAndHeaderCustomSettings;
 
     private AutoEscapingPolicy autoEscapingPolicy;
     // Values from template content that are detected automatically:
@@ -345,8 +345,8 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * protected when construction is done.
      */
     private void finishConstruction() {
-        headerCustomAttributes = _CollectionUtil.unmodifiableMap(headerCustomAttributes);
-        tcAndHeaderCustomAttributes = _CollectionUtil.unmodifiableMap(tcAndHeaderCustomAttributes);
+        headerCustomSettings = _CollectionUtil.unmodifiableMap(headerCustomSettings);
+        tcAndHeaderCustomSettings = _CollectionUtil.unmodifiableMap(tcAndHeaderCustomSettings);
         writeProtected = true;
     }
 
@@ -1068,24 +1068,24 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public Map<Serializable, Object> getCustomAttributesSnapshot(boolean includeInherited) {
+    public Map<Serializable, Object> getCustomSettingsSnapshot(boolean includeInherited) {
         boolean nonInheritedAttrsFinal;
         Map<? extends Serializable, ? extends Object> nonInheritedAttrs;
-        if (tcAndHeaderCustomAttributes != null) {
-            nonInheritedAttrs = tcAndHeaderCustomAttributes;
+        if (tcAndHeaderCustomSettings != null) {
+            nonInheritedAttrs = tcAndHeaderCustomSettings;
             nonInheritedAttrsFinal = writeProtected;
-        } else if (headerCustomAttributes != null) {
-            nonInheritedAttrs = headerCustomAttributes;
+        } else if (headerCustomSettings != null) {
+            nonInheritedAttrs = headerCustomSettings;
             nonInheritedAttrsFinal = writeProtected;
         } else if (tCfg != null) {
-            nonInheritedAttrs =  tCfg.getCustomAttributesSnapshot(false);
+            nonInheritedAttrs =  tCfg.getCustomSettingsSnapshot(false);
             nonInheritedAttrsFinal = true;
         } else {
             nonInheritedAttrs = Collections.emptyMap();
             nonInheritedAttrsFinal = true;
         }
 
-        Map<Serializable, Object> inheritedAttrs = includeInherited ? cfg.getCustomAttributesSnapshot(true)
+        Map<Serializable, Object> inheritedAttrs = includeInherited ? cfg.getCustomSettingsSnapshot(true)
                 : Collections.<Serializable, Object>emptyMap();
 
         LinkedHashMap<Serializable, Object> mergedAttrs;
@@ -1103,65 +1103,65 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     }
 
     @Override
-    public boolean isCustomAttributeSet(Serializable key) {
-        if (tcAndHeaderCustomAttributes != null) {
-            return tcAndHeaderCustomAttributes.containsKey(key);
+    public boolean isCustomSettingSet(Serializable key) {
+        if (tcAndHeaderCustomSettings != null) {
+            return tcAndHeaderCustomSettings.containsKey(key);
         }
-        return headerCustomAttributes != null && headerCustomAttributes.containsKey(key)
-                || tCfg != null && tCfg.isCustomAttributeSet(key);
+        return headerCustomSettings != null && headerCustomSettings.containsKey(key)
+                || tCfg != null && tCfg.isCustomSettingSet(key);
     }
 
     @Override
-    public Object getCustomAttribute(Serializable key) {
-        return getCustomAttribute(key, null, false);
+    public Object getCustomSetting(Serializable key) {
+        return getCustomSetting(key, null, false);
     }
 
     @Override
-    public Object getCustomAttribute(Serializable key, Object defaultValue) {
-        return getCustomAttribute(key, defaultValue, true);
+    public Object getCustomSetting(Serializable key, Object defaultValue) {
+        return getCustomSetting(key, defaultValue, true);
     }
 
-    private Object getCustomAttribute(Serializable key, Object defaultValue, boolean useDefaultValue) {
-        if (tcAndHeaderCustomAttributes != null) {
-            Object value = tcAndHeaderCustomAttributes.get(key);
-            if (value != null || tcAndHeaderCustomAttributes.containsKey(key)) {
+    private Object getCustomSetting(Serializable key, Object defaultValue, boolean useDefaultValue) {
+        if (tcAndHeaderCustomSettings != null) {
+            Object value = tcAndHeaderCustomSettings.get(key);
+            if (value != null || tcAndHeaderCustomSettings.containsKey(key)) {
                 return value;
             }
         } else {
-            if (headerCustomAttributes != null) {
-                Object value = headerCustomAttributes.get(key);
-                if (value != null || headerCustomAttributes.containsKey(key)) {
+            if (headerCustomSettings != null) {
+                Object value = headerCustomSettings.get(key);
+                if (value != null || headerCustomSettings.containsKey(key)) {
                     return value;
                 }
             }
             if (tCfg != null) {
-                Object value = tCfg.getCustomAttribute(key, MISSING_VALUE_MARKER);
+                Object value = tCfg.getCustomSetting(key, MISSING_VALUE_MARKER);
                 if (value != MISSING_VALUE_MARKER) {
                     return value;
                 }
             }
         }
-        return useDefaultValue ? cfg.getCustomAttribute(key, defaultValue) : cfg.getCustomAttribute(key);
+        return useDefaultValue ? cfg.getCustomSetting(key, defaultValue) : cfg.getCustomSetting(key);
     }
 
     /**
      * Should be called by the parser, for example to add the attributes specified in the #ftl header.
      */
-    void setHeaderCustomAttribute(String attName, Serializable attValue) {
+    void setHeaderCustomSetting(String attName, Serializable attValue) {
         checkWritable();
 
-        if (headerCustomAttributes == null) {
-            headerCustomAttributes = new LinkedHashMap<>();
+        if (headerCustomSettings == null) {
+            headerCustomSettings = new LinkedHashMap<>();
         }
-        headerCustomAttributes.put(attName, attValue);
+        headerCustomSettings.put(attName, attValue);
 
         if (tCfg != null) {
-            Map<Serializable, Object> tcCustAttrs = tCfg.getCustomAttributesSnapshot(false);
+            Map<Serializable, Object> tcCustAttrs = tCfg.getCustomSettingsSnapshot(false);
             if (!tcCustAttrs.isEmpty()) {
-                if (tcAndHeaderCustomAttributes == null) {
-                    tcAndHeaderCustomAttributes = new LinkedHashMap<>(tcCustAttrs);
+                if (tcAndHeaderCustomSettings == null) {
+                    tcAndHeaderCustomSettings = new LinkedHashMap<>(tcCustAttrs);
                 }
-                tcAndHeaderCustomAttributes.put(attName, attValue);
+                tcAndHeaderCustomSettings.put(attName, attValue);
             }
         }
     }

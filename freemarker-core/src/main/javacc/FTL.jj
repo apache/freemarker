@@ -3955,9 +3955,9 @@ void HeaderElement() :
                                 }
                             } catch (TemplateModelException tme) {
                             }
-                        } else if (ks.equalsIgnoreCase("attributes")) {
+                        } else if (ks.equalsIgnoreCase("custom_settings") || ks.equals("customSettings")) {
                             if (!(value instanceof TemplateHashModelEx)) {
-                                throw new ParseException("Expecting a hash of attribute names to values.", exp);
+                                throw new ParseException("Expecting a hash value for custom settings.", exp);
                             }
                             TemplateHashModelEx attributeMap = (TemplateHashModelEx) value;
                             try {
@@ -3967,11 +3967,11 @@ void HeaderElement() :
                                         Object attValue = DeepUnwrap.unwrap(attributeMap.get(attName));
                                         if (attValue != null && !(attValue instanceof Serializable)) {
                                             throw new ParseException(
-                                                    "Value of attribute " + _StringUtil.jQuote(attName)
+                                                    "Value of custom setting " + _StringUtil.jQuote(attName)
                                                     + " should implement java.io.Serializable.",
                                                     exp);
                                         }
-                                        template.setHeaderCustomAttribute(attName, (Serializable) attValue);
+                                        template.setHeaderCustomSetting(attName, (Serializable) attValue);
                                 }
                             } catch (TemplateModelException tme) {
                             }
@@ -3979,6 +3979,9 @@ void HeaderElement() :
                             String correctName;
 	                        if (ks.equals("charset") || ks.equals("source_encoding") || ks.equals("sourceEncoding")) {
 	                            correctName = "encoding";
+	                        } else if (ks.equals("attributes")) {
+	                            correctName = token_source.namingConvention == NamingConvention.CAMEL_CASE
+	                                    ? "customSettings" : "custom_settings";
 	                        } else if (ks.equals("xmlns")) {
 	                            // [2.4] If camel case will be the default, update this
                                 correctName

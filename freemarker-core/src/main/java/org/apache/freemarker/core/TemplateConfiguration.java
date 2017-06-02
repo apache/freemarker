@@ -83,7 +83,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     private final Boolean lazyImports;
     private final Boolean lazyAutoImports;
     private final boolean lazyAutoImportsSet;
-    private final Map<Serializable, Object> customAttributes;
+    private final Map<Serializable, Object> customSettings;
     
     private final TemplateLanguage templateLanguage;
     private final TagSyntax tagSyntax;
@@ -124,7 +124,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         lazyImports = builder.isLazyImportsSet() ? builder.getLazyImports() : null;
         lazyAutoImportsSet = builder.isLazyAutoImportsSet();
         lazyAutoImports = lazyAutoImportsSet ? builder.getLazyAutoImports() : null;
-        customAttributes = builder.getCustomAttributesSnapshot(false);
+        customSettings = builder.getCustomSettingsSnapshot(false);
 
         templateLanguage = builder.isTemplateLanguageSet() ? builder.getTemplateLanguage() : null;
         tagSyntax = builder.isTagSyntaxSet() ? builder.getTagSyntax() : null;
@@ -634,28 +634,28 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
      * Note that the {@code includeInherited} has no effect here, as {@link TemplateConfiguration}-s has no parent.
      */
     @Override
-    public Map<Serializable, Object> getCustomAttributesSnapshot(boolean includeInherited) {
-        return customAttributes;
+    public Map<Serializable, Object> getCustomSettingsSnapshot(boolean includeInherited) {
+        return customSettings;
     }
 
     @Override
-    public boolean isCustomAttributeSet(Serializable key) {
-        return customAttributes.containsKey(key);
+    public boolean isCustomSettingSet(Serializable key) {
+        return customSettings.containsKey(key);
     }
 
     @Override
-    public Object getCustomAttribute(Serializable key) {
-        Object result = getCustomAttribute(key, MISSING_VALUE_MARKER);
+    public Object getCustomSetting(Serializable key) {
+        Object result = getCustomSetting(key, MISSING_VALUE_MARKER);
         if (result == MISSING_VALUE_MARKER) {
-            throw new CustomAttributeNotSetException(key);
+            throw new CustomSettingNotSetException(key);
         }
         return result;
     }
 
     @Override
-    public Object getCustomAttribute(Serializable key, Object defaultValue) {
-        Object attValue = customAttributes.get(key);
-        if (attValue != null || customAttributes.containsKey(key)) {
+    public Object getCustomSetting(Serializable key, Object defaultValue) {
+        Object attValue = customSettings.get(key);
+        if (attValue != null || customSettings.containsKey(key)) {
             return attValue;
         }
         return defaultValue;
@@ -804,16 +804,16 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         }
 
         @Override
-        protected Object getDefaultCustomAttribute(Serializable key, Object defaultValue, boolean useDefaultValue) {
+        protected Object getDefaultCustomSetting(Serializable key, Object defaultValue, boolean useDefaultValue) {
             // We don't inherit from anything.
             if (useDefaultValue) {
                 return defaultValue;
             }
-            throw new CustomAttributeNotSetException(key);
+            throw new CustomSettingNotSetException(key);
         }
 
         @Override
-        protected void collectDefaultCustomAttributesSnapshot(Map<Serializable, Object> target) {
+        protected void collectDefaultCustomSettingsSnapshot(Map<Serializable, Object> target) {
             // We don't inherit from anything.
         }
 
@@ -934,9 +934,9 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
                         tc.isAutoIncludesSet() ? tc.getAutoIncludes() : null));
             }
 
-            setCustomAttributesMap(mergeMaps(
-                    getCustomAttributesSnapshot(false),
-                    tc.getCustomAttributesSnapshot(false),
+            setCustomSettingsMap(mergeMaps(
+                    getCustomSettingsSnapshot(false),
+                    tc.getCustomSettingsSnapshot(false),
                     true));
         }
 

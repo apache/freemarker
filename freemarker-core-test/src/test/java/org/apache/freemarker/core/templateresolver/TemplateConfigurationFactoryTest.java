@@ -154,8 +154,8 @@ public class TemplateConfigurationFactoryTest {
     @SuppressWarnings("boxing")
     private TemplateConfiguration newTemplateConfiguration(int id) {
         TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
-        tcb.setCustomAttribute("id", id);
-        tcb.setCustomAttribute("contains" + id, true);
+        tcb.setCustomSetting("id", id);
+        tcb.setCustomSetting("contains" + id, true);
         return tcb.build();
     }
 
@@ -167,10 +167,10 @@ public class TemplateConfigurationFactoryTest {
     private void assertApplicable(TemplateConfigurationFactory tcf, String sourceName, TemplateConfiguration... expectedTCs)
             throws IOException, TemplateConfigurationFactoryException {
         TemplateConfiguration mergedTC = tcf.get(sourceName, DummyTemplateLoadingSource.INSTANCE);
-        List<Serializable> mergedTCAttNames = new ArrayList<>(mergedTC.getCustomAttributesSnapshot(false).keySet());
+        List<Serializable> mergedTCAttNames = new ArrayList<>(mergedTC.getCustomSettingsSnapshot(false).keySet());
 
         for (TemplateConfiguration expectedTC : expectedTCs) {
-            Integer tcId = (Integer) expectedTC.getCustomAttribute("id");
+            Integer tcId = (Integer) expectedTC.getCustomSetting("id");
             if (tcId == null) {
                 fail("TemplateConfiguration-s must be created with newTemplateConfiguration(id) in this test");
             }
@@ -185,12 +185,12 @@ public class TemplateConfigurationFactoryTest {
             }
         }
         
-        assertEquals(expectedTCs[expectedTCs.length - 1].getCustomAttribute("id"), mergedTC.getCustomAttribute("id"));
+        assertEquals(expectedTCs[expectedTCs.length - 1].getCustomSetting("id"), mergedTC.getCustomSetting("id"));
     }
 
     private boolean containsCustomAttr(Serializable attKey, TemplateConfiguration... expectedTCs) {
         for (TemplateConfiguration expectedTC : expectedTCs) {
-            if (expectedTC.getCustomAttribute(attKey, ProcessingConfiguration.MISSING_VALUE_MARKER)
+            if (expectedTC.getCustomSetting(attKey, ProcessingConfiguration.MISSING_VALUE_MARKER)
                     != ProcessingConfiguration.MISSING_VALUE_MARKER) {
                 return true;
             }

@@ -1092,14 +1092,14 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     @Override
-    protected Object getDefaultCustomAttribute(Serializable key, Object defaultValue, boolean useDefaultValue) {
-        return useDefaultValue ? getMainTemplate().getCustomAttribute(key, defaultValue)
-                : getMainTemplate().getCustomAttribute(key);
+    protected Object getDefaultCustomSetting(Serializable key, Object defaultValue, boolean useDefaultValue) {
+        return useDefaultValue ? getMainTemplate().getCustomSetting(key, defaultValue)
+                : getMainTemplate().getCustomSetting(key);
     }
 
     @Override
-    protected void collectDefaultCustomAttributesSnapshot(Map<Serializable, Object> target) {
-        target.putAll(getMainTemplate().getCustomAttributesSnapshot(true));
+    protected void collectDefaultCustomSettingsSnapshot(Map<Serializable, Object> target) {
+        target.putAll(getMainTemplate().getCustomSettingsSnapshot(true));
     }
 
     /*

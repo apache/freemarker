@@ -44,8 +44,6 @@ import org.apache.freemarker.core.templateresolver.FirstMatchTemplateConfigurati
 import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
-import org.apache.freemarker.servlet.FreemarkerServlet;
-import org.apache.freemarker.servlet.FreemarkerServletConfigurationBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -314,7 +312,7 @@ public class FreemarkerServletTest {
         } catch (ServletException e) {
             assertThat(e.getCause().getCause().getMessage(), containsString(FreemarkerServlet.INIT_PARAM_VALUE_LEGACY));
         }
-        // But the legacy content_type template attribute can still set the output charset:
+        // But the legacy content_type template custom setting can still set the output charset:
         assertOutputEncodingEquals(
                 StandardCharsets.UTF_8, // <- expected response.characterEncoding
                 StandardCharsets.UTF_8, // <- expected env.outputEncoding
@@ -349,7 +347,7 @@ public class FreemarkerServletTest {
         } catch (ServletException e) {
             assertThat(e.getCause().getCause().getMessage(), containsString(FreemarkerServlet.INIT_PARAM_VALUE_LEGACY));
         }
-        // The legacy content_type template attribute can still specify an output charset, though it will be ignored:
+        // The legacy content_type template custom setting can still specify an output charset, though it will be ignored:
         assertOutputEncodingEquals(
                 SERVLET_RESPONSE_DEFAULT_CHARSET, // <- expected response.characterEncoding
                 SERVLET_RESPONSE_DEFAULT_CHARSET, // <- expected env.outputEncoding
@@ -394,7 +392,7 @@ public class FreemarkerServletTest {
         } catch (ServletException e) {
             assertThat(e.getCause().getCause().getMessage(), containsString(FreemarkerServlet.INIT_PARAM_VALUE_LEGACY));
         }
-        // The legacy content_type template attribute can still specify an output charset, though it will be overridden:
+        // The legacy content_type template custom setting can still specify an output charset, though it will be overridden:
         assertOutputEncodingEquals(
                 StandardCharsets.UTF_16LE, // <- expected response.characterEncoding
                 StandardCharsets.UTF_16LE, // <- expected env.outputEncoding
@@ -583,10 +581,10 @@ public class FreemarkerServletTest {
                         .getBytes(StandardCharsets.UTF_8));
                 tl.putTemplate(FOO_OUT_UTF8_FTL, "foo"
                         .getBytes(StandardCharsets.UTF_8));
-                tl.putTemplate(CONTENT_TYPE_ATTR_FTL, "<#ftl attributes={ 'content_type': 'text/plain' }>foo"
+                tl.putTemplate(CONTENT_TYPE_ATTR_FTL, "<#ftl customSettings={ 'content_type': 'text/plain' }>foo"
                         .getBytes(StandardCharsets.UTF_8));
                 tl.putTemplate(CONTENT_TYPE_ATTR_WITH_CHARSET_FTL,
-                        "<#ftl attributes={ 'content_type': 'text/plain; charset=UTF-8' }>foo"
+                        "<#ftl customSettings={ 'content_type': 'text/plain; charset=UTF-8' }>foo"
                         .getBytes(StandardCharsets.UTF_8));
                 tl.putTemplate(OUTPUT_FORMAT_HEADER_FTL, "<#ftl outputFormat='plainText'>foo"
                         .getBytes(StandardCharsets.UTF_8));

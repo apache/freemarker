@@ -50,7 +50,7 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 public interface ProcessingConfiguration {
 
     /**
-     * Useful as the default value parameter to {#getCustomAttribute(Serializable, Object)}, because this value is not
+     * Useful as the default value parameter to {#getCustomSetting(Serializable, Object)}, because this value is not
      * allowed for custom attributes.
      */
     Object MISSING_VALUE_MARKER = new Object();
@@ -679,9 +679,9 @@ public interface ProcessingConfiguration {
      * settings added dynamically (as opposed to in compilation time), where each custom attribute is treated as an
      * individual setting. So where predefined configuration settings used to have {@code isXxxSet}, {@code
      * unsetXxx}, and {@code setXxx} methods, custom attributes have these too, with a key (the identifier of the
-     * custom attribute) as an extra argument (see {@link #isCustomAttributeSet(Serializable)},
-     * {@link MutableProcessingConfiguration#setCustomAttribute(Serializable, Object)},
-     * {@link MutableProcessingConfiguration#unsetCustomAttribute(Serializable)}).
+     * custom attribute) as an extra argument (see {@link #isCustomSettingSet(Serializable)},
+     * {@link MutableProcessingConfiguration#setCustomSetting(Serializable, Object)},
+     * {@link MutableProcessingConfiguration#unsetCustomSetting(Serializable)}).
      * <p>
      * When the {@link ProcessingConfiguration} is part of a setting inheritance chain ({@link Environment} inherits
      * settings from the main {@link Template}, which inherits from the {@link Configuration}), this method will search
@@ -708,18 +708,18 @@ public interface ProcessingConfiguration {
      * @return The value of the custom attribute; possibly {@code null}, as that's a legal attribute value. The content
      * of the value object shouldn't be changed after it was added as an attribute (ideally, it should be an
      * immutable object); if you need to change the content, certainly you should use the {@link CustomStateScope}
-     * API. Note that if the custom attribute was created with <tt>&lt;#ftl&nbsp;attributes={...}&gt;</tt>, then this
-     * value is already unwrapped (i.e. it's a <code>String</code>, or a <code>List</code>, or a <code>Map</code>,
+     * API. Note that if the custom attribute was created with <tt>&lt;#ftl&nbsp;customSettings={...}&gt;</tt>, then
+     * this value is already unwrapped (i.e. it's a <code>String</code>, or a <code>List</code>, or a <code>Map</code>,
      * ...etc., not a FreeMarker specific class).
      *
-     * @throws CustomAttributeNotSetException if the custom attribute was not set (not even to {@code null}), nor in
+     * @throws CustomSettingNotSetException if the custom attribute was not set (not even to {@code null}), nor in
      * this {@link ProcessingConfiguration}, nor in another where we inherit settings from. Use
-     * {@link #getCustomAttribute(Serializable, Object)} to avoid this exception.
+     * {@link #getCustomSetting(Serializable, Object)} to avoid this exception.
      */
-    Object getCustomAttribute(Serializable key) throws CustomAttributeNotSetException;
+    Object getCustomSetting(Serializable key) throws CustomSettingNotSetException;
 
     /**
-     * Same as {@link #getCustomAttribute(Serializable)}, but instead of throwing {@link CustomAttributeNotSetException}
+     * Same as {@link #getCustomSetting(Serializable)}, but instead of throwing {@link CustomSettingNotSetException}
      * it returns the default value specified as the 2nd argument.
      *
      * @param defaultValue
@@ -728,7 +728,7 @@ public interface ProcessingConfiguration {
      *         the attribute was set. If you want to know if the value was set, {@link #MISSING_VALUE_MARKER} can
      *         be used, as it's guaranteed that an attribute never has that value.
      */
-    Object getCustomAttribute(Serializable key, Object defaultValue);
+    Object getCustomSetting(Serializable key, Object defaultValue);
 
     /**
      * Tells if this custom attribute is set directly in this object (not in its parent
@@ -737,23 +737,23 @@ public interface ProcessingConfiguration {
      * {@link SettingValueNotSetException}. Note that if an attribute was set to {@code
      * null} (as opposed to not set at all) then this method will return {@code true}.
      */
-    boolean isCustomAttributeSet(Serializable key);
+    boolean isCustomSettingSet(Serializable key);
 
     /**
-     * Collects all {@linkplain #getCustomAttribute(Serializable)} custom attributes} into a {@link Map}; mostly useful for
+     * Collects all {@linkplain #getCustomSetting(Serializable)} custom attributes} into a {@link Map}; mostly useful for
      * debugging and tooling, and is possibly too slow to call very frequently.
      *
      * @param includeInherited
      *         If {@code false}, only the custom attributes set in this {@link ProcessingConfiguration} will be
      *         collected, otherwise the custom attributes inherited from the parent {@link ProcessingConfiguration}-s
      *         will be too. Note that it's the last that matches the behavior of {@link
-     *         #getCustomAttribute(Serializable)}.
+     *         #getCustomSetting(Serializable)}.
      *
      * @return An unmodifiable and unchanging {@link Map}; not {@code null}. The object identity of keys and values of
      * this {@link Map} will not change when custom attributes are set/unset later (hence it's a snapshot). But, if
      * a key or value objects are themselves mutable objects, FreeMarker can't prevent their content from changing.
      * You shouldn't change the content of those objects.
      */
-    Map<Serializable, Object> getCustomAttributesSnapshot(boolean includeInherited);
+    Map<Serializable, Object> getCustomSettingsSnapshot(boolean includeInherited);
 
 }

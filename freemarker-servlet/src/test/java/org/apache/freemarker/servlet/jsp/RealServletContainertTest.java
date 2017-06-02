@@ -87,7 +87,7 @@ public class RealServletContainertTest extends WebAppTestCase {
     }
 
     @Test
-    public void basicCustomAttributes() throws Exception {
+    public void basicServletScopeAttributes() throws Exception {
         restartWebAppIfStarted(WEBAPP_BASIC);  // To clear the application scope attributes
         assertExpectedEqualsOutput(WEBAPP_BASIC, "attributes.txt", "tester"
                 + "?action=" + AllKindOfContainersModel2Action.class.getName()

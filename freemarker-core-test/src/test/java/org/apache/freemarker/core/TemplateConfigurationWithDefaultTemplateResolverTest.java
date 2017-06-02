@@ -42,8 +42,8 @@ public class TemplateConfigurationWithDefaultTemplateResolverTest {
 
     private static final String TEXT_WITH_ACCENTS = "pr\u00F3ba";
 
-    private static final Serializable CUST_ATT_1 = Integer.valueOf(111);
-    private static final Serializable CUST_ATT_2 = Integer.valueOf(222);
+    private static final Serializable CUST_SETTING_1 = Integer.valueOf(111);
+    private static final Serializable CUST_SETTING_2 = Integer.valueOf(222);
 
     private static final Charset ISO_8859_2 = Charset.forName("ISO-8859-2");
 
@@ -166,8 +166,8 @@ public class TemplateConfigurationWithDefaultTemplateResolverTest {
     }
     
     @Test
-    public void testCustomAttributes() throws Exception {
-        String commonFTL = "<#ftl attributes={ 'a3': 'a3temp' }>";
+    public void testCustomSettings() throws Exception {
+        String commonFTL = "<#ftl customSettings={ 'a3': 'a3temp' }>";
         StringTemplateLoader tl = new StringTemplateLoader();
         tl.putTemplate("(tc1)", commonFTL);
         tl.putTemplate("(tc1)noHeader", "");
@@ -180,52 +180,52 @@ public class TemplateConfigurationWithDefaultTemplateResolverTest {
                                 new ConditionalTemplateConfigurationFactory(
                                         new FileNameGlobMatcher("*(tc1)*"),
                                         new TemplateConfiguration.Builder()
-                                                .customAttribute("a1", "a1tc1")
-                                                .customAttribute("a2", "a2tc1")
-                                                .customAttribute("a3", "a3tc1")
-                                                .customAttribute(CUST_ATT_1, "ca1tc1")
-                                                .customAttribute(CUST_ATT_2, "ca2tc1")
+                                                .customSetting("a1", "a1tc1")
+                                                .customSetting("a2", "a2tc1")
+                                                .customSetting("a3", "a3tc1")
+                                                .customSetting(CUST_SETTING_1, "ca1tc1")
+                                                .customSetting(CUST_SETTING_2, "ca2tc1")
                                                 .build()),
                                 new ConditionalTemplateConfigurationFactory(
                                         new FileNameGlobMatcher("*(tc2)*"),
                                         new TemplateConfiguration.Builder()
-                                                .customAttribute("a1", "a1tc2")
-                                                .customAttribute(CUST_ATT_1, "ca1tc2")
+                                                .customSetting("a1", "a1tc2")
+                                                .customSetting(CUST_SETTING_1, "ca1tc2")
                                                 .build())))
                 .templateLoader(tl)
                 .build();
 
         {
             Template t = cfg.getTemplate("(tc1)");
-            assertEquals("a1tc1", t.getCustomAttribute("a1"));
-            assertEquals("a2tc1", t.getCustomAttribute("a2"));
-            assertEquals("a3temp", t.getCustomAttribute("a3"));
-            assertEquals("ca1tc1", t.getCustomAttribute(CUST_ATT_1));
-            assertEquals("ca2tc1", t.getCustomAttribute(CUST_ATT_2));
+            assertEquals("a1tc1", t.getCustomSetting("a1"));
+            assertEquals("a2tc1", t.getCustomSetting("a2"));
+            assertEquals("a3temp", t.getCustomSetting("a3"));
+            assertEquals("ca1tc1", t.getCustomSetting(CUST_SETTING_1));
+            assertEquals("ca2tc1", t.getCustomSetting(CUST_SETTING_2));
         }
         {
             Template t = cfg.getTemplate("(tc1)noHeader");
-            assertEquals("a1tc1", t.getCustomAttribute("a1"));
-            assertEquals("a2tc1", t.getCustomAttribute("a2"));
-            assertEquals("a3tc1", t.getCustomAttribute("a3"));
-            assertEquals("ca1tc1", t.getCustomAttribute(CUST_ATT_1));
-            assertEquals("ca2tc1", t.getCustomAttribute(CUST_ATT_2));
+            assertEquals("a1tc1", t.getCustomSetting("a1"));
+            assertEquals("a2tc1", t.getCustomSetting("a2"));
+            assertEquals("a3tc1", t.getCustomSetting("a3"));
+            assertEquals("ca1tc1", t.getCustomSetting(CUST_SETTING_1));
+            assertEquals("ca2tc1", t.getCustomSetting(CUST_SETTING_2));
         }
         {
             Template t = cfg.getTemplate("(tc2)");
-            assertEquals("a1tc2", t.getCustomAttribute("a1"));
-            assertEquals(MISSING_VALUE_MARKER, t.getCustomAttribute("a2", MISSING_VALUE_MARKER));
-            assertEquals("a3temp", t.getCustomAttribute("a3"));
-            assertEquals("ca1tc2", t.getCustomAttribute(CUST_ATT_1));
-            assertEquals(MISSING_VALUE_MARKER, t.getCustomAttribute(CUST_ATT_2, MISSING_VALUE_MARKER));
+            assertEquals("a1tc2", t.getCustomSetting("a1"));
+            assertEquals(MISSING_VALUE_MARKER, t.getCustomSetting("a2", MISSING_VALUE_MARKER));
+            assertEquals("a3temp", t.getCustomSetting("a3"));
+            assertEquals("ca1tc2", t.getCustomSetting(CUST_SETTING_1));
+            assertEquals(MISSING_VALUE_MARKER, t.getCustomSetting(CUST_SETTING_2, MISSING_VALUE_MARKER));
         }
         {
             Template t = cfg.getTemplate("(tc1)(tc2)");
-            assertEquals("a1tc2", t.getCustomAttribute("a1"));
-            assertEquals("a2tc1", t.getCustomAttribute("a2"));
-            assertEquals("a3temp", t.getCustomAttribute("a3"));
-            assertEquals("ca1tc2", t.getCustomAttribute(CUST_ATT_1));
-            assertEquals("ca2tc1", t.getCustomAttribute(CUST_ATT_2));
+            assertEquals("a1tc2", t.getCustomSetting("a1"));
+            assertEquals("a2tc1", t.getCustomSetting("a2"));
+            assertEquals("a3temp", t.getCustomSetting("a3"));
+            assertEquals("ca1tc2", t.getCustomSetting(CUST_SETTING_1));
+            assertEquals("ca2tc1", t.getCustomSetting(CUST_SETTING_2));
         }
     }
     
