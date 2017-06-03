@@ -181,7 +181,7 @@ public class TemplateConfigurationFactoryTest {
         
         for (Serializable attKey: mergedTCAttNames) {
             if (!containsCustomAttr(attKey, expectedTCs)) {
-                fail("The asserted TemplateConfiguration contains an unexpected custom attribute: " + attKey);
+                fail("The asserted TemplateConfiguration contains an unexpected custom setting: " + attKey);
             }
         }
         

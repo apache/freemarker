@@ -24,7 +24,7 @@ import java.io.Serializable;
 import org.apache.freemarker.core.util._StringUtil;
 
 /**
- * Thrown by {@link ProcessingConfiguration#getCustomSetting(Serializable)} if the custom attribute is not set.
+ * Thrown by {@link ProcessingConfiguration#getCustomSetting(Serializable)} if the custom setting is not set.
  */
 public class CustomSettingNotSetException extends SettingValueNotSetException {
 

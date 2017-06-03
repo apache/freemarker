@@ -153,7 +153,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * <li>If the {@value #INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE} init-param is {@value #INIT_PARAM_VALUE_NEVER} (the
  * default is {@value #INIT_PARAM_VALUE_ALWAYS}), then the value of {@link HttpServletResponse#getContentType()} is used
  * if that's non-{@code null}.
- * <li>The template's <tt>content_type</tt> custom attribute, usually specified via the <tt>attributes</tt> parameter of
+ * <li>The template's <tt>content_type</tt> custom setting, usually specified via the <tt>attributes</tt> parameter of
  * the <tt>&lt;#ftl&gt;</tt> directive. This is a legacy feature, deprecated by the {@link OutputFormat} mechanism.
  * <li>The {@linkplain Template#getOutputFormat() output format of the template}, if that has non-{@code null} MIME-type
  * ({@link OutputFormat#getMimeType()}). When a template has no output format specified, {@link UndefinedOutputFormat}
@@ -179,7 +179,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * type in the response, unless {@link HttpServletResponse#getContentType()} is {@code null}. The third possible value
  * is {@value #INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE}, which means that we only set the content type if either
  * the template has an associated {@link OutputFormat} with non-{@code null} {@link OutputFormat#getMimeType()}, or it
- * has a custom attribute with name <tt>content_type</tt>, or {@link HttpServletResponse#getContentType()} is
+ * has a custom setting with name <tt>content_type</tt>, or {@link HttpServletResponse#getContentType()} is
  * {@code null}. Setting this init-param allows you to specify the content type before forwarding to
  * {@link FreemarkerServlet}.</li>
  *

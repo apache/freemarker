@@ -1188,8 +1188,8 @@ public final class Configuration
      * {@inheritDoc}
      * <p>
      * Unlike the other isXxxSet methods of {@link Configuration}, this can return {@code false}, as at least the
-     * builders in FreeMarker Core can't provide defaults for custom attributes. Note that since
-     * {@link #getCustomSetting(Serializable)} just returns {@code null} for unset custom attributes, it's usually not a
+     * builders in FreeMarker Core can't provide defaults for custom settings. Note that since
+     * {@link #getCustomSetting(Serializable)} just returns {@code null} for unset custom settings, it's usually not a
      * problem.
      */
     @Override

@@ -2129,10 +2129,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * Setter pair of {@link #getCustomSetting(Serializable)}.
      *
      * @param key
-     *         The identifier of the the custom attribute; not {@code null}. Usually an enum or a {@link String}. Must
+     *         The identifier of the the custom setting; not {@code null}. Usually an enum or a {@link String}. Must
      *         be usable as {@link HashMap} key.
      * @param value
-     *         The value of the custom attribute. {@code null} is a legal attribute value. Thus, setting the value to
+     *         The value of the custom setting. {@code null} is a legal attribute value. Thus, setting the value to
      *         {@code null} doesn't unset (remove) the attribute; use {@link #unsetCustomSetting(Serializable)} for
      *         that. Also, {@link #MISSING_VALUE_MARKER} is not an allowed value.
      *         The content of the object shouldn't be changed after it was added as an attribute (ideally, it should
@@ -2162,10 +2162,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Unset the custom attribute for this {@link ProcessingConfiguration} (but not from the parent
+     * Unset the custom setting for this {@link ProcessingConfiguration} (but not from the parent
      * {@link ProcessingConfiguration}, from where it will be possibly inherited after this), as if
      * {@link #setCustomSetting(Serializable, Object)} was never called for it on this
-     * {@link ProcessingConfiguration}. Note that this is different than setting the custom attribute value to {@code
+     * {@link ProcessingConfiguration}. Note that this is different than setting the custom setting value to {@code
      * null}, as then {@link #getCustomSetting(Serializable)} will just return that {@code null}, and won't look for the
      * attribute in the parent {@link ProcessingConfiguration}.
      *
@@ -2217,7 +2217,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Called from {@link #getCustomSettingsSnapshot(boolean)}, adds the default (such as inherited) custom attributes
+     * Called from {@link #getCustomSettingsSnapshot(boolean)}, adds the default (such as inherited) custom settings
      * to the argument {@link Map}.
      */
     protected abstract void collectDefaultCustomSettingsSnapshot(Map<Serializable, Object> target);
@@ -2246,7 +2246,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Convenience method for calling {@link #setCustomSetting(Serializable, Object)} for each {@link Map} entry.
-     * Note that it won't remove the already existing custom attributes.
+     * Note that it won't remove the already existing custom settings.
      */
     public void setCustomSettings(Map<? extends Serializable, ?> customSettings) {
         _NullArgumentException.check("customSettings", customSettings);
@@ -2279,7 +2279,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Unsets all custom attributes which were set in this {@link ProcessingConfiguration} (but doesn't unset
+     * Unsets all custom settings which were set in this {@link ProcessingConfiguration} (but doesn't unset
      * those inherited from a parent {@link ProcessingConfiguration}).
      */
     public void unsetAllCustomSettings() {

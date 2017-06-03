@@ -51,7 +51,7 @@ public interface ProcessingConfiguration {
 
     /**
      * Useful as the default value parameter to {#getCustomSetting(Serializable, Object)}, because this value is not
-     * allowed for custom attributes.
+     * allowed for custom settings.
      */
     Object MISSING_VALUE_MARKER = new Object();
 
@@ -674,45 +674,45 @@ public interface ProcessingConfiguration {
     boolean isAutoIncludesSet();
 
     /**
-     * Retrieves the value of a custom attribute. Custom attributes are key-value pairs associated to a {@link
+     * Retrieves the value of a custom setting. Custom settings are key-value pairs associated to a {@link
      * ProcessingConfiguration} object, that the FreeMarker core doesn't try to interpret. They are like configuration
-     * settings added dynamically (as opposed to in compilation time), where each custom attribute is treated as an
+     * settings added dynamically (as opposed to in compilation time), where each custom setting is treated as an
      * individual setting. So where predefined configuration settings used to have {@code isXxxSet}, {@code
-     * unsetXxx}, and {@code setXxx} methods, custom attributes have these too, with a key (the identifier of the
-     * custom attribute) as an extra argument (see {@link #isCustomSettingSet(Serializable)},
+     * unsetXxx}, and {@code setXxx} methods, custom settings have these too, with a key (the identifier of the
+     * custom setting) as an extra argument (see {@link #isCustomSettingSet(Serializable)},
      * {@link MutableProcessingConfiguration#setCustomSetting(Serializable, Object)},
      * {@link MutableProcessingConfiguration#unsetCustomSetting(Serializable)}).
      * <p>
      * When the {@link ProcessingConfiguration} is part of a setting inheritance chain ({@link Environment} inherits
      * settings from the main {@link Template}, which inherits from the {@link Configuration}), this method will search
-     * the custom attribute in the whole inheritance chain, until it finds it.
+     * the custom setting in the whole inheritance chain, until it finds it.
      * <p>
      * To prevent key clashes (and for better performance), it's often a good idea to use enums as keys, rather than
      * {@link String}-s. If {@link String}-s are used for keys (names) by components that will be reused on several
      * places, then to avoid accidental name clashes, the names should use a prefix similar to a package name, like
      * like "com.example.myframework.".
      * <p>
-     * The values of custom attributes should be immutable, or at least not changed after they were added as a
-     * custom attribute value. To store custom state information (such as application or framework specific caches)
+     * The values of custom settings should be immutable, or at least not changed after they were added as a
+     * custom setting value. To store custom state information (such as application or framework specific caches)
      * you should use the methods provided by {@link CustomStateScope} instead.
      * <p>
-     * The FreeMarker core doesn't provide any means for accessing custom attributes from the templates. If a framework
+     * The FreeMarker core doesn't provide any means for accessing custom settings from the templates. If a framework
      * or application needs such functionality, it has to add its own custom directives/methods for that. But its
-     * more typical that custom attributes just influence the behavior of custom directives/methods without the normal
+     * more typical that custom settings just influence the behavior of custom directives/methods without the normal
      * templates directly accessing them, or that they are just used by the framework code that invokes templates.
      *
      * @param key
-     *         The identifier (usually an enum or a {@link String}) of the custom attribute; not {@code null}; must be
+     *         The identifier (usually an enum or a {@link String}) of the custom setting; not {@code null}; must be
      *         usable as {@link HashMap} key
      *
-     * @return The value of the custom attribute; possibly {@code null}, as that's a legal attribute value. The content
+     * @return The value of the custom setting; possibly {@code null}, as that's a legal attribute value. The content
      * of the value object shouldn't be changed after it was added as an attribute (ideally, it should be an
      * immutable object); if you need to change the content, certainly you should use the {@link CustomStateScope}
-     * API. Note that if the custom attribute was created with <tt>&lt;#ftl&nbsp;customSettings={...}&gt;</tt>, then
+     * API. Note that if the custom setting was created with <tt>&lt;#ftl&nbsp;customSettings={...}&gt;</tt>, then
      * this value is already unwrapped (i.e. it's a <code>String</code>, or a <code>List</code>, or a <code>Map</code>,
      * ...etc., not a FreeMarker specific class).
      *
-     * @throws CustomSettingNotSetException if the custom attribute was not set (not even to {@code null}), nor in
+     * @throws CustomSettingNotSetException if the custom setting was not set (not even to {@code null}), nor in
      * this {@link ProcessingConfiguration}, nor in another where we inherit settings from. Use
      * {@link #getCustomSetting(Serializable, Object)} to avoid this exception.
      */
@@ -731,7 +731,7 @@ public interface ProcessingConfiguration {
     Object getCustomSetting(Serializable key, Object defaultValue);
 
     /**
-     * Tells if this custom attribute is set directly in this object (not in its parent
+     * Tells if this custom setting is set directly in this object (not in its parent
      * {@link ProcessingConfiguration}). If not, then depending on the implementing class, reading the custom
      * attribute might returns the value of the setting from a parent object, or returns {@code null}, or throws a
      * {@link SettingValueNotSetException}. Note that if an attribute was set to {@code
@@ -740,17 +740,17 @@ public interface ProcessingConfiguration {
     boolean isCustomSettingSet(Serializable key);
 
     /**
-     * Collects all {@linkplain #getCustomSetting(Serializable)} custom attributes} into a {@link Map}; mostly useful for
+     * Collects all {@linkplain #getCustomSetting(Serializable)} custom settings} into a {@link Map}; mostly useful for
      * debugging and tooling, and is possibly too slow to call very frequently.
      *
      * @param includeInherited
-     *         If {@code false}, only the custom attributes set in this {@link ProcessingConfiguration} will be
-     *         collected, otherwise the custom attributes inherited from the parent {@link ProcessingConfiguration}-s
+     *         If {@code false}, only the custom settings set in this {@link ProcessingConfiguration} will be
+     *         collected, otherwise the custom settings inherited from the parent {@link ProcessingConfiguration}-s
      *         will be too. Note that it's the last that matches the behavior of {@link
      *         #getCustomSetting(Serializable)}.
      *
      * @return An unmodifiable and unchanging {@link Map}; not {@code null}. The object identity of keys and values of
-     * this {@link Map} will not change when custom attributes are set/unset later (hence it's a snapshot). But, if
+     * this {@link Map} will not change when custom settings are set/unset later (hence it's a snapshot). But, if
      * a key or value objects are themselves mutable objects, FreeMarker can't prevent their content from changing.
      * You shouldn't change the content of those objects.
      */

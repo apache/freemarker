@@ -110,11 +110,11 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     private String defaultNS;
     private Map prefixToNamespaceURILookup = new HashMap();
     private Map namespaceURIToPrefixLookup = new HashMap();
-    /** Custom attributes specified inside the template with the #ftl directive. Maybe {@code null}. */
+    /** Custom settings specified inside the template with the #ftl directive. Maybe {@code null}. */
     private Map<String, Serializable> headerCustomSettings;
     /**
      * In case {@link #headerCustomSettings} is not {@code null} and the {@link TemplateConfiguration} also specifies
-     * custom attributes, this is the two set of custom attributes merged. Otherwise it's {@code null}.
+     * custom settings, this is the two set of custom settings merged. Otherwise it's {@code null}.
      */
     private transient Map<Serializable, Object> tcAndHeaderCustomSettings;
 
