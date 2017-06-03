@@ -131,7 +131,7 @@ public class CustomSettingTest {
         try {
             pc.getCustomSetting(key);
             fail();
-        } catch (CustomSettingNotSetException e) {
+        } catch (CustomSettingValueNotSetException e) {
             assertSame(key, e.getKey());
         }
 

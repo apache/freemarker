@@ -353,7 +353,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract Locale getDefaultLocale();
 
@@ -416,7 +416,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract TimeZone getDefaultTimeZone();
 
@@ -459,7 +459,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract TimeZone getDefaultSQLDateAndTimeTimeZone();
 
@@ -499,7 +499,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract String getDefaultNumberFormat();
 
@@ -648,7 +648,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract String getDefaultBooleanFormat();
 
@@ -688,7 +688,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract String getDefaultTimeFormat();
 
@@ -728,7 +728,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract String getDefaultDateFormat();
 
@@ -768,7 +768,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract String getDefaultDateTimeFormat();
 
@@ -888,7 +888,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract TemplateExceptionHandler getDefaultTemplateExceptionHandler();
 
@@ -928,7 +928,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract ArithmeticEngine getDefaultArithmeticEngine();
 
@@ -969,7 +969,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract ObjectWrapper getDefaultObjectWrapper();
 
@@ -1012,7 +1012,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract Charset getDefaultOutputEncoding();
 
@@ -1053,7 +1053,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract Charset getDefaultURLEscapingCharset();
 
@@ -1094,7 +1094,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract TemplateClassResolver getDefaultNewBuiltinClassResolver();
 
@@ -1133,7 +1133,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract boolean getDefaultAutoFlush();
 
@@ -1172,7 +1172,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract boolean getDefaultShowErrorTips();
 
@@ -1211,7 +1211,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract boolean getDefaultAPIBuiltinEnabled();
 
@@ -1227,7 +1227,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract boolean getDefaultLogTemplateExceptions();
 
@@ -1266,7 +1266,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract boolean getDefaultLazyImports();
 
@@ -1305,7 +1305,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract Boolean getDefaultLazyAutoImports();
 
@@ -1392,7 +1392,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract Map<String,String> getDefaultAutoImports();
 
@@ -1459,7 +1459,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
     /**
      * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link SettingValueNotSetException}.
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract List<String> getDefaultAutoIncludes();
 
@@ -2181,7 +2181,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     @Override
-    public Object getCustomSetting(Serializable key) throws CustomSettingNotSetException {
+    public Object getCustomSetting(Serializable key) throws CustomSettingValueNotSetException {
         return getCustomSetting(key, null, false);
     }
 
@@ -2235,14 +2235,14 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *
      * @param useDefaultValue
      *         If {@code true}, and the attribute is missing, then return {@code defaultValue}, otherwise throw {@link
-     *         CustomSettingNotSetException}.
+     *         CustomSettingValueNotSetException}.
      *
-     * @throws CustomSettingNotSetException
+     * @throws CustomSettingValueNotSetException
      *         if the attribute wasn't set in the parents, or has no default otherwise, and {@code useDefaultValue} was
      *         {@code false}.
      */
     protected abstract Object getDefaultCustomSetting(
-            Serializable key, Object defaultValue, boolean useDefaultValue) throws CustomSettingNotSetException;
+            Serializable key, Object defaultValue, boolean useDefaultValue) throws CustomSettingValueNotSetException;
 
     /**
      * Convenience method for calling {@link #setCustomSetting(Serializable, Object)} for each {@link Map} entry.

@@ -80,7 +80,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
 
     /**
      * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
-     * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
+     * from another {@link ParsingConfiguration}, or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract TagSyntax getDefaultTagSyntax();
 
@@ -96,7 +96,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
 
     /**
      * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
-     * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
+     * from another {@link ParsingConfiguration}, or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract TemplateLanguage getDefaultTemplateLanguage();
 
@@ -167,7 +167,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
 
     /**
      * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
-     * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
+     * from another {@link ParsingConfiguration}, or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract NamingConvention getDefaultNamingConvention();
 
@@ -212,7 +212,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
 
     /**
      * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
-     * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
+     * from another {@link ParsingConfiguration}, or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract boolean getDefaultWhitespaceStripping();
 
@@ -258,7 +258,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
 
     /**
      * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
-     * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
+     * from another {@link ParsingConfiguration}, or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract AutoEscapingPolicy getDefaultAutoEscapingPolicy();
 
@@ -304,7 +304,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
 
     /**
      * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
-     * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
+     * from another {@link ParsingConfiguration}, or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract OutputFormat getDefaultOutputFormat();
 
@@ -349,7 +349,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
 
     /**
      * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
-     * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
+     * from another {@link ParsingConfiguration}, or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract boolean getDefaultRecognizeStandardFileExtensions();
 
@@ -368,7 +368,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
 
     /**
      * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
-     * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
+     * from another {@link ParsingConfiguration}, or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract Charset getDefaultSourceEncoding();
 
@@ -439,7 +439,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
 
     /**
      * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
-     * from another {@link ParsingConfiguration}, or throws {@link SettingValueNotSetException}.
+     * from another {@link ParsingConfiguration}, or throws {@link CoreSettingValueNotSetException}.
      */
     protected abstract int getDefaultTabSize();
 

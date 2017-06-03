@@ -66,7 +66,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isLocaleSet();
 
@@ -86,7 +86,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isTimeZoneSet();
 
@@ -149,7 +149,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isSQLDateAndTimeTimeZoneSet();
 
@@ -180,7 +180,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isNumberFormatSet();
 
@@ -214,7 +214,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isCustomNumberFormatsSet();
 
@@ -232,7 +232,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isBooleanFormatSet();
 
@@ -249,7 +249,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isTimeFormatSet();
 
@@ -266,7 +266,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isDateFormatSet();
 
@@ -361,7 +361,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isDateTimeFormatSet();
 
@@ -396,7 +396,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isCustomDateFormatsSet();
 
@@ -426,7 +426,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isTemplateExceptionHandlerSet();
 
@@ -440,7 +440,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isArithmeticEngineSet();
 
@@ -454,7 +454,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isObjectWrapperSet();
 
@@ -471,7 +471,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isOutputEncodingSet();
 
@@ -484,7 +484,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isURLEscapingCharsetSet();
 
@@ -500,7 +500,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isNewBuiltinClassResolverSet();
 
@@ -513,7 +513,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isAPIBuiltinEnabledSet();
 
@@ -532,7 +532,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isAutoFlushSet();
 
@@ -545,7 +545,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isShowErrorTipsSet();
 
@@ -563,7 +563,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isLogTemplateExceptionsSet();
 
@@ -590,7 +590,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isLazyImportsSet();
 
@@ -605,7 +605,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isLazyAutoImportsSet();
 
@@ -641,7 +641,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isAutoImportsSet();
 
@@ -669,7 +669,7 @@ public interface ProcessingConfiguration {
     /**
      * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
      * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link SettingValueNotSetException}.
+     * an {@link CoreSettingValueNotSetException}.
      */
     boolean isAutoIncludesSet();
 
@@ -712,14 +712,14 @@ public interface ProcessingConfiguration {
      * this value is already unwrapped (i.e. it's a <code>String</code>, or a <code>List</code>, or a <code>Map</code>,
      * ...etc., not a FreeMarker specific class).
      *
-     * @throws CustomSettingNotSetException if the custom setting was not set (not even to {@code null}), nor in
+     * @throws CustomSettingValueNotSetException if the custom setting was not set (not even to {@code null}), nor in
      * this {@link ProcessingConfiguration}, nor in another where we inherit settings from. Use
      * {@link #getCustomSetting(Serializable, Object)} to avoid this exception.
      */
-    Object getCustomSetting(Serializable key) throws CustomSettingNotSetException;
+    Object getCustomSetting(Serializable key) throws CustomSettingValueNotSetException;
 
     /**
-     * Same as {@link #getCustomSetting(Serializable)}, but instead of throwing {@link CustomSettingNotSetException}
+     * Same as {@link #getCustomSetting(Serializable)}, but instead of throwing {@link CustomSettingValueNotSetException}
      * it returns the default value specified as the 2nd argument.
      *
      * @param defaultValue
@@ -734,7 +734,7 @@ public interface ProcessingConfiguration {
      * Tells if this custom setting is set directly in this object (not in its parent
      * {@link ProcessingConfiguration}). If not, then depending on the implementing class, reading the custom
      * attribute might returns the value of the setting from a parent object, or returns {@code null}, or throws a
-     * {@link SettingValueNotSetException}. Note that if an attribute was set to {@code
+     * {@link CoreSettingValueNotSetException}. Note that if an attribute was set to {@code
      * null} (as opposed to not set at all) then this method will return {@code true}.
      */
     boolean isCustomSettingSet(Serializable key);

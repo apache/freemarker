@@ -40,7 +40,7 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
  * A partial set of configuration settings used for customizing the {@link Configuration}-level settings for individual
  * {@link Template}-s (or rather, for a group of templates). That it's partial means that you should call the
  * corresponding {@code isXxxSet()} before getting a settings, or else you may cause
- * {@link SettingValueNotSetException}. (There's no fallback to the {@link Configuration}-level settings to keep the
+ * {@link CoreSettingValueNotSetException}. (There's no fallback to the {@link Configuration}-level settings to keep the
  * dependency graph of configuration related beans non-cyclic. As user code seldom reads settings directly from
  * {@link TemplateConfiguration}-s anyway, this compromise was chosen.)
  * <p>
@@ -177,7 +177,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public TagSyntax getTagSyntax() {
         if (!isTagSyntaxSet()) {
-            throw new SettingValueNotSetException("tagSyntax");
+            throw new CoreSettingValueNotSetException("tagSyntax");
         }
         return tagSyntax;
     }
@@ -190,7 +190,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public TemplateLanguage getTemplateLanguage() {
         if (!isTemplateLanguageSet()) {
-            throw new SettingValueNotSetException("templateLanguage");
+            throw new CoreSettingValueNotSetException("templateLanguage");
         }
         return templateLanguage;
     }
@@ -203,7 +203,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public NamingConvention getNamingConvention() {
         if (!isNamingConventionSet()) {
-            throw new SettingValueNotSetException("namingConvention");
+            throw new CoreSettingValueNotSetException("namingConvention");
         }
         return namingConvention;
     }
@@ -216,7 +216,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public boolean getWhitespaceStripping() {
         if (!isWhitespaceStrippingSet()) {
-            throw new SettingValueNotSetException("whitespaceStripping");
+            throw new CoreSettingValueNotSetException("whitespaceStripping");
         }
         return whitespaceStripping;
     }
@@ -229,7 +229,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public AutoEscapingPolicy getAutoEscapingPolicy() {
         if (!isAutoEscapingPolicySet()) {
-            throw new SettingValueNotSetException("autoEscapingPolicy");
+            throw new CoreSettingValueNotSetException("autoEscapingPolicy");
         }
         return autoEscapingPolicy;
     }
@@ -242,7 +242,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public OutputFormat getOutputFormat() {
         if (!isOutputFormatSet()) {
-            throw new SettingValueNotSetException("outputFormat");
+            throw new CoreSettingValueNotSetException("outputFormat");
         }
         return outputFormat;
     }
@@ -250,7 +250,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public ArithmeticEngine getArithmeticEngine() {
         if (!isArithmeticEngineSet()) {
-            throw new SettingValueNotSetException("arithmeticEngine");
+            throw new CoreSettingValueNotSetException("arithmeticEngine");
         }
         return arithmeticEngine;
     }
@@ -268,7 +268,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public boolean getRecognizeStandardFileExtensions() {
         if (!isRecognizeStandardFileExtensionsSet()) {
-            throw new SettingValueNotSetException("recognizeStandardFileExtensions");
+            throw new CoreSettingValueNotSetException("recognizeStandardFileExtensions");
         }
         return recognizeStandardFileExtensions;
     }
@@ -281,7 +281,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public Charset getSourceEncoding() {
         if (!isSourceEncodingSet()) {
-            throw new SettingValueNotSetException("sourceEncoding");
+            throw new CoreSettingValueNotSetException("sourceEncoding");
         }
         return sourceEncoding;
     }
@@ -294,7 +294,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public int getTabSize() {
         if (!isTabSizeSet()) {
-            throw new SettingValueNotSetException("tabSize");
+            throw new CoreSettingValueNotSetException("tabSize");
         }
         return tabSize;
     }
@@ -305,18 +305,18 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     }
     
     /**
-     * Always throws {@link SettingValueNotSetException}, as this can't be set on the {@link TemplateConfiguration}
+     * Always throws {@link CoreSettingValueNotSetException}, as this can't be set on the {@link TemplateConfiguration}
      * level.
      */
     @Override
     public Version getIncompatibleImprovements() {
-        throw new SettingValueNotSetException("incompatibleImprovements");
+        throw new CoreSettingValueNotSetException("incompatibleImprovements");
     }
 
     @Override
     public Locale getLocale() {
         if (!isLocaleSet()) {
-            throw new SettingValueNotSetException("locale");
+            throw new CoreSettingValueNotSetException("locale");
         }
         return locale;
     }
@@ -329,7 +329,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public TimeZone getTimeZone() {
         if (!isTimeZoneSet()) {
-            throw new SettingValueNotSetException("timeZone");
+            throw new CoreSettingValueNotSetException("timeZone");
         }
         return timeZone;
     }
@@ -342,7 +342,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public TimeZone getSQLDateAndTimeTimeZone() {
         if (!isSQLDateAndTimeTimeZoneSet()) {
-            throw new SettingValueNotSetException("sqlDateAndTimeTimeZone");
+            throw new CoreSettingValueNotSetException("sqlDateAndTimeTimeZone");
         }
         return sqlDateAndTimeTimeZone;
     }
@@ -355,7 +355,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public String getNumberFormat() {
         if (!isNumberFormatSet()) {
-            throw new SettingValueNotSetException("numberFormat");
+            throw new CoreSettingValueNotSetException("numberFormat");
         }
         return numberFormat;
     }
@@ -368,7 +368,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public Map<String, TemplateNumberFormatFactory> getCustomNumberFormats() {
         if (!isCustomNumberFormatsSet()) {
-            throw new SettingValueNotSetException("customNumberFormats");
+            throw new CoreSettingValueNotSetException("customNumberFormats");
         }
         return customNumberFormats;
     }
@@ -386,7 +386,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public String getBooleanFormat() {
         if (!isBooleanFormatSet()) {
-            throw new SettingValueNotSetException("booleanFormat");
+            throw new CoreSettingValueNotSetException("booleanFormat");
         }
         return booleanFormat;
     }
@@ -399,7 +399,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public String getTimeFormat() {
         if (!isTimeFormatSet()) {
-            throw new SettingValueNotSetException("timeFormat");
+            throw new CoreSettingValueNotSetException("timeFormat");
         }
         return timeFormat;
     }
@@ -412,7 +412,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public String getDateFormat() {
         if (!isDateFormatSet()) {
-            throw new SettingValueNotSetException("dateFormat");
+            throw new CoreSettingValueNotSetException("dateFormat");
         }
         return dateFormat;
     }
@@ -425,7 +425,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public String getDateTimeFormat() {
         if (!isDateTimeFormatSet()) {
-            throw new SettingValueNotSetException("dateTimeFormat");
+            throw new CoreSettingValueNotSetException("dateTimeFormat");
         }
         return dateTimeFormat;
     }
@@ -438,7 +438,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public Map<String, TemplateDateFormatFactory> getCustomDateFormats() {
         if (!isCustomDateFormatsSet()) {
-            throw new SettingValueNotSetException("customDateFormats");
+            throw new CoreSettingValueNotSetException("customDateFormats");
         }
         return customDateFormats;
     }
@@ -462,7 +462,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public TemplateExceptionHandler getTemplateExceptionHandler() {
         if (!isTemplateExceptionHandlerSet()) {
-            throw new SettingValueNotSetException("templateExceptionHandler");
+            throw new CoreSettingValueNotSetException("templateExceptionHandler");
         }
         return templateExceptionHandler;
     }
@@ -475,7 +475,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public ObjectWrapper getObjectWrapper() {
         if (!isObjectWrapperSet()) {
-            throw new SettingValueNotSetException("objectWrapper");
+            throw new CoreSettingValueNotSetException("objectWrapper");
         }
         return objectWrapper;
     }
@@ -488,7 +488,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public Charset getOutputEncoding() {
         if (!isOutputEncodingSet()) {
-            throw new SettingValueNotSetException("");
+            throw new CoreSettingValueNotSetException("");
         }
         return outputEncoding;
     }
@@ -501,7 +501,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public Charset getURLEscapingCharset() {
         if (!isURLEscapingCharsetSet()) {
-            throw new SettingValueNotSetException("urlEscapingCharset");
+            throw new CoreSettingValueNotSetException("urlEscapingCharset");
         }
         return urlEscapingCharset;
     }
@@ -514,7 +514,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public TemplateClassResolver getNewBuiltinClassResolver() {
         if (!isNewBuiltinClassResolverSet()) {
-            throw new SettingValueNotSetException("newBuiltinClassResolver");
+            throw new CoreSettingValueNotSetException("newBuiltinClassResolver");
         }
         return newBuiltinClassResolver;
     }
@@ -527,7 +527,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public boolean getAPIBuiltinEnabled() {
         if (!isAPIBuiltinEnabledSet()) {
-            throw new SettingValueNotSetException("apiBuiltinEnabled");
+            throw new CoreSettingValueNotSetException("apiBuiltinEnabled");
         }
         return apiBuiltinEnabled;
     }
@@ -540,7 +540,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public boolean getAutoFlush() {
         if (!isAutoFlushSet()) {
-            throw new SettingValueNotSetException("autoFlush");
+            throw new CoreSettingValueNotSetException("autoFlush");
         }
         return autoFlush;
     }
@@ -553,7 +553,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public boolean getShowErrorTips() {
         if (!isShowErrorTipsSet()) {
-            throw new SettingValueNotSetException("showErrorTips");
+            throw new CoreSettingValueNotSetException("showErrorTips");
         }
         return showErrorTips;
     }
@@ -566,7 +566,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public boolean getLogTemplateExceptions() {
         if (!isLogTemplateExceptionsSet()) {
-            throw new SettingValueNotSetException("logTemplateExceptions");
+            throw new CoreSettingValueNotSetException("logTemplateExceptions");
         }
         return logTemplateExceptions;
     }
@@ -579,7 +579,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public boolean getLazyImports() {
         if (!isLazyImportsSet()) {
-            throw new SettingValueNotSetException("lazyImports");
+            throw new CoreSettingValueNotSetException("lazyImports");
         }
         return lazyImports;
     }
@@ -592,7 +592,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public Boolean getLazyAutoImports() {
         if (!isLazyAutoImportsSet()) {
-            throw new SettingValueNotSetException("lazyAutoImports");
+            throw new CoreSettingValueNotSetException("lazyAutoImports");
         }
         return lazyAutoImports;
     }
@@ -605,7 +605,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public Map<String, String> getAutoImports() {
         if (!isAutoImportsSet()) {
-            throw new SettingValueNotSetException("");
+            throw new CoreSettingValueNotSetException("");
         }
         return autoImports;
     }
@@ -618,7 +618,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public List<String> getAutoIncludes() {
         if (!isAutoIncludesSet()) {
-            throw new SettingValueNotSetException("autoIncludes");
+            throw new CoreSettingValueNotSetException("autoIncludes");
         }
         return autoIncludes;
     }
@@ -647,7 +647,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     public Object getCustomSetting(Serializable key) {
         Object result = getCustomSetting(key, MISSING_VALUE_MARKER);
         if (result == MISSING_VALUE_MARKER) {
-            throw new CustomSettingNotSetException(key);
+            throw new CustomSettingValueNotSetException(key);
         }
         return result;
     }
@@ -675,27 +675,27 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
 
         @Override
         protected Locale getDefaultLocale() {
-            throw new SettingValueNotSetException("locale");
+            throw new CoreSettingValueNotSetException("locale");
         }
 
         @Override
         protected TimeZone getDefaultTimeZone() {
-            throw new SettingValueNotSetException("timeZone");
+            throw new CoreSettingValueNotSetException("timeZone");
         }
 
         @Override
         protected TimeZone getDefaultSQLDateAndTimeTimeZone() {
-            throw new SettingValueNotSetException("SQLDateAndTimeTimeZone");
+            throw new CoreSettingValueNotSetException("SQLDateAndTimeTimeZone");
         }
 
         @Override
         protected String getDefaultNumberFormat() {
-            throw new SettingValueNotSetException("numberFormat");
+            throw new CoreSettingValueNotSetException("numberFormat");
         }
 
         @Override
         protected Map<String, TemplateNumberFormatFactory> getDefaultCustomNumberFormats() {
-            throw new SettingValueNotSetException("customNumberFormats");
+            throw new CoreSettingValueNotSetException("customNumberFormats");
         }
 
         @Override
@@ -705,102 +705,102 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
 
         @Override
         protected String getDefaultBooleanFormat() {
-            throw new SettingValueNotSetException("booleanFormat");
+            throw new CoreSettingValueNotSetException("booleanFormat");
         }
 
         @Override
         protected String getDefaultTimeFormat() {
-            throw new SettingValueNotSetException("timeFormat");
+            throw new CoreSettingValueNotSetException("timeFormat");
         }
 
         @Override
         protected String getDefaultDateFormat() {
-            throw new SettingValueNotSetException("dateFormat");
+            throw new CoreSettingValueNotSetException("dateFormat");
         }
 
         @Override
         protected String getDefaultDateTimeFormat() {
-            throw new SettingValueNotSetException("dateTimeFormat");
+            throw new CoreSettingValueNotSetException("dateTimeFormat");
         }
 
         @Override
         protected Map<String, TemplateDateFormatFactory> getDefaultCustomDateFormats() {
-            throw new SettingValueNotSetException("customDateFormats");
+            throw new CoreSettingValueNotSetException("customDateFormats");
         }
 
         @Override
         protected TemplateDateFormatFactory getDefaultCustomDateFormat(String name) {
-            throw new SettingValueNotSetException("customDateFormat");
+            throw new CoreSettingValueNotSetException("customDateFormat");
         }
 
         @Override
         protected TemplateExceptionHandler getDefaultTemplateExceptionHandler() {
-            throw new SettingValueNotSetException("templateExceptionHandler");
+            throw new CoreSettingValueNotSetException("templateExceptionHandler");
         }
 
         @Override
         protected ArithmeticEngine getDefaultArithmeticEngine() {
-            throw new SettingValueNotSetException("arithmeticEngine");
+            throw new CoreSettingValueNotSetException("arithmeticEngine");
         }
 
         @Override
         protected ObjectWrapper getDefaultObjectWrapper() {
-            throw new SettingValueNotSetException("objectWrapper");
+            throw new CoreSettingValueNotSetException("objectWrapper");
         }
 
         @Override
         protected Charset getDefaultOutputEncoding() {
-            throw new SettingValueNotSetException("outputEncoding");
+            throw new CoreSettingValueNotSetException("outputEncoding");
         }
 
         @Override
         protected Charset getDefaultURLEscapingCharset() {
-            throw new SettingValueNotSetException("URLEscapingCharset");
+            throw new CoreSettingValueNotSetException("URLEscapingCharset");
         }
 
         @Override
         protected TemplateClassResolver getDefaultNewBuiltinClassResolver() {
-            throw new SettingValueNotSetException("newBuiltinClassResolver");
+            throw new CoreSettingValueNotSetException("newBuiltinClassResolver");
         }
 
         @Override
         protected boolean getDefaultAutoFlush() {
-            throw new SettingValueNotSetException("autoFlush");
+            throw new CoreSettingValueNotSetException("autoFlush");
         }
 
         @Override
         protected boolean getDefaultShowErrorTips() {
-            throw new SettingValueNotSetException("showErrorTips");
+            throw new CoreSettingValueNotSetException("showErrorTips");
         }
 
         @Override
         protected boolean getDefaultAPIBuiltinEnabled() {
-            throw new SettingValueNotSetException("APIBuiltinEnabled");
+            throw new CoreSettingValueNotSetException("APIBuiltinEnabled");
         }
 
         @Override
         protected boolean getDefaultLogTemplateExceptions() {
-            throw new SettingValueNotSetException("logTemplateExceptions");
+            throw new CoreSettingValueNotSetException("logTemplateExceptions");
         }
 
         @Override
         protected boolean getDefaultLazyImports() {
-            throw new SettingValueNotSetException("lazyImports");
+            throw new CoreSettingValueNotSetException("lazyImports");
         }
 
         @Override
         protected Boolean getDefaultLazyAutoImports() {
-            throw new SettingValueNotSetException("lazyAutoImports");
+            throw new CoreSettingValueNotSetException("lazyAutoImports");
         }
 
         @Override
         protected Map<String, String> getDefaultAutoImports() {
-            throw new SettingValueNotSetException("autoImports");
+            throw new CoreSettingValueNotSetException("autoImports");
         }
 
         @Override
         protected List<String> getDefaultAutoIncludes() {
-            throw new SettingValueNotSetException("autoIncludes");
+            throw new CoreSettingValueNotSetException("autoIncludes");
         }
 
         @Override
@@ -809,7 +809,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
             if (useDefaultValue) {
                 return defaultValue;
             }
-            throw new CustomSettingNotSetException(key);
+            throw new CustomSettingValueNotSetException(key);
         }
 
         @Override
@@ -942,52 +942,52 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
 
         @Override
         public Version getIncompatibleImprovements() {
-            throw new SettingValueNotSetException("incompatibleImprovements");
+            throw new CoreSettingValueNotSetException("incompatibleImprovements");
         }
 
         @Override
         protected TagSyntax getDefaultTagSyntax() {
-            throw new SettingValueNotSetException("tagSyntax");
+            throw new CoreSettingValueNotSetException("tagSyntax");
         }
 
         @Override
         protected TemplateLanguage getDefaultTemplateLanguage() {
-            throw new SettingValueNotSetException("templateLanguage");
+            throw new CoreSettingValueNotSetException("templateLanguage");
         }
 
         @Override
         protected NamingConvention getDefaultNamingConvention() {
-            throw new SettingValueNotSetException("namingConvention");
+            throw new CoreSettingValueNotSetException("namingConvention");
         }
 
         @Override
         protected boolean getDefaultWhitespaceStripping() {
-            throw new SettingValueNotSetException("whitespaceStripping");
+            throw new CoreSettingValueNotSetException("whitespaceStripping");
         }
 
         @Override
         protected AutoEscapingPolicy getDefaultAutoEscapingPolicy() {
-            throw new SettingValueNotSetException("autoEscapingPolicy");
+            throw new CoreSettingValueNotSetException("autoEscapingPolicy");
         }
 
         @Override
         protected OutputFormat getDefaultOutputFormat() {
-            throw new SettingValueNotSetException("outputFormat");
+            throw new CoreSettingValueNotSetException("outputFormat");
         }
 
         @Override
         protected boolean getDefaultRecognizeStandardFileExtensions() {
-            throw new SettingValueNotSetException("recognizeStandardFileExtensions");
+            throw new CoreSettingValueNotSetException("recognizeStandardFileExtensions");
         }
 
         @Override
         protected Charset getDefaultSourceEncoding() {
-            throw new SettingValueNotSetException("sourceEncoding");
+            throw new CoreSettingValueNotSetException("sourceEncoding");
         }
 
         @Override
         protected int getDefaultTabSize() {
-            throw new SettingValueNotSetException("tabSize");
+            throw new CoreSettingValueNotSetException("tabSize");
         }
 
     }

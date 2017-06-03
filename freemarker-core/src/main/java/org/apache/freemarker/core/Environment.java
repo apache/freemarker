@@ -99,7 +99,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * If you need to modify or read this object before or after the <tt>process</tt> call, use
  * {@link Template#createProcessingEnvironment(Object rootMap, Writer out, ObjectWrapper wrapper)}
  * <p>
- * The {@link ProcessingConfiguration} reader methods of this class don't throw {@link SettingValueNotSetException}
+ * The {@link ProcessingConfiguration} reader methods of this class don't throw {@link CoreSettingValueNotSetException}
  * because unset settings are ultimately inherited from {@link Configuration}.
  */
 public final class Environment extends MutableProcessingConfiguration<Environment> implements CustomStateScope {

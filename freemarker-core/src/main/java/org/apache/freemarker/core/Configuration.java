@@ -134,7 +134,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * 
  * <p>{@link Configuration} is thread-safe and (as of 3.0.0) immutable (apart from internal caches).
  *
- * <p>The setting reader methods of this class don't throw {@link SettingValueNotSetException}, because all settings
+ * <p>The setting reader methods of this class don't throw {@link CoreSettingValueNotSetException}, because all settings
  * are set on the {@link Configuration} level (even if they were just initialized to a default value).
  */
 public final class Configuration
@@ -1215,7 +1215,7 @@ public final class Configuration
         if (useDefaultValue) {
             return defaultValue;
         }
-        throw new CustomSettingNotSetException(key);
+        throw new CustomSettingValueNotSetException(key);
     }
 
     @Override
@@ -2630,7 +2630,7 @@ public final class Configuration
             if (useDefaultValue) {
                 return defaultValue;
             }
-            throw new CustomSettingNotSetException(key);
+            throw new CustomSettingValueNotSetException(key);
         }
 
         @Override

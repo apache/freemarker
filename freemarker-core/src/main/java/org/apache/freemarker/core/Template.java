@@ -74,7 +74,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * {@link Template} objects if possible. {@link Configuration#getTemplate(String)} (and its overloads) does that
  * (caching {@link Template}-s) for you, but the constructor of course doesn't, so it's up to you to solve then.
  * <p>
- * The {@link ProcessingConfiguration} reader methods of this class don't throw {@link SettingValueNotSetException}
+ * The {@link ProcessingConfiguration} reader methods of this class don't throw {@link CoreSettingValueNotSetException}
  * because unset settings are ultimately inherited from {@link Configuration}.
  * <p>
  * Objects of this class are immutable and thus thread-safe.
