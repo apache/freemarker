@@ -437,7 +437,7 @@ public final class Configuration
         autoIncludes = builder.getAutoIncludes();
         lazyImports = builder.getLazyImports();
         lazyAutoImports = builder.getLazyAutoImports();
-        customSettings = builder.getCustomSettingsSnapshot(false);
+        customSettings = builder.getCustomSettings(false);
     }
 
     private <SelfT extends ExtendableBuilder<SelfT>> void wrapAndPutSharedVariables(
@@ -1180,7 +1180,7 @@ public final class Configuration
      * Because {@link Configuration} has on parent, the {@code includeInherited} parameter is ignored.
      */
     @Override
-    public Map<Serializable, Object> getCustomSettingsSnapshot(boolean includeInherited) {
+    public Map<Serializable, Object> getCustomSettings(boolean includeInherited) {
         return customSettings;
     }
 

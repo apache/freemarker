@@ -1099,7 +1099,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     @Override
     protected void collectDefaultCustomSettingsSnapshot(Map<Serializable, Object> target) {
-        target.putAll(getMainTemplate().getCustomSettingsSnapshot(true));
+        target.putAll(getMainTemplate().getCustomSettings(true));
     }
 
     /*

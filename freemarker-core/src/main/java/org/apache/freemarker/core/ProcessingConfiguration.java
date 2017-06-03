@@ -740,8 +740,8 @@ public interface ProcessingConfiguration {
     boolean isCustomSettingSet(Serializable key);
 
     /**
-     * Collects all {@linkplain #getCustomSetting(Serializable)} custom settings} into a {@link Map}; mostly useful for
-     * debugging and tooling, and is possibly too slow to call very frequently.
+     * Collects all {@linkplain #getCustomSetting(Serializable)} custom settings} into a {@link Map} (which is a
+     * snapshot); mostly useful for debugging and tooling, and is possibly too slow to call very frequently.
      *
      * @param includeInherited
      *         If {@code false}, only the custom settings set in this {@link ProcessingConfiguration} will be
@@ -750,10 +750,10 @@ public interface ProcessingConfiguration {
      *         #getCustomSetting(Serializable)}.
      *
      * @return An unmodifiable and unchanging {@link Map}; not {@code null}. The object identity of keys and values of
-     * this {@link Map} will not change when custom settings are set/unset later (hence it's a snapshot). But, if
+     * this {@link Map} will not change when custom settings are set/unset later (it's a snapshot). But, if
      * a key or value objects are themselves mutable objects, FreeMarker can't prevent their content from changing.
      * You shouldn't change the content of those objects.
      */
-    Map<Serializable, Object> getCustomSettingsSnapshot(boolean includeInherited);
+    Map<Serializable, Object> getCustomSettings(boolean includeInherited);
 
 }

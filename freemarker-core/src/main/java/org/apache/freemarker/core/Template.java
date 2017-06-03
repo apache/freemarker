@@ -1068,7 +1068,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public Map<Serializable, Object> getCustomSettingsSnapshot(boolean includeInherited) {
+    public Map<Serializable, Object> getCustomSettings(boolean includeInherited) {
         boolean nonInheritedAttrsFinal;
         Map<? extends Serializable, ? extends Object> nonInheritedAttrs;
         if (tcAndHeaderCustomSettings != null) {
@@ -1078,14 +1078,14 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
             nonInheritedAttrs = headerCustomSettings;
             nonInheritedAttrsFinal = writeProtected;
         } else if (tCfg != null) {
-            nonInheritedAttrs =  tCfg.getCustomSettingsSnapshot(false);
+            nonInheritedAttrs =  tCfg.getCustomSettings(false);
             nonInheritedAttrsFinal = true;
         } else {
             nonInheritedAttrs = Collections.emptyMap();
             nonInheritedAttrsFinal = true;
         }
 
-        Map<Serializable, Object> inheritedAttrs = includeInherited ? cfg.getCustomSettingsSnapshot(true)
+        Map<Serializable, Object> inheritedAttrs = includeInherited ? cfg.getCustomSettings(true)
                 : Collections.<Serializable, Object>emptyMap();
 
         LinkedHashMap<Serializable, Object> mergedAttrs;
@@ -1156,7 +1156,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         headerCustomSettings.put(attName, attValue);
 
         if (tCfg != null) {
-            Map<Serializable, Object> tcCustAttrs = tCfg.getCustomSettingsSnapshot(false);
+            Map<Serializable, Object> tcCustAttrs = tCfg.getCustomSettings(false);
             if (!tcCustAttrs.isEmpty()) {
                 if (tcAndHeaderCustomSettings == null) {
                     tcAndHeaderCustomSettings = new LinkedHashMap<>(tcCustAttrs);

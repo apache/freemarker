@@ -124,7 +124,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         lazyImports = builder.isLazyImportsSet() ? builder.getLazyImports() : null;
         lazyAutoImportsSet = builder.isLazyAutoImportsSet();
         lazyAutoImports = lazyAutoImportsSet ? builder.getLazyAutoImports() : null;
-        customSettings = builder.getCustomSettingsSnapshot(false);
+        customSettings = builder.getCustomSettings(false);
 
         templateLanguage = builder.isTemplateLanguageSet() ? builder.getTemplateLanguage() : null;
         tagSyntax = builder.isTagSyntaxSet() ? builder.getTagSyntax() : null;
@@ -634,7 +634,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
      * Note that the {@code includeInherited} has no effect here, as {@link TemplateConfiguration}-s has no parent.
      */
     @Override
-    public Map<Serializable, Object> getCustomSettingsSnapshot(boolean includeInherited) {
+    public Map<Serializable, Object> getCustomSettings(boolean includeInherited) {
         return customSettings;
     }
 
@@ -935,8 +935,8 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
             }
 
             setCustomSettingsMap(mergeMaps(
-                    getCustomSettingsSnapshot(false),
-                    tc.getCustomSettingsSnapshot(false),
+                    getCustomSettings(false),
+                    tc.getCustomSettings(false),
                     true));
         }
 

@@ -2199,7 +2199,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     @Override
-    public Map<Serializable, Object> getCustomSettingsSnapshot(boolean includeInherited) {
+    public Map<Serializable, Object> getCustomSettings(boolean includeInherited) {
         if (includeInherited) {
             LinkedHashMap<Serializable, Object> result = new LinkedHashMap<>();
             collectDefaultCustomSettingsSnapshot(result);
@@ -2217,7 +2217,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Called from {@link #getCustomSettingsSnapshot(boolean)}, adds the default (such as inherited) custom settings
+     * Called from {@link #getCustomSettings(boolean)}, adds the default (such as inherited) custom settings
      * to the argument {@link Map}.
      */
     protected abstract void collectDefaultCustomSettingsSnapshot(Map<Serializable, Object> target);

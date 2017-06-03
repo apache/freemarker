@@ -59,8 +59,8 @@ public class CustomSettingTest {
     }
 
     private void testMutableProcessingConfiguration(MutableProcessingConfiguration<?> mpc) {
-        assertTrue(mpc.getCustomSettingsSnapshot(true).isEmpty());
-        assertTrue(mpc.getCustomSettingsSnapshot(false).isEmpty());
+        assertTrue(mpc.getCustomSettings(true).isEmpty());
+        assertTrue(mpc.getCustomSettings(false).isEmpty());
         testMissingCustomSettingAccess(mpc, KEY_1);
 
         mpc.setCustomSetting(KEY_1, VALUE_1);
@@ -69,24 +69,24 @@ public class CustomSettingTest {
         assertSame(VALUE_1, mpc.getCustomSetting(KEY_1));
         assertSame(VALUE_2, mpc.getCustomSetting(KEY_2));
         testMissingCustomSettingAccess(mpc, KEY_3);
-        assertEquals(ImmutableMap.of(KEY_1, VALUE_1, KEY_2, VALUE_2), mpc.getCustomSettingsSnapshot(true));
-        assertEquals(ImmutableMap.of(KEY_1, VALUE_1, KEY_2, VALUE_2), mpc.getCustomSettingsSnapshot(false));
+        assertEquals(ImmutableMap.of(KEY_1, VALUE_1, KEY_2, VALUE_2), mpc.getCustomSettings(true));
+        assertEquals(ImmutableMap.of(KEY_1, VALUE_1, KEY_2, VALUE_2), mpc.getCustomSettings(false));
 
         assertSame(VALUE_2, mpc.getCustomSetting(KEY_2, "default"));
         mpc.unsetCustomSetting(KEY_2);
         assertEquals("default", mpc.getCustomSetting(KEY_2, "default"));
-        assertEquals(ImmutableMap.of(KEY_1, VALUE_1), mpc.getCustomSettingsSnapshot(true));
-        assertEquals(ImmutableMap.of(KEY_1, VALUE_1), mpc.getCustomSettingsSnapshot(false));
+        assertEquals(ImmutableMap.of(KEY_1, VALUE_1), mpc.getCustomSettings(true));
+        assertEquals(ImmutableMap.of(KEY_1, VALUE_1), mpc.getCustomSettings(false));
 
         mpc.unsetAllCustomSettings();
-        assertTrue(mpc.getCustomSettingsSnapshot(true).isEmpty());
+        assertTrue(mpc.getCustomSettings(true).isEmpty());
 
         testCustomSettingsSnapshotIsUnmodifiable(mpc);
         mpc.setCustomSetting(KEY_1, VALUE_1);
         testCustomSettingsSnapshotIsUnmodifiable(mpc);
 
         // Test no aliasing
-        Map<Serializable, Object> attrMap1 = mpc.getCustomSettingsSnapshot(false);
+        Map<Serializable, Object> attrMap1 = mpc.getCustomSettings(false);
         mpc.setCustomSetting(KEY_2, VALUE_2);
         assertNull(attrMap1.get(KEY_2));
 
@@ -95,7 +95,7 @@ public class CustomSettingTest {
         mpc.setCustomSettings(ImmutableMap.of(KEY_2, VALUE_2, KEY_3, VALUE_3));
         assertEquals(
                 ImmutableMap.of(KEY_1, VALUE_1, KEY_2, VALUE_2, KEY_3, VALUE_3),
-                mpc.getCustomSettingsSnapshot(false));
+                mpc.getCustomSettings(false));
 
         try {
             mpc.setCustomSetting(KEY_1, MISSING_VALUE_MARKER);
@@ -117,7 +117,7 @@ public class CustomSettingTest {
 
     private void testCustomSettingsSnapshotIsUnmodifiable(ProcessingConfiguration pc) {
         for (boolean includeInherited : new boolean[] { false,  true }) {
-            Map<Serializable, Object> map = pc.getCustomSettingsSnapshot(includeInherited);
+            Map<Serializable, Object> map = pc.getCustomSettings(includeInherited);
             try {
                 map.put("aNewKey", 123);
                 fail();
@@ -149,7 +149,7 @@ public class CustomSettingTest {
                 + "}>",
                 new Configuration.Builder(Configuration.VERSION_3_0_0).build());
 
-        assertEquals(ImmutableSet.of(KEY_1, KEY_2), t.getCustomSettingsSnapshot(true).keySet());
+        assertEquals(ImmutableSet.of(KEY_1, KEY_2), t.getCustomSettings(true).keySet());
         assertEquals(
                 ImmutableList.<Object>of("s", BigDecimal.valueOf(2), Boolean.TRUE, ImmutableMap.of("a", "A")),
                 t.getCustomSetting(KEY_1));
@@ -173,7 +173,7 @@ public class CustomSettingTest {
                 tcb.build());
 
         assertEquals(ImmutableMap.of(KEY_1, "a", KEY_2, "b", KEY_3, "c", KEY_4, VALUE_4),
-                t.getCustomSettingsSnapshot(true));
+                t.getCustomSettings(true));
         assertEquals("a", t.getCustomSetting(KEY_1));
         assertEquals("b", t.getCustomSetting(KEY_2));
         assertEquals("c", t.getCustomSetting(KEY_3)); // Has overridden TC attribute
@@ -192,7 +192,7 @@ public class CustomSettingTest {
                 new Configuration.Builder(Configuration.VERSION_3_0_0).build(),
                 tcb.build());
 
-        assertEquals(ImmutableSet.of(KEY_3, KEY_4), t.getCustomSettingsSnapshot(true).keySet());
+        assertEquals(ImmutableSet.of(KEY_3, KEY_4), t.getCustomSettings(true).keySet());
         assertEquals(VALUE_3, t.getCustomSetting(KEY_3));
         assertEquals(VALUE_4, t.getCustomSetting(KEY_4));
 
@@ -210,8 +210,8 @@ public class CustomSettingTest {
         assertEquals(VALUE_1, t.getCustomSetting(KEY_1));
         assertEquals("default", t.getCustomSetting(KEY_2, "default"));
 
-        assertEquals(ImmutableMap.of(KEY_1, VALUE_1), t.getCustomSettingsSnapshot(true));
-        assertTrue(t.getCustomSettingsSnapshot(false).isEmpty());
+        assertEquals(ImmutableMap.of(KEY_1, VALUE_1), t.getCustomSettings(true));
+        assertTrue(t.getCustomSettings(false).isEmpty());
 
         testMissingCustomSettingAccess(t);
         testCustomSettingsSnapshotIsUnmodifiable(t);
@@ -227,8 +227,8 @@ public class CustomSettingTest {
         assertEquals(VALUE_1, t.getCustomSetting(KEY_1));
         assertEquals("v2", t.getCustomSetting("k2"));
 
-        assertEquals(ImmutableMap.of(KEY_1, VALUE_1, "k2", "v2"), t.getCustomSettingsSnapshot(true));
-        assertEquals(ImmutableMap.of("k2", "v2"), t.getCustomSettingsSnapshot(false));
+        assertEquals(ImmutableMap.of(KEY_1, VALUE_1, "k2", "v2"), t.getCustomSettings(true));
+        assertEquals(ImmutableMap.of("k2", "v2"), t.getCustomSettings(false));
 
         testMissingCustomSettingAccess(t);
         testCustomSettingsSnapshotIsUnmodifiable(t);
@@ -247,9 +247,9 @@ public class CustomSettingTest {
         assertEquals(VALUE_3, t.getCustomSetting(KEY_3));
 
         assertEquals(ImmutableMap.of(KEY_1, VALUE_1, "k2", "v2", KEY_3, VALUE_3),
-                t.getCustomSettingsSnapshot(true));
+                t.getCustomSettings(true));
         assertEquals(ImmutableMap.of("k2", "v2", KEY_3, VALUE_3),
-                t.getCustomSettingsSnapshot(false));
+                t.getCustomSettings(false));
 
         testMissingCustomSettingAccess(t);
         testCustomSettingsSnapshotIsUnmodifiable(t);
@@ -260,9 +260,9 @@ public class CustomSettingTest {
         assertEquals("v2", env.getCustomSetting("k2"));
         assertEquals(VALUE_3, env.getCustomSetting(KEY_3));
         assertEquals(ImmutableMap.of(KEY_1, VALUE_1, "k2", "v2", KEY_3, VALUE_3),
-                env.getCustomSettingsSnapshot(true));
+                env.getCustomSettings(true));
         assertEquals(Collections.emptyMap(),
-                env.getCustomSettingsSnapshot(false));
+                env.getCustomSettings(false));
 
         env.setCustomSetting(KEY_4, VALUE_4);
         assertEquals(VALUE_1, env.getCustomSetting(KEY_1));
@@ -270,9 +270,9 @@ public class CustomSettingTest {
         assertEquals(VALUE_3, env.getCustomSetting(KEY_3));
         assertEquals(VALUE_4, env.getCustomSetting(KEY_4));
         assertEquals(ImmutableMap.of(KEY_1, VALUE_1, "k2", "v2", KEY_3, VALUE_3, KEY_4, VALUE_4),
-                env.getCustomSettingsSnapshot(true));
+                env.getCustomSettings(true));
         assertEquals(ImmutableMap.of(KEY_4, VALUE_4),
-                env.getCustomSettingsSnapshot(false));
+                env.getCustomSettings(false));
 
         testMissingCustomSettingAccess(env);
         testCustomSettingsSnapshotIsUnmodifiable(env);

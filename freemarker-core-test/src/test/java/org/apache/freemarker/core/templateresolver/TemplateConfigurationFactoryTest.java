@@ -167,7 +167,7 @@ public class TemplateConfigurationFactoryTest {
     private void assertApplicable(TemplateConfigurationFactory tcf, String sourceName, TemplateConfiguration... expectedTCs)
             throws IOException, TemplateConfigurationFactoryException {
         TemplateConfiguration mergedTC = tcf.get(sourceName, DummyTemplateLoadingSource.INSTANCE);
-        List<Serializable> mergedTCAttNames = new ArrayList<>(mergedTC.getCustomSettingsSnapshot(false).keySet());
+        List<Serializable> mergedTCAttNames = new ArrayList<>(mergedTC.getCustomSettings(false).keySet());
 
         for (TemplateConfiguration expectedTC : expectedTCs) {
             Integer tcId = (Integer) expectedTC.getCustomSetting("id");
