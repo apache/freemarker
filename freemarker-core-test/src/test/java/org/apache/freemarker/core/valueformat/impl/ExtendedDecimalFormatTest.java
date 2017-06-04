@@ -276,15 +276,14 @@ public class ExtendedDecimalFormatTest extends TemplateTest {
     
     @Test
     public void testTemplates() throws IOException, TemplateException {
-        TestConfigurationBuilder cfgB = new TestConfigurationBuilder();
-
-        setConfiguration(cfgB.numberFormat(",000.#").build());
+        setConfiguration(new TestConfigurationBuilder().numberFormat(",000.#").build());
         assertOutput("${1000.15} ${1000.25}", "1,000.2 1,000.2");
-        setConfiguration(cfgB.numberFormat(",000.#;; roundingMode=halfUp groupingSeparator=_").build());;
+        String numberFormat = ",000.#;; roundingMode=halfUp groupingSeparator=_";
+        setConfiguration(new TestConfigurationBuilder().numberFormat(numberFormat).build());;
         assertOutput("${1000.15} ${1000.25}", "1_000.2 1_000.3");
-        setConfiguration(cfgB.locale(Locale.GERMANY).build());;
+        setConfiguration(new TestConfigurationBuilder().numberFormat(numberFormat).locale(Locale.GERMANY).build());;
         assertOutput("${1000.15} ${1000.25}", "1_000,2 1_000,3");
-        setConfiguration(cfgB.locale(Locale.US).build());;
+        setConfiguration(new TestConfigurationBuilder().numberFormat(numberFormat).locale(Locale.US).build());;
         assertOutput(
                 "${1000.15}; "
                 + "${1000.15?string(',##.#;;groupingSeparator=\" \"')}; "

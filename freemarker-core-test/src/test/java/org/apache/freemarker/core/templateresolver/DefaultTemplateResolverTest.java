@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core.templateresolver;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -28,7 +29,6 @@ import java.util.Locale;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
@@ -48,13 +48,14 @@ public class DefaultTemplateResolverTest {
     @Test
     public void testCachedException() throws Exception {
         MockTemplateLoader loader = new MockTemplateLoader();
-        DefaultTemplateResolver tr = new DefaultTemplateResolver(
-                loader,
-                new StrongCacheStorage(), 100L,
-                DefaultTemplateLookupStrategy.INSTANCE, true,
-                DefaultTemplateNameFormat.INSTANCE,
-                null,
-                new TestConfigurationBuilder().build());
+        Configuration cfg = new TestConfigurationBuilder()
+                .templateLoader(loader)
+                .cacheStorage(new StrongCacheStorage())
+                .templateUpdateDelayMilliseconds(100L)
+                .build();
+        TemplateResolver tr = cfg.getTemplateResolver();
+        assertThat(tr, instanceOf(DefaultTemplateResolver.class));
+
         loader.setThrowException(true);
         try {
             tr.getTemplate("t", Locale.getDefault(), null).getTemplate();
@@ -88,19 +89,22 @@ public class DefaultTemplateResolverTest {
     @Test
     public void testCachedNotFound() throws Exception {
         MockTemplateLoader loader = new MockTemplateLoader();
-        DefaultTemplateResolver cache = new DefaultTemplateResolver(
-                loader,
-                new StrongCacheStorage(), 100L,
-                DefaultTemplateLookupStrategy.INSTANCE, false,
-                DefaultTemplateNameFormat.INSTANCE,
-                null, new TestConfigurationBuilder().build());
-        assertNull(cache.getTemplate("t", Locale.getDefault(), null).getTemplate());
+        Configuration cfg = new TestConfigurationBuilder()
+                .templateLoader(loader)
+                .cacheStorage(new StrongCacheStorage())
+                .templateUpdateDelayMilliseconds(100L)
+                .localizedLookup(false)
+                .build();
+        TemplateResolver tr = cfg.getTemplateResolver();
+        assertThat(tr, instanceOf(DefaultTemplateResolver.class));
+
+        assertNull(tr.getTemplate("t", Locale.getDefault(), null).getTemplate());
         assertEquals(1, loader.getLoadAttemptCount());
-        assertNull(cache.getTemplate("t", Locale.getDefault(), null).getTemplate());
+        assertNull(tr.getTemplate("t", Locale.getDefault(), null).getTemplate());
         // Still 1 - returned cached exception
         assertEquals(1, loader.getLoadAttemptCount());
         Thread.sleep(132L);
-        assertNull(cache.getTemplate("t", Locale.getDefault(), null).getTemplate());
+        assertNull(tr.getTemplate("t", Locale.getDefault(), null).getTemplate());
         // Cache had to retest
         assertEquals(2, loader.getLoadAttemptCount());
     }
@@ -211,69 +215,77 @@ public class DefaultTemplateResolverTest {
     @Test
     public void testZeroUpdateDelay() throws Exception {
         MonitoredTemplateLoader loader = new MonitoredTemplateLoader();
-        TestConfigurationBuilder cfgB = new TestConfigurationBuilder()
-                .cacheStorage(new StrongCacheStorage())
-                .templateLoader(loader)
-                .templateUpdateDelayMilliseconds(0);
 
-        Configuration cfg = cfgB.build();
+        {
+            Configuration cfg = new TestConfigurationBuilder()
+                    .cacheStorage(new StrongCacheStorage())
+                    .templateLoader(loader)
+                    .templateUpdateDelayMilliseconds(0L)
+                    .build();
+            for (int i = 1; i <= 3; i++) {
+                loader.putTextTemplate("t.ftl", "v" + i);
+                assertEquals("v" + i, cfg.getTemplate("t.ftl").toString());
+            }
 
-        for (int i = 1; i <= 3; i++) {
-            loader.putTextTemplate("t.ftl", "v" + i);
-            assertEquals("v" + i, cfg.getTemplate("t.ftl").toString());
+            loader.clearEvents();
+            loader.putTextTemplate("t.ftl", "v8");
+            assertEquals("v8", cfg.getTemplate("t.ftl").toString());
+            assertEquals("v8", cfg.getTemplate("t.ftl").toString());
+            loader.putTextTemplate("t.ftl", "v9");
+            assertEquals("v9", cfg.getTemplate("t.ftl").toString());
+            assertEquals("v9", cfg.getTemplate("t.ftl").toString());
+            assertEquals(
+                    ImmutableList.of(
+                            new LoadEvent("t_en_US.ftl", TemplateLoadingResultStatus.NOT_FOUND), // v8
+                            new LoadEvent("t_en.ftl", TemplateLoadingResultStatus.NOT_FOUND),
+                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.OPENED),
+
+                            new LoadEvent("t_en_US.ftl", TemplateLoadingResultStatus.NOT_FOUND), // v8
+                            new LoadEvent("t_en.ftl", TemplateLoadingResultStatus.NOT_FOUND),
+                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.NOT_MODIFIED),
+
+                            new LoadEvent("t_en_US.ftl", TemplateLoadingResultStatus.NOT_FOUND), // v9
+                            new LoadEvent("t_en.ftl", TemplateLoadingResultStatus.NOT_FOUND),
+                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.OPENED),
+
+                            new LoadEvent("t_en_US.ftl", TemplateLoadingResultStatus.NOT_FOUND), // v9
+                            new LoadEvent("t_en.ftl", TemplateLoadingResultStatus.NOT_FOUND),
+                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.NOT_MODIFIED)
+                    ),
+                    loader.getEvents(LoadEvent.class));
         }
 
-        loader.clearEvents();
-        loader.putTextTemplate("t.ftl", "v8");
-        assertEquals("v8", cfg.getTemplate("t.ftl").toString());
-        assertEquals("v8", cfg.getTemplate("t.ftl").toString());
-        loader.putTextTemplate("t.ftl", "v9");
-        assertEquals("v9", cfg.getTemplate("t.ftl").toString());
-        assertEquals("v9", cfg.getTemplate("t.ftl").toString());
-        assertEquals(
-                ImmutableList.of(
-                        new LoadEvent("t_en_US.ftl", TemplateLoadingResultStatus.NOT_FOUND), // v8
-                        new LoadEvent("t_en.ftl", TemplateLoadingResultStatus.NOT_FOUND),
-                        new LoadEvent("t.ftl", TemplateLoadingResultStatus.OPENED),
-
-                        new LoadEvent("t_en_US.ftl", TemplateLoadingResultStatus.NOT_FOUND), // v8
-                        new LoadEvent("t_en.ftl", TemplateLoadingResultStatus.NOT_FOUND),
-                        new LoadEvent("t.ftl", TemplateLoadingResultStatus.NOT_MODIFIED),
-                        
-                        new LoadEvent("t_en_US.ftl", TemplateLoadingResultStatus.NOT_FOUND), // v9
-                        new LoadEvent("t_en.ftl", TemplateLoadingResultStatus.NOT_FOUND),
-                        new LoadEvent("t.ftl", TemplateLoadingResultStatus.OPENED),
-
-                        new LoadEvent("t_en_US.ftl", TemplateLoadingResultStatus.NOT_FOUND), // v9
-                        new LoadEvent("t_en.ftl", TemplateLoadingResultStatus.NOT_FOUND),
-                        new LoadEvent("t.ftl", TemplateLoadingResultStatus.NOT_MODIFIED)
-                ),
-                loader.getEvents(LoadEvent.class));
-        
-        cfg = cfgB.localizedLookup(false).build();
-        loader.clearEvents();
-        loader.putTextTemplate("t.ftl", "v10");
-        assertEquals("v10", cfg.getTemplate("t.ftl").toString());
-        loader.putTextTemplate("t.ftl", "v11"); // same time stamp, different content
-        assertEquals("v11", cfg.getTemplate("t.ftl").toString());
-        assertEquals("v11", cfg.getTemplate("t.ftl").toString());
-        assertEquals("v11", cfg.getTemplate("t.ftl").toString());
-        Thread.sleep(17L);
-        assertEquals("v11", cfg.getTemplate("t.ftl").toString());
-        loader.putTextTemplate("t.ftl", "v12");
-        assertEquals("v12", cfg.getTemplate("t.ftl").toString());
-        assertEquals("v12", cfg.getTemplate("t.ftl").toString());
-        assertEquals(
-                ImmutableList.of(
-                        new LoadEvent("t.ftl", TemplateLoadingResultStatus.OPENED), // v10
-                        new LoadEvent("t.ftl", TemplateLoadingResultStatus.OPENED), // v11
-                        new LoadEvent("t.ftl", TemplateLoadingResultStatus.NOT_MODIFIED),
-                        new LoadEvent("t.ftl", TemplateLoadingResultStatus.NOT_MODIFIED),
-                        new LoadEvent("t.ftl", TemplateLoadingResultStatus.NOT_MODIFIED),
-                        new LoadEvent("t.ftl", TemplateLoadingResultStatus.OPENED), // v12
-                        new LoadEvent("t.ftl", TemplateLoadingResultStatus.NOT_MODIFIED)
-                ),
-                loader.getEvents(LoadEvent.class));
+        {
+            Configuration cfg = new TestConfigurationBuilder()
+                    .cacheStorage(new StrongCacheStorage())
+                    .templateLoader(loader)
+                    .templateUpdateDelayMilliseconds(0L)
+                    .localizedLookup(false)
+                    .build();
+            loader.clearEvents();
+            loader.putTextTemplate("t.ftl", "v10");
+            assertEquals("v10", cfg.getTemplate("t.ftl").toString());
+            loader.putTextTemplate("t.ftl", "v11"); // same time stamp, different content
+            assertEquals("v11", cfg.getTemplate("t.ftl").toString());
+            assertEquals("v11", cfg.getTemplate("t.ftl").toString());
+            assertEquals("v11", cfg.getTemplate("t.ftl").toString());
+            Thread.sleep(17L);
+            assertEquals("v11", cfg.getTemplate("t.ftl").toString());
+            loader.putTextTemplate("t.ftl", "v12");
+            assertEquals("v12", cfg.getTemplate("t.ftl").toString());
+            assertEquals("v12", cfg.getTemplate("t.ftl").toString());
+            assertEquals(
+                    ImmutableList.of(
+                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.OPENED), // v10
+                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.OPENED), // v11
+                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.NOT_MODIFIED),
+                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.NOT_MODIFIED),
+                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.NOT_MODIFIED),
+                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.OPENED), // v12
+                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.NOT_MODIFIED)
+                    ),
+                    loader.getEvents(LoadEvent.class));
+        }
     }
     
     @Test

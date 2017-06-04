@@ -55,9 +55,9 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("t.xml", "${.outputFormat}");
         addTemplate("tWithHeader", "<#ftl outputFormat='HTML'>${.outputFormat}");
         
-        TestConfigurationBuilder cfgB = createDefaultConfigurationBuilder();
         for (OutputFormat cfgOutputFormat
                 : new OutputFormat[] { UndefinedOutputFormat.INSTANCE, RTFOutputFormat.INSTANCE } ) {
+            TestConfigurationBuilder cfgB = createDefaultConfigurationBuilder();
             if (!cfgOutputFormat.equals(UndefinedOutputFormat.INSTANCE)) {
                 cfgB.setOutputFormat(cfgOutputFormat);
             }
@@ -100,8 +100,8 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("t.fTlX", commonContent);
         addTemplate("tWithHeader.ftlx", "<#ftl outputFormat='HTML'>" + commonContent);
         
-        TestConfigurationBuilder cfgB = createDefaultConfigurationBuilder();
         for (int setupNumber = 1; setupNumber <= 3; setupNumber++) {
+            TestConfigurationBuilder cfgB = createDefaultConfigurationBuilder();
             final OutputFormat cfgOutputFormat;
             final OutputFormat ftlhOutputFormat;
             final OutputFormat ftlxOutputFormat;
@@ -193,48 +193,38 @@ public class OutputFormatTest extends TemplateTest {
                         .build());
 
         {
-            TestConfigurationBuilder cfgB = createDefaultConfigurationBuilder();
-
-            setConfiguration(cfgB.outputFormat(HTMLOutputFormat.INSTANCE).build());
+            setConfiguration(createDefaultConfigurationBuilder().outputFormat(HTMLOutputFormat.INSTANCE).build());
             assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
-            setConfiguration(cfgB.templateConfigurations(tcfHTML).build());
+            setConfiguration(createDefaultConfigurationBuilder().templateConfigurations(tcfHTML).build());
             assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
-            setConfiguration(cfgB.templateConfigurations(tcfNoAutoEsc).build());
+            setConfiguration(createDefaultConfigurationBuilder().templateConfigurations(tcfNoAutoEsc).build());
             assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
         }
 
         {
-            TestConfigurationBuilder cfgB = createDefaultConfigurationBuilder();
-
-            setConfiguration(cfgB.recognizeStandardFileExtensions(false).build());
+            setConfiguration(createDefaultConfigurationBuilder().recognizeStandardFileExtensions(false).build());
             assertErrorContainsForNamed("t.ftlx", UndefinedOutputFormat.INSTANCE.getName());
-            setConfiguration(cfgB.outputFormat(HTMLOutputFormat.INSTANCE).build());
+
+            setConfiguration(createDefaultConfigurationBuilder()
+                    .recognizeStandardFileExtensions(false)
+                    .outputFormat(HTMLOutputFormat.INSTANCE).build());
             assertOutputForNamed("t.ftlx", "&#39; &#39; '");
-            setConfiguration(cfgB.outputFormat(XMLOutputFormat.INSTANCE).build());
+
+            setConfiguration(createDefaultConfigurationBuilder()
+                    .recognizeStandardFileExtensions(false)
+                    .outputFormat(XMLOutputFormat.INSTANCE).build());
             assertOutputForNamed("t.ftlx", "&apos; &apos; '");
-            setConfiguration(cfgB.templateConfigurations(tcfHTML).build());
+
+            setConfiguration(createDefaultConfigurationBuilder()
+                    .recognizeStandardFileExtensions(false)
+                    .templateConfigurations(tcfHTML).build());
             assertOutputForNamed("t.ftlx", "&#39; &#39; '");
-            setConfiguration(cfgB.templateConfigurations(tcfNoAutoEsc).build());
+
+            setConfiguration(createDefaultConfigurationBuilder()
+                    .recognizeStandardFileExtensions(false)
+                    .templateConfigurations(tcfNoAutoEsc)
+                    .outputFormat(XMLOutputFormat.INSTANCE).build());
             assertOutputForNamed("t.ftlx", "' &apos; '");
-        }
-
-        {
-            TestConfigurationBuilder cfgB = createDefaultConfigurationBuilder();
-            cfgB.setRecognizeStandardFileExtensions(true);
-
-            setConfiguration(cfgB.templateConfigurations(tcfHTML).build());
-            assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
-            setConfiguration(cfgB.templateConfigurations(tcfNoAutoEsc).build());
-            assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
-        }
-
-        {
-            TestConfigurationBuilder cfgB = createDefaultConfigurationBuilder();
-
-            setConfiguration(cfgB.templateConfigurations(tcfHTML).build());
-            assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
-            setConfiguration(cfgB.recognizeStandardFileExtensions(false).build());
-            assertOutputForNamed("t.ftlx", "&#39; &#39; '");
         }
     }
 
@@ -288,10 +278,10 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("tWithHeaderFalse", "<#ftl autoEsc=false>${'a&b'}");
         addTemplate("tWithHeaderTrue", "<#ftl autoEsc=true>${'a&b'}");
         
-        TestConfigurationBuilder cfgB = createDefaultConfigurationBuilder().outputFormat(XMLOutputFormat.INSTANCE);
-        assertEquals(ENABLE_IF_DEFAULT, cfgB.getAutoEscapingPolicy());
-
         for (boolean cfgAutoEscaping : new boolean[] { true, false }) {
+            TestConfigurationBuilder cfgB = createDefaultConfigurationBuilder().outputFormat(XMLOutputFormat.INSTANCE);
+            assertEquals(ENABLE_IF_DEFAULT, cfgB.getAutoEscapingPolicy());
+
             if (!cfgAutoEscaping) {
                 cfgB.setAutoEscapingPolicy(DISABLE);
             }
@@ -778,41 +768,30 @@ public class OutputFormatTest extends TemplateTest {
 
     @Test
     public void testAutoEscPolicy() throws Exception {
-        TestConfigurationBuilder cfgB = createDefaultConfigurationBuilder();
-        cfgB.setRegisteredCustomOutputFormats(ImmutableList.<OutputFormat>of(
-                SeldomEscapedOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE));
-        assertEquals(ENABLE_IF_DEFAULT, cfgB.getAutoEscapingPolicy());
+        assertEquals(ENABLE_IF_DEFAULT, createDefaultConfigurationBuilder().getAutoEscapingPolicy());
         
         String commonFTL = "${'.'} ${.autoEsc?c}";
         String notEsced = ". false";
         String esced = "\\. true";
-
         for (AutoEscapingPolicy autoEscPolicy : new AutoEscapingPolicy[] {
                 ENABLE_IF_DEFAULT,
                 ENABLE_IF_SUPPORTED,
                 DISABLE }) {
-            cfgB.setAutoEscapingPolicy(autoEscPolicy);
-            
             String sExpted = autoEscPolicy == ENABLE_IF_SUPPORTED ? esced : notEsced;
-            cfgB.setOutputFormat(SeldomEscapedOutputFormat.INSTANCE);
-            setConfiguration(cfgB.build());
+            setConfiguration(testAutoEscPolicy_createCfg(autoEscPolicy, SeldomEscapedOutputFormat.INSTANCE));
             assertOutput(commonFTL, sExpted);
-            cfgB.setOutputFormat(UndefinedOutputFormat.INSTANCE);
-            setConfiguration(cfgB.build());
+            setConfiguration(testAutoEscPolicy_createCfg(autoEscPolicy, UndefinedOutputFormat.INSTANCE));
             assertOutput("<#ftl outputFormat='seldomEscaped'>" + commonFTL, sExpted);
             assertOutput("<#outputFormat 'seldomEscaped'>" + commonFTL + "</#outputFormat>", sExpted);
             
             String dExpted = autoEscPolicy == DISABLE ? notEsced : esced;
-            cfgB.setOutputFormat(DummyOutputFormat.INSTANCE);
-            setConfiguration(cfgB.build());
+            setConfiguration(testAutoEscPolicy_createCfg(autoEscPolicy, DummyOutputFormat.INSTANCE));
             assertOutput(commonFTL, dExpted);
-            cfgB.setOutputFormat(UndefinedOutputFormat.INSTANCE);
-            setConfiguration(cfgB.build());
+            setConfiguration(testAutoEscPolicy_createCfg(autoEscPolicy, UndefinedOutputFormat.INSTANCE));
             assertOutput("<#ftl outputFormat='dummy'>" + commonFTL, dExpted);
             assertOutput("<#outputFormat 'dummy'>" + commonFTL + "</#outputFormat>", dExpted);
             
-            cfgB.setOutputFormat(DummyOutputFormat.INSTANCE);
-            setConfiguration(cfgB.build());
+            setConfiguration(testAutoEscPolicy_createCfg(autoEscPolicy, DummyOutputFormat.INSTANCE));
             assertOutput(
                     commonFTL
                     + "<#outputFormat 'seldomEscaped'>"
@@ -861,7 +840,18 @@ public class OutputFormatTest extends TemplateTest {
                     + dExpted);
         }
     }
-    
+
+    private Configuration testAutoEscPolicy_createCfg(AutoEscapingPolicy autoEscPolicy,
+            OutputFormat outpoutFormat)
+            throws TemplateModelException {
+        return createDefaultConfigurationBuilder()
+                .registeredCustomOutputFormats(ImmutableList.<OutputFormat>of(
+                        SeldomEscapedOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE))
+                .autoEscapingPolicy(autoEscPolicy)
+                .outputFormat(outpoutFormat)
+                .build();
+    }
+
     @Test
     public void testDynamicParsingBIsInherticContextOutputFormat() throws Exception {
         // Dynamic parser BI-s are supposed to use the ParsingConfiguration of the calling template, and ignore anything

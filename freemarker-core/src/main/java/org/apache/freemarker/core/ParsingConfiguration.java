@@ -195,9 +195,8 @@ public interface ParsingConfiguration {
 
     /**
      * Tells if the "file" extension part of the source name ({@link Template#getSourceName()}) will influence certain
-     * parsing settings. For backward compatibility, it defaults to {@code false} if
-     * {@link #getIncompatibleImprovements()} is less than 2.3.24. Starting from {@code incompatibleImprovements}
-     * 2.3.24, it defaults to {@code true}, so the following standard file extensions take their effect:
+     * parsing settings. Defaults to {@code true}. When {@code true}, the following standard file extensions take
+     * their effect:
      *
      * <ul>
      *   <li>{@code ftlh}: Sets the {@link #getOutputFormat() outputFormat} setting to {@code "HTML"}

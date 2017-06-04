@@ -44,7 +44,7 @@ import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
  * 
  * <li>{@link Object#equals(Object)} must still work properly if there are multiple instances of the same
  * {@link TemplateLoader} implementation. Like if you have an implementation that loads from a database table, the
- * {@link TemplateLoadingSource} should certain contain the JDBC connection string, the table name and the row ID, not
+ * {@link TemplateLoadingSource} should certainly contain the JDBC connection string, the table name and the row ID, not
  * just the row ID.
  * 
  * <li>Together with {@link Object#equals(Object)}, {@link Object#hashCode()} must be also overridden. The template

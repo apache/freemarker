@@ -51,27 +51,33 @@ public class SQLTimeZoneTest extends TemplateTest {
     private final Timestamp sqlTimestamp = new Timestamp(utcToLong("2014-07-12T10:30:05")); // 2014-07-12T12:30:05
     private final Date javaDate = new Date(utcToLong("2014-07-12T10:30:05")); // 2014-07-12T12:30:05
     private final Date javaDayErrorDate = new Date(utcToLong("2014-07-11T22:00:00")); // 2014-07-12T12:30:05
-    
+
+    @SuppressWarnings("unused") // Accessed from template
     public TimeZone getLastDefaultTimeZone() {
         return lastDefaultTimeZone;
     }
 
+    @SuppressWarnings("unused") // Accessed from template
     public void setLastDefaultTimeZone(TimeZone lastDefaultTimeZone) {
         this.lastDefaultTimeZone = lastDefaultTimeZone;
     }
 
+    @SuppressWarnings("unused") // Accessed from template
     public java.sql.Date getSqlDate() {
         return sqlDate;
     }
 
+    @SuppressWarnings("unused") // Accessed from template
     public Time getSqlTime() {
         return sqlTime;
     }
 
+    @SuppressWarnings("unused") // Accessed from template
     public Timestamp getSqlTimestamp() {
         return sqlTimestamp;
     }
 
+    @SuppressWarnings("unused") // Accessed from template
     public Date getJavaDate() {
         return javaDate;
     }
@@ -202,13 +208,7 @@ public class SQLTimeZoneTest extends TemplateTest {
     
     @Test
     public void testCacheFlushings() throws Exception {
-        Configuration.ExtendableBuilder<?> cfgB = createConfigurationBuilder()
-                .timeZone(_DateUtil.UTC)
-                .dateFormat("yyyy-MM-dd E")
-                .timeFormat("HH:mm:ss E")
-                .dateTimeFormat("yyyy-MM-dd'T'HH:mm:ss E");
-
-        setConfiguration(cfgB.build());
+        setConfiguration(testCacheFlushing_createBuilder().build());
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
                 + "<#setting locale='de'>\n"
@@ -234,7 +234,7 @@ public class SQLTimeZoneTest extends TemplateTest {
                 "2014-07-11 Fri, 10:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
                 + "2014-07-11 Fri, 10:30:05 Thu, 2014-07-12T10:30:05, 2014-07-12T10:30:05, 2014-07-12 Sat, 10:30:05 Sat\n");
 
-        setConfiguration(cfgB.sqlDateAndTimeTimeZone(GMT_P02).build());
+        setConfiguration(testCacheFlushing_createBuilder().sqlDateAndTimeTimeZone(GMT_P02).build());
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
                 + "<#setting locale='de'>\n"
@@ -259,6 +259,14 @@ public class SQLTimeZoneTest extends TemplateTest {
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n",
                 "2014-07-12 Sat, 12:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
                 + "2014-07-12 Sat, 12:30:05 Thu, 2014-07-12T10:30:05, 2014-07-12T10:30:05, 2014-07-12 Sat, 10:30:05 Sat\n");
+    }
+
+    private Configuration.ExtendableBuilder<?> testCacheFlushing_createBuilder() {
+        return createConfigurationBuilder()
+                .timeZone(_DateUtil.UTC)
+                .dateFormat("yyyy-MM-dd E")
+                .timeFormat("HH:mm:ss E")
+                .dateTimeFormat("yyyy-MM-dd'T'HH:mm:ss E");
     }
 
     @Test

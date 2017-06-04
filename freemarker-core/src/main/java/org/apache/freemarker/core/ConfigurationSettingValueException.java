@@ -57,7 +57,7 @@ public class ConfigurationSettingValueException extends ConfigurationException {
             Throwable cause) {
         super(
                 createMessage(
-                    name, value, true,
+                    name, value, showValue,
                     reason != null ? ", because: " : (cause != null ? "; see cause exception." : null),
                     reason),
                 cause);

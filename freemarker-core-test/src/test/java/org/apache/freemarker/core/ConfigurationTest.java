@@ -103,20 +103,14 @@ public class ConfigurationTest extends TestCase {
         //
         cfgB.setLogTemplateExceptions(true);
         {
-            Configuration cfg = cfgB.build();
             assertTrue(cfgB.isLogTemplateExceptionsSet());
-            assertTrue(cfg.isLogTemplateExceptionsSet());
             assertTrue(cfgB.getLogTemplateExceptions());
-            assertTrue(cfg.getLogTemplateExceptions());
         }
         //
         for (int i = 0; i < 2; i++) {
             cfgB.unsetLogTemplateExceptions();
-            Configuration cfg = cfgB.build();
             assertFalse(cfgB.isLogTemplateExceptionsSet());
-            assertTrue(cfg.isLogTemplateExceptionsSet());
             assertFalse(cfgB.getLogTemplateExceptions());
-            assertFalse(cfg.getLogTemplateExceptions());
         }
 
         DefaultObjectWrapper dow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
@@ -408,20 +402,23 @@ public class ConfigurationTest extends TestCase {
         tl.putTemplate("a/b.ftl", "In a/b.ftl");
         tl.putTemplate("b.ftl", "In b.ftl");
 
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0)
-                .templateLoader(tl);
-
         {
-            cfgB.setTemplateNameFormat(DefaultTemplateNameFormatFM2.INSTANCE);
-            final Template template = cfgB.build().getTemplate("a/./../b.ftl");
+            Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
+                    .templateLoader(tl)
+                    .templateNameFormat(DefaultTemplateNameFormatFM2.INSTANCE)
+                    .build();
+            final Template template = cfg.getTemplate("a/./../b.ftl");
             assertEquals("a/b.ftl", template.getLookupName());
             assertEquals("a/b.ftl", template.getSourceName());
             assertEquals("In a/b.ftl", template.toString());
         }
         
         {
-            cfgB.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
-            final Template template = cfgB.build().getTemplate("a/./../b.ftl");
+            Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
+                    .templateLoader(tl)
+                    .templateNameFormat(DefaultTemplateNameFormat.INSTANCE)
+                    .build();
+            final Template template = cfg.getTemplate("a/./../b.ftl");
             assertEquals("b.ftl", template.getLookupName());
             assertEquals("b.ftl", template.getSourceName());
             assertEquals("In b.ftl", template.toString());
@@ -455,30 +452,28 @@ public class ConfigurationTest extends TestCase {
         }
     }
     
-    public void testTemplateLookupStrategyDefaultAndSet() throws Exception {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
-        assertSame(DefaultTemplateLookupStrategy.INSTANCE, cfgB.getTemplateLookupStrategy());
-        assertSame(DefaultTemplateLookupStrategy.INSTANCE, cfgB.build().getTemplateLookupStrategy());
-
-        cfgB.setTemplateLoader(new ClassTemplateLoader(ConfigurationTest.class, ""));
-        assertSame(DefaultTemplateLookupStrategy.INSTANCE, cfgB.getTemplateLookupStrategy());
-        Configuration cfg = cfgB.build();
+    public void testTemplateLookupStrategyDefault() throws Exception {
+        Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
+                .templateLoader(new ClassTemplateLoader(ConfigurationTest.class, ""))
+                .build();
         assertSame(DefaultTemplateLookupStrategy.INSTANCE, cfg.getTemplateLookupStrategy());
-        cfg.getTemplate("toCache1.ftl");
+        assertEquals("toCache1.ftl", cfg.getTemplate("toCache1.ftl").getSourceName());
+    }
 
+    public void testTemplateLookupStrategyCustom() throws Exception {
         final TemplateLookupStrategy myStrategy = new TemplateLookupStrategy() {
             @Override
             public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
                 return ctx.lookupWithAcquisitionStrategy("toCache2.ftl");
             }
         };
-        cfgB.setTemplateLookupStrategy(myStrategy);
-        assertSame(myStrategy, cfgB.getTemplateLookupStrategy());
-        cfg = cfgB.build();
-        cfg.clearTemplateCache();
+
+        Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
+                .templateLoader(new ClassTemplateLoader(ConfigurationTest.class, ""))
+                .templateLookupStrategy(myStrategy)
+                .build();
         assertSame(myStrategy, cfg.getTemplateLookupStrategy());
-        Template template = cfg.getTemplate("toCache1.ftl");
-        assertEquals("toCache2.ftl", template.getSourceName());
+        assertEquals("toCache2.ftl", cfg.getTemplate("toCache1.ftl").getSourceName());
     }
     
     public void testSetTemplateConfigurations() throws Exception {
@@ -903,48 +898,50 @@ public class ConfigurationTest extends TestCase {
     public void testTemplateUpdateDelay() throws Exception {
         Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
 
-        assertEquals(DefaultTemplateResolver.DEFAULT_TEMPLATE_UPDATE_DELAY_MILLIS, cfgB.getTemplateUpdateDelayMilliseconds());
+        assertEquals(
+                DefaultTemplateResolver.DEFAULT_TEMPLATE_UPDATE_DELAY_MILLIS,
+                (Object) cfgB.getTemplateUpdateDelayMilliseconds());
         
-        cfgB.setTemplateUpdateDelayMilliseconds(4000);
-        assertEquals(4000L, cfgB.getTemplateUpdateDelayMilliseconds());
+        cfgB.setTemplateUpdateDelayMilliseconds(4000L);
+        assertEquals(4000L, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
         
-        cfgB.setTemplateUpdateDelayMilliseconds(100);
-        assertEquals(100L, cfgB.getTemplateUpdateDelayMilliseconds());
+        cfgB.setTemplateUpdateDelayMilliseconds(100L);
+        assertEquals(100L, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
         
         try {
             cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "5");
-            assertEquals(5000L, cfgB.getTemplateUpdateDelayMilliseconds());
+            assertEquals(5000L, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
         } catch (ConfigurationSettingValueException e) {
             assertThat(e.getMessage(), containsStringIgnoringCase("unit must be specified"));
         }
         cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "0");
-        assertEquals(0L, cfgB.getTemplateUpdateDelayMilliseconds());
+        assertEquals(0L, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
         try {
             cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "5 foo");
-            assertEquals(5000L, cfgB.getTemplateUpdateDelayMilliseconds());
+            assertEquals(5000L, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
         } catch (ConfigurationSettingValueException e) {
             assertThat(e.getMessage(), containsStringIgnoringCase("\"foo\""));
         }
         
         cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "3 ms");
-        assertEquals(3L, cfgB.getTemplateUpdateDelayMilliseconds());
+        assertEquals(3L, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
         cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "4ms");
-        assertEquals(4L, cfgB.getTemplateUpdateDelayMilliseconds());
+        assertEquals(4L, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
         
         cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "3 s");
-        assertEquals(3000L, cfgB.getTemplateUpdateDelayMilliseconds());
+        assertEquals(3000L, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
         cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "4s");
-        assertEquals(4000L, cfgB.getTemplateUpdateDelayMilliseconds());
+        assertEquals(4000L, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
         
         cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "3 m");
-        assertEquals(1000L * 60 * 3, cfgB.getTemplateUpdateDelayMilliseconds());
+        assertEquals(1000L * 60 * 3, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
         cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "4m");
-        assertEquals(1000L * 60 * 4, cfgB.getTemplateUpdateDelayMilliseconds());
+        assertEquals(1000L * 60 * 4, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
 
         cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "1 h");
-        assertEquals(1000L * 60 * 60, cfgB.getTemplateUpdateDelayMilliseconds());
+        assertEquals(1000L * 60 * 60, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
         cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "2h");
-        assertEquals(1000L * 60 * 60 * 2, cfgB.getTemplateUpdateDelayMilliseconds());
+        assertEquals(1000L * 60 * 60 * 2, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
     }
     
     @Test
@@ -1025,34 +1022,33 @@ public class ConfigurationTest extends TestCase {
 
     @Test
     public void testSetTabSize() throws Exception {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
-        
         String ftl = "${\t}";
         
         try {
-            new Template(null, ftl, cfgB.build());
+            new Template(null, ftl,
+                    new Configuration.Builder(Configuration.VERSION_3_0_0).build());
             fail();
         } catch (ParseException e) {
             assertEquals(9, e.getColumnNumber());
         }
         
-        cfgB.setTabSize(1);
         try {
-            new Template(null, ftl, cfgB.build());
+            new Template(null, ftl,
+                    new Configuration.Builder(Configuration.VERSION_3_0_0).tabSize(1).build());
             fail();
         } catch (ParseException e) {
             assertEquals(4, e.getColumnNumber());
         }
         
         try {
-            cfgB.setTabSize(0);
+            new Configuration.Builder(Configuration.VERSION_3_0_0).tabSize(0);
             fail();
         } catch (IllegalArgumentException e) {
             // Expected
         }
         
         try {
-            cfgB.setTabSize(257);
+            new Configuration.Builder(Configuration.VERSION_3_0_0).tabSize(257);
             fail();
         } catch (IllegalArgumentException e) {
             // Expected

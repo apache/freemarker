@@ -27,10 +27,11 @@ import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
+import org.apache.freemarker.core.templateresolver.TemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
-import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
+import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.SoftCacheStorage;
 
@@ -43,16 +44,24 @@ import org.apache.freemarker.core.templateresolver.impl.SoftCacheStorage;
 public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration {
 
     /**
-     * The {@link TemplateLoader} that is used to look up and load templates.
+     * The {@link TemplateResolver} to use; defaults to a {@link DefaultTemplateResolver}.
+     */
+    TemplateResolver getTemplateResolver();
+
+    /**
+     * Tells if this setting was explicitly set (otherwise its value will be the default value).
+     */
+    boolean isTemplateResolverSet();
+
+    /**
+     * The {@link TemplateLoader} that is used to look up and load templates; defaults to {@code null}.
      * By providing your own {@link TemplateLoader} implementation, you can load templates from whatever kind of
      * storages, like from relational databases, NoSQL-storages, etc.
      *
      * <p>You can chain several {@link TemplateLoader}-s together with {@link MultiTemplateLoader}.
      *
-     * <p>Default value: You should always set the template loader instead of relying on the default value.
-     * (But if you still care what it is, before "incompatible improvements" 2.3.21 it's a {@link FileTemplateLoader}
-     * that uses the current directory as its root; as it's hard tell what that directory will be, it's not very useful
-     * and dangerous. Starting with "incompatible improvements" 2.3.21 the default is {@code null}.)
+     * <p>If the {@link #getTemplateResolver() templateResolver} doesn't support this setting, then it must be {@code
+     * null}. This check is postponed until the {@link Configuration} instance is created.
      */
     TemplateLoader getTemplateLoader();
 
@@ -63,7 +72,11 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
 
     /**
      * The {@link TemplateLookupStrategy} that is used to look up templates based on the requested name, locale and
-     * custom lookup condition. Its default is {@link DefaultTemplateLookupStrategy#INSTANCE}.
+     * custom lookup condition. Its default is {@link DefaultTemplateLookupStrategy#INSTANCE}, except when the
+     * {@link #getTemplateResolver() templateResolver} doesn't support this setting, in which case it's {@code null}.
+     *
+     * <p>If the {@link #getTemplateResolver() templateResolver} doesn't support this setting, then it must be {@code
+     * null}. This check is postponed until the {@link Configuration} instance is created.
      */
     TemplateLookupStrategy getTemplateLookupStrategy();
 
@@ -74,8 +87,12 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
 
     /**
      * The template name format used; see {@link TemplateNameFormat}. The default is
-     * {@link DefaultTemplateNameFormatFM2#INSTANCE}, while the recommended value for new projects is
-     * {@link DefaultTemplateNameFormat#INSTANCE}.
+     * {@link DefaultTemplateNameFormatFM2#INSTANCE} (while the recommended value for new projects is
+     * {@link DefaultTemplateNameFormat#INSTANCE}), except when the {@link #getTemplateResolver() templateResolver}
+     * doesn't support this setting, in which case it's {@code null}.
+     *
+     * <p>If the {@link #getTemplateResolver() templateResolver} doesn't support this setting, then it must be {@code
+     * null}. This check is postponed until the {@link Configuration} instance is created.
      */
     TemplateNameFormat getTemplateNameFormat();
 
@@ -86,14 +103,17 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
 
     /**
      * The {@link TemplateConfigurationFactory} that will configure individual templates where their settings differ
-     * from those coming from the common {@link Configuration} object. A typical use case for that is specifying the
-     * {@link #getOutputFormat() outputFormat} or {@link #getSourceEncoding() sourceEncoding} for templates based on
-     * their file extension or parent directory.
+     * from those coming from the common {@link Configuration} object. Defaults to {@code null}.
+     * A typical use case for that is specifying the {@link #getOutputFormat() outputFormat} or
+     * {@link #getSourceEncoding() sourceEncoding} for templates based on their file extension or parent directory.
      * <p>
      * Note that the settings suggested by standard file extensions are stronger than that you set here. See
      * {@link #getRecognizeStandardFileExtensions()} for more information about standard file extensions.
      * <p>
      * See "Template configurations" in the FreeMarker Manual for examples.
+     *
+     * <p>If the {@link #getTemplateResolver() templateResolver} doesn't support this setting, then it must be {@code
+     * null}. This check is postponed until the {@link Configuration} instance is created.
      */
     TemplateConfigurationFactory getTemplateConfigurations();
 
@@ -103,8 +123,12 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
     boolean isTemplateConfigurationsSet();
 
     /**
-     * The map-like object used for caching templates to avoid repeated loading and parsing of the template "files".
-     * Its {@link Configuration}-level default is a {@link SoftCacheStorage}.
+     * The map-like object used for caching templates to avoid repeated loading and parsing of the template "files" to
+     * {@link Template} objects. The default is a {@link SoftCacheStorage}, except when the
+     * {@link #getTemplateResolver() templateResolver} doesn't support this setting, in which case it's {@code null}.
+     *
+     * <p>If the {@link #getTemplateResolver() templateResolver} doesn't support this setting, then it must be {@code
+     * null}. This check is postponed until the {@link Configuration} instance is created.
      */
     CacheStorage getCacheStorage();
 
@@ -115,9 +139,13 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
 
     /**
      * The time in milliseconds that must elapse before checking whether there is a newer version of a template
-     * "file" than the cached one. Defaults to 5000 ms.
+     * "file" than the cached one. The defaults is 5000 ms, except when the
+     * {@link #getTemplateResolver() templateResolver} doesn't support this setting, in which case it's {@code null}.
+     *
+     * <p>If the {@link #getTemplateResolver() templateResolver} doesn't support this setting, then it must be {@code
+     * null}. This check is postponed until the {@link Configuration} instance is created.
      */
-    long getTemplateUpdateDelayMilliseconds();
+    Long getTemplateUpdateDelayMilliseconds();
 
     /**
      * Tells if this setting was explicitly set (otherwise its value will be the default value).
@@ -158,8 +186,8 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
     Version getIncompatibleImprovements();
 
     /**
-     * Whether localized template lookup is enabled. Enabled by default.
-     *
+     * Whether localized template lookup is enabled . The default is {@code true}, except when the
+     * {@link #getTemplateResolver() templateResolver} doesn't support this setting, in which case it's {@code null}.
      * <p>
      * With the default {@link TemplateLookupStrategy}, localized lookup works like this: Let's say your locale setting
      * is {@code Locale("en", "AU")}, and you call {@link Configuration#getTemplate(String) cfg.getTemplate("foo.ftl")}.
@@ -168,8 +196,11 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
      * {@link #getTemplateLookupStrategy()} for a more details. If you need to generate different
      * template names, set your own a {@link TemplateLookupStrategy} implementation as the value of the
      * {@link #getTemplateLookupStrategy() templateLookupStrategy} setting.
+     * <p>
+     * If the {@link #getTemplateResolver() templateResolver} doesn't support this setting, then it must be {@code
+     * null}. This check is postponed until the {@link Configuration} instance is created.
      */
-    boolean getLocalizedLookup();
+    Boolean getLocalizedLookup();
 
     /**
      * Tells if this setting was explicitly set (otherwise its value will be the default value).

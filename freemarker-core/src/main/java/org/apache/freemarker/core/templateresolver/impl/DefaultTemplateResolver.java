@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core.templateresolver.impl;
 
+import static org.apache.freemarker.core.Configuration.ExtendableBuilder.*;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,6 +35,8 @@ import java.util.Locale;
 import java.util.StringTokenizer;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.ConfigurationException;
+import org.apache.freemarker.core.ConfigurationSettingValueException;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateConfiguration;
 import org.apache.freemarker.core.TemplateLanguage;
@@ -52,6 +56,7 @@ import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.TemplateResolver;
+import org.apache.freemarker.core.templateresolver.TemplateResolverDependencies;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.apache.freemarker.core.util._NullArgumentException;
@@ -83,100 +88,58 @@ public class DefaultTemplateResolver extends TemplateResolver {
     private static final Logger LOG = _CoreLogs.TEMPLATE_RESOLVER;
 
     /** Maybe {@code null}. */
-    private final TemplateLoader templateLoader;
+    private TemplateLoader templateLoader;
     
     /** Here we keep our cached templates */
-    private final CacheStorage cacheStorage;
-    private final TemplateLookupStrategy templateLookupStrategy;
-    private final TemplateNameFormat templateNameFormat;
-    private final TemplateConfigurationFactory templateConfigurations;
-    private final long templateUpdateDelayMilliseconds;
-    private final boolean localizedLookup;
+    private CacheStorage cacheStorage;
+    private TemplateLookupStrategy templateLookupStrategy;
+    private TemplateNameFormat templateNameFormat;
+    private TemplateConfigurationFactory templateConfigurations;
+    private long templateUpdateDelayMilliseconds;
+    private Charset sourceEncoding;
+    private TemplateLanguage templateLanguage;
+    private boolean localizedLookup;
 
-    private Configuration config;
-    
-    /**
-     * @param templateLoader
-     *            The {@link TemplateLoader} to use. Can be {@code null}, though then every request will result in
-     *            {@link TemplateNotFoundException}.
-     * @param cacheStorage
-     *            The {@link CacheStorage} to use. Can't be {@code null}.
-     * @param templateLookupStrategy
-     *            The {@link TemplateLookupStrategy} to use. Can't be {@code null}.
-     * @param templateUpdateDelayMilliseconds
-     *            See {@link Configuration#getTemplateUpdateDelayMilliseconds()}
-     * @param templateNameFormat
-     *            The {@link TemplateNameFormat} to use. Can't be {@code null}.
-     * @param templateConfigurations
-     *            The {@link TemplateConfigurationFactory} to use. Can be {@code null} (then all templates will use the
-     *            settings coming from the {@link Configuration} as is, except in the very rare case where a
-     *            {@link TemplateLoader} itself specifies a {@link TemplateConfiguration}).
-     * @param config
-     *            The {@link Configuration} this cache will be used for. Can't be {@code null}.
-     */
-    public DefaultTemplateResolver(
-            TemplateLoader templateLoader,
-            CacheStorage cacheStorage, long templateUpdateDelayMilliseconds,
-            TemplateLookupStrategy templateLookupStrategy, boolean localizedLookup,
-            TemplateNameFormat templateNameFormat,
-            TemplateConfigurationFactory templateConfigurations,
-            Configuration config) {
-        super(config);
+    @Override
+    protected void initialize() throws ConfigurationException {
+        TemplateResolverDependencies deps = getDependencies();
+
+        this.templateLoader = deps.getTemplateLoader();
         
-        this.templateLoader = templateLoader;
-        
-        _NullArgumentException.check("cacheStorage", cacheStorage);
-        this.cacheStorage = cacheStorage;
-        
+        this.cacheStorage = deps.getCacheStorage();
+        checkDependencyNotNull(CACHE_STORAGE_KEY, this.cacheStorage);
+
+        Long templateUpdateDelayMilliseconds = deps.getTemplateUpdateDelayMilliseconds();
+        checkDependencyNotNull(TEMPLATE_UPDATE_DELAY_KEY, templateUpdateDelayMilliseconds);
         this.templateUpdateDelayMilliseconds = templateUpdateDelayMilliseconds;
-        
-        this.localizedLookup = localizedLookup;
-        
-        _NullArgumentException.check("templateLookupStrategy", templateLookupStrategy);
-        this.templateLookupStrategy = templateLookupStrategy;
 
-        _NullArgumentException.check("templateNameFormat", templateNameFormat);
-        this.templateNameFormat = templateNameFormat;
+        Boolean localizedLookup = deps.getLocalizedLookup();
+        checkDependencyNotNull(LOCALIZED_LOOKUP_KEY, localizedLookup);
+        this.localizedLookup = localizedLookup;
+
+        this.templateLookupStrategy = deps.getTemplateLookupStrategy();
+        checkDependencyNotNull(TEMPLATE_LOOKUP_STRATEGY_KEY, this.templateLookupStrategy);
+
+        this.templateNameFormat = deps.getTemplateNameFormat();
+        checkDependencyNotNull(TEMPLATE_NAME_FORMAT_KEY, this.templateNameFormat);
 
         // Can be null
-        this.templateConfigurations = templateConfigurations;
-        
-        _NullArgumentException.check("config", config);
-        this.config = config;
-    }
-    
-    /**
-     * Returns the configuration for internal usage.
-     */
-    @Override
-    public Configuration getConfiguration() {
-        return config;
+        this.templateConfigurations = deps.getTemplateConfigurations();
+
+        this.sourceEncoding = deps.getSourceEncoding();
+        checkDependencyNotNull(SOURCE_ENCODING_KEY, this.sourceEncoding);
+
+        this.templateLanguage = deps.getTemplateLanguage();
+        checkDependencyNotNull(TEMPLATE_LANGUAGE_KEY, this.templateLanguage);
     }
 
-    public TemplateLoader getTemplateLoader() {
-        return templateLoader;
-    }
-
-    public CacheStorage getCacheStorage() {
-        return cacheStorage;
-    }
-    
-    /**
-     */
-    public TemplateLookupStrategy getTemplateLookupStrategy() {
-        return templateLookupStrategy;
-    }
-    
-    /**
-     */
-    public TemplateNameFormat getTemplateNameFormat() {
-        return templateNameFormat;
-    }
-    
-    /**
-     */
-    public TemplateConfigurationFactory getTemplateConfigurations() {
-        return templateConfigurations;
+    private void checkDependencyNotNull(String name, Object value) {
+        if (value == null) {
+            throw new ConfigurationSettingValueException(
+                    name, null, false,
+                    "This Configuration setting must be set and non-null when the TemplateResolver is a(n) "
+                    + this.getClass().getName() + ".", null);
+        }
     }
 
     /**
@@ -213,6 +176,8 @@ public class DefaultTemplateResolver extends TemplateResolver {
         _NullArgumentException.check("name", name);
         _NullArgumentException.check("locale", locale);
 
+        checkInitialized();
+
         name = templateNameFormat.normalizeRootBasedName(name);
         
         if (templateLoader == null) {
@@ -231,6 +196,41 @@ public class DefaultTemplateResolver extends TemplateResolver {
     @Override
     public String normalizeRootBasedName(String name) throws MalformedTemplateNameException {
         return templateNameFormat.normalizeRootBasedName(name);
+    }
+
+    @Override
+    public boolean supportsTemplateLoaderSetting() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsCacheStorageSetting() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsTemplateLookupStrategySetting() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsTemplateNameFormatSetting() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsTemplateConfigurationsSetting() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsTemplateUpdateDelayMillisecondsSetting() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsLocalizedLookupSetting() {
+        return true;
     }
 
     private Template getTemplateInternal(
@@ -533,9 +533,9 @@ public class DefaultTemplateResolver extends TemplateResolver {
             locale = tc.getLocale();
         }
         Charset initialEncoding = tc != null && tc.isSourceEncodingSet() ? tc.getSourceEncoding()
-                : config.getSourceEncoding();
+                : this.sourceEncoding;
         TemplateLanguage templateLanguage = tc != null && tc.isTemplateLanguageSet() ? tc.getTemplateLanguage()
-                : config.getTemplateLanguage();
+                : this.templateLanguage;
 
         Template template;
         {
@@ -572,7 +572,8 @@ public class DefaultTemplateResolver extends TemplateResolver {
             
             try {
                 try {
-                    template = templateLanguage.parse(name, sourceName, reader, config, tc,
+                    template = getDependencies().parse(
+                            templateLanguage, name, sourceName, reader, tc,
                             initialEncoding, markedInputStream);
                 } catch (WrongTemplateCharsetException charsetException) {
                     final Charset templateSpecifiedEncoding = charsetException.getTemplateSpecifiedEncoding();
@@ -590,7 +591,8 @@ public class DefaultTemplateResolver extends TemplateResolver {
                                 + ", but its canSpecifyCharsetInContent property is false.");
                     }
 
-                    template = templateLanguage.parse(name, sourceName, reader, config, tc,
+                    template = getDependencies().parse(
+                            templateLanguage, name, sourceName, reader, tc,
                             templateSpecifiedEncoding, markedInputStream);
                 }
             } finally {
@@ -601,28 +603,6 @@ public class DefaultTemplateResolver extends TemplateResolver {
         template.setLookupLocale(locale);
         template.setCustomLookupCondition(customLookupCondition);
         return template;
-    }
-
-    /**
-     * Gets the delay in milliseconds between checking for newer versions of a
-     * template source.
-     * @return the current value of the delay
-     */
-    public long getTemplateUpdateDelayMilliseconds() {
-        // synchronized was moved here so that we don't advertise that it's thread-safe, as it's not.
-        synchronized (this) {
-            return templateUpdateDelayMilliseconds;
-        }
-    }
-
-    /**
-     * Returns if localized template lookup is enabled or not.
-     */
-    public boolean getLocalizedLookup() {
-        // synchronized was moved here so that we don't advertise that it's thread-safe, as it's not.
-        synchronized (this) {
-            return localizedLookup;
-        }
     }
 
     /**
@@ -654,14 +634,6 @@ public class DefaultTemplateResolver extends TemplateResolver {
         }
     }
 
-    /**
-     * Removes an entry from the cache, hence forcing the re-loading of it when it's next time requested. (It doesn't
-     * delete the template file itself.) This is to give the application finer control over cache updating than the
-     * update delay ({@link #getTemplateUpdateDelayMilliseconds()}) alone does.
-     * 
-     * For the meaning of the parameters, see
-     * {@link Configuration#getTemplate(String, Locale, Serializable, boolean)}
-     */
     @Override
     public void removeTemplateFromCache(
             String name, Locale locale, Serializable customLookupCondition)

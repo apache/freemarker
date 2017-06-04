@@ -22,6 +22,7 @@ import java.io.IOException;
 
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateConfiguration;
+import org.apache.freemarker.core.TopLevelConfiguration;
 
 /**
  * Creates (or returns) {@link TemplateConfiguration}-s for template sources.
@@ -35,7 +36,10 @@ public abstract class TemplateConfigurationFactory {
      *            The name (path) that was used for {@link TemplateLoader#load}. See
      *            {@link Template#getSourceName()} for details.
      * @param templateLoadingSource
-     *            The object returned by {@link TemplateLoadingResult#getSource()}.
+     *            The object returned by {@link TemplateLoadingResult#getSource()}. For a
+     *            {@link TopLevelConfiguration#getTemplateResolver()} that doesn't use {@link TemplateLoader}-s
+     *            this is maybe {@code null}, or some other object wrapped into {@link TemplateLoadingSource} to
+     *            satisfy this contract.
      * 
      * @return The {@link TemplateConfiguration} to apply, or {@code null} if the there's no {@link TemplateConfiguration} for
      *         this template source.

@@ -61,9 +61,7 @@ import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.TransformControl;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
-import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.TemplateResolver;
-import org.apache.freemarker.core.templateresolver._CacheAPI;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
@@ -2778,8 +2776,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             // We can't cause a template lookup here (see TemplateLookupStrategy), as that can be expensive. We exploit
             // that (at least in 2.3.x) the name used for eager import namespace key isn't the template.sourceName, but
             // the looked up name (template.name), which we can get quickly:
-            TemplateNameFormat tnf = getConfiguration().getTemplateNameFormat();
-            templateName = _CacheAPI.normalizeRootBasedName(tnf, templateName);
+            templateName = getConfiguration().getTemplateResolver().normalizeRootBasedName(templateName);
         }
         
         if (loadedLibs == null) {
@@ -2857,19 +2854,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         if (baseName == null) {
             return targetName;
         }
-        return _CacheAPI.toRootBasedName(configuration.getTemplateNameFormat(), baseName, targetName);
-    }
-
-    String renderElementToString(ASTElement te) throws IOException, TemplateException {
-        Writer prevOut = out;
-        try {
-            StringWriter sw = new StringWriter();
-            out = sw;
-            visit(te);
-            return sw.toString();
-        } finally {
-            out = prevOut;
-        }
+        return configuration.getTemplateResolver().toRootBasedName(baseName, targetName);
     }
 
     void importMacros(Template template) {

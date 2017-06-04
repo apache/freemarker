@@ -62,41 +62,51 @@ public class SpecialVariableTest extends TemplateTest {
 
     @Test
     public void testAutoEsc() throws Exception {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
-
         for (AutoEscapingPolicy autoEscaping : new AutoEscapingPolicy[] {
                 AutoEscapingPolicy.ENABLE_IF_DEFAULT, AutoEscapingPolicy.ENABLE_IF_SUPPORTED }) {
-            cfgB.setAutoEscapingPolicy(autoEscaping);
-            cfgB.setOutputFormat(HTMLOutputFormat.INSTANCE);
-            setConfiguration(cfgB.build());
+            setConfiguration(new Configuration.Builder(Configuration.VERSION_3_0_0)
+                    .autoEscapingPolicy(autoEscaping)
+                    .outputFormat(HTMLOutputFormat.INSTANCE)
+                    .build());
             assertOutput("${.autoEsc?c}", "true");
             assertOutput("<#ftl autoEsc=false>${.autoEsc?c}", "false");
 
-            cfgB.setOutputFormat(PlainTextOutputFormat.INSTANCE);
-            setConfiguration(cfgB.build());
+            setConfiguration(new Configuration.Builder(Configuration.VERSION_3_0_0)
+                    .autoEscapingPolicy(autoEscaping)
+                    .outputFormat(PlainTextOutputFormat.INSTANCE)
+                    .build());
             assertOutput("${.autoEsc?c}", "false");
 
-            cfgB.setOutputFormat(UndefinedOutputFormat.INSTANCE);
-            setConfiguration(cfgB.build());
+            setConfiguration(new Configuration.Builder(Configuration.VERSION_3_0_0)
+                    .autoEscapingPolicy(autoEscaping)
+                    .outputFormat(UndefinedOutputFormat.INSTANCE)
+                    .build());
             assertOutput("${.autoEsc?c}", "false");
         }
         
-        cfgB.setAutoEscapingPolicy(AutoEscapingPolicy.DISABLE);
-        cfgB.setOutputFormat(HTMLOutputFormat.INSTANCE);
-        setConfiguration(cfgB.build());
+        setConfiguration(new Configuration.Builder(Configuration.VERSION_3_0_0)
+                .autoEscapingPolicy(AutoEscapingPolicy.DISABLE)
+                .outputFormat(HTMLOutputFormat.INSTANCE)
+                .build());
         assertOutput("${.autoEsc?c}", "false");
         assertOutput("<#ftl autoEsc=true>${.autoEsc?c}", "true");
 
-        cfgB.setOutputFormat(PlainTextOutputFormat.INSTANCE);
-        setConfiguration(cfgB.build());
+        setConfiguration(new Configuration.Builder(Configuration.VERSION_3_0_0)
+                .autoEscapingPolicy(AutoEscapingPolicy.DISABLE)
+                .outputFormat(PlainTextOutputFormat.INSTANCE)
+                .build());
         assertOutput("${.autoEsc?c}", "false");
 
-        cfgB.setOutputFormat(UndefinedOutputFormat.INSTANCE);
-        setConfiguration(cfgB.build());
+        setConfiguration(new Configuration.Builder(Configuration.VERSION_3_0_0)
+                .autoEscapingPolicy(AutoEscapingPolicy.DISABLE)
+                .outputFormat(UndefinedOutputFormat.INSTANCE)
+                .build());
         assertOutput("${.autoEsc?c}", "false");
 
-        cfgB.setAutoEscapingPolicy(AutoEscapingPolicy.ENABLE_IF_DEFAULT);
-        setConfiguration(cfgB.build());
+        setConfiguration(new Configuration.Builder(Configuration.VERSION_3_0_0)
+                .autoEscapingPolicy(AutoEscapingPolicy.ENABLE_IF_DEFAULT)
+                .outputFormat(UndefinedOutputFormat.INSTANCE)
+                .build());
         assertOutput(
                 "${.autoEsc?c} "
                 + "<#outputFormat 'HTML'>${.autoEsc?c}</#outputFormat> "

@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core;
 
+import static org.apache.freemarker.core.Configuration.ExtendableBuilder.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -76,7 +78,6 @@ import org.apache.freemarker.core.templateresolver.impl.MruCacheStorage;
 import org.apache.freemarker.core.templateresolver.impl.SoftCacheStorage;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.CaptureOutput;
-import org.apache.freemarker.core.util.CommonBuilder;
 import org.apache.freemarker.core.util.HtmlEscape;
 import org.apache.freemarker.core.util.NormalizeNewlines;
 import org.apache.freemarker.core.util.StandardCompress;
@@ -137,8 +138,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * <p>The setting reader methods of this class don't throw {@link CoreSettingValueNotSetException}, because all settings
  * are set on the {@link Configuration} level (even if they were just initialized to a default value).
  */
-public final class Configuration
-        implements TopLevelConfiguration, CustomStateScope {
+public final class Configuration implements TopLevelConfiguration, CustomStateScope {
     
     private static final String VERSION_PROPERTIES_PATH = "org/apache/freemarker/core/version.properties";
 
@@ -237,8 +237,14 @@ public final class Configuration
     // Configuration-specific settings:
 
     private final Version incompatibleImprovements;
-    private final DefaultTemplateResolver templateResolver;
-    private final boolean localizedLookup;
+    private final TemplateResolver templateResolver;
+    private final TemplateLoader templateLoader;
+    private final CacheStorage cacheStorage;
+    private final TemplateLookupStrategy templateLookupStrategy;
+    private final TemplateNameFormat templateNameFormat;
+    private final TemplateConfigurationFactory templateConfigurations;
+    private final Long templateUpdateDelayMilliseconds;
+    private final Boolean localizedLookup;
     private final List<OutputFormat> registeredCustomOutputFormats;
     private final Map<String, OutputFormat> registeredCustomOutputFormatsByName;
     private final Map<String, Object> sharedVariables;
@@ -291,19 +297,8 @@ public final class Configuration
 
     private <SelfT extends ExtendableBuilder<SelfT>> Configuration(ExtendableBuilder<SelfT> builder)
             throws ConfigurationException {
-        // Configuration-specific settings:
-
+        // Configuration-specific settings (except templateResolver):
         incompatibleImprovements = builder.getIncompatibleImprovements();
-
-        templateResolver = new DefaultTemplateResolver(
-                builder.getTemplateLoader(),
-                builder.getCacheStorage(), builder.getTemplateUpdateDelayMilliseconds(),
-                builder.getTemplateLookupStrategy(), builder.getLocalizedLookup(),
-                builder.getTemplateNameFormat(),
-                builder.getTemplateConfigurations(),
-                this);
-
-        localizedLookup = builder.getLocalizedLookup();
 
         {
             Collection<OutputFormat> registeredCustomOutputFormats = builder.getRegisteredCustomOutputFormats();
@@ -438,6 +433,67 @@ public final class Configuration
         lazyImports = builder.getLazyImports();
         lazyAutoImports = builder.getLazyAutoImports();
         customSettings = builder.getCustomSettings(false);
+
+        // Configuration-specific settings continued... templateResolver):
+
+        templateResolver = builder.getTemplateResolver();
+
+        templateLoader = builder.getTemplateLoader();
+        if (!templateResolver.supportsTemplateLoaderSetting()) {
+            checkSettingIsNullForThisTemplateResolver(
+                    templateResolver, TEMPLATE_LOADER_KEY, templateLoader);
+        }
+
+        cacheStorage = builder.getCacheStorage();
+        if (!templateResolver.supportsCacheStorageSetting()) {
+            checkSettingIsNullForThisTemplateResolver(
+                    templateResolver, CACHE_STORAGE_KEY, cacheStorage);
+        }
+
+        templateUpdateDelayMilliseconds = builder.getTemplateUpdateDelayMilliseconds();
+        if (!templateResolver.supportsTemplateUpdateDelayMillisecondsSetting()) {
+            checkSettingIsNullForThisTemplateResolver(
+                    templateResolver, TEMPLATE_UPDATE_DELAY_KEY, templateUpdateDelayMilliseconds);
+        }
+
+        templateLookupStrategy = builder.getTemplateLookupStrategy();
+        if (!templateResolver.supportsTemplateLookupStrategySetting()) {
+            checkSettingIsNullForThisTemplateResolver(
+                    templateResolver, TEMPLATE_LOOKUP_STRATEGY_KEY, templateLookupStrategy);
+        }
+
+        localizedLookup = builder.getLocalizedLookup();
+        if (!templateResolver.supportsLocalizedLookupSetting()) {
+            checkSettingIsNullForThisTemplateResolver(
+                    templateResolver, LOCALIZED_LOOKUP_KEY, localizedLookup);
+        }
+
+        templateNameFormat = builder.getTemplateNameFormat();
+        if (!templateResolver.supportsTemplateNameFormatSetting()) {
+            checkSettingIsNullForThisTemplateResolver(
+                    templateResolver, TEMPLATE_NAME_FORMAT_KEY, templateNameFormat);
+        }
+
+        templateConfigurations = builder.getTemplateConfigurations();
+        if (!templateResolver.supportsTemplateConfigurationsSetting()) {
+            checkSettingIsNullForThisTemplateResolver(
+                    templateResolver, TEMPLATE_CONFIGURATIONS_KEY, templateConfigurations);
+        }
+
+        templateResolver.setDependencies(new TemplateResolverDependenciesImpl(this, templateResolver));
+    }
+
+    private void checkSettingIsNullForThisTemplateResolver(
+            TemplateResolver templateResolver,
+            String settingName, Object value) {
+        if (value != null) {
+            throw new ConfigurationSettingValueException(
+                    settingName, null, false,
+                    "The templateResolver is a "
+                    + templateResolver.getClass().getName() + ", which doesn't support this setting, hence it "
+                    + "mustn't be set or must be set to null.",
+                    null);
+        }
     }
 
     private <SelfT extends ExtendableBuilder<SelfT>> void wrapAndPutSharedVariables(
@@ -478,11 +534,24 @@ public final class Configuration
     }
 
     @Override
+    public TemplateResolver getTemplateResolver() {
+        return templateResolver;
+    }
+
+
+
+    /**
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
+     */
+    @Override
+    public boolean isTemplateResolverSet() {
+        return true;
+    }
+
+    @Override
     public TemplateLoader getTemplateLoader() {
-        if (templateResolver == null) {
-            return null;
-        }
-        return templateResolver.getTemplateLoader();
+        return templateLoader;
     }
 
     /**
@@ -496,10 +565,7 @@ public final class Configuration
 
     @Override
     public TemplateLookupStrategy getTemplateLookupStrategy() {
-        if (templateResolver == null) {
-            return null;
-        }
-        return templateResolver.getTemplateLookupStrategy();
+        return templateLookupStrategy;
     }
 
     /**
@@ -513,10 +579,7 @@ public final class Configuration
     
     @Override
     public TemplateNameFormat getTemplateNameFormat() {
-        if (templateResolver == null) {
-            return null;
-        }
-        return templateResolver.getTemplateNameFormat();
+        return templateNameFormat;
     }
 
     /**
@@ -530,10 +593,7 @@ public final class Configuration
 
     @Override
     public TemplateConfigurationFactory getTemplateConfigurations() {
-        if (templateResolver == null) {
-            return null;
-        }
-        return templateResolver.getTemplateConfigurations();
+        return templateConfigurations;
     }
 
     /**
@@ -547,7 +607,7 @@ public final class Configuration
 
     @Override
     public CacheStorage getCacheStorage() {
-        return templateResolver.getCacheStorage();
+        return cacheStorage;
     }
 
     /**
@@ -560,8 +620,8 @@ public final class Configuration
     }
 
     @Override
-    public long getTemplateUpdateDelayMilliseconds() {
-        return templateResolver.getTemplateUpdateDelayMilliseconds();
+    public Long getTemplateUpdateDelayMilliseconds() {
+        return templateUpdateDelayMilliseconds;
     }
 
     /**
@@ -1350,7 +1410,7 @@ public final class Configuration
         if (locale == null) {
             locale = getLocale();
         }
-        final GetTemplateResult maybeTemp = templateResolver.getTemplate(name, locale, customLookupCondition);
+        final GetTemplateResult maybeTemp = getTemplateResolver().getTemplate(name, locale, customLookupCondition);
         final Template temp = maybeTemp.getTemplate();
         if (temp == null) {
             if (ignoreMissing) {
@@ -1455,7 +1515,7 @@ public final class Configuration
      * <p>This method is thread-safe and can be called while the engine processes templates.
      */
     public void clearTemplateCache() {
-        templateResolver.clearTemplateCache();
+        getTemplateResolver().clearTemplateCache();
     }
     
     /**
@@ -1472,12 +1532,12 @@ public final class Configuration
      */
     public void removeTemplateFromCache(String name, Locale locale, Serializable customLookupCondition)
             throws IOException {
-        templateResolver.removeTemplateFromCache(name, locale, customLookupCondition);
+        getTemplateResolver().removeTemplateFromCache(name, locale, customLookupCondition);
     }
 
     @Override
-    public boolean getLocalizedLookup() {
-        return templateResolver.getLocalizedLookup();
+    public Boolean getLocalizedLookup() {
+        return localizedLookup;
     }
 
     /**
@@ -1600,7 +1660,7 @@ public final class Configuration
      */
     public abstract static class ExtendableBuilder<SelfT extends ExtendableBuilder<SelfT>>
             extends MutableParsingAndProcessingConfiguration<SelfT>
-            implements TopLevelConfiguration, CommonBuilder<Configuration> {
+            implements TopLevelConfiguration, org.apache.freemarker.core.util.CommonBuilder<Configuration> {
 
         /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String SOURCE_ENCODING_KEY_SNAKE_CASE = "source_encoding";
@@ -1726,16 +1786,23 @@ public final class Configuration
         // Set early in the constructor to non-null
         private Version incompatibleImprovements = Configuration.VERSION_3_0_0;
 
+        private TemplateResolver templateResolver;
+        private TemplateResolver cachedDefaultTemplateResolver;
         private TemplateLoader templateLoader;
         private boolean templateLoaderSet;
         private CacheStorage cacheStorage;
+        private boolean cacheStorageSet;
         private CacheStorage cachedDefaultCacheStorage;
         private TemplateLookupStrategy templateLookupStrategy;
+        private boolean templateLookupStrategySet;
         private TemplateNameFormat templateNameFormat;
+        private boolean templateNameFormatSet;
         private TemplateConfigurationFactory templateConfigurations;
         private boolean templateConfigurationsSet;
         private Long templateUpdateDelayMilliseconds;
+        private boolean templateUpdateDelayMillisecondsSet;
         private Boolean localizedLookup;
+        private boolean localizedLookupSet;
 
         private Collection<OutputFormat> registeredCustomOutputFormats;
         private Map<String, Object> sharedVariables;
@@ -2024,8 +2091,48 @@ public final class Configuration
         }
 
         @Override
+        public TemplateResolver getTemplateResolver() {
+            return isTemplateResolverSet() ? templateResolver : getDefaultTemplateResolver();
+        }
+
+        @Override
+        public boolean isTemplateResolverSet() {
+            return templateResolver != null;
+        }
+
+        protected TemplateResolver getDefaultTemplateResolver() {
+            if (cachedDefaultTemplateResolver == null) {
+                cachedDefaultTemplateResolver = new DefaultTemplateResolver();
+            }
+            return cachedDefaultTemplateResolver;
+        }
+
+        /**
+         * Setter pair of {@link Configuration#getTemplateResolver()}; note {@code null}.
+         */
+        public void setTemplateResolver(TemplateResolver templateResolver) {
+            _NullArgumentException.check("templateResolver", templateResolver);
+            this.templateResolver = templateResolver;
+        }
+
+        /**
+         * Fluent API equivalent of {@link #setTemplateResolver(TemplateResolver)}
+         */
+        public SelfT templateResolver(TemplateResolver templateResolver) {
+            setTemplateResolver(templateResolver);
+            return self();
+        }
+
+        /**
+         * Resets this setting to its initial state, as if it was never set.
+         */
+        public void unsetTemplateResolver() {
+            templateResolver = null;
+        }
+
+        @Override
         public TemplateLoader getTemplateLoader() {
-            return isTemplateLoaderSet() ? templateLoader : getDefaultTemplateLoader();
+            return isTemplateLoaderSet() ? templateLoader : getDefaultTemplateLoaderTRAware();
         }
 
         @Override
@@ -2033,12 +2140,21 @@ public final class Configuration
             return templateLoaderSet;
         }
 
+        private TemplateLoader getDefaultTemplateLoaderTRAware() {
+            return isTemplateResolverSet() && !getTemplateResolver().supportsTemplateLoaderSetting() ?
+                    null : getDefaultTemplateLoader();
+        }
+
+        /**
+         * The default value when the {@link #getTemplateResolver() templateResolver} supports this setting (otherwise
+         * the default is hardwired to be {@code null} and this method isn't called).
+         */
         protected TemplateLoader getDefaultTemplateLoader() {
             return null;
         }
 
         /**
-         * Setter pair of {@link Configuration#getTemplateLoader()}.
+         * Setter pair of {@link Configuration#getTemplateLoader()}. Note that {@code null} is a valid value.
          */
         public void setTemplateLoader(TemplateLoader templateLoader) {
             this.templateLoader = templateLoader;
@@ -2063,14 +2179,23 @@ public final class Configuration
 
         @Override
         public CacheStorage getCacheStorage() {
-            return isCacheStorageSet() ? cacheStorage : getDefaultCacheStorage();
+            return isCacheStorageSet() ? cacheStorage : getDefaultCacheStorageTRAware();
         }
 
         @Override
         public boolean isCacheStorageSet() {
-            return cacheStorage != null;
+            return cacheStorageSet;
         }
 
+        private CacheStorage getDefaultCacheStorageTRAware() {
+            return isTemplateResolverSet() && !getTemplateResolver().supportsCacheStorageSetting() ? null
+                    : getDefaultCacheStorage();
+        }
+
+        /**
+         * The default value when the {@link #getTemplateResolver() templateResolver} supports this setting (otherwise
+         * the default is hardwired to be {@code null} and this method isn't called).
+         */
         protected CacheStorage getDefaultCacheStorage() {
             if (cachedDefaultCacheStorage == null) {
                 // If this will depend on incompatibleImprovements, null it out in onIncompatibleImprovementsChanged()!
@@ -2084,6 +2209,7 @@ public final class Configuration
          */
         public void setCacheStorage(CacheStorage cacheStorage) {
             this.cacheStorage = cacheStorage;
+            this.cacheStorageSet = true;
             cachedDefaultCacheStorage = null;
         }
 
@@ -2100,19 +2226,29 @@ public final class Configuration
          */
         public void unsetCacheStorage() {
             cacheStorage = null;
+            cacheStorageSet = false;
         }
 
         @Override
         public TemplateLookupStrategy getTemplateLookupStrategy() {
-            return isTemplateLookupStrategySet() ? templateLookupStrategy : getDefaultTemplateLookupStrategySet();
+            return isTemplateLookupStrategySet() ? templateLookupStrategy : getDefaultTemplateLookupStrategyTRAware();
         }
 
         @Override
         public boolean isTemplateLookupStrategySet() {
-            return templateLookupStrategy != null;
+            return templateLookupStrategySet;
         }
 
-        protected TemplateLookupStrategy getDefaultTemplateLookupStrategySet() {
+        private TemplateLookupStrategy getDefaultTemplateLookupStrategyTRAware() {
+            return isTemplateResolverSet() && !getTemplateResolver().supportsTemplateLookupStrategySetting() ? null :
+                    getDefaultTemplateLookupStrategy();
+        }
+
+        /**
+         * The default value when the {@link #getTemplateResolver() templateResolver} supports this setting (otherwise
+         * the default is hardwired to be {@code null} and this method isn't called).
+         */
+        protected TemplateLookupStrategy getDefaultTemplateLookupStrategy() {
             return DefaultTemplateLookupStrategy.INSTANCE;
         }
 
@@ -2120,8 +2256,8 @@ public final class Configuration
          * Setter pair of {@link Configuration#getTemplateLookupStrategy()}.
          */
         public void setTemplateLookupStrategy(TemplateLookupStrategy templateLookupStrategy) {
-            _NullArgumentException.check("templateLookupStrategy", templateLookupStrategy);
             this.templateLookupStrategy = templateLookupStrategy;
+            templateLookupStrategySet = true;
         }
 
         /**
@@ -2137,11 +2273,12 @@ public final class Configuration
          */
         public void unsetTemplateLookupStrategy() {
             templateLookupStrategy = null;
+            templateLookupStrategySet = false;
         }
 
         @Override
         public TemplateNameFormat getTemplateNameFormat() {
-            return isTemplateNameFormatSet() ? templateNameFormat : getDefaultTemplateNameFormat();
+            return isTemplateNameFormatSet() ? templateNameFormat : getDefaultTemplateNameFormatTRAware();
         }
 
         /**
@@ -2149,9 +2286,18 @@ public final class Configuration
          */
         @Override
         public boolean isTemplateNameFormatSet() {
-            return  templateNameFormat != null;
+            return templateNameFormatSet;
         }
 
+        private TemplateNameFormat getDefaultTemplateNameFormatTRAware() {
+            return isTemplateResolverSet() && !getTemplateResolver().supportsTemplateNameFormatSetting() ? null
+                    : getDefaultTemplateNameFormat();
+        }
+
+        /**
+         * The default value when the {@link #getTemplateResolver() templateResolver} supports this setting (otherwise
+         * the default is hardwired to be {@code null} and this method isn't called).
+         */
         protected TemplateNameFormat getDefaultTemplateNameFormat() {
             return DefaultTemplateNameFormatFM2.INSTANCE;
         }
@@ -2160,8 +2306,8 @@ public final class Configuration
          * Setter pair of {@link Configuration#getTemplateNameFormat()}.
          */
         public void setTemplateNameFormat(TemplateNameFormat templateNameFormat) {
-            _NullArgumentException.check("templateNameFormat", templateNameFormat);
             this.templateNameFormat = templateNameFormat;
+            templateNameFormatSet = true;
         }
 
         /**
@@ -2177,11 +2323,12 @@ public final class Configuration
          */
         public void unsetTemplateNameFormat() {
             this.templateNameFormat = null;
+            templateNameFormatSet = false;
         }
 
         @Override
         public TemplateConfigurationFactory getTemplateConfigurations() {
-            return isTemplateConfigurationsSet() ? templateConfigurations : getDefaultTemplateConfigurations();
+            return isTemplateConfigurationsSet() ? templateConfigurations : getDefaultTemplateConfigurationsTRAware();
         }
 
         @Override
@@ -2189,6 +2336,15 @@ public final class Configuration
             return templateConfigurationsSet;
         }
 
+        private TemplateConfigurationFactory getDefaultTemplateConfigurationsTRAware() {
+            return isTemplateResolverSet() && !getTemplateResolver().supportsTemplateConfigurationsSetting() ? null
+                    : getDefaultTemplateConfigurations();
+        }
+
+        /**
+         * The default value when the {@link #getTemplateResolver() templateResolver} supports this setting (otherwise
+         * the default is hardwired to be {@code null} and this method isn't called).
+         */
         protected TemplateConfigurationFactory getDefaultTemplateConfigurations() {
             return null;
         }
@@ -2218,31 +2374,41 @@ public final class Configuration
         }
 
         @Override
-        public long getTemplateUpdateDelayMilliseconds() {
+        public Long getTemplateUpdateDelayMilliseconds() {
             return isTemplateUpdateDelayMillisecondsSet() ? templateUpdateDelayMilliseconds
-                    : getDefaultTemplateUpdateDelayMilliseconds();
+                    : getDefaultTemplateUpdateDelayMillisecondsTRAware();
         }
 
         @Override
         public boolean isTemplateUpdateDelayMillisecondsSet() {
-            return templateUpdateDelayMilliseconds != null;
+            return templateUpdateDelayMillisecondsSet;
         }
 
-        protected long getDefaultTemplateUpdateDelayMilliseconds() {
-            return 5000;
+        private Long getDefaultTemplateUpdateDelayMillisecondsTRAware() {
+            return isTemplateResolverSet() && !getTemplateResolver().supportsTemplateUpdateDelayMillisecondsSetting()
+                    ? null : getDefaultTemplateUpdateDelayMilliseconds();
+        }
+
+        /**
+         * The default value when the {@link #getTemplateResolver() templateResolver} supports this setting (otherwise
+         * the default is hardwired to be {@code null} and this method isn't called).
+         */
+        protected Long getDefaultTemplateUpdateDelayMilliseconds() {
+            return 5000L;
         }
 
         /**
          * Setter pair of {@link Configuration#getTemplateUpdateDelayMilliseconds()}.
          */
-        public void setTemplateUpdateDelayMilliseconds(long templateUpdateDelayMilliseconds) {
+        public void setTemplateUpdateDelayMilliseconds(Long templateUpdateDelayMilliseconds) {
             this.templateUpdateDelayMilliseconds = templateUpdateDelayMilliseconds;
+            templateUpdateDelayMillisecondsSet = true;
         }
 
         /**
-         * Fluent API equivalent of {@link #setTemplateUpdateDelayMilliseconds(long)}
+         * Fluent API equivalent of {@link #setTemplateUpdateDelayMilliseconds(Long)}
          */
-        public SelfT templateUpdateDelayMilliseconds(long templateUpdateDelayMilliseconds) {
+        public SelfT templateUpdateDelayMilliseconds(Long templateUpdateDelayMilliseconds) {
             setTemplateUpdateDelayMilliseconds(templateUpdateDelayMilliseconds);
             return self();
         }
@@ -2252,19 +2418,29 @@ public final class Configuration
          */
         public void unsetTemplateUpdateDelayMilliseconds() {
             templateUpdateDelayMilliseconds = null;
+            templateUpdateDelayMillisecondsSet = false;
         }
 
         @Override
-        public boolean getLocalizedLookup() {
-            return isLocalizedLookupSet() ? localizedLookup : getDefaultLocalizedLookup();
+        public Boolean getLocalizedLookup() {
+            return isLocalizedLookupSet() ? localizedLookup : getDefaultLocalizedLookupTRAware();
         }
 
         @Override
         public boolean isLocalizedLookupSet() {
-            return localizedLookup != null;
+            return localizedLookupSet;
         }
 
-        protected boolean getDefaultLocalizedLookup() {
+        private Boolean getDefaultLocalizedLookupTRAware() {
+            return isTemplateResolverSet() && !getTemplateResolver().supportsLocalizedLookupSetting() ? null
+                    : getDefaultLocalizedLookup();
+        }
+
+        /**
+         * The default value when the {@link #getTemplateResolver() templateResolver} supports this setting (otherwise
+         * the default is hardwired to be {@code null} and this method isn't called).
+         */
+        protected Boolean getDefaultLocalizedLookup() {
             return true;
         }
 
@@ -2273,6 +2449,7 @@ public final class Configuration
          */
         public void setLocalizedLookup(Boolean localizedLookup) {
             this.localizedLookup = localizedLookup;
+            localizedLookupSet = true;
         }
 
         /**
@@ -2288,6 +2465,7 @@ public final class Configuration
          */
         public void unsetLocalizedLookup() {
             this.localizedLookup = null;
+            localizedLookupSet = false;
         }
 
         public Collection<OutputFormat> getRegisteredCustomOutputFormats() {

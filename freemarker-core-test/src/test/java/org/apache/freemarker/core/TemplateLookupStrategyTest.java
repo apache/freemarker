@@ -309,11 +309,15 @@ public class TemplateLookupStrategyTest {
         final Configuration cfg;
         final Configuration cfgNoLocLU;
         {
-            Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0)
+            cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
                     .templateLoader(tl)
-                    .templateLookupStrategy(new DomainTemplateLookupStrategy());
-            cfg = cfgB.build();
-            cfgNoLocLU = cfgB.localizedLookup(false).build();
+                    .templateLookupStrategy(new DomainTemplateLookupStrategy())
+                    .build();
+            cfgNoLocLU = new Configuration.Builder(Configuration.VERSION_3_0_0)
+                    .templateLoader(tl)
+                    .templateLookupStrategy(new DomainTemplateLookupStrategy())
+                    .localizedLookup(false)
+                    .build();
         }
 
         final String iAtDefaultContent = "i at default";

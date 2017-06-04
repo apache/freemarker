@@ -25,10 +25,6 @@ package org.apache.freemarker.core;
  */
 public abstract class SettingValueNotSetException extends RuntimeException {
 
-    public SettingValueNotSetException(String message) {
-        super(message);
-    }
-
     public SettingValueNotSetException(String message, Throwable cause) {
         super(message, cause);
     }
