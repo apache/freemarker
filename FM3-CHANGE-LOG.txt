@@ -85,8 +85,8 @@ the FreeMarer 3 changelog here:
   giving total control over this aspect of FreeMarker, in case replacing Configuration settings like `templateLoader`
   or `cacheStorage` wasn't enough. The `TemplateResolver` implementation declares which of the template resolution
   related Configuration settings it supports (for example, it may still want to rely on the `templateLoader`, but
-  doesn't use the other settings). It's a template resolution related settings that the TemplateResolver doesn't
-  support. The default implementation, `DefaultTemplateResolver`, supports all of them of course. Note that the
+  doesn't use the other settings). It's an error to set a template resolution related settings that the TemplateResolver
+  doesn't support. The default implementation, `DefaultTemplateResolver`, supports all of them of course. Note that the
   `TemplateCache` was removed, and was basically replaced by `DefaultTemplateResolver`.
 - Marked most static utility classes as internal, and renamed them to start with "_" (for example StringUtils was
   renamed to _StringUtil, thus people won't accidentally use it when they wanted to autocomplete to Apache Commons
