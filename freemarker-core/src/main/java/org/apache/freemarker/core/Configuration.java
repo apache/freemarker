@@ -1807,11 +1807,14 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         private Collection<OutputFormat> registeredCustomOutputFormats;
         private Map<String, Object> sharedVariables;
 
+        private boolean alreadyBuilt;
+
         /**
          * @param incompatibleImprovements
-         *         The inital value of the {@link Configuration#getIncompatibleImprovements() incompatibleImprovements};
-         *         can't {@code null}. This can be later changed via {@link #setIncompatibleImprovements(Version)}. The
-         *         point here is just to ensure that it's never {@code null}.
+         *         The initial value of the
+         *         {@link Configuration#getIncompatibleImprovements() incompatibleImprovements}; can't {@code null}.
+         *         This can be later changed via {@link #setIncompatibleImprovements(Version)}. The point here is
+         *         just to ensure that it's never {@code null}.
          */
         protected ExtendableBuilder(Version incompatibleImprovements) {
             _NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
@@ -1820,7 +1823,12 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
         @Override
         public Configuration build() throws ConfigurationException {
-            return new Configuration(this);
+            if (alreadyBuilt) {
+                throw new IllegalStateException("build() can only be executed once.");
+            }
+            Configuration configuration = new Configuration(this);
+            alreadyBuilt = true;
+            return configuration;
         }
 
         @Override
@@ -1839,7 +1847,8 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     } else {
                         setSourceEncoding(Charset.forName(value));
                     }
-                } else if (LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE.equals(name) || LOCALIZED_TEMPLATE_LOOKUP_KEY_CAMEL_CASE.equals(name)) {
+                } else if (LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE.equals(name)
+                        || LOCALIZED_TEMPLATE_LOOKUP_KEY_CAMEL_CASE.equals(name)) {
                     setLocalizedTemplateLookup(_StringUtil.getYesNo(value));
                 } else if (WHITESPACE_STRIPPING_KEY_SNAKE_CASE.equals(name)
                         || WHITESPACE_STRIPPING_KEY_CAMEL_CASE.equals(name)) {

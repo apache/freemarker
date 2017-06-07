@@ -1088,6 +1088,8 @@ class ClassIntrospector {
         //   default can be left unset (like null).
         // - If you add a new field, review all methods in this class, also the ClassIntrospector constructor
 
+        private boolean alreadyBuilt;
+
         Builder(ClassIntrospector ci) {
             exposureLevel = ci.exposureLevel;
             exposeFields = ci.exposeFields;
@@ -1230,10 +1232,14 @@ class ClassIntrospector {
          */
         @Override
         public ClassIntrospector build() {
+            if (alreadyBuilt) {
+                throw new IllegalStateException("build() can only be executed once.");
+            }
+
+            ClassIntrospector instance;
             if ((methodAppearanceFineTuner == null || methodAppearanceFineTuner instanceof SingletonCustomizer)
                     && (methodSorter == null || methodSorter instanceof SingletonCustomizer)) {
                 // Instance can be cached.
-                ClassIntrospector instance;
                 synchronized (INSTANCE_CACHE) {
                     Reference instanceRef = (Reference) INSTANCE_CACHE.get(this);
                     instance = instanceRef != null ? (ClassIntrospector) instanceRef.get() : null;
@@ -1245,14 +1251,15 @@ class ClassIntrospector {
                 }
 
                 removeClearedReferencesFromInstanceCache();
-
-                return instance;
             } else {
                 // If methodAppearanceFineTuner or methodSorter is specified and isn't marked as a singleton, the
                 // ClassIntrospector can't be shared/cached as those objects could contain a back-reference to the
                 // DefaultObjectWrapper.
-                return new ClassIntrospector(this, new Object(), true, false);
+                instance = new ClassIntrospector(this, new Object(), true, false);
             }
+
+            alreadyBuilt = true;
+            return instance;
         }
 
     }

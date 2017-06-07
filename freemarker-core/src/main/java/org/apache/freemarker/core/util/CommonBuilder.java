@@ -28,7 +28,10 @@ public interface CommonBuilder<ProductT> {
 
     /**
      * Creates an instance of the product class. This is usually a new instance, though if the product is stateless,
-     * it's possibly a shared object instead of a new one.
+     * it's possibly a shared object instead of a new one. Builders shouldn't allow calling this method for multiple
+     * times (not counting calls that threw exceptions), and should throw {@link IllegalStateException} to prevent that.
+     *
+     * @thorws IllegalStateException If this method has already returned successfully once.
      */
     ProductT build() throws ConfigurationException;
 

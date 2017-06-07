@@ -664,13 +664,20 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     public static final class Builder extends MutableParsingAndProcessingConfiguration<Builder>
             implements CommonBuilder<TemplateConfiguration> {
 
+        private boolean alreadyBuilt;
+
         public Builder() {
             super();
         }
 
         @Override
         public TemplateConfiguration build() {
-            return new TemplateConfiguration(this);
+            if (alreadyBuilt) {
+                throw new IllegalStateException("build() can only be executed once.");
+            }
+            TemplateConfiguration templateConfiguration = new TemplateConfiguration(this);
+            alreadyBuilt = true;
+            return templateConfiguration;
         }
 
         @Override

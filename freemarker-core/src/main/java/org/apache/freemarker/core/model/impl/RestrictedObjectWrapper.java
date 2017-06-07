@@ -71,6 +71,7 @@ public class RestrictedObjectWrapper extends DefaultObjectWrapper {
                 INSTANCE_CACHE = new WeakHashMap<>();
 
         private final static ReferenceQueue<RestrictedObjectWrapper> INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue<>();
+        private boolean alreadyBuilt;
 
         public Builder(Version incompatibleImprovements) {
             super(incompatibleImprovements, false);
@@ -78,8 +79,14 @@ public class RestrictedObjectWrapper extends DefaultObjectWrapper {
 
         @Override
         public RestrictedObjectWrapper build() {
-            return DefaultObjectWrapperTCCLSingletonUtil.getSingleton(
+            if (alreadyBuilt) {
+                throw new IllegalStateException("build() can only be executed once.");
+            }
+
+            RestrictedObjectWrapper singleton = DefaultObjectWrapperTCCLSingletonUtil.getSingleton(
                     this, INSTANCE_CACHE, INSTANCE_CACHE_REF_QUEUE, ConstructorInvoker.INSTANCE);
+            alreadyBuilt = true;
+            return singleton;
         }
 
         private static class ConstructorInvoker

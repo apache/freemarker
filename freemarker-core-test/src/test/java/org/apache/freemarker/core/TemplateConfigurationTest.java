@@ -731,17 +731,18 @@ public class TemplateConfigurationTest {
     
     @Test
     public void testInterpret() throws TemplateException, IOException {
-        TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
-        tcb.setArithmeticEngine(new DummyArithmeticEngine());
         {
-            TemplateConfiguration tc = tcb.build();
+            TemplateConfiguration tc = new TemplateConfiguration.Builder()
+                    .arithmeticEngine(new DummyArithmeticEngine())
+                    .build();
             assertOutputWithoutAndWithTC(tc,
                     "<#setting locale='en_US'><#assign src = r'${1} <#assign x = 1>${x + x}'><@src?interpret />",
                     "1 2", "11 22");
         }
-        tcb.setWhitespaceStripping(false);
         {
-            TemplateConfiguration tc = tcb.build();
+            TemplateConfiguration tc = new TemplateConfiguration.Builder()
+                    .whitespaceStripping(false)
+                    .build();
             assertOutputWithoutAndWithTC(tc,
                     "<#if true>\nX</#if><#assign src = r'<#if true>\nY</#if>'><@src?interpret />",
                     "XY", "\nX\nY");
@@ -763,15 +764,15 @@ public class TemplateConfigurationTest {
         }
         
         {
-            TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
             Charset outputEncoding = ISO_8859_2;
-            tcb.setOutputEncoding(outputEncoding);
 
             String legacyNCFtl = "${r'.output_encoding!\"null\"'?eval}";
             String camelCaseNCFtl = "${r'.outputEncoding!\"null\"'?eval}";
 
             {
-                TemplateConfiguration tc = tcb.build();
+                TemplateConfiguration tc = new TemplateConfiguration.Builder()
+                        .outputEncoding(outputEncoding)
+                        .build();
 
                 // Default is re-auto-detecting in ?eval:
                 assertOutputWithoutAndWithTC(tc, legacyNCFtl, "null", outputEncoding.name());
@@ -779,20 +780,20 @@ public class TemplateConfigurationTest {
             }
 
             {
-                // Force camelCase:
-                tcb.setNamingConvention(NamingConvention.CAMEL_CASE);
-
-                TemplateConfiguration tc = tcb.build();
+                TemplateConfiguration tc = new TemplateConfiguration.Builder()
+                        .outputEncoding(outputEncoding)
+                        .namingConvention(NamingConvention.CAMEL_CASE) // Force camelCase
+                        .build();
 
                 assertOutputWithoutAndWithTC(tc, legacyNCFtl, "null", null);
                 assertOutputWithoutAndWithTC(tc, camelCaseNCFtl, "null", outputEncoding.name());
             }
 
             {
-                // Force legacy:
-                tcb.setNamingConvention(NamingConvention.LEGACY);
-
-                TemplateConfiguration tc = tcb.build();
+                TemplateConfiguration tc = new TemplateConfiguration.Builder()
+                        .outputEncoding(outputEncoding)
+                        .namingConvention(NamingConvention.LEGACY) // Force legacy
+                        .build();
 
                 assertOutputWithoutAndWithTC(tc, legacyNCFtl, "null", outputEncoding.name());
                 assertOutputWithoutAndWithTC(tc, camelCaseNCFtl, "null", null);
@@ -840,8 +841,9 @@ public class TemplateConfigurationTest {
     public void testIsSet() throws Exception {
         for (PropertyDescriptor pd : getTemplateConfigurationSettingPropDescs(
                 TemplateConfiguration.Builder.class, true)) {
+            checkAllIsSetFalseExcept(new TemplateConfiguration.Builder().build(), null);
+
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
-            checkAllIsSetFalseExcept(tcb.build(), null);
             pd.getWriteMethod().invoke(tcb, SETTING_ASSIGNMENTS.get(pd.getName()));
             checkAllIsSetFalseExcept(tcb.build(), pd.getName());
         }

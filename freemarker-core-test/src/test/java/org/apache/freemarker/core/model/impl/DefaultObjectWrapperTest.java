@@ -129,9 +129,8 @@ public class DefaultObjectWrapperTest {
     @SuppressWarnings("boxing")
     @Test
     public void testBuilder() throws Exception {
-        DefaultObjectWrapper.Builder builder = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
-        DefaultObjectWrapper ow = builder.build();
-        assertSame(ow, builder.build());
+        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
+        assertSame(ow, new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
         assertSame(ow.getClass(), DefaultObjectWrapper.class);
         assertEquals(Configuration.VERSION_3_0_0, ow.getIncompatibleImprovements());
     }

@@ -25,6 +25,7 @@ package org.apache.freemarker.core.util;
 public class ProductWrappingBuilder<ProductT> implements CommonBuilder<ProductT> {
 
     private final ProductT product;
+    private boolean alreadyBuilt;
 
     public ProductWrappingBuilder(ProductT product) {
         _NullArgumentException.check("product", product);
@@ -33,6 +34,10 @@ public class ProductWrappingBuilder<ProductT> implements CommonBuilder<ProductT>
 
     @Override
     public ProductT build() {
+        if (alreadyBuilt) {
+            throw new IllegalStateException("build() can only be executed once.");
+        }
+        alreadyBuilt = true;
         return product;
     }
 }

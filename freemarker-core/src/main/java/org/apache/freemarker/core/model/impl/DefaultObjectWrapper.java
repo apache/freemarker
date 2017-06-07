@@ -1303,6 +1303,8 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
                 INSTANCE_CACHE = new WeakHashMap<>();
         private final static ReferenceQueue<DefaultObjectWrapper> INSTANCE_CACHE_REF_QUEUE = new ReferenceQueue<>();
 
+        private boolean alreadyBuilt;
+
         /**
          * See {@link ExtendableBuilder#ExtendableBuilder(Version, boolean)}
          */
@@ -1323,8 +1325,14 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          */
         @Override
         public DefaultObjectWrapper build() {
-            return DefaultObjectWrapperTCCLSingletonUtil.getSingleton(
+            if (alreadyBuilt) {
+                throw new IllegalStateException("build() can only be executed once.");
+            }
+
+            DefaultObjectWrapper singleton = DefaultObjectWrapperTCCLSingletonUtil.getSingleton(
                     this, INSTANCE_CACHE, INSTANCE_CACHE_REF_QUEUE, ConstructorInvoker.INSTANCE);
+            alreadyBuilt = true;
+            return singleton;
         }
 
         /**

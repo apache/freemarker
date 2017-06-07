@@ -161,10 +161,12 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
         
         {
-            DefaultObjectWrapper.Builder factory = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
-            factory.setExposureLevel(DefaultObjectWrapper.EXPOSE_PROPERTIES_ONLY);
-            DefaultObjectWrapper ow1 = factory.build();
-            DefaultObjectWrapper ow2 = factory.build();
+            DefaultObjectWrapper ow1 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .exposureLevel(DefaultObjectWrapper.EXPOSE_PROPERTIES_ONLY)
+                    .build();
+            DefaultObjectWrapper ow2 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .exposureLevel(DefaultObjectWrapper.EXPOSE_PROPERTIES_ONLY)
+                    .build();
             assertEquals(3, getDefaultObjectWrapperInstanceCacheSize());
             assertSame(ow1, ow2);
             
@@ -179,10 +181,12 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
         
         {
-            DefaultObjectWrapper.Builder factory = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
-            factory.setExposeFields(true);
-            DefaultObjectWrapper ow1 = factory.build();
-            DefaultObjectWrapper ow2 = factory.build();
+            DefaultObjectWrapper ow1 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .exposeFields(true)
+                    .build();
+            DefaultObjectWrapper ow2 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .exposeFields(true)
+                    .build();
             assertEquals(4, getDefaultObjectWrapperInstanceCacheSize());
             assertSame(ow1, ow2);
             
@@ -194,11 +198,11 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
         
         {
-            DefaultObjectWrapper.Builder factory = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
-            factory.setStrict(true);
-            factory.setDefaultDateType(TemplateDateModel.DATETIME);
-            factory.setOuterIdentity(new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
-            DefaultObjectWrapper ow = factory.build();
+            DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .strict(true)
+                    .defaultDateType(TemplateDateModel.DATETIME)
+                    .outerIdentity(new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build())
+                    .build();
             assertEquals(5, getDefaultObjectWrapperInstanceCacheSize());
             assertTrue(ow.isStrict());
             assertEquals(TemplateDateModel.DATETIME, ow.getDefaultDateType());
@@ -233,9 +237,9 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
 
         {
-            DefaultObjectWrapper.Builder factory = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
-            factory.setUseModelCache(true);
-            DefaultObjectWrapper ow = factory.build();
+            DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .useModelCache(true)
+                    .build();
             assertTrue(ow.getUseModelCache());
             assertEquals(2, getDefaultObjectWrapperInstanceCacheSize());
             
@@ -246,9 +250,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
     }
     
     private DefaultObjectWrapper getDefaultObjectWrapperWithSetting(Version ici, boolean useModelCache) {
-        DefaultObjectWrapper.Builder f = new DefaultObjectWrapper.Builder(ici);
-        f.setUseModelCache(useModelCache);
-        return f.build();
+        return new DefaultObjectWrapper.Builder(ici).useModelCache(useModelCache).build();
     }
 
     public void testMultipleTCCLs() {
@@ -317,17 +319,15 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         checkClassIntrospectorCacheSize(0);
         
         List<DefaultObjectWrapper> hardReferences = new LinkedList<>();
-        DefaultObjectWrapper.Builder builder;
 
         {
-            builder = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
-            
-            DefaultObjectWrapper bw1 = builder.build();
+            DefaultObjectWrapper bw1 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
             checkClassIntrospectorCacheSize(1);
             
-            builder.setExposureLevel(DefaultObjectWrapper.EXPOSE_SAFE);  // this was already set to this
-            builder.setUseModelCache(true);  // this shouldn't matter for the introspection cache
-            DefaultObjectWrapper bw2 = builder.build();
+            DefaultObjectWrapper bw2 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .exposureLevel(DefaultObjectWrapper.EXPOSE_SAFE)  // this was already set to this
+                    .useModelCache(true)  // this shouldn't matter for the introspection cache
+                    .build();
             checkClassIntrospectorCacheSize(1);
             
             assertSame(bw2.getClassIntrospector(), bw1.getClassIntrospector());
@@ -345,9 +345,9 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
         
         {
-            builder = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
-            builder.setExposeFields(true);
-            DefaultObjectWrapper ow = builder.build();
+            DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .exposeFields(true)
+                    .build();
             checkClassIntrospectorCacheSize(2);
             // Wrapping tests:
             assertTrue(exposesFields(ow));
@@ -359,8 +359,10 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
 
         {
-            builder.setExposureLevel(DefaultObjectWrapper.EXPOSE_ALL);
-            DefaultObjectWrapper ow = builder.build();
+            DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .exposureLevel(DefaultObjectWrapper.EXPOSE_ALL)
+                    .exposeFields(true)
+                    .build();
             checkClassIntrospectorCacheSize(3);
             // Wrapping tests:
             assertTrue(exposesFields(ow));
@@ -372,8 +374,9 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
         
         {
-            builder.setExposeFields(false);
-            DefaultObjectWrapper ow = builder.build();
+            DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .exposureLevel(DefaultObjectWrapper.EXPOSE_ALL)
+                    .build();
             checkClassIntrospectorCacheSize(4);
             // Wrapping tests:
             assertFalse(exposesFields(ow));
@@ -385,8 +388,9 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
         
         {
-            builder.setExposureLevel(DefaultObjectWrapper.EXPOSE_NOTHING);
-            DefaultObjectWrapper ow = builder.build();
+            DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .exposureLevel(DefaultObjectWrapper.EXPOSE_NOTHING)
+                    .build();
             checkClassIntrospectorCacheSize(5);
             // Wrapping tests:
             assertFalse(exposesFields(ow));
@@ -398,8 +402,10 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
 
         {
-            builder.setExposeFields(true);
-            DefaultObjectWrapper ow = builder.build();
+            DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .exposureLevel(DefaultObjectWrapper.EXPOSE_NOTHING)
+                    .exposeFields(true)
+                    .build();
             checkClassIntrospectorCacheSize(6);
             // Wrapping tests:
             assertTrue(exposesFields(ow));
@@ -411,8 +417,10 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
 
         {
-            builder.setExposureLevel(DefaultObjectWrapper.EXPOSE_PROPERTIES_ONLY);
-            DefaultObjectWrapper ow = builder.build();
+            DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .exposureLevel(DefaultObjectWrapper.EXPOSE_PROPERTIES_ONLY)
+                    .exposeFields(true)
+                    .build();
             checkClassIntrospectorCacheSize(7);
             // Wrapping tests:
             assertTrue(exposesFields(ow));
@@ -424,17 +432,19 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
         
         {
-            builder = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
-            builder.setUseModelCache(true);
-            builder.setExposeFields(false);
-            builder.setExposureLevel(DefaultObjectWrapper.EXPOSE_PROPERTIES_ONLY);
-            
-            DefaultObjectWrapper bw1 = builder.build();
+            DefaultObjectWrapper bw1 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .useModelCache(true)
+                    .exposeFields(false)
+                    .exposureLevel(DefaultObjectWrapper.EXPOSE_PROPERTIES_ONLY)
+                    .build();
             checkClassIntrospectorCacheSize(8);
             ClassIntrospector ci1 = bw1.getClassIntrospector();
             
-            builder.setUseModelCache(false);  // Shouldn't mater for the ClassIntrospector
-            DefaultObjectWrapper bw2 = builder.build();
+            DefaultObjectWrapper bw2 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .useModelCache(false)  // Shouldn't mater for the ClassIntrospector
+                    .exposeFields(false)
+                    .exposureLevel(DefaultObjectWrapper.EXPOSE_PROPERTIES_ONLY)
+                    .build();
             ClassIntrospector ci2 = bw2.getClassIntrospector();
             checkClassIntrospectorCacheSize(8);
             
@@ -460,15 +470,18 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         assertEquals(0, getClassIntrospectorNonClearedInstanceCacheSize());
 
         {
-            builder.setExposeFields(false);
-            
-            DefaultObjectWrapper bw1 = builder.build();
+            DefaultObjectWrapper bw1 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .exposureLevel(DefaultObjectWrapper.EXPOSE_PROPERTIES_ONLY)
+                    .build();
             checkClassIntrospectorCacheSize(8);
             assertEquals(1, getClassIntrospectorNonClearedInstanceCacheSize());
             ClassIntrospector ci1 = bw1.getClassIntrospector();
             
-            builder.setUseModelCache(true);  // Shouldn't mater
-            DefaultObjectWrapper bw2 = builder.build();
+            DefaultObjectWrapper bw2 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                .exposureLevel(DefaultObjectWrapper.EXPOSE_PROPERTIES_ONLY)
+                .useModelCache(true)  // Shouldn't mater for the ClassIntrospector
+                .build();
+
             ClassIntrospector ci2 = bw2.getClassIntrospector();
             
             assertSame(ci1, ci2);
@@ -486,8 +499,8 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
         
         {
-            builder = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
-            DefaultObjectWrapper ow = builder.build();
+            DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .build();
             checkClassIntrospectorCacheSize(8);
             assertEquals(2, getClassIntrospectorNonClearedInstanceCacheSize());
             // Wrapping tests:
@@ -504,9 +517,9 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         assertEquals(0, getClassIntrospectorNonClearedInstanceCacheSize());
         
         {
-            builder = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
-            builder.setExposeFields(true);
-            DefaultObjectWrapper ow = builder.build();
+            DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .exposeFields(true)
+                    .build();
             checkClassIntrospectorCacheSize(1);
             // Wrapping tests:
             assertTrue(exposesFields(ow));
@@ -518,19 +531,26 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
         
         {
-            builder = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
-            builder.setMethodAppearanceFineTuner(new MethodAppearanceFineTuner() {
+            MethodAppearanceFineTuner methodAppearanceFineTuner = new MethodAppearanceFineTuner() {
                 @Override
                 public void process(DecisionInput in, Decision out) {
                 }
-            });  // spoils ClassIntrospector() sharing
+            };
+            DefaultObjectWrapper bw1 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .useModelCache(false)
+                    .methodAppearanceFineTuner(methodAppearanceFineTuner)  // spoils ClassIntrospector() sharing
+                    .build();
+            assertSame(
+                    bw1,
+                    new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                            .useModelCache(false)
+                            .methodAppearanceFineTuner(methodAppearanceFineTuner)  // spoils ClassIntrospector() sharing
+                            .build());
 
-            builder.setUseModelCache(false);
-            DefaultObjectWrapper bw1 = builder.build();
-            assertSame(bw1, builder.build());
-
-            builder.setUseModelCache(true);
-            DefaultObjectWrapper bw2 = builder.build();
+            DefaultObjectWrapper bw2 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .useModelCache(true)
+                    .methodAppearanceFineTuner(methodAppearanceFineTuner)  // spoils ClassIntrospector() sharing
+                    .build();
             checkClassIntrospectorCacheSize(1);
             assertNotSame(bw1, bw2);
             assertNotSame(bw1.getClassIntrospector(), bw2.getClassIntrospector());
@@ -539,17 +559,22 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         }
 
         {
-            builder = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
-            builder.setMethodAppearanceFineTuner(
-                    GetlessMethodsAsPropertyGettersRule.INSTANCE);  // doesn't spoils sharing
-
-            builder.setUseModelCache(false);
-            DefaultObjectWrapper bw1 = builder.build();
-            assertSame(bw1, builder.build());
+            DefaultObjectWrapper bw1 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .methodAppearanceFineTuner(GetlessMethodsAsPropertyGettersRule.INSTANCE)  // doesn't spoils sharing
+                    .useModelCache(false)
+                    .build();
+            assertSame(
+                    bw1,
+                    new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                            .methodAppearanceFineTuner(GetlessMethodsAsPropertyGettersRule.INSTANCE)  // doesn't spoils sharing
+                            .useModelCache(false)
+                            .build());
             checkClassIntrospectorCacheSize(2);
-            
-            builder.setUseModelCache(true);
-            DefaultObjectWrapper bw2 = builder.build();
+
+            DefaultObjectWrapper bw2 = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                    .methodAppearanceFineTuner(GetlessMethodsAsPropertyGettersRule.INSTANCE)  // doesn't spoils sharing
+                    .useModelCache(true)
+                    .build();
             checkClassIntrospectorCacheSize(2);
             
             assertNotSame(bw1, bw2);
