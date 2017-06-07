@@ -247,8 +247,8 @@ public abstract class TemplateResolver {
 
     /**
      * Works like {@link #supportsTemplateLoaderSetting()}, but for the
-     * {@link Configuration#getLocalizedLookup() localizedLookup} setting.
+     * {@link Configuration#getLocalizedTemplateLookup() localizedTemplateLookup} setting.
      */
-    public abstract boolean supportsLocalizedLookupSetting();
+    public abstract boolean supportsLocalizedTemplateLookupSetting();
 
 }

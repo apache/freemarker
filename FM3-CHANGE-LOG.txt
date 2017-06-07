@@ -260,3 +260,4 @@ the FreeMarer 3 changelog here:
   - FM2 Configuration.${c}_TAG_SYNTAX with TagSyntax.${c}
   - FM2 Configuration.${c}_AUTO_ESCAPING_POLICY with AutoEscapingPolicy.${c}
 - Renamed the `cacheStorage` Configuration setting to `templateCacheStorage`.
+- Renamed the `localizedLookup` Configuration setting to `localizedLookup`.

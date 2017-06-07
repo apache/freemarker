@@ -45,9 +45,9 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
  * {@link TemplateConfiguration}-s anyway, this compromise was chosen.)
  * <p>
  * Note on the {@code locale} setting: When used with the standard template loading/caching mechanism ({@link
- * Configuration#getTemplate(String)} and its overloads), localized lookup happens before the {@code locale} specified
- * here could have effect. The {@code locale} will be only set in the template that the localized lookup has already
- * found.
+ * Configuration#getTemplate(String)} and its overloads), localized template lookup happens before the {@code locale}
+ * specified here could have effect. The {@code locale} will be only set in the template that the localized
+ * template lookup has already found.
  * <p>
  * This class is immutable. Use {@link TemplateConfiguration.Builder} to create a new instance.
  *

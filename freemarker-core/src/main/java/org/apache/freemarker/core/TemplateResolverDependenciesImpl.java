@@ -88,9 +88,9 @@ class TemplateResolverDependenciesImpl extends TemplateResolverDependencies {
     }
 
     @Override
-    public Boolean getLocalizedLookup() {
-        checkSettingSupported(LOCALIZED_LOOKUP_KEY, templateResolver.supportsLocalizedLookupSetting());
-        return configuration.getLocalizedLookup();
+    public Boolean getLocalizedTemplateLookup() {
+        checkSettingSupported(LOCALIZED_TEMPLATE_LOOKUP_KEY, templateResolver.supportsLocalizedTemplateLookupSetting());
+        return configuration.getLocalizedTemplateLookup();
     }
 
     @Override

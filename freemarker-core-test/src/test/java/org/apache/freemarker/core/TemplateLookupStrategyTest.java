@@ -136,7 +136,7 @@ public class TemplateLookupStrategyTest {
         try {
             new Configuration.Builder(Configuration.VERSION_3_0_0).templateLoader(tl)
                     .locale(new Locale("xx"))
-                    .localizedLookup(false).build()
+                    .localizedTemplateLookup(false).build()
                     .getTemplate("missing.ftl");
             fail();
         } catch (TemplateNotFoundException e) {
@@ -202,7 +202,7 @@ public class TemplateLookupStrategyTest {
             {
                 final Locale locale = new Locale("aa", "BB", "XX_XX");
                 final Template t = new Configuration.Builder(Configuration.VERSION_3_0_0).templateLoader(tl)
-                        .localizedLookup(false).build()
+                        .localizedTemplateLookup(false).build()
                         .getTemplate(templateName, locale);
                 assertEquals("test.ftl", t.getLookupName());
                 assertEquals("test.ftl", t.getSourceName());
@@ -316,7 +316,7 @@ public class TemplateLookupStrategyTest {
             cfgNoLocLU = new Configuration.Builder(Configuration.VERSION_3_0_0)
                     .templateLoader(tl)
                     .templateLookupStrategy(new DomainTemplateLookupStrategy())
-                    .localizedLookup(false)
+                    .localizedTemplateLookup(false)
                     .build();
         }
 

@@ -58,7 +58,7 @@ public abstract class TemplateLookupContext<R extends TemplateLookupResult> {
     /**
      * Finds the template source based on its <em>normalized</em> name; tries localized variations going from most
      * specific to less specific, and for each variation it delegates to {@link #lookupWithAcquisitionStrategy(String)}.
-     * If {@code templateLocale} is {@code null} (typically, because {@link Configuration#getLocalizedLookup()} is
+     * If {@code templateLocale} is {@code null} (typically, because {@link Configuration#getLocalizedTemplateLookup()} is
      * {@code false})), then it's the same as calling {@link #lookupWithAcquisitionStrategy(String)} directly. This is
      * the default strategy of FreeMarker (at least in 2.3.x), so for more information, see
      * {@link DefaultTemplateLookupStrategy#INSTANCE}.
@@ -81,8 +81,8 @@ public abstract class TemplateLookupContext<R extends TemplateLookupResult> {
     }
 
     /**
-     * {@code null} if localized lookup is disabled (see {@link Configuration#getLocalizedLookup()}), otherwise the
-     * locale requested.
+     * {@code null} if localized template lookup is disabled (see {@link Configuration#getLocalizedTemplateLookup()}),
+     * otherwise the locale requested.
      */
     public Locale getTemplateLocale() {
         return templateLocale;

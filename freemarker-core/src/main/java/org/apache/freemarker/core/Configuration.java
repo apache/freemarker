@@ -146,7 +146,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         // Must be sorted alphabetically!
         ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_SNAKE_CASE,
         ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE,
-        ExtendableBuilder.LOCALIZED_LOOKUP_KEY_SNAKE_CASE,
+        ExtendableBuilder.LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE,
         ExtendableBuilder.NAMING_CONVENTION_KEY_SNAKE_CASE,
         ExtendableBuilder.OUTPUT_FORMAT_KEY_SNAKE_CASE,
         ExtendableBuilder.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE,
@@ -169,7 +169,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         // Must be sorted alphabetically!
         ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE,
         ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE,
-        ExtendableBuilder.LOCALIZED_LOOKUP_KEY_CAMEL_CASE,
+        ExtendableBuilder.LOCALIZED_TEMPLATE_LOOKUP_KEY_CAMEL_CASE,
         ExtendableBuilder.NAMING_CONVENTION_KEY_CAMEL_CASE,
         ExtendableBuilder.OUTPUT_FORMAT_KEY_CAMEL_CASE,
         ExtendableBuilder.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE,
@@ -244,7 +244,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     private final TemplateNameFormat templateNameFormat;
     private final TemplateConfigurationFactory templateConfigurations;
     private final Long templateUpdateDelayMilliseconds;
-    private final Boolean localizedLookup;
+    private final Boolean localizedTemplateLookup;
     private final List<OutputFormat> registeredCustomOutputFormats;
     private final Map<String, OutputFormat> registeredCustomOutputFormatsByName;
     private final Map<String, Object> sharedVariables;
@@ -462,10 +462,10 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     templateResolver, TEMPLATE_LOOKUP_STRATEGY_KEY, templateLookupStrategy);
         }
 
-        localizedLookup = builder.getLocalizedLookup();
-        if (!templateResolver.supportsLocalizedLookupSetting()) {
+        localizedTemplateLookup = builder.getLocalizedTemplateLookup();
+        if (!templateResolver.supportsLocalizedTemplateLookupSetting()) {
             checkSettingIsNullForThisTemplateResolver(
-                    templateResolver, LOCALIZED_LOOKUP_KEY, localizedLookup);
+                    templateResolver, LOCALIZED_TEMPLATE_LOOKUP_KEY, localizedTemplateLookup);
         }
 
         templateNameFormat = builder.getTemplateNameFormat();
@@ -1369,13 +1369,13 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
      *            not {@code null}). This parameter also drives localized template lookup. Assuming that you have
      *            specified {@code en_US} as the locale and {@code myTemplate.ftl} as the name of the template, and the
      *            default {@link TemplateLookupStrategy} is used and
-     *            {@code #setLocalizedLookup(boolean) localized_lookup} is {@code true}, FreeMarker will first try to
+     *            {@code #setLocalizedTemplateLookup(boolean) localized_template_lookup} is {@code true}, FreeMarker will first try to
      *            retrieve {@code myTemplate_en_US.html}, then {@code myTemplate.en.ftl}, and finally
      *            {@code myTemplate.ftl}. Note that that the template's locale will be {@code en_US} even if it only
      *            finds {@code myTemplate.ftl}. Note that when the {@code locale} setting is overridden with a
      *            {@link TemplateConfiguration} provided by {@link #getTemplateConfigurations()}, that overrides the
-     *            value specified here, but only after the localized lookup, that is, it modifies the template
-     *            found by the localized lookup.
+     *            value specified here, but only after the localized template lookup, that is, it modifies the template
+     *            found by the localized template lookup.
      * 
      * @param customLookupCondition
      *            This value can be used by a custom {@link TemplateLookupStrategy}; has no effect with the default one.
@@ -1536,8 +1536,8 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     }
 
     @Override
-    public Boolean getLocalizedLookup() {
-        return localizedLookup;
+    public Boolean getLocalizedTemplateLookup() {
+        return localizedTemplateLookup;
     }
 
     /**
@@ -1545,7 +1545,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
      * value in the {@link Configuration}.
      */
     @Override
-    public boolean isLocalizedLookupSet() {
+    public boolean isLocalizedTemplateLookupSet() {
         return true;
     }
 
@@ -1669,11 +1669,11 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String SOURCE_ENCODING_KEY_CAMEL_CASE = "sourceEncoding";
         /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String LOCALIZED_LOOKUP_KEY_SNAKE_CASE = "localized_lookup";
+        public static final String LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE = "localized_template_lookup";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String LOCALIZED_LOOKUP_KEY = LOCALIZED_LOOKUP_KEY_SNAKE_CASE;
+        public static final String LOCALIZED_TEMPLATE_LOOKUP_KEY = LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE;
         /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String LOCALIZED_LOOKUP_KEY_CAMEL_CASE = "localizedLookup";
+        public static final String LOCALIZED_TEMPLATE_LOOKUP_KEY_CAMEL_CASE = "localizedTemplateLookup";
         /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String WHITESPACE_STRIPPING_KEY_SNAKE_CASE = "whitespace_stripping";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
@@ -1801,8 +1801,8 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         private boolean templateConfigurationsSet;
         private Long templateUpdateDelayMilliseconds;
         private boolean templateUpdateDelayMillisecondsSet;
-        private Boolean localizedLookup;
-        private boolean localizedLookupSet;
+        private Boolean localizedTemplateLookup;
+        private boolean localizedTemplateLookupSet;
 
         private Collection<OutputFormat> registeredCustomOutputFormats;
         private Map<String, Object> sharedVariables;
@@ -1839,8 +1839,8 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     } else {
                         setSourceEncoding(Charset.forName(value));
                     }
-                } else if (LOCALIZED_LOOKUP_KEY_SNAKE_CASE.equals(name) || LOCALIZED_LOOKUP_KEY_CAMEL_CASE.equals(name)) {
-                    setLocalizedLookup(_StringUtil.getYesNo(value));
+                } else if (LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE.equals(name) || LOCALIZED_TEMPLATE_LOOKUP_KEY_CAMEL_CASE.equals(name)) {
+                    setLocalizedTemplateLookup(_StringUtil.getYesNo(value));
                 } else if (WHITESPACE_STRIPPING_KEY_SNAKE_CASE.equals(name)
                         || WHITESPACE_STRIPPING_KEY_CAMEL_CASE.equals(name)) {
                     setWhitespaceStripping(_StringUtil.getYesNo(value));
@@ -2422,50 +2422,50 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         }
 
         @Override
-        public Boolean getLocalizedLookup() {
-            return isLocalizedLookupSet() ? localizedLookup : getDefaultLocalizedLookupTRAware();
+        public Boolean getLocalizedTemplateLookup() {
+            return isLocalizedTemplateLookupSet() ? localizedTemplateLookup : getDefaultLocalizedTemplateLookupTRAware();
         }
 
         @Override
-        public boolean isLocalizedLookupSet() {
-            return localizedLookupSet;
+        public boolean isLocalizedTemplateLookupSet() {
+            return localizedTemplateLookupSet;
         }
 
-        private Boolean getDefaultLocalizedLookupTRAware() {
-            return isTemplateResolverSet() && !getTemplateResolver().supportsLocalizedLookupSetting() ? null
-                    : getDefaultLocalizedLookup();
+        private Boolean getDefaultLocalizedTemplateLookupTRAware() {
+            return isTemplateResolverSet() && !getTemplateResolver().supportsLocalizedTemplateLookupSetting() ? null
+                    : getDefaultLocalizedTemplateLookup();
         }
 
         /**
          * The default value when the {@link #getTemplateResolver() templateResolver} supports this setting (otherwise
          * the default is hardwired to be {@code null} and this method isn't called).
          */
-        protected Boolean getDefaultLocalizedLookup() {
+        protected Boolean getDefaultLocalizedTemplateLookup() {
             return true;
         }
 
         /**
-         * Setter pair of {@link Configuration#getLocalizedLookup()}.
+         * Setter pair of {@link Configuration#getLocalizedTemplateLookup()}.
          */
-        public void setLocalizedLookup(Boolean localizedLookup) {
-            this.localizedLookup = localizedLookup;
-            localizedLookupSet = true;
+        public void setLocalizedTemplateLookup(Boolean localizedTemplateLookup) {
+            this.localizedTemplateLookup = localizedTemplateLookup;
+            localizedTemplateLookupSet = true;
         }
 
         /**
-         * Fluent API equivalent of {@link #setLocalizedLookup(Boolean)}
+         * Fluent API equivalent of {@link #setLocalizedTemplateLookup(Boolean)}
          */
-        public SelfT localizedLookup(Boolean localizedLookup) {
-            setLocalizedLookup(localizedLookup);
+        public SelfT localizedTemplateLookup(Boolean localizedTemplateLookup) {
+            setLocalizedTemplateLookup(localizedTemplateLookup);
             return self();
         }
 
         /**
          * Resets this setting to its initial state, as if it was never set.
          */
-        public void unsetLocalizedLookup() {
-            this.localizedLookup = null;
-            localizedLookupSet = false;
+        public void unsetLocalizedTemplateLookup() {
+            this.localizedTemplateLookup = null;
+            localizedTemplateLookupSet = false;
         }
 
         public Collection<OutputFormat> getRegisteredCustomOutputFormats() {

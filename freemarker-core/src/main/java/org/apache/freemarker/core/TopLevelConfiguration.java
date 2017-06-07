@@ -201,23 +201,23 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
      * Whether localized template lookup is enabled. The default is {@code true}, except when the
      * {@link #getTemplateResolver() templateResolver} doesn't support this setting, in which case it's {@code null}.
      * <p>
-     * With the default {@link TemplateLookupStrategy}, localized lookup works like this: Let's say your locale setting
-     * is {@code Locale("en", "AU")}, and you call {@link Configuration#getTemplate(String) cfg.getTemplate("foo.ftl")}.
-     * Then FreeMarker will look for the template under these names, stopping at the first that exists:
-     * {@code "foo_en_AU.ftl"}, {@code "foo_en.ftl"}, {@code "foo.ftl"}. See the description of the default value at
-     * {@link #getTemplateLookupStrategy()} for a more details. If you need to generate different
-     * template names, set your own a {@link TemplateLookupStrategy} implementation as the value of the
-     * {@link #getTemplateLookupStrategy() templateLookupStrategy} setting.
+     * With the default {@link TemplateLookupStrategy}, localized template lookup works like this: Let's say your
+     * locale setting is {@code Locale("en", "AU")}, and you call
+     * {@link Configuration#getTemplate(String) cfg.getTemplate("foo.ftl")}. Then FreeMarker will look for the
+     * template under these names, stopping at the first that exists: {@code "foo_en_AU.ftl"}, {@code "foo_en.ftl"},
+     * {@code "foo.ftl"}. See the description of the default value at {@link #getTemplateLookupStrategy()} for a more
+     * details. If you need to generate different template names, set your own a {@link TemplateLookupStrategy}
+     * implementation as the value of the {@link #getTemplateLookupStrategy() templateLookupStrategy} setting.
      * <p>
      * If the {@link #getTemplateResolver() templateResolver} doesn't support this setting, then it must be {@code
      * null}. These checks are postponed until the {@link Configuration} instance is created.
      */
-    Boolean getLocalizedLookup();
+    Boolean getLocalizedTemplateLookup();
 
     /**
      * Tells if this setting was explicitly set (otherwise its value will be the default value).
      */
-    boolean isLocalizedLookupSet();
+    boolean isLocalizedTemplateLookupSet();
 
     /**
      * Shared variables are variables that are visible as top-level variables for all templates, except where the data

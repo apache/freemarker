@@ -76,7 +76,7 @@ public class CustomTemplateResolverTest {
         Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0).build();
 
         assertNotNull(cfg.getTemplateLookupStrategy());
-        assertNotNull(cfg.getLocalizedLookup());
+        assertNotNull(cfg.getLocalizedTemplateLookup());
         assertNotNull(cfg.getTemplateCacheStorage());
         assertNotNull(cfg.getTemplateUpdateDelayMilliseconds());
         assertNotNull(cfg.getNamingConvention());
@@ -95,7 +95,7 @@ public class CustomTemplateResolverTest {
                 .build();
 
         assertNull(cfg.getTemplateLookupStrategy());
-        assertNull(cfg.getLocalizedLookup());
+        assertNull(cfg.getLocalizedTemplateLookup());
         assertNull(cfg.getTemplateCacheStorage());
         assertNull(cfg.getTemplateUpdateDelayMilliseconds());
         assertNull(cfg.getTemplateNameFormat());
@@ -115,7 +115,7 @@ public class CustomTemplateResolverTest {
                 .build();
 
         assertNull(cfg.getTemplateLookupStrategy());
-        assertNull(cfg.getLocalizedLookup());
+        assertNull(cfg.getLocalizedTemplateLookup());
         assertNull(cfg.getTemplateCacheStorage());
         assertNull(cfg.getTemplateUpdateDelayMilliseconds());
         assertNotNull(cfg.getNamingConvention()); //!
@@ -148,7 +148,7 @@ public class CustomTemplateResolverTest {
             // Expected
         }
         try {
-            new Configuration.Builder(Configuration.VERSION_3_0_0).localizedLookup(null).build();
+            new Configuration.Builder(Configuration.VERSION_3_0_0).localizedTemplateLookup(null).build();
             fail();
         } catch (ConfigurationSettingValueException e) {
             // Expected
@@ -167,8 +167,9 @@ public class CustomTemplateResolverTest {
     @Test
     public void testConfigurationValidityForCustomTemplateResolver() {
         for (String supportedSetting : new String[]{
-                TEMPLATE_LOADER_KEY, TEMPLATE_LOOKUP_STRATEGY_KEY, LOCALIZED_LOOKUP_KEY, TEMPLATE_NAME_FORMAT_KEY,
-                TEMPLATE_CACHE_STORAGE_KEY, TEMPLATE_UPDATE_DELAY_KEY, TEMPLATE_CONFIGURATIONS_KEY }) {
+                TEMPLATE_LOADER_KEY, TEMPLATE_LOOKUP_STRATEGY_KEY, LOCALIZED_TEMPLATE_LOOKUP_KEY,
+                TEMPLATE_NAME_FORMAT_KEY, TEMPLATE_CACHE_STORAGE_KEY, TEMPLATE_UPDATE_DELAY_KEY,
+                TEMPLATE_CONFIGURATIONS_KEY }) {
             {
                 Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0)
                         .templateResolver(new CustomTemplateResolver(supportedSetting));
@@ -194,8 +195,8 @@ public class CustomTemplateResolverTest {
             cfgB.setTemplateLoader(new StringTemplateLoader());
         } else if (TEMPLATE_LOOKUP_STRATEGY_KEY.equals(setting)) {
             cfgB.setTemplateLookupStrategy(DefaultTemplateLookupStrategy.INSTANCE);
-        } else if (LOCALIZED_LOOKUP_KEY.equals(setting)) {
-            cfgB.setLocalizedLookup(true);
+        } else if (LOCALIZED_TEMPLATE_LOOKUP_KEY.equals(setting)) {
+            cfgB.setLocalizedTemplateLookup(true);
         } else if (TEMPLATE_NAME_FORMAT_KEY.equals(setting)) {
             cfgB.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
         } else if (TEMPLATE_CACHE_STORAGE_KEY.equals(setting)) {
@@ -246,11 +247,11 @@ public class CustomTemplateResolverTest {
                 }
             }
 
-            if (LOCALIZED_LOOKUP_KEY.equals(supportedSetting)) {
-                assertNotNull(deps.getLocalizedLookup());
+            if (LOCALIZED_TEMPLATE_LOOKUP_KEY.equals(supportedSetting)) {
+                assertNotNull(deps.getLocalizedTemplateLookup());
             } else {
                 try {
-                    deps.getLocalizedLookup();
+                    deps.getLocalizedTemplateLookup();
                     fail();
                 } catch (IllegalStateException e) {
                     // Expected
@@ -382,8 +383,8 @@ public class CustomTemplateResolverTest {
         }
 
         @Override
-        public boolean supportsLocalizedLookupSetting() {
-            return LOCALIZED_LOOKUP_KEY.equals(supportedSetting);
+        public boolean supportsLocalizedTemplateLookupSetting() {
+            return LOCALIZED_TEMPLATE_LOOKUP_KEY.equals(supportedSetting);
         }
     }
 

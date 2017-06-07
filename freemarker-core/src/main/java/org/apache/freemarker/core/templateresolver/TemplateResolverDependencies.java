@@ -71,9 +71,9 @@ public abstract class TemplateResolverDependencies {
     public abstract Long getTemplateUpdateDelayMilliseconds();
 
     /**
-     * @throws IllegalStateException if {@link TemplateResolver#supportsLocalizedLookupSetting()} return {@code false}.
+     * @throws IllegalStateException if {@link TemplateResolver#supportsLocalizedTemplateLookupSetting()} return {@code false}.
      */
-    public abstract Boolean getLocalizedLookup();
+    public abstract Boolean getLocalizedTemplateLookup();
 
     public abstract Charset getSourceEncoding();
 

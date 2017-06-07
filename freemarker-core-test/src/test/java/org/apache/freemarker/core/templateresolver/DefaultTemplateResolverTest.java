@@ -93,7 +93,7 @@ public class DefaultTemplateResolverTest {
                 .templateLoader(loader)
                 .templateCacheStorage(new StrongCacheStorage())
                 .templateUpdateDelayMilliseconds(100L)
-                .localizedLookup(false)
+                .localizedTemplateLookup(false)
                 .build();
         TemplateResolver tr = cfg.getTemplateResolver();
         assertThat(tr, instanceOf(DefaultTemplateResolver.class));
@@ -260,7 +260,7 @@ public class DefaultTemplateResolverTest {
                     .templateCacheStorage(new StrongCacheStorage())
                     .templateLoader(loader)
                     .templateUpdateDelayMilliseconds(0L)
-                    .localizedLookup(false)
+                    .localizedTemplateLookup(false)
                     .build();
             loader.clearEvents();
             loader.putTextTemplate("t.ftl", "v10");

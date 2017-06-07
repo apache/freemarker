@@ -91,7 +91,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
     private long templateUpdateDelayMilliseconds;
     private Charset sourceEncoding;
     private TemplateLanguage templateLanguage;
-    private boolean localizedLookup;
+    private boolean localizedTemplateLookup;
 
     @Override
     protected void initialize() throws ConfigurationException {
@@ -106,9 +106,9 @@ public class DefaultTemplateResolver extends TemplateResolver {
         checkDependencyNotNull(TEMPLATE_UPDATE_DELAY_KEY, templateUpdateDelayMilliseconds);
         this.templateUpdateDelayMilliseconds = templateUpdateDelayMilliseconds;
 
-        Boolean localizedLookup = deps.getLocalizedLookup();
-        checkDependencyNotNull(LOCALIZED_LOOKUP_KEY, localizedLookup);
-        this.localizedLookup = localizedLookup;
+        Boolean localizedTemplateLookup = deps.getLocalizedTemplateLookup();
+        checkDependencyNotNull(LOCALIZED_TEMPLATE_LOOKUP_KEY, localizedTemplateLookup);
+        this.localizedTemplateLookup = localizedTemplateLookup;
 
         this.templateLookupStrategy = deps.getTemplateLookupStrategy();
         checkDependencyNotNull(TEMPLATE_LOOKUP_STRATEGY_KEY, this.templateLookupStrategy);
@@ -222,7 +222,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
     }
 
     @Override
-    public boolean supportsLocalizedLookupSetting() {
+    public boolean supportsLocalizedTemplateLookupSetting() {
         return true;
     }
 
@@ -768,7 +768,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
         DefaultTemplateResolverTemplateLookupContext(String templateName, Locale templateLocale, Object customLookupCondition,
                 TemplateLoadingSource cachedResultSource, Serializable cachedResultVersion,
                 TemplateLoaderSession session) {
-            super(templateName, localizedLookup ? templateLocale : null, customLookupCondition,
+            super(templateName, localizedTemplateLookup ? templateLocale : null, customLookupCondition,
                     cachedResultSource, cachedResultVersion);
             this.session = session;
         }

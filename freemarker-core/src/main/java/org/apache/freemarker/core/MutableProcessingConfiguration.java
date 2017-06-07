@@ -1666,8 +1666,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       <br>As the default value is the system default, which can change
      *       from one server to another, <b>you should always set this!</b>
      *       
-     *   <li><p>{@code "localized_lookup"}:
-     *       See {@link Configuration#getLocalizedLookup()}.
+     *   <li><p>{@code "localized_template_lookup"}:
+     *       See {@link Configuration#getLocalizedTemplateLookup()}.
      *       <br>String value: {@code "true"}, {@code "false"} (also the equivalents: {@code "yes"}, {@code "no"},
      *       {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}).
      *       ASTDirCase insensitive.

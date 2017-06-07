@@ -30,13 +30,13 @@ import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
  * The default lookup strategy of FreeMarker.
  * 
  * <p>
- * Through an example: Assuming localized lookup is enabled and that a template is requested for the name
+ * Through an example: Assuming localized template lookup is enabled and that a template is requested for the name
  * {@code example.ftl} and {@code Locale("es", "ES", "Traditional_WIN")}, it will try the following template names,
  * in this order: {@code "foo_en_AU_Traditional_WIN.ftl"}, {@code "foo_en_AU_Traditional.ftl"},
  * {@code "foo_en_AU.ftl"}, {@code "foo_en.ftl"}, {@code "foo.ftl"}. It stops at the first variation where it finds
  * a template. (If the template name contains "*" steps, finding the template for the attempted localized variation
- * happens with the template acquisition mechanism.) If localized lookup is disabled, it won't try to add any locale
- * strings, so it just looks for {@code "foo.ftl"}.
+ * happens with the template acquisition mechanism.) If localized template lookup is disabled, it won't try to add any
+ * locale strings, so it just looks for {@code "foo.ftl"}.
  * 
  * <p>
  * The generation of the localized name variation with the default lookup strategy, happens like this: It removes
