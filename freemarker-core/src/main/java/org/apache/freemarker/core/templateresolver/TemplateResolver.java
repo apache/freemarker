@@ -40,8 +40,8 @@ import org.apache.freemarker.core.util._NullArgumentException;
  * {@link DefaultTemplateResolver} depends on. These settings are collected into the
  * {@link TemplateResolverDependencies} class, and the {@link TemplateResolver} should get them in {@link #initialize()}
  * via {@link #getDependencies()}. It's possible that the custom {@link TemplateResolver} only uses some of these
- * settings, which should be reflected by the return value of the {@code supportsXxxDependency} methods (like
- * {@link #supportsTemplateLoaderSetting()}). (Note that there's no {@code supportsXxxDependency} method for
+ * settings, which should be reflected by the return value of the {@code supportsXxxSetting} methods (like
+ * {@link #supportsTemplateLoaderSetting()}). (Note that there's no {@code supportsXxxSetting} method for
  * {@link Configuration#getTemplateLanguage() templateLanguage} and {@link Configuration#getSourceEncoding()
  * sourceEncoding} and these settings are always exposed.) {@link TemplateResolverDependencies} will also expose the
  * {@link TemplateResolverDependencies#parse} method, which is used to create a {@link Template} from its source code.

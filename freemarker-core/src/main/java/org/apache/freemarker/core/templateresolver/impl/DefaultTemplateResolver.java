@@ -64,16 +64,9 @@ import org.apache.freemarker.core.util._StringUtil;
 import org.slf4j.Logger;
 
 /**
- * Performs caching and on-demand loading of the templates.
- * The actual template "file" loading is delegated to a {@link TemplateLoader} that you can specify in the constructor.
- * Some aspects of caching is delegated to a {@link CacheStorage} that you can also specify in the constructor.
- * 
- * <p>Typically you don't instantiate or otherwise use this class directly. By default the {@link Configuration} embeds
- * an instance of this class, that you access indirectly through {@link Configuration#getTemplate(String)} and other
- * {@link Configuration} API-s. When you set the {@link Configuration#getTemplateLoader() templateLoader} or
- * {@link Configuration#getCacheStorage() cacheStorage} of the {@link Configuration}, you indirectly configure the
- * {@link TemplateResolver}.
- */
+ * The default implementation of the {@link TemplateResolver} class; the default value of
+ * {@link Configuration#getTemplateResolver() templateResolver} configuration setting is an instance of this.
+  */
 public class DefaultTemplateResolver extends TemplateResolver {
     
     /**

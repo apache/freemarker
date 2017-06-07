@@ -60,8 +60,10 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
      *
      * <p>You can chain several {@link TemplateLoader}-s together with {@link MultiTemplateLoader}.
      *
-     * <p>If the {@link #getTemplateResolver() templateResolver} doesn't support this setting, then it must be {@code
-     * null}. This check is postponed until the {@link Configuration} instance is created.
+     * <p>If the the {@link #getTemplateResolver() templateResolver} is a {@link DefaultTemplateResolver} then this
+     * setting is allowed to be {@code null} (however then you won't be able to load any templates). If the class of
+     * the {@link #getTemplateResolver() templateResolver} is something else that doesn't support this setting, then
+     * it must be {@code null}. These checks are postponed until the {@link Configuration} instance is created.
      */
     TemplateLoader getTemplateLoader();
 
@@ -75,8 +77,10 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
      * custom lookup condition. Its default is {@link DefaultTemplateLookupStrategy#INSTANCE}, except when the
      * {@link #getTemplateResolver() templateResolver} doesn't support this setting, in which case it's {@code null}.
      *
-     * <p>If the {@link #getTemplateResolver() templateResolver} doesn't support this setting, then it must be {@code
-     * null}. This check is postponed until the {@link Configuration} instance is created.
+     * <p>If the the {@link #getTemplateResolver() templateResolver} is a {@link DefaultTemplateResolver} then this
+     * setting must not be {@code null}. If the class of the {@link #getTemplateResolver() templateResolver} is
+     * something else that doesn't support this setting, then it must be {@code null}. These checks are postponed until
+     * the {@link Configuration} instance is created.
      */
     TemplateLookupStrategy getTemplateLookupStrategy();
 
@@ -91,8 +95,10 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
      * {@link DefaultTemplateNameFormat#INSTANCE}), except when the {@link #getTemplateResolver() templateResolver}
      * doesn't support this setting, in which case it's {@code null}.
      *
-     * <p>If the {@link #getTemplateResolver() templateResolver} doesn't support this setting, then it must be {@code
-     * null}. This check is postponed until the {@link Configuration} instance is created.
+     * <p>If the the {@link #getTemplateResolver() templateResolver} is a {@link DefaultTemplateResolver} then this
+     * setting must not be {@code null}. If the class of the {@link #getTemplateResolver() templateResolver} is
+     * something else that doesn't support this setting, then it must be {@code null}. These checks are postponed until
+     * the {@link Configuration} instance is created.
      */
     TemplateNameFormat getTemplateNameFormat();
 
@@ -112,8 +118,10 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
      * <p>
      * See "Template configurations" in the FreeMarker Manual for examples.
      *
-     * <p>If the {@link #getTemplateResolver() templateResolver} doesn't support this setting, then it must be {@code
-     * null}. This check is postponed until the {@link Configuration} instance is created.
+     * <p>If the the {@link #getTemplateResolver() templateResolver} is a {@link DefaultTemplateResolver} then this
+     * is allowed to be {@code null}. If the class of the {@link #getTemplateResolver() templateResolver} is
+     * something else that doesn't support this setting, then it must be {@code null}. These checks are postponed
+     * until the {@link Configuration} instance is created.
      */
     TemplateConfigurationFactory getTemplateConfigurations();
 
@@ -127,8 +135,10 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
      * {@link Template} objects. The default is a {@link SoftCacheStorage}, except when the
      * {@link #getTemplateResolver() templateResolver} doesn't support this setting, in which case it's {@code null}.
      *
-     * <p>If the {@link #getTemplateResolver() templateResolver} doesn't support this setting, then it must be {@code
-     * null}. This check is postponed until the {@link Configuration} instance is created.
+     * <p>If the the {@link #getTemplateResolver() templateResolver} is a {@link DefaultTemplateResolver} then this
+     * setting must not be {@code null}. If the class of the {@link #getTemplateResolver() templateResolver} is
+     * something else that doesn't support this setting, then it must be {@code null}. These checks are postponed until
+     * the {@link Configuration} instance is created.
      */
     CacheStorage getCacheStorage();
 
@@ -142,8 +152,10 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
      * "file" than the cached one. The defaults is 5000 ms, except when the
      * {@link #getTemplateResolver() templateResolver} doesn't support this setting, in which case it's {@code null}.
      *
-     * <p>If the {@link #getTemplateResolver() templateResolver} doesn't support this setting, then it must be {@code
-     * null}. This check is postponed until the {@link Configuration} instance is created.
+     * <p>If the the {@link #getTemplateResolver() templateResolver} is a {@link DefaultTemplateResolver} then this
+     * setting must not be {@code null}. If the class of the {@link #getTemplateResolver() templateResolver} is
+     * something else that doesn't support this setting, then it must be {@code null}. These checks are postponed until
+     * the {@link Configuration} instance is created.
      */
     Long getTemplateUpdateDelayMilliseconds();
 
@@ -186,7 +198,7 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
     Version getIncompatibleImprovements();
 
     /**
-     * Whether localized template lookup is enabled . The default is {@code true}, except when the
+     * Whether localized template lookup is enabled. The default is {@code true}, except when the
      * {@link #getTemplateResolver() templateResolver} doesn't support this setting, in which case it's {@code null}.
      * <p>
      * With the default {@link TemplateLookupStrategy}, localized lookup works like this: Let's say your locale setting
@@ -198,7 +210,7 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
      * {@link #getTemplateLookupStrategy() templateLookupStrategy} setting.
      * <p>
      * If the {@link #getTemplateResolver() templateResolver} doesn't support this setting, then it must be {@code
-     * null}. This check is postponed until the {@link Configuration} instance is created.
+     * null}. These checks are postponed until the {@link Configuration} instance is created.
      */
     Boolean getLocalizedLookup();
 
