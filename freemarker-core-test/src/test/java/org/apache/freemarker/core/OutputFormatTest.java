@@ -1037,7 +1037,7 @@ public class OutputFormatTest extends TemplateTest {
                                 new TemplateConfiguration.Builder()
                                         .outputFormat(XMLOutputFormat.INSTANCE)
                                         .build()))
-                .cacheStorage(NullCacheStorage.INSTANCE); // Prevent caching as we change the cfgB between build().
+                .templateCacheStorage(NullCacheStorage.INSTANCE); // Prevent caching as we change the cfgB between build().
     }
 
     @Before

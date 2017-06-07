@@ -27,7 +27,7 @@ import org.apache.freemarker.core.Configuration;
  * small subset of the {@link java.util.Map} interface. 
  * The implementations must be thread safe.
  *
- * @see Configuration#getCacheStorage()
+ * @see Configuration#getTemplateCacheStorage()
  */
 public interface CacheStorage {
     Object get(Object key);

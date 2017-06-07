@@ -145,7 +145,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     private static final String[] SETTING_NAMES_SNAKE_CASE = new String[] {
         // Must be sorted alphabetically!
         ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_SNAKE_CASE,
-        ExtendableBuilder.CACHE_STORAGE_KEY_SNAKE_CASE,
         ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE,
         ExtendableBuilder.LOCALIZED_LOOKUP_KEY_SNAKE_CASE,
         ExtendableBuilder.NAMING_CONVENTION_KEY_SNAKE_CASE,
@@ -156,6 +155,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         ExtendableBuilder.SOURCE_ENCODING_KEY_SNAKE_CASE,
         ExtendableBuilder.TAB_SIZE_KEY_SNAKE_CASE,
         ExtendableBuilder.TAG_SYNTAX_KEY_SNAKE_CASE,
+        ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY_SNAKE_CASE,
         ExtendableBuilder.TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE,
         ExtendableBuilder.TEMPLATE_LANGUAGE_KEY_SNAKE_CASE,
         ExtendableBuilder.TEMPLATE_LOADER_KEY_SNAKE_CASE,
@@ -168,7 +168,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     private static final String[] SETTING_NAMES_CAMEL_CASE = new String[] {
         // Must be sorted alphabetically!
         ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE,
-        ExtendableBuilder.CACHE_STORAGE_KEY_CAMEL_CASE,
         ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE,
         ExtendableBuilder.LOCALIZED_LOOKUP_KEY_CAMEL_CASE,
         ExtendableBuilder.NAMING_CONVENTION_KEY_CAMEL_CASE,
@@ -179,6 +178,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         ExtendableBuilder.SOURCE_ENCODING_KEY_CAMEL_CASE,
         ExtendableBuilder.TAB_SIZE_KEY_CAMEL_CASE,
         ExtendableBuilder.TAG_SYNTAX_KEY_CAMEL_CASE,
+        ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY_CAMEL_CASE,
         ExtendableBuilder.TEMPLATE_CONFIGURATIONS_KEY_CAMEL_CASE,
         ExtendableBuilder.TEMPLATE_LANGUAGE_KEY_CAMEL_CASE,
         ExtendableBuilder.TEMPLATE_LOADER_KEY_CAMEL_CASE,
@@ -239,7 +239,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     private final Version incompatibleImprovements;
     private final TemplateResolver templateResolver;
     private final TemplateLoader templateLoader;
-    private final CacheStorage cacheStorage;
+    private final CacheStorage templateCacheStorage;
     private final TemplateLookupStrategy templateLookupStrategy;
     private final TemplateNameFormat templateNameFormat;
     private final TemplateConfigurationFactory templateConfigurations;
@@ -444,10 +444,10 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     templateResolver, TEMPLATE_LOADER_KEY, templateLoader);
         }
 
-        cacheStorage = builder.getCacheStorage();
-        if (!templateResolver.supportsCacheStorageSetting()) {
+        templateCacheStorage = builder.getTemplateCacheStorage();
+        if (!templateResolver.supportsTemplateCacheStorageSetting()) {
             checkSettingIsNullForThisTemplateResolver(
-                    templateResolver, CACHE_STORAGE_KEY, cacheStorage);
+                    templateResolver, TEMPLATE_CACHE_STORAGE_KEY, templateCacheStorage);
         }
 
         templateUpdateDelayMilliseconds = builder.getTemplateUpdateDelayMilliseconds();
@@ -606,8 +606,8 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     }
 
     @Override
-    public CacheStorage getCacheStorage() {
-        return cacheStorage;
+    public CacheStorage getTemplateCacheStorage() {
+        return templateCacheStorage;
     }
 
     /**
@@ -615,7 +615,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
      * value in the {@link Configuration}.
      */
     @Override
-    public boolean isCacheStorageSet() {
+    public boolean isTemplateCacheStorageSet() {
         return true;
     }
 
@@ -1706,11 +1706,11 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE = "autoEscapingPolicy";
         /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String CACHE_STORAGE_KEY_SNAKE_CASE = "cache_storage";
+        public static final String TEMPLATE_CACHE_STORAGE_KEY_SNAKE_CASE = "template_cache_storage";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String CACHE_STORAGE_KEY = CACHE_STORAGE_KEY_SNAKE_CASE;
+        public static final String TEMPLATE_CACHE_STORAGE_KEY = TEMPLATE_CACHE_STORAGE_KEY_SNAKE_CASE;
         /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String CACHE_STORAGE_KEY_CAMEL_CASE = "cacheStorage";
+        public static final String TEMPLATE_CACHE_STORAGE_KEY_CAMEL_CASE = "templateCacheStorage";
         /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String TEMPLATE_UPDATE_DELAY_KEY_SNAKE_CASE = "template_update_delay";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
@@ -1790,9 +1790,9 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         private TemplateResolver cachedDefaultTemplateResolver;
         private TemplateLoader templateLoader;
         private boolean templateLoaderSet;
-        private CacheStorage cacheStorage;
-        private boolean cacheStorageSet;
-        private CacheStorage cachedDefaultCacheStorage;
+        private CacheStorage templateCacheStorage;
+        private boolean templateCacheStorageSet;
+        private CacheStorage cachedDefaultTemplateCacheStorage;
         private TemplateLookupStrategy templateLookupStrategy;
         private boolean templateLookupStrategySet;
         private TemplateNameFormat templateNameFormat;
@@ -1880,9 +1880,9 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     } else {
                         setRecognizeStandardFileExtensions(_StringUtil.getYesNo(value));
                     }
-                } else if (CACHE_STORAGE_KEY_SNAKE_CASE.equals(name) || CACHE_STORAGE_KEY_CAMEL_CASE.equals(name)) {
+                } else if (TEMPLATE_CACHE_STORAGE_KEY_SNAKE_CASE.equals(name) || TEMPLATE_CACHE_STORAGE_KEY_CAMEL_CASE.equals(name)) {
                     if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
-                        unsetCacheStorage();
+                        unsetTemplateCacheStorage();
                     } if (value.indexOf('.') == -1) {
                         int strongSize = 0;
                         int softSize = 0;
@@ -1913,9 +1913,9 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                             throw new ConfigurationSettingValueException(name, value,
                                     "Either cache soft- or strong size must be set and non-0.");
                         }
-                        setCacheStorage(new MruCacheStorage(strongSize, softSize));
+                        setTemplateCacheStorage(new MruCacheStorage(strongSize, softSize));
                     } else {
-                        setCacheStorage((CacheStorage) _ObjectBuilderSettingEvaluator.eval(
+                        setTemplateCacheStorage((CacheStorage) _ObjectBuilderSettingEvaluator.eval(
                                 value, CacheStorage.class, false, _SettingEvaluationEnvironment.getCurrent()));
                     }
                 } else if (TEMPLATE_UPDATE_DELAY_KEY_SNAKE_CASE.equals(name)
@@ -2178,55 +2178,55 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         }
 
         @Override
-        public CacheStorage getCacheStorage() {
-            return isCacheStorageSet() ? cacheStorage : getDefaultCacheStorageTRAware();
+        public CacheStorage getTemplateCacheStorage() {
+            return isTemplateCacheStorageSet() ? templateCacheStorage : getDefaultTemplateCacheStorageTRAware();
         }
 
         @Override
-        public boolean isCacheStorageSet() {
-            return cacheStorageSet;
+        public boolean isTemplateCacheStorageSet() {
+            return templateCacheStorageSet;
         }
 
-        private CacheStorage getDefaultCacheStorageTRAware() {
-            return isTemplateResolverSet() && !getTemplateResolver().supportsCacheStorageSetting() ? null
-                    : getDefaultCacheStorage();
+        private CacheStorage getDefaultTemplateCacheStorageTRAware() {
+            return isTemplateResolverSet() && !getTemplateResolver().supportsTemplateCacheStorageSetting() ? null
+                    : getDefaultTemplateCacheStorage();
         }
 
         /**
          * The default value when the {@link #getTemplateResolver() templateResolver} supports this setting (otherwise
          * the default is hardwired to be {@code null} and this method isn't called).
          */
-        protected CacheStorage getDefaultCacheStorage() {
-            if (cachedDefaultCacheStorage == null) {
+        protected CacheStorage getDefaultTemplateCacheStorage() {
+            if (cachedDefaultTemplateCacheStorage == null) {
                 // If this will depend on incompatibleImprovements, null it out in onIncompatibleImprovementsChanged()!
-                cachedDefaultCacheStorage = new DefaultSoftCacheStorage();
+                cachedDefaultTemplateCacheStorage = new DefaultSoftCacheStorage();
             }
-            return cachedDefaultCacheStorage;
+            return cachedDefaultTemplateCacheStorage;
         }
 
         /**
-         * Setter pair of {@link Configuration#getCacheStorage()}
+         * Setter pair of {@link Configuration#getTemplateCacheStorage()}
          */
-        public void setCacheStorage(CacheStorage cacheStorage) {
-            this.cacheStorage = cacheStorage;
-            this.cacheStorageSet = true;
-            cachedDefaultCacheStorage = null;
+        public void setTemplateCacheStorage(CacheStorage templateCacheStorage) {
+            this.templateCacheStorage = templateCacheStorage;
+            this.templateCacheStorageSet = true;
+            cachedDefaultTemplateCacheStorage = null;
         }
 
         /**
-         * Fluent API equivalent of {@link #setCacheStorage(CacheStorage)}
+         * Fluent API equivalent of {@link #setTemplateCacheStorage(CacheStorage)}
          */
-        public SelfT cacheStorage(CacheStorage cacheStorage) {
-            setCacheStorage(cacheStorage);
+        public SelfT templateCacheStorage(CacheStorage templateCacheStorage) {
+            setTemplateCacheStorage(templateCacheStorage);
             return self();
         }
 
         /**
          * Resets this setting to its initial state, as if it was never set.
          */
-        public void unsetCacheStorage() {
-            cacheStorage = null;
-            cacheStorageSet = false;
+        public void unsetTemplateCacheStorage() {
+            templateCacheStorage = null;
+            templateCacheStorageSet = false;
         }
 
         @Override

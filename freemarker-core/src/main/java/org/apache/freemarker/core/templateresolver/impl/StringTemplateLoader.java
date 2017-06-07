@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.freemarker.core.templateresolver.CacheStorage;
+import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
@@ -40,8 +40,9 @@ import org.apache.freemarker.core.util._StringUtil;
  * A {@link TemplateLoader} that uses a {@link Map} with {@code String} as its source of templates. This is similar to
  * {@link StringTemplateLoader}, but uses {@code String} instead of {@link String}; see more details there.
  * 
- * <p>Note that {@link StringTemplateLoader} can't be used with a distributed (cluster-wide) {@link CacheStorage},
- * as it produces {@link TemplateLoadingSource}-s that deliberately throw exception on serialization (because the
+ * <p>Note that {@link StringTemplateLoader} can't be used with a distributed (cluster-wide)
+ * {@link Configuration#getTemplateCacheStorage()} templateCacheStorage}, as it produces
+ * {@link TemplateLoadingSource}-s that deliberately throw exception on serialization (because the
  * content is only accessible within a single JVM, and is also volatile).
  */
 // TODO JUnit tests

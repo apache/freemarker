@@ -49,7 +49,7 @@ public class TemplateGetEncodingTest {
                     new ConditionalTemplateConfigurationFactory(
                             new FileNameGlobMatcher("*-static*"), staticTextTCB.build()));
             cfgB.setTemplateLoader(tl);
-            cfgB.setCacheStorage(new StrongCacheStorage());
+            cfgB.setTemplateCacheStorage(new StrongCacheStorage());
         }
 
         Configuration cfg = cfgB.build();

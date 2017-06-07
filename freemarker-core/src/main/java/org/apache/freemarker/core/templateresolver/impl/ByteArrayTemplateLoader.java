@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.freemarker.core.templateresolver.CacheStorage;
+import org.apache.freemarker.core.TopLevelConfiguration;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
@@ -40,9 +40,10 @@ import org.apache.freemarker.core.util._StringUtil;
  * A {@link TemplateLoader} that uses a {@link Map} with {@code byte[]} as its source of templates. This is similar to
  * {@link StringTemplateLoader}, but uses {@code byte[]} instead of {@link String}; see more details there.
  * 
- * <p>Note that {@link ByteArrayTemplateLoader} can't be used with a distributed (cluster-wide) {@link CacheStorage},
- * as it produces {@link TemplateLoadingSource}-s that deliberately throw exception on serialization (because the
- * content is only accessible within a single JVM, and is also volatile).
+ * <p>Note that {@link ByteArrayTemplateLoader} can't be used with a distributed (cluster-wide)
+ * {@link TopLevelConfiguration#getTemplateCacheStorage()} templateCacheStorage}, as it produces
+ * {@link TemplateLoadingSource}-s that deliberately throw exception on serialization (because the content is only
+ * accessible within a single JVM, and is also volatile).
  */
 // TODO JUnit tests
 public class ByteArrayTemplateLoader implements TemplateLoader {

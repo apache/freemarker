@@ -217,9 +217,9 @@ public abstract class TemplateResolver {
 
     /**
      * Works like {@link #supportsTemplateLoaderSetting()}, but for the
-     * {@link Configuration#getCacheStorage() cacheStorage} setting.
+     * {@link Configuration#getTemplateCacheStorage() templateCacheStorage} setting.
      */
-    public abstract boolean supportsCacheStorageSetting();
+    public abstract boolean supportsTemplateCacheStorageSetting();
 
     /**
      * Works like {@link #supportsTemplateLoaderSetting()}, but for the

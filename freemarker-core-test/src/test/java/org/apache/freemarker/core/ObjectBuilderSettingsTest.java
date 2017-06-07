@@ -366,7 +366,7 @@ public class ObjectBuilderSettingsTest {
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyArithmeticEngine");
             props.setProperty(MutableProcessingConfiguration.TEMPLATE_EXCEPTION_HANDLER_KEY,
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyTemplateExceptionHandler");
-            props.setProperty(Configuration.ExtendableBuilder.CACHE_STORAGE_KEY,
+            props.setProperty(Configuration.ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY,
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyCacheStorage()");
             props.setProperty(MutableProcessingConfiguration.NEW_BUILTIN_CLASS_RESOLVER_KEY,
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyNewBuiltinClassResolver()");
@@ -379,7 +379,7 @@ public class ObjectBuilderSettingsTest {
                     Configuration.VERSION_3_0_0, ((DefaultObjectWrapper) cfgB.getObjectWrapper()).getIncompatibleImprovements());
             assertEquals(DummyArithmeticEngine.class, cfgB.getArithmeticEngine().getClass());
             assertEquals(DummyTemplateExceptionHandler.class, cfgB.getTemplateExceptionHandler().getClass());
-            assertEquals(DummyCacheStorage.class, cfgB.getCacheStorage().getClass());
+            assertEquals(DummyCacheStorage.class, cfgB.getTemplateCacheStorage().getClass());
             assertEquals(DummyNewBuiltinClassResolver.class, cfgB.getNewBuiltinClassResolver().getClass());
             assertEquals(DummyTemplateLoader.class, cfgB.getTemplateLoader().getClass());
             assertEquals(StandardCharsets.UTF_8, cfgB.getSourceEncoding());
@@ -392,7 +392,7 @@ public class ObjectBuilderSettingsTest {
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyArithmeticEngine(x = 1)");
             props.setProperty(MutableProcessingConfiguration.TEMPLATE_EXCEPTION_HANDLER_KEY,
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyTemplateExceptionHandler(x = 1)");
-            props.setProperty(Configuration.ExtendableBuilder.CACHE_STORAGE_KEY,
+            props.setProperty(Configuration.ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY,
                     "soft: 500, strong: 100");
             props.setProperty(MutableProcessingConfiguration.NEW_BUILTIN_CLASS_RESOLVER_KEY,
                     "allows_nothing");
@@ -402,7 +402,7 @@ public class ObjectBuilderSettingsTest {
             assertEquals(1, ((DummyTemplateExceptionHandler) cfgB.getTemplateExceptionHandler()).getX());
             assertEquals(Configuration.VERSION_3_0_0,
                     ((DefaultObjectWrapper) cfgB.getObjectWrapper()).getIncompatibleImprovements());
-            assertEquals(500, ((MruCacheStorage) cfgB.getCacheStorage()).getSoftSizeLimit());
+            assertEquals(500, ((MruCacheStorage) cfgB.getTemplateCacheStorage()).getSoftSizeLimit());
             assertEquals(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER, cfgB.getNewBuiltinClassResolver());
             assertEquals(StandardCharsets.UTF_8, cfgB.getSourceEncoding());
         }

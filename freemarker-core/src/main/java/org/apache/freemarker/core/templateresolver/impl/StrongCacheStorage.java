@@ -32,7 +32,7 @@ import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
  * it was passed, therefore prevents the cache from being purged during garbage collection. This class is always
  * thread-safe since 2.3.24, before that if we are running on Java 5 or later.
  *
- * @see Configuration#getCacheStorage()
+ * @see Configuration#getTemplateCacheStorage()
  */
 public class StrongCacheStorage implements CacheStorage, CacheStorageWithGetSize {
     

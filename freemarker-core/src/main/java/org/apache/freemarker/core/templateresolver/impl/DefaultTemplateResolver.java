@@ -84,7 +84,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
     private TemplateLoader templateLoader;
     
     /** Here we keep our cached templates */
-    private CacheStorage cacheStorage;
+    private CacheStorage templateCacheStorage;
     private TemplateLookupStrategy templateLookupStrategy;
     private TemplateNameFormat templateNameFormat;
     private TemplateConfigurationFactory templateConfigurations;
@@ -99,8 +99,8 @@ public class DefaultTemplateResolver extends TemplateResolver {
 
         this.templateLoader = deps.getTemplateLoader();
         
-        this.cacheStorage = deps.getCacheStorage();
-        checkDependencyNotNull(CACHE_STORAGE_KEY, this.cacheStorage);
+        this.templateCacheStorage = deps.getTemplateCacheStorage();
+        checkDependencyNotNull(TEMPLATE_CACHE_STORAGE_KEY, this.templateCacheStorage);
 
         Long templateUpdateDelayMilliseconds = deps.getTemplateUpdateDelayMilliseconds();
         checkDependencyNotNull(TEMPLATE_UPDATE_DELAY_KEY, templateUpdateDelayMilliseconds);
@@ -197,7 +197,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
     }
 
     @Override
-    public boolean supportsCacheStorageSetting() {
+    public boolean supportsTemplateCacheStorageSetting() {
         return true;
     }
 
@@ -235,7 +235,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
                 : null;
         final CachedResultKey cacheKey = new CachedResultKey(name, locale, customLookupCondition);
         
-        CachedResult oldCachedResult = (CachedResult) cacheStorage.get(cacheKey);
+        CachedResult oldCachedResult = (CachedResult) templateCacheStorage.get(cacheKey);
         
         final long now = System.currentTimeMillis();
         
@@ -295,7 +295,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
                                 + "(source: " + newTemplateLoaderResult.getSource() + ")"
                                 + " as it hasn't been changed on the backing store.");
                     }
-                    cacheStorage.put(cacheKey, newCachedResult);
+                    templateCacheStorage.put(cacheKey, newCachedResult);
                     return (Template) newCachedResult.templateOrException;
                 } else {
                     if (newTemplateLoaderResult.getStatus() != TemplateLoadingResultStatus.OPENED) {
@@ -371,7 +371,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
             }
             newCachedResult.templateOrException = template;
             newCachedResult.version = templateLoaderResult.getVersion();
-            cacheStorage.put(cacheKey, newCachedResult);
+            templateCacheStorage.put(cacheKey, newCachedResult);
             return template;
         } catch (RuntimeException e) {
             if (newCachedResult != null) {
@@ -492,7 +492,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
         cachedResult.templateOrException = e;
         cachedResult.source = null;
         cachedResult.version = null;
-        cacheStorage.put(cacheKey, cachedResult);
+        templateCacheStorage.put(cacheKey, cachedResult);
     }
 
     private Template loadTemplate(
@@ -606,8 +606,8 @@ public class DefaultTemplateResolver extends TemplateResolver {
      *            Whether to call {@link TemplateLoader#resetState()}. on the template loader.
      */
     public void clearTemplateCache(boolean resetTemplateLoader) {
-        synchronized (cacheStorage) {
-            cacheStorage.clear();
+        synchronized (templateCacheStorage) {
+            templateCacheStorage.clear();
             if (templateLoader != null && resetTemplateLoader) {
                 templateLoader.resetState();
             }
@@ -619,8 +619,8 @@ public class DefaultTemplateResolver extends TemplateResolver {
      */
     @Override
     public void clearTemplateCache() {
-        synchronized (cacheStorage) {
-            cacheStorage.clear();
+        synchronized (templateCacheStorage) {
+            templateCacheStorage.clear();
             if (templateLoader != null) {
                 templateLoader.resetState();
             }
@@ -645,7 +645,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
                     : null;
             CachedResultKey tk = new CachedResultKey(name, locale, customLookupCondition);
             
-            cacheStorage.remove(tk);
+            templateCacheStorage.remove(tk);
             if (debug) {
                 LOG.debug(debugPrefix + "Template was removed from the cache, if it was there");
             }

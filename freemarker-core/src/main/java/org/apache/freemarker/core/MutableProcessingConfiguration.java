@@ -1688,8 +1688,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       See {@link ParsingConfiguration#getWhitespaceStripping()}.
      *       <br>String value: {@code "true"}, {@code "false"}, {@code yes}, etc.
      *       
-     *   <li><p>{@code "cache_storage"}:
-     *       See {@link Configuration#getCacheStorage()}.
+     *   <li><p>{@code "template_cache_storage"}:
+     *       See {@link Configuration#getTemplateCacheStorage()}.
      *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
      *       expression</a>.
      *       If the value does not contain dot,
@@ -1697,7 +1697,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       maximum strong and soft sizes specified with the setting value. Examples
      *       of valid setting values:
      *       
-     *       <table style="width: auto; border-collapse: collapse" border="1" summary="cache_storage value examples">
+     *       <table style="width: auto; border-collapse: collapse" border="1" summary="template_cache_storage value
+     *       examples">
      *         <tr><th>Setting value<th>max. strong size<th>max. soft size
      *         <tr><td>{@code "strong:50, soft:500"}<td>50<td>500
      *         <tr><td>{@code "strong:100, soft"}<td>100<td>{@code Integer.MAX_VALUE}

@@ -77,7 +77,7 @@ public class CustomTemplateResolverTest {
 
         assertNotNull(cfg.getTemplateLookupStrategy());
         assertNotNull(cfg.getLocalizedLookup());
-        assertNotNull(cfg.getCacheStorage());
+        assertNotNull(cfg.getTemplateCacheStorage());
         assertNotNull(cfg.getTemplateUpdateDelayMilliseconds());
         assertNotNull(cfg.getNamingConvention());
 
@@ -96,7 +96,7 @@ public class CustomTemplateResolverTest {
 
         assertNull(cfg.getTemplateLookupStrategy());
         assertNull(cfg.getLocalizedLookup());
-        assertNull(cfg.getCacheStorage());
+        assertNull(cfg.getTemplateCacheStorage());
         assertNull(cfg.getTemplateUpdateDelayMilliseconds());
         assertNull(cfg.getTemplateNameFormat());
 
@@ -116,7 +116,7 @@ public class CustomTemplateResolverTest {
 
         assertNull(cfg.getTemplateLookupStrategy());
         assertNull(cfg.getLocalizedLookup());
-        assertNull(cfg.getCacheStorage());
+        assertNull(cfg.getTemplateCacheStorage());
         assertNull(cfg.getTemplateUpdateDelayMilliseconds());
         assertNotNull(cfg.getNamingConvention()); //!
 
@@ -130,7 +130,7 @@ public class CustomTemplateResolverTest {
     @Test
     public void testInvalidConfigurationForDefaultTemplateResolver() {
         try {
-            new Configuration.Builder(Configuration.VERSION_3_0_0).cacheStorage(null).build();
+            new Configuration.Builder(Configuration.VERSION_3_0_0).templateCacheStorage(null).build();
             fail();
         } catch (ConfigurationSettingValueException e) {
             // Expected
@@ -168,7 +168,7 @@ public class CustomTemplateResolverTest {
     public void testConfigurationValidityForCustomTemplateResolver() {
         for (String supportedSetting : new String[]{
                 TEMPLATE_LOADER_KEY, TEMPLATE_LOOKUP_STRATEGY_KEY, LOCALIZED_LOOKUP_KEY, TEMPLATE_NAME_FORMAT_KEY,
-                CACHE_STORAGE_KEY, TEMPLATE_UPDATE_DELAY_KEY, TEMPLATE_CONFIGURATIONS_KEY }) {
+                TEMPLATE_CACHE_STORAGE_KEY, TEMPLATE_UPDATE_DELAY_KEY, TEMPLATE_CONFIGURATIONS_KEY }) {
             {
                 Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0)
                         .templateResolver(new CustomTemplateResolver(supportedSetting));
@@ -198,8 +198,8 @@ public class CustomTemplateResolverTest {
             cfgB.setLocalizedLookup(true);
         } else if (TEMPLATE_NAME_FORMAT_KEY.equals(setting)) {
             cfgB.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
-        } else if (CACHE_STORAGE_KEY.equals(setting)) {
-            cfgB.setCacheStorage(new SoftCacheStorage());
+        } else if (TEMPLATE_CACHE_STORAGE_KEY.equals(setting)) {
+            cfgB.setTemplateCacheStorage(new SoftCacheStorage());
         } else if (TEMPLATE_UPDATE_DELAY_KEY.equals(setting)) {
             cfgB.setTemplateUpdateDelayMilliseconds(1234L);
         } else if (TEMPLATE_CONFIGURATIONS_KEY.equals(setting)) {
@@ -268,11 +268,11 @@ public class CustomTemplateResolverTest {
                 }
             }
 
-            if (CACHE_STORAGE_KEY.equals(supportedSetting)) {
-                assertNotNull(deps.getCacheStorage());
+            if (TEMPLATE_CACHE_STORAGE_KEY.equals(supportedSetting)) {
+                assertNotNull(deps.getTemplateCacheStorage());
             } else {
                 try {
-                    deps.getCacheStorage();
+                    deps.getTemplateCacheStorage();
                     fail();
                 } catch (IllegalStateException e) {
                     // Expected
@@ -357,8 +357,8 @@ public class CustomTemplateResolverTest {
         }
 
         @Override
-        public boolean supportsCacheStorageSetting() {
-            return CACHE_STORAGE_KEY.equals(supportedSetting);
+        public boolean supportsTemplateCacheStorageSetting() {
+            return TEMPLATE_CACHE_STORAGE_KEY.equals(supportedSetting);
         }
 
         @Override

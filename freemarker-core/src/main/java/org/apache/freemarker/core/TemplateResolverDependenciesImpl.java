@@ -57,9 +57,9 @@ class TemplateResolverDependenciesImpl extends TemplateResolverDependencies {
     }
 
     @Override
-    public CacheStorage getCacheStorage() {
-        checkSettingSupported(CACHE_STORAGE_KEY, templateResolver.supportsCacheStorageSetting());
-        return configuration.getCacheStorage();
+    public CacheStorage getTemplateCacheStorage() {
+        checkSettingSupported(TEMPLATE_CACHE_STORAGE_KEY, templateResolver.supportsTemplateCacheStorageSetting());
+        return configuration.getTemplateCacheStorage();
     }
 
     @Override

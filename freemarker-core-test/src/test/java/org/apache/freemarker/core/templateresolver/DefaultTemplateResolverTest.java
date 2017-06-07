@@ -50,7 +50,7 @@ public class DefaultTemplateResolverTest {
         MockTemplateLoader loader = new MockTemplateLoader();
         Configuration cfg = new TestConfigurationBuilder()
                 .templateLoader(loader)
-                .cacheStorage(new StrongCacheStorage())
+                .templateCacheStorage(new StrongCacheStorage())
                 .templateUpdateDelayMilliseconds(100L)
                 .build();
         TemplateResolver tr = cfg.getTemplateResolver();
@@ -91,7 +91,7 @@ public class DefaultTemplateResolverTest {
         MockTemplateLoader loader = new MockTemplateLoader();
         Configuration cfg = new TestConfigurationBuilder()
                 .templateLoader(loader)
-                .cacheStorage(new StrongCacheStorage())
+                .templateCacheStorage(new StrongCacheStorage())
                 .templateUpdateDelayMilliseconds(100L)
                 .localizedLookup(false)
                 .build();
@@ -147,7 +147,7 @@ public class DefaultTemplateResolverTest {
     public void testManualRemovalPlain() throws Exception {
         StringTemplateLoader loader = new StringTemplateLoader();
         Configuration cfg = new TestConfigurationBuilder()
-                .cacheStorage(new StrongCacheStorage())
+                .templateCacheStorage(new StrongCacheStorage())
                 .templateLoader(loader)
                 .templateUpdateDelayMilliseconds(Long.MAX_VALUE)
                 .build();
@@ -175,7 +175,7 @@ public class DefaultTemplateResolverTest {
     public void testManualRemovalI18ed() throws Exception {
         StringTemplateLoader loader = new StringTemplateLoader();
         Configuration cfg = new TestConfigurationBuilder()
-                .cacheStorage(new StrongCacheStorage())
+                .templateCacheStorage(new StrongCacheStorage())
                 .templateLoader(loader)
                 .templateUpdateDelayMilliseconds(Long.MAX_VALUE)
                 .build();
@@ -218,7 +218,7 @@ public class DefaultTemplateResolverTest {
 
         {
             Configuration cfg = new TestConfigurationBuilder()
-                    .cacheStorage(new StrongCacheStorage())
+                    .templateCacheStorage(new StrongCacheStorage())
                     .templateLoader(loader)
                     .templateUpdateDelayMilliseconds(0L)
                     .build();
@@ -257,7 +257,7 @@ public class DefaultTemplateResolverTest {
 
         {
             Configuration cfg = new TestConfigurationBuilder()
-                    .cacheStorage(new StrongCacheStorage())
+                    .templateCacheStorage(new StrongCacheStorage())
                     .templateLoader(loader)
                     .templateUpdateDelayMilliseconds(0L)
                     .localizedLookup(false)

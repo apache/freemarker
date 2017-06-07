@@ -35,7 +35,7 @@ import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
  * class is thread-safe to the extent that its underlying map is. The parameterless constructor uses a thread-safe map
  * since 2.3.24 or Java 5.
  *
- * @see ExtendableBuilder#setCacheStorage(CacheStorage)
+ * @see ExtendableBuilder#setTemplateCacheStorage(CacheStorage)
  */
 public class SoftCacheStorage implements CacheStorage, CacheStorageWithGetSize {
     

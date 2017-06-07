@@ -42,9 +42,9 @@ public abstract class TemplateResolverDependencies {
     public abstract TemplateLoader getTemplateLoader();
 
     /**
-     * @throws IllegalStateException if {@link TemplateResolver#supportsCacheStorageSetting()} return {@code false}.
+     * @throws IllegalStateException if {@link TemplateResolver#supportsTemplateCacheStorageSetting()} return {@code false}.
      */
-    public abstract CacheStorage getCacheStorage();
+    public abstract CacheStorage getTemplateCacheStorage();
 
     /**
      * @throws IllegalStateException if {@link TemplateResolver#supportsTemplateLookupStrategySetting()} return

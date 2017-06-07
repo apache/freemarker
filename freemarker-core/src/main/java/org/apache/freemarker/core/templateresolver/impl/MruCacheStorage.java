@@ -55,7 +55,7 @@ import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
  * memory-sensitive) most-recently-used caching through 
  * {@link SoftCacheStorage} as well.
  *
- * @see Configuration#getCacheStorage()
+ * @see Configuration#getTemplateCacheStorage()
  */
 public class MruCacheStorage implements CacheStorageWithGetSize {
     private final MruEntry strongHead = new MruEntry();

@@ -27,7 +27,7 @@ import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
  * A cache storage that doesn't store anything. Use this if you
  * don't want caching.
  *
- * @see Configuration#getCacheStorage()
+ * @see Configuration#getTemplateCacheStorage()
  */
 public class NullCacheStorage implements CacheStorage, CacheStorageWithGetSize {
     

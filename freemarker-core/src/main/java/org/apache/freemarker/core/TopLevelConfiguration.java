@@ -140,12 +140,12 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
      * something else that doesn't support this setting, then it must be {@code null}. These checks are postponed until
      * the {@link Configuration} instance is created.
      */
-    CacheStorage getCacheStorage();
+    CacheStorage getTemplateCacheStorage();
 
     /**
      * Tells if this setting was explicitly set (otherwise its value will be the default value).
      */
-    boolean isCacheStorageSet();
+    boolean isTemplateCacheStorageSet();
 
     /**
      * The time in milliseconds that must elapse before checking whether there is a newer version of a template

@@ -181,20 +181,20 @@ public class ConfigurationTest extends TestCase {
             assertSame(DefaultTemplateNameFormatFM2.INSTANCE, cfgB.getTemplateNameFormat());
         }
         
-        assertFalse(cfgB.isCacheStorageSet());
-        assertTrue(cfgB.getCacheStorage() instanceof SoftCacheStorage);
+        assertFalse(cfgB.isTemplateCacheStorageSet());
+        assertTrue(cfgB.getTemplateCacheStorage() instanceof SoftCacheStorage);
         //
-        cfgB.setCacheStorage(NullCacheStorage.INSTANCE);
-        assertTrue(cfgB.isCacheStorageSet());
-        assertSame(NullCacheStorage.INSTANCE, cfgB.getCacheStorage());
+        cfgB.setTemplateCacheStorage(NullCacheStorage.INSTANCE);
+        assertTrue(cfgB.isTemplateCacheStorageSet());
+        assertSame(NullCacheStorage.INSTANCE, cfgB.getTemplateCacheStorage());
         //
         for (int i = 0; i < 3; i++) {
             if (i == 2) {
-                cfgB.setCacheStorage(cfgB.getCacheStorage());
+                cfgB.setTemplateCacheStorage(cfgB.getTemplateCacheStorage());
             }
-            cfgB.unsetCacheStorage();
-            assertFalse(cfgB.isCacheStorageSet());
-            assertTrue(cfgB.getCacheStorage() instanceof SoftCacheStorage);
+            cfgB.unsetTemplateCacheStorage();
+            assertFalse(cfgB.isTemplateCacheStorageSet());
+            assertTrue(cfgB.getTemplateCacheStorage() instanceof SoftCacheStorage);
         }
     }
     
@@ -377,10 +377,10 @@ public class ConfigurationTest extends TestCase {
     public void testTemplateResolverCache() throws Exception {
         Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
         
-        CacheStorageWithGetSize cache = (CacheStorageWithGetSize) cfgB.getCacheStorage();
+        CacheStorageWithGetSize cache = (CacheStorageWithGetSize) cfgB.getTemplateCacheStorage();
         assertEquals(0, cache.getSize());
-        cfgB.setCacheStorage(new StrongCacheStorage());
-        cache = (CacheStorageWithGetSize) cfgB.getCacheStorage();
+        cfgB.setTemplateCacheStorage(new StrongCacheStorage());
+        cache = (CacheStorageWithGetSize) cfgB.getTemplateCacheStorage();
         assertEquals(0, cache.getSize());
         cfgB.setTemplateLoader(new ClassTemplateLoader(ConfigurationTest.class, ""));
         Configuration cfg = cfgB.build();
