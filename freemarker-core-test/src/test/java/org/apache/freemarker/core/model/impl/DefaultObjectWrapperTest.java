@@ -707,6 +707,18 @@ public class DefaultObjectWrapperTest {
         }
     }
 
+    @Test
+    public void testCanBeBuiltOnlyOnce() {
+        DefaultObjectWrapper.Builder tcb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
+        tcb.build();
+        try {
+            tcb.build();
+            fail();
+        } catch (IllegalStateException e) {
+            // Expected
+        }
+    }
+
     private TemplateHashModel wrapWithExposureLevel(Object bean, int exposureLevel) throws TemplateModelException {
         return (TemplateHashModel) new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
                 .exposureLevel(exposureLevel).build()

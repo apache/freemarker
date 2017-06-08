@@ -23,10 +23,12 @@ import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
@@ -162,14 +164,23 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
      * Adds two {@link List}-s; assuming the inputs are already unmodifiable and unchanging, it returns an
      * unmodifiable and unchanging {@link List} itself.
      */
-    private static List<String> mergeLists(List<String> list1, List<String> list2) {
+    private static List<String> mergeLists(List<String> list1, List<String> list2, boolean skipDuplicatesInList1) {
         if (list1 == null) return list2;
         if (list2 == null) return list1;
         if (list1.isEmpty()) return list2;
         if (list2.isEmpty()) return list1;
 
         ArrayList<String> mergedList = new ArrayList<>(list1.size() + list2.size());
-        mergedList.addAll(list1);
+        if (skipDuplicatesInList1) {
+            Set<String> list2Set = new HashSet<>(list2);
+            for (String it : list1) {
+                if (!list2Set.contains(it)) {
+                    mergedList.add(it);
+                }
+            }
+        } else {
+            mergedList.addAll(list1);
+        }
         mergedList.addAll(list2);
         return Collections.unmodifiableList(mergedList);
     }
@@ -933,12 +944,15 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
                 setAutoImports(mergeMaps(
                         isAutoImportsSet() ? getAutoImports() : null,
                         tc.isAutoImportsSet() ? tc.getAutoImports() : null,
-                        true));
+                        true),
+                        true);
             }
             if (tc.isAutoIncludesSet()) {
                 setAutoIncludes(mergeLists(
                         isAutoIncludesSet() ? getAutoIncludes() : null,
-                        tc.isAutoIncludesSet() ? tc.getAutoIncludes() : null));
+                        tc.isAutoIncludesSet() ? tc.getAutoIncludes() : null,
+                        true),
+                        true);
             }
 
             setCustomSettingsMap(mergeMaps(

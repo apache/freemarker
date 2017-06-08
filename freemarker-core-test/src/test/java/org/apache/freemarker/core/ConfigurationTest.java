@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -73,6 +74,7 @@ import org.apache.freemarker.core.userpkg.DummyOutputFormat;
 import org.apache.freemarker.core.userpkg.EpochMillisDivTemplateDateFormatFactory;
 import org.apache.freemarker.core.userpkg.EpochMillisTemplateDateFormatFactory;
 import org.apache.freemarker.core.userpkg.HexTemplateNumberFormatFactory;
+import org.apache.freemarker.core.util._CollectionUtil;
 import org.apache.freemarker.core.util._DateUtil;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._NullWriter;
@@ -1279,7 +1281,7 @@ public class ConfigurationTest extends TestCase {
     @SuppressFBWarnings("DLS_DEAD_LOCAL_STORE")
     public void testGetSettingNamesNameConventionsContainTheSame() throws Exception {
         Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
-        ConfigurableTest.testGetSettingNamesNameConventionsContainTheSame(
+        MutableProcessingConfigurationTest.testGetSettingNamesNameConventionsContainTheSame(
                 new ArrayList<>(cfgB.getSettingNames(false)),
                 new ArrayList<>(cfgB.getSettingNames(true)));
     }
@@ -1314,7 +1316,7 @@ public class ConfigurationTest extends TestCase {
     
     @Test
     public void testKeyStaticFieldsHasAllVariationsAndCorrectFormat() throws IllegalArgumentException, IllegalAccessException {
-        ConfigurableTest.testKeyStaticFieldsHasAllVariationsAndCorrectFormat(Configuration.ExtendableBuilder.class);
+        MutableProcessingConfigurationTest.testKeyStaticFieldsHasAllVariationsAndCorrectFormat(Configuration.ExtendableBuilder.class);
     }
 
     @Test
@@ -1423,7 +1425,35 @@ public class ConfigurationTest extends TestCase {
             assertThat(e.getMessage(), allOf(containsString("removed"), containsString("3.0.0")));
         }
     }
-    
+
+    @Test
+    public void testCanBeBuiltOnlyOnce() {
+        Configuration.Builder builder = new Configuration.Builder(Configuration.VERSION_3_0_0);
+        builder.build();
+        try {
+            builder.build();
+            fail();
+        } catch (IllegalStateException e) {
+            // Expected
+        }
+    }
+
+    @Test
+    public void testCollectionSettingMutability() throws IOException {
+        Configuration.Builder cb = new Configuration.Builder(Configuration.VERSION_3_0_0);
+
+        assertTrue(_CollectionUtil.isMapKnownToBeUnmodifiable(cb.getSharedVariables()));
+        Map<String, Object> mutableValue = new HashMap<>();
+        mutableValue.put("x", "v1");
+        cb.setSharedVariables(mutableValue);
+        Map<String, Object> immutableValue = cb.getSharedVariables();
+        assertNotSame(mutableValue, immutableValue); // Must be a copy
+        assertTrue(_CollectionUtil.isMapKnownToBeUnmodifiable(immutableValue));
+        assertEquals(mutableValue, immutableValue);
+        mutableValue.put("y", "v2");
+        assertNotEquals(mutableValue, immutableValue); // No aliasing
+    }
+
     @SuppressWarnings("boxing")
     private void assertStartsWith(List<String> list, List<String> headList) {
         int index = 0;

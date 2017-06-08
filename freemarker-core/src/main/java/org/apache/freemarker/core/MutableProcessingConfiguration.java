@@ -525,7 +525,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *         Not {@code null}; will be copied (to prevent aliasing effect); keys must conform to format name
      *         syntactical restrictions  (see in {@link #getCustomNumberFormats()})
      */
-    public void setCustomNumberFormats(Map<String, TemplateNumberFormatFactory> customNumberFormats) {
+    public void setCustomNumberFormats(Map<String, ? extends TemplateNumberFormatFactory> customNumberFormats) {
         setCustomNumberFormats(customNumberFormats, false);
     }
 
@@ -534,7 +534,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *         {@code true} if we know that the 1st argument is already validated, immutable, and unchanging (means,
      *         won't change later because of aliasing).
      */
-    void setCustomNumberFormats(Map<String, TemplateNumberFormatFactory> customNumberFormats,
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    void setCustomNumberFormats(Map<String, ? extends TemplateNumberFormatFactory> customNumberFormats,
             boolean validatedImmutableUnchanging) {
         _NullArgumentException.check("customNumberFormats", customNumberFormats);
         if (!validatedImmutableUnchanging) {
@@ -547,7 +548,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
             validateFormatNames(customNumberFormats.keySet());
             this.customNumberFormats = Collections.unmodifiableMap(new HashMap<>(customNumberFormats));
         } else {
-            this.customNumberFormats = customNumberFormats;
+            this.customNumberFormats = (Map) customNumberFormats;
         }
     }
 
@@ -794,7 +795,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *         Not {@code null}; will be copied (to prevent aliasing effect); keys must conform to format name
      *         syntactical restrictions (see in {@link #getCustomDateFormats()})
      */
-    public void setCustomDateFormats(Map<String, TemplateDateFormatFactory> customDateFormats) {
+    public void setCustomDateFormats(Map<String, ? extends TemplateDateFormatFactory> customDateFormats) {
         setCustomDateFormats(customDateFormats, false);
     }
 
@@ -803,8 +804,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *         {@code true} if we know that the 1st argument is already validated, immutable, and unchanging (means,
      *         won't change later because of aliasing).
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     void setCustomDateFormats(
-            Map<String, TemplateDateFormatFactory> customDateFormats,
+            Map<String, ? extends TemplateDateFormatFactory> customDateFormats,
             boolean validatedImmutableUnchanging) {
         _NullArgumentException.check("customDateFormats", customDateFormats);
         if (!validatedImmutableUnchanging) {
@@ -815,9 +817,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                     String.class, false,
                     TemplateDateFormatFactory.class, false);
             validateFormatNames(customDateFormats.keySet());
-            this.customDateFormats = Collections.unmodifiableMap(new HashMap(customDateFormats));
+            this.customDateFormats = Collections.unmodifiableMap(new HashMap<>(customDateFormats));
         } else {
-            this.customDateFormats = customDateFormats;
+            this.customDateFormats = (Map) customDateFormats;
         }
     }
 
@@ -1363,7 +1365,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                 return;
             }
             _CollectionUtil.safeCastMap("autoImports", autoImports, String.class, false, String.class, false);
-            this.autoImports = new LinkedHashMap<>(autoImports);
+            this.autoImports = Collections.unmodifiableMap(new LinkedHashMap<>(autoImports));
         } else {
             this.autoImports = autoImports;
         }

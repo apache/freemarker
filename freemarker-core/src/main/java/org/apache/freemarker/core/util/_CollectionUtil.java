@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -114,6 +115,9 @@ public class _CollectionUtil {
     private static final Class<?> UNMODIFIABLE_MAP_CLASS_1 = Collections.emptyMap().getClass();
     private static final Class<?> UNMODIFIABLE_MAP_CLASS_2 = Collections.unmodifiableMap(
             new HashMap<Object, Object> (1)).getClass();
+    private static final Class<?> UNMODIFIABLE_LIST_CLASS_1 = Collections.emptyList().getClass();
+    private static final Class<?> UNMODIFIABLE_LIST_CLASS_2 = Collections.unmodifiableList(
+            new ArrayList<Object>(1)).getClass();
 
     public static boolean isMapKnownToBeUnmodifiable(Map<?, ?> map) {
         if (map == null) {
@@ -121,6 +125,14 @@ public class _CollectionUtil {
         }
         Class<? extends Map> mapClass = map.getClass();
         return mapClass == UNMODIFIABLE_MAP_CLASS_1 || mapClass == UNMODIFIABLE_MAP_CLASS_2;
+    }
+
+    public static boolean isListKnownToBeUnmodifiable(List<?> list) {
+        if (list == null) {
+            return true;
+        }
+        Class<? extends List> listClass = list.getClass();
+        return listClass == UNMODIFIABLE_LIST_CLASS_1 || listClass == UNMODIFIABLE_LIST_CLASS_2;
     }
 
     /**

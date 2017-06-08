@@ -1,24 +1,25 @@
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
+ * or more contributor license agreements. See the NOTICE file
  * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
+ * regarding copyright ownership. The ASF licenses this file
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ * with the License. You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
+ * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
 
-package org.apache.freemarker.core;
+package org.apache.freemarker.core.model.impl;
 
+import static org.apache.freemarker.test.hamcerst.Matchers.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -26,14 +27,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import javax.annotation.PostConstruct;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateCollectionModelEx;
@@ -44,18 +49,44 @@ import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapperTest.TestBean;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-public class RestrictedObjetWrapperTest {
-    
+public class RestrictedObjectWrapperTest {
+
+    @Test
+    public void testBasics() throws TemplateModelException {
+        PostConstruct.class.toString();
+        RestrictedObjectWrapper ow = new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
+        testCustomizationCommonPart(ow);
+        assertTrue(ow.wrap(Collections.emptyMap()) instanceof DefaultMapAdapter);
+        assertTrue(ow.wrap(Collections.emptyList()) instanceof DefaultListAdapter);
+        assertTrue(ow.wrap(new boolean[] { }) instanceof DefaultArrayAdapter);
+        assertTrue(ow.wrap(new HashSet()) instanceof DefaultNonListCollectionAdapter);
+    }
+
+    @SuppressWarnings("boxing")
+    private void testCustomizationCommonPart(RestrictedObjectWrapper ow) throws TemplateModelException {
+        assertTrue(ow.wrap("x") instanceof SimpleScalar);
+        assertTrue(ow.wrap(1.5) instanceof SimpleNumber);
+        assertTrue(ow.wrap(new Date()) instanceof SimpleDate);
+        assertEquals(TemplateBooleanModel.TRUE, ow.wrap(true));
+        
+        try {
+            ow.wrap(new TestBean());
+            fail();
+        } catch (TemplateModelException e) {
+            assertThat(e.getMessage(), containsStringIgnoringCase("type"));
+        }
+    }
+
     @Test
     public void testDoesNotAllowAPIBuiltin() throws TemplateModelException {
         RestrictedObjectWrapper sow = new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
-        
+
         TemplateModelWithAPISupport map = (TemplateModelWithAPISupport) sow.wrap(new HashMap());
         try {
             map.getAPI();
@@ -80,7 +111,7 @@ public class RestrictedObjetWrapperTest {
         assertTrue(sow.wrap(new HashMap()) instanceof TemplateHashModelEx2);
         assertNull(sow.wrap(null));
     }
-    
+
     @Test
     public void testWontWrapDOM() throws SAXException, IOException, ParserConfigurationException,
             TemplateModelException {
@@ -88,7 +119,7 @@ public class RestrictedObjetWrapperTest {
         InputSource is = new InputSource();
         is.setCharacterStream(new StringReader("<doc><sub a='1' /></doc>"));
         Document doc = db.parse(is);
-        
+
         RestrictedObjectWrapper sow = new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         try {
             sow.wrap(doc);
@@ -97,7 +128,7 @@ public class RestrictedObjetWrapperTest {
             assertThat(e.getMessage(), containsString("won't wrap"));
         }
     }
-    
+
     @Test
     public void testWontWrapGenericObjects() {
         RestrictedObjectWrapper sow = new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
@@ -108,5 +139,17 @@ public class RestrictedObjetWrapperTest {
             assertThat(e.getMessage(), containsString("won't wrap"));
         }
     }
-    
+
+    @Test
+    public void testCanBeBuiltOnlyOnce() {
+        RestrictedObjectWrapper.Builder builder = new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0);
+        builder.build();
+        try {
+            builder.build();
+            fail();
+        } catch (IllegalStateException e) {
+            // Expected
+        }
+    }
+
 }

@@ -898,5 +898,17 @@ public class TemplateConfigurationTest {
             }
         }
     }
+
+    @Test
+    public void testCanBeBuiltOnlyOnce() {
+        TemplateConfiguration.Builder builder = new TemplateConfiguration.Builder();
+        builder.build();
+        try {
+            builder.build();
+            fail();
+        } catch (IllegalStateException e) {
+            // Expected
+        }
+    }
     
 }

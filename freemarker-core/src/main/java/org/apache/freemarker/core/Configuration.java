@@ -1550,30 +1550,9 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     }
 
     /**
-     * Returns the FreeMarker version information, most importantly the major.minor.micro version numbers.
-     * 
-     * On FreeMarker version numbering rules:
-     * <ul>
-     *   <li>For final/stable releases the version number is like major.minor.micro, like 2.3.19. (Historically,
-     *       when micro was 0 the version strings was like major.minor instead of the proper major.minor.0, but that's
-     *       not like that anymore.)
-     *   <li>When only the micro version is increased, compatibility with previous versions with the same
-     *       major.minor is kept. Thus <tt>freemarker.jar</tt> can be replaced in an existing application without
-     *       breaking it.</li>
-     *   <li>For non-final/unstable versions (that almost nobody uses), the format is:
-     *       <ul>
-     *         <li>Starting from 2.3.20: major.minor.micro-extraInfo, like
-     *             2.3.20-nightly_20130506T123456Z, 2.4.0-RC01. The major.minor.micro
-     *             always indicates the target we move towards, so 2.3.20-nightly or 2.3.20-M01 is
-     *             after 2.3.19 and will eventually become to 2.3.20. "PRE", "M" and "RC" (uppercase!) means
-     *             "preview", "milestone" and "release candidate" respectively, and is always followed by a 2 digit
-     *             0-padded counter, like M03 is the 3rd milestone release of a given major.minor.micro.</li> 
-     *         <li>Before 2.3.20: The extraInfo wasn't preceded by a "-".
-     *             Instead of "nightly" there was "mod", where the major.minor.micro part has indicated where
-     *             are we coming from, so 2.3.19mod (read as: 2.3.19 modified) was after 2.3.19 but before 2.3.20.
-     *             Also, "pre" and "rc" was lowercase, and was followd by a number without 0-padding.</li>
-     *       </ul>
-     * </ul>
+     * Returns the FreeMarker version information, most importantly the major.minor.micro version numbers; do not use
+     * this for {@link #getIncompatibleImprovements() #incompatibleImprovements} value, use constants like
+     * {@link Configuration#VERSION_3_0_0} for that.
      */
     public static Version getVersion() {
         return VERSION;
@@ -2551,7 +2530,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             _NullArgumentException.check("sharedVariables", sharedVariables);
             _CollectionUtil.safeCastMap(
                     "sharedVariables", sharedVariables, String.class, false, Object.class,true);
-            this.sharedVariables = new HashMap<>(sharedVariables);
+            this.sharedVariables = Collections.unmodifiableMap(new HashMap<>(sharedVariables));
         }
 
         /**
@@ -2834,8 +2813,9 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
         /**
          * @param incompatibleImprovements
-         *         Specifies the value of the {@linkplain Configuration#getIncompatibleImprovements()} incompatible
-         *         improvements setting}. This setting can't be changed later.
+         *         Specifies the value of the {@link Configuration#getIncompatibleImprovements()}
+         *         incompatibleImprovements} setting, such as {@link Configuration#VERSION_3_0_0}. This setting can't be
+         *         changed later.
          */
         public Builder(Version incompatibleImprovements) {
             super(incompatibleImprovements);
