@@ -309,43 +309,43 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             for (OutputFormat outputFormat : registeredCustomOutputFormats) {
                 String name = outputFormat.getName();
                 if (name.equals(UndefinedOutputFormat.INSTANCE.getName())) {
-                    throw new ConfigurationSettingValueException(
+                    throw new InvalidSettingValueException(
                             ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY, null, false,
                             "The \"" + name + "\" output format can't be redefined",
                             null);
                 }
                 if (name.equals(PlainTextOutputFormat.INSTANCE.getName())) {
-                    throw new ConfigurationSettingValueException(
+                    throw new InvalidSettingValueException(
                             ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY, null, false,
                             "The \"" + name + "\" output format can't be redefined",
                             null);
                 }
                 if (name.length() == 0) {
-                    throw new ConfigurationSettingValueException(
+                    throw new InvalidSettingValueException(
                             ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY, null, false,
                             "The output format name can't be 0 long",
                             null);
                 }
                 if (!Character.isLetterOrDigit(name.charAt(0))) {
-                    throw new ConfigurationSettingValueException(
+                    throw new InvalidSettingValueException(
                             ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY, null, false,
                             "The output format name must start with letter or digit: " + name,
                             null);
                 }
                 if (name.indexOf('+') != -1) {
-                    throw new ConfigurationSettingValueException(
+                    throw new InvalidSettingValueException(
                             ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY, null, false,
                             "The output format name can't contain \"+\" character: " + name,
                             null);
                 }
                 if (name.indexOf('{') != -1) {
-                    throw new ConfigurationSettingValueException(
+                    throw new InvalidSettingValueException(
                             ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY, null, false,
                             "The output format name can't contain \"{\" character: " + name,
                             null);
                 }
                 if (name.indexOf('}') != -1) {
-                    throw new ConfigurationSettingValueException(
+                    throw new InvalidSettingValueException(
                             ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY, null, false,
                             "The output format name can't contain \"}\" character: " + name,
                             null);
@@ -357,7 +357,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                         throw new IllegalArgumentException(
                                 "Duplicate output format in the collection: " + outputFormat);
                     }
-                    throw new ConfigurationSettingValueException(
+                    throw new InvalidSettingValueException(
                             ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY, null, false,
                             "Clashing output format names between " + replaced + " and " + outputFormat + ".",
                             null);
@@ -487,7 +487,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             TemplateResolver templateResolver,
             String settingName, Object value) {
         if (value != null) {
-            throw new ConfigurationSettingValueException(
+            throw new InvalidSettingValueException(
                     settingName, null, false,
                     "The templateResolver is a "
                     + templateResolver.getClass().getName() + ", which doesn't support this setting, hence it "
@@ -498,7 +498,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
     private <SelfT extends ExtendableBuilder<SelfT>> void wrapAndPutSharedVariables(
             HashMap<String, TemplateModel> wrappedSharedVariables, Map<String, Object> rawSharedVariables,
-            ObjectWrapper objectWrapper) throws ConfigurationSettingValueException {
+            ObjectWrapper objectWrapper) throws InvalidSettingValueException {
         if (rawSharedVariables.isEmpty()) {
             return;
         }
@@ -507,7 +507,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             try {
                 wrappedSharedVariables.put(ent.getKey(), objectWrapper.wrap(ent.getValue()));
             } catch (TemplateModelException e) {
-                throw new ConfigurationSettingValueException(
+                throw new InvalidSettingValueException(
                         ExtendableBuilder.SHARED_VARIABLES_KEY, null, false,
                         "Failed to wrap shared variable " + _StringUtil.jQuote(ent.getKey()),
                         e);
@@ -1861,7 +1861,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     } else if ("disable".equals(value)) {
                         setAutoEscapingPolicy(AutoEscapingPolicy.DISABLE);
                     } else {
-                        throw new ConfigurationSettingValueException( name, value,
+                        throw new InvalidSettingValueException( name, value,
                                 "No such predefined auto escaping policy name");
                     }
                 } else if (OUTPUT_FORMAT_KEY_SNAKE_CASE.equals(name) || OUTPUT_FORMAT_KEY_CAMEL_CASE.equals(name)) {
@@ -1877,7 +1877,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                             value, List.class, true, _SettingEvaluationEnvironment.getCurrent());
                     for (Object item : list) {
                         if (!(item instanceof OutputFormat)) {
-                            throw new ConfigurationSettingValueException(name, value,
+                            throw new InvalidSettingValueException(name, value,
                                     "List items must be " + OutputFormat.class.getName() + " instances.");
                         }
                     }
@@ -1905,7 +1905,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                             try {
                                 pValue = Integer.parseInt((String) ent.getValue());
                             } catch (NumberFormatException e) {
-                                throw new ConfigurationSettingValueException(name, value,
+                                throw new InvalidSettingValueException(name, value,
                                         "Malformed integer number (shown quoted): " + _StringUtil.jQuote(ent.getValue()));
                             }
                             if ("soft".equalsIgnoreCase(pName)) {
@@ -1913,13 +1913,13 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                             } else if ("strong".equalsIgnoreCase(pName)) {
                                 strongSize = pValue;
                             } else {
-                                throw new ConfigurationSettingValueException(name, value,
+                                throw new InvalidSettingValueException(name, value,
                                         "Unsupported cache parameter name (shown quoted): "
                                                 + _StringUtil.jQuote(ent.getValue()));
                             }
                         }
                         if (softSize == 0 && strongSize == 0) {
-                            throw new ConfigurationSettingValueException(name, value,
+                            throw new InvalidSettingValueException(name, value,
                                     "Either cache soft- or strong size must be set and non-0.");
                         }
                         setTemplateCacheStorage(new MruCacheStorage(strongSize, softSize));
@@ -1948,7 +1948,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     } else if (unit.equals("h")) {
                         multipier = 1000 * 60 * 60;
                     } else if (!unit.isEmpty()) {
-                        throw new ConfigurationSettingValueException(name, value,
+                        throw new InvalidSettingValueException(name, value,
                                 "Unrecognized time unit " + _StringUtil.jQuote(unit) + ". Valid units are: ms, s, m, h");
                     } else {
                         multipier = 0;
@@ -1956,7 +1956,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
                     int parsedValue = Integer.parseInt(valueWithoutUnit);
                     if (multipier == 0 && parsedValue != 0) {
-                        throw new ConfigurationSettingValueException(name, value,
+                        throw new InvalidSettingValueException(name, value,
                                 "Time unit must be specified for a non-0 value (examples: 500 ms, 3 s, 2 m, 1 h).");
                     }
 
@@ -1967,7 +1967,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                             value, Map.class, false, _SettingEvaluationEnvironment.getCurrent());
                     for (Object key : sharedVariables.keySet()) {
                         if (!(key instanceof String)) {
-                            throw new ConfigurationSettingValueException(name, null, false,
+                            throw new InvalidSettingValueException(name, null, false,
                                     "All keys in this Map must be strings, but one of them is an instance of "
                                     + "this class: " + _ClassUtil.getShortClassNameOfObject(key), null);
                         }
@@ -1979,7 +1979,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     } else if ("static_text".equals(value) || "staticText".equals(value)) {
                         setTemplateLanguage(TemplateLanguage.STATIC_TEXT);
                     } else {
-                        throw new ConfigurationSettingValueException(name, value, "Unsupported template language name");
+                        throw new InvalidSettingValueException(name, value, "Unsupported template language name");
                     }
                 } else if (TAG_SYNTAX_KEY_SNAKE_CASE.equals(name) || TAG_SYNTAX_KEY_CAMEL_CASE.equals(name)) {
                     if ("auto_detect".equals(value) || "autoDetect".equals(value)) {
@@ -1989,7 +1989,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     } else if ("square_bracket".equals(value) || "squareBracket".equals(value)) {
                         setTagSyntax(TagSyntax.SQUARE_BRACKET);
                     } else {
-                        throw new ConfigurationSettingValueException(name, value, "No such predefined tag syntax name");
+                        throw new InvalidSettingValueException(name, value, "No such predefined tag syntax name");
                     }
                 } else if (NAMING_CONVENTION_KEY_SNAKE_CASE.equals(name) || NAMING_CONVENTION_KEY_CAMEL_CASE.equals(name)) {
                     if ("auto_detect".equals(value) || "autoDetect".equals(value)) {
@@ -1999,7 +1999,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     } else if ("camel_case".equals(value) || "camelCase".equals(value)) {
                         setNamingConvention(NamingConvention.CAMEL_CASE);
                     } else {
-                        throw new ConfigurationSettingValueException(name, value,
+                        throw new InvalidSettingValueException(name, value,
                                 "No such predefined naming convention name.");
                     }
                 } else if (TAB_SIZE_KEY_SNAKE_CASE.equals(name) || TAB_SIZE_KEY_CAMEL_CASE.equals(name)) {
@@ -2031,7 +2031,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     } else if (value.equalsIgnoreCase("default_2_4_0")) {
                         setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
                     } else {
-                        throw new ConfigurationSettingValueException(name, value,
+                        throw new InvalidSettingValueException(name, value,
                                 "No such predefined template name format");
                     }
                 } else if (TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE.equals(name)
@@ -2045,10 +2045,10 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                 } else {
                     unknown = true;
                 }
-            } catch (ConfigurationSettingValueException e) {
+            } catch (InvalidSettingValueException e) {
                 throw e;
             } catch (Exception e) {
-                throw new ConfigurationSettingValueException(name, value, e);
+                throw new InvalidSettingValueException(name, value, e);
             }
             if (unknown) {
                 super.setSetting(name, value);

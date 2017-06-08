@@ -36,7 +36,7 @@ import java.util.StringTokenizer;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.ConfigurationException;
-import org.apache.freemarker.core.ConfigurationSettingValueException;
+import org.apache.freemarker.core.InvalidSettingValueException;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateConfiguration;
 import org.apache.freemarker.core.TemplateLanguage;
@@ -128,7 +128,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
 
     private void checkDependencyNotNull(String name, Object value) {
         if (value == null) {
-            throw new ConfigurationSettingValueException(
+            throw new InvalidSettingValueException(
                     name, null, false,
                     "This Configuration setting must be set and non-null when the TemplateResolver is a(n) "
                     + this.getClass().getName() + ".", null);

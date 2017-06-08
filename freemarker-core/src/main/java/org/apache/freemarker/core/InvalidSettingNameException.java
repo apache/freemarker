@@ -25,14 +25,14 @@ import org.apache.freemarker.core.util._StringUtil;
  * Thrown by {@link ExtendableBuilder#setSetting(String, String)} if the setting name was not recognized.
  */
 @SuppressWarnings("serial")
-public class UnknownConfigurationSettingException extends ConfigurationException {
+public class InvalidSettingNameException extends ConfigurationException {
 
-    UnknownConfigurationSettingException(String name, String correctedName) {
+    InvalidSettingNameException(String name, String correctedName) {
         super("Unknown FreeMarker configuration setting: " + _StringUtil.jQuote(name)
                 + (correctedName == null ? "" : ". You may meant: " + _StringUtil.jQuote(correctedName)));
     }
 
-    UnknownConfigurationSettingException(String name, Version removedInVersion) {
+    InvalidSettingNameException(String name, Version removedInVersion) {
         super("Unknown FreeMarker configuration setting: " + _StringUtil.jQuote(name)
                 + (removedInVersion == null ? "" : ". This setting was removed in version " + removedInVersion));
     }

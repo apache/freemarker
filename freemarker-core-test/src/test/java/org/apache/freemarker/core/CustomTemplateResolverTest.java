@@ -132,31 +132,31 @@ public class CustomTemplateResolverTest {
         try {
             new Configuration.Builder(Configuration.VERSION_3_0_0).templateCacheStorage(null).build();
             fail();
-        } catch (ConfigurationSettingValueException e) {
+        } catch (InvalidSettingValueException e) {
             // Expected
         }
         try {
             new Configuration.Builder(Configuration.VERSION_3_0_0).templateUpdateDelayMilliseconds(null).build();
             fail();
-        } catch (ConfigurationSettingValueException e) {
+        } catch (InvalidSettingValueException e) {
             // Expected
         }
         try {
             new Configuration.Builder(Configuration.VERSION_3_0_0).templateLookupStrategy(null).build();
             fail();
-        } catch (ConfigurationSettingValueException e) {
+        } catch (InvalidSettingValueException e) {
             // Expected
         }
         try {
             new Configuration.Builder(Configuration.VERSION_3_0_0).localizedTemplateLookup(null).build();
             fail();
-        } catch (ConfigurationSettingValueException e) {
+        } catch (InvalidSettingValueException e) {
             // Expected
         }
         try {
             new Configuration.Builder(Configuration.VERSION_3_0_0).templateNameFormat(null).build();
             fail();
-        } catch (ConfigurationSettingValueException e) {
+        } catch (InvalidSettingValueException e) {
             // Expected
         }
 
@@ -183,7 +183,7 @@ public class CustomTemplateResolverTest {
                 try {
                     cfgB.build();
                     fail();
-                } catch (ConfigurationSettingValueException e) {
+                } catch (InvalidSettingValueException e) {
                     // Expected
                 }
             }

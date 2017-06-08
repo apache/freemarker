@@ -29,13 +29,13 @@ import org.apache.freemarker.core.util._StringUtil;
  * cause exception.
  */
 @SuppressWarnings("serial")
-public class ConfigurationSettingValueException extends ConfigurationException {
+public class InvalidSettingValueException extends ConfigurationException {
 
-    public ConfigurationSettingValueException(String name, String value, Throwable cause) {
+    public InvalidSettingValueException(String name, String value, Throwable cause) {
         this(name, value, true, null, cause);
     }
 
-    public ConfigurationSettingValueException(String name, String value, String reason) {
+    public InvalidSettingValueException(String name, String value, String reason) {
         this(name, value, true, reason, null);
     }
 
@@ -53,7 +53,7 @@ public class ConfigurationSettingValueException extends ConfigurationException {
      * @param cause
      *         The cause exception of this exception (why setting the setting was failed)
      */
-    public ConfigurationSettingValueException(String name, Object value, boolean showValue, String reason,
+    public InvalidSettingValueException(String name, Object value, boolean showValue, String reason,
             Throwable cause) {
         super(
                 createMessage(

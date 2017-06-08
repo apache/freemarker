@@ -600,7 +600,7 @@ public class ConfigurationTest extends TestCase {
        
        try {
            cfgB.setSetting(Configuration.ExtendableBuilder.OUTPUT_FORMAT_KEY, "null");
-       } catch (ConfigurationSettingValueException e) {
+       } catch (InvalidSettingValueException e) {
            assertThat(e.getCause().getMessage(), containsString(UndefinedOutputFormat.class.getSimpleName()));
        }
     }
@@ -674,7 +674,7 @@ public class ConfigurationTest extends TestCase {
         try {
             cfg.setSetting(Configuration.ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE, "[TemplateConfiguration()]");
             fail();
-        } catch (ConfigurationSettingValueException e) {
+        } catch (InvalidSettingValueException e) {
             assertThat(e.getMessage(), containsString(OutputFormat.class.getSimpleName()));
         }
     }
@@ -911,7 +911,7 @@ public class ConfigurationTest extends TestCase {
         try {
             cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "5");
             assertEquals(5000L, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
-        } catch (ConfigurationSettingValueException e) {
+        } catch (InvalidSettingValueException e) {
             assertThat(e.getMessage(), containsStringIgnoringCase("unit must be specified"));
         }
         cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "0");
@@ -919,7 +919,7 @@ public class ConfigurationTest extends TestCase {
         try {
             cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "5 foo");
             assertEquals(5000L, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
-        } catch (ConfigurationSettingValueException e) {
+        } catch (InvalidSettingValueException e) {
             assertThat(e.getMessage(), containsStringIgnoringCase("\"foo\""));
         }
         
@@ -1344,7 +1344,7 @@ public class ConfigurationTest extends TestCase {
                 try {
                     cfgB.setSetting(nameCC, value);
                 } catch (Exception e) {
-                    assertThat(e, not(instanceOf(UnknownConfigurationSettingException.class)));
+                    assertThat(e, not(instanceOf(InvalidSettingNameException.class)));
                     resultCC = e;
                 }
                 
@@ -1353,7 +1353,7 @@ public class ConfigurationTest extends TestCase {
                 try {
                     cfgB.setSetting(nameSC, value);
                 } catch (Exception e) {
-                    assertThat(e, not(instanceOf(UnknownConfigurationSettingException.class)));
+                    assertThat(e, not(instanceOf(InvalidSettingNameException.class)));
                     resultSC = e;
                 }
                 

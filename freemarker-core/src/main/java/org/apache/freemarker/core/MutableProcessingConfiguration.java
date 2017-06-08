@@ -1854,8 +1854,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * @param name the name of the setting.
      * @param value the string that describes the new value of the setting.
      * 
-     * @throws UnknownConfigurationSettingException if the name is wrong.
-     * @throws ConfigurationSettingValueException if the new value of the setting can't be set for any other reasons.
+     * @throws InvalidSettingNameException if the name is wrong.
+     * @throws InvalidSettingValueException if the new value of the setting can't be set for any other reasons.
      */
     public void setSetting(String name, String value) throws ConfigurationException {
         boolean unknown = false;
@@ -1912,7 +1912,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                             && this instanceof Configuration.ExtendableBuilder) {
                         unsetTemplateExceptionHandler();
                     } else {
-                        throw new ConfigurationSettingValueException(
+                        throw new InvalidSettingValueException(
                                 name, value,
                                 "No such predefined template exception handler name");
                     }
@@ -1927,7 +1927,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                     } else if ("conservative".equalsIgnoreCase(value)) {
                         setArithmeticEngine(ConservativeArithmeticEngine.INSTANCE);
                     } else {
-                        throw new ConfigurationSettingValueException(
+                        throw new InvalidSettingValueException(
                                 name, value, "No such predefined arithmetical engine name");
                     }
                 } else {
@@ -1981,7 +1981,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                         } else if (segmentKey.equals(TRUSTED_TEMPLATES)) {
                             trustedTemplates = segmentValue;
                         } else {
-                            throw new ConfigurationSettingValueException(name, value,
+                            throw new InvalidSettingValueException(name, value,
                                     "Unrecognized list segment key: " + _StringUtil.jQuote(segmentKey) +
                                             ". Supported keys are: \"" + ALLOWED_CLASSES + "\", \"" +
                                             TRUSTED_TEMPLATES + "\"");
@@ -1994,7 +1994,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                                     value, TemplateClassResolver.class, false,
                                     _SettingEvaluationEnvironment.getCurrent()));
                 } else {
-                    throw new ConfigurationSettingValueException(
+                    throw new InvalidSettingValueException(
                             name, value,
                             "Not predefined class resolved name, nor follows class resolver definition syntax, nor "
                             + "looks like class name");
@@ -2014,10 +2014,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
             } else {
                 unknown = true;
             }
-        } catch (ConfigurationSettingValueException e) {
+        } catch (InvalidSettingValueException e) {
             throw e;
         } catch (Exception e) {
-            throw new ConfigurationSettingValueException(name, value, e);
+            throw new InvalidSettingValueException(name, value, e);
         }
         if (unknown) {
             throw unknownSettingException(name);
@@ -2074,11 +2074,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     /**
      * Creates the exception that should be thrown when a setting name isn't recognized.
      */
-    protected final UnknownConfigurationSettingException unknownSettingException(String name) {
+    protected final InvalidSettingNameException unknownSettingException(String name) {
         Version removalVersion = getRemovalVersionForUnknownSetting(name);
          return removalVersion != null
-                ? new UnknownConfigurationSettingException(name, removalVersion)
-                : new UnknownConfigurationSettingException(name, getCorrectedNameForUnknownSetting(name));
+                ? new InvalidSettingNameException(name, removalVersion)
+                : new InvalidSettingNameException(name, getCorrectedNameForUnknownSetting(name));
     }
 
     /**
