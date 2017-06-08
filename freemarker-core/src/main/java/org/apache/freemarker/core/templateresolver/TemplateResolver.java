@@ -35,6 +35,8 @@ import org.apache.freemarker.core.util._NullArgumentException;
  * in case the standard mechanism (a {@link DefaultTemplateResolver} combined with all the {@link Configuration}
  * settings like {@link Configuration#getTemplateLoader() templateLoader},
  * {@link Configuration#getTemplateConfigurations() templateConfigurations}, etc.) is not flexible enough.
+ * The {@link TemplateResolver} is put into use by setting the
+ * {@link Configuration#getTemplateResolver() templateResolver} configuration setting.
  * <p>
  * A custom {@link TemplateResolver} can depend on a selected set of {@link Configuration} settings; the same ones that
  * {@link DefaultTemplateResolver} depends on. These settings are collected into the
