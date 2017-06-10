@@ -1336,22 +1336,6 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         }
 
         /**
-         * Calls {@link ExtendableBuilder#hashCodeForCacheKey(ExtendableBuilder)}.
-         */
-        @Override
-        public int hashCode() {
-            return hashCodeForCacheKey(this);
-        }
-
-        /**
-         * Calls {@link ExtendableBuilder#equalsForCacheKey(ExtendableBuilder, Object)}.
-         */
-        @Override
-        public boolean equals(Object obj) {
-            return equalsForCacheKey(this, obj);
-        }
-
-        /**
          * For unit testing only
          */
         static Map<ClassLoader, Map<Builder, WeakReference<DefaultObjectWrapper>>> getInstanceCache() {
@@ -1460,52 +1444,48 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          * returns from a cache. If you override {@link ExtendableBuilder} and add new fields, don't forget to take
          * those into account too!
          *
-         * <p>{@link Builder#hashCode()} is delegated to this.
-         *
-         * @see #equalsForCacheKey(ExtendableBuilder, Object)
+         * @see #equals(Object)
          * @see #cloneForCacheKey()
          */
-        protected static int hashCodeForCacheKey(ExtendableBuilder<?, ?> builder) {
+        @Override
+        public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + builder.getIncompatibleImprovements().hashCode();
-            result = prime * result + builder.getDefaultDateType();
-            result = prime * result + (builder.getOuterIdentity() != null ? builder.getOuterIdentity().hashCode() : 0);
-            result = prime * result + (builder.isStrict() ? 1231 : 1237);
-            result = prime * result + (builder.getUseModelCache() ? 1231 : 1237);
-            result = prime * result + (builder.getUsePrivateCaches() ? 1231 : 1237);
-            result = prime * result + builder.classIntrospectorBuilder.hashCode();
-            result = prime * result + builder.getExtensions().hashCode();
+            result = prime * result + getIncompatibleImprovements().hashCode();
+            result = prime * result + getDefaultDateType();
+            result = prime * result + (getOuterIdentity() != null ? getOuterIdentity().hashCode() : 0);
+            result = prime * result + (isStrict() ? 1231 : 1237);
+            result = prime * result + (getUseModelCache() ? 1231 : 1237);
+            result = prime * result + (getUsePrivateCaches() ? 1231 : 1237);
+            result = prime * result + classIntrospectorBuilder.hashCode();
+            result = prime * result + getExtensions().hashCode();
             return result;
         }
-
+        
         /**
          * A content-based {@link Object#equals(Object)} that could be used to look up the product object that
          * {@link #build()} returns from a cache. If you override {@link ExtendableBuilder} and add new fields, don't
          * forget to take those into account too!
          *
-         * <p>
-         * {@link Builder#equals(Object)} is delegated to this.
-         *
-         * @see #hashCodeForCacheKey(ExtendableBuilder)
+         * @see #hashCode()
          * @see #cloneForCacheKey()
          */
-        protected static boolean equalsForCacheKey(ExtendableBuilder<?, ?> thisBuilder,  Object thatObj) {
-            if (thisBuilder == thatObj) return true;
+        public boolean equals(Object thatObj) {
+            if (this == thatObj) return true;
             if (thatObj == null) return false;
-            if (thisBuilder.getClass() != thatObj.getClass()) return false;
+            if (getClass() != thatObj.getClass()) return false;
             ExtendableBuilder<?, ?> thatBuilder = (ExtendableBuilder<?, ?>) thatObj;
 
-            if (!thisBuilder.getIncompatibleImprovements().equals(thatBuilder.getIncompatibleImprovements())) {
+            if (!getIncompatibleImprovements().equals(thatBuilder.getIncompatibleImprovements())) {
                 return false;
             }
-            if (thisBuilder.getDefaultDateType() != thatBuilder.getDefaultDateType()) return false;
-            if (thisBuilder.getOuterIdentity() != thatBuilder.getOuterIdentity()) return false;
-            if (thisBuilder.isStrict() != thatBuilder.isStrict()) return false;
-            if (thisBuilder.getUseModelCache() != thatBuilder.getUseModelCache()) return false;
-            if (thisBuilder.getUsePrivateCaches() != thatBuilder.getUsePrivateCaches()) return false;
-            if (!thisBuilder.getExtensions().equals(thatBuilder.getExtensions())) return false;
-            return thisBuilder.classIntrospectorBuilder.equals(thatBuilder.classIntrospectorBuilder);
+            if (getDefaultDateType() != thatBuilder.getDefaultDateType()) return false;
+            if (getOuterIdentity() != thatBuilder.getOuterIdentity()) return false;
+            if (isStrict() != thatBuilder.isStrict()) return false;
+            if (getUseModelCache() != thatBuilder.getUseModelCache()) return false;
+            if (getUsePrivateCaches() != thatBuilder.getUsePrivateCaches()) return false;
+            if (!getExtensions().equals(thatBuilder.getExtensions())) return false;
+            return this.classIntrospectorBuilder.equals(thatBuilder.classIntrospectorBuilder);
         }
 
         /**
@@ -1518,8 +1498,8 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          * method, and you will also cache product instances, you need to clone those values manually to prevent
          * aliasing problems, so don't forget to override this method!
          *
-         * @see #equalsForCacheKey(ExtendableBuilder, Object)
-         * @see #hashCodeForCacheKey(ExtendableBuilder)
+         * @see #equals(Object)
+         * @see #hashCode()
          */
         protected SelfT cloneForCacheKey() {
             try {
