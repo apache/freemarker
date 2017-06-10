@@ -19,9 +19,13 @@
 
 package org.apache.freemarker.core;
 
+import java.util.Collection;
 import java.util.Map;
 
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.outputformat.OutputFormat;
+import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
@@ -236,5 +240,34 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
      * Tells if this setting was explicitly set (if not, the default value of the setting will be used).
      */
     boolean isSharedVariablesSet();
+
+    /**
+     * The custom output formats that can be referred by their unique name ({@link OutputFormat#getName()}) from
+     * templates. Names are also used to look up the {@link OutputFormat} for standard file extensions; see them at
+     * {@link #getRecognizeStandardFileExtensions()}. Each must be different and has a unique name
+     * ({@link OutputFormat#getName()}) within this collection.
+     *
+     * <p>
+     * When there's a clash between a custom output format name and a standard output format name, the custom format
+     * will win, thus you can override the meaning of standard output format names. Except, it's not allowed to override
+     * {@link UndefinedOutputFormat} and {@link PlainTextOutputFormat}.
+     *
+     * <p>
+     * The default value is an empty collection.
+     *
+     * @throws IllegalArgumentException
+     *             When multiple different {@link OutputFormat}-s have the same name in the parameter collection. When
+     *             the same {@link OutputFormat} object occurs for multiple times in the collection. If an
+     *             {@link OutputFormat} name is 0 long. If an {@link OutputFormat} name doesn't start with letter or
+     *             digit. If an {@link OutputFormat} name contains {@code '+'} or <code>'{'</code> or <code>'}'</code>.
+     *             If an {@link OutputFormat} name equals to {@link UndefinedOutputFormat#getName()} or
+     *             {@link PlainTextOutputFormat#getName()}.
+     */
+    Collection<OutputFormat> getRegisteredCustomOutputFormats();
+
+    /**
+     * Tells if this setting was explicitly set (if not, the default value of the setting will be used).
+     */
+    boolean isRegisteredCustomOutputFormatsSet();
 
 }

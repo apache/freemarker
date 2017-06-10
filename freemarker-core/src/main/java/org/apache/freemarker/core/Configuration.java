@@ -26,9 +26,11 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -302,12 +304,36 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         incompatibleImprovements = builder.getIncompatibleImprovements();
 
         {
-            Collection<OutputFormat> registeredCustomOutputFormats = builder.getRegisteredCustomOutputFormats();
+            final Collection<OutputFormat> regCustOutputFormats;
+            {
+                Collection<OutputFormat> directRegCustOutputFormats = builder.getRegisteredCustomOutputFormats();
+                Collection<OutputFormat> impliedRegCustOutputFormats =
+                        builder.getImpliedRegisteredCustomOutputFormats();
+                if (impliedRegCustOutputFormats.isEmpty()) {
+                    regCustOutputFormats = directRegCustOutputFormats;
+                } else if (directRegCustOutputFormats.isEmpty()) {
+                    regCustOutputFormats = impliedRegCustOutputFormats;
+                } else {
+                    List<OutputFormat> mergedOutputFormats = new ArrayList<>(
+                            impliedRegCustOutputFormats.size() + directRegCustOutputFormats.size());
+                    HashSet<String> directNames = new HashSet<>(directRegCustOutputFormats.size() * 4 / 3 + 1, .75f);
+                    for (OutputFormat directRegCustOutputFormat : directRegCustOutputFormats) {
+                        directNames.add(directRegCustOutputFormat.getName());
+                    }
+                    for (OutputFormat impliedRegCustOutputFormat : impliedRegCustOutputFormats) {
+                        if (!directNames.contains(impliedRegCustOutputFormat.getName())) {
+                            mergedOutputFormats.add(impliedRegCustOutputFormat);
+                        }
+                    }
+                    mergedOutputFormats.addAll(directRegCustOutputFormats);
+                    regCustOutputFormats = Collections.unmodifiableList(mergedOutputFormats);
+                }
+            }
 
-            _NullArgumentException.check(registeredCustomOutputFormats);
+            _NullArgumentException.check(regCustOutputFormats);
             Map<String, OutputFormat> registeredCustomOutputFormatsByName = new LinkedHashMap<>(
-                    registeredCustomOutputFormats.size() * 4 / 3, 1f);
-            for (OutputFormat outputFormat : registeredCustomOutputFormats) {
+                    regCustOutputFormats.size() * 4 / 3, 1f);
+            for (OutputFormat outputFormat : regCustOutputFormats) {
                 String name = outputFormat.getName();
                 if (name.equals(UndefinedOutputFormat.INSTANCE.getName())) {
                     throw new InvalidSettingValueException(
@@ -367,14 +393,14 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
             this.registeredCustomOutputFormatsByName = registeredCustomOutputFormatsByName;
             this.registeredCustomOutputFormats = Collections.unmodifiableList(
-                    new ArrayList<> (registeredCustomOutputFormats));
+                    new ArrayList<> (regCustOutputFormats));
         }
 
         ObjectWrapper objectWrapper = builder.getObjectWrapper();
 
         {
             Map<String, Object> sharedVariables = _CollectionUtil.mergeImmutableMaps(builder
-                    .getImplicitSharedVariables(), builder.getSharedVariables(), false);
+                    .getImpliedSharedVariables(), builder.getSharedVariables(), false);
 
             HashMap<String, TemplateModel> wrappedSharedVariables = new HashMap<>(
                     sharedVariables.size() * 4 / 3 + 1, 0.75f);
@@ -803,30 +829,17 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         return (MarkupOutputFormat) of;
     }
     
-    /**
-     * The custom output formats that can be referred by their unique name ({@link OutputFormat#getName()}) from
-     * templates. Names are also used to look up the {@link OutputFormat} for standard file extensions; see them at
-     * {@link #getRecognizeStandardFileExtensions()}. Each must be different and has a unique name
-     * ({@link OutputFormat#getName()}) within this collection.
-     *
-     * <p>
-     * When there's a clash between a custom output format name and a standard output format name, the custom format
-     * will win, thus you can override the meaning of standard output format names. Except, it's not allowed to override
-     * {@link UndefinedOutputFormat} and {@link PlainTextOutputFormat}.
-     *
-     * <p>
-     * The default value is an empty collection.
-     *
-     * @throws IllegalArgumentException
-     *             When multiple different {@link OutputFormat}-s have the same name in the parameter collection. When
-     *             the same {@link OutputFormat} object occurs for multiple times in the collection. If an
-     *             {@link OutputFormat} name is 0 long. If an {@link OutputFormat} name doesn't start with letter or
-     *             digit. If an {@link OutputFormat} name contains {@code '+'} or <code>'{'</code> or <code>'}'</code>.
-     *             If an {@link OutputFormat} name equals to {@link UndefinedOutputFormat#getName()} or
-     *             {@link PlainTextOutputFormat#getName()}.
-     */
     public Collection<OutputFormat> getRegisteredCustomOutputFormats() {
         return registeredCustomOutputFormats;
+    }
+
+    /**
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
+     */
+    @Override
+    public boolean isRegisteredCustomOutputFormatsSet() {
+        return true;
     }
 
     @Override
@@ -2477,9 +2490,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     : getDefaultRegisteredCustomOutputFormats();
         }
 
-        /**
-         * Tells if this setting was explicitly set (if not, the default value of the setting will be used).
-         */
         public boolean isRegisteredCustomOutputFormatsSet() {
             return registeredCustomOutputFormats != null;
         }
@@ -2489,11 +2499,23 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         }
 
         /**
+         * The imports that will be added to the built {@link Configuration} before the ones coming from
+         * {@link #getRegisteredCustomOutputFormats()}. When overriding this method, always consider adding to the
+         * return value of the super method, rather than replacing it.
+         *
+         * @return Immutable {@link Collection}; not {@code null}
+         */
+        protected Collection<OutputFormat> getImpliedRegisteredCustomOutputFormats() {
+            return Collections.emptyList();
+        }
+
+        /**
          * Setter pair of {@link Configuration#getRegisteredCustomOutputFormats()}.
          */
         public void setRegisteredCustomOutputFormats(Collection<OutputFormat> registeredCustomOutputFormats) {
             _NullArgumentException.check("registeredCustomOutputFormats", registeredCustomOutputFormats);
-            this.registeredCustomOutputFormats = registeredCustomOutputFormats;
+            this.registeredCustomOutputFormats = Collections.unmodifiableCollection(
+                    new ArrayList<>(registeredCustomOutputFormats));
         }
 
         /**
@@ -2502,6 +2524,13 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         public SelfT registeredCustomOutputFormats(Collection<OutputFormat> registeredCustomOutputFormats) {
             setRegisteredCustomOutputFormats(registeredCustomOutputFormats);
             return self();
+        }
+
+        /**
+         * Varargs overload if {@link #registeredCustomOutputFormats(Collection)}.
+         */
+        public SelfT registeredCustomOutputFormats(OutputFormat... registeredCustomOutputFormats) {
+            return registeredCustomOutputFormats(Arrays.asList(registeredCustomOutputFormats));
         }
 
         /**
@@ -2534,7 +2563,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         /**
          * The {@link Map} to use as shared variables if {@link #isSharedVariablesSet()} is {@code false}.
          *
-         * @see #getImplicitSharedVariables()
+         * @see #getImpliedSharedVariables()
          */
         protected Map<String, Object> getDefaultSharedVariables() {
             return Collections.emptyMap();
@@ -2559,7 +2588,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
          *
          * @return Immutable {@link Map}; not {@code null}
          */
-        protected Map<String, Object> getImplicitSharedVariables() {
+        protected Map<String, Object> getImpliedSharedVariables() {
             return DEFAULT_SHARED_VARIABLES;
         }
 

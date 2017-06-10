@@ -76,6 +76,8 @@ import org.apache.freemarker.core.userpkg.DummyOutputFormat;
 import org.apache.freemarker.core.userpkg.EpochMillisDivTemplateDateFormatFactory;
 import org.apache.freemarker.core.userpkg.EpochMillisTemplateDateFormatFactory;
 import org.apache.freemarker.core.userpkg.HexTemplateNumberFormatFactory;
+import org.apache.freemarker.core.userpkg.NameClashingDummyOutputFormat;
+import org.apache.freemarker.core.userpkg.SeldomEscapedOutputFormat;
 import org.apache.freemarker.core.util._CollectionUtil;
 import org.apache.freemarker.core.util._DateUtil;
 import org.apache.freemarker.core.util._NullArgumentException;
@@ -1457,7 +1459,8 @@ public class ConfigurationTest extends TestCase {
     }
 
     @Test
-    public void testImpliedSettingValues() throws IOException, TemplateConfigurationFactoryException {
+    public void testImpliedSettingValues()
+            throws IOException, TemplateConfigurationFactoryException, UnregisteredOutputFormatException {
         Configuration cfg = new ImpliedSettingValuesTestBuilder().build();
 
         assertEquals("Y,N", cfg.getTemplateConfigurations().get("t.yn", null).getBooleanFormat());
@@ -1466,10 +1469,16 @@ public class ConfigurationTest extends TestCase {
         assertEquals(ImmutableMap.of("lib", "lib.ftl"), cfg.getAutoImports());
         assertEquals(ImmutableList.of("inc.ftl"), cfg.getAutoIncludes());
         assertEquals(ImmutableMap.of("v", 1), cfg.getSharedVariables());
+        assertEquals(ImmutableList.of(CustomHTMLOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE),
+                cfg.getRegisteredCustomOutputFormats());
+        assertSame(CustomHTMLOutputFormat.INSTANCE, cfg.getOutputFormat("HTML"));
+        assertSame(DummyOutputFormat.INSTANCE, cfg.getOutputFormat("dummy"));
+        assertSame(XMLOutputFormat.INSTANCE, cfg.getOutputFormat("XML"));
     }
 
     @Test
-    public void testImpliedSettingValues2() throws IOException, TemplateConfigurationFactoryException {
+    public void testImpliedSettingValues2()
+            throws IOException, TemplateConfigurationFactoryException, UnregisteredOutputFormatException {
         Configuration cfg = new ImpliedSettingValuesTestBuilder()
                 .templateConfigurations(
                         new ConditionalTemplateConfigurationFactory(
@@ -1482,6 +1491,8 @@ public class ConfigurationTest extends TestCase {
                 .autoImports(ImmutableMap.of("lib2", "lib2.ftl"))
                 .autoIncludes(ImmutableList.of("inc2.ftl"))
                 .sharedVariables(ImmutableMap.of("v2", 2))
+                .registeredCustomOutputFormats(
+                        SeldomEscapedOutputFormat.INSTANCE, NameClashingDummyOutputFormat.INSTANCE)
                 .build();
 
         TemplateConfigurationFactory tcf = cfg.getTemplateConfigurations();
@@ -1499,6 +1510,17 @@ public class ConfigurationTest extends TestCase {
         assertEquals(ImmutableList.of("inc.ftl", "inc2.ftl"), cfg.getAutoIncludes());
 
         assertEquals(ImmutableMap.of("v", 1, "v2", 2), cfg.getSharedVariables());
+
+        assertEquals(
+                ImmutableList.of(
+                        CustomHTMLOutputFormat.INSTANCE,
+                        SeldomEscapedOutputFormat.INSTANCE,
+                        NameClashingDummyOutputFormat.INSTANCE),
+                cfg.getRegisteredCustomOutputFormats());
+        assertSame(CustomHTMLOutputFormat.INSTANCE, cfg.getOutputFormat("HTML"));
+        assertSame(NameClashingDummyOutputFormat.INSTANCE, cfg.getOutputFormat("dummy"));
+        assertSame(SeldomEscapedOutputFormat.INSTANCE, cfg.getOutputFormat("seldomEscaped"));
+        assertSame(XMLOutputFormat.INSTANCE, cfg.getOutputFormat("XML"));
     }
 
     @SuppressWarnings("boxing")
@@ -1568,8 +1590,13 @@ public class ConfigurationTest extends TestCase {
         }
 
         @Override
-        protected Map<String, Object> getImplicitSharedVariables() {
+        protected Map<String, Object> getImpliedSharedVariables() {
             return ImmutableMap.<String, Object>of("v", 1);
+        }
+
+        @Override
+        protected Collection<OutputFormat> getImpliedRegisteredCustomOutputFormats() {
+            return ImmutableList.<OutputFormat>of(CustomHTMLOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE);
         }
     }
 
