@@ -21,20 +21,16 @@ package org.apache.freemarker.core;
 import java.io.Reader;
 import java.io.Serializable;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.TimeZone;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.util.CommonBuilder;
+import org.apache.freemarker.core.util._CollectionUtil;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 
@@ -137,52 +133,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         outputFormat = builder.isOutputFormatSet() ? builder.getOutputFormat() : null;
         sourceEncoding = builder.isSourceEncodingSet() ? builder.getSourceEncoding() : null;
         tabSize = builder.isTabSizeSet() ? builder.getTabSize() : null;
-    }
-
-    /**
-     * Adds two {@link Map}-s (keeping the iteration order); assuming the inputs are already unmodifiable and
-     * unchanging, it returns an unmodifiable and unchanging {@link Map} itself.
-     */
-    private static <K,V> Map<K,V> mergeMaps(Map<K,V> m1, Map<K,V> m2, boolean overwriteUpdatesOrder) {
-        if (m1 == null) return m2;
-        if (m2 == null) return m1;
-        if (m1.isEmpty()) return m2;
-        if (m2.isEmpty()) return m1;
-
-        LinkedHashMap<K, V> mergedM = new LinkedHashMap<>((m1.size() + m2.size()) * 4 / 3 + 1, 0.75f);
-        mergedM.putAll(m1);
-        if (overwriteUpdatesOrder) {
-            for (K m2Key : m2.keySet()) {
-                mergedM.remove(m2Key); // So that duplicate keys are moved after m1 keys
-            }
-        }
-        mergedM.putAll(m2);
-        return Collections.unmodifiableMap(mergedM);
-    }
-
-    /**
-     * Adds two {@link List}-s; assuming the inputs are already unmodifiable and unchanging, it returns an
-     * unmodifiable and unchanging {@link List} itself.
-     */
-    private static List<String> mergeLists(List<String> list1, List<String> list2, boolean skipDuplicatesInList1) {
-        if (list1 == null) return list2;
-        if (list2 == null) return list1;
-        if (list1.isEmpty()) return list2;
-        if (list2.isEmpty()) return list1;
-
-        ArrayList<String> mergedList = new ArrayList<>(list1.size() + list2.size());
-        if (skipDuplicatesInList1) {
-            Set<String> list2Set = new HashSet<>(list2);
-            for (String it : list1) {
-                if (!list2Set.contains(it)) {
-                    mergedList.add(it);
-                }
-            }
-        } else {
-            mergedList.addAll(list1);
-        }
-        mergedList.addAll(list2);
-        return Collections.unmodifiableList(mergedList);
     }
 
     @Override
@@ -858,13 +808,13 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
                 setBooleanFormat(tc.getBooleanFormat());
             }
             if (tc.isCustomDateFormatsSet()) {
-                setCustomDateFormats(mergeMaps(
+                setCustomDateFormats(_CollectionUtil.mergeImmutableMaps(
                         isCustomDateFormatsSet() ? getCustomDateFormats() : null, tc.getCustomDateFormats(), false),
                         true
                 );
             }
             if (tc.isCustomNumberFormatsSet()) {
-                setCustomNumberFormats(mergeMaps(
+                setCustomNumberFormats(_CollectionUtil.mergeImmutableMaps(
                         isCustomNumberFormatsSet() ? getCustomNumberFormats() : null, tc.getCustomNumberFormats(), false),
                         true);
             }
@@ -941,24 +891,24 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
                 setLazyAutoImports(tc.getLazyAutoImports());
             }
             if (tc.isAutoImportsSet()) {
-                setAutoImports(mergeMaps(
+                setAutoImports(_CollectionUtil.mergeImmutableMaps(
                         isAutoImportsSet() ? getAutoImports() : null,
                         tc.isAutoImportsSet() ? tc.getAutoImports() : null,
                         true),
                         true);
             }
             if (tc.isAutoIncludesSet()) {
-                setAutoIncludes(mergeLists(
+                setAutoIncludes(_CollectionUtil.mergeImmutableLists(
                         isAutoIncludesSet() ? getAutoIncludes() : null,
                         tc.isAutoIncludesSet() ? tc.getAutoIncludes() : null,
                         true),
                         true);
             }
 
-            setCustomSettingsMap(mergeMaps(
+            setCustomSettingsMap(_CollectionUtil.mergeImmutableMaps(
                     getCustomSettings(false),
                     tc.getCustomSettings(false),
-                    true));
+                    false));
         }
 
         @Override

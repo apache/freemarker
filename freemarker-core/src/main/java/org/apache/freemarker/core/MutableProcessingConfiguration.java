@@ -555,7 +555,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     /**
      * Fluent API equivalent of {@link #setCustomNumberFormats(Map)}
      */
-    public SelfT customNumberFormats(Map<String, TemplateNumberFormatFactory> value) {
+    public SelfT customNumberFormats(Map<String, ? extends TemplateNumberFormatFactory> value) {
         setCustomNumberFormats(value);
         return self();
     }
@@ -619,7 +619,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         int commaIdx = booleanFormat.indexOf(',');
         if (commaIdx == -1) {
             throw new IllegalArgumentException(
-                    "Setting value must be string that contains two comma-separated values for true and false, " +
+                    "Setting value must be a string that contains two comma-separated values for true and false, " +
                     "respectively.");
         }
         
@@ -826,7 +826,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     /**
      * Fluent API equivalent of {@link #setCustomDateFormats(Map)}
      */
-    public SelfT customDateFormats(Map<String, TemplateDateFormatFactory> value) {
+    public SelfT customDateFormats(Map<String, ? extends TemplateDateFormatFactory> value) {
         setCustomDateFormats(value);
         return self();
     }

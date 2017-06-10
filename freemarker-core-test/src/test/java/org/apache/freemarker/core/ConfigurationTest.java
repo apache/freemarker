@@ -55,6 +55,8 @@ import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
 import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
+import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory;
+import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactoryException;
 import org.apache.freemarker.core.templateresolver.TemplateLookupContext;
 import org.apache.freemarker.core.templateresolver.TemplateLookupResult;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
@@ -1454,6 +1456,51 @@ public class ConfigurationTest extends TestCase {
         assertNotEquals(mutableValue, immutableValue); // No aliasing
     }
 
+    @Test
+    public void testImpliedSettingValues() throws IOException, TemplateConfigurationFactoryException {
+        Configuration cfg = new ImpliedSettingValuesTestBuilder().build();
+
+        assertEquals("Y,N", cfg.getTemplateConfigurations().get("t.yn", null).getBooleanFormat());
+        assertNotNull(cfg.getCustomNumberFormat("hex"));
+        assertNotNull(cfg.getCustomDateFormat("epoch"));
+        assertEquals(ImmutableMap.of("lib", "lib.ftl"), cfg.getAutoImports());
+        assertEquals(ImmutableList.of("inc.ftl"), cfg.getAutoIncludes());
+        assertEquals(ImmutableMap.of("v", 1), cfg.getSharedVariables());
+    }
+
+    @Test
+    public void testImpliedSettingValues2() throws IOException, TemplateConfigurationFactoryException {
+        Configuration cfg = new ImpliedSettingValuesTestBuilder()
+                .templateConfigurations(
+                        new ConditionalTemplateConfigurationFactory(
+                                new FileNameGlobMatcher("*.jn"),
+                                new TemplateConfiguration.Builder().booleanFormat("J,N").build()
+                        )
+                )
+                .customNumberFormats(ImmutableMap.of("baseN", BaseNTemplateNumberFormatFactory.INSTANCE))
+                .customDateFormats(ImmutableMap.of("epochDiv", EpochMillisDivTemplateDateFormatFactory.INSTANCE))
+                .autoImports(ImmutableMap.of("lib2", "lib2.ftl"))
+                .autoIncludes(ImmutableList.of("inc2.ftl"))
+                .sharedVariables(ImmutableMap.of("v2", 2))
+                .build();
+
+        TemplateConfigurationFactory tcf = cfg.getTemplateConfigurations();
+        assertEquals("Y,N", tcf.get("t.yn", null).getBooleanFormat());
+        assertEquals("J,N", tcf.get("t.jn", null).getBooleanFormat());
+
+        assertNotNull(cfg.getCustomNumberFormat("hex"));
+        assertNotNull(cfg.getCustomNumberFormat("baseN"));
+
+        assertNotNull(cfg.getCustomDateFormat("epoch"));
+        assertNotNull(cfg.getCustomDateFormat("epochDiv"));
+
+        assertEquals(ImmutableMap.of("lib", "lib.ftl", "lib2", "lib2.ftl"), cfg.getAutoImports());
+
+        assertEquals(ImmutableList.of("inc.ftl", "inc2.ftl"), cfg.getAutoIncludes());
+
+        assertEquals(ImmutableMap.of("v", 1, "v2", 2), cfg.getSharedVariables());
+    }
+
     @SuppressWarnings("boxing")
     private void assertStartsWith(List<String> list, List<String> headList) {
         int index = 0;
@@ -1483,5 +1530,47 @@ public class ConfigurationTest extends TestCase {
         }
         
     }
-    
+
+    private static class ImpliedSettingValuesTestBuilder
+            extends Configuration.ExtendableBuilder<ImpliedSettingValuesTestBuilder> {
+
+        ImpliedSettingValuesTestBuilder() {
+            super(Configuration.VERSION_3_0_0);
+        }
+
+        @Override
+        protected TemplateConfigurationFactory getImpliedTemplateConfigurations() {
+            return new ConditionalTemplateConfigurationFactory(
+                    new FileNameGlobMatcher("*.yn"),
+                    new TemplateConfiguration.Builder().booleanFormat("Y,N").build());
+        }
+
+        @Override
+        protected Map<String, TemplateNumberFormatFactory> getImpliedCustomNumberFormats() {
+            return ImmutableMap.<String, TemplateNumberFormatFactory>of(
+                    "hex", HexTemplateNumberFormatFactory.INSTANCE);
+        }
+
+        @Override
+        protected Map<String, TemplateDateFormatFactory> getImpliedCustomDateFormats() {
+            return ImmutableMap.<String, TemplateDateFormatFactory>of(
+                    "epoch", EpochMillisTemplateDateFormatFactory.INSTANCE);
+        }
+
+        @Override
+        protected Map<String, String> getImpliedAutoImports() {
+            return ImmutableMap.of("lib", "lib.ftl");
+        }
+
+        @Override
+        protected List<String> getImpliedAutoIncludes() {
+            return ImmutableList.of("inc.ftl");
+        }
+
+        @Override
+        protected Map<String, Object> getImplicitSharedVariables() {
+            return ImmutableMap.<String, Object>of("v", 1);
+        }
+    }
+
 }

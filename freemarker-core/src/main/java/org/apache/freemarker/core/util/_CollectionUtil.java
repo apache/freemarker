@@ -23,8 +23,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Don't use this; used internally by FreeMarker, might changes without notice.
@@ -144,4 +147,52 @@ public class _CollectionUtil {
         return isMapKnownToBeUnmodifiable(map) ? map : Collections.unmodifiableMap(map);
     }
 
+    /**
+     * Adds two {@link Map}-s (keeping the iteration order); assuming the inputs are already unmodifiable and
+     * unchanging, it returns an unmodifiable and unchanging {@link Map} itself.
+     */
+    public static <K,V> Map<K,V> mergeImmutableMaps(Map<K,V> m1, Map<K,V> m2, boolean keepOriginalOrder) {
+        if (m1 == null) return m2;
+        if (m2 == null) return m1;
+        if (m1.isEmpty()) return m2;
+        if (m2.isEmpty()) return m1;
+
+        Map<K, V> mergedM = keepOriginalOrder
+                ? new LinkedHashMap<K, V>((m1.size() + m2.size()) * 4 / 3 + 1, 0.75f)
+                : new HashMap<K, V>((m1.size() + m2.size()) * 4 / 3 + 1, 0.75f);
+        mergedM.putAll(m1);
+        if (keepOriginalOrder) {
+            for (K m2Key : m2.keySet()) {
+                mergedM.remove(m2Key); // So that duplicate keys are moved after m1 keys
+            }
+        }
+        mergedM.putAll(m2);
+        return Collections.unmodifiableMap(mergedM);
+    }
+
+    /**
+     * Adds two {@link List}-s; assuming the inputs are already unmodifiable and unchanging, it returns an
+     * unmodifiable and unchanging {@link List} itself.
+     */
+    public static List<String> mergeImmutableLists(List<String> list1, List<String> list2,
+            boolean skipDuplicatesInList1) {
+        if (list1 == null) return list2;
+        if (list2 == null) return list1;
+        if (list1.isEmpty()) return list2;
+        if (list2.isEmpty()) return list1;
+
+        ArrayList<String> mergedList = new ArrayList<>(list1.size() + list2.size());
+        if (skipDuplicatesInList1) {
+            Set<String> list2Set = new HashSet<>(list2);
+            for (String it : list1) {
+                if (!list2Set.contains(it)) {
+                    mergedList.add(it);
+                }
+            }
+        } else {
+            mergedList.addAll(list1);
+        }
+        mergedList.addAll(list2);
+        return Collections.unmodifiableList(mergedList);
+    }
 }

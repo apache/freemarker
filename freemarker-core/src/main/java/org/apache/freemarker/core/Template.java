@@ -661,7 +661,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         return customLookupCondition;
     }
 
-    // TODO [FM3] Should not be public, should be final field
+    // TODO [FM3] Should be gone; see comment above the lookupLocale field
     /**
      * Mostly only used internally; setter pair of {@link #getCustomLookupCondition()}. This meant to be called directly
      * after instantiating the template with its constructor, after a successfull lookup that used this condition. So
@@ -803,7 +803,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         return tCfg != null && tCfg.isLocaleSet() ? tCfg.getLocale() : cfg.getLocale();
     }
 
-    // TODO [FM3] Temporary hack; See comment above the locale field
+    // TODO [FM3] Temporary hack; See comment above the lookupLocale field
     public void setLookupLocale(Locale lookupLocale) {
         this.lookupLocale = lookupLocale;
     }

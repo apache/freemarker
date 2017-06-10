@@ -64,6 +64,7 @@ import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.GetTemplateResult;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
+import org.apache.freemarker.core.templateresolver.MergingTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.TemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLookupContext;
@@ -372,26 +373,15 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         ObjectWrapper objectWrapper = builder.getObjectWrapper();
 
         {
-            Map<String, Object> sharedVariables = builder.getSharedVariables();
+            Map<String, Object> sharedVariables = _CollectionUtil.mergeImmutableMaps(builder
+                    .getImplicitSharedVariables(), builder.getSharedVariables(), false);
 
             HashMap<String, TemplateModel> wrappedSharedVariables = new HashMap<>(
-                    (sharedVariables.size() + 5 /* [FM3] 5 legacy vars */) * 4 / 3 + 1, 0.75f);
+                    sharedVariables.size() * 4 / 3 + 1, 0.75f);
+            wrapAndPutSharedVariables(wrappedSharedVariables, sharedVariables, objectWrapper);
 
-            // TODO [FM3] Get rid of this
-            wrappedSharedVariables.put("capture_output", new CaptureOutput());
-            wrappedSharedVariables.put("compress", StandardCompress.INSTANCE);
-            wrappedSharedVariables.put("html_escape", new HtmlEscape());
-            wrappedSharedVariables.put("normalize_newlines", new NormalizeNewlines());
-            wrappedSharedVariables.put("xml_escape", new XmlEscape());
-
-            // In case the inherited sharedVariables aren't empty, we want to merge the two maps:
-            wrapAndPutSharedVariables(wrappedSharedVariables, builder.getDefaultSharedVariables(),
-                    objectWrapper);
-            if (builder.isSharedVariablesSet()) {
-                wrapAndPutSharedVariables(wrappedSharedVariables, sharedVariables, objectWrapper);
-            }
             this.wrappedSharedVariables = wrappedSharedVariables;
-            this.sharedVariables = Collections.unmodifiableMap(new LinkedHashMap<>(sharedVariables));
+            this.sharedVariables = Collections.unmodifiableMap(sharedVariables);
         }
 
         // ParsingConfiguration settings:
@@ -426,10 +416,14 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         showErrorTips = builder.getShowErrorTips();
         apiBuiltinEnabled = builder.getAPIBuiltinEnabled();
         logTemplateExceptions = builder.getLogTemplateExceptions();
-        customDateFormats = builder.getCustomDateFormats();
-        customNumberFormats = builder.getCustomNumberFormats();
-        autoImports = builder.getAutoImports();
-        autoIncludes = builder.getAutoIncludes();
+        customDateFormats = _CollectionUtil.mergeImmutableMaps(
+                builder.getImpliedCustomDateFormats(), builder.getCustomDateFormats(), false);
+        customNumberFormats = _CollectionUtil.mergeImmutableMaps(
+                builder.getImpliedCustomNumberFormats(), builder.getCustomNumberFormats(), false);
+        autoImports = _CollectionUtil.mergeImmutableMaps(
+                builder.getImpliedAutoImports(), builder.getAutoImports(), true);
+        autoIncludes = _CollectionUtil.mergeImmutableLists(
+                builder.getImpliedAutoIncludes(), builder.getAutoIncludes(), true);
         lazyImports = builder.getLazyImports();
         lazyAutoImports = builder.getLazyAutoImports();
         customSettings = builder.getCustomSettings(false);
@@ -474,11 +468,21 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     templateResolver, TEMPLATE_NAME_FORMAT_KEY, templateNameFormat);
         }
 
-        templateConfigurations = builder.getTemplateConfigurations();
+        TemplateConfigurationFactory templateConfigurations = builder.getTemplateConfigurations();
         if (!templateResolver.supportsTemplateConfigurationsSetting()) {
             checkSettingIsNullForThisTemplateResolver(
                     templateResolver, TEMPLATE_CONFIGURATIONS_KEY, templateConfigurations);
         }
+        TemplateConfigurationFactory impliedTemplateConfigurations = builder.getImpliedTemplateConfigurations();
+        if (impliedTemplateConfigurations != null) {
+            if (templateConfigurations != null) {
+                templateConfigurations = new MergingTemplateConfigurationFactory(
+                        impliedTemplateConfigurations, templateConfigurations);
+            } else {
+                templateConfigurations = impliedTemplateConfigurations;
+            }
+        }
+        this.templateConfigurations = templateConfigurations;
 
         templateResolver.setDependencies(new TemplateResolverDependenciesImpl(this, templateResolver));
     }
@@ -2338,6 +2342,18 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         }
 
         /**
+         * The template configurations that will be added to the built {@link Configuration} before the ones
+         * coming from {@link #setCustomNumberFormats(Map)}}, where addition happens with
+         * {@link MergingTemplateConfigurationFactory}. When overriding this method, always
+         * consider adding to the return value of the super method, rather than replacing it.
+         *
+         * @return Maybe {@code null}.
+         */
+        protected TemplateConfigurationFactory getImpliedTemplateConfigurations() {
+            return null;
+        }
+
+        /**
          * Setter pair of {@link Configuration#getTemplateConfigurations()}.
          */
         public void setTemplateConfigurations(TemplateConfigurationFactory templateConfigurations) {
@@ -2515,8 +2531,36 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             return sharedVariables != null;
         }
 
+        /**
+         * The {@link Map} to use as shared variables if {@link #isSharedVariablesSet()} is {@code false}.
+         *
+         * @see #getImplicitSharedVariables()
+         */
         protected Map<String, Object> getDefaultSharedVariables() {
             return Collections.emptyMap();
+        }
+
+        private static final Map<String, Object> DEFAULT_SHARED_VARIABLES;
+        static {
+            // TODO [FM3] Get rid of these
+            Map<String, Object> sharedVariables = new HashMap<>();
+            sharedVariables.put("capture_output", new CaptureOutput());
+            sharedVariables.put("compress", StandardCompress.INSTANCE);
+            sharedVariables.put("html_escape", new HtmlEscape());
+            sharedVariables.put("normalize_newlines", new NormalizeNewlines());
+            sharedVariables.put("xml_escape", new XmlEscape());
+            DEFAULT_SHARED_VARIABLES = Collections.unmodifiableMap(sharedVariables);
+        }
+
+        /**
+         * The shared variables that will be added to the built {@link Configuration} before the ones coming from
+         * {@link #getSharedVariables()}. When overriding this method, always consider adding to the return value
+         * of the super method, rather than replacing it.
+         *
+         * @return Immutable {@link Map}; not {@code null}
+         */
+        protected Map<String, Object> getImplicitSharedVariables() {
+            return DEFAULT_SHARED_VARIABLES;
         }
 
         /**
@@ -2669,9 +2713,25 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             return Collections.emptyMap();
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see #getImpliedCustomNumberFormats()
+         */
         @Override
         protected TemplateNumberFormatFactory getDefaultCustomNumberFormat(String name) {
             return null;
+        }
+
+        /**
+         * The custom number formats that will be added to the built {@link Configuration} before the ones coming from
+         * {@link #getCustomNumberFormats()}. When overriding this method, always consider adding to the return
+         * value of the super method, rather than replacing it.
+         *
+         * @return Immutable {@link Map}; not {@code null}
+         */
+        protected Map<String, TemplateNumberFormatFactory> getImpliedCustomNumberFormats() {
+            return Collections.emptyMap();
         }
 
         @Override
@@ -2694,8 +2754,24 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             return "";
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see #getImpliedCustomDateFormats()
+         */
         @Override
         protected Map<String, TemplateDateFormatFactory> getDefaultCustomDateFormats() {
+            return Collections.emptyMap();
+        }
+
+        /**
+         * The custom date formats that will be added to the built {@link Configuration} before the ones coming from
+         * {@link #getCustomDateFormats()}. When overriding this method, always consider adding to the return value
+         * of the super method, rather than replacing it.
+         *
+         * @return Immutable {@link Map}; not {@code null}
+         */
+        protected Map<String, TemplateDateFormatFactory> getImpliedCustomDateFormats() {
             return Collections.emptyMap();
         }
 
@@ -2781,13 +2857,43 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             return null;
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * @see #getImpliedAutoImports()
+         */
         @Override
         protected Map<String, String> getDefaultAutoImports() {
             return Collections.emptyMap();
         }
 
+        /**
+         * The auto-imports that will be added to the built {@link Configuration} before the ones coming from
+         * {@link #getSharedVariables()}. When overriding this method, always consider adding to the return value
+         * of the super method, rather than replacing it.
+         */
+        protected Map<String, String> getImpliedAutoImports() {
+            return Collections.emptyMap();
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * @see #getImpliedAutoIncludes()
+         */
         @Override
         protected List<String> getDefaultAutoIncludes() {
+            return Collections.emptyList();
+        }
+
+        /**
+         * The imports that will be added to the built {@link Configuration} before the ones coming from
+         * {@link #getAutoIncludes()}. When overriding this method, always consider adding to the return
+         * value of the super method, rather than replacing it.
+         *
+         * @return Immutable {@link List}; not {@code null}
+         */
+        protected List<String> getImpliedAutoIncludes() {
             return Collections.emptyList();
         }
 
