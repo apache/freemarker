@@ -23,24 +23,33 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 import org.apache.freemarker.core.userpkg.BaseNTemplateNumberFormatFactory;
 import org.apache.freemarker.core.userpkg.EpochMillisDivTemplateDateFormatFactory;
 import org.apache.freemarker.core.userpkg.EpochMillisTemplateDateFormatFactory;
 import org.apache.freemarker.core.userpkg.HexTemplateNumberFormatFactory;
 import org.apache.freemarker.core.util._CollectionUtil;
+import org.apache.freemarker.core.util._DateUtil;
+import org.apache.freemarker.core.util._NullWriter;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableMap;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class MutableProcessingConfigurationTest {
 
@@ -236,6 +245,311 @@ public class MutableProcessingConfigurationTest {
             assertEquals(mutableValue, immutableValue);
             mutableValue.put("y", HexTemplateNumberFormatFactory.INSTANCE);
             assertNotEquals(mutableValue, immutableValue); // No aliasing
+        }
+    }
+
+    @Test
+    public void testSetTimeZone() throws ConfigurationException {
+        TimeZone origSysDefTZ = TimeZone.getDefault();
+        try {
+            TimeZone sysDefTZ = TimeZone.getTimeZone("GMT-01");
+            TimeZone.setDefault(sysDefTZ);
+
+            Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
+            assertEquals(sysDefTZ, cfgB.getTimeZone());
+            cfgB.setSetting(MutableProcessingConfiguration.TIME_ZONE_KEY, "JVM default");
+            assertEquals(sysDefTZ, cfgB.getTimeZone());
+
+            TimeZone newSysDefTZ = TimeZone.getTimeZone("GMT+09");
+            TimeZone.setDefault(newSysDefTZ);
+            assertEquals(sysDefTZ, cfgB.getTimeZone());
+            cfgB.setSetting(MutableProcessingConfiguration.TIME_ZONE_KEY, "JVM default");
+            assertEquals(newSysDefTZ, cfgB.getTimeZone());
+        } finally {
+            TimeZone.setDefault(origSysDefTZ);
+        }
+    }
+
+    @Test
+    public void testSetSQLDateAndTimeTimeZone() throws ConfigurationException {
+        TimeZone origSysDefTZ = TimeZone.getDefault();
+        try {
+            TimeZone sysDefTZ = TimeZone.getTimeZone("GMT-01");
+            TimeZone.setDefault(sysDefTZ);
+
+            Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
+            assertNull(cfgB.getSQLDateAndTimeTimeZone());
+
+            cfgB.setSQLDateAndTimeTimeZone(null);
+            assertNull(cfgB.getSQLDateAndTimeTimeZone());
+
+            cfgB.setSetting(MutableProcessingConfiguration.SQL_DATE_AND_TIME_TIME_ZONE_KEY, "JVM default");
+            assertEquals(sysDefTZ, cfgB.getSQLDateAndTimeTimeZone());
+
+            cfgB.setSetting(MutableProcessingConfiguration.SQL_DATE_AND_TIME_TIME_ZONE_KEY, "null");
+            assertNull(cfgB.getSQLDateAndTimeTimeZone());
+        } finally {
+            TimeZone.setDefault(origSysDefTZ);
+        }
+    }
+
+    @Test
+    public void testTimeZoneLayers() throws Exception {
+        TimeZone localTZ = TimeZone.getTimeZone("Europe/Brussels");
+
+        {
+            Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0).build();
+            Template t = new Template(null, "", cfg);
+            Environment env1 = t.createProcessingEnvironment(null, new StringWriter());
+            Environment env2 = t.createProcessingEnvironment(null, new StringWriter());
+
+            // cfg:
+            assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
+            assertNull(cfg.getSQLDateAndTimeTimeZone());
+            // env:
+            assertEquals(TimeZone.getDefault(), env1.getTimeZone());
+            assertNull(env1.getSQLDateAndTimeTimeZone());
+            // env 2:
+            assertEquals(TimeZone.getDefault(), env2.getTimeZone());
+            assertNull(env2.getSQLDateAndTimeTimeZone());
+
+            env1.setSQLDateAndTimeTimeZone(_DateUtil.UTC);
+            // cfg:
+            assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
+            assertNull(cfg.getSQLDateAndTimeTimeZone());
+            // env:
+            assertEquals(TimeZone.getDefault(), env1.getTimeZone());
+            assertEquals(_DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
+
+            env1.setTimeZone(localTZ);
+            // cfg:
+            assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
+            assertNull(cfg.getSQLDateAndTimeTimeZone());
+            // env:
+            assertEquals(localTZ, env1.getTimeZone());
+            assertEquals(_DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
+            // env 2:
+            assertEquals(TimeZone.getDefault(), env2.getTimeZone());
+            assertNull(env2.getSQLDateAndTimeTimeZone());
+        }
+
+        {
+            TimeZone otherTZ1 = TimeZone.getTimeZone("GMT+05");
+            TimeZone otherTZ2 = TimeZone.getTimeZone("GMT+06");
+            Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
+                    .timeZone(otherTZ1)
+                    .sqlDateAndTimeTimeZone(otherTZ2)
+                    .build();
+
+            Template t = new Template(null, "", cfg);
+            Environment env1 = t.createProcessingEnvironment(null, new StringWriter());
+            Environment env2 = t.createProcessingEnvironment(null, new StringWriter());
+
+            env1.setTimeZone(localTZ);
+            env1.setSQLDateAndTimeTimeZone(_DateUtil.UTC);
+
+            // cfg:
+            assertEquals(otherTZ1, cfg.getTimeZone());
+            assertEquals(otherTZ2, cfg.getSQLDateAndTimeTimeZone());
+            // env:
+            assertEquals(localTZ, env1.getTimeZone());
+            assertEquals(_DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
+            // env 2:
+            assertEquals(otherTZ1, env2.getTimeZone());
+            assertEquals(otherTZ2, env2.getSQLDateAndTimeTimeZone());
+
+            try {
+                setTimeZoneToNull(env2);
+                fail();
+            } catch (IllegalArgumentException e) {
+                // expected
+            }
+            env2.setSQLDateAndTimeTimeZone(null);
+            assertEquals(otherTZ1, env2.getTimeZone());
+            assertNull(env2.getSQLDateAndTimeTimeZone());
+        }
+    }
+
+    @SuppressFBWarnings(value="NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS", justification="Expected to fail")
+    private void setTimeZoneToNull(Environment env2) {
+        env2.setTimeZone(null);
+    }
+
+    @Test
+    public void testSetLogTemplateExceptionsViaSetSettingAPI() throws ConfigurationException {
+        Configuration.Builder cfg = new Configuration.Builder(Configuration.VERSION_3_0_0);
+        assertFalse(cfg.getLogTemplateExceptions());
+        cfg.setSetting(MutableProcessingConfiguration.LOG_TEMPLATE_EXCEPTIONS_KEY, "true");
+        assertTrue(cfg.getLogTemplateExceptions());
+    }
+
+    @Test
+    public void testApiBuiltinEnabled() throws Exception {
+        try {
+            new Template(
+                    null, "${1?api}",
+                    new Configuration.Builder(Configuration.VERSION_3_0_0).build())
+                    .process(null, _NullWriter.INSTANCE);
+            fail();
+        } catch (TemplateException e) {
+            assertThat(e.getMessage(), containsString(MutableProcessingConfiguration.API_BUILTIN_ENABLED_KEY));
+        }
+
+        new Template(
+                null, "${m?api.hashCode()}",
+                new Configuration.Builder(Configuration.VERSION_3_0_0).apiBuiltinEnabled(true).build())
+                .process(Collections.singletonMap("m", new HashMap()), _NullWriter.INSTANCE);
+    }
+
+    @Test
+    @SuppressFBWarnings(value = "NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS ", justification = "Testing wrong args")
+    public void testSetCustomNumberFormat() throws Exception {
+        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
+
+        try {
+            cfgB.setCustomNumberFormats(null);
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("null"));
+        }
+
+        try {
+            cfgB.setCustomNumberFormats(Collections.<String, TemplateNumberFormatFactory>singletonMap(
+                    "", HexTemplateNumberFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("0 length"));
+        }
+
+        try {
+            cfgB.setCustomNumberFormats(Collections.<String, TemplateNumberFormatFactory>singletonMap(
+                    "a_b", HexTemplateNumberFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("a_b"));
+        }
+
+        try {
+            cfgB.setCustomNumberFormats(Collections.<String, TemplateNumberFormatFactory>singletonMap(
+                    "a b", HexTemplateNumberFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("a b"));
+        }
+
+        try {
+            cfgB.setCustomNumberFormats(ImmutableMap.<String, TemplateNumberFormatFactory>of(
+                    "a", HexTemplateNumberFormatFactory.INSTANCE,
+                    "@wrong", HexTemplateNumberFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("@wrong"));
+        }
+
+        cfgB.setSetting(MutableProcessingConfiguration.CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE,
+                "{ 'base': " + BaseNTemplateNumberFormatFactory.class.getName() + "() }");
+        assertEquals(
+                Collections.singletonMap("base", BaseNTemplateNumberFormatFactory.INSTANCE),
+                cfgB.getCustomNumberFormats());
+
+        cfgB.setSetting(MutableProcessingConfiguration.CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE,
+                "{ "
+                        + "'base': " + BaseNTemplateNumberFormatFactory.class.getName() + "(), "
+                        + "'hex': " + HexTemplateNumberFormatFactory.class.getName() + "()"
+                        + " }");
+        assertEquals(
+                ImmutableMap.of(
+                        "base", BaseNTemplateNumberFormatFactory.INSTANCE,
+                        "hex", HexTemplateNumberFormatFactory.INSTANCE),
+                cfgB.getCustomNumberFormats());
+
+        cfgB.setSetting(MutableProcessingConfiguration.CUSTOM_NUMBER_FORMATS_KEY, "{}");
+        assertEquals(Collections.emptyMap(), cfgB.getCustomNumberFormats());
+
+        try {
+            cfgB.setSetting(MutableProcessingConfiguration.CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE,
+                    "{ 'x': " + EpochMillisTemplateDateFormatFactory.class.getName() + "() }");
+            fail();
+        } catch (ConfigurationException e) {
+            assertThat(e.getCause().getMessage(), allOf(
+                    containsString(EpochMillisTemplateDateFormatFactory.class.getName()),
+                    containsString(TemplateNumberFormatFactory.class.getName())));
+        }
+    }
+
+    @SuppressFBWarnings(value="NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS", justification="We test failures")
+    @Test
+    public void testSetCustomDateFormat() throws Exception {
+        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
+
+        try {
+            cfgB.setCustomDateFormats(null);
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("null"));
+        }
+
+        try {
+            cfgB.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>singletonMap(
+                    "", EpochMillisTemplateDateFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("0 length"));
+        }
+
+        try {
+            cfgB.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>singletonMap(
+                    "a_b", EpochMillisTemplateDateFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("a_b"));
+        }
+
+        try {
+            cfgB.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>singletonMap(
+                    "a b", EpochMillisTemplateDateFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("a b"));
+        }
+
+        try {
+            cfgB.setCustomDateFormats(ImmutableMap.<String, TemplateDateFormatFactory>of(
+                    "a", EpochMillisTemplateDateFormatFactory.INSTANCE,
+                    "@wrong", EpochMillisTemplateDateFormatFactory.INSTANCE));
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("@wrong"));
+        }
+
+        cfgB.setSetting(MutableProcessingConfiguration.CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE,
+                "{ 'epoch': " + EpochMillisTemplateDateFormatFactory.class.getName() + "() }");
+        assertEquals(
+                Collections.singletonMap("epoch", EpochMillisTemplateDateFormatFactory.INSTANCE),
+                cfgB.getCustomDateFormats());
+
+        cfgB.setSetting(MutableProcessingConfiguration.CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE,
+                "{ "
+                        + "'epoch': " + EpochMillisTemplateDateFormatFactory.class.getName() + "(), "
+                        + "'epochDiv': " + EpochMillisDivTemplateDateFormatFactory.class.getName() + "()"
+                        + " }");
+        assertEquals(
+                ImmutableMap.of(
+                        "epoch", EpochMillisTemplateDateFormatFactory.INSTANCE,
+                        "epochDiv", EpochMillisDivTemplateDateFormatFactory.INSTANCE),
+                cfgB.getCustomDateFormats());
+
+        cfgB.setSetting(MutableProcessingConfiguration.CUSTOM_DATE_FORMATS_KEY, "{}");
+        assertEquals(Collections.emptyMap(), cfgB.getCustomDateFormats());
+
+        try {
+            cfgB.setSetting(MutableProcessingConfiguration.CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE,
+                    "{ 'x': " + HexTemplateNumberFormatFactory.class.getName() + "() }");
+            fail();
+        } catch (ConfigurationException e) {
+            assertThat(e.getCause().getMessage(), allOf(
+                    containsString(HexTemplateNumberFormatFactory.class.getName()),
+                    containsString(TemplateDateFormatFactory.class.getName())));
         }
     }
 

@@ -31,7 +31,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -50,7 +49,6 @@ import org.apache.freemarker.core.outputformat.UnregisteredOutputFormatException
 import org.apache.freemarker.core.outputformat.impl.CombinedMarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
-import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
 import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
@@ -80,7 +78,6 @@ import org.apache.freemarker.core.userpkg.NameClashingDummyOutputFormat;
 import org.apache.freemarker.core.userpkg.SeldomEscapedOutputFormat;
 import org.apache.freemarker.core.util._CollectionUtil;
 import org.apache.freemarker.core.util._DateUtil;
-import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._NullWriter;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
@@ -90,17 +87,11 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import junit.framework.TestCase;
-
-public class ConfigurationTest extends TestCase {
+public class ConfigurationTest {
 
     private static final Charset ISO_8859_2 = Charset.forName("ISO-8859-2");
 
-    public ConfigurationTest(String name) {
-        super(name);
-    }
-
+    @Test
     public void testUnsetAndIsSet() throws Exception {
         Configuration.ExtendableBuilder<?> cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
         
@@ -203,7 +194,8 @@ public class ConfigurationTest extends TestCase {
             assertTrue(cfgB.getTemplateCacheStorage() instanceof SoftCacheStorage);
         }
     }
-    
+
+    @Test
     public void testTemplateLoadingErrors() throws Exception {
         Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
                 .templateLoader(new ClassTemplateLoader(getClass(), "nosuchpackage"))
@@ -215,7 +207,8 @@ public class ConfigurationTest extends TestCase {
             assertThat(e.getMessage(), not(containsString("wasn't set")));
         }
     }
-    
+
+    @Test
     public void testVersion() {
         Version v = Configuration.getVersion();
         assertTrue(v.intValue() >= _CoreAPI.VERSION_INT_3_0_0);
@@ -232,7 +225,8 @@ public class ConfigurationTest extends TestCase {
             assertThat(e.getMessage(), containsString("3.0.0"));
         }
     }
-    
+
+    @Test
     public void testShowErrorTips() throws Exception {
         try {
             Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0).build();
@@ -379,7 +373,8 @@ public class ConfigurationTest extends TestCase {
         t.process(null, sw);
         assertEquals(expectedContent, sw.toString());
     }
-    
+
+    @Test
     public void testTemplateResolverCache() throws Exception {
         Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
         
@@ -403,6 +398,7 @@ public class ConfigurationTest extends TestCase {
         assertEquals(1, cache.getSize());
     }
 
+    @Test
     public void testTemplateNameFormat() throws Exception {
         StringTemplateLoader tl = new StringTemplateLoader();
         tl.putTemplate("a/b.ftl", "In a/b.ftl");
@@ -431,6 +427,7 @@ public class ConfigurationTest extends TestCase {
         }
     }
 
+    @Test
     public void testTemplateNameFormatSetSetting() throws Exception {
         Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
         assertSame(DefaultTemplateNameFormatFM2.INSTANCE, cfgB.getTemplateNameFormat());
@@ -443,6 +440,7 @@ public class ConfigurationTest extends TestCase {
         assertFalse(cfgB.isTemplateNameFormatSet());
     }
 
+    @Test
     public void testObjectWrapperSetSetting() throws Exception {
         Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
         {
@@ -457,7 +455,8 @@ public class ConfigurationTest extends TestCase {
             assertThat(cfgB.getObjectWrapper(), instanceOf(RestrictedObjectWrapper.class));
         }
     }
-    
+
+    @Test
     public void testTemplateLookupStrategyDefault() throws Exception {
         Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
                 .templateLoader(new ClassTemplateLoader(ConfigurationTest.class, ""))
@@ -466,6 +465,7 @@ public class ConfigurationTest extends TestCase {
         assertEquals("toCache1.ftl", cfg.getTemplate("toCache1.ftl").getSourceName());
     }
 
+    @Test
     public void testTemplateLookupStrategyCustom() throws Exception {
         final TemplateLookupStrategy myStrategy = new TemplateLookupStrategy() {
             @Override
@@ -481,7 +481,8 @@ public class ConfigurationTest extends TestCase {
         assertSame(myStrategy, cfg.getTemplateLookupStrategy());
         assertEquals("toCache2.ftl", cfg.getTemplate("toCache1.ftl").getSourceName());
     }
-    
+
+    @Test
     public void testSetTemplateConfigurations() throws Exception {
         Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
         assertNull(cfgB.getTemplateConfigurations());
@@ -544,73 +545,6 @@ public class ConfigurationTest extends TestCase {
         assertNull(cfgB.getTemplateConfigurations());
     }
 
-    public void testSetAutoEscaping() throws Exception {
-       Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
-    
-       assertEquals(AutoEscapingPolicy.ENABLE_IF_DEFAULT, cfgB.getAutoEscapingPolicy());
-
-       cfgB.setAutoEscapingPolicy(AutoEscapingPolicy.ENABLE_IF_SUPPORTED);
-       assertEquals(AutoEscapingPolicy.ENABLE_IF_SUPPORTED, cfgB.getAutoEscapingPolicy());
-
-       cfgB.setAutoEscapingPolicy(AutoEscapingPolicy.ENABLE_IF_DEFAULT);
-       assertEquals(AutoEscapingPolicy.ENABLE_IF_DEFAULT, cfgB.getAutoEscapingPolicy());
-
-       cfgB.setAutoEscapingPolicy(AutoEscapingPolicy.DISABLE);
-       assertEquals(AutoEscapingPolicy.DISABLE, cfgB.getAutoEscapingPolicy());
-       
-       cfgB.setSetting(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enableIfSupported");
-       assertEquals(AutoEscapingPolicy.ENABLE_IF_SUPPORTED, cfgB.getAutoEscapingPolicy());
-
-       cfgB.setSetting(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enable_if_supported");
-       assertEquals(AutoEscapingPolicy.ENABLE_IF_SUPPORTED, cfgB.getAutoEscapingPolicy());
-       
-       cfgB.setSetting(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enableIfDefault");
-       assertEquals(AutoEscapingPolicy.ENABLE_IF_DEFAULT, cfgB.getAutoEscapingPolicy());
-
-       cfgB.setSetting(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enable_if_default");
-       assertEquals(AutoEscapingPolicy.ENABLE_IF_DEFAULT, cfgB.getAutoEscapingPolicy());
-       
-       cfgB.setSetting(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "disable");
-       assertEquals(AutoEscapingPolicy.DISABLE, cfgB.getAutoEscapingPolicy());
-    }
-
-    public void testSetOutputFormat() throws Exception {
-       Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
-       
-       assertEquals(UndefinedOutputFormat.INSTANCE, cfgB.getOutputFormat());
-       assertFalse(cfgB.isOutputFormatSet());
-       
-       try {
-           cfgB.setOutputFormat(null);
-           fail();
-       } catch (_NullArgumentException e) {
-           // Expected
-       }
-       
-       assertFalse(cfgB.isOutputFormatSet());
-       
-       cfgB.setSetting(Configuration.ExtendableBuilder.OUTPUT_FORMAT_KEY_CAMEL_CASE, XMLOutputFormat.class.getSimpleName());
-       assertEquals(XMLOutputFormat.INSTANCE, cfgB.getOutputFormat());
-       
-       cfgB.setSetting(Configuration.ExtendableBuilder.OUTPUT_FORMAT_KEY_SNAKE_CASE, HTMLOutputFormat.class.getSimpleName());
-       assertEquals(HTMLOutputFormat.INSTANCE, cfgB.getOutputFormat());
-       
-       cfgB.unsetOutputFormat();
-       assertEquals(UndefinedOutputFormat.INSTANCE, cfgB.getOutputFormat());
-       assertFalse(cfgB.isOutputFormatSet());
-       
-       cfgB.setOutputFormat(UndefinedOutputFormat.INSTANCE);
-       assertTrue(cfgB.isOutputFormatSet());
-       cfgB.setSetting(Configuration.ExtendableBuilder.OUTPUT_FORMAT_KEY_CAMEL_CASE, "default");
-       assertFalse(cfgB.isOutputFormatSet());
-       
-       try {
-           cfgB.setSetting(Configuration.ExtendableBuilder.OUTPUT_FORMAT_KEY, "null");
-       } catch (InvalidSettingValueException e) {
-           assertThat(e.getCause().getMessage(), containsString(UndefinedOutputFormat.class.getSimpleName()));
-       }
-    }
-    
     @Test
     public void testGetOutputFormatByName() throws Exception {
         Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0).build();
@@ -665,6 +599,7 @@ public class ConfigurationTest extends TestCase {
         }
     }
 
+    @Test
     public void testSetRegisteredCustomOutputFormats() throws Exception {
         Configuration.Builder cfg = new Configuration.Builder(Configuration.VERSION_3_0_0);
         
@@ -685,157 +620,7 @@ public class ConfigurationTest extends TestCase {
         }
     }
 
-    public void testSetRecognizeStandardFileExtensions() throws Exception {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
-     
-        assertTrue(cfgB.getRecognizeStandardFileExtensions());
-        assertFalse(cfgB.isRecognizeStandardFileExtensionsSet());
-
-        cfgB.setRecognizeStandardFileExtensions(false);
-        assertFalse(cfgB.getRecognizeStandardFileExtensions());
-        assertTrue(cfgB.isRecognizeStandardFileExtensionsSet());
-     
-        cfgB.unsetRecognizeStandardFileExtensions();
-        assertTrue(cfgB.getRecognizeStandardFileExtensions());
-        assertFalse(cfgB.isRecognizeStandardFileExtensionsSet());
-        
-        cfgB.setRecognizeStandardFileExtensions(true);
-        assertTrue(cfgB.getRecognizeStandardFileExtensions());
-        assertTrue(cfgB.isRecognizeStandardFileExtensionsSet());
-     
-        cfgB.setSetting(Configuration.ExtendableBuilder.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE, "false");
-        assertFalse(cfgB.getRecognizeStandardFileExtensions());
-        assertTrue(cfgB.isRecognizeStandardFileExtensionsSet());
-        
-        cfgB.setSetting(Configuration.ExtendableBuilder.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE, "default");
-        assertTrue(cfgB.getRecognizeStandardFileExtensions());
-        assertFalse(cfgB.isRecognizeStandardFileExtensionsSet());
-     }
-    
-    public void testSetTimeZone() throws ConfigurationException {
-        TimeZone origSysDefTZ = TimeZone.getDefault();
-        try {
-            TimeZone sysDefTZ = TimeZone.getTimeZone("GMT-01");
-            TimeZone.setDefault(sysDefTZ);
-            
-            Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
-            assertEquals(sysDefTZ, cfgB.getTimeZone());
-            cfgB.setSetting(MutableProcessingConfiguration.TIME_ZONE_KEY, "JVM default");
-            assertEquals(sysDefTZ, cfgB.getTimeZone());
-            
-            TimeZone newSysDefTZ = TimeZone.getTimeZone("GMT+09");
-            TimeZone.setDefault(newSysDefTZ);
-            assertEquals(sysDefTZ, cfgB.getTimeZone());
-            cfgB.setSetting(MutableProcessingConfiguration.TIME_ZONE_KEY, "JVM default");
-            assertEquals(newSysDefTZ, cfgB.getTimeZone());
-        } finally {
-            TimeZone.setDefault(origSysDefTZ);
-        }
-    }
-    
-    public void testSetSQLDateAndTimeTimeZone() throws ConfigurationException {
-        TimeZone origSysDefTZ = TimeZone.getDefault();
-        try {
-            TimeZone sysDefTZ = TimeZone.getTimeZone("GMT-01");
-            TimeZone.setDefault(sysDefTZ);
-            
-            Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
-            assertNull(cfgB.getSQLDateAndTimeTimeZone());
-            
-            cfgB.setSQLDateAndTimeTimeZone(null);
-            assertNull(cfgB.getSQLDateAndTimeTimeZone());
-            
-            cfgB.setSetting(MutableProcessingConfiguration.SQL_DATE_AND_TIME_TIME_ZONE_KEY, "JVM default");
-            assertEquals(sysDefTZ, cfgB.getSQLDateAndTimeTimeZone());
-            
-            cfgB.setSetting(MutableProcessingConfiguration.SQL_DATE_AND_TIME_TIME_ZONE_KEY, "null");
-            assertNull(cfgB.getSQLDateAndTimeTimeZone());
-        } finally {
-            TimeZone.setDefault(origSysDefTZ);
-        }
-    }
-
-    public void testTimeZoneLayers() throws Exception {
-        TimeZone localTZ = TimeZone.getTimeZone("Europe/Brussels");
-
-        {
-            Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0).build();
-            Template t = new Template(null, "", cfg);
-            Environment env1 = t.createProcessingEnvironment(null, new StringWriter());
-            Environment env2 = t.createProcessingEnvironment(null, new StringWriter());
-
-            // cfg:
-            assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
-            assertNull(cfg.getSQLDateAndTimeTimeZone());
-            // env:
-            assertEquals(TimeZone.getDefault(), env1.getTimeZone());
-            assertNull(env1.getSQLDateAndTimeTimeZone());
-            // env 2:
-            assertEquals(TimeZone.getDefault(), env2.getTimeZone());
-            assertNull(env2.getSQLDateAndTimeTimeZone());
-
-            env1.setSQLDateAndTimeTimeZone(_DateUtil.UTC);
-            // cfg:
-            assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
-            assertNull(cfg.getSQLDateAndTimeTimeZone());
-            // env:
-            assertEquals(TimeZone.getDefault(), env1.getTimeZone());
-            assertEquals(_DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
-
-            env1.setTimeZone(localTZ);
-            // cfg:
-            assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
-            assertNull(cfg.getSQLDateAndTimeTimeZone());
-            // env:
-            assertEquals(localTZ, env1.getTimeZone());
-            assertEquals(_DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
-            // env 2:
-            assertEquals(TimeZone.getDefault(), env2.getTimeZone());
-            assertNull(env2.getSQLDateAndTimeTimeZone());
-        }
-
-        {
-            TimeZone otherTZ1 = TimeZone.getTimeZone("GMT+05");
-            TimeZone otherTZ2 = TimeZone.getTimeZone("GMT+06");
-            Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
-                    .timeZone(otherTZ1)
-                    .sqlDateAndTimeTimeZone(otherTZ2)
-                    .build();
-
-            Template t = new Template(null, "", cfg);
-            Environment env1 = t.createProcessingEnvironment(null, new StringWriter());
-            Environment env2 = t.createProcessingEnvironment(null, new StringWriter());
-
-            env1.setTimeZone(localTZ);
-            env1.setSQLDateAndTimeTimeZone(_DateUtil.UTC);
-
-            // cfg:
-            assertEquals(otherTZ1, cfg.getTimeZone());
-            assertEquals(otherTZ2, cfg.getSQLDateAndTimeTimeZone());
-            // env:
-            assertEquals(localTZ, env1.getTimeZone());
-            assertEquals(_DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
-            // env 2:
-            assertEquals(otherTZ1, env2.getTimeZone());
-            assertEquals(otherTZ2, env2.getSQLDateAndTimeTimeZone());
-
-            try {
-                setTimeZoneToNull(env2);
-                fail();
-            } catch (IllegalArgumentException e) {
-                // expected
-            }
-            env2.setSQLDateAndTimeTimeZone(null);
-            assertEquals(otherTZ1, env2.getTimeZone());
-            assertNull(env2.getSQLDateAndTimeTimeZone());
-        }
-    }
-
-    @SuppressFBWarnings(value="NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS", justification="Expected to fail")
-    private void setTimeZoneToNull(Environment env2) {
-        env2.setTimeZone(null);
-    }
-    
+    @Test
     public void testSetICIViaSetSettingAPI() throws ConfigurationException {
         Configuration.Builder cfg = new Configuration.Builder(Configuration.VERSION_3_0_0);
         assertEquals(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS, cfg.getIncompatibleImprovements());
@@ -844,13 +629,7 @@ public class ConfigurationTest extends TestCase {
         assertEquals(Configuration.VERSION_3_0_0, cfg.getIncompatibleImprovements());
     }
 
-    public void testSetLogTemplateExceptionsViaSetSettingAPI() throws ConfigurationException {
-        Configuration.Builder cfg = new Configuration.Builder(Configuration.VERSION_3_0_0);
-        assertFalse(cfg.getLogTemplateExceptions());
-        cfg.setSetting(MutableProcessingConfiguration.LOG_TEMPLATE_EXCEPTIONS_KEY, "true");
-        assertTrue(cfg.getLogTemplateExceptions());
-    }
-    
+    @Test
     public void testSharedVariables() throws TemplateException, IOException {
         Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
                 .sharedVariables(ImmutableMap.of(
@@ -880,24 +659,6 @@ public class ConfigurationTest extends TestCase {
         new Template(null, "${a} ${b}", cfg)
                 .process(ImmutableMap.of("a", "aaDM"), sw);
         assertEquals("aaDM bb", sw.toString());
-    }
-
-    @Test
-    public void testApiBuiltinEnabled() throws Exception {
-        try {
-            new Template(
-                    null, "${1?api}",
-                    new Configuration.Builder(Configuration.VERSION_3_0_0).build())
-                    .process(null, _NullWriter.INSTANCE);
-            fail();
-        } catch (TemplateException e) {
-            assertThat(e.getMessage(), containsString(MutableProcessingConfiguration.API_BUILTIN_ENABLED_KEY));
-        }
-            
-        new Template(
-                null, "${m?api.hashCode()}",
-                new Configuration.Builder(Configuration.VERSION_3_0_0).apiBuiltinEnabled(true).build())
-                .process(Collections.singletonMap("m", new HashMap()), _NullWriter.INSTANCE);
     }
 
     @Test
@@ -949,329 +710,17 @@ public class ConfigurationTest extends TestCase {
         cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "2h");
         assertEquals(1000L * 60 * 60 * 2, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
     }
-    
-    @Test
-    @SuppressFBWarnings(value = "NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS ", justification = "Testing wrong args")
-    public void testSetCustomNumberFormat() throws Exception {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
-        
-        try {
-            cfgB.setCustomNumberFormats(null);
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), containsString("null"));
-        }
-
-        try {
-            cfgB.setCustomNumberFormats(Collections.<String, TemplateNumberFormatFactory>singletonMap(
-                    "", HexTemplateNumberFormatFactory.INSTANCE));
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), containsString("0 length"));
-        }
-
-        try {
-            cfgB.setCustomNumberFormats(Collections.<String, TemplateNumberFormatFactory>singletonMap(
-                    "a_b", HexTemplateNumberFormatFactory.INSTANCE));
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), containsString("a_b"));
-        }
-
-        try {
-            cfgB.setCustomNumberFormats(Collections.<String, TemplateNumberFormatFactory>singletonMap(
-                    "a b", HexTemplateNumberFormatFactory.INSTANCE));
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), containsString("a b"));
-        }
-        
-        try {
-            cfgB.setCustomNumberFormats(ImmutableMap.<String, TemplateNumberFormatFactory>of(
-                    "a", HexTemplateNumberFormatFactory.INSTANCE,
-                    "@wrong", HexTemplateNumberFormatFactory.INSTANCE));
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), containsString("@wrong"));
-        }
-        
-        cfgB.setSetting(MutableProcessingConfiguration.CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE,
-                "{ 'base': " + BaseNTemplateNumberFormatFactory.class.getName() + "() }");
-        assertEquals(
-                Collections.singletonMap("base", BaseNTemplateNumberFormatFactory.INSTANCE),
-                cfgB.getCustomNumberFormats());
-        
-        cfgB.setSetting(MutableProcessingConfiguration.CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE,
-                "{ "
-                + "'base': " + BaseNTemplateNumberFormatFactory.class.getName() + "(), "
-                + "'hex': " + HexTemplateNumberFormatFactory.class.getName() + "()"
-                + " }");
-        assertEquals(
-                ImmutableMap.of(
-                        "base", BaseNTemplateNumberFormatFactory.INSTANCE,
-                        "hex", HexTemplateNumberFormatFactory.INSTANCE),
-                cfgB.getCustomNumberFormats());
-        
-        cfgB.setSetting(MutableProcessingConfiguration.CUSTOM_NUMBER_FORMATS_KEY, "{}");
-        assertEquals(Collections.emptyMap(), cfgB.getCustomNumberFormats());
-        
-        try {
-            cfgB.setSetting(MutableProcessingConfiguration.CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE,
-                    "{ 'x': " + EpochMillisTemplateDateFormatFactory.class.getName() + "() }");
-            fail();
-        } catch (ConfigurationException e) {
-            assertThat(e.getCause().getMessage(), allOf(
-                    containsString(EpochMillisTemplateDateFormatFactory.class.getName()),
-                    containsString(TemplateNumberFormatFactory.class.getName())));
-        }
-    }
-
-    @Test
-    public void testSetTabSize() throws Exception {
-        String ftl = "${\t}";
-        
-        try {
-            new Template(null, ftl,
-                    new Configuration.Builder(Configuration.VERSION_3_0_0).build());
-            fail();
-        } catch (ParseException e) {
-            assertEquals(9, e.getColumnNumber());
-        }
-        
-        try {
-            new Template(null, ftl,
-                    new Configuration.Builder(Configuration.VERSION_3_0_0).tabSize(1).build());
-            fail();
-        } catch (ParseException e) {
-            assertEquals(4, e.getColumnNumber());
-        }
-        
-        try {
-            new Configuration.Builder(Configuration.VERSION_3_0_0).tabSize(0);
-            fail();
-        } catch (IllegalArgumentException e) {
-            // Expected
-        }
-        
-        try {
-            new Configuration.Builder(Configuration.VERSION_3_0_0).tabSize(257);
-            fail();
-        } catch (IllegalArgumentException e) {
-            // Expected
-        }
-    }
-
-    @Test
-    public void testTabSizeSetting() throws Exception {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
-        assertEquals(8, cfgB.getTabSize());
-        cfgB.setSetting(Configuration.ExtendableBuilder.TAB_SIZE_KEY_CAMEL_CASE, "4");
-        assertEquals(4, cfgB.getTabSize());
-        cfgB.setSetting(Configuration.ExtendableBuilder.TAB_SIZE_KEY_SNAKE_CASE, "1");
-        assertEquals(1, cfgB.getTabSize());
-        
-        try {
-            cfgB.setSetting(Configuration.ExtendableBuilder.TAB_SIZE_KEY_SNAKE_CASE, "x");
-            fail();
-        } catch (ConfigurationException e) {
-            assertThat(e.getCause(), instanceOf(NumberFormatException.class));
-        }
-    }
-    
-    @SuppressFBWarnings(value="NP_NULL_PARAM_DEREF_ALL_TARGETS_DANGEROUS", justification="We test failures")
-    @Test
-    public void testSetCustomDateFormat() throws Exception {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
-        
-        try {
-            cfgB.setCustomDateFormats(null);
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), containsString("null"));
-        }
-        
-        try {
-            cfgB.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>singletonMap(
-                    "", EpochMillisTemplateDateFormatFactory.INSTANCE));
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), containsString("0 length"));
-        }
-
-        try {
-            cfgB.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>singletonMap(
-                    "a_b", EpochMillisTemplateDateFormatFactory.INSTANCE));
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), containsString("a_b"));
-        }
-
-        try {
-            cfgB.setCustomDateFormats(Collections.<String, TemplateDateFormatFactory>singletonMap(
-                    "a b", EpochMillisTemplateDateFormatFactory.INSTANCE));
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), containsString("a b"));
-        }
-        
-        try {
-            cfgB.setCustomDateFormats(ImmutableMap.<String, TemplateDateFormatFactory>of(
-                    "a", EpochMillisTemplateDateFormatFactory.INSTANCE,
-                    "@wrong", EpochMillisTemplateDateFormatFactory.INSTANCE));
-            fail();
-        } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), containsString("@wrong"));
-        }
-        
-        cfgB.setSetting(MutableProcessingConfiguration.CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE,
-                "{ 'epoch': " + EpochMillisTemplateDateFormatFactory.class.getName() + "() }");
-        assertEquals(
-                Collections.singletonMap("epoch", EpochMillisTemplateDateFormatFactory.INSTANCE),
-                cfgB.getCustomDateFormats());
-        
-        cfgB.setSetting(MutableProcessingConfiguration.CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE,
-                "{ "
-                + "'epoch': " + EpochMillisTemplateDateFormatFactory.class.getName() + "(), "
-                + "'epochDiv': " + EpochMillisDivTemplateDateFormatFactory.class.getName() + "()"
-                + " }");
-        assertEquals(
-                ImmutableMap.of(
-                        "epoch", EpochMillisTemplateDateFormatFactory.INSTANCE,
-                        "epochDiv", EpochMillisDivTemplateDateFormatFactory.INSTANCE),
-                cfgB.getCustomDateFormats());
-        
-        cfgB.setSetting(MutableProcessingConfiguration.CUSTOM_DATE_FORMATS_KEY, "{}");
-        assertEquals(Collections.emptyMap(), cfgB.getCustomDateFormats());
-        
-        try {
-            cfgB.setSetting(MutableProcessingConfiguration.CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE,
-                    "{ 'x': " + HexTemplateNumberFormatFactory.class.getName() + "() }");
-            fail();
-        } catch (ConfigurationException e) {
-            assertThat(e.getCause().getMessage(), allOf(
-                    containsString(HexTemplateNumberFormatFactory.class.getName()),
-                    containsString(TemplateDateFormatFactory.class.getName())));
-        }
-    }
-
-    public void testNamingConventionSetSetting() throws ConfigurationException {
-        Configuration.Builder cfg = new Configuration.Builder(Configuration.VERSION_3_0_0);
-
-        assertEquals(NamingConvention.AUTO_DETECT, cfg.getNamingConvention());
-        
-        cfg.setSetting("naming_convention", "legacy");
-        assertEquals(NamingConvention.LEGACY, cfg.getNamingConvention());
-        
-        cfg.setSetting("naming_convention", "camel_case");
-        assertEquals(NamingConvention.CAMEL_CASE, cfg.getNamingConvention());
-        
-        cfg.setSetting("naming_convention", "auto_detect");
-        assertEquals(NamingConvention.AUTO_DETECT, cfg.getNamingConvention());
-    }
-
-    public void testLazyImportsSetSetting() throws ConfigurationException {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
-
-        assertFalse(cfgB.getLazyImports());
-        assertFalse(cfgB.isLazyImportsSet());
-        cfgB.setSetting("lazy_imports", "true");
-        assertTrue(cfgB.getLazyImports());
-        cfgB.setSetting("lazyImports", "false");
-        assertFalse(cfgB.getLazyImports());
-        assertTrue(cfgB.isLazyImportsSet());
-    }
-    
-    public void testLazyAutoImportsSetSetting() throws ConfigurationException {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
-
-        assertNull(cfgB.getLazyAutoImports());
-        assertFalse(cfgB.isLazyAutoImportsSet());
-        cfgB.setSetting("lazy_auto_imports", "true");
-        assertEquals(Boolean.TRUE, cfgB.getLazyAutoImports());
-        assertTrue(cfgB.isLazyAutoImportsSet());
-        cfgB.setSetting("lazyAutoImports", "false");
-        assertEquals(Boolean.FALSE, cfgB.getLazyAutoImports());
-        cfgB.setSetting("lazyAutoImports", "null");
-        assertNull(cfgB.getLazyAutoImports());
-        assertTrue(cfgB.isLazyAutoImportsSet());
-        cfgB.unsetLazyAutoImports();
-        assertNull(cfgB.getLazyAutoImports());
-        assertFalse(cfgB.isLazyAutoImportsSet());
-    }
-
-    public void testLocaleSetting() throws TemplateException, ConfigurationException {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
-
-        assertEquals(Locale.getDefault(), cfgB.getLocale());
-        assertFalse(cfgB.isLocaleSet());
-
-        Locale nonDefault = Locale.getDefault().equals(Locale.GERMANY) ? Locale.FRANCE : Locale.GERMANY;
-        cfgB.setLocale(nonDefault);
-        assertTrue(cfgB.isLocaleSet());
-        assertEquals(nonDefault, cfgB.getLocale());
-
-        cfgB.unsetLocale();
-        assertEquals(Locale.getDefault(), cfgB.getLocale());
-        assertFalse(cfgB.isLocaleSet());
-
-        cfgB.setSetting(Configuration.ExtendableBuilder.LOCALE_KEY, "JVM default");
-        assertEquals(Locale.getDefault(), cfgB.getLocale());
-        assertTrue(cfgB.isLocaleSet());
-    }
-
-    public void testDefaultEncodingSetting() throws TemplateException, ConfigurationException {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
-
-        assertEquals(Charset.defaultCharset(), cfgB.getSourceEncoding());
-        assertFalse(cfgB.isSourceEncodingSet());
-
-        Charset nonDefault = Charset.defaultCharset().equals(StandardCharsets.UTF_8) ? StandardCharsets.ISO_8859_1
-                : StandardCharsets.UTF_8;
-        cfgB.setSourceEncoding(nonDefault);
-        assertTrue(cfgB.isSourceEncodingSet());
-        assertEquals(nonDefault, cfgB.getSourceEncoding());
-
-        cfgB.unsetSourceEncoding();
-        assertEquals(Charset.defaultCharset(), cfgB.getSourceEncoding());
-        assertFalse(cfgB.isSourceEncodingSet());
-
-        cfgB.setSetting(Configuration.ExtendableBuilder.SOURCE_ENCODING_KEY, "JVM default");
-        assertEquals(Charset.defaultCharset(), cfgB.getSourceEncoding());
-        assertTrue(cfgB.isSourceEncodingSet());
-    }
-
-    public void testTimeZoneSetting() throws TemplateException, ConfigurationException {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
-
-        assertEquals(TimeZone.getDefault(), cfgB.getTimeZone());
-        assertFalse(cfgB.isTimeZoneSet());
-
-        TimeZone nonDefault = TimeZone.getDefault().equals(_DateUtil.UTC) ? TimeZone.getTimeZone("PST") : _DateUtil.UTC;
-        cfgB.setTimeZone(nonDefault);
-        assertTrue(cfgB.isTimeZoneSet());
-        assertEquals(nonDefault, cfgB.getTimeZone());
-
-        cfgB.unsetTimeZone();
-        assertEquals(TimeZone.getDefault(), cfgB.getTimeZone());
-        assertFalse(cfgB.isTimeZoneSet());
-
-        cfgB.setSetting(Configuration.ExtendableBuilder.TIME_ZONE_KEY, "JVM default");
-        assertEquals(TimeZone.getDefault(), cfgB.getTimeZone());
-        assertTrue(cfgB.isTimeZoneSet());
-    }
 
     @Test
     public void testGetSettingNamesAreSorted() throws Exception {
-        Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0).build();
         for (boolean camelCase : new boolean[] { false, true }) {
             List<String> names = new ArrayList<>(Configuration.Builder.getSettingNames(camelCase));
-            List<String> procCfgNames = new ArrayList<>(new Template(null, "", cfg)
-                    .createProcessingEnvironment(null, _NullWriter.INSTANCE)
-                    .getSettingNames(camelCase));
-            assertStartsWith(names, procCfgNames);
+            List<String> inheritedNames = new ArrayList<>(
+                    MutableParsingAndProcessingConfiguration.getSettingNames(camelCase));
+            assertStartsWith(names, inheritedNames);
             
             String prevName = null;
-            for (int i = procCfgNames.size(); i < names.size(); i++) {
+            for (int i = inheritedNames.size(); i < names.size(); i++) {
                 String name = names.get(i);
                 if (prevName != null) {
                     assertThat(name, greaterThan(prevName));
@@ -1282,33 +731,28 @@ public class ConfigurationTest extends TestCase {
     }
 
     @Test
-    @SuppressFBWarnings("DLS_DEAD_LOCAL_STORE")
     public void testGetSettingNamesNameConventionsContainTheSame() throws Exception {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
         MutableProcessingConfigurationTest.testGetSettingNamesNameConventionsContainTheSame(
-                new ArrayList<>(cfgB.getSettingNames(false)),
-                new ArrayList<>(cfgB.getSettingNames(true)));
+                new ArrayList<>(Configuration.Builder.getSettingNames(false)),
+                new ArrayList<>(Configuration.Builder.getSettingNames(true)));
     }
 
     @Test
-    @SuppressFBWarnings("DLS_DEAD_LOCAL_STORE")
     public void testStaticFieldKeysCoverAllGetSettingNames() throws Exception {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
-        List<String> names = new ArrayList<>(cfgB.getSettingNames(false));
-        List<String> cfgableNames = new ArrayList<>(cfgB.getSettingNames(false));
-        assertStartsWith(names, cfgableNames);
-        
-        for (int i = cfgableNames.size(); i < names.size(); i++) {
-            String name = names.get(i);
+        List<String> names = new ArrayList<>(Configuration.Builder.getSettingNames(false));
+        for (String name :  names) {
             assertTrue("No field was found for " + name, keyFieldExists(name));
         }
     }
     
     @Test
     public void testGetSettingNamesCoversAllStaticKeyFields() throws Exception {
-        Collection<String> names = new Configuration.Builder(Configuration.VERSION_3_0_0).getSettingNames(false);
+        Collection<String> names = Configuration.Builder.getSettingNames(false);
         
-        for (Class<? extends MutableProcessingConfiguration> cfgableClass : new Class[] { Configuration.class, MutableProcessingConfiguration.class }) {
+        for (Class<?> cfgableClass : new Class[] {
+                Configuration.class,
+                MutableParsingAndProcessingConfiguration.class,
+                MutableProcessingConfiguration.class }) {
             for (Field f : cfgableClass.getFields()) {
                 if (f.getName().endsWith("_KEY")) {
                     final Object name = f.get(null);
@@ -1321,18 +765,6 @@ public class ConfigurationTest extends TestCase {
     @Test
     public void testKeyStaticFieldsHasAllVariationsAndCorrectFormat() throws IllegalArgumentException, IllegalAccessException {
         MutableProcessingConfigurationTest.testKeyStaticFieldsHasAllVariationsAndCorrectFormat(Configuration.ExtendableBuilder.class);
-    }
-
-    @Test
-    public void testGetSettingNamesCoversAllSettingNames() throws Exception {
-        Collection<String> names = new Configuration.Builder(Configuration.VERSION_3_0_0).getSettingNames(false);
-        
-        for (Field f : MutableProcessingConfiguration.class.getFields()) {
-            if (f.getName().endsWith("_KEY")) {
-                final Object name = f.get(null);
-                assertTrue("Missing setting name: " + name, names.contains(name));
-            }
-        }
     }
 
     @Test
@@ -1536,7 +968,7 @@ public class ConfigurationTest extends TestCase {
     private boolean keyFieldExists(String name) throws Exception {
         Field field;
         try {
-            field = Configuration.class.getField(name.toUpperCase() + "_KEY");
+            field = Configuration.ExtendableBuilder.class.getField(name.toUpperCase() + "_KEY");
         } catch (NoSuchFieldException e) {
             return false;
         }

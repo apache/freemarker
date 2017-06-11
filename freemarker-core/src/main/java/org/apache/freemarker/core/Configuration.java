@@ -146,49 +146,31 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     private static final String VERSION_PROPERTIES_PATH = "org/apache/freemarker/core/version.properties";
 
     private static final String[] SETTING_NAMES_SNAKE_CASE = new String[] {
-        // Must be sorted alphabetically!
-        ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_SNAKE_CASE,
-        ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE,
-        ExtendableBuilder.LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE,
-        ExtendableBuilder.NAMING_CONVENTION_KEY_SNAKE_CASE,
-        ExtendableBuilder.OUTPUT_FORMAT_KEY_SNAKE_CASE,
-        ExtendableBuilder.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE,
-        ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE,
-        ExtendableBuilder.SHARED_VARIABLES_KEY_SNAKE_CASE,
-        ExtendableBuilder.SOURCE_ENCODING_KEY_SNAKE_CASE,
-        ExtendableBuilder.TAB_SIZE_KEY_SNAKE_CASE,
-        ExtendableBuilder.TAG_SYNTAX_KEY_SNAKE_CASE,
-        ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY_SNAKE_CASE,
-        ExtendableBuilder.TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE,
-        ExtendableBuilder.TEMPLATE_LANGUAGE_KEY_SNAKE_CASE,
-        ExtendableBuilder.TEMPLATE_LOADER_KEY_SNAKE_CASE,
-        ExtendableBuilder.TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE,
-        ExtendableBuilder.TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE,
-        ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY_SNAKE_CASE,
-        ExtendableBuilder.WHITESPACE_STRIPPING_KEY_SNAKE_CASE,
+            // Must be sorted alphabetically!
+            ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE,
+            ExtendableBuilder.LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE,
+            ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE,
+            ExtendableBuilder.SHARED_VARIABLES_KEY_SNAKE_CASE,
+            ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY_SNAKE_CASE,
+            ExtendableBuilder.TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE,
+            ExtendableBuilder.TEMPLATE_LOADER_KEY_SNAKE_CASE,
+            ExtendableBuilder.TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE,
+            ExtendableBuilder.TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE,
+            ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY_SNAKE_CASE
     };
 
     private static final String[] SETTING_NAMES_CAMEL_CASE = new String[] {
-        // Must be sorted alphabetically!
-        ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE,
-        ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE,
-        ExtendableBuilder.LOCALIZED_TEMPLATE_LOOKUP_KEY_CAMEL_CASE,
-        ExtendableBuilder.NAMING_CONVENTION_KEY_CAMEL_CASE,
-        ExtendableBuilder.OUTPUT_FORMAT_KEY_CAMEL_CASE,
-        ExtendableBuilder.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE,
-        ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE,
-        ExtendableBuilder.SHARED_VARIABLES_KEY_CAMEL_CASE,
-        ExtendableBuilder.SOURCE_ENCODING_KEY_CAMEL_CASE,
-        ExtendableBuilder.TAB_SIZE_KEY_CAMEL_CASE,
-        ExtendableBuilder.TAG_SYNTAX_KEY_CAMEL_CASE,
-        ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY_CAMEL_CASE,
-        ExtendableBuilder.TEMPLATE_CONFIGURATIONS_KEY_CAMEL_CASE,
-        ExtendableBuilder.TEMPLATE_LANGUAGE_KEY_CAMEL_CASE,
-        ExtendableBuilder.TEMPLATE_LOADER_KEY_CAMEL_CASE,
-        ExtendableBuilder.TEMPLATE_LOOKUP_STRATEGY_KEY_CAMEL_CASE,
-        ExtendableBuilder.TEMPLATE_NAME_FORMAT_KEY_CAMEL_CASE,
-        ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY_CAMEL_CASE,
-        ExtendableBuilder.WHITESPACE_STRIPPING_KEY_CAMEL_CASE
+            // Must be sorted alphabetically!
+            ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE,
+            ExtendableBuilder.LOCALIZED_TEMPLATE_LOOKUP_KEY_CAMEL_CASE,
+            ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE,
+            ExtendableBuilder.SHARED_VARIABLES_KEY_CAMEL_CASE,
+            ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY_CAMEL_CASE,
+            ExtendableBuilder.TEMPLATE_CONFIGURATIONS_KEY_CAMEL_CASE,
+            ExtendableBuilder.TEMPLATE_LOADER_KEY_CAMEL_CASE,
+            ExtendableBuilder.TEMPLATE_LOOKUP_STRATEGY_KEY_CAMEL_CASE,
+            ExtendableBuilder.TEMPLATE_NAME_FORMAT_KEY_CAMEL_CASE,
+            ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY_CAMEL_CASE
     };
     
     private static final Map<String, OutputFormat> STANDARD_OUTPUT_FORMATS;
@@ -1659,127 +1641,75 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             implements TopLevelConfiguration, org.apache.freemarker.core.util.CommonBuilder<Configuration> {
 
         /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String SOURCE_ENCODING_KEY_SNAKE_CASE = "source_encoding";
-        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String SOURCE_ENCODING_KEY = SOURCE_ENCODING_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String SOURCE_ENCODING_KEY_CAMEL_CASE = "sourceEncoding";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE = "localized_template_lookup";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String LOCALIZED_TEMPLATE_LOOKUP_KEY = LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE;
         /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String LOCALIZED_TEMPLATE_LOOKUP_KEY_CAMEL_CASE = "localizedTemplateLookup";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String WHITESPACE_STRIPPING_KEY_SNAKE_CASE = "whitespace_stripping";
-        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String WHITESPACE_STRIPPING_KEY = WHITESPACE_STRIPPING_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String WHITESPACE_STRIPPING_KEY_CAMEL_CASE = "whitespaceStripping";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String OUTPUT_FORMAT_KEY_SNAKE_CASE = "output_format";
-        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String OUTPUT_FORMAT_KEY = OUTPUT_FORMAT_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String OUTPUT_FORMAT_KEY_CAMEL_CASE = "outputFormat";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE = "recognize_standard_file_extensions";
-        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY
-                = RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE = "recognizeStandardFileExtensions";
+
         /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE = "registered_custom_output_formats";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY = REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE;
         /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE = "registeredCustomOutputFormats";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String AUTO_ESCAPING_POLICY_KEY_SNAKE_CASE = "auto_escaping_policy";
-        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String AUTO_ESCAPING_POLICY_KEY = AUTO_ESCAPING_POLICY_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE = "autoEscapingPolicy";
+
         /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String TEMPLATE_CACHE_STORAGE_KEY_SNAKE_CASE = "template_cache_storage";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String TEMPLATE_CACHE_STORAGE_KEY = TEMPLATE_CACHE_STORAGE_KEY_SNAKE_CASE;
         /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String TEMPLATE_CACHE_STORAGE_KEY_CAMEL_CASE = "templateCacheStorage";
+
         /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String TEMPLATE_UPDATE_DELAY_KEY_SNAKE_CASE = "template_update_delay";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String TEMPLATE_UPDATE_DELAY_KEY = TEMPLATE_UPDATE_DELAY_KEY_SNAKE_CASE;
         /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String TEMPLATE_UPDATE_DELAY_KEY_CAMEL_CASE = "templateUpdateDelay";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String AUTO_INCLUDE_KEY_SNAKE_CASE = "auto_include";
-        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String AUTO_INCLUDE_KEY = AUTO_INCLUDE_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String AUTO_INCLUDE_KEY_CAMEL_CASE = "autoInclude";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String TEMPLATE_LANGUAGE_KEY_SNAKE_CASE = "template_language";
-        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String TEMPLATE_LANGUAGE_KEY = TEMPLATE_LANGUAGE_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String TEMPLATE_LANGUAGE_KEY_CAMEL_CASE = "templateLanguage";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String TAG_SYNTAX_KEY_SNAKE_CASE = "tag_syntax";
-        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String TAG_SYNTAX_KEY = TAG_SYNTAX_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String TAG_SYNTAX_KEY_CAMEL_CASE = "tagSyntax";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String NAMING_CONVENTION_KEY_SNAKE_CASE = "naming_convention";
-        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String NAMING_CONVENTION_KEY = NAMING_CONVENTION_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String NAMING_CONVENTION_KEY_CAMEL_CASE = "namingConvention";
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String TAB_SIZE_KEY_SNAKE_CASE = "tab_size";
-        /** Alias to the {@code ..._SNAKE_CASE} variation. */
-        public static final String TAB_SIZE_KEY = TAB_SIZE_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String TAB_SIZE_KEY_CAMEL_CASE = "tabSize";
+
         /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String TEMPLATE_LOADER_KEY_SNAKE_CASE = "template_loader";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String TEMPLATE_LOADER_KEY = TEMPLATE_LOADER_KEY_SNAKE_CASE;
         /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String TEMPLATE_LOADER_KEY_CAMEL_CASE = "templateLoader";
+
         /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE = "template_lookup_strategy";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String TEMPLATE_LOOKUP_STRATEGY_KEY = TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE;
         /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String TEMPLATE_LOOKUP_STRATEGY_KEY_CAMEL_CASE = "templateLookupStrategy";
+
         /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE = "template_name_format";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String TEMPLATE_NAME_FORMAT_KEY = TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE;
         /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String TEMPLATE_NAME_FORMAT_KEY_CAMEL_CASE = "templateNameFormat";
+
         /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String SHARED_VARIABLES_KEY_SNAKE_CASE = "shared_variables";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String SHARED_VARIABLES_KEY = SHARED_VARIABLES_KEY_SNAKE_CASE;
         /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String SHARED_VARIABLES_KEY_CAMEL_CASE = "sharedVariables";
+
         /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE = "template_configurations";
         /** Alias to the {@code ..._SNAKE_CASE} variation. */
         public static final String TEMPLATE_CONFIGURATIONS_KEY = TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE;
         /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String TEMPLATE_CONFIGURATIONS_KEY_CAMEL_CASE = "templateConfigurations";
+
         /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE = "incompatible_improvements";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String INCOMPATIBLE_IMPROVEMENTS_KEY = INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE;
         /** Modern, camel case ({@code likeThis}) variation of the setting name. */
         public static final String INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE = "incompatibleImprovements";
-        // Set early in the constructor to non-null
+
         private Version incompatibleImprovements = Configuration.VERSION_3_0_0;
 
         private TemplateResolver templateResolver;
@@ -1799,7 +1729,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         private boolean templateUpdateDelayMillisecondsSet;
         private Boolean localizedTemplateLookup;
         private boolean localizedTemplateLookupSet;
-
         private Collection<OutputFormat> registeredCustomOutputFormats;
         private Map<String, Object> sharedVariables;
 
@@ -1829,44 +1758,18 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
         @Override
         public void setSetting(String name, String value) throws ConfigurationException {
-            boolean unknown = false;
+            boolean nameUnhandled = false;
             try {
+                // TODO [FM3] Do we still need this?
                 if ("TemplateUpdateInterval".equalsIgnoreCase(name)) {
                     name = TEMPLATE_UPDATE_DELAY_KEY;
                 } else if ("DefaultEncoding".equalsIgnoreCase(name)) {
                     name = SOURCE_ENCODING_KEY;
                 }
 
-                if (SOURCE_ENCODING_KEY_SNAKE_CASE.equals(name) || SOURCE_ENCODING_KEY_CAMEL_CASE.equals(name)) {
-                    if (JVM_DEFAULT_VALUE.equalsIgnoreCase(value)) {
-                        setSourceEncoding(Charset.defaultCharset());
-                    } else {
-                        setSourceEncoding(Charset.forName(value));
-                    }
-                } else if (LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE.equals(name)
+                if (LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE.equals(name)
                         || LOCALIZED_TEMPLATE_LOOKUP_KEY_CAMEL_CASE.equals(name)) {
                     setLocalizedTemplateLookup(_StringUtil.getYesNo(value));
-                } else if (WHITESPACE_STRIPPING_KEY_SNAKE_CASE.equals(name)
-                        || WHITESPACE_STRIPPING_KEY_CAMEL_CASE.equals(name)) {
-                    setWhitespaceStripping(_StringUtil.getYesNo(value));
-                } else if (AUTO_ESCAPING_POLICY_KEY_SNAKE_CASE.equals(name) || AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE.equals(name)) {
-                    if ("enable_if_default".equals(value) || "enableIfDefault".equals(value)) {
-                        setAutoEscapingPolicy(AutoEscapingPolicy.ENABLE_IF_DEFAULT);
-                    } else if ("enable_if_supported".equals(value) || "enableIfSupported".equals(value)) {
-                        setAutoEscapingPolicy(AutoEscapingPolicy.ENABLE_IF_SUPPORTED);
-                    } else if ("disable".equals(value)) {
-                        setAutoEscapingPolicy(AutoEscapingPolicy.DISABLE);
-                    } else {
-                        throw new InvalidSettingValueException( name, value,
-                                "No such predefined auto escaping policy name");
-                    }
-                } else if (OUTPUT_FORMAT_KEY_SNAKE_CASE.equals(name) || OUTPUT_FORMAT_KEY_CAMEL_CASE.equals(name)) {
-                    if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
-                        unsetOutputFormat();
-                    } else {
-                        setOutputFormat((OutputFormat) _ObjectBuilderSettingEvaluator.eval(
-                                value, OutputFormat.class, true, _SettingEvaluationEnvironment.getCurrent()));
-                    }
                 } else if (REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE.equals(name)
                         || REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE.equals(name)) {
                     List list = (List) _ObjectBuilderSettingEvaluator.eval(
@@ -1878,13 +1781,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                         }
                     }
                     setRegisteredCustomOutputFormats(list);
-                } else if (RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE.equals(name)
-                        || RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE.equals(name)) {
-                    if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
-                        unsetRecognizeStandardFileExtensions();
-                    } else {
-                        setRecognizeStandardFileExtensions(_StringUtil.getYesNo(value));
-                    }
                 } else if (TEMPLATE_CACHE_STORAGE_KEY_SNAKE_CASE.equals(name) || TEMPLATE_CACHE_STORAGE_KEY_CAMEL_CASE.equals(name)) {
                     if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
                         unsetTemplateCacheStorage();
@@ -1969,37 +1865,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                         }
                     }
                     setSharedVariables((Map) sharedVariables);
-                } else if (TEMPLATE_LANGUAGE_KEY_SNAKE_CASE.equals(name) || TEMPLATE_LANGUAGE_KEY_CAMEL_CASE.equals(name)) {
-                    if ("FTL".equals(value)) {
-                        setTemplateLanguage(TemplateLanguage.FTL);
-                    } else if ("static_text".equals(value) || "staticText".equals(value)) {
-                        setTemplateLanguage(TemplateLanguage.STATIC_TEXT);
-                    } else {
-                        throw new InvalidSettingValueException(name, value, "Unsupported template language name");
-                    }
-                } else if (TAG_SYNTAX_KEY_SNAKE_CASE.equals(name) || TAG_SYNTAX_KEY_CAMEL_CASE.equals(name)) {
-                    if ("auto_detect".equals(value) || "autoDetect".equals(value)) {
-                        setTagSyntax(TagSyntax.AUTO_DETECT);
-                    } else if ("angle_bracket".equals(value) || "angleBracket".equals(value)) {
-                        setTagSyntax(TagSyntax.ANGLE_BRACKET);
-                    } else if ("square_bracket".equals(value) || "squareBracket".equals(value)) {
-                        setTagSyntax(TagSyntax.SQUARE_BRACKET);
-                    } else {
-                        throw new InvalidSettingValueException(name, value, "No such predefined tag syntax name");
-                    }
-                } else if (NAMING_CONVENTION_KEY_SNAKE_CASE.equals(name) || NAMING_CONVENTION_KEY_CAMEL_CASE.equals(name)) {
-                    if ("auto_detect".equals(value) || "autoDetect".equals(value)) {
-                        setNamingConvention(NamingConvention.AUTO_DETECT);
-                    } else if ("legacy".equals(value)) {
-                        setNamingConvention(NamingConvention.LEGACY);
-                    } else if ("camel_case".equals(value) || "camelCase".equals(value)) {
-                        setNamingConvention(NamingConvention.CAMEL_CASE);
-                    } else {
-                        throw new InvalidSettingValueException(name, value,
-                                "No such predefined naming convention name.");
-                    }
-                } else if (TAB_SIZE_KEY_SNAKE_CASE.equals(name) || TAB_SIZE_KEY_CAMEL_CASE.equals(name)) {
-                    setTabSize(Integer.parseInt(value));
                 } else if (INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE.equals(name)
                         || INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE.equals(name)) {
                     setIncompatibleImprovements(new Version(value));
@@ -2039,14 +1904,14 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                                 value, TemplateConfigurationFactory.class, false, _SettingEvaluationEnvironment.getCurrent()));
                     }
                 } else {
-                    unknown = true;
+                    nameUnhandled = true;
                 }
             } catch (InvalidSettingValueException e) {
                 throw e;
             } catch (Exception e) {
                 throw new InvalidSettingValueException(name, value, e);
             }
-            if (unknown) {
+            if (nameUnhandled) {
                 super.setSetting(name, value);
             }
         }
@@ -2063,7 +1928,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
          */
         public static Set<String> getSettingNames(boolean camelCase) {
             return new _UnmodifiableCompositeSet<>(
-                    MutableProcessingConfiguration.getSettingNames(camelCase),
+                    MutableParsingAndProcessingConfiguration.getSettingNames(camelCase),
                     new _SortedArraySet<>(camelCase ? SETTING_NAMES_CAMEL_CASE : SETTING_NAMES_SNAKE_CASE));
         }
 
