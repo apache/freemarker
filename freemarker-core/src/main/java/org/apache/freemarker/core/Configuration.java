@@ -1761,13 +1761,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         public void setSetting(String name, String value) throws ConfigurationException {
             boolean nameUnhandled = false;
             try {
-                // TODO [FM3] Do we still need this?
-                if ("TemplateUpdateInterval".equalsIgnoreCase(name)) {
-                    name = TEMPLATE_UPDATE_DELAY_KEY;
-                } else if ("DefaultEncoding".equalsIgnoreCase(name)) {
-                    name = SOURCE_ENCODING_KEY;
-                }
-
                 if (LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE.equals(name)
                         || LOCALIZED_TEMPLATE_LOOKUP_KEY_CAMEL_CASE.equals(name)) {
                     setLocalizedTemplateLookup(_StringUtil.getYesNo(value));
@@ -1959,7 +1952,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                 // [2.4] Default might changes to camel-case
                 return SOURCE_ENCODING_KEY;
             }
-            if ("defaultEncoding".equals(name) || "defaultCharset".equals(name)) {
+            if ("defaultEncoding".equalsIgnoreCase(name) || "defaultCharset".equals(name)) {
                 return SOURCE_ENCODING_KEY_CAMEL_CASE;
             }
             if (name.equals("incompatible_enhancements")) {
@@ -1979,6 +1972,9 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             }
             if (name.equals("localized_lookup")) {
                 return LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE;
+            }
+            if ("TemplateUpdateInterval".equalsIgnoreCase(name)) {
+                return TEMPLATE_UPDATE_DELAY_KEY;
             }
 
             return super.getCorrectedNameForUnknownSetting(name);
