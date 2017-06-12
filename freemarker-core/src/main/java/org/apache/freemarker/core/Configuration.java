@@ -1954,8 +1954,8 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
         @Override
         protected String getCorrectedNameForUnknownSetting(String name) {
-            if ("encoding".equals(name) || "default_encoding".equals(name) || "charset".equals(name) || "default_charset"
-                    .equals(name)) {
+            if ("encoding".equals(name) || "default_encoding".equals(name) || "charset".equals(name)
+                    || "default_charset".equals(name)) {
                 // [2.4] Default might changes to camel-case
                 return SOURCE_ENCODING_KEY;
             }
@@ -1967,6 +1967,18 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             }
             if (name.equals("incompatibleEnhancements")) {
                 return INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE;
+            }
+            if (name.equals("cacheStorage")) {
+                return TEMPLATE_CACHE_STORAGE_KEY_CAMEL_CASE;
+            }
+            if (name.equals("cache_storage")) {
+                return TEMPLATE_CACHE_STORAGE_KEY_SNAKE_CASE;
+            }
+            if (name.equals("localizedLookup")) {
+                return LOCALIZED_TEMPLATE_LOOKUP_KEY_CAMEL_CASE;
+            }
+            if (name.equals("localized_lookup")) {
+                return LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE;
             }
 
             return super.getCorrectedNameForUnknownSetting(name);
