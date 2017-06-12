@@ -22,7 +22,9 @@ package org.apache.freemarker.core;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
@@ -269,5 +271,19 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
      * Tells if this setting was explicitly set (if not, the default value of the setting will be used).
      */
     boolean isRegisteredCustomOutputFormatsSet();
+
+    /**
+     * The object wrapper used to wrap objects to {@link TemplateModel}-s. The default is a
+     * {@link DefaultObjectWrapper} with all its setting on default values, and {@code incompatibleImprovements} set
+     * to {@link Configuration#getIncompatibleImprovements()}.
+     */
+    ObjectWrapper getObjectWrapper();
+
+    /**
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
+     * an {@link CoreSettingValueNotSetException}.
+     */
+    boolean isObjectWrapperSet();
 
 }

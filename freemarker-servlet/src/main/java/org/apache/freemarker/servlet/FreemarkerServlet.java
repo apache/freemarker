@@ -543,7 +543,7 @@ public class FreemarkerServlet extends HttpServlet {
         
         // Process object_wrapper init-param out of order:
         String objectWrapperInitParamValue = getInitParameter(
-                MutableProcessingConfiguration.OBJECT_WRAPPER_KEY, DEPR_INITPARAM_OBJECT_WRAPPER);
+                Configuration.Builder.OBJECT_WRAPPER_KEY, DEPR_INITPARAM_OBJECT_WRAPPER);
         if (objectWrapperInitParamValue != null) {
             setObjectWrapperFromInitParam(cfgB, objectWrapperInitParamValue);
         }
@@ -578,7 +578,7 @@ public class FreemarkerServlet extends HttpServlet {
             
             try {
                 if (name.equals(DEPR_INITPARAM_OBJECT_WRAPPER)
-                        || name.equals(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY)
+                        || name.equals(Configuration.Builder.OBJECT_WRAPPER_KEY)
                         || name.equals(INIT_PARAM_TEMPLATE_PATH)
                         || name.equals(Configuration.ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY)) {
                     // ignore: we have already processed these
@@ -1246,7 +1246,7 @@ public class FreemarkerServlet extends HttpServlet {
      */
     protected void setObjectWrapperFromInitParam(Configuration.ExtendableBuilder<?> cb, String initParamValue)
             throws ConfigurationException {
-        cb.setSetting(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY, initParamValue);
+        cb.setSetting(Configuration.Builder.OBJECT_WRAPPER_KEY, initParamValue);
     }
 
     protected HttpRequestParametersHashModel createRequestParametersHashModel(HttpServletRequest request) {

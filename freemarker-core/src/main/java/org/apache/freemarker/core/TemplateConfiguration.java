@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
-import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.util.CommonBuilder;
 import org.apache.freemarker.core.util._CollectionUtil;
@@ -64,7 +63,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     private final String booleanFormat;
     private final TemplateExceptionHandler templateExceptionHandler;
     private final ArithmeticEngine arithmeticEngine;
-    private final ObjectWrapper objectWrapper;
     private final Charset outputEncoding;
     private final boolean outputEncodingSet;
     private final Charset urlEscapingCharset;
@@ -105,7 +103,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         booleanFormat = builder.isBooleanFormatSet() ? builder.getBooleanFormat() : null;
         templateExceptionHandler = builder.isTemplateExceptionHandlerSet() ? builder.getTemplateExceptionHandler() : null;
         arithmeticEngine = builder.isArithmeticEngineSet() ? builder.getArithmeticEngine() : null;
-        objectWrapper = builder.isObjectWrapperSet() ? builder.getObjectWrapper() : null;
         outputEncodingSet = builder.isOutputEncodingSet();
         outputEncoding = outputEncodingSet ? builder.getOutputEncoding() : null;
         urlEscapingCharsetSet = builder.isURLEscapingCharsetSet();
@@ -434,19 +431,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     }
 
     @Override
-    public ObjectWrapper getObjectWrapper() {
-        if (!isObjectWrapperSet()) {
-            throw new CoreSettingValueNotSetException("objectWrapper");
-        }
-        return objectWrapper;
-    }
-
-    @Override
-    public boolean isObjectWrapperSet() {
-        return objectWrapper != null;
-    }
-
-    @Override
     public Charset getOutputEncoding() {
         if (!isOutputEncodingSet()) {
             throw new CoreSettingValueNotSetException("");
@@ -712,11 +696,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         }
 
         @Override
-        protected ObjectWrapper getDefaultObjectWrapper() {
-            throw new CoreSettingValueNotSetException("objectWrapper");
-        }
-
-        @Override
         protected Charset getDefaultOutputEncoding() {
             throw new CoreSettingValueNotSetException("outputEncoding");
         }
@@ -841,9 +820,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
             }
             if (tc.isNumberFormatSet()) {
                 setNumberFormat(tc.getNumberFormat());
-            }
-            if (tc.isObjectWrapperSet()) {
-                setObjectWrapper(tc.getObjectWrapper());
             }
             if (tc.isOutputEncodingSet()) {
                 setOutputEncoding(tc.getOutputEncoding());

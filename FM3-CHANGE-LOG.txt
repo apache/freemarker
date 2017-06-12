@@ -131,8 +131,9 @@ the FreeMarer 3 changelog here:
 - Java methods (when using DefaultObjectWrapper) won't be accessible as sequences anyore. That is, earlier, instead of
   obj.m(1), you could write obj.m[1]. This strange feature has led to some tricky cases, while almost nobody has
   utilized it.
-- SimpleObjectWrapper was renamed to RestrictedObjectWrapper, also the "simple" setting value was rename to
-  "restricted".
+- SimpleObjectWrapper was renamed to RestrictedObjectWrapper. When configuring with properties, the `simple` setting
+  value for the `objectWrapper` (`object_wrapper`) setting is not supported anymore, instead `RestrictedObjectWrapper(3.0.0)`
+  can be written.
 - Removed the global static final ObjectWrapper-s. It had a "few" consequences:
   - Standard TemplateModel implementations that can have an ObjectWrapper contrucor parameter don't allow null there anymore.
     Also, any constructor overloads where you cold omit the ObjectWrapper were removed (these were deprecated in FM2 too).

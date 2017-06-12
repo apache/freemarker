@@ -169,7 +169,7 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
                 MutableProcessingConfiguration.BOOLEAN_FORMAT_KEY,
                 MutableProcessingConfiguration.LOCALE_KEY,
                 MutableProcessingConfiguration.NUMBER_FORMAT_KEY,
-                MutableProcessingConfiguration.OBJECT_WRAPPER_KEY,
+                Configuration.Builder.OBJECT_WRAPPER_KEY,
                 MutableProcessingConfiguration.TEMPLATE_EXCEPTION_HANDLER_KEY);
 
         final ProcessingConfiguration ProcessingConfiguration;

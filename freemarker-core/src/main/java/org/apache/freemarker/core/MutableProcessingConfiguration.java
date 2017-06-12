@@ -158,14 +158,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     public static final String ARITHMETIC_ENGINE_KEY_CAMEL_CASE = "arithmeticEngine";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String ARITHMETIC_ENGINE_KEY = ARITHMETIC_ENGINE_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String OBJECT_WRAPPER_KEY_SNAKE_CASE = "object_wrapper";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String OBJECT_WRAPPER_KEY_CAMEL_CASE = "objectWrapper";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String OBJECT_WRAPPER_KEY = OBJECT_WRAPPER_KEY_SNAKE_CASE;
-    
+
     /** Legacy, snake case ({@code like_this}) variation of the setting name. */
     public static final String BOOLEAN_FORMAT_KEY_SNAKE_CASE = "boolean_format";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. */
@@ -268,7 +261,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE,
         NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE,
         NUMBER_FORMAT_KEY_SNAKE_CASE,
-        OBJECT_WRAPPER_KEY_SNAKE_CASE,
         OUTPUT_ENCODING_KEY_SNAKE_CASE,
         SHOW_ERROR_TIPS_KEY_SNAKE_CASE,
         SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE,
@@ -296,7 +288,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE,
         NEW_BUILTIN_CLASS_RESOLVER_KEY_CAMEL_CASE,
         NUMBER_FORMAT_KEY_CAMEL_CASE,
-        OBJECT_WRAPPER_KEY_CAMEL_CASE,
         OUTPUT_ENCODING_KEY_CAMEL_CASE,
         SHOW_ERROR_TIPS_KEY_CAMEL_CASE,
         SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE,
@@ -317,7 +308,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     private String booleanFormat;
     private TemplateExceptionHandler templateExceptionHandler;
     private ArithmeticEngine arithmeticEngine;
-    private ObjectWrapper objectWrapper;
     private Charset outputEncoding;
     private boolean outputEncodingSet;
     private Charset urlEscapingCharset;
@@ -940,47 +930,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Setter pair of {@link #getObjectWrapper()}
-     */
-    public void setObjectWrapper(ObjectWrapper objectWrapper) {
-        _NullArgumentException.check("objectWrapper", objectWrapper);
-        this.objectWrapper = objectWrapper;
-    }
-
-    /**
-     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
-     * {@link ProcessingConfiguration}).
-     */
-    public void unsetObjectWrapper() {
-        objectWrapper = null;
-    }
-
-    /**
-     * Fluent API equivalent of {@link #setObjectWrapper(ObjectWrapper)}
-     */
-    public SelfT objectWrapper(ObjectWrapper value) {
-        setObjectWrapper(value);
-        return self();
-    }
-
-    @Override
-    public ObjectWrapper getObjectWrapper() {
-         return isObjectWrapperSet()
-                ? objectWrapper : getDefaultObjectWrapper();
-    }
-
-    /**
-     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
-     */
-    protected abstract ObjectWrapper getDefaultObjectWrapper();
-
-    @Override
-    public boolean isObjectWrapperSet() {
-        return objectWrapper != null;
-    }
-
-    /**
      * The setter pair of {@link #getOutputEncoding()}
      */
     public void setOutputEncoding(Charset outputEncoding) {
@@ -1476,7 +1425,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     /**
      * Sets a FreeMarker setting by a name and string value. If you can configure FreeMarker directly with Java (or
      * other programming language), you should use the dedicated setter methods instead (like
-     * {@link #setObjectWrapper(ObjectWrapper)}. This meant to be used only when you get settings from somewhere
+     * {@link #setTimeZone(TimeZone)}. This meant to be used only when you get settings from somewhere
      * as {@link String}-{@link String} name-value pairs (typically, as a {@link Properties} object). Below you find an
      * overview of the settings available.
      * 
@@ -1521,15 +1470,14 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       {@code "bigdecimal"}, {@code "conservative"}.
      *       
      *   <li><p>{@code "object_wrapper"}:
-     *       See {@link #setObjectWrapper(ObjectWrapper)}.
+     *       See {@link Configuration.Builder#setObjectWrapper(ObjectWrapper)}.
      *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
      *       expression</a>, with the addition that {@link DefaultObjectWrapper}, {@link DefaultObjectWrapper} and
      *       {@link RestrictedObjectWrapper} can be referred without package name. For example, these strings are valid
-     *       values: {@code "DefaultObjectWrapper(3.0.0)"},
-     *       {@code "DefaultObjectWrapper(2.3.21, simpleMapWrapper=true)"}.
-     *       <br>If the value does not contain dot, then it must be one of these special values (case insensitive):
-     *       {@code "default"} means the default of {@link Configuration},
-     *       {@code "restricted"} means the a {@link RestrictedObjectWrapper} instance.
+     *       values: {@code "DefaultObjectWrapper(3.0.0)"}, {@code "RestrictedObjectWrapper(3.0.0)"}.
+     *       {@code "com.example.MyObjectWrapper(1, 2, someProperty=true, otherProperty=false)"}.
+     *       <br>It also accepts the special value (case insensitive) {@code "default"}.
+     *       <br>It also accepts the special value (case insensitive) {@code "default"}.
      *
      *   <li><p>{@code "number_format"}: See {@link #setNumberFormat(String)}.
      *   
@@ -1935,21 +1883,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                 } else {
                     setArithmeticEngine((ArithmeticEngine) _ObjectBuilderSettingEvaluator.eval(
                             value, ArithmeticEngine.class, false, _SettingEvaluationEnvironment.getCurrent()));
-                }
-            } else if (OBJECT_WRAPPER_KEY_SNAKE_CASE.equals(name) || OBJECT_WRAPPER_KEY_CAMEL_CASE.equals(name)) {
-                if (DEFAULT_VALUE.equalsIgnoreCase(value)) {
-                    if (this instanceof Configuration.ExtendableBuilder) {
-                        this.unsetObjectWrapper();
-                    } else {
-                        // FM3 TODO should depend on IcI
-                        setObjectWrapper(new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
-                    }
-                } else if ("restricted".equalsIgnoreCase(value)) {
-                    // FM3 TODO should depend on IcI
-                    setObjectWrapper(new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
-                } else {
-                    setObjectWrapper((ObjectWrapper) _ObjectBuilderSettingEvaluator.eval(
-                                    value, ObjectWrapper.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (BOOLEAN_FORMAT_KEY_SNAKE_CASE.equals(name) || BOOLEAN_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                 setBooleanFormat(value);

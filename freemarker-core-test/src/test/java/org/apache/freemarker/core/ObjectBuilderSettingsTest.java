@@ -360,7 +360,7 @@ public class ObjectBuilderSettingsTest {
         
         {
             Properties props = new Properties();
-            props.setProperty(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY,
+            props.setProperty(Configuration.ExtendableBuilder.OBJECT_WRAPPER_KEY,
                     "org.apache.freemarker.core.model.impl.DefaultObjectWrapper(3.0.0)");
             props.setProperty(MutableProcessingConfiguration.ARITHMETIC_ENGINE_KEY,
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyArithmeticEngine");
@@ -387,7 +387,7 @@ public class ObjectBuilderSettingsTest {
         
         {
             Properties props = new Properties();
-            props.setProperty(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY, "defAult");
+            props.setProperty(Configuration.ExtendableBuilder.OBJECT_WRAPPER_KEY, "defAult");
             props.setProperty(MutableProcessingConfiguration.ARITHMETIC_ENGINE_KEY,
                     "org.apache.freemarker.core.ObjectBuilderSettingsTest$DummyArithmeticEngine(x = 1)");
             props.setProperty(MutableProcessingConfiguration.TEMPLATE_EXCEPTION_HANDLER_KEY,
@@ -409,7 +409,7 @@ public class ObjectBuilderSettingsTest {
 
         {
             Properties props = new Properties();
-            props.setProperty(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY, "Default");
+            props.setProperty(Configuration.ExtendableBuilder.OBJECT_WRAPPER_KEY, "Default");
             props.setProperty(MutableProcessingConfiguration.ARITHMETIC_ENGINE_KEY, "bigdecimal");
             props.setProperty(MutableProcessingConfiguration.TEMPLATE_EXCEPTION_HANDLER_KEY, "rethrow");
             cfgB.setSettings(props);
@@ -422,7 +422,7 @@ public class ObjectBuilderSettingsTest {
         
         {
             Properties props = new Properties();
-            props.setProperty(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY, "DefaultObjectWrapper(3.0.0)");
+            props.setProperty(Configuration.ExtendableBuilder.OBJECT_WRAPPER_KEY, "DefaultObjectWrapper(3.0.0)");
             cfgB.setSettings(props);
             assertEquals(DefaultObjectWrapper.class, cfgB.getObjectWrapper().getClass());
             assertEquals(

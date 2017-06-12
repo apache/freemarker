@@ -32,9 +32,6 @@ import java.util.TimeZone;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine;
-import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
@@ -443,20 +440,6 @@ public interface ProcessingConfiguration {
      * an {@link CoreSettingValueNotSetException}.
      */
     boolean isArithmeticEngineSet();
-
-    /**
-     * The object wrapper used to wrap objects to {@link TemplateModel}-s.
-     * Its {@link Configuration}-level default is a {@link DefaultObjectWrapper} with all its setting on default
-     * values, and {@code incompatibleImprovements} set to {@link Configuration#getIncompatibleImprovements()}.
-     */
-    ObjectWrapper getObjectWrapper();
-
-    /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link CoreSettingValueNotSetException}.
-     */
-    boolean isObjectWrapperSet();
 
     /**
      * Informs FreeMarker about the charset used for the output. As FreeMarker outputs character stream (not

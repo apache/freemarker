@@ -921,11 +921,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     @Override
-    protected ObjectWrapper getDefaultObjectWrapper() {
-        return getMainTemplate().getObjectWrapper();
-    }
-
-    @Override
     public void setLocale(Locale locale) {
         Locale prevLocale = getLocale();
         super.setLocale(locale);
@@ -2898,6 +2893,13 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             customStateMap.put(customStateKey, customState);
         }
         return customState;
+    }
+
+    /**
+     * Convenience method that simply delegates to {@link Configuration#getObjectWrapper()}.
+     */
+    public ObjectWrapper getObjectWrapper() {
+        return getConfiguration().getObjectWrapper();
     }
 
     final class NestedElementTemplateDirectiveBody implements TemplateDirectiveBody {

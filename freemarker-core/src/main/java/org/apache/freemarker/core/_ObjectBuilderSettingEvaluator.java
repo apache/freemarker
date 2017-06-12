@@ -658,7 +658,6 @@ public class _ObjectBuilderSettingEvaluator {
             SHORTHANDS = new HashMap/*<String,String>*/();
             
             addWithSimpleName(SHORTHANDS, DefaultObjectWrapper.class);
-            addWithSimpleName(SHORTHANDS, DefaultObjectWrapper.class);
             addWithSimpleName(SHORTHANDS, RestrictedObjectWrapper.class);
 
             addWithSimpleName(SHORTHANDS, TemplateConfiguration.class);

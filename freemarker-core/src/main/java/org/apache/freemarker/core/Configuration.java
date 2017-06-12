@@ -50,6 +50,7 @@ import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
+import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.UnregisteredOutputFormatException;
@@ -149,6 +150,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             // Must be sorted alphabetically!
             ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE,
             ExtendableBuilder.LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE,
+            ExtendableBuilder.OBJECT_WRAPPER_KEY_SNAKE_CASE,
             ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE,
             ExtendableBuilder.SHARED_VARIABLES_KEY_SNAKE_CASE,
             ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY_SNAKE_CASE,
@@ -163,6 +165,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             // Must be sorted alphabetically!
             ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE,
             ExtendableBuilder.LOCALIZED_TEMPLATE_LOOKUP_KEY_CAMEL_CASE,
+            ExtendableBuilder.OBJECT_WRAPPER_KEY_CAMEL_CASE,
             ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE,
             ExtendableBuilder.SHARED_VARIABLES_KEY_CAMEL_CASE,
             ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY_CAMEL_CASE,
@@ -378,7 +381,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     new ArrayList<> (regCustOutputFormats));
         }
 
-        ObjectWrapper objectWrapper = builder.getObjectWrapper();
+        this.objectWrapper = builder.getObjectWrapper();
 
         {
             Map<String, Object> sharedVariables = _CollectionUtil.mergeImmutableMaps(builder
@@ -386,7 +389,16 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
             HashMap<String, TemplateModel> wrappedSharedVariables = new HashMap<>(
                     sharedVariables.size() * 4 / 3 + 1, 0.75f);
-            wrapAndPutSharedVariables(wrappedSharedVariables, sharedVariables, objectWrapper);
+            for (Entry<String, Object> ent : sharedVariables.entrySet()) {
+                try {
+                    wrappedSharedVariables.put(ent.getKey(), objectWrapper.wrap(ent.getValue()));
+                } catch (TemplateModelException e) {
+                    throw new InvalidSettingValueException(
+                            ExtendableBuilder.SHARED_VARIABLES_KEY, null, false,
+                            "Failed to wrap shared variable " + _StringUtil.jQuote(ent.getKey()),
+                            e);
+                }
+            }
 
             this.wrappedSharedVariables = wrappedSharedVariables;
             this.sharedVariables = Collections.unmodifiableMap(sharedVariables);
@@ -416,7 +428,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         booleanFormat = builder.getBooleanFormat();
         templateExceptionHandler = builder.getTemplateExceptionHandler();
         arithmeticEngine = builder.getArithmeticEngine();
-        this.objectWrapper = objectWrapper;
         outputEncoding = builder.getOutputEncoding();
         urlEscapingCharset = builder.getURLEscapingCharset();
         autoFlush = builder.getAutoFlush();
@@ -505,25 +516,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     + templateResolver.getClass().getName() + ", which doesn't support this setting, hence it "
                     + "mustn't be set or must be set to null.",
                     null);
-        }
-    }
-
-    private <SelfT extends ExtendableBuilder<SelfT>> void wrapAndPutSharedVariables(
-            HashMap<String, TemplateModel> wrappedSharedVariables, Map<String, Object> rawSharedVariables,
-            ObjectWrapper objectWrapper) throws InvalidSettingValueException {
-        if (rawSharedVariables.isEmpty()) {
-            return;
-        }
-
-        for (Entry<String, Object> ent : rawSharedVariables.entrySet()) {
-            try {
-                wrappedSharedVariables.put(ent.getKey(), objectWrapper.wrap(ent.getValue()));
-            } catch (TemplateModelException e) {
-                throw new InvalidSettingValueException(
-                        ExtendableBuilder.SHARED_VARIABLES_KEY, null, false,
-                        "Failed to wrap shared variable " + _StringUtil.jQuote(ent.getKey()),
-                        e);
-            }
         }
     }
 
@@ -1704,6 +1696,13 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         public static final String TEMPLATE_CONFIGURATIONS_KEY_CAMEL_CASE = "templateConfigurations";
 
         /** Legacy, snake case ({@code like_this}) variation of the setting name. */
+        public static final String OBJECT_WRAPPER_KEY_SNAKE_CASE = "object_wrapper";
+        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
+        public static final String OBJECT_WRAPPER_KEY_CAMEL_CASE = "objectWrapper";
+        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+        public static final String OBJECT_WRAPPER_KEY = OBJECT_WRAPPER_KEY_SNAKE_CASE;
+
+        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
         public static final String INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE = "incompatible_improvements";
         /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
         public static final String INCOMPATIBLE_IMPROVEMENTS_KEY = INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE;
@@ -1731,6 +1730,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         private boolean localizedTemplateLookupSet;
         private Collection<OutputFormat> registeredCustomOutputFormats;
         private Map<String, Object> sharedVariables;
+        private ObjectWrapper objectWrapper;
 
         private boolean alreadyBuilt;
 
@@ -1902,6 +1902,17 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     } else {
                         setTemplateConfigurations((TemplateConfigurationFactory) _ObjectBuilderSettingEvaluator.eval(
                                 value, TemplateConfigurationFactory.class, false, _SettingEvaluationEnvironment.getCurrent()));
+                    }
+                } else if (OBJECT_WRAPPER_KEY_SNAKE_CASE.equals(name)
+                        || OBJECT_WRAPPER_KEY_CAMEL_CASE.equals(name)) {
+                    if (DEFAULT_VALUE.equalsIgnoreCase(value)) {
+                        this.unsetObjectWrapper();
+                    } else if ("restricted".equalsIgnoreCase(value)) {
+                        // FM3 TODO should depend on IcI, but maybe the simplest is to remove this convenience value
+                        setObjectWrapper(new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
+                    } else {
+                        setObjectWrapper((ObjectWrapper) _ObjectBuilderSettingEvaluator.eval(
+                                value, ObjectWrapper.class, false, _SettingEvaluationEnvironment.getCurrent()));
                     }
                 } else {
                     nameUnhandled = true;
@@ -2686,7 +2697,36 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
         private DefaultObjectWrapper cachedDefaultObjectWrapper;
 
+        /**
+         * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+         * {@link ProcessingConfiguration}).
+         */
+        public void unsetObjectWrapper() {
+            objectWrapper = null;
+        }
+
+        /**
+         * Fluent API equivalent of {@link #setObjectWrapper(ObjectWrapper)}
+         */
+        public SelfT objectWrapper(ObjectWrapper value) {
+            setObjectWrapper(value);
+            return self();
+        }
+
         @Override
+        public ObjectWrapper getObjectWrapper() {
+            return isObjectWrapperSet() ? objectWrapper : getDefaultObjectWrapper();
+        }
+
+        @Override
+        public boolean isObjectWrapperSet() {
+            return objectWrapper != null;
+        }
+
+        /**
+         * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+         * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
+         */
         protected ObjectWrapper getDefaultObjectWrapper() {
             if (cachedDefaultObjectWrapper == null) {
                 // Note: This field is cleared by onIncompatibleImprovementsChanged
@@ -2696,9 +2736,9 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             return cachedDefaultObjectWrapper;
         }
 
-        @Override
         public void setObjectWrapper(ObjectWrapper objectWrapper) {
-            super.setObjectWrapper(objectWrapper);
+            _NullArgumentException.check("objectWrapper", objectWrapper);
+            this.objectWrapper = objectWrapper;
             if (objectWrapper != cachedDefaultObjectWrapper) {
                 // Just to make it GC-able
                 cachedDefaultObjectWrapper = null;

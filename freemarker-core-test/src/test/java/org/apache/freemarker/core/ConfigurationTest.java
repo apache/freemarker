@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core;
 
+import static org.apache.freemarker.core.Configuration.*;
+import static org.apache.freemarker.core.Configuration.ExtendableBuilder.*;
 import static org.apache.freemarker.test.hamcerst.Matchers.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -93,7 +95,7 @@ public class ConfigurationTest {
 
     @Test
     public void testUnsetAndIsSet() throws Exception {
-        Configuration.ExtendableBuilder<?> cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
+        Configuration.ExtendableBuilder<?> cfgB = new Builder(VERSION_3_0_0);
         
         assertFalse(cfgB.isLogTemplateExceptionsSet());
         assertFalse(cfgB.getLogTemplateExceptions());
@@ -110,11 +112,11 @@ public class ConfigurationTest {
             assertFalse(cfgB.getLogTemplateExceptions());
         }
 
-        DefaultObjectWrapper dow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
+        DefaultObjectWrapper dow = new DefaultObjectWrapper.Builder(VERSION_3_0_0).build();
         assertFalse(cfgB.isObjectWrapperSet());
         assertSame(dow, cfgB.getObjectWrapper());
         //
-        RestrictedObjectWrapper ow = new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
+        RestrictedObjectWrapper ow = new RestrictedObjectWrapper.Builder(VERSION_3_0_0).build();
         cfgB.setObjectWrapper(ow);
         assertTrue(cfgB.isObjectWrapperSet());
         assertSame(ow, cfgB.getObjectWrapper());
@@ -197,7 +199,7 @@ public class ConfigurationTest {
 
     @Test
     public void testTemplateLoadingErrors() throws Exception {
-        Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
+        Configuration cfg = new Builder(VERSION_3_0_0)
                 .templateLoader(new ClassTemplateLoader(getClass(), "nosuchpackage"))
                 .build();
         try {
@@ -210,17 +212,17 @@ public class ConfigurationTest {
 
     @Test
     public void testVersion() {
-        Version v = Configuration.getVersion();
+        Version v = getVersion();
         assertTrue(v.intValue() >= _CoreAPI.VERSION_INT_3_0_0);
         
         try {
-            new Configuration.Builder(new Version(999, 1, 2));
+            new Builder(new Version(999, 1, 2));
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("upgrade"));
         }
         
         try {
-            new Configuration.Builder(new Version(2, 3, 0));
+            new Builder(new Version(2, 3, 0));
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("3.0.0"));
         }
@@ -229,7 +231,7 @@ public class ConfigurationTest {
     @Test
     public void testShowErrorTips() throws Exception {
         try {
-            Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0).build();
+            Configuration cfg = new Builder(VERSION_3_0_0).build();
             new Template(null, "${x}", cfg).process(null, _NullWriter.INSTANCE);
             fail();
         } catch (TemplateException e) {
@@ -237,7 +239,7 @@ public class ConfigurationTest {
         }
 
         try {
-            Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0).showErrorTips(false).build();
+            Configuration cfg = new Builder(VERSION_3_0_0).showErrorTips(false).build();
             new Template(null, "${x}", cfg).process(null, _NullWriter.INSTANCE);
             fail();
         } catch (TemplateException e) {
@@ -261,7 +263,7 @@ public class ConfigurationTest {
         tl.putTemplate(tHuFtl, "${1}".getBytes(StandardCharsets.UTF_8));
         tl.putTemplate(tUtf8Ftl, "<#ftl encoding='utf-8'>".getBytes(StandardCharsets.UTF_8));
 
-        Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
+        Configuration cfg = new Builder(VERSION_3_0_0)
                 .locale(Locale.GERMAN)
                 .sourceEncoding(StandardCharsets.ISO_8859_1)
                 .templateLoader(tl)
@@ -376,7 +378,7 @@ public class ConfigurationTest {
 
     @Test
     public void testTemplateResolverCache() throws Exception {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
+        Builder cfgB = new Builder(VERSION_3_0_0);
         
         CacheStorageWithGetSize cache = (CacheStorageWithGetSize) cfgB.getTemplateCacheStorage();
         assertEquals(0, cache.getSize());
@@ -405,7 +407,7 @@ public class ConfigurationTest {
         tl.putTemplate("b.ftl", "In b.ftl");
 
         {
-            Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
+            Configuration cfg = new Builder(VERSION_3_0_0)
                     .templateLoader(tl)
                     .templateNameFormat(DefaultTemplateNameFormatFM2.INSTANCE)
                     .build();
@@ -416,7 +418,7 @@ public class ConfigurationTest {
         }
         
         {
-            Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
+            Configuration cfg = new Builder(VERSION_3_0_0)
                     .templateLoader(tl)
                     .templateNameFormat(DefaultTemplateNameFormat.INSTANCE)
                     .build();
@@ -429,36 +431,36 @@ public class ConfigurationTest {
 
     @Test
     public void testTemplateNameFormatSetSetting() throws Exception {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
+        Builder cfgB = new Builder(VERSION_3_0_0);
         assertSame(DefaultTemplateNameFormatFM2.INSTANCE, cfgB.getTemplateNameFormat());
-        cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_NAME_FORMAT_KEY, "defAult_2_4_0");
+        cfgB.setSetting(TEMPLATE_NAME_FORMAT_KEY, "defAult_2_4_0");
         assertSame(DefaultTemplateNameFormat.INSTANCE, cfgB.getTemplateNameFormat());
-        cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_NAME_FORMAT_KEY, "defaUlt_2_3_0");
+        cfgB.setSetting(TEMPLATE_NAME_FORMAT_KEY, "defaUlt_2_3_0");
         assertSame(DefaultTemplateNameFormatFM2.INSTANCE, cfgB.getTemplateNameFormat());
         assertTrue(cfgB.isTemplateNameFormatSet());
-        cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_NAME_FORMAT_KEY, "defauLt");
+        cfgB.setSetting(TEMPLATE_NAME_FORMAT_KEY, "defauLt");
         assertFalse(cfgB.isTemplateNameFormatSet());
     }
 
     @Test
     public void testObjectWrapperSetSetting() throws Exception {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
+        Builder cfgB = new Builder(VERSION_3_0_0);
         {
-            cfgB.setSetting(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY, "defAult");
-            DefaultObjectWrapper dow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
+            cfgB.setSetting(OBJECT_WRAPPER_KEY, "defAult");
+            DefaultObjectWrapper dow = new DefaultObjectWrapper.Builder(VERSION_3_0_0).build();
             assertSame(dow, cfgB.getObjectWrapper());
-            assertEquals(Configuration.VERSION_3_0_0, dow.getIncompatibleImprovements());
+            assertEquals(VERSION_3_0_0, dow.getIncompatibleImprovements());
         }
         
         {
-            cfgB.setSetting(MutableProcessingConfiguration.OBJECT_WRAPPER_KEY, "restricted");
+            cfgB.setSetting(OBJECT_WRAPPER_KEY, "restricted");
             assertThat(cfgB.getObjectWrapper(), instanceOf(RestrictedObjectWrapper.class));
         }
     }
 
     @Test
     public void testTemplateLookupStrategyDefault() throws Exception {
-        Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
+        Configuration cfg = new Builder(VERSION_3_0_0)
                 .templateLoader(new ClassTemplateLoader(ConfigurationTest.class, ""))
                 .build();
         assertSame(DefaultTemplateLookupStrategy.INSTANCE, cfg.getTemplateLookupStrategy());
@@ -474,7 +476,7 @@ public class ConfigurationTest {
             }
         };
 
-        Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
+        Configuration cfg = new Builder(VERSION_3_0_0)
                 .templateLoader(new ClassTemplateLoader(ConfigurationTest.class, ""))
                 .templateLookupStrategy(myStrategy)
                 .build();
@@ -484,7 +486,7 @@ public class ConfigurationTest {
 
     @Test
     public void testSetTemplateConfigurations() throws Exception {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
+        Builder cfgB = new Builder(VERSION_3_0_0);
         assertNull(cfgB.getTemplateConfigurations());
 
         StringTemplateLoader tl = new StringTemplateLoader();
@@ -496,7 +498,7 @@ public class ConfigurationTest {
         
         cfgB.setTimeZone(TimeZone.getTimeZone("GMT+09"));
         
-        cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_CONFIGURATIONS_KEY,
+        cfgB.setSetting(TEMPLATE_CONFIGURATIONS_KEY,
                 "MergingTemplateConfigurationFactory("
                     + "FirstMatchTemplateConfigurationFactory("
                         + "ConditionalTemplateConfigurationFactory("
@@ -541,13 +543,13 @@ public class ConfigurationTest {
         }
         
         assertNotNull(cfgB.getTemplateConfigurations());
-        cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_CONFIGURATIONS_KEY, "null");
+        cfgB.setSetting(TEMPLATE_CONFIGURATIONS_KEY, "null");
         assertNull(cfgB.getTemplateConfigurations());
     }
 
     @Test
     public void testGetOutputFormatByName() throws Exception {
-        Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0).build();
+        Configuration cfg = new Builder(VERSION_3_0_0).build();
         
         assertSame(HTMLOutputFormat.INSTANCE, cfg.getOutputFormat(HTMLOutputFormat.INSTANCE.getName()));
         
@@ -601,11 +603,11 @@ public class ConfigurationTest {
 
     @Test
     public void testSetRegisteredCustomOutputFormats() throws Exception {
-        Configuration.Builder cfg = new Configuration.Builder(Configuration.VERSION_3_0_0);
+        Builder cfg = new Builder(VERSION_3_0_0);
         
         assertTrue(cfg.getRegisteredCustomOutputFormats().isEmpty());
         
-        cfg.setSetting(Configuration.ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE,
+        cfg.setSetting(REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE,
                 "[org.apache.freemarker.core.userpkg.CustomHTMLOutputFormat(), "
                 + "org.apache.freemarker.core.userpkg.DummyOutputFormat()]");
         assertEquals(
@@ -613,7 +615,7 @@ public class ConfigurationTest {
                 new ArrayList(cfg.getRegisteredCustomOutputFormats()));
         
         try {
-            cfg.setSetting(Configuration.ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE, "[TemplateConfiguration()]");
+            cfg.setSetting(REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE, "[TemplateConfiguration()]");
             fail();
         } catch (InvalidSettingValueException e) {
             assertThat(e.getMessage(), containsString(OutputFormat.class.getSimpleName()));
@@ -622,16 +624,16 @@ public class ConfigurationTest {
 
     @Test
     public void testSetICIViaSetSettingAPI() throws ConfigurationException {
-        Configuration.Builder cfg = new Configuration.Builder(Configuration.VERSION_3_0_0);
-        assertEquals(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS, cfg.getIncompatibleImprovements());
+        Builder cfg = new Builder(VERSION_3_0_0);
+        assertEquals(DEFAULT_INCOMPATIBLE_IMPROVEMENTS, cfg.getIncompatibleImprovements());
         // This is the only valid value ATM:
-        cfg.setSetting(Configuration.ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY, "3.0.0");
-        assertEquals(Configuration.VERSION_3_0_0, cfg.getIncompatibleImprovements());
+        cfg.setSetting(INCOMPATIBLE_IMPROVEMENTS_KEY, "3.0.0");
+        assertEquals(VERSION_3_0_0, cfg.getIncompatibleImprovements());
     }
 
     @Test
     public void testSharedVariables() throws TemplateException, IOException {
-        Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
+        Configuration cfg = new Builder(VERSION_3_0_0)
                 .sharedVariables(ImmutableMap.of(
                         "a", "aa",
                         "b", "bb",
@@ -663,7 +665,7 @@ public class ConfigurationTest {
 
     @Test
     public void testTemplateUpdateDelay() throws Exception {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
+        Builder cfgB = new Builder(VERSION_3_0_0);
 
         assertEquals(
                 DefaultTemplateResolver.DEFAULT_TEMPLATE_UPDATE_DELAY_MILLIS,
@@ -676,45 +678,45 @@ public class ConfigurationTest {
         assertEquals(100L, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
         
         try {
-            cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "5");
+            cfgB.setSetting(TEMPLATE_UPDATE_DELAY_KEY, "5");
             assertEquals(5000L, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
         } catch (InvalidSettingValueException e) {
             assertThat(e.getMessage(), containsStringIgnoringCase("unit must be specified"));
         }
-        cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "0");
+        cfgB.setSetting(TEMPLATE_UPDATE_DELAY_KEY, "0");
         assertEquals(0L, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
         try {
-            cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "5 foo");
+            cfgB.setSetting(TEMPLATE_UPDATE_DELAY_KEY, "5 foo");
             assertEquals(5000L, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
         } catch (InvalidSettingValueException e) {
             assertThat(e.getMessage(), containsStringIgnoringCase("\"foo\""));
         }
         
-        cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "3 ms");
+        cfgB.setSetting(TEMPLATE_UPDATE_DELAY_KEY, "3 ms");
         assertEquals(3L, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
-        cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "4ms");
+        cfgB.setSetting(TEMPLATE_UPDATE_DELAY_KEY, "4ms");
         assertEquals(4L, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
         
-        cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "3 s");
+        cfgB.setSetting(TEMPLATE_UPDATE_DELAY_KEY, "3 s");
         assertEquals(3000L, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
-        cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "4s");
+        cfgB.setSetting(TEMPLATE_UPDATE_DELAY_KEY, "4s");
         assertEquals(4000L, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
         
-        cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "3 m");
+        cfgB.setSetting(TEMPLATE_UPDATE_DELAY_KEY, "3 m");
         assertEquals(1000L * 60 * 3, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
-        cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "4m");
+        cfgB.setSetting(TEMPLATE_UPDATE_DELAY_KEY, "4m");
         assertEquals(1000L * 60 * 4, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
 
-        cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "1 h");
+        cfgB.setSetting(TEMPLATE_UPDATE_DELAY_KEY, "1 h");
         assertEquals(1000L * 60 * 60, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
-        cfgB.setSetting(Configuration.ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "2h");
+        cfgB.setSetting(TEMPLATE_UPDATE_DELAY_KEY, "2h");
         assertEquals(1000L * 60 * 60 * 2, (Object) cfgB.getTemplateUpdateDelayMilliseconds());
     }
 
     @Test
     public void testGetSettingNamesAreSorted() throws Exception {
         for (boolean camelCase : new boolean[] { false, true }) {
-            List<String> names = new ArrayList<>(Configuration.Builder.getSettingNames(camelCase));
+            List<String> names = new ArrayList<>(Builder.getSettingNames(camelCase));
             List<String> inheritedNames = new ArrayList<>(
                     MutableParsingAndProcessingConfiguration.getSettingNames(camelCase));
             assertStartsWith(names, inheritedNames);
@@ -733,13 +735,13 @@ public class ConfigurationTest {
     @Test
     public void testGetSettingNamesNameConventionsContainTheSame() throws Exception {
         MutableProcessingConfigurationTest.testGetSettingNamesNameConventionsContainTheSame(
-                new ArrayList<>(Configuration.Builder.getSettingNames(false)),
-                new ArrayList<>(Configuration.Builder.getSettingNames(true)));
+                new ArrayList<>(Builder.getSettingNames(false)),
+                new ArrayList<>(Builder.getSettingNames(true)));
     }
 
     @Test
     public void testStaticFieldKeysCoverAllGetSettingNames() throws Exception {
-        List<String> names = new ArrayList<>(Configuration.Builder.getSettingNames(false));
+        List<String> names = new ArrayList<>(Builder.getSettingNames(false));
         for (String name :  names) {
             assertTrue("No field was found for " + name, keyFieldExists(name));
         }
@@ -747,7 +749,7 @@ public class ConfigurationTest {
     
     @Test
     public void testGetSettingNamesCoversAllStaticKeyFields() throws Exception {
-        Collection<String> names = Configuration.Builder.getSettingNames(false);
+        Collection<String> names = Builder.getSettingNames(false);
         
         for (Class<?> cfgableClass : new Class[] {
                 Configuration.class,
@@ -764,16 +766,16 @@ public class ConfigurationTest {
     
     @Test
     public void testKeyStaticFieldsHasAllVariationsAndCorrectFormat() throws IllegalArgumentException, IllegalAccessException {
-        MutableProcessingConfigurationTest.testKeyStaticFieldsHasAllVariationsAndCorrectFormat(Configuration.ExtendableBuilder.class);
+        MutableProcessingConfigurationTest.testKeyStaticFieldsHasAllVariationsAndCorrectFormat(ExtendableBuilder.class);
     }
 
     @Test
     public void testSetSettingSupportsBothNamingConventions() throws Exception {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
+        Builder cfgB = new Builder(VERSION_3_0_0);
         
-        cfgB.setSetting(Configuration.ExtendableBuilder.SOURCE_ENCODING_KEY_CAMEL_CASE, StandardCharsets.UTF_16LE.name());
+        cfgB.setSetting(SOURCE_ENCODING_KEY_CAMEL_CASE, StandardCharsets.UTF_16LE.name());
         assertEquals(StandardCharsets.UTF_16LE, cfgB.getSourceEncoding());
-        cfgB.setSetting(Configuration.ExtendableBuilder.SOURCE_ENCODING_KEY_SNAKE_CASE, StandardCharsets.UTF_8.name());
+        cfgB.setSetting(SOURCE_ENCODING_KEY_SNAKE_CASE, StandardCharsets.UTF_8.name());
         assertEquals(StandardCharsets.UTF_8, cfgB.getSourceEncoding());
         
         for (String nameCC : cfgB.getSettingNames(true)) {
@@ -807,7 +809,7 @@ public class ConfigurationTest {
     
     @Test
     public void testGetSupportedBuiltInDirectiveNames() {
-        Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0).build();
+        Configuration cfg = new Builder(VERSION_3_0_0).build();
         
         Set<String> allNames = cfg.getSupportedBuiltInDirectiveNames(NamingConvention.AUTO_DETECT);
         Set<String> lNames = cfg.getSupportedBuiltInDirectiveNames(NamingConvention.LEGACY);
@@ -822,7 +824,7 @@ public class ConfigurationTest {
 
     @Test
     public void testGetSupportedBuiltInNames() {
-        Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0).build();
+        Configuration cfg = new Builder(VERSION_3_0_0).build();
         
         Set<String> allNames = cfg.getSupportedBuiltInNames(NamingConvention.AUTO_DETECT);
         Set<String> lNames = cfg.getSupportedBuiltInNames(NamingConvention.LEGACY);
@@ -847,7 +849,7 @@ public class ConfigurationTest {
     
     @Test
     public void testRemovedSettings() {
-        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
+        Builder cfgB = new Builder(VERSION_3_0_0);
         try {
             cfgB.setSetting("classic_compatible", "true");
             fail();
@@ -864,7 +866,7 @@ public class ConfigurationTest {
 
     @Test
     public void testCanBeBuiltOnlyOnce() {
-        Configuration.Builder builder = new Configuration.Builder(Configuration.VERSION_3_0_0);
+        Builder builder = new Builder(VERSION_3_0_0);
         builder.build();
         try {
             builder.build();
@@ -876,7 +878,7 @@ public class ConfigurationTest {
 
     @Test
     public void testCollectionSettingMutability() throws IOException {
-        Configuration.Builder cb = new Configuration.Builder(Configuration.VERSION_3_0_0);
+        Builder cb = new Builder(VERSION_3_0_0);
 
         assertTrue(_CollectionUtil.isMapKnownToBeUnmodifiable(cb.getSharedVariables()));
         Map<String, Object> mutableValue = new HashMap<>();
@@ -968,7 +970,7 @@ public class ConfigurationTest {
     private boolean keyFieldExists(String name) throws Exception {
         Field field;
         try {
-            field = Configuration.ExtendableBuilder.class.getField(name.toUpperCase() + "_KEY");
+            field = ExtendableBuilder.class.getField(name.toUpperCase() + "_KEY");
         } catch (NoSuchFieldException e) {
             return false;
         }
@@ -989,7 +991,7 @@ public class ConfigurationTest {
             extends Configuration.ExtendableBuilder<ImpliedSettingValuesTestBuilder> {
 
         ImpliedSettingValuesTestBuilder() {
-            super(Configuration.VERSION_3_0_0);
+            super(VERSION_3_0_0);
         }
 
         @Override

@@ -490,7 +490,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     * @param dataModel the holder of the variables visible from all templates; see {@link #process(Object, Writer)} for
     *     more details.
     * @param wrapper The {@link ObjectWrapper} to use to wrap objects into {@link TemplateModel}
-    *     instances. Normally you left it {@code null}, in which case {@link MutableProcessingConfiguration#getObjectWrapper()} will be
+    *     instances. Normally you left it {@code null}, in which case {@link Configuration#getObjectWrapper()} will be
     *     used.
     * @param out The {@link Writer} where the output of the template will go; see {@link #process(Object, Writer)} for
     *     more details.
@@ -508,7 +508,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
             dataModelHash = (TemplateHashModel) dataModel;
         } else {
             if (wrapper == null) {
-                wrapper = getObjectWrapper();
+                wrapper = getConfiguration().getObjectWrapper();
             }
 
             if (dataModel == null) {
@@ -944,16 +944,6 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     @Override
     public boolean isArithmeticEngineSet() {
         return tCfg != null && tCfg.isArithmeticEngineSet();
-    }
-
-    @Override
-    public ObjectWrapper getObjectWrapper() {
-        return tCfg != null && tCfg.isObjectWrapperSet() ? tCfg.getObjectWrapper() : cfg.getObjectWrapper();
-    }
-
-    @Override
-    public boolean isObjectWrapperSet() {
-        return tCfg != null && tCfg.isObjectWrapperSet();
     }
 
     @Override
