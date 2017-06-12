@@ -270,7 +270,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     private final TemplateClassResolver newBuiltinClassResolver;
     private final Boolean showErrorTips;
     private final Boolean apiBuiltinEnabled;
-    private final Boolean logTemplateExceptions;
     private final Map<String, TemplateDateFormatFactory> customDateFormats;
     private final Map<String, TemplateNumberFormatFactory> customNumberFormats;
     private final Map<String, String> autoImports;
@@ -435,7 +434,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         newBuiltinClassResolver = builder.getNewBuiltinClassResolver();
         showErrorTips = builder.getShowErrorTips();
         apiBuiltinEnabled = builder.getAPIBuiltinEnabled();
-        logTemplateExceptions = builder.getLogTemplateExceptions();
         customDateFormats = _CollectionUtil.mergeImmutableMaps(
                 builder.getImpliedCustomDateFormats(), builder.getCustomDateFormats(), false);
         customNumberFormats = _CollectionUtil.mergeImmutableMaps(
@@ -1153,20 +1151,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
      */
     @Override
     public boolean isShowErrorTipsSet() {
-        return true;
-    }
-
-    @Override
-    public boolean getLogTemplateExceptions() {
-        return logTemplateExceptions;
-    }
-
-    /**
-     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
-     * value in the {@link Configuration}.
-     */
-    @Override
-    public boolean isLogTemplateExceptionsSet() {
         return true;
     }
 
@@ -2781,11 +2765,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
         @Override
         protected boolean getDefaultAPIBuiltinEnabled() {
-            return false;
-        }
-
-        @Override
-        protected boolean getDefaultLogTemplateExceptions() {
             return false;
         }
 

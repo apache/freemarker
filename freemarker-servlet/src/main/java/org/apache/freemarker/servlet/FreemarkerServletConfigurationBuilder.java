@@ -49,12 +49,6 @@ public class FreemarkerServletConfigurationBuilder<SelfT extends FreemarkerServl
         return TemplateExceptionHandler.HTML_DEBUG_HANDLER;
     }
 
-    // TODO [FM3] Remove when this will be the ExtendableBuilder default too.
-    @Override
-    protected boolean getDefaultLogTemplateExceptions() {
-        return false;
-    }
-
     @Override
     public void setTemplateLoader(TemplateLoader templateLoader) {
         super.setTemplateLoader(templateLoader);

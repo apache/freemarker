@@ -209,13 +209,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     public static final String API_BUILTIN_ENABLED_KEY = API_BUILTIN_ENABLED_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE = "log_template_exceptions";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE = "logTemplateExceptions";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String LOG_TEMPLATE_EXCEPTIONS_KEY = LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE;
-
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
     public static final String LAZY_IMPORTS_KEY_SNAKE_CASE = "lazy_imports";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. */
     public static final String LAZY_IMPORTS_KEY_CAMEL_CASE = "lazyImports";
@@ -258,7 +251,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE,
         LAZY_IMPORTS_KEY_SNAKE_CASE,
         LOCALE_KEY_SNAKE_CASE,
-        LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE,
         NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE,
         NUMBER_FORMAT_KEY_SNAKE_CASE,
         OUTPUT_ENCODING_KEY_SNAKE_CASE,
@@ -285,7 +277,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         LAZY_AUTO_IMPORTS_KEY_CAMEL_CASE,
         LAZY_IMPORTS_KEY_CAMEL_CASE,
         LOCALE_KEY_CAMEL_CASE,
-        LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE,
         NEW_BUILTIN_CLASS_RESOLVER_KEY_CAMEL_CASE,
         NUMBER_FORMAT_KEY_CAMEL_CASE,
         OUTPUT_ENCODING_KEY_CAMEL_CASE,
@@ -316,7 +307,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     private TemplateClassResolver newBuiltinClassResolver;
     private Boolean showErrorTips;
     private Boolean apiBuiltinEnabled;
-    private Boolean logTemplateExceptions;
     private Map<String, TemplateDateFormatFactory> customDateFormats;
     private Map<String, TemplateNumberFormatFactory> customNumberFormats;
     private Map<String, String> autoImports;
@@ -1172,45 +1162,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     @Override
-    public boolean getLogTemplateExceptions() {
-         return isLogTemplateExceptionsSet() ? logTemplateExceptions : getDefaultLogTemplateExceptions();
-    }
-
-    /**
-     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
-     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
-     */
-    protected abstract boolean getDefaultLogTemplateExceptions();
-
-    @Override
-    public boolean isLogTemplateExceptionsSet() {
-        return logTemplateExceptions != null;
-    }
-
-    /**
-     * Setter pair of {@link #getLogTemplateExceptions()}
-     */
-    public void setLogTemplateExceptions(boolean value) {
-        logTemplateExceptions = value;
-    }
-
-    /**
-     * Fluent API equivalent of {@link #setLogTemplateExceptions(boolean)}
-     */
-    public SelfT logTemplateExceptions(boolean value) {
-        setLogTemplateExceptions(value);
-        return self();
-    }
-
-    /**
-     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
-     * {@link ProcessingConfiguration}).
-     */
-    public void unsetLogTemplateExceptions() {
-        logTemplateExceptions = null;
-    }
-
-    @Override
     public boolean getLazyImports() {
          return isLazyImportsSet() ? lazyImports : getDefaultLazyImports();
     }
@@ -1934,9 +1885,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                             "Not predefined class resolved name, nor follows class resolver definition syntax, nor "
                             + "looks like class name");
                 }
-            } else if (LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE.equals(name)
-                    || LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE.equals(name)) {
-                setLogTemplateExceptions(_StringUtil.getYesNo(value));
             } else if (LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE.equals(name) || LAZY_AUTO_IMPORTS_KEY_CAMEL_CASE.equals(name)) {
                 setLazyAutoImports(value.equals(NULL_VALUE) ? null : Boolean.valueOf(_StringUtil.getYesNo(value)));
             } else if (LAZY_IMPORTS_KEY_SNAKE_CASE.equals(name) || LAZY_IMPORTS_KEY_CAMEL_CASE.equals(name)) {

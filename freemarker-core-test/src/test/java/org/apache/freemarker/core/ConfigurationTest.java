@@ -95,21 +95,23 @@ public class ConfigurationTest {
 
     @Test
     public void testUnsetAndIsSet() throws Exception {
+        // TODO This should automatically test all setting via reflection...
+
         Configuration.ExtendableBuilder<?> cfgB = new Builder(VERSION_3_0_0);
         
-        assertFalse(cfgB.isLogTemplateExceptionsSet());
-        assertFalse(cfgB.getLogTemplateExceptions());
+        assertFalse(cfgB.isAutoEscapingPolicySet());
+        assertEquals(AutoEscapingPolicy.ENABLE_IF_DEFAULT, cfgB.getAutoEscapingPolicy());
         //
-        cfgB.setLogTemplateExceptions(true);
+        cfgB.setAutoEscapingPolicy(AutoEscapingPolicy.DISABLE);
         {
-            assertTrue(cfgB.isLogTemplateExceptionsSet());
-            assertTrue(cfgB.getLogTemplateExceptions());
+            assertTrue(cfgB.isAutoEscapingPolicySet());
+            assertEquals(AutoEscapingPolicy.DISABLE, cfgB.getAutoEscapingPolicy());
         }
         //
         for (int i = 0; i < 2; i++) {
-            cfgB.unsetLogTemplateExceptions();
-            assertFalse(cfgB.isLogTemplateExceptionsSet());
-            assertFalse(cfgB.getLogTemplateExceptions());
+            cfgB.unsetAutoEscapingPolicy();
+            assertFalse(cfgB.isAutoEscapingPolicySet());
+            assertEquals(AutoEscapingPolicy.ENABLE_IF_DEFAULT, cfgB.getAutoEscapingPolicy());
         }
 
         DefaultObjectWrapper dow = new DefaultObjectWrapper.Builder(VERSION_3_0_0).build();

@@ -40,9 +40,8 @@ public interface TemplateExceptionHandler {
      * 
      * <p>Note that {@link StopException}-s (raised by {@code #stop}) won't be captured.
      * 
-     * <p>Note that you shouldn't log the exception in this method unless you suppress it. If there's a concern that the
-     * exception might won't be logged after it bubbles up from {@link Template#process(Object, Writer)}, simply
-     * ensure that {@link Configuration#getLogTemplateExceptions()} is {@code true}. 
+     * <p>Note that you shouldn't log the exception in this method unless you suppress the exception. After
+     * all, eventually the exception is catched somewhere and is (hopefully) logged.
      * 
      * @param te The exception that occurred; don't forget to re-throw it unless you want to suppress it
      * @param env The runtime environment of the template

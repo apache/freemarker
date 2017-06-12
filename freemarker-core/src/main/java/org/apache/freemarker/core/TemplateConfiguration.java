@@ -71,7 +71,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     private final TemplateClassResolver newBuiltinClassResolver;
     private final Boolean showErrorTips;
     private final Boolean apiBuiltinEnabled;
-    private final Boolean logTemplateExceptions;
     private final Map<String, TemplateDateFormatFactory> customDateFormats;
     private final Map<String, TemplateNumberFormatFactory> customNumberFormats;
     private final Map<String, String> autoImports;
@@ -111,7 +110,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         newBuiltinClassResolver = builder.isNewBuiltinClassResolverSet() ? builder.getNewBuiltinClassResolver() : null;
         showErrorTips = builder.isShowErrorTipsSet() ? builder.getShowErrorTips() : null;
         apiBuiltinEnabled = builder.isAPIBuiltinEnabledSet() ? builder.getAPIBuiltinEnabled() : null;
-        logTemplateExceptions = builder.isLogTemplateExceptionsSet() ? builder.getLogTemplateExceptions() : null;
         customDateFormats = builder.isCustomDateFormatsSet() ? builder.getCustomDateFormats() : null;
         customNumberFormats = builder.isCustomNumberFormatsSet() ? builder.getCustomNumberFormats() : null;
         autoImports = builder.isAutoImportsSet() ? builder.getAutoImports() : null;
@@ -509,19 +507,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     }
 
     @Override
-    public boolean getLogTemplateExceptions() {
-        if (!isLogTemplateExceptionsSet()) {
-            throw new CoreSettingValueNotSetException("logTemplateExceptions");
-        }
-        return logTemplateExceptions;
-    }
-
-    @Override
-    public boolean isLogTemplateExceptionsSet() {
-        return logTemplateExceptions != null;
-    }
-
-    @Override
     public boolean getLazyImports() {
         if (!isLazyImportsSet()) {
             throw new CoreSettingValueNotSetException("lazyImports");
@@ -726,11 +711,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         }
 
         @Override
-        protected boolean getDefaultLogTemplateExceptions() {
-            throw new CoreSettingValueNotSetException("logTemplateExceptions");
-        }
-
-        @Override
         protected boolean getDefaultLazyImports() {
             throw new CoreSettingValueNotSetException("lazyImports");
         }
@@ -808,9 +788,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
             }
             if (tc.isLocaleSet()) {
                 setLocale(tc.getLocale());
-            }
-            if (tc.isLogTemplateExceptionsSet()) {
-                setLogTemplateExceptions(tc.getLogTemplateExceptions());
             }
             if (tc.isNamingConventionSet()) {
                 setNamingConvention(tc.getNamingConvention());

@@ -376,14 +376,6 @@ public class MutableProcessingConfigurationTest {
     }
 
     @Test
-    public void testSetLogTemplateExceptionsViaSetSettingAPI() throws ConfigurationException {
-        Configuration.Builder cfg = new Configuration.Builder(Configuration.VERSION_3_0_0);
-        assertFalse(cfg.getLogTemplateExceptions());
-        cfg.setSetting(MutableProcessingConfiguration.LOG_TEMPLATE_EXCEPTIONS_KEY, "true");
-        assertTrue(cfg.getLogTemplateExceptions());
-    }
-
-    @Test
     public void testApiBuiltinEnabled() throws Exception {
         try {
             new Template(

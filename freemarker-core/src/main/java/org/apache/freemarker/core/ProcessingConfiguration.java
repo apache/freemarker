@@ -533,24 +533,6 @@ public interface ProcessingConfiguration {
     boolean isShowErrorTipsSet();
 
     /**
-     * Specifies if {@link TemplateException}-s thrown by template processing are logged by FreeMarker or not. The
-     * default is {@code true} for backward compatibility, but that results in logging the exception twice in properly
-     * written applications, because there the {@link TemplateException} thrown by the public FreeMarker API is also
-     * logged by the caller (even if only as the cause exception of a higher level exception). Hence, in modern
-     * applications it should be set to {@code false}. Note that this setting has no effect on the logging of exceptions
-     * caught by {@code #attempt}; those are always logged, no mater what (because those exceptions won't bubble up
-     * until the API caller).
-     */
-    boolean getLogTemplateExceptions();
-
-    /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
-     * an {@link CoreSettingValueNotSetException}.
-     */
-    boolean isLogTemplateExceptionsSet();
-
-    /**
      * Specifies if {@code <#import ...>} (and {@link Environment#importLib(String, String)}) should delay the loading
      * and processing of the imported templates until the content of the imported namespace is actually accessed. This
      * makes the overhead of <em>unused</em> imports negligible. A drawback is that importing a missing or otherwise

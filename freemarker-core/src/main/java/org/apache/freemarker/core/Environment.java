@@ -888,14 +888,13 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         }
         lastThrowable = templateException;
 
-        // Log the exception, if logTemplateExceptions isn't false. However, even if it's false, if we are inside
-        // an #attempt block, it has to be logged, as it certainly won't bubble up to the caller of FreeMarker.
-        if (LOG.isErrorEnabled() && (isInAttemptBlock() || getLogTemplateExceptions())) {
+        // Log the exception if we are inside an #attempt block; it has to be logged, as it certainly won't bubble up
+        // to the caller of FreeMarker.
+        if (LOG.isErrorEnabled() && isInAttemptBlock()) {
             LOG.error("Error executing FreeMarker template", templateException);
         }
 
-        // Stop exception is not passed to the handler, but
-        // explicitly rethrown.
+        // Stop exception is not passed to the handler, but explicitly rethrown.
         if (templateException instanceof StopException) {
             throw templateException;
         }
@@ -1057,11 +1056,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     @Override
     protected boolean getDefaultAPIBuiltinEnabled() {
         return getMainTemplate().getAPIBuiltinEnabled();
-    }
-
-    @Override
-    protected boolean getDefaultLogTemplateExceptions() {
-        return getMainTemplate().getLogTemplateExceptions();
     }
 
     @Override

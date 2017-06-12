@@ -267,3 +267,6 @@ the FreeMarer 3 changelog here:
     like applications could break when moved to another server if the application
     was unwillingly relying on the default.
   - Changed the default of logTemplateExceptions to false.
+- Removed the logTemplateExceptions (log_template_exceptions) setting. FreeMarker now
+  behaves as if it was false. When a FreeMarker method throws an exception, the
+  caller is responsible for either logging it or letting it bubble up.

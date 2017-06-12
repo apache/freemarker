@@ -385,9 +385,7 @@ public class RealServletContainertTest extends WebAppTestCase {
             assertEquals(Configuration.VERSION_3_0_0, cfg.getIncompatibleImprovements());
             
             assertSame(cfg.getTemplateExceptionHandler(), TemplateExceptionHandler.HTML_DEBUG_HANDLER);
-            
-            assertFalse(cfg.getLogTemplateExceptions());
-            
+
             {
                 ObjectWrapper ow = cfg.getObjectWrapper();
                 assertTrue(ow instanceof DefaultObjectWrapper);
@@ -410,14 +408,15 @@ public class RealServletContainertTest extends WebAppTestCase {
         protected Configuration.ExtendableBuilder createConfigurationBuilder() {
             return new FreemarkerServletConfigurationBuilder(
                     AssertCustomizedDefaultsFreemarkerServlet.this, Configuration.VERSION_3_0_0) {
+
                 @Override
                 protected TemplateExceptionHandler getDefaultTemplateExceptionHandler() {
                     return TemplateExceptionHandler.RETHROW_HANDLER;
                 }
 
                 @Override
-                protected boolean getDefaultLogTemplateExceptions() {
-                    return true;
+                protected String getDefaultBooleanFormat() {
+                    return "Y,N";
                 }
 
                 @Override
@@ -440,7 +439,7 @@ public class RealServletContainertTest extends WebAppTestCase {
             
             assertSame(cfg.getTemplateExceptionHandler(), TemplateExceptionHandler.RETHROW_HANDLER);
             
-            assertTrue(cfg.getLogTemplateExceptions());
+            assertEquals("Y,N", cfg.getBooleanFormat());
             
             {
                 ObjectWrapper ow = cfg.getObjectWrapper();

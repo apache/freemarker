@@ -20,7 +20,6 @@ package org.apache.freemarker.manual.examples;
 
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,9 +39,7 @@ public class GettingStartedExample {
         /* Create the configuration singleton (using builder pattern) */
         Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
                 .templateLoader(new ClassTemplateLoader(GettingStartedExample.class, ""))
-                .sourceEncoding(StandardCharsets.UTF_8)
                 .templateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER)
-                .logTemplateExceptions(false)
                 .build();
 
         /* ------------------------------------------------------------------------ */    

@@ -1007,16 +1007,6 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     }
 
     @Override
-    public boolean getLogTemplateExceptions() {
-        return tCfg != null && tCfg.isLogTemplateExceptionsSet() ? tCfg.getLogTemplateExceptions() : cfg.getLogTemplateExceptions();
-    }
-
-    @Override
-    public boolean isLogTemplateExceptionsSet() {
-        return tCfg != null && tCfg.isLogTemplateExceptionsSet();
-    }
-
-    @Override
     public boolean getLazyImports() {
         return tCfg != null && tCfg.isLazyImportsSet() ? tCfg.getLazyImports() : cfg.getLazyImports();
     }

@@ -160,7 +160,6 @@ public class TemplateConfigurationTest {
         SETTING_ASSIGNMENTS.put("dateFormat", "yyyy-#DDD");
         SETTING_ASSIGNMENTS.put("dateTimeFormat", "yyyy-#DDD-@HH:mm");
         SETTING_ASSIGNMENTS.put("locale", NON_DEFAULT_LOCALE);
-        SETTING_ASSIGNMENTS.put("logTemplateExceptions", true);
         SETTING_ASSIGNMENTS.put("newBuiltinClassResolver", TemplateClassResolver.ALLOWS_NOTHING_RESOLVER);
         SETTING_ASSIGNMENTS.put("numberFormat", "0.0000");
         SETTING_ASSIGNMENTS.put("objectWrapper",
@@ -602,7 +601,6 @@ public class TemplateConfigurationTest {
 
         {
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
-            tcb.setLogTemplateExceptions(false);
             tcb.setTabSize(3);
             TemplateConfiguration tc = tcb.build();
             assertOutputWithoutAndWithTC(tc,

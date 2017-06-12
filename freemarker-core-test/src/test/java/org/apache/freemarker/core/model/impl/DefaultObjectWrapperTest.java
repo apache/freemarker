@@ -753,7 +753,6 @@ public class DefaultObjectWrapperTest {
     private String processTemplate(ObjectWrapper objectWrapper, Object value, String ftl)
             throws TemplateException, IOException {
         Configuration cfg = new TestConfigurationBuilder()
-                .logTemplateExceptions(false)
                 .objectWrapper(objectWrapper)
                 .build();
         StringWriter out = new StringWriter();
