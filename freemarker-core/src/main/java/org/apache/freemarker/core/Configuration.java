@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -2585,7 +2586,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
         @Override
         protected Charset getDefaultSourceEncoding() {
-            return Charset.defaultCharset();
+            return StandardCharsets.UTF_8;
         }
 
         @Override

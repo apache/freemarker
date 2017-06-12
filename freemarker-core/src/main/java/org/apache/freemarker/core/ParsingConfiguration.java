@@ -252,9 +252,7 @@ public interface ParsingConfiguration {
     /**
      * Sets the charset used for decoding template files.
      * <p>
-     * Defaults to the default system {@code fileEncoding}, which can change from one server to
-     * another, so <b>you should always set this setting</b>. If you don't know what charset your should chose,
-     * {@code "UTF-8"} is usually a good choice.
+     * Defaults to {@code "UTF-8"}. (On some desktop applications {@link Charset#defaultCharset()} is maybe preferable.)
      * <p>
      * When a project contains groups (like folders) of template files where the groups use different encodings,
      * consider using the {@link Configuration#getTemplateConfigurations() templateConfigurations} setting on the

@@ -19,8 +19,6 @@
 
 package org.apache.freemarker.test;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -63,11 +61,6 @@ public class TestConfigurationBuilder extends Configuration.ExtendableBuilder<Te
     @Override
     protected Locale getDefaultLocale() {
         return Locale.US;
-    }
-
-    @Override
-    protected Charset getDefaultSourceEncoding() {
-        return StandardCharsets.UTF_8;
     }
 
     @Override

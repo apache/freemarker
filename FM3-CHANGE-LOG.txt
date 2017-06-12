@@ -96,7 +96,6 @@ the FreeMarer 3 changelog here:
 - Deleted o.a.f.core.util.DOMNodeModel (it has noting to do with the standard XML support, o.a.f.core.model.dom)
 - All CacheStorage-s must be thread safe from now on (removed ConcurrentCacheStorage marker interface)
 - Removed support for incompatibleImprovements before 3.0.0. So currently 3.0.0 is the only support value.
-- Changed the default of logTemplateExceptions to false.
 - Removed `String Configurable.getSetting(String)` and `Properties getSettings()`. It has never worked well,
   and is impossible to implement properly.
 - Even for setting values that are class names without following `()` or other argument list, the INSTANCE field and
@@ -262,3 +261,9 @@ the FreeMarer 3 changelog here:
   - FM2 Configuration.${c}_AUTO_ESCAPING_POLICY with AutoEscapingPolicy.${c}
 - Renamed the `cacheStorage` Configuration setting to `templateCacheStorage`.
 - Renamed the `localizedLookup` Configuration setting to `localizedLookup`.
+- Changed the defaults of some Configuration settings:
+  - sourceEncoding ("encoding" earlier) to UTF-8 from the platform default charset.
+    Using the platform default charset was proven to be fragile in practice,
+    like applications could break when moved to another server if the application
+    was unwillingly relying on the default.
+  - Changed the default of logTemplateExceptions to false.

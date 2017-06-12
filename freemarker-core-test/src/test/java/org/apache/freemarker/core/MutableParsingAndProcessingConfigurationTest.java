@@ -262,17 +262,15 @@ public class MutableParsingAndProcessingConfigurationTest {
     public void testSourceEncodingSetting() throws TemplateException, ConfigurationException {
         Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
 
-        assertEquals(Charset.defaultCharset(), cfgB.getSourceEncoding());
+        assertEquals(StandardCharsets.UTF_8, cfgB.getSourceEncoding());
         assertFalse(cfgB.isSourceEncodingSet());
 
-        Charset nonDefault = Charset.defaultCharset().equals(StandardCharsets.UTF_8) ? StandardCharsets.ISO_8859_1
-                : StandardCharsets.UTF_8;
-        cfgB.setSourceEncoding(nonDefault);
+        cfgB.setSourceEncoding(StandardCharsets.ISO_8859_1);
         assertTrue(cfgB.isSourceEncodingSet());
-        assertEquals(nonDefault, cfgB.getSourceEncoding());
+        assertEquals(StandardCharsets.ISO_8859_1, cfgB.getSourceEncoding());
 
         cfgB.unsetSourceEncoding();
-        assertEquals(Charset.defaultCharset(), cfgB.getSourceEncoding());
+        assertEquals(StandardCharsets.UTF_8, cfgB.getSourceEncoding());
         assertFalse(cfgB.isSourceEncodingSet());
 
         cfgB.setSetting(Configuration.ExtendableBuilder.SOURCE_ENCODING_KEY, "JVM default");
