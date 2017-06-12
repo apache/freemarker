@@ -411,11 +411,11 @@ public class ObjectBuilderSettingsTest {
             Properties props = new Properties();
             props.setProperty(Configuration.ExtendableBuilder.OBJECT_WRAPPER_KEY, "Default");
             props.setProperty(MutableProcessingConfiguration.ARITHMETIC_ENGINE_KEY, "bigdecimal");
-            props.setProperty(MutableProcessingConfiguration.TEMPLATE_EXCEPTION_HANDLER_KEY, "rethrow");
+            props.setProperty(MutableProcessingConfiguration.TEMPLATE_EXCEPTION_HANDLER_KEY, "debug");
             cfgB.setSettings(props);
             assertEquals(DefaultObjectWrapper.class, cfgB.getObjectWrapper().getClass());
             assertSame(BigDecimalArithmeticEngine.INSTANCE, cfgB.getArithmeticEngine());
-            assertSame(TemplateExceptionHandler.RETHROW_HANDLER, cfgB.getTemplateExceptionHandler());
+            assertSame(TemplateExceptionHandler.DEBUG_HANDLER, cfgB.getTemplateExceptionHandler());
             assertEquals(Configuration.VERSION_3_0_0,
                     ((DefaultObjectWrapper) cfgB.getObjectWrapper()).getIncompatibleImprovements());
         }

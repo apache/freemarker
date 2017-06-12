@@ -127,17 +127,10 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  *  {@link Template Template} myTemplate = cfg.{@link #getTemplate(String) getTemplate}("myTemplate.html");
  *  myTemplate.{@link Template#process(Object, java.io.Writer) process}(dataModel, out);</pre>
  * 
- * <p>A couple of settings that you should not leave on its default value are:
- * <ul>
- *   <li>{@link #getTemplateLoader templateLoader}: The default value is {@code null}, so you won't be able to load
- *       anything.
- *   <li>{@link #getSourceEncoding sourceEncoding}: The default value is system dependent, which makes it
- *       fragile on servers, so it should be set explicitly, like to "UTF-8" nowadays. 
- *   <li>{@link #getTemplateExceptionHandler() templateExceptionHandler}: For developing
- *       HTML pages, the most convenient value is {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}. For production,
- *       {@link TemplateExceptionHandler#RETHROW_HANDLER} is safer to use.
- * </ul>
- * 
+ * <p>Note that you certainly want to set the {@link #getTemplateLoader templateLoader} setting, as its default
+ * value is {@code null}, so you won't be able to load any templates (as FreeMarker doesn't know where from should it
+ * load them).
+ *
  * <p>{@link Configuration} is thread-safe and (as of 3.0.0) immutable (apart from internal caches).
  *
  * <p>The setting reader methods of this class don't throw {@link CoreSettingValueNotSetException}, because all settings
@@ -2680,7 +2673,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
         @Override
         protected TemplateExceptionHandler getDefaultTemplateExceptionHandler() {
-            return TemplateExceptionHandler.DEBUG_HANDLER; // [FM3] RETHROW;
+            return TemplateExceptionHandler.RETHROW_HANDLER;
         }
 
         @Override

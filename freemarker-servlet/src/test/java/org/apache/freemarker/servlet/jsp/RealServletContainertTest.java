@@ -411,7 +411,7 @@ public class RealServletContainertTest extends WebAppTestCase {
 
                 @Override
                 protected TemplateExceptionHandler getDefaultTemplateExceptionHandler() {
-                    return TemplateExceptionHandler.RETHROW_HANDLER;
+                    return TemplateExceptionHandler.HTML_DEBUG_HANDLER;
                 }
 
                 @Override
@@ -437,7 +437,7 @@ public class RealServletContainertTest extends WebAppTestCase {
         protected void doAssertions(Configuration cfg) {
             assertEquals(Configuration.VERSION_3_0_0, cfg.getIncompatibleImprovements());
             
-            assertSame(cfg.getTemplateExceptionHandler(), TemplateExceptionHandler.RETHROW_HANDLER);
+            assertSame(cfg.getTemplateExceptionHandler(), TemplateExceptionHandler.HTML_DEBUG_HANDLER);
             
             assertEquals("Y,N", cfg.getBooleanFormat());
             

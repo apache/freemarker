@@ -25,7 +25,6 @@ import java.util.Map;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateExceptionHandler;
 import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.junit.Test;
 
@@ -39,7 +38,6 @@ public class GettingStartedExample {
         /* Create the configuration singleton (using builder pattern) */
         Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
                 .templateLoader(new ClassTemplateLoader(GettingStartedExample.class, ""))
-                .templateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER)
                 .build();
 
         /* ------------------------------------------------------------------------ */    
