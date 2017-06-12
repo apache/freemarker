@@ -139,6 +139,7 @@ public class SQLTimeZoneTest extends TemplateTest {
         TimeZone.setDefault(GMT_P02);
         try {
             Configuration.ExtendableBuilder<?> cfgB = createConfigurationBuilder();
+            cfgB.setSQLDateAndTimeTimeZone(null);
             cfgB.unsetTimeZone();
             setConfiguration(cfgB.build());
 
@@ -170,6 +171,7 @@ public class SQLTimeZoneTest extends TemplateTest {
     public void testWithGMT1AndNullSQL() throws Exception {
         setConfiguration(createConfigurationBuilder()
                 .timeZone(TimeZone.getTimeZone("GMT+01:00"))
+                .sqlDateAndTimeTimeZone(null)
                 .build());
         assertNull(getConfiguration().getSQLDateAndTimeTimeZone());
 
@@ -190,6 +192,7 @@ public class SQLTimeZoneTest extends TemplateTest {
     public void testWithGMT2AndNullSQL() throws Exception {
         setConfiguration(createConfigurationBuilder()
                 .timeZone(TimeZone.getTimeZone("GMT+02"))
+                .sqlDateAndTimeTimeZone(null)
                 .build());
         assertNull(getConfiguration().getSQLDateAndTimeTimeZone());
 
@@ -264,6 +267,7 @@ public class SQLTimeZoneTest extends TemplateTest {
     private Configuration.ExtendableBuilder<?> testCacheFlushing_createBuilder() {
         return createConfigurationBuilder()
                 .timeZone(_DateUtil.UTC)
+                .sqlDateAndTimeTimeZone(null) // Default from FM2...
                 .dateFormat("yyyy-MM-dd E")
                 .timeFormat("HH:mm:ss E")
                 .dateTimeFormat("yyyy-MM-dd'T'HH:mm:ss E");
@@ -294,9 +298,8 @@ public class SQLTimeZoneTest extends TemplateTest {
     public void testChangeSettingInTemplate() throws Exception {
         setConfiguration(createConfigurationBuilder()
                 .timeZone(_DateUtil.UTC)
+                .sqlDateAndTimeTimeZone(null)
                 .build());
-
-        assertNull(getConfiguration().getSQLDateAndTimeTimeZone());
 
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n"

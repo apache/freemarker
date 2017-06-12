@@ -2591,7 +2591,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
         @Override
         protected TimeZone getDefaultSQLDateAndTimeTimeZone() {
-            return null;
+            return TimeZone.getDefault();
         }
 
         @Override

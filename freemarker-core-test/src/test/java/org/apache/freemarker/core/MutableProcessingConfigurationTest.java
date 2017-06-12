@@ -278,7 +278,7 @@ public class MutableProcessingConfigurationTest {
             TimeZone.setDefault(sysDefTZ);
 
             Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
-            assertNull(cfgB.getSQLDateAndTimeTimeZone());
+            assertEquals(sysDefTZ, cfgB.getSQLDateAndTimeTimeZone());
 
             cfgB.setSQLDateAndTimeTimeZone(null);
             assertNull(cfgB.getSQLDateAndTimeTimeZone());
@@ -288,6 +288,9 @@ public class MutableProcessingConfigurationTest {
 
             cfgB.setSetting(MutableProcessingConfiguration.SQL_DATE_AND_TIME_TIME_ZONE_KEY, "null");
             assertNull(cfgB.getSQLDateAndTimeTimeZone());
+
+            cfgB.unsetSQLDateAndTimeTimeZone();
+            assertEquals(sysDefTZ, cfgB.getSQLDateAndTimeTimeZone());
         } finally {
             TimeZone.setDefault(origSysDefTZ);
         }
@@ -298,7 +301,9 @@ public class MutableProcessingConfigurationTest {
         TimeZone localTZ = TimeZone.getTimeZone("Europe/Brussels");
 
         {
-            Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0).build();
+            Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
+                    .sqlDateAndTimeTimeZone(null)
+                    .build();
             Template t = new Template(null, "", cfg);
             Environment env1 = t.createProcessingEnvironment(null, new StringWriter());
             Environment env2 = t.createProcessingEnvironment(null, new StringWriter());

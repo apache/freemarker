@@ -89,12 +89,12 @@ public interface ProcessingConfiguration {
 
     /**
      * The time zone used when dealing with {@link java.sql.Date java.sql.Date} and
-     * {@link java.sql.Time java.sql.Time} values. Its {@link Configuration}-level defaults is {@code null} for
-     * backward compatibility, but in most applications this should be set to the JVM default time zone (server
-     * default time zone), because that's what most JDBC drivers will use when constructing the
-     * {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values. If this setting is {@code
-     * null} FreeMarker will use the value of ({@link #getTimeZone()}) for {@link java.sql.Date java.sql.Date} and
-     * {@link java.sql.Time java.sql.Time} values, which often gives bad results.
+     * {@link java.sql.Time java.sql.Time} values. Its {@link Configuration}-level defaults is
+     * {@link TimeZone#getDefault()}, that is, the JVM default time zone (server default time zone), because that's
+     * what most JDBC drivers will use when constructing the {@link java.sql.Date java.sql.Date} and
+     * {@link java.sql.Time java.sql.Time} values. If this setting is {@code null} FreeMarker will use the value of
+     * ({@link #getTimeZone()}) for {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time}
+     * values, which often gives bad results due to how most JDBC drivers work.
      *
      * <p>This setting doesn't influence the formatting of other kind of values (like of
      * {@link java.sql.Timestamp java.sql.Timestamp} or plain {@link java.util.Date java.util.Date} values).

@@ -262,12 +262,14 @@ the FreeMarer 3 changelog here:
 - Renamed the `cacheStorage` Configuration setting to `templateCacheStorage`.
 - Renamed the `localizedLookup` Configuration setting to `localizedLookup`.
 - Changed the defaults of some Configuration settings:
-  - sourceEncoding ("encoding" earlier) to UTF-8 from the platform default charset.
+  - Changed the default of sourceEncoding ("encoding" earlier) to UTF-8 from the platform default charset.
     Using the platform default charset was proven to be fragile in practice,
     like applications could break when moved to another server if the application
     was unwillingly relying on the default.
   - Changed the default of templateExceptionHandler (template_exception_hander) to
-    TemplateExceptionHandler.RETHROW_HANDLER
+    TemplateExceptionHandler.RETHROW_HANDLER from DEBUG_HANDLER
+  - Changed the default of sqlDateAndTimeTimeZone (sql_date_and_time_time_zone) to
+    TimeZone.default() from null (where null meant falling back to the timeZone setting value)
 - Removed the logTemplateExceptions (log_template_exceptions) setting. FreeMarker now
   behaves as if it was false. When a FreeMarker method throws an exception, the
   caller is responsible for either logging it or letting it bubble up.

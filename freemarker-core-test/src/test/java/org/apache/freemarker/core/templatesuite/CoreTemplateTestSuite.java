@@ -114,6 +114,7 @@ public class CoreTemplateTestSuite extends TemplateTestSuite {
             });
             dataModel.put("sqlDate", new java.sql.Date(1273955885023L));
             dataModel.put("sqlTime", new java.sql.Time(74285023L));
+            confB.setSQLDateAndTimeTimeZone(null); // Default in FM2, when the tests were written
         } else if (simpleTestName.startsWith("list-") || simpleTestName.startsWith("list[")
                 || simpleTestName.startsWith("list2[") || simpleTestName.startsWith("list3[")
                 || simpleTestName.equals("listhash")) {
@@ -170,6 +171,8 @@ public class CoreTemplateTestSuite extends TemplateTestSuite {
             dataModel.put("timeOnly", new java.sql.Time(d.getTime()));
             dataModel.put("dateOnly", new java.sql.Date(d.getTime()));
             dataModel.put("dateTime", new java.sql.Timestamp(d.getTime()));
+
+            confB.setSQLDateAndTimeTimeZone(null); // Default in FM2, when the tests were written
         } else if (simpleTestName.equals("var-layers")) {
             dataModel.put("x", Integer.valueOf(4));
             dataModel.put("z", Integer.valueOf(4));
