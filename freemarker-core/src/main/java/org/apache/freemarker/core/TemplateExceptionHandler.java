@@ -54,7 +54,7 @@ public interface TemplateExceptionHandler {
     * executing. It does nothing to handle the event. Note that the exception is still logged, as with all
     * other {@link TemplateExceptionHandler}-s.
     */
-    TemplateExceptionHandler IGNORE_HANDLER = new TemplateExceptionHandler() {
+    TemplateExceptionHandler IGNORE = new TemplateExceptionHandler() {
         @Override
         public void handleTemplateException(TemplateException te, Environment env, Writer out) {
             // Do nothing
@@ -65,7 +65,7 @@ public interface TemplateExceptionHandler {
      * {@link TemplateExceptionHandler} that simply re-throws the exception; this should be used in most production
      * systems.
      */
-    TemplateExceptionHandler RETHROW_HANDLER = new TemplateExceptionHandler() {
+    TemplateExceptionHandler RETHROW = new TemplateExceptionHandler() {
         @Override
         public void handleTemplateException(TemplateException te, Environment env, Writer out)
                 throws TemplateException {
@@ -77,7 +77,7 @@ public interface TemplateExceptionHandler {
      * {@link TemplateExceptionHandler} useful when you developing non-HTML templates. This handler
      * outputs the stack trace information to the client and then re-throws the exception.
      */
-    TemplateExceptionHandler DEBUG_HANDLER = new TemplateExceptionHandler() {
+    TemplateExceptionHandler DEBUG = new TemplateExceptionHandler() {
         @Override
         public void handleTemplateException(TemplateException te, Environment env, Writer out)
                 throws TemplateException {
@@ -97,7 +97,7 @@ public interface TemplateExceptionHandler {
      * outputs the stack trace information to the client, formatting it so that it will be usually well readable
      * in the browser, and then re-throws the exception.
      */
-    TemplateExceptionHandler HTML_DEBUG_HANDLER = new TemplateExceptionHandler() {
+    TemplateExceptionHandler HTML_DEBUG = new TemplateExceptionHandler() {
         @Override
         public void handleTemplateException(TemplateException te, Environment env, Writer out)
                 throws TemplateException {

@@ -129,16 +129,16 @@ public class ConfigurationTest {
         }
         
         assertFalse(cfgB.isTemplateExceptionHandlerSet());
-        assertSame(TemplateExceptionHandler.RETHROW_HANDLER, cfgB.getTemplateExceptionHandler());
+        assertSame(TemplateExceptionHandler.RETHROW, cfgB.getTemplateExceptionHandler());
         //
-        cfgB.setTemplateExceptionHandler(TemplateExceptionHandler.DEBUG_HANDLER);
+        cfgB.setTemplateExceptionHandler(TemplateExceptionHandler.DEBUG);
         assertTrue(cfgB.isTemplateExceptionHandlerSet());
-        assertSame(TemplateExceptionHandler.DEBUG_HANDLER, cfgB.getTemplateExceptionHandler());
+        assertSame(TemplateExceptionHandler.DEBUG, cfgB.getTemplateExceptionHandler());
         //
         for (int i = 0; i < 2; i++) {
             cfgB.unsetTemplateExceptionHandler();
             assertFalse(cfgB.isTemplateExceptionHandlerSet());
-            assertSame(TemplateExceptionHandler.RETHROW_HANDLER, cfgB.getTemplateExceptionHandler());
+            assertSame(TemplateExceptionHandler.RETHROW, cfgB.getTemplateExceptionHandler());
         }
         
         assertFalse(cfgB.isTemplateLoaderSet());

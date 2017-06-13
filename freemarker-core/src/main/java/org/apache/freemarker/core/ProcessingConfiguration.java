@@ -399,15 +399,15 @@ public interface ProcessingConfiguration {
 
     /**
      * The exception handler used to handle exceptions occurring inside templates.
-     * Its {@link Configuration}-level default is {@link TemplateExceptionHandler#RETHROW_HANDLER}. The recommended
+     * Its {@link Configuration}-level default is {@link TemplateExceptionHandler#RETHROW}. The recommended
      * values are:
      *
      * <ul>
-     *   <li>In production systems: {@link TemplateExceptionHandler#RETHROW_HANDLER}
+     *   <li>In production systems: {@link TemplateExceptionHandler#RETHROW}
      *   <li>During development of HTML templates, if you want to the error directly in the browser:
-     *   {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}
+     *   {@link TemplateExceptionHandler#HTML_DEBUG}
      *   <li>During development of non-HTML templates, if you want to the error directly in the output:
-     *   {@link TemplateExceptionHandler#DEBUG_HANDLER}
+     *   {@link TemplateExceptionHandler#DEBUG}
      * </ul>
      *
      * <p>All of these will let the exception propagate further, so that you can catch it around

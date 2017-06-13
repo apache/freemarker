@@ -1405,10 +1405,10 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
      *       expression</a>.
      *       If the value does not contain dot, then it must be one of these predefined values (case insensitive):
-     *       {@code "rethrow"} (means {@link TemplateExceptionHandler#RETHROW_HANDLER}),
-     *       {@code "debug"} (means {@link TemplateExceptionHandler#DEBUG_HANDLER}),
-     *       {@code "html_debug"} (means {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}),
-     *       {@code "ignore"} (means {@link TemplateExceptionHandler#IGNORE_HANDLER}),
+     *       {@code "rethrow"} (means {@link TemplateExceptionHandler#RETHROW}),
+     *       {@code "debug"} (means {@link TemplateExceptionHandler#DEBUG}),
+     *       {@code "html_debug"} (means {@link TemplateExceptionHandler#HTML_DEBUG}),
+     *       {@code "ignore"} (means {@link TemplateExceptionHandler#IGNORE}),
      *       {@code "default"} (only allowed for {@link Configuration} instances) for the default.
      *       
      *   <li><p>{@code "arithmetic_engine"}:
@@ -1797,16 +1797,16 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                 if (value.indexOf('.') == -1) {
                     if ("debug".equalsIgnoreCase(value)) {
                         setTemplateExceptionHandler(
-                                TemplateExceptionHandler.DEBUG_HANDLER);
+                                TemplateExceptionHandler.DEBUG);
                     } else if ("html_debug".equalsIgnoreCase(value) || "htmlDebug".equals(value)) {
                         setTemplateExceptionHandler(
-                                TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+                                TemplateExceptionHandler.HTML_DEBUG);
                     } else if ("ignore".equalsIgnoreCase(value)) {
                         setTemplateExceptionHandler(
-                                TemplateExceptionHandler.IGNORE_HANDLER);
+                                TemplateExceptionHandler.IGNORE);
                     } else if ("rethrow".equalsIgnoreCase(value)) {
                         setTemplateExceptionHandler(
-                                TemplateExceptionHandler.RETHROW_HANDLER);
+                                TemplateExceptionHandler.RETHROW);
                     } else if (DEFAULT_VALUE.equalsIgnoreCase(value)
                             && this instanceof Configuration.ExtendableBuilder) {
                         unsetTemplateExceptionHandler();

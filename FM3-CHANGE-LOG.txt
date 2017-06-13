@@ -259,6 +259,11 @@ the FreeMarer 3 changelog here:
   - FM2 Configuration.${c}_NAMING_CONVENTION with NamingConvention.${c}
   - FM2 Configuration.${c}_TAG_SYNTAX with TagSyntax.${c}
   - FM2 Configuration.${c}_AUTO_ESCAPING_POLICY with AutoEscapingPolicy.${c}
+- TemplateClassResolver.UNRESTRICTED_RESOLVER and ALLOWS_NOTHING_RESOLVER was renamed
+  to UNRESTRICTED and ALLOW_NOTHING. Also the String setting name "allows_nothing" and
+  "allowsNothing" were renamed to "allow_nothing" and "allowNothing".
+- TemplateExceptionHandler.IGNORE_HANDLER, RETHROW_HANDLER, DEBUG_HANDLER and
+  HTLM_DEBUG_HANDLER was renamed to IGNORE, RETHROW, DEBUG and HTML_DEBUG  
 - Renamed the `cacheStorage` Configuration setting to `templateCacheStorage`.
 - Renamed the `localizedLookup` Configuration setting to `localizedLookup`.
 - Changed the defaults of some Configuration settings:
@@ -267,7 +272,7 @@ the FreeMarer 3 changelog here:
     like applications could break when moved to another server if the application
     was unwillingly relying on the default.
   - Changed the default of templateExceptionHandler (template_exception_hander) to
-    TemplateExceptionHandler.RETHROW_HANDLER from DEBUG_HANDLER
+    TemplateExceptionHandler.RETHROW from DEBUG
   - Changed the default of sqlDateAndTimeTimeZone (sql_date_and_time_time_zone) to
     TimeZone.default() from null (where null meant falling back to the timeZone setting value)
   - Changed the default of templateNameFormat (template_name_format) to what's equivalent to
@@ -276,6 +281,3 @@ the FreeMarer 3 changelog here:
 - Removed the logTemplateExceptions (log_template_exceptions) setting. FreeMarker now
   behaves as if it was false. When a FreeMarker method throws an exception, the
   caller is responsible for either logging it or letting it bubble up.
-- TemplateClassResolver.UNRESTRICTED_RESOLVER and ALLOWS_NOTHING_RESOLVER was renamed
-  to UNRESTRICTED and ALLOW_NOTHING. Also the String setting name "allows_nothing" and
-  "allowsNothing" were renamed to "allow_nothing" and "allowNothing".

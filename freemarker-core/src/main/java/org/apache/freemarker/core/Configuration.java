@@ -2669,7 +2669,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
         @Override
         protected TemplateExceptionHandler getDefaultTemplateExceptionHandler() {
-            return TemplateExceptionHandler.RETHROW_HANDLER;
+            return TemplateExceptionHandler.RETHROW;
         }
 
         @Override

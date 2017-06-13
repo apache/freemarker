@@ -46,7 +46,7 @@ public class FreemarkerServletConfigurationBuilder<SelfT extends FreemarkerServl
     @Override
     protected TemplateExceptionHandler getDefaultTemplateExceptionHandler() {
         // TODO [FM3] Not a good default. Should depend on if we are in development mode or production mode.
-        return TemplateExceptionHandler.HTML_DEBUG_HANDLER;
+        return TemplateExceptionHandler.HTML_DEBUG;
     }
 
     @Override

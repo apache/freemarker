@@ -415,7 +415,7 @@ public class ObjectBuilderSettingsTest {
             cfgB.setSettings(props);
             assertEquals(DefaultObjectWrapper.class, cfgB.getObjectWrapper().getClass());
             assertSame(BigDecimalArithmeticEngine.INSTANCE, cfgB.getArithmeticEngine());
-            assertSame(TemplateExceptionHandler.DEBUG_HANDLER, cfgB.getTemplateExceptionHandler());
+            assertSame(TemplateExceptionHandler.DEBUG, cfgB.getTemplateExceptionHandler());
             assertEquals(Configuration.VERSION_3_0_0,
                     ((DefaultObjectWrapper) cfgB.getObjectWrapper()).getIncompatibleImprovements());
         }

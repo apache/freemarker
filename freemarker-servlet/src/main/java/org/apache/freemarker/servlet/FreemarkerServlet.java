@@ -605,13 +605,13 @@ public class FreemarkerServlet extends HttpServlet {
                     }
     
                     if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_RETHROW.equals(value)) {
-                        cfgB.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+                        cfgB.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW);
                     } else if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_DEBUG.equals(value)) {
-                        cfgB.setTemplateExceptionHandler(TemplateExceptionHandler.DEBUG_HANDLER);
+                        cfgB.setTemplateExceptionHandler(TemplateExceptionHandler.DEBUG);
                     } else if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_HTML_DEBUG.equals(value)) {
-                        cfgB.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+                        cfgB.setTemplateExceptionHandler(TemplateExceptionHandler.HTML_DEBUG);
                     } else if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_IGNORE.equals(value)) {
-                        cfgB.setTemplateExceptionHandler(TemplateExceptionHandler.IGNORE_HANDLER);
+                        cfgB.setTemplateExceptionHandler(TemplateExceptionHandler.IGNORE);
                     } else {
                         throw new InitParamValueException(DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER, value,
                                 "Not one of the supported values.");
@@ -869,7 +869,7 @@ public class FreemarkerServlet extends HttpServlet {
         } catch (TemplateException e) {
             final TemplateExceptionHandler teh = config.getTemplateExceptionHandler();
             // Ensure that debug handler responses aren't rolled back:
-            if (teh == TemplateExceptionHandler.HTML_DEBUG_HANDLER || teh == TemplateExceptionHandler.DEBUG_HANDLER
+            if (teh == TemplateExceptionHandler.HTML_DEBUG || teh == TemplateExceptionHandler.DEBUG
                     || teh.getClass().getName().indexOf("Debug") != -1) {
                 response.flushBuffer();
             }

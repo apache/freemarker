@@ -166,7 +166,7 @@ public class TemplateConfigurationTest {
                 new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
         SETTING_ASSIGNMENTS.put("outputEncoding", StandardCharsets.UTF_16);
         SETTING_ASSIGNMENTS.put("showErrorTips", false);
-        SETTING_ASSIGNMENTS.put("templateExceptionHandler", TemplateExceptionHandler.IGNORE_HANDLER);
+        SETTING_ASSIGNMENTS.put("templateExceptionHandler", TemplateExceptionHandler.IGNORE);
         SETTING_ASSIGNMENTS.put("timeFormat", "@HH:mm");
         SETTING_ASSIGNMENTS.put("timeZone", NON_DEFAULT_TZ);
         SETTING_ASSIGNMENTS.put("arithmeticEngine", ConservativeArithmeticEngine.INSTANCE);

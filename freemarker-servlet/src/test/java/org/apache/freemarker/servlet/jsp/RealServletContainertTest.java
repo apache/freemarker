@@ -384,7 +384,7 @@ public class RealServletContainertTest extends WebAppTestCase {
         protected void doAssertions(Configuration cfg) {
             assertEquals(Configuration.VERSION_3_0_0, cfg.getIncompatibleImprovements());
             
-            assertSame(cfg.getTemplateExceptionHandler(), TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+            assertSame(cfg.getTemplateExceptionHandler(), TemplateExceptionHandler.HTML_DEBUG);
 
             {
                 ObjectWrapper ow = cfg.getObjectWrapper();
@@ -411,7 +411,7 @@ public class RealServletContainertTest extends WebAppTestCase {
 
                 @Override
                 protected TemplateExceptionHandler getDefaultTemplateExceptionHandler() {
-                    return TemplateExceptionHandler.HTML_DEBUG_HANDLER;
+                    return TemplateExceptionHandler.HTML_DEBUG;
                 }
 
                 @Override
@@ -437,7 +437,7 @@ public class RealServletContainertTest extends WebAppTestCase {
         protected void doAssertions(Configuration cfg) {
             assertEquals(Configuration.VERSION_3_0_0, cfg.getIncompatibleImprovements());
             
-            assertSame(cfg.getTemplateExceptionHandler(), TemplateExceptionHandler.HTML_DEBUG_HANDLER);
+            assertSame(cfg.getTemplateExceptionHandler(), TemplateExceptionHandler.HTML_DEBUG);
             
             assertEquals("Y,N", cfg.getBooleanFormat());
             
