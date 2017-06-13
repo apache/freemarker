@@ -5151,9 +5151,9 @@ other@example.com</programlisting>
           <literal>namespace</literal> parameter:</para>
 
           <programlisting role="template">&lt;#import "/lib/example.ftl" as e&gt;
-${my.mail}
+${e.mail}
 &lt;#assign mail="other@example.com" <emphasis>in e</emphasis>&gt;
-${my.mail}</programlisting>
+${e.mail}</programlisting>
 
           <programlisting role="output">user@example.com
 other@example.com</programlisting>
@@ -5218,7 +5218,7 @@ User is: ${user}
 &lt;#import "/lib/example.ftl" as e2&gt;
 &lt;#import "/lib/example.ftl" as e3&gt;
 ${e.mail}, ${e2.mail}, ${e3.mail}
-&lt;#assign mail="other@example.com" in my&gt;
+&lt;#assign mail="other@example.com" in e&gt;
 ${e.mail}, ${e2.mail}, ${e3.mail}</programlisting>
 
           <programlisting role="output">user@example.com, user@example.com, user@example.com
