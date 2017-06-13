@@ -1490,9 +1490,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       The value must be one of these (ignore the quotation marks):
      *       <ol>
      *         <li><p>{@code "unrestricted"}:
-     *             Use {@link TemplateClassResolver#UNRESTRICTED_RESOLVER}
-     *         <li><p>{@code "allows_nothing"}:
-     *             Use {@link TemplateClassResolver#ALLOWS_NOTHING_RESOLVER}
+     *             Use {@link TemplateClassResolver#UNRESTRICTED}
+     *         <li><p>{@code "allow_nothing"}:
+     *             Use {@link TemplateClassResolver#ALLOW_NOTHING}
      *         <li><p>Something that contains colon will use
      *             {@link OptInTemplateClassResolver} and is expected to
      *             store comma separated values (possibly quoted) segmented
@@ -1515,7 +1515,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *                   {@code lib/foo/bar.ftl}) and template {@code safe.ftl}
      *                   (that does not match {@code foo/safe.ftl}, only
      *                   exactly {@code safe.ftl}) to instantiate anything
-     *                   that {@link TemplateClassResolver#UNRESTRICTED_RESOLVER} allows.
+     *                   that {@link TemplateClassResolver#UNRESTRICTED} allows.
      *               <tr>
      *                 <td>
      *                   {@code allowed_classes: com.example.C1, com.example.C2}
@@ -1850,9 +1850,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
             } else if (NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE.equals(name)
                     || NEW_BUILTIN_CLASS_RESOLVER_KEY_CAMEL_CASE.equals(name)) {
                 if ("unrestricted".equals(value)) {
-                    setNewBuiltinClassResolver(TemplateClassResolver.UNRESTRICTED_RESOLVER);
-                } else if ("allows_nothing".equals(value) || "allowsNothing".equals(value)) {
-                    setNewBuiltinClassResolver(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER);
+                    setNewBuiltinClassResolver(TemplateClassResolver.UNRESTRICTED);
+                } else if ("allow_nothing".equals(value) || "allowNothing".equals(value)) {
+                    setNewBuiltinClassResolver(TemplateClassResolver.ALLOW_NOTHING);
                 } else if (value.indexOf(":") != -1) {
                     List<_KeyValuePair<String, List<String>>> segments = parseAsSegmentedList(value);
                     Set allowedClasses = null;
@@ -1873,6 +1873,12 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                     }
                     setNewBuiltinClassResolver(
                             new OptInTemplateClassResolver(allowedClasses, trustedTemplates));
+                } else if ("allows_nothing".equals(value)) {
+                    throw new InvalidSettingValueException(
+                            name, value, "The correct value would be: allow_nothing");
+                } else if ("allowsNothing".equals(value)) {
+                    throw new InvalidSettingValueException(
+                            name, value, "The correct value would be: allowNothing");
                 } else if (value.indexOf('.') != -1) {
                     setNewBuiltinClassResolver((TemplateClassResolver) _ObjectBuilderSettingEvaluator.eval(
                                     value, TemplateClassResolver.class, false,

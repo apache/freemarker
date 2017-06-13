@@ -177,7 +177,7 @@ Note that for the incompatible_improvements setting you can specify a list of ve
       <setting new_builtin_class_resolver="unrestricted"/>
    </testCase>   
    <testCase name="new-allowsnothing" template="new-defaultresolver.ftl">
-      <setting new_builtin_class_resolver="allows_nothing"/>
+      <setting new_builtin_class_resolver="allow_nothing"/>
    </testCase>   
    <testCase name="new-optin">
       <setting new_builtin_class_resolver="

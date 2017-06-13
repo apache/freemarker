@@ -276,3 +276,6 @@ the FreeMarer 3 changelog here:
 - Removed the logTemplateExceptions (log_template_exceptions) setting. FreeMarker now
   behaves as if it was false. When a FreeMarker method throws an exception, the
   caller is responsible for either logging it or letting it bubble up.
+- TemplateClassResolver.UNRESTRICTED_RESOLVER and ALLOWS_NOTHING_RESOLVER was renamed
+  to UNRESTRICTED and ALLOW_NOTHING. Also the String setting name "allows_nothing" and
+  "allowsNothing" were renamed to "allow_nothing" and "allowNothing".

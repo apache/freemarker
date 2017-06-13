@@ -36,7 +36,7 @@ public interface TemplateClassResolver {
     /**
      * Simply calls {@link _ClassUtil#forName(String)}.
      */
-    TemplateClassResolver UNRESTRICTED_RESOLVER = new TemplateClassResolver() {
+    TemplateClassResolver UNRESTRICTED = new TemplateClassResolver() {
 
         @Override
         public Class resolve(String className, Environment env, Template template)
@@ -53,7 +53,7 @@ public interface TemplateClassResolver {
     /**
      * Doesn't allow resolving any classes.
      */
-    TemplateClassResolver ALLOWS_NOTHING_RESOLVER =  new TemplateClassResolver() {
+    TemplateClassResolver ALLOW_NOTHING =  new TemplateClassResolver() {
 
         @Override
         public Class resolve(String className, Environment env, Template template)

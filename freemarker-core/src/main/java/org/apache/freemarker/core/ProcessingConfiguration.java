@@ -477,8 +477,8 @@ public interface ProcessingConfiguration {
      * The {@link TemplateClassResolver} that is used when the <code>new</code> built-in is called in a template. That
      * is, when a template contains the <code>"com.example.SomeClassName"?new</code> expression, this object will be
      * called to resolve the <code>"com.example.SomeClassName"</code> string to a class. The default value is {@link
-     * TemplateClassResolver#UNRESTRICTED_RESOLVER}. If you allow users to upload templates, it's important to use a
-     * custom restrictive {@link TemplateClassResolver} or {@link TemplateClassResolver#ALLOWS_NOTHING_RESOLVER}.
+     * TemplateClassResolver#UNRESTRICTED}. If you allow users to upload templates, it's important to use a
+     * custom restrictive {@link TemplateClassResolver} or {@link TemplateClassResolver#ALLOW_NOTHING}.
      */
     TemplateClassResolver getNewBuiltinClassResolver();
 

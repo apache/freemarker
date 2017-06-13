@@ -395,7 +395,7 @@ public class ObjectBuilderSettingsTest {
             props.setProperty(Configuration.ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY,
                     "soft: 500, strong: 100");
             props.setProperty(MutableProcessingConfiguration.NEW_BUILTIN_CLASS_RESOLVER_KEY,
-                    "allows_nothing");
+                    "allow_nothing");
             cfgB.setSettings(props);
             assertEquals(DefaultObjectWrapper.class, cfgB.getObjectWrapper().getClass());
             assertEquals(1, ((DummyArithmeticEngine) cfgB.getArithmeticEngine()).getX());
@@ -403,7 +403,7 @@ public class ObjectBuilderSettingsTest {
             assertEquals(Configuration.VERSION_3_0_0,
                     ((DefaultObjectWrapper) cfgB.getObjectWrapper()).getIncompatibleImprovements());
             assertEquals(500, ((MruCacheStorage) cfgB.getTemplateCacheStorage()).getSoftSizeLimit());
-            assertEquals(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER, cfgB.getNewBuiltinClassResolver());
+            assertEquals(TemplateClassResolver.ALLOW_NOTHING, cfgB.getNewBuiltinClassResolver());
             assertEquals(StandardCharsets.UTF_8, cfgB.getSourceEncoding());
         }
 

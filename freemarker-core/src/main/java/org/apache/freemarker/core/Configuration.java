@@ -2739,7 +2739,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
         @Override
         protected TemplateClassResolver getDefaultNewBuiltinClassResolver() {
-            return TemplateClassResolver.UNRESTRICTED_RESOLVER;
+            return TemplateClassResolver.UNRESTRICTED;
         }
 
         @Override

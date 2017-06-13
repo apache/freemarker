@@ -160,7 +160,7 @@ public class TemplateConfigurationTest {
         SETTING_ASSIGNMENTS.put("dateFormat", "yyyy-#DDD");
         SETTING_ASSIGNMENTS.put("dateTimeFormat", "yyyy-#DDD-@HH:mm");
         SETTING_ASSIGNMENTS.put("locale", NON_DEFAULT_LOCALE);
-        SETTING_ASSIGNMENTS.put("newBuiltinClassResolver", TemplateClassResolver.ALLOWS_NOTHING_RESOLVER);
+        SETTING_ASSIGNMENTS.put("newBuiltinClassResolver", TemplateClassResolver.ALLOW_NOTHING);
         SETTING_ASSIGNMENTS.put("numberFormat", "0.0000");
         SETTING_ASSIGNMENTS.put("objectWrapper",
                 new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
