@@ -947,7 +947,7 @@ public class Configurable {
         int commaIdx = booleanFormat.indexOf(',');
         if (commaIdx == -1) {
             throw new IllegalArgumentException(
-                    "Setting value must be string that contains two comma-separated values for true and false, " +
+                    "Setting value must be a string that contains two comma-separated values for true and false, " +
                     "respectively.");
         }
         
@@ -2538,6 +2538,12 @@ public class Configurable {
                     }
                     setNewBuiltinClassResolver(
                             new OptInTemplateClassResolver(allowedClasses, trustedTemplates));
+                } else if ("allow_nothing".equals(value)) {
+                    throw new IllegalArgumentException(
+                            "The correct value would be: allows_nothing");
+                } else if ("allowNothing".equals(value)) {
+                    throw new IllegalArgumentException(
+                            "The correct value would be: allowsNothing");
                 } else if (value.indexOf('.') != -1) {
                     setNewBuiltinClassResolver((TemplateClassResolver) _ObjectBuilderSettingEvaluator.eval(
                                     value, TemplateClassResolver.class, false,
