@@ -64,7 +64,6 @@ import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
-import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.NullCacheStorage;
 import org.apache.freemarker.core.templateresolver.impl.SoftCacheStorage;
@@ -170,16 +169,16 @@ public class ConfigurationTest {
         }
         
         assertFalse(cfgB.isTemplateNameFormatSet());
-        assertSame(DefaultTemplateNameFormatFM2.INSTANCE, cfgB.getTemplateNameFormat());
-        //
-        cfgB.setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
-        assertTrue(cfgB.isTemplateNameFormatSet());
         assertSame(DefaultTemplateNameFormat.INSTANCE, cfgB.getTemplateNameFormat());
+        //
+        cfgB.setTemplateNameFormat(null);
+        assertTrue(cfgB.isTemplateNameFormatSet());
+        assertNull(cfgB.getTemplateNameFormat());
         //
         for (int i = 0; i < 2; i++) {
             cfgB.unsetTemplateNameFormat();
             assertFalse(cfgB.isTemplateNameFormatSet());
-            assertSame(DefaultTemplateNameFormatFM2.INSTANCE, cfgB.getTemplateNameFormat());
+            assertSame(DefaultTemplateNameFormat.INSTANCE, cfgB.getTemplateNameFormat());
         }
         
         assertFalse(cfgB.isTemplateCacheStorageSet());
@@ -411,17 +410,6 @@ public class ConfigurationTest {
         {
             Configuration cfg = new Builder(VERSION_3_0_0)
                     .templateLoader(tl)
-                    .templateNameFormat(DefaultTemplateNameFormatFM2.INSTANCE)
-                    .build();
-            final Template template = cfg.getTemplate("a/./../b.ftl");
-            assertEquals("a/b.ftl", template.getLookupName());
-            assertEquals("a/b.ftl", template.getSourceName());
-            assertEquals("In a/b.ftl", template.toString());
-        }
-        
-        {
-            Configuration cfg = new Builder(VERSION_3_0_0)
-                    .templateLoader(tl)
                     .templateNameFormat(DefaultTemplateNameFormat.INSTANCE)
                     .build();
             final Template template = cfg.getTemplate("a/./../b.ftl");
@@ -434,12 +422,9 @@ public class ConfigurationTest {
     @Test
     public void testTemplateNameFormatSetSetting() throws Exception {
         Builder cfgB = new Builder(VERSION_3_0_0);
-        assertSame(DefaultTemplateNameFormatFM2.INSTANCE, cfgB.getTemplateNameFormat());
-        cfgB.setSetting(TEMPLATE_NAME_FORMAT_KEY, "defAult_2_4_0");
         assertSame(DefaultTemplateNameFormat.INSTANCE, cfgB.getTemplateNameFormat());
-        cfgB.setSetting(TEMPLATE_NAME_FORMAT_KEY, "defaUlt_2_3_0");
-        assertSame(DefaultTemplateNameFormatFM2.INSTANCE, cfgB.getTemplateNameFormat());
-        assertTrue(cfgB.isTemplateNameFormatSet());
+        cfgB.setTemplateNameFormat(null);
+        assertNull(cfgB.getTemplateNameFormat());
         cfgB.setSetting(TEMPLATE_NAME_FORMAT_KEY, "defauLt");
         assertFalse(cfgB.isTemplateNameFormatSet());
     }

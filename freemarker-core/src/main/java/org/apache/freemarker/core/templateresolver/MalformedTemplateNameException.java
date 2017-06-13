@@ -23,14 +23,11 @@ import java.io.IOException;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateNotFoundException;
-import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
-import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
 import org.apache.freemarker.core.util._StringUtil;
 
 /**
- * Indicates that the template name given was malformed according the {@link TemplateNameFormat} in use. Note that for
- * backward compatibility, {@link DefaultTemplateNameFormatFM2} doesn't throw this exception,
- * {@link DefaultTemplateNameFormat} does. This exception extends {@link IOException} for backward compatibility.
+ * Indicates that the template name given was malformed according the {@link TemplateNameFormat} in use.
+ * This exception extends {@link IOException} for backward compatibility.
  * 
  *
  * @see TemplateNotFoundException

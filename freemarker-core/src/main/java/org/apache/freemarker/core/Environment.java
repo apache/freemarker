@@ -63,7 +63,6 @@ import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
-import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.apache.freemarker.core.util._DateUtil;
 import org.apache.freemarker.core.util._DateUtil.DateToISO8601CalendarFactory;
@@ -2819,24 +2818,25 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * Resolves a reference to a template (like the one used in {@code #include} or {@code #import}), assuming a base
      * name. This gives a full (that is, absolute), even if non-normalized template name, that could be used for
      * {@link Configuration#getTemplate(String)}. This is mostly used when a template refers to another template.
-     * 
+     *
      * @param baseName
      *            The name to which relative {@code targetName}-s are relative to. Maybe {@code null} (happens when
-     *            resolving names in nameless templates), which means that the base is the root "directory", and so the
-     *            {@code targetName} is returned without change. Assuming {@link DefaultTemplateNameFormatFM2#INSTANCE}
-     *            or {@link DefaultTemplateNameFormat#INSTANCE}, the rules are as follows. If you want to specify a base
-     *            directory here, it must end with {@code "/"}. If it doesn't end with {@code "/"}, it's parent
-     *            directory will be used as the base path. Might starts with a scheme part (like {@code "foo://"}, or
-     *            with {@link DefaultTemplateNameFormat#INSTANCE} even just with {@code "foo:"}).
+     *            resolving names in nameless templates), which means that the base is the root "directory", and so
+     *            the {@code targetName} is returned without change. Assuming the
+     *            {@link Configuration#getTemplateNameFormat() templateNameFormat} is
+     *            {@link DefaultTemplateNameFormat#INSTANCE}, the rules are as follows. If you want to specify a base
+     *            directory here, it must end with {@code "/"}. If it doesn't end with {@code "/"}, it's treated as
+     *            a file name and so its parent directory will be used as the base path. Might starts with a scheme
+     *            part (like {@code "foo://"}, or even just {@code "foo:"}).
      * @param targetName
-     *            The name of the template, which is either a relative or absolute name. Assuming
-     *            {@link DefaultTemplateNameFormatFM2#INSTANCE} or {@link DefaultTemplateNameFormat#INSTANCE}, the rules
-     *            are as follows. If it starts with {@code "/"} or contains a scheme part separator ({@code "://"},
-     *            also, with {@link DefaultTemplateNameFormat#INSTANCE} a {@code ":"} with no {@code "/"} anywhere
-     *            before it) then it's an absolute name, otherwise it's a relative path. Relative paths are interpreted
-     *            relatively to the {@code baseName}. Absolute names are simply returned as is, ignoring the
-     *            {@code baseName}, except, when the {@code baseName} has scheme part while the {@code targetName}
-     *            doesn't have, then the schema of the {@code baseName} is prepended to the {@code targetName}.
+     *            The name of the template, which is either a relative or absolute name. Assuming the
+     *            {@link Configuration#getTemplateNameFormat() templateNameFormat} is
+     *            {@link DefaultTemplateNameFormat#INSTANCE}, the rules are as follows. If it starts with {@code "/"}
+     *            or contains a scheme part separator (a {@code ":"} with no {@code "/"} anywhere before it)
+     *            then it's an absolute name, otherwise it's a relative path. Relative paths are interpreted
+     *            relatively to the {@code baseName}. Absolute names are simply returned as is, ignoring the {@code
+     *            baseName}, except, when the {@code baseName} has scheme part while the {@code targetName} doesn't
+     *            have it, then the schema of the {@code baseName} is prepended to the {@code targetName}.
      */
     public String toFullTemplateName(String baseName, String targetName)
             throws MalformedTemplateNameException {

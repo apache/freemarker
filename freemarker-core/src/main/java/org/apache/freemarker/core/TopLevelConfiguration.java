@@ -36,7 +36,6 @@ import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.TemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
-import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.SoftCacheStorage;
@@ -97,8 +96,7 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
 
     /**
      * The template name format used; see {@link TemplateNameFormat}. The default is
-     * {@link DefaultTemplateNameFormatFM2#INSTANCE} (while the recommended value for new projects is
-     * {@link DefaultTemplateNameFormat#INSTANCE}), except when the {@link #getTemplateResolver() templateResolver}
+     * {@link DefaultTemplateNameFormat#INSTANCE}, except when the {@link #getTemplateResolver() templateResolver}
      * doesn't support this setting, in which case it's {@code null}.
      *
      * <p>If the the {@link #getTemplateResolver() templateResolver} is a {@link DefaultTemplateResolver} then this

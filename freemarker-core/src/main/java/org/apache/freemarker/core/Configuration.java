@@ -77,7 +77,6 @@ import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
 import org.apache.freemarker.core.templateresolver.TemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
-import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.MruCacheStorage;
 import org.apache.freemarker.core.templateresolver.impl.SoftCacheStorage;
@@ -1312,23 +1311,24 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
      *
      * @param name
      *            The name or path of the template, which is not a real path, but interpreted inside the current
-     *            {@link TemplateLoader}. Can't be {@code null}. The exact syntax of the name depends on the underlying
-     *            {@link TemplateLoader} (the {@link TemplateResolver} more generally), but the default
-     *            {@link TemplateResolver} has some assumptions. First, the name is expected to be a
-     *            hierarchical path, with path components separated by a slash character (not with backslash!). The path
-     *            (the name) given here must <em>not</em> begin with slash; it's always interpreted relative to the
-     *            "template root directory". Then, the {@code ..} and {@code .} path meta-elements will be resolved. For
-     *            example, if the name is {@code a/../b/./c.ftl}, then it will be simplified to {@code b/c.ftl}. The
-     *            rules regarding this are the same as with conventional UN*X paths. The path must not reach outside the
-     *            template root directory, that is, it can't be something like {@code "../templates/my.ftl"} (not even
-     *            if this path happens to be equivalent with {@code "/my.ftl"}). Furthermore, the path is allowed to
-     *            contain at most one path element whose name is {@code *} (asterisk). This path meta-element triggers
-     *            the <i>acquisition mechanism</i>. If the template is not found in the location described by the
-     *            concatenation of the path left to the asterisk (called base path) and the part to the right of the
-     *            asterisk (called resource path), the {@link TemplateResolver} (at least the default one) will attempt
-     *            to remove the rightmost path component from the base path ("go up one directory") and concatenate
-     *            that with the resource path. The process is repeated until either a template is found, or the base
-     *            path is completely exhausted.
+     *            {@link TemplateLoader}. Can't be {@code null}. The exact syntax of the name depends on the
+     *            underlying {@link TemplateNameFormat} and to an extent on the {@link TemplateLoader} (or on the
+     *            {@link TemplateResolver} more generally), but the default configuration has some assumptions.
+     *            First, the name is expected to be a hierarchical path, with path components separated by a slash
+     *            character (not with backslash!). The path (the name) given here is always interpreted relative to
+     *            the "template root directory" and must <em>not</em> begin with slash. Then, the {@code ..} and
+     *            {@code .} path meta-elements will be resolved. For example, if the name is {@code a/../b/./c.ftl},
+     *            then it will be simplified to {@code b/c.ftl}. The rules regarding this are the same as with
+     *            conventional UN*X paths. The path must not reach outside the template root directory, that is, it
+     *            can't be something like {@code "../templates/my.ftl"} (not even if this path happens to be
+     *            equivalent with {@code "/my.ftl"}). Furthermore, the path is allowed to contain at most one path
+     *            element whose name is {@code *} (asterisk). This path meta-element triggers the <i>acquisition
+     *            mechanism</i>. If the template is not found in the location described by the concatenation of the
+     *            path left to the asterisk (called base path) and the part to the right of the asterisk (called
+     *            resource path), then the {@link TemplateResolver} (at least the default one) will attempt to remove
+     *            the rightmost path component from the base path (go up one directory) and concatenate that with
+     *            the resource path. The process is repeated until either a template is found, or the base path is
+     *            completely exhausted.
      *
      * @param locale
      *            The requested locale of the template. This is what {@link Template#getLocale()} on the resulting
@@ -1858,10 +1858,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                         || TEMPLATE_NAME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
                     if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
                         unsetTemplateNameFormat();
-                    } else if (value.equalsIgnoreCase("default_2_3_0")) {
-                        setTemplateNameFormat(DefaultTemplateNameFormatFM2.INSTANCE);
-                    } else if (value.equalsIgnoreCase("default_2_4_0")) {
-                        setTemplateNameFormat(DefaultTemplateNameFormat.INSTANCE);
                     } else {
                         throw new InvalidSettingValueException(name, value,
                                 "No such predefined template name format");
@@ -2166,7 +2162,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
          * the default is hardwired to be {@code null} and this method isn't called).
          */
         protected TemplateNameFormat getDefaultTemplateNameFormat() {
-            return DefaultTemplateNameFormatFM2.INSTANCE;
+            return DefaultTemplateNameFormat.INSTANCE;
         }
 
         /**

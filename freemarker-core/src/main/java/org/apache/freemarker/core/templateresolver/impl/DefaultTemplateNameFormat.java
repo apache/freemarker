@@ -18,64 +18,41 @@
  */
 package org.apache.freemarker.core.templateresolver.impl;
 
+import java.io.Serializable;
+import java.util.Locale;
+
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
 import org.apache.freemarker.core.util._StringUtil;
 
 /**
- * The default template name format only when {@link Configuration#getIncompatibleImprovements()
- * incompatible_improvements} is set to 2.4.0 (or higher). This is not the out-of-the-box default format of FreeMarker
- * 2.4.x, because the default {@code incompatible_improvements} is still 2.3.0 there.
- * 
+ * The default {@linkplain Configuration#getTemplateNameFormat()} template name format}. This defines a format where
+ * directories and file names in a path are separated with {@code "/"} (slash). {@code "\"} (backslash) is not
+ * allowed and causes {@link MalformedTemplateNameException}. Directory names {@code "."} and {@code ".."} are
+ * treated specially with the same meaning as in UN*X paths. Directory name {@code "*"} is treated as acquisition
+ * mark (see {@link Configuration#getTemplate(String, Locale, Serializable, boolean)}).
  * <p>
- * Differences to the {@link DefaultTemplateNameFormatFM2} format:
- * 
- * <ul>
- * 
- * <li>The scheme and the path need not be separated with {@code "://"} anymore, only with {@code ":"}. This makes
- * template names like {@code "classpath:foo.ftl"} interpreted as an absolute name with scheme {@code "classpath"}
- * and absolute path "foo.ftl". The scheme name before the {@code ":"} can't contain {@code "/"}, or else it's
- * treated as a malformed name. The scheme part can be separated either with {@code "://"} or just {@code ":"} from
- * the path. Hence, {@code myschme:/x} is normalized to {@code myschme:x}, while {@code myschme:///x} is normalized
- * to {@code myschme://x}, but {@code myschme://x} or {@code myschme:/x} aren't changed by normalization. It's up
- * the {@link TemplateLoader} to which the normalized names are passed to decide which of these scheme separation
- * conventions are valid (maybe both).</li>
- * 
- * <li>{@code ":"} is not allowed in template names, except as the scheme separator (see previous point).
- * 
- * <li>Malformed paths throw {@link MalformedTemplateNameException} instead of acting like if the template wasn't
- * found.
- * 
- * <li>{@code "\"} (backslash) is not allowed in template names, and causes {@link MalformedTemplateNameException}.
- * With {@link DefaultTemplateNameFormatFM2} you would certainly end up with a {@link TemplateNotFoundException} (or
- * worse, it would work, but steps like {@code ".."} wouldn't be normalized by FreeMarker).
- * 
- * <li>Template names might end with {@code /}, like {@code "foo/"}, and the presence or lack of the terminating
- * {@code /} is seen as significant. While their actual interpretation is up to the {@link TemplateLoader},
- * operations that manipulate template names assume that the last step refers to a "directory" as opposed to a
- * "file" exactly if the terminating {@code /} is present. Except, the empty name is assumed to refer to the root
- * "directory" (despite that it doesn't end with {@code /}).
- *
- * <li>{@code //} is normalized to {@code /}, except of course if it's in the scheme name terminator. Like
- * {@code foo//bar///baaz.ftl} is normalized to {@code foo/bar/baaz.ftl}. (In general, 0 long step names aren't
- * possible anymore.)</li>
- * 
- * <li>The {@code ".."} bugs of the legacy normalizer are oms: {@code ".."} steps has removed the preceding
- * {@code "."} or {@code "*"} or scheme steps, not treating them specially as they should be. Now these work as
- * expected. Examples: {@code "a/./../c"} has become to {@code "a/c"}, now it will be {@code "c"}; {@code "a/b/*}
- * {@code /../c"} has become to {@code "a/b/c"}, now it will be {@code "a/*}{@code /c"}; {@code "scheme://.."} has
- * become to {@code "scheme:/"}, now it will be {@code null} ({@link TemplateNotFoundException}) for backing out of
- * the root directory.</li>
- * 
- * <li>As now directory paths has to be handled as well, it recognizes terminating, leading, and lonely {@code ".."}
- * and {@code "."} steps. For example, {@code "foo/bar/.."} now becomes to {@code "foo/"}</li>
- * 
- * <li>Multiple consecutive {@code *} steps are normalized to one</li>
- * 
- * </ul>
+ * The name may starts with scheme part, like in {@code "classpath:com/example/bar.ftl"} (scheme "classpath" and
+ * absolute path "com/example/bar.ftl") or {@code "cms://example.com/foo.ftl"} (scheme "cms" and absolute path
+ * "example.com/foo.ftl"). The scheme name before the {@code ":"} (colon) can't contain {@code "/"}, and {@code ":"}
+ * can only be used for denoting the scheme, or else {@link MalformedTemplateNameException} is thrown.
+ * The scheme part can be separated either with {@code "://"} or just with {@code ":"} from the path, hence, {@code
+ * myschme:/x} is normalized to {@code myschme:x}, while {@code myschme:///x} is normalized to {@code myschme://x},
+ * but {@code myschme://x} or {@code myschme:/x} aren't changed by normalization. It's up the {@link TemplateLoader}
+ * (to which the normalized names are passed) to decide which of these scheme separation conventions are accepted.
+ * <p>
+ * Template names might end with {@code /}, like {@code "foo/"}, and the presence or lack of the terminating {@code
+ * "/"} is significant. While their actual interpretation is up to the {@link TemplateLoader}, operations that
+ * manipulate template names assume that the last step refers to a "directory" as opposed to a "file" exactly if the
+ * terminating {@code /} is present. Except, the empty name is assumed to refer to the root "directory" (despite that
+ * it doesn't end with {@code /}).
+ * <p>
+ * {@code //} is normalized to {@code /}, except of course if it's in the scheme name terminator. Like {@code
+ * foo//bar///baaz.ftl} is normalized to {@code foo/bar/baaz.ftl}. Hence 0 length step names aren't possible.
+ * <p>
+ * Multiple consecutive {@code "*"} steps are normalized to one
  */
 public final class DefaultTemplateNameFormat extends TemplateNameFormat {
     

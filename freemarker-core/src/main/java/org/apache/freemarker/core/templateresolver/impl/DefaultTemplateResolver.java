@@ -152,11 +152,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
      *         check that it's missing.
      * 
      * @throws MalformedTemplateNameException
-     *             If the {@code name} was malformed according the current {@link TemplateNameFormat}. However, if the
-     *             {@link TemplateNameFormat} is {@link DefaultTemplateNameFormatFM2#INSTANCE} and
-     *             {@link Configuration#getIncompatibleImprovements()} is less than 2.4.0, then instead of throwing this
-     *             exception, a {@link GetTemplateResult} will be returned, similarly as if the template were missing
-     *             (the {@link GetTemplateResult#getMissingTemplateReason()} will describe the real error).
+     *             If the {@code name} was malformed according the current {@link TemplateNameFormat}.
      * 
      * @throws IOException
      *             If reading the template has failed from a reason other than the template is missing. This method

@@ -121,7 +121,7 @@ public class IncludeAndImportTest extends TemplateTest {
         // The opposite of the previous, where different names refer to the same template after a lookup:
         assertOutput(
                 "<#setting locale='en_US'>"
-                + "<#import '*/lib.ftl' as ns1>"
+                + "<#import 'x/*/lib.ftl' as ns1>"
                 + "<#import 'lib.ftl' as ns2>"
                 + "<@ns1.m/> <@ns2.m/> ${history}",
                 "en en LEnLEn");

@@ -115,7 +115,7 @@ public class TemplateNotFoundMessageTest {
             String errMsg = failWith(emptyLoader, "x\\y");
             showErrorMessage(errMsg);
             assertThat(errMsg,
-                    allOf(containsStringIgnoringCase("warning"), containsStringIgnoringCase("backslash")));
+                    containsStringIgnoringCase("backslash"));
         }
         {
             String errMsg = failWith(emptyLoader, "x/./y");

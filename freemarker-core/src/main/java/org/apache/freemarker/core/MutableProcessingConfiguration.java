@@ -58,7 +58,6 @@ import org.apache.freemarker.core.templateresolver.OrMatcher;
 import org.apache.freemarker.core.templateresolver.PathGlobMatcher;
 import org.apache.freemarker.core.templateresolver.PathRegexMatcher;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
-import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormatFM2;
 import org.apache.freemarker.core.util.FTLUtil;
 import org.apache.freemarker.core.util.GenericParseException;
 import org.apache.freemarker.core.util.OptInTemplateClassResolver;
@@ -1656,8 +1655,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       
      *   <li><p>{@code "template_name_format"}:
      *       See: {@link Configuration#getTemplateNameFormat()}.
-     *       <br>String value: {@code "default"} (case insensitive) for the default, {@code "default_2_3_0"}
-     *       for {@link DefaultTemplateNameFormatFM2#INSTANCE}, {@code "default_2_4_0"} for
+     *       <br>String value: {@code "default"} (case insensitive) for the default,
      *       {@link DefaultTemplateNameFormat#INSTANCE}.
      * </ul>
      * 
