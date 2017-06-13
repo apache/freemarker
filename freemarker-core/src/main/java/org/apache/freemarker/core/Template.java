@@ -591,14 +591,15 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
 
     /**
      * The name that was actually used to load this template from the {@link TemplateLoader} (or from other custom
-     * storage mechanism). This is what should be shown in error messages as the error location. This is usually the
-     * same as {@link #getLookupName()}, except when localized template lookup, template acquisition ({@code *} step
-     * in the name), or other {@link TemplateLookupStrategy} transforms the requested name ({@link #getLookupName()})
-     * to a different final {@link TemplateLoader}-level name. For example, when you get a template with name {@code
-     * "foo .ftl"} then because of localized template lookup, it's possible that something like {@code "foo_en.ftl"}
-     * will be loaded behind the scenes. While the template name will be still the same as the requested template
-     * name ({@code "foo .ftl"}), errors should point to {@code "foo_de.ftl"}. Note that relative paths are always
-     * resolved relatively to the {@code name}, not to the {@code sourceName}.
+     * storage mechanism), or possibly {@code null} for non-stored templates. This is what should be shown in error
+     * messages as the error location. This is usually the same as {@link #getLookupName()}, except when localized
+     * template lookup, template acquisition ({@code *} step in the name), or other {@link TemplateLookupStrategy}
+     * transforms the requested name ({@link #getLookupName()}) to a different final {@link TemplateLoader}-level
+     * name. For example, when you get a template with name {@code "foo .ftl"} then because of localized template
+     * lookup, it's possible that something like {@code "foo_en.ftl"} will be loaded behind the scenes. While the
+     * template name will be still the same as the requested template name ({@code "foo .ftl"}), errors should point
+     * to {@code "foo_de.ftl"}. Note that relative paths are always resolved relatively to the {@code name}, not to
+     * the {@code sourceName}.
      */
     public String getSourceName() {
         return sourceName;
