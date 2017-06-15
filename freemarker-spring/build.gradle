@@ -1,0 +1,102 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+title = "Apache FreeMarker Spring Framework support"
+description = """\
+FreeMarker template engine, Spring Framework support. \
+This is an optional module, mostly useful in frameworks based on Spring Framework."""
+
+dependencies {
+    compile project(":freemarker-core")
+
+    compileOnly "javax.servlet:servlet-api:2.5"
+
+    def springVersion = "4.3.9.RELEASE"
+
+    compileOnly("org.springframework:spring-core:$springVersion") {
+        exclude group: "commons-logging", module: "commons-logging"
+    }
+    compileOnly("org.springframework:spring-beans:$springVersion") {
+        exclude group: "commons-logging", module: "commons-logging"
+    }
+    compileOnly("org.springframework:spring-context:$springVersion") {
+        exclude group: "commons-logging", module: "commons-logging"
+    }
+    compileOnly("org.springframework:spring-context-support:$springVersion") {
+        exclude group: "commons-logging", module: "commons-logging"
+    }
+    compileOnly("org.springframework:spring-web:$springVersion") {
+        exclude group: "commons-logging", module: "commons-logging"
+    }
+    compileOnly("org.springframework:spring-webmvc:$springVersion") {
+        exclude group: "commons-logging", module: "commons-logging"
+    }
+
+    // ------------------------------------------------------------------------
+    // For tests
+
+    testCompile("org.springframework:spring-test:$springVersion") {
+        exclude group: "commons-logging", module: "commons-logging"
+    }
+}
+
+jar {
+    manifest {
+        // This is needed for "a.class.from.another.Bundle"?new() to work.
+        instructionReplace 'DynamicImport-Package', '*'
+
+        instructionReplace 'Bundle-RequiredExecutionEnvironment', 'JavaSE-1.7'
+        // TODO Gradle adds a "Require-Capability"... is it a problem? If not, do we need the above?
+
+        attributes(
+                "Extension-name": "${project.group}:${project.name}",
+                "Specification-Title": project.title,
+                "Implementation-Title": project.title
+        )
+    }
+}
+
+javadoc {
+    title "${project.title} ${versionCanonical} API"
+}
+
+// The identical parts of Maven "deployer" and "installer" configurations:
+def mavenCommons = { callerDelegate ->
+    delegate = callerDelegate
+
+    pom.project {
+        description project.description
+    }
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            mavenCommons(delegate)
+        }
+    }
+}
+
+install {
+    repositories {
+        mavenInstaller {
+            mavenCommons(delegate)
+        }
+    }
+}
