@@ -29,22 +29,19 @@ dependencies {
 
     def springVersion = "4.3.9.RELEASE"
 
-    compileOnly("org.springframework:spring-core:$springVersion") {
+    compile("org.springframework:spring-core:$springVersion") {
         exclude group: "commons-logging", module: "commons-logging"
     }
-    compileOnly("org.springframework:spring-beans:$springVersion") {
+    compile("org.springframework:spring-beans:$springVersion") {
         exclude group: "commons-logging", module: "commons-logging"
     }
-    compileOnly("org.springframework:spring-context:$springVersion") {
+    compile("org.springframework:spring-context:$springVersion") {
         exclude group: "commons-logging", module: "commons-logging"
     }
-    compileOnly("org.springframework:spring-context-support:$springVersion") {
+    compile("org.springframework:spring-web:$springVersion") {
         exclude group: "commons-logging", module: "commons-logging"
     }
-    compileOnly("org.springframework:spring-web:$springVersion") {
-        exclude group: "commons-logging", module: "commons-logging"
-    }
-    compileOnly("org.springframework:spring-webmvc:$springVersion") {
+    compile("org.springframework:spring-webmvc:$springVersion") {
         exclude group: "commons-logging", module: "commons-logging"
     }
 
