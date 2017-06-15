@@ -44,6 +44,8 @@ public class ConfigurationFactoryBean extends ExtendableBuilder<ConfigurationFac
     private Map<String, String> settings = new LinkedHashMap<>();
 
     public ConfigurationFactoryBean() {
+        // By default, set the default version constant.
+        // #setIncompatibleImprovements(Version) can be used to change it.
         super(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
 
         delegate = new AbstractFactoryBean<Configuration>() {

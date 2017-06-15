@@ -18,13 +18,16 @@
  */
 package org.apache.freemarker.spring;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Configuration.ExtendableBuilder;
+import org.apache.freemarker.core.Version;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -55,9 +58,15 @@ public class ConfigurationFactoryBeanTest {
         final Map<String, String> settings = new LinkedHashMap<>();
         settings.put(ExtendableBuilder.LOCALIZED_TEMPLATE_LOOKUP_KEY_CAMEL_CASE, "true");
 
+        final Map<String, Object> sharedVars = new HashMap<>();
+        sharedVars.put("sharedVar1", "sharedVal1");
+        sharedVars.put("sharedVar2", "sharedVal2");
+
         BeanDefinition beanDef =
                 BeanDefinitionBuilder.genericBeanDefinition(ConfigurationFactoryBean.class.getName())
+                .addPropertyValue("incompatibleImprovements", new Version(3, 0, 0))
                 .addPropertyValue("settings", settings)
+                .addPropertyValue("sharedVariables", sharedVars)
                 .getBeanDefinition();
 
         appContext.registerBeanDefinition("freemarkerConfig", beanDef);
@@ -68,7 +77,10 @@ public class ConfigurationFactoryBeanTest {
         assertTrue("Not a Configuration object: " + bean, bean instanceof Configuration);
 
         Configuration config = (Configuration) bean;
+        assertEquals(new Version(3, 0, 0), config.getIncompatibleImprovements());
         assertTrue(config.getLocalizedTemplateLookup());
+        assertEquals("sharedVal1", config.getSharedVariables().get("sharedVar1"));
+        assertEquals("sharedVal2", config.getSharedVariables().get("sharedVar2"));
     }
 
 }
