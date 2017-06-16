@@ -72,6 +72,7 @@ public class ConfigurationFactoryBean extends ExtendableBuilder<ConfigurationFac
     }
 
     public void setSettings(Map<String, String> settings) {
+        this.settings.clear();
         this.settings.putAll(settings);
     }
 

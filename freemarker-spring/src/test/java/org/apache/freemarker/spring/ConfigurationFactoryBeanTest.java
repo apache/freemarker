@@ -19,15 +19,25 @@
 package org.apache.freemarker.spring;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.freemarker.core.AutoEscapingPolicy;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Configuration.ExtendableBuilder;
+import org.apache.freemarker.core.MutableParsingAndProcessingConfiguration;
+import org.apache.freemarker.core.NamingConvention;
+import org.apache.freemarker.core.TagSyntax;
+import org.apache.freemarker.core.TemplateLanguage;
 import org.apache.freemarker.core.Version;
+import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
+import org.apache.freemarker.core.templateresolver.CacheStorage;
+import org.apache.freemarker.core.templateresolver.impl.MruCacheStorage;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,9 +64,22 @@ public class ConfigurationFactoryBeanTest {
     }
 
     @Test
-    public void testConfigurationFactoryBeanDefinition() throws Exception {
+    public void testConfigurationFactoryBeanSettings() throws Exception {
         final Map<String, String> settings = new LinkedHashMap<>();
-        settings.put(ExtendableBuilder.LOCALIZED_TEMPLATE_LOOKUP_KEY_CAMEL_CASE, "true");
+
+        settings.put(MutableParsingAndProcessingConfiguration.SOURCE_ENCODING_KEY, "UTF-8");
+        settings.put(MutableParsingAndProcessingConfiguration.WHITESPACE_STRIPPING_KEY, "true");
+        settings.put(MutableParsingAndProcessingConfiguration.AUTO_ESCAPING_POLICY_KEY, "enableIfSupported");
+        settings.put(MutableParsingAndProcessingConfiguration.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY, "true");
+        settings.put(MutableParsingAndProcessingConfiguration.TEMPLATE_LANGUAGE_KEY, "FTL");
+        settings.put(MutableParsingAndProcessingConfiguration.TAG_SYNTAX_KEY, "squareBracket");
+        settings.put(MutableParsingAndProcessingConfiguration.NAMING_CONVENTION_KEY, "camelCase");
+        settings.put(MutableParsingAndProcessingConfiguration.TAB_SIZE_KEY, "4");
+
+        settings.put(ExtendableBuilder.OBJECT_WRAPPER_KEY, "restricted");
+        settings.put(ExtendableBuilder.LOCALIZED_TEMPLATE_LOOKUP_KEY, "false");
+        settings.put(ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY, "strong:20, soft:250");
+        settings.put(ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "1m");
 
         final Map<String, Object> sharedVars = new HashMap<>();
         sharedVars.put("sharedVar1", "sharedVal1");
@@ -77,8 +100,25 @@ public class ConfigurationFactoryBeanTest {
         assertTrue("Not a Configuration object: " + bean, bean instanceof Configuration);
 
         Configuration config = (Configuration) bean;
+
         assertEquals(new Version(3, 0, 0), config.getIncompatibleImprovements());
-        assertTrue(config.getLocalizedTemplateLookup());
+        assertEquals(Charset.forName("UTF-8"), config.getSourceEncoding());
+        assertTrue(config.isWhitespaceStrippingSet());
+        assertEquals(AutoEscapingPolicy.ENABLE_IF_SUPPORTED, config.getAutoEscapingPolicy());
+        assertTrue(config.isRecognizeStandardFileExtensionsSet());
+        assertEquals(TemplateLanguage.FTL, config.getTemplateLanguage());
+        assertEquals(TagSyntax.SQUARE_BRACKET, config.getTagSyntax());
+        assertEquals(NamingConvention.CAMEL_CASE, config.getNamingConvention());
+        assertEquals(4, config.getTabSize());
+
+        assertTrue(config.getObjectWrapper() instanceof RestrictedObjectWrapper);
+        assertFalse(config.getLocalizedTemplateLookup());
+        CacheStorage cacheStorage = config.getTemplateCacheStorage();
+        assertTrue(cacheStorage instanceof MruCacheStorage);
+        assertEquals(20, ((MruCacheStorage) cacheStorage).getStrongSizeLimit());
+        assertEquals(250, ((MruCacheStorage) cacheStorage).getSoftSizeLimit());
+        assertEquals(60000, config.getTemplateUpdateDelayMilliseconds().longValue());
+
         assertEquals("sharedVal1", config.getSharedVariables().get("sharedVar1"));
         assertEquals("sharedVal2", config.getSharedVariables().get("sharedVar2"));
     }
