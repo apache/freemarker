@@ -77,19 +77,20 @@ public class ConfigurationFactoryBeanTest {
         settings.put(MutableParsingAndProcessingConfiguration.TAB_SIZE_KEY, "4");
 
         settings.put(ExtendableBuilder.OBJECT_WRAPPER_KEY, "restricted");
-        settings.put(ExtendableBuilder.LOCALIZED_TEMPLATE_LOOKUP_KEY, "false");
         settings.put(ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY, "strong:20, soft:250");
-        settings.put(ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY, "1m");
 
         final Map<String, Object> sharedVars = new HashMap<>();
         sharedVars.put("sharedVar1", "sharedVal1");
         sharedVars.put("sharedVar2", "sharedVal2");
 
+        // Creating bean definition which is equivalent to <bean/> element in Spring XML configuration.
         BeanDefinition beanDef =
                 BeanDefinitionBuilder.genericBeanDefinition(ConfigurationFactoryBean.class.getName())
                 .addPropertyValue("incompatibleImprovements", new Version(3, 0, 0))
                 .addPropertyValue("settings", settings)
                 .addPropertyValue("sharedVariables", sharedVars)
+                .addPropertyValue("templateUpdateDelayMilliseconds", 60000)
+                .addPropertyValue("localizedTemplateLookup", "false")
                 .getBeanDefinition();
 
         appContext.registerBeanDefinition("freemarkerConfig", beanDef);
