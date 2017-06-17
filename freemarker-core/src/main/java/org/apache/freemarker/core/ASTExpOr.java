@@ -43,7 +43,7 @@ final class ASTExpOr extends ASTExpBoolean {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "||";
     }
 

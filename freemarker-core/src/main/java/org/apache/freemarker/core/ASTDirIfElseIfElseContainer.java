@@ -75,12 +75,12 @@ final class ASTDirIfElseIfElseContainer extends ASTDirective {
             buf.append("</#if>");
             return buf.toString();
         } else {
-            return getNodeTypeSymbol();
+            return getASTNodeDescriptor();
         }
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#if-#elseif-#else-container";
     }
     

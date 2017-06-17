@@ -48,8 +48,8 @@ abstract class BuiltInWithParseTimeParameters extends SpecialBuiltIn {
     }
     
     @Override
-    String getNodeTypeSymbol() {
-        return super.getNodeTypeSymbol() + "(...)";
+    String getASTNodeDescriptor() {
+        return super.getASTNodeDescriptor() + "(...)";
     }        
     
     @Override

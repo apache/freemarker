@@ -74,7 +74,7 @@ final class ASTDirVisit extends ASTDirective {
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getNodeTypeSymbol());
+        sb.append(getASTNodeDescriptor());
         sb.append(' ');
         sb.append(targetNode.getCanonicalForm());
         if (namespaces != null) {
@@ -86,7 +86,7 @@ final class ASTDirVisit extends ASTDirective {
     }
 
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#visit";
     }
     

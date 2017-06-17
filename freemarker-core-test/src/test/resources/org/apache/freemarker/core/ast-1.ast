@@ -86,7 +86,7 @@
                 - content: dynamic "..."  // o.a.f.c.ASTExpStringLiteral
                     - value part: "x"  // String
                     - value part: ${...}  // o.a.f.c.ASTDollarInterpolation
-                        - content: *  // o.a.f.c.ArithmeticExpression
+                        - content: *  // o.a.f.c.ASTExpArithmetic
                             - left-hand operand: baaz  // o.a.f.c.ASTExpVariable
                             - right-hand operand: 10  // o.a.f.c.ASTExpNumberLiteral
                             - AST-node subtype: "1"  // Integer

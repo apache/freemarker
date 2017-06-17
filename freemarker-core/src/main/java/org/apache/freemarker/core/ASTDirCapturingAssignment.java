@@ -128,7 +128,7 @@ final class ASTDirCapturingAssignment extends ASTDirective {
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append("<");
-        sb.append(getNodeTypeSymbol());
+        sb.append(getASTNodeDescriptor());
         sb.append(' ');
         sb.append(varName);
         if (namespaceExp != null) {
@@ -139,7 +139,7 @@ final class ASTDirCapturingAssignment extends ASTDirective {
             sb.append('>');
             sb.append(getChildrenCanonicalForm());
             sb.append("</");
-            sb.append(getNodeTypeSymbol());
+            sb.append(getASTNodeDescriptor());
             sb.append('>');
         } else {
             sb.append(" = .nested_output");
@@ -148,7 +148,7 @@ final class ASTDirCapturingAssignment extends ASTDirective {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return ASTDirAssignment.getDirectiveName(scope);
     }
     

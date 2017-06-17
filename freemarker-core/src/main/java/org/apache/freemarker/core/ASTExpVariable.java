@@ -61,7 +61,7 @@ final class ASTExpVariable extends ASTExpression {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return getCanonicalForm();
     }
 

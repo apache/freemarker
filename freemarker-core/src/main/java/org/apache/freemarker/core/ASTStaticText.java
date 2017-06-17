@@ -81,7 +81,7 @@ final class ASTStaticText extends ASTElement {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#text";
     }
     

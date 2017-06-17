@@ -167,7 +167,7 @@ final class ASTExpStringLiteral extends ASTExpression implements TemplateScalarM
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return dynamicValue == null ? getCanonicalForm() : "dynamic \"...\"";
     }
     

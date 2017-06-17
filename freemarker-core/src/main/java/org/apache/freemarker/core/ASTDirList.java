@@ -125,7 +125,7 @@ final class ASTDirList extends ASTDirective {
     protected String dump(boolean canonical) {
         StringBuilder buf = new StringBuilder();
         if (canonical) buf.append('<');
-        buf.append(getNodeTypeSymbol());
+        buf.append(getASTNodeDescriptor());
         buf.append(' ');
         buf.append(listedExp.getCanonicalForm());
         if (loopVarName != null) {
@@ -141,7 +141,7 @@ final class ASTDirList extends ASTDirective {
             buf.append(getChildrenCanonicalForm());
             if (!(getParent() instanceof ASTDirListElseContainer)) {
                 buf.append("</");
-                buf.append(getNodeTypeSymbol());
+                buf.append(getASTNodeDescriptor());
                 buf.append('>');
             }
         }
@@ -184,7 +184,7 @@ final class ASTDirList extends ASTDirective {
     }    
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#list";
     }
 

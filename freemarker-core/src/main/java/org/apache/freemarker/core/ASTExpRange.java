@@ -68,11 +68,11 @@ final class ASTExpRange extends ASTExpression {
     @Override
     public String getCanonicalForm() {
         String rhs = rho != null ? rho.getCanonicalForm() : "";
-        return lho.getCanonicalForm() + getNodeTypeSymbol() + rhs;
+        return lho.getCanonicalForm() + getASTNodeDescriptor() + rhs;
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         switch (endType) {
         case END_EXCLUSIVE: return "..<";
         case END_INCLUSIVE: return "..";

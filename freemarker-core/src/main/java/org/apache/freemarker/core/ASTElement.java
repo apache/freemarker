@@ -79,7 +79,7 @@ abstract class ASTElement extends ASTNode {
      * This final implementation calls {@link #dump(boolean) dump(false)}.
      * 
      * @see #getCanonicalForm()
-     * @see #getNodeTypeSymbol()
+     * @see #getASTNodeDescriptor()
      */
     public final String getDescription() {
         return dump(false);

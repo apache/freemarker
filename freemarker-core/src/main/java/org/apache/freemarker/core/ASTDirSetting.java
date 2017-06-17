@@ -127,7 +127,7 @@ final class ASTDirSetting extends ASTDirective {
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getNodeTypeSymbol());
+        sb.append(getASTNodeDescriptor());
         sb.append(' ');
         sb.append(_StringUtil.toFTLTopLevelTragetIdentifier(key));
         sb.append('=');
@@ -137,7 +137,7 @@ final class ASTDirSetting extends ASTDirective {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#setting";
     }
 

@@ -38,10 +38,10 @@ class ASTDirNoEscape extends ASTDirective {
     @Override
     protected String dump(boolean canonical) {
         if (canonical) {
-            return "<" + getNodeTypeSymbol() + '>' + getChildrenCanonicalForm()
-                    + "</" + getNodeTypeSymbol() + '>';
+            return "<" + getASTNodeDescriptor() + '>' + getChildrenCanonicalForm()
+                    + "</" + getASTNodeDescriptor() + '>';
         } else {
-            return getNodeTypeSymbol();
+            return getASTNodeDescriptor();
         }
     }
 
@@ -61,7 +61,7 @@ class ASTDirNoEscape extends ASTDirective {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#noescape";
     }
 

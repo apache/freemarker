@@ -34,11 +34,11 @@ final class ASTDirFallback extends ASTDirective {
 
     @Override
     protected String dump(boolean canonical) {
-        return canonical ? "<" + getNodeTypeSymbol() + "/>" : getNodeTypeSymbol();
+        return canonical ? "<" + getASTNodeDescriptor() + "/>" : getASTNodeDescriptor();
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#fallback";
     }
     

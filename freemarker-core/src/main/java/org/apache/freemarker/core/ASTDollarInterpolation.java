@@ -112,7 +112,7 @@ final class ASTDollarInterpolation extends ASTInterpolation {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "${...}";
     }
 

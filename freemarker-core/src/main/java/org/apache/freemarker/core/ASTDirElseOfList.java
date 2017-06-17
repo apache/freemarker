@@ -39,16 +39,16 @@ final class ASTDirElseOfList extends ASTDirective {
     protected String dump(boolean canonical) {
         if (canonical) {
             StringBuilder buf = new StringBuilder();
-            buf.append('<').append(getNodeTypeSymbol()).append('>');
+            buf.append('<').append(getASTNodeDescriptor()).append('>');
             buf.append(getChildrenCanonicalForm());            
             return buf.toString();
         } else {
-            return getNodeTypeSymbol();
+            return getASTNodeDescriptor();
         }
     }
 
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#else";
     }
     

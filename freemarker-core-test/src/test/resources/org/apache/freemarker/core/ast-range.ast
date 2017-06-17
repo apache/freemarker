@@ -89,11 +89,11 @@
         - assignment target: "x"  // String
         - assignment operator: "="  // String
         - assignment source: ..  // o.a.f.c.ASTExpRange
-            - left-hand operand: *  // o.a.f.c.ArithmeticExpression
+            - left-hand operand: *  // o.a.f.c.ASTExpArithmetic
                 - left-hand operand: n  // o.a.f.c.ASTExpVariable
                 - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
                 - AST-node subtype: "1"  // Integer
-            - right-hand operand: *  // o.a.f.c.ArithmeticExpression
+            - right-hand operand: *  // o.a.f.c.ASTExpArithmetic
                 - left-hand operand: m  // o.a.f.c.ASTExpVariable
                 - right-hand operand: 2  // o.a.f.c.ASTExpNumberLiteral
                 - AST-node subtype: "1"  // Integer
@@ -149,8 +149,8 @@
                         - left-hand operand: n  // o.a.f.c.ASTExpVariable
                         - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
                     - right-hand operand: 2  // o.a.f.c.ASTExpNumberLiteral
-                - right-hand operand: -  // o.a.f.c.ArithmeticExpression
-                    - left-hand operand: -  // o.a.f.c.ArithmeticExpression
+                - right-hand operand: -  // o.a.f.c.ASTExpArithmetic
+                    - left-hand operand: -  // o.a.f.c.ASTExpArithmetic
                         - left-hand operand: m  // o.a.f.c.ASTExpVariable
                         - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
                         - AST-node subtype: "0"  // Integer
@@ -162,8 +162,8 @@
                         - left-hand operand: o  // o.a.f.c.ASTExpVariable
                         - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
                     - right-hand operand: 2  // o.a.f.c.ASTExpNumberLiteral
-                - right-hand operand: -  // o.a.f.c.ArithmeticExpression
-                    - left-hand operand: -  // o.a.f.c.ArithmeticExpression
+                - right-hand operand: -  // o.a.f.c.ASTExpArithmetic
+                    - left-hand operand: -  // o.a.f.c.ASTExpArithmetic
                         - left-hand operand: p  // o.a.f.c.ASTExpVariable
                         - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
                         - AST-node subtype: "0"  // Integer
@@ -187,7 +187,7 @@
         - assignment target: "x"  // String
         - assignment operator: "="  // String
         - assignment source: ..  // o.a.f.c.ASTExpRange
-            - left-hand operand: -  // o.a.f.c.ArithmeticExpression
+            - left-hand operand: -  // o.a.f.c.ASTExpArithmetic
                 - left-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
                 - right-hand operand: a  // o.a.f.c.ASTExpVariable
                 - AST-node subtype: "0"  // Integer
@@ -200,7 +200,7 @@
         - assignment target: "x"  // String
         - assignment operator: "="  // String
         - assignment source: ..*  // o.a.f.c.ASTExpRange
-            - left-hand operand: *  // o.a.f.c.ArithmeticExpression
+            - left-hand operand: *  // o.a.f.c.ASTExpArithmetic
                 - left-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
                 - right-hand operand: a  // o.a.f.c.ASTExpVariable
                 - AST-node subtype: "1"  // Integer
@@ -242,7 +242,7 @@
                 - left-hand operand: m  // o.a.f.c.ASTExpVariable
                 - right-hand operand: null  // Null
             - argument value: ..  // o.a.f.c.ASTExpRange
-                - left-hand operand: -  // o.a.f.c.ArithmeticExpression
+                - left-hand operand: -  // o.a.f.c.ASTExpArithmetic
                     - left-hand operand: m  // o.a.f.c.ASTExpVariable
                     - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
                     - AST-node subtype: "0"  // Integer
@@ -251,7 +251,7 @@
                 - left-hand operand: +  // o.a.f.c.ASTExpAddOrConcat
                     - left-hand operand: m  // o.a.f.c.ASTExpVariable
                     - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
-                - right-hand operand: -  // o.a.f.c.ArithmeticExpression
+                - right-hand operand: -  // o.a.f.c.ASTExpArithmetic
                     - left-hand operand: n  // o.a.f.c.ASTExpVariable
                     - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
                     - AST-node subtype: "0"  // Integer
@@ -260,11 +260,11 @@
     @  // o.a.f.c.ASTDirUserDefined
         - callee: m  // o.a.f.c.ASTExpVariable
         - argument value: ..  // o.a.f.c.ASTExpRange
-            - left-hand operand: *  // o.a.f.c.ArithmeticExpression
+            - left-hand operand: *  // o.a.f.c.ASTExpArithmetic
                 - left-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
                 - right-hand operand: m  // o.a.f.c.ASTExpVariable
                 - AST-node subtype: "1"  // Integer
-            - right-hand operand: -  // o.a.f.c.ArithmeticExpression
+            - right-hand operand: -  // o.a.f.c.ASTExpArithmetic
                 - left-hand operand: m  // o.a.f.c.ASTExpVariable
                 - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
                 - AST-node subtype: "0"  // Integer
@@ -272,7 +272,7 @@
             - left-hand operand: +  // o.a.f.c.ASTExpAddOrConcat
                 - left-hand operand: m  // o.a.f.c.ASTExpVariable
                 - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
-            - right-hand operand: -  // o.a.f.c.ArithmeticExpression
+            - right-hand operand: -  // o.a.f.c.ASTExpArithmetic
                 - left-hand operand: n  // o.a.f.c.ASTExpVariable
                 - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
                 - AST-node subtype: "0"  // Integer

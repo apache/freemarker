@@ -321,7 +321,7 @@ public class ASTPrinter {
             ASTNode tObj = (ASTNode) node;
 
             printNodeLineStart(paramRole, ind, out);
-            out.write(tObj.getNodeTypeSymbol());
+            out.write(tObj.getASTNodeDescriptor());
             printNodeLineEnd(node, out, opts);
             
             if (opts.getShowConstantValue() && node instanceof ASTExpression) {

@@ -59,7 +59,7 @@ final class ASTExpNumberLiteral extends ASTExpression implements TemplateNumberM
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return getCanonicalForm();
     }
     

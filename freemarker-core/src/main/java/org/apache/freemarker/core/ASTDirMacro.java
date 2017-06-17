@@ -93,7 +93,7 @@ final class ASTDirMacro extends ASTDirective implements TemplateModel {
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getNodeTypeSymbol());
+        sb.append(getASTNodeDescriptor());
         sb.append(' ');
         sb.append(_StringUtil.toFTLTopLevelTragetIdentifier(name));
         if (function) sb.append('(');
@@ -133,13 +133,13 @@ final class ASTDirMacro extends ASTDirective implements TemplateModel {
         if (canonical) {
             sb.append('>');
             sb.append(getChildrenCanonicalForm());
-            sb.append("</").append(getNodeTypeSymbol()).append('>');
+            sb.append("</").append(getASTNodeDescriptor()).append('>');
         }
         return sb.toString();
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return function ? "#function" : "#macro";
     }
     

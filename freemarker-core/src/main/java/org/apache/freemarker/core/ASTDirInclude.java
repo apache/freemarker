@@ -102,7 +102,7 @@ final class ASTDirInclude extends ASTDirective {
     protected String dump(boolean canonical) {
         StringBuilder buf = new StringBuilder();
         if (canonical) buf.append('<');
-        buf.append(getNodeTypeSymbol());
+        buf.append(getASTNodeDescriptor());
         buf.append(' ');
         buf.append(includedTemplateNameExp.getCanonicalForm());
         if (ignoreMissingExp != null) {
@@ -113,7 +113,7 @@ final class ASTDirInclude extends ASTDirective {
     }
 
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#include";
     }
     

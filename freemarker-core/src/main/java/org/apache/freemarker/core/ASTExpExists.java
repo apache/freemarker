@@ -65,11 +65,11 @@ class ASTExpExists extends ASTExpression {
 
 	@Override
     public String getCanonicalForm() {
-		return exp.getCanonicalForm() + getNodeTypeSymbol();
+		return exp.getCanonicalForm() + getASTNodeDescriptor();
 	}
 	
 	@Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "??";
     }
 

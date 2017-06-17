@@ -48,12 +48,12 @@ final class ASTDirAttemptRecoverContainer extends ASTDirective {
     @Override
     protected String dump(boolean canonical) {
         if (!canonical) {
-            return getNodeTypeSymbol();
+            return getASTNodeDescriptor();
         } else {
             StringBuilder buf = new StringBuilder();
-            buf.append("<").append(getNodeTypeSymbol()).append(">");
+            buf.append("<").append(getASTNodeDescriptor()).append(">");
             buf.append(getChildrenCanonicalForm());            
-            buf.append("</").append(getNodeTypeSymbol()).append(">");
+            buf.append("</").append(getASTNodeDescriptor()).append(">");
             return buf.toString();
         }
     }
@@ -76,7 +76,7 @@ final class ASTDirAttemptRecoverContainer extends ASTDirective {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#attempt";
     }
     

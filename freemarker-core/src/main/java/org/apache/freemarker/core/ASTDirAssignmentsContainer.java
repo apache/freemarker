@@ -103,7 +103,7 @@ final class ASTDirAssignmentsContainer extends ASTDirective {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return ASTDirAssignment.getDirectiveName(scope);
     }
 

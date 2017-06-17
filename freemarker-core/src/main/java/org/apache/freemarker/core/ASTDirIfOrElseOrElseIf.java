@@ -55,7 +55,7 @@ final class ASTDirIfOrElseOrElseIf extends ASTDirective {
     protected String dump(boolean canonical) {
         StringBuilder buf = new StringBuilder();
         if (canonical) buf.append('<');
-        buf.append(getNodeTypeSymbol());
+        buf.append(getASTNodeDescriptor());
         if (condition != null) {
             buf.append(' ');
             buf.append(condition.getCanonicalForm());
@@ -71,7 +71,7 @@ final class ASTDirIfOrElseOrElseIf extends ASTDirective {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         if (type == TYPE_ELSE) {
             return "#else";
         } else if (type == TYPE_IF) {

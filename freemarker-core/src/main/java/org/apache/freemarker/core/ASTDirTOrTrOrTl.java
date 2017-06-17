@@ -46,13 +46,13 @@ final class ASTDirTOrTrOrTl extends ASTDirective {
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getNodeTypeSymbol());
+        sb.append(getASTNodeDescriptor());
         if (canonical) sb.append("/>");
         return sb.toString();
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         if (left && right) {
             return "#t";
         } else if (left) {

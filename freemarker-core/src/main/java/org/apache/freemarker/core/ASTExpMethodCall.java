@@ -96,7 +96,7 @@ final class ASTExpMethodCall extends ASTExpression {
     }
 
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "...(...)";
     }
     

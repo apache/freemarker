@@ -43,7 +43,7 @@ final class ASTDirCase extends ASTDirective {
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getNodeTypeSymbol());
+        sb.append(getASTNodeDescriptor());
         if (condition != null) {
             sb.append(' ');
             sb.append(condition.getCanonicalForm());
@@ -56,7 +56,7 @@ final class ASTDirCase extends ASTDirective {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return condition != null ? "#case" : "#default";
     }
 

@@ -48,7 +48,7 @@ class ASTDirItems extends ASTDirective {
         if (iterCtx == null) {
             // The parser should prevent this situation
             throw new _MiscTemplateException(env,
-                    getNodeTypeSymbol(), " without iteration in context");
+                    getASTNodeDescriptor(), " without iteration in context");
         }
         
         iterCtx.loopForItemsElement(env, getChildBuffer(), loopVarName, loopVar2Name);
@@ -64,7 +64,7 @@ class ASTDirItems extends ASTDirective {
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getNodeTypeSymbol());
+        sb.append(getASTNodeDescriptor());
         sb.append(" as ");
         sb.append(_StringUtil.toFTLTopLevelIdentifierReference(loopVarName));
         if (loopVar2Name != null) {
@@ -75,14 +75,14 @@ class ASTDirItems extends ASTDirective {
             sb.append('>');
             sb.append(getChildrenCanonicalForm());
             sb.append("</");
-            sb.append(getNodeTypeSymbol());
+            sb.append(getASTNodeDescriptor());
             sb.append('>');
         }
         return sb.toString();
     }
 
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#items";
     }
 
