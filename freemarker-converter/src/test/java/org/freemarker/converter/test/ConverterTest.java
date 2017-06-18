@@ -17,14 +17,30 @@
  * under the License.
  */
 
-rootProject.name = 'freemarker'
+package org.freemarker.converter.test;
 
-include 'freemarker-core'
-include 'freemarker-core-test'
-include 'freemarker-core-test-java8'
-include 'freemarker-servlet'
-include 'freemarker-test-utils'
-include 'freemarker-manual'
-include 'freemarker-dom'
-include 'freemarker-converter'
+import java.io.File;
+import java.io.IOException;
 
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
+
+public abstract class ConverterTest {
+
+    @Rule
+    public TemporaryFolder folder = new TemporaryFolder();
+
+    protected File srcDir;
+    protected File dstDir;
+
+    @Before
+    public void setup() throws IOException {
+        srcDir = folder.newFolder("src");
+        dstDir = folder.newFolder("dst");
+        createSourceFiles();
+    }
+
+    protected abstract void createSourceFiles() throws IOException;
+
+}

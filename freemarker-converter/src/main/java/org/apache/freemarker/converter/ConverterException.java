@@ -17,14 +17,16 @@
  * under the License.
  */
 
-rootProject.name = 'freemarker'
+package org.apache.freemarker.converter;
 
-include 'freemarker-core'
-include 'freemarker-core-test'
-include 'freemarker-core-test-java8'
-include 'freemarker-servlet'
-include 'freemarker-test-utils'
-include 'freemarker-manual'
-include 'freemarker-dom'
-include 'freemarker-converter'
+public class ConverterException extends Exception {
 
+    public ConverterException(String message) {
+        this(message, null);
+    }
+
+    public ConverterException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+}
