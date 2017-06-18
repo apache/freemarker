@@ -26,5 +26,5 @@ include 'freemarker-servlet'
 include 'freemarker-test-utils'
 include 'freemarker-manual'
 include 'freemarker-dom'
+include 'freemarker-spring'
 include 'freemarker-converter'
-
