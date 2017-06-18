@@ -61,12 +61,12 @@ class ASTDirListElseContainer extends ASTDirective {
             buf.append("</#list>");
             return buf.toString();
         } else {
-            return getNodeTypeSymbol();
+            return getASTNodeDescriptor();
         }
     }
 
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#list-#else-container";
     }
 

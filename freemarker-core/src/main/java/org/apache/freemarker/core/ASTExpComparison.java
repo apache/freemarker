@@ -68,7 +68,7 @@ final class ASTExpComparison extends ASTExpBoolean {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return opString;
     }
 

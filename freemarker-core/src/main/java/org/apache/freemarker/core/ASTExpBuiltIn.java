@@ -375,7 +375,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "?" + key;
     }
 

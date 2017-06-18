@@ -93,11 +93,11 @@ class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcess
 
         @Override
         protected String dump(boolean canonical) {
-            return canonical ? "" : "<#--" + getNodeTypeSymbol() + "--#>";
+            return canonical ? "" : "<#--" + getASTNodeDescriptor() + "--#>";
         }
 
         @Override
-        String getNodeTypeSymbol() {
+        String getASTNodeDescriptor() {
             return "##threadInterruptionCheck";
         }
 

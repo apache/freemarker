@@ -32,7 +32,7 @@ import org.apache.freemarker.core.util._StringUtil;
  */
 final class ASTDirAssignment extends ASTDirective {
 
-    // These must not clash with ArithmeticExpression.TYPE_... constants: 
+    // These must not clash with ASTExpArithmetic.TYPE_... constants:
     private static final int OPERATOR_TYPE_EQUALS = 0x10000;
     private static final int OPERATOR_TYPE_PLUS_EQUALS = 0x10001;
     private static final int OPERATOR_TYPE_PLUS_PLUS = 0x10002;
@@ -77,16 +77,16 @@ final class ASTDirAssignment extends ASTDirective {
                 operatorType = OPERATOR_TYPE_PLUS_EQUALS;
                 break;
             case FMParserConstants.MINUS_EQUALS:
-                operatorType = ArithmeticExpression.TYPE_SUBSTRACTION;
+                operatorType = ASTExpArithmetic.TYPE_SUBSTRACTION;
                 break;
             case FMParserConstants.TIMES_EQUALS:
-                operatorType = ArithmeticExpression.TYPE_MULTIPLICATION;
+                operatorType = ASTExpArithmetic.TYPE_MULTIPLICATION;
                 break;
             case FMParserConstants.DIV_EQUALS:
-                operatorType = ArithmeticExpression.TYPE_DIVISION;
+                operatorType = ASTExpArithmetic.TYPE_DIVISION;
                 break;
             case FMParserConstants.MOD_EQUALS:
-                operatorType = ArithmeticExpression.TYPE_MODULO;
+                operatorType = ASTExpArithmetic.TYPE_MODULO;
                 break;
             default:
                 throw new BugException();
@@ -164,11 +164,11 @@ final class ASTDirAssignment extends ASTDirective {
                 if (operatorType == OPERATOR_TYPE_PLUS_PLUS) {
                     value  = ASTExpAddOrConcat._evalOnNumbers(env, getParent(), lhoNumber, ONE);
                 } else if (operatorType == OPERATOR_TYPE_MINUS_MINUS) {
-                    value = ArithmeticExpression._eval(
-                            env, getParent(), lhoNumber, ArithmeticExpression.TYPE_SUBSTRACTION, ONE);
-                } else { // operatorType == ArithmeticExpression.TYPE_...
+                    value = ASTExpArithmetic._eval(
+                            env, getParent(), lhoNumber, ASTExpArithmetic.TYPE_SUBSTRACTION, ONE);
+                } else { // operatorType == ASTExpArithmetic.TYPE_...
                     Number rhoNumber = valueExp.evalToNumber(env);
-                    value = ArithmeticExpression._eval(env, this, lhoNumber, operatorType, rhoNumber);
+                    value = ASTExpArithmetic._eval(env, this, lhoNumber, operatorType, rhoNumber);
                 }
             }
         }
@@ -184,7 +184,7 @@ final class ASTDirAssignment extends ASTDirective {
     @Override
     protected String dump(boolean canonical) {
         StringBuilder buf = new StringBuilder();
-        String dn = getParent() instanceof ASTDirAssignmentsContainer ? null : getNodeTypeSymbol();
+        String dn = getParent() instanceof ASTDirAssignmentsContainer ? null : getASTNodeDescriptor();
         if (dn != null) {
             if (canonical) buf.append("<");
             buf.append(dn);
@@ -212,7 +212,7 @@ final class ASTDirAssignment extends ASTDirective {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return getDirectiveName(scope);
     }
     
@@ -272,7 +272,7 @@ final class ASTDirAssignment extends ASTDirective {
         } else if (operatorType == OPERATOR_TYPE_MINUS_MINUS) {
             return "--";
         } else {
-            return ArithmeticExpression.getOperatorSymbol(operatorType) + "=";
+            return ASTExpArithmetic.getOperatorSymbol(operatorType) + "=";
         }
     }
     

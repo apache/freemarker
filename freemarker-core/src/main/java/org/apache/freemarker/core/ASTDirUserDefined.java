@@ -166,7 +166,7 @@ final class ASTDirUserDefined extends ASTDirective implements DirectiveCallPlace
     }
 
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "@";
     }
 

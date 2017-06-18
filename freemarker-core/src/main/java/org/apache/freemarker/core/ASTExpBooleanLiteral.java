@@ -48,7 +48,7 @@ final class ASTExpBooleanLiteral extends ASTExpression {
     }
 
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return getCanonicalForm();
     }
     

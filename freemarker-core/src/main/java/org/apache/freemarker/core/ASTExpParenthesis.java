@@ -43,7 +43,7 @@ final class ASTExpParenthesis extends ASTExpression {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "(...)";
     }
     

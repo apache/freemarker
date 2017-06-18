@@ -34,7 +34,12 @@ description = "Apache FreeMarker template engine, root project"
 
 // Libraries that are referred from multiple places:
 ext.libraries = [
-    findbugs: "com.google.code.findbugs:annotations:3.0.0"
+    findbugs: "com.google.code.findbugs:annotations:3.0.0",
+    commonsIo: "commons-io:commons-io:2.5",
+    commonsLang: "org.apache.commons:commons-lang3:3.6",
+    commonsCollections: "commons-collections:commons-collections:3.1",
+    commonsCli: "commons-cli:commons-cli:1.4",
+    guava: "com.google.guava:guava-jdk5:17.0"
 ]
 ext.slf4jVersion = "1.7.25"
 

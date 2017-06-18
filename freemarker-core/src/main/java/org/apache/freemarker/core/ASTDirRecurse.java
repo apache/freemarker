@@ -76,7 +76,7 @@ final class ASTDirRecurse extends ASTDirective {
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getNodeTypeSymbol());
+        sb.append(getASTNodeDescriptor());
         if (targetNode != null) {
             sb.append(' ');
             sb.append(targetNode.getCanonicalForm());
@@ -90,7 +90,7 @@ final class ASTDirRecurse extends ASTDirective {
     }
 
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#recurse";
     }
 

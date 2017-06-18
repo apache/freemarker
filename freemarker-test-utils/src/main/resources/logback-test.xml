@@ -26,6 +26,7 @@
 	</appender>
 	
 	<logger name="org.eclipse.jetty" level="INFO" />
+	<!-- logger name="org.apache.freemarker" level="TRACE" / -->
 
 	<root level="debug">
 		<appender-ref ref="STDOUT" />

@@ -117,7 +117,7 @@ final class ASTExpListLiteral extends ASTExpression {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "[...]";
     }
     

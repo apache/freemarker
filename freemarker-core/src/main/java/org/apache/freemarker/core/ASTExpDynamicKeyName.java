@@ -250,7 +250,7 @@ final class ASTExpDynamicKeyName extends ASTExpression {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "...[...]";
     }
     

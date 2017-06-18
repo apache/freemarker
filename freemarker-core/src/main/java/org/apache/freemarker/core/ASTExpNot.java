@@ -41,7 +41,7 @@ final class ASTExpNot extends ASTExpBoolean {
     }
  
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "!";
     }
     

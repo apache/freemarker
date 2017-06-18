@@ -46,11 +46,11 @@ final class ASTExpDot extends ASTExpression {
 
     @Override
     public String getCanonicalForm() {
-        return target.getCanonicalForm() + getNodeTypeSymbol() + _StringUtil.toFTLIdentifierReferenceAfterDot(key);
+        return target.getCanonicalForm() + getASTNodeDescriptor() + _StringUtil.toFTLIdentifierReferenceAfterDot(key);
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return ".";
     }
     

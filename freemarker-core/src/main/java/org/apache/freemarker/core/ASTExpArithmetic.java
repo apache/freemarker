@@ -27,7 +27,7 @@ import org.apache.freemarker.core.model.impl.SimpleNumber;
  * An operator for arithmetic operations. Note that the + operator is in {@link ASTExpAddOrConcat}, because its
  * overloaded (does string concatenation and more).
  */
-final class ArithmeticExpression extends ASTExpression {
+final class ASTExpArithmetic extends ASTExpression {
 
     static final int TYPE_SUBSTRACTION = 0;
     static final int TYPE_MULTIPLICATION = 1;
@@ -40,7 +40,7 @@ final class ArithmeticExpression extends ASTExpression {
     private final ASTExpression rho;
     private final int operator;
 
-    ArithmeticExpression(ASTExpression lho, ASTExpression rho, int operator) {
+    ASTExpArithmetic(ASTExpression lho, ASTExpression rho, int operator) {
         this.lho = lho;
         this.rho = rho;
         this.operator = operator;
@@ -79,7 +79,7 @@ final class ArithmeticExpression extends ASTExpression {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return String.valueOf(getOperatorSymbol(operator));
     }
 
@@ -95,7 +95,7 @@ final class ArithmeticExpression extends ASTExpression {
     @Override
     protected ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
-    	return new ArithmeticExpression(
+    	return new ASTExpArithmetic(
     	        lho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
     	        rho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
     	        operator);

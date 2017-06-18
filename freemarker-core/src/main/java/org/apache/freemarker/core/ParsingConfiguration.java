@@ -237,8 +237,9 @@ public interface ParsingConfiguration {
      * messages (or the column number you get through other API-s). So for example if the users edit templates in an
      * editor where the tab width is set to 4, you should set this to 4 so that the column numbers printed by FreeMarker
      * will match the column number shown in the editor. This setting doesn't affect the output of templates, as a tab
-     * in the template will remain a tab in the output too.
-     * It's value is at least 1, at most 256.
+     * in the template will remain a tab in the output too. The value of this setting is at least 1, and at most 256.
+     * When it's 1, tab characters will be kept in the return value of {@link Template#getSource(int, int, int, int)},
+     * otherwise they will be replaced with the appropriate number of spaces.
      */
     int getTabSize();
 

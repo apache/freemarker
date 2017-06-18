@@ -48,14 +48,14 @@ final class ASTDirCompress extends ASTDirective {
     @Override
     protected String dump(boolean canonical) {
         if (canonical) {
-            return "<" + getNodeTypeSymbol() + ">" + getChildrenCanonicalForm() + "</" + getNodeTypeSymbol() + ">";
+            return "<" + getASTNodeDescriptor() + ">" + getChildrenCanonicalForm() + "</" + getASTNodeDescriptor() + ">";
         } else {
-            return getNodeTypeSymbol();
+            return getASTNodeDescriptor();
         }
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#compress";
     }
     

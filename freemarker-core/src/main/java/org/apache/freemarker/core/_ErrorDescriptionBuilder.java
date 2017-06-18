@@ -76,7 +76,7 @@ public class _ErrorDescriptionBuilder {
                 Blaming blaming = findBlaming(parentElement, blamed, 0);
                 if (blaming != null) {
                     sb.append("For ");
-                    String nss = blaming.blamer.getNodeTypeSymbol();
+                    String nss = blaming.blamer.getASTNodeDescriptor();
                     char q = nss.indexOf('"') == -1 ? '\"' : '`';
                     sb.append(q).append(nss).append(q);
                     sb.append(" ").append(blaming.roleOfblamed).append(": ");

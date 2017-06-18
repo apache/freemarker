@@ -59,19 +59,19 @@ class ASTDirEscape extends ASTDirective {
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getNodeTypeSymbol())
+        sb.append(getASTNodeDescriptor())
                 .append(' ').append(_StringUtil.toFTLTopLevelIdentifierReference(variable))
                 .append(" as ").append(expr.getCanonicalForm());
         if (canonical) {
             sb.append('>');
             sb.append(getChildrenCanonicalForm());
-            sb.append("</").append(getNodeTypeSymbol()).append('>');
+            sb.append("</").append(getASTNodeDescriptor()).append('>');
         }
         return sb.toString();
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#escape";
     }
     

@@ -71,7 +71,7 @@ final class ASTDirImport extends ASTDirective {
     protected String dump(boolean canonical) {
         StringBuilder buf = new StringBuilder();
         if (canonical) buf.append('<');
-        buf.append(getNodeTypeSymbol());
+        buf.append(getASTNodeDescriptor());
         buf.append(' ');
         buf.append(importedTemplateNameExp.getCanonicalForm());
         buf.append(" as ");
@@ -81,7 +81,7 @@ final class ASTDirImport extends ASTDirective {
     }
 
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#import";
     }
     

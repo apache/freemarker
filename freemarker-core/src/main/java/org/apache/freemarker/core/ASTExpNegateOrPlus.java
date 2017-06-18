@@ -67,7 +67,7 @@ final class ASTExpNegateOrPlus extends ASTExpression {
     }
 
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return isMinus ? "-..." : "+...";
     }
     

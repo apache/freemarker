@@ -173,7 +173,7 @@ abstract class ASTNode {
      * source, assuming we turn off automatic white-space removal when parsing the canonical form.
      * 
      * @see ASTElement#getDescription()
-     * @see #getNodeTypeSymbol()
+     * @see #getASTNodeDescriptor()
      */
     abstract public String getCanonicalForm();
     
@@ -183,14 +183,11 @@ abstract class ASTNode {
      * be suitable as tree node labels in a tree view. Yet, they should be consistent and complete enough so that an AST
      * that is equivalent with the original could be reconstructed from the tree view. Thus, for literal values that are
      * leaf nodes the symbols should be the canonical form of value.
-     * 
-     * Note that {@link ASTElement#getDescription()} has similar role, only it doesn't go under the element level
-     * (i.e. down to the expression level), instead it always prints the embedded expressions itself.
-     * 
+     *
      * @see #getCanonicalForm()
      * @see ASTElement#getDescription()
      */
-    abstract String getNodeTypeSymbol();
+    abstract String getASTNodeDescriptor();
     
     /**
      * Returns highest valid parameter index + 1. So one should scan indexes with {@link #getParameterValue(int)}

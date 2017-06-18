@@ -1544,7 +1544,7 @@ ASTExpression AdditiveExpression() :
             } else {
                 numberLiteralOnly(lhs);
                 numberLiteralOnly(rhs);
-                result = new ArithmeticExpression(lhs, rhs, ArithmeticExpression.TYPE_SUBSTRACTION);
+                result = new ASTExpArithmetic(lhs, rhs, ASTExpArithmetic.TYPE_SUBSTRACTION);
             }
             result.setLocation(template, lhs, rhs);
             lhs = result;
@@ -1562,7 +1562,7 @@ ASTExpression AdditiveExpression() :
 ASTExpression MultiplicativeExpression() :
 {
     ASTExpression lhs, rhs, result;
-    int operation = ArithmeticExpression.TYPE_MULTIPLICATION;
+    int operation = ASTExpArithmetic.TYPE_MULTIPLICATION;
 }
 {
     lhs = UnaryExpression() { result = lhs; }
@@ -1570,18 +1570,18 @@ ASTExpression MultiplicativeExpression() :
         LOOKAHEAD(<TIMES>|<DIVIDE>|<PERCENT>)
         (
             (
-                <TIMES> { operation = ArithmeticExpression.TYPE_MULTIPLICATION; }
+                <TIMES> { operation = ASTExpArithmetic.TYPE_MULTIPLICATION; }
                 |
-                <DIVIDE> { operation = ArithmeticExpression.TYPE_DIVISION; }
+                <DIVIDE> { operation = ASTExpArithmetic.TYPE_DIVISION; }
                 |
-                <PERCENT> {operation = ArithmeticExpression.TYPE_MODULO; }
+                <PERCENT> {operation = ASTExpArithmetic.TYPE_MODULO; }
             )
         )
         rhs = UnaryExpression()
         {
             numberLiteralOnly(lhs);
             numberLiteralOnly(rhs);
-            result = new ArithmeticExpression(lhs, rhs, operation);
+            result = new ASTExpArithmetic(lhs, rhs, operation);
             result.setLocation(template, lhs, rhs);
             lhs = result;
         }

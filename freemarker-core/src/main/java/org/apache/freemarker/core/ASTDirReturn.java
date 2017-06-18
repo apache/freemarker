@@ -46,7 +46,7 @@ final class ASTDirReturn extends ASTDirective {
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getNodeTypeSymbol());
+        sb.append(getASTNodeDescriptor());
         if (exp != null) {
             sb.append(' ');
             sb.append(exp.getCanonicalForm());
@@ -56,7 +56,7 @@ final class ASTDirReturn extends ASTDirective {
     }
 
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#return";
     }
     

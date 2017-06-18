@@ -48,7 +48,7 @@ final class ASTComment extends ASTElement {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#--...--";
     }
     

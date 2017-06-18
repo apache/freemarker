@@ -116,7 +116,7 @@ final class ASTHashInterpolation extends ASTInterpolation {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#{...}";
     }
 

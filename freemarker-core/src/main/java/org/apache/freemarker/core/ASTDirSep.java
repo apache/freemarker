@@ -37,7 +37,7 @@ class ASTDirSep extends ASTDirective {
         if (iterCtx == null) {
             // The parser should prevent this situation
             throw new _MiscTemplateException(env,
-                    getNodeTypeSymbol(), " without iteration in context");
+                    getASTNodeDescriptor(), " without iteration in context");
         }
         
         if (iterCtx.hasNext()) {
@@ -55,19 +55,19 @@ class ASTDirSep extends ASTDirective {
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getNodeTypeSymbol());
+        sb.append(getASTNodeDescriptor());
         if (canonical) {
             sb.append('>');
             sb.append(getChildrenCanonicalForm());
             sb.append("</");
-            sb.append(getNodeTypeSymbol());
+            sb.append(getASTNodeDescriptor());
             sb.append('>');
         }
         return sb.toString();
     }
 
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#sep";
     }
 

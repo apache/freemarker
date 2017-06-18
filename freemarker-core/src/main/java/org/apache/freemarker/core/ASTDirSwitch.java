@@ -84,7 +84,7 @@ final class ASTDirSwitch extends ASTDirective {
     protected String dump(boolean canonical) {
         StringBuilder buf = new StringBuilder();
         if (canonical) buf.append('<');
-        buf.append(getNodeTypeSymbol());
+        buf.append(getASTNodeDescriptor());
         buf.append(' ');
         buf.append(searched.getCanonicalForm());
         if (canonical) {
@@ -94,13 +94,13 @@ final class ASTDirSwitch extends ASTDirective {
                 ASTDirCase cas = (ASTDirCase) getChild(i);
                 buf.append(cas.getCanonicalForm());
             }
-            buf.append("</").append(getNodeTypeSymbol()).append('>');
+            buf.append("</").append(getASTNodeDescriptor()).append('>');
         }
         return buf.toString();
     }
 
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#switch";
     }
 

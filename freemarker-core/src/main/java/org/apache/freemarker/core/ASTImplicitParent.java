@@ -54,7 +54,7 @@ final class ASTImplicitParent extends ASTElement {
             if (getParent() == null) {
                 return "root";
             }
-            return getNodeTypeSymbol(); // ASTImplicitParent is uninteresting in a stack trace.
+            return getASTNodeDescriptor(); // ASTImplicitParent is uninteresting in a stack trace.
         }
     }
 
@@ -70,7 +70,7 @@ final class ASTImplicitParent extends ASTElement {
     }
 
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#mixed_content";
     }
     

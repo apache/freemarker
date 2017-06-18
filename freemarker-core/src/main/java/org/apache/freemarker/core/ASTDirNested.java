@@ -64,7 +64,7 @@ final class ASTDirNested extends ASTDirective {
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append(getNodeTypeSymbol());
+        sb.append(getASTNodeDescriptor());
         if (bodyParameters != null) {
             for (int i = 0; i < bodyParameters.size(); i++) {
                 sb.append(' ');
@@ -76,7 +76,7 @@ final class ASTDirNested extends ASTDirective {
     }
     
     @Override
-    String getNodeTypeSymbol() {
+    String getASTNodeDescriptor() {
         return "#nested";
     }
     
