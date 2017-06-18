@@ -42,7 +42,8 @@ import freemarker.template.Template;
  * the insignificant white-space and comments inside the tags is even trickier.
  * This information has to be restored from the source code string ({@link #src}), based on the positions (begin/end
  * column/row number) of the AST nodes, and sometimes that has to be combined with some simple manual parsing.
- * <li>Do not hard-code "<" and ">" into the code where you should use {@link #tagBeginChar} and {@link #tagEndChar}.
+ * <li>Do not hard-code "&lt;" and "&gt;" into the code where you should use {@link #tagBeginChar} and
+ * {@link #tagEndChar}.
  * <li>Stopping with error is always better than risking incorrect output. Use assertions. Don't be permissive with
  * unexpected input.
  * <li>Generally, try to use node parameters (via {@link #getOnlyParam(TemplateObject, ParameterRole, Class)},
