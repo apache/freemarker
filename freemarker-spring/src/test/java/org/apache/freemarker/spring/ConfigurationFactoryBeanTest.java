@@ -37,6 +37,7 @@ import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateLanguage;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
+import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.impl.MruCacheStorage;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
@@ -70,6 +71,7 @@ public class ConfigurationFactoryBeanTest {
         final Properties settings = new Properties();
 
         settings.setProperty(MutableParsingAndProcessingConfiguration.SOURCE_ENCODING_KEY, "UTF-8");
+        settings.setProperty(MutableParsingAndProcessingConfiguration.OUTPUT_FORMAT_KEY, "PlainTextOutputFormat()");
         settings.setProperty(MutableParsingAndProcessingConfiguration.WHITESPACE_STRIPPING_KEY, "true");
         settings.setProperty(MutableParsingAndProcessingConfiguration.AUTO_ESCAPING_POLICY_KEY, "enableIfSupported");
         settings.setProperty(MutableParsingAndProcessingConfiguration.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY, "true");
@@ -84,6 +86,10 @@ public class ConfigurationFactoryBeanTest {
         final Map<String, Object> sharedVars = new HashMap<>();
         sharedVars.put("sharedVar1", "sharedVal1");
         sharedVars.put("sharedVar2", "sharedVal2");
+
+        final Map<String, String> autoImports = new HashMap<>();
+        autoImports.put("mylib1", "/libs/mylib1.ftl");
+        autoImports.put("mylib2", "/libs/mylib2.ftl");
 
         final StringTemplateLoader templateLoader = new StringTemplateLoader();
         templateLoader.putTemplate("fooTemplate", "foo");
@@ -106,6 +112,12 @@ public class ConfigurationFactoryBeanTest {
         //       <entry key="sharedVar2" value="sharedVal2" />
         //     </map>
         //   </property>
+        //   <property name="autoImports">
+        //     <map>
+        //       <entry key="mylib1" value="/libs/mylib1.ftl" />
+        //       <entry key="mylib2" value="/libs/mylib2.ftl" />
+        //     </map>
+        //   </property>
         //   <property name="templateUpdateDelayMilliseconds" value="60000" />
         //   <property name="localizedTemplateLookup" value="false" />
         //   <property name="templateLoader">
@@ -119,6 +131,7 @@ public class ConfigurationFactoryBeanTest {
                 .addPropertyValue("incompatibleImprovements", "3.0.0")
                 .addPropertyValue("settings", settings)
                 .addPropertyValue("sharedVariables", sharedVars)
+                .addPropertyValue("autoImports", autoImports)
                 .addPropertyValue("templateUpdateDelayMilliseconds", 60000)
                 .addPropertyValue("localizedTemplateLookup", "false")
                 .addPropertyValue("templateLoader", templateLoader)
@@ -135,6 +148,7 @@ public class ConfigurationFactoryBeanTest {
 
         assertEquals(new Version(3, 0, 0), config.getIncompatibleImprovements());
         assertEquals(Charset.forName("UTF-8"), config.getSourceEncoding());
+        assertEquals(PlainTextOutputFormat.INSTANCE.getName(), config.getOutputFormat().getName());
         assertTrue(config.isWhitespaceStrippingSet());
         assertEquals(AutoEscapingPolicy.ENABLE_IF_SUPPORTED, config.getAutoEscapingPolicy());
         assertTrue(config.isRecognizeStandardFileExtensionsSet());
@@ -153,6 +167,9 @@ public class ConfigurationFactoryBeanTest {
 
         assertEquals("sharedVal1", config.getSharedVariables().get("sharedVar1"));
         assertEquals("sharedVal2", config.getSharedVariables().get("sharedVar2"));
+
+        assertEquals("/libs/mylib1.ftl", config.getAutoImports().get("mylib1"));
+        assertEquals("/libs/mylib2.ftl", config.getAutoImports().get("mylib2"));
 
         final Template fooTemplate = config.getTemplate("fooTemplate");
         assertEquals("foo", fooTemplate.toString());
