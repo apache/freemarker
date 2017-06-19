@@ -106,7 +106,7 @@ public class ConfigurationFactoryBeanTest {
         // </bean>
         BeanDefinition beanDef =
                 BeanDefinitionBuilder.genericBeanDefinition(ConfigurationFactoryBean.class.getName())
-                .addPropertyValue("incompatibleImprovements", new Version(3, 0, 0))
+                .addPropertyValue("incompatibleImprovements", "3.0.0")
                 .addPropertyValue("settings", settings)
                 .addPropertyValue("sharedVariables", sharedVars)
                 .addPropertyValue("templateUpdateDelayMilliseconds", 60000)
