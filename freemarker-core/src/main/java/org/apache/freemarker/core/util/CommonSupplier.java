@@ -20,10 +20,16 @@
 package org.apache.freemarker.core.util;
 
 /**
- * Used for the trivial cases of the factory pattern. Has a generic type argument since 2.3.24.
+ * Similar to {@code java.util.function.Supplier} in Java 8, but we don't require Java 8.
  */
-public interface ObjectFactory<T> {
-    
-    T createObject() throws Exception;
+public interface CommonSupplier<ProductT> {
+
+    /**
+     * Returns an instance of the object. Whether this should return a new object each time, or the same
+     * object every time, is ultimately specified by the method whose parameter the supplier will be. If nothing
+     * is said there, then it should return a new object every time, except if the object is immutable and thread
+     * safe, in which case it can be safely returned for multiple times.
+     */
+    ProductT get() throws Exception;
 
 }

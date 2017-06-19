@@ -31,7 +31,7 @@ import java.util.Map;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateTransformModel;
-import org.apache.freemarker.core.util.ObjectFactory;
+import org.apache.freemarker.core.util.CommonSupplier;
 import org.apache.freemarker.core.util._StringUtil;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -251,7 +251,7 @@ final class ASTDirUserDefined extends ASTDirective implements DirectiveCallPlace
 
     @Override
     @SuppressFBWarnings(value={ "IS2_INCONSISTENT_SYNC", "DC_DOUBLECHECK" }, justification="Performance tricks")
-    public Object getOrCreateCustomData(Object providerIdentity, ObjectFactory objectFactory)
+    public Object getOrCreateCustomData(Object providerIdentity, CommonSupplier supplier)
             throws CallPlaceCustomDataInitializationException {
         // We are using double-checked locking, utilizing Java memory model "final" trick.
         // Note that this.customDataHolder is NOT volatile.
@@ -261,7 +261,7 @@ final class ASTDirUserDefined extends ASTDirective implements DirectiveCallPlace
             synchronized (this) {
                 customDataHolder = this.customDataHolder;
                 if (customDataHolder == null || customDataHolder.providerIdentity != providerIdentity) {
-                    customDataHolder = createNewCustomData(providerIdentity, objectFactory);
+                    customDataHolder = createNewCustomData(providerIdentity, supplier);
                     this.customDataHolder = customDataHolder; 
                 }
             }
@@ -271,7 +271,7 @@ final class ASTDirUserDefined extends ASTDirective implements DirectiveCallPlace
             synchronized (this) {
                 customDataHolder = this.customDataHolder;
                 if (customDataHolder == null || customDataHolder.providerIdentity != providerIdentity) {
-                    customDataHolder = createNewCustomData(providerIdentity, objectFactory);
+                    customDataHolder = createNewCustomData(providerIdentity, supplier);
                     this.customDataHolder = customDataHolder;
                 }
             }
@@ -280,20 +280,20 @@ final class ASTDirUserDefined extends ASTDirective implements DirectiveCallPlace
         return customDataHolder.customData;
     }
 
-    private CustomDataHolder createNewCustomData(Object provierIdentity, ObjectFactory objectFactory)
+    private CustomDataHolder createNewCustomData(Object provierIdentity, CommonSupplier supplier)
             throws CallPlaceCustomDataInitializationException {
         CustomDataHolder customDataHolder;
         Object customData;
         try {
-            customData = objectFactory.createObject();
+            customData = supplier.get();
         } catch (Exception e) {
             throw new CallPlaceCustomDataInitializationException(
                     "Failed to initialize custom data for provider identity "
                     + _StringUtil.tryToString(provierIdentity) + " via factory "
-                    + _StringUtil.tryToString(objectFactory), e);
+                    + _StringUtil.tryToString(supplier), e);
         }
         if (customData == null) {
-            throw new NullPointerException("ObjectFactory.createObject() has returned null");
+            throw new NullPointerException("CommonSupplier.get() has returned null");
         }
         customDataHolder = new CustomDataHolder(provierIdentity, customData);
         return customDataHolder;
@@ -317,7 +317,7 @@ final class ASTDirUserDefined extends ASTDirective implements DirectiveCallPlace
     
     /**
      * Used for implementing double check locking in implementing the
-     * {@link DirectiveCallPlace#getOrCreateCustomData(Object, ObjectFactory)}.
+     * {@link DirectiveCallPlace#getOrCreateCustomData(Object, CommonSupplier)}.
      */
     private static class CustomDataHolder {
         

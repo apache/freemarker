@@ -22,9 +22,10 @@ package org.apache.freemarker.core.util;
 import org.apache.freemarker.core.ConfigurationException;
 
 /**
- * Interface of builders (used for implementing the builder pattern).
- */
-public interface CommonBuilder<ProductT> {
+ * Common interface for builders (used for implementing the builder design pattern). This is technically very similar to
+ * {@link CommonSupplier}, but the intent is more specific. A is builder stateful object used only for creating a
+ * single instance. Generally, it isn't expected to be thread safe.
+ */public interface CommonBuilder<ProductT> {
 
     /**
      * Creates an instance of the product class. This is usually a new instance, though if the product is stateless,

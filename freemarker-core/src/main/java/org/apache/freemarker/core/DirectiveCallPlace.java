@@ -23,7 +23,7 @@ import java.util.IdentityHashMap;
 
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateTransformModel;
-import org.apache.freemarker.core.util.ObjectFactory;
+import org.apache.freemarker.core.util.CommonSupplier;
 
 /**
  * Gives information about the place where a directive is called from, also lets you attach a custom data object to that
@@ -32,7 +32,7 @@ import org.apache.freemarker.core.util.ObjectFactory;
  * {@link Template} object that contains the directive call. Hence, the {@link DirectiveCallPlace} object and the custom
  * data you put into it is cached together with the {@link Template} (and templates are normally cached - see
  * {@link Configuration#getTemplate(String)}). The custom data is normally initialized on demand, that is, when the
- * directive call is first executed, via {@link #getOrCreateCustomData(Object, ObjectFactory)}.
+ * directive call is first executed, via {@link #getOrCreateCustomData(Object, CommonSupplier)}.
  * 
  * <p>
  * Currently this method doesn't give you access to the {@link Template} object, because it's probable that future
@@ -84,10 +84,10 @@ public interface DirectiveCallPlace {
      * during template parsing, not on runtime settings.
      * 
      * <p>
-     * This method will block other calls while the {@code objectFactory} is executing, thus, the object will be
+     * This method will block other calls while the {@code supplier} is executing, thus, the object will be
      * <em>usually</em> created only once, even if multiple threads request the value when it's still {@code null}. It
      * doesn't stand though when {@code providerIdentity} mismatches occur (see later). Furthermore, then it's also
-     * possible that multiple objects created by the same {@link ObjectFactory} will be in use on the same time, because
+     * possible that multiple objects created by the same {@link CommonSupplier} will be in use on the same time, because
      * of directive executions already running in parallel, and because of memory synchronization delays (hardware
      * dependent) between the threads.
      * 
@@ -105,17 +105,17 @@ public interface DirectiveCallPlace {
      *            data. (In a more generic implementation the {@code providerIdentity} would be a key in a
      *            {@link IdentityHashMap}, but then this feature would be slower, while {@code providerIdentity}
      *            mismatches aren't occurring in most applications.)
-     * @param objectFactory
+     * @param supplier
      *            Called when the custom data wasn't yet set, to invoke its initial value. If this parameter is
      *            {@code null} and the custom data wasn't set yet, then {@code null} will be returned. The returned
-     *            value of {@link ObjectFactory#createObject()} can be any kind of object, but can't be {@code null}.
+     *            value of {@link CommonSupplier#get()} can be any kind of object, but can't be {@code null}.
      * 
-     * @return The current custom data object, or possibly {@code null} if there was no {@link ObjectFactory} provided.
+     * @return The current custom data object, or possibly {@code null} if there was no {@link CommonSupplier} provided.
      * 
      * @throws CallPlaceCustomDataInitializationException
-     *             If the {@link ObjectFactory} had to be invoked but failed.
+     *             If the {@link CommonSupplier} had to be invoked but failed.
      */
-    Object getOrCreateCustomData(Object providerIdentity, ObjectFactory objectFactory)
+    Object getOrCreateCustomData(Object providerIdentity, CommonSupplier supplier)
             throws CallPlaceCustomDataInitializationException;
 
     /**

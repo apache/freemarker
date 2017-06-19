@@ -19,8 +19,10 @@
 
 package org.apache.freemarker.core;
 
+import org.apache.freemarker.core.util.CommonSupplier;
+
 /**
- * Thrown by {@link DirectiveCallPlace#getOrCreateCustomData(Object, org.apache.freemarker.core.util.ObjectFactory)}
+ * Thrown by {@link DirectiveCallPlace#getOrCreateCustomData(Object, CommonSupplier)}
  */
 public class CallPlaceCustomDataInitializationException extends Exception {
 

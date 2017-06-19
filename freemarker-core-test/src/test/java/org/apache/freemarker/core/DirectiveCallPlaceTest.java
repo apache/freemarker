@@ -31,7 +31,7 @@ import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
-import org.apache.freemarker.core.util.ObjectFactory;
+import org.apache.freemarker.core.util.CommonSupplier;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
 
@@ -125,10 +125,10 @@ public class DirectiveCallPlaceTest extends TemplateTest {
             if (callPlace.isNestedOutputCacheable()) {
                 try {
                     convertedText = (String) callPlace.getOrCreateCustomData(
-                            getTextConversionIdentity(), new ObjectFactory<String>() {
+                            getTextConversionIdentity(), new CommonSupplier<String>() {
 
                                 @Override
-                                public String createObject() throws TemplateException, IOException {
+                                public String get() throws TemplateException, IOException {
                                     return convertBodyText(body)
                                             + "[cached " + cacheRecreationCount.incrementAndGet() + "]";
                                 }
