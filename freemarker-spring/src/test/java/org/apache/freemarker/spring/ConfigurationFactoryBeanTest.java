@@ -33,11 +33,13 @@ import org.apache.freemarker.core.Configuration.ExtendableBuilder;
 import org.apache.freemarker.core.MutableParsingAndProcessingConfiguration;
 import org.apache.freemarker.core.NamingConvention;
 import org.apache.freemarker.core.TagSyntax;
+import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateLanguage;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.impl.MruCacheStorage;
+import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -83,6 +85,9 @@ public class ConfigurationFactoryBeanTest {
         sharedVars.put("sharedVar1", "sharedVal1");
         sharedVars.put("sharedVar2", "sharedVal2");
 
+        final StringTemplateLoader templateLoader = new StringTemplateLoader();
+        templateLoader.putTemplate("fooTemplate", "foo");
+
         // Creating bean definition which is equivalent to <bean/> element in Spring XML configuration like the following:
         //
         // <bean class="org.apache.freemarker.spring.ConfigurationFactoryBean">
@@ -103,7 +108,12 @@ public class ConfigurationFactoryBeanTest {
         //   </property>
         //   <property name="templateUpdateDelayMilliseconds" value="60000" />
         //   <property name="localizedTemplateLookup" value="false" />
+        //   <property name="templateLoader">
+        //     <bean class="org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader">
+        //     </bean>
+        //   </property>
         // </bean>
+        //
         BeanDefinition beanDef =
                 BeanDefinitionBuilder.genericBeanDefinition(ConfigurationFactoryBean.class.getName())
                 .addPropertyValue("incompatibleImprovements", "3.0.0")
@@ -111,6 +121,7 @@ public class ConfigurationFactoryBeanTest {
                 .addPropertyValue("sharedVariables", sharedVars)
                 .addPropertyValue("templateUpdateDelayMilliseconds", 60000)
                 .addPropertyValue("localizedTemplateLookup", "false")
+                .addPropertyValue("templateLoader", templateLoader)
                 .getBeanDefinition();
 
         appContext.registerBeanDefinition("freemarkerConfig", beanDef);
@@ -142,6 +153,9 @@ public class ConfigurationFactoryBeanTest {
 
         assertEquals("sharedVal1", config.getSharedVariables().get("sharedVar1"));
         assertEquals("sharedVal2", config.getSharedVariables().get("sharedVar2"));
+
+        final Template fooTemplate = config.getTemplate("fooTemplate");
+        assertEquals("foo", fooTemplate.toString());
     }
 
 }
