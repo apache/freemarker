@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */ 
 public final class _ServletLogs {
 
-    public static final Logger SERVLET = LoggerFactory.getLogger("org.apache.freemarker.servlet");
+    public static final Logger ROOT = LoggerFactory.getLogger("org.apache.freemarker.servlet");
     public static final Logger JSP = LoggerFactory.getLogger("org.apache.freemarker.servlet.jsp");
-    
+
 }

@@ -327,7 +327,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 // [FM3] Lot of things are marked here with "BC" and deprecated
 public class FreemarkerServlet extends HttpServlet {
     
-    private static final Logger LOG = _ServletLogs.SERVLET;
+    private static final Logger LOG = _ServletLogs.ROOT;
     
     @Deprecated
     private static final Logger LOG_RT = _CoreLogs.RUNTIME;

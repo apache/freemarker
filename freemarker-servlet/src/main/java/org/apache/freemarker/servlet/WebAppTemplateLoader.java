@@ -32,7 +32,6 @@ import java.util.Objects;
 import javax.servlet.ServletContext;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
@@ -50,7 +49,7 @@ import org.slf4j.Logger;
  */
 public class WebAppTemplateLoader implements TemplateLoader {
 
-    private static final Logger LOG = _CoreLogs.TEMPLATE_RESOLVER;
+    private static final Logger LOG = _ServletLogs.ROOT;
 
     private final ServletContext servletContext;
     private final String subdirPath;

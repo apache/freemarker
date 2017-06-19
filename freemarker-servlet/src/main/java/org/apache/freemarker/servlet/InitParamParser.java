@@ -46,7 +46,7 @@ final class InitParamParser {
     static final String TEMPLATE_PATH_PREFIX_FILE = "file://";
     static final String TEMPLATE_PATH_SETTINGS_BI_NAME = "settings";
     
-    private static final Logger LOG = _ServletLogs.SERVLET;
+    private static final Logger LOG = _ServletLogs.ROOT;
     
     private InitParamParser() {
         // Not to be instantiated
