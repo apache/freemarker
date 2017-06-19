@@ -46,6 +46,7 @@ public class SpringResourceTemplateLoaderTest {
     public void setUp() throws IOException {
         appContext = new GenericApplicationContext();
         templateLoader = new SpringResourceTemplateLoader();
+        templateLoader.setBaseLocation(TEMPLATE_BASE_PATH);
         templateLoader.setResourceLoader(appContext);
         cfg = new TestConfigurationBuilder().templateLoader(templateLoader).build();
     }
@@ -62,7 +63,7 @@ public class SpringResourceTemplateLoaderTest {
     @Test
     public void testSuccessful() throws Exception {
         for (int i = 0; i < 2; i++) {
-            assertEquals("foo", cfg.getTemplate(TEMPLATE_BASE_PATH + "sub1/sub2/t.ftl").toString());
+            assertEquals("foo", cfg.getTemplate("sub1/sub2/t.ftl").toString());
         }
     }
 
@@ -70,7 +71,7 @@ public class SpringResourceTemplateLoaderTest {
     public void testNotFound() throws Exception {
         for (int i = 0; i < 2; i++) {
             try {
-                cfg.getTemplate(TEMPLATE_BASE_PATH + "sub1X/sub2/t.ftl");
+                cfg.getTemplate("sub1X/sub2/t.ftl");
                 fail();
             } catch (TemplateNotFoundException e) {
                 assertThat(e.getMessage(), containsString("sub1X"));

@@ -39,18 +39,55 @@ public class SpringResourceTemplateLoader implements TemplateLoader, ResourceLoa
 
     private static final Logger LOG = _SpringLogs.TEMPLATE_RESOLVER;
 
+    /**
+     * Base template resource location.
+     * <P>
+     * If this property is a non-null string, this is prepended to the template name internally when resolving
+     * a resource.
+     * </P>
+     */
+    private String baseLocation;
+
+    /**
+     * Spring Framework resource loader.
+     */
     private ResourceLoader resourceLoader;
 
+    /**
+     * Base resource location which can be prepended to the template name internally when resolving a resource.
+     * @return
+     */
+    public String getBaseLocation() {
+        return baseLocation;
+    }
+
+    /**
+     * Set base resource location which can be prepended to the template name internally when resolving a resource.
+     * @param baseLocation
+     */
+    public void setBaseLocation(String baseLocation) {
+        this.baseLocation = baseLocation;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setResourceLoader(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public TemplateLoaderSession createSession() {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public TemplateLoadingResult load(String name, TemplateLoadingSource ifSourceDiffersFrom,
             Serializable ifVersionDiffersFrom, TemplateLoaderSession session) throws IOException {
@@ -58,7 +95,15 @@ public class SpringResourceTemplateLoader implements TemplateLoader, ResourceLoa
             throw new IllegalStateException("Spring Framework ResourceLoader was not set.");
         }
 
-        Resource resource = resourceLoader.getResource(name);
+        String resourceLocation;
+
+        if (baseLocation == null) {
+            resourceLocation = name;
+        } else {
+            resourceLocation = baseLocation + "/" + name;
+        }
+
+        Resource resource = resourceLoader.getResource(resourceLocation);
 
         if (!resource.exists()) {
             return TemplateLoadingResult.NOT_FOUND;
@@ -74,7 +119,7 @@ public class SpringResourceTemplateLoader implements TemplateLoader, ResourceLoa
                 version = lmd;
             }
         } catch (IOException e) {
-            LOG.debug("The last modified timestamp of the resource at '{}' may not be resolved.", name, e);
+            LOG.debug("The last modified timestamp of the resource at '{}' may not be resolved.", resourceLocation, e);
         }
 
         if (ifSourceDiffersFrom != null && ifSourceDiffersFrom.equals(source)
@@ -85,6 +130,9 @@ public class SpringResourceTemplateLoader implements TemplateLoader, ResourceLoa
         return new TemplateLoadingResult(source, version, resource.getInputStream(), null);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void resetState() {
         // Does nothing
