@@ -1,4 +1,5 @@
 description = "FreeMarker Manual (i.e., the documention)"
+published = false
 
 dependencies {
     compile project(":freemarker-core")

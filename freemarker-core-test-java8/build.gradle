@@ -2,6 +2,7 @@ description = """\
 The unit tests of freemarker-core that need Java 8 features. These were moved to a separate project to avoid \
 a project that contains java files that require varous Java versions.
 """
+published = false
 
 // Override inherited default Java version:
 sourceCompatibility = "1.8"

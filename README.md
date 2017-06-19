@@ -125,10 +125,16 @@ FreeMarker). (On UN*X-like systems you don't need that jar, as our custom
 To test your build, issue `./gradlew test`. Issued from the top directory,
 this will run the tests of all modules.
 
-To generate API documentation, issue `./gradlew javadoc`; the output will
-appear in the build/docs/api subdirectory of each module. To generate the
-FreeMarker Manual, issue `./gradlew manualOffline` (TODO: not yet working);
-the output will appear under `freemarker-manual/build/docgen`.
+To generate the aggregated API documention (contains the API of several modules
+that are deemed to be used commonly enough), issue `./gradlew aggregateJavadoc`
+from the root module; the output will appear in the `build/docs/api`
+subdirectory. To generate API documentation per module, issue
+`./gradlew javadoc`; the output will appear in the build/docs/api subdirectory
+of the module.
+
+To generate the FreeMarker Manual, issue `./gradlew manualOffline`
+(TODO: not yet working); the output will appear under
+`freemarker-manual/build/docgen`.
 
 
 Eclipse and other IDE setup

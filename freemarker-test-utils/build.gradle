@@ -20,6 +20,7 @@
 title = "Apache FreeMarker Test Utiltities"
 description = """\
 FreeMarker template engine, testing utilities for internal use; this is not a published module."""
+published = false
 
 dependencies {
     compile project(":freemarker-core")

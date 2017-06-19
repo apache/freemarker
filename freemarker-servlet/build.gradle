@@ -22,6 +22,8 @@ description = """\
 FreeMarker template engine, Servlet and JSP support. \
 This is an optional module, mostly useful in frameworks based on JSP Model-2 architecture, or when custom JSP tags \
 need to be called from templates."""
+published = true
+inAggregateJavadoc = true
 
 dependencies {
     compile project(":freemarker-core")

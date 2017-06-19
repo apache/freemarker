@@ -21,6 +21,8 @@ title = "Apache FreeMarker DOM support"
 description = """\
 FreeMarker template engine, W3C DOM (XML) wrapping support. \
 This is an optional module, useful when the data-model can contain variables that are XML nodes."""
+published = true
+inAggregateJavadoc = true
 
 dependencies {
     compile project(":freemarker-core")

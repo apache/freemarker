@@ -21,6 +21,8 @@ title = "Apache FreeMarker Spring Framework support"
 description = """\
 FreeMarker template engine, Spring Framework support. \
 This is an optional module, mostly useful in frameworks based on Spring Framework."""
+published = true
+inAggregateJavadoc = true
 
 dependencies {
     compile project(":freemarker-core")

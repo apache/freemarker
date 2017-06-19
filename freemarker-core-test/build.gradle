@@ -20,6 +20,7 @@
 description = """\
 The unit tests of freemarker-core. These tests used to be in freemarker-core, but to avoid depenency loop \
 through freemarker-test-utils, they had to be moved into a separate project."""
+published = false
 
 dependencies {
     compile project(":freemarker-core")

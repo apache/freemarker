@@ -20,6 +20,8 @@
 title = "Apache FreeMarker Converter"
 description = """\
 FreeMarker template converter tool. Used to convert between template languages."""
+published = true
+inAggregateJavadoc = false
 
 dependencies {
     compile project(":freemarker-core")

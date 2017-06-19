@@ -26,7 +26,9 @@ ext.versionForMf = "2.97.0"
 allprojects {
     group = "org.apache.freemarker"
     version = "${versionCanonical}"
-    ext.title = null; // Title shown in JavaDoc and other documentation
+    ext.title = null // Title shown in JavaDoc and other documentation
+    ext.published = null // To decide if this is a published module (API) or an internal one
+    ext.inAggregateJavadoc = null // for published project, whether to include this in the main aggregate JavaDoc
 }
 
 title = "Apache FreeMarker"
@@ -103,6 +105,85 @@ ext.bannedLibraries = [
         }
     }
 } // each Java version
+
+// Common javadoc configuration:
+def javadocCommons = { callerDelegate ->
+    delegate = callerDelegate
+
+    exclude "**/_*.java"
+    options.use = true
+    options.encoding = "UTF-8"
+    options.docEncoding = "UTF-8"
+    options.charSet = "UTF-8"
+    options.locale = "en_US"
+    options.links = [ "http://docs.oracle.com/javase/8/docs/api/" ]
+    doLast {
+        // We will fix low quality typography of JDK 8 Javadoc here. Bascially we make it look like JDK 7.
+
+        File cssFile = new File(outputDirectory, "stylesheet.css")
+        assert cssFile.exists()
+
+        // Tell that it's modified:
+        ant.replaceregexp(
+                file: cssFile, flags: "gs", encoding: "utf-8",
+                match: $//\* (Javadoc style sheet) \*//$, replace: $//\* \1 - JDK 8 usability fix regexp substitutions applied \*//$
+        )
+
+        // Remove broken link:
+        ant.replaceregexp(
+                file: cssFile, flags: "gs", encoding: "utf-8",
+                match: $/@import url\('resources/fonts/dejavu.css'\);\s*/$, replace: ""
+        )
+
+        // Font family fixes:
+        ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/['"]DejaVu Sans['"]/$, replace: "Arial"
+        )
+        ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/['"]DejaVu Sans Mono['"]/$, replace: "'Courier New'"
+        )
+        ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/['"]DejaVu Serif['"]/$, replace: "Arial"
+        )
+        ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/(?<=[\s,:])serif\b/$, replace: "sans-serif"
+        )
+        ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/(?<=[\s,:])Georgia,\s*/$, replace: ""
+        )
+        ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/['"]Times New Roman['"],\s*/$, replace: ""
+        )
+        ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/(?<=[\s,:])Times,\s*/$, replace: ""
+        )
+        ant.replaceregexp(
+                file: cssFile, flags: "gsi", encoding: "utf-8",
+                match: $/(?<=[\s,:])Arial\s*,\s*Arial\b/$, replace: "Arial"
+        )
+
+        // "Parameters:", "Returns:", "Throws:", "Since:", "See also:" etc. fixes:
+        String ddSelectorStart = $/(?:\.contentContainer\s+\.(?:details|description)|\.serializedFormContainer)\s+dl\s+dd\b.*?\{[^\}]*\b/$
+        String ddPropertyEnd = $/\b.+?;/$
+        // - Put back description (dd) indentation:
+        ant.replaceregexp(
+                file: cssFile, flags: "gs", encoding: "utf-8",
+                match: $/(${ddSelectorStart})margin${ddPropertyEnd}/$, replace: $/\1margin: 5px 0 10px 20px;/$
+        )
+        // - No monospace font for the description (dd) part:
+        ant.replaceregexp(
+                file: cssFile, flags: "gs", encoding: "utf-8",
+                match: $/(${ddSelectorStart})font-family${ddPropertyEnd}/$, replace: $/\1/$
+        )
+    }
+}
 
 subprojects {
     apply plugin: "java"
@@ -249,85 +330,48 @@ subprojects {
     [install.repositories.mavenInstaller, uploadArchives.repositories.mavenDeployer]*.pom*.whenConfigured { pom ->
         pom.dependencies = pom.dependencies.findAll { dep -> dep.scope != "test" }        
     }
-    
-    javadoc {
-        exclude "**/_*.java"
-        options.use = true
-        options.encoding = "UTF-8"
-        options.docEncoding = "UTF-8"
-        options.charSet = "UTF-8"
-        options.locale = "en_US"
-        options.links = [ "http://docs.oracle.com/javase/8/docs/api/" ]
-        doLast {
-            // We will fix low quality typography of JDK 8 Javadoc here. Bascially we make it look like JDK 7.
-            
-            File cssFile = new File(outputDirectory, "stylesheet.css")
-            assert cssFile.exists()
-            
-            // Tell that it's modified:
-            ant.replaceregexp(
-                file: cssFile, flags: "gs", encoding: "utf-8",
-                match: $//\* (Javadoc style sheet) \*//$, replace: $//\* \1 - JDK 8 usability fix regexp substitutions applied \*//$
-            )
 
-            // Remove broken link:
-            ant.replaceregexp(
-                file: cssFile, flags: "gs", encoding: "utf-8",
-                match: $/@import url\('resources/fonts/dejavu.css'\);\s*/$, replace: ""
-            )
-            
-            // Font family fixes:
-            ant.replaceregexp(
-                file: cssFile, flags: "gsi", encoding: "utf-8",
-                match: $/['"]DejaVu Sans['"]/$, replace: "Arial"
-            )
-            ant.replaceregexp(
-                file: cssFile, flags: "gsi", encoding: "utf-8",
-                match: $/['"]DejaVu Sans Mono['"]/$, replace: "'Courier New'"
-            )
-            ant.replaceregexp(
-                file: cssFile, flags: "gsi", encoding: "utf-8",
-                match: $/['"]DejaVu Serif['"]/$, replace: "Arial"
-            )
-            ant.replaceregexp(
-                file: cssFile, flags: "gsi", encoding: "utf-8",
-                match: $/(?<=[\s,:])serif\b/$, replace: "sans-serif"
-            )
-            ant.replaceregexp(
-                file: cssFile, flags: "gsi", encoding: "utf-8",
-                match: $/(?<=[\s,:])Georgia,\s*/$, replace: ""
-            )
-            ant.replaceregexp(
-                file: cssFile, flags: "gsi", encoding: "utf-8",
-                match: $/['"]Times New Roman['"],\s*/$, replace: ""
-            )
-            ant.replaceregexp(
-                file: cssFile, flags: "gsi", encoding: "utf-8",
-                match: $/(?<=[\s,:])Times,\s*/$, replace: ""
-            )
-            ant.replaceregexp(
-                file: cssFile, flags: "gsi", encoding: "utf-8",
-                match: $/(?<=[\s,:])Arial\s*,\s*Arial\b/$, replace: "Arial"
-            )
-            
-            // "Parameters:", "Returns:", "Throws:", "Since:", "See also:" etc. fixes:
-            String ddSelectorStart = $/(?:\.contentContainer\s+\.(?:details|description)|\.serializedFormContainer)\s+dl\s+dd\b.*?\{[^\}]*\b/$
-            String ddPropertyEnd = $/\b.+?;/$
-            // - Put back description (dd) indentation:
-            ant.replaceregexp(
-                file: cssFile, flags: "gs", encoding: "utf-8",
-                match: $/(${ddSelectorStart})margin${ddPropertyEnd}/$, replace: $/\1margin: 5px 0 10px 20px;/$
-            )
-            // - No monospace font for the description (dd) part:
-            ant.replaceregexp(
-                file: cssFile, flags: "gs", encoding: "utf-8",
-                match: $/(${ddSelectorStart})font-family${ddPropertyEnd}/$, replace: $/\1/$
-            )
-            
-        }
+    javadoc {
+        javadocCommons(delegate)
     }
 
+    afterEvaluate { project ->
+        if (project.ext.published == null) {
+            throw new GradleScriptException("The \"published\" extension property of the \"${project.path}\" project " +
+                    "wasn't set. Use true for projects that meant to be published to Maven Central. Use false for " +
+                    "projects that are used internally only.",
+                    null);
+        }
+        if (project.ext.inAggregateJavadoc == null) {
+            if (project.ext.published) {
+                throw new GradleScriptException("The \"inAggregateJavadoc\" extension property of the \"${project.path}\" " +
+                        "project must be set, as it's a published project. Use true for projects that should be part of " +
+                        "the main unified FreeMarker API documentation. Use false for projects that are very rarely " +
+                        "used, and thus should have a " + "separate API javadoc.",
+                        null);
+            }
+        } else if (!project.ext.published && project.ext.inAggregateJavadoc) {
+            throw new GradleScriptException("Do not set the \"inAggregateJavadoc\" property extension to true when " +
+                    "for the \"${project.path}\" project, as the \"published\" extension property is false for it.",
+                    null);
+        }
+
+        if (project.published && project.inAggregateJavadoc) {
+            def aggregateJavadoc = rootProject.tasks.getByName('aggregateJavadoc')
+            def javadoc = project.tasks.getByName('javadoc')
+            aggregateJavadoc.source javadoc.source
+            aggregateJavadoc.classpath = files(aggregateJavadoc.classpath, javadoc.classpath)
+            logger.info "Added ${javadoc.path} input to ${aggregateJavadoc.path}"
+        }
+    }
 } // end subprojects
+
+task aggregateJavadoc(type: Javadoc) {
+    javadocCommons(delegate)
+    title "${project.title} ${versionCanonical} API"
+    destinationDir = new File(project.buildDir, 'api')
+    // source-s and classpath-s are added later, in the afterEvaluate of subprojects!
+}
 
 // TODO Build source distribution files
 // TODO Build binary distribution files (contains the binaries of all *published* modules)

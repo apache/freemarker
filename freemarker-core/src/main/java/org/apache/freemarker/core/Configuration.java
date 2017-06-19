@@ -123,7 +123,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  *  ...
  *  
  *  // Later, whenever the application needs a template (so you may do this a lot, and from multiple threads):
- *  {@link Template Template} myTemplate = cfg.{@link #getTemplate(String) getTemplate}("myTemplate.html");
+ *  {@link Template Template} myTemplate = cfg.{@link #getTemplate(String) getTemplate}("myTemplate.ftlh");
  *  myTemplate.{@link Template#process(Object, java.io.Writer) process}(dataModel, out);</pre>
  * 
  * <p>Note that you certainly want to set the {@link #getTemplateLoader templateLoader} setting, as its default

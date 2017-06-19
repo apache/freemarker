@@ -25,6 +25,8 @@ title = "Apache FreeMarker Core"
 description = """\
 FreeMarker template engine, core module. This module covers all basic functionality, and is all that's needed for \
 many applications."""
+published = true
+inAggregateJavadoc = true
 
 dependencies {
     // Note that common dependencies are added in the root project.
