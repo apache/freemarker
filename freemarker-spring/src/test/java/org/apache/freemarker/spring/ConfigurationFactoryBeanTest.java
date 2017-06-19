@@ -24,8 +24,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.freemarker.core.AutoEscapingPolicy;
 import org.apache.freemarker.core.Configuration;
@@ -33,11 +33,14 @@ import org.apache.freemarker.core.Configuration.ExtendableBuilder;
 import org.apache.freemarker.core.MutableParsingAndProcessingConfiguration;
 import org.apache.freemarker.core.NamingConvention;
 import org.apache.freemarker.core.TagSyntax;
+import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateLanguage;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
+import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.impl.MruCacheStorage;
+import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,32 +68,73 @@ public class ConfigurationFactoryBeanTest {
 
     @Test
     public void testConfigurationFactoryBeanSettings() throws Exception {
-        final Map<String, String> settings = new LinkedHashMap<>();
+        final Properties settings = new Properties();
 
-        settings.put(MutableParsingAndProcessingConfiguration.SOURCE_ENCODING_KEY, "UTF-8");
-        settings.put(MutableParsingAndProcessingConfiguration.WHITESPACE_STRIPPING_KEY, "true");
-        settings.put(MutableParsingAndProcessingConfiguration.AUTO_ESCAPING_POLICY_KEY, "enableIfSupported");
-        settings.put(MutableParsingAndProcessingConfiguration.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY, "true");
-        settings.put(MutableParsingAndProcessingConfiguration.TEMPLATE_LANGUAGE_KEY, "FTL");
-        settings.put(MutableParsingAndProcessingConfiguration.TAG_SYNTAX_KEY, "squareBracket");
-        settings.put(MutableParsingAndProcessingConfiguration.NAMING_CONVENTION_KEY, "camelCase");
-        settings.put(MutableParsingAndProcessingConfiguration.TAB_SIZE_KEY, "4");
+        settings.setProperty(MutableParsingAndProcessingConfiguration.SOURCE_ENCODING_KEY, "UTF-8");
+        settings.setProperty(MutableParsingAndProcessingConfiguration.OUTPUT_FORMAT_KEY, "PlainTextOutputFormat()");
+        settings.setProperty(MutableParsingAndProcessingConfiguration.WHITESPACE_STRIPPING_KEY, "true");
+        settings.setProperty(MutableParsingAndProcessingConfiguration.AUTO_ESCAPING_POLICY_KEY, "enableIfSupported");
+        settings.setProperty(MutableParsingAndProcessingConfiguration.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY, "true");
+        settings.setProperty(MutableParsingAndProcessingConfiguration.TEMPLATE_LANGUAGE_KEY, "FTL");
+        settings.setProperty(MutableParsingAndProcessingConfiguration.TAG_SYNTAX_KEY, "squareBracket");
+        settings.setProperty(MutableParsingAndProcessingConfiguration.NAMING_CONVENTION_KEY, "camelCase");
+        settings.setProperty(MutableParsingAndProcessingConfiguration.TAB_SIZE_KEY, "4");
 
-        settings.put(ExtendableBuilder.OBJECT_WRAPPER_KEY, "restricted");
-        settings.put(ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY, "strong:20, soft:250");
+        settings.setProperty(ExtendableBuilder.OBJECT_WRAPPER_KEY, "restricted");
+        settings.setProperty(ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY, "strong:20, soft:250");
 
         final Map<String, Object> sharedVars = new HashMap<>();
         sharedVars.put("sharedVar1", "sharedVal1");
         sharedVars.put("sharedVar2", "sharedVal2");
 
-        // Creating bean definition which is equivalent to <bean/> element in Spring XML configuration.
+        final Map<String, String> autoImports = new HashMap<>();
+        autoImports.put("mylib1", "/libs/mylib1.ftl");
+        autoImports.put("mylib2", "/libs/mylib2.ftl");
+
+        final StringTemplateLoader templateLoader = new StringTemplateLoader();
+        templateLoader.putTemplate("fooTemplate", "foo");
+
+        // Creating bean definition which is equivalent to <bean/> element in Spring XML configuration like the following:
+        //
+        // <bean class="org.apache.freemarker.spring.ConfigurationFactoryBean">
+        //   <property name="incompatibleImprovements" value="3.0.0" />
+        //   <property name="settings">
+        //     <props>
+        //       <prop key="source_encoding">UTF-8</prop>
+        //       <prop key="whitespace_stripping">true</prop>
+        //       <!-- SNIP -->
+        //       <prop key="template_cache_storage">strong:20, soft:250</prop>
+        //     </props>
+        //   </property>
+        //   <property name="sharedVariables">
+        //     <map>
+        //       <entry key="sharedVar1" value="sharedVal1" />
+        //       <entry key="sharedVar2" value="sharedVal2" />
+        //     </map>
+        //   </property>
+        //   <property name="autoImports">
+        //     <map>
+        //       <entry key="mylib1" value="/libs/mylib1.ftl" />
+        //       <entry key="mylib2" value="/libs/mylib2.ftl" />
+        //     </map>
+        //   </property>
+        //   <property name="templateUpdateDelayMilliseconds" value="60000" />
+        //   <property name="localizedTemplateLookup" value="false" />
+        //   <property name="templateLoader">
+        //     <bean class="org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader">
+        //     </bean>
+        //   </property>
+        // </bean>
+        //
         BeanDefinition beanDef =
                 BeanDefinitionBuilder.genericBeanDefinition(ConfigurationFactoryBean.class.getName())
-                .addPropertyValue("incompatibleImprovements", new Version(3, 0, 0))
+                .addPropertyValue("incompatibleImprovements", "3.0.0")
                 .addPropertyValue("settings", settings)
                 .addPropertyValue("sharedVariables", sharedVars)
+                .addPropertyValue("autoImports", autoImports)
                 .addPropertyValue("templateUpdateDelayMilliseconds", 60000)
                 .addPropertyValue("localizedTemplateLookup", "false")
+                .addPropertyValue("templateLoader", templateLoader)
                 .getBeanDefinition();
 
         appContext.registerBeanDefinition("freemarkerConfig", beanDef);
@@ -104,6 +148,7 @@ public class ConfigurationFactoryBeanTest {
 
         assertEquals(new Version(3, 0, 0), config.getIncompatibleImprovements());
         assertEquals(Charset.forName("UTF-8"), config.getSourceEncoding());
+        assertEquals(PlainTextOutputFormat.INSTANCE.getName(), config.getOutputFormat().getName());
         assertTrue(config.isWhitespaceStrippingSet());
         assertEquals(AutoEscapingPolicy.ENABLE_IF_SUPPORTED, config.getAutoEscapingPolicy());
         assertTrue(config.isRecognizeStandardFileExtensionsSet());
@@ -122,6 +167,12 @@ public class ConfigurationFactoryBeanTest {
 
         assertEquals("sharedVal1", config.getSharedVariables().get("sharedVar1"));
         assertEquals("sharedVal2", config.getSharedVariables().get("sharedVar2"));
+
+        assertEquals("/libs/mylib1.ftl", config.getAutoImports().get("mylib1"));
+        assertEquals("/libs/mylib2.ftl", config.getAutoImports().get("mylib2"));
+
+        final Template fooTemplate = config.getTemplate("fooTemplate");
+        assertEquals("foo", fooTemplate.toString());
     }
 
 }
