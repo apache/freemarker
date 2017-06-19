@@ -22,11 +22,11 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Objects;
 
-import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
+import org.apache.freemarker.spring._SpringLogs;
 import org.slf4j.Logger;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
@@ -37,7 +37,7 @@ import org.springframework.core.io.ResourceLoader;
  */
 public class SpringResourceTemplateLoader implements TemplateLoader, ResourceLoaderAware {
 
-    private static final Logger LOG = _CoreLogs.TEMPLATE_RESOLVER;
+    private static final Logger LOG = _SpringLogs.TEMPLATE_RESOLVER;
 
     private ResourceLoader resourceLoader;
 
@@ -74,10 +74,7 @@ public class SpringResourceTemplateLoader implements TemplateLoader, ResourceLoa
                 version = lmd;
             }
         } catch (IOException e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("The last modified timestamp of the resource at '{}' may not be resolved. {}", name,
-                        e.toString());
-            }
+            LOG.debug("The last modified timestamp of the resource at '{}' may not be resolved.", name, e);
         }
 
         if (ifSourceDiffersFrom != null && ifSourceDiffersFrom.equals(source)

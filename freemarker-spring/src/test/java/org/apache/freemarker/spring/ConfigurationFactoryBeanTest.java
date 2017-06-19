@@ -24,8 +24,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.freemarker.core.AutoEscapingPolicy;
 import org.apache.freemarker.core.Configuration;
@@ -65,25 +65,45 @@ public class ConfigurationFactoryBeanTest {
 
     @Test
     public void testConfigurationFactoryBeanSettings() throws Exception {
-        final Map<String, String> settings = new LinkedHashMap<>();
+        final Properties settings = new Properties();
 
-        settings.put(MutableParsingAndProcessingConfiguration.SOURCE_ENCODING_KEY, "UTF-8");
-        settings.put(MutableParsingAndProcessingConfiguration.WHITESPACE_STRIPPING_KEY, "true");
-        settings.put(MutableParsingAndProcessingConfiguration.AUTO_ESCAPING_POLICY_KEY, "enableIfSupported");
-        settings.put(MutableParsingAndProcessingConfiguration.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY, "true");
-        settings.put(MutableParsingAndProcessingConfiguration.TEMPLATE_LANGUAGE_KEY, "FTL");
-        settings.put(MutableParsingAndProcessingConfiguration.TAG_SYNTAX_KEY, "squareBracket");
-        settings.put(MutableParsingAndProcessingConfiguration.NAMING_CONVENTION_KEY, "camelCase");
-        settings.put(MutableParsingAndProcessingConfiguration.TAB_SIZE_KEY, "4");
+        settings.setProperty(MutableParsingAndProcessingConfiguration.SOURCE_ENCODING_KEY, "UTF-8");
+        settings.setProperty(MutableParsingAndProcessingConfiguration.WHITESPACE_STRIPPING_KEY, "true");
+        settings.setProperty(MutableParsingAndProcessingConfiguration.AUTO_ESCAPING_POLICY_KEY, "enableIfSupported");
+        settings.setProperty(MutableParsingAndProcessingConfiguration.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY, "true");
+        settings.setProperty(MutableParsingAndProcessingConfiguration.TEMPLATE_LANGUAGE_KEY, "FTL");
+        settings.setProperty(MutableParsingAndProcessingConfiguration.TAG_SYNTAX_KEY, "squareBracket");
+        settings.setProperty(MutableParsingAndProcessingConfiguration.NAMING_CONVENTION_KEY, "camelCase");
+        settings.setProperty(MutableParsingAndProcessingConfiguration.TAB_SIZE_KEY, "4");
 
-        settings.put(ExtendableBuilder.OBJECT_WRAPPER_KEY, "restricted");
-        settings.put(ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY, "strong:20, soft:250");
+        settings.setProperty(ExtendableBuilder.OBJECT_WRAPPER_KEY, "restricted");
+        settings.setProperty(ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY, "strong:20, soft:250");
 
         final Map<String, Object> sharedVars = new HashMap<>();
         sharedVars.put("sharedVar1", "sharedVal1");
         sharedVars.put("sharedVar2", "sharedVal2");
 
-        // Creating bean definition which is equivalent to <bean/> element in Spring XML configuration.
+        // Creating bean definition which is equivalent to <bean/> element in Spring XML configuration like the following:
+        //
+        // <bean class="org.apache.freemarker.spring.ConfigurationFactoryBean">
+        //   <property name="incompatibleImprovements" value="3.0.0" />
+        //   <property name="settings">
+        //     <props>
+        //       <prop key="source_encoding">UTF-8</prop>
+        //       <prop key="whitespace_stripping">true</prop>
+        //       <!-- SNIP -->
+        //       <prop key="template_cache_storage">strong:20, soft:250</prop>
+        //     </props>
+        //   </property>
+        //   <property name="sharedVariables">
+        //     <map>
+        //       <entry key="sharedVar1" value="sharedVal1" />
+        //       <entry key="sharedVar2" value="sharedVal2" />
+        //     </map>
+        //   </property>
+        //   <property name="templateUpdateDelayMilliseconds" value="60000" />
+        //   <property name="localizedTemplateLookup" value="false" />
+        // </bean>
         BeanDefinition beanDef =
                 BeanDefinitionBuilder.genericBeanDefinition(ConfigurationFactoryBean.class.getName())
                 .addPropertyValue("incompatibleImprovements", new Version(3, 0, 0))

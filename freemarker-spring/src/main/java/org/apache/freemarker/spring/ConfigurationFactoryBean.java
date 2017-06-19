@@ -18,10 +18,6 @@
  */
 package org.apache.freemarker.spring;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Configuration.ExtendableBuilder;
 import org.springframework.beans.BeansException;
@@ -41,8 +37,6 @@ public class ConfigurationFactoryBean extends ExtendableBuilder<ConfigurationFac
 
     private AbstractFactoryBean<Configuration> delegate;
 
-    private Map<String, String> settings = new LinkedHashMap<>();
-
     public ConfigurationFactoryBean() {
         // By default, set the default version constant.
         // #setIncompatibleImprovements(Version) can be used to change it.
@@ -57,23 +51,10 @@ public class ConfigurationFactoryBean extends ExtendableBuilder<ConfigurationFac
 
             @Override
             protected Configuration createInstance() throws Exception {
-                for (Map.Entry<String, String> entry : settings.entrySet()) {
-                    setSetting(entry.getKey(), entry.getValue());
-                }
-
                 return build();
             }
 
         };
-    }
-
-    public Map<String, String> getSettings() {
-        return Collections.unmodifiableMap(settings);
-    }
-
-    public void setSettings(Map<String, String> settings) {
-        this.settings.clear();
-        this.settings.putAll(settings);
     }
 
     @Override
