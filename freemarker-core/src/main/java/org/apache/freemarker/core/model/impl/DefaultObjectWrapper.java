@@ -1025,7 +1025,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * enumeration. To obtain an enum model for a class, get the element of this
      * hash with the fully qualified class name. For example, if you place this
      * hash model inside the root data model under name "enums", you can use
-     * i.e. <code>statics["java.math.RoundingMode"].UP</code> to access the
+     * i.e. <code>enums["java.math.RoundingMode"].UP</code> to access the
      * {@link java.math.RoundingMode#UP} value.
      * @return a hash model whose keys are fully qualified class names, and
      * that returns hash models whose elements are the enum models of the
