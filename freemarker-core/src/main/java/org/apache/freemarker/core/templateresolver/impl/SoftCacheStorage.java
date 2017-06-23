@@ -37,7 +37,7 @@ import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
  *
  * @see ExtendableBuilder#setTemplateCacheStorage(CacheStorage)
  */
-public class SoftCacheStorage implements CacheStorage, CacheStorageWithGetSize {
+public class SoftCacheStorage implements CacheStorageWithGetSize {
     
     private final ReferenceQueue queue = new ReferenceQueue();
     private final ConcurrentMap map;

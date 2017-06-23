@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
 
 /**
@@ -34,7 +33,7 @@ import org.apache.freemarker.core.templateresolver.CacheStorageWithGetSize;
  *
  * @see Configuration#getTemplateCacheStorage()
  */
-public class StrongCacheStorage implements CacheStorage, CacheStorageWithGetSize {
+public class StrongCacheStorage implements CacheStorageWithGetSize {
     
     private final ConcurrentMap map = new ConcurrentHashMap();
 

@@ -86,7 +86,7 @@ public class MruCacheStorage implements CacheStorageWithGetSize {
     }
     
     @Override
-    public Object get(Object key) {
+    public synchronized Object get(Object key) {
         removeClearedReferences();
         MruEntry entry = (MruEntry) map.get(key);
         if (entry == null) {
@@ -102,7 +102,7 @@ public class MruCacheStorage implements CacheStorageWithGetSize {
     }
 
     @Override
-    public void put(Object key, Object value) {
+    public synchronized void put(Object key, Object value) {
         removeClearedReferences();
         MruEntry entry = (MruEntry) map.get(key);
         if (entry == null) {
@@ -116,7 +116,7 @@ public class MruCacheStorage implements CacheStorageWithGetSize {
     }
 
     @Override
-    public void remove(Object key) {
+    public synchronized void remove(Object key) {
         removeClearedReferences();
         removeInternal(key);
     }
