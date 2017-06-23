@@ -77,11 +77,12 @@ abstract public class TemplateElement extends TemplateObject {
     abstract TemplateElement[] accept(Environment env) throws TemplateException, IOException;
 
     /**
-     * One-line description of the element, that contain all the information that is used in {@link #getCanonicalForm()}
-     * , except the nested content (elements) of the element. The expressions inside the element (the parameters) has to
-     * be shown. Meant to be used for stack traces, also for tree views that don't go down to the expression-level.
-     * There are no backward-compatibility guarantees regarding the format used ATM, but it must be regular enough to be
-     * machine-parseable, and it must contain all information necessary for restoring an AST equivalent to the original.
+     * One-line description of the element, that contains all the information that is used in
+     * {@link #getCanonicalForm()}, except the nested content (elements) of the element. The expressions inside the
+     * element (the parameters) has to be shown. Meant to be used for stack traces, also for tree views that don't go
+     * down to the expression-level. There are no backward-compatibility guarantees regarding the format used ATM, but
+     * it must be regular enough to be machine-parseable, and it must contain all information necessary for restoring an
+     * AST equivalent to the original.
      * 
      * This final implementation calls {@link #dump(boolean) dump(false)}.
      * 

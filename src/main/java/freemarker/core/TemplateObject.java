@@ -198,9 +198,6 @@ public abstract class TemplateObject {
      * that is equivalent with the original could be reconstructed from the tree view. Thus, for literal values that are
      * leaf nodes the symbols should be the canonical form of value.
      * 
-     * Note that {@link TemplateElement#getDescription()} has similar role, only it doesn't go under the element level
-     * (i.e. down to the expression level), instead it always prints the embedded expressions itself.
-     * 
      * @see #getCanonicalForm()
      * @see TemplateElement#getDescription()
      */

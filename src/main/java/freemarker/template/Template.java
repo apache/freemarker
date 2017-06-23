@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
 
@@ -598,7 +599,9 @@ public class Template extends Configurable {
     }
 
     /**
-     * Returns the default character encoding used for reading included files.
+     * The encoding that was (allegedly) used to read this template; also the the default character encoding used for
+     * reading files included from this template. Possibly {@code null}, in which case you are supposed to use
+     * {@link Configuration#getEncoding(Locale)}. 
      */
     public String getEncoding() {
         return this.encoding;

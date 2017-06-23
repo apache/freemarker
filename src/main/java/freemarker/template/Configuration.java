@@ -122,7 +122,7 @@ import freemarker.template.utility.XmlEscape;
  *  ...
  *  
  *  // Later, whenever the application needs a template (so you may do this a lot, and from multiple threads):
- *  {@link Template Template} myTemplate = cfg.{@link #getTemplate(String) getTemplate}("myTemplate.html");
+ *  {@link Template Template} myTemplate = cfg.{@link #getTemplate(String) getTemplate}("myTemplate.ftlh");
  *  myTemplate.{@link Template#process(Object, java.io.Writer) process}(dataModel, out);</pre>
  * 
  * <p>A couple of settings that you should not leave on its default value are:
@@ -2324,7 +2324,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * messages (or the column number you get through other API-s). So for example if the users edit templates in an
      * editor where the tab width is set to 4, you should set this to 4 so that the column numbers printed by FreeMarker
      * will match the column number shown in the editor. This setting doesn't affect the output of templates, as a tab
-     * in the template will remain a tab in the output too.
+     * in the template will remain a tab in the output too. If you set this setting to 1, then tab characters will be
+     * kept in the return value of {@link Template#getSource(int, int, int, int)}, otherwise they will be replaced with
+     * the appropriate number of spaces.
      * 
      * @param tabSize
      *            At least 1, at most 256.
@@ -2651,12 +2653,16 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * default encoding if no encoding is set explicitly for the specified
      * locale. You can associate encodings with locales using 
      * {@link #setEncoding(Locale, String)} or {@link #loadBuiltInEncodingMap()}.
+     * 
+     * @param locale Shouldn't be {@code null}, though for backward compatibility it's accepted when the locale to
+     *               encoding {@link Map} (see earlier) is empty.
      */
     public String getEncoding(Locale locale) {
         if (localeToCharsetMap.isEmpty()) {
             return defaultEncoding;
         } else {
             // Try for a full name match (may include country and variant)
+            NullArgumentException.check("locale", locale);
             String charset = (String) localeToCharsetMap.get(locale.toString());
             if (charset == null) {
                 if (locale.getVariant().length() > 0) {

@@ -25,7 +25,7 @@ import freemarker.template.TemplateException;
 
 /**
  * Container for a group of related #if, #elseif and #else elements.
- * Each such block is a nested {@link ConditionalBlock}. Note that if an #if has no #else of #elseif,
+ * Each such block is a nested {@link ConditionalBlock}. Note that if an #if has no #else or #elseif,
  * {@link ConditionalBlock} doesn't need this parent element. 
  */
 final class IfBlock extends TemplateElement {
