@@ -23,10 +23,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.freemarker.core.NamingConvention;
-import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.converter.ConverterException;
 import org.apache.freemarker.converter.ConverterUtils;
+import org.apache.freemarker.core.NamingConvention;
+import org.apache.freemarker.core.util.FTLUtil;
+import org.apache.freemarker.core.util._NullArgumentException;
+import org.apache.freemarker.core.util._StringUtil;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -50,9 +52,12 @@ import freemarker.template.Template;
  * {@link #getParam(TemplateObject, int, ParameterRole, Class)}, etc.) instead of directly calling methods specific
  * to the node subclass. Always process all parameters; where you don't use
  * {@link #getOnlyParam(TemplateObject, ParameterRole, Class)}, use {@link #assertParamCount(TemplateObject, int)} to
- * ensure that. If you know you don't need some of the paramters, still at least call
+ * ensure that no parameter remains unhandled. If you know you don't need some of the parameters, still at least call
  * {@link #assertParamRole(TemplateObject, int, ParameterRole)} for them. These ensure that if new parameters are
  * added in FreeMarker 2.x, no information will be silently lost during conversion.
+ * <li>At many places you will see that we meticulously extract parts from the source, piece by piece print it to the
+ * output, but at the end we just end up with the same text that could have been copied from the source. The idea is
+ * that as the FM3 template language evolves, we will have to change the output for some pieces.
  * </ul>
  */
 @SuppressWarnings("deprecation")
@@ -100,7 +105,7 @@ public class FM2ASTToFM3SourceConverter {
     private String getOutput() throws ConverterException {
         String s = out.toString();
         try {
-            new org.apache.freemarker.core.Template(null, s, fm3Config);
+            //!!T new org.apache.freemarker.core.Template(null, s, fm3Config);
         } catch (Exception e) {
             throw new ConverterException(
                     "The result of the conversion wasn't valid FreeMarker 3 template; see cause exception", e);
@@ -132,7 +137,7 @@ public class FM2ASTToFM3SourceConverter {
             printEndTagSkippedTokens(node);
             print(tagEndChar);
         } else if (node instanceof ConditionalBlock) {
-            assertParamCount(node,2);
+            assertParamCount(node, 2);
             TemplateObject conditionExp = getParam(node, 0, ParameterRole.CONDITION, TemplateObject.class);
             int nodeSubtype = getParam(node, 1, ParameterRole.AST_NODE_SUBTYPE, Integer.class);
 
@@ -163,6 +168,92 @@ public class FM2ASTToFM3SourceConverter {
                 printEndTagSkippedTokens(node);
                 print(tagEndChar);
             }
+        } else if (node instanceof UnifiedCall) {
+            print(tagBeginChar);
+            print('@');
+
+            TemplateObject callee = getParam(node, 0, ParameterRole.CALLEE, TemplateObject.class);
+            printExpressionNode(callee);
+
+            TemplateObject lastPrintedExp = callee;
+            int paramIdx = 1;
+            int paramCount = node.getParameterCount();
+
+            // Print positional arguments:
+            while (paramIdx < paramCount && node.getParameterRole(paramIdx) == ParameterRole.ARGUMENT_VALUE) {
+                TemplateObject argValue = getParam(node, paramIdx, ParameterRole.ARGUMENT_VALUE, TemplateObject.class);
+
+                printParameterSeparatorSource(lastPrintedExp, argValue);
+                printExpressionNode(argValue);
+
+                lastPrintedExp = argValue;
+                paramIdx++;
+            }
+
+            // Print named arguments:
+            while (paramIdx < paramCount
+                    && node.getParameterRole(paramIdx) == ParameterRole.ARGUMENT_NAME) {
+                TemplateObject argValue = getParam(node, paramIdx + 1, ParameterRole.ARGUMENT_VALUE,
+                        TemplateObject.class);
+
+                printParameterSeparatorSource(lastPrintedExp, argValue); // Prints something like " someArgName="
+                printExpressionNode(argValue);
+
+                lastPrintedExp = argValue;
+                paramIdx += 2;
+            }
+
+            // Print loop variables:
+            int pos = getEndPositionExclusive(lastPrintedExp);
+            boolean beforeFirstLoopVar = true;
+            while (paramIdx < paramCount) {
+                String sep = readExpWSAndSeparator(pos, beforeFirstLoopVar ? ';' : ',', false);
+                assertNodeContent(sep.length() != 0, node,
+                        "Can't find loop variable separator", null);
+                print(sep);
+                pos += sep.length();
+
+                String loopVarName = getParam(node, paramIdx, ParameterRole.TARGET_LOOP_VARIABLE, String.class);
+                print(_StringUtil.toFTLTopLevelIdentifierReference(loopVarName));
+                String identifierInSrc = readIdentifier(pos);
+                assertNodeContent(identifierInSrc.length() != 0, node,
+                        "Can't find loop variable identifier in source", null);
+                pos += identifierInSrc.length(); // skip loop var name
+
+                beforeFirstLoopVar = false;
+                paramIdx++;
+            }
+
+            int startTagEndPos = printStartTagSkippedTokens(node, pos, false);
+            print(tagEndChar);
+
+            int elementEndPos = getEndPositionInclusive(node);
+            {
+                char c = src.charAt(elementEndPos);
+                assertNodeContent(c == tagEndChar, node,
+                        "tagEndChar expected, found '{}'", c);
+            }
+            if (startTagEndPos != elementEndPos) { // We have an end-tag
+                assertNodeContent(src.charAt(startTagEndPos - 1) != '/', node,
+                        "Not expected \"/\" at the end of the start tag", null);
+                printChildrenElements(node);
+
+                print(tagBeginChar);
+                print("/@");
+                int nameStartPos = elementEndPos; // Not 1 less; consider the case of </@>
+                while (nameStartPos >= 2 && !src.startsWith("/@", nameStartPos - 2)) {
+                    nameStartPos--;
+                }
+                assertNodeContent(nameStartPos >= 2, node,
+                        "Couldn't extract name from end-tag.", null);
+                print(src.substring(nameStartPos, elementEndPos)); // Also prints ignored WS after name, for now
+                print(tagEndChar);
+            } else { // We don't have end-tag
+                assertNodeContent(src.charAt(startTagEndPos - 1) == '/', node,
+                        "Expected \"/\" at the end of the start tag", null);
+                assertNodeContent(node.getChildCount() == 0, node,
+                        "Expected no children", null);
+            }
         } else if (node instanceof Comment) {
             print(tagBeginChar);
             print("#--");
@@ -175,8 +266,68 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private void printExpressionNode(TemplateObject node) throws ConverterException {
-        if (node instanceof Identifier || node instanceof NumberLiteral || node instanceof BooleanLiteral) {
+        if (node instanceof Identifier) {
+            print(FTLUtil.escapeIdentifier(((Identifier) node).getName()));
+        } else if (node instanceof NumberLiteral) {
+            print(getSrcSectionInclEnd(
+                    node.getBeginColumn(), node.getBeginLine(),
+                    node.getEndColumn(), node.getEndLine()));
+        } else if (node instanceof BooleanLiteral) {
             print(node.getCanonicalForm());
+        } else if (node instanceof StringLiteral) {
+            boolean rawString = false;
+            char quote;
+            {
+                int pos = getStartPosition(node);
+                quote = src.charAt(pos);
+                while ((quote == '\\' || quote == '{' /* 2.3.26 bug workaround */ || quote == 'r')
+                        && pos < src.length()) {
+                    pos++;
+                    if (quote == 'r') {
+                        rawString = true;
+                    }
+                    quote = src.charAt(pos);
+                }
+                if (quote != '\'' && quote != '"') {
+                    throw new UnexpectedNodeContentException(node, "Unexpected string quote character: {}", quote);
+                }
+            }
+            if (rawString) {
+                print('r');
+            }
+            print(quote);
+
+            int parameterCount = node.getParameterCount();
+            if (parameterCount == 0) {
+                if (!rawString) {
+                    print(FTLUtil.escapeStringLiteralPart(((StringLiteral) node).getAsString(), quote));
+                } else {
+                    print(((StringLiteral) node).getAsString());
+                }
+            } else {
+                // Not really a literal; contains interpolations
+                for (int paramIdx = 0; paramIdx < parameterCount; paramIdx++) {
+                    Object param = getParam(node, paramIdx, ParameterRole.VALUE_PART, Object.class);
+                    if (param instanceof String) {
+                        print(FTLUtil.escapeStringLiteralPart((String) param));
+                    } else {
+                        assertNodeContent(param instanceof Interpolation, node,
+                                "Unexpected parameter type: {}", param.getClass().getName());
+
+                        // We print the interpolation, the cut it out from the output, then put it back escaped:
+                        int interpStartPos = out.length();
+                        printNode((TemplateElement) param);
+                        int interpEndPos = out.length();
+                        String interp = out.substring(interpStartPos, interpEndPos);
+                        out.setLength(interpStartPos + 2); // +2 to keep the "${"
+                        String inerpInside = interp.substring(2, interp.length() - 1);
+                        print(FTLUtil.escapeStringLiteralPart(inerpInside, quote)); // For now we escape as FTL2
+                        print(interp.charAt(interp.length() - 1)); // "}"
+                    }
+                }
+            }
+
+            print(quote);
         } else if (node instanceof AddConcatExpression) {
             assertParamCount(node, 2);
             TemplateObject lho = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, TemplateObject.class);
@@ -221,8 +372,8 @@ public class FM2ASTToFM3SourceConverter {
 
             printExpressionNode(lho); // [lho]?biName
 
-            int postLHOPos = getPosition(lho.getEndColumn(), lho.getEndLine()) + 1;
-            int endPos = getPosition(node.getEndColumn(), node.getEndLine());
+            int postLHOPos = getEndPositionExclusive(lho);
+            int endPos = getEndPositionInclusive(node);
             boolean foundQuestionMark = false;
             int pos = postLHOPos;
             scanForRHO: while (pos < endPos) {
@@ -322,13 +473,16 @@ public class FM2ASTToFM3SourceConverter {
     /**
      * Prints the part between the last parameter (or the directive name if there are no parameters) and the tag closer
      * character, for a start tag. That part may contains whitespace or comments, which aren't visible in the AST.
+     *
+     * @return The position of the last character of the start tag. Note that the printed string never includes this
+     *         character.
      */
-    private void printStartTagSkippedTokens(TemplateElement node, TemplateObject lastParam, boolean trimSlash)
-            throws UnexpectedNodeContentException {
+    private int printStartTagSkippedTokens(TemplateElement node, TemplateObject lastParam, boolean trimSlash)
+            throws ConverterException {
         int pos;
         if (lastParam == null) {
             // No parameter; must skip the tag name
-            pos = getPosition(node.getBeginColumn(), node.getBeginLine());
+            pos = getStartPosition(node);
             {
                 char c = src.charAt(pos++);
                 assertNodeContent(c == tagBeginChar, node,
@@ -349,41 +503,40 @@ public class FM2ASTToFM3SourceConverter {
         } else {
             pos = getPosition(lastParam.getEndColumn() + 1, lastParam.getEndLine());
         }
+        return printStartTagSkippedTokens(node, pos, trimSlash);
+    }
+
+    /**
+     * Similar to {@link #printStartTagSkippedTokens(TemplateElement, TemplateObject, boolean)}, but with explicitly
+     * specified scan start position.
+     *
+     * @param pos The position where the first skipped character can occur (or the tag end character).
+     */
+    private int printStartTagSkippedTokens(TemplateElement node, int pos, boolean trimSlash)
+            throws ConverterException {
         final int startPos = pos;
 
-        while (pos < src.length()) {
-            char c = src.charAt(pos);
-            if ((c == '<' || c == '[')
-                    && (src.startsWith("!--", pos + 1) || src.startsWith("#--", pos + 1))) {
-                pos += 4;
-                scanForCommentEnd: while (pos < src.length()) {
-                    if (src.startsWith("-->", pos) || src.startsWith("--]", pos)) {
-                        pos += 3;
-                        break scanForCommentEnd;
-                    }
-                    pos++;
-                }
-                if (pos == src.length()) {
-                    throw new UnexpectedNodeContentException(node, "Can't find comment end in the start tag", null);
-                }
-            } else if (c == '/' && pos + 1 < src.length() && src.charAt(pos + 1) == tagEndChar) {
-                print(src.substring(startPos, trimSlash ? pos : pos + 1));
-                return;
-            } else if (c == tagEndChar) {
-                print(src.substring(startPos, pos));
-                return;
-            } else if (Character.isWhitespace(c)) {
-                pos++;
-            } else {
-                throw new UnexpectedNodeContentException(node,
-                        "Unexpected character when scanning for tag end: '{}'", c);
-            }
+        pos = getPositionAfterWSAndExpComments(pos);
+        if (pos == src.length()) {
+            throw new UnexpectedNodeContentException(node,
+                    "End of source reached when scanning for tag end", null);
         }
-        throw new UnexpectedNodeContentException(node, "Can't find start tag end", null);
+
+        char c = src.charAt(pos);
+        if (c == '/' && pos + 1 < src.length() && src.charAt(pos + 1) == tagEndChar) {
+            print(src.substring(startPos, trimSlash ? pos : pos + 1));
+            return pos + 1;
+        } else if (c == tagEndChar) {
+            print(src.substring(startPos, pos));
+            return pos;
+        } else {
+            throw new UnexpectedNodeContentException(node,
+                    "Unexpected character when scanning for tag end: '{}'", c);
+        }
     }
 
     private void printEndTagSkippedTokens(TemplateElement node) throws UnexpectedNodeContentException {
-        int tagEndPos = getPosition(node.getEndColumn(), node.getEndLine());
+        int tagEndPos = getEndPositionInclusive(node);
         {
             char c = src.charAt(tagEndPos);
             assertNodeContent(c == tagEndChar, node,
@@ -467,6 +620,18 @@ public class FM2ASTToFM3SourceConverter {
         }
     }
 
+    private int getStartPosition(TemplateObject node) {
+        return getPosition(node.getBeginColumn(), node.getBeginLine());
+    }
+
+    private int getEndPositionInclusive(TemplateObject node) {
+        return getPosition(node.getEndColumn(), node.getEndLine());
+    }
+
+    private int getEndPositionExclusive(TemplateObject node) {
+        return getEndPositionInclusive(node) + 1;
+    }
+
     /**
      * Returns the position of a character in the {@link #src} string.
      *
@@ -490,12 +655,83 @@ public class FM2ASTToFM3SourceConverter {
         return rowStartPositions.get(row - 1) + column - 1;
     }
 
+    private String getSrcSectionInclEnd(int startColumn, int startRow, int exclEndColumn, int endRow) {
+        return src.substring(getPosition(startColumn, startRow), getPosition(exclEndColumn, endRow) + 1);
+    }
+
     private String getSrcSectionExclEnd(int startColumn, int startRow, int exclEndColumn, int endRow) {
         return src.substring(getPosition(startColumn, startRow), getPosition(exclEndColumn, endRow));
     }
 
     private boolean isCoreNameChar(char c) {
         return Character.isLetterOrDigit(c) || c == '_';
+    }
+
+    /**
+     * @return Position after the whitespace and comments, or the argument position if there were node
+     */
+    private int getPositionAfterWSAndExpComments(int pos) throws ConverterException {
+        scanForNoWSNoComment: while (pos < src.length()) {
+            char c = src.charAt(pos);
+            if ((c == '<' || c == '[')
+                    && (src.startsWith("!--", pos + 1) || src.startsWith("#--", pos + 1))) {
+                pos += 4;
+                scanForCommentEnd:
+                while (pos < src.length()) {
+                    if (src.startsWith("-->", pos) || src.startsWith("--]", pos)) {
+                        pos += 3;
+                        break scanForCommentEnd;
+                    }
+                    pos++;
+                }
+                if (pos == src.length()) {
+                    throw new ConverterException("Can't find comment end at " + pos, null);
+                }
+            } else if (Character.isWhitespace(c)) {
+                pos++;
+            } else {
+                break scanForNoWSNoComment;
+            }
+        }
+        return pos;
+    }
+
+
+    private String readExpWSAndSeparator(int startPos, char separator, boolean separatorOptional)
+            throws ConverterException {
+        int pos = getPositionAfterWSAndExpComments(startPos);
+
+        if (pos == src.length() || src.charAt(pos) != separator) {
+            // No separator
+            return separatorOptional ? src.substring(startPos, pos) : "";
+        }
+        pos++; // Skip separator
+
+        pos = getPositionAfterWSAndExpComments(pos);
+
+        return src.substring(startPos, pos);
+    }
+
+    private String readIdentifier(int startPos) throws ConverterException {
+        int pos = startPos;
+        scanUntilIdentifierEnd: while (pos < src.length()) {
+            char c = src.charAt(pos);
+            if (c == '\\') {
+                if (pos + 1 == src.length()) {
+                    throw new ConverterException("Misplaced \"\\\" at position " + pos);
+                }
+                if (!FTLUtil.isEscapedIdentifierCharacter(src.charAt(pos + 1))) {
+                    throw new ConverterException("Invalid escape at position " + pos);
+                }
+                pos += 2; // to skip escaped character
+            } else if (pos == startPos && FTLUtil.isNonEscapedIdentifierStart(c)
+                    || FTLUtil.isNonEscapedIdentifierPart(c)) {
+                pos++;
+            } else {
+                break scanUntilIdentifierEnd;
+            }
+        }
+        return src.substring(startPos, pos);
     }
 
 }

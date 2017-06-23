@@ -27,8 +27,8 @@ import java.io.IOException;
 import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.freemarker.converter.FM2ToFM3Converter;
 import org.apache.freemarker.converter.ConverterException;
+import org.apache.freemarker.converter.FM2ToFM3Converter;
 import org.freemarker.converter.test.ConverterTest;
 import org.junit.Test;
 
@@ -46,13 +46,29 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
     }
 
     @Test
-    public void testInterpolations() throws IOException, ConverterException {
-        assertConvertedSame("${var}");
-        assertConvertedSame("${  var\n}");
+    public void testLiterals() throws IOException, ConverterException {
+        assertConvertedSame("${''}");
+        assertConvertedSame("${'s'}");
+        assertConvertedSame("${\"\"}");
+        assertConvertedSame("${\"s\"}");
+        assertConvertedSame("${\"\\\"'\"}");
+        assertConvertedSame("${'\"\\''}");
+        assertConvertedSame("${'1${x + 1 + \\'s\\'}2'}");
+        assertConvertedSame("${\"s ${'x $\\{\\\"y\\\"}'}\"}");
+        assertConvertedSame("${'${1}${2}'}");
+
+        assertConvertedSame("${r'${1}'}");
+
+        assertConvertedSame("${1}");
+        assertConvertedSame("${0.5}");
+        assertConvertedSame("${-1.5}");
+
+        assertConvertedSame("${true}");
+        assertConvertedSame("${false}");
     }
 
     @Test
-    public void testExpressions() throws IOException, ConverterException {
+    public void testOtherExpressions() throws IOException, ConverterException {
         assertConvertedSame("${x + 1\r\n\t- y % 2 / 2 * +z / -1}");
         assertConvertedSame("${x * (y + z) * (\ty+z\n)}");
 
@@ -63,12 +79,40 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
     }
 
     @Test
-    public void testDirectives() throws IOException, ConverterException {
+    public void testInterpolations() throws IOException, ConverterException {
+        assertConvertedSame("${var}");
+        assertConvertedSame("${  var\n}");
+    }
+
+    @Test
+    public void testCoreDirectives() throws IOException, ConverterException {
         assertConvertedSame("<#if foo>1</#if>");
         assertConvertedSame("<#if\n  foo\n>\n123\n</#if\n>");
 
         assertConverted("<#if foo>1<#elseIf bar>2<#else>3</#if>", "<#if foo>1<#elseif bar>2<#else>3</#if>");
         assertConvertedSame("<#if  foo >1<#elseIf  bar >2<#else >3</#if >");
+    }
+
+    @Test
+    public void testUserDirectives() throws IOException, ConverterException {
+        assertConvertedSame("<@foo/>");
+        assertConvertedSame("<@foo />");
+        assertConvertedSame("<@foo\\-bar />");
+        assertConvertedSame("<@foo></@foo>");
+        assertConvertedSame("<@foo\\-bar >t</@foo\\-bar>");
+        assertConvertedSame("<@foo\\-bar >t</@>");
+        assertConvertedSame("<@foo x=1 y=2 />");
+        assertConvertedSame("<@foo x\\-y=1 />");
+        assertConvertedSame("<@foo\n\tx = 1\n\ty = 2\n/>");
+        assertConvertedSame("<@foo 1 2 />");
+        assertConvertedSame("<@foo <#-- C1 --> 1 <#-- C2 --> 2 <#-- C3 --> />");
+        assertConvertedSame("<@foo 1, 2 />");
+        assertConvertedSame("<@foo <#-- C1 --> 1 <#-- C2 -->, <#-- C3 --> 2 <#-- C4 --> />");
+        assertConvertedSame("<@foo x=1; i, j></@>");
+        assertConvertedSame("<@foo 1; i, j></@>");
+        assertConvertedSame("<@foo 1 2; i\\-2, j></@>");
+        assertConvertedSame("<@foo x=1 y=2; i></@>");
+        assertConvertedSame("<@foo x=1 ;\n    i <#-- C0 --> , <#-- C1 -->\n\t<!-- C2 --> j <#-- C3 -->\n></@>");
     }
 
     @Test
