@@ -65,6 +65,24 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
 
         assertConvertedSame("${true}");
         assertConvertedSame("${false}");
+
+        assertConvertedSame("${f([])}");
+        assertConvertedSame("${f([ <#-- C --> ])}");
+        assertConvertedSame("${f([1])}");
+        assertConvertedSame("${f([1, [x,y], 3])}");
+        assertConvertedSame("${f([<#-- C1 --> 1, <#-- C2 --> 2, <#-- C3 --> 3 <#-- C4 -->])}");
+
+        assertConvertedSame("${f({})}");
+        assertConvertedSame("${f({k: v})}");
+        assertConvertedSame("${f({k1: v1, k2: v2, 'k3': 33})}");
+        assertConvertedSame("${f({ <#-- C1 --> k1 <#-- C1 --> : <#-- C1 --> v1 <#-- C1 -->,k2:v2 <#-- C1 -->})}");
+
+        assertConvertedSame("${f(1 .. 9)}");
+        assertConvertedSame("${f(1 ..* 9)}");
+        assertConvertedSame("${f(1 ..! 9)}");
+        assertConvertedSame("${f(1 ..< 9)}");
+        assertConvertedSame("${f(1 ..)}");
+        assertConvertedSame("${f(1<#-- C1 -->..\t<#-- C2 -->9)}");
     }
 
     @Test
@@ -76,6 +94,13 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("${f(1)}");
         assertConvertedSame("${f(1, 2)}");
         assertConvertedSame("${f<#-- C1 -->(<#-- C2 --> 1, 2 ,<#-- C3 --> 3,<#-- C4 -->4 <#-- C5 -->)}");
+
+        assertConvertedSame("${m[key]}");
+        assertConvertedSame("${m['key']}");
+        assertConvertedSame("${m <#-- C1 --> [ <#-- C2 --> key <#-- C3 --> ]}");
+
+        assertConvertedSame("${m.key}");
+        assertConvertedSame("${m <#-- C1 --> . <#-- C3 --> key}");
     }
 
     @Test

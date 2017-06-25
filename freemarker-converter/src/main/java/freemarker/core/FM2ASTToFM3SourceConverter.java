@@ -27,6 +27,7 @@ import org.apache.freemarker.converter.ConverterException;
 import org.apache.freemarker.converter.ConverterUtils;
 import org.apache.freemarker.core.NamingConvention;
 import org.apache.freemarker.core.util.FTLUtil;
+import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._StringUtil;
 
@@ -116,8 +117,11 @@ public class FM2ASTToFM3SourceConverter {
     private void printNode(TemplateObject node) throws ConverterException {
         if (node instanceof TemplateElement) {
             printTemplateElement((TemplateElement) node);
+        } else if (node instanceof Expression) {
+            printExp((Expression) node);
         } else {
-            printExpressionNode(node);
+            throw new UnexpectedNodeContentException(node, "Unhandled node class",
+                    _ClassUtil.getShortClassNameOfObject(node));
         }
     }
 
@@ -128,132 +132,8 @@ public class FM2ASTToFM3SourceConverter {
             print(getOnlyParam(node, ParameterRole.CONTENT, String.class));
         } else if (node instanceof DollarVariable) {
             printWithParamsLeadingSkippedTokens("${", node);
-            printNode(getOnlyParam(node, ParameterRole.CONTENT, TemplateObject.class));
+            printNode(getOnlyParam(node, ParameterRole.CONTENT, Expression.class));
             printWithParamsTrailingSkippedTokens("}", node, 0);
-        } else if (node instanceof IfBlock) {
-            printChildrenElements(node);
-            print(tagBeginChar);
-            print("/#if");
-            printEndTagSkippedTokens(node);
-            print(tagEndChar);
-        } else if (node instanceof ConditionalBlock) {
-            assertParamCount(node, 2);
-            TemplateObject conditionExp = getParam(node, 0, ParameterRole.CONDITION, TemplateObject.class);
-            int nodeSubtype = getParam(node, 1, ParameterRole.AST_NODE_SUBTYPE, Integer.class);
-
-            print(tagBeginChar);
-            String tagStart;
-            if (nodeSubtype == ConditionalBlock.TYPE_IF) {
-                tagStart = "#if";
-            } else if (nodeSubtype == ConditionalBlock.TYPE_ELSE) {
-                tagStart = "#else";
-            } else if (nodeSubtype == ConditionalBlock.TYPE_ELSE_IF) {
-                tagStart = "#elseIf";
-            } else {
-                throw new UnexpectedNodeContentException(node, "Unhandled subtype, {}.", nodeSubtype);
-            }
-            print(tagStart);
-            if (conditionExp != null) {
-                printWithParamsLeadingSkippedTokens(tagStart.length() + 1, node);
-                printNode(conditionExp);
-            }
-            printStartTagSkippedTokens(node, conditionExp, true);
-            print(tagEndChar);
-
-            printChildrenElements(node);
-
-            if (!(node.getParentElement() instanceof IfBlock)) {
-                print(tagBeginChar);
-                print("/#if");
-                printEndTagSkippedTokens(node);
-                print(tagEndChar);
-            }
-        } else if (node instanceof UnifiedCall) {
-            print(tagBeginChar);
-            print('@');
-
-            TemplateObject callee = getParam(node, 0, ParameterRole.CALLEE, TemplateObject.class);
-            printExpressionNode(callee);
-
-            TemplateObject lastPrintedExp = callee;
-            int paramIdx = 1;
-            int paramCount = node.getParameterCount();
-
-            // Print positional arguments:
-            while (paramIdx < paramCount && node.getParameterRole(paramIdx) == ParameterRole.ARGUMENT_VALUE) {
-                TemplateObject argValue = getParam(node, paramIdx, ParameterRole.ARGUMENT_VALUE, TemplateObject.class);
-
-                printParameterSeparatorSource(lastPrintedExp, argValue);
-                printExpressionNode(argValue);
-
-                lastPrintedExp = argValue;
-                paramIdx++;
-            }
-
-            // Print named arguments:
-            while (paramIdx < paramCount
-                    && node.getParameterRole(paramIdx) == ParameterRole.ARGUMENT_NAME) {
-                TemplateObject argValue = getParam(node, paramIdx + 1, ParameterRole.ARGUMENT_VALUE,
-                        TemplateObject.class);
-
-                printParameterSeparatorSource(lastPrintedExp, argValue); // Prints something like " someArgName="
-                printExpressionNode(argValue);
-
-                lastPrintedExp = argValue;
-                paramIdx += 2;
-            }
-
-            // Print loop variables:
-            int pos = getEndPositionExclusive(lastPrintedExp);
-            boolean beforeFirstLoopVar = true;
-            while (paramIdx < paramCount) {
-                String sep = readExpWSAndSeparator(pos, beforeFirstLoopVar ? ';' : ',', false);
-                assertNodeContent(sep.length() != 0, node,
-                        "Can't find loop variable separator", null);
-                print(sep);
-                pos += sep.length();
-
-                String loopVarName = getParam(node, paramIdx, ParameterRole.TARGET_LOOP_VARIABLE, String.class);
-                print(_StringUtil.toFTLTopLevelIdentifierReference(loopVarName));
-                String identifierInSrc = readIdentifier(pos);
-                assertNodeContent(identifierInSrc.length() != 0, node,
-                        "Can't find loop variable identifier in source", null);
-                pos += identifierInSrc.length(); // skip loop var name
-
-                beforeFirstLoopVar = false;
-                paramIdx++;
-            }
-
-            int startTagEndPos = printStartTagSkippedTokens(node, pos, false);
-            print(tagEndChar);
-
-            int elementEndPos = getEndPositionInclusive(node);
-            {
-                char c = src.charAt(elementEndPos);
-                assertNodeContent(c == tagEndChar, node,
-                        "tagEndChar expected, found '{}'", c);
-            }
-            if (startTagEndPos != elementEndPos) { // We have an end-tag
-                assertNodeContent(src.charAt(startTagEndPos - 1) != '/', node,
-                        "Not expected \"/\" at the end of the start tag", null);
-                printChildrenElements(node);
-
-                print(tagBeginChar);
-                print("/@");
-                int nameStartPos = elementEndPos; // Not 1 less; consider the case of </@>
-                while (nameStartPos >= 2 && !src.startsWith("/@", nameStartPos - 2)) {
-                    nameStartPos--;
-                }
-                assertNodeContent(nameStartPos >= 2, node,
-                        "Couldn't extract name from end-tag.", null);
-                print(src.substring(nameStartPos, elementEndPos)); // Also prints ignored WS after name, for now
-                print(tagEndChar);
-            } else { // We don't have end-tag
-                assertNodeContent(src.charAt(startTagEndPos - 1) == '/', node,
-                        "Expected \"/\" at the end of the start tag", null);
-                assertNodeContent(node.getChildCount() == 0, node,
-                        "Expected no children", null);
-            }
         } else if (node instanceof Comment) {
             print(tagBeginChar);
             print("#--");
@@ -261,144 +141,445 @@ public class FM2ASTToFM3SourceConverter {
             print("--");
             print(tagEndChar);
         } else {
+            printDir(node);
+        }
+    }
+
+    /**
+     * Prints a directive
+     */
+    private void printDir(TemplateElement node) throws ConverterException {
+        if (node instanceof IfBlock) {
+            printDirIfElseElseIfContainer((IfBlock) node);
+        } else if (node instanceof ConditionalBlock) {
+            printDirIfOrElseOrElseIf((ConditionalBlock) node);
+        } else if (node instanceof UnifiedCall) {
+            printDirCustom((UnifiedCall) node);
+        } else {
             throw new ConverterException("Unhandled AST TemplateElement class: " + node.getClass().getName());
         }
     }
 
-    private void printExpressionNode(TemplateObject node) throws ConverterException {
+    private void printDirCustom(UnifiedCall node) throws ConverterException {
+        print(tagBeginChar);
+        print('@');
+
+        Expression callee = getParam(node, 0, ParameterRole.CALLEE, Expression.class);
+        printExp(callee);
+
+        Expression lastPrintedExp = callee;
+        int paramIdx = 1;
+        int paramCount = node.getParameterCount();
+
+        // Print positional arguments:
+        while (paramIdx < paramCount && node.getParameterRole(paramIdx) == ParameterRole.ARGUMENT_VALUE) {
+            Expression argValue = getParam(node, paramIdx, ParameterRole.ARGUMENT_VALUE, Expression.class);
+
+            printParameterSeparatorSource(lastPrintedExp, argValue);
+            printExp(argValue);
+
+            lastPrintedExp = argValue;
+            paramIdx++;
+        }
+
+        // Print named arguments:
+        while (paramIdx < paramCount
+                && node.getParameterRole(paramIdx) == ParameterRole.ARGUMENT_NAME) {
+            Expression argValue = getParam(node, paramIdx + 1, ParameterRole.ARGUMENT_VALUE, Expression.class);
+
+            printParameterSeparatorSource(lastPrintedExp, argValue); // Prints something like " someArgName="
+            printExp(argValue);
+
+            lastPrintedExp = argValue;
+            paramIdx += 2;
+        }
+
+        // Print loop variables:
+        int pos = getEndPositionExclusive(lastPrintedExp);
+        boolean beforeFirstLoopVar = true;
+        while (paramIdx < paramCount) {
+            String sep = readExpWSAndSeparator(pos, beforeFirstLoopVar ? ';' : ',', false);
+            assertNodeContent(sep.length() != 0, node,
+                    "Can't find loop variable separator", null);
+            printWithConvertedExpComments(sep);
+            pos += sep.length();
+
+            String loopVarName = getParam(node, paramIdx, ParameterRole.TARGET_LOOP_VARIABLE, String.class);
+            print(_StringUtil.toFTLTopLevelIdentifierReference(loopVarName));
+            String identifierInSrc = readIdentifier(pos);
+            assertNodeContent(identifierInSrc.length() != 0, node,
+                    "Can't find loop variable identifier in source", null);
+            pos += identifierInSrc.length(); // skip loop var name
+
+            beforeFirstLoopVar = false;
+            paramIdx++;
+        }
+
+        int startTagEndPos = printStartTagSkippedTokens(node, pos, false);
+        print(tagEndChar);
+
+        int elementEndPos = getEndPositionInclusive(node);
+        {
+            char c = src.charAt(elementEndPos);
+            assertNodeContent(c == tagEndChar, node,
+                    "tagEndChar expected, found '{}'", c);
+        }
+        if (startTagEndPos != elementEndPos) { // We have an end-tag
+            assertNodeContent(src.charAt(startTagEndPos - 1) != '/', node,
+                    "Not expected \"/\" at the end of the start tag", null);
+            printChildrenElements(node);
+
+            print(tagBeginChar);
+            print("/@");
+            int nameStartPos = elementEndPos; // Not 1 less; consider the case of </@>
+            while (nameStartPos >= 2 && !src.startsWith("/@", nameStartPos - 2)) {
+                nameStartPos--;
+            }
+            assertNodeContent(nameStartPos >= 2, node,
+                    "Couldn't extract name from end-tag.", null);
+            // Also prints ignored WS after name, for now:
+            printWithConvertedExpComments(src.substring(nameStartPos, elementEndPos));
+            print(tagEndChar);
+        } else { // We don't have end-tag
+            assertNodeContent(src.charAt(startTagEndPos - 1) == '/', node,
+                    "Expected \"/\" at the end of the start tag", null);
+            assertNodeContent(node.getChildCount() == 0, node,
+                    "Expected no children", null);
+        }
+    }
+
+    private void printDirIfOrElseOrElseIf(ConditionalBlock node) throws ConverterException {
+        assertParamCount(node, 2);
+        Expression conditionExp = getParam(node, 0, ParameterRole.CONDITION, Expression.class);
+        int nodeSubtype = getParam(node, 1, ParameterRole.AST_NODE_SUBTYPE, Integer.class);
+
+        print(tagBeginChar);
+        String tagStart;
+        if (nodeSubtype == ConditionalBlock.TYPE_IF) {
+            tagStart = "#if";
+        } else if (nodeSubtype == ConditionalBlock.TYPE_ELSE) {
+            tagStart = "#else";
+        } else if (nodeSubtype == ConditionalBlock.TYPE_ELSE_IF) {
+            tagStart = "#elseIf";
+        } else {
+            throw new UnexpectedNodeContentException(node, "Unhandled subtype, {}.", nodeSubtype);
+        }
+        print(tagStart);
+        if (conditionExp != null) {
+            printWithParamsLeadingSkippedTokens(tagStart.length() + 1, node);
+            printNode(conditionExp);
+        }
+        printStartTagSkippedTokens(node, conditionExp, true);
+        print(tagEndChar);
+
+        printChildrenElements(node);
+
+        if (!(node.getParentElement() instanceof IfBlock)) {
+            print(tagBeginChar);
+            print("/#if");
+            printEndTagSkippedTokens(node);
+            print(tagEndChar);
+        }
+    }
+
+    private void printDirIfElseElseIfContainer(IfBlock node) throws ConverterException {
+        printChildrenElements(node);
+        print(tagBeginChar);
+        print("/#if");
+        printEndTagSkippedTokens(node);
+        print(tagEndChar);
+    }
+
+    /**
+     * Prints an expression
+     */
+    private void printExp(Expression node) throws ConverterException {
         if (node instanceof Identifier) {
-            print(FTLUtil.escapeIdentifier(((Identifier) node).getName()));
+            printExpIdentifier((Identifier) node);
         } else if (node instanceof NumberLiteral) {
-            print(getSrcSectionInclEnd(
-                    node.getBeginColumn(), node.getBeginLine(),
-                    node.getEndColumn(), node.getEndLine()));
+            printExpNumericalLiteral((NumberLiteral) node);
         } else if (node instanceof BooleanLiteral) {
-            print(node.getCanonicalForm());
+            printExpBooleanLiteral((BooleanLiteral) node);
         } else if (node instanceof StringLiteral) {
-            boolean rawString = false;
-            char quote;
-            {
-                int pos = getStartPosition(node);
-                quote = src.charAt(pos);
-                while ((quote == '\\' || quote == '{' /* 2.3.26 bug workaround */ || quote == 'r')
-                        && pos < src.length()) {
-                    pos++;
-                    if (quote == 'r') {
-                        rawString = true;
-                    }
-                    quote = src.charAt(pos);
-                }
-                if (quote != '\'' && quote != '"') {
-                    throw new UnexpectedNodeContentException(node, "Unexpected string quote character: {}", quote);
-                }
-            }
-            if (rawString) {
-                print('r');
-            }
-            print(quote);
-
-            int parameterCount = node.getParameterCount();
-            if (parameterCount == 0) {
-                if (!rawString) {
-                    print(FTLUtil.escapeStringLiteralPart(((StringLiteral) node).getAsString(), quote));
-                } else {
-                    print(((StringLiteral) node).getAsString());
-                }
-            } else {
-                // Not really a literal; contains interpolations
-                for (int paramIdx = 0; paramIdx < parameterCount; paramIdx++) {
-                    Object param = getParam(node, paramIdx, ParameterRole.VALUE_PART, Object.class);
-                    if (param instanceof String) {
-                        print(FTLUtil.escapeStringLiteralPart((String) param));
-                    } else {
-                        assertNodeContent(param instanceof Interpolation, node,
-                                "Unexpected parameter type: {}", param.getClass().getName());
-
-                        // We print the interpolation, the cut it out from the output, then put it back escaped:
-                        int interpStartPos = out.length();
-                        printNode((TemplateElement) param);
-                        int interpEndPos = out.length();
-                        String interp = out.substring(interpStartPos, interpEndPos);
-                        out.setLength(interpStartPos + 2); // +2 to keep the "${"
-                        String inerpInside = interp.substring(2, interp.length() - 1);
-                        print(FTLUtil.escapeStringLiteralPart(inerpInside, quote)); // For now we escape as FTL2
-                        print(interp.charAt(interp.length() - 1)); // "}"
-                    }
-                }
-            }
-
-            print(quote);
+            printExpStringLiteral((StringLiteral) node);
+        } else if (node instanceof ListLiteral) {
+            printExpListLiteral((ListLiteral) node);
+        } else if (node instanceof HashLiteral) {
+            printExpHashLiteral((HashLiteral) node);
+        } else if (node instanceof Range) {
+            printExpRange((Range) node);
         } else if (node instanceof AddConcatExpression) {
-            assertParamCount(node, 2);
-            TemplateObject lho = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, TemplateObject.class);
-            TemplateObject rho = getParam(node, 1, ParameterRole.RIGHT_HAND_OPERAND, TemplateObject.class);
-            printNode(lho);
-            printParameterSeparatorSource(lho, rho);
-            printNode(rho);
+            printExpAddConcat((AddConcatExpression) node);
         } else if (node instanceof ArithmeticExpression) {
-            assertParamCount(node, 3);
-            assertParamRole(node, 2, ParameterRole.AST_NODE_SUBTYPE);
-            TemplateObject lho = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, TemplateObject.class);
-            TemplateObject rho = getParam(node, 1, ParameterRole.RIGHT_HAND_OPERAND, TemplateObject.class);
-            printNode(lho);
-            printParameterSeparatorSource(lho, rho);
-            printNode(rho);
+            printExpArithmetic((ArithmeticExpression) node);
         } else if (node instanceof UnaryPlusMinusExpression) {
-            assertParamCount(node, 2);
-            assertParamRole(node, 1, ParameterRole.AST_NODE_SUBTYPE);
-            printWithParamsLeadingSkippedTokens(node.getNodeTypeSymbol().substring(0, 1), node);
-            printNode(getParam(node, 0, ParameterRole.RIGHT_HAND_OPERAND, TemplateObject.class));
+            printExpUnaryPlusMinus((UnaryPlusMinusExpression) node);
         } else if (node instanceof ParentheticalExpression) {
-            printWithParamsLeadingSkippedTokens("(", node);
-            printNode(getOnlyParam(node, ParameterRole.ENCLOSED_OPERAND, TemplateObject.class));
-            printWithParamsTrailingSkippedTokens(")", node, 0);
+            printExpParenthetical((ParentheticalExpression) node);
         } else if (node instanceof MethodCall) {
-            TemplateObject callee = getParam(node, 0, ParameterRole.CALLEE, TemplateObject.class);
-            printExpressionNode(callee);
-
-            TemplateObject prevParam = callee;
-            int argCnt = node.getParameterCount() - 1;
-            for (int argIdx = 0; argIdx < argCnt; argIdx++) {
-                TemplateObject argExp = getParam(node, argIdx + 1, ParameterRole.ARGUMENT_VALUE, TemplateObject.class);
-                printParameterSeparatorSource(prevParam, argExp);
-                printExpressionNode(argExp);
-                prevParam = argExp;
-            }
-            printWithParamsTrailingSkippedTokens(")", node, argCnt);
+            printExpMethodCall((MethodCall) node);
+        } else if (node instanceof DynamicKeyName) {
+            printExpDynamicKeyName((DynamicKeyName) node);
         } else if (node instanceof BuiltIn) {
-            assertParamCount(node, 2);
-            TemplateObject lho = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, TemplateObject.class);
-            String rho = getParam(node, 1, ParameterRole.RIGHT_HAND_OPERAND, String.class);
-
-            printExpressionNode(lho); // [lho]?biName
-
-            int postLHOPos = getEndPositionExclusive(lho);
-            int endPos = getEndPositionInclusive(node);
-            boolean foundQuestionMark = false;
-            int pos = postLHOPos;
-            scanForRHO: while (pos < endPos) {
-                char c = src.charAt(pos);
-                if (c == '?') {
-                    foundQuestionMark = true;
-                    pos++;
-                } else if (Character.isWhitespace(c)) {
-                    pos++;
-                } else if (isCoreNameChar(c)) {
-                    break scanForRHO;
-                } else {
-                    throw new UnexpectedNodeContentException(node,
-                            "Unexpected character when scanning for for built-in key: '{}'", c);
-                }
-            }
-            if (pos == endPos || !foundQuestionMark) {
-                throw new UnexpectedNodeContentException(node, "Couldn't find built-in key in source", null);
-            }
-            print(src.substring(postLHOPos, pos)); // lho[?]biName
-
-            print(convertBuiltInName(rho));
+            printExpBuiltIn((BuiltIn) node);
+        } else if (node instanceof Dot) {
+            printExpDot((Dot) node);
         } else {
             throw new ConverterException("Unhandled AST node class: " + node.getClass().getName());
         }
+    }
+
+    private void printExpDot(Dot node) throws ConverterException {
+        assertParamCount(node, 2);
+        Expression lho = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, Expression.class);
+        String rho = getParam(node, 1, ParameterRole.RIGHT_HAND_OPERAND, String.class);
+        printNode(lho);
+        printWithConvertedExpComments(
+                readExpWSAndSeparator(getEndPositionExclusive(lho), '.', false));
+        print(FTLUtil.escapeIdentifier(rho));
+    }
+
+    private void printExpDynamicKeyName(DynamicKeyName node) throws ConverterException {
+        assertParamCount(node, 2);
+
+        Expression hashExp = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, Expression.class);
+        printExp(hashExp);
+
+        Expression keyExp = getParam(node, 1, ParameterRole.ENCLOSED_OPERAND, Expression.class);
+        printParameterSeparatorSource(hashExp, keyExp);
+        printExp(keyExp);
+
+        printWithParamsTrailingSkippedTokens("]", node, 1);
+    }
+
+    private void printExpRange(Range node) throws ConverterException {
+        assertParamCount(node, 2);
+
+        Expression lho = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, Expression.class);
+        Expression rho = getParam(node, 1, ParameterRole.RIGHT_HAND_OPERAND, Expression.class);
+
+        printExp(lho);
+
+        printWithConvertedExpComments(src.substring(
+                getEndPositionExclusive(lho),
+                rho != null ? getStartPosition(rho) : getEndPositionExclusive(node)));
+
+        if (rho != null) {
+            printExp(rho);
+        }
+    }
+
+    private void printExpHashLiteral(HashLiteral node) throws ConverterException {
+        int openCharPos = getStartPosition(node);
+        int closeCharPos = getEndPositionInclusive(node);
+        assertNodeContent(src.charAt(openCharPos) == '{', node,
+                "Expected '{'", null);
+        assertNodeContent(src.charAt(closeCharPos) == '}', node,
+                "Expected '}'", null);
+
+        int paramCnt = node.getParameterCount();
+        if (paramCnt == 0) {
+            print('{');
+            printWithConvertedExpComments(src.substring(openCharPos + 1, closeCharPos));
+            print('}');
+        } else {
+            printWithParamsLeadingSkippedTokens("{", node);
+            Expression prevValue = null;
+            for (int paramIdx = 0; paramIdx < paramCnt; paramIdx += 2) {
+                Expression key = getParam(node, paramIdx, ParameterRole.ITEM_KEY, Expression.class);
+                Expression value = getParam(node, paramIdx + 1, ParameterRole.ITEM_VALUE, Expression.class);
+
+                if (prevValue != null) {
+                    printParameterSeparatorSource(prevValue, key);
+                }
+                printExp(key);
+                printParameterSeparatorSource(key, value);
+                printExp(value);
+
+                prevValue = value;
+            }
+            printWithParamsTrailingSkippedTokens("}", node, node.getParameterCount() - 1);
+        }
+    }
+
+    private void printExpListLiteral(ListLiteral node) throws ConverterException {
+        int openCharPos = getStartPosition(node);
+        int closeCharPos = getEndPositionInclusive(node);
+        assertNodeContent(src.charAt(openCharPos) == '[', node,
+                "Expected '['", null);
+        assertNodeContent(src.charAt(closeCharPos) == ']', node,
+                "Expected ']'", null);
+
+        int paramCnt = node.getParameterCount();
+        if (paramCnt == 0) {
+            print('[');
+            printWithConvertedExpComments(src.substring(openCharPos + 1, closeCharPos));
+            print(']');
+        } else {
+            printWithParamsLeadingSkippedTokens("[", node);
+            Expression prevItem = null;
+            for (int paramIdx = 0; paramIdx < paramCnt; paramIdx++) {
+                Expression item = getParam(node, paramIdx, ParameterRole.ITEM_VALUE, Expression.class);
+
+                if (prevItem != null) {
+                    printParameterSeparatorSource(prevItem, item);
+                }
+                printExp(item);
+
+                prevItem = item;
+            }
+            printWithParamsTrailingSkippedTokens("]", node, node.getParameterCount() - 1);
+        }
+    }
+
+    private void printExpParenthetical(ParentheticalExpression node) throws ConverterException {
+        printWithParamsLeadingSkippedTokens("(", node);
+        printNode(getOnlyParam(node, ParameterRole.ENCLOSED_OPERAND, Expression.class));
+        printWithParamsTrailingSkippedTokens(")", node, 0);
+    }
+
+    private void printExpUnaryPlusMinus(UnaryPlusMinusExpression node) throws ConverterException {
+        assertParamCount(node, 2);
+        assertParamRole(node, 1, ParameterRole.AST_NODE_SUBTYPE);
+        printWithParamsLeadingSkippedTokens(node.getNodeTypeSymbol().substring(0, 1), node);
+        printNode(getParam(node, 0, ParameterRole.RIGHT_HAND_OPERAND, Expression.class));
+    }
+
+    private void printExpArithmetic(ArithmeticExpression node) throws ConverterException {
+        assertParamCount(node, 3);
+        assertParamRole(node, 2, ParameterRole.AST_NODE_SUBTYPE);
+        Expression lho = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, Expression.class);
+        Expression rho = getParam(node, 1, ParameterRole.RIGHT_HAND_OPERAND, Expression.class);
+        printNode(lho);
+        printParameterSeparatorSource(lho, rho);
+        printNode(rho);
+    }
+
+    private void printExpAddConcat(AddConcatExpression node) throws ConverterException {
+        assertParamCount(node, 2);
+        Expression lho = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, Expression.class);
+        Expression rho = getParam(node, 1, ParameterRole.RIGHT_HAND_OPERAND, Expression.class);
+        printNode(lho);
+        printParameterSeparatorSource(lho, rho);
+        printNode(rho);
+    }
+
+    private void printExpBooleanLiteral(BooleanLiteral node) {
+        print(node.getCanonicalForm());
+    }
+
+    private void printExpNumericalLiteral(NumberLiteral node) {
+        print(getSrcSectionInclEnd(
+                node.getBeginColumn(), node.getBeginLine(),
+                node.getEndColumn(), node.getEndLine()));
+    }
+
+    private void printExpIdentifier(Identifier node) {
+        print(FTLUtil.escapeIdentifier(node.getName()));
+    }
+
+    private void printExpMethodCall(MethodCall node) throws ConverterException {
+        Expression callee = getParam(node, 0, ParameterRole.CALLEE, Expression.class);
+        printExp(callee);
+
+        Expression prevParam = callee;
+        int argCnt = node.getParameterCount() - 1;
+        for (int argIdx = 0; argIdx < argCnt; argIdx++) {
+            Expression argExp = getParam(node, argIdx + 1, ParameterRole.ARGUMENT_VALUE, Expression.class);
+            printParameterSeparatorSource(prevParam, argExp);
+            printExp(argExp);
+            prevParam = argExp;
+        }
+        printWithParamsTrailingSkippedTokens(")", node, argCnt);
+    }
+
+    private void printExpBuiltIn(BuiltIn node) throws ConverterException {
+        assertParamCount(node, 2);
+        Expression lho = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, Expression.class);
+        String rho = getParam(node, 1, ParameterRole.RIGHT_HAND_OPERAND, String.class);
+
+        printExp(lho); // [lho]?biName
+
+        int postLHOPos = getEndPositionExclusive(lho);
+        int endPos = getEndPositionInclusive(node);
+        boolean foundQuestionMark = false;
+        int pos = postLHOPos;
+        scanForRHO: while (pos < endPos) {
+            char c = src.charAt(pos);
+            if (c == '?') {
+                foundQuestionMark = true;
+                pos++;
+            } else if (Character.isWhitespace(c)) {
+                pos++;
+            } else if (isCoreNameChar(c)) {
+                break scanForRHO;
+            } else {
+                throw new UnexpectedNodeContentException(node,
+                        "Unexpected character when scanning for for built-in key: '{}'", c);
+            }
+        }
+        if (pos == endPos || !foundQuestionMark) {
+            throw new UnexpectedNodeContentException(node, "Couldn't find built-in key in source", null);
+        }
+        print(src.substring(postLHOPos, pos)); // lho[?]biName
+
+        print(convertBuiltInName(rho));
+    }
+
+    private void printExpStringLiteral(StringLiteral node) throws ConverterException {
+        boolean rawString = false;
+        char quote;
+        {
+            int pos = getStartPosition(node);
+            quote = src.charAt(pos);
+            while ((quote == '\\' || quote == '{' /* 2.3.26 bug workaround */ || quote == 'r')
+                    && pos < src.length()) {
+                pos++;
+                if (quote == 'r') {
+                    rawString = true;
+                }
+                quote = src.charAt(pos);
+            }
+            if (quote != '\'' && quote != '"') {
+                throw new UnexpectedNodeContentException(node, "Unexpected string quote character: {}", quote);
+            }
+        }
+        if (rawString) {
+            print('r');
+        }
+        print(quote);
+
+        int parameterCount = node.getParameterCount();
+        if (parameterCount == 0) {
+            if (!rawString) {
+                print(FTLUtil.escapeStringLiteralPart(node.getAsString(), quote));
+            } else {
+                print(node.getAsString());
+            }
+        } else {
+            // Not really a literal; contains interpolations
+            for (int paramIdx = 0; paramIdx < parameterCount; paramIdx++) {
+                Object param = getParam(node, paramIdx, ParameterRole.VALUE_PART, Object.class);
+                if (param instanceof String) {
+                    print(FTLUtil.escapeStringLiteralPart((String) param));
+                } else {
+                    assertNodeContent(param instanceof Interpolation, node,
+                            "Unexpected parameter type: {}", param.getClass().getName());
+
+                    // We print the interpolation, the cut it out from the output, then put it back escaped:
+                    int interpStartPos = out.length();
+                    printNode((TemplateElement) param);
+                    int interpEndPos = out.length();
+                    String interp = out.substring(interpStartPos, interpEndPos);
+                    out.setLength(interpStartPos + 2); // +2 to keep the "${"
+                    String inerpInside = interp.substring(2, interp.length() - 1);
+                    print(FTLUtil.escapeStringLiteralPart(inerpInside, quote)); // For now we escape as FTL2
+                    print(interp.charAt(interp.length() - 1)); // "}"
+                }
+            }
+        }
+
+        print(quote);
     }
 
     private String convertBuiltInName(String name) throws ConverterException {
@@ -415,7 +596,7 @@ public class FM2ASTToFM3SourceConverter {
         return converted;
     }
 
-    private void printParameterSeparatorSource(TemplateObject lho, TemplateObject rho) {
+    private void printParameterSeparatorSource(Expression lho, Expression rho) {
         print(getSrcSectionExclEnd(
                 lho.getEndColumn() + 1, lho.getEndLine(),
                 rho.getBeginColumn(), rho.getBeginLine()));
@@ -439,8 +620,8 @@ public class FM2ASTToFM3SourceConverter {
         if (node.getParameterCount() == 0) {
             return;
         }
-        TemplateObject param = getParam(node, 0, null, TemplateObject.class);
-        print(getSrcSectionExclEnd(
+        Expression param = getParam(node, 0, null, Expression.class);
+        printWithConvertedExpComments(getSrcSectionExclEnd(
                 node.getBeginColumn() + beforeParamsLength, node.getBeginLine(),
                 param.getBeginColumn(), param.getBeginLine()));
     }
@@ -452,7 +633,7 @@ public class FM2ASTToFM3SourceConverter {
         String skippedTokens = getSrcSectionExclEnd(
                 node.getBeginColumn() + beforeSkippedTokens.length(), node.getBeginLine(),
                 node.getEndColumn() - afterSkippedTokens.length() + 1, node.getEndLine());
-        print(skippedTokens);
+        printWithConvertedExpComments(skippedTokens);
         print(afterSkippedTokens);
     }
 
@@ -462,11 +643,11 @@ public class FM2ASTToFM3SourceConverter {
         int parameterCount = node.getParameterCount();
         assertNodeContent(lastVisualParamIdx < parameterCount, node,
                 "Parameter count too low: {}", parameterCount);
-        TemplateObject param = getParam(node, lastVisualParamIdx, null, TemplateObject.class);
+        Expression param = getParam(node, lastVisualParamIdx, null, Expression.class);
         String skippedTokens = getSrcSectionExclEnd(
                 param.getEndColumn() + 1, param.getEndLine(),
                 node.getEndColumn() - afterParams.length() + 1, node.getEndLine());
-        print(skippedTokens);
+        printWithConvertedExpComments(skippedTokens);
         print(afterParams);
     }
 
@@ -477,7 +658,7 @@ public class FM2ASTToFM3SourceConverter {
      * @return The position of the last character of the start tag. Note that the printed string never includes this
      *         character.
      */
-    private int printStartTagSkippedTokens(TemplateElement node, TemplateObject lastParam, boolean trimSlash)
+    private int printStartTagSkippedTokens(TemplateElement node, Expression lastParam, boolean trimSlash)
             throws ConverterException {
         int pos;
         if (lastParam == null) {
@@ -507,7 +688,7 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     /**
-     * Similar to {@link #printStartTagSkippedTokens(TemplateElement, TemplateObject, boolean)}, but with explicitly
+     * Similar to {@link #printStartTagSkippedTokens(TemplateElement, Expression, boolean)}, but with explicitly
      * specified scan start position.
      *
      * @param pos The position where the first skipped character can occur (or the tag end character).
@@ -524,10 +705,10 @@ public class FM2ASTToFM3SourceConverter {
 
         char c = src.charAt(pos);
         if (c == '/' && pos + 1 < src.length() && src.charAt(pos + 1) == tagEndChar) {
-            print(src.substring(startPos, trimSlash ? pos : pos + 1));
+            printWithConvertedExpComments(src.substring(startPos, trimSlash ? pos : pos + 1));
             return pos + 1;
         } else if (c == tagEndChar) {
-            print(src.substring(startPos, pos));
+            printWithConvertedExpComments(src.substring(startPos, pos));
             return pos;
         } else {
             throw new UnexpectedNodeContentException(node,
@@ -551,7 +732,12 @@ public class FM2ASTToFM3SourceConverter {
         assertNodeContent(pos > 0 && isCoreNameChar(src.charAt(pos)), node,
                 "Can't find end tag name", null);
 
-        print(src.substring(pos + 1, tagEndPos));
+        printWithConvertedExpComments(src.substring(pos + 1, tagEndPos));
+    }
+
+    private void printWithConvertedExpComments(String s) {
+        // Later we might want to convert comment syntax here
+        print(s);
     }
 
     private void print(String s) {
