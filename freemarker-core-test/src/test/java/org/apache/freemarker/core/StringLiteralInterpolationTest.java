@@ -34,11 +34,8 @@ public class StringLiteralInterpolationTest extends TemplateTest {
     @Test
     public void basics() throws IOException, TemplateException {
         addToDataModel("x", 1);
-        assertOutput("${'${x}'}", "1");
-        assertOutput("${'#{x}'}", "1");
+        assertOutput("${'${x}'}", "1"); // Find related: [interpolation prefixes]
         assertOutput("${'a${x}b${x*2}c'}", "a1b2c");
-        assertOutput("${'a#{x}b#{x*2}c'}", "a1b2c");
-        assertOutput("${'a#{x; m2}'}", "a1.00");
         assertOutput("${'${x} ${x}'}", "1 1");
         assertOutput("${'$\\{x}'}", "${x}");
         assertOutput("${'$\\{x} $\\{x}'}", "${x} ${x}");
@@ -116,12 +113,10 @@ public class StringLiteralInterpolationTest extends TemplateTest {
         assertOutput("${\"${1000}_&\"}", "1.00*10<sup>3</sup>_&amp;");
         assertOutput("${\"${1000}, ${2000}\"}", "1.00*10<sup>3</sup>, 2.00*10<sup>3</sup>");
         assertOutput("${\"& ${'x'}, ${2000}\"}", "&amp; x, 2.00*10<sup>3</sup>");
-        assertOutput("${\"& ${'x'}, #{2000}\"}", "& x, 2000");
-        
+
         assertOutput("${\"${2000}\"?isMarkupOutput?c}", "true");
         assertOutput("${\"x ${2000}\"?isMarkupOutput?c}", "true");
         assertOutput("${\"${2000} x\"?isMarkupOutput?c}", "true");
-        assertOutput("${\"#{2000}\"?isMarkupOutput?c}", "false");
         assertOutput("${\"${'x'}\"?isMarkupOutput?c}", "false");
         assertOutput("${\"x ${'x'}\"?isMarkupOutput?c}", "false");
         assertOutput("${\"${'x'} x\"?isMarkupOutput?c}", "false");

@@ -53,14 +53,14 @@
 
 <p>Now perform a number assignment:</p>
 
-#{1.300000?double}
+${1.300000?double}
 
 <#assign mynumber = 1.8, USA="en_US" />
 <#assign myfloat = mynumber?float />
 
 My number is: ${mynumber}
 <#setting locale="en_US">
-My float is: #{myfloat ; m6}
+My float is: ${myfloat?string('0.000000')}
 The int part is: ${myfloat?int}
 
 <#assign mymessage = mynumber?string>
@@ -73,7 +73,7 @@ ${mymessage + 3}
 ${mymessage}
 
 <#assign mymessage = mymessage + 2>
-#{mymessage}
+${mymessage}
 
 <p>Try numbers in tests</p>
 

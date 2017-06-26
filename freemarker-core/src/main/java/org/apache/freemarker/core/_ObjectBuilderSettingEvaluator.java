@@ -510,9 +510,10 @@ public class _ObjectBuilderSettingEvaluator {
                         break seekTokenEnd;
                     } else if (c == '{') {
                         char prevC = src.charAt(pos - 1);
-                        if (prevC == '$' || prevC == '#') {
+                        // Find related: [interpolation prefixes]
+                        if (prevC == '$') {
                             throw new _ObjectBuilderSettingEvaluationException(
-                                    "${...} and #{...} aren't allowed here.");
+                                    "${...} isn't allowed here.");
                         }
                     }
                 } else {

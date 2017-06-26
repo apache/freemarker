@@ -1706,8 +1706,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *        {@code BigDecimal} and "bi" for {@code BigInteger}.</li>
      *        <li>A boolean literal: {@code true} or {@code false}
      *        <li>The null literal: {@code null}
-     *        <li>A string literal with FTL syntax, except that  it can't contain <tt>${...}</tt>-s and
-     *            <tt>#{...}</tt>-s. Examples: {@code "Line 1\nLine 2"} or {@code r"C:\temp"}.
+     *        <li>A string literal with FTL syntax, except that  it can't contain <tt>${...}</tt>-s.
+     *            Examples: {@code "Line 1\nLine 2"} or {@code r"C:\temp"}.
      *        <li>A list literal (since 2.3.24) with FTL-like syntax, for example {@code [ 'foo', 2, true ]}.
      *            If the parameter is expected to be array, the list will be automatically converted to array.
      *            The list items can be any kind of expression, like even object builder expressions.

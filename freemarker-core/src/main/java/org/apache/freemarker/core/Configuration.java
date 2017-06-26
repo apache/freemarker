@@ -657,7 +657,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
      * <p><b>About auto-escaping</b></p>
      *
      * <p>
-     * Auto-escaping has significance when a value is printed with <code>${...}</code> (or <code>#{...}</code>). If
+     * Auto-escaping has significance when a value is printed with <code>${...}</code>. If
      * auto-escaping is on, FreeMarker will assume that the value is plain text (as opposed to markup or some kind of
      * rich text), so it will escape it according the current output format (see {@link #getOutputFormat()}
      * and {@link TemplateConfiguration.Builder#setOutputFormat(OutputFormat)}). If auto-escaping is off, FreeMarker

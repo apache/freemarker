@@ -51,8 +51,7 @@ final class ASTExpStringLiteral extends ASTExpression implements TemplateScalarM
     void parseValue(FMParserTokenManager parentTkMan, OutputFormat outputFormat) throws ParseException {
         // The way this works is incorrect (the literal should be parsed without un-escaping),
         // but we can't fix this backward compatibly.
-        if (value.length() > 3 && (value.indexOf("${") >= 0 || value.indexOf("#{") >= 0)) {
-            
+        if (value.length() > 3 && value.indexOf("${") >= 0) { // Find related: [interpolation prefixes]
             Template parentTemplate = getTemplate();
             ParsingConfiguration pCfg = parentTemplate.getParsingConfiguration();
 

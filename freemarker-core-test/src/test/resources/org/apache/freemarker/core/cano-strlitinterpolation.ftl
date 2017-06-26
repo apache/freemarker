@@ -16,4 +16,4 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<@m x='${e1 + "a\'b${x}"}#{x; M2}' y='$\{e2}' />
+<@m x='${e1 + "a\'b${x}"}' y='$\{e2}' />

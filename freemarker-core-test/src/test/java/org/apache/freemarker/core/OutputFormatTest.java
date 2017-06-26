@@ -315,22 +315,6 @@ public class OutputFormatTest extends TemplateTest {
     }
     
     @Test
-    public void testNumericalInterpolation() throws IOException, TemplateException {
-        setConfiguration(new TestConfigurationBuilder()
-                .registeredCustomOutputFormats(Collections.<OutputFormat>singleton(DummyOutputFormat.INSTANCE))
-                .build());
-        assertOutput(
-                "<#ftl outputFormat='dummy'>#{1.5}; #{1.5; m3}; ${'a.b'}",
-                "1\\.5; 1\\.500; a\\.b");
-        assertOutput(
-                "<#ftl outputFormat='dummy' autoEsc=false>#{1.5}; #{1.5; m3}; ${'a.b'}; ${'a.b'?esc}",
-                "1.5; 1.500; a.b; a\\.b");
-        assertOutput("<#ftl outputFormat='plainText'>#{1.5}", "1.5");
-        assertOutput("<#ftl outputFormat='HTML'>#{1.5}", "1.5");
-        assertOutput("#{1.5}", "1.5");
-    }
-    
-    @Test
     public void testUndefinedOutputFormat() throws IOException, TemplateException {
         assertOutput("${'a < b'}; ${htmlPlain}; ${htmlMarkup}", "a < b; a &lt; {h&#39;}; <p>c");
         assertErrorContains("${'x'?esc}", "undefined", "escaping", "?esc");

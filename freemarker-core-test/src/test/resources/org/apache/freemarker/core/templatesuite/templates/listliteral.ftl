@@ -32,7 +32,7 @@
 <#assign mymessage = "hello">
 <#assign test = [ "test1", "test23", "test45", message, mymessage]>
 
-The list contains #{test?size} items.
+The list contains ${test?size} items.
 
 <#list test as item>
 <p>${item}</p>

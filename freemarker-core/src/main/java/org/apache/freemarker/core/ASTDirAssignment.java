@@ -224,7 +224,7 @@ final class ASTDirAssignment extends ASTDirective {
         } else if (scope == ASTDirAssignment.NAMESPACE) {
             return "#assign";
         } else {
-            return "#{unknown_assignment_type}";
+            throw new BugException();
         }
     }
     

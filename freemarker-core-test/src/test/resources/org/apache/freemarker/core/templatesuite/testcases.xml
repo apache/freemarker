@@ -57,7 +57,6 @@ Note that for the incompatible_improvements setting you can specify a list of ve
    <testCase name="api-builtins" noOutput="true">
       <setting api_builtin_enabled="true" />
    </testCase>
-   <testCase name="arithmetic" />
    <testCase name="assignments" noOutput="true" />
    <testCase name="boolean" />
    <testCase name="charset-in-header" />

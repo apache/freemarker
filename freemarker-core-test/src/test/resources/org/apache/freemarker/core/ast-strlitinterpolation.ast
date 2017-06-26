@@ -58,10 +58,8 @@
         - content: dynamic "..."  // o.a.f.c.ASTExpStringLiteral
             - value part: ${...}  // o.a.f.c.ASTDollarInterpolation
                 - content: x  // o.a.f.c.ASTExpVariable
-            - value part: #{...}  // o.a.f.c.ASTHashInterpolation
+            - value part: ${...}  // o.a.f.c.ASTDollarInterpolation
                 - content: y  // o.a.f.c.ASTExpVariable
-                - minimum decimals: "0"  // Integer
-                - maximum decimals: "0"  // Integer
     #text  // o.a.f.c.ASTStaticText
         - content: "\n6. "  // String
     ${...}  // o.a.f.c.ASTDollarInterpolation

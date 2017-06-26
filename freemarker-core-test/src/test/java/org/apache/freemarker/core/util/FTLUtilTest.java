@@ -35,7 +35,8 @@ public class FTLUtilTest {
         assertEquals("a{b}c", FTLUtil.escapeStringLiteralPart("a{b}c"));
         assertEquals("a#b", FTLUtil.escapeStringLiteralPart("a#b"));
         assertEquals("a$b", FTLUtil.escapeStringLiteralPart("a$b"));
-        assertEquals("a#\\{b}c", FTLUtil.escapeStringLiteralPart("a#{b}c"));
+        // Find related: [interpolation prefixes]
+        assertEquals("a#{b}c", FTLUtil.escapeStringLiteralPart("a#{b}c"));
         assertEquals("a$\\{b}c", FTLUtil.escapeStringLiteralPart("a${b}c"));
         assertEquals("a'c\\\"d", FTLUtil.escapeStringLiteralPart("a'c\"d", '"'));
         assertEquals("a\\'c\"d", FTLUtil.escapeStringLiteralPart("a'c\"d", '\''));

@@ -24,7 +24,7 @@
 
 <p>A simple test follows:</p>
   
-    #{message?capitalize?length}
+    ${message?capitalize?length}
     
     ${message [1..] ? upper_case}
     

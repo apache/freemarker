@@ -159,7 +159,8 @@ public final class FTLUtil {
     }
 
     private static boolean isInterpolationStart(char c) {
-        return c == '$' || c == '#';
+        // Find related: [interpolation prefixes]
+        return c == '$';
     }
 
     /**

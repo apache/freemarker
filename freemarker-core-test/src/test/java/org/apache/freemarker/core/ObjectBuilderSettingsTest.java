@@ -523,24 +523,17 @@ public class ObjectBuilderSettingsTest {
         } catch (_ObjectBuilderSettingEvaluationException e) {
             assertThat(e.getMessage(), containsString("\")\""));
         }
-        
+
         try {
             _ObjectBuilderSettingEvaluator.eval(
-                    "foo.Bar('s${x}s'))",
+                    "'s${x}s'",
                     Object.class, false, _SettingEvaluationEnvironment.getCurrent());
             fail();
         } catch (_ObjectBuilderSettingEvaluationException e) {
             assertThat(e.getMessage(), containsString("${...}"));
         }
-        
-        try {
-            _ObjectBuilderSettingEvaluator.eval(
-                    "foo.Bar('s#{x}s'))",
-                    Object.class, false, _SettingEvaluationEnvironment.getCurrent());
-            fail();
-        } catch (_ObjectBuilderSettingEvaluationException e) {
-            assertThat(e.getMessage(), containsString("#{...}"));
-        }
+        // Find related: [interpolation prefixes]
+        assertEqualsEvaled("s#{x}s", "'s#{x}s'"); // FM2 #{} is not recognized
     }
 
     @Test

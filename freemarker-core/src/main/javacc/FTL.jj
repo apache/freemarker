@@ -958,13 +958,14 @@ TOKEN:
 {
     <STATIC_TEXT_WS : ("\n" | "\r" | "\t" | " ")+>
     |
-    <STATIC_TEXT_NON_WS : (~["$", "<", "#", "[", "{", "\n", "\r", "\t", " "])+>
+    // Find related: [interpolation prefixes]
+    <STATIC_TEXT_NON_WS : (~["$", "<", "[", "{", "\n", "\r", "\t", " "])+>
     |
-    <STATIC_TEXT_FALSE_ALARM : "$" | "#" | "<" | "[" | "{"> // to handle a lone dollar sign or "<" or "# or <@ with whitespace after"
+    // Find related: [interpolation prefixes]
+    <STATIC_TEXT_FALSE_ALARM : "$" | "<" | "[" | "{"> // to handle a lone dollar sign or "<" or "# or <@ with whitespace after
     |
+    // Find related: [interpolation prefixes]
     <DOLLAR_INTERPOLATION_OPENING : "${"> { startInterpolation(matchedToken); }
-    |
-    <HASH_INTERPOLATION_OPENING : "#{"> { startInterpolation(matchedToken); }
 }
 
 <FM_EXPRESSION, IN_PAREN, NAMED_PARAMETER_EXPRESSION> SKIP :
@@ -1152,7 +1153,7 @@ TOKEN:
         }
     }
     |
-    <OPEN_MISPLACED_INTERPOLATION : "${" | "#{">
+    <OPEN_MISPLACED_INTERPOLATION : "${"> // Find related: [interpolation prefixes]
     {
         if ("".length() == 0) {  // prevents unreachabe "break" compilation error in generated Java
             char c = matchedToken.image.charAt(0);
@@ -2117,7 +2118,7 @@ ASTExpStringLiteral ASTExpStringLiteral(boolean interpolate) :
         result.setLocation(template, t, t);
         if (interpolate && !raw) {
             // TODO: This logic is broken. It can't handle literals that contains both ${...} and $\{...}. 
-            if (t.image.indexOf("${") >= 0 || t.image.indexOf("#{") >= 0) result.parseValue(token_source, outputFormat);
+            if (t.image.indexOf("${") >= 0) result.parseValue(token_source, outputFormat);
         }
         return result;
     }
@@ -2180,10 +2181,9 @@ ASTExpHashLiteral ASTExpHashLiteral() :
 }
 
 /**
- * A production representing the ${...}
- * that outputs a variable.
+ * ${exp}
  */
-ASTDollarInterpolation StringOutput() :
+ASTDollarInterpolation ASTDollarInterpolation() :
 {
     ASTExpression exp;
     Token begin, end;
@@ -2201,86 +2201,6 @@ ASTDollarInterpolation StringOutput() :
                 exp, escapedExpression(exp),
                 outputFormat,
                 autoEscaping);
-        result.setLocation(template, begin, end);
-        return result;
-    }
-}
-
-ASTHashInterpolation ASTHashInterpolation() :
-{
-    ASTExpression exp;
-    Token fmt = null, begin, end;
-}
-{
-    begin = <HASH_INTERPOLATION_OPENING>
-    exp = ASTExpression() { numberLiteralOnly(exp); }
-    [
-        <SEMICOLON>
-        fmt = <ID>
-    ]
-    end = <CLOSING_CURLY_BRACKET>
-    {
-        MarkupOutputFormat<?> autoEscOF = autoEscaping && outputFormat instanceof MarkupOutputFormat
-                ? (MarkupOutputFormat<?>) outputFormat : null;
-    
-        ASTHashInterpolation result;
-        if (fmt != null) {
-            int minFrac = -1;  // -1 indicates that the value has not been set
-            int maxFrac = -1;
-
-            StringTokenizer st = new StringTokenizer(fmt.image, "mM", true);
-            char type = '-';
-            while (st.hasMoreTokens()) {
-                String token = st.nextToken();
-                try {
-	                if (type != '-') {
-	                    switch (type) {
-	                    case 'm':
-	                        if (minFrac != -1) throw new ParseException("Invalid formatting string", template, fmt);
-	                        minFrac = Integer.parseInt(token);
-	                        break;
-	                    case 'M':
-	                        if (maxFrac != -1) throw new ParseException("Invalid formatting string", template, fmt);
-	                        maxFrac = Integer.parseInt(token);
-	                        break;
-	                    default:
-	                        throw new ParseException("Invalid formatting string", template, fmt);
-	                    }
-	                    type = '-';
-	                } else if (token.equals("m")) {
-	                    type = 'm';
-	                } else if (token.equals("M")) {
-	                    type = 'M';
-	                } else {
-	                    throw new ParseException();
-	                }
-                } catch (ParseException e) {
-                	throw new ParseException("Invalid format specifier " + fmt.image, template, fmt);
-                } catch (NumberFormatException e) {
-                	throw new ParseException("Invalid number in the format specifier " + fmt.image, template, fmt);
-                }
-            }
-
-            if (maxFrac == -1) {
-	            if (minFrac == -1) {
-	                throw new ParseException(
-	                		"Invalid format specification, at least one of m and M must be specified!", template, fmt);
-	            }
-            	maxFrac = minFrac;
-            } else if (minFrac == -1) {
-            	minFrac = 0;
-            }
-            if (minFrac > maxFrac) {
-            	throw new ParseException(
-            			"Invalid format specification, min cannot be greater than max!", template, fmt);
-            }
-            if (minFrac > 50 || maxFrac > 50) {// sanity check
-                throw new ParseException("Cannot specify more than 50 fraction digits", template, fmt);
-            }
-            result = new ASTHashInterpolation(exp, minFrac, maxFrac, autoEscOF);
-        } else {  // if format != null
-            result = new ASTHashInterpolation(exp, autoEscOF);
-        }
         result.setLocation(template, begin, end);
         return result;
     }
@@ -3724,9 +3644,7 @@ TemplateElements MixedContentElements() :
         (
             elem = PCData()
             |
-            elem = StringOutput()
-            |
-            elem = ASTHashInterpolation()
+            elem = ASTDollarInterpolation()
             |
             elem = FreemarkerDirective()
         )
@@ -3770,9 +3688,7 @@ ASTImplicitParent ASTImplicitParent() :
         (
             elem = PCData()
             |
-            elem = StringOutput()
-            |
-            elem = ASTHashInterpolation()
+            elem = ASTDollarInterpolation()
             |
             elem = FreemarkerDirective()
         )
@@ -3814,8 +3730,7 @@ ASTElement OptionalBlock() :
 }
 
 /**
- * A production freemarker text that may contain
- * ${...} and #{...} but no directives.
+ * A production freemarker text that may contain ${...}, but no directives.
  */
 ASTElement FreeMarkerText() :
 {
@@ -3827,9 +3742,7 @@ ASTElement FreeMarkerText() :
         (
             elem = PCData()
             |
-            elem = StringOutput()
-            |
-            elem = ASTHashInterpolation()
+            elem = ASTDollarInterpolation()  // Find related: [interpolation prefixes]
         )
         {
             if (begin == null) {
@@ -4063,15 +3976,7 @@ List<Object> StaticTextAndInterpolations() :
 	    }
 	    |
 	    (
-	        LOOKAHEAD(<DOLLAR_INTERPOLATION_OPENING>)
-		    (
-		        interpolation = StringOutput()
-	        )
-		    |
-            LOOKAHEAD(<HASH_INTERPOLATION_OPENING>)
-		    (
-                interpolation = ASTHashInterpolation()
-		    )
+            interpolation = ASTDollarInterpolation()
 	    )
 	    {
             if (staticTextCollector != null) {

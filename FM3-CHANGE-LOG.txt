@@ -283,3 +283,6 @@ the FreeMarer 3 changelog here:
   caller is responsible for either logging it or letting it bubble up.
 - util.ObjectFactory was renamed to CommonSupplier, and its createObject() method was renamed to
   get(), to be more similar to the Java 8 API.
+- Removed long deprecated `#{}` interpolations. They are treated as plain static text now. (The
+  template converter tool translates these to `${}` interpolations. For example `#{x}` is simply 
+  translated to `${b}`, while `#{x; m1M3}` is translated to `${x?string('0.0##')}`).
