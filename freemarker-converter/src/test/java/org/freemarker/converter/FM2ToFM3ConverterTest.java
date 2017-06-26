@@ -98,15 +98,36 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("${m[key]}");
         assertConvertedSame("${m['key']}");
         assertConvertedSame("${m <#-- C1 --> [ <#-- C2 --> key <#-- C3 --> ]}");
+        assertConvertedSame("${seq\\-foo[1]}");
 
         assertConvertedSame("${m.key}");
         assertConvertedSame("${m <#-- C1 --> . <#-- C3 --> key}");
+
+        assertConvertedSame("${.outputFormat}");
+        assertConvertedSame("${. <#-- C --> outputFormat}");
+        assertConverted("${.outputFormat}","${.output_format}");
     }
 
     @Test
     public void testInterpolations() throws IOException, ConverterException {
-        assertConvertedSame("${var}");
-        assertConvertedSame("${  var\n}");
+        assertConvertedSame("${n}");
+        assertConvertedSame("${  n\n}");
+
+        assertConverted("${n}", "#{n}");
+        assertConverted("${n?string('0.00')}", "#{n; m2}");
+        assertConverted("${n?string('0.###')}", "#{n; M3}");
+        assertConverted("${n?string('0.00###')}", "#{n; m2M5}");
+        assertConverted("${n + 1}", "#{n + 1}");
+        assertConverted("${(n + 1)?string('0.00')}", "#{n + 1; m2}");
+        assertConverted("${(n * m)?string('0.00')}", "#{n * m; m2}");
+        assertConverted("${(-n)?string('0.00')}", "#{-n; m2}");
+        assertConverted("${a.b?string('0.00')}", "#{a.b; m2}");
+        assertConverted("${f()?string('0.00')}", "#{f(); m2}");
+        assertConverted("${m[k]?string('0.00')}", "#{m[k]; m2}");
+        assertConverted("${n?abs?string('0.00')}", "#{n?abs; m2}");
+
+        assertConverted("${  n  }", "#{  n  }");
+        assertConverted("${  n?string('0.00')}", "#{  n ; m2}");
     }
 
     @Test

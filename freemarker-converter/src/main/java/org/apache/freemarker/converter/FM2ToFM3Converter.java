@@ -103,8 +103,6 @@ public class FM2ToFM3Converter extends Converter {
         fileTransCtx.setDestinationFileName(getDestinationFileName(template));
         fileTransCtx.getDestinationStream().write(
                 FM2ASTToFM3SourceConverter.convert(template, src).getBytes(getTemplateEncoding(template)));
-
-
     }
 
     private String getTemplateEncoding(Template template) {

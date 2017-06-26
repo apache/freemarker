@@ -131,9 +131,9 @@ public class FM2ASTToFM3SourceConverter {
         } else if (node instanceof TextBlock) {
             print(getOnlyParam(node, ParameterRole.CONTENT, String.class));
         } else if (node instanceof DollarVariable) {
-            printWithParamsLeadingSkippedTokens("${", node);
-            printNode(getOnlyParam(node, ParameterRole.CONTENT, Expression.class));
-            printWithParamsTrailingSkippedTokens("}", node, 0);
+            printDollarInterpolation((DollarVariable) node);
+        } else if (node instanceof NumericalOutput) {
+            printNumericalInterpolation((NumericalOutput) node);
         } else if (node instanceof Comment) {
             print(tagBeginChar);
             print("#--");
@@ -143,6 +143,62 @@ public class FM2ASTToFM3SourceConverter {
         } else {
             printDir(node);
         }
+    }
+
+    private void printNumericalInterpolation(NumericalOutput node) throws ConverterException {
+        printWithParamsLeadingSkippedTokens("${", node);
+        Expression content = getParam(node, 0, ParameterRole.CONTENT, Expression.class);
+
+        int pos = getPositionAfterWSAndExpComments(getEndPositionExclusive(content));
+        assertNodeContent(pos < src.length(), node, "Unexpected EOF", null);
+        char c = src.charAt(pos);
+        assertNodeContent(c == ';' || c == '}', node, "Expected ';' or '}', found '{}'", c);
+        if (c == ';') { // #{exp; m1M2} -> ${exp?string('0.0#')}
+            int minDecimals = getParam(node, 1, ParameterRole.MINIMUM_DECIMALS, Integer.class);
+            int maxDecimals = getParam(node, 2, ParameterRole.MAXIMUM_DECIMALS, Integer.class);
+
+            boolean needsParen = !needsNoParenthesisAsBuiltInLHO(content);
+            if (needsParen) {
+                print('(');
+            }
+            printNode(content);
+            if (needsParen) {
+                print(')');
+            }
+            print("?string('0.");
+            for (int i = 0; i < minDecimals; i++) {
+                print('0');
+            }
+            for (int i = minDecimals; i < maxDecimals; i++) {
+                print('#');
+            }
+            print("')}");
+        } else { // #{exp} -> ${exp}
+            printNode(content);
+            printWithParamsTrailingSkippedTokens("}", node, 0);
+        }
+    }
+
+    private boolean needsNoParenthesisAsBuiltInLHO(Expression exp) {
+        return
+                exp instanceof Identifier
+                || exp instanceof NumberLiteral
+                || exp instanceof BooleanLiteral
+                || exp instanceof StringLiteral
+                || exp instanceof ListLiteral
+                || exp instanceof HashLiteral
+                || exp instanceof ParentheticalExpression
+                || exp instanceof MethodCall
+                || exp instanceof DynamicKeyName
+                || exp instanceof BuiltIn
+                || exp instanceof BuiltinVariable
+                || exp instanceof Dot;
+    }
+
+    private void printDollarInterpolation(DollarVariable node) throws ConverterException {
+        printWithParamsLeadingSkippedTokens("${", node);
+        printNode(getOnlyParam(node, ParameterRole.CONTENT, Expression.class));
+        printWithParamsTrailingSkippedTokens("}", node, 0);
     }
 
     /**
@@ -322,11 +378,29 @@ public class FM2ASTToFM3SourceConverter {
             printExpDynamicKeyName((DynamicKeyName) node);
         } else if (node instanceof BuiltIn) {
             printExpBuiltIn((BuiltIn) node);
+        } else if (node instanceof BuiltinVariable) {
+            printExpBuiltinVariable((BuiltinVariable) node);
         } else if (node instanceof Dot) {
             printExpDot((Dot) node);
         } else {
             throw new ConverterException("Unhandled AST node class: " + node.getClass().getName());
         }
+    }
+
+    private void printExpBuiltinVariable(BuiltinVariable node) throws ConverterException {
+        int startPos = getStartPosition(node);
+        String sep = readExpWSAndSeparator(startPos, '.', false);
+        printWithConvertedExpComments(sep);
+        String name = src.substring(startPos + sep.length(), getEndPositionExclusive(node));
+        print(convertBuiltInVariableName(name));
+    }
+
+    private String convertBuiltInVariableName(String name) throws ConverterException {
+        String converted = name.indexOf('_') == -1 ? name : ConverterUtils.snakeCaseToCamelCase(name);
+
+        // Will replace removed names here
+
+        return converted;
     }
 
     private void printExpDot(Dot node) throws ConverterException {
@@ -342,11 +416,11 @@ public class FM2ASTToFM3SourceConverter {
     private void printExpDynamicKeyName(DynamicKeyName node) throws ConverterException {
         assertParamCount(node, 2);
 
-        Expression hashExp = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, Expression.class);
-        printExp(hashExp);
+        Expression collExp = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, Expression.class);
+        printExp(collExp);
 
         Expression keyExp = getParam(node, 1, ParameterRole.ENCLOSED_OPERAND, Expression.class);
-        printParameterSeparatorSource(hashExp, keyExp);
+        printParameterSeparatorSource(collExp, keyExp);
         printExp(keyExp);
 
         printWithParamsTrailingSkippedTokens("]", node, 1);
