@@ -2724,7 +2724,7 @@ baz
             <literal>book[test]</literal>. More examples; these are all
             equivalent: <literal>book.author.name</literal>,
             <literal>book["author"].name</literal>,
-            <literal>book.author.["name"]</literal>,
+            <literal>book.author["name"]</literal>,
             <literal>book["author"]["name"]</literal>.</para>
 
             <para>When you use the dot syntax, the same restrictions apply
@@ -18896,15 +18896,14 @@ Primary content continued</programlisting>
           linkend="dgui_template_exp_missing">missing value handler
           operators</link>). It can handle all kind of errors that occurs when
           the block is executed (i.e. not syntactical errors, which are
-          detected earlier). And it's meant to enclose bigger template
-          fragments, where error can occur at various points. For example, you
-          have a part in your template that deals with printing
-          advertisements, but that's not the primary content of the page, so
-          you don't want your whole page be down just because some error
-          occurs with the printing of the advertisements (say, because of a
-          temporal database server faliure). So you put the whole
-          advertisement printing into an <literal><replaceable>attempt
-          block</replaceable></literal>.</para>
+          detected earlier). It meant to enclose bigger template fragments,
+          where error can occur at various points. For example, you have a
+          part in your template that deals with printing advertisements, but
+          that's not the primary content of the page, so you don't want your
+          whole page be down just because some error occurs with the printing
+          of the advertisements (say, because of a database server outage). So
+          you put the whole advertisement printing into an
+          <literal><replaceable>attempt block</replaceable></literal>.</para>
 
           <para>In some environments programmers configure FreeMarker so that
           it doesn't abort template execution for certain errors, but
@@ -18921,11 +18920,17 @@ Primary content continued</programlisting>
           references to special variable are started with dot (for example:
           <literal>${.error}</literal>).</para>
 
-          <para><phrase role="forProgrammers">Errors occurring during template
-          execution are always <link
-          linkend="pgui_misc_logging">logged</link>, even if they occur inside
-          an <literal><replaceable>attempt
-          block</replaceable></literal>.</phrase></para>
+          <para><phrase role="forProgrammers">By default errors occurring
+          inside an <literal><replaceable>attempt
+          block</replaceable></literal> are logged as errors. This is because
+          <literal>attempt</literal> is not supposed to be a general purpose
+          error handler mechanism, like <literal>try</literal> is in Java.
+          It's for decreasing the impact of unexpected errors, by making it
+          possible that only part of the page is going down, instead of the
+          whole page. But it's still an error, something that someone should
+          fix. (The way this error is reported can be customized with the
+          <literal>attempt_exception_reporter</literal> configuration
+          setting.)</phrase></para>
         </section>
       </section>
 
@@ -26854,6 +26859,37 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para>Added new configuration setting,
+              <literal>attempt_exception_reporter</literal>
+              (<literal>Configurable.setAttemptExceptionReporter(AttemptExceptionReporter)</literal>),
+              to allow the customization of how the exceptions handled (and
+              thus suppressed) by the <link
+              linkend="ref.directive.attempt"><literal>attempt</literal>
+              directive</link> are reported. The default
+              <literal>AttemptExceptionReporter</literal> logs the exception
+              as an error, just as it was in earlier versions, though now the
+              error message will indicate that the exception was thrown inside
+              an <literal>attempt</literal> directive block.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: When the
+              <literal>TemplateExceptionHandler</literal> suppresses (i.e.,
+              doesn't re-throw) an exception, the <link
+              linkend="ref.directive.attempt"><literal>attempt</literal>
+              directive</link> won't log it anymore. (To be precise, the
+              <literal>AttemptExceptionReporter</literal> won't be invoked for
+              it anymore; the default one logs as error.)</para>
+            </listitem>
+
+            <listitem>
+              <para>When logging error due to an error in an <link
+              linkend="ref.directive.attempt"><literal>attempt</literal>
+              directive</link> block, the log message now indicates that error
+              was inside an <literal>attempt</literal> block.</para>
+            </listitem>
+
             <listitem>
               <para>Bug fixed (<link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-52">FREEMARKER-52</link>):

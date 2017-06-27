@@ -234,6 +234,9 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         if (tc.isTemplateExceptionHandlerSet()) {
             setTemplateExceptionHandler(tc.getTemplateExceptionHandler());
         }
+        if (tc.isAttemptExceptionReporterSet()) {
+            setAttemptExceptionReporter(tc.getAttemptExceptionReporter());
+        }
         if (tc.isTimeFormatSet()) {
             setTimeFormat(tc.getTimeFormat());
         }
@@ -348,6 +351,9 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         }
         if (isTemplateExceptionHandlerSet() && !template.isTemplateExceptionHandlerSet()) {
             template.setTemplateExceptionHandler(getTemplateExceptionHandler());
+        }
+        if (isAttemptExceptionReporterSet() && !template.isAttemptExceptionReporterSet()) {
+            template.setAttemptExceptionReporter(getAttemptExceptionReporter());
         }
         if (isTimeFormatSet() && !template.isTimeFormatSet()) {
             template.setTimeFormat(getTimeFormat());
@@ -635,6 +641,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
                 || isShowErrorTipsSet()
                 || isSQLDateAndTimeTimeZoneSet()
                 || isTemplateExceptionHandlerSet()
+                || isAttemptExceptionReporterSet()
                 || isTimeFormatSet()
                 || isTimeZoneSet()
                 || isURLEscapingCharsetSet();

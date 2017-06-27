@@ -81,6 +81,11 @@ public class _TemplateAPI {
         return Configuration.getDefaultTemplateExceptionHandler(incompatibleImprovements);
     }
 
+    public static AttemptExceptionReporter getDefaultAttemptExceptionReporter(
+            Version incompatibleImprovements) {
+        return Configuration.getDefaultAttemptExceptionReporter(incompatibleImprovements);
+    }
+    
     public static boolean getDefaultLogTemplateExceptions(Version incompatibleImprovements) {
         return Configuration.getDefaultLogTemplateExceptions(incompatibleImprovements);
     }

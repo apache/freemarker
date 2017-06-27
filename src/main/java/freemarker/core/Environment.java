@@ -839,20 +839,27 @@ public final class Environment extends Configurable {
         }
         lastThrowable = templateException;
 
-        // Log the exception, if logTemplateExceptions isn't false. However, even if it's false, if we are inside
-        // an #attempt block, it has to be logged, as it certainly won't bubble up to the caller of FreeMarker.
-        if (LOG.isErrorEnabled() && (isInAttemptBlock() || getLogTemplateExceptions())) {
+        if (getLogTemplateExceptions() && LOG.isErrorEnabled()
+                && !isInAttemptBlock() /* because then the AttemptExceptionReporter will report this */) {
             LOG.error("Error executing FreeMarker template", templateException);
         }
 
-        // Stop exception is not passed to the handler, but
-        // explicitly rethrown.
-        if (templateException instanceof StopException) {
-            throw templateException;
+        try {
+            // Stop exception is not passed to the handler, but
+            // explicitly rethrown.
+            if (templateException instanceof StopException) {
+                throw templateException;
+            }
+    
+            // Finally, pass the exception to the handler
+            getTemplateExceptionHandler().handleTemplateException(templateException, this, out);
+        } catch (TemplateException e) {
+            // Note that if the TemplateExceptionHandler doesn't rethrow the exception, we don't get in there.
+            if (isInAttemptBlock()) {
+                this.getAttemptExceptionReporter().report(templateException, this);
+            }
+            throw e;
         }
-
-        // Finally, pass the exception to the handler
-        getTemplateExceptionHandler().handleTemplateException(templateException, this, out);
     }
 
     @Override

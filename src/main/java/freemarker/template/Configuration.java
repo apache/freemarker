@@ -510,6 +510,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     private boolean objectWrapperExplicitlySet;
     private boolean templateExceptionHandlerExplicitlySet;
+    private boolean attemptExceptionReporterExplicitlySet;
     private boolean logTemplateExceptionsExplicitlySet;
     private boolean localeExplicitlySet;
     private boolean defaultEncodingExplicitlySet;
@@ -961,6 +962,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private TemplateExceptionHandler getDefaultTemplateExceptionHandler() {
         return getDefaultTemplateExceptionHandler(getIncompatibleImprovements());
     }
+
+    private AttemptExceptionReporter getDefaultAttemptExceptionReporter() {
+        return getDefaultAttemptExceptionReporter(getIncompatibleImprovements());
+    }
     
     private boolean getDefaultLogTemplateExceptions() {
         return getDefaultLogTemplateExceptions(getIncompatibleImprovements());
@@ -975,6 +980,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         return TemplateExceptionHandler.DEBUG_HANDLER;
     }
 
+    // Package visible as Configurable needs this to initialize the field defaults.
+    final static AttemptExceptionReporter getDefaultAttemptExceptionReporter(Version incompatibleImprovements) {
+        return AttemptExceptionReporter.LOG_ERROR_REPORTER;
+    }
+    
     // Package visible as Configurable needs this to initialize the field defaults.
     final static boolean getDefaultLogTemplateExceptions(Version incompatibleImprovements) {
         return true;
@@ -1703,6 +1713,36 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     public boolean isTemplateExceptionHandlerExplicitlySet() {
         return templateExceptionHandlerExplicitlySet;
+    }
+    
+    @Override
+    public void setAttemptExceptionReporter(AttemptExceptionReporter attemptExceptionReporter) {
+        super.setAttemptExceptionReporter(attemptExceptionReporter);
+        attemptExceptionReporterExplicitlySet = true;
+    }
+
+    /**
+     * Resets the setting to its default, as if it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
+     * {@link #isAttemptExceptionReporterExplicitlySet()} will return {@code false}.
+     * 
+     * @since 2.3.27
+     */
+    public void unsetAttemptExceptionReporter() {
+        if (attemptExceptionReporterExplicitlySet) {
+            setAttemptExceptionReporter(getDefaultAttemptExceptionReporter());
+            attemptExceptionReporterExplicitlySet = false;
+        }
+    }
+    
+    /**
+     * Tells if {@link #setAttemptExceptionReporter(AttemptExceptionReporter)} (or equivalent) was already called on
+     * this instance.
+     * 
+     * @since 2.3.27
+     */
+    public boolean isAttemptExceptionReporterExplicitlySet() {
+        return attemptExceptionReporterExplicitlySet;
     }    
     
     /**
@@ -1788,6 +1828,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             if (!templateExceptionHandlerExplicitlySet) {
                 templateExceptionHandlerExplicitlySet = true;
                 unsetTemplateExceptionHandler();
+            }
+
+            if (!attemptExceptionReporterExplicitlySet) {
+                attemptExceptionReporterExplicitlySet = true;
+                unsetAttemptExceptionReporter();
             }
             
             if (!logTemplateExceptionsExplicitlySet) {

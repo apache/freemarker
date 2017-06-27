@@ -52,6 +52,7 @@ import freemarker.cache.PathRegexMatcher;
 import freemarker.cache.TemplateLoader;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.template.AttemptExceptionReporter;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.ObjectWrapper;
@@ -161,6 +162,13 @@ public class Configurable {
     public static final String TEMPLATE_EXCEPTION_HANDLER_KEY_CAMEL_CASE = "templateExceptionHandler";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String TEMPLATE_EXCEPTION_HANDLER_KEY = TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.27 */
+    public static final String ATTEMPT_EXCEPTION_REPORTER_KEY_SNAKE_CASE = "attempt_exception_reporter";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.27 */
+    public static final String ATTEMPT_EXCEPTION_REPORTER_KEY_CAMEL_CASE = "attemptExceptionReporter";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String ATTEMPT_EXCEPTION_REPORTER_KEY = ATTEMPT_EXCEPTION_REPORTER_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String ARITHMETIC_ENGINE_KEY_SNAKE_CASE = "arithmetic_engine";
@@ -275,6 +283,7 @@ public class Configurable {
         // Must be sorted alphabetically!
         API_BUILTIN_ENABLED_KEY_SNAKE_CASE,
         ARITHMETIC_ENGINE_KEY_SNAKE_CASE,
+        ATTEMPT_EXCEPTION_REPORTER_KEY_SNAKE_CASE,
         AUTO_FLUSH_KEY_SNAKE_CASE,
         AUTO_IMPORT_KEY_SNAKE_CASE,
         AUTO_INCLUDE_KEY_SNAKE_CASE,
@@ -305,6 +314,7 @@ public class Configurable {
         // Must be sorted alphabetically!
         API_BUILTIN_ENABLED_KEY_CAMEL_CASE,
         ARITHMETIC_ENGINE_KEY_CAMEL_CASE,
+        ATTEMPT_EXCEPTION_REPORTER_KEY_CAMEL_CASE,
         AUTO_FLUSH_KEY_CAMEL_CASE,
         AUTO_IMPORT_KEY_CAMEL_CASE,
         AUTO_INCLUDE_KEY_CAMEL_CASE,
@@ -348,6 +358,7 @@ public class Configurable {
     private String falseStringValue;  // deduced from booleanFormat
     private Integer classicCompatible;
     private TemplateExceptionHandler templateExceptionHandler;
+    private AttemptExceptionReporter attemptExceptionReporter;
     private ArithmeticEngine arithmeticEngine;
     private ObjectWrapper objectWrapper;
     private String outputEncoding;
@@ -412,9 +423,10 @@ public class Configurable {
         classicCompatible = Integer.valueOf(0);
         properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatible.toString());
         
-        templateExceptionHandler = _TemplateAPI.getDefaultTemplateExceptionHandler(
-                incompatibleImprovements);
+        templateExceptionHandler = _TemplateAPI.getDefaultTemplateExceptionHandler(incompatibleImprovements);
         properties.setProperty(TEMPLATE_EXCEPTION_HANDLER_KEY, templateExceptionHandler.getClass().getName());
+
+        attemptExceptionReporter = _TemplateAPI.getDefaultAttemptExceptionReporter(incompatibleImprovements);
         
         arithmeticEngine = ArithmeticEngine.BIGDECIMAL_ENGINE;
         properties.setProperty(ARITHMETIC_ENGINE_KEY, arithmeticEngine.getClass().getName());
@@ -461,12 +473,8 @@ public class Configurable {
      */
     public Configurable(Configurable parent) {
         this.parent = parent;
-        locale = null;
-        numberFormat = null;
-        classicCompatible = null;
-        templateExceptionHandler = null;
         properties = new Properties(parent.properties);
-        customAttributes = new HashMap(0);
+        customAttributes = new HashMap<Object, Object>(0);
     }
     
     @Override
@@ -1313,7 +1321,16 @@ public class Configurable {
      * Neither is it meant to be used to roll back the printed output. These should be solved outside template
      * processing when the exception raises from {@link Template#process(Object, Writer) Template.process}.
      * {@link TemplateExceptionHandler} meant to be used if you want to include special content <em>in</em> the template
-     * output, or if you want to suppress certain exceptions. 
+     * output, or if you want to suppress certain exceptions. If you suppress an exception, and the
+     * {@link Environment#getLogTemplateExceptions()} returns {@code false}, then it's the responsibility of the
+     * {@link TemplateExceptionHandler} to log the exception (if you want it to be logged).  
+     *  
+     * <p>The {@link #setLogTemplateExceptions(boolean) log_template_exceptions} and
+     * {@link #setAttemptExceptionReporter(AttemptExceptionReporter) attempt_exception_reporter} settings take effect
+     * before the {@link TemplateExceptionHandler} is invoked, so these settings are technically independent, and deal
+     * with different aspects of exception handling.  
+     * 
+     * @see #setAttemptExceptionReporter(AttemptExceptionReporter)
      */
     public void setTemplateExceptionHandler(TemplateExceptionHandler templateExceptionHandler) {
         NullArgumentException.check("templateExceptionHandler", templateExceptionHandler);
@@ -1336,6 +1353,44 @@ public class Configurable {
      */
     public boolean isTemplateExceptionHandlerSet() {
         return templateExceptionHandler != null;
+    }
+    
+    /**
+     * Specifies how exceptions handled (and hence suppressed) by an {@code #attempt} blocks will be logged or otherwise
+     * reported. The default value is {@link AttemptExceptionReporter#LOG_ERROR_REPORTER}.
+     * 
+     * <p>Note that {@code #attempt} is not supposed to be a general purpose error handler mechanism, like {@code try}
+     * is in Java. It's for decreasing the impact of unexpected errors, by making it possible that only part of the
+     * page is going down, instead of the whole page. But it's still an error, something that someone should fix. So the
+     * error should be reported, not just ignored in a custom {@link AttemptExceptionReporter}-s.
+     * 
+     * <p>The {@link AttemptExceptionReporter} is invoked regardless of the value of the
+     * {@link #setLogTemplateExceptions(boolean) log_template_exceptions} setting.
+     * 
+     * @since 2.3.27
+     */
+    public void setAttemptExceptionReporter(AttemptExceptionReporter attemptExceptionReporter) {
+        NullArgumentException.check("attemptExceptionReporter", attemptExceptionReporter);
+        this.attemptExceptionReporter = attemptExceptionReporter;
+    }
+    
+    /**
+     * The getter pair of {@link #setAttemptExceptionReporter(AttemptExceptionReporter)}.
+     * 
+     * @since 2.3.27
+     */
+    public AttemptExceptionReporter getAttemptExceptionReporter() {
+        return attemptExceptionReporter != null
+                ? attemptExceptionReporter : parent.getAttemptExceptionReporter();
+    }
+    
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.27
+     */
+    public boolean isAttemptExceptionReporterSet() {
+        return attemptExceptionReporter != null;
     }
 
     /**
@@ -1607,8 +1662,9 @@ public class Configurable {
      * written applications, because there the {@link TemplateException} thrown by the public FreeMarker API is also
      * logged by the caller (even if only as the cause exception of a higher level exception). Hence, in modern
      * applications it should be set to {@code false}. Note that this setting has no effect on the logging of exceptions
-     * caught by {@code #attempt}; those are always logged, no mater what (because those exceptions won't bubble up
-     * until the API caller).
+     * caught by {@code #attempt}; by default those are always logged as errors (because those exceptions won't bubble
+     * up to the API caller), however, that can be changed with the {@link
+     * #setAttemptExceptionReporter(AttemptExceptionReporter) attempt_exception_reporter} setting.
      * 
      * @since 2.3.22
      */
@@ -2020,8 +2076,17 @@ public class Configurable {
      *       {@code "rethrow"} (means {@link TemplateExceptionHandler#RETHROW_HANDLER}),
      *       {@code "debug"} (means {@link TemplateExceptionHandler#DEBUG_HANDLER}),
      *       {@code "html_debug"} (means {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}),
-     *       {@code "ignore"} (means {@link TemplateExceptionHandler#IGNORE_HANDLER}),
-     *       {@code "default"} (only allowed for {@link Configuration} instances) for the default.
+     *       {@code "ignore"} (means {@link TemplateExceptionHandler#IGNORE_HANDLER}), or
+     *       {@code "default"} (only allowed for {@link Configuration} instances) for the default value.
+     *       
+     *   <li><p>{@code "attempt_exception_reporter"}:
+     *       See {@link #setAttemptExceptionReporter(AttemptExceptionReporter)}.
+     *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
+     *       expression</a>.
+     *       If the value does not contain dot, then it must be one of these predefined values (case insensitive):
+     *       {@code "log_error"} (means {@link AttemptExceptionReporter#LOG_ERROR_REPORTER}),
+     *       {@code "log_warn"} (means {@link AttemptExceptionReporter#LOG_WARN_REPORTER}), or
+     *       {@code "default"} (only allowed for {@link Configuration} instances) for the default value.
      *       
      *   <li><p>{@code "arithmetic_engine"}:
      *       See {@link #setArithmeticEngine(ArithmeticEngine)}.  
@@ -2456,6 +2521,24 @@ public class Configurable {
                 } else {
                     setTemplateExceptionHandler((TemplateExceptionHandler) _ObjectBuilderSettingEvaluator.eval(
                             value, TemplateExceptionHandler.class, false, _SettingEvaluationEnvironment.getCurrent()));
+                }
+            } else if (ATTEMPT_EXCEPTION_REPORTER_KEY_SNAKE_CASE.equals(name)
+                    || ATTEMPT_EXCEPTION_REPORTER_KEY_CAMEL_CASE.equals(name)) {
+                if (value.indexOf('.') == -1) {
+                    if ("log_error".equalsIgnoreCase(value) || "logError".equals(value)) {
+                        setAttemptExceptionReporter(
+                                AttemptExceptionReporter.LOG_ERROR_REPORTER);
+                    } else if ("log_warn".equalsIgnoreCase(value) || "logWarn".equals(value)) {
+                        setAttemptExceptionReporter(
+                                AttemptExceptionReporter.LOG_WARN_REPORTER);
+                    } else if (DEFAULT.equalsIgnoreCase(value) && this instanceof Configuration) {
+                        ((Configuration) this).unsetAttemptExceptionReporter();
+                    } else {
+                        throw invalidSettingValueException(name, value);
+                    }
+                } else {
+                    setAttemptExceptionReporter((AttemptExceptionReporter) _ObjectBuilderSettingEvaluator.eval(
+                            value, AttemptExceptionReporter.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (ARITHMETIC_ENGINE_KEY_SNAKE_CASE.equals(name) || ARITHMETIC_ENGINE_KEY_CAMEL_CASE.equals(name)) {
                 if (value.indexOf('.') == -1) { 
