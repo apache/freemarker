@@ -27,7 +27,8 @@ inAggregateJavadoc = true
 dependencies {
     compile project(":freemarker-core")
 
-    compileOnly "javax.servlet:servlet-api:2.5"
+    // TODO: what's difference between compileOnly and compile??
+    compile "org.apache.geronimo.specs:geronimo-servlet_3.0_spec:1.0"
 
     def springVersion = "4.3.9.RELEASE"
 
