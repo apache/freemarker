@@ -167,6 +167,7 @@ public class TemplateConfigurationTest {
         SETTING_ASSIGNMENTS.put("outputEncoding", StandardCharsets.UTF_16);
         SETTING_ASSIGNMENTS.put("showErrorTips", false);
         SETTING_ASSIGNMENTS.put("templateExceptionHandler", TemplateExceptionHandler.IGNORE);
+        SETTING_ASSIGNMENTS.put("attemptExceptionReporter", AttemptExceptionReporter.LOG_WARN);
         SETTING_ASSIGNMENTS.put("timeFormat", "@HH:mm");
         SETTING_ASSIGNMENTS.put("timeZone", NON_DEFAULT_TZ);
         SETTING_ASSIGNMENTS.put("arithmeticEngine", ConservativeArithmeticEngine.INSTANCE);

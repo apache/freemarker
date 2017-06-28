@@ -929,7 +929,8 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
 
     @Override
     public TemplateExceptionHandler getTemplateExceptionHandler() {
-        return tCfg != null && tCfg.isTemplateExceptionHandlerSet() ? tCfg.getTemplateExceptionHandler() : cfg.getTemplateExceptionHandler();
+        return tCfg != null && tCfg.isTemplateExceptionHandlerSet() ? tCfg.getTemplateExceptionHandler()
+                : cfg.getTemplateExceptionHandler();
     }
 
     @Override
@@ -937,6 +938,17 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         return tCfg != null && tCfg.isTemplateExceptionHandlerSet();
     }
 
+    @Override
+    public AttemptExceptionReporter getAttemptExceptionReporter() {
+        return tCfg != null && tCfg.isAttemptExceptionReporterSet() ? tCfg.getAttemptExceptionReporter()
+                : cfg.getAttemptExceptionReporter();
+    }
+
+    @Override
+    public boolean isAttemptExceptionReporterSet() {
+        return tCfg != null && tCfg.isAttemptExceptionReporterSet();
+    }
+    
     @Override
     public ArithmeticEngine getArithmeticEngine() {
         return tCfg != null && tCfg.isArithmeticEngineSet() ? tCfg.getArithmeticEngine() : cfg.getArithmeticEngine();

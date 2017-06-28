@@ -418,7 +418,10 @@ public interface ProcessingConfiguration {
      * Neither is it meant to be used to roll back the printed output. These should be solved outside template
      * processing when the exception raises from {@link Template#process(Object, Writer) Template.process}.
      * {@link TemplateExceptionHandler} meant to be used if you want to include special content <em>in</em> the template
-     * output, or if you want to suppress certain exceptions.
+     * output, or if you want to suppress certain exceptions. If you suppress an exception then it's the responsibility
+     * of the {@link TemplateExceptionHandler} to log the exception (if you want it to be logged).
+     *
+     * @see #getAttemptExceptionReporter()
      */
     TemplateExceptionHandler getTemplateExceptionHandler();
 
@@ -428,6 +431,27 @@ public interface ProcessingConfiguration {
      * an {@link CoreSettingValueNotSetException}.
      */
     boolean isTemplateExceptionHandlerSet();
+
+    /**
+     * Specifies how exceptions handled (and hence suppressed) by an {@code #attempt} blocks will be logged or otherwise
+     * reported. The default value is {@link AttemptExceptionReporter#LOG_ERROR}.
+     *
+     * <p>Note that {@code #attempt} is not supposed to be a general purpose error handler mechanism, like {@code try}
+     * is in Java. It's for decreasing the impact of unexpected errors, by making it possible that only part of the
+     * page is going down, instead of the whole page. But it's still an error, something that someone should fix. So the
+     * error should be reported, not just ignored in a custom {@link AttemptExceptionReporter}-s.
+     *
+     * <p>The {@link AttemptExceptionReporter} is not invoked if the {@link TemplateExceptionHandler} has
+     * suppressed the exception.
+     */
+    AttemptExceptionReporter getAttemptExceptionReporter();
+
+    /**
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting mights returns a default value, or returns the value of the setting from a parent object, or throws
+     * a {@link CoreSettingValueNotSetException}.
+     */
+    boolean isAttemptExceptionReporterSet();
 
     /**
      * The arithmetic engine used to perform arithmetic operations.

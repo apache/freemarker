@@ -611,11 +611,35 @@ public class ConfigurationTest {
 
     @Test
     public void testSetICIViaSetSettingAPI() throws ConfigurationException {
-        Builder cfg = new Builder(VERSION_3_0_0);
-        assertEquals(DEFAULT_INCOMPATIBLE_IMPROVEMENTS, cfg.getIncompatibleImprovements());
+        Builder cfgB = new Builder(VERSION_3_0_0);
+        assertEquals(DEFAULT_INCOMPATIBLE_IMPROVEMENTS, cfgB.getIncompatibleImprovements());
         // This is the only valid value ATM:
-        cfg.setSetting(INCOMPATIBLE_IMPROVEMENTS_KEY, "3.0.0");
-        assertEquals(VERSION_3_0_0, cfg.getIncompatibleImprovements());
+        cfgB.setSetting(INCOMPATIBLE_IMPROVEMENTS_KEY, "3.0.0");
+        assertEquals(VERSION_3_0_0, cfgB.getIncompatibleImprovements());
+    }
+
+    @Test
+    public void testSetAttemptExceptionReporter() throws TemplateException {
+        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
+        assertEquals(AttemptExceptionReporter.LOG_ERROR, cfgB.getAttemptExceptionReporter());
+        assertFalse(cfgB.isAttemptExceptionReporterSet());
+        cfgB.setSetting(MutableProcessingConfiguration.ATTEMPT_EXCEPTION_REPORTER_KEY, "log_warn");
+        assertEquals(AttemptExceptionReporter.LOG_WARN, cfgB.getAttemptExceptionReporter());
+        assertTrue(cfgB.isAttemptExceptionReporterSet());
+        cfgB.setSetting(MutableProcessingConfiguration.ATTEMPT_EXCEPTION_REPORTER_KEY, "default");
+        assertEquals(AttemptExceptionReporter.LOG_ERROR, cfgB.getAttemptExceptionReporter());
+        assertFalse(cfgB.isAttemptExceptionReporterSet());
+
+        assertEquals(AttemptExceptionReporter.LOG_ERROR,
+                new Configuration.Builder(Configuration.VERSION_3_0_0)
+                        .build()
+                .getAttemptExceptionReporter());
+
+        assertEquals(AttemptExceptionReporter.LOG_WARN,
+                new Configuration.Builder(Configuration.VERSION_3_0_0)
+                        .attemptExceptionReporter(AttemptExceptionReporter.LOG_WARN)
+                        .build()
+                        .getAttemptExceptionReporter());
     }
 
     @Test

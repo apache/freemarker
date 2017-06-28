@@ -104,7 +104,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     private static final ThreadLocal<Environment> TLS_ENVIRONMENT = new ThreadLocal();
 
     private static final Logger LOG = _CoreLogs.RUNTIME;
-    private static final Logger LOG_ATTEMPT = _CoreLogs.ATTEMPT;
 
     // Do not use this object directly; deepClone it first! DecimalFormat isn't
     // thread-safe.
@@ -575,10 +574,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             out = prevOut;
         }
         if (thrownException != null) {
-            if (LOG_ATTEMPT.isDebugEnabled()) {
-                LOG_ATTEMPT.debug("Error in attempt block " +
-                        attemptBlock.getStartLocationQuoted(), thrownException);
-            }
             try {
                 recoveredErrorStack.add(thrownException);
                 visit(recoverySection);
@@ -887,19 +882,22 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         }
         lastThrowable = templateException;
 
-        // Log the exception if we are inside an #attempt block; it has to be logged, as it certainly won't bubble up
-        // to the caller of FreeMarker.
-        if (LOG.isErrorEnabled() && isInAttemptBlock()) {
-            LOG.error("Error executing FreeMarker template", templateException);
-        }
+        try {
+            // Stop exception is not passed to the handler, but
+            // explicitly rethrown.
+            if (templateException instanceof StopException) {
+                throw templateException;
+            }
 
-        // Stop exception is not passed to the handler, but explicitly rethrown.
-        if (templateException instanceof StopException) {
-            throw templateException;
+            // Finally, pass the exception to the handler
+            getTemplateExceptionHandler().handleTemplateException(templateException, this, out);
+        } catch (TemplateException e) {
+            // Note that if the TemplateExceptionHandler doesn't rethrow the exception, we don't get in there.
+            if (isInAttemptBlock()) {
+                this.getAttemptExceptionReporter().report(templateException, this);
+            }
+            throw e;
         }
-
-        // Finally, pass the exception to the handler
-        getTemplateExceptionHandler().handleTemplateException(templateException, this, out);
     }
 
     @Override
@@ -911,6 +909,11 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     @Override
     protected TemplateExceptionHandler getDefaultTemplateExceptionHandler() {
         return getMainTemplate().getTemplateExceptionHandler();
+    }
+
+    @Override
+    protected AttemptExceptionReporter getDefaultAttemptExceptionReporter() {
+        return getMainTemplate().getAttemptExceptionReporter();
     }
 
     @Override
