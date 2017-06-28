@@ -3457,30 +3457,29 @@ ${12 % -5} &lt;#-- Prints 2 --&gt;
           <literal>&lt;#if (x &gt; y)&gt;</literal>, although it's considered
           to be less elegant.</para>
 
-          <note>
-            <para>FreeMarker supports some other alternatives too, but these
-            are deprecated:</para>
+          <para>FreeMarker supports some more syntactical alternatives:</para>
 
-            <itemizedlist>
-              <listitem>
-                <para>Writing <literal>&amp;gt;</literal> and
-                <literal>&amp;lt;</literal> on the place of the problematic
-                relation marks, like in: <literal>&lt;#if x &amp;gt;
-                y&gt;</literal> or <literal>&lt;#if x &amp;gt;=
-                y&gt;</literal> . Note that in general FTL does not support
-                entity references (the
-                <literal>&amp;<replaceable>...</replaceable>;</literal>
-                things) in FTL tags; it's just an exception with the
-                arithmetical comparisons.</para>
-              </listitem>
+          <itemizedlist>
+            <listitem>
+              <para><literal>&amp;gt;</literal> and
+              <literal>&amp;lt;</literal> can also be used, like in:
+              <literal>&lt;#if x &amp;gt; y&gt;</literal> or <literal>&lt;#if
+              x &amp;gt;= y&gt;</literal>. This isn't meant to be entered
+              manually; it's to work around cases where the template gets
+              XML/HTML escaped and the user can't easily prevent that
+              happening. Note that in general FTL does not support entity
+              references (the
+              <literal>&amp;<replaceable>...</replaceable>;</literal> things)
+              in FTL tags; it's just an exception with these operators.</para>
+            </listitem>
 
-              <listitem>
-                <para><literal>\lt</literal>, <literal>\lte</literal>,
-                <literal>\gt</literal> and <literal>\gte</literal> which are
-                the same as the ones without the backslash</para>
-              </listitem>
-            </itemizedlist>
-          </note>
+            <listitem>
+              <para>Deprecated forms: <literal>\lt</literal>,
+              <literal>\lte</literal>, <literal>\gt</literal> and
+              <literal>\gte</literal>. These are the same as the ones without
+              the backslash.</para>
+            </listitem>
+          </itemizedlist>
         </section>
 
         <section xml:id="dgui_template_exp_logicalop">
@@ -3535,6 +3534,38 @@ ${12 % -5} &lt;#-- Prints 2 --&gt;
 &lt;#if <emphasis>!</emphasis>hot&gt; &lt;#-- here hot must be a boolean --&gt;
   It's not hot.
 &lt;/#if&gt;</programlisting>
+
+          <para>FreeMarker supports some more syntactical alternatives:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><literal>\and</literal> (since FreeMarker 2.3.27): In some
+              applications using <literal>&amp;&amp;</literal> causes problems
+              as it's not valid in XML or HTML. While FreeMarker templates was
+              never intended to be valid XML/HTML, only their output should be
+              that, in reality there are some applications that expect the
+              template itself to be valid XML/HTML regardless. This syntax is
+              a workaround for such cases. Also note that unlike with the
+              comparison operators, <literal>and</literal> without
+              <literal>\</literal> is not supported due to backward
+              compatibility restrictions.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>&amp;amp;&amp;amp;</literal> (since FreeMarker
+              2.3.27): This isn't meant to be entered manually; it's to work
+              around cases where the template gets XML/HTML escaped and the
+              user can't easily prevent that happening. Note that in general
+              FTL does not support entity references (the
+              <literal>&amp;<replaceable>...</replaceable>;</literal> things)
+              in FTL tags; it's just an exception with these operators.</para>
+            </listitem>
+
+            <listitem>
+              <para>Deprecated forms: <literal>&amp;</literal> and
+              <literal>|</literal>. Don't use them anymore.</para>
+            </listitem>
+          </itemizedlist>
         </section>
 
         <section xml:id="dgui_template_exp_builtin">
@@ -26854,6 +26885,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
         release.</emphasis> The <quote>incubating</quote> suffix is required
         by the Apache Software Foundation until the project becomes a fully
         accepted (graduated) Apache project.</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Added alternative syntaxes for the
+              <literal>&amp;&amp;</literal> (logical <quote>and</quote>)
+              operator: <literal>\and</literal> and
+              <literal>&amp;amp;&amp;amp;</literal>. These are to work around
+              issues in applications where the template must be a valid XML
+              (<literal>&amp;&amp;</literal> is not valid XML/HTML, at most
+              places), or where the template entered is stored after XML or
+              HTML escaping. Note that lonely <literal>&amp;amp;</literal>,
+              and <literal>and</literal> without <literal>\</literal> is not
+              recognized for backward compatibility.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
 
         <section>
           <title>Changes on the Java side</title>
