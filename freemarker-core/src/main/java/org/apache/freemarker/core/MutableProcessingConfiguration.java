@@ -150,7 +150,14 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     public static final String TEMPLATE_EXCEPTION_HANDLER_KEY_CAMEL_CASE = "templateExceptionHandler";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String TEMPLATE_EXCEPTION_HANDLER_KEY = TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE;
-    
+
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
+    public static final String ATTEMPT_EXCEPTION_REPORTER_KEY_SNAKE_CASE = "attempt_exception_reporter";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
+    public static final String ATTEMPT_EXCEPTION_REPORTER_KEY_CAMEL_CASE = "attemptExceptionReporter";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String ATTEMPT_EXCEPTION_REPORTER_KEY = ATTEMPT_EXCEPTION_REPORTER_KEY_SNAKE_CASE;
+
     /** Legacy, snake case ({@code like_this}) variation of the setting name. */
     public static final String ARITHMETIC_ENGINE_KEY_SNAKE_CASE = "arithmetic_engine";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. */
@@ -239,6 +246,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         // Must be sorted alphabetically!
         API_BUILTIN_ENABLED_KEY_SNAKE_CASE,
         ARITHMETIC_ENGINE_KEY_SNAKE_CASE,
+        ATTEMPT_EXCEPTION_REPORTER_KEY_SNAKE_CASE,
         AUTO_FLUSH_KEY_SNAKE_CASE,
         AUTO_IMPORT_KEY_SNAKE_CASE,
         AUTO_INCLUDE_KEY_SNAKE_CASE,
@@ -265,6 +273,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         // Must be sorted alphabetically!
         API_BUILTIN_ENABLED_KEY_CAMEL_CASE,
         ARITHMETIC_ENGINE_KEY_CAMEL_CASE,
+        ATTEMPT_EXCEPTION_REPORTER_KEY_CAMEL_CASE,
         AUTO_FLUSH_KEY_CAMEL_CASE,
         AUTO_IMPORT_KEY_CAMEL_CASE,
         AUTO_INCLUDE_KEY_CAMEL_CASE,
@@ -297,6 +306,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     private boolean sqlDateAndTimeTimeZoneSet;
     private String booleanFormat;
     private TemplateExceptionHandler templateExceptionHandler;
+    private AttemptExceptionReporter attemptExceptionReporter;
     private ArithmeticEngine arithmeticEngine;
     private Charset outputEncoding;
     private boolean outputEncodingSet;
@@ -879,6 +889,47 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
+     * Setter pair of {@link #getAttemptExceptionReporter()}
+     */
+    public void setAttemptExceptionReporter(AttemptExceptionReporter attemptExceptionReporter) {
+        _NullArgumentException.check("attemptExceptionReporter", attemptExceptionReporter);
+        this.attemptExceptionReporter = attemptExceptionReporter;
+    }
+
+    /**
+     * Fluent API equivalent of {@link #setAttemptExceptionReporter(AttemptExceptionReporter)}
+     */
+    public SelfT attemptExceptionReporter(AttemptExceptionReporter value) {
+        setAttemptExceptionReporter(value);
+        return self();
+    }
+
+    /**
+     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
+     * {@link ProcessingConfiguration}).
+     */
+    public void unsetAttemptExceptionReporter() {
+        attemptExceptionReporter = null;
+    }
+
+    @Override
+    public AttemptExceptionReporter getAttemptExceptionReporter() {
+        return isAttemptExceptionReporterSet()
+                ? attemptExceptionReporter : getDefaultAttemptExceptionReporter();
+    }
+
+    /**
+     * Returns the value the getter method returns when the setting is not set (possibly by inheriting the setting value
+     * from another {@link ProcessingConfiguration}), or throws {@link CoreSettingValueNotSetException}.
+     */
+    protected abstract AttemptExceptionReporter getDefaultAttemptExceptionReporter();
+
+    @Override
+    public boolean isAttemptExceptionReporterSet() {
+        return attemptExceptionReporter != null;
+    }
+
+    /**
      * Setter pair of {@link #getArithmeticEngine()}
      */
     public void setArithmeticEngine(ArithmeticEngine arithmeticEngine) {
@@ -1407,9 +1458,18 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       If the value does not contain dot, then it must be one of these predefined values (case insensitive):
      *       {@code "rethrow"} (means {@link TemplateExceptionHandler#RETHROW}),
      *       {@code "debug"} (means {@link TemplateExceptionHandler#DEBUG}),
-     *       {@code "html_debug"} (means {@link TemplateExceptionHandler#HTML_DEBUG}),
-     *       {@code "ignore"} (means {@link TemplateExceptionHandler#IGNORE}),
+     *       {@code "htmlDebug"} (means {@link TemplateExceptionHandler#HTML_DEBUG}),
+     *       {@code "ignore"} (means {@link TemplateExceptionHandler#IGNORE}), or
      *       {@code "default"} (only allowed for {@link Configuration} instances) for the default.
+     *
+     *   <li><p>{@code "attempt_exception_reporter"}:
+     *       See {@link #setAttemptExceptionReporter(AttemptExceptionReporter)}.
+     *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
+     *       expression</a>.
+     *       If the value does not contain dot, then it must be one of these predefined values (case insensitive):
+     *       {@code "logError"} (means {@link AttemptExceptionReporter#LOG_ERROR}),
+     *       {@code "logWarn"} (means {@link AttemptExceptionReporter#LOG_WARN}), or
+     *       {@code "default"} (only allowed for {@link Configuration} instances) for the default value.
      *       
      *   <li><p>{@code "arithmetic_engine"}:
      *       See {@link #setArithmeticEngine(ArithmeticEngine)}.  
@@ -1810,6 +1870,27 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                     } else if (DEFAULT_VALUE.equalsIgnoreCase(value)
                             && this instanceof Configuration.ExtendableBuilder) {
                         unsetTemplateExceptionHandler();
+                    } else {
+                        throw new InvalidSettingValueException(
+                                name, value,
+                                "No such predefined template exception handler name");
+                    }
+                } else {
+                    setTemplateExceptionHandler((TemplateExceptionHandler) _ObjectBuilderSettingEvaluator.eval(
+                            value, TemplateExceptionHandler.class, false, _SettingEvaluationEnvironment.getCurrent()));
+                }
+            } else if (ATTEMPT_EXCEPTION_REPORTER_KEY_SNAKE_CASE.equals(name)
+                    || ATTEMPT_EXCEPTION_REPORTER_KEY_CAMEL_CASE.equals(name)) {
+                if (value.indexOf('.') == -1) {
+                    if ("log_error".equalsIgnoreCase(value) || "logError".equals(value)) {
+                        setAttemptExceptionReporter(
+                                AttemptExceptionReporter.LOG_ERROR);
+                    } else if ("log_warn".equalsIgnoreCase(value) || "logWarn".equals(value)) {
+                        setAttemptExceptionReporter(
+                                AttemptExceptionReporter.LOG_WARN);
+                    } else if (DEFAULT_VALUE.equalsIgnoreCase(value)
+                            && this instanceof Configuration.ExtendableBuilder) {
+                        unsetAttemptExceptionReporter();
                     } else {
                         throw new InvalidSettingValueException(
                                 name, value,

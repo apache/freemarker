@@ -254,6 +254,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     private final TimeZone sqlDateAndTimeTimeZone;
     private final String booleanFormat;
     private final TemplateExceptionHandler templateExceptionHandler;
+    private final AttemptExceptionReporter attemptExceptionReporter;
     private final ArithmeticEngine arithmeticEngine;
     private final ObjectWrapper objectWrapper;
     private final Charset outputEncoding;
@@ -419,6 +420,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         sqlDateAndTimeTimeZone = builder.getSQLDateAndTimeTimeZone();
         booleanFormat = builder.getBooleanFormat();
         templateExceptionHandler = builder.getTemplateExceptionHandler();
+        attemptExceptionReporter = builder.getAttemptExceptionReporter();
         arithmeticEngine = builder.getArithmeticEngine();
         outputEncoding = builder.getOutputEncoding();
         urlEscapingCharset = builder.getURLEscapingCharset();
@@ -521,6 +523,20 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
      */
     @Override
     public boolean isTemplateExceptionHandlerSet() {
+        return true;
+    }
+
+    @Override
+    public AttemptExceptionReporter getAttemptExceptionReporter() {
+        return attemptExceptionReporter;
+    }
+
+    /**
+     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
+     * value in the {@link Configuration}.
+     */
+    @Override
+    public boolean isAttemptExceptionReporterSet() {
         return true;
     }
 
@@ -2672,6 +2688,11 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             return TemplateExceptionHandler.RETHROW;
         }
 
+        @Override
+        protected AttemptExceptionReporter getDefaultAttemptExceptionReporter() {
+            return AttemptExceptionReporter.LOG_ERROR;
+        }
+        
         @Override
         protected ArithmeticEngine getDefaultArithmeticEngine() {
             return BigDecimalArithmeticEngine.INSTANCE;

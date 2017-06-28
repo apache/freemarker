@@ -62,6 +62,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     private final boolean sqlDateAndTimeTimeZoneSet;
     private final String booleanFormat;
     private final TemplateExceptionHandler templateExceptionHandler;
+    private final AttemptExceptionReporter attemptExceptionReporter;
     private final ArithmeticEngine arithmeticEngine;
     private final Charset outputEncoding;
     private final boolean outputEncodingSet;
@@ -100,7 +101,10 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         sqlDateAndTimeTimeZoneSet = builder.isSQLDateAndTimeTimeZoneSet();
         sqlDateAndTimeTimeZone = sqlDateAndTimeTimeZoneSet ? builder.getSQLDateAndTimeTimeZone() : null;
         booleanFormat = builder.isBooleanFormatSet() ? builder.getBooleanFormat() : null;
-        templateExceptionHandler = builder.isTemplateExceptionHandlerSet() ? builder.getTemplateExceptionHandler() : null;
+        templateExceptionHandler = builder.isTemplateExceptionHandlerSet() ? builder.getTemplateExceptionHandler()
+                : null;
+        attemptExceptionReporter = builder.isAttemptExceptionReporterSet() ? builder.getAttemptExceptionReporter()
+                : null;
         arithmeticEngine = builder.isArithmeticEngineSet() ? builder.getArithmeticEngine() : null;
         outputEncodingSet = builder.isOutputEncodingSet();
         outputEncoding = outputEncodingSet ? builder.getOutputEncoding() : null;
@@ -429,6 +433,19 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     }
 
     @Override
+    public AttemptExceptionReporter getAttemptExceptionReporter() {
+        if (!isAttemptExceptionReporterSet()) {
+            throw new CoreSettingValueNotSetException("attemptExceptionReporter");
+        }
+        return attemptExceptionReporter;
+    }
+
+    @Override
+    public boolean isAttemptExceptionReporterSet() {
+        return attemptExceptionReporter != null;
+    }
+    
+    @Override
     public Charset getOutputEncoding() {
         if (!isOutputEncodingSet()) {
             throw new CoreSettingValueNotSetException("");
@@ -676,6 +693,11 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         }
 
         @Override
+        protected AttemptExceptionReporter getDefaultAttemptExceptionReporter() {
+            throw new CoreSettingValueNotSetException("attemptExceptionReporter");
+        }
+
+        @Override
         protected ArithmeticEngine getDefaultArithmeticEngine() {
             throw new CoreSettingValueNotSetException("arithmeticEngine");
         }
@@ -821,6 +843,9 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
             }
             if (tc.isTemplateExceptionHandlerSet()) {
                 setTemplateExceptionHandler(tc.getTemplateExceptionHandler());
+            }
+            if (tc.isAttemptExceptionReporterSet()) {
+                setAttemptExceptionReporter(tc.getAttemptExceptionReporter());
             }
             if (tc.isTimeFormatSet()) {
                 setTimeFormat(tc.getTimeFormat());

@@ -264,6 +264,8 @@ the FreeMarer 3 changelog here:
   "allowsNothing" were renamed to "allow_nothing" and "allowNothing".
 - TemplateExceptionHandler.IGNORE_HANDLER, RETHROW_HANDLER, DEBUG_HANDLER and
   HTLM_DEBUG_HANDLER was renamed to IGNORE, RETHROW, DEBUG and HTML_DEBUG  
+- AttemptExceptionReporter.LOG_ERROR_REPORTER and LOG_WARN_REPORTER was renamed to
+  LOG_ERROR and LOG_WARN (to be consistent with the new TemplateExceptionHandler names)
 - Renamed the `cacheStorage` Configuration setting to `templateCacheStorage`.
 - Renamed the `localizedLookup` Configuration setting to `localizedLookup`.
 - Changed the defaults of some Configuration settings:
@@ -286,3 +288,5 @@ the FreeMarer 3 changelog here:
 - Removed long deprecated `#{}` interpolations. They are treated as plain static text now. (The
   template converter tool translates these to `${}` interpolations. For example `#{x}` is simply 
   translated to `${b}`, while `#{x; m1M3}` is translated to `${x?string('0.0##')}`).
+- #attempt now logs errors into the org.apache.freemarker.core.Runtime.Attempt log chategory (by
+  default). It doesn't create an additional debug level log entry anymore.
