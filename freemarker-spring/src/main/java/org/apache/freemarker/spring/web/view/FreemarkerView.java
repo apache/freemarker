@@ -18,8 +18,17 @@
  */
 package org.apache.freemarker.spring.web.view;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Map;
 
+import javax.servlet.GenericServlet;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -35,12 +44,40 @@ import org.apache.freemarker.servlet.jsp.TaglibFactory;
 
 public class FreemarkerView extends AbstractFreemarkerView {
 
+    private PageContextServletConfig pageContextServletConfig;
+
+    private PageContextServlet pageContextServlet;
+
     private ServletContextHashModel servletContextModel;
 
     private TaglibFactory taglibFactory;
 
+    public PageContextServlet getPageContextServlet() {
+        // TODO: proper locking...
+        if (pageContextServlet == null) {
+            pageContextServlet = new PageContextServlet();
+            pageContextServletConfig = new PageContextServletConfig(getServletContext(), getBeanName());
+
+            try {
+                pageContextServlet.init(pageContextServletConfig);
+            } catch (ServletException e) {
+                // never happen
+            }
+        }
+
+        return pageContextServlet;
+    }
+
+    public void setPageContextServlet(PageContextServlet pageContextServlet) {
+        this.pageContextServlet = pageContextServlet;
+    }
+
     public ServletContextHashModel getServletContextModel() {
-        // TODO
+        // TODO: proper locking...
+        if (servletContextModel == null) {
+            servletContextModel = new ServletContextHashModel(getPageContextServlet(), getObjectWrapperForModel());
+        }
+
         return servletContextModel;
     }
 
@@ -62,8 +99,10 @@ public class FreemarkerView extends AbstractFreemarkerView {
             HttpServletRequest request, HttpServletResponse response) {
         AllHttpScopesHashModel model = new AllHttpScopesHashModel(objectWrapperForModel, getServletContext(), request);
         model.putUnlistedModel(FreemarkerServlet.KEY_APPLICATION, getServletContextModel());
-        model.putUnlistedModel(FreemarkerServlet.KEY_SESSION, getHttpSessionModel(objectWrapperForModel, request, response));
-        model.putUnlistedModel(FreemarkerServlet.KEY_REQUEST, new HttpRequestHashModel(request, response, objectWrapperForModel));
+        model.putUnlistedModel(FreemarkerServlet.KEY_SESSION,
+                getHttpSessionModel(objectWrapperForModel, request, response));
+        model.putUnlistedModel(FreemarkerServlet.KEY_REQUEST,
+                new HttpRequestHashModel(request, response, objectWrapperForModel));
         model.putUnlistedModel(FreemarkerServlet.KEY_REQUEST_PARAMETERS,
                 new HttpRequestParametersHashModel(request, objectWrapperForModel));
         model.putUnlistedModel(FreemarkerServlet.KEY_JSP_TAGLIBS, getTaglibFactory());
@@ -77,4 +116,52 @@ public class FreemarkerView extends AbstractFreemarkerView {
         HttpSessionHashModel sessionModel = new HttpSessionHashModel(null, request, response, objectWrapperForModel);
         return sessionModel;
     }
+
+    /**
+     * Extending {@link GenericServlet} for {@link PageContext#getPage()} in JSP Tag Library support.
+     */
+    @SuppressWarnings("serial")
+    private static class PageContextServlet extends GenericServlet {
+
+        @Override
+        public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {
+            // Do nothing
+        }
+
+    }
+
+    /**
+     * {@link ServletConfig} for {@link PageContextServlet}.
+     */
+    private class PageContextServletConfig implements ServletConfig {
+
+        private ServletContext servletContext;
+        private String servletName;
+
+        public PageContextServletConfig(ServletContext servletContext, String servletName) {
+            this.servletContext = servletContext;
+            this.servletName = servletName;
+        }
+
+        @Override
+        public String getServletName() {
+            return servletName;
+        }
+
+        @Override
+        public ServletContext getServletContext() {
+            return servletContext;
+        }
+
+        @Override
+        public String getInitParameter(String name) {
+            return null;
+        }
+
+        @Override
+        public Enumeration<String> getInitParameterNames() {
+            return Collections.enumeration(Collections.<String> emptySet());
+        }
+    }
+
 }

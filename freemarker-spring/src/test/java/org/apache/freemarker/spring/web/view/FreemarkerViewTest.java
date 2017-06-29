@@ -93,12 +93,12 @@ public class FreemarkerViewTest {
         request.setPathInfo(";mypathinfo");
         request.addParameter("token1", "value1");
         request.setSession(session);
-        request.setAttribute("visitorCount", visitorCount);
+        request.setAttribute("promotion", "Fresh blue berries");
 
         // TODO: Add 'Application.attributeName' example, too.
         templateLoader.putTemplate("default-model.ftl",
-                "${name!}, you have ${Session.itemCountInCart!0} items in cart. "
-                        + "BTW, you're ${Request.visitorCount}th visitor. "
+                "${name!}, you have ${Session.itemCountInCart!0} items in cart. " + "Hot deal: ${Request.promotion}. "
+                        + "BTW, you're ${Application.visitorCount}th visitor. "
                         + "(token1: ${RequestParameters['token1']!})");
 
         FreemarkerView view = new FreemarkerView();
@@ -112,8 +112,8 @@ public class FreemarkerViewTest {
         final long count = visitorCount.incrementAndGet();
         MockHttpServletResponse response = new MockHttpServletResponse();
         view.render(model, request, response);
-        assertEquals("Dan, you have 3 items in cart. BTW, you're " + count + "th visitor. (token1: value1)",
-                response.getContentAsString());
+        assertEquals("Dan, you have 3 items in cart. Hot deal: Fresh blue berries. BTW, you're " + count
+                + "th visitor. (token1: value1)", response.getContentAsString());
     }
 
     @Test
