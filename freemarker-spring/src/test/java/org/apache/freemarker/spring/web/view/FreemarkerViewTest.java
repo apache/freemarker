@@ -60,7 +60,7 @@ public class FreemarkerViewTest {
         FreemarkerView view = new FreemarkerView();
         view.setServletContext(servletContext);
         view.setConfiguration(configuration);
-        view.setTemplateName("hello.ftl");
+        view.setName("hello.ftl");
 
         int visitCount = 0;
         Map<String, Object> model = new HashMap<String, Object>();

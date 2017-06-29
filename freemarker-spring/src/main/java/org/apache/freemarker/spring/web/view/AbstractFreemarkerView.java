@@ -19,6 +19,8 @@
 package org.apache.freemarker.spring.web.view;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,39 +30,90 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.ParseException;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateNotFoundException;
+import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
+import org.apache.freemarker.core.model.TemplateHashModel;
+import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.springframework.web.servlet.view.AbstractView;
 
 public abstract class AbstractFreemarkerView extends AbstractView {
 
     private Configuration configuration;
-    private String templateName;
+    private String name;
+    private Locale locale;
+    private Serializable customLookupCondition;
+    private boolean ignoreMissing;
 
     public Configuration getConfiguration() {
         return configuration;
     }
 
     public void setConfiguration(Configuration configuration) {
+        if (!(configuration.getObjectWrapper() instanceof ObjectWrapperAndUnwrapper)) {
+            throw new RuntimeException(AbstractFreemarkerView.class.getSimpleName() + " requires an ObjectWrapper that "
+                    + "implements " + ObjectWrapperAndUnwrapper.class.getName() + ", but this class doesn't do that: "
+                    + configuration.getObjectWrapper().getClass().getName());
+        }
+
         this.configuration = configuration;
     }
 
-    public String getTemplateName() {
-        return templateName;
+    public String getName() {
+        return name;
     }
 
-    public void setTemplateName(String templateName) {
-        this.templateName = templateName;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Locale getLocale() {
+        return locale;
+    }
+
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
+
+    public Serializable getCustomLookupCondition() {
+        return customLookupCondition;
+    }
+
+    public void setCustomLookupCondition(Serializable customLookupCondition) {
+        this.customLookupCondition = customLookupCondition;
+    }
+
+    public boolean isIgnoreMissing() {
+        return ignoreMissing;
+    }
+
+    public void setIgnoreMissing(boolean ignoreMissing) {
+        this.ignoreMissing = ignoreMissing;
     }
 
     @Override
     protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,
             HttpServletResponse response) throws Exception {
-        getTemplate().process(model, response.getWriter());
+        getTemplate().process(createModel(model, getObjectWrapperForModel(), request, response), response.getWriter());
     }
 
     protected Template getTemplate()
             throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
-        return getConfiguration().getTemplate(getTemplateName());
+        return getConfiguration().getTemplate(getName(), getLocale(), getCustomLookupCondition(), isIgnoreMissing());
     }
 
+    protected ObjectWrapperAndUnwrapper getObjectWrapperForModel() {
+        ObjectWrapperAndUnwrapper wrapper;
+
+        if (configuration.isObjectWrapperSet()) {
+            wrapper = (ObjectWrapperAndUnwrapper) configuration.getObjectWrapper();
+        } else {
+            // TODO: need to cache this?
+            wrapper = new DefaultObjectWrapper.Builder(configuration.getIncompatibleImprovements()).build();
+        }
+
+        return wrapper;
+    }
+
+    protected abstract TemplateHashModel createModel(Map<String, Object> map,
+            ObjectWrapperAndUnwrapper objectWrapperForModel, HttpServletRequest request, HttpServletResponse response);
 }

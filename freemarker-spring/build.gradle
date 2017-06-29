@@ -25,7 +25,9 @@ published = true
 inAggregateJavadoc = true
 
 dependencies {
+
     compile project(":freemarker-core")
+    compile project(":freemarker-servlet")
 
     // TODO: what's difference between compileOnly and compile??
     compile "org.apache.geronimo.specs:geronimo-servlet_3.0_spec:1.0"

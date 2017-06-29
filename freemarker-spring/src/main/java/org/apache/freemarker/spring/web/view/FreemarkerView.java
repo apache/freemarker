@@ -18,6 +18,66 @@
  */
 package org.apache.freemarker.spring.web.view;
 
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
+import org.apache.freemarker.core.model.TemplateHashModel;
+import org.apache.freemarker.servlet.AllHttpScopesHashModel;
+import org.apache.freemarker.servlet.FreemarkerServlet;
+import org.apache.freemarker.servlet.HttpRequestHashModel;
+import org.apache.freemarker.servlet.HttpRequestParametersHashModel;
+import org.apache.freemarker.servlet.HttpSessionHashModel;
+import org.apache.freemarker.servlet.ServletContextHashModel;
+import org.apache.freemarker.servlet.jsp.TaglibFactory;
+
 public class FreemarkerView extends AbstractFreemarkerView {
 
+    private ServletContextHashModel servletContextModel;
+
+    private TaglibFactory taglibFactory;
+
+    public ServletContextHashModel getServletContextModel() {
+        return servletContextModel;
+    }
+
+    public void setServletContextModel(ServletContextHashModel servletContextModel) {
+        this.servletContextModel = servletContextModel;
+    }
+
+    public TaglibFactory getTaglibFactory() {
+        // TODO
+        return taglibFactory;
+    }
+
+    public void setTaglibFactory(TaglibFactory taglibFactory) {
+        this.taglibFactory = taglibFactory;
+    }
+
+    @Override
+    protected TemplateHashModel createModel(Map<String, Object> map, ObjectWrapperAndUnwrapper objectWrapperForModel,
+            HttpServletRequest request, HttpServletResponse response) {
+        AllHttpScopesHashModel model = new AllHttpScopesHashModel(objectWrapperForModel, getServletContext(), request);
+        model.putUnlistedModel(FreemarkerServlet.KEY_APPLICATION, getServletContextModel());
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            model.putUnlistedModel(FreemarkerServlet.KEY_SESSION, getHttpSessionModel(objectWrapperForModel, request, response));
+        }
+        model.putUnlistedModel(FreemarkerServlet.KEY_REQUEST, new HttpRequestHashModel(request, response, objectWrapperForModel));
+        model.putUnlistedModel(FreemarkerServlet.KEY_REQUEST_PARAMETERS,
+                new HttpRequestParametersHashModel(request, objectWrapperForModel));
+        model.putUnlistedModel(FreemarkerServlet.KEY_JSP_TAGLIBS, getTaglibFactory());
+        model.putAll(map);
+        return model;
+    }
+
+    protected HttpSessionHashModel getHttpSessionModel(ObjectWrapperAndUnwrapper objectWrapperForModel,
+            HttpServletRequest request, HttpServletResponse response) {
+        // TODO
+        HttpSessionHashModel sessionModel = new HttpSessionHashModel(null, request, response, objectWrapperForModel);
+        return sessionModel;
+    }
 }
