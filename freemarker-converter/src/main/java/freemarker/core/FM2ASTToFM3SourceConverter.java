@@ -20,7 +20,9 @@
 package freemarker.core;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.freemarker.converter.ConverterException;
@@ -382,9 +384,99 @@ public class FM2ASTToFM3SourceConverter {
             printExpBuiltinVariable((BuiltinVariable) node);
         } else if (node instanceof Dot) {
             printExpDot((Dot) node);
+        } else if (node instanceof ComparisonExpression) {
+            printExpComparison((ComparisonExpression) node);
+        } else if (node instanceof AndExpression) {
+            printExpAnd((AndExpression) node);
+        } else if (node instanceof OrExpression) {
+            printExpOr((OrExpression) node);
+        } else if (node instanceof NotExpression) {
+            printExpNot((NotExpression) node);
         } else {
-            throw new ConverterException("Unhandled AST node class: " + node.getClass().getName());
+            throw new ConverterException("Unhandled AST node expression class: " + node.getClass().getName());
         }
+    }
+
+    private void printExpNot(NotExpression node) throws ConverterException {
+        printWithParamsLeadingSkippedTokens("!", node);
+        printNode(getOnlyParam(node, ParameterRole.RIGHT_HAND_OPERAND, Expression.class));
+    }
+
+    private static final Map<String, String> COMPARATOR_OP_MAP;
+    static {
+        COMPARATOR_OP_MAP = new HashMap<String, String>();
+        // For now we leave FM2 ops as is, but later in many cases they will be replaced.
+        COMPARATOR_OP_MAP.put("==", "==");
+        COMPARATOR_OP_MAP.put("=", "=");
+        COMPARATOR_OP_MAP.put("!=", "!=");
+        COMPARATOR_OP_MAP.put("<", "<");
+        COMPARATOR_OP_MAP.put("lt", "lt");
+        COMPARATOR_OP_MAP.put("\\lt", "\\lt");
+        COMPARATOR_OP_MAP.put("&lt;", "&lt;");
+        COMPARATOR_OP_MAP.put("<=", "<=");
+        COMPARATOR_OP_MAP.put("lte", "lte");
+        COMPARATOR_OP_MAP.put("\\lte", "\\lte");
+        COMPARATOR_OP_MAP.put("&lt;=", "&lt;=");
+        COMPARATOR_OP_MAP.put(">", ">");
+        COMPARATOR_OP_MAP.put("gt", "gt");
+        COMPARATOR_OP_MAP.put("\\gt", "\\gt");
+        COMPARATOR_OP_MAP.put("&gt;", "&gt;");
+        COMPARATOR_OP_MAP.put(">=", ">=");
+        COMPARATOR_OP_MAP.put("gte", "gte");
+        COMPARATOR_OP_MAP.put("\\gte", "\\gte");
+        COMPARATOR_OP_MAP.put("&gt;=", "&gt;=");
+    }
+
+    private void printExpComparison(ComparisonExpression node) throws ConverterException {
+        printExpBinaryWithMappedOperator(node, COMPARATOR_OP_MAP);
+    }
+
+    private static final Map<String, String> AND_OP_MAP;
+    static {
+        AND_OP_MAP = new HashMap<String, String>();
+        // For now we leave FM2 ops as is, but later in many cases they will be replaced.
+        AND_OP_MAP.put("&&", "&&");
+        AND_OP_MAP.put("&", "&");
+        AND_OP_MAP.put("\\and", "\\and");
+        AND_OP_MAP.put("&amp;&amp;", "&amp;&amp;");
+    }
+
+    private void printExpAnd(AndExpression node) throws ConverterException {
+        printExpBinaryWithMappedOperator(node, AND_OP_MAP);
+    }
+
+    private static final Map<String, String> OR_OP_MAP;
+    static {
+        OR_OP_MAP = new HashMap<String, String>();
+        // For now we leave FM2 ops as is, but later in many cases they will be replaced.
+        OR_OP_MAP.put("||", "||");
+        OR_OP_MAP.put("|", "|");
+    }
+
+    private void printExpOr(OrExpression node) throws ConverterException {
+        printExpBinaryWithMappedOperator(node, OR_OP_MAP);
+    }
+
+    private void printExpBinaryWithMappedOperator(Expression node, Map<String, String> operatorMapper) throws
+            ConverterException {
+        assertParamCount(node, 2);
+        Expression lho = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, Expression.class);
+        Expression rho = getParam(node, 1, ParameterRole.RIGHT_HAND_OPERAND, Expression.class);
+
+        printExp(lho);
+
+        int lhoEndExcl = getEndPositionExclusive(lho);
+        int opStart = getPositionAfterWSAndExpComments(lhoEndExcl);
+        printWithConvertedExpComments(src.substring(lhoEndExcl, opStart));
+        final String fm2Op = readUntilWSOrComment(opStart);
+        String fm3Op = operatorMapper.get(fm2Op);
+        if (fm3Op == null) {
+            throw new UnexpectedNodeContentException(node, "Unhandled operator: {}", fm2Op);
+        }
+        print(fm3Op);
+        printWithConvertedExpComments(src.substring(opStart + fm2Op.length(), getStartPosition(rho)));
+
+        printExp(rho);
     }
 
     private void printExpBuiltinVariable(BuiltinVariable node) throws ConverterException {
@@ -933,9 +1025,8 @@ public class FM2ASTToFM3SourceConverter {
     private int getPositionAfterWSAndExpComments(int pos) throws ConverterException {
         scanForNoWSNoComment: while (pos < src.length()) {
             char c = src.charAt(pos);
-            if ((c == '<' || c == '[')
-                    && (src.startsWith("!--", pos + 1) || src.startsWith("#--", pos + 1))) {
-                pos += 4;
+            if (isExpCommentStart(pos)) {
+                pos += 4; // length of "<#--"
                 scanForCommentEnd:
                 while (pos < src.length()) {
                     if (src.startsWith("-->", pos) || src.startsWith("--]", pos)) {
@@ -992,6 +1083,22 @@ public class FM2ASTToFM3SourceConverter {
             }
         }
         return src.substring(startPos, pos);
+    }
+
+    private String readUntilWSOrComment(int startPos) throws ConverterException {
+        int pos = startPos;
+        while (pos < src.length() && !Character.isWhitespace(src.charAt(pos)) && !isExpCommentStart(pos)) {
+            pos++;
+        }
+        return src.substring(startPos, pos);
+    }
+
+    private boolean isExpCommentStart(int pos) {
+        char c = src.charAt(pos);
+        return (c == '<' || c == '[')
+                && (pos + 1 < src.length()
+                && src.startsWith("!--", pos + 1) || src.startsWith("#--", pos + 1));
+
     }
 
 }
