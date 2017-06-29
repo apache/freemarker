@@ -22,7 +22,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
@@ -41,6 +40,7 @@ public class FreemarkerView extends AbstractFreemarkerView {
     private TaglibFactory taglibFactory;
 
     public ServletContextHashModel getServletContextModel() {
+        // TODO
         return servletContextModel;
     }
 
@@ -62,10 +62,7 @@ public class FreemarkerView extends AbstractFreemarkerView {
             HttpServletRequest request, HttpServletResponse response) {
         AllHttpScopesHashModel model = new AllHttpScopesHashModel(objectWrapperForModel, getServletContext(), request);
         model.putUnlistedModel(FreemarkerServlet.KEY_APPLICATION, getServletContextModel());
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            model.putUnlistedModel(FreemarkerServlet.KEY_SESSION, getHttpSessionModel(objectWrapperForModel, request, response));
-        }
+        model.putUnlistedModel(FreemarkerServlet.KEY_SESSION, getHttpSessionModel(objectWrapperForModel, request, response));
         model.putUnlistedModel(FreemarkerServlet.KEY_REQUEST, new HttpRequestHashModel(request, response, objectWrapperForModel));
         model.putUnlistedModel(FreemarkerServlet.KEY_REQUEST_PARAMETERS,
                 new HttpRequestParametersHashModel(request, objectWrapperForModel));
