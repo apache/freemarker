@@ -21,6 +21,7 @@ package org.apache.freemarker.servlet;
 
 import java.io.Serializable;
 
+import javax.servlet.GenericServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -40,7 +41,7 @@ public final class HttpSessionHashModel implements TemplateHashModel, Serializab
     private transient final ObjectWrapper wrapper;
 
     // These are required for lazy initializing session
-    private transient final FreemarkerServlet servlet;
+    private transient final GenericServlet servlet;
     private transient final HttpServletRequest request;
     private transient final HttpServletResponse response;
     
@@ -62,16 +63,15 @@ public final class HttpSessionHashModel implements TemplateHashModel, Serializab
      * Use this constructor when the session isn't already created. It is passed
      * enough parameters so that the session can be properly initialized after
      * it's detected that it was created.
-     * @param servlet the FreemarkerServlet that created this model. If the
-     * model is not created through FreemarkerServlet, leave this argument as
-     * null.
+     * @param servlet the servlet (e.g, FreemarkerServlet) that created this model. If the
+     * model is not created through FreemarkerServlet, this argument can be left as null.
      * @param request the actual request
      * @param response the actual response
      * @param wrapper an object wrapper used to wrap session attributes
      */
-    public HttpSessionHashModel(FreemarkerServlet servlet, HttpServletRequest request, HttpServletResponse response, ObjectWrapper wrapper) {
+    public HttpSessionHashModel(GenericServlet servlet, HttpServletRequest request, HttpServletResponse response, ObjectWrapper wrapper) {
         this.wrapper = wrapper;
-        
+
         this.servlet = servlet;
         this.request = request;
         this.response = response;
@@ -88,8 +88,11 @@ public final class HttpSessionHashModel implements TemplateHashModel, Serializab
             session = request.getSession(false);
             if (session != null && servlet != null) {
                 try {
-                    servlet.initializeSessionAndInstallModel(request, response, 
-                            this, session);
+                    session.setAttribute(FreemarkerServlet.ATTR_SESSION_MODEL, this);
+
+                    if (servlet instanceof FreemarkerServlet) {
+                        ((FreemarkerServlet) servlet).initializeSession(request, response);
+                    }
                 } catch (RuntimeException e) {
                     throw e;
                 } catch (Exception e) {
@@ -99,14 +102,13 @@ public final class HttpSessionHashModel implements TemplateHashModel, Serializab
         }
     }
 
-    boolean isOrphaned(HttpSession currentSession) {
+    public boolean isOrphaned(HttpSession currentSession) {
         return (session != null && session != currentSession) || 
             (session == null && request == null);
     }
-    
+
     @Override
-    public boolean isEmpty()
-    throws TemplateModelException {
+    public boolean isEmpty() throws TemplateModelException {
         checkSessionExistence();
         return session == null || !session.getAttributeNames().hasMoreElements();
     }

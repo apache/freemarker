@@ -31,6 +31,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
@@ -41,31 +42,38 @@ import org.apache.freemarker.servlet.HttpRequestParametersHashModel;
 import org.apache.freemarker.servlet.HttpSessionHashModel;
 import org.apache.freemarker.servlet.ServletContextHashModel;
 import org.apache.freemarker.servlet.jsp.TaglibFactory;
+import org.apache.freemarker.servlet.jsp.TaglibFactoryBuilder;
 
 public class FreemarkerView extends AbstractFreemarkerView {
 
-    private PageContextServletConfig pageContextServletConfig;
+    private volatile PageContextServlet pageContextServlet;
 
-    private PageContextServlet pageContextServlet;
+    private volatile ServletContextHashModel servletContextModel;
 
-    private ServletContextHashModel servletContextModel;
-
-    private TaglibFactory taglibFactory;
+    private volatile TaglibFactory taglibFactory;
 
     public PageContextServlet getPageContextServlet() {
-        // TODO: proper locking...
-        if (pageContextServlet == null) {
-            pageContextServlet = new PageContextServlet();
-            pageContextServletConfig = new PageContextServletConfig(getServletContext(), getBeanName());
+        PageContextServlet servlet = pageContextServlet;
 
-            try {
-                pageContextServlet.init(pageContextServletConfig);
-            } catch (ServletException e) {
-                // never happen
+        if (servlet == null) {
+            synchronized (this) {
+                servlet = pageContextServlet;
+
+                if (servlet == null) {
+                    servlet = new PageContextServlet();
+
+                    try {
+                        servlet.init(new PageContextServletConfig(getServletContext(), getBeanName()));
+                    } catch (ServletException e) {
+                        // never happens...
+                    }
+
+                    pageContextServlet = servlet;
+                }
             }
         }
 
-        return pageContextServlet;
+        return servlet;
     }
 
     public void setPageContextServlet(PageContextServlet pageContextServlet) {
@@ -73,12 +81,20 @@ public class FreemarkerView extends AbstractFreemarkerView {
     }
 
     public ServletContextHashModel getServletContextModel() {
-        // TODO: proper locking...
-        if (servletContextModel == null) {
-            servletContextModel = new ServletContextHashModel(getPageContextServlet(), getObjectWrapperForModel());
+        ServletContextHashModel contextModel = servletContextModel;
+
+        if (contextModel == null) {
+            synchronized (this) {
+                contextModel = servletContextModel;
+
+                if (contextModel == null) {
+                    contextModel = new ServletContextHashModel(getPageContextServlet(), getObjectWrapperForModel());
+                    servletContextModel = contextModel;
+                }
+            }
         }
 
-        return servletContextModel;
+        return contextModel;
     }
 
     public void setServletContextModel(ServletContextHashModel servletContextModel) {
@@ -86,8 +102,22 @@ public class FreemarkerView extends AbstractFreemarkerView {
     }
 
     public TaglibFactory getTaglibFactory() {
-        // TODO
-        return taglibFactory;
+        TaglibFactory tlFactory = taglibFactory;
+
+        if (tlFactory == null) {
+            synchronized (this) {
+                tlFactory = taglibFactory;
+
+                if (tlFactory == null) {
+                    tlFactory = new TaglibFactoryBuilder(getServletContext(), getObjectWrapperForModel())
+                            .build();
+
+                    taglibFactory = tlFactory;
+                }
+            }
+        }
+
+        return tlFactory;
     }
 
     public void setTaglibFactory(TaglibFactory taglibFactory) {
@@ -97,23 +127,51 @@ public class FreemarkerView extends AbstractFreemarkerView {
     @Override
     protected TemplateHashModel createModel(Map<String, Object> map, ObjectWrapperAndUnwrapper objectWrapperForModel,
             HttpServletRequest request, HttpServletResponse response) {
+
         AllHttpScopesHashModel model = new AllHttpScopesHashModel(objectWrapperForModel, getServletContext(), request);
+
         model.putUnlistedModel(FreemarkerServlet.KEY_APPLICATION, getServletContextModel());
+
         model.putUnlistedModel(FreemarkerServlet.KEY_SESSION,
                 getHttpSessionModel(objectWrapperForModel, request, response));
-        model.putUnlistedModel(FreemarkerServlet.KEY_REQUEST,
-                new HttpRequestHashModel(request, response, objectWrapperForModel));
-        model.putUnlistedModel(FreemarkerServlet.KEY_REQUEST_PARAMETERS,
-                new HttpRequestParametersHashModel(request, objectWrapperForModel));
+
+        HttpRequestHashModel requestModel = (HttpRequestHashModel) request
+                .getAttribute(FreemarkerServlet.ATTR_REQUEST_MODEL);
+        HttpRequestParametersHashModel requestParametersModel = (HttpRequestParametersHashModel) request
+                .getAttribute(FreemarkerServlet.ATTR_REQUEST_PARAMETERS_MODEL);
+
+        if (requestModel == null || requestModel.getRequest() != request) {
+            requestModel = new HttpRequestHashModel(request, response, objectWrapperForModel);
+            request.setAttribute(FreemarkerServlet.ATTR_REQUEST_MODEL, requestModel);
+            requestParametersModel = new HttpRequestParametersHashModel(request, objectWrapperForModel);
+        }
+
+        model.putUnlistedModel(FreemarkerServlet.KEY_REQUEST, requestModel);
+        model.putUnlistedModel(FreemarkerServlet.KEY_REQUEST_PARAMETERS, requestParametersModel);
+
         model.putUnlistedModel(FreemarkerServlet.KEY_JSP_TAGLIBS, getTaglibFactory());
+
         model.putAll(map);
+
         return model;
     }
 
     protected HttpSessionHashModel getHttpSessionModel(ObjectWrapperAndUnwrapper objectWrapperForModel,
             HttpServletRequest request, HttpServletResponse response) {
-        // TODO
-        HttpSessionHashModel sessionModel = new HttpSessionHashModel(null, request, response, objectWrapperForModel);
+        HttpSessionHashModel sessionModel;
+        HttpSession session = request.getSession(false);
+
+        if (session != null) {
+            sessionModel = (HttpSessionHashModel) session.getAttribute(FreemarkerServlet.ATTR_SESSION_MODEL);
+
+            if (sessionModel == null || sessionModel.isOrphaned(session)) {
+                sessionModel = new HttpSessionHashModel(session, objectWrapperForModel);
+                session.setAttribute(FreemarkerServlet.ATTR_SESSION_MODEL, sessionModel);
+            }
+        } else {
+            sessionModel = new HttpSessionHashModel(getPageContextServlet(), request, response, objectWrapperForModel);
+        }
+
         return sessionModel;
     }
 

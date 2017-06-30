@@ -95,7 +95,6 @@ public class FreemarkerViewTest {
         request.setSession(session);
         request.setAttribute("promotion", "Fresh blue berries");
 
-        // TODO: Add 'Application.attributeName' example, too.
         templateLoader.putTemplate("default-model.ftl",
                 "${name!}, you have ${Session.itemCountInCart!0} items in cart. " + "Hot deal: ${Request.promotion}. "
                         + "BTW, you're ${Application.visitorCount}th visitor. "
