@@ -124,6 +124,15 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
                 + "${a<#-- C5 -->||<#-- C6 -->b}${a<#-- C7 -->|<#-- C8 -->b}");
 
         assertConvertedSame("${!a}${! foo}${! <#-- C1 --> bar}${!!c}");
+
+        assertConvertedSame("${a!} ${a!0}");
+        assertConvertedSame("${a <#-- C1 --> !} ${a <#-- C2 --> ! <#-- C3 --> 0}");
+        assertConvertedSame("${a!b.c(x!0, y!0)}");
+        assertConvertedSame("${(a.b)!x}");
+        // [FM3] Will be: a!(x+1)
+        assertConvertedSame("${a!x+1}");
+
+        assertConvertedSame("${a??} ${a <#-- C1 --> ??}");
     }
 
     @Test
@@ -155,6 +164,27 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
 
         assertConverted("<#if foo>1<#elseIf bar>2<#else>3</#if>", "<#if foo>1<#elseif bar>2<#else>3</#if>");
         assertConvertedSame("<#if  foo >1<#elseIf  bar >2<#else >3</#if >");
+
+        assertConvertedSame("<#macro m>body</#macro>");
+        assertConvertedSame("<#macro <#-- C1 --> m <#-- C2 -->></#macro >");
+        assertConvertedSame("<#macro m()></#macro>");
+        assertConvertedSame("<#macro m <#-- C1 --> ( <#-- C2 --> ) <#-- C3 --> ></#macro>");
+        assertConvertedSame("<#macro m p1></#macro>");
+        assertConvertedSame("<#macro m(p1)></#macro>");
+        assertConvertedSame("<#macro m p1 p2 p3></#macro>");
+        assertConvertedSame("<#macro m p1 <#-- C1 --> p2 <#-- C2 --> p3 <#-- C3 -->></#macro>");
+        assertConvertedSame("<#macro m(p1<#-- C1 -->,<#-- C2 --> p2<#-- C3 -->,<#-- C4 -->"
+                + " p5<#-- C5 -->)<#-- C6 -->></#macro>");
+        assertConvertedSame("<#macro m p1=11 p2=foo p3=a+b></#macro>");
+        assertConvertedSame("<#macro m(p1=11, p2=foo, p3=a+b)></#macro>");
+        assertConvertedSame("<#macro m p1<#-- C1 -->=<#-- C2 -->11<#-- C3 -->,<#-- C4 -->p2=22></#macro>");
+        assertConvertedSame("<#macro m others...></#macro>");
+        assertConvertedSame("<#macro m p1 others...></#macro>");
+        assertConvertedSame("<#macro m p1 p2=22 others...></#macro>");
+        assertConvertedSame("<#macro m(others...)></#macro>");
+        assertConvertedSame("<#macro m(others <#-- C1 --> ... <#-- C2 --> )></#macro>");
+        assertConvertedSame("<#function m x y>foo</#function>");
+        assertConvertedSame("<#macro m\\-1 p\\-1></#macro>");
     }
 
     @Test

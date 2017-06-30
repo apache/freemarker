@@ -35,6 +35,7 @@ import org.apache.freemarker.core.util._StringUtil;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template.utility.StringUtil;
 
 /**
  * Takes a FreeMarker 2 AST, and converts it to an FreeMarker 3 source code.
@@ -154,7 +155,7 @@ public class FM2ASTToFM3SourceConverter {
         int pos = getPositionAfterWSAndExpComments(getEndPositionExclusive(content));
         assertNodeContent(pos < src.length(), node, "Unexpected EOF", null);
         char c = src.charAt(pos);
-        assertNodeContent(c == ';' || c == '}', node, "Expected ';' or '}', found '{}'", c);
+        assertNodeContent(c == ';' || c == '}', node, "Expected ';' or '}', found {}", c);
         if (c == ';') { // #{exp; m1M2} -> ${exp?string('0.0#')}
             int minDecimals = getParam(node, 1, ParameterRole.MINIMUM_DECIMALS, Integer.class);
             int maxDecimals = getParam(node, 2, ParameterRole.MAXIMUM_DECIMALS, Integer.class);
@@ -213,9 +214,141 @@ public class FM2ASTToFM3SourceConverter {
             printDirIfOrElseOrElseIf((ConditionalBlock) node);
         } else if (node instanceof UnifiedCall) {
             printDirCustom((UnifiedCall) node);
+        } else if (node instanceof Macro) {
+            printDirMacroOrFunction((Macro) node);
         } else {
             throw new ConverterException("Unhandled AST TemplateElement class: " + node.getClass().getName());
         }
+    }
+
+    private void printDirMacroOrFunction(Macro node) throws ConverterException {
+        int paramCnt = node.getParameterCount();
+
+        int subtype = getParam(node, paramCnt - 1, ParameterRole.AST_NODE_SUBTYPE, Integer.class);
+        String tagName;
+        if (subtype == Macro.TYPE_MACRO) {
+            tagName = "#macro";
+        } else if (subtype == Macro.TYPE_FUNCTION) {
+            tagName = "#function";
+        } else {
+            throw new UnexpectedNodeContentException(node, "Unhandled node subtype: {}", subtype);
+        }
+
+        print(tagBeginChar);
+        print(tagName);
+        int pos = getStartPosition(node) + 1;
+        assertNodeContent(src.substring(pos, pos + tagName.length()).equals(tagName), node,
+                "Tag name doesn't match {}", tagName);
+        pos += tagName.length();
+
+        {
+            String sep = readWSAndExpComments(pos);
+            printWithConvertedExpComments(sep);
+            pos += sep.length();
+        }
+
+        String assignedName = getParam(node, 0, ParameterRole.ASSIGNMENT_TARGET, String.class);
+        print(FTLUtil.escapeIdentifier(assignedName));
+        {
+            int lastPos = pos;
+            pos = getPositionAfterIdentifier(pos);
+            assertNodeContent(pos > lastPos, node, "Expected target name", null);
+        }
+
+        {
+            String sep = readWSAndExpComments(pos, '(', true);
+            printWithConvertedExpComments(sep);
+            pos += sep.length();
+        }
+
+        int paramIdx = 1;
+        while (node.getParameterRole(paramIdx) == ParameterRole.PARAMETER_NAME) {
+            String paramName = getParam(node, paramIdx++, ParameterRole.PARAMETER_NAME, String.class);
+            print(FTLUtil.escapeIdentifier(paramName));
+            {
+                int lastPos = pos;
+                pos = getPositionAfterIdentifier(pos);
+                assertNodeContent(pos > lastPos, node, "Expected parameter name", null);
+            }
+
+            Expression paramDefault = getParam(node, paramIdx++, ParameterRole.PARAMETER_DEFAULT, Expression.class);
+            if (paramDefault != null) {
+                String sep = readWSAndExpComments(pos, '=', false);
+                printWithConvertedExpComments(sep);
+                printExp(paramDefault);
+                pos = getEndPositionExclusive(paramDefault);
+            }
+
+            {
+                String sep = readWSAndExpComments(pos);
+                printWithConvertedExpComments(sep);
+                pos += sep.length();
+            }
+            {
+                char c = src.charAt(pos);
+                assertNodeContent(
+                        c == ',' || c == ')' || c == tagEndChar
+                                || c == '\\' || StringUtil.isFTLIdentifierStart(c),
+                        node,
+                        "Unexpected character: {}", c);
+                if (c == ',') {
+                    print(c);
+                    pos++;
+
+                    String sep = readWSAndExpComments(pos);
+                    printWithConvertedExpComments(sep);
+                    pos += sep.length();
+                }
+                if (c == ')') {
+                    assertNodeContent(node.getParameterRole(paramIdx) != ParameterRole.PARAMETER_NAME, node,
+                            "Expected no parameter after \"(\"", null);
+                }
+            }
+        }
+
+        {
+            ParameterRole parameterRole = node.getParameterRole(paramIdx);
+            assertNodeContent(parameterRole == ParameterRole.CATCH_ALL_PARAMETER_NAME, node,
+                    "Expected catch-all parameter role, but found {}", parameterRole);
+        }
+        String paramName = getParam(node, paramIdx++, ParameterRole.CATCH_ALL_PARAMETER_NAME, String.class);
+        if (paramName != null) {
+            print(FTLUtil.escapeIdentifier(paramName));
+            {
+                int lastPos = pos;
+                pos = getPositionAfterIdentifier(pos);
+                assertNodeContent(pos > lastPos, node,
+                        "Expected catch-all parameter name", null);
+            }
+            {
+                String sep = readWSAndExpComments(pos);
+                printWithConvertedExpComments(sep);
+                pos += sep.length();
+            }
+            assertNodeContent(src.startsWith("...", pos), node,
+                    "Expected \"...\" after catch-all parameter name", null);
+            print("...");
+            pos += 3;
+        }
+
+        assertNodeContent(paramIdx == paramCnt - 1, node,
+                "Expected AST parameter at index {} to be the last one", paramIdx);
+
+        {
+            String sep = readWSAndExpComments(pos, ')', true);
+            printWithConvertedExpComments(sep);
+            pos += sep.length();
+        }
+        assertNodeContent(src.charAt(pos) == tagEndChar, node, "Tag end not found", null);
+        print(tagEndChar);
+
+        printChildrenElements(node);
+
+        print(tagBeginChar);
+        print('/');
+        print(tagName);
+        printEndTagSkippedTokens(node);
+        print(tagEndChar);
     }
 
     private void printDirCustom(UnifiedCall node) throws ConverterException {
@@ -256,7 +389,7 @@ public class FM2ASTToFM3SourceConverter {
         int pos = getEndPositionExclusive(lastPrintedExp);
         boolean beforeFirstLoopVar = true;
         while (paramIdx < paramCount) {
-            String sep = readExpWSAndSeparator(pos, beforeFirstLoopVar ? ';' : ',', false);
+            String sep = readWSAndExpComments(pos, beforeFirstLoopVar ? ';' : ',', false);
             assertNodeContent(sep.length() != 0, node,
                     "Can't find loop variable separator", null);
             printWithConvertedExpComments(sep);
@@ -280,7 +413,7 @@ public class FM2ASTToFM3SourceConverter {
         {
             char c = src.charAt(elementEndPos);
             assertNodeContent(c == tagEndChar, node,
-                    "tagEndChar expected, found '{}'", c);
+                    "tagEndChar expected, found {}", c);
         }
         if (startTagEndPos != elementEndPos) { // We have an end-tag
             assertNodeContent(src.charAt(startTagEndPos - 1) != '/', node,
@@ -392,14 +525,49 @@ public class FM2ASTToFM3SourceConverter {
             printExpOr((OrExpression) node);
         } else if (node instanceof NotExpression) {
             printExpNot((NotExpression) node);
+        } else if (node instanceof DefaultToExpression) {
+            printExpDefault((DefaultToExpression) node);
+        } else if (node instanceof ExistsExpression) {
+            printExpExists((ExistsExpression) node);
         } else {
             throw new ConverterException("Unhandled AST node expression class: " + node.getClass().getName());
         }
     }
 
+    private void printPostfixOperator(Expression node, String operator) throws ConverterException {
+        Expression lho = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, Expression.class);
+        printExp(lho);
+
+        int wsStartPos = getEndPositionExclusive(lho);
+        int opPos = getPositionAfterWSAndExpComments(wsStartPos);
+        printWithConvertedExpComments(src.substring(wsStartPos, opPos));
+        String operatorInSrc = src.substring(opPos, opPos + operator.length());
+        assertNodeContent(operatorInSrc.equals(operator), node,
+                "Expected " + _StringUtil.jQuote(operator) + ", found {}", operatorInSrc);
+        print(operator);
+    }
+
+    private void printExpExists(ExistsExpression node) throws ConverterException {
+        assertParamCount(node, 1);
+        printPostfixOperator(node, "??");
+    }
+
+    private void printExpDefault(DefaultToExpression node) throws ConverterException {
+        assertParamCount(node, 2);
+        Expression rho = getParam(node, 1, ParameterRole.RIGHT_HAND_OPERAND, Expression.class);
+        if (rho != null) {
+            Expression lho = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, Expression.class);
+            printExp(lho);
+            printParameterSeparatorSource(lho, rho);
+            printNode(rho);
+        } else {
+            printPostfixOperator(node, "!");
+        }
+    }
+
     private void printExpNot(NotExpression node) throws ConverterException {
         printWithParamsLeadingSkippedTokens("!", node);
-        printNode(getOnlyParam(node, ParameterRole.RIGHT_HAND_OPERAND, Expression.class));
+        printExp(getOnlyParam(node, ParameterRole.RIGHT_HAND_OPERAND, Expression.class));
     }
 
     private static final Map<String, String> COMPARATOR_OP_MAP;
@@ -481,7 +649,7 @@ public class FM2ASTToFM3SourceConverter {
 
     private void printExpBuiltinVariable(BuiltinVariable node) throws ConverterException {
         int startPos = getStartPosition(node);
-        String sep = readExpWSAndSeparator(startPos, '.', false);
+        String sep = readWSAndExpComments(startPos, '.', false);
         printWithConvertedExpComments(sep);
         String name = src.substring(startPos + sep.length(), getEndPositionExclusive(node));
         print(convertBuiltInVariableName(name));
@@ -501,7 +669,7 @@ public class FM2ASTToFM3SourceConverter {
         String rho = getParam(node, 1, ParameterRole.RIGHT_HAND_OPERAND, String.class);
         printNode(lho);
         printWithConvertedExpComments(
-                readExpWSAndSeparator(getEndPositionExclusive(lho), '.', false));
+                readWSAndExpComments(getEndPositionExclusive(lho), '.', false));
         print(FTLUtil.escapeIdentifier(rho));
     }
 
@@ -681,7 +849,7 @@ public class FM2ASTToFM3SourceConverter {
                 break scanForRHO;
             } else {
                 throw new UnexpectedNodeContentException(node,
-                        "Unexpected character when scanning for for built-in key: '{}'", c);
+                        "Unexpected character when scanning for for built-in key: {}", c);
             }
         }
         if (pos == endPos || !foundQuestionMark) {
@@ -833,12 +1001,12 @@ public class FM2ASTToFM3SourceConverter {
             {
                 char c = src.charAt(pos++);
                 assertNodeContent(c == tagBeginChar, node,
-                        "tagBeginChar expected, found '{}'", c);
+                        "tagBeginChar expected, found {}", c);
             }
             {
                 char c = src.charAt(pos++);
                 assertNodeContent(c == '#', node,
-                        "'#' expected, found '{}'", c);
+                        "'#' expected, found {}", c);
             }
             findNameEnd: while (pos < src.length()) {
                 char c = src.charAt(pos);
@@ -878,7 +1046,7 @@ public class FM2ASTToFM3SourceConverter {
             return pos;
         } else {
             throw new UnexpectedNodeContentException(node,
-                    "Unexpected character when scanning for tag end: '{}'", c);
+                    "Unexpected character when scanning for tag end: {}", c);
         }
     }
 
@@ -887,7 +1055,7 @@ public class FM2ASTToFM3SourceConverter {
         {
             char c = src.charAt(tagEndPos);
             assertNodeContent(c == tagEndChar, node,
-                    "tagEndChar expected, found '{}'", c);
+                    "tagEndChar expected, found {}", c);
         }
 
         int pos = tagEndPos - 1;
@@ -1047,8 +1215,12 @@ public class FM2ASTToFM3SourceConverter {
         return pos;
     }
 
+    private String readWSAndExpComments(int startPos)
+            throws ConverterException {
+        return src.substring(startPos, getPositionAfterWSAndExpComments(startPos));
+    }
 
-    private String readExpWSAndSeparator(int startPos, char separator, boolean separatorOptional)
+    private String readWSAndExpComments(int startPos, char separator, boolean separatorOptional)
             throws ConverterException {
         int pos = getPositionAfterWSAndExpComments(startPos);
 
@@ -1063,7 +1235,7 @@ public class FM2ASTToFM3SourceConverter {
         return src.substring(startPos, pos);
     }
 
-    private String readIdentifier(int startPos) throws ConverterException {
+    private int getPositionAfterIdentifier(int startPos) throws ConverterException {
         int pos = startPos;
         scanUntilIdentifierEnd: while (pos < src.length()) {
             char c = src.charAt(pos);
@@ -1071,18 +1243,19 @@ public class FM2ASTToFM3SourceConverter {
                 if (pos + 1 == src.length()) {
                     throw new ConverterException("Misplaced \"\\\" at position " + pos);
                 }
-                if (!FTLUtil.isEscapedIdentifierCharacter(src.charAt(pos + 1))) {
-                    throw new ConverterException("Invalid escape at position " + pos);
-                }
                 pos += 2; // to skip escaped character
             } else if (pos == startPos && FTLUtil.isNonEscapedIdentifierStart(c)
-                    || FTLUtil.isNonEscapedIdentifierPart(c)) {
+                    || StringUtil.isFTLIdentifierPart(c)) {
                 pos++;
             } else {
                 break scanUntilIdentifierEnd;
             }
         }
-        return src.substring(startPos, pos);
+        return pos;
+    }
+
+    private String readIdentifier(int startPos) throws ConverterException {
+        return src.substring(startPos, getPositionAfterIdentifier(startPos));
     }
 
     private String readUntilWSOrComment(int startPos) throws ConverterException {
