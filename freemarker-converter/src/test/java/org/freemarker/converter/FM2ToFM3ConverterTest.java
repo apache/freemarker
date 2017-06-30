@@ -106,6 +106,24 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("${.outputFormat}");
         assertConvertedSame("${. <#-- C --> outputFormat}");
         assertConverted("${.outputFormat}","${.output_format}");
+
+        assertConvertedSame("${a < b}${a <= b}${(a > b)}${(a >= b)}${a == b}${a != b}");
+        assertConvertedSame("${a<#-- C1 --><<#-- C2 -->b}${a<#-- C3 --><=<#-- C4 -->b}"
+                + "${(a<#-- C7 -->><#-- C8 -->b)}${(a<#-- C9 -->>=<#-- CA -->b)}"
+                + "${a<#-- CB -->==<#-- CC -->b}${a<#-- CD -->!=<#-- CE -->b}");
+        // "Same" for now, will be different later.
+        assertConvertedSame("${a = b}${a == b}");
+        assertConvertedSame("${a &lt; b}${a lt b}${a \\lt b}");
+        assertConvertedSame("${a &lt;= b}${a lte b}${a \\lte b}");
+        assertConvertedSame("${a &gt; b}${a gt b}${a \\gt b}");
+        assertConvertedSame("${a &gt;= b}${a gte b}${a \\gte b}");
+
+        // [FM3] Add \and and &amp;&amp; tests when 2.3.27 is released
+        assertConvertedSame("${a && b}${a & b}${a || b}${a | b}");
+        assertConvertedSame("${a<#-- C1 -->&&<#-- C2 -->b}${a<#-- C3 -->&<#-- C4 -->b}"
+                + "${a<#-- C5 -->||<#-- C6 -->b}${a<#-- C7 -->|<#-- C8 -->b}");
+
+        assertConvertedSame("${!a}${! foo}${! <#-- C1 --> bar}${!!c}");
     }
 
     @Test
