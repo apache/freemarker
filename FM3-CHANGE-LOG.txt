@@ -290,3 +290,6 @@ the FreeMarer 3 changelog here:
   translated to `${b}`, while `#{x; m1M3}` is translated to `${x?string('0.0##')}`).
 - #attempt now logs errors into the org.apache.freemarker.core.Runtime.Attempt log chategory (by
   default). It doesn't create an additional debug level log entry anymore.
+- You can't close #attempt/#recover with `</#recover>` anymore, only with `<#attempt>`. This was the
+  standard form in FM2 as well, and is consistent with how #if/#else works. (The template converter
+  tool does this conversion.)
