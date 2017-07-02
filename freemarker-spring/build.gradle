@@ -29,33 +29,57 @@ dependencies {
     compile project(":freemarker-core")
     compile project(":freemarker-servlet")
 
-    // TODO: what's difference between compileOnly and compile??
-    compile "org.apache.geronimo.specs:geronimo-servlet_3.0_spec:1.0"
-
+    def geronimoServletSpec3Version = "1.0"
     def springVersion = "4.3.9.RELEASE"
 
-    compile("org.springframework:spring-core:$springVersion") {
+    compileOnly "org.apache.geronimo.specs:geronimo-servlet_3.0_spec:${geronimoServletSpec3Version}"
+
+    compileOnly("org.springframework:spring-core:$springVersion") {
         exclude group: "commons-logging", module: "commons-logging"
     }
-    compile("org.springframework:spring-beans:$springVersion") {
+    compileOnly("org.springframework:spring-beans:$springVersion") {
         exclude group: "commons-logging", module: "commons-logging"
     }
-    compile("org.springframework:spring-context:$springVersion") {
+    compileOnly("org.springframework:spring-context:$springVersion") {
         exclude group: "commons-logging", module: "commons-logging"
     }
-    compile("org.springframework:spring-web:$springVersion") {
+    compileOnly("org.springframework:spring-web:$springVersion") {
         exclude group: "commons-logging", module: "commons-logging"
     }
-    compile("org.springframework:spring-webmvc:$springVersion") {
+    compileOnly("org.springframework:spring-webmvc:$springVersion") {
         exclude group: "commons-logging", module: "commons-logging"
     }
 
     // ------------------------------------------------------------------------
     // For tests
 
+    def taglibsStandardVersion = "1.2.1"
+
+    testCompile "org.apache.geronimo.specs:geronimo-servlet_3.0_spec:${geronimoServletSpec3Version}"
+
+    testCompile("org.springframework:spring-core:$springVersion") {
+        exclude group: "commons-logging", module: "commons-logging"
+    }
+    testCompile("org.springframework:spring-beans:$springVersion") {
+        exclude group: "commons-logging", module: "commons-logging"
+    }
+    testCompile("org.springframework:spring-context:$springVersion") {
+        exclude group: "commons-logging", module: "commons-logging"
+    }
+    testCompile("org.springframework:spring-web:$springVersion") {
+        exclude group: "commons-logging", module: "commons-logging"
+    }
+    testCompile("org.springframework:spring-webmvc:$springVersion") {
+        exclude group: "commons-logging", module: "commons-logging"
+    }
     testCompile("org.springframework:spring-test:$springVersion") {
         exclude group: "commons-logging", module: "commons-logging"
     }
+
+    testCompile "javax.servlet.jsp:jsp-api:2.1"
+    testCompile "org.apache.taglibs:taglibs-standard-spec:${taglibsStandardVersion}"
+    testCompile "org.apache.taglibs:taglibs-standard-impl:${taglibsStandardVersion}"
+
 }
 
 jar {

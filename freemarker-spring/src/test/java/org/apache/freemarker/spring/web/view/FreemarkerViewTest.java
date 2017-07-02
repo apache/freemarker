@@ -34,25 +34,41 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockServletContext;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.GenericWebApplicationContext;
 
 public class FreemarkerViewTest {
 
     private ServletContext servletContext;
+    private GenericWebApplicationContext applicationContext;
 
     private StringTemplateLoader templateLoader;
-
     private Configuration configuration;
+
+    private FreemarkerViewResolver viewResolver;
 
     private AtomicLong visitorCount;
 
     @Before
     public void setUp() throws Exception {
         servletContext = new MockServletContext();
-        visitorCount = new AtomicLong();
-        servletContext.setAttribute("visitorCount", visitorCount);
+
+        applicationContext = new GenericWebApplicationContext(servletContext);
+        applicationContext.refresh();
+        servletContext.setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, applicationContext);
+
         templateLoader = new StringTemplateLoader();
         configuration = new Configuration.Builder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS)
                 .templateLoader(templateLoader).build();
+
+        viewResolver = new FreemarkerViewResolver();
+        viewResolver.setServletContext(servletContext);
+        viewResolver.setApplicationContext(applicationContext);
+        viewResolver.setConfiguration(configuration);
+        viewResolver.afterPropertiesSet();
+
+        visitorCount = new AtomicLong();
+        servletContext.setAttribute("visitorCount", visitorCount);
     }
 
     @Test
@@ -63,10 +79,7 @@ public class FreemarkerViewTest {
 
         templateLoader.putTemplate("hello.ftl", "Hello, ${name!\"World\"}! Visit count: ${visitCount!0}");
 
-        FreemarkerView view = new FreemarkerView();
-        view.setServletContext(servletContext);
-        view.setConfiguration(configuration);
-        view.setName("hello.ftl");
+        FreemarkerView view = createFreemarkerView("hello.ftl");
 
         int visitCount = 0;
         Map<String, Object> model = new HashMap<String, Object>();
@@ -100,10 +113,7 @@ public class FreemarkerViewTest {
                         + "BTW, you're ${Application.visitorCount}th visitor. "
                         + "(token1: ${RequestParameters['token1']!})");
 
-        FreemarkerView view = new FreemarkerView();
-        view.setServletContext(servletContext);
-        view.setConfiguration(configuration);
-        view.setName("default-model.ftl");
+        FreemarkerView view = createFreemarkerView("default-model.ftl");
 
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("name", "Dan");
@@ -121,16 +131,33 @@ public class FreemarkerViewTest {
         request.setContextPath("/mycontext");
         request.setServletPath("/myservlet");
 
-        // TODO: 
-        templateLoader.putTemplate("taglibs.ftl", "");
+        templateLoader.putTemplate("taglibs.ftl",
+                "<#assign e=JspTaglibs ['http://freemarker.org/jsp/example/echo'] >"
+                + "<#assign msg=\"Hello!\" />"
+                + "<@e.echo message=msg />");
 
-        FreemarkerView view = new FreemarkerView();
-        view.setServletContext(servletContext);
-        view.setConfiguration(configuration);
-        view.setName("taglibs.ftl");
+        FreemarkerView view = createFreemarkerView("taglibs.ftl");
 
         Map<String, Object> model = new HashMap<String, Object>();
         MockHttpServletResponse response = new MockHttpServletResponse();
         view.render(model, request, response);
+        assertEquals("Hello!", response.getContentAsString());
+    }
+
+    private FreemarkerView createFreemarkerView(final String name) {
+        FreemarkerView view = new FreemarkerView();
+
+        view.setServletContext(servletContext);
+        view.setApplicationContext(applicationContext);
+        view.setConfiguration(configuration);
+        view.setObjectWrapper(viewResolver.getObjectWrapper());
+
+        view.setPageContextServlet(viewResolver.getPageContextServlet());
+        view.setServletContextModel(viewResolver.getServletContextModel());
+        view.setTaglibFactory(viewResolver.getTaglibFactory());
+
+        view.setName(name);
+
+        return view;
     }
 }

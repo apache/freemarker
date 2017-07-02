@@ -32,13 +32,13 @@ import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
-import org.springframework.web.servlet.view.AbstractView;
+import org.springframework.web.servlet.view.AbstractTemplateView;
 
-public abstract class AbstractFreemarkerView extends AbstractView {
+public abstract class AbstractFreemarkerView extends AbstractTemplateView {
 
     private Configuration configuration;
+    private ObjectWrapperAndUnwrapper objectWrapper;
     private String name;
     private Locale locale;
     private Serializable customLookupCondition;
@@ -49,13 +49,15 @@ public abstract class AbstractFreemarkerView extends AbstractView {
     }
 
     public void setConfiguration(Configuration configuration) {
-        if (!(configuration.getObjectWrapper() instanceof ObjectWrapperAndUnwrapper)) {
-            throw new RuntimeException(AbstractFreemarkerView.class.getSimpleName() + " requires an ObjectWrapper that "
-                    + "implements " + ObjectWrapperAndUnwrapper.class.getName() + ", but this class doesn't do that: "
-                    + configuration.getObjectWrapper().getClass().getName());
-        }
-
         this.configuration = configuration;
+    }
+
+    public ObjectWrapperAndUnwrapper getObjectWrapper() {
+        return objectWrapper;
+    }
+
+    public void setObjectWrapper(ObjectWrapperAndUnwrapper objectWrapper) {
+        this.objectWrapper = objectWrapper;
     }
 
     public String getName() {
@@ -91,27 +93,14 @@ public abstract class AbstractFreemarkerView extends AbstractView {
     }
 
     @Override
-    protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,
+    protected void renderMergedTemplateModel(Map<String, Object> model, HttpServletRequest request,
             HttpServletResponse response) throws Exception {
-        getTemplate().process(createModel(model, getObjectWrapperForModel(), request, response), response.getWriter());
+        getTemplate().process(createModel(model, getObjectWrapper(), request, response), response.getWriter());
     }
 
     protected Template getTemplate()
             throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
         return getConfiguration().getTemplate(getName(), getLocale(), getCustomLookupCondition(), isIgnoreMissing());
-    }
-
-    protected ObjectWrapperAndUnwrapper getObjectWrapperForModel() {
-        ObjectWrapperAndUnwrapper wrapper;
-
-        if (configuration.isObjectWrapperSet()) {
-            wrapper = (ObjectWrapperAndUnwrapper) configuration.getObjectWrapper();
-        } else {
-            // TODO: need to cache this?
-            wrapper = new DefaultObjectWrapper.Builder(configuration.getIncompatibleImprovements()).build();
-        }
-
-        return wrapper;
     }
 
     protected abstract TemplateHashModel createModel(Map<String, Object> map,
