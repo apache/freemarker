@@ -19,10 +19,8 @@
 
 package freemarker.core;
 
-import java.util.Objects;
-
-import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.converter.ConverterException;
+import org.apache.freemarker.core.util._StringUtil;
 
 public class UnexpectedNodeContentException extends ConverterException {
     public UnexpectedNodeContentException(TemplateObject node, String errorMessage, Object msgParam) {
@@ -36,6 +34,17 @@ public class UnexpectedNodeContentException extends ConverterException {
         if (substIdx == -1) {
             return errorMessage;
         }
-        return errorMessage.substring(0, substIdx) + Objects.toString(msgParam) + errorMessage.substring(substIdx + 2);
+        return errorMessage.substring(0, substIdx) + formatParam(msgParam) + errorMessage.substring(substIdx + 2);
     }
+
+    private static String formatParam(Object param) {
+        if (param == null) {
+            return "null";
+        }
+        if (param instanceof String || param instanceof Character) {
+            return _StringUtil.jQuote(param);
+        }
+        return param.toString();
+    }
+
 }
