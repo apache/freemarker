@@ -1324,12 +1324,8 @@ public class Configurable {
      * output, or if you want to suppress certain exceptions. If you suppress an exception, and the
      * {@link Environment#getLogTemplateExceptions()} returns {@code false}, then it's the responsibility of the
      * {@link TemplateExceptionHandler} to log the exception (if you want it to be logged).  
-     *  
-     * <p>The {@link #setLogTemplateExceptions(boolean) log_template_exceptions} and
-     * {@link #setAttemptExceptionReporter(AttemptExceptionReporter) attempt_exception_reporter} settings take effect
-     * before the {@link TemplateExceptionHandler} is invoked, so these settings are technically independent, and deal
-     * with different aspects of exception handling.  
      * 
+     * @see #setLogTemplateExceptions(boolean)
      * @see #setAttemptExceptionReporter(AttemptExceptionReporter)
      */
     public void setTemplateExceptionHandler(TemplateExceptionHandler templateExceptionHandler) {
@@ -1366,6 +1362,8 @@ public class Configurable {
      * 
      * <p>The {@link AttemptExceptionReporter} is invoked regardless of the value of the
      * {@link #setLogTemplateExceptions(boolean) log_template_exceptions} setting.
+     * The {@link AttemptExceptionReporter} is not invoked if the {@link TemplateExceptionHandler} has suppressed the
+     * exception.
      * 
      * @since 2.3.27
      */
