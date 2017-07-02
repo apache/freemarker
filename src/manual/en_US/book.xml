@@ -2971,7 +2971,7 @@ J</programlisting>
               <secondary>substring</secondary>
             </indexterm>
 
-            <para>You can a slice a string in the same way as you <link
+            <para>You can slice a string in the same way as you <link
             linkend="dgui_template_exp_seqenceop_slice">slice a
             sequence</link> (see there), only here instead of sequence items
             you work with characters. Some differences are:</para>
@@ -2989,7 +2989,8 @@ J</programlisting>
                 multi-typed value), then slicing will slice the sequence
                 instead of the string. When you are processing XML, such
                 values are common. In such cases you can use
-                <literal><replaceable>someXMLnode</replaceable>?string[<replaceable>range</replaceable>]</literal>.</para>
+                <literal><replaceable>someXMLnode</replaceable>?string[<replaceable>range</replaceable>]</literal>
+                to fore string slicing.</para>
               </listitem>
 
               <listitem>
@@ -18876,13 +18877,16 @@ ${x}</programlisting>
           outputted even if the outputting of a certain part of the page
           fails. If an error occurs during the execution of the
           <literal><replaceable>attempt block</replaceable></literal>, then
-          the template execution is not aborted, but the
+          the output of the <literal><replaceable>attempt
+          block</replaceable></literal> is rolled back <phrase
+          role="forProgrammers">(and the error is logged, with the default
+          configuration at least)</phrase>, and the
           <literal><replaceable>recover block</replaceable></literal> is
-          executed instead of the <literal><replaceable>attempt
-          block</replaceable></literal>. If no error occurs during the
-          execution of the <literal><replaceable>attempt
-          block</replaceable></literal>, then the
-          <literal><replaceable>recover block</replaceable></literal> is
+          executed instead, then template execution continues normally after
+          the <literal><replaceable>recover block</replaceable></literal>. If
+          no error occurs during the execution of the
+          <literal><replaceable>attempt block</replaceable></literal>, then
+          the <literal><replaceable>recover block</replaceable></literal> is
           ignored. A simple example:</para>
 
           <programlisting role="template">Primary content
@@ -18893,8 +18897,9 @@ ${x}</programlisting>
 &lt;/#attempt&gt;
 Primary content continued</programlisting>
 
-          <para>If the <literal>thisMayFails</literal> variable doesn't exist,
-          then the output is:</para>
+          <para>If the <literal>thisMayFails</literal> variable doesn't exist
+          (or any other error occurs at that place), then the output
+          is:</para>
 
           <programlisting role="output">Primary content
   Ops! The optional content is not available.
@@ -18953,15 +18958,18 @@ Primary content continued</programlisting>
 
           <para><phrase role="forProgrammers">By default errors occurring
           inside an <literal><replaceable>attempt
-          block</replaceable></literal> are logged as errors. This is because
-          <literal>attempt</literal> is not supposed to be a general purpose
-          error handler mechanism, like <literal>try</literal> is in Java.
-          It's for decreasing the impact of unexpected errors, by making it
-          possible that only part of the page is going down, instead of the
-          whole page. But it's still an error, something that someone should
-          fix. (The way this error is reported can be customized with the
-          <literal>attempt_exception_reporter</literal> configuration
-          setting.)</phrase></para>
+          block</replaceable></literal> are <link
+          linkend="pgui_misc_logging">logged</link> with
+          <literal>ERROR</literal> level, despite that the template recovers
+          from them. This is because <literal>attempt</literal> is not meant
+          to be a general purpose error handler mechanism, like
+          <literal>try</literal> is in Java. It's for decreasing the impact of
+          unexpected errors on the visitors, by making it possible that only
+          part of the page is going down, instead of the whole page. But it's
+          still an error, something that needs the attention of the operators.
+          (The way this error is reported can be customized with the
+          <literal>attempt_exception_reporter</literal> configuration setting,
+          since FreeMarker 2.3.27.)</phrase></para>
         </section>
       </section>
 
