@@ -39,6 +39,8 @@ public class FreemarkerViewResolver extends AbstractTemplateViewResolver impleme
     private ServletContextHashModel servletContextModel;
     private TaglibFactory taglibFactory;
 
+    private String normalizedPrefix;
+
     public FreemarkerViewResolver() {
         setViewClass(requiredViewClass());
     }
@@ -55,6 +57,19 @@ public class FreemarkerViewResolver extends AbstractTemplateViewResolver impleme
 
     public void setConfiguration(Configuration configuration) {
         this.configuration = configuration;
+    }
+
+    @Override
+    public void setPrefix(String prefix) {
+        super.setPrefix(prefix);
+
+        final String prefixValue = getPrefix();
+
+        if (prefixValue.startsWith("/")) {
+            normalizedPrefix = prefixValue.substring(1);
+        } else {
+            normalizedPrefix = prefixValue;
+        }
     }
 
     @Override
@@ -101,6 +116,13 @@ public class FreemarkerViewResolver extends AbstractTemplateViewResolver impleme
     @Override
     protected AbstractUrlBasedView buildView(String viewName) throws Exception {
         FreemarkerView view = (FreemarkerView) super.buildView(viewName);
+        final String url;
+        if (normalizedPrefix != null) {
+            url = normalizedPrefix + viewName + getSuffix();
+        } else {
+            url = viewName + getSuffix();
+        }
+        view.setUrl(url);
         view.setConfiguration(configuration);
         view.setObjectWrapper(objectWrapper);
         view.setPageContextServlet(pageContextServlet);

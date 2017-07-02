@@ -156,7 +156,7 @@ public class FreemarkerViewTest {
         view.setServletContextModel(viewResolver.getServletContextModel());
         view.setTaglibFactory(viewResolver.getTaglibFactory());
 
-        view.setName(name);
+        view.setUrl(name);
 
         return view;
     }

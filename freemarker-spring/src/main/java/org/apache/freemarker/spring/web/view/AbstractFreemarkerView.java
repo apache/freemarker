@@ -39,7 +39,8 @@ public abstract class AbstractFreemarkerView extends AbstractTemplateView {
 
     private Configuration configuration;
     private ObjectWrapperAndUnwrapper objectWrapper;
-    private String name;
+
+    // TODO: how to determine locale, customLookupCondition and ignoreMissing? From viewResolver settings?
     private Locale locale;
     private Serializable customLookupCondition;
     private boolean ignoreMissing;
@@ -58,14 +59,6 @@ public abstract class AbstractFreemarkerView extends AbstractTemplateView {
 
     public void setObjectWrapper(ObjectWrapperAndUnwrapper objectWrapper) {
         this.objectWrapper = objectWrapper;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Locale getLocale() {
@@ -100,7 +93,7 @@ public abstract class AbstractFreemarkerView extends AbstractTemplateView {
 
     protected Template getTemplate()
             throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException {
-        return getConfiguration().getTemplate(getName(), getLocale(), getCustomLookupCondition(), isIgnoreMissing());
+        return getConfiguration().getTemplate(getUrl(), getLocale(), getCustomLookupCondition(), isIgnoreMissing());
     }
 
     protected abstract TemplateHashModel createModel(Map<String, Object> map,
