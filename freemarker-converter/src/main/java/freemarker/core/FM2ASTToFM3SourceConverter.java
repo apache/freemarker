@@ -153,7 +153,7 @@ public class FM2ASTToFM3SourceConverter {
         Expression content = getParam(node, 0, ParameterRole.CONTENT, Expression.class);
 
         int pos = getPositionAfterWSAndExpComments(getEndPositionExclusive(content));
-        assertNodeContent(pos < src.length(), node, "Unexpected EOF", null);
+        assertNodeContent(pos < src.length(), node, "Unexpected EOF");
         char c = src.charAt(pos);
         assertNodeContent(c == ';' || c == '}', node, "Expected ';' or '}', found {}", c);
         if (c == ';') { // #{exp; m1M2} -> ${exp?string('0.0#')}
@@ -216,9 +216,126 @@ public class FM2ASTToFM3SourceConverter {
             printDirCustom((UnifiedCall) node);
         } else if (node instanceof Macro) {
             printDirMacroOrFunction((Macro) node);
+        } else if (node instanceof Assignment) {
+            printDirAssignmentLonely((Assignment) node);
+        } else if (node instanceof AssignmentInstruction) {
+            printDirAssignmentMultiple((AssignmentInstruction) node);
+        } else if (node instanceof AttemptBlock) {
+            printDirAttemptRecover((AttemptBlock) node);
         } else {
             throw new ConverterException("Unhandled AST TemplateElement class: " + node.getClass().getName());
         }
+    }
+
+    private void printDirAttemptRecover(AttemptBlock node) throws ConverterException {
+        print(tagBeginChar);
+        print("#attempt");
+        printStartTagSkippedTokens(node, null, true);
+        print(tagEndChar);
+
+        printNode(node.getChild(0));
+        assertNodeContent(node.getChild(1) instanceof RecoveryBlock, node, "child[1] should be #recover");
+
+        RecoveryBlock recoverDir = getOnlyParam(node, ParameterRole.ERROR_HANDLER, RecoveryBlock.class);
+        print(tagBeginChar);
+        print("#recover");
+        printStartTagSkippedTokens(recoverDir, null, true);
+        print(tagEndChar);
+
+        printChildrenElements(recoverDir);
+
+        print(tagBeginChar);
+        print("/#attempt"); // in FM2 this could be /#recover, but we normalize it
+        printEndTagSkippedTokens(node);
+        print(tagEndChar);
+    }
+
+    private void printDirAssignmentMultiple(AssignmentInstruction node) throws ConverterException {
+        assertParamCount(node, 2);
+
+        int pos = printDirAssignmentCommonTagTillAssignmentExp(node, 0);
+
+        int childCnt = node.getChildCount();
+        for (int childIdx = 0; childIdx < childCnt; childIdx++) {
+            Assignment assignment = (Assignment) node.getChild(childIdx);
+            pos = printDirAssignmentCommonExp(assignment, pos);
+            if (childIdx != childCnt - 1) {
+                pos = printWSAndExpComments(pos, ",", true);
+            }
+        }
+
+        printDirAssignmentCommonTagAfterLastAssignmentExp(node, 1, pos);
+    }
+
+    private void printDirAssignmentLonely(Assignment node) throws ConverterException {
+        assertParamCount(node, 5);
+
+        int pos = printDirAssignmentCommonTagTillAssignmentExp(node, 3);
+        pos = printDirAssignmentCommonExp(node, pos);
+        printDirAssignmentCommonTagAfterLastAssignmentExp(node, 4, pos);
+    }
+
+    private void printDirAssignmentCommonTagAfterLastAssignmentExp(TemplateElement node, int nsParamIdx, int pos) throws
+            ConverterException {
+        Expression ns = getParam(node, nsParamIdx, ParameterRole.NAMESPACE, Expression.class);
+        if (ns != null) {
+            pos = printWSAndExpComments(pos, "in", false);
+            printExp(ns);
+            pos = getEndPositionExclusive(ns);
+        }
+        pos = printWSAndExpComments(pos);
+
+        char c = src.charAt(pos);
+        assertNodeContent(c == tagEndChar, node, "End of tag was expected, but found {}", c);
+        print(tagEndChar);
+    }
+
+    private int printDirAssignmentCommonTagTillAssignmentExp(TemplateElement node, int scopeParamIdx)
+            throws ConverterException {
+        print(tagBeginChar);
+
+        int scope = getParam(node, scopeParamIdx, ParameterRole.VARIABLE_SCOPE, Integer.class);
+        String tagName;
+        if (scope == Assignment.NAMESPACE) {
+            tagName = "#assign";
+        } else if (scope == Assignment.GLOBAL) {
+            tagName = "#global";
+        } else if (scope == Assignment.LOCAL) {
+            tagName = "#local";
+        } else {
+            throw new UnexpectedNodeContentException(node, "Unhandled scope: {}", scope);
+        }
+        print(tagName);
+        int pos = getPositionAfterIdentifier(getStartPosition(node) + 2);
+
+        pos = printWSAndExpComments(pos);
+        return pos;
+    }
+
+    private int printDirAssignmentCommonExp(Assignment node, int pos) throws ConverterException {
+        {
+            String target = getParam(node, 0, ParameterRole.ASSIGNMENT_TARGET, String.class);
+            print(FTLUtil.escapeIdentifier(target));
+            pos = getPositionAfterIdentifier(pos);
+        }
+
+        pos = printWSAndExpComments(pos);
+
+        {
+            String operator = getParam(node, 1, ParameterRole.ASSIGNMENT_OPERATOR, String.class);
+            print(operator);
+            pos += operator.length();
+        }
+
+        pos = printWSAndExpComments(pos);
+
+        Expression source = getParam(node, 2, ParameterRole.ASSIGNMENT_SOURCE, Expression.class);
+        if (source != null) {
+            printExp(source);
+            pos = getEndPositionExclusive(source);
+        }
+
+        return pos;
     }
 
     private void printDirMacroOrFunction(Macro node) throws ConverterException {
@@ -236,30 +353,19 @@ public class FM2ASTToFM3SourceConverter {
 
         print(tagBeginChar);
         print(tagName);
-        int pos = getStartPosition(node) + 1;
-        assertNodeContent(src.substring(pos, pos + tagName.length()).equals(tagName), node,
-                "Tag name doesn't match {}", tagName);
-        pos += tagName.length();
+        int pos = getPositionAfterIdentifier(getStartPosition(node) + 2);
 
-        {
-            String sep = readWSAndExpComments(pos);
-            printWithConvertedExpComments(sep);
-            pos += sep.length();
-        }
+        pos = printWSAndExpComments(pos);
 
         String assignedName = getParam(node, 0, ParameterRole.ASSIGNMENT_TARGET, String.class);
         print(FTLUtil.escapeIdentifier(assignedName));
         {
             int lastPos = pos;
             pos = getPositionAfterIdentifier(pos);
-            assertNodeContent(pos > lastPos, node, "Expected target name", null);
+            assertNodeContent(pos > lastPos, node, "Expected target name");
         }
 
-        {
-            String sep = readWSAndExpComments(pos, '(', true);
-            printWithConvertedExpComments(sep);
-            pos += sep.length();
-        }
+        pos = printWSAndExpComments(pos, "(", true);
 
         int paramIdx = 1;
         while (node.getParameterRole(paramIdx) == ParameterRole.PARAMETER_NAME) {
@@ -268,22 +374,17 @@ public class FM2ASTToFM3SourceConverter {
             {
                 int lastPos = pos;
                 pos = getPositionAfterIdentifier(pos);
-                assertNodeContent(pos > lastPos, node, "Expected parameter name", null);
+                assertNodeContent(pos > lastPos, node, "Expected parameter name");
             }
 
             Expression paramDefault = getParam(node, paramIdx++, ParameterRole.PARAMETER_DEFAULT, Expression.class);
             if (paramDefault != null) {
-                String sep = readWSAndExpComments(pos, '=', false);
-                printWithConvertedExpComments(sep);
+                printWSAndExpComments(pos, "=", false);
                 printExp(paramDefault);
                 pos = getEndPositionExclusive(paramDefault);
             }
 
-            {
-                String sep = readWSAndExpComments(pos);
-                printWithConvertedExpComments(sep);
-                pos += sep.length();
-            }
+            pos = printWSAndExpComments(pos);
             {
                 char c = src.charAt(pos);
                 assertNodeContent(
@@ -295,13 +396,11 @@ public class FM2ASTToFM3SourceConverter {
                     print(c);
                     pos++;
 
-                    String sep = readWSAndExpComments(pos);
-                    printWithConvertedExpComments(sep);
-                    pos += sep.length();
+                    pos = printWSAndExpComments(pos);
                 }
                 if (c == ')') {
                     assertNodeContent(node.getParameterRole(paramIdx) != ParameterRole.PARAMETER_NAME, node,
-                            "Expected no parameter after \"(\"", null);
+                            "Expected no parameter after \"(\"");
                 }
             }
         }
@@ -318,15 +417,11 @@ public class FM2ASTToFM3SourceConverter {
                 int lastPos = pos;
                 pos = getPositionAfterIdentifier(pos);
                 assertNodeContent(pos > lastPos, node,
-                        "Expected catch-all parameter name", null);
+                        "Expected catch-all parameter name");
             }
-            {
-                String sep = readWSAndExpComments(pos);
-                printWithConvertedExpComments(sep);
-                pos += sep.length();
-            }
+            pos = printWSAndExpComments(pos);
             assertNodeContent(src.startsWith("...", pos), node,
-                    "Expected \"...\" after catch-all parameter name", null);
+                    "Expected \"...\" after catch-all parameter name");
             print("...");
             pos += 3;
         }
@@ -334,12 +429,8 @@ public class FM2ASTToFM3SourceConverter {
         assertNodeContent(paramIdx == paramCnt - 1, node,
                 "Expected AST parameter at index {} to be the last one", paramIdx);
 
-        {
-            String sep = readWSAndExpComments(pos, ')', true);
-            printWithConvertedExpComments(sep);
-            pos += sep.length();
-        }
-        assertNodeContent(src.charAt(pos) == tagEndChar, node, "Tag end not found", null);
+        pos = printWSAndExpComments(pos, ")", true);
+        assertNodeContent(src.charAt(pos) == tagEndChar, node, "Tag end not found");
         print(tagEndChar);
 
         printChildrenElements(node);
@@ -389,9 +480,9 @@ public class FM2ASTToFM3SourceConverter {
         int pos = getEndPositionExclusive(lastPrintedExp);
         boolean beforeFirstLoopVar = true;
         while (paramIdx < paramCount) {
-            String sep = readWSAndExpComments(pos, beforeFirstLoopVar ? ';' : ',', false);
+            String sep = readWSAndExpComments(pos, beforeFirstLoopVar ? ";" : ",", false);
             assertNodeContent(sep.length() != 0, node,
-                    "Can't find loop variable separator", null);
+                    "Can't find loop variable separator");
             printWithConvertedExpComments(sep);
             pos += sep.length();
 
@@ -399,7 +490,7 @@ public class FM2ASTToFM3SourceConverter {
             print(_StringUtil.toFTLTopLevelIdentifierReference(loopVarName));
             String identifierInSrc = readIdentifier(pos);
             assertNodeContent(identifierInSrc.length() != 0, node,
-                    "Can't find loop variable identifier in source", null);
+                    "Can't find loop variable identifier in source");
             pos += identifierInSrc.length(); // skip loop var name
 
             beforeFirstLoopVar = false;
@@ -417,7 +508,7 @@ public class FM2ASTToFM3SourceConverter {
         }
         if (startTagEndPos != elementEndPos) { // We have an end-tag
             assertNodeContent(src.charAt(startTagEndPos - 1) != '/', node,
-                    "Not expected \"/\" at the end of the start tag", null);
+                    "Not expected \"/\" at the end of the start tag");
             printChildrenElements(node);
 
             print(tagBeginChar);
@@ -427,15 +518,15 @@ public class FM2ASTToFM3SourceConverter {
                 nameStartPos--;
             }
             assertNodeContent(nameStartPos >= 2, node,
-                    "Couldn't extract name from end-tag.", null);
+                    "Couldn't extract name from end-tag.");
             // Also prints ignored WS after name, for now:
             printWithConvertedExpComments(src.substring(nameStartPos, elementEndPos));
             print(tagEndChar);
         } else { // We don't have end-tag
             assertNodeContent(src.charAt(startTagEndPos - 1) == '/', node,
-                    "Expected \"/\" at the end of the start tag", null);
+                    "Expected \"/\" at the end of the start tag");
             assertNodeContent(node.getChildCount() == 0, node,
-                    "Expected no children", null);
+                    "Expected no children");
         }
     }
 
@@ -649,9 +740,10 @@ public class FM2ASTToFM3SourceConverter {
 
     private void printExpBuiltinVariable(BuiltinVariable node) throws ConverterException {
         int startPos = getStartPosition(node);
-        String sep = readWSAndExpComments(startPos, '.', false);
-        printWithConvertedExpComments(sep);
-        String name = src.substring(startPos + sep.length(), getEndPositionExclusive(node));
+
+        int varNameStart = printWSAndExpComments(startPos, ".", false);
+
+        String name = src.substring(varNameStart, getEndPositionExclusive(node));
         print(convertBuiltInVariableName(name));
     }
 
@@ -668,8 +760,7 @@ public class FM2ASTToFM3SourceConverter {
         Expression lho = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, Expression.class);
         String rho = getParam(node, 1, ParameterRole.RIGHT_HAND_OPERAND, String.class);
         printNode(lho);
-        printWithConvertedExpComments(
-                readWSAndExpComments(getEndPositionExclusive(lho), '.', false));
+        printWSAndExpComments(getEndPositionExclusive(lho), ".", false);
         print(FTLUtil.escapeIdentifier(rho));
     }
 
@@ -707,9 +798,9 @@ public class FM2ASTToFM3SourceConverter {
         int openCharPos = getStartPosition(node);
         int closeCharPos = getEndPositionInclusive(node);
         assertNodeContent(src.charAt(openCharPos) == '{', node,
-                "Expected '{'", null);
+                "Expected '{'");
         assertNodeContent(src.charAt(closeCharPos) == '}', node,
-                "Expected '}'", null);
+                "Expected '}'");
 
         int paramCnt = node.getParameterCount();
         if (paramCnt == 0) {
@@ -740,9 +831,9 @@ public class FM2ASTToFM3SourceConverter {
         int openCharPos = getStartPosition(node);
         int closeCharPos = getEndPositionInclusive(node);
         assertNodeContent(src.charAt(openCharPos) == '[', node,
-                "Expected '['", null);
+                "Expected '['");
         assertNodeContent(src.charAt(closeCharPos) == ']', node,
-                "Expected ']'", null);
+                "Expected ']'");
 
         int paramCnt = node.getParameterCount();
         if (paramCnt == 0) {
@@ -1064,7 +1155,7 @@ public class FM2ASTToFM3SourceConverter {
         }
 
         assertNodeContent(pos > 0 && isCoreNameChar(src.charAt(pos)), node,
-                "Can't find end tag name", null);
+                "Can't find end tag name");
 
         printWithConvertedExpComments(src.substring(pos + 1, tagEndPos));
     }
@@ -1131,6 +1222,11 @@ public class FM2ASTToFM3SourceConverter {
         ParameterRole paramRole = node.getParameterRole(index);
         assertNodeContent(paramRole == expectedParamRole, node,
                 "Unexpected node parameter role \"{}\".", paramRole);
+    }
+
+    private void assertNodeContent(boolean good, TemplateObject node, String
+        errorMessage) throws UnexpectedNodeContentException {
+        assertNodeContent(good, node, errorMessage, null);
     }
 
     private void assertNodeContent(boolean good, TemplateObject node, String
@@ -1220,19 +1316,34 @@ public class FM2ASTToFM3SourceConverter {
         return src.substring(startPos, getPositionAfterWSAndExpComments(startPos));
     }
 
-    private String readWSAndExpComments(int startPos, char separator, boolean separatorOptional)
+    private String readWSAndExpComments(int startPos, String separator, boolean separatorOptional)
             throws ConverterException {
         int pos = getPositionAfterWSAndExpComments(startPos);
 
-        if (pos == src.length() || src.charAt(pos) != separator) {
+        if (pos == src.length() || !src.startsWith(separator, pos)) {
             // No separator
             return separatorOptional ? src.substring(startPos, pos) : "";
         }
-        pos++; // Skip separator
+        pos += separator.length();
 
         pos = getPositionAfterWSAndExpComments(pos);
 
         return src.substring(startPos, pos);
+    }
+
+    private int printWSAndExpComments(int pos) throws ConverterException {
+        String sep = readWSAndExpComments(pos);
+        printWithConvertedExpComments(sep);
+        pos += sep.length();
+        return pos;
+    }
+
+    private int printWSAndExpComments(int pos, String separator, boolean sepOptional) throws
+            ConverterException {
+        String sep = readWSAndExpComments(pos, separator, sepOptional);
+        printWithConvertedExpComments(sep);
+        pos += sep.length();
+        return pos;
     }
 
     private int getPositionAfterIdentifier(int startPos) throws ConverterException {
