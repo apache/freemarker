@@ -181,7 +181,7 @@ the FreeMarer 3 changelog here:
   builders to create them.
   - Removed CustomAttribute class. Custom attribute keys can be anything Serializable.
   - As "attributes" can't be modifiable after Builder.build(), and hence didn't fit into the new system, the "attributes" setting was removed.
-    In place of, two new concepts were introduced, targetting two different "attributes" use-cases:
+    In place of that, two new concepts were introduced, targetting two different "attributes" use-cases:
     - Custom states: CustomStateKey class and the CustomStateScope interface was introduced, which
       is somewhat similar to the now removed CustomAttribute. CustomStateScope contains one method, Object getCustomState(CustomStateKey), which
       may calls CustomStateKey.create() to lazily create the state object for the key. Configuration, Template and Environment implements
@@ -190,6 +190,8 @@ the FreeMarer 3 changelog here:
       in the Envronment. You can get their values with `getCustomSetting(Serializble key[, Object defaultValue])`. If no default is specified,
       and the custom setting is not set, a CustomSettingNotSetException is thrown. Just like standard settings, custom settings automatically
       inherited from higher scopes.
+    - In the #ftl header, the `attributes` parameter name was changed to `customSettings`
+      (The template converter tool takes care of this conversion.)
   - Added ProcessingConfiguration interface for the read-only access of template processing settings. This is similar to the
     already existing (in FM2) ParserConfiguration interface.
   - Renamed Configurable to MutableProcessingAndParserConfiguration. Made it abstract too.
