@@ -28,10 +28,7 @@ import java.util.Set;
 import org.apache.freemarker.converter.ConverterException;
 import org.apache.freemarker.converter.ConverterUtils;
 import org.apache.freemarker.core.NamingConvention;
-import org.apache.freemarker.core.util.FTLUtil;
-import org.apache.freemarker.core.util._ClassUtil;
-import org.apache.freemarker.core.util._NullArgumentException;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util.*;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -67,6 +64,7 @@ import freemarker.template.utility.StringUtil;
 @SuppressWarnings("deprecation")
 public class FM2ASTToFM3SourceConverter {
 
+    private final Template template;
     private final String src;
     private final StringBuilder out;
     private List<Integer> rowStartPositions;
@@ -78,17 +76,34 @@ public class FM2ASTToFM3SourceConverter {
             .build();
     private final Set<String> fm3BuiltInNames = fm3Config.getSupportedBuiltInNames();
 
+    private boolean printNextCustomDirAsFtlDir;
+
     /**
-     * @param template Must have been parsed with {@link Configuration#getWhitespaceStripping()} {@code false}.
+     * @param fm2Cfg The {@link Configuration} used for parsing; {@link Configuration#getWhitespaceStripping()} must
+     *               return {@code false}.
      */
-    public static String convert(Template template, String src) throws ConverterException {
-        FM2ASTToFM3SourceConverter instance = new FM2ASTToFM3SourceConverter(template, src);
-        instance.printNode(template.getRootTreeNode());
-        return instance.getOutput();
+    public static Result convert(String templateName, String src, Configuration fm2Cfg) throws ConverterException {
+        return new FM2ASTToFM3SourceConverter(templateName, src, fm2Cfg).convert();
     }
 
-    private FM2ASTToFM3SourceConverter(Template template, String src) {
-        _NullArgumentException.check("template", template);
+    private Result convert() throws ConverterException {
+        printDirFtl();
+        printNode(template.getRootTreeNode());
+
+        String outAsString = out.toString();
+        try {
+            //!!T new org.apache.freemarker.core.Template(null, s, fm3Config);
+        } catch (Exception e) {
+            throw new ConverterException(
+                    "The result of the conversion wasn't valid FreeMarker 3 template; see cause exception", e);
+        }
+
+        return new Result(template, outAsString);
+    }
+
+    private FM2ASTToFM3SourceConverter(String templateName, String src, Configuration fm2Cfg)
+            throws ConverterException {
+        template = createTemplate(templateName, src, fm2Cfg);
         if (template.getParserConfiguration().getWhitespaceStripping()) {
             throw new IllegalArgumentException("The Template must have been parsed with whitespaceStripping false.");
         }
@@ -106,15 +121,80 @@ public class FM2ASTToFM3SourceConverter {
         }
     }
 
-    private String getOutput() throws ConverterException {
-        String s = out.toString();
-        try {
-            //!!T new org.apache.freemarker.core.Template(null, s, fm3Config);
-        } catch (Exception e) {
-            throw new ConverterException(
-                    "The result of the conversion wasn't valid FreeMarker 3 template; see cause exception", e);
+    /**
+     * Converts a {@link String} to a {@link Template}.
+     */
+    private static Template createTemplate(String templateName, String src, Configuration fm2Cfg) throws
+            ConverterException {
+        if (fm2Cfg.getWhitespaceStripping()) {
+            throw new IllegalArgumentException("Configuration.whitespaceStripping must be false");
         }
-        return s;
+        try {
+            return new Template(templateName, src, fm2Cfg);
+        } catch (Exception e) {
+            throw new ConverterException("Failed to load FreeMarker 2.3.x template", e);
+        }
+    }
+
+    // The FTL tag is not part of the AST tree, so we have to treat it differently
+    private void printDirFtl() throws ConverterException {
+        int pos = getPositionAfterWSAndExpComments(0);
+        if (src.length() > pos + 1 && src.charAt(pos) == tagBeginChar && src.startsWith("#ftl", pos + 1)) {
+            printWithConvertedExpComments(src.substring(0, pos));
+
+            pos += 5; // "<#ftl".length()
+
+            int tagEnd;
+            String postFtlTagSkippedWS;
+            {
+                int firstNodePos;
+
+                TemplateElement rootNode = template.getRootTreeNode();
+                if (rootNode.getBeginLine() != 0) {
+                    firstNodePos = getStartPosition(rootNode);
+                    assertNodeContent(firstNodePos > pos, rootNode,
+                            "Root node position should be after #ftl header");
+                } else {
+                    // Extreme case where the template only contains the #ftl header.
+                    assertNodeContent(rootNode.getEndLine() == 0, rootNode,
+                            "Expected 0 end line for root node");
+                    firstNodePos = src.length();
+                }
+
+                tagEnd = firstNodePos - 1;
+                while (tagEnd >= 0 && src.charAt(tagEnd) != tagEndChar) {
+                    if (!Character.isWhitespace(src.charAt(tagEnd))) {
+                        throw new ConverterException("Non-WS character while backtracking to #ftl tag end character.");
+                    }
+                    tagEnd--;
+                }
+                if (tagEnd < 0) {
+                    throw new ConverterException("Couldn't backtrack to #ftl tag end character.");
+                }
+
+                postFtlTagSkippedWS = src.substring(tagEnd + 1, firstNodePos);
+            }
+
+            boolean hasSlash = src.charAt(tagEnd - 1) == '/';
+
+            // We need the Expression-s parsed, but they aren't part of the AST. So, we parse a template that contains
+            // a similar custom "ftl" directive, and the converter to print it as an #ftl directive.
+            FM2ASTToFM3SourceConverter customFtlDirSrcConverter = new FM2ASTToFM3SourceConverter(
+                    template.getName(),
+                    tagBeginChar + "@ftl" + src.substring(pos, tagEnd) + (hasSlash ? "" : "/") + tagEndChar,
+                    template.getConfiguration());
+            customFtlDirSrcConverter.printNextCustomDirAsFtlDir = true;
+            String fm3Content = customFtlDirSrcConverter.convert().fm3Content;
+            print(hasSlash
+                    ? fm3Content
+                    : fm3Content.substring(0, fm3Content.length() - 2) + tagEndChar);
+
+            print(postFtlTagSkippedWS);
+        }
+    }
+
+    private String convertFtlHeaderParamName(String name) throws ConverterException {
+        return name.indexOf('_') == -1 ? name : ConverterUtils.snakeCaseToCamelCase(name);
     }
 
     private void printNode(TemplateObject node) throws ConverterException {
@@ -220,6 +300,8 @@ public class FM2ASTToFM3SourceConverter {
             printDirAssignmentLonely((Assignment) node);
         } else if (node instanceof AssignmentInstruction) {
             printDirAssignmentMultiple((AssignmentInstruction) node);
+        } else if (node instanceof AttemptBlock) {
+            printDirAttemptRecover((AttemptBlock) node);
         } else if (node instanceof AttemptBlock) {
             printDirAttemptRecover((AttemptBlock) node);
         } else {
@@ -443,8 +525,11 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private void printDirCustom(UnifiedCall node) throws ConverterException {
+        boolean ftlDirMode = printNextCustomDirAsFtlDir;
+        printNextCustomDirAsFtlDir = false;
+
         print(tagBeginChar);
-        print('@');
+        print(ftlDirMode ? '#' : '@');
 
         Expression callee = getParam(node, 0, ParameterRole.CALLEE, Expression.class);
         printExp(callee);
@@ -467,9 +552,19 @@ public class FM2ASTToFM3SourceConverter {
         // Print named arguments:
         while (paramIdx < paramCount
                 && node.getParameterRole(paramIdx) == ParameterRole.ARGUMENT_NAME) {
+            String paramName = getParam(node, paramIdx, ParameterRole.ARGUMENT_NAME, String.class);
             Expression argValue = getParam(node, paramIdx + 1, ParameterRole.ARGUMENT_VALUE, Expression.class);
 
-            printParameterSeparatorSource(lastPrintedExp, argValue); // Prints something like " someArgName="
+            int pos = getEndPositionExclusive(lastPrintedExp);
+            pos = printWSAndExpComments(pos, ",", true);
+            int paramNameStartPos = pos;
+            pos = getPositionAfterIdentifier(pos);
+            assertNodeContent(pos > paramNameStartPos, node, "Parameter name in src was empty");
+            if (ftlDirMode) {
+                paramName = convertFtlHeaderParamName(paramName);
+            }
+            print(FTLUtil.escapeIdentifier(paramName));
+            printWSAndExpComments(pos, "=", false);
             printExp(argValue);
 
             lastPrintedExp = argValue;
@@ -1383,6 +1478,24 @@ public class FM2ASTToFM3SourceConverter {
                 && (pos + 1 < src.length()
                 && src.startsWith("!--", pos + 1) || src.startsWith("#--", pos + 1));
 
+    }
+
+    public static class Result {
+        private final Template fm2Template;
+        private final String fm3Content;
+
+        public Result(Template fm2Template, String fm3Content) {
+            this.fm2Template = fm2Template;
+            this.fm3Content = fm3Content;
+        }
+
+        public Template getFM2Template() {
+            return fm2Template;
+        }
+
+        public String getFM3Content() {
+            return fm3Content;
+        }
     }
 
 }

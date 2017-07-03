@@ -93,16 +93,11 @@ public class FM2ToFM3Converter extends Converter {
     @Override
     protected void convertFile(FileConversionContext fileTransCtx) throws ConverterException, IOException {
         String src = IOUtils.toString(fileTransCtx.getSourceStream(), StandardCharsets.UTF_8);
-        Template template;
-        try {
-            template = new Template(fileTransCtx.getSourceFile().getName(), src, fm2Cfg);
-        } catch (Exception e) {
-            throw new ConverterException("Failed to load FreeMarker 2.3.x template", e);
-        }
-
-        fileTransCtx.setDestinationFileName(getDestinationFileName(template));
+        FM2ASTToFM3SourceConverter.Result result = FM2ASTToFM3SourceConverter.convert(fileTransCtx.getSourceFile()
+                .getName(), src, fm2Cfg);
+        fileTransCtx.setDestinationFileName(getDestinationFileName(result.getFM2Template()));
         fileTransCtx.getDestinationStream().write(
-                FM2ASTToFM3SourceConverter.convert(template, src).getBytes(getTemplateEncoding(template)));
+                result.getFM3Content().getBytes(getTemplateEncoding(result.getFM2Template())));
     }
 
     private String getTemplateEncoding(Template template) {

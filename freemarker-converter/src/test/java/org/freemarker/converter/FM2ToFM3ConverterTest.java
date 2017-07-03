@@ -203,6 +203,13 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("<#attempt >a<#recover  >r</#attempt   >");
         assertConverted("<#attempt>a<#recover>r</#attempt>", "<#attempt>a<#recover>r</#recover>");
         assertConverted("<#attempt >a<#recover  >r</#attempt   >", "<#attempt >a<#recover  >r</#recover   >");
+
+        assertConvertedSame("<#ftl>");
+        assertConvertedSame("<#ftl>x");
+        assertConvertedSame("<#ftl>x${x}");
+        assertConvertedSame("<#ftl>\nx${x}");
+        assertConvertedSame("\n\n  <#ftl>\n\nx");
+        assertConverted("<#ftl outputFormat='HTML'>x", "<#ftl output_format='HTML'>x");
     }
 
     @Test
