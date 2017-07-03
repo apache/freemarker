@@ -194,7 +194,11 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private String convertFtlHeaderParamName(String name) throws ConverterException {
-        return name.indexOf('_') == -1 ? name : ConverterUtils.snakeCaseToCamelCase(name);
+        name = name.indexOf('_') == -1 ? name : ConverterUtils.snakeCaseToCamelCase(name);
+        if (name.equals("attributes")) {
+            name = "customSettings";
+        }
+        return name;
     }
 
     private void printNode(TemplateObject node) throws ConverterException {
@@ -304,32 +308,122 @@ public class FM2ASTToFM3SourceConverter {
             printDirAttemptRecover((AttemptBlock) node);
         } else if (node instanceof AttemptBlock) {
             printDirAttemptRecover((AttemptBlock) node);
+        } else if (node instanceof AutoEscBlock) {
+            printDirAutoEsc((AutoEscBlock) node);
+        } else if (node instanceof NoAutoEscBlock) {
+            printDirNoAutoEsc((NoAutoEscBlock) node);
+        } else if (node instanceof CompressedBlock) {
+            printDirCompress((CompressedBlock) node);
+        } else if (node instanceof EscapeBlock) {
+            printDirEscape((EscapeBlock) node);
+        } else if (node instanceof NoEscapeBlock) {
+            printDirNoEscape((NoEscapeBlock) node);
+        } else if (node instanceof FlushInstruction) {
+            printDirFlush((FlushInstruction) node);
+        } else if (node instanceof ReturnInstruction) {
+            printDirReturn((ReturnInstruction) node);
+        } else if (node instanceof LibraryLoad) {
+            printDirImport((LibraryLoad) node);
         } else {
             throw new ConverterException("Unhandled AST TemplateElement class: " + node.getClass().getName());
         }
     }
 
+    private void printDirImport(LibraryLoad node) throws ConverterException {
+        assertParamCount(node, 2);
+
+        printCoreDirStartTagBeforeParams(node, "import");
+
+        Expression templateName = getParam(node, 0, ParameterRole.TEMPLATE_NAME, Expression.class);
+        printExp(templateName);
+
+        int pos = printWSAndExpComments(getEndPositionExclusive(templateName), "as", false);
+
+        print(FTLUtil.escapeIdentifier(getParam(node, 1, ParameterRole.NAMESPACE, String.class)));
+        int identifierStartPos = pos;
+        pos = getPositionAfterIdentifier(pos);
+        assertNodeContent(pos > identifierStartPos, node, "Can't find namespace variable name");
+
+        printStartTagEnd(node, pos, false);
+    }
+
+    private void printDirReturn(ReturnInstruction node) throws ConverterException {
+        printCoreDirStartTagBeforeParams(node, "return");
+
+        Expression value = getOnlyParam(node, ParameterRole.VALUE, Expression.class);
+        printExp(value);
+        printStartTagEnd(node, value, false);
+    }
+
+    private void printDirFlush(FlushInstruction node) throws ConverterException {
+        printDirGenericParameterlessWithoutNestedContent(node, "flush");
+    }
+
+    private void printDirNoEscape(NoEscapeBlock node) throws ConverterException {
+        printDirGenericParameterlessWithNestedContent(node, "noEscape");
+    }
+
+    private void printDirEscape(EscapeBlock node) throws ConverterException {
+        assertParamCount(node, 2);
+
+        int pos = printCoreDirStartTagBeforeParams(node, "escape");
+
+        int identifierStartPos = pos;
+        pos = getPositionAfterIdentifier(pos);
+        assertNodeContent(pos > identifierStartPos, node, "Can't find placeholder variable name");
+        print(FTLUtil.escapeIdentifier(getParam(node, 0, ParameterRole.PLACEHOLDER_VARIABLE, String.class)));
+
+        pos = printWSAndExpComments(pos, "as", false);
+
+        Expression expTemplate = getParam(node, 1, ParameterRole.EXPRESSION_TEMPLATE, Expression.class);
+        printExp(expTemplate);
+        printStartTagEnd(node, expTemplate, false);
+
+        printChildrenElements(node);
+
+        printCoreDirEndTag(node, "escape");
+    }
+
+    private void printDirCompress(CompressedBlock node) throws ConverterException {
+        printDirGenericParameterlessWithNestedContent(node, "compress");
+    }
+
+    private void printDirAutoEsc(AutoEscBlock node) throws ConverterException {
+        printDirGenericParameterlessWithNestedContent(node, "autoEsc");
+    }
+
+    private void printDirNoAutoEsc(NoAutoEscBlock node) throws ConverterException {
+        printDirGenericParameterlessWithNestedContent(node, "noAutoEsc");
+    }
+
+    private void printDirGenericParameterlessWithNestedContent(TemplateElement node, String tagName) throws ConverterException {
+        assertParamCount(node, 0);
+
+        printCoreDirParameterlessStartTag(node, tagName);
+        printChildrenElements(node);
+        printCoreDirEndTag(node, tagName);
+    }
+
+    private void printDirGenericParameterlessWithoutNestedContent(TemplateElement node, String name)
+            throws ConverterException {
+        assertParamCount(node, 0);
+        printCoreDirParameterlessStartTag(node, name);
+    }
+
     private void printDirAttemptRecover(AttemptBlock node) throws ConverterException {
-        print(tagBeginChar);
-        print("#attempt");
-        printStartTagSkippedTokens(node, null, true);
-        print(tagEndChar);
+        assertParamCount(node, 1); // 1: The recovery block
+
+        printCoreDirParameterlessStartTag(node, "attempt");
 
         printNode(node.getChild(0));
         assertNodeContent(node.getChild(1) instanceof RecoveryBlock, node, "child[1] should be #recover");
 
         RecoveryBlock recoverDir = getOnlyParam(node, ParameterRole.ERROR_HANDLER, RecoveryBlock.class);
-        print(tagBeginChar);
-        print("#recover");
-        printStartTagSkippedTokens(recoverDir, null, true);
-        print(tagEndChar);
+        printCoreDirParameterlessStartTag(recoverDir, "recover");
 
         printChildrenElements(recoverDir);
 
-        print(tagBeginChar);
-        print("/#attempt"); // in FM2 this could be /#recover, but we normalize it
-        printEndTagSkippedTokens(node);
-        print(tagEndChar);
+        printCoreDirEndTag(node, "attempt"); // in FM2 this could be /#recover, but we normalize it
     }
 
     private void printDirAssignmentMultiple(AssignmentInstruction node) throws ConverterException {
@@ -357,8 +451,8 @@ public class FM2ASTToFM3SourceConverter {
         printDirAssignmentCommonTagAfterLastAssignmentExp(node, 4, pos);
     }
 
-    private void printDirAssignmentCommonTagAfterLastAssignmentExp(TemplateElement node, int nsParamIdx, int pos) throws
-            ConverterException {
+    private void printDirAssignmentCommonTagAfterLastAssignmentExp(TemplateElement node, int nsParamIdx, int pos)
+            throws ConverterException {
         Expression ns = getParam(node, nsParamIdx, ParameterRole.NAMESPACE, Expression.class);
         if (ns != null) {
             pos = printWSAndExpComments(pos, "in", false);
@@ -374,31 +468,25 @@ public class FM2ASTToFM3SourceConverter {
 
     private int printDirAssignmentCommonTagTillAssignmentExp(TemplateElement node, int scopeParamIdx)
             throws ConverterException {
-        print(tagBeginChar);
-
         int scope = getParam(node, scopeParamIdx, ParameterRole.VARIABLE_SCOPE, Integer.class);
         String tagName;
         if (scope == Assignment.NAMESPACE) {
-            tagName = "#assign";
+            tagName = "assign";
         } else if (scope == Assignment.GLOBAL) {
-            tagName = "#global";
+            tagName = "global";
         } else if (scope == Assignment.LOCAL) {
-            tagName = "#local";
+            tagName = "local";
         } else {
             throw new UnexpectedNodeContentException(node, "Unhandled scope: {}", scope);
         }
-        print(tagName);
-        int pos = getPositionAfterIdentifier(getStartPosition(node) + 2);
-
-        pos = printWSAndExpComments(pos);
-        return pos;
+        return printCoreDirStartTagBeforeParams(node, tagName);
     }
 
     private int printDirAssignmentCommonExp(Assignment node, int pos) throws ConverterException {
         {
             String target = getParam(node, 0, ParameterRole.ASSIGNMENT_TARGET, String.class);
             print(FTLUtil.escapeIdentifier(target));
-            pos = getPositionAfterIdentifier(pos);
+            pos = getPositionAfterIdentifier(pos, true);
         }
 
         pos = printWSAndExpComments(pos);
@@ -426,24 +514,20 @@ public class FM2ASTToFM3SourceConverter {
         int subtype = getParam(node, paramCnt - 1, ParameterRole.AST_NODE_SUBTYPE, Integer.class);
         String tagName;
         if (subtype == Macro.TYPE_MACRO) {
-            tagName = "#macro";
+            tagName = "macro";
         } else if (subtype == Macro.TYPE_FUNCTION) {
-            tagName = "#function";
+            tagName = "function";
         } else {
             throw new UnexpectedNodeContentException(node, "Unhandled node subtype: {}", subtype);
         }
 
-        print(tagBeginChar);
-        print(tagName);
-        int pos = getPositionAfterIdentifier(getStartPosition(node) + 2);
-
-        pos = printWSAndExpComments(pos);
+        int pos = printCoreDirStartTagBeforeParams(node, tagName);
 
         String assignedName = getParam(node, 0, ParameterRole.ASSIGNMENT_TARGET, String.class);
         print(FTLUtil.escapeIdentifier(assignedName));
         {
             int lastPos = pos;
-            pos = getPositionAfterIdentifier(pos);
+            pos = getPositionAfterIdentifier(pos, true);
             assertNodeContent(pos > lastPos, node, "Expected target name");
         }
 
@@ -517,11 +601,7 @@ public class FM2ASTToFM3SourceConverter {
 
         printChildrenElements(node);
 
-        print(tagBeginChar);
-        print('/');
-        print(tagName);
-        printEndTagSkippedTokens(node);
-        print(tagEndChar);
+        printCoreDirEndTag(node, tagName);
     }
 
     private void printDirCustom(UnifiedCall node) throws ConverterException {
@@ -592,8 +672,7 @@ public class FM2ASTToFM3SourceConverter {
             paramIdx++;
         }
 
-        int startTagEndPos = printStartTagSkippedTokens(node, pos, false);
-        print(tagEndChar);
+        int startTagEndPos = printStartTagEnd(node, pos, false);
 
         int elementEndPos = getEndPositionInclusive(node);
         {
@@ -630,41 +709,36 @@ public class FM2ASTToFM3SourceConverter {
         Expression conditionExp = getParam(node, 0, ParameterRole.CONDITION, Expression.class);
         int nodeSubtype = getParam(node, 1, ParameterRole.AST_NODE_SUBTYPE, Integer.class);
 
-        print(tagBeginChar);
-        String tagStart;
+        String tagName;
         if (nodeSubtype == ConditionalBlock.TYPE_IF) {
-            tagStart = "#if";
+            tagName = "if";
         } else if (nodeSubtype == ConditionalBlock.TYPE_ELSE) {
-            tagStart = "#else";
+            tagName = "else";
         } else if (nodeSubtype == ConditionalBlock.TYPE_ELSE_IF) {
-            tagStart = "#elseIf";
+            tagName = "elseIf";
         } else {
             throw new UnexpectedNodeContentException(node, "Unhandled subtype, {}.", nodeSubtype);
         }
-        print(tagStart);
+
         if (conditionExp != null) {
-            printWithParamsLeadingSkippedTokens(tagStart.length() + 1, node);
+            printCoreDirStartTagBeforeParams(node, tagName);
             printNode(conditionExp);
+            printStartTagEnd(node, conditionExp, true);
+        } else {
+            printCoreDirParameterlessStartTag(node, tagName);
         }
-        printStartTagSkippedTokens(node, conditionExp, true);
-        print(tagEndChar);
 
         printChildrenElements(node);
 
         if (!(node.getParentElement() instanceof IfBlock)) {
-            print(tagBeginChar);
-            print("/#if");
-            printEndTagSkippedTokens(node);
-            print(tagEndChar);
+            printCoreDirEndTag(node, "if");
         }
     }
 
     private void printDirIfElseElseIfContainer(IfBlock node) throws ConverterException {
         printChildrenElements(node);
-        print(tagBeginChar);
-        print("/#if");
-        printEndTagSkippedTokens(node);
-        print(tagEndChar);
+
+        printCoreDirEndTag(node, "if");
     }
 
     /**
@@ -1129,6 +1203,29 @@ public class FM2ASTToFM3SourceConverter {
         }
     }
 
+    private int printCoreDirStartTagBeforeParams(TemplateElement node, String tagName)
+            throws ConverterException {
+        print(tagBeginChar);
+        print('#');
+        print(tagName);
+        return printWSAndExpComments(getPositionAfterTagName(node));
+    }
+
+    private int printCoreDirParameterlessStartTag(TemplateElement node, String tagName)
+            throws ConverterException {
+        int pos = printCoreDirStartTagBeforeParams(node, tagName);
+        print(tagEndChar);
+        return pos + 1;
+    }
+
+    private void printCoreDirEndTag(TemplateElement node, String tagName) throws UnexpectedNodeContentException {
+        print(tagBeginChar);
+        print("/#");
+        print(tagName);
+        printEndTagSkippedTokens(node);
+        print(tagEndChar);
+    }
+
     private void printWithParamsLeadingSkippedTokens(String beforeParams, TemplateObject node)
             throws ConverterException {
         print(beforeParams);
@@ -1172,48 +1269,50 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     /**
-     * Prints the part between the last parameter (or the directive name if there are no parameters) and the tag closer
-     * character, for a start tag. That part may contains whitespace or comments, which aren't visible in the AST.
+     * Prints the part of the start tag that's after the last parameter,or after the directive name when there's no
+     * parameter. (This will print the whitespace or comments that isn't visible in the AST.)
      *
      * @return The position of the last character of the start tag. Note that the printed string never includes this
      *         character.
      */
-    private int printStartTagSkippedTokens(TemplateElement node, Expression lastParam, boolean trimSlash)
+    private int printStartTagEnd(TemplateElement node, Expression lastParam, boolean trimSlash)
             throws ConverterException {
-        int pos;
-        if (lastParam == null) {
-            // No parameter; must skip the tag name
-            pos = getStartPosition(node);
-            {
-                char c = src.charAt(pos++);
-                assertNodeContent(c == tagBeginChar, node,
-                        "tagBeginChar expected, found {}", c);
-            }
-            {
-                char c = src.charAt(pos++);
-                assertNodeContent(c == '#', node,
-                        "'#' expected, found {}", c);
-            }
-            findNameEnd: while (pos < src.length()) {
-                char c = src.charAt(pos);
-                if (!isCoreNameChar(c)) {
-                    break findNameEnd;
-                }
-                pos++;
-            }
-        } else {
-            pos = getPosition(lastParam.getEndColumn() + 1, lastParam.getEndLine());
+        return printStartTagEnd(
+                node,
+                lastParam == null ? getPositionAfterTagName(node)
+                        : getPosition(lastParam.getEndColumn() + 1, lastParam.getEndLine()),
+                trimSlash);
+    }
+
+    private int getPositionAfterTagName(TemplateElement node) throws UnexpectedNodeContentException {
+        int pos = getStartPosition(node);
+        {
+            char c = src.charAt(pos++);
+            assertNodeContent(c == tagBeginChar, node,
+                    "tagBeginChar expected, found {}", c);
         }
-        return printStartTagSkippedTokens(node, pos, trimSlash);
+        {
+            char c = src.charAt(pos++);
+            assertNodeContent(c == '#', node,
+                    "'#' expected, found {}", c);
+        }
+        while (pos < src.length()) {
+            char c = src.charAt(pos);
+            if (!isCoreNameChar(c)) {
+                return pos;
+            }
+            pos++;
+        }
+        throw new UnexpectedNodeContentException(node, "Can't find end of tag name", null);
     }
 
     /**
-     * Similar to {@link #printStartTagSkippedTokens(TemplateElement, Expression, boolean)}, but with explicitly
+     * Similar to {@link #printStartTagEnd(TemplateElement, Expression, boolean)}, but with explicitly
      * specified scan start position.
      *
      * @param pos The position where the first skipped character can occur (or the tag end character).
      */
-    private int printStartTagSkippedTokens(TemplateElement node, int pos, boolean trimSlash)
+    private int printStartTagEnd(TemplateElement node, int pos, boolean trimSlash)
             throws ConverterException {
         final int startPos = pos;
 
@@ -1226,9 +1325,11 @@ public class FM2ASTToFM3SourceConverter {
         char c = src.charAt(pos);
         if (c == '/' && pos + 1 < src.length() && src.charAt(pos + 1) == tagEndChar) {
             printWithConvertedExpComments(src.substring(startPos, trimSlash ? pos : pos + 1));
+            print(tagEndChar);
             return pos + 1;
         } else if (c == tagEndChar) {
             printWithConvertedExpComments(src.substring(startPos, pos));
+            print(tagEndChar);
             return pos;
         } else {
             throw new UnexpectedNodeContentException(node,
@@ -1442,22 +1543,71 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private int getPositionAfterIdentifier(int startPos) throws ConverterException {
-        int pos = startPos;
-        scanUntilIdentifierEnd: while (pos < src.length()) {
-            char c = src.charAt(pos);
-            if (c == '\\') {
-                if (pos + 1 == src.length()) {
-                    throw new ConverterException("Misplaced \"\\\" at position " + pos);
+        return getPositionAfterIdentifier(startPos, false);
+    }
+
+    private int getPositionAfterIdentifier(int startPos, boolean assignmentTarget) throws ConverterException {
+        if (assignmentTarget && looksLikeStringLiteralStart(startPos)) {
+            return getPositionAfterStringLiteral(startPos);
+        } else {
+            int pos = startPos;
+            scanUntilIdentifierEnd:
+            while (pos < src.length()) {
+                char c = src.charAt(pos);
+                if (c == '\\') {
+                    if (pos + 1 == src.length()) {
+                        throw new ConverterException("Misplaced \"\\\" at position " + pos);
+                    }
+                    pos += 2; // to skip escaped character
+                } else if (pos == startPos && StringUtil.isFTLIdentifierStart(c)
+                        || StringUtil.isFTLIdentifierPart(c)) {
+                    pos++;
+                } else {
+                    break scanUntilIdentifierEnd;
                 }
-                pos += 2; // to skip escaped character
-            } else if (pos == startPos && FTLUtil.isNonEscapedIdentifierStart(c)
-                    || StringUtil.isFTLIdentifierPart(c)) {
-                pos++;
+            }
+            return pos;
+        }
+    }
+
+    private int getPositionAfterStringLiteral(int pos) throws ConverterException {
+        char c = src.charAt(pos++);
+        boolean raw;
+        if (c == 'r') {
+            c = src.charAt(pos++);
+            raw = true;
+        } else {
+            raw = false;
+        }
+        char quotationC = c;
+        if (!isQuotationChar(quotationC)) {
+            throw new IllegalArgumentException("The specifies position is not the beginning of a string literal");
+        }
+
+        boolean escaped = false;
+        while (pos < src.length()) {
+            c = src.charAt(pos++);
+            if (c == quotationC && !escaped) {
+                return pos;
+            } if (c == '\\' && !escaped && !raw) {
+                escaped = true;
             } else {
-                break scanUntilIdentifierEnd;
+                escaped = false;
             }
         }
-        return pos;
+        throw new ConverterException("Reached end of input before the string literal was closed.");
+    }
+
+    private boolean looksLikeStringLiteralStart(int pos) {
+        if (pos >= src.length()) {
+            return false;
+        }
+        char c = src.charAt(pos);
+        return (isQuotationChar(c) || c == 'r' && pos < src.length() + 1 && isQuotationChar(src.charAt(pos + 1)));
+    }
+
+    private boolean isQuotationChar(char q) {
+        return q == '\'' || q == '\"';
     }
 
     private String readIdentifier(int startPos) throws ConverterException {

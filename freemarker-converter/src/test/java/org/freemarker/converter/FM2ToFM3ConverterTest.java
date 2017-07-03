@@ -183,8 +183,11 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("<#macro m p1 p2=22 others...></#macro>");
         assertConvertedSame("<#macro m(others...)></#macro>");
         assertConvertedSame("<#macro m(others <#--1--> ... <#--2--> )></#macro>");
-        assertConvertedSame("<#function m x y>foo</#function>");
+        assertConvertedSame("<#function f x y><#return x + y></#function>");
+        assertConvertedSame("<#function f(x, y=0 <#--0-->)><#return <#--1--> x + y <#--2-->></#function>");
         assertConvertedSame("<#macro m\\-1 p\\-1></#macro>");
+        // Only works with " now, as it doesn't keep the literal kind. Later we will escape differently anyway:
+        assertConvertedSame("<#macro \"m 1\"></#macro>");
 
         assertConvertedSame("<#assign x = 1>");
         assertConvertedSame("<#global x = 1>");
@@ -198,6 +201,8 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("<#global x = 1, y++, z /= 2>");
         assertConvertedSame("<#assign x = 1 y++ z /= 2>");
         assertConvertedSame("<#assign <#--0-->x = 1<#--1-->,<#--2-->y++<#--3-->z/=2<#--4-->>");
+        // Only works with " now, as it doesn't keep the literal kind. Later we will escape differently anyway:
+        assertConvertedSame("<#assign \"x y\" = 1>");
 
         assertConvertedSame("<#attempt>a<#recover>r</#attempt>");
         assertConvertedSame("<#attempt >a<#recover  >r</#attempt   >");
@@ -210,6 +215,26 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("<#ftl>\nx${x}");
         assertConvertedSame("\n\n  <#ftl>\n\nx");
         assertConverted("<#ftl outputFormat='HTML'>x", "<#ftl output_format='HTML'>x");
+        assertConverted("<#ftl encoding='utf-8' customSettings={'a': [1, 2, 3]}>",
+                "<#ftl encoding='utf-8' attributes={'a': [1, 2, 3]}>");
+        assertConverted("<#ftl <#--1-->\n\tencoding='utf-8' <#--2-->\n\tcustomSettings={'a': [1, 2, 3]} <#--3-->\n>",
+                "<#ftl <#--1-->\n\tencoding='utf-8' <#--2-->\n\tattributes={'a': [1, 2, 3]} <#--3-->\n>");
+
+        assertConvertedSame("<#ftl outputFormat='XML'><#noAutoEsc><#autoEsc>${x}</#autoEsc></#noAutoEsc>");
+        assertConvertedSame("<#ftl outputFormat='XML'><#noAutoEsc ><#autoEsc\t>${x}</#autoEsc\n></#noAutoEsc\r>");
+
+        assertConvertedSame("<#compress>x</#compress>");
+        assertConvertedSame("<#compress >x</#compress  >");
+
+        assertConvertedSame("<#escape x as x?html><#noEscape>${v}</#noEscape></#escape>");
+        assertConvertedSame("<#escape <#--1--> x <#--2--> as <#--3--> x?html <#--4--> >"
+                + "<#noEscape >${v}</#noEscape >"
+                + "</#escape >");
+        assertConvertedSame("<#flush>");
+        assertConvertedSame("<#flush >");
+
+        assertConvertedSame("<#import '/lib/foo.ftl' as foo >");
+        assertConvertedSame("<#import <#--1--> '/lib/foo.ftl' <#--2--> as <#--3--> foo <#--4--> >");
     }
 
     @Test
