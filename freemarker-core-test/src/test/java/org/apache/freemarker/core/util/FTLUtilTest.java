@@ -115,4 +115,14 @@ public class FTLUtilTest {
         assertFalse(FTLUtil.isNonEscapedIdentifierStart('\\'));
     }
 
+    @Test
+    public void testToStringLiteral() {
+        assertNull(FTLUtil.toStringLiteral(null));
+        assertEquals("\"\"", FTLUtil.toStringLiteral(""));
+        assertEquals("'foo\"bar\"baaz\\''", FTLUtil.toStringLiteral("foo\"bar\"baaz'"));
+        assertEquals("\"foo'bar'baaz\\\"\"", FTLUtil.toStringLiteral("foo'bar'baaz\""));
+        assertEquals("r\"\\d\"", FTLUtil.toStringLiteral("\\d"));
+        assertEquals("r'\\d\"'", FTLUtil.toStringLiteral("\\d\""));
+    }
+
 }
