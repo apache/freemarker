@@ -288,15 +288,41 @@ public final class FTLUtil {
 
     /**
      * Creates a <em>quoted</em> FTL string literal from a string, using escaping where necessary. The result either
-     * uses regular quotation marks (UCS 0x22) or apostrophe-quotes (UCS 0x27), depending on the string content.
-     * (Currently, apostrophe-quotes will be chosen exactly when the string contains regular quotation character and
-     * doesn't contain apostrophe-quote character.)
+     * uses regular quotation marks (UCS 0x22) or apostrophe-quotes (UCS 0x27), or it will be a raw string literal
+     * (like {@code r"can contain backslash anywhere"}).
+     * This is decided based on the number of regular quotation marks, apostrophe-quotes, and backslashes.
      *
      * @param s The value that should be converted to an FTL string literal whose evaluated value equals to {@code s}
      */
     public static String toStringLiteral(String s) {
+        if (s == null) {
+            return null;
+        }
+
+        int aposCnt = 0;
+        int quotCnt = 0;
+        int backslashCnt = 0;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '\'') {
+                aposCnt++;
+            } else if (c == '"') {
+                quotCnt++;
+            } else if (c == '\\') {
+                backslashCnt++;
+            }
+        }
+
+        if (backslashCnt != 0) {
+            if (quotCnt == 0) {
+                return "r\"" + s + "\"";
+            } else if (aposCnt == 0) {
+                return "r\'" + s + "\'";
+            }
+        }
+
         char quotation;
-        if (s.indexOf('"') != -1 && s.indexOf('\'') == -1) {
+        if (aposCnt < quotCnt ) {
             quotation = '\'';
         } else {
             quotation = '\"';
@@ -615,6 +641,10 @@ public final class FTLUtil {
                 }
                 lastEscIdx = i;
                 plusOutLn++;
+            } else if (i == 0 && !isNonEscapedIdentifierStart(c)
+                    || i > 0 && !isNonEscapedIdentifierPart(c)) {
+                // TODO [FM3] But quoting is only allowed for target variables... that's a strange syntax anyway.
+                return toStringLiteral(s);
             }
         }
 

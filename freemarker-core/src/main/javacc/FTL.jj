@@ -2261,11 +2261,7 @@ ASTDirAttemptRecoverContainer Attempt() :
     start = <ATTEMPT>
     children = MixedContentElements()
     recoveryBlock = Recover()
-    (
-        end = <END_RECOVER>
-        |
-        end = <END_ATTEMPT>
-    )
+    end = <END_ATTEMPT>
     {
         ASTDirAttemptRecoverContainer result = new ASTDirAttemptRecoverContainer(children, recoveryBlock);
         result.setLocation(template, start, end);

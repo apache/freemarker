@@ -70,19 +70,19 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("${f([ <#-- C --> ])}");
         assertConvertedSame("${f([1])}");
         assertConvertedSame("${f([1, [x,y], 3])}");
-        assertConvertedSame("${f([<#-- C1 --> 1, <#-- C2 --> 2, <#-- C3 --> 3 <#-- C4 -->])}");
+        assertConvertedSame("${f([<#--1--> 1, <#--2--> 2, <#--3--> 3 <#--4-->])}");
 
         assertConvertedSame("${f({})}");
         assertConvertedSame("${f({k: v})}");
         assertConvertedSame("${f({k1: v1, k2: v2, 'k3': 33})}");
-        assertConvertedSame("${f({ <#-- C1 --> k1 <#-- C1 --> : <#-- C1 --> v1 <#-- C1 -->,k2:v2 <#-- C1 -->})}");
+        assertConvertedSame("${f({ <#--1--> k1 <#--2--> : <#--3--> v1 <#--4-->,k2:v2 <#--5-->})}");
 
         assertConvertedSame("${f(1 .. 9)}");
         assertConvertedSame("${f(1 ..* 9)}");
         assertConvertedSame("${f(1 ..! 9)}");
         assertConvertedSame("${f(1 ..< 9)}");
         assertConvertedSame("${f(1 ..)}");
-        assertConvertedSame("${f(1<#-- C1 -->..\t<#-- C2 -->9)}");
+        assertConvertedSame("${f(1<#--1-->..\t<#--2-->9)}");
     }
 
     @Test
@@ -93,24 +93,24 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("${f()}");
         assertConvertedSame("${f(1)}");
         assertConvertedSame("${f(1, 2)}");
-        assertConvertedSame("${f<#-- C1 -->(<#-- C2 --> 1, 2 ,<#-- C3 --> 3,<#-- C4 -->4 <#-- C5 -->)}");
+        assertConvertedSame("${f<#--1-->(<#--2--> 1, 2 ,<#--3--> 3,<#--4-->4 <#--5-->)}");
 
         assertConvertedSame("${m[key]}");
         assertConvertedSame("${m['key']}");
-        assertConvertedSame("${m <#-- C1 --> [ <#-- C2 --> key <#-- C3 --> ]}");
+        assertConvertedSame("${m <#--1--> [ <#--2--> key <#--3--> ]}");
         assertConvertedSame("${seq\\-foo[1]}");
 
         assertConvertedSame("${m.key}");
-        assertConvertedSame("${m <#-- C1 --> . <#-- C3 --> key}");
+        assertConvertedSame("${m <#--1--> . <#--3--> key}");
 
         assertConvertedSame("${.outputFormat}");
         assertConvertedSame("${. <#-- C --> outputFormat}");
         assertConverted("${.outputFormat}","${.output_format}");
 
         assertConvertedSame("${a < b}${a <= b}${(a > b)}${(a >= b)}${a == b}${a != b}");
-        assertConvertedSame("${a<#-- C1 --><<#-- C2 -->b}${a<#-- C3 --><=<#-- C4 -->b}"
-                + "${(a<#-- C7 -->><#-- C8 -->b)}${(a<#-- C9 -->>=<#-- CA -->b)}"
-                + "${a<#-- CB -->==<#-- CC -->b}${a<#-- CD -->!=<#-- CE -->b}");
+        assertConvertedSame("${a<#--1--><<#--2-->b}${a<#--3--><=<#--4-->b}"
+                + "${(a<#--7-->><#--8-->b)}${(a<#--9-->>=<#--A-->b)}"
+                + "${a<#--B-->==<#--C-->b}${a<#--D-->!=<#--E-->b}");
         // "Same" for now, will be different later.
         assertConvertedSame("${a = b}${a == b}");
         assertConvertedSame("${a &lt; b}${a lt b}${a \\lt b}");
@@ -120,19 +120,19 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
 
         // [FM3] Add \and and &amp;&amp; tests when 2.3.27 is released
         assertConvertedSame("${a && b}${a & b}${a || b}${a | b}");
-        assertConvertedSame("${a<#-- C1 -->&&<#-- C2 -->b}${a<#-- C3 -->&<#-- C4 -->b}"
-                + "${a<#-- C5 -->||<#-- C6 -->b}${a<#-- C7 -->|<#-- C8 -->b}");
+        assertConvertedSame("${a<#--1-->&&<#--2-->b}${a<#--3-->&<#--4-->b}"
+                + "${a<#--5-->||<#--6-->b}${a<#--7-->|<#--8-->b}");
 
-        assertConvertedSame("${!a}${! foo}${! <#-- C1 --> bar}${!!c}");
+        assertConvertedSame("${!a}${! foo}${! <#--1--> bar}${!!c}");
 
         assertConvertedSame("${a!} ${a!0}");
-        assertConvertedSame("${a <#-- C1 --> !} ${a <#-- C2 --> ! <#-- C3 --> 0}");
+        assertConvertedSame("${a <#--1--> !} ${a <#--2--> ! <#--3--> 0}");
         assertConvertedSame("${a!b.c(x!0, y!0)}");
         assertConvertedSame("${(a.b)!x}");
         // [FM3] Will be: a!(x+1)
         assertConvertedSame("${a!x+1}");
 
-        assertConvertedSame("${a??} ${a <#-- C1 --> ??}");
+        assertConvertedSame("${a??} ${a <#--1--> ??}");
     }
 
     @Test
@@ -166,25 +166,75 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("<#if  foo >1<#elseIf  bar >2<#else >3</#if >");
 
         assertConvertedSame("<#macro m>body</#macro>");
-        assertConvertedSame("<#macro <#-- C1 --> m <#-- C2 -->></#macro >");
+        assertConvertedSame("<#macro <#--1--> m <#--2-->></#macro >");
         assertConvertedSame("<#macro m()></#macro>");
-        assertConvertedSame("<#macro m <#-- C1 --> ( <#-- C2 --> ) <#-- C3 --> ></#macro>");
+        assertConvertedSame("<#macro m <#--1--> ( <#--2--> ) <#--3--> ></#macro>");
         assertConvertedSame("<#macro m p1></#macro>");
         assertConvertedSame("<#macro m(p1)></#macro>");
         assertConvertedSame("<#macro m p1 p2 p3></#macro>");
-        assertConvertedSame("<#macro m p1 <#-- C1 --> p2 <#-- C2 --> p3 <#-- C3 -->></#macro>");
-        assertConvertedSame("<#macro m(p1<#-- C1 -->,<#-- C2 --> p2<#-- C3 -->,<#-- C4 -->"
-                + " p5<#-- C5 -->)<#-- C6 -->></#macro>");
+        assertConvertedSame("<#macro m p1 <#--1--> p2 <#--2--> p3 <#--3-->></#macro>");
+        assertConvertedSame("<#macro m(p1<#--1-->,<#--2--> p2<#--3-->,<#--4-->"
+                + " p5<#--5-->)<#--6-->></#macro>");
         assertConvertedSame("<#macro m p1=11 p2=foo p3=a+b></#macro>");
         assertConvertedSame("<#macro m(p1=11, p2=foo, p3=a+b)></#macro>");
-        assertConvertedSame("<#macro m p1<#-- C1 -->=<#-- C2 -->11<#-- C3 -->,<#-- C4 -->p2=22></#macro>");
+        assertConvertedSame("<#macro m p1<#--1-->=<#--2-->11<#--3-->,<#--4-->p2=22></#macro>");
         assertConvertedSame("<#macro m others...></#macro>");
         assertConvertedSame("<#macro m p1 others...></#macro>");
         assertConvertedSame("<#macro m p1 p2=22 others...></#macro>");
         assertConvertedSame("<#macro m(others...)></#macro>");
-        assertConvertedSame("<#macro m(others <#-- C1 --> ... <#-- C2 --> )></#macro>");
-        assertConvertedSame("<#function m x y>foo</#function>");
+        assertConvertedSame("<#macro m(others <#--1--> ... <#--2--> )></#macro>");
+        assertConvertedSame("<#function f x y><#return x + y></#function>");
+        assertConvertedSame("<#function f(x, y=0 <#--0-->)><#return <#--1--> x + y <#--2-->></#function>");
         assertConvertedSame("<#macro m\\-1 p\\-1></#macro>");
+        // Only works with " now, as it doesn't keep the literal kind. Later we will escape differently anyway:
+        assertConvertedSame("<#macro \"m 1\"></#macro>");
+
+        assertConvertedSame("<#assign x = 1>");
+        assertConvertedSame("<#global x = 1>");
+        assertConvertedSame("<#macro m><#local x = 1></#macro>");
+        assertConvertedSame("<#assign x = 1 in someNs>");
+        assertConvertedSame("<#assign <#--1--> x <#--2--> = <#--3--> 1 <#--4--> in <#--5--> someNs <#--6-->>");
+        assertConvertedSame("<#assign x=1 y=2,z=3>");
+        assertConvertedSame("<#assign x += 1>");
+        assertConvertedSame("<#assign x *= 2>");
+        assertConvertedSame("<#assign x-->");
+        assertConvertedSame("<#global x = 1, y++, z /= 2>");
+        assertConvertedSame("<#assign x = 1 y++ z /= 2>");
+        assertConvertedSame("<#assign <#--0-->x = 1<#--1-->,<#--2-->y++<#--3-->z/=2<#--4-->>");
+        // Only works with " now, as it doesn't keep the literal kind. Later we will escape differently anyway:
+        assertConvertedSame("<#assign \"x y\" = 1>");
+
+        assertConvertedSame("<#attempt>a<#recover>r</#attempt>");
+        assertConvertedSame("<#attempt >a<#recover  >r</#attempt   >");
+        assertConverted("<#attempt>a<#recover>r</#attempt>", "<#attempt>a<#recover>r</#recover>");
+        assertConverted("<#attempt >a<#recover  >r</#attempt   >", "<#attempt >a<#recover  >r</#recover   >");
+
+        assertConvertedSame("<#ftl>");
+        assertConvertedSame("<#ftl>x");
+        assertConvertedSame("<#ftl>x${x}");
+        assertConvertedSame("<#ftl>\nx${x}");
+        assertConvertedSame("\n\n  <#ftl>\n\nx");
+        assertConverted("<#ftl outputFormat='HTML'>x", "<#ftl output_format='HTML'>x");
+        assertConverted("<#ftl encoding='utf-8' customSettings={'a': [1, 2, 3]}>",
+                "<#ftl encoding='utf-8' attributes={'a': [1, 2, 3]}>");
+        assertConverted("<#ftl <#--1-->\n\tencoding='utf-8' <#--2-->\n\tcustomSettings={'a': [1, 2, 3]} <#--3-->\n>",
+                "<#ftl <#--1-->\n\tencoding='utf-8' <#--2-->\n\tattributes={'a': [1, 2, 3]} <#--3-->\n>");
+
+        assertConvertedSame("<#ftl outputFormat='XML'><#noAutoEsc><#autoEsc>${x}</#autoEsc></#noAutoEsc>");
+        assertConvertedSame("<#ftl outputFormat='XML'><#noAutoEsc ><#autoEsc\t>${x}</#autoEsc\n></#noAutoEsc\r>");
+
+        assertConvertedSame("<#compress>x</#compress>");
+        assertConvertedSame("<#compress >x</#compress  >");
+
+        assertConvertedSame("<#escape x as x?html><#noEscape>${v}</#noEscape></#escape>");
+        assertConvertedSame("<#escape <#--1--> x <#--2--> as <#--3--> x?html <#--4--> >"
+                + "<#noEscape >${v}</#noEscape >"
+                + "</#escape >");
+        assertConvertedSame("<#flush>");
+        assertConvertedSame("<#flush >");
+
+        assertConvertedSame("<#import '/lib/foo.ftl' as foo >");
+        assertConvertedSame("<#import <#--1--> '/lib/foo.ftl' <#--2--> as <#--3--> foo <#--4--> >");
     }
 
     @Test
@@ -199,14 +249,14 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("<@foo x\\-y=1 />");
         assertConvertedSame("<@foo\n\tx = 1\n\ty = 2\n/>");
         assertConvertedSame("<@foo 1 2 />");
-        assertConvertedSame("<@foo <#-- C1 --> 1 <#-- C2 --> 2 <#-- C3 --> />");
+        assertConvertedSame("<@foo <#--1--> 1 <#--2--> 2 <#--3--> />");
         assertConvertedSame("<@foo 1, 2 />");
-        assertConvertedSame("<@foo <#-- C1 --> 1 <#-- C2 -->, <#-- C3 --> 2 <#-- C4 --> />");
+        assertConvertedSame("<@foo <#--1--> 1 <#--2-->, <#--3--> 2 <#--4--> />");
         assertConvertedSame("<@foo x=1; i, j></@>");
         assertConvertedSame("<@foo 1; i, j></@>");
         assertConvertedSame("<@foo 1 2; i\\-2, j></@>");
         assertConvertedSame("<@foo x=1 y=2; i></@>");
-        assertConvertedSame("<@foo x=1 ;\n    i <#-- C0 --> , <#-- C1 -->\n\t<!-- C2 --> j <#-- C3 -->\n></@>");
+        assertConvertedSame("<@foo x=1 ;\n    i <#-- C0 --> , <#--1-->\n\t<!-- C2 --> j <#--3-->\n></@>");
     }
 
     @Test
@@ -219,7 +269,7 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
     @Test
     public void testComments() throws IOException, ConverterException {
         assertConvertedSame("\n<#--\n  c\n\t-->\n");
-        assertConvertedSame("${1 + <#-- C1 -->\r\n2 +[#-- C2 --]3 +<!--\tC3\t-->4 +[!-- C4 --] 5 + -<!-- -->1}");
+        assertConvertedSame("${1 + <#--1-->\r\n2 +[#-- C2 --]3 +<!--\tC3\t-->4 +[!-- C4 --] 5 + -<!-- -->1}");
     }
 
     @Test
