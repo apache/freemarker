@@ -33,11 +33,29 @@ import org.apache.freemarker.servlet.jsp.TaglibFactory.ClearMetaInfTldSource;
 import org.apache.freemarker.servlet.jsp.TaglibFactory.MetaInfTldSource;
 import org.apache.freemarker.servlet.jsp.TaglibFactory.WebInfPerLibJarMetaInfTldSource;
 
+/**
+ * Builder for {@link TaglibFactory}.
+ */
 public class TaglibFactoryBuilder {
 
+    /**
+     * Servlet context.
+     */
     private final ServletContext servletContext;
+
+    /**
+     * Object wrapper to be used in model building.
+     */
     private final ObjectWrapper objectWrapper;
+
+    /**
+     * TLD locations to look for when finding available JSP tag libraries.
+     */
     private List<MetaInfTldSource> metaInfTldSources = new ArrayList<>();
+
+    /**
+     * TLD classpath locations to look for when finding available JSP tag libraries.
+     */
     private List<String> classPathTlds = new ArrayList<>();
 
     public TaglibFactoryBuilder(ServletContext servletContext, ObjectWrapper objectWrapper) {
