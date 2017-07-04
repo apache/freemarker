@@ -561,15 +561,19 @@ public interface ProcessingConfiguration {
     /**
      * Specifies if {@code <#import ...>} (and {@link Environment#importLib(String, String)}) should delay the loading
      * and processing of the imported templates until the content of the imported namespace is actually accessed. This
-     * makes the overhead of <em>unused</em> imports negligible. A drawback is that importing a missing or otherwise
-     * broken template will be successful, and the problem will remain hidden until (and if) the namespace content is
-     * actually used. Also, you lose the strict control over when the namespace initializing code in the imported
-     * template will be executed, though it shouldn't mater for well written imported templates anyway. Note that the
-     * namespace initializing code will run with the same {@linkplain #getLocale() locale} as it was at the
-     * point of the {@code <#import ...>} call (other settings won't be handled specially like that).
+     * makes the overhead of <em>unused</em> imports negligible. Note that turning on lazy importing isn't entirely
+     * transparent, as accessing global variables (usually created with {@code <#global ...=...>}) that should be
+     * created by the imported template won't trigger the loading and processing of the lazily imported template
+     * (because globals aren't accessed through the namespace variable), so the global variable will just be missing.
+     * In general, you lose the strict control over when the namespace initializing code in the imported template will
+     * be executed, though it shouldn't mater for most well designed imported templates.
+     * Another drawback is that importing a missing or otherwise broken template will be successful, and the problem
+     * will remain hidden until (and if) the namespace content is actually used. Note that the namespace initializing
+     * code will run with the same {@linkplain ProcessingConfiguration#getLocale() locale} as it was at the point of the
+     * {@code <#import ...>} call (other settings won't be handled specially like that).
      * <p>
      * The default is {@code false} (and thus imports are eager) for backward compatibility, which can cause
-     * perceivable overhead if you have many imports and only a few of them is used.
+     * perceivable overhead if you have many imports and only a few of them is actually used.
      * <p>
      * This setting also affects {@linkplain #getAutoImports() auto-imports}, unless you have set a non-{@code null}
      * value with {@link #getLazyAutoImports()}.
