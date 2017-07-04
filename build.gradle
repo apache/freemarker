@@ -369,7 +369,7 @@ subprojects {
 task aggregateJavadoc(type: Javadoc) {
     javadocCommons(delegate)
     title "${project.title} ${versionCanonical} API"
-    destinationDir = new File(project.buildDir, 'api')
+    destinationDir = new File(new File(project.buildDir, 'docs'), 'javadoc')
     // source-s and classpath-s are added later, in the afterEvaluate of subprojects!
 }
 
