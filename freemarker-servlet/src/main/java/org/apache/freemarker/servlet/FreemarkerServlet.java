@@ -27,9 +27,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -65,10 +65,8 @@ import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
 import org.apache.freemarker.core.util._SecurityUtil;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.servlet.jsp.TaglibFactory;
-import org.apache.freemarker.servlet.jsp.TaglibFactory.ClasspathMetaInfTldSource;
-import org.apache.freemarker.servlet.jsp.TaglibFactory.ClearMetaInfTldSource;
 import org.apache.freemarker.servlet.jsp.TaglibFactory.MetaInfTldSource;
-import org.apache.freemarker.servlet.jsp.TaglibFactory.WebInfPerLibJarMetaInfTldSource;
+import org.apache.freemarker.servlet.jsp.TaglibFactoryBuilder;
 import org.slf4j.Logger;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -448,9 +446,9 @@ public class FreemarkerServlet extends HttpServlet {
 
     // Note these names start with dot, so they're essentially invisible from
     // a freemarker script.
-    private static final String ATTR_REQUEST_MODEL = ".freemarker.Request";
-    private static final String ATTR_REQUEST_PARAMETERS_MODEL = ".freemarker.RequestParameters";
-    private static final String ATTR_SESSION_MODEL = ".freemarker.Session";
+    public static final String ATTR_REQUEST_MODEL = ".freemarker.Request";
+    public static final String ATTR_REQUEST_PARAMETERS_MODEL = ".freemarker.RequestParameters";
+    public static final String ATTR_SESSION_MODEL = ".freemarker.Session";
     
     /** @deprecated We only keeps this attribute for backward compatibility, but actually aren't using it. */
     @Deprecated
@@ -642,7 +640,7 @@ public class FreemarkerServlet extends HttpServlet {
                 } else if (name.equals(INIT_PARAM_EXCEPTION_ON_MISSING_TEMPLATE)) {
                     exceptionOnMissingTemplate = _StringUtil.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_META_INF_TLD_LOCATIONS)) {
-                    metaInfTldSources = parseAsMetaInfTldLocations(value);
+                    metaInfTldSources = TaglibFactoryBuilder.parseMetaInfTldLocations(InitParamParser.parseCommaSeparatedList(value));
                 } else if (name.equals(INIT_PARAM_CLASSPATH_TLDS)) {
                     List newClasspathTlds = new ArrayList();
                     if (classpathTlds != null) {
@@ -677,44 +675,6 @@ public class FreemarkerServlet extends HttpServlet {
                     + config.getObjectWrapper().getClass().getName());
         }
         LOG.debug("Using object wrapper {}", config.getObjectWrapper());
-    }
-    
-    private List/*<MetaInfTldSource>*/ parseAsMetaInfTldLocations(String value) throws ParseException {
-        List/*<MetaInfTldSource>*/ metaInfTldSources = null;
-        
-        List/*<String>*/ values = InitParamParser.parseCommaSeparatedList(value);
-        for (Iterator it = values.iterator(); it.hasNext(); ) {
-            final String itemStr = (String) it.next();
-            final MetaInfTldSource metaInfTldSource;
-            if (itemStr.equals(META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS)) {
-                metaInfTldSource = WebInfPerLibJarMetaInfTldSource.INSTANCE;
-            } else if (itemStr.startsWith(META_INF_TLD_LOCATION_CLASSPATH)) {
-                String itemRightSide = itemStr.substring(META_INF_TLD_LOCATION_CLASSPATH.length()).trim();
-                if (itemRightSide.length() == 0) {
-                    metaInfTldSource = new ClasspathMetaInfTldSource(Pattern.compile(".*", Pattern.DOTALL));
-                } else if (itemRightSide.startsWith(":")) {
-                    final String regexpStr = itemRightSide.substring(1).trim();
-                    if (regexpStr.length() == 0) {
-                        throw new ParseException("Empty regular expression after \""
-                                + META_INF_TLD_LOCATION_CLASSPATH + ":\"", -1);
-                    }
-                    metaInfTldSource = new ClasspathMetaInfTldSource(Pattern.compile(regexpStr));   
-                } else {
-                    throw new ParseException("Invalid \"" + META_INF_TLD_LOCATION_CLASSPATH
-                            + "\" value syntax: " + value, -1);
-                }
-            } else if (itemStr.startsWith(META_INF_TLD_LOCATION_CLEAR)) {
-                metaInfTldSource = ClearMetaInfTldSource.INSTANCE;
-            } else {
-                throw new ParseException("Item has no recognized source type prefix: " + itemStr, -1);
-            }
-            if (metaInfTldSources == null) {
-                metaInfTldSources = new ArrayList();
-            }
-            metaInfTldSources.add(metaInfTldSource);
-        }
-        
-        return metaInfTldSources;
     }
 
     /**
@@ -1000,8 +960,8 @@ public class FreemarkerServlet extends HttpServlet {
                 sessionModel = (HttpSessionHashModel) session.getAttribute(ATTR_SESSION_MODEL);
                 if (sessionModel == null || sessionModel.isOrphaned(session)) {
                     sessionModel = new HttpSessionHashModel(session, objectWrapper);
-                    initializeSessionAndInstallModel(request, response, 
-                            sessionModel, session);
+                    session.setAttribute(ATTR_SESSION_MODEL, sessionModel);
+                    initializeSession(request, response);
                 }
             } else {
                 sessionModel = new HttpSessionHashModel(this, request, response, objectWrapper);
@@ -1040,73 +1000,47 @@ public class FreemarkerServlet extends HttpServlet {
      * The default implementation configures it based on the servlet-init parameters and various other environmental
      * settings, so if you override this method, you should call super, then adjust the result.
      */
-    protected TaglibFactory createTaglibFactory(ObjectWrapper objectWrapper,
-            ServletContext servletContext) throws TemplateModelException {
-        TaglibFactory taglibFactory = new TaglibFactory(servletContext);
-        
-        taglibFactory.setObjectWrapper(objectWrapper);
-        
-        {
-            List/*<MetaInfTldSource>*/ mergedMetaInfTldSources = new ArrayList();
+    @SuppressWarnings("unchecked")
+    protected TaglibFactory createTaglibFactory(ObjectWrapper objectWrapper, ServletContext servletContext)
+            throws TemplateModelException {
 
-            if (metaInfTldSources != null) {
-                mergedMetaInfTldSources.addAll(metaInfTldSources);
-            }
-            
-            String sysPropVal = _SecurityUtil.getSystemProperty(SYSTEM_PROPERTY_META_INF_TLD_SOURCES, null);
-            if (sysPropVal != null) {
-                try {
-                    List metaInfTldSourcesSysProp = parseAsMetaInfTldLocations(sysPropVal);
-                    if (metaInfTldSourcesSysProp != null) {
-                        mergedMetaInfTldSources.addAll(metaInfTldSourcesSysProp);
-                    }
-                } catch (ParseException e) {
-                    throw new TemplateModelException("Failed to parse system property \""
-                            + SYSTEM_PROPERTY_META_INF_TLD_SOURCES + "\"", e);
-                }
-            }
+        List<MetaInfTldSource> metaInfTldSourcesFromSysProp = null;
+        try {
+            final String prop = _SecurityUtil.getSystemProperty(SYSTEM_PROPERTY_META_INF_TLD_SOURCES, null);
+            metaInfTldSourcesFromSysProp = (List<MetaInfTldSource>) ((prop != null)
+                    ? TaglibFactoryBuilder.parseMetaInfTldLocations(InitParamParser.parseCommaSeparatedList(prop))
+                    : Collections.emptyList());
+        } catch (ParseException e) {
+            throw new TemplateModelException(
+                    "Failed to parse system property \"" + SYSTEM_PROPERTY_META_INF_TLD_SOURCES + "\"", e);
+        }
 
-            List/*<Pattern>*/ jettyTaglibJarPatterns = null;
-            try {
-                final String attrVal = (String) servletContext.getAttribute(ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS);
-                jettyTaglibJarPatterns = attrVal != null ? InitParamParser.parseCommaSeparatedPatterns(attrVal) : null;
-            } catch (Exception e) {
-                LOG.error("Failed to parse application context attribute \""
-                        + ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS + "\" - it will be ignored", e);
-            }
-            if (jettyTaglibJarPatterns != null) {
-                for (Iterator/*<Pattern>*/ it = jettyTaglibJarPatterns.iterator(); it.hasNext(); ) {
-                    Pattern pattern = (Pattern) it.next();
-                    mergedMetaInfTldSources.add(new ClasspathMetaInfTldSource(pattern));
-                }
-            }
-            
-            taglibFactory.setMetaInfTldSources(mergedMetaInfTldSources);
+        List<Pattern> jettyTaglibJarPatterns = null;
+        try {
+            final String attrVal = (String) servletContext.getAttribute(ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS);
+            jettyTaglibJarPatterns = (attrVal != null) ? InitParamParser.parseCommaSeparatedPatterns(attrVal)
+                    : Collections.emptyList();
+        } catch (Exception e) {
+            LOG.error("Failed to parse application context attribute \"" + ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS
+                    + "\" - it will be ignored", e);
         }
-        
-        {
-            List/*<String>*/ mergedClassPathTlds = new ArrayList();
-            if (classpathTlds != null) {
-                mergedClassPathTlds.addAll(classpathTlds);
-            }
-            
-            String sysPropVal = _SecurityUtil.getSystemProperty(SYSTEM_PROPERTY_CLASSPATH_TLDS, null);
-            if (sysPropVal != null) {
-                try {
-                    List/*<String>*/ classpathTldsSysProp = InitParamParser.parseCommaSeparatedList(sysPropVal);
-                    if (classpathTldsSysProp != null) {
-                        mergedClassPathTlds.addAll(classpathTldsSysProp);
-                    }
-                } catch (ParseException e) {
-                    throw new TemplateModelException("Failed to parse system property \""
-                            + SYSTEM_PROPERTY_CLASSPATH_TLDS + "\"", e);
-                }
-            }
-            
-            taglibFactory.setClasspathTlds(mergedClassPathTlds);
+
+        List<String> classpathTldsFromSysProp = null;
+        try {
+            final String prop = _SecurityUtil.getSystemProperty(SYSTEM_PROPERTY_CLASSPATH_TLDS, null);
+            classpathTldsFromSysProp = (prop != null) ? InitParamParser.parseCommaSeparatedList(prop)
+                    : Collections.emptyList();
+        } catch (ParseException e) {
+            throw new TemplateModelException(
+                    "Failed to parse system property \"" + SYSTEM_PROPERTY_CLASSPATH_TLDS + "\"", e);
         }
-        
-        return taglibFactory;        
+
+        return new TaglibFactoryBuilder(servletContext, objectWrapper)
+                .addAllMetaInfTldSources(metaInfTldSources)
+                .addAllMetaInfTldSources(metaInfTldSourcesFromSysProp)
+                .addAllJettyMetaInfTldJarPatterns(jettyTaglibJarPatterns)
+                .addAllClasspathTlds(classpathTlds)
+                .addAllClasspathTlds(classpathTldsFromSysProp).build();
     }
 
     /**
@@ -1133,14 +1067,6 @@ public class FreemarkerServlet extends HttpServlet {
      */
     protected List/*<MetaInfTldSource>*/ createDefaultMetaInfTldSources() {
         return TaglibFactory.DEFAULT_META_INF_TLD_SOURCES;
-    }
-    
-    void initializeSessionAndInstallModel(HttpServletRequest request,
-            HttpServletResponse response, HttpSessionHashModel sessionModel, 
-            HttpSession session)
-            throws ServletException, IOException {
-        session.setAttribute(ATTR_SESSION_MODEL, sessionModel);
-        initializeSession(request, response);
     }
 
     /**
@@ -1279,10 +1205,8 @@ public class FreemarkerServlet extends HttpServlet {
      * @param request the actual HTTP request
      * @param response the actual HTTP response
      */
-    protected void initializeSession(
-        HttpServletRequest request,
-        HttpServletResponse response)
-        throws ServletException, IOException {
+    protected void initializeSession(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
     }
 
     /**
