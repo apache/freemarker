@@ -127,10 +127,10 @@ this will run the tests of all modules.
 
 To generate the aggregated API documention (contains the API of several modules
 that are deemed to be used commonly enough), issue `./gradlew aggregateJavadoc`
-from the root module; the output will appear in the `build/docs/api`
+from the root module; the output will appear in the `build/docs/javadoc`
 subdirectory. To generate API documentation per module, issue
-`./gradlew javadoc`; the output will appear in the build/docs/api subdirectory
-of the module.
+`./gradlew javadoc`; the output will appear in the `build/docs/javadoc`
+subdirectory of the module.
 
 To generate the FreeMarker Manual, issue `./gradlew manualOffline`
 (TODO: not yet working); the output will appear under
