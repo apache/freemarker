@@ -32,16 +32,16 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.apache.freemarker.core.util._SecurityUtil;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
 class DebuggerServer {
 
-    private static final Logger LOG = _CoreLogs.DEBUG_SERVER;
+    private static final Logger LOG = LoggerFactory.getLogger(DebuggerServer.class);
     
     // TODO: Eventually replace with Yarrow    
     // TODO: Can be extremely slow (on Linux, not enough entropy)

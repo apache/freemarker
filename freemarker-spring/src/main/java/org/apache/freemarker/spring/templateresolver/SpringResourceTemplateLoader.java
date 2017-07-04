@@ -26,8 +26,8 @@ import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
-import org.apache.freemarker.spring._SpringLogs;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -37,7 +37,7 @@ import org.springframework.core.io.ResourceLoader;
  */
 public class SpringResourceTemplateLoader implements TemplateLoader, ResourceLoaderAware {
 
-    private static final Logger LOG = _SpringLogs.TEMPLATE_RESOLVER;
+    private static final Logger LOG = LoggerFactory.getLogger(SpringResourceTemplateLoader.class);
 
     /**
      * Base template resource location.

@@ -25,6 +25,8 @@ the FreeMarer 3 changelog here:
 - Removed JSP 2.0 support (2.1 and Servlet 2.5 is the minimum for now, but maybe it will be 2.2 and Servlet 3.0 later).
 - Removed freemarker.ext.log, our log abstraction layer from the old times when there was no clear winner on this field.
   Added org.slf4j:slf4j-api as required dependency instead.
+- Log categories are now simply the full qualified class name of the logging classes. There are no predefined log
+  categories (such as "freemarker.runtime", etc.) anymore. This is to follow the common practices in logging.
 - Removed all classes with "main" methods that were part of freemarker.jar. Such tools should be separate artifacts,
   not part of the library, and they are often classified as CWE-489 "Leftover Debug Code". The removed classes are:
   freemarker.core.CommandLine, freemarker.ext.dom.Transform, freemarker.template.utility.ToCanonical
@@ -290,8 +292,8 @@ the FreeMarer 3 changelog here:
 - Removed long deprecated `#{}` interpolations. They are treated as plain static text now. (The
   template converter tool translates these to `${}` interpolations. For example `#{x}` is simply 
   translated to `${b}`, while `#{x; m1M3}` is translated to `${x?string('0.0##')}`).
-- #attempt now logs errors into the org.apache.freemarker.core.Runtime.Attempt log chategory (by
-  default). It doesn't create an additional debug level log entry anymore.
+- #attempt doesn't create an additional debug level log entry when an exception is catched. It only
+  log an error level log (by default at least; see the `attemptExceptionReporter` setting)
 - You can't close #attempt/#recover with `</#recover>` anymore, only with `<#attempt>`. This was the
   standard form in FM2 as well, and is consistent with how #if/#else works. (The template converter
   tool does this conversion.)

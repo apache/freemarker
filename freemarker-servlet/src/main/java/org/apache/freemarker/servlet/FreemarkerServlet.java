@@ -50,7 +50,6 @@ import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.TemplateExceptionHandler;
 import org.apache.freemarker.core.TemplateNotFoundException;
-import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -68,6 +67,7 @@ import org.apache.freemarker.servlet.jsp.TaglibFactory;
 import org.apache.freemarker.servlet.jsp.TaglibFactory.MetaInfTldSource;
 import org.apache.freemarker.servlet.jsp.TaglibFactoryBuilder;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -325,10 +325,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 // [FM3] Lot of things are marked here with "BC" and deprecated
 public class FreemarkerServlet extends HttpServlet {
     
-    private static final Logger LOG = _ServletLogs.ROOT;
-    
-    @Deprecated
-    private static final Logger LOG_RT = _CoreLogs.RUNTIME;
+    private static final Logger LOG = LoggerFactory.getLogger(FreemarkerServlet.class);
 
     public static final long serialVersionUID = -2440216393145762479L;
 
@@ -885,10 +882,6 @@ public class FreemarkerServlet extends HttpServlet {
 
     private ServletException newServletExceptionWithFreeMarkerLogging(String message, Throwable cause) throws ServletException {
         if (cause instanceof TemplateException) {
-            // For backward compatibility, we log into the same category as Environment did when
-            // log_template_exceptions was true.
-            LOG_RT.error(message, cause);
-        } else {
             LOG.error(message, cause);
         }
 

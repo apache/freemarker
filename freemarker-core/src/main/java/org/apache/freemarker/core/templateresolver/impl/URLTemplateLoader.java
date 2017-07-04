@@ -29,23 +29,23 @@ import java.net.URLConnection;
 import java.util.Objects;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is an abstract template loader that can load templates whose location can be described by an URL. Subclasses
  * only need to override the {@link #getURL(String)}, {@link #extractNegativeResult(URLConnection)}, and perhaps the
  * {@link #prepareConnection(URLConnection)} method.
  */
-// TODO JUnit test (including implementing a HTTP-based template loader to test the new protected methods)
+// TODO [FM3] JUnit test (including implementing a HTTP-based template loader to test the new protected methods)
 public abstract class URLTemplateLoader implements TemplateLoader {
-    
-    private static final Logger LOG = _CoreLogs.TEMPLATE_RESOLVER;
+
+    private static final Logger LOG = LoggerFactory.getLogger(URLTemplateLoader.class);
     
     private Boolean urlConnectionUsesCaches = false;
     

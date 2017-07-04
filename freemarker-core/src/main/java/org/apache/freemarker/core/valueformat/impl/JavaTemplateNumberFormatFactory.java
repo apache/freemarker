@@ -24,11 +24,11 @@ import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.valueformat.InvalidFormatParametersException;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Deals with {@link TemplateNumberFormat}-s that wrap a Java {@link NumberFormat}. The parameter string is usually
@@ -44,8 +44,8 @@ import org.slf4j.Logger;
 public class JavaTemplateNumberFormatFactory extends TemplateNumberFormatFactory {
     
     public static final JavaTemplateNumberFormatFactory INSTANCE = new JavaTemplateNumberFormatFactory();
-    
-    private static final Logger LOG = _CoreLogs.RUNTIME;
+
+    private static final Logger LOG = LoggerFactory.getLogger(JavaTemplateNumberFormatFactory.class);
 
     private static final ConcurrentHashMap<CacheKey, NumberFormat> GLOBAL_FORMAT_CACHE
             = new ConcurrentHashMap<>();

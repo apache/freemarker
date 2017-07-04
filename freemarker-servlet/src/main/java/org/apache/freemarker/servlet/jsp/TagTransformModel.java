@@ -39,15 +39,15 @@ import javax.servlet.jsp.tagext.TryCatchFinally;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.TransformControl;
-import org.apache.freemarker.servlet._ServletLogs;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Adapts a {@link Tag}-based custom JSP tag to be a value that's callable in templates as an user-defined directive.
  * For {@link SimpleTag}-based custom JSP tags {@link SimpleTagDirectiveModel} is used instead.
  */
 class TagTransformModel extends JspTagModelBase implements TemplateTransformModel {
-    private static final Logger LOG = _ServletLogs.JSP;
+    private static final Logger LOG = LoggerFactory.getLogger(TagTransformModel.class);
     
     private final boolean isBodyTag;
     private final boolean isIterationTag;

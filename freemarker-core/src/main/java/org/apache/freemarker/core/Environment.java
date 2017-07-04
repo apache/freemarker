@@ -80,6 +80,7 @@ import org.apache.freemarker.core.valueformat.impl.JavaTemplateDateFormatFactory
 import org.apache.freemarker.core.valueformat.impl.JavaTemplateNumberFormatFactory;
 import org.apache.freemarker.core.valueformat.impl.XSTemplateDateFormatFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -100,18 +101,16 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * because unset settings are ultimately inherited from {@link Configuration}.
  */
 public final class Environment extends MutableProcessingConfiguration<Environment> implements CustomStateScope {
-    
-    private static final ThreadLocal<Environment> TLS_ENVIRONMENT = new ThreadLocal();
 
-    private static final Logger LOG = _CoreLogs.RUNTIME;
+    private static final Logger LOG = LoggerFactory.getLogger(Environment.class);
+
+    private static final ThreadLocal<Environment> TLS_ENVIRONMENT = new ThreadLocal();
 
     // Do not use this object directly; deepClone it first! DecimalFormat isn't
     // thread-safe.
-    private static final DecimalFormat C_NUMBER_FORMAT = new DecimalFormat(
-            "0.################",
-            new DecimalFormatSymbols(Locale.US));
-
+    private static final DecimalFormat C_NUMBER_FORMAT;
     static {
+        C_NUMBER_FORMAT = new DecimalFormat("0.################", new DecimalFormatSymbols(Locale.US));
         C_NUMBER_FORMAT.setGroupingUsed(false);
         C_NUMBER_FORMAT.setDecimalSeparatorAlwaysShown(false);
     }

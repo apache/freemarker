@@ -42,7 +42,6 @@ import org.apache.freemarker.core.TemplateConfiguration;
 import org.apache.freemarker.core.TemplateLanguage;
 import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core.WrongTemplateCharsetException;
-import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.GetTemplateResult;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
@@ -62,6 +61,7 @@ import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._StringUtil;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The default implementation of the {@link TemplateResolver} class; the default value of
@@ -73,12 +73,13 @@ public class DefaultTemplateResolver extends TemplateResolver {
      * The default template update delay; see {@link Configuration#getTemplateUpdateDelayMilliseconds()}.
      */
     public static final long DEFAULT_TEMPLATE_UPDATE_DELAY_MILLIS = 5000L;
-    
+
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultTemplateResolver.class);
+
     private static final String ASTERISKSTR = "*";
     private static final char ASTERISK = '*';
     private static final char SLASH = '/';
     private static final String LOCALE_PART_SEPARATOR = "_";
-    private static final Logger LOG = _CoreLogs.TEMPLATE_RESOLVER;
 
     /** Maybe {@code null}. */
     private TemplateLoader templateLoader;

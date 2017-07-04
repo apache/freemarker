@@ -34,8 +34,8 @@ import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
 
-import org.apache.freemarker.servlet._ServletLogs;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An instance of this class should be registered as a <tt>&lt;listener&gt;</tt> in
@@ -48,7 +48,7 @@ public class EventForwarding
         ServletContextListener,
         HttpSessionListener,
         HttpSessionAttributeListener {
-    private static final Logger LOG = _ServletLogs.JSP;
+    private static final Logger LOG = LoggerFactory.getLogger(EventForwarding.class);
     
     private static final String ATTR_NAME = EventForwarding.class.getName();
     

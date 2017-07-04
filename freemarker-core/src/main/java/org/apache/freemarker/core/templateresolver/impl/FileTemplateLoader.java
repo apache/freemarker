@@ -32,7 +32,6 @@ import java.security.PrivilegedExceptionAction;
 import java.util.Objects;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
@@ -40,6 +39,7 @@ import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
 import org.apache.freemarker.core.util._SecurityUtil;
 import org.apache.freemarker.core.util._StringUtil;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A {@link TemplateLoader} that uses files inside a specified directory as the source of templates. By default it does
@@ -73,7 +73,7 @@ public class FileTemplateLoader implements TemplateLoader {
     private static final int CASE_CHECK_CACHE__SOFT_SIZE = 1000;
     private static final boolean SEP_IS_SLASH = File.separatorChar == '/';
     
-    private static final Logger LOG = _CoreLogs.TEMPLATE_RESOLVER;
+    private static final Logger LOG = LoggerFactory.getLogger(FileTemplateLoader.class);
     
     public final File baseDir;
     private final String canonicalBasePath;

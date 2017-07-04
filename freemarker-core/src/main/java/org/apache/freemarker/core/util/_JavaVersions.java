@@ -19,14 +19,17 @@
 package org.apache.freemarker.core.util;
 
 import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core._Java8;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Used internally only, might changes without notice!
  */
 public final class _JavaVersions {
-    
+
+    private static final Logger LOG = LoggerFactory.getLogger(_JavaVersions.class);
+
     private _JavaVersions() {
         // Not meant to be instantiated
     }
@@ -65,7 +68,7 @@ public final class _JavaVersions {
                         .getField("INSTANCE").get(null);
             } catch (Exception e) {
                 try {
-                    _CoreLogs.RUNTIME.error("Failed to access Java 8 functionality", e);
+                    LOG.error("Failed to access Java 8 functionality", e);
                 } catch (Exception e2) {
                     // Suppressed
                 }

@@ -48,12 +48,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.CommonBuilder;
 import org.apache.freemarker.core.util._JavaVersions;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Returns information about a {@link Class} that's useful for FreeMarker. Encapsulates a cache for this. Thread-safe,
@@ -70,7 +70,7 @@ class ClassIntrospector {
     // these are shared by many object wrappers, and concurrency related glitches due to user errors must remain
     // local to the object wrappers, not corrupting the shared ClassIntrospector.
 
-    private static final Logger LOG = _CoreLogs.OBJECT_WRAPPER;
+    private static final Logger LOG = LoggerFactory.getLogger(ClassIntrospector.class);
 
     private static final String JREBEL_SDK_CLASS_NAME = "org.zeroturnaround.javarebel.ClassEventListener";
     private static final String JREBEL_INTEGRATION_ERROR_MSG

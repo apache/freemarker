@@ -24,11 +24,8 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.server.Unreferenced;
 
-import org.apache.freemarker.core._CoreLogs;
-import org.apache.freemarker.core.debug.DebuggerClient;
-import org.apache.freemarker.core.debug.DebuggerListener;
-import org.apache.freemarker.core.debug.EnvironmentSuspendedEvent;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Used by the {@link DebuggerClient} to invoke local
@@ -38,8 +35,8 @@ extends
     UnicastRemoteObject
 implements
     DebuggerListener, Unreferenced {
-    
-    private static final Logger LOG = _CoreLogs.DEBUG_CLIENT;
+
+    private static final Logger LOG = LoggerFactory.getLogger(RmiDebuggerListenerImpl.class);
     
     private static final long serialVersionUID = 1L;
 

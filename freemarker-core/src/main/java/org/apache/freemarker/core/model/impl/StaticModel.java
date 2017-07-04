@@ -26,12 +26,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Wraps the static fields and methods of a class in a
@@ -43,8 +43,8 @@ import org.slf4j.Logger;
  */
 final class StaticModel implements TemplateHashModelEx {
     
-    private static final Logger LOG = _CoreLogs.OBJECT_WRAPPER;
-    
+    private static final Logger LOG = LoggerFactory.getLogger(StaticModel.class);
+
     private final Class clazz;
     private final DefaultObjectWrapper wrapper;
     private final Map map = new HashMap();

@@ -35,6 +35,7 @@ import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
 import org.apache.freemarker.core.util._StringUtil;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 final class InitParamParser {
@@ -45,8 +46,8 @@ final class InitParamParser {
     static final String TEMPLATE_PATH_PREFIX_CLASSPATH = "classpath:";
     static final String TEMPLATE_PATH_PREFIX_FILE = "file://";
     static final String TEMPLATE_PATH_SETTINGS_BI_NAME = "settings";
-    
-    private static final Logger LOG = _ServletLogs.ROOT;
+
+    private static final Logger LOG = LoggerFactory.getLogger(InitParamParser.class);
     
     private InitParamParser() {
         // Not to be instantiated

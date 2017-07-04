@@ -33,8 +33,8 @@ import javax.servlet.jsp.el.VariableResolver;
 
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.util._ClassUtil;
-import org.apache.freemarker.servlet._ServletLogs;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Don't use this class; it's only public to work around Google App Engine Java
@@ -43,8 +43,8 @@ import org.slf4j.Logger;
  * Implementation of PageContext that contains all JSP 2.1 methods.
  */
 public class _FreeMarkerPageContext21 extends FreeMarkerPageContext {
-    
-    private static final Logger LOG = _ServletLogs.JSP;
+
+    private static final Logger LOG = LoggerFactory.getLogger(_FreeMarkerPageContext21.class);
 
     static {
         if (JspFactory.getDefaultFactory() == null) {

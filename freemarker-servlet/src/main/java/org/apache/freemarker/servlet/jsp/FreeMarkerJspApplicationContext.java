@@ -41,13 +41,13 @@ import javax.servlet.jsp.el.ImplicitObjectELResolver;
 import javax.servlet.jsp.el.ScopedAttributeELResolver;
 
 import org.apache.freemarker.core.util._ClassUtil;
-import org.apache.freemarker.servlet._ServletLogs;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
 class FreeMarkerJspApplicationContext implements JspApplicationContext {
-    private static final Logger LOG = _ServletLogs.JSP;
+    private static final Logger LOG = LoggerFactory.getLogger(FreeMarkerJspApplicationContext.class);
     private static final ExpressionFactory expressionFactoryImpl = findExpressionFactoryImplementation();
     
     private final LinkedList listeners = new LinkedList();

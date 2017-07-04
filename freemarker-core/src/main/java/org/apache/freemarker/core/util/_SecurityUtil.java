@@ -23,14 +23,14 @@ import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
-import org.apache.freemarker.core._CoreLogs;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
 public class _SecurityUtil {
-    
-    private static final Logger LOG = _CoreLogs.SECURITY;
+
+    private static final Logger LOG = LoggerFactory.getLogger(_SecurityUtil.class);
     
     private _SecurityUtil() {
     }

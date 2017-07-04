@@ -42,6 +42,7 @@ import org.apache.freemarker.core.util._CollectionUtil;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._StringUtil;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A {@link TemplateLoader} that uses streams reachable through {@link ServletContext#getResource(String)} as its source
@@ -49,7 +50,7 @@ import org.slf4j.Logger;
  */
 public class WebAppTemplateLoader implements TemplateLoader {
 
-    private static final Logger LOG = _ServletLogs.ROOT;
+    private static final Logger LOG = LoggerFactory.getLogger(WebAppTemplateLoader.class);
 
     private final ServletContext servletContext;
     private final String subdirPath;

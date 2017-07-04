@@ -75,8 +75,8 @@ import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.servlet.FreemarkerServlet;
 import org.apache.freemarker.servlet.HttpRequestHashModel;
-import org.apache.freemarker.servlet._ServletLogs;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
@@ -107,7 +107,7 @@ public class TaglibFactory implements TemplateHashModel {
     public static final List/*<? extends MetaInfTldSource>*/ DEFAULT_META_INF_TLD_SOURCES
             = Collections.singletonList(WebInfPerLibJarMetaInfTldSource.INSTANCE);
 
-    private static final Logger LOG = _ServletLogs.JSP;
+    private static final Logger LOG = LoggerFactory.getLogger(TaglibFactory.class);
 
     private static final int URL_TYPE_FULL = 0;
     private static final int URL_TYPE_ABSOLUTE = 1;

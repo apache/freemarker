@@ -27,6 +27,7 @@ import org.apache.freemarker.core.model.impl._MethodUtil;
 import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.core.util._StringUtil;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Used internally only, might changes without notice!
@@ -36,7 +37,7 @@ import org.slf4j.Logger;
  */
 public class _ErrorDescriptionBuilder {
 
-    private static final Logger LOG = _CoreLogs.RUNTIME;
+    private static final Logger LOG = LoggerFactory.getLogger(_ErrorDescriptionBuilder.class);
 
     private final String description;
     private final Object[] descriptionParts;

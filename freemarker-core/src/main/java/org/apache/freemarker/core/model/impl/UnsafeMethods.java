@@ -29,13 +29,13 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.util._ClassUtil;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class UnsafeMethods {
-    
-    private static final Logger LOG = _CoreLogs.OBJECT_WRAPPER;
+
+    private static final Logger LOG = LoggerFactory.getLogger(UnsafeMethods.class);
     private static final String UNSAFE_METHODS_PROPERTIES = "unsafeMethods.properties";
     private static final Set UNSAFE_METHODS = createUnsafeMethodsSet();
     

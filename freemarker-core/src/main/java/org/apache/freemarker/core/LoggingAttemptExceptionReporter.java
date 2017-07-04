@@ -19,11 +19,17 @@
 
 package org.apache.freemarker.core;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Default {@link AttemptExceptionReporter} implementation, factored out from {@link AttemptExceptionReporter} so that
  * we can have static field.
  */
 class LoggingAttemptExceptionReporter implements AttemptExceptionReporter {
+
+
+    private static final Logger LOG = LoggerFactory.getLogger(LoggingAttemptExceptionReporter.class);
 
     private final boolean logAsWarn;
 
@@ -34,9 +40,9 @@ class LoggingAttemptExceptionReporter implements AttemptExceptionReporter {
     public void report(TemplateException te, Environment env) {
         String message = "Error executing FreeMarker template part in the #attempt block";
         if (!logAsWarn) {
-            _CoreLogs.ATTEMPT.error(message, te);
+            LOG.error(message, te);
         } else {
-            _CoreLogs.ATTEMPT.warn(message, te);
+            LOG.warn(message, te);
         }
     }
 

@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core._DelayedFTLTypeDescription;
 import org.apache.freemarker.core._DelayedJQuote;
 import org.apache.freemarker.core._TemplateModelException;
@@ -47,6 +46,7 @@ import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.util._StringUtil;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A class that will wrap an arbitrary object into {@link org.apache.freemarker.core.model.TemplateHashModel}
@@ -60,9 +60,9 @@ import org.slf4j.Logger;
 
 public class BeanModel
         implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport {
-    
-    private static final Logger LOG = _CoreLogs.OBJECT_WRAPPER;
-    
+
+    private static final Logger LOG = LoggerFactory.getLogger(BeanModel.class);
+
     protected final Object object;
     protected final DefaultObjectWrapper wrapper;
     

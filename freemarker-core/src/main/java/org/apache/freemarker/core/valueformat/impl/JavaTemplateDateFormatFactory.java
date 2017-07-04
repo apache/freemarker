@@ -27,13 +27,13 @@ import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core._CoreLogs;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.valueformat.InvalidFormatParametersException;
 import org.apache.freemarker.core.valueformat.TemplateDateFormat;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.UnknownDateTypeFormattingUnsupportedException;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Deals with {@link TemplateDateFormat}-s that wrap a Java {@link DateFormat}. The parameter string is usually a
@@ -47,8 +47,8 @@ import org.slf4j.Logger;
 public class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
     
     public static final JavaTemplateDateFormatFactory INSTANCE = new JavaTemplateDateFormatFactory();
-    
-    private static final Logger LOG = _CoreLogs.RUNTIME;
+
+    private static final Logger LOG = LoggerFactory.getLogger(JavaTemplateDateFormatFactory.class);
 
     private static final ConcurrentHashMap<CacheKey, DateFormat> GLOBAL_FORMAT_CACHE = new ConcurrentHashMap<>();
     private static final int LEAK_ALERT_DATE_FORMAT_CACHE_SIZE = 1024;

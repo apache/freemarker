@@ -26,13 +26,14 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.templateresolver.impl.MruCacheStorage;
 import org.apache.freemarker.core.util._StringUtil;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Helper for language features (like built-ins) that use regular expressions. 
  */
 final class RegexpHelper {
 
-    private static final Logger LOG = _CoreLogs.RUNTIME;
+    private static final Logger LOG = LoggerFactory.getLogger(RegexpHelper.class);
     
     private static volatile boolean flagWarningsEnabled = LOG.isWarnEnabled();
     private static final int MAX_FLAG_WARNINGS_LOGGED = 25;
