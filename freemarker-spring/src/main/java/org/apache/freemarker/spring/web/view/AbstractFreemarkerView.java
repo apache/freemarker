@@ -43,7 +43,7 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  */
 public abstract class AbstractFreemarkerView extends AbstractTemplateView {
 
-    private static Logger log = LoggerFactory.getLogger(AbstractFreemarkerView.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractFreemarkerView.class);
 
     /**
      * FreeMarker {@link Configuration} instance.
@@ -119,7 +119,7 @@ public abstract class AbstractFreemarkerView extends AbstractTemplateView {
             getTemplate();
             return true;
         } catch (TemplateNotFoundException e) {
-            log.debug("No view found for URL: {}", getUrl());
+            LOG.debug("No view found for URL: {}", getUrl());
         } catch (MalformedTemplateNameException e) {
             throw new ApplicationContextException("Malformed template name: " + getUrl(), e);
         } catch (ParseException e) {
