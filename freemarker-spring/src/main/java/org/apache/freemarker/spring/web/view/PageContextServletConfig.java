@@ -24,7 +24,11 @@ import java.util.Enumeration;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
-class PageContextServletConfig implements ServletConfig {
+/**
+ * A built-in internal {@link ServletConfig} class used when initializing the page context servlet
+ * ({@link PageContextServlet}) internally.
+ */
+final class PageContextServletConfig implements ServletConfig {
 
     private ServletContext servletContext;
     private String servletName;

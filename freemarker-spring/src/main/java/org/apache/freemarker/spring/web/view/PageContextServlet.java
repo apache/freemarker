@@ -26,10 +26,11 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 /**
- * <code>GenericServlet</code> to support {@link javax.servlet.jsp.PageContext#getPage()} when JspTaglibs is used.
+ * A built-in internal servlet class to be used as page object in JSP tag libraries used in FreeMarker templates.
+ * @see {@link javax.servlet.jsp.PageContext#getPage()}
  */
 @SuppressWarnings("serial")
-class PageContextServlet extends GenericServlet {
+final class PageContextServlet extends GenericServlet {
 
     @Override
     public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException {

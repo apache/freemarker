@@ -20,6 +20,7 @@ package org.apache.freemarker.spring.web.view;
 
 import java.util.Map;
 
+import javax.servlet.GenericServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -34,32 +35,74 @@ import org.apache.freemarker.servlet.HttpSessionHashModel;
 import org.apache.freemarker.servlet.ServletContextHashModel;
 import org.apache.freemarker.servlet.jsp.TaglibFactory;
 
+/**
+ * FreeMarker template based view implementation, with being able to provide a {@link ServletContextHashModel}
+ * and {@link TaglibFactory} models to the templates.
+ */
 public class FreemarkerView extends AbstractFreemarkerView {
 
-    private PageContextServlet pageContextServlet;
+    /**
+     * Internal servlet instance to provide a page object in JSP tag library usages.
+     * @see {@link javax.servlet.jsp.PageContext#getPage()}
+     */
+    private GenericServlet pageContextServlet;
+
+    /**
+     * {@link ServletContextHashModel} instance for templates to access servlet context attributes.
+     */
     private ServletContextHashModel servletContextModel;
+
+    /**
+     * {@link TaglibFactory} instance for templates to be able to use JSP tag libraries.
+     */
     private TaglibFactory taglibFactory;
 
-    public PageContextServlet getPageContextServlet() {
+    /**
+     * Get {@link GenericServlet} instance which is a page object in JSP tag library usages.
+     * @return {@link GenericServlet} instance which is a page object in JSP tag library usages
+     */
+    public GenericServlet getPageContextServlet() {
         return pageContextServlet;
     }
 
-    public void setPageContextServlet(PageContextServlet pageContextServlet) {
+    /**
+     * Set {@link GenericServlet} instance which is a page object in JSP tag library usages.
+     * @param pageContextServlet {@link GenericServlet} instance which is a page object in JSP tag library
+     * usages
+     */
+    public void setPageContextServlet(GenericServlet pageContextServlet) {
         this.pageContextServlet = pageContextServlet;
     }
 
+    /**
+     * Get {@link ServletContextHashModel} instance by which templates can access servlet context attributes.
+     * @return {@link ServletContextHashModel} instance by which templates can access servlet context attributes
+     */
     public ServletContextHashModel getServletContextModel() {
         return servletContextModel;
     }
 
+    /**
+     * Set {@link ServletContextHashModel} instance by which templates can access servlet context attributes.
+     * @param servletContextModel {@link ServletContextHashModel} instance by which templates can access servlet
+     * context attributes
+     */
     public void setServletContextModel(ServletContextHashModel servletContextModel) {
         this.servletContextModel = servletContextModel;
     }
 
+    /**
+     * Get {@link TaglibFactory} instance by which templates can use JSP tag libraries.
+     * @return {@link TaglibFactory} instance by which templates can use JSP tag libraries.
+     */
     public TaglibFactory getTaglibFactory() {
         return taglibFactory;
     }
 
+    /**
+     * Set {@link TaglibFactory} instance by which templates can use JSP tag libraries.
+     * @param taglibFactory {@link TaglibFactory} instance by which templates can use JSP tag libraries.
+     */
     public void setTaglibFactory(TaglibFactory taglibFactory) {
         this.taglibFactory = taglibFactory;
     }
@@ -96,6 +139,13 @@ public class FreemarkerView extends AbstractFreemarkerView {
         return model;
     }
 
+    /**
+     * Get {@link HttpSessionHashModel} instance by which templates can access session attributes.
+     * @param objectWrapperForModel ObjectWrapper to be used in model building
+     * @param request request
+     * @param response response
+     * @return {@link HttpSessionHashModel} instance by which templates can access session attributes
+     */
     protected HttpSessionHashModel getHttpSessionModel(ObjectWrapperAndUnwrapper objectWrapperForModel,
             HttpServletRequest request, HttpServletResponse response) {
         HttpSessionHashModel sessionModel;

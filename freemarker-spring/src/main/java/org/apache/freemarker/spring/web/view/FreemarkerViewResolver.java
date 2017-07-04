@@ -18,6 +18,7 @@
  */
 package org.apache.freemarker.spring.web.view;
 
+import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
 
 import org.apache.freemarker.core.Configuration;
@@ -29,47 +30,69 @@ import org.apache.freemarker.servlet.jsp.TaglibFactoryBuilder;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
+import org.springframework.web.servlet.view.UrlBasedViewResolver;
 
+/**
+ * FreeMarker template view resolver implementation, extending {@link AbstractTemplateViewResolver} that extends
+ * {@link UrlBasedViewResolver}.
+ * <p>
+ * The FreeMarker {@link Configuration} property must be set at least. Otherwise this throws {@link IllegalStateException}
+ * during initialization. In the bean initialization phase, this retrieves {@link ObjectWrapperAndUnwrapper} from
+ * the {@link Configuration} and instantiate the internal page object ({@link PageContextServlet}) for JSP tag
+ * library usages, {@link ServletContextHashModel} property for servlet context attribute accesses and {@link TaglibFactory}
+ * property for JSP tag library usages.
+ * </p>
+ */
 public class FreemarkerViewResolver extends AbstractTemplateViewResolver implements InitializingBean {
 
+    /**
+     * FreeMarker {@link Configuration} instance.
+     */
     private Configuration configuration;
 
+    /**
+     * {@link ObjectWrapperAndUnwrapper} instance to be used in model building.
+     */
     private ObjectWrapperAndUnwrapper objectWrapper;
-    private PageContextServlet pageContextServlet;
+
+    /**
+     * Internal servlet instance to provide a page object in JSP tag library usages.
+     * @see {@link javax.servlet.jsp.PageContext#getPage()}
+     */
+    private GenericServlet pageContextServlet;
+
+    /**
+     * {@link ServletContextHashModel} instance for templates to access servlet context attributes.
+     */
     private ServletContextHashModel servletContextModel;
+
+    /**
+     * {@link TaglibFactory} instance for templates to be able to use JSP tag libraries.
+     */
     private TaglibFactory taglibFactory;
 
-    private String normalizedPrefix;
-
+    /**
+     * Constructs view resolver.
+     */
     public FreemarkerViewResolver() {
-        setViewClass(requiredViewClass());
+        super();
+        setViewClass(FreemarkerView.class);
     }
 
-    public FreemarkerViewResolver(String prefix, String suffix) {
-        this();
-        setPrefix(prefix);
-        setSuffix(suffix);
-    }
-
+    /**
+     * Get FreeMarker {@link Configuration} instance.
+     * @return FreeMarker {@link Configuration} instance
+     */
     public Configuration getConfiguration() {
         return configuration;
     }
 
+    /**
+     * Set FreeMarker {@link Configuration} instance.
+     * @param configuration FreeMarker {@link Configuration} instance
+     */
     public void setConfiguration(Configuration configuration) {
         this.configuration = configuration;
-    }
-
-    @Override
-    public void setPrefix(String prefix) {
-        super.setPrefix(prefix);
-
-        final String prefixValue = getPrefix();
-
-        if (prefixValue.startsWith("/")) {
-            normalizedPrefix = prefixValue.substring(1);
-        } else {
-            normalizedPrefix = prefixValue;
-        }
     }
 
     @Override
@@ -98,7 +121,7 @@ public class FreemarkerViewResolver extends AbstractTemplateViewResolver impleme
 
         try {
             pageContextServlet
-                    .init(new PageContextServletConfig(getServletContext(), FreemarkerViewResolver.class.getName()));
+                    .init(new PageContextServletConfig(getServletContext(), PageContextServlet.class.getSimpleName()));
         } catch (ServletException e) {
             // never happens...
         }
@@ -116,13 +139,6 @@ public class FreemarkerViewResolver extends AbstractTemplateViewResolver impleme
     @Override
     protected AbstractUrlBasedView buildView(String viewName) throws Exception {
         FreemarkerView view = (FreemarkerView) super.buildView(viewName);
-        final String url;
-        if (normalizedPrefix != null) {
-            url = normalizedPrefix + viewName + getSuffix();
-        } else {
-            url = viewName + getSuffix();
-        }
-        view.setUrl(url);
         view.setConfiguration(configuration);
         view.setObjectWrapper(objectWrapper);
         view.setPageContextServlet(pageContextServlet);
@@ -131,18 +147,34 @@ public class FreemarkerViewResolver extends AbstractTemplateViewResolver impleme
         return view;
     }
 
+    /**
+     * Get {@link ObjectWrapperAndUnwrapper} that is used in model building.
+     * @return {@link ObjectWrapperAndUnwrapper} that is used in model building
+     */
     protected ObjectWrapperAndUnwrapper getObjectWrapper() {
         return objectWrapper;
     }
 
-    protected PageContextServlet getPageContextServlet() {
+    /**
+     * Get {@link GenericServlet} instance which is a page object in JSP tag library usages.
+     * @return {@link GenericServlet} instance which is a page object in JSP tag library usages
+     */
+    protected GenericServlet getPageContextServlet() {
         return pageContextServlet;
     }
 
+    /**
+     * Get {@link ServletContextHashModel} instance by which templates can access servlet context attributes.
+     * @return {@link ServletContextHashModel} instance by which templates can access servlet context attributes
+     */
     protected ServletContextHashModel getServletContextModel() {
         return servletContextModel;
     }
 
+    /**
+     * Get {@link TaglibFactory} instance by which templates can use JSP tag libraries.
+     * @return {@link TaglibFactory} instance by which templates can use JSP tag libraries.
+     */
     protected TaglibFactory getTaglibFactory() {
         return taglibFactory;
     }
