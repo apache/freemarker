@@ -32,7 +32,6 @@ import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.servlet.ServletContextHashModel;
 import org.apache.freemarker.servlet.jsp.TaglibFactory;
-import org.apache.freemarker.servlet.jsp.TaglibFactoryBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -73,7 +72,7 @@ public class FreemarkerViewTest {
 
         pageContextServlet = new PageContextServlet();
         pageContextServlet.init(new PageContextServletConfig(servletContext, PageContextServlet.class.getSimpleName()));
-        taglibFactory = new TaglibFactoryBuilder(servletContext, objectWrapper).build();
+        taglibFactory = new TaglibFactory.Builder(servletContext, objectWrapper).build();
 
         viewResolver = new FreemarkerViewResolver();
         viewResolver.setServletContext(servletContext);

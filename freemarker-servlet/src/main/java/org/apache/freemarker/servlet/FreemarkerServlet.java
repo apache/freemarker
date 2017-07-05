@@ -65,7 +65,6 @@ import org.apache.freemarker.core.util._SecurityUtil;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.servlet.jsp.TaglibFactory;
 import org.apache.freemarker.servlet.jsp.TaglibFactory.MetaInfTldSource;
-import org.apache.freemarker.servlet.jsp.TaglibFactoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -637,7 +636,7 @@ public class FreemarkerServlet extends HttpServlet {
                 } else if (name.equals(INIT_PARAM_EXCEPTION_ON_MISSING_TEMPLATE)) {
                     exceptionOnMissingTemplate = _StringUtil.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_META_INF_TLD_LOCATIONS)) {
-                    metaInfTldSources = TaglibFactoryBuilder.parseMetaInfTldLocations(InitParamParser.parseCommaSeparatedList(value));
+                    metaInfTldSources = TaglibFactory.Builder.parseMetaInfTldLocations(InitParamParser.parseCommaSeparatedList(value));
                 } else if (name.equals(INIT_PARAM_CLASSPATH_TLDS)) {
                     List newClasspathTlds = new ArrayList();
                     if (classpathTlds != null) {
@@ -1001,7 +1000,7 @@ public class FreemarkerServlet extends HttpServlet {
         try {
             final String prop = _SecurityUtil.getSystemProperty(SYSTEM_PROPERTY_META_INF_TLD_SOURCES, null);
             metaInfTldSourcesFromSysProp = (List<MetaInfTldSource>) ((prop != null)
-                    ? TaglibFactoryBuilder.parseMetaInfTldLocations(InitParamParser.parseCommaSeparatedList(prop))
+                    ? TaglibFactory.Builder.parseMetaInfTldLocations(InitParamParser.parseCommaSeparatedList(prop))
                     : Collections.emptyList());
         } catch (ParseException e) {
             throw new TemplateModelException(
@@ -1028,7 +1027,7 @@ public class FreemarkerServlet extends HttpServlet {
                     "Failed to parse system property \"" + SYSTEM_PROPERTY_CLASSPATH_TLDS + "\"", e);
         }
 
-        return new TaglibFactoryBuilder(servletContext, objectWrapper)
+        return new TaglibFactory.Builder(servletContext, objectWrapper)
                 .addAllMetaInfTldSources(metaInfTldSources)
                 .addAllMetaInfTldSources(metaInfTldSourcesFromSysProp)
                 .addAllJettyMetaInfTldJarPatterns(jettyTaglibJarPatterns)

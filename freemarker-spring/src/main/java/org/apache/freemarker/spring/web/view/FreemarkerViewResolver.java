@@ -26,7 +26,6 @@ import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.servlet.ServletContextHashModel;
 import org.apache.freemarker.servlet.jsp.TaglibFactory;
-import org.apache.freemarker.servlet.jsp.TaglibFactoryBuilder;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
@@ -128,7 +127,7 @@ public class FreemarkerViewResolver extends AbstractTemplateViewResolver impleme
 
         servletContextModel = new ServletContextHashModel(pageContextServlet, objectWrapper);
 
-        taglibFactory = new TaglibFactoryBuilder(getServletContext(), objectWrapper).build();
+        taglibFactory = new TaglibFactory.Builder(getServletContext(), objectWrapper).build();
     }
 
     @Override

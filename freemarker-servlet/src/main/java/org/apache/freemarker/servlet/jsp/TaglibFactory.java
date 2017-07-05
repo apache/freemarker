@@ -38,6 +38,7 @@ import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -61,6 +62,7 @@ import javax.servlet.jsp.tagext.Tag;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.freemarker.core.ConfigurationException;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
@@ -70,6 +72,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.util.BugException;
+import org.apache.freemarker.core.util.CommonBuilder;
 import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._StringUtil;
@@ -1988,6 +1991,135 @@ public class TaglibFactory implements TemplateHashModel {
             super(message);
         }
         
+    }
+
+    public static class Builder implements CommonBuilder<TaglibFactory> {
+
+        /**
+         * Servlet context.
+         */
+        private final ServletContext servletContext;
+
+        /**
+         * Object wrapper to be used in model building.
+         */
+        private final ObjectWrapper objectWrapper;
+
+        /**
+         * TLD locations to look for when finding available JSP tag libraries.
+         */
+        private List<MetaInfTldSource> metaInfTldSources = new ArrayList<>();
+
+        /**
+         * TLD classpath locations to look for when finding available JSP tag libraries.
+         */
+        private List<String> classPathTlds = new ArrayList<>();
+
+        public Builder(ServletContext servletContext, ObjectWrapper objectWrapper) {
+            this.servletContext = servletContext;
+            this.objectWrapper = objectWrapper;
+        }
+
+        public Builder addMetaInfTldSource(MetaInfTldSource metaInfTldSource) {
+            metaInfTldSources.add(metaInfTldSource);
+            return this;
+        }
+
+        public Builder addAllMetaInfTldSources(List<MetaInfTldSource> metaInfTldSources) {
+            this.metaInfTldSources.addAll(metaInfTldSources);
+            return this;
+        }
+
+        public Builder addMetaInfTldLocation(String metaInfTldLocation) throws ParseException {
+            return addMetaInfTldSource(parseMetaInfTldLocation(metaInfTldLocation));
+        }
+
+        public Builder addMetaInfTldLocations(List<String> metaInfTldLocations) throws ParseException {
+            return addAllMetaInfTldSources(parseMetaInfTldLocations(metaInfTldLocations));
+        }
+
+        public Builder addJettyMetaInfTldJarPattern(Pattern pattern) {
+            return addMetaInfTldSource(new ClasspathMetaInfTldSource(pattern));
+        }
+
+        public Builder addAllJettyMetaInfTldJarPatterns(List<Pattern> patterns) {
+            for (Pattern pattern : patterns) {
+                addJettyMetaInfTldJarPattern(pattern);
+            }
+
+            return this;
+        }
+
+        public Builder addClasspathTld(String classpathTld) {
+            classPathTlds.add(classpathTld);
+            return this;
+        }
+
+        public Builder addAllClasspathTlds(List<String> classpathTlds) {
+            classPathTlds.addAll(classpathTlds);
+            return this;
+        }
+
+        public TaglibFactory build() throws ConfigurationException {
+            TaglibFactory taglibFactory = new TaglibFactory(servletContext);
+            taglibFactory.setObjectWrapper(objectWrapper);
+            taglibFactory.setMetaInfTldSources(metaInfTldSources);
+            taglibFactory.setClasspathTlds(classPathTlds);
+            return taglibFactory;
+        }
+
+        public static MetaInfTldSource parseMetaInfTldLocation(String value) throws ParseException {
+            MetaInfTldSource metaInfTldSource;
+
+            if (value.equals(FreemarkerServlet.META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS)) {
+                metaInfTldSource = WebInfPerLibJarMetaInfTldSource.INSTANCE;
+            } else if (value.startsWith(FreemarkerServlet.META_INF_TLD_LOCATION_CLASSPATH)) {
+                String itemRightSide = value.substring(FreemarkerServlet.META_INF_TLD_LOCATION_CLASSPATH.length())
+                        .trim();
+
+                if (itemRightSide.length() == 0) {
+                    metaInfTldSource = new ClasspathMetaInfTldSource(Pattern.compile(".*", Pattern.DOTALL));
+                } else if (itemRightSide.startsWith(":")) {
+                    final String regexpStr = itemRightSide.substring(1).trim();
+                    if (regexpStr.length() == 0) {
+                        throw new ParseException("Empty regular expression after \""
+                                + FreemarkerServlet.META_INF_TLD_LOCATION_CLASSPATH + ":\"", -1);
+                    }
+                    metaInfTldSource = new ClasspathMetaInfTldSource(Pattern.compile(regexpStr));
+                } else {
+                    throw new ParseException("Invalid \"" + FreemarkerServlet.META_INF_TLD_LOCATION_CLASSPATH
+                            + "\" value syntax: " + value, -1);
+                }
+            } else if (value.startsWith(FreemarkerServlet.META_INF_TLD_LOCATION_CLEAR)) {
+                metaInfTldSource = ClearMetaInfTldSource.INSTANCE;
+            } else {
+                throw new ParseException("Item has no recognized source type prefix: " + value, -1);
+            }
+
+            return metaInfTldSource;
+        }
+
+        public static List<MetaInfTldSource> parseMetaInfTldLocations(List<String> values) throws ParseException {
+            List<MetaInfTldSource> metaInfTldSources = null;
+
+            if (values != null) {
+                for (String value : values) {
+                    final MetaInfTldSource metaInfTldSource = parseMetaInfTldLocation(value);
+
+                    if (metaInfTldSources == null) {
+                        metaInfTldSources = new ArrayList();
+                    }
+
+                    metaInfTldSources.add(metaInfTldSource);
+                }
+            }
+
+            if (metaInfTldSources == null) {
+                metaInfTldSources = Collections.emptyList();
+            }
+
+            return metaInfTldSources;
+        }
     }
 
 }
