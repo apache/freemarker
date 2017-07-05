@@ -2039,6 +2039,8 @@ public class TaglibFactory implements TemplateHashModel {
          */
         private List<String> classPathTlds = new ArrayList<>();
 
+        private boolean alreadyBuilt;
+
         public Builder() {
         }
 
@@ -2161,7 +2163,11 @@ public class TaglibFactory implements TemplateHashModel {
         }
 
         public TaglibFactory build() throws ConfigurationException {
+            if (alreadyBuilt) {
+                throw new IllegalStateException("build() can only be executed once.");
+            }
             TaglibFactory taglibFactory = new TaglibFactory(this);
+            alreadyBuilt = true;
             return taglibFactory;
         }
     }
