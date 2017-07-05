@@ -1027,7 +1027,9 @@ public class FreemarkerServlet extends HttpServlet {
                     "Failed to parse system property \"" + SYSTEM_PROPERTY_CLASSPATH_TLDS + "\"", e);
         }
 
-        return new TaglibFactory.Builder(servletContext, objectWrapper)
+        return new TaglibFactory.Builder()
+                .servletContext(servletContext)
+                .objectWrapper(objectWrapper)
                 .addAllMetaInfTldSources(metaInfTldSources)
                 .addAllMetaInfTldSources(metaInfTldSourcesFromSysProp)
                 .addAllJettyMetaInfTldJarPatterns(jettyTaglibJarPatterns)

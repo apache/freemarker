@@ -72,7 +72,10 @@ public class FreemarkerViewTest {
 
         pageContextServlet = new PageContextServlet();
         pageContextServlet.init(new PageContextServletConfig(servletContext, PageContextServlet.class.getSimpleName()));
-        taglibFactory = new TaglibFactory.Builder(servletContext, objectWrapper).build();
+        taglibFactory = new TaglibFactory.Builder()
+                .servletContext(servletContext)
+                .objectWrapper(objectWrapper)
+                .build();
 
         viewResolver = new FreemarkerViewResolver();
         viewResolver.setServletContext(servletContext);

@@ -127,7 +127,10 @@ public class FreemarkerViewResolver extends AbstractTemplateViewResolver impleme
 
         servletContextModel = new ServletContextHashModel(pageContextServlet, objectWrapper);
 
-        taglibFactory = new TaglibFactory.Builder(getServletContext(), objectWrapper).build();
+        taglibFactory = new TaglibFactory.Builder()
+                .servletContext(getServletContext())
+                .objectWrapper(objectWrapper)
+                .build();
     }
 
     @Override

@@ -1998,12 +1998,12 @@ public class TaglibFactory implements TemplateHashModel {
         /**
          * Servlet context.
          */
-        private final ServletContext servletContext;
+        private ServletContext servletContext;
 
         /**
          * Object wrapper to be used in model building.
          */
-        private final ObjectWrapper objectWrapper;
+        private ObjectWrapper objectWrapper;
 
         /**
          * TLD locations to look for when finding available JSP tag libraries.
@@ -2015,9 +2015,49 @@ public class TaglibFactory implements TemplateHashModel {
          */
         private List<String> classPathTlds = new ArrayList<>();
 
-        public Builder(ServletContext servletContext, ObjectWrapper objectWrapper) {
+        public Builder() {
+        }
+
+        public ServletContext getServletContext() {
+            return servletContext;
+        }
+
+        public void setServletContext(ServletContext servletContext) {
             this.servletContext = servletContext;
+        }
+
+        public Builder servletContext(ServletContext servletContext) {
+            setServletContext(servletContext);
+            return this;
+        }
+
+        public ObjectWrapper getObjectWrapper() {
+            return objectWrapper;
+        }
+
+        public void setObjectWrapper(ObjectWrapper objectWrapper) {
             this.objectWrapper = objectWrapper;
+        }
+
+        public Builder objectWrapper(ObjectWrapper objectWrapper) {
+            setObjectWrapper(objectWrapper);
+            return this;
+        }
+
+        public List<MetaInfTldSource> getMetaInfTldSources() {
+            return metaInfTldSources;
+        }
+
+        public void setMetaInfTldSources(List<MetaInfTldSource> metaInfTldSources) {
+            this.metaInfTldSources = metaInfTldSources;
+        }
+
+        public List<String> getClassPathTlds() {
+            return classPathTlds;
+        }
+
+        public void setClassPathTlds(List<String> classPathTlds) {
+            this.classPathTlds = classPathTlds;
         }
 
         public Builder addMetaInfTldSource(MetaInfTldSource metaInfTldSource) {
