@@ -636,7 +636,7 @@ public class FreemarkerServlet extends HttpServlet {
                 } else if (name.equals(INIT_PARAM_EXCEPTION_ON_MISSING_TEMPLATE)) {
                     exceptionOnMissingTemplate = _StringUtil.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_META_INF_TLD_LOCATIONS)) {
-                    metaInfTldSources = TaglibFactory.Builder.parseMetaInfTldLocations(InitParamParser.parseCommaSeparatedList(value));
+                    metaInfTldSources = TaglibFactory.parseMetaInfTldLocations(InitParamParser.parseCommaSeparatedList(value));
                 } else if (name.equals(INIT_PARAM_CLASSPATH_TLDS)) {
                     List newClasspathTlds = new ArrayList();
                     if (classpathTlds != null) {
@@ -1000,7 +1000,7 @@ public class FreemarkerServlet extends HttpServlet {
         try {
             final String prop = _SecurityUtil.getSystemProperty(SYSTEM_PROPERTY_META_INF_TLD_SOURCES, null);
             metaInfTldSourcesFromSysProp = (List<MetaInfTldSource>) ((prop != null)
-                    ? TaglibFactory.Builder.parseMetaInfTldLocations(InitParamParser.parseCommaSeparatedList(prop))
+                    ? TaglibFactory.parseMetaInfTldLocations(InitParamParser.parseCommaSeparatedList(prop))
                     : Collections.emptyList());
         } catch (ParseException e) {
             throw new TemplateModelException(

@@ -137,6 +137,59 @@ public class TaglibFactory implements TemplateHashModel {
     private List/*<String>*/ failedTldLocations = new ArrayList();
     private int nextTldLocationLookupPhase = 0;
 
+    public static MetaInfTldSource parseMetaInfTldLocation(String value) throws ParseException {
+        MetaInfTldSource metaInfTldSource;
+
+        if (value.equals(FreemarkerServlet.META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS)) {
+            metaInfTldSource = WebInfPerLibJarMetaInfTldSource.INSTANCE;
+        } else if (value.startsWith(FreemarkerServlet.META_INF_TLD_LOCATION_CLASSPATH)) {
+            String itemRightSide = value.substring(FreemarkerServlet.META_INF_TLD_LOCATION_CLASSPATH.length())
+                    .trim();
+
+            if (itemRightSide.length() == 0) {
+                metaInfTldSource = new ClasspathMetaInfTldSource(Pattern.compile(".*", Pattern.DOTALL));
+            } else if (itemRightSide.startsWith(":")) {
+                final String regexpStr = itemRightSide.substring(1).trim();
+                if (regexpStr.length() == 0) {
+                    throw new ParseException("Empty regular expression after \""
+                            + FreemarkerServlet.META_INF_TLD_LOCATION_CLASSPATH + ":\"", -1);
+                }
+                metaInfTldSource = new ClasspathMetaInfTldSource(Pattern.compile(regexpStr));
+            } else {
+                throw new ParseException("Invalid \"" + FreemarkerServlet.META_INF_TLD_LOCATION_CLASSPATH
+                        + "\" value syntax: " + value, -1);
+            }
+        } else if (value.startsWith(FreemarkerServlet.META_INF_TLD_LOCATION_CLEAR)) {
+            metaInfTldSource = ClearMetaInfTldSource.INSTANCE;
+        } else {
+            throw new ParseException("Item has no recognized source type prefix: " + value, -1);
+        }
+
+        return metaInfTldSource;
+    }
+
+    public static List<MetaInfTldSource> parseMetaInfTldLocations(List<String> values) throws ParseException {
+        List<MetaInfTldSource> metaInfTldSources = null;
+
+        if (values != null) {
+            for (String value : values) {
+                final MetaInfTldSource metaInfTldSource = parseMetaInfTldLocation(value);
+
+                if (metaInfTldSources == null) {
+                    metaInfTldSources = new ArrayList();
+                }
+
+                metaInfTldSources.add(metaInfTldSource);
+            }
+        }
+
+        if (metaInfTldSources == null) {
+            metaInfTldSources = Collections.emptyList();
+        }
+
+        return metaInfTldSources;
+    }
+
     /**
     /**
      * Creates a new JSP taglib factory that will be used to load JSP tag libraries and functions for the web
@@ -149,8 +202,11 @@ public class TaglibFactory implements TemplateHashModel {
      * @param servletContext
      *            The servlet context whose JSP tag libraries this factory will load.
      */
-    public TaglibFactory(ServletContext servletContext) {
-        this.servletContext = servletContext;
+    private TaglibFactory(Builder builder) {
+        servletContext = builder.getServletContext();
+        objectWrapper = builder.getObjectWrapper();
+        metaInfTldSources = builder.getMetaInfTldSources();
+        classpathTlds = builder.getClassPathTlds();
     }
 
     /**
@@ -2101,64 +2157,8 @@ public class TaglibFactory implements TemplateHashModel {
         }
 
         public TaglibFactory build() throws ConfigurationException {
-            TaglibFactory taglibFactory = new TaglibFactory(servletContext);
-            taglibFactory.setObjectWrapper(objectWrapper);
-            taglibFactory.setMetaInfTldSources(metaInfTldSources);
-            taglibFactory.setClasspathTlds(classPathTlds);
+            TaglibFactory taglibFactory = new TaglibFactory(this);
             return taglibFactory;
-        }
-
-        public static MetaInfTldSource parseMetaInfTldLocation(String value) throws ParseException {
-            MetaInfTldSource metaInfTldSource;
-
-            if (value.equals(FreemarkerServlet.META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS)) {
-                metaInfTldSource = WebInfPerLibJarMetaInfTldSource.INSTANCE;
-            } else if (value.startsWith(FreemarkerServlet.META_INF_TLD_LOCATION_CLASSPATH)) {
-                String itemRightSide = value.substring(FreemarkerServlet.META_INF_TLD_LOCATION_CLASSPATH.length())
-                        .trim();
-
-                if (itemRightSide.length() == 0) {
-                    metaInfTldSource = new ClasspathMetaInfTldSource(Pattern.compile(".*", Pattern.DOTALL));
-                } else if (itemRightSide.startsWith(":")) {
-                    final String regexpStr = itemRightSide.substring(1).trim();
-                    if (regexpStr.length() == 0) {
-                        throw new ParseException("Empty regular expression after \""
-                                + FreemarkerServlet.META_INF_TLD_LOCATION_CLASSPATH + ":\"", -1);
-                    }
-                    metaInfTldSource = new ClasspathMetaInfTldSource(Pattern.compile(regexpStr));
-                } else {
-                    throw new ParseException("Invalid \"" + FreemarkerServlet.META_INF_TLD_LOCATION_CLASSPATH
-                            + "\" value syntax: " + value, -1);
-                }
-            } else if (value.startsWith(FreemarkerServlet.META_INF_TLD_LOCATION_CLEAR)) {
-                metaInfTldSource = ClearMetaInfTldSource.INSTANCE;
-            } else {
-                throw new ParseException("Item has no recognized source type prefix: " + value, -1);
-            }
-
-            return metaInfTldSource;
-        }
-
-        public static List<MetaInfTldSource> parseMetaInfTldLocations(List<String> values) throws ParseException {
-            List<MetaInfTldSource> metaInfTldSources = null;
-
-            if (values != null) {
-                for (String value : values) {
-                    final MetaInfTldSource metaInfTldSource = parseMetaInfTldLocation(value);
-
-                    if (metaInfTldSources == null) {
-                        metaInfTldSources = new ArrayList();
-                    }
-
-                    metaInfTldSources.add(metaInfTldSource);
-                }
-            }
-
-            if (metaInfTldSources == null) {
-                metaInfTldSources = Collections.emptyList();
-            }
-
-            return metaInfTldSources;
         }
     }
 
