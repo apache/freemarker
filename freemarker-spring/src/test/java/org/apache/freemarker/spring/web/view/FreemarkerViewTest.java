@@ -24,10 +24,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.servlet.GenericServlet;
 import javax.servlet.ServletContext;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
+import org.apache.freemarker.servlet.ServletContextHashModel;
+import org.apache.freemarker.servlet.jsp.TaglibFactory;
+import org.apache.freemarker.servlet.jsp.TaglibFactoryBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -44,6 +49,10 @@ public class FreemarkerViewTest {
 
     private StringTemplateLoader templateLoader;
     private Configuration configuration;
+    private ObjectWrapperAndUnwrapper objectWrapper;
+
+    private GenericServlet pageContextServlet;
+    private TaglibFactory taglibFactory;
 
     private FreemarkerViewResolver viewResolver;
 
@@ -60,6 +69,11 @@ public class FreemarkerViewTest {
         templateLoader = new StringTemplateLoader();
         configuration = new Configuration.Builder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS)
                 .templateLoader(templateLoader).build();
+        objectWrapper = (ObjectWrapperAndUnwrapper) configuration.getObjectWrapper();
+
+        pageContextServlet = new PageContextServlet();
+        pageContextServlet.init(new PageContextServletConfig(servletContext, PageContextServlet.class.getSimpleName()));
+        taglibFactory = new TaglibFactoryBuilder(servletContext, objectWrapper).build();
 
         viewResolver = new FreemarkerViewResolver();
         viewResolver.setServletContext(servletContext);
@@ -144,17 +158,17 @@ public class FreemarkerViewTest {
         assertEquals("Hello!", response.getContentAsString());
     }
 
-    private FreemarkerView createFreemarkerView(final String name) {
+    private FreemarkerView createFreemarkerView(final String name) throws Exception {
         FreemarkerView view = new FreemarkerView();
 
         view.setServletContext(servletContext);
         view.setApplicationContext(applicationContext);
         view.setConfiguration(configuration);
-        view.setObjectWrapper(viewResolver.getObjectWrapper());
+        view.setObjectWrapper(objectWrapper);
 
-        view.setPageContextServlet(viewResolver.getPageContextServlet());
-        view.setServletContextModel(viewResolver.getServletContextModel());
-        view.setTaglibFactory(viewResolver.getTaglibFactory());
+        view.setPageContextServlet(pageContextServlet);
+        view.setServletContextModel(new ServletContextHashModel(pageContextServlet, objectWrapper));
+        view.setTaglibFactory(taglibFactory);
 
         view.setUrl(name);
 

@@ -147,36 +147,4 @@ public class FreemarkerViewResolver extends AbstractTemplateViewResolver impleme
         return view;
     }
 
-    /**
-     * Get {@link ObjectWrapperAndUnwrapper} that is used in model building.
-     * @return {@link ObjectWrapperAndUnwrapper} that is used in model building
-     */
-    protected ObjectWrapperAndUnwrapper getObjectWrapper() {
-        return objectWrapper;
-    }
-
-    /**
-     * Get {@link GenericServlet} instance which is a page object in JSP tag library usages.
-     * @return {@link GenericServlet} instance which is a page object in JSP tag library usages
-     */
-    protected GenericServlet getPageContextServlet() {
-        return pageContextServlet;
-    }
-
-    /**
-     * Get {@link ServletContextHashModel} instance by which templates can access servlet context attributes.
-     * @return {@link ServletContextHashModel} instance by which templates can access servlet context attributes
-     */
-    protected ServletContextHashModel getServletContextModel() {
-        return servletContextModel;
-    }
-
-    /**
-     * Get {@link TaglibFactory} instance by which templates can use JSP tag libraries.
-     * @return {@link TaglibFactory} instance by which templates can use JSP tag libraries.
-     */
-    protected TaglibFactory getTaglibFactory() {
-        return taglibFactory;
-    }
-
 }
