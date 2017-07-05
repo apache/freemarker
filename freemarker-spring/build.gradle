@@ -30,7 +30,10 @@ dependencies {
     compile project(":freemarker-servlet")
 
     def geronimoServletSpec3Version = "1.0"
-    def springVersion = "4.3.9.RELEASE"
+    def geronimoJspSpec22Version = "1.2"
+    def geronimoELSpec22Version = "1.0.4"
+
+    def springVersion = "4.0.9.RELEASE"
 
     compileOnly "org.apache.geronimo.specs:geronimo-servlet_3.0_spec:${geronimoServletSpec3Version}"
 
@@ -76,9 +79,9 @@ dependencies {
         exclude group: "commons-logging", module: "commons-logging"
     }
 
-    testCompile "javax.servlet.jsp:jsp-api:2.1"
+    testCompile "org.apache.geronimo.specs:geronimo-jsp_2.2_spec:${geronimoJspSpec22Version}"
+    testCompile "org.apache.geronimo.specs:geronimo-el_2.2_spec:${geronimoELSpec22Version}"
     testCompile "org.apache.taglibs:taglibs-standard-spec:${taglibsStandardVersion}"
-    testCompile "org.apache.taglibs:taglibs-standard-impl:${taglibsStandardVersion}"
 
 }
 

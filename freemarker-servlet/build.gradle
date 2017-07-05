@@ -28,8 +28,13 @@ inAggregateJavadoc = true
 dependencies {
     compile project(":freemarker-core")
 
-    compileOnly "javax.servlet.jsp:jsp-api:2.1"
-    compileOnly "javax.servlet:servlet-api:2.5"
+    def geronimoServletSpec3Version = "1.0"
+    def geronimoJspSpec22Version = "1.2"
+    def geronimoELSpec22Version = "1.0.4"
+
+    compileOnly "org.apache.geronimo.specs:geronimo-servlet_3.0_spec:${geronimoServletSpec3Version}"
+    compileOnly "org.apache.geronimo.specs:geronimo-jsp_2.2_spec:${geronimoJspSpec22Version}"
+    compileOnly "org.apache.geronimo.specs:geronimo-el_2.2_spec:${geronimoELSpec22Version}"
 
     // ------------------------------------------------------------------------
     // For tests
