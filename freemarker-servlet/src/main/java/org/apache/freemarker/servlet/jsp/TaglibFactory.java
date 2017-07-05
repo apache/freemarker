@@ -344,80 +344,6 @@ public class TaglibFactory implements TemplateHashModel {
     public boolean isEmpty() {
         return false;
     }
-    
-    /**
-     * See {@link #setObjectWrapper(ObjectWrapper)}.
-     */
-    public ObjectWrapper getObjectWrapper() {
-        return objectWrapper;
-    }
-
-    /**
-     * Sets the {@link ObjectWrapper} used when building the JSP tag library {@link TemplateHashModel}-s from the TLD-s.
-     * Usually, it should be the same {@link ObjectWrapper} that will be used inside the templates. {@code null} value
-     * is only supported for backward compatibility. For custom EL functions to be exposed, it must be non-{@code null}
-     * and an {@code intanceof} {@link DefaultObjectWrapper} (like typically, a {@link DefaultObjectWrapper}).
-     */
-    public void setObjectWrapper(ObjectWrapper objectWrapper) {
-        checkNotStarted();
-        this.objectWrapper = objectWrapper;
-    }
-
-    /**
-     * See {@link #setMetaInfTldSources(List)}.
-     */
-    public List/*<Pattern>*/ getMetaInfTldSources() {
-        return metaInfTldSources;
-    }
-
-    /**
-     * Sets the list of places where we will look for {@code META-INF/**}{@code /*.tld} files. By default this is a list
-     * that only contains {@link WebInfPerLibJarMetaInfTldSource#INSTANCE}. This corresponds to the behavior that the
-     * JSP specification describes. See the {@link MetaInfTldSource} subclasses for the possible values and their
-     * meanings.
-     * 
-     * <p>
-     * This is usually set via the init-params of {@link FreemarkerServlet}.
-     * 
-     * @param metaInfTldSources
-     *            The list of {@link MetaInfTldSource} subclass instances. Their order matters if multiple TLD-s define
-     *            a taglib with the same {@code taglib-uri}. In that case, the one found by the earlier
-     *            {@link MetaInfTldSource} wins.
-     * 
-     * @see #setClasspathTlds(List)
-     */
-    public void setMetaInfTldSources(List/*<? extends MetaInfTldSource>*/ metaInfTldSources) {
-        checkNotStarted();
-        _NullArgumentException.check("metaInfTldSources", metaInfTldSources);
-        this.metaInfTldSources = metaInfTldSources;
-    }
-
-    /**
-     * See {@link #setClasspathTlds(List)}.
-     */
-    public List/*<String>*/ getClasspathTlds() {
-        return classpathTlds;
-    }
-
-    /**
-     * Sets the class-loader resource paths of the TLD-s that aren't inside the locations covered by
-     * {@link #setMetaInfTldSources(List)}, yet you want them to be discovered. They will be loaded with the class
-     * loader provided by the servlet container.
-     * 
-     * <p>
-     * This is usually set via the init-params of {@link FreemarkerServlet}.
-     * 
-     * @param classpathTlds
-     *            List of {@code String}-s, maybe {@code null}. Each item is a resource path, like
-     *            {@code "/META-INF/my.tld"}. (Relative resource paths will be interpreted as root-relative.)
-     * 
-     * @see #setMetaInfTldSources(List)
-     */
-    public void setClasspathTlds(List/*<String>*/ classpathTlds) {
-        checkNotStarted();
-        _NullArgumentException.check("classpathTlds", classpathTlds);
-        this.classpathTlds = classpathTlds;
-    }
 
     private void checkNotStarted() {
         synchronized (lock) {
@@ -2091,6 +2017,12 @@ public class TaglibFactory implements TemplateHashModel {
             return objectWrapper;
         }
 
+        /**
+         * Sets the {@link ObjectWrapper} used when building the JSP tag library {@link TemplateHashModel}-s from the TLD-s.
+         * Usually, it should be the same {@link ObjectWrapper} that will be used inside the templates. {@code null} value
+         * is only supported for backward compatibility. For custom EL functions to be exposed, it must be non-{@code null}
+         * and an {@code intanceof} {@link DefaultObjectWrapper} (like typically, a {@link DefaultObjectWrapper}).
+         */
         public void setObjectWrapper(ObjectWrapper objectWrapper) {
             this.objectWrapper = objectWrapper;
         }
@@ -2104,6 +2036,22 @@ public class TaglibFactory implements TemplateHashModel {
             return metaInfTldSources;
         }
 
+        /**
+         * Sets the list of places where we will look for {@code META-INF/**}{@code /*.tld} files. By default this is a list
+         * that only contains {@link WebInfPerLibJarMetaInfTldSource#INSTANCE}. This corresponds to the behavior that the
+         * JSP specification describes. See the {@link MetaInfTldSource} subclasses for the possible values and their
+         * meanings.
+         * 
+         * <p>
+         * This is usually set via the init-params of {@link FreemarkerServlet}.
+         * 
+         * @param metaInfTldSources
+         *            The list of {@link MetaInfTldSource} subclass instances. Their order matters if multiple TLD-s define
+         *            a taglib with the same {@code taglib-uri}. In that case, the one found by the earlier
+         *            {@link MetaInfTldSource} wins.
+         * 
+         * @see #setClasspathTlds(List)
+         */
         public void setMetaInfTldSources(List<MetaInfTldSource> metaInfTldSources) {
             this.metaInfTldSources = metaInfTldSources;
         }
@@ -2112,6 +2060,20 @@ public class TaglibFactory implements TemplateHashModel {
             return classPathTlds;
         }
 
+        /**
+         * Sets the class-loader resource paths of the TLD-s that aren't inside the locations covered by
+         * {@link #setMetaInfTldSources(List)}, yet you want them to be discovered. They will be loaded with the class
+         * loader provided by the servlet container.
+         * 
+         * <p>
+         * This is usually set via the init-params of {@link FreemarkerServlet}.
+         * 
+         * @param classpathTlds
+         *            List of {@code String}-s, maybe {@code null}. Each item is a resource path, like
+         *            {@code "/META-INF/my.tld"}. (Relative resource paths will be interpreted as root-relative.)
+         * 
+         * @see #setMetaInfTldSources(List)
+         */
         public void setClassPathTlds(List<String> classPathTlds) {
             this.classPathTlds = classPathTlds;
         }
