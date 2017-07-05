@@ -353,13 +353,9 @@ public class TaglibFactory implements TemplateHashModel {
 
     private TldLocation getExplicitlyMappedTldLocation(final String uri) throws SAXException, IOException,
             TaglibGettingException {
-        while (true) {
-            final TldLocation tldLocation = (TldLocation) tldLocations.get(uri);
+        TldLocation tldLocation;
 
-            if (tldLocation != null) {
-                return tldLocation;
-            }
-
+        for (tldLocation = tldLocations.get(uri); tldLocation == null; tldLocation = tldLocations.get(uri)) {
             switch (nextTldLocationLookupPhase) {
             case 0:
                 // Not in JSP spec.
@@ -385,6 +381,8 @@ public class TaglibFactory implements TemplateHashModel {
 
             nextTldLocationLookupPhase++;
         }
+
+        return tldLocation;
     }
 
     private void addTldLocationsFromWebXml() throws SAXException, IOException {
@@ -595,11 +593,8 @@ public class TaglibFactory implements TemplateHashModel {
                 ZipInputStream zipIn = new ZipInputStream(in);
 
                 try {
-                    while (true) {
-                        ZipEntry curEntry = zipIn.getNextEntry();
-                        if (curEntry == null) break;
-
-                        String curEntryPath = normalizeJarEntryPath(curEntry.getName(), false);
+                    for (ZipEntry entry = zipIn.getNextEntry(); entry != null; entry = zipIn.getNextEntry()) {
+                        String curEntryPath = normalizeJarEntryPath(entry.getName(), false);
                         if (curEntryPath.startsWith(metaInfEntryPath) && curEntryPath.endsWith(".tld")) {
                             addTldLocationFromTld(zipIn,
                                     new ServletContextJarEntryTldLocation(jarResourcePath, curEntryPath)); 
@@ -685,16 +680,16 @@ public class TaglibFactory implements TemplateHashModel {
             }
 
             final InputStream in = new URL(rawJarContentUrlEF).openStream();
+            if (in == null) {
+                throw new IOException("TLD resource in a jar resource not found: " + rawJarContentUrlEF);
+            }
 
             try {
                 ZipInputStream zipIn = new ZipInputStream(in);
 
                 try {
-                    while (true) {
-                        ZipEntry curEntry = zipIn.getNextEntry();
-                        if (curEntry == null) break;
-        
-                        String curEntryPath = normalizeJarEntryPath(curEntry.getName(), false);
+                    for (ZipEntry entry = zipIn.getNextEntry(); entry != null; entry = zipIn.getNextEntry()) {
+                        String curEntryPath = normalizeJarEntryPath(entry.getName(), false);
                         if (curEntryPath.startsWith(baseEntryPath) && curEntryPath.endsWith(".tld")) {
                             final String curEntryBaseRelativePath = curEntryPath.substring(baseEntryPath.length());
                             final URL tldUrl = createJarEntryUrl(jarBaseEntryUrl, curEntryBaseRelativePath);
@@ -749,12 +744,15 @@ public class TaglibFactory implements TemplateHashModel {
      * Adds the TLD location mapping from the TLD itself.
      */
     private void addTldLocationFromTld(TldLocation tldLocation) throws IOException, SAXException {
-        InputStream in = tldLocation.getInputStream();
+        InputStream in = null;
 
         try {
+            in = tldLocation.getInputStream();
             addTldLocationFromTld(in, tldLocation);
         } finally {
-            in.close();
+            if (in != null) {
+                in.close();
+            }
         }
     }
 
@@ -819,12 +817,8 @@ public class TaglibFactory implements TemplateHashModel {
 
     private static void collectMetaInfUrlsFromClassLoader(ClassLoader cl, Set<URLWithExternalForm> metainfDirUrls)
             throws IOException {
-        Enumeration<URL> urls = cl.getResources(META_INF_REL_PATH);
-
-        if (urls != null) {
-            while (urls.hasMoreElements()) {
-                metainfDirUrls.add(new URLWithExternalForm((URL) urls.nextElement()));
-            }
+        for (Enumeration<URL> urls = cl.getResources(META_INF_REL_PATH); urls.hasMoreElements(); ) {
+            metainfDirUrls.add(new URLWithExternalForm(urls.nextElement()));
         }
     }
 
@@ -1102,15 +1096,12 @@ public class TaglibFactory implements TemplateHashModel {
     }
 
     private static boolean isDescendantOfOrSameAs(ClassLoader descendant, ClassLoader parent) {
-        while (true) {
-            if (descendant == null) {
-                return false;
-            }
+        for (; descendant != null; descendant = descendant.getParent()) {
             if (descendant == parent) {
                 return true;
             }
-            descendant = descendant.getParent();
         }
+        return false;
     }
 
     /**
@@ -1195,6 +1186,7 @@ public class TaglibFactory implements TemplateHashModel {
     }
 
     private interface InputStreamFactory {
+
         InputStream getInputStream();
 
     }
@@ -1487,11 +1479,14 @@ public class TaglibFactory implements TemplateHashModel {
                 ServletContext ctx, TldLocation tldLocation, ObjectWrapper objectWrapper) throws IOException, SAXException {
             final TldParserForTaglibBuilding tldParser = new TldParserForTaglibBuilding(objectWrapper);
 
-            InputStream in = tldLocation.getInputStream();
+            InputStream in = null;
             try {
+                in = tldLocation.getInputStream();
                 parseXml(in, tldLocation.getXmlSystemId(), tldParser);
             } finally {
-                in.close();
+                if (in != null) {
+                    in.close();
+                }
             }
 
             EventForwarding eventForwarding = EventForwarding.getInstance(ctx);
