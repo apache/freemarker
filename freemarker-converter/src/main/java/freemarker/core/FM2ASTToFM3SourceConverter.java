@@ -20,11 +20,14 @@
 package freemarker.core;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.freemarker.converter.ConversionWarnReceiver;
 import org.apache.freemarker.converter.ConverterException;
 import org.apache.freemarker.converter.ConverterUtils;
 import org.apache.freemarker.core.NamingConvention;
@@ -66,6 +69,8 @@ public class FM2ASTToFM3SourceConverter {
 
     private final Template template;
     private final String src;
+    private final ConversionWarnReceiver warnReceiver;
+
     private final StringBuilder out;
     private List<Integer> rowStartPositions;
     private final char tagBeginChar;
@@ -79,11 +84,14 @@ public class FM2ASTToFM3SourceConverter {
     private boolean printNextCustomDirAsFtlDir;
 
     /**
-     * @param fm2Cfg The {@link Configuration} used for parsing; {@link Configuration#getWhitespaceStripping()} must
-     *               return {@code false}.
+     * @param fm2Cfg
+     *         The {@link Configuration} used for parsing; {@link Configuration#getWhitespaceStripping()} must return
+     *         {@code false}.
      */
-    public static Result convert(String templateName, String src, Configuration fm2Cfg) throws ConverterException {
-        return new FM2ASTToFM3SourceConverter(templateName, src, fm2Cfg).convert();
+    public static Result convert(
+            String templateName, String src, Configuration fm2Cfg, ConversionWarnReceiver warnReceiver)
+            throws ConverterException {
+        return new FM2ASTToFM3SourceConverter(templateName, src, fm2Cfg, warnReceiver).convert();
     }
 
     private Result convert() throws ConverterException {
@@ -101,7 +109,8 @@ public class FM2ASTToFM3SourceConverter {
         return new Result(template, outAsString);
     }
 
-    private FM2ASTToFM3SourceConverter(String templateName, String src, Configuration fm2Cfg)
+    private FM2ASTToFM3SourceConverter(
+            String templateName, String src, Configuration fm2Cfg, ConversionWarnReceiver warnReceiver)
             throws ConverterException {
         template = createTemplate(templateName, src, fm2Cfg);
         if (template.getParserConfiguration().getWhitespaceStripping()) {
@@ -111,6 +120,9 @@ public class FM2ASTToFM3SourceConverter {
         _NullArgumentException.check("src", src);
 
         this.src = src;
+
+        this.warnReceiver = warnReceiver;
+
         this.out = new StringBuilder();
         if (template.getActualTagSyntax() == Configuration.SQUARE_BRACKET_TAG_SYNTAX) {
             tagBeginChar = '[';
@@ -182,7 +194,8 @@ public class FM2ASTToFM3SourceConverter {
             FM2ASTToFM3SourceConverter customFtlDirSrcConverter = new FM2ASTToFM3SourceConverter(
                     template.getName(),
                     tagBeginChar + "@ftl" + src.substring(pos, tagEnd) + (hasSlash ? "" : "/") + tagEndChar,
-                    template.getConfiguration());
+                    template.getConfiguration(), warnReceiver
+            );
             customFtlDirSrcConverter.printNextCustomDirAsFtlDir = true;
             String fm3Content = customFtlDirSrcConverter.convert().fm3Content;
             print(hasSlash
@@ -269,17 +282,17 @@ public class FM2ASTToFM3SourceConverter {
     private boolean needsNoParenthesisAsBuiltInLHO(Expression exp) {
         return
                 exp instanceof Identifier
-                || exp instanceof NumberLiteral
-                || exp instanceof BooleanLiteral
-                || exp instanceof StringLiteral
-                || exp instanceof ListLiteral
-                || exp instanceof HashLiteral
-                || exp instanceof ParentheticalExpression
-                || exp instanceof MethodCall
-                || exp instanceof DynamicKeyName
-                || exp instanceof BuiltIn
-                || exp instanceof BuiltinVariable
-                || exp instanceof Dot;
+                        || exp instanceof NumberLiteral
+                        || exp instanceof BooleanLiteral
+                        || exp instanceof StringLiteral
+                        || exp instanceof ListLiteral
+                        || exp instanceof HashLiteral
+                        || exp instanceof ParentheticalExpression
+                        || exp instanceof MethodCall
+                        || exp instanceof DynamicKeyName
+                        || exp instanceof BuiltIn
+                        || exp instanceof BuiltinVariable
+                        || exp instanceof Dot;
     }
 
     private void printDollarInterpolation(DollarVariable node) throws ConverterException {
@@ -324,9 +337,100 @@ public class FM2ASTToFM3SourceConverter {
             printDirReturn((ReturnInstruction) node);
         } else if (node instanceof LibraryLoad) {
             printDirImport((LibraryLoad) node);
+        } else if (node instanceof Include) {
+            printDirInclude((Include) node);
         } else {
             throw new ConverterException("Unhandled AST TemplateElement class: " + node.getClass().getName());
         }
+    }
+
+    private void printDirInclude(Include node) throws ConverterException {
+        if (Configuration.getVersion().intValue() != Configuration.VERSION_2_3_26.intValue()) {
+            throw new BugException("Fix things at [broken in 2.3.26] comments; version was: "
+                    + Configuration.getVersion());
+        }
+        // assertParamCount(node, 4); // [broken in 2.3.26]
+
+        printCoreDirStartTagBeforeParams(node, "include");
+
+        Expression templateName = getParam(node, 0, ParameterRole.TEMPLATE_NAME, Expression.class);
+        int templateNameEndPos = getEndPositionExclusive(templateName);
+
+        Expression parseParam = getParam(node, 1, ParameterRole.PARSE_PARAMETER, Expression.class);
+        if (parseParam != null) {
+            warnReceiver.warn(parseParam.getBeginLine(), parseParam.getBeginColumn(),
+                    "The \"parse\" parameter of #include was removed, as it's not supported anymore. Use the "
+                            + "templateConfigurations configuration setting to specify which files are not parsed.");
+
+        }
+
+        Expression encodingParam = getParam(node, 2, ParameterRole.ENCODING_PARAMETER, Expression.class);
+        if (encodingParam != null) {
+            warnReceiver.warn(encodingParam.getBeginLine(), encodingParam.getBeginColumn(),
+                    "The \"encoding\" parameter of #include was removed, as it's not supported anymore. Use the "
+                            + "templateConfigurations configuration setting to specify which files has a different "
+                            + "encoding than the configured default.");
+        }
+
+        // Can't use as parameterCount is [broken in 2.3.26]:
+        // Expression ignoreMissingParam = getParam(node, 3, ParameterRole.IGNORE_MISSING_PARAMETER, Expression.class);
+        Expression ignoreMissingParam = (Expression) node.getParameterValue(3);
+
+        List<Expression> sortedExps =
+                sortExpressionsByPosition(templateName, parseParam, encodingParam, ignoreMissingParam);
+
+        printExp(templateName);
+        String postNameWSOrComment = readAndWSAndExpComments(templateNameEndPos);
+        if (ignoreMissingParam != null || (parseParam == null && encodingParam == null)) {
+            // This will separate us from ignoreMissing=exp, or from the tagEndChar
+            print(postNameWSOrComment);
+        } else {
+            // We only have removed thing after in the src => no need for spacing after us
+            int commentPos = postNameWSOrComment.indexOf("--") - 1;
+            if (commentPos >= 0) {
+                print(rightTrim(postNameWSOrComment));
+            }
+        }
+
+        for (int i = 1; i < sortedExps.size(); i++) {
+            Expression paramExp = sortedExps.get(i);
+            if (paramExp == ignoreMissingParam) {
+                int identifierStartPos = getPositionAfterWSAndExpComments(
+                        getEndPositionExclusive(sortedExps.get(i - 1)));
+                print("ignoreMissing");
+                printSeparatorAndWSAndExpComments(getPositionAfterIdentifier(identifierStartPos), "=");
+                printExp(paramExp);
+
+                String postParamWSOrComment = readAndWSAndExpComments(getEndPositionExclusive(paramExp));
+                if (i == sortedExps.size() - 1) {
+                    // We were the last int the source as well
+                    print(postParamWSOrComment);
+                } else {
+                    int commentPos = postParamWSOrComment.indexOf("--") - 1;
+                    if (commentPos >= 0) {
+                        print(rightTrim(postParamWSOrComment));
+                    }
+                }
+            }
+        }
+
+        print(tagEndChar);
+    }
+
+    private List<Expression> sortExpressionsByPosition(Expression... expressions) {
+        ArrayList<Expression> list = new ArrayList<>(expressions.length);
+        for (Expression expression : expressions) {
+            if (expression != null) {
+                list.add(expression);
+            }
+        }
+        Collections.sort(list, new Comparator<Expression>() {
+            @Override
+            public int compare(Expression o1, Expression o2) {
+                return Integer.compare(getStartPosition(o1), getStartPosition(o2));
+            }
+        });
+        return list;
     }
 
     private void printDirImport(LibraryLoad node) throws ConverterException {
@@ -337,12 +441,10 @@ public class FM2ASTToFM3SourceConverter {
         Expression templateName = getParam(node, 0, ParameterRole.TEMPLATE_NAME, Expression.class);
         printExp(templateName);
 
-        int pos = printWSAndExpComments(getEndPositionExclusive(templateName), "as", false);
+        int pos = printSeparatorAndWSAndExpComments(getEndPositionExclusive(templateName), "as");
 
         print(FTLUtil.escapeIdentifier(getParam(node, 1, ParameterRole.NAMESPACE, String.class)));
-        int identifierStartPos = pos;
         pos = getPositionAfterIdentifier(pos);
-        assertNodeContent(pos > identifierStartPos, node, "Can't find namespace variable name");
 
         printStartTagEnd(node, pos, false);
     }
@@ -368,12 +470,10 @@ public class FM2ASTToFM3SourceConverter {
 
         int pos = printCoreDirStartTagBeforeParams(node, "escape");
 
-        int identifierStartPos = pos;
         pos = getPositionAfterIdentifier(pos);
-        assertNodeContent(pos > identifierStartPos, node, "Can't find placeholder variable name");
         print(FTLUtil.escapeIdentifier(getParam(node, 0, ParameterRole.PLACEHOLDER_VARIABLE, String.class)));
 
-        pos = printWSAndExpComments(pos, "as", false);
+        pos = printSeparatorAndWSAndExpComments(pos, "as");
 
         Expression expTemplate = getParam(node, 1, ParameterRole.EXPRESSION_TEMPLATE, Expression.class);
         printExp(expTemplate);
@@ -396,7 +496,8 @@ public class FM2ASTToFM3SourceConverter {
         printDirGenericParameterlessWithNestedContent(node, "noAutoEsc");
     }
 
-    private void printDirGenericParameterlessWithNestedContent(TemplateElement node, String tagName) throws ConverterException {
+    private void printDirGenericParameterlessWithNestedContent(TemplateElement node, String tagName)
+            throws ConverterException {
         assertParamCount(node, 0);
 
         printCoreDirParameterlessStartTag(node, tagName);
@@ -436,7 +537,7 @@ public class FM2ASTToFM3SourceConverter {
             Assignment assignment = (Assignment) node.getChild(childIdx);
             pos = printDirAssignmentCommonExp(assignment, pos);
             if (childIdx != childCnt - 1) {
-                pos = printWSAndExpComments(pos, ",", true);
+                pos = printOptionalSeparatorAndWSAndExpComments(pos, ",");
             }
         }
 
@@ -455,7 +556,7 @@ public class FM2ASTToFM3SourceConverter {
             throws ConverterException {
         Expression ns = getParam(node, nsParamIdx, ParameterRole.NAMESPACE, Expression.class);
         if (ns != null) {
-            pos = printWSAndExpComments(pos, "in", false);
+            printSeparatorAndWSAndExpComments(pos, "in");
             printExp(ns);
             pos = getEndPositionExclusive(ns);
         }
@@ -483,11 +584,9 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private int printDirAssignmentCommonExp(Assignment node, int pos) throws ConverterException {
-        {
-            String target = getParam(node, 0, ParameterRole.ASSIGNMENT_TARGET, String.class);
-            print(FTLUtil.escapeIdentifier(target));
-            pos = getPositionAfterIdentifier(pos, true);
-        }
+        String target = getParam(node, 0, ParameterRole.ASSIGNMENT_TARGET, String.class);
+        print(FTLUtil.escapeIdentifier(target));
+        pos = getPositionAfterAssignmentTargetIdentifier(pos);
 
         pos = printWSAndExpComments(pos);
 
@@ -525,27 +624,19 @@ public class FM2ASTToFM3SourceConverter {
 
         String assignedName = getParam(node, 0, ParameterRole.ASSIGNMENT_TARGET, String.class);
         print(FTLUtil.escapeIdentifier(assignedName));
-        {
-            int lastPos = pos;
-            pos = getPositionAfterIdentifier(pos, true);
-            assertNodeContent(pos > lastPos, node, "Expected target name");
-        }
+        pos = getPositionAfterAssignmentTargetIdentifier(pos);
 
-        pos = printWSAndExpComments(pos, "(", true);
+        pos = printOptionalSeparatorAndWSAndExpComments(pos, "(");
 
         int paramIdx = 1;
         while (node.getParameterRole(paramIdx) == ParameterRole.PARAMETER_NAME) {
             String paramName = getParam(node, paramIdx++, ParameterRole.PARAMETER_NAME, String.class);
             print(FTLUtil.escapeIdentifier(paramName));
-            {
-                int lastPos = pos;
-                pos = getPositionAfterIdentifier(pos);
-                assertNodeContent(pos > lastPos, node, "Expected parameter name");
-            }
+            pos = getPositionAfterIdentifier(pos);
 
             Expression paramDefault = getParam(node, paramIdx++, ParameterRole.PARAMETER_DEFAULT, Expression.class);
             if (paramDefault != null) {
-                printWSAndExpComments(pos, "=", false);
+                printSeparatorAndWSAndExpComments(pos, "=");
                 printExp(paramDefault);
                 pos = getEndPositionExclusive(paramDefault);
             }
@@ -579,12 +670,7 @@ public class FM2ASTToFM3SourceConverter {
         String paramName = getParam(node, paramIdx++, ParameterRole.CATCH_ALL_PARAMETER_NAME, String.class);
         if (paramName != null) {
             print(FTLUtil.escapeIdentifier(paramName));
-            {
-                int lastPos = pos;
-                pos = getPositionAfterIdentifier(pos);
-                assertNodeContent(pos > lastPos, node,
-                        "Expected catch-all parameter name");
-            }
+            pos = getPositionAfterIdentifier(pos);
             pos = printWSAndExpComments(pos);
             assertNodeContent(src.startsWith("...", pos), node,
                     "Expected \"...\" after catch-all parameter name");
@@ -595,7 +681,7 @@ public class FM2ASTToFM3SourceConverter {
         assertNodeContent(paramIdx == paramCnt - 1, node,
                 "Expected AST parameter at index {} to be the last one", paramIdx);
 
-        pos = printWSAndExpComments(pos, ")", true);
+        pos = printOptionalSeparatorAndWSAndExpComments(pos, ")");
         assertNodeContent(src.charAt(pos) == tagEndChar, node, "Tag end not found");
         print(tagEndChar);
 
@@ -636,15 +722,13 @@ public class FM2ASTToFM3SourceConverter {
             Expression argValue = getParam(node, paramIdx + 1, ParameterRole.ARGUMENT_VALUE, Expression.class);
 
             int pos = getEndPositionExclusive(lastPrintedExp);
-            pos = printWSAndExpComments(pos, ",", true);
-            int paramNameStartPos = pos;
+            pos = printOptionalSeparatorAndWSAndExpComments(pos, ",");
             pos = getPositionAfterIdentifier(pos);
-            assertNodeContent(pos > paramNameStartPos, node, "Parameter name in src was empty");
             if (ftlDirMode) {
                 paramName = convertFtlHeaderParamName(paramName);
             }
             print(FTLUtil.escapeIdentifier(paramName));
-            printWSAndExpComments(pos, "=", false);
+            printSeparatorAndWSAndExpComments(pos, "=");
             printExp(argValue);
 
             lastPrintedExp = argValue;
@@ -655,11 +739,7 @@ public class FM2ASTToFM3SourceConverter {
         int pos = getEndPositionExclusive(lastPrintedExp);
         boolean beforeFirstLoopVar = true;
         while (paramIdx < paramCount) {
-            String sep = readWSAndExpComments(pos, beforeFirstLoopVar ? ";" : ",", false);
-            assertNodeContent(sep.length() != 0, node,
-                    "Can't find loop variable separator");
-            printWithConvertedExpComments(sep);
-            pos += sep.length();
+            pos = printSeparatorAndWSAndExpComments(pos, beforeFirstLoopVar ? ";" : ",");
 
             String loopVarName = getParam(node, paramIdx, ParameterRole.TARGET_LOOP_VARIABLE, String.class);
             print(_StringUtil.toFTLTopLevelIdentifierReference(loopVarName));
@@ -831,6 +911,7 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private static final Map<String, String> COMPARATOR_OP_MAP;
+
     static {
         COMPARATOR_OP_MAP = new HashMap<String, String>();
         // For now we leave FM2 ops as is, but later in many cases they will be replaced.
@@ -860,6 +941,7 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private static final Map<String, String> AND_OP_MAP;
+
     static {
         AND_OP_MAP = new HashMap<String, String>();
         // For now we leave FM2 ops as is, but later in many cases they will be replaced.
@@ -874,6 +956,7 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private static final Map<String, String> OR_OP_MAP;
+
     static {
         OR_OP_MAP = new HashMap<String, String>();
         // For now we leave FM2 ops as is, but later in many cases they will be replaced.
@@ -910,7 +993,7 @@ public class FM2ASTToFM3SourceConverter {
     private void printExpBuiltinVariable(BuiltinVariable node) throws ConverterException {
         int startPos = getStartPosition(node);
 
-        int varNameStart = printWSAndExpComments(startPos, ".", false);
+        int varNameStart = printSeparatorAndWSAndExpComments(startPos, ".");
 
         String name = src.substring(varNameStart, getEndPositionExclusive(node));
         print(convertBuiltInVariableName(name));
@@ -929,7 +1012,7 @@ public class FM2ASTToFM3SourceConverter {
         Expression lho = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, Expression.class);
         String rho = getParam(node, 1, ParameterRole.RIGHT_HAND_OPERAND, String.class);
         printNode(lho);
-        printWSAndExpComments(getEndPositionExclusive(lho), ".", false);
+        printSeparatorAndWSAndExpComments(getEndPositionExclusive(lho), ".");
         print(FTLUtil.escapeIdentifier(rho));
     }
 
@@ -1098,7 +1181,8 @@ public class FM2ASTToFM3SourceConverter {
         int endPos = getEndPositionInclusive(node);
         boolean foundQuestionMark = false;
         int pos = postLHOPos;
-        scanForRHO: while (pos < endPos) {
+        scanForRHO:
+        while (pos < endPos) {
             char c = src.charAt(pos);
             if (c == '?') {
                 foundQuestionMark = true;
@@ -1203,11 +1287,11 @@ public class FM2ASTToFM3SourceConverter {
         }
     }
 
-    private int printCoreDirStartTagBeforeParams(TemplateElement node, String tagName)
+    private int printCoreDirStartTagBeforeParams(TemplateElement node, String fm3TagName)
             throws ConverterException {
         print(tagBeginChar);
         print('#');
-        print(tagName);
+        print(fm3TagName);
         return printWSAndExpComments(getPositionAfterTagName(node));
     }
 
@@ -1218,10 +1302,10 @@ public class FM2ASTToFM3SourceConverter {
         return pos + 1;
     }
 
-    private void printCoreDirEndTag(TemplateElement node, String tagName) throws UnexpectedNodeContentException {
+    private void printCoreDirEndTag(TemplateElement node, String fm3TagName) throws UnexpectedNodeContentException {
         print(tagBeginChar);
         print("/#");
-        print(tagName);
+        print(fm3TagName);
         printEndTagSkippedTokens(node);
         print(tagEndChar);
     }
@@ -1243,17 +1327,6 @@ public class FM2ASTToFM3SourceConverter {
                 param.getBeginColumn(), param.getBeginLine()));
     }
 
-    private void printWithEnclosedSkippedTokens(
-            String beforeSkippedTokens, String afterSkippedTokens, TemplateObject node)
-            throws ConverterException {
-        print(beforeSkippedTokens);
-        String skippedTokens = getSrcSectionExclEnd(
-                node.getBeginColumn() + beforeSkippedTokens.length(), node.getBeginLine(),
-                node.getEndColumn() - afterSkippedTokens.length() + 1, node.getEndLine());
-        printWithConvertedExpComments(skippedTokens);
-        print(afterSkippedTokens);
-    }
-
     private void printWithParamsTrailingSkippedTokens(
             String afterParams, TemplateObject node, int lastVisualParamIdx) throws
             ConverterException {
@@ -1273,7 +1346,7 @@ public class FM2ASTToFM3SourceConverter {
      * parameter. (This will print the whitespace or comments that isn't visible in the AST.)
      *
      * @return The position of the last character of the start tag. Note that the printed string never includes this
-     *         character.
+     * character.
      */
     private int printStartTagEnd(TemplateElement node, Expression lastParam, boolean trimSlash)
             throws ConverterException {
@@ -1310,7 +1383,8 @@ public class FM2ASTToFM3SourceConverter {
      * Similar to {@link #printStartTagEnd(TemplateElement, Expression, boolean)}, but with explicitly
      * specified scan start position.
      *
-     * @param pos The position where the first skipped character can occur (or the tag end character).
+     * @param pos
+     *         The position where the first skipped character can occur (or the tag end character).
      */
     private int printStartTagEnd(TemplateElement node, int pos, boolean trimSlash)
             throws ConverterException {
@@ -1421,7 +1495,7 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private void assertNodeContent(boolean good, TemplateObject node, String
-        errorMessage) throws UnexpectedNodeContentException {
+            errorMessage) throws UnexpectedNodeContentException {
         assertNodeContent(good, node, errorMessage, null);
     }
 
@@ -1447,8 +1521,10 @@ public class FM2ASTToFM3SourceConverter {
     /**
      * Returns the position of a character in the {@link #src} string.
      *
-     * @param column 1-based column
-     * @param row 1-based row
+     * @param column
+     *         1-based column
+     * @param row
+     *         1-based row
      */
     private int getPosition(int column, int row) {
         if (rowStartPositions == null) {
@@ -1483,7 +1559,8 @@ public class FM2ASTToFM3SourceConverter {
      * @return Position after the whitespace and comments, or the argument position if there were node
      */
     private int getPositionAfterWSAndExpComments(int pos) throws ConverterException {
-        scanForNoWSNoComment: while (pos < src.length()) {
+        scanForNoWSNoComment:
+        while (pos < src.length()) {
             char c = src.charAt(pos);
             if (isExpCommentStart(pos)) {
                 pos += 4; // length of "<#--"
@@ -1507,18 +1584,21 @@ public class FM2ASTToFM3SourceConverter {
         return pos;
     }
 
-    private String readWSAndExpComments(int startPos)
+    private String readAndWSAndExpComments(int startPos)
             throws ConverterException {
         return src.substring(startPos, getPositionAfterWSAndExpComments(startPos));
     }
 
-    private String readWSAndExpComments(int startPos, String separator, boolean separatorOptional)
+    private String readSeparatorAndWSAndExpComments(int startPos, String separator, boolean separatorOptional)
             throws ConverterException {
         int pos = getPositionAfterWSAndExpComments(startPos);
 
         if (pos == src.length() || !src.startsWith(separator, pos)) {
-            // No separator
-            return separatorOptional ? src.substring(startPos, pos) : "";
+            if (!separatorOptional) {
+                throw new ConverterException(
+                        "Expected separator " + _StringUtil.jQuote(separator) + " at position " + pos + ".");
+            }
+            return src.substring(startPos, pos);
         }
         pos += separator.length();
 
@@ -1528,15 +1608,23 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private int printWSAndExpComments(int pos) throws ConverterException {
-        String sep = readWSAndExpComments(pos);
+        String sep = readAndWSAndExpComments(pos);
         printWithConvertedExpComments(sep);
         pos += sep.length();
         return pos;
     }
 
-    private int printWSAndExpComments(int pos, String separator, boolean sepOptional) throws
-            ConverterException {
-        String sep = readWSAndExpComments(pos, separator, sepOptional);
+    private int printSeparatorAndWSAndExpComments(int pos, String separator) throws ConverterException {
+        return printSeparatorAndWSAndExpComments(pos, separator, false);
+    }
+
+    private int printOptionalSeparatorAndWSAndExpComments(int pos, String separator) throws ConverterException {
+        return printSeparatorAndWSAndExpComments(pos, separator, true);
+    }
+
+    private int printSeparatorAndWSAndExpComments(int pos, String separator, boolean sepOptional)
+            throws ConverterException {
+        String sep = readSeparatorAndWSAndExpComments(pos, separator, sepOptional);
         printWithConvertedExpComments(sep);
         pos += sep.length();
         return pos;
@@ -1544,6 +1632,10 @@ public class FM2ASTToFM3SourceConverter {
 
     private int getPositionAfterIdentifier(int startPos) throws ConverterException {
         return getPositionAfterIdentifier(startPos, false);
+    }
+
+    private int getPositionAfterAssignmentTargetIdentifier(int startPos) throws ConverterException {
+        return getPositionAfterIdentifier(startPos, true);
     }
 
     private int getPositionAfterIdentifier(int startPos, boolean assignmentTarget) throws ConverterException {
@@ -1565,6 +1657,9 @@ public class FM2ASTToFM3SourceConverter {
                 } else {
                     break scanUntilIdentifierEnd;
                 }
+            }
+            if (pos == startPos) {
+                throw new ConverterException("Expected an identifier at position " + startPos + ".");
             }
             return pos;
         }
@@ -1646,6 +1741,18 @@ public class FM2ASTToFM3SourceConverter {
         public String getFM3Content() {
             return fm3Content;
         }
+    }
+
+    private String rightTrim(String s) {
+        if (s == null) {
+            return null;
+        }
+
+        int i = s.length() - 1;
+        while (i >= 0 && Character.isWhitespace(s.charAt(i))) {
+            i--;
+        }
+        return i != -1 ? s.substring(0, i + 1) : "";
     }
 
 }

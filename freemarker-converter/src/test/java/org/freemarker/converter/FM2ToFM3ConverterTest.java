@@ -235,6 +235,24 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
 
         assertConvertedSame("<#import '/lib/foo.ftl' as foo >");
         assertConvertedSame("<#import <#--1--> '/lib/foo.ftl' <#--2--> as <#--3--> foo <#--4--> >");
+
+        assertConvertedSame("<#include 'foo.ftl'>");
+        assertConverted("<#include 'foo.ftl' ignoreMissing=true>", "<#include 'foo.ftl' ignore_missing=true>");
+        assertConverted("<#include 'foo.ftl' ignoreMissing=true>",
+                "<#include 'foo.ftl' ignore_missing=true encoding='utf-8' parse=false>");
+        assertConverted("<#include 'foo.ftl' ignoreMissing=true>",
+                "<#include 'foo.ftl' encoding='utf-8' ignore_missing=true parse=false>");
+        assertConverted("<#include 'foo.ftl' ignoreMissing=true>",
+                "<#include 'foo.ftl' encoding='utf-8' parse=false ignore_missing=true>");
+        assertConvertedSame("<#include <#--1--> 'foo.ftl' <#--2--> >");
+        assertConvertedSame("<#include <#--1--> 'foo.ftl' <#--2--> ignoreMissing=true <#--3--> >");
+        assertConverted("<#include <#--1--> 'foo.ftl' <#--2-->>",
+                "<#include <#--1--> 'foo.ftl' <#--2--> parse=true <#--3--> >");
+        assertConverted("<#include <#--1--> 'foo.ftl' <#--2--> ignoreMissing=true <#--3-->>",
+                "<#include <#--1--> 'foo.ftl' <#--2--> ignoreMissing=true <#--3--> parse=true <#--4--> >");
+        assertConverted("<#include <#--1--> 'foo.ftl' <#--2--> ignoreMissing=true <#--4-->>",
+                "<#include <#--1--> 'foo.ftl' <#--2--> encoding='UTF-8' <#--3--> ignoreMissing=true <#--4--> "
+                        + "parse=true <#--5--> >");
     }
 
     @Test
