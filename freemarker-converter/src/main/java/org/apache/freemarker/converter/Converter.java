@@ -42,6 +42,7 @@ public abstract class Converter {
 
     private File source;
     private File destinationDirectory;
+    private ConversionWarnReceiver conversionWarnReceiver = new LoggingWarnReceiver();
     private boolean createDestinationDirectory;
     private boolean executed;
     private Set<File> directoriesKnownToExist = new HashSet<>();
@@ -70,7 +71,15 @@ public abstract class Converter {
         this.createDestinationDirectory = createDestinationDirectory;
     }
 
-    public final void execute()  throws ConverterException {
+    public ConversionWarnReceiver getConversionWarnReceiver() {
+        return conversionWarnReceiver;
+    }
+
+    public void setConversionWarnReceiver(ConversionWarnReceiver conversionWarnReceiver) {
+        this.conversionWarnReceiver = conversionWarnReceiver;
+    }
+
+    public final void execute() throws ConverterException {
         if (executed) {
             throw new IllegalStateException("This converted was already invoked once.");
         }
@@ -132,11 +141,13 @@ public abstract class Converter {
             LOG.debug("Converting file: {}", src);
             FileConversionContext fileTransCtx = null;
             try {
-                fileTransCtx = new FileConversionContext(srcStream, src, dstDir);
+                conversionWarnReceiver.setSourceFile(src);
+                fileTransCtx = new FileConversionContext(srcStream, src, dstDir, conversionWarnReceiver);
                 convertFile(fileTransCtx);
             } catch (IOException e) {
                 throw new ConverterException("I/O exception while converting " + _StringUtil.jQuote(src) + ".", e);
             } finally {
+                conversionWarnReceiver.setSourceFile(null);
                 try {
                     if (fileTransCtx != null && fileTransCtx.outputStream != null) {
                         fileTransCtx.outputStream.close();
@@ -198,14 +209,16 @@ public abstract class Converter {
         private final InputStream sourceStream;
         private final File sourceFile;
         private final File dstDir;
+        private final ConversionWarnReceiver conversionWarnReceiver;
         private String destinationFileName;
         private OutputStream outputStream;
 
         public FileConversionContext(
-                InputStream sourceStream, File sourceFile, File dstDir) {
+                InputStream sourceStream, File sourceFile, File dstDir, ConversionWarnReceiver conversionWarnReceiver) {
             this.sourceStream = sourceStream;
             this.sourceFile = sourceFile;
             this.dstDir = dstDir;
+            this.conversionWarnReceiver = conversionWarnReceiver;
         }
 
         /**
@@ -229,7 +242,7 @@ public abstract class Converter {
 
         /**
          * Write the content of the destination file with this.  You need not close this stream in
-s         * {@link Converter#convertFile(FileConversionContext)}; the {@link Converter} will do that.
+         * s         * {@link Converter#convertFile(FileConversionContext)}; the {@link Converter} will do that.
          */
         public OutputStream getDestinationStream() throws ConverterException {
             if (outputStream == null) {
@@ -255,7 +268,9 @@ s         * {@link Converter#convertFile(FileConversionContext)}; the {@link Con
 
         /**
          * Sets the name of the file where the output will be written.
-         * @param destinationFileName Can't contain directory name, only the file name.
+         *
+         * @param destinationFileName
+         *         Can't contain directory name, only the file name.
          */
         public void setDestinationFileName(String destinationFileName) {
             if (outputStream != null) {
@@ -268,6 +283,11 @@ s         * {@link Converter#convertFile(FileConversionContext)}; the {@link Con
             }
             this.destinationFileName = destinationFileName;
         }
+
+        public ConversionWarnReceiver getConversionWarnReceiver() {
+            return conversionWarnReceiver;
+        }
+
     }
 
 }
