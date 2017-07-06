@@ -136,6 +136,12 @@ public class TaglibFactory implements TemplateHashModel {
     private List<String> failedTldLocations = new ArrayList<>();
     private int nextTldLocationLookupPhase = 0;
 
+    /**
+     * Parse TLD location string {@code value}. e.g, "webInfPerLibJars", "classpath:*", etc.
+     * @param value TLD location string
+     * @return {@link MetaInfTldSource} instance for the value
+     * @throws ParseException if invalid value syntax found
+     */
     public static MetaInfTldSource parseMetaInfTldLocation(String value) throws ParseException {
         MetaInfTldSource metaInfTldSource;
 
@@ -167,6 +173,13 @@ public class TaglibFactory implements TemplateHashModel {
         return metaInfTldSource;
     }
 
+    /**
+     * Parse each TLD location string in the {@code list} and return a list of type {@link MetaInfTldSource}.
+     * @param values TLD location string value list
+     * @return a list of type {@link MetaInfTldSource} by parsing each TLD location string item value
+     * @throws ParseException if invalid value syntax found
+     * @see {@link #parseMetaInfTldLocation(String)}
+     */
     public static List<MetaInfTldSource> parseMetaInfTldLocations(List<String> values) throws ParseException {
         List<MetaInfTldSource> metaInfTldSources = null;
 
@@ -205,7 +218,7 @@ public class TaglibFactory implements TemplateHashModel {
         servletContext = builder.getServletContext();
         objectWrapper = builder.getObjectWrapper();
         metaInfTldSources = builder.getMetaInfTldSources();
-        classpathTlds = builder.getClassPathTlds();
+        classpathTlds = builder.getClasspathTlds();
     }
 
     /**
@@ -496,7 +509,7 @@ public class TaglibFactory implements TemplateHashModel {
             }
         }
     }
-    
+
     private void addTldLocationsFromWebInfPerLibJarMetaInfTlds() throws IOException, SAXException {
         LOG.debug("Looking for TLD locations in servletContext:/WEB-INF/lib/*.{jar,zip}{}*.tld", META_INF_ABS_PATH);
 
@@ -583,7 +596,7 @@ public class TaglibFactory implements TemplateHashModel {
                 LOG.debug("Scanning for " + META_INF_ABS_PATH
                         + "*.tld-s in ZipInputStream (slow): servletContext:" + jarResourcePath);
             }
-    
+
             final InputStream in = servletContext.getResourceAsStream(jarResourcePath);
             if (in == null) {
                 throw new IOException("ServletContext resource not found: " + jarResourcePath);
@@ -1060,6 +1073,7 @@ public class TaglibFactory implements TemplateHashModel {
             if (jarFileUrl == null) {
                 throw new IOException("Servlet context resource not found: " + servletContextJarFilePath);
             }
+
             return new URL(
                     "jar:"
                     + jarFileUrl.toURI()
@@ -1329,17 +1343,20 @@ public class TaglibFactory implements TemplateHashModel {
             }
 
             final String entryPath;
+
             if (this.entryPath != null) {
                 entryPath = this.entryPath;
             } else {
                 if (entryUrl == null) {
                     throw new IOException("Nothing to deduce jar entry path from.");
                 }
+
                 String urlEF = entryUrl.toExternalForm();
                 int sepIdx = urlEF.indexOf(JAR_URL_ENTRY_PATH_START);
                 if (sepIdx == -1) {
                     throw new IOException("Couldn't extract jar entry path from: " + urlEF);
                 }
+
                 entryPath = normalizeJarEntryPath(
                         URLDecoder.decode(
                                 urlEF.substring(sepIdx + JAR_URL_ENTRY_PATH_START.length()),
@@ -1357,6 +1374,7 @@ public class TaglibFactory implements TemplateHashModel {
                     throw new IOException("Jar's InputStreamFactory (" + fallbackRawJarContentInputStreamFactory
                             + ") says the resource doesn't exist.");
                 }
+
                 zipIn = new ZipInputStream(rawIn);
 
                 while (true) {
@@ -2014,69 +2032,75 @@ public class TaglibFactory implements TemplateHashModel {
         public TaglibGettingException(String message) {
             super(message);
         }
-        
+
     }
 
+    /**
+     * Creates a new {@link TaglibFactory}.
+     */
     public static class Builder implements CommonBuilder<TaglibFactory> {
 
         /**
          * Servlet context.
          */
-        private ServletContext servletContext;
+        private final ServletContext servletContext;
 
         /**
-         * Object wrapper to be used in model building.
+         * ObjectWrapper to be used in model building.
          */
-        private ObjectWrapper objectWrapper;
+        private final ObjectWrapper objectWrapper;
 
         /**
          * TLD locations to look for when finding available JSP tag libraries.
          */
-        private List<MetaInfTldSource> metaInfTldSources = new ArrayList<>();
+        private List<MetaInfTldSource> metaInfTldSources;
 
         /**
          * TLD classpath locations to look for when finding available JSP tag libraries.
          */
-        private List<String> classPathTlds = new ArrayList<>();
+        private List<String> classpathTlds;
 
         private boolean alreadyBuilt;
 
-        public Builder() {
+        /**
+         * Constructs a Builder with ServletContext and ObjectWrapper.
+         * @param servletContext ServletContext instance
+         * @param objectWrapper the {@link ObjectWrapper} used when building the JSP tag library {@link TemplateHashModel}-s from the TLD-s.
+         * Usually, it should be the same {@link ObjectWrapper} that will be used inside the templates. {@code null} value
+         * is only supported for backward compatibility. For custom EL functions to be exposed, it must be non-{@code null}
+         * and an {@code intanceof} {@link DefaultObjectWrapper} (like typically, a {@link DefaultObjectWrapper}).
+         */
+        public Builder(ServletContext servletContext, ObjectWrapper objectWrapper) {
+            _NullArgumentException.check("servletContext", servletContext);
+            _NullArgumentException.check("objectWrapper", objectWrapper);
+            this.servletContext = servletContext;
+            this.objectWrapper = objectWrapper;
         }
 
+        /**
+         * Get ServletContext instance.
+         * @return ServletContext instance
+         */
         public ServletContext getServletContext() {
             return servletContext;
         }
 
-        public void setServletContext(ServletContext servletContext) {
-            this.servletContext = servletContext;
-        }
-
-        public Builder servletContext(ServletContext servletContext) {
-            setServletContext(servletContext);
-            return this;
-        }
-
+        /**
+         * Get ObjectWrapper to be used in model building.
+         * @return ObjectWrapper to be used in model building
+         */
         public ObjectWrapper getObjectWrapper() {
             return objectWrapper;
         }
 
         /**
-         * Sets the {@link ObjectWrapper} used when building the JSP tag library {@link TemplateHashModel}-s from the TLD-s.
-         * Usually, it should be the same {@link ObjectWrapper} that will be used inside the templates. {@code null} value
-         * is only supported for backward compatibility. For custom EL functions to be exposed, it must be non-{@code null}
-         * and an {@code intanceof} {@link DefaultObjectWrapper} (like typically, a {@link DefaultObjectWrapper}).
+         * Get the list of places where to look for {@code META-INF/**}{@code /*.tld} files.
+         * @return the list of places where to look for {@code META-INF/**}{@code /*.tld} files
          */
-        public void setObjectWrapper(ObjectWrapper objectWrapper) {
-            this.objectWrapper = objectWrapper;
-        }
-
-        public Builder objectWrapper(ObjectWrapper objectWrapper) {
-            setObjectWrapper(objectWrapper);
-            return this;
-        }
-
         public List<MetaInfTldSource> getMetaInfTldSources() {
+            if (metaInfTldSources == null) {
+                return Collections.emptyList();
+            }
             return metaInfTldSources;
         }
 
@@ -2097,11 +2121,34 @@ public class TaglibFactory implements TemplateHashModel {
          * @see #setClasspathTlds(List)
          */
         public void setMetaInfTldSources(List<MetaInfTldSource> metaInfTldSources) {
-            this.metaInfTldSources = metaInfTldSources;
+            _NullArgumentException.check("metaInfTldSources", metaInfTldSources);
+            this.metaInfTldSources = Collections.unmodifiableList(new ArrayList<>(metaInfTldSources));
         }
 
-        public List<String> getClassPathTlds() {
-            return classPathTlds;
+        /**
+         * Fluent API equivalent of {@link #setMetaInfTldSources(List)}.
+         * @param metaInfTldSources
+         *            The list of {@link MetaInfTldSource} subclass instances. Their order matters if multiple TLD-s define
+         *            a taglib with the same {@code taglib-uri}. In that case, the one found by the earlier
+         *            {@link MetaInfTldSource} wins.
+         * @return this builder
+         */
+        public Builder metaInfTldSources(List<MetaInfTldSource> metaInfTldSources) {
+            setMetaInfTldSources(metaInfTldSources);
+            return this;
+        }
+
+        /**
+         * Get the class-loader resource paths of the TLD-s that aren't inside the locations covered by
+         * {@link #setMetaInfTldSources(List)}, yet you want them to be discovered.
+         * @return the class-loader resource paths of the TLD-s that aren't inside the locations covered by
+         * {@link #setMetaInfTldSources(List)}, yet you want them to be discovered
+         */
+        public List<String> getClasspathTlds() {
+            if (classpathTlds == null) {
+                return Collections.emptyList();
+            }
+            return classpathTlds;
         }
 
         /**
@@ -2118,50 +2165,24 @@ public class TaglibFactory implements TemplateHashModel {
          * 
          * @see #setMetaInfTldSources(List)
          */
-        public void setClassPathTlds(List<String> classPathTlds) {
-            this.classPathTlds = classPathTlds;
+        public void setClasspathTlds(List<String> classpathTlds) {
+            _NullArgumentException.check("objectWrapper", objectWrapper);
+            this.classpathTlds = Collections.unmodifiableList(new ArrayList<>(classpathTlds));
         }
 
-        public Builder addMetaInfTldSource(MetaInfTldSource metaInfTldSource) {
-            metaInfTldSources.add(metaInfTldSource);
+        /**
+         * Fluent API equivalent of {@link #setClasspathTlds(List)}.
+         * @param classpathTlds
+         *            List of {@code String}-s, maybe {@code null}. Each item is a resource path, like
+         *            {@code "/META-INF/my.tld"}. (Relative resource paths will be interpreted as root-relative.)
+         * @return this builder
+         */
+        public Builder classpathTlds(List<String> classpathTlds) {
+            setClasspathTlds(classpathTlds);
             return this;
         }
 
-        public Builder addAllMetaInfTldSources(List<MetaInfTldSource> metaInfTldSources) {
-            this.metaInfTldSources.addAll(metaInfTldSources);
-            return this;
-        }
-
-        public Builder addMetaInfTldLocation(String metaInfTldLocation) throws ParseException {
-            return addMetaInfTldSource(parseMetaInfTldLocation(metaInfTldLocation));
-        }
-
-        public Builder addMetaInfTldLocations(List<String> metaInfTldLocations) throws ParseException {
-            return addAllMetaInfTldSources(parseMetaInfTldLocations(metaInfTldLocations));
-        }
-
-        public Builder addJettyMetaInfTldJarPattern(Pattern pattern) {
-            return addMetaInfTldSource(new ClasspathMetaInfTldSource(pattern));
-        }
-
-        public Builder addAllJettyMetaInfTldJarPatterns(List<Pattern> patterns) {
-            for (Pattern pattern : patterns) {
-                addJettyMetaInfTldJarPattern(pattern);
-            }
-
-            return this;
-        }
-
-        public Builder addClasspathTld(String classpathTld) {
-            classPathTlds.add(classpathTld);
-            return this;
-        }
-
-        public Builder addAllClasspathTlds(List<String> classpathTlds) {
-            classPathTlds.addAll(classpathTlds);
-            return this;
-        }
-
+        @Override
         public TaglibFactory build() throws ConfigurationException {
             if (alreadyBuilt) {
                 throw new IllegalStateException("build() can only be executed once.");

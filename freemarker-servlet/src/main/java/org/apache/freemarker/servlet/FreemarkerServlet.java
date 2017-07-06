@@ -61,9 +61,11 @@ import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
+import org.apache.freemarker.core.util._CollectionUtil;
 import org.apache.freemarker.core.util._SecurityUtil;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.servlet.jsp.TaglibFactory;
+import org.apache.freemarker.servlet.jsp.TaglibFactory.ClasspathMetaInfTldSource;
 import org.apache.freemarker.servlet.jsp.TaglibFactory.MetaInfTldSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -490,8 +492,8 @@ public class FreemarkerServlet extends HttpServlet {
     private ResponseCharacterEncoding responseCharacterEncoding = ResponseCharacterEncoding.LEGACY;
     private Charset forcedResponseCharacterEncoding;
     private OverrideResponseLocale overrideResponseLocale = OverrideResponseLocale.ALWAYS;
-    private List/*<MetaInfTldSource>*/ metaInfTldSources;
-    private List/*<String>*/ classpathTlds;
+    private List<MetaInfTldSource> metaInfTldSources;
+    private List<String> classpathTlds;
 
     private Object lazyInitFieldsLock = new Object();
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
@@ -1007,11 +1009,15 @@ public class FreemarkerServlet extends HttpServlet {
                     "Failed to parse system property \"" + SYSTEM_PROPERTY_META_INF_TLD_SOURCES + "\"", e);
         }
 
-        List<Pattern> jettyTaglibJarPatterns = null;
+        List<MetaInfTldSource> jettyMetaInfTldSources = null;
         try {
             final String attrVal = (String) servletContext.getAttribute(ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS);
-            jettyTaglibJarPatterns = (attrVal != null) ? InitParamParser.parseCommaSeparatedPatterns(attrVal)
-                    : Collections.emptyList();
+            List<Pattern> jettyTaglibJarPatterns = (attrVal != null)
+                    ? InitParamParser.parseCommaSeparatedPatterns(attrVal) : Collections.emptyList();
+            jettyMetaInfTldSources = new ArrayList<>(jettyTaglibJarPatterns.size());
+            for (Pattern pattern : jettyTaglibJarPatterns) {
+                jettyMetaInfTldSources.add(new ClasspathMetaInfTldSource(pattern));
+            }
         } catch (Exception e) {
             LOG.error("Failed to parse application context attribute \"" + ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS
                     + "\" - it will be ignored", e);
@@ -1027,14 +1033,12 @@ public class FreemarkerServlet extends HttpServlet {
                     "Failed to parse system property \"" + SYSTEM_PROPERTY_CLASSPATH_TLDS + "\"", e);
         }
 
-        return new TaglibFactory.Builder()
-                .servletContext(servletContext)
-                .objectWrapper(objectWrapper)
-                .addAllMetaInfTldSources(metaInfTldSources)
-                .addAllMetaInfTldSources(metaInfTldSourcesFromSysProp)
-                .addAllJettyMetaInfTldJarPatterns(jettyTaglibJarPatterns)
-                .addAllClasspathTlds(classpathTlds)
-                .addAllClasspathTlds(classpathTldsFromSysProp).build();
+        return new TaglibFactory.Builder(servletContext, objectWrapper)
+                .metaInfTldSources(_CollectionUtil.mergeListsToImmutableList(true, metaInfTldSources,
+                        metaInfTldSourcesFromSysProp, jettyMetaInfTldSources))
+                .classpathTlds(
+                        _CollectionUtil.mergeTwoListsToImmutableList(classpathTlds, classpathTldsFromSysProp, true))
+                .build();
     }
 
     /**
