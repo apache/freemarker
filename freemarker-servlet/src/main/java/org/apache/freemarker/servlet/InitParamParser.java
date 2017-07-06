@@ -125,8 +125,8 @@ final class InitParamParser {
         return "/" + path;
     }
 
-    static List/*<String>*/ parseCommaSeparatedList(String value) throws ParseException {
-        List/*<String>*/ valuesList = new ArrayList();
+    static List<String> parseCommaSeparatedList(String value) throws ParseException {
+        List<String> valuesList = new ArrayList<>();
         String[] values = _StringUtil.split(value, ',');
         for (int i = 0; i < values.length; i++) {
             final String s = values[i].trim();

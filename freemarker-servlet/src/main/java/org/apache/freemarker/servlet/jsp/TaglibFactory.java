@@ -2053,7 +2053,7 @@ public class TaglibFactory implements TemplateHashModel {
         /**
          * TLD locations to look for when finding available JSP tag libraries.
          */
-        private List<MetaInfTldSource> metaInfTldSources;
+        private List<? extends MetaInfTldSource> metaInfTldSources;
 
         /**
          * TLD classpath locations to look for when finding available JSP tag libraries.
@@ -2097,11 +2097,8 @@ public class TaglibFactory implements TemplateHashModel {
          * Get the list of places where to look for {@code META-INF/**}{@code /*.tld} files.
          * @return the list of places where to look for {@code META-INF/**}{@code /*.tld} files
          */
-        public List<MetaInfTldSource> getMetaInfTldSources() {
-            if (metaInfTldSources == null) {
-                return Collections.emptyList();
-            }
-            return metaInfTldSources;
+        public List<? extends MetaInfTldSource> getMetaInfTldSources() {
+            return (metaInfTldSources != null) ? metaInfTldSources : Collections.<MetaInfTldSource> emptyList();
         }
 
         /**
@@ -2120,7 +2117,7 @@ public class TaglibFactory implements TemplateHashModel {
          * 
          * @see #setClasspathTlds(List)
          */
-        public void setMetaInfTldSources(List<MetaInfTldSource> metaInfTldSources) {
+        public void setMetaInfTldSources(List<? extends MetaInfTldSource> metaInfTldSources) {
             _NullArgumentException.check("metaInfTldSources", metaInfTldSources);
             this.metaInfTldSources = Collections.unmodifiableList(new ArrayList<>(metaInfTldSources));
         }
@@ -2133,7 +2130,7 @@ public class TaglibFactory implements TemplateHashModel {
          *            {@link MetaInfTldSource} wins.
          * @return this builder
          */
-        public Builder metaInfTldSources(List<MetaInfTldSource> metaInfTldSources) {
+        public Builder metaInfTldSources(List<? extends MetaInfTldSource> metaInfTldSources) {
             setMetaInfTldSources(metaInfTldSources);
             return this;
         }
@@ -2145,10 +2142,7 @@ public class TaglibFactory implements TemplateHashModel {
          * {@link #setMetaInfTldSources(List)}, yet you want them to be discovered
          */
         public List<String> getClasspathTlds() {
-            if (classpathTlds == null) {
-                return Collections.emptyList();
-            }
-            return classpathTlds;
+            return (classpathTlds != null) ? classpathTlds : Collections.<String> emptyList();
         }
 
         /**
