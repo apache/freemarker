@@ -360,6 +360,34 @@ public class TaglibFactory implements TemplateHashModel {
         return false;
     }
 
+    /**
+     * See {@link Builder#getMetaInfTldSources()}
+     */
+    public ServletContext getServletContext() {
+        return servletContext;
+    }
+
+    /**
+     * See {@link Builder#getObjectWrapper()}
+     */
+    public ObjectWrapper getObjectWrapper() {
+        return objectWrapper;
+    }
+
+    /**
+     * See {@link Builder#getMetaInfTldSources()}
+     */
+    public List<? extends MetaInfTldSource> getMetaInfTldSources() {
+        return metaInfTldSources;
+    }
+
+    /**
+     * See {@link Builder#getClasspathTlds()}
+     */
+    public List<String> getClasspathTlds() {
+        return classpathTlds;
+    }
+
     private TldLocation getExplicitlyMappedTldLocation(final String uri) throws SAXException, IOException,
             TaglibGettingException {
         TldLocation tldLocation;
