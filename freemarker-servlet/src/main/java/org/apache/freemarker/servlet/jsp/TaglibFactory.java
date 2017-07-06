@@ -178,7 +178,7 @@ public class TaglibFactory implements TemplateHashModel {
      * @param values TLD location string value list
      * @return a list of type {@link MetaInfTldSource} by parsing each TLD location string item value
      * @throws ParseException if invalid value syntax found
-     * @see {@link #parseMetaInfTldLocation(String)}
+     * @see #parseMetaInfTldLocation(String)
      */
     public static List<MetaInfTldSource> parseMetaInfTldLocations(List<String> values) throws ParseException {
         List<MetaInfTldSource> metaInfTldSources = null;
@@ -206,13 +206,9 @@ public class TaglibFactory implements TemplateHashModel {
     /**
      * Creates a new JSP taglib factory that will be used to load JSP tag libraries and functions for the web
      * application represented by the passed in {@link ServletContext}.
-     * You should at least call {@link #setObjectWrapper(ObjectWrapper)} before start using this object.
-     * 
+     *
      * <p>This object is only thread-safe after you have stopped calling its setter methods (and it was properly
      * published to the other threads; see JSR 133 (Java Memory Model)).
-     * 
-     * @param servletContext
-     *            The servlet context whose JSP tag libraries this factory will load.
      */
     private TaglibFactory(Builder builder) {
         servletContext = builder.getServletContext();
@@ -1120,7 +1116,7 @@ public class TaglibFactory implements TemplateHashModel {
 
     /**
      * A location within which we will look for {@code META-INF/**}{@code /*.tld}-s. Used in the parameter to
-     * {@link #setMetaInfTldSources}. See concrete subclasses for more.
+     * {@link Builder#setMetaInfTldSources}. See concrete subclasses for more.
      */
     public static abstract class MetaInfTldSource {
         private MetaInfTldSource() { }
@@ -1171,12 +1167,12 @@ public class TaglibFactory implements TemplateHashModel {
     }
 
     /**
-     * When it occurs in the {@link MetaInfTldSource} list, all {@link MetaInfTldSource}-s before it will be disabled.
-     * This is useful when the list is assembled from multiple sources, and some want to re-start it, rather than append
-     * to the end of it.
-     * 
+     * When it occurs in the {@link MetaInfTldSource} list ({@link #getMetaInfTldSources()}), all {@link
+     * MetaInfTldSource}-s before it will be disabled. This is useful when the list is assembled from multiple sources,
+     * and some wants to re-start it, rather than append to the end of it.
+     *
      * @see FreemarkerServlet#SYSTEM_PROPERTY_META_INF_TLD_SOURCES
-     * @see TaglibFactory#setMetaInfTldSources(List)
+     * @see Builder#setMetaInfTldSources(List)
      */
     public static final class ClearMetaInfTldSource extends MetaInfTldSource {
         public final static ClearMetaInfTldSource INSTANCE = new ClearMetaInfTldSource();
@@ -2046,7 +2042,7 @@ public class TaglibFactory implements TemplateHashModel {
         private final ServletContext servletContext;
 
         /**
-         * ObjectWrapper to be used in model building.
+         * {@link ObjectWrapper} to be used in model building.
          */
         private final ObjectWrapper objectWrapper;
 

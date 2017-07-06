@@ -242,7 +242,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * optionally followed by colon and a regular expression, or {@value #META_INF_TLD_LOCATION_CLEAR}. For example {@code 
  * <param-value>classpath:.*myoverride.*\.jar$, webInfPerLibJars, classpath:.*taglib.*\.jar$</param-value>}, or {@code 
  * <param-value>classpath</param-value>}. (Whitespace around the commas and list items will be ignored.) See
- * {@link TaglibFactory#setMetaInfTldSources(List)} for more information. Defaults to a list that contains
+ * {@link TaglibFactory.Builder#setMetaInfTldSources(List)} for more information. Defaults to a list that contains
  * {@value #META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS} only (can be overridden with
  * {@link #createDefaultMetaInfTldSources()}). Note that this can be also specified with the
  * {@value #SYSTEM_PROPERTY_META_INF_TLD_SOURCES} system property. If both the init-param and the system property
@@ -254,8 +254,8 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * Jetty's {@code "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern"} servlet context attribute.</li>
  * 
  * <li><strong>{@value #INIT_PARAM_CLASSPATH_TLDS}</strong> (since 2.3.22): Comma separated list of paths; see
- * {@link TaglibFactory#setClasspathTlds(List)}. Whitespace around the list items will be ignored. Defaults to no paths
- * (can be overidden with {@link #createDefaultClassPathTlds()}). Note that this can also be specified with the
+ * {@link TaglibFactory.Builder#setClasspathTlds(List)}. Whitespace around the list items will be ignored. Defaults to
+ * no paths (can be overidden with {@link #createDefaultClassPathTlds()}). Note that this can also be specified with the
  * {@value #SYSTEM_PROPERTY_CLASSPATH_TLDS} system property. If both the init-param and the system property exists, the
  * items listed in system property will be added after those specified by the init-param.</li>
  * 
