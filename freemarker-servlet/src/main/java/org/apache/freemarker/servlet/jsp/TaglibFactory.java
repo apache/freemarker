@@ -2102,24 +2102,21 @@ public class TaglibFactory implements TemplateHashModel {
         }
 
         /**
-         * Get ServletContext instance.
-         * @return ServletContext instance
+         * Get {@link ServletContext} that the {@link TaglibFactory} will belong to.
          */
         public ServletContext getServletContext() {
             return servletContext;
         }
 
         /**
-         * Get ObjectWrapper to be used in model building.
-         * @return ObjectWrapper to be used in model building
+         * Gets the {@link ObjectWrapper} to be used in model building.
          */
         public ObjectWrapper getObjectWrapper() {
             return objectWrapper;
         }
 
         /**
-         * Get the list of places where to look for {@code META-INF/**}{@code /*.tld} files.
-         * @return the list of places where to look for {@code META-INF/**}{@code /*.tld} files
+         * Getter pair of {@link #setClasspathTlds(List)}
          */
         public List<MetaInfTldSource> getMetaInfTldSources() {
             return (metaInfTldSources != null) ? metaInfTldSources : Collections.<MetaInfTldSource> emptyList();
@@ -2148,10 +2145,6 @@ public class TaglibFactory implements TemplateHashModel {
 
         /**
          * Fluent API equivalent of {@link #setMetaInfTldSources(List)}.
-         * @param metaInfTldSources
-         *            The list of {@link MetaInfTldSource} subclass instances. Their order matters if multiple TLD-s define
-         *            a taglib with the same {@code taglib-uri}. In that case, the one found by the earlier
-         *            {@link MetaInfTldSource} wins.
          * @return this builder
          */
         public Builder metaInfTldSources(List<? extends MetaInfTldSource> metaInfTldSources) {
@@ -2160,10 +2153,7 @@ public class TaglibFactory implements TemplateHashModel {
         }
 
         /**
-         * Get the class-loader resource paths of the TLD-s that aren't inside the locations covered by
-         * {@link #setMetaInfTldSources(List)}, yet you want them to be discovered.
-         * @return the class-loader resource paths of the TLD-s that aren't inside the locations covered by
-         * {@link #setMetaInfTldSources(List)}, yet you want them to be discovered
+         * Getter pair of {@link #setClasspathTlds(List)}.
          */
         public List<String> getClasspathTlds() {
             return (classpathTlds != null) ? classpathTlds : Collections.<String> emptyList();
@@ -2190,9 +2180,6 @@ public class TaglibFactory implements TemplateHashModel {
 
         /**
          * Fluent API equivalent of {@link #setClasspathTlds(List)}.
-         * @param classpathTlds
-         *            List of {@code String}-s, maybe {@code null}. Each item is a resource path, like
-         *            {@code "/META-INF/my.tld"}. (Relative resource paths will be interpreted as root-relative.)
          * @return this builder
          */
         public Builder classpathTlds(List<String> classpathTlds) {
