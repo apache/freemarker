@@ -2049,7 +2049,7 @@ public class TaglibFactory implements TemplateHashModel {
         /**
          * TLD locations to look for when finding available JSP tag libraries.
          */
-        private List<? extends MetaInfTldSource> metaInfTldSources;
+        private List<MetaInfTldSource> metaInfTldSources;
 
         /**
          * TLD classpath locations to look for when finding available JSP tag libraries.
@@ -2093,7 +2093,7 @@ public class TaglibFactory implements TemplateHashModel {
          * Get the list of places where to look for {@code META-INF/**}{@code /*.tld} files.
          * @return the list of places where to look for {@code META-INF/**}{@code /*.tld} files
          */
-        public List<? extends MetaInfTldSource> getMetaInfTldSources() {
+        public List<MetaInfTldSource> getMetaInfTldSources() {
             return (metaInfTldSources != null) ? metaInfTldSources : Collections.<MetaInfTldSource> emptyList();
         }
 
