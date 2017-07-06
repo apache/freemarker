@@ -1035,10 +1035,10 @@ public class FreemarkerServlet extends HttpServlet {
         }
 
         return new TaglibFactory.Builder(servletContext, objectWrapper)
-                .metaInfTldSources(_CollectionUtil.mergeListsToImmutableList(true, metaInfTldSources,
+                .metaInfTldSources(_CollectionUtil.mergeImmutableLists(true, metaInfTldSources,
                         metaInfTldSourcesFromSysProp, jettyMetaInfTldSources))
                 .classpathTlds(
-                        _CollectionUtil.mergeTwoListsToImmutableList(classpathTlds, classpathTldsFromSysProp, true))
+                        _CollectionUtil.mergeImmutableLists(classpathTlds, classpathTldsFromSysProp, true))
                 .build();
     }
 

@@ -876,7 +876,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
                         true);
             }
             if (tc.isAutoIncludesSet()) {
-                setAutoIncludes(_CollectionUtil.mergeTwoListsToImmutableList(
+                setAutoIncludes(_CollectionUtil.mergeImmutableLists(
                         isAutoIncludesSet() ? getAutoIncludes() : null,
                         tc.isAutoIncludesSet() ? tc.getAutoIncludes() : null,
                         true),

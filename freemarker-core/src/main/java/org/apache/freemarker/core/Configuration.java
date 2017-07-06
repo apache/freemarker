@@ -434,7 +434,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                 builder.getImpliedCustomNumberFormats(), builder.getCustomNumberFormats(), false);
         autoImports = _CollectionUtil.mergeImmutableMaps(
                 builder.getImpliedAutoImports(), builder.getAutoImports(), true);
-        autoIncludes = _CollectionUtil.mergeTwoListsToImmutableList(
+        autoIncludes = _CollectionUtil.mergeImmutableLists(
                 builder.getImpliedAutoIncludes(), builder.getAutoIncludes(), true);
         lazyImports = builder.getLazyImports();
         lazyAutoImports = builder.getLazyAutoImports();

@@ -174,20 +174,20 @@ public class _CollectionUtil {
      * Adds multiple {@link List}-s; assuming the inputs are already unmodifiable and unchanging, it returns an
      * unmodifiable and unchanging {@link List} itself.
      */
-    public static <T> List<T> mergeListsToImmutableList(boolean skipDuplicatesInList1, List<T> ... lists) {
+    public static <T> List<T> mergeImmutableLists(boolean skipDuplicatesInList1, List<T> ... lists) {
         if (lists == null || lists.length == 0) {
             return null;
         }
 
         if (lists.length == 1) {
-            return mergeTwoListsToImmutableList(lists[0], null, skipDuplicatesInList1);
+            return mergeImmutableLists(lists[0], null, skipDuplicatesInList1);
         } else if (lists.length == 2) {
-            return mergeTwoListsToImmutableList(lists[0], lists[1], skipDuplicatesInList1);
+            return mergeImmutableLists(lists[0], lists[1], skipDuplicatesInList1);
         } else {
             List<T> [] reducedLists = new List[lists.length - 1];
-            reducedLists[0] = mergeTwoListsToImmutableList(lists[0], lists[1], skipDuplicatesInList1);
+            reducedLists[0] = mergeImmutableLists(lists[0], lists[1], skipDuplicatesInList1);
             System.arraycopy(lists, 2, reducedLists, 1, lists.length - 2);
-            return mergeListsToImmutableList(skipDuplicatesInList1, reducedLists);
+            return mergeImmutableLists(skipDuplicatesInList1, reducedLists);
         }
     }
 
@@ -195,7 +195,7 @@ public class _CollectionUtil {
      * Adds two {@link List}-s; assuming the inputs are already unmodifiable and unchanging, it returns an
      * unmodifiable and unchanging {@link List} itself.
      */
-    public static <T> List<T> mergeTwoListsToImmutableList(List<T> list1, List<T> list2,
+    public static <T> List<T> mergeImmutableLists(List<T> list1, List<T> list2,
             boolean skipDuplicatesInList1) {
         if (list1 == null) return list2;
         if (list2 == null) return list1;
