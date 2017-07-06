@@ -61,11 +61,12 @@ import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
+import org.apache.freemarker.core.util._CollectionUtil;
 import org.apache.freemarker.core.util._SecurityUtil;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.servlet.jsp.TaglibFactory;
+import org.apache.freemarker.servlet.jsp.TaglibFactory.ClasspathMetaInfTldSource;
 import org.apache.freemarker.servlet.jsp.TaglibFactory.MetaInfTldSource;
-import org.apache.freemarker.servlet.jsp.TaglibFactoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -324,7 +325,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  */
 // [FM3] Lot of things are marked here with "BC" and deprecated
 public class FreemarkerServlet extends HttpServlet {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(FreemarkerServlet.class);
 
     public static final long serialVersionUID = -2440216393145762479L;
@@ -334,7 +335,7 @@ public class FreemarkerServlet extends HttpServlet {
      * has existed long before 2.3.22, but this constant was only added then.)
      */
     public static final String INIT_PARAM_TEMPLATE_PATH = "TemplatePath";
-    
+
     /**
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params. (This init-param
      * has existed long before 2.3.22, but this constant was only added then.)
@@ -366,7 +367,7 @@ public class FreemarkerServlet extends HttpServlet {
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
      */
     public static final String INIT_PARAM_BUFFER_SIZE = "BufferSize";
-    
+
     /**
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
      */
@@ -376,12 +377,12 @@ public class FreemarkerServlet extends HttpServlet {
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
      */
     public static final String INIT_PARAM_EXCEPTION_ON_MISSING_TEMPLATE = "ExceptionOnMissingTemplate";
-    
+
     /**
      * Init-param name - see the {@link FreemarkerServlet} class documentation about the init-params.
      */
     public static final String INIT_PARAM_CLASSPATH_TLDS = "ClasspathTlds";
-    
+
     private static final String INIT_PARAM_DEBUG = "Debug";
 
     private static final String DEPR_INITPARAM_TEMPLATE_DELAY = "TemplateDelay";
@@ -393,9 +394,9 @@ public class FreemarkerServlet extends HttpServlet {
     private static final String DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_HTML_DEBUG = "htmlDebug";
     private static final String DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_IGNORE = "ignore";
     private static final String DEPR_INITPARAM_DEBUG = "debug";
-    
+
     private static final ContentType DEFAULT_CONTENT_TYPE = new ContentType("text/html");
-    
+
     public static final String INIT_PARAM_VALUE_NEVER = "never";
     public static final String INIT_PARAM_VALUE_ALWAYS = "always";
     public static final String INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE = "whenTemplateHasMimeType";
@@ -416,17 +417,17 @@ public class FreemarkerServlet extends HttpServlet {
      * {@value #INIT_PARAM_CLASSPATH_TLDS} init-param. The value syntax is the same as of the init-param.
      */
     public static final String SYSTEM_PROPERTY_CLASSPATH_TLDS = "org.freemarker.jsp.classpathTlds";
-    
+
     /**
      * Used as part of the value of the {@value #INIT_PARAM_META_INF_TLD_LOCATIONS} init-param.
      */
     public static final String META_INF_TLD_LOCATION_WEB_INF_PER_LIB_JARS = "webInfPerLibJars";
-    
+
     /**
      * Used as part of the value of the {@value #INIT_PARAM_META_INF_TLD_LOCATIONS} init-param.
      */
     public static final String META_INF_TLD_LOCATION_CLASSPATH = "classpath";
-    
+
     /**
      * Used as part of the value of the {@value #INIT_PARAM_META_INF_TLD_LOCATIONS} init-param.
      */
@@ -446,18 +447,18 @@ public class FreemarkerServlet extends HttpServlet {
     public static final String ATTR_REQUEST_MODEL = ".freemarker.Request";
     public static final String ATTR_REQUEST_PARAMETERS_MODEL = ".freemarker.RequestParameters";
     public static final String ATTR_SESSION_MODEL = ".freemarker.Session";
-    
+
     /** @deprecated We only keeps this attribute for backward compatibility, but actually aren't using it. */
     @Deprecated
     private static final String ATTR_APPLICATION_MODEL = ".freemarker.Application";
-    
+
     /** @deprecated We only keeps this attribute for backward compatibility, but actually aren't using it. */
     @Deprecated
     private static final String ATTR_JSP_TAGLIBS_MODEL = ".freemarker.JspTaglibs";
 
     private static final String ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS
             = "org.eclipse.jetty.server.webapp.ContainerIncludeJarPattern";
-    
+
     private static final String EXPIRATION_DATE;
 
     static {
@@ -475,14 +476,14 @@ public class FreemarkerServlet extends HttpServlet {
     private boolean noCache;
     private Integer bufferSize;
     private boolean exceptionOnMissingTemplate;
-    
+
     /**
      * @deprecated Not used anymore; to enable/disable debug logging, just set the logging level of the logging library
      *             used by {@link Logger}.
      */
     @Deprecated
     protected boolean debug;
-    
+
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private Configuration config;
     private ContentType contentType;
@@ -491,16 +492,14 @@ public class FreemarkerServlet extends HttpServlet {
     private ResponseCharacterEncoding responseCharacterEncoding = ResponseCharacterEncoding.LEGACY;
     private Charset forcedResponseCharacterEncoding;
     private OverrideResponseLocale overrideResponseLocale = OverrideResponseLocale.ALWAYS;
-    private List/*<MetaInfTldSource>*/ metaInfTldSources;
-    private List/*<String>*/ classpathTlds;
+    private List<MetaInfTldSource> metaInfTldSources;
+    private List<String> classpathTlds;
 
     private Object lazyInitFieldsLock = new Object();
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private ServletContextHashModel servletContextModel;
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="Not investing into making this Servlet serializable")
     private TaglibFactory taglibFactory;
-    
-    private boolean objectWrapperMismatchWarnLogged;
 
     /**
      * Don't override this method to adjust FreeMarker settings! Override the protected methods for that, such as
@@ -519,11 +518,11 @@ public class FreemarkerServlet extends HttpServlet {
                     + " servlet; see cause exception.", e);
         }
     }
-    
+
     private void initialize() throws InitParamValueException, MalformedWebXmlException, ConflictingInitParamsException,
             ConfigurationException {
         Configuration.ExtendableBuilder<?> cfgB = createConfigurationBuilder();
-        
+
         // Only override what's coming from the config if it was explicitly specified: 
         final String iciInitParamValue = getInitParameter(Configuration.ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY);
         if (iciInitParamValue != null) {
@@ -535,7 +534,7 @@ public class FreemarkerServlet extends HttpServlet {
         }
 
         contentType = DEFAULT_CONTENT_TYPE;
-        
+
         // Process object_wrapper init-param out of order:
         String objectWrapperInitParamValue = getInitParameter(
                 Configuration.Builder.OBJECT_WRAPPER_KEY, DEPR_INITPARAM_OBJECT_WRAPPER);
@@ -552,12 +551,12 @@ public class FreemarkerServlet extends HttpServlet {
                 throw new InitParamValueException(INIT_PARAM_TEMPLATE_PATH, templatePath, e);
             }
         }
-        
+
         metaInfTldSources = createDefaultMetaInfTldSources();
         classpathTlds = createDefaultClassPathTlds();
 
         // Process all other init-params:
-        for (Enumeration initPNames = getServletConfig().getInitParameterNames(); initPNames.hasMoreElements();) {
+        for (Enumeration<String> initPNames = getServletConfig().getInitParameterNames(); initPNames.hasMoreElements();) {
             final String name = (String) initPNames.nextElement();
             final String value = getInitParameter(name);
             if (name == null) {
@@ -570,7 +569,7 @@ public class FreemarkerServlet extends HttpServlet {
                         "init-param " + _StringUtil.jQuote(name) + " without param-value. "
                         + "Maybe the web.xml is not well-formed?");
             }
-            
+
             try {
                 if (name.equals(DEPR_INITPARAM_OBJECT_WRAPPER)
                         || name.equals(Configuration.Builder.OBJECT_WRAPPER_KEY)
@@ -598,7 +597,7 @@ public class FreemarkerServlet extends HttpServlet {
                         throw new ConflictingInitParamsException(
                                 MutableProcessingConfiguration.TEMPLATE_EXCEPTION_HANDLER_KEY, DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER);
                     }
-    
+
                     if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_RETHROW.equals(value)) {
                         cfgB.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW);
                     } else if (DEPR_INITPARAM_TEMPLATE_EXCEPTION_HANDLER_DEBUG.equals(value)) {
@@ -637,9 +636,9 @@ public class FreemarkerServlet extends HttpServlet {
                 } else if (name.equals(INIT_PARAM_EXCEPTION_ON_MISSING_TEMPLATE)) {
                     exceptionOnMissingTemplate = _StringUtil.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_META_INF_TLD_LOCATIONS)) {
-                    metaInfTldSources = TaglibFactoryBuilder.parseMetaInfTldLocations(InitParamParser.parseCommaSeparatedList(value));
+                    metaInfTldSources = TaglibFactory.parseMetaInfTldLocations(InitParamParser.parseCommaSeparatedList(value));
                 } else if (name.equals(INIT_PARAM_CLASSPATH_TLDS)) {
-                    List newClasspathTlds = new ArrayList();
+                    List<String> newClasspathTlds = new ArrayList<>();
                     if (classpathTlds != null) {
                         newClasspathTlds.addAll(classpathTlds);
                     }
@@ -654,7 +653,7 @@ public class FreemarkerServlet extends HttpServlet {
                 throw new InitParamValueException(name, value, e);
             }
         } // for initPNames
-        
+
         if (contentType.containsCharset && responseCharacterEncoding != ResponseCharacterEncoding.LEGACY) {
             throw new InitParamValueException(INIT_PARAM_CONTENT_TYPE, contentType.httpHeaderValue,
                     new IllegalStateException("You can't specify the charset in the content type, because the \"" +
@@ -688,7 +687,7 @@ public class FreemarkerServlet extends HttpServlet {
     protected TemplateLoader createTemplateLoader(String templatePath) throws IOException {
         return InitParamParser.createTemplateLoader(templatePath, getClass(), getServletContext());
     }
-    
+
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response)
         throws ServletException, IOException {
@@ -711,7 +710,7 @@ public class FreemarkerServlet extends HttpServlet {
         if (preprocessRequest(request, response)) {
             return;
         }
-        
+
         if (bufferSize != null && !response.isCommitted()) {
             try {
                 response.setBufferSize(bufferSize.intValue());
@@ -775,7 +774,7 @@ public class FreemarkerServlet extends HttpServlet {
                 }
             }
         }
-        
+
         if (responseCharacterEncoding != ResponseCharacterEncoding.LEGACY
                 && responseCharacterEncoding != ResponseCharacterEncoding.DO_NOT_SET) {
             // Using the Servlet 2.4 way of setting character encoding.
@@ -864,7 +863,7 @@ public class FreemarkerServlet extends HttpServlet {
             // Converted with toString() for backward compatibility.
             return new ContentType(contentTypeAttr.toString());
         }
-        
+
         String outputFormatMimeType = template.getOutputFormat().getMimeType();
         if (outputFormatMimeType != null) {
             if (responseCharacterEncoding == ResponseCharacterEncoding.LEGACY) {
@@ -876,7 +875,7 @@ public class FreemarkerServlet extends HttpServlet {
                 return new ContentType(outputFormatMimeType, false);
             }
         }
-            
+
         return null;
     }
 
@@ -920,7 +919,7 @@ public class FreemarkerServlet extends HttpServlet {
                                         final HttpServletResponse response) throws TemplateModelException {
         try {
             AllHttpScopesHashModel params = new AllHttpScopesHashModel(objectWrapper, servletContext, request);
-    
+
             // Create hash model wrapper for servlet context (the application)
             final ServletContextHashModel servletContextModel;
             final TaglibFactory taglibFactory;
@@ -942,13 +941,14 @@ public class FreemarkerServlet extends HttpServlet {
                     taglibFactory = this.taglibFactory;
                 }
             }
-            
+
             params.putUnlistedModel(KEY_APPLICATION, servletContextModel);
             params.putUnlistedModel(KEY_APPLICATION_PRIVATE, servletContextModel);
             params.putUnlistedModel(KEY_JSP_TAGLIBS, taglibFactory);
             // Create hash model wrapper for session
             HttpSessionHashModel sessionModel;
             HttpSession session = request.getSession(false);
+
             if (session != null) {
                 sessionModel = (HttpSessionHashModel) session.getAttribute(ATTR_SESSION_MODEL);
                 if (sessionModel == null || sessionModel.isOrphaned(session)) {
@@ -959,6 +959,7 @@ public class FreemarkerServlet extends HttpServlet {
             } else {
                 sessionModel = new HttpSessionHashModel(this, request, response, objectWrapper);
             }
+
             params.putUnlistedModel(KEY_SESSION, sessionModel);
     
             // Create hash model wrapper for request
@@ -971,6 +972,7 @@ public class FreemarkerServlet extends HttpServlet {
                     ATTR_REQUEST_PARAMETERS_MODEL,
                     createRequestParametersHashModel(request));
             }
+
             params.putUnlistedModel(KEY_REQUEST, requestModel);
             params.putUnlistedModel(KEY_INCLUDE, new IncludePage(request, response));
             params.putUnlistedModel(KEY_REQUEST_PRIVATE, requestModel);
@@ -1001,18 +1003,22 @@ public class FreemarkerServlet extends HttpServlet {
         try {
             final String prop = _SecurityUtil.getSystemProperty(SYSTEM_PROPERTY_META_INF_TLD_SOURCES, null);
             metaInfTldSourcesFromSysProp = (List<MetaInfTldSource>) ((prop != null)
-                    ? TaglibFactoryBuilder.parseMetaInfTldLocations(InitParamParser.parseCommaSeparatedList(prop))
+                    ? TaglibFactory.parseMetaInfTldLocations(InitParamParser.parseCommaSeparatedList(prop))
                     : Collections.emptyList());
         } catch (ParseException e) {
             throw new TemplateModelException(
                     "Failed to parse system property \"" + SYSTEM_PROPERTY_META_INF_TLD_SOURCES + "\"", e);
         }
 
-        List<Pattern> jettyTaglibJarPatterns = null;
+        List<MetaInfTldSource> jettyMetaInfTldSources = null;
         try {
             final String attrVal = (String) servletContext.getAttribute(ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS);
-            jettyTaglibJarPatterns = (attrVal != null) ? InitParamParser.parseCommaSeparatedPatterns(attrVal)
-                    : Collections.emptyList();
+            List<Pattern> jettyTaglibJarPatterns = (attrVal != null)
+                    ? InitParamParser.parseCommaSeparatedPatterns(attrVal) : Collections.emptyList();
+            jettyMetaInfTldSources = new ArrayList<>(jettyTaglibJarPatterns.size());
+            for (Pattern pattern : jettyTaglibJarPatterns) {
+                jettyMetaInfTldSources.add(new ClasspathMetaInfTldSource(pattern));
+            }
         } catch (Exception e) {
             LOG.error("Failed to parse application context attribute \"" + ATTR_JETTY_CP_TAGLIB_JAR_PATTERNS
                     + "\" - it will be ignored", e);
@@ -1022,18 +1028,18 @@ public class FreemarkerServlet extends HttpServlet {
         try {
             final String prop = _SecurityUtil.getSystemProperty(SYSTEM_PROPERTY_CLASSPATH_TLDS, null);
             classpathTldsFromSysProp = (prop != null) ? InitParamParser.parseCommaSeparatedList(prop)
-                    : Collections.emptyList();
+                    : Collections.<String>emptyList();
         } catch (ParseException e) {
             throw new TemplateModelException(
                     "Failed to parse system property \"" + SYSTEM_PROPERTY_CLASSPATH_TLDS + "\"", e);
         }
 
-        return new TaglibFactoryBuilder(servletContext, objectWrapper)
-                .addAllMetaInfTldSources(metaInfTldSources)
-                .addAllMetaInfTldSources(metaInfTldSourcesFromSysProp)
-                .addAllJettyMetaInfTldJarPatterns(jettyTaglibJarPatterns)
-                .addAllClasspathTlds(classpathTlds)
-                .addAllClasspathTlds(classpathTldsFromSysProp).build();
+        return new TaglibFactory.Builder(servletContext, objectWrapper)
+                .metaInfTldSources(_CollectionUtil.mergeListsToImmutableList(true, metaInfTldSources,
+                        metaInfTldSourcesFromSysProp, jettyMetaInfTldSources))
+                .classpathTlds(
+                        _CollectionUtil.mergeTwoListsToImmutableList(classpathTlds, classpathTldsFromSysProp, true))
+                .build();
     }
 
     /**
@@ -1045,7 +1051,7 @@ public class FreemarkerServlet extends HttpServlet {
      * 
      * @return A {@link List} of {@link String}-s; not {@code null}.
      */
-    protected List/*<MetaInfTldSource>*/ createDefaultClassPathTlds() {
+    protected List<String> createDefaultClassPathTlds() {
         return TaglibFactory.DEFAULT_CLASSPATH_TLDS;
     }
 
@@ -1058,8 +1064,9 @@ public class FreemarkerServlet extends HttpServlet {
      * 
      * @return A {@link List} of {@link MetaInfTldSource}-s; not {@code null}.
      */
-    protected List/*<MetaInfTldSource>*/ createDefaultMetaInfTldSources() {
-        return TaglibFactory.DEFAULT_META_INF_TLD_SOURCES;
+    @SuppressWarnings("unchecked")
+    protected List<MetaInfTldSource> createDefaultMetaInfTldSources() {
+        return (List<MetaInfTldSource>) TaglibFactory.DEFAULT_META_INF_TLD_SOURCES;
     }
 
     /**
@@ -1150,7 +1157,7 @@ public class FreemarkerServlet extends HttpServlet {
     protected void afterConfigurationBuilt(Configuration cfg) {
         // do nothing
     }
-    
+
     /**
      * Called from {@link #init()} to set the {@link ObjectWrapper} in the {@link ExtendableBuilder}
      * from the init-param value.
@@ -1249,7 +1256,7 @@ public class FreemarkerServlet extends HttpServlet {
         TemplateModel data)
         throws ServletException, IOException {
     }
-    
+
     /**
      * Returns the {@link org.apache.freemarker.core.Configuration} object used by this servlet.
      * Please don't forget that {@link org.apache.freemarker.core.Configuration} is not thread-safe
@@ -1283,7 +1290,7 @@ public class FreemarkerServlet extends HttpServlet {
             res.setHeader("Expires", EXPIRATION_DATE);
         }
     }
-    
+
     private int parseSize(String value) throws ParseException {
         int lastDigitIdx;
         for (lastDigitIdx = value.length() - 1; lastDigitIdx >= 0; lastDigitIdx--) {
@@ -1292,11 +1299,12 @@ public class FreemarkerServlet extends HttpServlet {
                 break;
             }
         }
-        
+
         final int n = Integer.parseInt(value.substring(0, lastDigitIdx + 1).trim());
-        
+
         final String unitStr = value.substring(lastDigitIdx + 1).trim().toUpperCase();
         final int unit;
+
         if (unitStr.length() == 0 || unitStr.equals("B")) {
             unit = 1;
         } else if (unitStr.equals("K") || unitStr.equals("KB") || unitStr.equals("KIB")) {
@@ -1306,7 +1314,7 @@ public class FreemarkerServlet extends HttpServlet {
         } else {
             throw new ParseException("Unknown unit: " + unitStr, lastDigitIdx + 1);
         }
-        
+
         long size = (long) n * unit;
         if (size < 0) {
             throw new IllegalArgumentException("Buffer size can't be negative");
@@ -1317,8 +1325,9 @@ public class FreemarkerServlet extends HttpServlet {
         return (int) size;
     }
 
+    @SuppressWarnings("serial")
     private static class InitParamValueException extends Exception {
-        
+
         InitParamValueException(String initParamName, String initParamValue, Throwable casue) {
             super("Failed to set the " + _StringUtil.jQuote(initParamName) + " servlet init-param to "
                     + _StringUtil.jQuote(initParamValue) + "; see cause exception.",
@@ -1329,11 +1338,12 @@ public class FreemarkerServlet extends HttpServlet {
             super("Failed to set the " + _StringUtil.jQuote(initParamName) + " servlet init-param to "
                     + _StringUtil.jQuote(initParamValue) + ": " + cause);
         }
-        
+
     }
-    
+
+    @SuppressWarnings("serial")
     private static class ConflictingInitParamsException extends Exception {
-        
+
         ConflictingInitParamsException(String recommendedName, String otherName) {
             super("Conflicting servlet init-params: "
                     + _StringUtil.jQuote(recommendedName) + " and " + _StringUtil.jQuote(otherName)
@@ -1341,18 +1351,19 @@ public class FreemarkerServlet extends HttpServlet {
         }
     }
 
+    @SuppressWarnings("serial")
     private static class MalformedWebXmlException extends Exception {
 
         MalformedWebXmlException(String message) {
             super(message);
         }
-        
+
     }
-    
+
     private static class ContentType {
         private final String httpHeaderValue;
         private final boolean containsCharset;
-        
+
         public ContentType(String httpHeaderValue) {
             this(httpHeaderValue, contentTypeContainsCharset(httpHeaderValue));
         }
@@ -1361,7 +1372,7 @@ public class FreemarkerServlet extends HttpServlet {
             this.httpHeaderValue = httpHeaderValue;
             this.containsCharset = containsCharset;
         }
-        
+
         private static boolean contentTypeContainsCharset(String contentType) {
             int charsetIdx = contentType.toLowerCase().indexOf("charset=");
             if (charsetIdx != -1) {
@@ -1378,7 +1389,7 @@ public class FreemarkerServlet extends HttpServlet {
             }
             return false;
         }
-        
+
         /**
          * Extracts the MIME type without the charset specifier or other such extras.
          */
@@ -1386,9 +1397,9 @@ public class FreemarkerServlet extends HttpServlet {
             int scIdx = httpHeaderValue.indexOf(';');
             return (scIdx == -1 ? httpHeaderValue : httpHeaderValue.substring(0, scIdx)).trim();
         }
-        
+
     }
-    
+
     private <T extends InitParamValueEnum> T initParamValueToEnum(String initParamValue, T[] enumValues) {
         for (T enumValue : enumValues) {
             String enumInitParamValue = enumValue.getInitParamValue();
@@ -1398,7 +1409,7 @@ public class FreemarkerServlet extends HttpServlet {
                 return enumValue;
             }
         }
-        
+
         StringBuilder sb = new StringBuilder();
         sb.append(_StringUtil.jQuote(initParamValue));
         sb.append(" is not a one of the enumeration values: ");
@@ -1431,14 +1442,14 @@ public class FreemarkerServlet extends HttpServlet {
     private interface InitParamValueEnum {
         String getInitParamValue();
     }
-    
+
     private enum OverrideResponseContentType implements InitParamValueEnum {
         ALWAYS(INIT_PARAM_VALUE_ALWAYS),
         NEVER(INIT_PARAM_VALUE_NEVER),
         WHEN_TEMPLATE_HAS_MIME_TYPE(INIT_PARAM_VALUE_WHEN_TEMPLATE_HAS_MIME_TYPE);
 
         private final String initParamValue;
-        
+
         OverrideResponseContentType(String initParamValue) {
             this.initParamValue = initParamValue;
         }
@@ -1448,7 +1459,7 @@ public class FreemarkerServlet extends HttpServlet {
             return initParamValue;
         }
     }
-    
+
     private enum ResponseCharacterEncoding implements InitParamValueEnum {
         // [FM3] Get rid of LEGACY
         LEGACY(INIT_PARAM_VALUE_LEGACY),
@@ -1457,7 +1468,7 @@ public class FreemarkerServlet extends HttpServlet {
         FORCE_CHARSET(INIT_PARAM_VALUE_FORCE_PREFIX + "${charsetName}");
 
         private final String initParamValue;
-        
+
         ResponseCharacterEncoding(String initParamValue) {
             this.initParamValue = initParamValue;
         }
@@ -1483,6 +1494,5 @@ public class FreemarkerServlet extends HttpServlet {
             return initParamValue;
         }
     }
-
 
 }

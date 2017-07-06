@@ -171,20 +171,41 @@ public class _CollectionUtil {
     }
 
     /**
+     * Adds multiple {@link List}-s; assuming the inputs are already unmodifiable and unchanging, it returns an
+     * unmodifiable and unchanging {@link List} itself.
+     */
+    public static <T> List<T> mergeListsToImmutableList(boolean skipDuplicatesInList1, List<T> ... lists) {
+        if (lists == null || lists.length == 0) {
+            return null;
+        }
+
+        if (lists.length == 1) {
+            return mergeTwoListsToImmutableList(lists[0], null, skipDuplicatesInList1);
+        } else if (lists.length == 2) {
+            return mergeTwoListsToImmutableList(lists[0], lists[1], skipDuplicatesInList1);
+        } else {
+            List<T> [] reducedLists = new List[lists.length - 1];
+            reducedLists[0] = mergeTwoListsToImmutableList(lists[0], lists[1], skipDuplicatesInList1);
+            System.arraycopy(lists, 2, reducedLists, 1, lists.length - 2);
+            return mergeListsToImmutableList(skipDuplicatesInList1, reducedLists);
+        }
+    }
+
+    /**
      * Adds two {@link List}-s; assuming the inputs are already unmodifiable and unchanging, it returns an
      * unmodifiable and unchanging {@link List} itself.
      */
-    public static List<String> mergeImmutableLists(List<String> list1, List<String> list2,
+    public static <T> List<T> mergeTwoListsToImmutableList(List<T> list1, List<T> list2,
             boolean skipDuplicatesInList1) {
         if (list1 == null) return list2;
         if (list2 == null) return list1;
         if (list1.isEmpty()) return list2;
         if (list2.isEmpty()) return list1;
 
-        ArrayList<String> mergedList = new ArrayList<>(list1.size() + list2.size());
+        ArrayList<T> mergedList = new ArrayList<>(list1.size() + list2.size());
         if (skipDuplicatesInList1) {
-            Set<String> list2Set = new HashSet<>(list2);
-            for (String it : list1) {
+            Set<T> list2Set = new HashSet<>(list2);
+            for (T it : list1) {
                 if (!list2Set.contains(it)) {
                     mergedList.add(it);
                 }
@@ -195,4 +216,5 @@ public class _CollectionUtil {
         mergedList.addAll(list2);
         return Collections.unmodifiableList(mergedList);
     }
+
 }

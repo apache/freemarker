@@ -26,7 +26,6 @@ import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.servlet.ServletContextHashModel;
 import org.apache.freemarker.servlet.jsp.TaglibFactory;
-import org.apache.freemarker.servlet.jsp.TaglibFactoryBuilder;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
@@ -128,7 +127,8 @@ public class FreemarkerViewResolver extends AbstractTemplateViewResolver impleme
 
         servletContextModel = new ServletContextHashModel(pageContextServlet, objectWrapper);
 
-        taglibFactory = new TaglibFactoryBuilder(getServletContext(), objectWrapper).build();
+        // TODO: additional meta-inf / classpath tld resources?
+        taglibFactory = new TaglibFactory.Builder(getServletContext(), objectWrapper).build();
     }
 
     @Override
@@ -145,38 +145,6 @@ public class FreemarkerViewResolver extends AbstractTemplateViewResolver impleme
         view.setServletContextModel(servletContextModel);
         view.setTaglibFactory(taglibFactory);
         return view;
-    }
-
-    /**
-     * Get {@link ObjectWrapperAndUnwrapper} that is used in model building.
-     * @return {@link ObjectWrapperAndUnwrapper} that is used in model building
-     */
-    protected ObjectWrapperAndUnwrapper getObjectWrapper() {
-        return objectWrapper;
-    }
-
-    /**
-     * Get {@link GenericServlet} instance which is a page object in JSP tag library usages.
-     * @return {@link GenericServlet} instance which is a page object in JSP tag library usages
-     */
-    protected GenericServlet getPageContextServlet() {
-        return pageContextServlet;
-    }
-
-    /**
-     * Get {@link ServletContextHashModel} instance by which templates can access servlet context attributes.
-     * @return {@link ServletContextHashModel} instance by which templates can access servlet context attributes
-     */
-    protected ServletContextHashModel getServletContextModel() {
-        return servletContextModel;
-    }
-
-    /**
-     * Get {@link TaglibFactory} instance by which templates can use JSP tag libraries.
-     * @return {@link TaglibFactory} instance by which templates can use JSP tag libraries.
-     */
-    protected TaglibFactory getTaglibFactory() {
-        return taglibFactory;
     }
 
 }
