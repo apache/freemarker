@@ -164,5 +164,9 @@ public class _TemplateAPI {
     public static TimeZone getDefaultTimeZone() {
         return Configuration.getDefaultTimeZone();
     }
+
+    public static void setPreventStrippings(Configuration conf, boolean preventStrippings) {
+        conf.setPreventStrippings(preventStrippings);
+    }
     
 }

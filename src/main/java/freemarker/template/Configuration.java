@@ -499,7 +499,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private Version incompatibleImprovements;
     private int tagSyntax = ANGLE_BRACKET_TAG_SYNTAX;
     private int namingConvention = AUTO_DETECT_NAMING_CONVENTION;
-    private int tabSize = 8;  // Default from JavaCC 3.x 
+    private int tabSize = 8;  // Default from JavaCC 3.x
+    private boolean preventStrippings;
 
     private TemplateCache cache;
     
@@ -2398,6 +2399,25 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         return tabSize;
     }
     
+    /**
+     * Getter pair of {@link #setPreventStrippings(boolean)}.
+     * 
+     * @since 2.3.27
+     */
+    boolean getPreventStrippings() {
+        return preventStrippings;
+    }
+
+    /**
+     * Used internally; added for the FreeMarker 2 to FreeMarker 3 converter, prevents the stripping/removal of AST
+     * nodes so that the source code can be fully reproduced from the AST.
+     * 
+     * @since 2.3.27
+     */
+    void setPreventStrippings(boolean preventStrippings) {
+        this.preventStrippings = preventStrippings;
+    }
+
     /**
      * Retrieves the template with the given name from the template cache, loading it into the cache first if it's
      * missing/staled.

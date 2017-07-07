@@ -225,9 +225,9 @@ public class Template extends Configurable {
      * @since 2.3.24
      */
     public Template(
-            String name, String sourceName, Reader reader,
-            Configuration cfg, ParserConfiguration customParserConfiguration,
-            String encoding) throws IOException {
+           String name, String sourceName, Reader reader,
+           Configuration cfg, ParserConfiguration customParserConfiguration,
+           String encoding) throws IOException {
         this(name, sourceName, cfg, customParserConfiguration);
         
         this.setEncoding(encoding);
@@ -243,6 +243,9 @@ public class Template extends Configurable {
             
             try {
                 FMParser parser = new FMParser(this, reader, actualParserConfiguration);
+                if (cfg != null) {
+                    _CoreAPI.setPreventStrippings(parser, cfg.getPreventStrippings());
+                }
                 try {
                     this.rootElement = parser.Root();
                 } catch (IndexOutOfBoundsException exc) {

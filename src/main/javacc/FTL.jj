@@ -70,7 +70,7 @@ public class FMParser {
 
     private Template template;
 
-    private boolean stripWhitespace, stripText;
+    private boolean stripWhitespace, stripText, preventStrippings;
     private int incompatibleImprovements;
     private OutputFormat outputFormat;
     private int autoEscapingPolicy;
@@ -290,6 +290,13 @@ public class FMParser {
     void tearDownStringLiteralMode(FMParserTokenManager parentTokenSource) {
         parentTokenSource.namingConvention = token_source.namingConvention;
         parentTokenSource.namingConventionEstabilisher = token_source.namingConventionEstabilisher;
+    }
+    
+    /**
+     * Used when we need to recreate the source code from the AST (such as for the FM2 to FM3 converter).
+     */
+    void setPreventStrippings(boolean preventStrippings) {
+        this.preventStrippings = preventStrippings;
     }
 
     private OutputFormat getFormatFromStdFileExt() {
@@ -3975,7 +3982,7 @@ TextBlock PCData() :
         }
     )+
     {
-        if (stripText && mixedContentNesting == 1) return null;
+        if (stripText && mixedContentNesting == 1 && !preventStrippings) return null;
 
         TextBlock result = new TextBlock(buf.toString(), false);
         result.setLocation(template, start, t);
@@ -4383,7 +4390,9 @@ TemplateElement Root() :
     {
         TemplateElement root = children.asSingleElement(); 
         root.setFieldsForRootElement();
-        root = root.postParseCleanup(stripWhitespace);
+        if (!preventStrippings) {
+            root = root.postParseCleanup(stripWhitespace);
+        }
         // The cleanup result is possibly an element from deeper:
         root.setFieldsForRootElement();
         return root;

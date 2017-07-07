@@ -213,5 +213,9 @@ public class _CoreAPI {
     public static TemplateElement getChildElement(TemplateElement te, int index) {
         return te.getChild(index);
     }
+
+    public static void setPreventStrippings(FMParser parser, boolean preventStrippings) {
+        parser.setPreventStrippings(preventStrippings);
+    }
     
 }
