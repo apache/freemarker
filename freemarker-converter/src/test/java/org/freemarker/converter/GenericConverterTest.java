@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.freemarker.converter.ConversionMarkers;
 import org.apache.freemarker.converter.MissingRequiredPropertyException;
 import org.apache.freemarker.converter.PropertyValidationException;
 import org.apache.freemarker.converter.Converter;
@@ -164,15 +165,53 @@ public class GenericConverterTest extends ConverterTest {
         }
     }
 
+    @Test
+    public void testMarksStored() throws IOException, ConverterException {
+        write(new File(srcDir, "warn.txt"), "[trigger warn]", UTF_8);
+        write(new File(srcDir, "tip.txt"), "[trigger tip]", UTF_8);
+
+        ToUpperCaseConverter converter = new ToUpperCaseConverter();
+        converter.setSource(srcDir);
+        converter.setDestinationDirectory(dstDir);
+        converter.execute();
+
+        String markersFileContent = readConversionMarkersFile();
+        assertThat(markersFileContent, allOf(
+                containsString("[WARN]"),
+                containsString("warn.txt:1:2"),
+                containsString("Warn message")));
+        assertThat(markersFileContent, allOf(
+                containsString("[TIP]"),
+                containsString("tip.txt.uc:1:2"),
+                containsString("Tip message")));
+    }
+
+    @Test
+    public void emptyMarkFileCreated() throws IOException, ConverterException {
+        ToUpperCaseConverter converter = new ToUpperCaseConverter();
+        converter.setSource(srcDir);
+        converter.setDestinationDirectory(dstDir);
+        converter.execute();
+
+        File markersFile = new File(dstDir, Converter.CONVERSION_MARKERS_FILE_NAME);
+        assertTrue(markersFile.exists());
+    }
+
     public static class ToUpperCaseConverter extends Converter {
 
-        public static final int BUFFER_SIZE = 4096;
-
         @Override
-        protected void convertFile(FileConversionContext fileTransCtx) throws ConverterException, IOException {
-            String content = IOUtils.toString(fileTransCtx.getSourceStream(), StandardCharsets.UTF_8);
-            fileTransCtx.setDestinationFileName(fileTransCtx.getSourceFileName() + ".uc");
-            IOUtils.write(content.toUpperCase(), fileTransCtx.getDestinationStream(), StandardCharsets.UTF_8);
+        protected void convertFile(FileConversionContext ctx) throws ConverterException, IOException {
+            String content = IOUtils.toString(ctx.getSourceStream(), StandardCharsets.UTF_8);
+            ctx.setDestinationFileName(ctx.getSourceFileName() + ".uc");
+            if (content.contains("[trigger warn]")) {
+                ctx.getConversionMarkers().markInSource(
+                        1, 2, ConversionMarkers.Type.WARN, "Warn message");
+            }
+            if (content.contains("[trigger tip]")) {
+                ctx.getConversionMarkers().markInDestination(
+                        1, 2, ConversionMarkers.Type.TIP, "Tip message");
+            }
+            IOUtils.write(content.toUpperCase(), ctx.getDestinationStream(), StandardCharsets.UTF_8);
         }
 
     }

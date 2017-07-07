@@ -19,9 +19,14 @@
 
 package org.freemarker.converter.test;
 
+import static java.nio.charset.StandardCharsets.*;
+import static org.apache.commons.io.FileUtils.*;
+import static org.junit.Assert.*;
+
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.freemarker.converter.Converter;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
@@ -42,5 +47,23 @@ public abstract class ConverterTest {
     }
 
     protected abstract void createSourceFiles() throws IOException;
+
+    protected String readConversionMarkersFile() throws IOException {
+        return readConversionMarkersFile(false);
+    }
+
+    protected String readConversionMarkersFile(boolean delete) throws IOException {
+        File markersFile = getConversionMarkersFile();
+        assertTrue(markersFile.isFile());
+        String content = readFileToString(markersFile, UTF_8);
+        if (!markersFile.delete()) {
+            throw new IOException("Failed to delete file: " + markersFile);
+        }
+        return content;
+    }
+
+    protected File getConversionMarkersFile() {
+        return new File(dstDir, Converter.CONVERSION_MARKERS_FILE_NAME);
+    }
 
 }

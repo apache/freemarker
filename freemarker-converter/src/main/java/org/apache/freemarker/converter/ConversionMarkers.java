@@ -22,15 +22,32 @@ package org.apache.freemarker.converter;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Receives source code markings with positions.
- */
-public class ConversionMarkerReceiver {
+import org.apache.freemarker.core.util._NullArgumentException;
 
-    private final List<Entry> sourceFileMarkers = new ArrayList<>();
-    private final List<Entry> destinationFileMarkers = new ArrayList<>();
+/**
+ * Stores markers that apply to a given position in the source or destination file.
+ */
+public class ConversionMarkers {
+
+    private final List<Entry> sourceMarkers = new ArrayList<>();
+    private final List<Entry> destinationMarkers = new ArrayList<>();
 
     /**
+     * Adds a marker to the source file.
+     * @param row
+     *         1-based column in the source file
+     * @param col
+     *         1-based row in the source file
+     * @param message
+*         Not {@code null}
+     */
+    public void markInSource(int row, int col, Type type, String message) {
+        sourceMarkers.add(new Entry(row, col, Type.WARN, message));
+    }
+
+    /**
+     * Adds a marker to the destination file.
+     *
      * @param row
      *         1-based column in the source file
      * @param col
@@ -38,12 +55,9 @@ public class ConversionMarkerReceiver {
      * @param message
      *         Not {@code null}
      */
-    public void warnInSource(int row, int col, String message);
-
-    /**
-     * Similar to {@link #warnInSource(int, int, String)}, but adds a tipInOutput instead of a warning message.
-     */
-    public void tipInOutput(int row, int col, String message);
+    public void markInDestination(int row, int col, Type type, String message) {
+        destinationMarkers.add(new Entry(row, col, type, message));
+    }
 
     public enum Type {
         WARN, TIP
@@ -52,11 +66,16 @@ public class ConversionMarkerReceiver {
     public class Entry {
         private final int row;
         private final int column;
+        private final Type type;
         private final String message;
 
-        public Entry(int row, int column, String message) {
+        public Entry(int row, int column, Type type, String message) {
+            _NullArgumentException.check("type", type);
+            _NullArgumentException.check("message", message);
+
             this.row = row;
             this.column = column;
+            this.type = type;
             this.message = message;
         }
 
@@ -68,9 +87,21 @@ public class ConversionMarkerReceiver {
             return column;
         }
 
+        public Type getType() {
+            return type;
+        }
+
         public String getMessage() {
             return message;
         }
+    }
+
+    public List<Entry> getSourceMarkers() {
+        return sourceMarkers;
+    }
+
+    public List<Entry> getDestinationMarkers() {
+        return destinationMarkers;
     }
 
 }

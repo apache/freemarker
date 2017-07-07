@@ -20,6 +20,7 @@
 package org.freemarker.converter;
 
 import static java.nio.charset.StandardCharsets.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -164,6 +165,8 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
 
         assertConverted("<#if foo>1<#elseIf bar>2<#else>3</#if>", "<#if foo>1<#elseif bar>2<#else>3</#if>");
         assertConvertedSame("<#if  foo >1<#elseIf  bar >2<#else >3</#if >");
+        assertConverted("<#if foo>1<#elseIf bar>2<#else>3</#if>", "<#if foo>1<#elseif bar/>2<#else/>3</#if>");
+        assertConverted("<#if foo>1<#elseIf bar>2<#else>3</#if>", "<#if foo>1<#elseif bar />2<#else />3</#if>");
 
         assertConvertedSame("<#macro m>body</#macro>");
         assertConvertedSame("<#macro <#--1--> m <#--2-->></#macro >");
@@ -238,8 +241,10 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
 
         assertConvertedSame("<#include 'foo.ftl'>");
         assertConverted("<#include 'foo.ftl' ignoreMissing=true>", "<#include 'foo.ftl' ignore_missing=true>");
+        assertTrue(lastConversionMarkersFileContent.isEmpty());
         assertConverted("<#include 'foo.ftl' ignoreMissing=true>",
                 "<#include 'foo.ftl' ignore_missing=true encoding='utf-8' parse=false>");
+        assertLastConversionMarkersFileContains("[WARN]", "encoding", "parse");
         assertConverted("<#include 'foo.ftl' ignoreMissing=true>",
                 "<#include 'foo.ftl' encoding='utf-8' ignore_missing=true parse=false>");
         assertConverted("<#include 'foo.ftl' ignoreMissing=true>",
@@ -253,6 +258,31 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConverted("<#include <#--1--> 'foo.ftl' <#--2--> ignoreMissing=true <#--4-->>",
                 "<#include <#--1--> 'foo.ftl' <#--2--> encoding='UTF-8' <#--3--> ignoreMissing=true <#--4--> "
                         + "parse=true <#--5--> >");
+
+        assertConvertedSame("<#list xs as x>${x}</#list>");
+        assertConvertedSame("<#list <#--1--> xs <#--2--> as <#--3--> x <#--4--> >${x}</#list >");
+        assertConvertedSame("<#list xs as k, v>${k}${v}</#list>");
+        assertConvertedSame("<#list <#--1--> xs <#--2--> as <#--3--> k <#--4-->, v <#--5--> >${k}${v}</#list >");
+
+        assertConverted("<#list xs as x>${x}</#list>", "<#foreach x in xs>${x}</#foreach>");
+        assertConverted(
+                "<#list <#--1--> xs <#--XS--> as x <#--X-->>${x}</#list>",
+                "<#foreach <#--1--> x <#--X--> in xs <#--XS-->>${x}</#foreach>");
+
+        assertConvertedSame("<#list xs as x>${x}<#sep>, </#list>");
+        assertConvertedSame("<#list xs as x>${x}<#sep>, </#sep></#list>");
+
+        assertConvertedSame("<#list xs as x>${x}<#else>-</#list>");
+        assertConvertedSame("<#list xs as x>${x}<#else >-</#list >");
+        assertConverted("<#list xs as x>${x}<#else>-</#list>", "<#list xs as x>${x}<#else/>-</#list>");
+
+        assertConvertedSame("<#list xs>[<#items as x>${x}<#sep>, </#items>]</#list>");
+        assertConvertedSame("<#list xs>[<#items as <#--1--> x <#--2-->>${x}<#sep>, </#items>]</#list>");
+        assertConvertedSame("<#list xs>[<#items as k, v>${h}${v}<#sep>, </#items>]</#list>");
+        assertConvertedSame(
+                "<#list xs>[<#items as <#--1--> k <#--2-->, <#--3--> v <#--4-->>${h}${v}<#sep>, </#items>]</#list>");
+        assertConvertedSame("<#list xs as x><#if x == 0><#break></#if>${x}</#list>");
+        assertConvertedSame("<#list xs>[<#items  as x>${x}<#sep>, </#sep >|</#items>]<#else>-</#list>");
     }
 
     @Test
@@ -347,9 +377,17 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertEquals(ftl3, convert(ftl2, squareBracketTagSyntax));
     }
 
+    private void assertLastConversionMarkersFileContains(String... parts) {
+        for (String part : parts) {
+            assertThat(lastConversionMarkersFileContent, containsString(part));
+        }
+    }
+
     private String convert(String ftl2) throws IOException, ConverterException {
         return convert(ftl2, false);
     }
+
+    private String lastConversionMarkersFileContent;
 
     private String convert(String ftl2, boolean squareBracketTagSyntax) throws IOException, ConverterException {
         File srcFile = new File(srcDir, "t");
@@ -372,6 +410,8 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         if (!outputFile.delete()) {
             throw new IOException("Couldn't delete file: " + outputFile);
         }
+
+        lastConversionMarkersFileContent = readConversionMarkersFile(true);
 
         return output;
     }

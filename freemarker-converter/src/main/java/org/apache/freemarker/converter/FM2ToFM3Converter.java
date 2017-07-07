@@ -94,7 +94,7 @@ public class FM2ToFM3Converter extends Converter {
     protected void convertFile(FileConversionContext fileTransCtx) throws ConverterException, IOException {
         String src = IOUtils.toString(fileTransCtx.getSourceStream(), StandardCharsets.UTF_8);
         FM2ASTToFM3SourceConverter.Result result = FM2ASTToFM3SourceConverter.convert(
-                fileTransCtx.getSourceFile().getName(), src, fm2Cfg, fileTransCtx.getConversionWarnReceiver()
+                fileTransCtx.getSourceFile().getName(), src, fm2Cfg, fileTransCtx.getConversionMarkers()
         );
         fileTransCtx.setDestinationFileName(getDestinationFileName(result.getFM2Template()));
         fileTransCtx.getDestinationStream().write(

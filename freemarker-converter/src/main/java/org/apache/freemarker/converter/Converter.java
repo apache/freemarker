@@ -22,11 +22,14 @@ package org.apache.freemarker.converter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._StringUtil;
@@ -37,15 +40,17 @@ public abstract class Converter {
 
     public static final String PROPERTY_NAME_SOURCE = "source";
     public static final String PROPERTY_NAME_DESTINATION_DIRECTORY = "destinationDirectory";
+    public static final String CONVERSION_MARKERS_FILE_NAME = "__conversion-markers.txt";
 
     private static final Logger LOG = LoggerFactory.getLogger(Converter.class);
 
     private File source;
     private File destinationDirectory;
-    private ConversionWarnReceiver conversionWarnReceiver = new LoggingWarnReceiver();
     private boolean createDestinationDirectory;
+
     private boolean executed;
     private Set<File> directoriesKnownToExist = new HashSet<>();
+    private Writer conversionMarkersWriter;
 
     public File getSource() {
         return source;
@@ -71,14 +76,6 @@ public abstract class Converter {
         this.createDestinationDirectory = createDestinationDirectory;
     }
 
-    public ConversionWarnReceiver getConversionWarnReceiver() {
-        return conversionWarnReceiver;
-    }
-
-    public void setConversionWarnReceiver(ConversionWarnReceiver conversionWarnReceiver) {
-        this.conversionWarnReceiver = conversionWarnReceiver;
-    }
-
     public final void execute() throws ConverterException {
         if (executed) {
             throw new IllegalStateException("This converted was already invoked once.");
@@ -89,7 +86,20 @@ public abstract class Converter {
         LOG.debug("Source: {}", source);
         LOG.debug("Destination directory: {}", destinationDirectory);
 
-        convertFiles(source, destinationDirectory, true);
+        // Just so that no confusing marker file remains there:
+        File markerFile = new File(destinationDirectory, CONVERSION_MARKERS_FILE_NAME);
+        markerFile.delete();
+        try {
+            convertFiles(source, destinationDirectory, true);
+        } finally {
+            if (conversionMarkersWriter != null) {
+                try {
+                    conversionMarkersWriter.close();
+                } catch (IOException e) {
+                    throw new ConverterException("Marker file (" + markerFile + ") couldn't be written: ", e);
+                }
+            }
+        }
     }
 
     /**
@@ -139,18 +149,17 @@ public abstract class Converter {
         }
         try {
             LOG.debug("Converting file: {}", src);
-            FileConversionContext fileTransCtx = null;
+            FileConversionContext ctx = null;
             try {
-                conversionWarnReceiver.setSourceFile(src);
-                fileTransCtx = new FileConversionContext(srcStream, src, dstDir, conversionWarnReceiver);
-                convertFile(fileTransCtx);
+                ctx = new FileConversionContext(srcStream, src, dstDir);
+                convertFile(ctx);
+                storeConversionMarkers(ctx.getConversionMarkers(), ctx);
             } catch (IOException e) {
                 throw new ConverterException("I/O exception while converting " + _StringUtil.jQuote(src) + ".", e);
             } finally {
-                conversionWarnReceiver.setSourceFile(null);
                 try {
-                    if (fileTransCtx != null && fileTransCtx.outputStream != null) {
-                        fileTransCtx.outputStream.close();
+                    if (ctx != null && ctx.outputStream != null) {
+                        ctx.outputStream.close();
                     }
                 } catch (IOException e) {
                     throw new ConverterException("Failed to close destination file", e);
@@ -163,6 +172,43 @@ public abstract class Converter {
                 throw new ConverterException("Failed to close file: " + src, e);
             }
         }
+    }
+
+    private void storeConversionMarkers(ConversionMarkers conversionMarkers, FileConversionContext ctx)
+            throws ConverterException {
+        if (conversionMarkersWriter == null) {
+            File conversionMarkersFile = new File(destinationDirectory, CONVERSION_MARKERS_FILE_NAME);
+            try {
+                conversionMarkersWriter = new FileWriter(conversionMarkersFile);
+            } catch (IOException e) {
+                throw new ConverterException("Failed to create conversion marker file: " + conversionMarkersFile, e);
+            }
+        }
+        for (ConversionMarkers.Entry marker : conversionMarkers.getSourceMarkers()) {
+            try {
+                conversionMarkersWriter.write(toString(marker, ctx.getSourceFile()));
+            } catch (IOException e) {
+                throw new ConverterException("Failed to write conversion marker file", e);
+            }
+        }
+        for (ConversionMarkers.Entry marker : conversionMarkers.getDestinationMarkers()) {
+            try {
+                conversionMarkersWriter.write(toString(marker, ctx.getDestinationFile()));
+            } catch (IOException e) {
+                throw new ConverterException("Failed to write conversion marker file", e);
+            }
+        }
+    }
+
+    private String toString(ConversionMarkers.Entry marker, File file) {
+        return "[" + marker.getType() + "] " + file + ":" + marker.getRow() + ":" + marker.getColumn()
+                + " " + addTabAfterLineBreaks(marker.getMessage()) + "\n";
+    }
+
+    private static final Pattern AFTER_LINE_BREAKS_PATTERN = Pattern.compile("\\n|\\r\\n?");
+
+    private String addTabAfterLineBreaks(String message) {
+        return AFTER_LINE_BREAKS_PATTERN.matcher(message).replaceAll("$0\t");
     }
 
     private void ensureDirectoryExists(File dir) throws ConverterException {
@@ -209,16 +255,14 @@ public abstract class Converter {
         private final InputStream sourceStream;
         private final File sourceFile;
         private final File dstDir;
-        private final ConversionWarnReceiver conversionWarnReceiver;
+        private final ConversionMarkers conversionMarkers = new ConversionMarkers();
         private String destinationFileName;
         private OutputStream outputStream;
 
-        public FileConversionContext(
-                InputStream sourceStream, File sourceFile, File dstDir, ConversionWarnReceiver conversionWarnReceiver) {
+        public FileConversionContext(InputStream sourceStream, File sourceFile, File dstDir) {
             this.sourceStream = sourceStream;
             this.sourceFile = sourceFile;
             this.dstDir = dstDir;
-            this.conversionWarnReceiver = conversionWarnReceiver;
         }
 
         /**
@@ -252,7 +296,7 @@ public abstract class Converter {
                 }
 
                 ensureDirectoryExists(dstDir);
-                File dstFile = new File(dstDir, destinationFileName);
+                File dstFile = getDestinationFile();
                 try {
                     outputStream = new FileOutputStream(dstFile);
                 } catch (IOException e) {
@@ -284,10 +328,16 @@ public abstract class Converter {
             this.destinationFileName = destinationFileName;
         }
 
-        public ConversionWarnReceiver getConversionWarnReceiver() {
-            return conversionWarnReceiver;
+        public ConversionMarkers getConversionMarkers() {
+            return conversionMarkers;
         }
 
+        public File getDestinationFile() {
+            if (destinationFileName == null) {
+                throw new IllegalStateException("FileConversionContext.destinationFileName wasn't yet set.");
+            }
+            return new File(dstDir, destinationFileName);
+        }
     }
 
 }
