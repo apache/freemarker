@@ -22,7 +22,7 @@ package org.apache.freemarker.core;
 /**
  * AST directive node: {@code #t}, {@code #tr}, {@code #tl}.
  */
-final class ASTDirTOrTrOrTl extends ASTDirective {
+final class ASTDirTOrRtOrLtOrNt extends ASTDirective {
     
     private static final int TYPE_T = 0;
     private static final int TYPE_LT = 1;
@@ -31,7 +31,7 @@ final class ASTDirTOrTrOrTl extends ASTDirective {
 
     final boolean left, right;
 
-    ASTDirTOrTrOrTl(boolean left, boolean right) {
+    ASTDirTOrRtOrLtOrNt(boolean left, boolean right) {
         this.left = left;
         this.right = right;
     }

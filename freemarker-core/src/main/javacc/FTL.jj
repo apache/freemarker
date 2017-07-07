@@ -2649,17 +2649,17 @@ ASTElement Flush() :
 ASTElement Trim() :
 {
     Token t;
-    ASTDirTOrTrOrTl result = null;
+    ASTDirTOrRtOrLtOrNt result = null;
 }
 {
     (
-        t = <TRIM> { result = new ASTDirTOrTrOrTl(true, true); }
+        t = <TRIM> { result = new ASTDirTOrRtOrLtOrNt(true, true); }
         |
-        t = <LTRIM> { result = new ASTDirTOrTrOrTl(true, false); }
+        t = <LTRIM> { result = new ASTDirTOrRtOrLtOrNt(true, false); }
         |
-        t = <RTRIM> { result = new ASTDirTOrTrOrTl(false, true); }
+        t = <RTRIM> { result = new ASTDirTOrRtOrLtOrNt(false, true); }
         |
-        t = <NOTRIM> { result = new ASTDirTOrTrOrTl(false, false); }
+        t = <NOTRIM> { result = new ASTDirTOrRtOrLtOrNt(false, false); }
     )
     {
         result.setLocation(template, t, t);

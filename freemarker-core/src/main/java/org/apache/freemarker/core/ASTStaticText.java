@@ -144,8 +144,8 @@ final class ASTStaticText extends ASTElement {
         for (ASTElement elem = nextTerminalNode();
              elem != null && elem.beginLine == endLine;
              elem = elem.nextTerminalNode()) {
-            if (elem instanceof ASTDirTOrTrOrTl) {
-                ASTDirTOrTrOrTl ti = (ASTDirTOrTrOrTl) elem;
+            if (elem instanceof ASTDirTOrRtOrLtOrNt) {
+                ASTDirTOrRtOrLtOrNt ti = (ASTDirTOrRtOrLtOrNt) elem;
                 if (!ti.left && !ti.right) {
                     result = true;
                 }
@@ -182,8 +182,8 @@ final class ASTStaticText extends ASTElement {
         for (ASTElement elem = prevTerminalNode();
              elem != null && elem.endLine == beginLine;
              elem = elem.prevTerminalNode()) {
-            if (elem instanceof ASTDirTOrTrOrTl) {
-                ASTDirTOrTrOrTl ti = (ASTDirTOrTrOrTl) elem;
+            if (elem instanceof ASTDirTOrRtOrLtOrNt) {
+                ASTDirTOrRtOrLtOrNt ti = (ASTDirTOrRtOrLtOrNt) elem;
                 if (!ti.left && !ti.right) {
                     result = true;
                 }
@@ -219,7 +219,7 @@ final class ASTStaticText extends ASTElement {
                                 if (te.heedsOpeningWhitespace()) {
                                     trimTrailingPart = false;
                                 }
-                                if (te instanceof ASTDirTOrTrOrTl && ((ASTDirTOrTrOrTl) te).left) {
+                                if (te instanceof ASTDirTOrRtOrLtOrNt && ((ASTDirTOrRtOrLtOrNt) te).left) {
                                     trimTrailingPart = true;
                                     break;
                                 }
