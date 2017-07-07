@@ -892,7 +892,16 @@
 </project>
 ]]></echo>
   </target>
-  
+
+  <target name="maven-install" depends="jar, maven-pom"
+      description="Installs the jar into the local maven repo (without signing)">
+		<exec executable="${mvnCommand}" failonerror="true">
+			<arg value="install:install-file" />
+			<arg value="-Dfile=build/freemarker.jar" />
+			<arg value="-DpomFile=build/pom.xml" />
+		</exec>
+  </target>
+
   <!--
     Uploads the freemarker.jar that is in the current DISTRIBUTION DIRECTORY
     to a Maven repository (snapshot or central).
@@ -949,7 +958,7 @@ Proceed? </input>
     
 		<!-- Sign and deploy the main artifact -->
 		<exec executable="${mvnCommand}" failonerror="true">
-			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
+			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.6:sign-and-deploy-file" />
       <!--
         As we use the gpg plugin instead of a normal Maven "deploy", sadly we can't just
         inherit the repo URL and repositoryId from the parent POM.
@@ -958,35 +967,15 @@ Proceed? </input>
 			<arg value="-DrepositoryId=${maven-server-id}" />
 			<arg value="-DpomFile=build/pom.xml" />
 			<arg value="-Dfile=${dist.bin.dir}/freemarker.jar" />
-      <arg value="-Pgpg" />
-		</exec>
-
-		<!-- Sign and deploy the sources artifact -->
-		<exec executable="${mvnCommand}" failonerror="true">
-			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
-			<arg value="-Durl=${maven-repository-url}" />
-			<arg value="-DrepositoryId=${maven-server-id}" />
-			<arg value="-DpomFile=build/pom.xml" />
-			<arg value="-Dfile=build/maven-source-attachment.jar" />
-			<arg value="-Dclassifier=sources" />
-      <arg value="-Pgpg" />
-		</exec>
-
-		<!-- Sign and deploy the javadoc artifact -->
-		<exec executable="${mvnCommand}" failonerror="true">
-			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
-			<arg value="-Durl=${maven-repository-url}" />
-			<arg value="-DrepositoryId=${maven-server-id}" />
-			<arg value="-DpomFile=build/pom.xml" />
-			<arg value="-Dfile=build/maven-javadoc-attachment.jar" />
-			<arg value="-Dclassifier=javadoc" />
+			<arg value="-Dsources=build/maven-source-attachment.jar" />
+			<arg value="-Djavadoc=build/maven-javadoc-attachment.jar" />
       <arg value="-Pgpg" />
 		</exec>
     
     <echo>*****************************************************************</echo>
     <echo>Check the above lines for any Maven errors!</echo>
     <echo>Now you need to close and maybe release the staged repo on</echo>
-    <echo>http://repository.apache.org.</echo>
+    <echo>http://repository.apache.org (except for SNAPSHOT versions).</echo>
     <echo>Note that before releasing, voting is needed!</echo>
     <echo>*****************************************************************</echo>
   </target>
