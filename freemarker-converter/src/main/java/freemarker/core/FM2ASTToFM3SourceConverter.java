@@ -236,20 +236,43 @@ public class FM2ASTToFM3SourceConverter {
         if (node instanceof MixedContent) {
             printChildElements(node);
         } else if (node instanceof TextBlock) {
-            print(getOnlyParam(node, ParameterRole.CONTENT, String.class));
+            printText(node);
         } else if (node instanceof DollarVariable) {
             printDollarInterpolation((DollarVariable) node);
         } else if (node instanceof NumericalOutput) {
             printNumericalInterpolation((NumericalOutput) node);
         } else if (node instanceof Comment) {
-            print(tagBeginChar);
-            print("#--");
-            print(getOnlyParam(node, ParameterRole.CONTENT, String.class));
-            print("--");
-            print(tagEndChar);
+            printComment((Comment) node);
         } else {
             printDir(node);
         }
+    }
+
+    private void printText(TemplateElement node) throws ConverterException {
+        int startPos = getStartPosition(node);
+        int endPos = getEndPositionExclusive(node);
+        if (startPos < 0 || startPos >= endPos) { // empty text
+            return;
+        }
+
+        boolean isNoParseBlock = src.startsWith(tagBeginChar + "#no", startPos);
+        if (isNoParseBlock) {
+            printCoreDirStartTagParameterless(node, "noParse");
+        }
+        print(getOnlyParam(node, ParameterRole.CONTENT, String.class));
+        if (isNoParseBlock) {
+            printCoreDirEndTag(node, NO_PARSE_FM_2_TAG_NAMES, "noParse");
+        }
+    }
+
+    private static final ImmutableList<String> NO_PARSE_FM_2_TAG_NAMES = ImmutableList.of("noparse", "noParse");
+
+    private void printComment(Comment node) throws UnexpectedNodeContentException {
+        print(tagBeginChar);
+        print("#--");
+        print(getOnlyParam(node, ParameterRole.CONTENT, String.class));
+        print("--");
+        print(tagEndChar);
     }
 
     private void printNumericalInterpolation(NumericalOutput node) throws ConverterException {
@@ -320,8 +343,12 @@ public class FM2ASTToFM3SourceConverter {
             printDirCustom((UnifiedCall) node);
         } else if (node instanceof Macro) {
             printDirMacroOrFunction((Macro) node);
+        } else if (node instanceof BodyInstruction) {
+            printDirNested((BodyInstruction) node);
         } else if (node instanceof Assignment) {
             printDirAssignmentLonely((Assignment) node);
+        } else if (node instanceof BlockAssignment) {
+            printDirBlockAssignment((BlockAssignment) node);
         } else if (node instanceof AssignmentInstruction) {
             printDirAssignmentMultiple((AssignmentInstruction) node);
         } else if (node instanceof AttemptBlock) {
@@ -356,9 +383,43 @@ public class FM2ASTToFM3SourceConverter {
             printDirItems((Items) node);
         } else if (node instanceof BreakInstruction) {
             printDirBreak((BreakInstruction) node);
+        } else if (node instanceof TrimInstruction) {
+            printDirTOrNtOrLtOrRt((TrimInstruction) node);
         } else {
             throw new ConverterException("Unhandled AST TemplateElement class: " + node.getClass().getName());
         }
+    }
+
+    private void printDirTOrNtOrLtOrRt(TrimInstruction node) throws ConverterException {
+        int subtype= getOnlyParam(node, ParameterRole.AST_NODE_SUBTYPE, Integer.class);
+        String tagName;
+        if (subtype == TrimInstruction.TYPE_T) {
+            tagName = "t";
+        } else if (subtype == TrimInstruction.TYPE_LT) {
+            tagName = "lt";
+        } else if (subtype == TrimInstruction.TYPE_RT) {
+            tagName = "rt";
+        } else if (subtype == TrimInstruction.TYPE_NT) {
+            tagName = "nt";
+        } else {
+            throw new UnexpectedNodeContentException(node, "Unhandled subtype {}.", subtype);
+        }
+
+        printCoreDirStartTagParameterless(node, tagName);
+    }
+
+    private void printDirNested(BodyInstruction node) throws ConverterException {
+        int pos = printCoreDirStartTagBeforeParams(node, "nested");
+        int paramCnt = node.getParameterCount();
+        for (int paramIdx = 0; paramIdx < paramCnt; paramIdx++) {
+            Expression passedValue = getParam(node, paramIdx, ParameterRole.PASSED_VALUE, Expression.class);
+            printExp(passedValue);
+            pos = getEndPositionExclusive(passedValue);
+            if (paramIdx < paramCnt - 1) {
+                printOptionalSeparatorAndWSAndExpComments(pos, ",");
+            }
+        }
+        printStartTagEnd(node, pos, true);
     }
 
     private void printDirBreak(BreakInstruction node) throws ConverterException {
@@ -489,16 +550,14 @@ public class FM2ASTToFM3SourceConverter {
         printChildElements(node);
 
         if (printEndTag) {
-            printCoreDirEndTag(node, ImmutableList.of("list", "foreach", "forEach"), "list", false);
+            printCoreDirEndTag(node, LIST_FM_2_TAG_NAMES, "list", false);
         }
     }
 
+    private static final ImmutableList<String> LIST_FM_2_TAG_NAMES = ImmutableList.of("list", "foreach", "forEach");
+
     private void printDirInclude(Include node) throws ConverterException {
-        if (Configuration.getVersion().intValue() != Configuration.VERSION_2_3_26.intValue()) {
-            throw new BugException("Fix things at [broken in 2.3.26] comments; version was: "
-                    + Configuration.getVersion());
-        }
-        // assertParamCount(node, 4); // [broken in 2.3.26]
+        assertParamCount(node, 4);
 
         printCoreDirStartTagBeforeParams(node, "include");
 
@@ -521,9 +580,7 @@ public class FM2ASTToFM3SourceConverter {
                             + "encoding than the configured default.");
         }
 
-        // Can't use as parameterCount is [broken in 2.3.26]:
-        // Expression ignoreMissingParam = getParam(node, 3, ParameterRole.IGNORE_MISSING_PARAMETER, Expression.class);
-        Expression ignoreMissingParam = (Expression) node.getParameterValue(3);
+        Expression ignoreMissingParam = getParam(node, 3, ParameterRole.IGNORE_MISSING_PARAMETER, Expression.class);
 
         List<Expression> sortedExps =
                 sortExpressionsByPosition(templateName, parseParam, encodingParam, ignoreMissingParam);
@@ -611,8 +668,10 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private void printDirNoEscape(NoEscapeBlock node) throws ConverterException {
-        printDirGenericParameterlessWithNestedContent(node, "noEscape");
+        printDirGenericParameterlessWithNestedContent(node, NO_ESCAPE_FM_2_TAG_NAMES, "noEscape");
     }
+
+    private static final ImmutableList<String> NO_ESCAPE_FM_2_TAG_NAMES = ImmutableList.of("noescape", "noEscape");
 
     private void printDirEscape(EscapeBlock node) throws ConverterException {
         assertParamCount(node, 2);
@@ -638,20 +697,30 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private void printDirAutoEsc(AutoEscBlock node) throws ConverterException {
-        printDirGenericParameterlessWithNestedContent(node, "autoEsc");
+        printDirGenericParameterlessWithNestedContent(node, AUTO_ESC_FM_2_TAG_NAMES, "autoEsc");
     }
+
+    private static final ImmutableList<String> AUTO_ESC_FM_2_TAG_NAMES = ImmutableList.of("autoesc", "autoEsc");
 
     private void printDirNoAutoEsc(NoAutoEscBlock node) throws ConverterException {
-        printDirGenericParameterlessWithNestedContent(node, "noAutoEsc");
+        printDirGenericParameterlessWithNestedContent(node, NO_AUTO_ESC_FM_2_TAG_NAMES, "noAutoEsc");
     }
 
-    private void printDirGenericParameterlessWithNestedContent(TemplateElement node, String tagName)
+    private static final ImmutableList<String> NO_AUTO_ESC_FM_2_TAG_NAMES = ImmutableList.of("noautoesc", "noAutoEsc");
+
+    private void printDirGenericParameterlessWithNestedContent(TemplateElement node, String fm3TagName)
+            throws ConverterException {
+        printDirGenericParameterlessWithNestedContent(node, Collections.singleton(fm3TagName), fm3TagName);
+    }
+
+    private void printDirGenericParameterlessWithNestedContent(TemplateElement node,
+            Collection<String> fm2TagName, String fm3TagName)
             throws ConverterException {
         assertParamCount(node, 0);
 
-        printCoreDirStartTagParameterless(node, tagName);
+        printCoreDirStartTagParameterless(node, fm3TagName);
         printChildElements(node);
-        printCoreDirEndTag(node, tagName);
+        printCoreDirEndTag(node, fm2TagName, fm3TagName);
     }
 
     private void printDirGenericParameterlessWithoutNestedContent(TemplateElement node, String name)
@@ -674,8 +743,10 @@ public class FM2ASTToFM3SourceConverter {
         printChildElements(recoverDir);
 
         // In FM2 this could be </#recover> as well, but we normalize it
-        printCoreDirEndTag(node, ImmutableList.of("attempt", "recover"), "attempt", false);
+        printCoreDirEndTag(node, ATTEMPT_RECOVER_FM_2_TAG_NAMES, "attempt", false);
     }
+
+    private static final ImmutableList<String> ATTEMPT_RECOVER_FM_2_TAG_NAMES = ImmutableList.of("attempt", "recover");
 
     private void printDirAssignmentMultiple(AssignmentInstruction node) throws ConverterException {
         assertParamCount(node, 2);
@@ -702,6 +773,28 @@ public class FM2ASTToFM3SourceConverter {
         printDirAssignmentCommonTagAfterLastAssignmentExp(node, 4, pos);
     }
 
+    private void printDirBlockAssignment(BlockAssignment node) throws ConverterException {
+        assertParamCount(node, 3);
+
+        int pos = printDirAssignmentCommonTagTillAssignmentExp(node, 1);
+
+        print(FTLUtil.escapeIdentifier(getParam(node, 0, ParameterRole.ASSIGNMENT_TARGET, String.class)));
+        pos = getPositionAfterAssignmentTargetIdentifier(pos);
+
+        Expression namespace = getParam(node, 2, ParameterRole.NAMESPACE, Expression.class);
+        if (namespace != null) {
+            printSeparatorAndWSAndExpComments(pos, "in");
+            printExp(namespace);
+            pos = getEndPositionExclusive(namespace);
+        }
+
+        printStartTagEnd(node, pos, true);
+
+        printChildElements(node);
+
+        printCoreDirEndTag(node, getAssignmentDirTagName(node, 1));
+    }
+
     private void printDirAssignmentCommonTagAfterLastAssignmentExp(TemplateElement node, int nsParamIdx, int pos)
             throws ConverterException {
         Expression ns = getParam(node, nsParamIdx, ParameterRole.NAMESPACE, Expression.class);
@@ -719,6 +812,11 @@ public class FM2ASTToFM3SourceConverter {
 
     private int printDirAssignmentCommonTagTillAssignmentExp(TemplateElement node, int scopeParamIdx)
             throws ConverterException {
+        return printCoreDirStartTagBeforeParams(node, getAssignmentDirTagName(node, scopeParamIdx));
+    }
+
+    private String getAssignmentDirTagName(TemplateElement node, int scopeParamIdx)
+            throws UnexpectedNodeContentException {
         int scope = getParam(node, scopeParamIdx, ParameterRole.VARIABLE_SCOPE, Integer.class);
         String tagName;
         if (scope == Assignment.NAMESPACE) {
@@ -730,7 +828,7 @@ public class FM2ASTToFM3SourceConverter {
         } else {
             throw new UnexpectedNodeContentException(node, "Unhandled scope: {}", scope);
         }
-        return printCoreDirStartTagBeforeParams(node, tagName);
+        return tagName;
     }
 
     private int printDirAssignmentCommonExp(Assignment node, int pos) throws ConverterException {
@@ -1360,7 +1458,7 @@ public class FM2ASTToFM3SourceConverter {
         {
             int pos = getStartPosition(node);
             quote = src.charAt(pos);
-            while ((quote == '\\' || quote == '{' /* 2.3.26 bug workaround */ || quote == 'r')
+            while ((quote == '\\' || quote == '{' /* [broken in 2.3.26] */ || quote == 'r')
                     && pos < src.length()) {
                 pos++;
                 if (quote == 'r') {
@@ -1459,7 +1557,20 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private void printCoreDirEndTag(TemplateElement node, String tagName) throws UnexpectedNodeContentException {
-        printCoreDirEndTag(node, Collections.singleton(tagName), tagName, false);
+        printCoreDirEndTag(node, Collections.singleton(tagName), tagName);
+    }
+
+    private void printCoreDirEndTag(TemplateElement node, Collection<String> fm2TagName, String fm3TagName) throws
+            UnexpectedNodeContentException {
+        if (fm2TagName.size() == 0) {
+            throw new IllegalArgumentException("You must specify at least 1 FM2 tag names");
+        }
+        if (fm2TagName.size() == 1 && containsUpperCaseLetter(fm3TagName)) {
+            throw new IllegalArgumentException(
+                    "You must specify multiple FM2 tag names when the FM3 tag name ("
+                    + fm3TagName + ") contains upper case letters");
+        }
+        printCoreDirEndTag(node, fm2TagName, fm3TagName, false);
     }
 
     private void printCoreDirEndTag(TemplateElement node, Collection<String> fm2TagNames, String fm3TagName,
@@ -1717,6 +1828,9 @@ public class FM2ASTToFM3SourceConverter {
      *         1-based row
      */
     private int getPosition(int column, int row) {
+        if (row == 0) {
+            return  -1;
+        }
         if (rowStartPositions == null) {
             rowStartPositions = new ArrayList<>();
             rowStartPositions.add(0);
@@ -1943,6 +2057,28 @@ public class FM2ASTToFM3SourceConverter {
             i--;
         }
         return i != -1 ? s.substring(0, i + 1) : "";
+    }
+
+    private boolean isUpperCaseLetter(char c) {
+        return Character.isUpperCase(c) && Character.isLetter(c);
+    }
+
+    private HashMap<String, Boolean> containsUpperCaseLetterResults = new HashMap<>();
+
+    private boolean containsUpperCaseLetter(String s) {
+        Boolean result = containsUpperCaseLetterResults.get(s);
+        if (result != null) {
+            return result;
+        }
+
+        int i = 0;
+        while (i < s.length() && !isUpperCaseLetter(s.charAt(i))) {
+            i++;
+        }
+        result = i < s.length();
+
+        containsUpperCaseLetterResults.put(s, result);
+        return result;
     }
 
 }

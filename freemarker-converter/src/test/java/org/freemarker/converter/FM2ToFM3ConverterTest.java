@@ -191,6 +191,12 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("<#macro m\\-1 p\\-1></#macro>");
         // Only works with " now, as it doesn't keep the literal kind. Later we will escape differently anyway:
         assertConvertedSame("<#macro \"m 1\"></#macro>");
+        assertConvertedSame("<#macro m><#nested x + 1, 2, 3></#macro>");
+        assertConvertedSame("<#macro m><#nested <#--1--> x + 1 <#--2-->, <#--3--> 2 <#--4-->></#macro>");
+        // [FM3] Will be different (comma)
+        assertConvertedSame("<#macro m><#nested x + 1 2 3></#macro>");
+        assertConvertedSame("<#macro m><#nested <#--1--> x + 1 <#--2--> 2 <#--3-->></#macro>");
+        assertConverted("<#macro m><#nested x></#macro>", "<#macro m><#nested x /></#macro>");
 
         assertConvertedSame("<#assign x = 1>");
         assertConvertedSame("<#global x = 1>");
@@ -206,6 +212,14 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("<#assign <#--0-->x = 1<#--1-->,<#--2-->y++<#--3-->z/=2<#--4-->>");
         // Only works with " now, as it doesn't keep the literal kind. Later we will escape differently anyway:
         assertConvertedSame("<#assign \"x y\" = 1>");
+
+        assertConvertedSame("<#assign x>t</#assign>");
+        assertConvertedSame("<#assign x in ns>t</#assign>");
+        assertConvertedSame("<#assign x\\-y>t</#assign>");
+        assertConvertedSame("<#assign \"x y\">t</#assign>");
+        assertConvertedSame("<#global x>t</#global>");
+        assertConvertedSame("<#macro m><#local x>t</#local></#macro>");
+        assertConvertedSame("<#assign <#--1--> x <#--2--> in <#--3--> ns <#--4-->>t</#assign >");
 
         assertConvertedSame("<#attempt>a<#recover>r</#attempt>");
         assertConvertedSame("<#attempt >a<#recover  >r</#attempt   >");
@@ -225,6 +239,9 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
 
         assertConvertedSame("<#ftl outputFormat='XML'><#noAutoEsc><#autoEsc>${x}</#autoEsc></#noAutoEsc>");
         assertConvertedSame("<#ftl outputFormat='XML'><#noAutoEsc ><#autoEsc\t>${x}</#autoEsc\n></#noAutoEsc\r>");
+        assertConverted(
+                "<#ftl outputFormat='XML'><#noAutoEsc>${x}</#noAutoEsc>",
+                "<#ftl output_format='XML'><#noautoesc>${x}</#noautoesc>");
 
         assertConvertedSame("<#compress>x</#compress>");
         assertConvertedSame("<#compress >x</#compress  >");
@@ -283,6 +300,17 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
                 "<#list xs>[<#items as <#--1--> k <#--2-->, <#--3--> v <#--4-->>${h}${v}<#sep>, </#items>]</#list>");
         assertConvertedSame("<#list xs as x><#if x == 0><#break></#if>${x}</#list>");
         assertConvertedSame("<#list xs>[<#items  as x>${x}<#sep>, </#sep >|</#items>]<#else>-</#list>");
+
+        assertConvertedSame("<#noParse><#foo>${1}<#----></#noParse>");
+        assertConverted("<#noParse >t</#noParse >", "<#noparse >t</#noparse >");
+
+        assertConvertedSame("<#assign x = 1><#t>");
+        assertConvertedSame("a<#t>\nb");
+        assertConvertedSame("<#t><#nt><#lt><#rt>");
+        assertConvertedSame("<#t ><#nt ><#lt ><#rt >");
+        assertConverted("<#t><#nt><#lt><#rt>", "<#t /><#nt /><#lt /><#rt />");
+
+        assertConvertedSame("<#ftl stripText='true'>\n\n<#macro m>\nx\n</#macro>\n");
     }
 
     @Test

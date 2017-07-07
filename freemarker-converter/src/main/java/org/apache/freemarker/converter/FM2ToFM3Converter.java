@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import freemarker.core.FM2ASTToFM3SourceConverter;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+import freemarker.template._TemplateAPI;
 
 public class FM2ToFM3Converter extends Converter {
 
@@ -59,6 +60,7 @@ public class FM2ToFM3Converter extends Converter {
         fm2Cfg = new Configuration(Configuration.VERSION_2_3_19 /* To fix ignored initial unknown tags */);
         fm2Cfg.setWhitespaceStripping(false);
         fm2Cfg.setTabSize(1);
+        _TemplateAPI.setPreventStrippings(fm2Cfg, true);
         try {
             fm2Cfg.setSettings(freeMarker2Settings);
         } catch (Exception e) {

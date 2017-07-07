@@ -25,7 +25,7 @@ inAggregateJavadoc = false
 
 dependencies {
     compile project(":freemarker-core")
-    compile "org.freemarker:freemarker:2.3.26-incubating"
+    compile "org.freemarker:freemarker-gae:2.3.27-incubating-SNAPSHOT"
     compile libraries.commonsCli
     compile libraries.commonsLang
     compile libraries.commonsIo
