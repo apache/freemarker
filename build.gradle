@@ -200,8 +200,13 @@ subprojects {
     // TODO Ensure that JUnit tests run on Java 7, except for the modules that were made for later versions.
 
     repositories {
-        // mavenLocal()
+        mavenLocal()
         mavenCentral()
+
+        // This is only needed temporarily (remove before first stable release):
+        maven {
+            url "https://repository.apache.org/content/repositories/snapshots"
+        }
     }
     
     // Dependencies used in all subprojects:
