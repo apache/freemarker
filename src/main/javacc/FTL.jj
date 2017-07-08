@@ -3432,11 +3432,14 @@ TemplateElement Call() :
     Token start, end, id;
     HashMap namedArgs = null;
     ArrayList positionalArgs = null;
-    String macroName= null;
+    Identifier macroName= null;
 }
 {
     start = <CALL>
-    id = <ID> { macroName = id.image; }
+    id = <ID> {
+        macroName = new Identifier(id.image);
+        macroName.setLocation(template, id, id);
+    }
     (
         LOOKAHEAD(<ID><EQUALS>)
         namedArgs = NamedArgs()
@@ -3454,9 +3457,9 @@ TemplateElement Call() :
     {
         UnifiedCall result = null;
         if (positionalArgs != null) {
-            result = new UnifiedCall(new Identifier(macroName), positionalArgs, TemplateElements.EMPTY, null);
+            result = new UnifiedCall(macroName, positionalArgs, TemplateElements.EMPTY, null);
         } else {
-            result = new UnifiedCall(new Identifier(macroName), namedArgs, TemplateElements.EMPTY, null);
+            result = new UnifiedCall(macroName, namedArgs, TemplateElements.EMPTY, null);
         }
         result.legacySyntax = true;
         result.setLocation(template, start, end);
