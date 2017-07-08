@@ -3581,18 +3581,22 @@ TransformBlock Transform() :
 SwitchBlock Switch() :
 {
     SwitchBlock switchBlock;
+    MixedContent ignoredSectionBeforeFirstCase = null;
     Case caseIns;
     Expression switchExp;
     Token start, end;
     boolean defaultFound = false;
 }
 {
-    start = <SWITCH>
-    switchExp = Expression()
-    <DIRECTIVE_END>
+    (
+	    start = <SWITCH>
+	    switchExp = Expression()
+	    <DIRECTIVE_END>
+        [ ignoredSectionBeforeFirstCase = WhitespaceAndComments() ]
+    )
     {
         breakableDirectiveNesting++;
-        switchBlock = new SwitchBlock(switchExp);
+        switchBlock = new SwitchBlock(switchExp, ignoredSectionBeforeFirstCase);
     }
     (
         LOOKAHEAD(2)
@@ -3624,7 +3628,6 @@ Case Case() :
     Token start;
 }
 {
-    [<STATIC_TEXT_WS>]
     (
         start = <CASE> exp = Expression() <DIRECTIVE_END>
         |
@@ -3990,6 +3993,21 @@ TextBlock PCData() :
     }
 }
 
+TextBlock WhitespaceText() :
+{
+    Token t = null, start = null;
+}
+{
+    t = <STATIC_TEXT_WS>
+    {
+        if (stripText && mixedContentNesting == 1 && !preventStrippings) return null;
+
+        TextBlock result = new TextBlock(t.image, false);
+        result.setLocation(template, t, t);
+        return result;
+    }
+}
+
 /**
  * Production for dealing with unparsed content,
  * i.e. what is inside a comment or noparse tag.
@@ -4145,6 +4163,44 @@ TemplateElement FreeMarkerText() :
         }
     )+
     {
+        nodes.setLocation(template, begin, elem);
+        return nodes;
+    }
+}
+
+/**
+ * To be used between tags that in theory has nothing between, such between #switch and the first #case.
+ */
+MixedContent WhitespaceAndComments() :
+{
+    MixedContent nodes = new MixedContent();
+    TemplateElement elem, begin = null;
+}
+{
+    (
+        (
+            elem = WhitespaceText()
+            |
+            elem = Comment()
+        )
+        {
+            if (elem != null) { // not removed by stripText
+	            if (begin == null) {
+	                begin = elem;
+	            }
+	            nodes.addChild(elem);
+            }
+        }
+    )+
+    {
+        if (begin == null // Was is removed by stripText?
+                // Nodes here won't be ever executed anyway, but whitespace stripping should still remove the
+                // lonely TextBlock from the AST, as that's purely source code formatting. If it's not lonely, then
+                // there must be a comment, in which case the generic whitespace stripping algorithm will kick in.
+                || stripWhitespace && !preventStrippings
+                        && nodes.getChildCount() == 1 && nodes.getChild(0) instanceof TextBlock) {
+            return null;
+        }
         nodes.setLocation(template, begin, elem);
         return nodes;
     }

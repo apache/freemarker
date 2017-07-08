@@ -30,13 +30,20 @@ final class SwitchBlock extends TemplateElement {
 
     private Case defaultCase;
     private final Expression searched;
+    private int firstCaseIndex;
 
     /**
      * @param searched the expression to be tested.
      */
-    SwitchBlock(Expression searched) {
+    SwitchBlock(Expression searched, MixedContent ignoredSectionBeforeFirstCase) {
         this.searched = searched;
-        setChildBufferCapacity(4);
+        
+        int ignoredCnt = ignoredSectionBeforeFirstCase != null ? ignoredSectionBeforeFirstCase.getChildCount() : 0;
+        setChildBufferCapacity(ignoredCnt + 4);
+        for (int i = 0; i < ignoredCnt; i++) {
+            addChild(ignoredSectionBeforeFirstCase.getChild(i));
+        }
+        firstCaseIndex = ignoredCnt; // Note that normally postParseCleanup will overwrite this 
     }
 
     /**
@@ -55,7 +62,7 @@ final class SwitchBlock extends TemplateElement {
         boolean processedCase = false;
         int ln = getChildCount();
         try {
-            for (int i = 0; i < ln; i++) {
+            for (int i = firstCaseIndex; i < ln; i++) {
                 Case cas = (Case) getChild(i);
                 boolean processCase = false;
 
@@ -94,8 +101,7 @@ final class SwitchBlock extends TemplateElement {
             buf.append('>');
             int ln = getChildCount();
             for (int i = 0; i < ln; i++) {
-                Case cas = (Case) getChild(i);
-                buf.append(cas.getCanonicalForm());
+                buf.append(getChild(i).getCanonicalForm());
             }
             buf.append("</").append(getNodeTypeSymbol()).append('>');
         }
@@ -127,6 +133,21 @@ final class SwitchBlock extends TemplateElement {
     @Override
     boolean isNestedBlockRepeater() {
         return false;
+    }
+
+    @Override
+    TemplateElement postParseCleanup(boolean stripWhitespace) throws ParseException {
+        TemplateElement result = super.postParseCleanup(stripWhitespace);
+        
+        // The first #case might have shifted in the child array, so we have to find it again:
+        int ln = getChildCount();
+        int i = 0;
+        while (i < ln && !(getChildAt(i) instanceof Case)) {
+            i++;
+        }
+        firstCaseIndex = i;
+        
+        return result;
     }
     
 }

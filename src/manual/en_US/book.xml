@@ -26910,6 +26910,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               and <literal>and</literal> without <literal>\</literal> is not
               recognized for backward compatibility.</para>
             </listitem>
+
+            <listitem>
+              <para>Bug fixed: Comments were not allowed by the parser between
+              the <literal>switch</literal> tag and the first
+              <literal>case</literal> tag.</para>
+            </listitem>
           </itemizedlist>
         </section>
 
