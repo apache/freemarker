@@ -42,6 +42,8 @@ public abstract class Converter {
     public static final String PROPERTY_NAME_DESTINATION_DIRECTORY = "destinationDirectory";
     public static final String CONVERSION_MARKERS_FILE_NAME = "__conversion-markers.txt";
 
+    public static ThreadLocal<FileConversionContext> FILE_CONVERSION_CONTEXT_TLS = new ThreadLocal<>();
+
     private static final Logger LOG = LoggerFactory.getLogger(Converter.class);
 
     private File source;
@@ -148,29 +150,34 @@ public abstract class Converter {
             throw new ConverterException("Failed to open file for reading: " + src, e);
         }
         try {
-            LOG.debug("Converting file: {}", src);
-            FileConversionContext ctx = null;
             try {
-                ctx = new FileConversionContext(srcStream, src, dstDir);
-                convertFile(ctx);
-                storeConversionMarkers(ctx.getConversionMarkers(), ctx);
-            } catch (IOException e) {
-                throw new ConverterException("I/O exception while converting " + _StringUtil.jQuote(src) + ".", e);
+                LOG.debug("Converting file: {}", src);
+                FileConversionContext ctx = null;
+                try {
+                    ctx = new FileConversionContext(srcStream, src, dstDir);
+                    FILE_CONVERSION_CONTEXT_TLS.set(ctx);
+                    convertFile(ctx);
+                    storeConversionMarkers(ctx.getConversionMarkers(), ctx);
+                } catch (IOException e) {
+                    throw new ConverterException("I/O exception while converting " + _StringUtil.jQuote(src) + ".", e);
+                } finally {
+                    try {
+                        if (ctx != null && ctx.outputStream != null) {
+                            ctx.outputStream.close();
+                        }
+                    } catch (IOException e) {
+                        throw new ConverterException("Failed to close destination file", e);
+                    }
+                }
             } finally {
                 try {
-                    if (ctx != null && ctx.outputStream != null) {
-                        ctx.outputStream.close();
-                    }
+                    srcStream.close();
                 } catch (IOException e) {
-                    throw new ConverterException("Failed to close destination file", e);
+                    throw new ConverterException("Failed to close file: " + src, e);
                 }
             }
         } finally {
-            try {
-                srcStream.close();
-            } catch (IOException e) {
-                throw new ConverterException("Failed to close file: " + src, e);
-            }
+            FILE_CONVERSION_CONTEXT_TLS.remove();
         }
     }
 

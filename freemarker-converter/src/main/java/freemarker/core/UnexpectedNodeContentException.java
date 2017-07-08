@@ -25,8 +25,9 @@ import org.apache.freemarker.core.util._StringUtil;
 public class UnexpectedNodeContentException extends ConverterException {
     public UnexpectedNodeContentException(TemplateObject node, String errorMessage, Object msgParam) {
         super("Unexpected AST content for " + _StringUtil.jQuote(node.getNodeTypeSymbol()) + " node (class: "
-                + node.getClass().getName() + ") " + node.getStartLocation() + ":\n"
-                + renderMessage(errorMessage, msgParam));
+                + node.getClass().getName() + "):\n"
+                + renderMessage(errorMessage, msgParam),
+                node.getBeginLine(), node.getBeginColumn());
     }
 
     private static String renderMessage(String errorMessage, Object msgParam) {

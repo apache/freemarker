@@ -30,6 +30,7 @@ import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.apache.freemarker.converter.ConverterException;
 import org.apache.freemarker.converter.FM2ToFM3Converter;
+import org.apache.freemarker.converter.UnconvertableLegacyFeatureException;
 import org.freemarker.converter.test.ConverterTest;
 import org.junit.Test;
 
@@ -308,9 +309,64 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("a<#t>\nb");
         assertConvertedSame("<#t><#nt><#lt><#rt>");
         assertConvertedSame("<#t ><#nt ><#lt ><#rt >");
-        assertConverted("<#t><#nt><#lt><#rt>", "<#t /><#nt /><#lt /><#rt />");
+        assertConvertedSame("<#t><#nt><#lt><#rt>");
 
         assertConvertedSame("<#ftl stripText='true'>\n\n<#macro m>\nx\n</#macro>\n");
+
+        assertConvertedSame("<#setting <#--1--> numberFormat <#--2--> = <#--3--> '0.0' <#--4-->>");
+        assertConverted("<#setting numberFormat='0.0' />", "<#setting number_format='0.0' />");
+        try {
+            convert("x<#setting classic_compatible=true>");
+            fail();
+        } catch (UnconvertableLegacyFeatureException e) {
+            assertEquals(1, (Object) e.getRow());
+            assertEquals(2, (Object) e.getColumn());
+        }
+
+        assertConvertedSame("<#stop>");
+        assertConvertedSame("<#stop />");
+        assertConvertedSame("<#stop 'Reason'>");
+        assertConvertedSame("<#stop <#--1--> 'Reason' <#--2-->>");
+
+        assertConvertedSame(""
+                + "<#switch x>\n"
+                + "  <#--1-->\n"
+                + "  <#case 1>one<#break>\n"
+                + "  <#--2-->\n"
+                + "  <#case 3>one<#break />\n"
+                + "  <#case 3>fall through<#case 4>three<#break>\n"
+                + "  <#default>def\n"
+                + "</#switch>");
+        assertConvertedSame(""
+                + "<#switch x>\n"
+                + "  <#--1-->\n"
+                + "</#switch>");
+        assertConvertedSame("<#switch x> </#switch>");
+        assertConvertedSame("<#switch x><#-- Empty --></#switch>");
+        assertConverted("<#switch x> <#case 2> </#switch>", "<#switch x> <#case 2> </#switch>");
+
+        assertConvertedSame("<#visit node>");
+        assertConvertedSame("<#visit <#--1--> node <#--2-->>");
+        assertConvertedSame("<#visit node using ns>");
+        assertConvertedSame("<#visit node <#--1--> using <#--2--> ns <#--3-->>");
+        assertConvertedSame("<#recurse node>");
+        assertConvertedSame("<#recurse <#--1--> node <#--2-->>");
+        assertConvertedSame("<#recurse node using ns>");
+        assertConvertedSame("<#recurse node <#--1--> using <#--2--> ns <#--3-->>");
+        assertConvertedSame("<#macro m><#fallback></#macro>");
+        assertConvertedSame("<#macro m><#fallback /></#macro>");
+    }
+
+    @Test
+    public void testLegacyDirectives() throws IOException, ConverterException {
+        assertConverted("<#--<#bar>-->", "<#comment><#bar></#comment>");
+        try {
+            convert("x<#comment>--></#comment>");
+            fail();
+        } catch (UnconvertableLegacyFeatureException e) {
+            assertEquals(1, (Object) e.getRow());
+            assertEquals(2, (Object) e.getColumn());
+        }
     }
 
     @Test

@@ -197,12 +197,28 @@ public class GenericConverterTest extends ConverterTest {
         assertTrue(markersFile.exists());
     }
 
+    @Test
+    public void testLocationInException() throws IOException, ConverterException {
+        write(new File(srcDir, "error.txt"), "x[trigger error]", UTF_8);
+
+        ToUpperCaseConverter converter = new ToUpperCaseConverter();
+        converter.setSource(srcDir);
+        converter.setDestinationDirectory(dstDir);
+        try {
+            converter.execute();
+            fail();
+        } catch (ConverterException e) {
+            assertThat(e.getMessage(), containsString("error.txt:1:2: Error message"));
+        }
+    }
+
     public static class ToUpperCaseConverter extends Converter {
 
         @Override
         protected void convertFile(FileConversionContext ctx) throws ConverterException, IOException {
             String content = IOUtils.toString(ctx.getSourceStream(), StandardCharsets.UTF_8);
             ctx.setDestinationFileName(ctx.getSourceFileName() + ".uc");
+
             if (content.contains("[trigger warn]")) {
                 ctx.getConversionMarkers().markInSource(
                         1, 2, ConversionMarkers.Type.WARN, "Warn message");
@@ -211,6 +227,10 @@ public class GenericConverterTest extends ConverterTest {
                 ctx.getConversionMarkers().markInDestination(
                         1, 2, ConversionMarkers.Type.TIP, "Tip message");
             }
+            if (content.contains("[trigger error]")) {
+                throw new ConverterException("Error message", 1, 2);
+            }
+
             IOUtils.write(content.toUpperCase(), ctx.getDestinationStream(), StandardCharsets.UTF_8);
         }
 
