@@ -367,6 +367,15 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
             assertEquals(1, (Object) e.getRow());
             assertEquals(2, (Object) e.getColumn());
         }
+
+        assertConverted("<@m 1, 2, 3/>", "<#call m(1, 2, 3)>");
+        assertConverted("<@m/>", "<#call m()>");
+        assertConverted("<@m/>", "<#call m>");
+        assertConverted("<@m a=1 b=2/>", "<#call m a=1 b=2>");
+
+        assertConverted("<@t a=1 b=2>x</@t>", "<#transform t a=1 b=2>x</#transform>");
+        assertConverted("<@n.t>x</@n.t>", "<#transform n.t>x</#transform>");
+        assertConverted("<@f()>x</@>", "<#transform f()>x</#transform>");
     }
 
     @Test

@@ -406,9 +406,50 @@ public class FM2ASTToFM3SourceConverter {
             printDirRecurse((RecurseNode) node);
         } else if (node instanceof FallbackInstruction) {
             printDirFallback((FallbackInstruction) node);
+        } else if (node instanceof TransformBlock) {
+            printDirTransform((TransformBlock) node);
         } else {
             throw new ConverterException("Unhandled AST TemplateElement class: " + node.getClass().getName());
         }
+    }
+
+    private void printDirTransform(TransformBlock node) throws ConverterException {
+        Expression callee = getParam(node, 0, ParameterRole.CALLEE, Expression.class);
+
+        print(tagBeginChar);
+        print('@');
+        printExp(callee);
+
+        int pos = printWSAndExpComments(getEndPositionExclusive(callee));
+        if (src.charAt(pos) == ';') {
+            pos++;
+            pos = printWSAndExpComments(pos);
+        }
+
+        int paramIdx = 1;
+        while (paramIdx < node.getParameterCount()) {
+            String paramName = getParam(node, paramIdx++, ParameterRole.ARGUMENT_NAME, String.class);
+            print(FTLUtil.escapeIdentifier(paramName));
+            pos = getPositionAfterIdentifier(pos);
+
+            pos = printSeparatorAndWSAndExpComments(pos, "=");
+
+            Expression paramValue = getParam(node, paramIdx++, ParameterRole.ARGUMENT_VALUE, Expression.class);
+            printExp(paramValue);
+
+            pos = printWSAndExpComments(getEndPositionExclusive(paramValue));
+        }
+
+        printStartTagEnd(node, pos, false);
+
+        printChildElements(node);
+
+        print(tagBeginChar);
+        print("/@");
+        if (callee instanceof Identifier || (callee instanceof Dot && ((Dot) callee).onlyHasIdentifiers())) {
+            printExp(callee);
+        }
+        print(tagEndChar);
     }
 
     private void printDirFallback(FallbackInstruction node) throws ConverterException {
@@ -426,7 +467,7 @@ public class FM2ASTToFM3SourceConverter {
     private void printDirVisitLike(TemplateElement node, String tagName) throws ConverterException {
         assertParamCount(node, 2);
 
-        printStartTagPartBeforeParams(node, tagName);
+        printDirStartTagPartBeforeParams(node, tagName);
 
         Expression lastParam;
 
@@ -457,7 +498,7 @@ public class FM2ASTToFM3SourceConverter {
             throw new UnexpectedNodeContentException(node, "Unsupported subtype {}", subtype);
         }
 
-        int pos = printStartTagPartBeforeParams(node, tagName);
+        int pos = printDirStartTagPartBeforeParams(node, tagName);
 
         Expression value = getParam(node, 0, ParameterRole.CONDITION, Expression.class);
         if (value != null) {
@@ -475,7 +516,7 @@ public class FM2ASTToFM3SourceConverter {
     private void printDirSwitch(SwitchBlock node) throws ConverterException {
         assertParamCount(node, 1);
 
-        printStartTagPartBeforeParams(node, "switch");
+        printDirStartTagPartBeforeParams(node, "switch");
 
         Expression param = getOnlyParam(node, ParameterRole.VALUE, Expression.class);
         printExp(param);
@@ -490,7 +531,7 @@ public class FM2ASTToFM3SourceConverter {
     private void printDirStop(StopInstruction node) throws ConverterException {
         assertParamCount(node, 1);
 
-        int pos = printStartTagPartBeforeParams(node, "stop");
+        int pos = printDirStartTagPartBeforeParams(node, "stop");
         Expression message = getParam(node, 0, ParameterRole.MESSAGE, Expression.class);
         if (message != null) {
             printExp(message);
@@ -502,7 +543,7 @@ public class FM2ASTToFM3SourceConverter {
     private void printDirSetting(PropertySetting node) throws ConverterException {
         assertParamCount(node, 2);
 
-        int pos = printStartTagPartBeforeParams(node, "setting");
+        int pos = printDirStartTagPartBeforeParams(node, "setting");
 
         print(FTLUtil.escapeIdentifier(convertSettingName(
                 getParam(node, 0, ParameterRole.ITEM_KEY, String.class),
@@ -552,7 +593,7 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private void printDirNested(BodyInstruction node) throws ConverterException {
-        int pos = printStartTagPartBeforeParams(node, "nested");
+        int pos = printDirStartTagPartBeforeParams(node, "nested");
         int paramCnt = node.getParameterCount();
         for (int paramIdx = 0; paramIdx < paramCnt; paramIdx++) {
             Expression passedValue = getParam(node, paramIdx, ParameterRole.PASSED_VALUE, Expression.class);
@@ -570,7 +611,7 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private void printDirItems(Items node) throws ConverterException {
-        int pos = printStartTagPartBeforeParams(node, "items");
+        int pos = printDirStartTagPartBeforeParams(node, "items");
         pos = printSeparatorAndWSAndExpComments(pos, "as");
 
         int paramCnt = node.getParameterCount();
@@ -616,7 +657,7 @@ public class FM2ASTToFM3SourceConverter {
         int paramCount = node.getParameterCount();
         assertNodeContent(paramCount <= 3, node, "ParameterCount <= 3 was expected");
 
-        int pos = printStartTagPartBeforeParams(node, "list");
+        int pos = printDirStartTagPartBeforeParams(node, "list");
 
         Expression listSource = getParam(node, 0, ParameterRole.LIST_SOURCE, Expression.class);
         // To be future proof, we don't assume that the parameter count of list don't include the null parameters.
@@ -702,7 +743,7 @@ public class FM2ASTToFM3SourceConverter {
     private void printDirInclude(Include node) throws ConverterException {
         assertParamCount(node, 4);
 
-        printStartTagPartBeforeParams(node, "include");
+        printDirStartTagPartBeforeParams(node, "include");
 
         Expression templateName = getParam(node, 0, ParameterRole.TEMPLATE_NAME, Expression.class);
         int templateNameEndPos = getEndPositionExclusive(templateName);
@@ -785,7 +826,7 @@ public class FM2ASTToFM3SourceConverter {
     private void printDirImport(LibraryLoad node) throws ConverterException {
         assertParamCount(node, 2);
 
-        printStartTagPartBeforeParams(node, "import");
+        printDirStartTagPartBeforeParams(node, "import");
 
         Expression templateName = getParam(node, 0, ParameterRole.TEMPLATE_NAME, Expression.class);
         printExp(templateName);
@@ -799,7 +840,7 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private void printDirReturn(ReturnInstruction node) throws ConverterException {
-        printStartTagPartBeforeParams(node, "return");
+        printDirStartTagPartBeforeParams(node, "return");
 
         Expression value = getOnlyParam(node, ParameterRole.VALUE, Expression.class);
         printExp(value);
@@ -819,7 +860,7 @@ public class FM2ASTToFM3SourceConverter {
     private void printDirEscape(EscapeBlock node) throws ConverterException {
         assertParamCount(node, 2);
 
-        int pos = printStartTagPartBeforeParams(node, "escape");
+        int pos = printDirStartTagPartBeforeParams(node, "escape");
 
         pos = getPositionAfterIdentifier(pos);
         print(FTLUtil.escapeIdentifier(getParam(node, 0, ParameterRole.PLACEHOLDER_VARIABLE, String.class)));
@@ -955,7 +996,7 @@ public class FM2ASTToFM3SourceConverter {
 
     private int printDirAssignmentCommonTagTillAssignmentExp(TemplateElement node, int scopeParamIdx)
             throws ConverterException {
-        return printStartTagPartBeforeParams(node, getAssignmentDirTagName(node, scopeParamIdx));
+        return printDirStartTagPartBeforeParams(node, getAssignmentDirTagName(node, scopeParamIdx));
     }
 
     private String getAssignmentDirTagName(TemplateElement node, int scopeParamIdx)
@@ -1011,7 +1052,7 @@ public class FM2ASTToFM3SourceConverter {
             throw new UnexpectedNodeContentException(node, "Unhandled node subtype: {}", subtype);
         }
 
-        int pos = printStartTagPartBeforeParams(node, tagName);
+        int pos = printDirStartTagPartBeforeParams(node, tagName);
 
         String assignedName = getParam(node, 0, ParameterRole.ASSIGNMENT_TARGET, String.class);
         print(FTLUtil.escapeIdentifier(assignedName));
@@ -1085,13 +1126,28 @@ public class FM2ASTToFM3SourceConverter {
         boolean ftlDirMode = printNextCustomDirAsFtlDir;
         printNextCustomDirAsFtlDir = false;
 
+        boolean legacyCallDirMode = src.startsWith("#call" , getStartPosition(node) + 1);
+
         print(tagBeginChar);
         print(ftlDirMode ? '#' : '@');
 
         Expression callee = getParam(node, 0, ParameterRole.CALLEE, Expression.class);
         printExp(callee);
 
-        Expression lastPrintedExp = callee;
+        int calleEnd = getEndPositionExclusive(callee);
+        int lastParamEnd = printWSAndExpComments(calleEnd);
+        boolean legacyCallDirWithParenthesis = false;
+        boolean legacyCallDirNeedsSeparatorSpace = false;
+        if (legacyCallDirMode) {
+            if (src.charAt(lastParamEnd) == '(') {
+                if (calleEnd == lastParamEnd) {
+                    legacyCallDirNeedsSeparatorSpace = true;
+                }
+                lastParamEnd++; // skip '('
+                legacyCallDirWithParenthesis = true;
+            }
+        }
+
         int paramIdx = 1;
         int paramCount = node.getParameterCount();
 
@@ -1099,11 +1155,22 @@ public class FM2ASTToFM3SourceConverter {
         while (paramIdx < paramCount && node.getParameterRole(paramIdx) == ParameterRole.ARGUMENT_VALUE) {
             Expression argValue = getParam(node, paramIdx, ParameterRole.ARGUMENT_VALUE, Expression.class);
 
-            printParameterSeparatorSource(lastPrintedExp, argValue);
+            if (legacyCallDirNeedsSeparatorSpace) {
+                print(' ');
+                legacyCallDirNeedsSeparatorSpace = false;
+            }
+            printSeparatorAndWSAndExpComments(lastParamEnd, ",", true);
             printExp(argValue);
 
-            lastPrintedExp = argValue;
+            lastParamEnd = getEndPositionExclusive(argValue);
             paramIdx++;
+        }
+
+        if (legacyCallDirWithParenthesis) {
+            lastParamEnd = printWSAndExpComments(lastParamEnd);
+            assertNodeContent(src.charAt(lastParamEnd) == ')', node,
+                    "Can't find closing parenthesis of #call(...)");
+            lastParamEnd++; // skip ')'
         }
 
         // Print named arguments:
@@ -1112,7 +1179,7 @@ public class FM2ASTToFM3SourceConverter {
             String paramName = getParam(node, paramIdx, ParameterRole.ARGUMENT_NAME, String.class);
             Expression argValue = getParam(node, paramIdx + 1, ParameterRole.ARGUMENT_VALUE, Expression.class);
 
-            int pos = getEndPositionExclusive(lastPrintedExp);
+            int pos = lastParamEnd;
             pos = printOptionalSeparatorAndWSAndExpComments(pos, ",");
             pos = getPositionAfterIdentifier(pos);
             if (ftlDirMode) {
@@ -1122,12 +1189,12 @@ public class FM2ASTToFM3SourceConverter {
             printSeparatorAndWSAndExpComments(pos, "=");
             printExp(argValue);
 
-            lastPrintedExp = argValue;
+            lastParamEnd = getEndPositionExclusive(argValue);
             paramIdx += 2;
         }
 
         // Print loop variables:
-        int pos = getEndPositionExclusive(lastPrintedExp);
+        int pos = lastParamEnd;
         boolean beforeFirstLoopVar = true;
         while (paramIdx < paramCount) {
             pos = printSeparatorAndWSAndExpComments(pos, beforeFirstLoopVar ? ";" : ",");
@@ -1143,6 +1210,10 @@ public class FM2ASTToFM3SourceConverter {
             paramIdx++;
         }
 
+        pos = printWSAndExpComments(pos);
+        if (legacyCallDirMode) {
+            print('/');
+        }
         int startTagEndPos = printStartTagEnd(node, pos, false);
 
         int elementEndPos = getEndPositionInclusive(node);
@@ -1168,8 +1239,10 @@ public class FM2ASTToFM3SourceConverter {
             printWithConvertedExpComments(src.substring(nameStartPos, elementEndPos));
             print(tagEndChar);
         } else { // We don't have end-tag
-            assertNodeContent(src.charAt(startTagEndPos - 1) == '/', node,
-                    "Expected \"/\" at the end of the start tag");
+            if (!legacyCallDirMode) {
+                assertNodeContent(src.charAt(startTagEndPos - 1) == '/', node,
+                        "Expected \"/\" at the end of the start tag");
+            }
             assertNodeContent(node.getChildCount() == 0, node,
                     "Expected no children");
         }
@@ -1192,7 +1265,7 @@ public class FM2ASTToFM3SourceConverter {
         }
 
         if (conditionExp != null) {
-            printStartTagPartBeforeParams(node, tagName);
+            printDirStartTagPartBeforeParams(node, tagName);
             printNode(conditionExp);
             printStartTagEnd(node, conditionExp, true);
         } else {
@@ -1370,7 +1443,7 @@ public class FM2ASTToFM3SourceConverter {
         int lhoEndExcl = getEndPositionExclusive(lho);
         int opStart = getPositionAfterWSAndExpComments(lhoEndExcl);
         printWithConvertedExpComments(src.substring(lhoEndExcl, opStart));
-        final String fm2Op = readUntilWSOrComment(opStart);
+        final String fm2Op = readUntilWSOrComment(opStart, getStartPosition(rho));
         String fm3Op = operatorMapper.get(fm2Op);
         if (fm3Op == null) {
             throw new UnexpectedNodeContentException(node, "Unhandled operator: {}", fm2Op);
@@ -1684,7 +1757,7 @@ public class FM2ASTToFM3SourceConverter {
      *
      * @return The position in the source after the printed part
      */
-    private int printStartTagPartBeforeParams(TemplateElement node, String fm3TagName)
+    private int printDirStartTagPartBeforeParams(TemplateElement node, String fm3TagName)
             throws ConverterException {
         print(tagBeginChar);
         print('#');
@@ -1704,7 +1777,7 @@ public class FM2ASTToFM3SourceConverter {
 
     private int printDirStartTagNoParams(TemplateElement node, String fm3TagName, boolean removeSlash)
             throws ConverterException {
-        int pos = printStartTagPartBeforeParams(node, fm3TagName);
+        int pos = printDirStartTagPartBeforeParams(node, fm3TagName);
         printStartTagEnd(node, pos, removeSlash);
         return pos + 1;
     }
@@ -2166,9 +2239,9 @@ public class FM2ASTToFM3SourceConverter {
         return src.substring(startPos, getPositionAfterIdentifier(startPos));
     }
 
-    private String readUntilWSOrComment(int startPos) throws ConverterException {
+    private String readUntilWSOrComment(int startPos, int endPosition) throws ConverterException {
         int pos = startPos;
-        while (pos < src.length() && !Character.isWhitespace(src.charAt(pos)) && !isExpCommentStart(pos)) {
+        while (pos < endPosition && !Character.isWhitespace(src.charAt(pos)) && !isExpCommentStart(pos)) {
             pos++;
         }
         return src.substring(startPos, pos);
