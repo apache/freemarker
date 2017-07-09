@@ -24,20 +24,37 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.freemarker.core.util._NullArgumentException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import freemarker.core.FM2ASTToFM3SourceConverter;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template._TemplateAPI;
 
+/**
+ * Converts FreeMarker 2 templates to FreeMarker 3 templates, as far as it's possible automatically. While the output
+ * will contain syntactically correct FreeMarker 3 templates, the templates will have to be reviewed by humans, as
+ * due to the semantic differences (such as a different treatment of {@code null}).
+ * <p>
+ * This is work in progress... new conversion are mostly only added when the syntactical change was
+ * already implemented. Current conversions:
+ * <ul>
+ *     <li>All FreeMarker defined names are converted camel case
+ *     <li>Renamed setting names in the {@code ftl} heading and in {@code #setting} tags are replaced with the new name.
+ *     <li>Renamed built-in variables are replaced with the new name
+ *     <li>From {@code #else}, {@code #elseif} and {@code #recover} tags that end with {@code "/>"} or {@code "/]"} the
+ *         "/" characters is removed (as it's now illegal)
+ *     <li>{@code #else}, {@code #elseif} and {@code #recover} tags that end with {@code "/>"} or {@code "/]"} the
+ *         "/" characters is removed (as it's now illegal)
+ *     <li>The last tag in {@code <#attempt>...<#recover>...</#recover>} is replaced with {@code </#attempt>}
+ * </ul>
+ */
 public class FM2ToFM3Converter extends Converter {
 
-    public static final Logger LOG = LoggerFactory.getLogger(Converter.class);
+    private static final Pattern DEFAULT_INCLUDE = Pattern.compile("(?i).*\\.(fm|ftl(x|h)?)");
 
     private static final Map<String, String> DEFAULT_REPLACED_FILE_EXTENSIONS;
     static {
@@ -55,16 +72,23 @@ public class FM2ToFM3Converter extends Converter {
     private Configuration fm2Cfg;
 
     @Override
+    protected Pattern getDefaultInclude() {
+        return DEFAULT_INCLUDE;
+    }
+
+    @Override
     protected void prepare() throws ConverterException {
         super.prepare();
         fm2Cfg = new Configuration(Configuration.VERSION_2_3_19 /* To fix ignored initial unknown tags */);
         fm2Cfg.setWhitespaceStripping(false);
         fm2Cfg.setTabSize(1);
         _TemplateAPI.setPreventStrippings(fm2Cfg, true);
-        try {
-            fm2Cfg.setSettings(freeMarker2Settings);
-        } catch (Exception e) {
-            throw new ConverterException("Error while configuring FreeMarker 2", e);
+        if (freeMarker2Settings != null) {
+            try {
+                fm2Cfg.setSettings(freeMarker2Settings);
+            } catch (Exception e) {
+                throw new ConverterException("Error while configuring FreeMarker 2", e);
+            }
         }
     }
 

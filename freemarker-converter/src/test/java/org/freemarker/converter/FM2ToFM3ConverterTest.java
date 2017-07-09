@@ -426,7 +426,27 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
     }
 
     @Test
-    public void testFileExtensions() throws IOException, ConverterException {
+    public void testDefaultIncludes() throws IOException, ConverterException {
+        FileUtils.write(new File(srcDir, "t.txt"), "x", UTF_8);
+        FileUtils.write(new File(srcDir, "t.fm"), "x", UTF_8);
+        FileUtils.write(new File(srcDir, "t.ftl"), "x", UTF_8);
+        FileUtils.write(new File(srcDir, "t.ftlfoo"), "x", UTF_8);
+        FileUtils.write(new File(srcDir, "U.FTLH"), "x", UTF_8);
+
+        FM2ToFM3Converter converter = new FM2ToFM3Converter();
+        converter.setSource(srcDir);
+        converter.setDestinationDirectory(dstDir);
+        converter.execute();
+
+        assertFalse(new File(dstDir, "t.txt").exists());
+        assertTrue(new File(dstDir, "t.fm3").exists());
+        assertTrue(new File(dstDir, "t.fm3").exists());
+        assertFalse(new File(dstDir, "t.ftlfoo").exists());
+        assertTrue(new File(dstDir, "U.fm3h").exists());
+    }
+
+    @Test
+    public void testFileExtensionConversion() throws IOException, ConverterException {
         FileUtils.write(new File(srcDir, "t1"), "x", UTF_8);
         FileUtils.write(new File(srcDir, "t2.foo"), "x", UTF_8);
         FileUtils.write(new File(srcDir, "t3.ftl"), "x", UTF_8);
@@ -441,10 +461,7 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         FM2ToFM3Converter converter = new FM2ToFM3Converter();
         converter.setSource(srcDir);
         converter.setDestinationDirectory(dstDir);
-        Properties properties = new Properties();
-        properties.setProperty(Configuration.DEFAULT_ENCODING_KEY, UTF_8.name());
-        converter.setFreeMarker2Settings(properties);
-
+        converter.setInclude(null);
         converter.execute();
 
         assertTrue(new File(dstDir, "t1").exists());
@@ -496,6 +513,7 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         FM2ToFM3Converter converter = new FM2ToFM3Converter();
         converter.setSource(srcFile);
         converter.setDestinationDirectory(dstDir);
+        converter.setInclude(null);
         Properties properties = new Properties();
         properties.setProperty(Configuration.DEFAULT_ENCODING_KEY, UTF_8.name());
         if (squareBracketTagSyntax) {

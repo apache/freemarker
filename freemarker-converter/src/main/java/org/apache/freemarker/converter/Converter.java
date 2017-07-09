@@ -27,7 +27,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -36,16 +38,26 @@ import org.apache.freemarker.core.util._StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Abstract superclass for converters. A converter converts the files in the source directory (and in its
+ * subdirectories, recursively), or of a single source file, and writes the converted files into the the destination
+ * directory.
+ */
 public abstract class Converter {
 
+    public static final String PROPERTY_NAME_INCLUDE = "include";
+    public static final String PROPERTY_NAME_EXCLUDE = "exclude";
     public static final String PROPERTY_NAME_SOURCE = "source";
     public static final String PROPERTY_NAME_DESTINATION_DIRECTORY = "destinationDirectory";
+
     public static final String CONVERSION_MARKERS_FILE_NAME = "__conversion-markers.txt";
 
     public static ThreadLocal<FileConversionContext> FILE_CONVERSION_CONTEXT_TLS = new ThreadLocal<>();
 
     private static final Logger LOG = LoggerFactory.getLogger(Converter.class);
 
+    private Pattern include;
+    private Pattern exclude;
     private File source;
     private File destinationDirectory;
     private boolean createDestinationDirectory;
@@ -54,30 +66,106 @@ public abstract class Converter {
     private Set<File> directoriesKnownToExist = new HashSet<>();
     private Writer conversionMarkersWriter;
 
+    public Converter() {
+        include = getDefaultInclude();
+    }
+
+    /**
+     * Getter pair of {@link #setSource(File)}.
+     */
     public File getSource() {
         return source;
     }
 
+    /**
+     * Sets the directory that contains the files to be converted (subdirectories will be also searched, and so on
+     * recursively), or the single file that should be converted. Can't be {@code null}.
+     */
     public void setSource(File source) {
+        _NullArgumentException.check("source", source);
         this.source = source != null ? source.getAbsoluteFile() : null;
     }
 
+    /**
+     * Getter pair of {@link #setDestinationDirectory(File)}.
+     */
     public File getDestinationDirectory() {
         return destinationDirectory;
     }
 
+    /**
+     * Sets the directory into which the converted files will be written. Unless
+     * {@linkplain #setCreateDestinationDirectory(boolean) createDestinationDirectory property} was set to {@code true},
+     * the directory must already exits.
+     * <p>
+     * Already existing files will be overwritten without warning. Already existing files and subdirectories for which
+     * there's no clashing output will be left as is.
+     */
     public void setDestinationDirectory(File destinationDirectory) {
         this.destinationDirectory = destinationDirectory != null ? destinationDirectory.getAbsoluteFile() : null;
     }
 
+    /**
+     * Getter pair of {@link #setCreateDestinationDirectory(boolean)}.
+     */
     public boolean isCreateDestinationDirectory() {
         return createDestinationDirectory;
     }
 
+    /**
+     * Sets whether the destination directory should be created if it doesn't exist. Defaults to {@code false}.
+     * Subdirectories inside the destination directory will be always automatically created, regardless of this
+     * property.
+     */
     public void setCreateDestinationDirectory(boolean createDestinationDirectory) {
         this.createDestinationDirectory = createDestinationDirectory;
     }
 
+    /**
+     * Getter pair of {@link #setInclude(Pattern)}.
+     */
+    public Pattern getInclude() {
+        return include;
+    }
+
+    /**
+     * Sets what subset of the files selected by the {@linkplain #setSource(File) source property} will be
+     * processed (unless they are excluded by the {@linkplain #setExclude(Pattern) exclude} property.)
+     * Default is {@link #getDefaultInclude()}.
+     *
+     * @param include Matched against the source directory relative path. In the matched path, backslashes are
+     *                replaced with slash. If {@code null}, then matches everything.
+     */
+    public void setInclude(Pattern include) {
+        this.include = include;
+    }
+
+    /**
+     * Returns the default value of the {@linkplain #setInclude(Pattern) include property}.
+     */
+    protected abstract Pattern getDefaultInclude();
+
+    /**
+     * Getter pair of {@link #setExclude(Pattern)}.
+     */
+    public Pattern getExclude() {
+        return exclude;
+    }
+
+    /**
+     * Sets what subset of the files selected by the {@linkplain #setSource(File) source property} will not be
+     * processed. Default is {@code null}.
+     *
+     * @param exclude Matched against the source directory relative path. In the matched path, backslashes are
+     *                replaced with slash. If {@code null}, then matches noting (nothing will be excluded).
+     */
+    public void setExclude(Pattern exclude) {
+        this.exclude = exclude;
+    }
+
+    /**
+     * Executes the file conversions.
+     */
     public final void execute() throws ConverterException {
         if (executed) {
             throw new IllegalStateException("This converted was already invoked once.");
@@ -143,6 +231,10 @@ public abstract class Converter {
     }
 
     private void convertFile(File src, File dstDir) throws ConverterException {
+        if (!isToBeProcessed(src)) {
+            return;
+        }
+
         InputStream srcStream;
         try {
             srcStream = new FileInputStream(src);
@@ -179,6 +271,30 @@ public abstract class Converter {
         } finally {
             FILE_CONVERSION_CONTEXT_TLS.remove();
         }
+    }
+
+    private boolean isToBeProcessed(File src) {
+        String relSrcPath;
+        File source = getSource();
+        if (source.isFile()) {
+            relSrcPath = source.getName();
+        } else {
+            relSrcPath = pathToStringWithSlashes(source.toPath().relativize(src.toPath()).normalize());
+        }
+
+        return (include == null || include.matcher(relSrcPath).matches())
+                && (exclude == null || !exclude.matcher(relSrcPath).matches());
+    }
+
+    private String pathToStringWithSlashes(Path path) {
+        StringBuilder sb = new StringBuilder();
+        for (Iterator<Path> it = path.iterator(); it.hasNext();) {
+            if (sb.length() != 0) {
+                sb.append('/');
+            }
+            sb.append(it.next());
+        }
+        return sb.toString();
     }
 
     private void storeConversionMarkers(ConversionMarkers conversionMarkers, FileConversionContext ctx)

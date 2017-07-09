@@ -27,6 +27,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.freemarker.converter.ConversionMarkers;
@@ -212,7 +213,45 @@ public class GenericConverterTest extends ConverterTest {
         }
     }
 
+    @Test
+    public void testIncludeAndExclude() throws IOException, ConverterException {
+        write(new File(srcDir, "included.txt"), "x", UTF_8);
+        write(new File(srcDir, "not-included.doc"), "x", UTF_8);
+        write(new File(srcDir, "~excluded.txt"), "x", UTF_8);
+
+        ToUpperCaseConverter converter = new ToUpperCaseConverter();
+        converter.setSource(srcDir);
+        converter.setDestinationDirectory(dstDir);
+        converter.setInclude(Pattern.compile("(?i).*\\.txt"));
+        converter.setExclude(Pattern.compile("(.*/)?~[^/]*"));
+        converter.execute();
+
+        assertTrue(new File(dstDir, "included.txt.uc").exists());
+        assertFalse(new File(dstDir, "not-included.doc.uc").exists());
+        assertFalse(new File(dstDir, "~excluded.txt.uc").exists());
+    }
+
+    @Test
+    public void testIncludeAndExclude2() throws IOException, ConverterException {
+        write(new File(srcDir, "included.txt"), "x", UTF_8);
+        write(new File(srcDir, "included2.doc"), "x", UTF_8);
+
+        ToUpperCaseConverter converter = new ToUpperCaseConverter();
+        converter.setSource(srcDir);
+        converter.setDestinationDirectory(dstDir);
+        converter.setInclude(null);
+        converter.execute();
+
+        assertTrue(new File(dstDir, "included.txt.uc").exists());
+        assertTrue(new File(dstDir, "included2.doc.uc").exists());
+    }
+
     public static class ToUpperCaseConverter extends Converter {
+
+        @Override
+        protected Pattern getDefaultInclude() {
+            return Pattern.compile("(?i).*\\.txt");
+        }
 
         @Override
         protected void convertFile(FileConversionContext ctx) throws ConverterException, IOException {
