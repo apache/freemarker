@@ -71,12 +71,6 @@
   "34"
   "4"
 
-  "12default45"
-  "2default45"
-  "default"
-  "45"
-  "5"
-
 
 </body>
 </html>

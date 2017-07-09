@@ -297,3 +297,4 @@ the FreeMarer 3 changelog here:
 - You can't close #attempt/#recover with `</#recover>` anymore, only with `<#attempt>`. This was the
   standard form in FM2 as well, and is consistent with how #if/#else works. (The template converter
   tool does this conversion.)
+- Inside a #switch, #case can't be after #default anymore (this is actually a bug in FM2)

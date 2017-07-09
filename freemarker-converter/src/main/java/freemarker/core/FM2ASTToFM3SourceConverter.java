@@ -109,7 +109,7 @@ public class FM2ASTToFM3SourceConverter {
 
         String outAsString = out.toString();
         try {
-            //!!T new org.apache.freemarker.core.Template(null, s, fm3Config);
+            new org.apache.freemarker.core.Template(null, outAsString, fm3Config);
         } catch (Exception e) {
             throw new ConverterException(
                     "The result of the conversion wasn't valid FreeMarker 3 template; see cause exception", e);
@@ -522,6 +522,21 @@ public class FM2ASTToFM3SourceConverter {
         printExp(param);
 
         printStartTagEnd(node, param, false);
+
+        // FM2 have allowed #case after #default, FM3 doesn't:
+        boolean pastDefault = false;
+        for (int i = 0; i < node.getChildCount(); i++) {
+            TemplateElement child = node.getChild(i);
+            if (child instanceof Case) {
+                if (((Case) child).condition == null) {
+                    pastDefault = true;
+                } else if (pastDefault) {
+                    throw new UnconvertableLegacyFeatureException("The \"case\" directive can't be after "
+                            + "the \"default\" directive since FreeMarker 3. You need to rearrange this \"switch\".",
+                            child.getBeginLine(), child.getBeginColumn());
+                }
+            }
+        }
 
         printChildElements(node);
 

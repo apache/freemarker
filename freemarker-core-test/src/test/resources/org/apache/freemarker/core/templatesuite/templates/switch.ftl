@@ -130,13 +130,9 @@
   "<#switch x><#case 1>1<#case 2>2<#case 3>3<#case 4>4</#switch>"
 </#list>
 
-<#-- Legacy parser bug: #default might not be the last, but it doesn't fall through if called directly -->
-<#list [1, 2, 3, 4, 5] as x>
-  "<#switch x><#case 1>1<#case 2>2<#default>default<#case 4>4<#case 5>5</#switch>"
-</#list>
-
-<#-- two #default-s are parsing error -->
+<#-- Parsing errors -->
 <@assertFails message="can only have one default"><@"<#switch 1><#case 1><#default><#default></#switch>"?interpret /></@>
+<@assertFails message="after the \"default\""><@"<#switch 1><#default><#case 1></#switch>"?interpret /></@>
 
 </body>
 </html>

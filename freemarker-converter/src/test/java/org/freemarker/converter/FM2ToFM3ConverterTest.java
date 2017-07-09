@@ -344,6 +344,13 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("<#switch x> </#switch>");
         assertConvertedSame("<#switch x><#-- Empty --></#switch>");
         assertConverted("<#switch x> <#case 2> </#switch>", "<#switch x> <#case 2> </#switch>");
+        try {
+            convert("<#switch x><#default><#case 1></#switch>");
+            fail();
+        } catch (UnconvertableLegacyFeatureException e) {
+            assertEquals(1, (Object) e.getRow());
+            assertEquals(22, (Object) e.getColumn());
+        }
 
         assertConvertedSame("<#visit node>");
         assertConvertedSame("<#visit <#--1--> node <#--2-->>");

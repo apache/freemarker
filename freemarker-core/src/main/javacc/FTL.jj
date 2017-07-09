@@ -3199,7 +3199,7 @@ ASTDirSwitch Switch() :
 {
     ASTDirSwitch switchBlock;
     ASTImplicitParent ignoredSectionBeforeFirstCase = null;
-    ASTDirCase caseIns;
+    ASTDirCase caseOrDefault;
     ASTExpression switchExp;
     Token start, end;
     boolean defaultFound = false;
@@ -3217,16 +3217,20 @@ ASTDirSwitch Switch() :
     }
     (
         LOOKAHEAD(2)
-        caseIns = ASTDirCase()
+        caseOrDefault = ASTDirCase()
         {
-            if (caseIns.condition == null) {
+            if (caseOrDefault.condition == null) {
                 if (defaultFound) {
                     throw new ParseException(
-                    "You can only have one default case in a switch statement", template, start);
+                            "You can only have one default case in a switch statement", template, start);
                 }
                 defaultFound = true;
+            } else if (defaultFound) {
+                    throw new ParseException(
+                            "You can't have a \"case\" directive after the \"default\" directive",
+                            caseOrDefault);
             }
-            switchBlock.addCase(caseIns);
+            switchBlock.addCase(caseOrDefault);
         }
     )*
     [<STATIC_TEXT_WS>]
