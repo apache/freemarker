@@ -3198,18 +3198,22 @@ ASTStaticText NoParse() :
 ASTDirSwitch Switch() :
 {
     ASTDirSwitch switchBlock;
+    ASTImplicitParent ignoredSectionBeforeFirstCase = null;
     ASTDirCase caseIns;
     ASTExpression switchExp;
     Token start, end;
     boolean defaultFound = false;
 }
 {
-    start = <SWITCH>
-    switchExp = ASTExpression()
-    <DIRECTIVE_END>
+    (
+	    start = <SWITCH>
+	    switchExp = ASTExpression()
+	    <DIRECTIVE_END>
+        [ ignoredSectionBeforeFirstCase = WhitespaceAndComments() ]
+    )
     {
         breakableDirectiveNesting++;
-        switchBlock = new ASTDirSwitch(switchExp);
+        switchBlock = new ASTDirSwitch(switchExp, ignoredSectionBeforeFirstCase);
     }
     (
         LOOKAHEAD(2)
@@ -3241,7 +3245,6 @@ ASTDirCase ASTDirCase() :
     Token start;
 }
 {
-    [<STATIC_TEXT_WS>]
     (
         start = <CASE> exp = ASTExpression() <DIRECTIVE_END>
         |
@@ -3601,6 +3604,21 @@ ASTStaticText PCData() :
     }
 }
 
+ASTStaticText WhitespaceText() :
+{
+    Token t = null, start = null;
+}
+{
+    t = <STATIC_TEXT_WS>
+    {
+        if (stripText && mixedContentNesting == 1) return null;
+
+        ASTStaticText result = new ASTStaticText(t.image, false);
+        result.setLocation(template, t, t);
+        return result;
+    }
+}
+
 /**
  * Production for dealing with unparsed content,
  * i.e. what is inside a comment or noparse tag.
@@ -3748,6 +3766,44 @@ ASTElement FreeMarkerText() :
         }
     )+
     {
+        nodes.setLocation(template, begin, elem);
+        return nodes;
+    }
+}
+
+/**
+ * To be used between tags that in theory has nothing between, such between #switch and the first #case.
+ */
+ASTImplicitParent WhitespaceAndComments() :
+{
+    ASTImplicitParent nodes = new ASTImplicitParent();
+    ASTElement elem, begin = null;
+}
+{
+    (
+        (
+            elem = WhitespaceText()
+            |
+            elem = Comment()
+        )
+        {
+            if (elem != null) { // not removed by stripText
+	            if (begin == null) {
+	                begin = elem;
+	            }
+	            nodes.addChild(elem);
+            }
+        }
+    )+
+    {
+        if (begin == null // Was is removed by stripText?
+                // Nodes here won't be ever executed anyway, but whitespace stripping should still remove the
+                // lonely ASTStaticText from the AST, as that's purely source code formatting. If it's not lonely, then
+                // there must be a comment, in which case the generic whitespace stripping algorithm will kick in.
+                || stripWhitespace
+                        && nodes.getChildCount() == 1 && nodes.getChild(0) instanceof ASTStaticText) {
+            return null;
+        }
         nodes.setLocation(template, begin, elem);
         return nodes;
     }

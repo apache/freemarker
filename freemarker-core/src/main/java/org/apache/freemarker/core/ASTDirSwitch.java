@@ -28,13 +28,20 @@ final class ASTDirSwitch extends ASTDirective {
 
     private ASTDirCase defaultCase;
     private final ASTExpression searched;
+    private int firstCaseIndex;
 
     /**
      * @param searched the expression to be tested.
      */
-    ASTDirSwitch(ASTExpression searched) {
+    ASTDirSwitch(ASTExpression searched, ASTImplicitParent ignoredSectionBeforeFirstCase) {
         this.searched = searched;
-        setChildBufferCapacity(4);
+
+        int ignoredCnt = ignoredSectionBeforeFirstCase != null ? ignoredSectionBeforeFirstCase.getChildCount() : 0;
+        setChildBufferCapacity(ignoredCnt + 4);
+        for (int i = 0; i < ignoredCnt; i++) {
+            addChild(ignoredSectionBeforeFirstCase.getChild(i));
+        }
+        firstCaseIndex = ignoredCnt; // Note that normally postParseCleanup will overwrite this
     }
 
     void addCase(ASTDirCase cas) {
@@ -50,7 +57,7 @@ final class ASTDirSwitch extends ASTDirective {
         boolean processedCase = false;
         int ln = getChildCount();
         try {
-            for (int i = 0; i < ln; i++) {
+            for (int i = firstCaseIndex; i < ln; i++) {
                 ASTDirCase cas = (ASTDirCase) getChild(i);
                 boolean processCase = false;
 
@@ -91,8 +98,7 @@ final class ASTDirSwitch extends ASTDirective {
             buf.append('>');
             int ln = getChildCount();
             for (int i = 0; i < ln; i++) {
-                ASTDirCase cas = (ASTDirCase) getChild(i);
-                buf.append(cas.getCanonicalForm());
+                buf.append(getChild(i).getCanonicalForm());
             }
             buf.append("</").append(getASTNodeDescriptor()).append('>');
         }
@@ -125,5 +131,20 @@ final class ASTDirSwitch extends ASTDirective {
     boolean isNestedBlockRepeater() {
         return false;
     }
-    
+
+    @Override
+    ASTElement postParseCleanup(boolean stripWhitespace) throws ParseException {
+        ASTElement result = super.postParseCleanup(stripWhitespace);
+
+        // The first #case might have shifted in the child array, so we have to find it again:
+        int ln = getChildCount();
+        int i = 0;
+        while (i < ln && !(getChild(i) instanceof ASTDirCase)) {
+            i++;
+        }
+        firstCaseIndex = i;
+
+        return result;
+    }
+
 }
