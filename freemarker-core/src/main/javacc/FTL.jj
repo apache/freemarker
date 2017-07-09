@@ -805,8 +805,6 @@ TOKEN:
     |
     <END_SEP : <END_TAG> "sep" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <END_RECOVER : <END_TAG> "recover" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
-    |
     <END_ATTEMPT : <END_TAG> "attempt" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
     <END_LOCAL : <END_TAG> "local" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
