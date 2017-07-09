@@ -37,14 +37,15 @@ public class GettingStartedExample {
     
         /* Create the configuration singleton (using builder pattern) */
         Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
-                .templateLoader(new ClassTemplateLoader(GettingStartedExample.class, ""))
+                .templateLoader(new ClassTemplateLoader(
+                        GettingStartedExample.class, ""))
                 .build();
 
         /* ------------------------------------------------------------------------ */    
         /* You usually do these for MULTIPLE TIMES in the application life-cycle:   */    
 
         /* Create a data-model */
-        Map<String, Object> root = new HashMap();
+        Map<String, Object> root = new HashMap<>();
         root.put("user", "Big Joe");
         Product latest = new Product();
         latest.setUrl("products/greenmouse.html");
