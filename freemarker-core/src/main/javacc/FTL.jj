@@ -833,7 +833,7 @@ TOKEN:
     |
     <END_SWITCH : <END_TAG> "switch" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <ELSE : <START_TAG> "else" <CLOSE_TAG2>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
+    <ELSE : <START_TAG> "else" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
     <BREAK : <START_TAG> "break" <CLOSE_TAG2>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
@@ -2225,7 +2225,7 @@ ASTElement If() :
     (
         t = <ELSE_IF>
         condition = ASTExpression()
-        end = LooseDirectiveEnd()
+        end = <DIRECTIVE_END>
         children = MixedContentElements()
         {
             cblock = new ASTDirIfOrElseOrElseIf(condition, children, ASTDirIfOrElseOrElseIf.TYPE_ELSE_IF);
