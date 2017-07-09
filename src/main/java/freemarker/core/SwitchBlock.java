@@ -142,7 +142,7 @@ final class SwitchBlock extends TemplateElement {
         // The first #case might have shifted in the child array, so we have to find it again:
         int ln = getChildCount();
         int i = 0;
-        while (i < ln && !(getChildAt(i) instanceof Case)) {
+        while (i < ln && !(getChild(i) instanceof Case)) {
             i++;
         }
         firstCaseIndex = i;

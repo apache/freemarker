@@ -97,6 +97,7 @@
     <#case 3>
       3
       <#switch x*2>
+        <#--  Comment is allowed here since 2.3.27 -->
         <#case 1>
           i1
           <#break>
@@ -121,6 +122,8 @@
 [<#switch 213>
   <#case 1>sadas
 </#switch>]
+
+[<#switch 213></#switch>]
 
 <#-- Fall-through -->
 <#list [ 0, 1, 2, 3, 4 ] as x>
