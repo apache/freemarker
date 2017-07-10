@@ -36,7 +36,7 @@ import freemarker.template._TemplateAPI;
 
 /**
  * Converts FreeMarker 2 templates to FreeMarker 3 templates, as far as it's possible automatically. While the output
- * will contain syntactically correct FreeMarker 3 templates, the templates will have to be reviewed by humans, as
+ * will contain syntactically correct FreeMarker 3 templates, the templates will have to be reviewed by humans,
  * due to the semantic differences (such as a different treatment of {@code null}).
  * <p>
  * This is work in progress... new conversion are mostly only added when the syntactical change was

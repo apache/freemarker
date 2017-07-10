@@ -65,6 +65,7 @@ public abstract class Converter {
     private boolean executed;
     private Set<File> directoriesKnownToExist = new HashSet<>();
     private Writer conversionMarkersWriter;
+    private int convertedFileCount;
 
     public Converter() {
         include = getDefaultInclude();
@@ -84,6 +85,10 @@ public abstract class Converter {
     public void setSource(File source) {
         _NullArgumentException.check("source", source);
         this.source = source != null ? source.getAbsoluteFile() : null;
+    }
+
+    public int getConvertedFileCount() {
+        return convertedFileCount;
     }
 
     /**
@@ -250,6 +255,7 @@ public abstract class Converter {
                     FILE_CONVERSION_CONTEXT_TLS.set(ctx);
                     convertFile(ctx);
                     storeConversionMarkers(ctx.getConversionMarkers(), ctx);
+                    convertedFileCount++;
                 } catch (IOException e) {
                     throw new ConverterException("I/O exception while converting " + _StringUtil.jQuote(src) + ".", e);
                 } finally {
