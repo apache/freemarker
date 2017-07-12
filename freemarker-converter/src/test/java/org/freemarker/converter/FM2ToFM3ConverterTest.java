@@ -25,7 +25,9 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.freemarker.converter.ConverterException;
@@ -33,6 +35,8 @@ import org.apache.freemarker.converter.FM2ToFM3Converter;
 import org.apache.freemarker.converter.UnconvertableLegacyFeatureException;
 import org.freemarker.converter.test.ConverterTest;
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableSet;
 
 import freemarker.template.Configuration;
 
@@ -198,6 +202,7 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("<#macro m><#nested x + 1 2 3></#macro>");
         assertConvertedSame("<#macro m><#nested <#--1--> x + 1 <#--2--> 2 <#--3-->></#macro>");
         assertConverted("<#macro m><#nested x></#macro>", "<#macro m><#nested x /></#macro>");
+        assertConvertedSame("<#macro m><#return><#return ></#macro>");
 
         assertConvertedSame("<#assign x = 1>");
         assertConvertedSame("<#global x = 1>");
@@ -213,6 +218,7 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("<#assign <#--0-->x = 1<#--1-->,<#--2-->y++<#--3-->z/=2<#--4-->>");
         // Only works with " now, as it doesn't keep the literal kind. Later we will escape differently anyway:
         assertConvertedSame("<#assign \"x y\" = 1>");
+        assertConvertedSame("<#assign x = 1/>");
 
         assertConvertedSame("<#assign x>t</#assign>");
         assertConvertedSame("<#assign x in ns>t</#assign>");
@@ -362,6 +368,8 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("<#recurse node <#--1--> using <#--2--> ns <#--3-->>");
         assertConvertedSame("<#macro m><#fallback></#macro>");
         assertConvertedSame("<#macro m><#fallback /></#macro>");
+
+        assertConvertedSame("<#outputFormat 'HTML'>${x}</#outputFormat>");
     }
 
     @Test
@@ -412,6 +420,35 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConverted("${s?upperCase} ${s?leftPad(123)}", "${s?upper_case} ${s?left_pad(123)}");
         assertConverted("${s?html}", "${s?web_safe}");
         assertConvertedSame("${s  ?   upperCase\t?\t\tleftPad(5)}");
+        assertConvertedSame("${s <#--1--> ? <#--2--> upperCase}");
+        // Runtime params:
+        assertConvertedSame("${s?leftPad(9)}");
+        // Parse time params:
+        assertConvertedSame("${s?then(1, 2)}");
+        assertConvertedSame("${s?switch(1, 'one', 2, 'two', 'more')}");
+        assertConvertedSame("${s?then <#--1--> ( <#--2--> 1 <#--3-->, <#--5--> 2 <#--6--> )}");
+    }
+
+    /** Tests if the names of all current FM2 built-ins can be converted to FM3 names. */
+    @Test
+    public void testBuiltInNameConversion()
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException,
+            ConverterException {
+        Configuration cfg = new Configuration(Configuration.getVersion());
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("<#outputformat 'HTML'><#list xs as x>");
+        for (String builtInName : cfg.getSupportedBuiltInNames(Configuration.LEGACY_NAMING_CONVENTION)) {
+            if (!LEGACY_ESCAPING_BUTILT_INS.contains(builtInName)) {
+                sb.append("${x?").append(builtInName).append("(1, 2)").append("}");
+            }
+        }
+        sb.append("</#list></#outputformat>");
+        for (String builtInName : LEGACY_ESCAPING_BUTILT_INS) {
+            sb.append("${x?").append(builtInName).append("}");
+        }
+
+        convert(sb.toString());
     }
 
     @Test
@@ -475,6 +512,9 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertTrue(new File(dstDir, "t9.fm3").exists());
         assertTrue(new File(dstDir, "t10.Foo3").exists());
     }
+
+    private static final Set<String> LEGACY_ESCAPING_BUTILT_INS = ImmutableSet.of(
+            "html", "xml", "xhtml", "rtf", "web_safe");
 
     private void assertConvertedSame(String ftl2) throws IOException, ConverterException {
         assertConverted(ftl2, ftl2);

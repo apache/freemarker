@@ -179,7 +179,10 @@ public abstract class Converter {
 
         prepare();
         LOG.debug("Source: {}", source);
-        LOG.debug("Destination directory: {}", destinationDirectory);
+        LOG.debug("DestinationDirectory: {}", destinationDirectory);
+        LOG.debug("CreateDestinationDirectory: {}", createDestinationDirectory);
+        LOG.debug("Include: {}", include);
+        LOG.debug("Exclude: {}", exclude);
 
         // Just so that no confusing marker file remains there:
         File markerFile = new File(destinationDirectory, CONVERSION_MARKERS_FILE_NAME);

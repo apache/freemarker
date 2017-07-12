@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -126,6 +128,12 @@ public class FM2ToFM3ConverterCLI {
                 if (cl.hasOption(CREATE_DESTINATION_OPTION)) {
                     converter.setCreateDestinationDirectory(true);
                 }
+                if (cl.hasOption(INCLUDE_OPTION)) {
+                    converter.setInclude(getRegexpOption(cl, INCLUDE_OPTION));
+                }
+                if (cl.hasOption(EXCLUDE_OPTION)) {
+                    converter.setExclude(getRegexpOption(cl, EXCLUDE_OPTION));
+                }
                 converter.setFreeMarker2Settings(cl.getOptionProperties(FREEMARKER_2_SETTING_OPTION_SHORT));
                 try {
                     converter.execute();
@@ -136,7 +144,7 @@ public class FM2ToFM3ConverterCLI {
                         printWrapped("Conversion was finished successfully. "
                                 + "Converted " + converter.getConvertedFileCount() + " file(s).");
                     }
-                } catch (Throwable e) {
+                } catch (ConverterException e) {
                     printWrapped("Conversion was terminated with error. See details in the Java stack "
                             + "trace:\n");
                     printConciseStackTrace(e);
@@ -150,6 +158,16 @@ public class FM2ToFM3ConverterCLI {
             return COMMAND_LINE_FORMAT_ERROR_EXIT_STATUS;
         }
         return SUCCESS_EXIT_STATUS;
+    }
+
+    private Pattern getRegexpOption(CommandLine cl, String optionName) throws ParseException {
+        String optionValue = cl.getOptionValue(optionName);
+        try {
+            return Pattern.compile(optionValue);
+        } catch (PatternSyntaxException e) {
+            throw new ParseException(
+                    "The value of the \"" + optionName + "\" is not a valid regular expression: " + optionValue);
+        }
     }
 
     private void printConciseStackTrace(Throwable e) {

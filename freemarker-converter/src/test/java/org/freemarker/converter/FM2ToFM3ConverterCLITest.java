@@ -77,7 +77,8 @@ public class FM2ToFM3ConverterCLITest extends ConverterTest {
                 srcDir.toString(), "-d", dstDir.toString(),
                 "--include", ".*", "--exclude", ".*2\\.ftl");
         assertTrue(new File(dstDir, "1.fm3").exists());
-        assertFalse(new File(dstDir, "3.txt").exists());
+        assertFalse(new File(dstDir, "2.fm3").exists());
+        assertTrue(new File(dstDir, "3.txt").exists());
     }
 
     public void assertCLIResult(int expectedExitStatus, String stdoutContains, String stdoutNotContains, String...
