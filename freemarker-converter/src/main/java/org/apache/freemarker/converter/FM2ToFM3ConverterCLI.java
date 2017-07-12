@@ -22,7 +22,10 @@ package org.apache.freemarker.converter;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -45,7 +48,9 @@ public class FM2ToFM3ConverterCLI {
     private static final String CREATE_DESTINATION_OPTION = "create-destination";
     private static final String INCLUDE_OPTION = "include";
     private static final String EXCLUDE_OPTION = "exclude";
-    private static final String FREEMARKER_2_SETTING_OPTION_SHORT = "S";
+    private static final String FILE_EXTENSION_SUBSTITUTION = "file-ext-subst";
+    private static final String NO_PREDEFINED_FILE_EXTENSION_SUBSTITUTIONS = "no-predef-file-ext-substs";
+    private static final String FREEMARKER_2_SETTING_OPTION = "fm2-setting";
     private static final String HELP_OPTION = "help";
     private static final String HELP_OPTION_SHORT = "h";
 
@@ -71,14 +76,24 @@ public class FM2ToFM3ConverterCLI {
                             + "the files already matched by the \"include\" option. The default matches nothing "
                             + "(nothing is excluded). See the \"include\" option about the matched path.")
                     .build())
-            .addOption(Option.builder(FREEMARKER_2_SETTING_OPTION_SHORT)
-                    .hasArg().argName("name=value")
+            .addOption(Option.builder("S").longOpt(FREEMARKER_2_SETTING_OPTION)
+                    .hasArgs().argName("name=value").valueSeparator()
                     .desc("FreeMarker 2 configuration settings, to influence the parsing of the source. You can have "
                             + "multiple instances of this option, to set multiple settings. For the possible names "
                             + "and values see the FreeMarker 2 documentation, especially "
                             + "http://freemarker.org/docs/api/freemarker/template/Configuration.html#setSetting-java"
                             + ".lang.String-java.lang.String-"
                             + ".")
+                    .build())
+            .addOption(Option.builder("E").longOpt(FILE_EXTENSION_SUBSTITUTION)
+                    .hasArgs().argName("old=new").valueSeparator()
+                    .desc("File extensions that will be substituted (replaced). If predefined substitutions are "
+                            + "allowed (by default they are), then this substitution is added to those "
+                            + "(maybe replacing one).")
+                    .build())
+            .addOption(Option.builder(null).longOpt(NO_PREDEFINED_FILE_EXTENSION_SUBSTITUTIONS)
+                    .desc("Disables the predefined file extension substitutions (i.e, \"ftl\", \"ftlh\", "
+                            + "\"ftlx\" and \"fm\" are replaced with the corresponding FreeMarker 3 file extensions).")
                     .build())
             .addOption(Option.builder(HELP_OPTION_SHORT).longOpt(HELP_OPTION)
                     .desc("Prints command-line help.")
@@ -123,18 +138,33 @@ public class FM2ToFM3ConverterCLI {
                 }
 
                 FM2ToFM3Converter converter = new FM2ToFM3Converter();
+
                 converter.setSource(new File(unparsedArgs.get(0)));
+
                 converter.setDestinationDirectory(new File(cl.getOptionValue(DESTINATION_OPTION)));
+
                 if (cl.hasOption(CREATE_DESTINATION_OPTION)) {
                     converter.setCreateDestinationDirectory(true);
                 }
+
                 if (cl.hasOption(INCLUDE_OPTION)) {
                     converter.setInclude(getRegexpOption(cl, INCLUDE_OPTION));
                 }
+
                 if (cl.hasOption(EXCLUDE_OPTION)) {
                     converter.setExclude(getRegexpOption(cl, EXCLUDE_OPTION));
                 }
-                converter.setFreeMarker2Settings(cl.getOptionProperties(FREEMARKER_2_SETTING_OPTION_SHORT));
+
+                Map<String, String> fileExtensionSubtitutions = cl.hasOption(NO_PREDEFINED_FILE_EXTENSION_SUBSTITUTIONS)
+                        ? new HashMap<String, String>()
+                        : new HashMap<String, String>(FM2ToFM3Converter.DEFAULT_FILE_EXTENSION_SUBSTITUTIONS);
+                for (Map.Entry<Object, Object> entry
+                        : cl.getOptionProperties(FILE_EXTENSION_SUBSTITUTION).entrySet()) {
+                    fileExtensionSubtitutions.put((String) entry.getKey(), (String) entry.getValue());
+                }
+                converter.setFileExtensionSubtitutions(Collections.unmodifiableMap(fileExtensionSubtitutions));
+
+                converter.setFreeMarker2Settings(cl.getOptionProperties(FREEMARKER_2_SETTING_OPTION));
                 try {
                     converter.execute();
 

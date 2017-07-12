@@ -81,17 +81,51 @@ public class FM2ToFM3ConverterCLITest extends ConverterTest {
         assertTrue(new File(dstDir, "3.txt").exists());
     }
 
+    @Test
+    public void testExtensionCustomization1() {
+        assertCLIResult(SUCCESS_EXIT_STATUS, null, null,
+                srcDir.toString(), "-d", dstDir.toString(),
+                "--include", ".*", "-Etxt=txt3");
+        assertTrue(new File(dstDir, "1.fm3").exists());
+        assertTrue(new File(dstDir, "3.txt3").exists());
+    }
+
+    @Test
+    public void testExtensionCustomization2() {
+        assertCLIResult(SUCCESS_EXIT_STATUS, null, null,
+                srcDir.toString(), "-d", dstDir.toString(),
+                "--include", ".*", "-Eftl=foo");
+        assertTrue(new File(dstDir, "1.foo").exists());
+        assertTrue(new File(dstDir, "3.txt").exists());
+    }
+
+    @Test
+    public void testExtensionCustomization3() {
+        assertCLIResult(SUCCESS_EXIT_STATUS, null, null,
+                srcDir.toString(), "-d", dstDir.toString(),
+                "--include", ".*",
+                "--no-predef-file-ext-substs",
+                "--file-ext-subst", "txt=txt3",
+                "--no-predef-file-ext-substs"
+        );
+        assertTrue(new File(dstDir, "1.ftl").exists());
+        assertTrue(new File(dstDir, "3.txt3").exists());
+    }
+
     public void assertCLIResult(int expectedExitStatus, String stdoutContains, String stdoutNotContains, String...
             args) {
         StringWriter sw = new StringWriter();
         PrintWriter out = new PrintWriter(sw);
         int actualExitStatus = FM2ToFM3ConverterCLI.execute(out, args);
-        assertEquals(actualExitStatus, expectedExitStatus);
+        String stdout = sw.toString();
+        if (actualExitStatus != expectedExitStatus) {
+            assertEquals("Exit status mismatch. The output was:\n" + stdout, actualExitStatus, expectedExitStatus);
+        }
         if (stdoutContains != null) {
-            assertThat(sw.toString(), containsString(stdoutContains));
+            assertThat(stdout, containsString(stdoutContains));
         }
         if (stdoutNotContains != null) {
-            assertThat(sw.toString(), not(containsString(stdoutNotContains)));
+            assertThat(stdout, not(containsString(stdoutNotContains)));
         }
     }
 

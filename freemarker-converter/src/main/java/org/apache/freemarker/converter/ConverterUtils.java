@@ -52,4 +52,24 @@ public final class ConverterUtils {
         } while (wordStartIdx < s.length());
         return sb.toString();
     }
+
+    public static boolean isUpperCaseLetter(char c) {
+        return Character.isUpperCase(c) && Character.isLetter(c);
+    }
+
+    public static String rightTrim(String s) {
+        if (s == null) {
+            return null;
+        }
+
+        int i = s.length() - 1;
+        while (i >= 0 && Character.isWhitespace(s.charAt(i))) {
+            i--;
+        }
+        return i != -1 ? s.substring(0, i + 1) : "";
+    }
+
+    public static boolean isQuotationChar(char q) {
+        return q == '\'' || q == '\"';
+    }
 }

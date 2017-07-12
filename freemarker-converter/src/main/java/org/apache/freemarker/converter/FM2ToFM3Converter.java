@@ -21,15 +21,28 @@ package org.apache.freemarker.converter;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.freemarker.core.NamingConvention;
 import org.apache.freemarker.core.util._NullArgumentException;
 
+import com.google.common.collect.ImmutableMap;
+
+import freemarker.core.CSSOutputFormat;
 import freemarker.core.FM2ASTToFM3SourceConverter;
+import freemarker.core.HTMLOutputFormat;
+import freemarker.core.JSONOutputFormat;
+import freemarker.core.JavaScriptOutputFormat;
+import freemarker.core.MarkupOutputFormat;
+import freemarker.core.OutputFormat;
+import freemarker.core.PlainTextOutputFormat;
+import freemarker.core.RTFOutputFormat;
+import freemarker.core.UndefinedOutputFormat;
+import freemarker.core.XHTMLOutputFormat;
+import freemarker.core.XMLOutputFormat;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template._TemplateAPI;
@@ -54,20 +67,17 @@ import freemarker.template._TemplateAPI;
  */
 public class FM2ToFM3Converter extends Converter {
 
-    private static final Pattern DEFAULT_INCLUDE = Pattern.compile("(?i).*\\.(fm|ftl(x|h)?)");
+    public static final Pattern DEFAULT_INCLUDE = Pattern.compile("(?i).*\\.(fm|ftl(x|h)?)");
 
-    private static final Map<String, String> DEFAULT_REPLACED_FILE_EXTENSIONS;
-    static {
-        DEFAULT_REPLACED_FILE_EXTENSIONS = new HashMap<>();
-        DEFAULT_REPLACED_FILE_EXTENSIONS.put("ftl", "fm3");
-        DEFAULT_REPLACED_FILE_EXTENSIONS.put("fm", "fm3");
-        DEFAULT_REPLACED_FILE_EXTENSIONS.put("ftlh", "fm3h");
-        DEFAULT_REPLACED_FILE_EXTENSIONS.put("fmh", "fm3h");
-        DEFAULT_REPLACED_FILE_EXTENSIONS.put("ftlx", "fm3x");
-        DEFAULT_REPLACED_FILE_EXTENSIONS.put("fmx", "fm3x");
-    }
+    public static final Map<String, String> DEFAULT_FILE_EXTENSION_SUBSTITUTIONS
+            = new ImmutableMap.Builder<String,String>()
+                    .put("ftl", "fm3")
+                    .put("ftlh", "fm3h")
+                    .put("ftlx", "fm3x")
+                    .put("fm", "fm3")
+                    .build();
 
-    private Map<String, String> outputFileExtensions = DEFAULT_REPLACED_FILE_EXTENSIONS;
+    private Map<String, String> fileExtensionSubtitutions = DEFAULT_FILE_EXTENSION_SUBSTITUTIONS;
     private Properties freeMarker2Settings;
     private Configuration fm2Cfg;
 
@@ -82,6 +92,7 @@ public class FM2ToFM3Converter extends Converter {
         fm2Cfg = new Configuration(Configuration.VERSION_2_3_19 /* To fix ignored initial unknown tags */);
         fm2Cfg.setWhitespaceStripping(false);
         fm2Cfg.setTabSize(1);
+        fm2Cfg.setRecognizeStandardFileExtensions(true);
         _TemplateAPI.setPreventStrippings(fm2Cfg, true);
         if (freeMarker2Settings != null) {
             try {
@@ -101,9 +112,9 @@ public class FM2ToFM3Converter extends Converter {
 
         String ext = srcFileName.substring(lastDotIdx + 1);
 
-        String replacementExt = getOutputFileExtensions().get(ext);
+        String replacementExt = getFileExtensionSubtitutions().get(ext);
         if (replacementExt == null) {
-            replacementExt = getOutputFileExtensions().get(ext.toLowerCase());
+            replacementExt = getFileExtensionSubtitutions().get(ext.toLowerCase());
         }
         if (replacementExt == null) {
             return srcFileName;
@@ -125,6 +136,49 @@ public class FM2ToFM3Converter extends Converter {
         fileTransCtx.setDestinationFileName(getDestinationFileName(result.getFM2Template()));
         fileTransCtx.getDestinationStream().write(
                 result.getFM3Content().getBytes(getTemplateEncoding(result.getFM2Template())));
+
+        try {
+            org.apache.freemarker.core.Configuration fm3Config = new org.apache.freemarker.core.Configuration
+                    .Builder(org.apache.freemarker.core.Configuration.getVersion() /* highest possible by design */)
+                    .namingConvention(NamingConvention.CAMEL_CASE)
+                    .outputFormat(converOutputFormat(result.getFM2Template().getOutputFormat()))
+                    .build();
+            new org.apache.freemarker.core.Template(null, result.getFM3Content(), fm3Config);
+        } catch (Exception e) {
+            throw new ConverterException(
+                    "The result of the conversion wasn't valid FreeMarker 3 template; see cause exception and "
+                    + fileTransCtx.getDestinationFile(), e);
+        }
+    }
+
+    private org.apache.freemarker.core.outputformat.OutputFormat converOutputFormat(OutputFormat outputFormat) {
+        return outputFormat == HTMLOutputFormat.INSTANCE
+                        ? org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat.INSTANCE
+                : outputFormat == XHTMLOutputFormat.INSTANCE
+                        ? org.apache.freemarker.core.outputformat.impl.XHTMLOutputFormat.INSTANCE
+                : outputFormat == XMLOutputFormat.INSTANCE
+                        ? org.apache.freemarker.core.outputformat.impl.XMLOutputFormat.INSTANCE
+                : outputFormat == RTFOutputFormat.INSTANCE
+                        ? org.apache.freemarker.core.outputformat.impl.RTFOutputFormat.INSTANCE
+                : outputFormat == PlainTextOutputFormat.INSTANCE
+                        ? org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat.INSTANCE
+                : outputFormat == UndefinedOutputFormat.INSTANCE
+                        ? org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat.INSTANCE
+                : outputFormat == JavaScriptOutputFormat.INSTANCE
+                        ? org.apache.freemarker.core.outputformat.impl.JavaScriptOutputFormat.INSTANCE
+                : outputFormat == JSONOutputFormat.INSTANCE
+                        ? org.apache.freemarker.core.outputformat.impl.JSONOutputFormat.INSTANCE
+                : outputFormat == CSSOutputFormat.INSTANCE
+                        ? org.apache.freemarker.core.outputformat.impl.CSSOutputFormat.INSTANCE
+                : getSimilarOutputFormat(outputFormat);
+    }
+
+    private org.apache.freemarker.core.outputformat.OutputFormat getSimilarOutputFormat(OutputFormat outputFormat) {
+        if (outputFormat instanceof MarkupOutputFormat) {
+            return org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat.INSTANCE;
+        } else {
+            return org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat.INSTANCE;
+        }
     }
 
     private String getTemplateEncoding(Template template) {
@@ -132,13 +186,13 @@ public class FM2ToFM3Converter extends Converter {
         return encoding != null ? encoding : fm2Cfg.getEncoding(template.getLocale());
     }
 
-    public Map<String, String> getOutputFileExtensions() {
-        return outputFileExtensions;
+    public Map<String, String> getFileExtensionSubtitutions() {
+        return fileExtensionSubtitutions;
     }
 
-    public void setOutputFileExtensions(Map<String, String> outputFileExtensions) {
-        _NullArgumentException.check("outputFileExtensions", outputFileExtensions);
-        this.outputFileExtensions = outputFileExtensions;
+    public void setFileExtensionSubtitutions(Map<String, String> fileExtensionSubtitutions) {
+        _NullArgumentException.check("fileExtensionSubtitutions", fileExtensionSubtitutions);
+        this.fileExtensionSubtitutions = fileExtensionSubtitutions;
     }
 
     public Properties getFreeMarker2Settings() {

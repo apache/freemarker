@@ -108,6 +108,9 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
 
         assertConvertedSame("${m.key}");
         assertConvertedSame("${m <#--1--> . <#--3--> key}");
+        assertConvertedSame("${m.@key}");
+        assertConvertedSame("${m.*}");
+        assertConvertedSame("${m.**}");
 
         assertConvertedSame("${.outputFormat}");
         assertConvertedSame("${. <#-- C --> outputFormat}");
@@ -366,6 +369,9 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("<#recurse <#--1--> node <#--2-->>");
         assertConvertedSame("<#recurse node using ns>");
         assertConvertedSame("<#recurse node <#--1--> using <#--2--> ns <#--3-->>");
+        assertConvertedSame("<#recurse>");
+        assertConvertedSame("<#recurse <#--1-->>");
+        assertConvertedSame("<#recurse <#--1--> using <#--2--> ns>");
         assertConvertedSame("<#macro m><#fallback></#macro>");
         assertConvertedSame("<#macro m><#fallback /></#macro>");
 
@@ -413,6 +419,14 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("<@foo 1 2; i\\-2, j></@>");
         assertConvertedSame("<@foo x=1 y=2; i></@>");
         assertConvertedSame("<@foo x=1 ;\n    i <#-- C0 --> , <#--1-->\n\t<!-- C2 --> j <#--3-->\n></@>");
+    }
+
+    @Test
+    public void testTagEndCharGlitch() throws IOException, ConverterException {
+        assertConverted("<#assign x = 1>x", "<#assign x = 1]x");
+        assertConverted("<#if x[0] == 1>x<#else>y</#if>", "<#if x[0] == 1]x<#else]y</#if]");
+        assertConverted("<@m x[0]>x</@m>", "<@m x[0]]x</@m]");
+        assertConverted("<#ftl customSettings={'a': []}>x", "<#ftl attributes={'a': []}]x");
     }
 
     @Test
@@ -511,6 +525,17 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertTrue(new File(dstDir, "t8.fm3sx").exists());
         assertTrue(new File(dstDir, "t9.fm3").exists());
         assertTrue(new File(dstDir, "t10.Foo3").exists());
+    }
+
+    @Test
+    public void testOutputFormatSet() throws IOException, ConverterException {
+            File srcFile = new File(srcDir, "t.ftlh");
+            FileUtils.write(srcFile, "${x?esc}", UTF_8);
+
+            FM2ToFM3Converter converter = new FM2ToFM3Converter();
+            converter.setSource(srcFile);
+            converter.setDestinationDirectory(dstDir);
+            converter.execute();
     }
 
     private static final Set<String> LEGACY_ESCAPING_BUTILT_INS = ImmutableSet.of(

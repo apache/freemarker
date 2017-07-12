@@ -32,7 +32,6 @@ import org.apache.freemarker.converter.ConversionMarkers;
 import org.apache.freemarker.converter.ConverterException;
 import org.apache.freemarker.converter.ConverterUtils;
 import org.apache.freemarker.converter.UnconvertableLegacyFeatureException;
-import org.apache.freemarker.core.NamingConvention;
 import org.apache.freemarker.core.util.FTLUtil;
 import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.core.util._NullArgumentException;
@@ -83,11 +82,9 @@ public class FM2ASTToFM3SourceConverter {
     private List<Integer> rowStartPositions;
     private final char tagBeginChar;
     private final char tagEndChar;
-    private final org.apache.freemarker.core.Configuration fm3Config = new org.apache.freemarker.core.Configuration
+    private final Set<String> fm3BuiltInNames = new org.apache.freemarker.core.Configuration
             .Builder(org.apache.freemarker.core.Configuration.getVersion() /* highest possible by design */)
-            .namingConvention(NamingConvention.CAMEL_CASE)
-            .build();
-    private final Set<String> fm3BuiltInNames = fm3Config.getSupportedBuiltInNames();
+            .build().getSupportedBuiltInNames();
 
     private boolean printNextCustomDirAsFtlDir;
 
@@ -105,16 +102,7 @@ public class FM2ASTToFM3SourceConverter {
     private Result convert() throws ConverterException {
         printDirFtl();
         printNode(template.getRootTreeNode());
-
-        String outAsString = out.toString();
-        try {
-            new org.apache.freemarker.core.Template(null, outAsString, fm3Config);
-        } catch (Exception e) {
-            throw new ConverterException(
-                    "The result of the conversion wasn't valid FreeMarker 3 template; see cause exception", e);
-        }
-
-        return new Result(template, outAsString);
+        return new Result(template, out.toString());
     }
 
     private FM2ASTToFM3SourceConverter(
@@ -182,7 +170,7 @@ public class FM2ASTToFM3SourceConverter {
                 }
 
                 tagEnd = firstNodePos - 1;
-                while (tagEnd >= 0 && src.charAt(tagEnd) != tagEndChar) {
+                while (tagEnd >= 0 && !isTagEndChar(src.charAt(tagEnd))) {
                     if (!Character.isWhitespace(src.charAt(tagEnd))) {
                         throw new ConverterException("Non-WS character while backtracking to #ftl tag end character.");
                     }
@@ -482,22 +470,22 @@ public class FM2ASTToFM3SourceConverter {
     private void printDirVisitLike(TemplateElement node, String tagName) throws ConverterException {
         assertParamCount(node, 2);
 
-        printDirStartTagPartBeforeParams(node, tagName);
-
-        Expression lastParam;
+        int pos = printDirStartTagPartBeforeParams(node, tagName);
 
         Expression nodeExp = getParam(node, 0, ParameterRole.NODE, Expression.class);
-        printExp(nodeExp);
-        lastParam = nodeExp;
+        if (nodeExp != null) {
+            printExp(nodeExp);
+            pos = getEndPositionExclusive(nodeExp);
+        }
 
         Expression ns = getParam(node, 1, ParameterRole.NAMESPACE, Expression.class);
         if (ns != null) {
-            printSeparatorAndWSAndExpComments(getEndPositionExclusive(lastParam), "using");
+            printSeparatorAndWSAndExpComments(pos, "using");
             printExp(ns);
-            lastParam = ns;
+            pos = getEndPositionExclusive(ns);
         }
 
-        printDirStartTagEnd(node, lastParam, false);
+        printDirStartTagEnd(node, pos, false);
     }
 
     private void printDirCase(Case node) throws ConverterException {
@@ -751,11 +739,11 @@ public class FM2ASTToFM3SourceConverter {
             String postVar2WSAndComment = readWSAndExpComments(getEndPositionExclusive(listSource));
 
             printExp(listSource);
-            printWithConvertedExpComments(rightTrim(postVar2WSAndComment));
+            printWithConvertedExpComments(ConverterUtils.rightTrim(postVar2WSAndComment));
             print(" as ");
             print(FTLUtil.escapeIdentifier(loopVal1));
-            printWithConvertedExpComments(rightTrim(postVar1WSAndComment));
-            printWithConvertedExpComments(rightTrim(postInWSAndComment));
+            printWithConvertedExpComments(ConverterUtils.rightTrim(postVar1WSAndComment));
+            printWithConvertedExpComments(ConverterUtils.rightTrim(postInWSAndComment));
         } else {
             throw new UnexpectedNodeContentException(node, "Expected #list or #foreach as node symbol", null);
         }
@@ -810,7 +798,7 @@ public class FM2ASTToFM3SourceConverter {
             // We only have removed thing after in the src => no need for spacing after us
             int commentPos = postNameWSOrComment.indexOf("--") - 1;
             if (commentPos >= 0) {
-                printWithConvertedExpComments(rightTrim(postNameWSOrComment));
+                printWithConvertedExpComments(ConverterUtils.rightTrim(postNameWSOrComment));
             }
         }
 
@@ -830,7 +818,7 @@ public class FM2ASTToFM3SourceConverter {
                 } else {
                     int commentPos = postParamWSOrComment.indexOf("--") - 1;
                     if (commentPos >= 0) {
-                        printWithConvertedExpComments(rightTrim(postParamWSOrComment));
+                        printWithConvertedExpComments(ConverterUtils.rightTrim(postParamWSOrComment));
                     }
                 }
             }
@@ -1108,7 +1096,7 @@ public class FM2ASTToFM3SourceConverter {
             {
                 char c = src.charAt(pos);
                 assertNodeContent(
-                        c == ',' || c == ')' || c == tagEndChar
+                        c == ',' || c == ')' || isTagEndChar(c)
                                 || c == '\\' || StringUtil.isFTLIdentifierStart(c),
                         node,
                         "Unexpected character: {}", c);
@@ -1145,7 +1133,7 @@ public class FM2ASTToFM3SourceConverter {
                 "Expected AST parameter at index {} to be the last one", paramIdx);
 
         pos = printOptionalSeparatorAndWSAndExpComments(pos, ")");
-        assertNodeContent(src.charAt(pos) == tagEndChar, node, "Tag end not found");
+        assertNodeContent(isTagEndChar(src.charAt(pos)), node, "Tag end not found");
         print(tagEndChar);
 
         printChildElements(node);
@@ -1250,7 +1238,7 @@ public class FM2ASTToFM3SourceConverter {
         int elementEndPos = getEndPositionInclusive(node);
         {
             char c = src.charAt(elementEndPos);
-            assertNodeContent(c == tagEndChar, node,
+            assertNodeContent(isTagEndChar(c), node,
                     "tagEndChar expected, found {}", c);
         }
         if (startTagEndPos != elementEndPos) { // We have an end-tag
@@ -1510,7 +1498,7 @@ public class FM2ASTToFM3SourceConverter {
         String rho = getParam(node, 1, ParameterRole.RIGHT_HAND_OPERAND, String.class);
         printNode(lho);
         printSeparatorAndWSAndExpComments(getEndPositionExclusive(lho), ".");
-        print(FTLUtil.escapeIdentifier(rho));
+        print(rho.startsWith("*") ? rho : FTLUtil.escapeIdentifier(rho));
     }
 
     private void printExpDynamicKeyName(DynamicKeyName node) throws ConverterException {
@@ -1695,9 +1683,13 @@ public class FM2ASTToFM3SourceConverter {
                     printSeparatorAndWSAndExpComments(pos, ",");
                 }
             }
-            pos = printSeparatorAndWSAndExpComments(pos, ")");
-            assertNodeContent(pos == getEndPositionExclusive(node), node,
+            pos = printWSAndExpComments(pos);
+            boolean endChar = src.charAt(pos) == ')';
+            assertNodeContent(pos == getEndPositionInclusive(node), node,
                     "Actual end position doesn't match node end position.");
+            assertNodeContent(endChar, node,
+                    "Expected ')' but found {}.");
+            print(')');
         } else {
             assertParamCount(node, 2);
         }
@@ -1856,7 +1848,7 @@ public class FM2ASTToFM3SourceConverter {
         int tagEndPos = getEndPositionInclusive(node);
         {
             char c = src.charAt(tagEndPos);
-            if (c != tagEndChar) {
+            if (!isTagEndChar(c)) {
                 if (optional) {
                     return;
                 }
@@ -1985,7 +1977,7 @@ public class FM2ASTToFM3SourceConverter {
         }
 
         char c = src.charAt(pos);
-        if (c == '/' && pos + 1 < src.length() && src.charAt(pos + 1) == tagEndChar) {
+        if (c == '/' && pos + 1 < src.length() && isTagEndChar(src.charAt(pos + 1))) {
             printWithConvertedExpComments(src.substring(startPos, pos));
 
             if (removeSlash) {
@@ -1998,7 +1990,7 @@ public class FM2ASTToFM3SourceConverter {
             }
             print(tagEndChar);
             return pos + 1;
-        } else if (c == tagEndChar) {
+        } else if (isTagEndChar(c)) {
             printWithConvertedExpComments(src.substring(startPos, pos));
             print(tagEndChar);
             return pos;
@@ -2256,7 +2248,7 @@ public class FM2ASTToFM3SourceConverter {
             raw = false;
         }
         char quotationC = c;
-        if (!isQuotationChar(quotationC)) {
+        if (!ConverterUtils.isQuotationChar(quotationC)) {
             throw new IllegalArgumentException("The specifies position is not the beginning of a string literal");
         }
 
@@ -2279,11 +2271,8 @@ public class FM2ASTToFM3SourceConverter {
             return false;
         }
         char c = src.charAt(pos);
-        return (isQuotationChar(c) || c == 'r' && pos < src.length() + 1 && isQuotationChar(src.charAt(pos + 1)));
-    }
-
-    private boolean isQuotationChar(char q) {
-        return q == '\'' || q == '\"';
+        return (ConverterUtils.isQuotationChar(c) || c == 'r' && pos < src.length() + 1 && ConverterUtils
+                .isQuotationChar(src.charAt(pos + 1)));
     }
 
     private String readIdentifier(int startPos) throws ConverterException {
@@ -2298,12 +2287,38 @@ public class FM2ASTToFM3SourceConverter {
         return src.substring(startPos, pos);
     }
 
+    /**
+     * Because FM2 has this glitch where tags starting wit {@code <} can be closed with an unparied {@code ]}, we
+     * have to do this more complicated check.
+     */
+    private boolean isTagEndChar(char c) {
+        return c == tagEndChar || c == ']';
+    }
+
     private boolean isExpCommentStart(int pos) {
         char c = src.charAt(pos);
         return (c == '<' || c == '[')
                 && (pos + 1 < src.length()
                 && src.startsWith("!--", pos + 1) || src.startsWith("#--", pos + 1));
 
+    }
+
+    private HashMap<String, Boolean> containsUpperCaseLetterResults = new HashMap<>();
+
+    private boolean containsUpperCaseLetter(String s) {
+        Boolean result = containsUpperCaseLetterResults.get(s);
+        if (result != null) {
+            return result;
+        }
+
+        int i = 0;
+        while (i < s.length() && !ConverterUtils.isUpperCaseLetter(s.charAt(i))) {
+            i++;
+        }
+        result = i < s.length();
+
+        containsUpperCaseLetterResults.put(s, result);
+        return result;
     }
 
     public static class Result {
@@ -2322,40 +2337,6 @@ public class FM2ASTToFM3SourceConverter {
         public String getFM3Content() {
             return fm3Content;
         }
-    }
-
-    private String rightTrim(String s) {
-        if (s == null) {
-            return null;
-        }
-
-        int i = s.length() - 1;
-        while (i >= 0 && Character.isWhitespace(s.charAt(i))) {
-            i--;
-        }
-        return i != -1 ? s.substring(0, i + 1) : "";
-    }
-
-    private boolean isUpperCaseLetter(char c) {
-        return Character.isUpperCase(c) && Character.isLetter(c);
-    }
-
-    private HashMap<String, Boolean> containsUpperCaseLetterResults = new HashMap<>();
-
-    private boolean containsUpperCaseLetter(String s) {
-        Boolean result = containsUpperCaseLetterResults.get(s);
-        if (result != null) {
-            return result;
-        }
-
-        int i = 0;
-        while (i < s.length() && !isUpperCaseLetter(s.charAt(i))) {
-            i++;
-        }
-        result = i < s.length();
-
-        containsUpperCaseLetterResults.put(s, result);
-        return result;
     }
 
 }
