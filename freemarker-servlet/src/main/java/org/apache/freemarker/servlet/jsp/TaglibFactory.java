@@ -123,8 +123,8 @@ public class TaglibFactory implements TemplateHashModel {
     private final ServletContext servletContext;
 
     private ObjectWrapper objectWrapper;
-    private List<? extends MetaInfTldSource> metaInfTldSources = DEFAULT_META_INF_TLD_SOURCES;
-    private List<String> classpathTlds = DEFAULT_CLASSPATH_TLDS;
+    private List<? extends MetaInfTldSource> metaInfTldSources;
+    private List<String> classpathTlds;
 
     boolean test_emulateNoUrlToFileConversions = false;
     boolean test_emulateNoJarURLConnections = false;
@@ -2077,12 +2077,12 @@ public class TaglibFactory implements TemplateHashModel {
         /**
          * TLD locations to look for when finding available JSP tag libraries.
          */
-        private List<MetaInfTldSource> metaInfTldSources;
+        private List<? extends MetaInfTldSource> metaInfTldSources = DEFAULT_META_INF_TLD_SOURCES;
 
         /**
          * TLD classpath locations to look for when finding available JSP tag libraries.
          */
-        private List<String> classpathTlds;
+        private List<String> classpathTlds = DEFAULT_CLASSPATH_TLDS;
 
         private boolean alreadyBuilt;
 
@@ -2118,7 +2118,7 @@ public class TaglibFactory implements TemplateHashModel {
         /**
          * Getter pair of {@link #setClasspathTlds(List)}
          */
-        public List<MetaInfTldSource> getMetaInfTldSources() {
+        public List<? extends MetaInfTldSource> getMetaInfTldSources() {
             return (metaInfTldSources != null) ? metaInfTldSources : Collections.<MetaInfTldSource> emptyList();
         }
 
