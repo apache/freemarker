@@ -16,13 +16,13 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<#assign x1 = .data_model.x>
+<#assign x1 = .dataModel.x>
 <#assign x2 = x>
 <#assign z2 = z>
 <#macro foo>
 <@.main.foo 1/>
-  ${z} = ${z2} = ${x1} = ${.data_model.x}
+  ${z} = ${z2} = ${x1} = ${.dataModel.x}
   5
   ${x} == ${.globals.x}
-  ${y} == ${.globals.y} == ${.data_model.y?default("ERROR")}
+  ${y} == ${.globals.y} == ${.dataModel.y?default("ERROR")}
 </#macro>

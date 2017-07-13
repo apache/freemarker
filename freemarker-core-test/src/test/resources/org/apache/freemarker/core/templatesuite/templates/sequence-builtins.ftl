@@ -18,7 +18,7 @@
 -->
 <@noOutput>
 <#setting locale="en_US">
-<#setting number_format="0.#########">
+<#setting numberFormat="0.#########">
 
 <#assign ls = []?sort>
 <#list ls as i>
@@ -82,13 +82,13 @@ Sorting hashes:
   {"name":"beetroot", "weight":0.3}
 ]>
 Order by name:
-<#assign ls = ls?sort_by("name")>
+<#assign ls = ls?sortBy("name")>
 <#list ls as i>
 - ${i.name}: ${i.weight}
 </#list>
 
 Order by weight:
-<#assign ls = ls?sort_by("weight")>
+<#assign ls = ls?sortBy("weight")>
 <#list ls as i>
 - ${i.name}: ${i.weight}
 </#list>
@@ -99,12 +99,12 @@ Order by a.x.v:
         {"a": {"x": {"v": "aqweqw", "w": "asd"}, "y": '1999-01-20'?date('yyyy-MM-dd')}},
         {"a": {"x": {"v": "dfgdf", "w": "asd"}, "y": '1999-04-20'?date('yyyy-MM-dd')}},
         {"a": {"x": {"v": "utyu", "w": "asd"}, "y": '1999-04-19'?date('yyyy-MM-dd')}}]>
-<#list x?sort_by(['a', 'x', 'v']) as i>
+<#list x?sortBy(['a', 'x', 'v']) as i>
 - ${i.a.x.v}
 </#list>
 
 Order by a.y, which is a date:
-<#list x?sort_by(['a', 'y']) as i>
+<#list x?sortBy(['a', 'y']) as i>
 - ${i.a.y?string('yyyy-MM-dd')}
 </#list>
 
@@ -135,173 +135,173 @@ Contains:
 <#macro test></#macro>
 <#assign x = [1, "2", true, [1,2,3], {"a":1}, test, '1992-02-21'?date('yyyy-MM-dd')]>
 True:
-${x?seq_contains(1.0)?string}
-${x?seq_contains("2")?string}
-${x?seq_contains(true)?string}
-${x?seq_contains('1992-02-21'?date('yyyy-MM-dd'))?string}
-${abcSet?seq_contains("a")?string}
-${abcSet?seq_contains("b")?string}
-${abcSet?seq_contains("c")?string}
+${x?seqContains(1.0)?string}
+${x?seqContains("2")?string}
+${x?seqContains(true)?string}
+${x?seqContains('1992-02-21'?date('yyyy-MM-dd'))?string}
+${abcSet?seqContains("a")?string}
+${abcSet?seqContains("b")?string}
+${abcSet?seqContains("c")?string}
 
 False:
-${x?seq_contains("1")?string}
-${x?seq_contains(2)?string}
-${x?seq_contains(false)?string}
-${x?seq_contains('1992-02-22'?date('yyyy-MM-dd'))?string}
-${abcSet?seq_contains("A")?string}
-${abcSet?seq_contains(1)?string}
-${abcSet?seq_contains(true)?string}
+${x?seqContains("1")?string}
+${x?seqContains(2)?string}
+${x?seqContains(false)?string}
+${x?seqContains('1992-02-22'?date('yyyy-MM-dd'))?string}
+${abcSet?seqContains("A")?string}
+${abcSet?seqContains(1)?string}
+${abcSet?seqContains(true)?string}
 
 <#assign x = []>
-False: ${x?seq_contains(1)?string}
+False: ${x?seqContains(1)?string}
 
 Index_of:
 ---------
 
 <#assign x = [1, "2", true, [1,2,3], {"a":1}, test, '1992-02-21'?date('yyyy-MM-dd')]>
-0 = ${x?seq_index_of(1.0)}
-1 = ${x?seq_index_of("2")}
-2 = ${x?seq_index_of(true)}
-6 = ${x?seq_index_of('1992-02-21'?date('yyyy-MM-dd'))}
-0 = ${abcSet?seq_index_of("a")}
-1 = ${abcSet?seq_index_of("b")}
-2 = ${abcSet?seq_index_of("c")}
+0 = ${x?seqIndexOf(1.0)}
+1 = ${x?seqIndexOf("2")}
+2 = ${x?seqIndexOf(true)}
+6 = ${x?seqIndexOf('1992-02-21'?date('yyyy-MM-dd'))}
+0 = ${abcSet?seqIndexOf("a")}
+1 = ${abcSet?seqIndexOf("b")}
+2 = ${abcSet?seqIndexOf("c")}
 
--1 = ${x?seq_index_of("1")}
--1 = ${x?seq_index_of(2)}
--1 = ${x?seq_index_of(false)}
--1 = ${x?seq_index_of('1992-02-22'?date('yyyy-MM-dd'))}
--1 = ${abcSet?seq_index_of("A")}
--1 = ${abcSet?seq_index_of(1)}
--1 = ${abcSet?seq_index_of(true)}
+-1 = ${x?seqIndexOf("1")}
+-1 = ${x?seqIndexOf(2)}
+-1 = ${x?seqIndexOf(false)}
+-1 = ${x?seqIndexOf('1992-02-22'?date('yyyy-MM-dd'))}
+-1 = ${abcSet?seqIndexOf("A")}
+-1 = ${abcSet?seqIndexOf(1)}
+-1 = ${abcSet?seqIndexOf(true)}
 
 <#assign x = []>
--1 = ${x?seq_index_of(1)}
+-1 = ${x?seqIndexOf(1)}
 
 Last_index_of:
 --------------
 
 <#assign x = [1, "2", true, [1,2,3], {"a":1}, test, 1, '1992-02-21'?date('yyyy-MM-dd')]>
-6 = ${x?seq_last_index_of(1.0)}
-1 = ${x?seq_last_index_of("2")}
-2 = ${x?seq_last_index_of(true)}
-7 = ${x?seq_last_index_of('1992-02-21'?date('yyyy-MM-dd'))}
--1 = ${x?seq_last_index_of("1")}
-0 = ${abcSet?seq_last_index_of("a")}
-1 = ${abcSet?seq_last_index_of("b")}
-2 = ${abcSet?seq_last_index_of("c")}
--1 = ${abcSet?seq_last_index_of("A")}
+6 = ${x?seqLastIndexOf(1.0)}
+1 = ${x?seqLastIndexOf("2")}
+2 = ${x?seqLastIndexOf(true)}
+7 = ${x?seqLastIndexOf('1992-02-21'?date('yyyy-MM-dd'))}
+-1 = ${x?seqLastIndexOf("1")}
+0 = ${abcSet?seqLastIndexOf("a")}
+1 = ${abcSet?seqLastIndexOf("b")}
+2 = ${abcSet?seqLastIndexOf("c")}
+-1 = ${abcSet?seqLastIndexOf("A")}
 
 Index_of and last_index_of with starting indices
 ------------------------------------------------
 
 <#assign names = ["Joe", "Fred", "Joe", "Susan"]>
 seq_index_of "Joe":
-0 = ${names?seq_index_of("Joe", -2)}
-0 = ${names?seq_index_of("Joe", -1)}
-0 = ${names?seq_index_of("Joe", 0)}
-2 = ${names?seq_index_of("Joe", 1)}
-2 = ${names?seq_index_of("Joe", 2)}
--1 = ${names?seq_index_of("Joe", 3)}
--1 = ${names?seq_index_of("Joe", 4)}
+0 = ${names?seqIndexOf("Joe", -2)}
+0 = ${names?seqIndexOf("Joe", -1)}
+0 = ${names?seqIndexOf("Joe", 0)}
+2 = ${names?seqIndexOf("Joe", 1)}
+2 = ${names?seqIndexOf("Joe", 2)}
+-1 = ${names?seqIndexOf("Joe", 3)}
+-1 = ${names?seqIndexOf("Joe", 4)}
  
 seq_last_index_of "Joe":
--1 = ${names?seq_last_index_of("Joe", -2)}
--1 = ${names?seq_last_index_of("Joe", -1)}
-0 = ${names?seq_last_index_of("Joe", 0)}
-0 = ${names?seq_last_index_of("Joe", 1)}
-2 = ${names?seq_last_index_of("Joe", 2)}
-2 = ${names?seq_last_index_of("Joe", 3)}
-2 = ${names?seq_last_index_of("Joe", 4)}
+-1 = ${names?seqLastIndexOf("Joe", -2)}
+-1 = ${names?seqLastIndexOf("Joe", -1)}
+0 = ${names?seqLastIndexOf("Joe", 0)}
+0 = ${names?seqLastIndexOf("Joe", 1)}
+2 = ${names?seqLastIndexOf("Joe", 2)}
+2 = ${names?seqLastIndexOf("Joe", 3)}
+2 = ${names?seqLastIndexOf("Joe", 4)}
  
 seq_index_of "Susan":
-3 = ${names?seq_index_of("Susan", -2)}
-3 = ${names?seq_index_of("Susan", -1)}
-3 = ${names?seq_index_of("Susan", 0)}
-3 = ${names?seq_index_of("Susan", 1)}
-3 = ${names?seq_index_of("Susan", 2)}
-3 = ${names?seq_index_of("Susan", 3)}
--1 = ${names?seq_index_of("Susan", 4)}
+3 = ${names?seqIndexOf("Susan", -2)}
+3 = ${names?seqIndexOf("Susan", -1)}
+3 = ${names?seqIndexOf("Susan", 0)}
+3 = ${names?seqIndexOf("Susan", 1)}
+3 = ${names?seqIndexOf("Susan", 2)}
+3 = ${names?seqIndexOf("Susan", 3)}
+-1 = ${names?seqIndexOf("Susan", 4)}
  
 seq_last_index_of "Susan":
--1 = ${names?seq_last_index_of("Susan", -2)}
--1 = ${names?seq_last_index_of("Susan", -1)}
--1 = ${names?seq_last_index_of("Susan", 0)}
--1 = ${names?seq_last_index_of("Susan", 1)}
--1 = ${names?seq_last_index_of("Susan", 2)}
-3 = ${names?seq_last_index_of("Susan", 3)}
-3 = ${names?seq_last_index_of("Susan", 4)}
+-1 = ${names?seqLastIndexOf("Susan", -2)}
+-1 = ${names?seqLastIndexOf("Susan", -1)}
+-1 = ${names?seqLastIndexOf("Susan", 0)}
+-1 = ${names?seqLastIndexOf("Susan", 1)}
+-1 = ${names?seqLastIndexOf("Susan", 2)}
+3 = ${names?seqLastIndexOf("Susan", 3)}
+3 = ${names?seqLastIndexOf("Susan", 4)}
 
 seq_index_of "a":
-0 = ${abcSet?seq_index_of("a", -2)}
-0 = ${abcSet?seq_index_of("a", -1)}
-0 = ${abcSet?seq_index_of("a", 0)}
--1 = ${abcSet?seq_index_of("a", 1)}
--1 = ${abcSet?seq_index_of("a", 2)}
--1 = ${abcSet?seq_index_of("a", 3)}
--1 = ${abcSet?seq_index_of("a", 4)}
+0 = ${abcSet?seqIndexOf("a", -2)}
+0 = ${abcSet?seqIndexOf("a", -1)}
+0 = ${abcSet?seqIndexOf("a", 0)}
+-1 = ${abcSet?seqIndexOf("a", 1)}
+-1 = ${abcSet?seqIndexOf("a", 2)}
+-1 = ${abcSet?seqIndexOf("a", 3)}
+-1 = ${abcSet?seqIndexOf("a", 4)}
 
 seq_index_of "b":
-1 = ${abcSet?seq_index_of("b", -2)}
-1 = ${abcSet?seq_index_of("b", -1)}
-1 = ${abcSet?seq_index_of("b", 0)}
-1 = ${abcSet?seq_index_of("b", 1)}
--1 = ${abcSet?seq_index_of("b", 2)}
--1 = ${abcSet?seq_index_of("b", 3)}
+1 = ${abcSet?seqIndexOf("b", -2)}
+1 = ${abcSet?seqIndexOf("b", -1)}
+1 = ${abcSet?seqIndexOf("b", 0)}
+1 = ${abcSet?seqIndexOf("b", 1)}
+-1 = ${abcSet?seqIndexOf("b", 2)}
+-1 = ${abcSet?seqIndexOf("b", 3)}
 
 seq_index_of "c":
-2 = ${abcSet?seq_index_of("c", -2)}
-2 = ${abcSet?seq_index_of("c", -1)}
-2 = ${abcSet?seq_index_of("c", 0)}
-2 = ${abcSet?seq_index_of("c", 1)}
-2 = ${abcSet?seq_index_of("c", 2)}
--1 = ${abcSet?seq_index_of("c", 3)}
+2 = ${abcSet?seqIndexOf("c", -2)}
+2 = ${abcSet?seqIndexOf("c", -1)}
+2 = ${abcSet?seqIndexOf("c", 0)}
+2 = ${abcSet?seqIndexOf("c", 1)}
+2 = ${abcSet?seqIndexOf("c", 2)}
+-1 = ${abcSet?seqIndexOf("c", 3)}
  
 seq_last_index_of "a":
--1 = ${abcSet?seq_last_index_of("a", -2)}
--1 = ${abcSet?seq_last_index_of("a", -1)}
-0 = ${abcSet?seq_last_index_of("a", 0)}
-0 = ${abcSet?seq_last_index_of("a", 1)}
-0 = ${abcSet?seq_last_index_of("a", 2)}
-0 = ${abcSet?seq_last_index_of("a", 3)}
-0 = ${abcSet?seq_last_index_of("a", 4)}
+-1 = ${abcSet?seqLastIndexOf("a", -2)}
+-1 = ${abcSet?seqLastIndexOf("a", -1)}
+0 = ${abcSet?seqLastIndexOf("a", 0)}
+0 = ${abcSet?seqLastIndexOf("a", 1)}
+0 = ${abcSet?seqLastIndexOf("a", 2)}
+0 = ${abcSet?seqLastIndexOf("a", 3)}
+0 = ${abcSet?seqLastIndexOf("a", 4)}
 
 seq_last_index_of "b":
--1 = ${abcSet?seq_last_index_of("b", -2)}
--1 = ${abcSet?seq_last_index_of("b", -1)}
--1 = ${abcSet?seq_last_index_of("b", 0)}
-1 = ${abcSet?seq_last_index_of("b", 1)}
-1 = ${abcSet?seq_last_index_of("b", 2)}
-1 = ${abcSet?seq_last_index_of("b", 3)}
+-1 = ${abcSet?seqLastIndexOf("b", -2)}
+-1 = ${abcSet?seqLastIndexOf("b", -1)}
+-1 = ${abcSet?seqLastIndexOf("b", 0)}
+1 = ${abcSet?seqLastIndexOf("b", 1)}
+1 = ${abcSet?seqLastIndexOf("b", 2)}
+1 = ${abcSet?seqLastIndexOf("b", 3)}
 
 seq_last_index_of "c":
--1 = ${abcSet?seq_last_index_of("c", -2)}
--1 = ${abcSet?seq_last_index_of("c", -1)}
--1 = ${abcSet?seq_last_index_of("c", 0)}
--1 = ${abcSet?seq_last_index_of("c", 1)}
-2 = ${abcSet?seq_last_index_of("c", 2)}
-2 = ${abcSet?seq_last_index_of("c", 3)}
+-1 = ${abcSet?seqLastIndexOf("c", -2)}
+-1 = ${abcSet?seqLastIndexOf("c", -1)}
+-1 = ${abcSet?seqLastIndexOf("c", 0)}
+-1 = ${abcSet?seqLastIndexOf("c", 1)}
+2 = ${abcSet?seqLastIndexOf("c", 2)}
+2 = ${abcSet?seqLastIndexOf("c", 3)}
 
 Sequence builtins ignoring nulls
 --------------------------------
 
-true = ${listWithNull?seq_contains('c')?string}
-2 = ${listWithNull?seq_index_of('c')}
-0 = ${listWithNull?seq_last_index_of('a')}
+true = ${listWithNull?seqContains('c')?string}
+2 = ${listWithNull?seqIndexOf('c')}
+0 = ${listWithNull?seqLastIndexOf('a')}
 
 These should throw exception, but for BC they don't:
-false = ${listWithNull?seq_contains(noSuchVar)?string}
--1 = ${listWithNull?seq_index_of(noSuchVar)}
--1 = ${listWithNull?seq_last_index_of(noSuchVar)}
+false = ${listWithNull?seqContains(noSuchVar)?string}
+-1 = ${listWithNull?seqIndexOf(noSuchVar)}
+-1 = ${listWithNull?seqLastIndexOf(noSuchVar)}
 
 Sequence built-ins failing on date-type mismatch
 ------------------------------------------------
 
 <#assign x = ['1992-02-21'?date('yyyy-MM-dd'), 'foo']>
-<@assertEquals actual=x?seq_index_of('foo') expected=1 />
-<@assertEquals actual=x?seq_index_of('1992-02-21'?date('yyyy-MM-dd')) expected=0 />
+<@assertEquals actual=x?seqIndexOf('foo') expected=1 />
+<@assertEquals actual=x?seqIndexOf('1992-02-21'?date('yyyy-MM-dd')) expected=0 />
 <@assertFails message="dates of different types">
-  0 = ${x?seq_index_of('1992-02-21 00:00:00'?datetime('yyyy-MM-dd HH:mm:ss'))}
+  0 = ${x?seqIndexOf('1992-02-21 00:00:00'?datetime('yyyy-MM-dd HH:mm:ss'))}
 </@>
 
 Chunk

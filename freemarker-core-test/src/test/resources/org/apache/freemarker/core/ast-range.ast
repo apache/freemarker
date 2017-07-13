@@ -116,14 +116,14 @@
         - assignment operator: "="  // String
         - assignment source: ..  // o.a.f.c.ASTExpRange
             - left-hand operand: ...(...)  // o.a.f.c.ASTExpMethodCall
-                - callee: ?index_of  // o.a.f.c.BuiltInsForStringsBasic$index_ofBI
+                - callee: ?indexOf  // o.a.f.c.BuiltInsForStringsBasic$index_ofBI
                     - left-hand operand: n  // o.a.f.c.ASTExpVariable
-                    - right-hand operand: "index_of"  // String
+                    - right-hand operand: "indexOf"  // String
                 - argument value: "x"  // o.a.f.c.ASTExpStringLiteral
             - right-hand operand: ...(...)  // o.a.f.c.ASTExpMethodCall
-                - callee: ?index_of  // o.a.f.c.BuiltInsForStringsBasic$index_ofBI
+                - callee: ?indexOf  // o.a.f.c.BuiltInsForStringsBasic$index_ofBI
                     - left-hand operand: m  // o.a.f.c.ASTExpVariable
-                    - right-hand operand: "index_of"  // String
+                    - right-hand operand: "indexOf"  // String
                 - argument value: "y"  // o.a.f.c.ASTExpStringLiteral
         - variable scope: "1"  // Integer
         - namespace: null  // Null

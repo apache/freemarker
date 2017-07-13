@@ -20,19 +20,19 @@ FreeMarker: Encoding string built-in tests
 
 <#assign x = r'  dieBugsDie! * vazzZE 123456 --cdc-- --<<--@ x ${"kigyo"?upper_case}  '>
   
-cap_first:  ${x?cap_first}
-uncap_first:${x?uncap_first}
-uncap_first:${"Blah"?uncap_first}
+cap_first:  ${x?capFirst}
+uncap_first:${x?uncapFirst}
+uncap_first:${"Blah"?uncapFirst}
 capitalize: ${x?capitalize}
 html:       ${x?html}
 length:     ${x?length}
-lower_case: ${x?lower_case}
+lower_case: ${x?lowerCase}
 rtf:        ${x?rtf}
 trim:       ${x?trim}
 trim2:      ${"foo bar"?trim}
 trim3:      ${" foo bar"?trim}
 trim4:      ${"foo bar "?trim}
-upper_case: ${x?upper_case}
+upper_case: ${x?upperCase}
 xml:        ${x?xml}
 xhtml:      ${"\"Blah's is > 1 & < 2\""?xhtml}
 <@assertEquals actual="'"?html expected="&#39;" />
@@ -56,7 +56,7 @@ xhtml:      ${"\"Blah's is > 1 & < 2\""?xhtml}
 <@assertFails message="shouldn't be greater than the end index">${"ab"?substring(1, 0)}</@><#t>
 
 word_list:
-<#global words = x?word_list>
+<#global words = x?wordList>
 <#list words as w>- ${w}
 </#list>
 
@@ -67,11 +67,11 @@ ${"1.5e3"?number?c}
 ${"0005"?number?c}
 ${"+0"?number?c}
 ${"-0"?number?c}
-${"NaN"?number?is_nan?c}
-${("INF"?number?is_infinite && "INF"?number > 0)?c}
-${("-INF"?number?is_infinite && "-INF"?number < 0)?c}
-${("Infinity"?number?is_infinite && "Infinity"?number > 0)?c}
-${("-Infinity"?number?is_infinite && "-Infinity"?number < 0)?c}
+${"NaN"?number?isNan?c}
+${("INF"?number?isInfinite && "INF"?number > 0)?c}
+${("-INF"?number?isInfinite && "-INF"?number < 0)?c}
+${("Infinity"?number?isInfinite && "Infinity"?number > 0)?c}
+${("-Infinity"?number?isInfinite && "-Infinity"?number < 0)?c}
 
 ${"org.apache.freemarker.core.templatesuite.models.NewTestModel"?new()}
 ${"org.apache.freemarker.core.templatesuite.models.NewTestModel"?new(1)}
@@ -108,22 +108,22 @@ ${matches?groups[2]}
 <#assign a = "foo", b="bar", c="(a+b)?upper_case">
 ${c?eval}
 
-[${"a"?j_string}] = [a]
-[${"a\\'x'\nb"?j_string}] = [a\\'x'\nb]
-[${"\x1\x1A\x20"?j_string}] = [\u0001\u001a ]
+[${"a"?jString}] = [a]
+[${"a\\'x'\nb"?jString}] = [a\\'x'\nb]
+[${"\x0001\x001A "?jString}] = [\u0001\u001a ]
 
-[${"a"?js_string}] = [a]
-[${"a\\'x'\nb"?js_string}] = [a\\\'x\'\nb]
-[${"\x1\x1A\x20"?js_string}] = [\x01\x1A ]
-[${"<![CDATA["?js_string}] = [\x3C![CDATA[]
-[${"]]>"?js_string}] = []]\>]
+[${"a"?jsString}] = [a]
+[${"a\\'x'\nb"?jsString}] = [a\\\'x\'\nb]
+[${"\x0001\x001A "?jsString}] = [\x01\x1A ]
+[${"<![CDATA["?jsString}] = [\x3C![CDATA[]
+[${"]]>"?jsString}] = []]\>]
 
-[${"a"?json_string}] = [a]
-[${"a\\'x'\nb"?json_string}] = [a\\'x'\nb]
-[${"\x1\x1A\x20"?json_string}] = [\u0001\u001A ]
-[${"\n\r\t\f\b\""?json_string}] = [\n\r\t\f\b\"]
-[${"/"?json_string}] = [\/]
-[${"a/b"?json_string}] = [a/b]
-[${"</script>"?json_string}] = [<\/script>]
-[${"<![CDATA["?json_string}] = [\u003C![CDATA[]
-[${"]]>"?json_string}] = []]\u003E]
+[${"a"?jsonString}] = [a]
+[${"a\\'x'\nb"?jsonString}] = [a\\'x'\nb]
+[${"\x0001\x001A "?jsonString}] = [\u0001\u001A ]
+[${"\n\r\t\f\b\""?jsonString}] = [\n\r\t\f\b\"]
+[${"/"?jsonString}] = [\/]
+[${"a/b"?jsonString}] = [a/b]
+[${"</script>"?jsonString}] = [<\/script>]
+[${"<![CDATA["?jsonString}] = [\u003C![CDATA[]
+[${"]]>"?jsonString}] = []]\u003E]

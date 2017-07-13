@@ -16,32 +16,32 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<#setting time_zone = "UTC">
+<#setting timeZone = "UTC">
 
-<@assert test=unknown?is_unknown_date_like />
-<@assert test=!timeOnly?is_unknown_date_like />
-<@assert test=!dateOnly?is_unknown_date_like />
-<@assert test=!dateTime?is_unknown_date_like />
+<@assert test=unknown?isUnknownDateLike />
+<@assert test=!timeOnly?isUnknownDateLike />
+<@assert test=!dateOnly?isUnknownDateLike />
+<@assert test=!dateTime?isUnknownDateLike />
 
-<@assert test=!unknown?is_date_only />
-<@assert test=!timeOnly?is_date_only />
-<@assert test=dateOnly?is_date_only />
-<@assert test=!dateTime?is_date_only />
+<@assert test=!unknown?isDateOnly />
+<@assert test=!timeOnly?isDateOnly />
+<@assert test=dateOnly?isDateOnly />
+<@assert test=!dateTime?isDateOnly />
 
-<@assert test=!unknown?is_time />
-<@assert test=timeOnly?is_time />
-<@assert test=!dateOnly?is_time />
-<@assert test=!dateTime?is_time />
+<@assert test=!unknown?isTime />
+<@assert test=timeOnly?isTime />
+<@assert test=!dateOnly?isTime />
+<@assert test=!dateTime?isTime />
 
-<@assert test=!unknown?is_datetime />
-<@assert test=!timeOnly?is_datetime />
-<@assert test=!dateOnly?is_datetime />
-<@assert test=dateTime?is_datetime />
+<@assert test=!unknown?isDatetime />
+<@assert test=!timeOnly?isDatetime />
+<@assert test=!dateOnly?isDatetime />
+<@assert test=dateTime?isDatetime />
 
 <@assertFails message="isn't known if">${unknown?string.xs}</@>
-<@assertEquals expected="2003-04-05T06:07:08Z" actual=unknown?datetime_if_unknown?string.xs />
-<@assertEquals expected="2003-04-05Z" actual=unknown?date_if_unknown?string.xs />
-<@assertEquals expected="06:07:08Z" actual=unknown?time_if_unknown?string.xs />
-<@assertEquals expected="2003-04-05T06:07:08Z" actual=dateTime?date_if_unknown?string.xs />
-<@assertEquals expected="2003-04-05" actual=dateOnly?time_if_unknown?string.xs />
-<@assertEquals expected="06:07:08" actual=timeOnly?date_if_unknown?string.xs />
+<@assertEquals expected="2003-04-05T06:07:08Z" actual=unknown?datetimeIfUnknown?string.xs />
+<@assertEquals expected="2003-04-05Z" actual=unknown?dateIfUnknown?string.xs />
+<@assertEquals expected="06:07:08Z" actual=unknown?timeIfUnknown?string.xs />
+<@assertEquals expected="2003-04-05T06:07:08Z" actual=dateTime?dateIfUnknown?string.xs />
+<@assertEquals expected="2003-04-05" actual=dateOnly?timeIfUnknown?string.xs />
+<@assertEquals expected="06:07:08" actual=timeOnly?dateIfUnknown?string.xs />

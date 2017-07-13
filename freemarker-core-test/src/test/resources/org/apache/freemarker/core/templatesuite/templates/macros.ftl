@@ -31,7 +31,7 @@
 <#assign urls = {"home" : "/home.html", "about" : "/about.html"}>
 <#assign images = {"home" : "/images/home.png", "about" : "/image/about-us.jpeg"}>
 <#assign preferences = {"showImages" : true}>
-<#assign "español" = français><#macro français(url, image, alt)>
+<#assign español = français><#macro français(url, image, alt)>
     <#local var = "Kilroy">
     <a href="${url}">
     <#if preferences.showImages>
@@ -74,7 +74,7 @@
 
 <p>Test "catch-all" macro parameter:</p>
 
-<#macro "catch-all" foo bar...>
+<#macro catch\-all foo bar...>
 foo=${foo} baz=[<#list bar?keys?sort as key>${key}=${bar[key]}<#if key_has_next>, </#if></#list>]
 </#macro>
 <#assign catchall = .namespace["catch-all"]>

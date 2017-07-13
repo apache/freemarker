@@ -16,13 +16,13 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<#setting number_format = ",##0.##">
+<#setting numberFormat = ",##0.##">
 <#setting locale = "fr_FR">
 ${1}
 ${1?c}
 ${1234567.886}
 ${1234567.886?c}
-<#setting number_format = "0.00">
+<#setting numberFormat = "0.00">
 ${1}
 ${1?c}
 ${1234567.886}

@@ -16,4 +16,4 @@
   specific language governing permissions and limitations
   under the License.
 -->
-${"<h1>"?no_esc + "Foo & bar" + "</h1>"?no_esc}
+${"<h1>"?noEsc + "Foo & bar" + "</h1>"?noEsc}

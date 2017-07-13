@@ -1,4 +1,4 @@
-<#ftl ns_prefixes={ "n": "http://freemarker.org/test/bar", "D": "http://freemarker.org/test/namespace-test" }>
+<#ftl nsPrefixes={ "n": "http://freemarker.org/test/bar", "D": "http://freemarker.org/test/namespace-test" }>
 <#--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file

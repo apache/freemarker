@@ -1,4 +1,4 @@
-<#ftl ns_prefixes={
+<#ftl nsPrefixes={
     "D": "http://freemarker.org/test/namespace-test",
     "n": "http://freemarker.org/test/foo",
     "bar": "http://freemarker.org/test/bar"

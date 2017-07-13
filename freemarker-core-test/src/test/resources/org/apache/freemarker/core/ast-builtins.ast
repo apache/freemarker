@@ -25,17 +25,17 @@
         - content: "\n"  // String
     ${...}  // o.a.f.c.ASTDollarInterpolation
         - content: ...(...)  // o.a.f.c.ASTExpMethodCall
-            - callee: ?left_pad  // o.a.f.c.BuiltInsForStringsBasic$padBI
+            - callee: ?leftPad  // o.a.f.c.BuiltInsForStringsBasic$padBI
                 - left-hand operand: x  // o.a.f.c.ASTExpVariable
-                - right-hand operand: "left_pad"  // String
+                - right-hand operand: "leftPad"  // String
             - argument value: 5  // o.a.f.c.ASTExpNumberLiteral
     #text  // o.a.f.c.ASTStaticText
         - content: "\n"  // String
     ${...}  // o.a.f.c.ASTDollarInterpolation
         - content: ...(...)  // o.a.f.c.ASTExpMethodCall
-            - callee: ?left_pad  // o.a.f.c.BuiltInsForStringsBasic$padBI
+            - callee: ?leftPad  // o.a.f.c.BuiltInsForStringsBasic$padBI
                 - left-hand operand: x  // o.a.f.c.ASTExpVariable
-                - right-hand operand: "left_pad"  // String
+                - right-hand operand: "leftPad"  // String
             - argument value: 5  // o.a.f.c.ASTExpNumberLiteral
             - argument value: "-"  // o.a.f.c.ASTExpStringLiteral
     #text  // o.a.f.c.ASTStaticText

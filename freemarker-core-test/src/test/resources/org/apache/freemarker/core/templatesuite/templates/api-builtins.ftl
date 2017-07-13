@@ -30,11 +30,11 @@
 </#list>
 <@assertEquals expected="1: a, 2: b, 3: c" actual=dump />
 
-<@assert test=map?has_api />
-<@assert test=list?has_api />
-<@assert test=set?has_api />
-<@assert test=!s?has_api />
-<@assert test=!1?has_api />
-<@assert test=!""?has_api />
-<@assert test=!{}?has_api />
-<@assert test=!true?has_api />
+<@assert test=map?hasApi />
+<@assert test=list?hasApi />
+<@assert test=set?hasApi />
+<@assert test=!s?hasApi />
+<@assert test=!1?hasApi />
+<@assert test=!""?hasApi />
+<@assert test=!{}?hasApi />
+<@assert test=!true?hasApi />

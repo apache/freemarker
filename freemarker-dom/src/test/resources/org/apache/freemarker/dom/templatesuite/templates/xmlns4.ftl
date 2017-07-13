@@ -1,4 +1,4 @@
-<#ftl ns_prefixes = {"x" : "http://x", "y" : "http://y"}>
+<#ftl nsPrefixes = {"x" : "http://x", "y" : "http://y"}>
 <#--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -36,7 +36,7 @@
   <#recurse>
 </#macro>
 
-<#macro 'x:chapter'>
+<#macro x\:chapter>
   <h2><#recurse .node["y:title"]></h2>
   <#recurse>
 </#macro>
@@ -45,22 +45,22 @@
   <p><#recurse>
 </#macro>
 
-<#macro 'x:para'>
+<#macro x\:para>
   <p><#recurse>
 </#macro>
 
-<#macro 'y:para'>
+<#macro y\:para>
   <p><#recurse>
 </#macro>
 
-<#macro "x:title">
+<#macro x\:title>
   <#--
     We have handled this element imperatively,
     so we do nothing here.
   -->
 </#macro>
 
-<#macro "y:title">
+<#macro y\:title>
   <#--
     We have handled this element imperatively,
     so we do nothing here.

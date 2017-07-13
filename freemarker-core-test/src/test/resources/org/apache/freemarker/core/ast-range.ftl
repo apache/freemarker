@@ -30,7 +30,7 @@
 
 <#assign x = n?abs .. m?abs>
 
-<#assign x = n?index_of('x') .. m?index_of('y')>
+<#assign x = n?indexOf('x') .. m?indexOf('y')>
 
 <#assign x = n..m == o..p>
 

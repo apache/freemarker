@@ -1,4 +1,4 @@
-<#ftl ns_prefixes={"D" : "http://x.com", "y" : "http://y.com"}>
+<#ftl nsPrefixes={"D" : "http://x.com", "y" : "http://y.com"}>
 <#--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file

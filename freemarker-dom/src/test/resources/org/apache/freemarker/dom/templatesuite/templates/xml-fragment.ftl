@@ -1,4 +1,4 @@
-<#ftl ns_prefixes = {"n" : "http://x"}>
+<#ftl nsPrefixes = {"n" : "http://x"}>
 <#--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -17,9 +17,9 @@
   specific language governing permissions and limitations
   under the License.
 -->
-${node?node_name} = b
-${node?root?node_name} = @document
-${node['/']?node_name} = @document
+${node?nodeName} = b
+${node?root?nodeName} = @document
+${node['/']?nodeName} = @document
 
 ${node['n:c']} = C<>&"']]>
 
