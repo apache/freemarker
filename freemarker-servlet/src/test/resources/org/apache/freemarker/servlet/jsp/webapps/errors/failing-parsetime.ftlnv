@@ -17,4 +17,4 @@
   under the License.
 -->
 
-${'x'?no_such_builtin}
+${'x'?noSuchBuiltin}

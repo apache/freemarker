@@ -78,14 +78,29 @@ public final class FTLUtil {
 
     /**
      * Escapes a string according the FTL string literal escaping rules, assuming the literal is quoted with
-     * {@code quotation}; it doesn't add the quotation marks themselves.
+     * {@code quotation}; it doesn't add the quotation marks themselves. {@code '&'}, {@code '<'}, and {@code '>'}
+     * characters will be escaped.
      *
      * @param quotation Either {@code '"'} or {@code '\''}. It's assumed that the string literal whose part we calculate is
      *                  enclosed within this kind of quotation mark. Thus, the other kind of quotation character will not be
      *                  escaped in the result.
      */
     public static String escapeStringLiteralPart(String s, char quotation) {
-        return escapeStringLiteralPart(s, quotation, false);
+        return escapeStringLiteralPart(s, quotation, false, true, true, true);
+    }
+
+    /**
+     * Escapes a string according the FTL string literal escaping rules, assuming the literal is quoted with
+     * {@code quotation}; it doesn't add the quotation marks themselves.
+     *
+     * @param quotation See in {@link #escapeStringLiteralPart(String, char)}
+     * @param escapeAmp Whether to escape {@code '&'}
+     * @param escapeLT Whether to escape {@code '<'}
+     * @param escapeGT Whether to escape {@code '>'}
+     */
+    public static String escapeStringLiteralPart(String s, char quotation,
+            boolean escapeAmp, boolean escapeLT, boolean escapeGT) {
+        return escapeStringLiteralPart(s, quotation, false, escapeAmp, escapeLT, escapeGT);
     }
 
     /**
@@ -100,6 +115,11 @@ public final class FTLUtil {
     }
 
     private static String escapeStringLiteralPart(String s, char quotation, boolean addQuotation) {
+        return escapeStringLiteralPart(s, quotation, addQuotation, true, true, true);
+    }
+
+    private static String escapeStringLiteralPart(String s, char quotation, boolean addQuotation,
+            boolean escapeAmp, boolean escapeLT, boolean escapeGT) {
         final int ln = s.length();
 
         final char otherQuotation;
@@ -121,7 +141,8 @@ public final class FTLUtil {
                     c < escLn ? ESCAPES[c] :
                             c == '{' && i > 0 && isInterpolationStart(s.charAt(i - 1)) ? '{' :
                                     0;
-            if (escape == 0 || escape == otherQuotation) {
+            if (escape == 0 || escape == otherQuotation
+                    || c == '&' && !escapeAmp || c == '<' && !escapeLT || c == '>' && !escapeGT) {
                 if (buf != null) {
                     buf.append(c);
                 }
