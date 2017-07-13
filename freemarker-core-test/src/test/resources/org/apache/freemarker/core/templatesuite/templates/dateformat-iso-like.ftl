@@ -17,7 +17,7 @@
   under the License.
 -->
 <#assign d = "2010-05-15 22:38:05:23 +0200"?datetime("yyyy-MM-dd HH:mm:ss:S Z")>
-<#setting time_zone="GMT+02">
+<#setting timeZone="GMT+02">
 <@assertEquals actual=d?string.xs  expected="2010-05-15T22:38:05.023+02:00" />
 <@assertEquals actual=d?string.iso expected="2010-05-15T22:38:05.023+02:00" />
 <@assertEquals actual=d?string('xs')  expected="2010-05-15T22:38:05.023+02:00" />
@@ -83,20 +83,20 @@
 <@assertEquals actual=d?string.xs_ms  expected="12:30:15.000+02:00" />
 <@assertEquals actual=d?string.iso_ms expected="12:30:15.000+02:00" />
 
-<#setting time_zone="GMT+02">
+<#setting timeZone="GMT+02">
 <#assign d = "2010-05-15"?date("yyyy-MM-dd")>
 <@assertEquals actual=d?string.xs  expected="2010-05-15+02:00" />
 <@assertEquals actual=d?string.iso expected="2010-05-15" />
-<#setting time_zone="GMT+00">
+<#setting timeZone="GMT+00">
 <@assertEquals actual=d?string.xs  expected="2010-05-14Z" />
 <@assertEquals actual=d?string.iso expected="2010-05-14" />
 
-<#setting time_zone="GMT+02:30">
+<#setting timeZone="GMT+02:30">
 <#assign d = "2010-05-15"?datetime("yyyy-MM-dd")>
 <@assertEquals actual=d?string.xs  expected="2010-05-15T00:00:00+02:30" />
 <@assertEquals actual=d?string.iso expected="2010-05-15T00:00:00+02:30" />
 
-<#setting time_zone="GMT-05">
+<#setting timeZone="GMT-05">
 <#setting locale = "en_US">
 <#assign d = "BC 0001-05-15"?date("G yyyy-MM-dd")>
 <#-- Tests that: (a) BC 1 isn't 0 like in ISO 8601; (b) No Julian calendar is used.  -->
@@ -104,46 +104,46 @@
 <@assertEquals actual=d?string.iso expected="0000-05-13" />
 
 <#assign dt = "2010-05-15T01:02:03"?datetime.xs>
-<#setting datetime_format="xs">
+<#setting datetimeFormat="xs">
 <@assertEquals actual=dt?string expected="2010-05-15T01:02:03-05:00" />
-<#setting datetime_format="xs u">
+<#setting datetimeFormat="xs u">
 <@assertEquals actual=dt?string expected="2010-05-15T06:02:03Z" />
-<#setting datetime_format="iso u">
+<#setting datetimeFormat="iso u">
 <@assertEquals actual=dt?string expected="2010-05-15T06:02:03Z" />
-<#setting datetime_format="xs fz">
+<#setting datetimeFormat="xs fz">
 <@assertEquals actual=dt?string expected="2010-05-15T01:02:03-05:00" />
-<#setting datetime_format="xs fz u">
+<#setting datetimeFormat="xs fz u">
 <@assertEquals actual=dt?string expected="2010-05-15T06:02:03Z" />
-<#setting datetime_format="xs nz u">
+<#setting datetimeFormat="xs nz u">
 <@assertEquals actual=dt?string expected="2010-05-15T06:02:03" />
-<#setting datetime_format="iso m nz">
+<#setting datetimeFormat="iso m nz">
 <@assertEquals actual=dt?string expected="2010-05-15T01:02" />
 
 <#assign d = dt?date>
-<#setting date_format="xs">
+<#setting dateFormat="xs">
 <@assertEquals actual=d?string expected="2010-05-15-05:00" />
-<#setting date_format="iso">
+<#setting dateFormat="iso">
 <@assertEquals actual=d?string expected="2010-05-15" />
-<#setting date_format="xs fz">
+<#setting dateFormat="xs fz">
 <@assertEquals actual=d?string expected="2010-05-15-05:00" />
-<#setting date_format="xs fz u">
+<#setting dateFormat="xs fz u">
 <@assertEquals actual=d?string expected="2010-05-15Z" />
-<#setting date_format="iso fz u">
+<#setting dateFormat="iso fz u">
 <@assertEquals actual=d?string expected="2010-05-15" />
-<#setting date_format="xs nz">
+<#setting dateFormat="xs nz">
 <@assertEquals actual=d?string expected="2010-05-15" />
 
 <#assign t = dt?time>
 <@assertEquals actual=d?string expected="2010-05-15" />
-<#setting time_format="xs">
+<#setting timeFormat="xs">
 <@assertEquals actual=t?string expected="01:02:03-05:00" />
-<#setting time_format="iso_m">
+<#setting timeFormat="iso_m">
 <@assertEquals actual=t?string expected="01:02-05:00" />
-<#setting time_format="xs fz">
+<#setting timeFormat="xs fz">
 <@assertEquals actual=t?string expected="01:02:03-05:00" />
-<#setting time_format="xs nz">
+<#setting timeFormat="xs nz">
 <@assertEquals actual=t?string expected="01:02:03" />
-<#setting time_format="iso nz ms">
+<#setting timeFormat="iso nz ms">
 <@assertEquals actual=t?string expected="01:02:03.000" />
 
 <@assertFails message="Use ?date, ?time, or ?datetime">${unknownDate?string.xs}</@>

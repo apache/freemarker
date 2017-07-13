@@ -41,7 +41,7 @@ ${"test\nFoo"?matches('.*\n^foo', 'im')?string} == true
 ${"test\nFoo"?matches('.*\n^foo', 'mi')?string} == true
 ${"test\nFoo"?matches('.*^foo', 'ism')?string} == true
 ${"test\nFoo"?matches('.*^foo', 'smi')?string} == true
-<#setting boolean_format="True,False">
+<#setting booleanFormat="True,False">
 <@assert test=false?matches('[eslaF]+') />
 <@assert test='False'?matches('[eslaF]+') />
 
@@ -74,8 +74,8 @@ Any last words:
 
 c-word with follower:
 <#list s?matches('(c[a-z]*+).([a-z]++)', 'is') as m>
-- "${m?j_string}"
-  Groups: <#list m?groups as g>"${g?j_string}"<#if g_has_next>, </#if></#list>
+- "${m?jString}"
+  Groups: <#list m?groups as g>"${g?jString}"<#if g_has_next>, </#if></#list>
 </#list>
 
 c-word with follower in the same line:

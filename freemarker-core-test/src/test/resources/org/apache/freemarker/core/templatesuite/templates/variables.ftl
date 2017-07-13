@@ -64,7 +64,7 @@
 <p>${items[ "_test" ]}</p>
 <p>${items._test}</p>
 
-${"God save the queen."?word_list[1]?upper_case}
+${"God save the queen."?wordList[1]?upperCase}
 
 </body>
 </html>

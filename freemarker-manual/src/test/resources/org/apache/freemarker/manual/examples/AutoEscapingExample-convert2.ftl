@@ -16,9 +16,9 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<#outputformat "HTML"><#assign htmlMO><p>Test</#assign></#outputformat>
-<#outputformat "XML"><#assign xmlMO><p>Test</p></#assign></#outputformat>
-<#outputformat "RTF"><#assign rtfMO>\par Test</#assign></#outputformat>
+<#outputFormat "HTML"><#assign htmlMO><p>Test</#assign></#outputFormat>
+<#outputFormat "XML"><#assign xmlMO><p>Test</p></#assign></#outputFormat>
+<#outputFormat "RTF"><#assign rtfMO>\par Test</#assign></#outputFormat>
 <#-- We assume that we have "undefined" output format here. -->
 HTML: ${htmlMO}
 XML:  ${xmlMO}

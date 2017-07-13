@@ -17,8 +17,8 @@
   under the License.
 -->
 <#setting locale="en_US">
-<#setting time_zone="GMT">
-<#setting datetime_format="">
+<#setting timeZone="GMT">
+<#setting datetimeFormat="">
 ${date}
 ${unknownDate?datetime}
 ${date?string}
@@ -46,26 +46,26 @@ ${date?time?string.short}
 ${date?time?string.medium}
 ${date?time?string.long}
 <#setting locale="hu_hu">
-<#setting datetime_format="long_long">
+<#setting datetimeFormat="long_long">
 ${date}
 <#setting locale="en_US">
-<#setting datetime_format="EEE, dd MMM yyyyy HH:mm:ss z">
+<#setting datetimeFormat="EEE, dd MMM yyyyy HH:mm:ss z">
 ${date}
 ${unknownDate?string["EEE, dd MMM yyyy HH:mm:ss z"]}
 ${unknownDate?string("EEE, dd MMM yyyy HH:mm:ss z")}
 ${unknownDate?string.yyyy}
 
-<#setting datetime_format="yyyy">
+<#setting datetimeFormat="yyyy">
 <#assign s = date?string>
 ${s}
-<#setting datetime_format="MM">
+<#setting datetimeFormat="MM">
 ${s}
 
 <#-- Check ?string lazy evaluation bug was fixed: -->
-<#setting datetime_format="yyyy">
+<#setting datetimeFormat="yyyy">
 <#assign s = date?string>
 <#-- no ${s} -->
-<#setting datetime_format="MM">
+<#setting datetimeFormat="MM">
 ${s}
 <#assign s = date?string>
 ${s}

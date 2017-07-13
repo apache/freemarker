@@ -22,11 +22,11 @@
 
 <#assign bTrue=true>
 <#assign bFalse=false>
-<#include "include2-included.ftl" ignore_missing=true>
-<#include "include2-included.ftl" ignore_missing=bTrue>
-<#include "include2-included.ftl" ignore_missing=false>
-<#include "include2-included.ftl" ignore_missing=bFalse>
+<#include "include2-included.ftl" ignoreMissing=true>
+<#include "include2-included.ftl" ignoreMissing=bTrue>
+<#include "include2-included.ftl" ignoreMissing=false>
+<#include "include2-included.ftl" ignoreMissing=bFalse>
 
 <@assertFails message="not found"><#include "missing.ftl"></@>
-[<#include "missing.ftl" ignore_missing=true>]
-[<#include "missing.ftl" ignore_missing=bTrue>]
+[<#include "missing.ftl" ignoreMissing=true>]
+[<#include "missing.ftl" ignoreMissing=bTrue>]

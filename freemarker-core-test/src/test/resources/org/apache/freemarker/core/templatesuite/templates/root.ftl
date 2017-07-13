@@ -28,16 +28,16 @@
 
 <p>Access the same variable via the root variable (dot syntax):</p>
 
-<p>${.data_model.message}</p>
+<p>${.dataModel.message}</p>
 
 <p>Access the same variable via the root variable (bracket syntax):</p>
 
-<p>${.data_model["message"]}</p>
+<p>${.dataModel["message"]}</p>
 
 <p>Ensure that root lookups are unaffected by local variables:</p>
 
 <#macro test message>
-  ${.data_model.message}
+  ${.dataModel.message}
   ${message}
 </#macro>
 

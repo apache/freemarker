@@ -26,6 +26,6 @@
   
     ${message?capitalize?length}
     
-    ${message [1..] ? upper_case}
+    ${message [1..] ? upperCase}
     
     message: ${message ?capitalize[0..10]}

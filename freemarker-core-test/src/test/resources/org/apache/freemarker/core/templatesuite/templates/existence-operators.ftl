@@ -32,10 +32,10 @@
 <@isNonFastIRE>${v}</@> <#-- To check that it isn't an IRE.FAST_INSTANCE -->
 <@assertEquals actual=v?exists expected=false />
 <@assertEquals actual=(v)?exists expected=false />
-<@assertEquals actual=v?if_exists expected='' />
-<@assertEquals actual=(v)?if_exists expected='' />
-<@assertEquals actual=v?has_content expected=false />
-<@assertEquals actual=(v)?has_content expected=false />
+<@assertEquals actual=v?ifExists expected='' />
+<@assertEquals actual=(v)?ifExists expected='' />
+<@assertEquals actual=v?hasContent expected=false />
+<@assertEquals actual=(v)?hasContent expected=false />
 
 <@assertEquals actual=v?default(w, '-') expected='-' />
 <@assertEquals actual=v!w!'-' expected='-' />
@@ -52,10 +52,10 @@
 	<@assertEquals actual=(v)?default('-') expected=v />
 	<@assert test=v?exists />
 	<@assert test=(v)?exists />
-	<@assertEquals actual=v?if_exists expected=v />
-	<@assertEquals actual=(v)?if_exists expected=v />
-	<@assert test=v?has_content />
-	<@assert test=(v)?has_content />
+	<@assertEquals actual=v?ifExists expected=v />
+	<@assertEquals actual=(v)?ifExists expected=v />
+	<@assert test=v?hasContent />
+	<@assert test=(v)?hasContent />
 </#list>
 <@assert test=!v?? />
 <@assert test=!v?exists />
@@ -69,10 +69,10 @@
 <@assertEquals actual=(u.v)?default('-') expected='-' />
 <@isIRE>${u.v?exists}</@>
 <@assertEquals actual=(u.v)?exists expected=false />
-<@isIRE>${u.v?if_exists}</@>
-<@assertEquals actual=(u.v)?if_exists expected='' />
-<@isIRE>${u.v?has_content}</@>
-<@assertEquals actual=(u.v)?has_content expected=false />
+<@isIRE>${u.v?ifExists}</@>
+<@assertEquals actual=(u.v)?ifExists expected='' />
+<@isIRE>${u.v?hasContent}</@>
+<@assertEquals actual=(u.v)?hasContent expected=false />
 
 <#assign u = { 'x': 'X' } >
 <@assertEquals actual=u.v!'-' expected='-' />
@@ -83,10 +83,10 @@
 <@assertEquals actual=(u.v)?default('-') expected='-' />
 <@assertEquals actual=u.v?exists expected=false />
 <@assertEquals actual=(u.v)?exists expected=false />
-<@assertEquals actual=u.v?if_exists expected='' />
-<@assertEquals actual=(u.v)?if_exists expected='' />
-<@assertEquals actual=u.v?has_content expected=false />
-<@assertEquals actual=(u.v)?has_content expected=false />
+<@assertEquals actual=u.v?ifExists expected='' />
+<@assertEquals actual=(u.v)?ifExists expected='' />
+<@assertEquals actual=u.v?hasContent expected=false />
+<@assertEquals actual=(u.v)?hasContent expected=false />
 
 <#assign u = { 'v': 'V' } >
 <@assertEquals actual=u.v!'-' expected='V' />
@@ -97,10 +97,10 @@
 <@assertEquals actual=(u.v)?default('-') expected='V' />
 <@assert test=u.v?exists />
 <@assert test=(u.v)?exists />
-<@assertEquals actual=u.v?if_exists expected='V' />
-<@assertEquals actual=(u.v)?if_exists expected='V' />
-<@assert test=u.v?has_content />
-<@assert test=(u.v)?has_content />
+<@assertEquals actual=u.v?ifExists expected='V' />
+<@assertEquals actual=(u.v)?ifExists expected='V' />
+<@assert test=u.v?hasContent />
+<@assert test=(u.v)?hasContent />
 
 <#list 1..4 as i>
   <#if i == 3><#assign x = 'X'></#if>

@@ -54,7 +54,7 @@ Entire input match:
 <#assign firstGS = false>
 <#list matches as m>
 - M: ${m}
-    <#if firstGS?is_boolean>
+    <#if firstGS?isBoolean>
       <#assign firstGS = m?groups>
     </#if>
     <#list m?groups as g>

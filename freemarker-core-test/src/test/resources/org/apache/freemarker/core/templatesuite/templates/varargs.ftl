@@ -16,7 +16,7 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<#setting number_format="#">
+<#setting numberFormat="#">
 
 ${m.bar()} == 0
 ${m.bar([])} == 0
@@ -42,4 +42,4 @@ ${m.overloaded([11, 22, 33, 44, 55])} == -1122334455
 ${m.overloaded(11, 22)} == 1122
 ${m.overloaded([11, 22])} == -1122
 
-${m.noVarArgs("string", true, 123, 1000000?number_to_date)} == string, true, 123, 1000000
+${m.noVarArgs("string", true, 123, 1000000?numberToDate)} == string, true, 123, 1000000

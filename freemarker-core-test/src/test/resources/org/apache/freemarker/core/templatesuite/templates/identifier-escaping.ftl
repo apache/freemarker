@@ -20,7 +20,7 @@
     <#local \.namespace = 123>
     <a-b>${data\-color}<#nested \.namespace></a-b><#t>
 </#macro>
-<#macro "m-b2"></#macro>
+<#macro m\-b2></#macro>
 <#macro "m/b2"></#macro>
 
 <@m\-a data\-color="red"; loop\-var>${loop\-var}</@>
@@ -46,7 +46,7 @@ Switch: <#switch sw\-a>
     <#default>Fails
 </#switch>
 
-<#escape \-x as \-x?upper_case>${'escaped'}</#escape>
+<#escape \-x as \-x?upperCase>${'escaped'}</#escape>
 
 <#if false && sw\-a == 1>
     <#visit x\-y2 using x\-y1>
@@ -57,7 +57,7 @@ Switch: <#switch sw\-a>
 
 <#assign @as@_a = 'as1'>
 ${@as@_a}
-<#assign 'as-c' = 'as2'>
+<#assign as\-c = 'as2'>
 ${.vars['as-c']}
 <#assign "as/b" = 'as3'>
 ${.vars["as/b"]}
@@ -75,7 +75,7 @@ ${.vars['as"d']}
 
 <#macro dumpNS>
     <#list .namespace?keys?sort as k>
-        ${k} = <#local v = .namespace[k]><#if v?is_string>${v}<#else>...</#if><#lt>
+        ${k} = <#local v = .namespace[k]><#if v?isString>${v}<#else>...</#if><#lt>
     </#list>
 </#macro>
 <@dumpNS />

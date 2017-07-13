@@ -21,7 +21,7 @@
 <title>FreeMarker: NoParse Test</title>
 </head>
 <body>
-<#noparse>
+<#noParse>
 
 A simple test follows:
 
@@ -31,31 +31,31 @@ A more rigorous test, showing that we're not faking it:
 
 ${message@#$%&}
 
-</#noparse>
+</#noParse>
 <#if message?exists>
 	<p>Message exists!
-	<#noparse>
+	<#noParse>
 		...and even generates output!
 		<#if message>
 			Nested statements are ok, too.
 		</#if>
-	</#noparse>
+	</#noParse>
 	</p>
 </#if>
 
 Here's another edge case, this time, trying to output a &lt;noparse&gt;
 inside another &lt;noparse&gt;
 
-<#noparse>
+<#noParse>
 
 This is what the noparse instruction looks like:
 
-<#nop</#noparse><#noparse>arse>This part of the template wont be parsed by the 
+<#nop</#noParse><#noParse>arse>This part of the template wont be parsed by the 
 FreeMarker parser. Instead, it will be treated as verbatim text information,
-and output as such.</#nop</#noparse><#noparse>arse>
+and output as such.</#nop</#noParse><#noParse>arse>
 
 The rest of the template appears here.
-</#noparse>
+</#noParse>
 
 Simple.
 </body>

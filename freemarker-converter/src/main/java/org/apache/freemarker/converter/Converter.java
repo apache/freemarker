@@ -283,6 +283,12 @@ public abstract class Converter {
     }
 
     private boolean isToBeProcessed(File src) {
+        String relSrcPath = getRelativeSourcePathWithSlashes(src);
+        return (include == null || include.matcher(relSrcPath).matches())
+                && (exclude == null || !exclude.matcher(relSrcPath).matches());
+    }
+
+    private String getRelativeSourcePathWithSlashes(File src) {
         String relSrcPath;
         File source = getSource();
         if (source.isFile()) {
@@ -290,9 +296,7 @@ public abstract class Converter {
         } else {
             relSrcPath = pathToStringWithSlashes(source.toPath().relativize(src.toPath()).normalize());
         }
-
-        return (include == null || include.matcher(relSrcPath).matches())
-                && (exclude == null || !exclude.matcher(relSrcPath).matches());
+        return relSrcPath;
     }
 
     private String pathToStringWithSlashes(Path path) {
@@ -402,6 +406,13 @@ public abstract class Converter {
          */
         public File getSourceFile() {
             return sourceFile;
+        }
+
+        /**
+         * Returns the path of the source file relatively to the source directory, using slash to separate directories.
+         */
+        public String getRelativeSourcePathWithSlashes() {
+            return Converter.this.getRelativeSourcePathWithSlashes(sourceFile);
         }
 
         public String getSourceFileName() {

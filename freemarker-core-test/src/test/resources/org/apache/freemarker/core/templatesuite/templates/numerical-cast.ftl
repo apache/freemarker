@@ -18,7 +18,7 @@
   under the License.
 -->
 <#setting locale="en_US">
-<#setting number_format="0.#########">
+<#setting numberFormat="0.#########">
 
 <#assign testlist= [ 0, 1, -1, 0.5, 1.5, -0.5,
 	 -1.5, 0.25, -0.25, 1.75, -1.75,

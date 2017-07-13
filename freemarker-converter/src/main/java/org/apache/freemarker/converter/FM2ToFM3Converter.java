@@ -20,17 +20,21 @@
 package org.apache.freemarker.converter;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.freemarker.core.NamingConvention;
 import org.apache.freemarker.core.util._NullArgumentException;
 
 import com.google.common.collect.ImmutableMap;
 
+import freemarker.cache.FileTemplateLoader;
+import freemarker.cache.MultiTemplateLoader;
+import freemarker.cache.StringTemplateLoader;
+import freemarker.cache.StrongCacheStorage;
+import freemarker.cache.TemplateLoader;
+import freemarker.cache.TemplateLookupStrategy;
 import freemarker.core.CSSOutputFormat;
 import freemarker.core.FM2ASTToFM3SourceConverter;
 import freemarker.core.HTMLOutputFormat;
@@ -80,6 +84,7 @@ public class FM2ToFM3Converter extends Converter {
     private Map<String, String> fileExtensionSubtitutions = DEFAULT_FILE_EXTENSION_SUBSTITUTIONS;
     private Properties freeMarker2Settings;
     private Configuration fm2Cfg;
+    private StringTemplateLoader stringTemplateLoader;
 
     @Override
     protected Pattern getDefaultInclude() {
@@ -90,10 +95,7 @@ public class FM2ToFM3Converter extends Converter {
     protected void prepare() throws ConverterException {
         super.prepare();
         fm2Cfg = new Configuration(Configuration.VERSION_2_3_19 /* To fix ignored initial unknown tags */);
-        fm2Cfg.setWhitespaceStripping(false);
-        fm2Cfg.setTabSize(1);
         fm2Cfg.setRecognizeStandardFileExtensions(true);
-        _TemplateAPI.setPreventStrippings(fm2Cfg, true);
         if (freeMarker2Settings != null) {
             try {
                 fm2Cfg.setSettings(freeMarker2Settings);
@@ -101,10 +103,34 @@ public class FM2ToFM3Converter extends Converter {
                 throw new ConverterException("Error while configuring FreeMarker 2", e);
             }
         }
+
+        // From now on we will overwrite settings that the user has set with freeMarker2Settings.
+
+        fm2Cfg.setTabSize(1);
+        _TemplateAPI.setPreventStrippings(fm2Cfg, true);
+        fm2Cfg.setTemplateLookupStrategy(TemplateLookupStrategy.DEFAULT_2_3_0);
+        fm2Cfg.setLocalizedLookup(false);
+        fm2Cfg.setCacheStorage(new StrongCacheStorage());
+
+        stringTemplateLoader = new StringTemplateLoader();
+        try {
+            fm2Cfg.setTemplateLoader(new MultiTemplateLoader(new TemplateLoader[] {
+                    stringTemplateLoader,
+                    new FileTemplateLoader(getSource().isDirectory() ? getSource() : getSource().getParentFile())
+                }
+            ));
+        } catch (IOException e) {
+            throw new ConverterException("Failed to create template loader", e);
+        }
     }
 
     private String getDestinationFileName(Template template) throws ConverterException {
         String srcFileName = template.getName();
+        int lastSlashIdx = srcFileName.lastIndexOf('/');
+        if (lastSlashIdx != -1) {
+            srcFileName = srcFileName.substring(lastSlashIdx + 1);
+        }
+
         int lastDotIdx = srcFileName.lastIndexOf('.');
         if (lastDotIdx == -1) {
             return srcFileName;
@@ -129,9 +155,16 @@ public class FM2ToFM3Converter extends Converter {
     
     @Override
     protected void convertFile(FileConversionContext fileTransCtx) throws ConverterException, IOException {
-        String src = IOUtils.toString(fileTransCtx.getSourceStream(), StandardCharsets.UTF_8);
+        Template template = null;
+        try {
+            template = fm2Cfg.getTemplate(fileTransCtx.getRelativeSourcePathWithSlashes());
+        } catch (Exception e) {
+            throw new ConverterException("Failed to load FreeMarker 2.3.x template", e);
+        }
+        fm2Cfg.clearTemplateCache();
+
         FM2ASTToFM3SourceConverter.Result result = FM2ASTToFM3SourceConverter.convert(
-                fileTransCtx.getSourceFile().getName(), src, fm2Cfg, fileTransCtx.getConversionMarkers()
+                template, fm2Cfg, stringTemplateLoader, fileTransCtx.getConversionMarkers()
         );
         fileTransCtx.setDestinationFileName(getDestinationFileName(result.getFM2Template()));
         fileTransCtx.getDestinationStream().write(

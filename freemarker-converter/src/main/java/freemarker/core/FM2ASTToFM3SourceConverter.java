@@ -19,6 +19,9 @@
 
 package freemarker.core;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.freemarker.converter.ConversionMarkers;
 import org.apache.freemarker.converter.ConverterException;
 import org.apache.freemarker.converter.ConverterUtils;
@@ -40,6 +44,8 @@ import org.apache.freemarker.core.util._StringUtil;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import freemarker.cache.StringTemplateLoader;
+import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.utility.StringUtil;
@@ -75,6 +81,7 @@ import freemarker.template.utility.StringUtil;
 public class FM2ASTToFM3SourceConverter {
 
     private final Template template;
+    private final StringTemplateLoader overlayTemplateLoader;
     private final String src;
     private final ConversionMarkers markers;
 
@@ -94,9 +101,10 @@ public class FM2ASTToFM3SourceConverter {
      *         {@code false}.
      */
     public static Result convert(
-            String templateName, String src, Configuration fm2Cfg, ConversionMarkers warnReceiver)
+            Template template, Configuration fm2Cfg, StringTemplateLoader overlayTemplateLoader,
+            ConversionMarkers warnReceiver)
             throws ConverterException {
-        return new FM2ASTToFM3SourceConverter(templateName, src, fm2Cfg, warnReceiver).convert();
+        return new FM2ASTToFM3SourceConverter(template, fm2Cfg, overlayTemplateLoader, warnReceiver).convert();
     }
 
     private Result convert() throws ConverterException {
@@ -106,16 +114,30 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private FM2ASTToFM3SourceConverter(
-            String templateName, String src, Configuration fm2Cfg, ConversionMarkers warnReceiver)
+            Template template, Configuration fm2Cfg, StringTemplateLoader overlayTemplateLoader,
+            ConversionMarkers warnReceiver)
             throws ConverterException {
-        template = createTemplate(templateName, src, fm2Cfg);
-        if (template.getParserConfiguration().getWhitespaceStripping()) {
-            throw new IllegalArgumentException("The Template must have been parsed with whitespaceStripping false.");
+        this.template = template;
+        this.overlayTemplateLoader = overlayTemplateLoader;
+
+        try {
+            TemplateLoader templateLoader = fm2Cfg.getTemplateLoader();
+            Object templateSource = templateLoader.findTemplateSource(template.getName());
+            if (templateSource == null) {
+                throw new FileNotFoundException("Template not found: " + template.getName());
+            }
+
+            Reader reader = templateLoader.getReader(templateSource, template.getEncoding());
+            try {
+                this.src = IOUtils.toString(reader);
+            } finally {
+                reader.close();
+            }
+        } catch (IOException e) {
+            throw new ConverterException("Failed to load template source", e);
+        } finally {
+            fm2Cfg.clearTemplateCache();
         }
-
-        _NullArgumentException.check("src", src);
-
-        this.src = src;
 
         this.markers = warnReceiver;
 
@@ -129,23 +151,12 @@ public class FM2ASTToFM3SourceConverter {
         }
     }
 
-    /**
-     * Converts a {@link String} to a {@link Template}.
-     */
-    private static Template createTemplate(String templateName, String src, Configuration fm2Cfg) throws
-            ConverterException {
-        if (fm2Cfg.getWhitespaceStripping()) {
-            throw new IllegalArgumentException("Configuration.whitespaceStripping must be false");
-        }
-        try {
-            return new Template(templateName, src, fm2Cfg);
-        } catch (Exception e) {
-            throw new ConverterException("Failed to load FreeMarker 2.3.x template", e);
-        }
-    }
-
     // The FTL tag is not part of the AST tree, so we have to treat it differently
     private void printDirFtl() throws ConverterException {
+        if (printNextCustomDirAsFtlDir) {
+            return;
+        }
+
         int pos = getPositionAfterWSAndExpComments(0);
         if (src.length() > pos + 1 && src.charAt(pos) == tagBeginChar && src.startsWith("#ftl", pos + 1)) {
             printWithConvertedExpComments(src.substring(0, pos));
@@ -186,14 +197,30 @@ public class FM2ASTToFM3SourceConverter {
             boolean hasSlash = src.charAt(tagEnd - 1) == '/';
 
             // We need the Expression-s parsed, but they aren't part of the AST. So, we parse a template that contains
-            // a similar custom "ftl" directive, and the converter to print it as an #ftl directive.
-            FM2ASTToFM3SourceConverter customFtlDirSrcConverter = new FM2ASTToFM3SourceConverter(
-                    template.getName(),
-                    tagBeginChar + "@ftl" + src.substring(pos, tagEnd) + (hasSlash ? "" : "/") + tagEndChar,
-                    template.getConfiguration(), markers
-            );
-            customFtlDirSrcConverter.printNextCustomDirAsFtlDir = true;
-            String fm3Content = customFtlDirSrcConverter.convert().fm3Content;
+            // a similar custom "ftl" directive, and set up the converter to print it as an #ftl directive.
+            String fm3Content;
+            {
+                Configuration fm2Cfg = template.getConfiguration();
+                fm2Cfg.clearTemplateCache();
+                FM2ASTToFM3SourceConverter customFtlDirSrcConverter;
+                overlayTemplateLoader.putTemplate(
+                        template.getName(),
+                        tagBeginChar + "#ftl" + tagEndChar
+                        + tagBeginChar + "@ftl" + src.substring(pos, tagEnd) + (hasSlash ? "" : "/") + tagEndChar);
+                try {
+                    customFtlDirSrcConverter = new FM2ASTToFM3SourceConverter(
+                            fm2Cfg.getTemplate(template.getName()),
+                            fm2Cfg, overlayTemplateLoader, markers
+                    );
+                } catch (IOException e) {
+                    throw new ConverterException("Failed load template made for #ftl parsing", e);
+                } finally {
+                    overlayTemplateLoader.removeTemplate(template.getName());
+                    fm2Cfg.clearTemplateCache();
+                }
+                customFtlDirSrcConverter.printNextCustomDirAsFtlDir = true;
+                fm3Content = customFtlDirSrcConverter.convert().fm3Content;
+            }
             print(hasSlash
                     ? fm3Content
                     : fm3Content.substring(0, fm3Content.length() - 2) + tagEndChar);
@@ -621,7 +648,7 @@ public class FM2ASTToFM3SourceConverter {
                 printOptionalSeparatorAndWSAndExpComments(pos, ",");
             }
         }
-        printDirStartTagEnd(node, pos, true);
+        printDirStartTagEnd(node, pos, false);
     }
 
     private void printDirBreak(BreakInstruction node) throws ConverterException {
@@ -1695,7 +1722,35 @@ public class FM2ASTToFM3SourceConverter {
         }
     }
 
+    private int stringLiteralNestingLevel;
+
     private void printExpStringLiteral(StringLiteral node) throws ConverterException {
+        boolean escapeAmp, escapeLT, escapeGT;
+        if (stringLiteralNestingLevel == 0) {
+            // We check if the source code has avoided '&', '<', and '>'. If it did, we will escape them in the output.
+
+            escapeAmp = true;
+            escapeLT = true;
+            escapeGT = true;
+
+            int endPos = getEndPositionInclusive(node);
+            for (int idx = getStartPosition(node) + 1; idx < endPos; idx++) {
+                char c = src.charAt(idx);
+                if (c == '&') {
+                    escapeAmp = false;
+                } else if (c == '<') {
+                    escapeLT = false;
+                } else if (c == '>') {
+                    escapeGT = false;
+                }
+            }
+        } else {
+            // Don't escape in nested literals (like ${'${"nested"}'}), as the outer literal takes care of that.
+            escapeAmp = false;
+            escapeLT = false;
+            escapeGT = false;
+        }
+
         boolean rawString = false;
         char quote;
         {
@@ -1721,7 +1776,7 @@ public class FM2ASTToFM3SourceConverter {
         int parameterCount = node.getParameterCount();
         if (parameterCount == 0) {
             if (!rawString) {
-                print(FTLUtil.escapeStringLiteralPart(node.getAsString(), quote));
+                print(FTLUtil.escapeStringLiteralPart(node.getAsString(), quote, escapeAmp, escapeLT, escapeGT));
             } else {
                 print(node.getAsString());
             }
@@ -1730,14 +1785,21 @@ public class FM2ASTToFM3SourceConverter {
             for (int paramIdx = 0; paramIdx < parameterCount; paramIdx++) {
                 Object param = getParam(node, paramIdx, ParameterRole.VALUE_PART, Object.class);
                 if (param instanceof String) {
-                    print(FTLUtil.escapeStringLiteralPart((String) param));
+                    print(FTLUtil.escapeStringLiteralPart((String) param, quote, escapeAmp, escapeLT, escapeGT));
                 } else {
                     assertNodeContent(param instanceof Interpolation, node,
                             "Unexpected parameter type: {}", param.getClass().getName());
 
                     // We print the interpolation, the cut it out from the output, then put it back escaped:
                     int interpStartPos = out.length();
-                    printNode((TemplateElement) param);
+
+                    try {
+                        stringLiteralNestingLevel++;
+                        printNode((TemplateElement) param);
+                    } finally {
+                        stringLiteralNestingLevel--;
+                    }
+
                     int interpEndPos = out.length();
                     String interp = out.substring(interpStartPos, interpEndPos);
                     out.setLength(interpStartPos + 2); // +2 to keep the "${"
@@ -1878,6 +1940,14 @@ public class FM2ASTToFM3SourceConverter {
                 return;
             }
             throw new UnexpectedNodeContentException(node, "Unexpected end tag name: {}", srcTagName);
+        }
+
+        char slash = src.charAt(pos - 1);
+        if (pos < 1 || slash != '/') {
+            if (optional) {
+                return;
+            }
+            throw new UnexpectedNodeContentException(node, "'/' expected, but found {}", slash);
         }
 
         print(tagBeginChar);

@@ -26,6 +26,8 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.Set;
 
@@ -62,6 +64,9 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("${'1${x + 1 + \\'s\\'}2'}");
         assertConvertedSame("${\"s ${'x $\\{\\\"y\\\"}'}\"}");
         assertConvertedSame("${'${1}${2}'}");
+        assertConvertedSame("<@m x='${e1 + \"a\\'b$\\{x}\"}' y='$\\{e2}' />");
+        assertConvertedSame("${\"&<>\\\"'{}\\\\a/\"}");
+        assertConvertedSame("${\"${x}&<>\\\"'{}${x}\\\\a/${x}\"}");
 
         assertConvertedSame("${r'${1}'}");
 
@@ -204,7 +209,7 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         // [FM3] Will be different (comma)
         assertConvertedSame("<#macro m><#nested x + 1 2 3></#macro>");
         assertConvertedSame("<#macro m><#nested <#--1--> x + 1 <#--2--> 2 <#--3-->></#macro>");
-        assertConverted("<#macro m><#nested x></#macro>", "<#macro m><#nested x /></#macro>");
+        assertConvertedSame("<#macro m><#nested x /></#macro>");
         assertConvertedSame("<#macro m><#return><#return ></#macro>");
 
         assertConvertedSame("<#assign x = 1>");
@@ -237,6 +242,7 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConverted("<#attempt >a<#recover  >r</#attempt   >", "<#attempt >a<#recover  >r</#recover   >");
 
         assertConvertedSame("<#ftl>");
+        assertConvertedSame("[#ftl]"); // To test when the tag syntax is overridden by #ftl
         assertConvertedSame("<#ftl>x");
         assertConvertedSame("<#ftl>x${x}");
         assertConvertedSame("<#ftl>\nx${x}");
@@ -298,6 +304,7 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
 
         assertConvertedSame("<#list xs as x>${x}<#sep>, </#list>");
         assertConvertedSame("<#list xs as x>${x}<#sep>, </#sep></#list>");
+        assertConvertedSame("<#list xs as x><#sep></#list>");
 
         assertConvertedSame("<#list xs as x>${x}<#else>-</#list>");
         assertConvertedSame("<#list xs as x>${x}<#else >-</#list >");
@@ -422,14 +429,6 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
     }
 
     @Test
-    public void testTagEndCharGlitch() throws IOException, ConverterException {
-        assertConverted("<#assign x = 1>x", "<#assign x = 1]x");
-        assertConverted("<#if x[0] == 1>x<#else>y</#if>", "<#if x[0] == 1]x<#else]y</#if]");
-        assertConverted("<@m x[0]>x</@m>", "<@m x[0]]x</@m]");
-        assertConverted("<#ftl customSettings={'a': []}>x", "<#ftl attributes={'a': []}]x");
-    }
-
-    @Test
     public void testBuiltInExpressions() throws IOException, ConverterException {
         assertConverted("${s?upperCase} ${s?leftPad(123)}", "${s?upper_case} ${s?left_pad(123)}");
         assertConverted("${s?html}", "${s?web_safe}");
@@ -441,6 +440,14 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("${s?then(1, 2)}");
         assertConvertedSame("${s?switch(1, 'one', 2, 'two', 'more')}");
         assertConvertedSame("${s?then <#--1--> ( <#--2--> 1 <#--3-->, <#--5--> 2 <#--6--> )}");
+    }
+
+    @Test
+    public void testTagEndCharGlitch() throws IOException, ConverterException {
+        assertConverted("<#assign x = 1>x", "<#assign x = 1]x");
+        assertConverted("<#if x[0] == 1>x<#else>y</#if>", "<#if x[0] == 1]x<#else]y</#if]");
+        assertConverted("<@m x[0]>x</@m>", "<@m x[0]]x</@m]");
+        assertConverted("<#ftl customSettings={'a': []}>x", "<#ftl attributes={'a': []}]x");
     }
 
     /** Tests if the names of all current FM2 built-ins can be converted to FM3 names. */
@@ -536,6 +543,25 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
             converter.setSource(srcFile);
             converter.setDestinationDirectory(dstDir);
             converter.execute();
+    }
+
+    @Test
+    public void testCharset() throws IOException, ConverterException {
+        FileUtils.write(new File(srcDir, "t1.ftl"),
+                "<#ftl encoding='ISO-8859-1'>béka",
+                StandardCharsets.ISO_8859_1);
+        FileUtils.write(new File(srcDir, "t2.ftl"),
+                "béka", Charset.forName("UTF-8"));
+
+        FM2ToFM3Converter converter = new FM2ToFM3Converter();
+        converter.setSource(srcDir);
+        converter.setDestinationDirectory(dstDir);
+        converter.execute();
+
+        assertThat(FileUtils.readFileToString(new File(dstDir, "t1.fm3"), StandardCharsets.ISO_8859_1),
+                containsString("béka"));
+        assertThat(FileUtils.readFileToString(new File(dstDir, "t2.fm3"), UTF_8),
+                containsString("béka"));
     }
 
     private static final Set<String> LEGACY_ESCAPING_BUTILT_INS = ImmutableSet.of(

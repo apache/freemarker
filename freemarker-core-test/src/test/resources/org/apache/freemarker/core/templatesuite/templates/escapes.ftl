@@ -26,8 +26,8 @@ ${3}
 ${"x"}
 ${"y"}
 ${"z"}
-<#noescape>${1}</#noescape>
-<#noescape><#noescape>${1}</#noescape></#noescape>
+<#noEscape>${1}</#noEscape>
+<#noEscape><#noEscape>${1}</#noEscape></#noEscape>
 </#escape>
 ${1}
 ${2}
@@ -43,27 +43,27 @@ ${"<&>"}
 ---
 <#assign x = "<Mooo>">
 ${x} = <Mooo>
-<#escape x as x?upper_case>
+<#escape x as x?upperCase>
   ${x} = <MOOO>
   <#escape x as x?html>
     ${x} = &lt;MOOO&gt;
-    <#noescape>
+    <#noEscape>
       ${x} = <MOOO>
-    </#noescape>
+    </#noEscape>
     ${x} = &lt;MOOO&gt;
   </#escape>
   ${x} = <MOOO>
-  <#noescape>
+  <#noEscape>
     ${x} = <Mooo>
     <#escape x as x?html>
       ${x} = &lt;Mooo&gt;
-      <#noescape>
+      <#noEscape>
         ${x} = <Mooo>
-      </#noescape>
+      </#noEscape>
       ${x} = &lt;Mooo&gt;
     </#escape>
     ${x} = <Mooo>
-  </#noescape>
+  </#noEscape>
   ${x} = <MOOO>
 </#escape>
 <#escape az as ["red", "green", "blue"][az-1]>
@@ -71,9 +71,9 @@ ${x} = <Mooo>
 </#escape>
 ---
 <#assign s = 'A&B'>
-<#escape x as '<' + x?html + '>[' + x?lower_case + '](' + x + ')'>
+<#escape x as '<' + x?html + '>[' + x?lowerCase + '](' + x + ')'>
   ${s} ${s + 2}
-  <#escape x as '{' + x?lower_case + '}' + x>
+  <#escape x as '{' + x?lowerCase + '}' + x>
     ${s} ${s + 2}
   </#escape>
 </#escape>

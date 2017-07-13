@@ -17,7 +17,7 @@
   under the License.
 -->
 <@infoBox "Foo & bar" />
-<@infoBox "Foo <b>bar</b>"?no_esc />
+<@infoBox "Foo <b>bar</b>"?noEsc />
 
 <#macro infoBox message>
   <div class="infoBox">

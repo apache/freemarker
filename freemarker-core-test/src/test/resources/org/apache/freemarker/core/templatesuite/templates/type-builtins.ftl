@@ -16,7 +16,7 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<#setting boolean_format="1,0">
+<#setting booleanFormat="1,0">
 StNuBoMeTaMaHaHxSeCoCxEnInDiNo
 <#list [
   "a", 1, false,
@@ -25,20 +25,20 @@ StNuBoMeTaMaHaHxSeCoCxEnInDiNo
   testnode,
   bean, bean.m, bean.mOverloaded
 ] as x>
-  ${x?is_string} <#t>
-  ${x?is_number} <#t>
-  ${x?is_boolean} <#t>
-  ${x?is_method} <#t>
-  ${x?is_macro} <#t>
-  ${x?is_transform} <#t>
-  ${x?is_hash} <#t>
-  ${x?is_hash_ex} <#t>
-  ${x?is_sequence} <#t>
-  ${x?is_collection} <#t>
-  ${x?is_collection_ex} <#t>
-  ${x?is_enumerable} <#t>
-  ${x?is_indexable} <#t>
-  ${x?is_directive} <#t>
-  ${x?is_node}<#lt>
+  ${x?isString} <#t>
+  ${x?isNumber} <#t>
+  ${x?isBoolean} <#t>
+  ${x?isMethod} <#t>
+  ${x?isMacro} <#t>
+  ${x?isTransform} <#t>
+  ${x?isHash} <#t>
+  ${x?isHashEx} <#t>
+  ${x?isSequence} <#t>
+  ${x?isCollection} <#t>
+  ${x?isCollectionEx} <#t>
+  ${x?isEnumerable} <#t>
+  ${x?isIndexable} <#t>
+  ${x?isDirective} <#t>
+  ${x?isNode}<#lt>
 </#list>
 <#macro testmacro></#macro>
