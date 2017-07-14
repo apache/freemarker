@@ -301,3 +301,9 @@ the FreeMarer 3 changelog here:
   (The template converter can't fix this automatically, but reports it as an error.)
 - #else and #elseif tags must be ended without "/", for example, <#else/> is illegal now, <#else> is legal.
   (The template converter tool does this conversion.)
+- Spring Framework Support (freemarker-spring): FREEMARKER-54, FREEMARKER-55
+  - ConfigurationFactoryBean, a new Spring Framework's FactoryBean to create Configuration, using Builder.
+  - SpringResourceTemplateLoader, a new TemplateLoader to load templates from Spring Framework's Resources.
+  - New FreeMarkerView and FreeMarkerViewResolver for MVC support. FreeMarkerView supports TaglibFactory and other
+    models by default like FreemarkerServlet does.
+
