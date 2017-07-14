@@ -39,7 +39,7 @@ import org.apache.freemarker.servlet.jsp.TaglibFactory;
  * FreeMarker template based view implementation, with being able to provide a {@link ServletContextHashModel}
  * and {@link TaglibFactory} models to the templates.
  */
-public class FreemarkerView extends AbstractFreemarkerView {
+public class FreeMarkerView extends AbstractFreeMarkerView {
 
     /**
      * Internal servlet instance to provide a page object in JSP tag library usages.

@@ -42,7 +42,7 @@ import org.springframework.web.servlet.view.UrlBasedViewResolver;
  * property for JSP tag library usages.
  * </p>
  */
-public class FreemarkerViewResolver extends AbstractTemplateViewResolver implements InitializingBean {
+public class FreeMarkerViewResolver extends AbstractTemplateViewResolver implements InitializingBean {
 
     /**
      * FreeMarker {@link Configuration} instance.
@@ -73,9 +73,9 @@ public class FreemarkerViewResolver extends AbstractTemplateViewResolver impleme
     /**
      * Constructs view resolver.
      */
-    public FreemarkerViewResolver() {
+    public FreeMarkerViewResolver() {
         super();
-        setViewClass(FreemarkerView.class);
+        setViewClass(FreeMarkerView.class);
     }
 
     /**
@@ -104,7 +104,7 @@ public class FreemarkerViewResolver extends AbstractTemplateViewResolver impleme
             if (configuration.isObjectWrapperSet()) {
                 if (!(configuration.getObjectWrapper() instanceof ObjectWrapperAndUnwrapper)) {
                     throw new RuntimeException(
-                            FreemarkerViewResolver.class.getSimpleName() + " requires an ObjectWrapper that "
+                            FreeMarkerViewResolver.class.getSimpleName() + " requires an ObjectWrapper that "
                                     + "implements " + ObjectWrapperAndUnwrapper.class.getName()
                                     + ", but the Configuration's ObjectWrapper doesn't do that: "
                                     + configuration.getObjectWrapper().getClass().getName());
@@ -132,12 +132,12 @@ public class FreemarkerViewResolver extends AbstractTemplateViewResolver impleme
 
     @Override
     protected Class<?> requiredViewClass() {
-        return FreemarkerView.class;
+        return FreeMarkerView.class;
     }
 
     @Override
     protected AbstractUrlBasedView buildView(String viewName) throws Exception {
-        FreemarkerView view = (FreemarkerView) super.buildView(viewName);
+        FreeMarkerView view = (FreeMarkerView) super.buildView(viewName);
         view.setConfiguration(configuration);
         view.setObjectWrapper(objectWrapper);
         view.setPageContextServlet(pageContextServlet);
