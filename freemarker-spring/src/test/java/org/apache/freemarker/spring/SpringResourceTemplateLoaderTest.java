@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.spring.templateresolver;
+package org.apache.freemarker.spring;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;

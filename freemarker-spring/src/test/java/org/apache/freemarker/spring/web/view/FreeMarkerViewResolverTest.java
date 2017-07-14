@@ -36,7 +36,7 @@ import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
-public class FreemarkerViewResolverTest {
+public class FreeMarkerViewResolverTest {
 
     private ServletContext servletContext;
     private GenericWebApplicationContext applicationContext;
@@ -44,7 +44,7 @@ public class FreemarkerViewResolverTest {
     private StringTemplateLoader templateLoader;
     private Configuration configuration;
 
-    private FreemarkerViewResolver viewResolver;
+    private FreeMarkerViewResolver viewResolver;
 
     private String prefix = "/WEB-INF/freemarker/";
     private String normalizedPrefix = "WEB-INF/freemarker/";
@@ -64,7 +64,7 @@ public class FreemarkerViewResolverTest {
         configuration = new Configuration.Builder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS)
                 .templateLoader(templateLoader).build();
 
-        viewResolver = new FreemarkerViewResolver();
+        viewResolver = new FreeMarkerViewResolver();
         viewResolver.setServletContext(servletContext);
         viewResolver.setApplicationContext(applicationContext);
         viewResolver.setConfiguration(configuration);
@@ -81,15 +81,15 @@ public class FreemarkerViewResolverTest {
 
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        FreemarkerView view = resolveFreemarkerView("hello", null);//Locale.ENGLISH);
+        FreeMarkerView view = resolveFreemarkerView("hello", null);//Locale.ENGLISH);
         Map<String, Object> model = new HashMap<String, Object>();
         view.render(model, request, response);
 
         assertEquals("Hello, World!", response.getContentAsString());
     }
 
-    private FreemarkerView resolveFreemarkerView(final String name, final Locale locale) throws Exception {
-        FreemarkerView view = (FreemarkerView) viewResolver.resolveViewName(name, locale);
+    private FreeMarkerView resolveFreemarkerView(final String name, final Locale locale) throws Exception {
+        FreeMarkerView view = (FreeMarkerView) viewResolver.resolveViewName(name, locale);
         view.setServletContext(servletContext);
         view.setApplicationContext(applicationContext);
         return view;

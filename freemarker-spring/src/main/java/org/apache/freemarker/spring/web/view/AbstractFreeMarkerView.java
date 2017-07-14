@@ -41,9 +41,9 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
  * Adapter base class for FreeMarker template-based views, with the ability to access {@link Configuration}
  * and {@link ObjectWrapperAndUnwrapper}.
  */
-public abstract class AbstractFreemarkerView extends AbstractTemplateView {
+public abstract class AbstractFreeMarkerView extends AbstractTemplateView {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractFreemarkerView.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractFreeMarkerView.class);
 
     /**
      * FreeMarker {@link Configuration} instance.
