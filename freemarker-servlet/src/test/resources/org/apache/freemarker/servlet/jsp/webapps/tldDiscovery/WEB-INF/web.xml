@@ -58,16 +58,16 @@
 
     <!-- FreeMarker settings: -->
     <init-param>
-      <param-name>incompatible_improvements</param-name>
+      <param-name>incompatibleImprovements</param-name>
       <param-value>3.0.0</param-value>
     </init-param>
     <init-param>
-      <param-name>template_exception_handler</param-name>
-      <!-- Some may prefer "html_debug" for development. -->
+      <param-name>templateExceptionHandler</param-name>
+      <!-- Some may prefer "htmlDebug" for development. -->
       <param-value>rethrow</param-value>
     </init-param>
     <init-param>
-      <param-name>template_update_delay</param-name>
+      <param-name>templateUpdateDelay</param-name>
       <param-value>0</param-value> <!-- 0 is for development only! Use higher value otherwise. -->
     </init-param>
     <init-param>
@@ -79,7 +79,7 @@
       <param-value>en_US</param-value>
     </init-param>
     <init-param>
-      <param-name>number_format</param-name>
+      <param-name>numberFormat</param-name>
       <param-value>0.##########</param-value>
     </init-param>
 
@@ -112,16 +112,16 @@
 
     <!-- FreeMarker settings: -->
     <init-param>
-      <param-name>incompatible_improvements</param-name>
+      <param-name>incompatibleImprovements</param-name>
       <param-value>3.0.0</param-value>
     </init-param>
     <init-param>
-      <param-name>template_exception_handler</param-name>
-      <!-- Some may prefer "html_debug" for development. -->
+      <param-name>templateExceptionHandler</param-name>
+      <!-- Some may prefer "htmlDebug" for development. -->
       <param-value>rethrow</param-value>
     </init-param>
     <init-param>
-      <param-name>template_update_delay</param-name>
+      <param-name>templateUpdateDelay</param-name>
       <param-value>0</param-value> <!-- 0 is for development only! Use higher value otherwise. -->
     </init-param>
     <init-param>
@@ -133,7 +133,7 @@
       <param-value>en_US</param-value>
     </init-param>
     <init-param>
-      <param-name>number_format</param-name>
+      <param-name>numberFormat</param-name>
       <param-value>0.##########</param-value>
     </init-param>
 

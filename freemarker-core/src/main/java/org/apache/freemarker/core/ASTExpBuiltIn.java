@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.freemarker.core.BuiltInsForDates.iso_BI;
 import org.apache.freemarker.core.BuiltInsForDates.iso_utc_or_local_BI;
@@ -79,8 +77,6 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
     protected ASTExpression target;
     protected String key;
 
-    static final Set<String> CAMEL_CASE_NAMES = new TreeSet<>();
-    static final Set<String> SNAKE_CASE_NAMES = new TreeSet<>();
     static final int NUMBER_OF_BIS = 263;
     static final HashMap<String, ASTExpBuiltIn> BUILT_INS_BY_NAME = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
 
@@ -93,21 +89,21 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("boolean", new BuiltInsForStringsMisc.booleanBI());
         putBI("byte", new byteBI());
         putBI("c", new BuiltInsForMultipleTypes.cBI());
-        putBI("cap_first", "capFirst", new BuiltInsForStringsBasic.cap_firstBI());
+        putBI("capFirst", new BuiltInsForStringsBasic.cap_firstBI());
         putBI("capitalize", new BuiltInsForStringsBasic.capitalizeBI());
         putBI("ceiling", new ceilingBI());
         putBI("children", new childrenBI());
-        putBI("chop_linebreak", "chopLinebreak", new BuiltInsForStringsBasic.chop_linebreakBI());
+        putBI("chopLinebreak", new BuiltInsForStringsBasic.chop_linebreakBI());
         putBI("contains", new BuiltInsForStringsBasic.containsBI());        
         putBI("date", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.DATE));
-        putBI("date_if_unknown", "dateIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATE));
+        putBI("dateIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATE));
         putBI("datetime", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.DATETIME));
-        putBI("datetime_if_unknown", "datetimeIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATETIME));
+        putBI("datetimeIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATETIME));
         putBI("default", new BuiltInsForExistenceHandling.defaultBI());
         putBI("double", new doubleBI());
-        putBI("ends_with", "endsWith", new BuiltInsForStringsBasic.ends_withBI());
-        putBI("ensure_ends_with", "ensureEndsWith", new BuiltInsForStringsBasic.ensure_ends_withBI());
-        putBI("ensure_starts_with", "ensureStartsWith", new BuiltInsForStringsBasic.ensure_starts_withBI());
+        putBI("endsWith", new BuiltInsForStringsBasic.ends_withBI());
+        putBI("ensureEndsWith", new BuiltInsForStringsBasic.ensure_ends_withBI());
+        putBI("ensureStartsWith", new BuiltInsForStringsBasic.ensure_starts_withBI());
         putBI("esc", new escBI());
         putBI("eval", new evalBI());
         putBI("exists", new BuiltInsForExistenceHandling.existsBI());
@@ -116,171 +112,171 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("floor", new floorBI());
         putBI("chunk", new chunkBI());
         putBI("counter", new BuiltInsForLoopVariables.counterBI());
-        putBI("item_cycle", "itemCycle", new BuiltInsForLoopVariables.item_cycleBI());
-        putBI("has_api", "hasApi", new BuiltInsForMultipleTypes.has_apiBI());
-        putBI("has_content", "hasContent", new BuiltInsForExistenceHandling.has_contentBI());
-        putBI("has_next", "hasNext", new BuiltInsForLoopVariables.has_nextBI());
+        putBI("itemCycle", new BuiltInsForLoopVariables.item_cycleBI());
+        putBI("hasApi", new BuiltInsForMultipleTypes.has_apiBI());
+        putBI("hasContent", new BuiltInsForExistenceHandling.has_contentBI());
+        putBI("hasNext", new BuiltInsForLoopVariables.has_nextBI());
         putBI("html", new BuiltInsForStringsEncoding.htmlBI());
-        putBI("if_exists", "ifExists", new BuiltInsForExistenceHandling.if_existsBI());
+        putBI("ifExists", new BuiltInsForExistenceHandling.if_existsBI());
         putBI("index", new BuiltInsForLoopVariables.indexBI());
-        putBI("index_of", "indexOf", new BuiltInsForStringsBasic.index_ofBI(false));
+        putBI("indexOf", new BuiltInsForStringsBasic.index_ofBI(false));
         putBI("int", new intBI());
         putBI("interpret", new BuiltInsForStringsMisc.interpretBI());
-        putBI("is_boolean", "isBoolean", new BuiltInsForMultipleTypes.is_booleanBI());
-        putBI("is_collection", "isCollection", new BuiltInsForMultipleTypes.is_collectionBI());
-        putBI("is_collection_ex", "isCollectionEx", new BuiltInsForMultipleTypes.is_collection_exBI());
+        putBI("isBoolean", new BuiltInsForMultipleTypes.is_booleanBI());
+        putBI("isCollection", new BuiltInsForMultipleTypes.is_collectionBI());
+        putBI("isCollectionEx", new BuiltInsForMultipleTypes.is_collection_exBI());
         is_dateLikeBI bi = new BuiltInsForMultipleTypes.is_dateLikeBI();
-        putBI("is_date", "isDate", bi);  // misnomer
-        putBI("is_date_like", "isDateLike", bi);
-        putBI("is_date_only", "isDateOnly", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.DATE));
-        putBI("is_even_item", "isEvenItem", new BuiltInsForLoopVariables.is_even_itemBI());
-        putBI("is_first", "isFirst", new BuiltInsForLoopVariables.is_firstBI());
-        putBI("is_last", "isLast", new BuiltInsForLoopVariables.is_lastBI());
-        putBI("is_unknown_date_like", "isUnknownDateLike", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.UNKNOWN));
-        putBI("is_datetime", "isDatetime", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.DATETIME));
-        putBI("is_directive", "isDirective", new BuiltInsForMultipleTypes.is_directiveBI());
-        putBI("is_enumerable", "isEnumerable", new BuiltInsForMultipleTypes.is_enumerableBI());
-        putBI("is_hash_ex", "isHashEx", new BuiltInsForMultipleTypes.is_hash_exBI());
-        putBI("is_hash", "isHash", new BuiltInsForMultipleTypes.is_hashBI());
-        putBI("is_infinite", "isInfinite", new is_infiniteBI());
-        putBI("is_indexable", "isIndexable", new BuiltInsForMultipleTypes.is_indexableBI());
-        putBI("is_macro", "isMacro", new BuiltInsForMultipleTypes.is_macroBI());
-        putBI("is_markup_output", "isMarkupOutput", new BuiltInsForMultipleTypes.is_markup_outputBI());
-        putBI("is_method", "isMethod", new BuiltInsForMultipleTypes.is_methodBI());
-        putBI("is_nan", "isNan", new is_nanBI());
-        putBI("is_node", "isNode", new BuiltInsForMultipleTypes.is_nodeBI());
-        putBI("is_number", "isNumber", new BuiltInsForMultipleTypes.is_numberBI());
-        putBI("is_odd_item", "isOddItem", new BuiltInsForLoopVariables.is_odd_itemBI());
-        putBI("is_sequence", "isSequence", new BuiltInsForMultipleTypes.is_sequenceBI());
-        putBI("is_string", "isString", new BuiltInsForMultipleTypes.is_stringBI());
-        putBI("is_time", "isTime", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.TIME));
-        putBI("is_transform", "isTransform", new BuiltInsForMultipleTypes.is_transformBI());
+        putBI("isDate", bi);  // misnomer
+        putBI("isDateLike", bi);
+        putBI("isDateOnly", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.DATE));
+        putBI("isEvenItem", new BuiltInsForLoopVariables.is_even_itemBI());
+        putBI("isFirst", new BuiltInsForLoopVariables.is_firstBI());
+        putBI("isLast", new BuiltInsForLoopVariables.is_lastBI());
+        putBI("isUnknownDateLike", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.UNKNOWN));
+        putBI("isDatetime", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.DATETIME));
+        putBI("isDirective", new BuiltInsForMultipleTypes.is_directiveBI());
+        putBI("isEnumerable", new BuiltInsForMultipleTypes.is_enumerableBI());
+        putBI("isHashEx", new BuiltInsForMultipleTypes.is_hash_exBI());
+        putBI("isHash", new BuiltInsForMultipleTypes.is_hashBI());
+        putBI("isInfinite", new is_infiniteBI());
+        putBI("isIndexable", new BuiltInsForMultipleTypes.is_indexableBI());
+        putBI("isMacro", new BuiltInsForMultipleTypes.is_macroBI());
+        putBI("isMarkupOutput", new BuiltInsForMultipleTypes.is_markup_outputBI());
+        putBI("isMethod", new BuiltInsForMultipleTypes.is_methodBI());
+        putBI("isNan", new is_nanBI());
+        putBI("isNode", new BuiltInsForMultipleTypes.is_nodeBI());
+        putBI("isNumber", new BuiltInsForMultipleTypes.is_numberBI());
+        putBI("isOddItem", new BuiltInsForLoopVariables.is_odd_itemBI());
+        putBI("isSequence", new BuiltInsForMultipleTypes.is_sequenceBI());
+        putBI("isString", new BuiltInsForMultipleTypes.is_stringBI());
+        putBI("isTime", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.TIME));
+        putBI("isTransform", new BuiltInsForMultipleTypes.is_transformBI());
         
-        putBI("iso_utc", "isoUtc", new iso_utc_or_local_BI(
+        putBI("isoUtc", new iso_utc_or_local_BI(
                 /* showOffset = */ null, _DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
-        putBI("iso_utc_fz", "isoUtcFZ", new iso_utc_or_local_BI(
+        putBI("isoUtcFZ", new iso_utc_or_local_BI(
                 /* showOffset = */ Boolean.TRUE, _DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
-        putBI("iso_utc_nz", "isoUtcNZ", new iso_utc_or_local_BI(
+        putBI("isoUtcNZ", new iso_utc_or_local_BI(
                 /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
         
-        putBI("iso_utc_ms", "isoUtcMs", new iso_utc_or_local_BI(
+        putBI("isoUtcMs", new iso_utc_or_local_BI(
                 /* showOffset = */ null, _DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ true));
-        putBI("iso_utc_ms_nz", "isoUtcMsNZ", new iso_utc_or_local_BI(
+        putBI("isoUtcMsNZ", new iso_utc_or_local_BI(
                 /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ true));
         
-        putBI("iso_utc_m", "isoUtcM", new iso_utc_or_local_BI(
+        putBI("isoUtcM", new iso_utc_or_local_BI(
                 /* showOffset = */ null, _DateUtil.ACCURACY_MINUTES, /* useUTC = */ true));
-        putBI("iso_utc_m_nz", "isoUtcMNZ", new iso_utc_or_local_BI(
+        putBI("isoUtcMNZ", new iso_utc_or_local_BI(
                 /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_MINUTES, /* useUTC = */ true));
         
-        putBI("iso_utc_h", "isoUtcH", new iso_utc_or_local_BI(
+        putBI("isoUtcH", new iso_utc_or_local_BI(
                 /* showOffset = */ null, _DateUtil.ACCURACY_HOURS, /* useUTC = */ true));
-        putBI("iso_utc_h_nz", "isoUtcHNZ", new iso_utc_or_local_BI(
+        putBI("isoUtcHNZ", new iso_utc_or_local_BI(
                 /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_HOURS, /* useUTC = */ true));
         
-        putBI("iso_local", "isoLocal", new iso_utc_or_local_BI(
+        putBI("isoLocal", new iso_utc_or_local_BI(
                 /* showOffset = */ null, _DateUtil.ACCURACY_SECONDS, /* useUTC = */ false));
-        putBI("iso_local_nz", "isoLocalNZ", new iso_utc_or_local_BI(
+        putBI("isoLocalNZ", new iso_utc_or_local_BI(
                 /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_SECONDS, /* useUTC = */ false));
         
-        putBI("iso_local_ms", "isoLocalMs", new iso_utc_or_local_BI(
+        putBI("isoLocalMs", new iso_utc_or_local_BI(
                 /* showOffset = */ null, _DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ false));
-        putBI("iso_local_ms_nz", "isoLocalMsNZ", new iso_utc_or_local_BI(
+        putBI("isoLocalMsNZ", new iso_utc_or_local_BI(
                 /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ false));
         
-        putBI("iso_local_m", "isoLocalM", new iso_utc_or_local_BI(
+        putBI("isoLocalM", new iso_utc_or_local_BI(
                 /* showOffset = */ null, _DateUtil.ACCURACY_MINUTES, /* useUTC = */ false));
-        putBI("iso_local_m_nz", "isoLocalMNZ", new iso_utc_or_local_BI(
+        putBI("isoLocalMNZ", new iso_utc_or_local_BI(
                 /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_MINUTES, /* useUTC = */ false));
         
-        putBI("iso_local_h", "isoLocalH", new iso_utc_or_local_BI(
+        putBI("isoLocalH", new iso_utc_or_local_BI(
                 /* showOffset = */ null, _DateUtil.ACCURACY_HOURS, /* useUTC = */ false));
-        putBI("iso_local_h_nz", "isoLocalHNZ", new iso_utc_or_local_BI(
+        putBI("isoLocalHNZ", new iso_utc_or_local_BI(
                 /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_HOURS, /* useUTC = */ false));
         
         putBI("iso", new iso_BI(
                 /* showOffset = */ null, _DateUtil.ACCURACY_SECONDS));
-        putBI("iso_nz", "isoNZ", new iso_BI(
+        putBI("isoNZ", new iso_BI(
                 /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_SECONDS));
         
-        putBI("iso_ms", "isoMs", new iso_BI(
+        putBI("isoMs", new iso_BI(
                 /* showOffset = */ null, _DateUtil.ACCURACY_MILLISECONDS));
-        putBI("iso_ms_nz", "isoMsNZ", new iso_BI(
+        putBI("isoMsNZ", new iso_BI(
                 /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_MILLISECONDS));
         
-        putBI("iso_m", "isoM", new iso_BI(
+        putBI("isoM", new iso_BI(
                 /* showOffset = */ null, _DateUtil.ACCURACY_MINUTES));
-        putBI("iso_m_nz", "isoMNZ", new iso_BI(
+        putBI("isoMNZ", new iso_BI(
                 /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_MINUTES));
         
-        putBI("iso_h", "isoH", new iso_BI(
+        putBI("isoH", new iso_BI(
                 /* showOffset = */ null, _DateUtil.ACCURACY_HOURS));
-        putBI("iso_h_nz", "isoHNZ", new iso_BI(
+        putBI("isoHNZ", new iso_BI(
                 /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_HOURS));
         
-        putBI("j_string", "jString", new BuiltInsForStringsEncoding.j_stringBI());
+        putBI("jString", new BuiltInsForStringsEncoding.j_stringBI());
         putBI("join", new BuiltInsForSequences.joinBI());
-        putBI("js_string", "jsString", new BuiltInsForStringsEncoding.js_stringBI());
-        putBI("json_string", "jsonString", new BuiltInsForStringsEncoding.json_stringBI());
-        putBI("keep_after", "keepAfter", new BuiltInsForStringsBasic.keep_afterBI());
-        putBI("keep_before", "keepBefore", new BuiltInsForStringsBasic.keep_beforeBI());
-        putBI("keep_after_last", "keepAfterLast", new BuiltInsForStringsBasic.keep_after_lastBI());
-        putBI("keep_before_last", "keepBeforeLast", new BuiltInsForStringsBasic.keep_before_lastBI());
+        putBI("jsString", new BuiltInsForStringsEncoding.js_stringBI());
+        putBI("jsonString", new BuiltInsForStringsEncoding.json_stringBI());
+        putBI("keepAfter", new BuiltInsForStringsBasic.keep_afterBI());
+        putBI("keepBefore", new BuiltInsForStringsBasic.keep_beforeBI());
+        putBI("keepAfterLast", new BuiltInsForStringsBasic.keep_after_lastBI());
+        putBI("keepBeforeLast", new BuiltInsForStringsBasic.keep_before_lastBI());
         putBI("keys", new BuiltInsForHashes.keysBI());
-        putBI("last_index_of", "lastIndexOf", new BuiltInsForStringsBasic.index_ofBI(true));
+        putBI("lastIndexOf", new BuiltInsForStringsBasic.index_ofBI(true));
         putBI("last", new lastBI());
-        putBI("left_pad", "leftPad", new BuiltInsForStringsBasic.padBI(true));
+        putBI("leftPad", new BuiltInsForStringsBasic.padBI(true));
         putBI("length", new BuiltInsForStringsBasic.lengthBI());
         putBI("long", new longBI());
-        putBI("lower_abc", "lowerAbc", new BuiltInsForNumbers.lower_abcBI());
-        putBI("lower_case", "lowerCase", new BuiltInsForStringsBasic.lower_caseBI());
+        putBI("lowerAbc", new BuiltInsForNumbers.lower_abcBI());
+        putBI("lowerCase", new BuiltInsForStringsBasic.lower_caseBI());
         putBI("namespace", new BuiltInsForMultipleTypes.namespaceBI());
         putBI("new", new BuiltInsForStringsMisc.newBI());
-        putBI("markup_string", "markupString", new markup_stringBI());
-        putBI("node_name", "nodeName", new node_nameBI());
-        putBI("node_namespace", "nodeNamespace", new node_namespaceBI());
-        putBI("node_type", "nodeType", new node_typeBI());
-        putBI("no_esc", "noEsc", new no_escBI());
+        putBI("markupString", new markup_stringBI());
+        putBI("nodeName", new node_nameBI());
+        putBI("nodeNamespace", new node_namespaceBI());
+        putBI("nodeType", new node_typeBI());
+        putBI("noEsc", new no_escBI());
         putBI("number", new BuiltInsForStringsMisc.numberBI());
-        putBI("number_to_date", "numberToDate", new number_to_dateBI(TemplateDateModel.DATE));
-        putBI("number_to_time", "numberToTime", new number_to_dateBI(TemplateDateModel.TIME));
-        putBI("number_to_datetime", "numberToDatetime", new number_to_dateBI(TemplateDateModel.DATETIME));
+        putBI("numberToDate", new number_to_dateBI(TemplateDateModel.DATE));
+        putBI("numberToTime", new number_to_dateBI(TemplateDateModel.TIME));
+        putBI("numberToDatetime", new number_to_dateBI(TemplateDateModel.DATETIME));
         putBI("parent", new parentBI());
-        putBI("previous_sibling", "previousSibling", new previousSiblingBI());
-        putBI("next_sibling", "nextSibling", new nextSiblingBI());
-        putBI("item_parity", "itemParity", new BuiltInsForLoopVariables.item_parityBI());
-        putBI("item_parity_cap", "itemParityCap", new BuiltInsForLoopVariables.item_parity_capBI());
+        putBI("previousSibling", new previousSiblingBI());
+        putBI("nextSibling", new nextSiblingBI());
+        putBI("itemParity", new BuiltInsForLoopVariables.item_parityBI());
+        putBI("itemParityCap", new BuiltInsForLoopVariables.item_parity_capBI());
         putBI("reverse", new reverseBI());
-        putBI("right_pad", "rightPad", new BuiltInsForStringsBasic.padBI(false));
+        putBI("rightPad", new BuiltInsForStringsBasic.padBI(false));
         putBI("root", new rootBI());
         putBI("round", new roundBI());
-        putBI("remove_ending", "removeEnding", new BuiltInsForStringsBasic.remove_endingBI());
-        putBI("remove_beginning", "removeBeginning", new BuiltInsForStringsBasic.remove_beginningBI());
+        putBI("removeEnding", new BuiltInsForStringsBasic.remove_endingBI());
+        putBI("removeBeginning", new BuiltInsForStringsBasic.remove_beginningBI());
         putBI("rtf", new BuiltInsForStringsEncoding.rtfBI());
-        putBI("seq_contains", "seqContains", new seq_containsBI());
-        putBI("seq_index_of", "seqIndexOf", new seq_index_ofBI(1));
-        putBI("seq_last_index_of", "seqLastIndexOf", new seq_index_ofBI(-1));
+        putBI("seqContains", new seq_containsBI());
+        putBI("seqIndexOf", new seq_index_ofBI(1));
+        putBI("seqLastIndexOf", new seq_index_ofBI(-1));
         putBI("short", new shortBI());
         putBI("size", new BuiltInsForMultipleTypes.sizeBI());
-        putBI("sort_by", "sortBy", new sort_byBI());
+        putBI("sortBy", new sort_byBI());
         putBI("sort", new sortBI());
         putBI("split", new BuiltInsForStringsBasic.split_BI());
         putBI("switch", new BuiltInsWithParseTimeParameters.switch_BI());
-        putBI("starts_with", "startsWith", new BuiltInsForStringsBasic.starts_withBI());
+        putBI("startsWith", new BuiltInsForStringsBasic.starts_withBI());
         putBI("string", new BuiltInsForMultipleTypes.stringBI());
         putBI("substring", new BuiltInsForStringsBasic.substringBI());
         putBI("then", new BuiltInsWithParseTimeParameters.then_BI());
         putBI("time", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.TIME));
-        putBI("time_if_unknown", "timeIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.TIME));
+        putBI("timeIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.TIME));
         putBI("trim", new BuiltInsForStringsBasic.trimBI());
-        putBI("uncap_first", "uncapFirst", new BuiltInsForStringsBasic.uncap_firstBI());
-        putBI("upper_abc", "upperAbc", new BuiltInsForNumbers.upper_abcBI());
-        putBI("upper_case", "upperCase", new BuiltInsForStringsBasic.upper_caseBI());
+        putBI("uncapFirst", new BuiltInsForStringsBasic.uncap_firstBI());
+        putBI("upperAbc", new BuiltInsForNumbers.upper_abcBI());
+        putBI("upperCase", new BuiltInsForStringsBasic.upper_caseBI());
         putBI("url", new BuiltInsForStringsEncoding.urlBI());
-        putBI("url_path", "urlPath", new BuiltInsForStringsEncoding.urlPathBI());
+        putBI("urlPath", new BuiltInsForStringsEncoding.urlPathBI());
         putBI("values", new BuiltInsForHashes.valuesBI());
-        putBI("web_safe", "webSafe", BUILT_INS_BY_NAME.get("html"));  // deprecated; use ?html instead
-        putBI("word_list", "wordList", new BuiltInsForStringsBasic.word_listBI());
+        putBI("webSafe", BUILT_INS_BY_NAME.get("html"));  // deprecated; use ?html instead
+        putBI("wordList", new BuiltInsForStringsBasic.word_listBI());
         putBI("xhtml", new BuiltInsForStringsEncoding.xhtmlBI());
         putBI("xml", new BuiltInsForStringsEncoding.xmlBI());
         putBI("matches", new BuiltInsForStringsRegexp.matchesBI());
@@ -295,17 +291,8 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
     
     private static void putBI(String name, ASTExpBuiltIn bi) {
         BUILT_INS_BY_NAME.put(name, bi);
-        SNAKE_CASE_NAMES.add(name);
-        CAMEL_CASE_NAMES.add(name);
     }
 
-    private static void putBI(String nameSnakeCase, String nameCamelCase, ASTExpBuiltIn bi) {
-        BUILT_INS_BY_NAME.put(nameSnakeCase, bi);
-        BUILT_INS_BY_NAME.put(nameCamelCase, bi);
-        SNAKE_CASE_NAMES.add(nameSnakeCase);
-        CAMEL_CASE_NAMES.add(nameCamelCase);
-    }
-    
     /**
      * @param target
      *            Left-hand-operand expression
@@ -328,32 +315,20 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
             Collections.sort(names);
             char lastLetter = 0;
 
-            NamingConvention shownNamingConvention;
-            {
-                NamingConvention namingConvention = tokenManager.namingConvention;
-                shownNamingConvention = namingConvention != NamingConvention.AUTO_DETECT
-                        ? namingConvention : NamingConvention.LEGACY /* [2.4] CAMEL_CASE */;
-            }
-            
             boolean first = true;
             for (String correctName : names) {
-                NamingConvention correctNameNamingConvetion = _StringUtil.getIdentifierNamingConvention(correctName);
-                if (shownNamingConvention == NamingConvention.CAMEL_CASE
-                        ? correctNameNamingConvetion != NamingConvention.LEGACY
-                        : correctNameNamingConvetion != NamingConvention.CAMEL_CASE) {
-                    if (first) {
-                        first = false;
-                    } else {
-                        buf.append(", ");
-                    }
-
-                    char firstChar = correctName.charAt(0);
-                    if (firstChar != lastLetter) {
-                        lastLetter = firstChar;
-                        buf.append('\n');
-                    }
-                    buf.append(correctName);
+                if (first) {
+                    first = false;
+                } else {
+                    buf.append(", ");
                 }
+
+                char firstChar = correctName.charAt(0);
+                if (firstChar != lastLetter) {
+                    lastLetter = firstChar;
+                    buf.append('\n');
+                }
+                buf.append(correctName);
             }
                 
             throw new ParseException(buf.toString(), null, keyTk);

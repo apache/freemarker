@@ -36,73 +36,51 @@ import org.apache.freemarker.core.util._StringUtil;
  */
 final class ASTExpBuiltInVariable extends ASTExpression {
 
-    static final String TEMPLATE_NAME_CC = "templateName";
-    static final String TEMPLATE_NAME = "template_name";
-    static final String MAIN_TEMPLATE_NAME_CC = "mainTemplateName";
-    static final String MAIN_TEMPLATE_NAME = "main_template_name";
-    static final String CURRENT_TEMPLATE_NAME_CC = "currentTemplateName";
-    static final String CURRENT_TEMPLATE_NAME = "current_template_name";
+    static final String TEMPLATE_NAME = "templateName";
+    static final String MAIN_TEMPLATE_NAME = "mainTemplateName";
+    static final String CURRENT_TEMPLATE_NAME = "currentTemplateName";
     static final String NAMESPACE = "namespace";
     static final String MAIN = "main";
     static final String GLOBALS = "globals";
     static final String LOCALS = "locals";
-    static final String DATA_MODEL_CC = "dataModel";
-    static final String DATA_MODEL = "data_model";
+    static final String DATA_MODEL = "dataModel";
     static final String LANG = "lang";
     static final String LOCALE = "locale";
-    static final String LOCALE_OBJECT_CC = "localeObject";
-    static final String LOCALE_OBJECT = "locale_object";
-    static final String CURRENT_NODE_CC = "currentNode";
-    static final String CURRENT_NODE = "current_node";
+    static final String LOCALE_OBJECT = "localeObject";
+    static final String CURRENT_NODE = "currentNode";
     static final String NODE = "node";
     static final String PASS = "pass";
     static final String VARS = "vars";
     static final String VERSION = "version";
-    static final String INCOMPATIBLE_IMPROVEMENTS_CC = "incompatibleImprovements";
-    static final String INCOMPATIBLE_IMPROVEMENTS = "incompatible_improvements";
+    static final String INCOMPATIBLE_IMPROVEMENTS = "incompatibleImprovements";
     static final String ERROR = "error";
-    static final String OUTPUT_ENCODING_CC = "outputEncoding";
-    static final String OUTPUT_ENCODING = "output_encoding";
-    static final String OUTPUT_FORMAT_CC = "outputFormat";
-    static final String OUTPUT_FORMAT = "output_format";
-    static final String AUTO_ESC_CC = "autoEsc";
-    static final String AUTO_ESC = "auto_esc";
-    static final String URL_ESCAPING_CHARSET_CC = "urlEscapingCharset";
-    static final String URL_ESCAPING_CHARSET = "url_escaping_charset";
+    static final String OUTPUT_ENCODING = "outputEncoding";
+    static final String OUTPUT_FORMAT = "outputFormat";
+    static final String AUTO_ESC = "autoEsc";
+    static final String URL_ESCAPING_CHARSET = "urlEscapingCharset";
     static final String NOW = "now";
     
-    static final String[] SPEC_VAR_NAMES = new String[] {
-        AUTO_ESC_CC,
+    static final String[] BUILT_IN_VARIABLE_NAMES = new String[] {
         AUTO_ESC,
-        CURRENT_NODE_CC,
-        CURRENT_TEMPLATE_NAME_CC,
         CURRENT_NODE,
         CURRENT_TEMPLATE_NAME,
-        DATA_MODEL_CC,
         DATA_MODEL,
         ERROR,
         GLOBALS,
-        INCOMPATIBLE_IMPROVEMENTS_CC,
         INCOMPATIBLE_IMPROVEMENTS,
         LANG,
         LOCALE,
-        LOCALE_OBJECT_CC,
         LOCALE_OBJECT,
         LOCALS,
         MAIN,
-        MAIN_TEMPLATE_NAME_CC,
         MAIN_TEMPLATE_NAME,
         NAMESPACE,
         NODE,
         NOW,
-        OUTPUT_ENCODING_CC,
-        OUTPUT_FORMAT_CC,
         OUTPUT_ENCODING,
         OUTPUT_FORMAT,
         PASS,
-        TEMPLATE_NAME_CC,
         TEMPLATE_NAME,
-        URL_ESCAPING_CHARSET_CC,
         URL_ESCAPING_CHARSET,
         VARS,
         VERSION
@@ -115,23 +93,16 @@ final class ASTExpBuiltInVariable extends ASTExpression {
             throws ParseException {
         String name = nameTk.image;
         this.parseTimeValue = parseTimeValue;
-        if (Arrays.binarySearch(SPEC_VAR_NAMES, name) < 0) {
+        if (Arrays.binarySearch(BUILT_IN_VARIABLE_NAMES, name) < 0) {
             StringBuilder sb = new StringBuilder();
             sb.append("Unknown special variable name: ");
             sb.append(_StringUtil.jQuote(name)).append(".");
 
-            NamingConvention shownNamingConvention;
-            {
-                NamingConvention namingConvention = tokenManager.namingConvention;
-                shownNamingConvention = namingConvention != NamingConvention.AUTO_DETECT
-                        ? namingConvention : NamingConvention.LEGACY /* [2.4] CAMEL_CASE */;
-            }
-            
             {
                 String correctName;
-                if (name.equals("auto_escape") || name.equals("auto_escaping") || name.equals("autoesc")) {
-                    correctName = "auto_esc";
-                } else if (name.equals("autoEscape") || name.equals("autoEscaping")) {
+                if (
+                        name.equals("auto_escape") || name.equals("auto_escaping") || name.equals("autoEsc") ||
+                        name.equals("autoEscape") || name.equals("autoEscaping")) {
                     correctName = "autoEsc";
                 } else {
                     correctName = null;
@@ -144,18 +115,13 @@ final class ASTExpBuiltInVariable extends ASTExpression {
             
             sb.append("\nThe allowed special variable names are: ");
             boolean first = true;
-            for (final String correctName : SPEC_VAR_NAMES) {
-                NamingConvention correctNameNamingConvention = _StringUtil.getIdentifierNamingConvention(correctName);
-                if (shownNamingConvention == NamingConvention.CAMEL_CASE
-                        ? correctNameNamingConvention != NamingConvention.LEGACY
-                        : correctNameNamingConvention != NamingConvention.CAMEL_CASE) {
-                    if (first) {
-                        first = false;
-                    } else {
-                        sb.append(", ");
-                    }
-                    sb.append(correctName);
+            for (final String correctName : BUILT_IN_VARIABLE_NAMES) {
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(", ");
                 }
+                sb.append(correctName);
             }
             throw new ParseException(sb.toString(), null, nameTk);
         }
@@ -181,7 +147,7 @@ final class ASTExpBuiltInVariable extends ASTExpression {
             ASTDirMacro.Context ctx = env.getCurrentMacroContext();
             return ctx == null ? null : ctx.getLocals();
         }
-        if (name == DATA_MODEL || name == DATA_MODEL_CC) {
+        if (name == DATA_MODEL) {
             return env.getDataModel();
         }
         if (name == VARS) {
@@ -190,31 +156,30 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         if (name == LOCALE) {
             return new SimpleScalar(env.getLocale().toString());
         }
-        if (name == LOCALE_OBJECT || name == LOCALE_OBJECT_CC) {
+        if (name == LOCALE_OBJECT) {
             return env.getObjectWrapper().wrap(env.getLocale());
         }
         if (name == LANG) {
             return new SimpleScalar(env.getLocale().getLanguage());
         }
-        if (name == CURRENT_NODE || name == NODE || name == CURRENT_NODE_CC) {
+        if (name == CURRENT_NODE || name == NODE) {
             return env.getCurrentVisitorNode();
         }
-        if (name == MAIN_TEMPLATE_NAME || name == MAIN_TEMPLATE_NAME_CC) {
+        if (name == MAIN_TEMPLATE_NAME) {
             return SimpleScalar.newInstanceOrNull(env.getMainTemplate().getLookupName());
         }
         // [FM3] Some of these two should be removed.
-        if (name == CURRENT_TEMPLATE_NAME || name == CURRENT_TEMPLATE_NAME_CC
-                || name == TEMPLATE_NAME || name == TEMPLATE_NAME_CC) {
+        if (name == CURRENT_TEMPLATE_NAME || name == TEMPLATE_NAME) {
             return SimpleScalar.newInstanceOrNull(env.getCurrentTemplate().getLookupName());
         }
         if (name == PASS) {
             return ASTDirMacro.DO_NOTHING_MACRO;
         }
-        if (name == OUTPUT_ENCODING || name == OUTPUT_ENCODING_CC) {
+        if (name == OUTPUT_ENCODING) {
             Charset encoding = env.getOutputEncoding();
             return encoding != null ? new SimpleScalar(encoding.name()) : null;
         }
-        if (name == URL_ESCAPING_CHARSET || name == URL_ESCAPING_CHARSET_CC) {
+        if (name == URL_ESCAPING_CHARSET) {
             Charset charset = env.getURLEscapingCharset();
             return charset != null ? new SimpleScalar(charset.name()) : null;
         }
@@ -227,7 +192,7 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         if (name == VERSION) {
             return new SimpleScalar(Configuration.getVersion().toString());
         }
-        if (name == INCOMPATIBLE_IMPROVEMENTS || name == INCOMPATIBLE_IMPROVEMENTS_CC) {
+        if (name == INCOMPATIBLE_IMPROVEMENTS) {
             return new SimpleScalar(env.getConfiguration().getIncompatibleImprovements().toString());
         }
         

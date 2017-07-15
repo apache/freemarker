@@ -37,25 +37,16 @@ final class ASTDirSetting extends ASTDirective {
     
     static final String[] SETTING_NAMES = new String[] {
             // Must be sorted alphabetically!
-            MutableProcessingConfiguration.BOOLEAN_FORMAT_KEY_CAMEL_CASE,
-            MutableProcessingConfiguration.BOOLEAN_FORMAT_KEY_SNAKE_CASE,
-            MutableProcessingConfiguration.DATE_FORMAT_KEY_CAMEL_CASE,
-            MutableProcessingConfiguration.DATE_FORMAT_KEY_SNAKE_CASE,
-            MutableProcessingConfiguration.DATETIME_FORMAT_KEY_CAMEL_CASE,
-            MutableProcessingConfiguration.DATETIME_FORMAT_KEY_SNAKE_CASE,
+            MutableProcessingConfiguration.BOOLEAN_FORMAT_KEY,
+            MutableProcessingConfiguration.DATE_FORMAT_KEY,
+            MutableProcessingConfiguration.DATE_TIME_FORMAT_KEY,
             MutableProcessingConfiguration.LOCALE_KEY,
-            MutableProcessingConfiguration.NUMBER_FORMAT_KEY_CAMEL_CASE,
-            MutableProcessingConfiguration.NUMBER_FORMAT_KEY_SNAKE_CASE,
-            MutableProcessingConfiguration.OUTPUT_ENCODING_KEY_CAMEL_CASE,
-            MutableProcessingConfiguration.OUTPUT_ENCODING_KEY_SNAKE_CASE,
-            MutableProcessingConfiguration.SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE,
+            MutableProcessingConfiguration.NUMBER_FORMAT_KEY,
+            MutableProcessingConfiguration.OUTPUT_ENCODING_KEY,
             MutableProcessingConfiguration.SQL_DATE_AND_TIME_TIME_ZONE_KEY,
-            MutableProcessingConfiguration.TIME_FORMAT_KEY_CAMEL_CASE,
-            MutableProcessingConfiguration.TIME_ZONE_KEY_CAMEL_CASE,
-            MutableProcessingConfiguration.TIME_FORMAT_KEY_SNAKE_CASE,
-            MutableProcessingConfiguration.TIME_ZONE_KEY_SNAKE_CASE,
-            MutableProcessingConfiguration.URL_ESCAPING_CHARSET_KEY_CAMEL_CASE,
-            MutableProcessingConfiguration.URL_ESCAPING_CHARSET_KEY_SNAKE_CASE
+            MutableProcessingConfiguration.TIME_FORMAT_KEY,
+            MutableProcessingConfiguration.TIME_ZONE_KEY,
+            MutableProcessingConfiguration.URL_ESCAPING_CHARSET_KEY,
     };
 
     ASTDirSetting(Token keyTk, FMParserTokenManager tokenManager, ASTExpression value, Configuration cfg)
@@ -63,8 +54,7 @@ final class ASTDirSetting extends ASTDirective {
         String key = keyTk.image;
         if (Arrays.binarySearch(SETTING_NAMES, key) < 0) {
             StringBuilder sb = new StringBuilder();
-            if (Configuration.ExtendableBuilder.getSettingNames(true).contains(key)
-                    || Configuration.ExtendableBuilder.getSettingNames(false).contains(key)) {
+            if (Configuration.ExtendableBuilder.getSettingNames().contains(key)) {
                 sb.append("The setting name is recognized, but changing this setting from inside a template isn't "
                         + "supported.");                
             } else {
@@ -72,27 +62,15 @@ final class ASTDirSetting extends ASTDirective {
                 sb.append(_StringUtil.jQuote(key)).append(".");
                 sb.append(" The allowed setting names are: ");
 
-                NamingConvention shownNamingConvention;
-                {
-                    NamingConvention namingConvention = tokenManager.namingConvention;
-                    shownNamingConvention = namingConvention != NamingConvention.AUTO_DETECT
-                            ? namingConvention : NamingConvention.LEGACY /* [2.4] CAMEL_CASE */;
-                }
-                
                 boolean first = true;
                 for (String correctName : SETTING_NAMES) {
-                    NamingConvention correctNameNamingConvention = _StringUtil.getIdentifierNamingConvention(correctName);
-                    if (shownNamingConvention == NamingConvention.CAMEL_CASE
-                            ? correctNameNamingConvention != NamingConvention.LEGACY
-                            : correctNameNamingConvention != NamingConvention.CAMEL_CASE) {
-                        if (first) {
-                            first = false;
-                        } else {
-                            sb.append(", ");
-                        }
-
-                        sb.append(correctName);
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append(", ");
                     }
+
+                    sb.append(correctName);
                 }
             }
             throw new ParseException(sb.toString(), null, keyTk);

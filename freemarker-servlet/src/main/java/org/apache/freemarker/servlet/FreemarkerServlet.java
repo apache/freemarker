@@ -125,9 +125,9 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * Also, you can prepend it with {@code classpath:}, like in <tt>classpath:com/example/templates</tt>, to indicate that
  * you want to load templates from the specified package accessible through the Thread Context Class Loader of the
  * thread that initializes this servlet.<br>
- * If {@code incompatible_improvements} is set to 2.3.22 (or higher), you can specify multiple comma separated locations
+ * If {@code incompatibleImprovements} is set to 2.3.22 (or higher), you can specify multiple comma separated locations
  * inside square brackets, like: {@code [ WEB-INF/templates, classpath:com/example/myapp/templates ]}. This internally
- * creates a {@link MultiTemplateLoader}. Note again that if {@code incompatible_improvements} isn't set to at least
+ * creates a {@link MultiTemplateLoader}. Note again that if {@code incompatibleImprovements} isn't set to at least
  * 2.3.22, the initial {@code [} has no special meaning, and so this feature is unavailable.<br>
  * Any of the above can have a {@code ?setting(name=value, ...)} postfix to set the JavaBeans properties of the
  * {@link TemplateLoader} created. For example,
@@ -266,7 +266,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * <li>The following init-params are supported only for backward compatibility, and their usage is discouraged:
  * {@code TemplateUpdateInterval}, {@code DefaultEncoding}, {@code ObjectWrapper}, {@code TemplateExceptionHandler}.
  * Instead, use init-params with the setting names documented at
- * {@link ExtendableBuilder#setSetting(String, String)}, such as {@code object_wrapper}.
+ * {@link ExtendableBuilder#setSetting(String, String)}, such as {@code objectWrapper}.
  * 
  * <li><strong>Any other init-params</strong> will be interpreted as {@link Configuration}-level FreeMarker setting. See
  * the possible names and values at {@link ExtendableBuilder#setSetting(String, String)}. Note that
@@ -312,11 +312,11 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * <li>If the template contains parsing errors, it will log it with error level, then the servlet throws
  * {@link ServletException} to the servlet container (with the proper cause exception).</li>
  * 
- * <li>If the template throws exception during its execution, and the value of the {@code template_exception_handler}
+ * <li>If the template throws exception during its execution, and the value of the {@code templateExceptionHandler}
  * init-param is {@code rethrow} (recommended), it will log it with error level and then the servlet throws
  * {@link ServletException} to the servlet container (with the proper cause exception). But beware, the default value of
- * the {@code template_exception_handler} init-param is {@code html_debug}, which is for development only! Set it to
- * {@code rethrow} for production. The {@code html_debug} (and {@code debug}) handlers will print error details to the
+ * the {@code templateExceptionHandler} init-param is {@code htmlDebug}, which is for development only! Set it to
+ * {@code rethrow} for production. The {@code htmlDebug} (and {@code debug}) handlers will print error details to the
  * page and then commit the HTTP response with response code 200 "OK", thus, the server wont be able roll back the
  * response and send back an HTTP 500 page. This is so that the template developers will see the error without digging
  * the logs.
@@ -535,7 +535,7 @@ public class FreemarkerServlet extends HttpServlet {
 
         contentType = DEFAULT_CONTENT_TYPE;
 
-        // Process object_wrapper init-param out of order:
+        // Process objectWrapper init-param out of order:
         String objectWrapperInitParamValue = getInitParameter(
                 Configuration.Builder.OBJECT_WRAPPER_KEY, DEPR_INITPARAM_OBJECT_WRAPPER);
         if (objectWrapperInitParamValue != null) {
@@ -1165,7 +1165,7 @@ public class FreemarkerServlet extends HttpServlet {
      * interpret yourself, otherwise fall back to the super method. This method won't be called if there's not
      * init-param that specifies the object wrapper.
      * <p>
-     * The default implementation interprets the {@code object_wrapper} servlet init-param with
+     * The default implementation interprets the {@code objectWrapper} servlet init-param with
      * calling {@link MutableProcessingConfiguration#setSetting(String, String)}.
      *
      * @param initParamValue Not {@code null}

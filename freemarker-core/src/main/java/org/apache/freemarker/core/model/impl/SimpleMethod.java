@@ -41,7 +41,7 @@ import org.apache.freemarker.core.util._ClassUtil;
 class SimpleMethod {
     
     static final String MARKUP_OUTPUT_TO_STRING_TIP
-            = "A markup output value can be converted to markup string like value?markup_string. "
+            = "A markup output value can be converted to markup string like value?markupString. "
               + "But consider if the Java method whose argument it will be can handle markup strings properly.";
     
     private final Member member;

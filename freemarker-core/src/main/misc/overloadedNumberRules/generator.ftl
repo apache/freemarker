@@ -68,7 +68,7 @@
 <#function toPrice cellValue, boost>
     <#if cellValue?starts_with("BC ")>
         <#local cellValue = cellValue[3..]>
-    <#elseif cellValue == '-' || cellValue == 'N/A'>
+    <#elseIf cellValue == '-' || cellValue == 'N/A'>
         <#return 'Integer.MAX_VALUE'>
     </#if>
     <#local cellValue = cellValue?number>

@@ -20,6 +20,12 @@
 Because the Manual won't be updated for a good while, we will lead
 the FreeMarer 3 changelog here:
 
+- Switched to camel case as the only supported naming convention. This is as if in FM2 you set the "namingConvention"
+  configuration setting to "camelCase", however the "namingConvention" setting was removed, as no other convention will
+  be supported (for the default dialect at least). Also, configuration setting names and values must use camel case
+  too (FM2 was forgiving there). This means `#elseif` becomes to ``#elseIf`, ``?upper_case`, `?upperCase`, and
+  if you configure FreeMarker with Properties, then `template_loader` becomes to `templateLoader`.
+  Note that the template converter tool takes care of this conversion.
 - Increased version number to 3.0.0 (nightly aka. SNAPSHOT)
 - Removed legacy extensions: rhyno, jython, xml (not to be confused with dom), jdom, ant.
 - Servlet 3.0 and JSP 2.2 and is the minimum requirement now (if Serlvet/JSP features are used at all).
@@ -171,9 +177,9 @@ the FreeMarer 3 changelog here:
   Also added a new setting, "templateLanguage", which decides this; the two available values are
   TemplateLanguage.FTL and TemplateLanguage.STATIC_TEXT.
 - Configuration.getTemplate has no "encoding" parameter anymore. Similarly #include has no "encoding" parameter either. The charset
-  of templates can be specified via Configuration.defaultEncoding and Configuration.templateConfigurations (for example based on the
-  directory it is in), or wirh the #ftl directive inside the template. Thus, a given template always has the same charset, no mater how
-  it's accessed.
+  of templates can be specified via Configuration.sourceEncoding and Configuration.templateConfigurations (for example
+  based on the directory it is in), or with the #ftl directive inside the template. Thus, a given template always has
+  the same charset, no mater how it's accessed.
 - #include-d/#import-ed templates don't inheirit the charset (encoding) of the #include-ing/#import-ing template. (Because,
   again, the charset of a template file is independent of how you access it.)
 - Removed Configuration.setEncoding(java.util.Locale, String) and the related other methods. Because of the new logic of template
@@ -260,18 +266,20 @@ the FreeMarer 3 changelog here:
                     .build())
 
 - Configuration-related int constants were replaced with enums:
-  - FM2 Configuration.${c}_NAMING_CONVENTION with NamingConvention.${c}
   - FM2 Configuration.${c}_TAG_SYNTAX with TagSyntax.${c}
   - FM2 Configuration.${c}_AUTO_ESCAPING_POLICY with AutoEscapingPolicy.${c}
 - TemplateClassResolver.UNRESTRICTED_RESOLVER and ALLOWS_NOTHING_RESOLVER was renamed
   to UNRESTRICTED and ALLOW_NOTHING. Also the String setting name "allows_nothing" and
-  "allowsNothing" were renamed to "allow_nothing" and "allowNothing".
+  "allowsNothing" were renamed to "allowNothing".
 - TemplateExceptionHandler.IGNORE_HANDLER, RETHROW_HANDLER, DEBUG_HANDLER and
   HTLM_DEBUG_HANDLER was renamed to IGNORE, RETHROW, DEBUG and HTML_DEBUG  
 - AttemptExceptionReporter.LOG_ERROR_REPORTER and LOG_WARN_REPORTER was renamed to
   LOG_ERROR and LOG_WARN (to be consistent with the new TemplateExceptionHandler names)
 - Renamed the `cacheStorage` Configuration setting to `templateCacheStorage`.
 - Renamed the `localizedLookup` Configuration setting to `localizedLookup`.
+- Renamed the `datetimeFormat` Configuration setting to `dateTimeFormat` (following Java 8 convention).
+- Renamed the String key for the historically incorrect `autoInclude` Configuration setting to `autoIncludes`.
+- Renamed the String key for the historically incorrect `autoImport` Configuration setting to `autoImports`.
 - Changed the defaults of some Configuration settings:
   - Changed the default of sourceEncoding ("encoding" earlier) to UTF-8 from the platform default charset.
     Using the platform default charset was proven to be fragile in practice,
@@ -279,9 +287,9 @@ the FreeMarer 3 changelog here:
     was unwillingly relying on the default.
   - Changed the default of templateExceptionHandler (template_exception_hander) to
     TemplateExceptionHandler.RETHROW from DEBUG
-  - Changed the default of sqlDateAndTimeTimeZone (sql_date_and_time_time_zone) to
+  - Changed the default of sqlDateAndTimeTimeZone (sqlDateAndTimeTimeZone) to
     TimeZone.default() from null (where null meant falling back to the timeZone setting value)
-  - Changed the default of templateNameFormat (template_name_format) to what's equivalent to
+  - Changed the default of templateNameFormat (templateNameFormat) to what's equivalent to
     FM2 DefaultTemplateNameFormat24. The old DefaultTemplateNameFormat was removed, and
     DefaultTemplateNameFormat24 was renamed to DefaultTemplateNameFormat.
 - Removed the logTemplateExceptions (log_template_exceptions) setting. FreeMarker now
@@ -299,5 +307,5 @@ the FreeMarer 3 changelog here:
   tool does this conversion.)
 - Inside a #switch, #case can't be after #default anymore (this is actually a bug in FM2)
   (The template converter can't fix this automatically, but reports it as an error.)
-- #else and #elseif tags must be ended without "/", for example, <#else/> is illegal now, <#else> is legal.
+- #else and #elseIf tags must be ended without "/", for example, <#else/> is illegal now, <#else> is legal.
   (The template converter tool does this conversion.)

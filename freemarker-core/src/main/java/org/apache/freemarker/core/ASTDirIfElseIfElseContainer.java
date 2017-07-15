@@ -22,7 +22,7 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 
 /**
- * AST directive node: Container for a group of related {@code #if}, {@code #elseif} and {@code #else} directives.
+ * AST directive node: Container for a group of related {@code #if}, {@code #elseIf} and {@code #else} directives.
  * Each such block is a nested {@link ASTDirIfOrElseOrElseIf}. Note that if an {@code #if} stands alone,
  * {@link ASTDirIfOrElseOrElseIf} doesn't need this parent element.
  */
@@ -81,7 +81,7 @@ final class ASTDirIfElseIfElseContainer extends ASTDirective {
     
     @Override
     String getASTNodeDescriptor() {
-        return "#if-#elseif-#else-container";
+        return "#if-#elseIf-#else-container";
     }
     
     @Override

@@ -33,7 +33,7 @@ public class SpecialVariableTest extends TemplateTest {
     @Test
     public void testNamesSorted() throws Exception {
         String prevName = null;
-        for (String name : ASTExpBuiltInVariable.SPEC_VAR_NAMES) {
+        for (String name : ASTExpBuiltInVariable.BUILT_IN_VARIABLE_NAMES) {
             if (prevName != null) {
                 assertThat(name, greaterThan(prevName));
             }
@@ -56,7 +56,7 @@ public class SpecialVariableTest extends TemplateTest {
         
         setConfiguration(new Configuration.Builder(Configuration.getVersion()).build());
         assertOutput(
-                "${.incompatible_improvements}",
+                "${.incompatibleImprovements}",
                 getConfiguration().getIncompatibleImprovements().toString());
     }
 

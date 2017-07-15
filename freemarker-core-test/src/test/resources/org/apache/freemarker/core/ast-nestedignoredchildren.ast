@@ -16,5 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#outputformat  // o.a.f.c.ASTDirOutputFormat
+#outputFormat  // o.a.f.c.ASTDirOutputFormat
     - value: "HTML"  // o.a.f.c.ASTExpStringLiteral

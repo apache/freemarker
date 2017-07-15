@@ -34,8 +34,8 @@ public class InterpretAndEvalTemplateNameTest extends TemplateTest {
     @Test
     public void testInterpret() throws IOException, TemplateException {
         for (String getTemplateNames : new String[] {
-                "c=${.current_template_name}, m=${.main_template_name}",
-                "c=${\".current_template_name\"?eval}, m=${\".main_template_name\"?eval}"
+                "c=${.currentTemplateName}, m=${.mainTemplateName}",
+                "c=${\".currentTemplateName\"?eval}, m=${\".mainTemplateName\"?eval}"
                 }) {
             StringTemplateLoader tl = new StringTemplateLoader();
             tl.putTemplate(

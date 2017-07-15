@@ -40,7 +40,6 @@ public class DOMSiblingTest extends TemplateTest {
     @Test
     public void testBlankPreviousSibling() throws IOException, TemplateException {
         assertOutput("${doc.person.name?previousSibling}", "\n    ");
-        assertOutput("${doc.person.name?previous_sibling}", "\n    ");
     }
 
     @Test
@@ -51,7 +50,6 @@ public class DOMSiblingTest extends TemplateTest {
     @Test
     public void testBlankNextSibling() throws IOException, TemplateException {
         assertOutput("${doc.person.name?nextSibling}", "\n    ");
-        assertOutput("${doc.person.name?next_sibling}", "\n    ");
     }
 
     @Test

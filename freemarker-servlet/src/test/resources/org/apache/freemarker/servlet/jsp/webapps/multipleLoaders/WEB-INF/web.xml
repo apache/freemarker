@@ -42,12 +42,12 @@
 			<param-value>[ WEB-INF/templates, classpath:org/apache/freemarker/servlet/jsp/templates ]</param-value>
 		</init-param>
         <init-param>
-            <param-name>incompatible_improvements</param-name>
+            <param-name>incompatibleImprovements</param-name>
             <param-value>3.0.0</param-value>
         </init-param>
 		<init-param>
-			<param-name>template_exception_handler</param-name>
-			<!-- Some may prefer "html_debug" for development. -->
+			<param-name>templateExceptionHandler</param-name>
+			<!-- Some may prefer "htmlDebug" for development. -->
 			<param-value>rethrow</param-value>
 		</init-param>
 		<init-param>

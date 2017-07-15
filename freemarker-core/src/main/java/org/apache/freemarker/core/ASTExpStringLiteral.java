@@ -45,8 +45,8 @@ final class ASTExpStringLiteral extends ASTExpression implements TemplateScalarM
     
     /**
      * @param parentTkMan
-     *            The token source of the template that contains this string literal. As of this writing, we only need
-     *            this to share the {@code namingConvetion} with that.
+     *            The token source of the template that contains this string literal. This is possibly needed to
+     *            inherit tokenizer-level auto-detected settings.
      */
     void parseValue(FMParserTokenManager parentTkMan, OutputFormat outputFormat) throws ParseException {
         // The way this works is incorrect (the literal should be parsed without un-escaping),

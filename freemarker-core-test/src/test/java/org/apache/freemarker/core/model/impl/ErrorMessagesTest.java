@@ -66,8 +66,8 @@ public class ErrorMessagesTest {
                 fail();
             } catch (TemplateModelException e) {
                 assertThat(e.getMessage(), allOf(
-                        containsString("String"), containsString("convert"), containsString("markup_output"),
-                        containsString("Tip:"), containsString("?markup_string")));
+                        containsString("String"), containsString("convert"), containsString("markupOutput"),
+                        containsString("Tip:"), containsString("?markupString")));
             }
         }
         
@@ -78,8 +78,8 @@ public class ErrorMessagesTest {
                 fail();
             } catch (TemplateModelException e) {
                 assertThat(e.getMessage(), allOf(
-                        containsString("Date"), containsString("convert"), containsString("markup_output"),
-                        not(containsString("?markup_string"))));
+                        containsString("Date"), containsString("convert"), containsString("markupOutput"),
+                        not(containsString("?markupString"))));
             }
         }
         
@@ -91,8 +91,8 @@ public class ErrorMessagesTest {
             } catch (TemplateModelException e) {
                 assertThat(e.getMessage(), allOf(
                         containsString("No compatible overloaded"),
-                        containsString("String"), containsString("markup_output"),
-                        containsString("Tip:"), containsString("?markup_string")));
+                        containsString("String"), containsString("markupOutput"),
+                        containsString("Tip:"), containsString("?markupString")));
             }
         }
         
@@ -104,8 +104,8 @@ public class ErrorMessagesTest {
             } catch (TemplateModelException e) {
                 assertThat(e.getMessage(), allOf(
                         containsString("No compatible overloaded"),
-                        containsString("Integer"), containsString("markup_output"),
-                        not(containsString("?markup_string"))));
+                        containsString("Integer"), containsString("markupOutput"),
+                        not(containsString("?markupString"))));
             }
         }
         

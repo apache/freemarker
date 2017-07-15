@@ -395,7 +395,7 @@ public class ObjectBuilderSettingsTest {
             props.setProperty(Configuration.ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY,
                     "soft: 500, strong: 100");
             props.setProperty(MutableProcessingConfiguration.NEW_BUILTIN_CLASS_RESOLVER_KEY,
-                    "allow_nothing");
+                    "allowNothing");
             cfgB.setSettings(props);
             assertEquals(DefaultObjectWrapper.class, cfgB.getObjectWrapper().getClass());
             assertEquals(1, ((DummyArithmeticEngine) cfgB.getArithmeticEngine()).getX());

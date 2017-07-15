@@ -1789,7 +1789,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                 settingValue = getDateFormat();
                 break;
             case TemplateDateModel.DATETIME:
-                settingName = MutableProcessingConfiguration.DATETIME_FORMAT_KEY;
+                settingName = MutableProcessingConfiguration.DATE_TIME_FORMAT_KEY;
                 settingValue = getDateTimeFormat();
                 break;
             default:

@@ -27,12 +27,12 @@ import org.apache.freemarker.core.outputformat.OutputFormat;
 /**
  * Adds {@link Configuration} fallback to the {@link ParsingConfiguration} part of a {@link TemplateConfiguration}.
  */
-final class TemplateParsingConfigurationWithFallback implements ParsingConfiguration {
+final class ParsingConfigurationWithFallback implements ParsingConfiguration {
 
     private final Configuration cfg;
     private final TemplateConfiguration tCfg;
 
-    TemplateParsingConfigurationWithFallback(Configuration cfg, TemplateConfiguration tCfg) {
+    ParsingConfigurationWithFallback(Configuration cfg, TemplateConfiguration tCfg) {
         this.cfg = cfg;
         this.tCfg = tCfg;
     }
@@ -54,16 +54,6 @@ final class TemplateParsingConfigurationWithFallback implements ParsingConfigura
 
     @Override
     public boolean isTagSyntaxSet() {
-        return true;
-    }
-
-    @Override
-    public NamingConvention getNamingConvention() {
-        return tCfg.isNamingConventionSet() ? tCfg.getNamingConvention() : cfg.getNamingConvention();
-    }
-
-    @Override
-    public boolean isNamingConventionSet() {
         return true;
     }
 
@@ -122,6 +112,12 @@ final class TemplateParsingConfigurationWithFallback implements ParsingConfigura
     public Version getIncompatibleImprovements() {
         // This can be only set on the Configuration-level
         return cfg.getIncompatibleImprovements();
+    }
+
+    @Override
+    public boolean isIncompatibleImprovementsSet() {
+        // This can be only set on the Configuration-level
+        return cfg.isIncompatibleImprovementsSet();
     }
 
     @Override

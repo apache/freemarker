@@ -18,7 +18,7 @@
 -->
 <#setting locale="en_US">
 <#setting timeZone="GMT">
-<#setting datetimeFormat="G yyyy-MM-dd HH:mm:ss.S Z">
+<#setting dateTimeFormat="G yyyy-MM-dd HH:mm:ss.S Z">
 <#setting dateFormat="G yyyy-MM-dd Z">
 <#setting timeFormat="HH:mm:ss.S Z">
 
@@ -52,7 +52,7 @@
 <#list ['xs', 'xs_nz', 'xs_fz', 'xs s', 'xs ms'] as format>
   <#setting dateFormat=format>
   <#setting timeFormat=format>
-  <#setting datetimeFormat=format>
+  <#setting dateTimeFormat=format>
   <@assertEquals expected=refDate actual="1998-10-30Z"?date />
   <@assertEquals expected=refTime actual="15:30:44.512Z"?time />
   <@assertEquals expected=refDateTime actual="1998-10-30T15:30:44.512Z"?datetime />
@@ -60,7 +60,7 @@
 <#list ['iso', 'iso_nz', 'iso_fz', 'iso m'] as format>
   <#setting dateFormat=format>
   <#setting timeFormat=format>
-  <#setting datetimeFormat=format>
+  <#setting dateTimeFormat=format>
   <@assertEquals expected=refDate actual="1998-10-30"?date />
   <@assertEquals expected=refDate actual="19981030"?date />
   <@assertEquals expected=refTime actual="15:30:44,512Z"?time />

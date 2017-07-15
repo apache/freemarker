@@ -43,8 +43,8 @@
 
         <!-- This is the default anyway:
 		<init-param>
-			<param-name>template_exception_handler</param-name>
-			<param-value>html_debug</param-value>
+			<param-name>templateExceptionHandler</param-name>
+			<param-value>htmlDebug</param-value>
 		</init-param>
         -->
 
@@ -61,7 +61,7 @@
         </init-param>
 
         <init-param>
-            <param-name>template_exception_handler</param-name>
+            <param-name>templateExceptionHandler</param-name>
             <param-value>rethrow</param-value>
         </init-param>
 
@@ -82,7 +82,7 @@
         </init-param>
 
         <init-param>
-            <param-name>template_exception_handler</param-name>
+            <param-name>templateExceptionHandler</param-name>
             <param-value>rethrow</param-value>
         </init-param>
 

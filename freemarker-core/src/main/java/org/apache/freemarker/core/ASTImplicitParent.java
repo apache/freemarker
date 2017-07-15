@@ -71,7 +71,7 @@ final class ASTImplicitParent extends ASTElement {
 
     @Override
     String getASTNodeDescriptor() {
-        return "#mixed_content";
+        return "#mixedContent";
     }
     
     @Override

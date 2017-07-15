@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#mixed_content  // o.a.f.c.ASTImplicitParent
+#mixedContent  // o.a.f.c.ASTImplicitParent
     #text  // o.a.f.c.ASTStaticText
         - content: "1 "  // String
     @  // o.a.f.c.ASTDirUserDefined
@@ -63,7 +63,7 @@
         - namespace: null  // Null
     #text  // o.a.f.c.ASTStaticText
         - content: "\n4 "  // String
-    #if-#elseif-#else-container  // o.a.f.c.ASTDirIfElseIfElseContainer
+    #if-#elseIf-#else-container  // o.a.f.c.ASTDirIfElseIfElseContainer
         #if  // o.a.f.c.ASTDirIfOrElseOrElseIf
             - condition: ==  // o.a.f.c.ASTExpComparison
                 - left-hand operand: +  // o.a.f.c.ASTExpAddOrConcat
@@ -175,12 +175,12 @@
         - content: " A comment "  // String
     #text  // o.a.f.c.ASTStaticText
         - content: "\n11 "  // String
-    #outputformat  // o.a.f.c.ASTDirOutputFormat
+    #outputFormat  // o.a.f.c.ASTDirOutputFormat
         - value: "XML"  // o.a.f.c.ASTExpStringLiteral
-        #noautoesc  // o.a.f.c.ASTDirNoAutoEsc
+        #noAutoEsc  // o.a.f.c.ASTDirNoAutoEsc
             ${...}  // o.a.f.c.ASTDollarInterpolation
                 - content: a  // o.a.f.c.ASTExpVariable
-            #autoesc  // o.a.f.c.ASTDirAutoEsc
+            #autoEsc  // o.a.f.c.ASTDirAutoEsc
                 ${...}  // o.a.f.c.ASTDollarInterpolation
                     - content: b  // o.a.f.c.ASTExpVariable
             ${...}  // o.a.f.c.ASTDollarInterpolation

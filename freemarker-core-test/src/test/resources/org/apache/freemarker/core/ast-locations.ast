@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#mixed_content  // o.a.f.c.ASTImplicitParent; Location 1:1-18:8
+#mixedContent  // o.a.f.c.ASTImplicitParent; Location 1:1-18:8
     #if  // o.a.f.c.ASTDirIfOrElseOrElseIf; Location 1:1-1:15
         - condition: exp  // o.a.f.c.ASTExpVariable; Location 1:6-1:8
         - AST-node subtype: "0"  // Integer
@@ -36,14 +36,14 @@
             - content: "2"  // String
     #text  // o.a.f.c.ASTStaticText; Location 3:21-3:21
         - content: "\n"  // String
-    #if-#elseif-#else-container  // o.a.f.c.ASTDirIfElseIfElseContainer; Location 4:1-4:22
+    #if-#elseIf-#else-container  // o.a.f.c.ASTDirIfElseIfElseContainer; Location 4:1-4:22
         #if  // o.a.f.c.ASTDirIfOrElseOrElseIf; Location 4:1-4:9
             - condition: exp  // o.a.f.c.ASTExpVariable; Location 4:6-4:8
             - AST-node subtype: "0"  // Integer
         #else  // o.a.f.c.ASTDirIfOrElseOrElseIf; Location 4:10-4:16
             - condition: null  // Null
             - AST-node subtype: "1"  // Integer
-    #if-#elseif-#else-container  // o.a.f.c.ASTDirIfElseIfElseContainer; Location 5:1-5:24
+    #if-#elseIf-#else-container  // o.a.f.c.ASTDirIfElseIfElseContainer; Location 5:1-5:24
         #if  // o.a.f.c.ASTDirIfOrElseOrElseIf; Location 5:1-5:10
             - condition: exp  // o.a.f.c.ASTExpVariable; Location 5:6-5:8
             - AST-node subtype: "0"  // Integer
@@ -56,7 +56,7 @@
                 - content: "1"  // String
     #text  // o.a.f.c.ASTStaticText; Location 5:25-5:25
         - content: "\n"  // String
-    #if-#elseif-#else-container  // o.a.f.c.ASTDirIfElseIfElseContainer; Location 6:1-6:32
+    #if-#elseIf-#else-container  // o.a.f.c.ASTDirIfElseIfElseContainer; Location 6:1-6:32
         #if  // o.a.f.c.ASTDirIfOrElseOrElseIf; Location 6:1-6:14
             - condition: exp  // o.a.f.c.ASTExpVariable; Location 6:6-6:8
             - AST-node subtype: "0"  // Integer
@@ -73,18 +73,18 @@
                 - content: "2"  // String
     #text  // o.a.f.c.ASTStaticText; Location 6:33-6:33
         - content: "\n"  // String
-    #if-#elseif-#else-container  // o.a.f.c.ASTDirIfElseIfElseContainer; Location 7:1-7:28
+    #if-#elseIf-#else-container  // o.a.f.c.ASTDirIfElseIfElseContainer; Location 7:1-7:28
         #if  // o.a.f.c.ASTDirIfOrElseOrElseIf; Location 7:1-7:9
             - condition: exp  // o.a.f.c.ASTExpVariable; Location 7:6-7:8
             - AST-node subtype: "0"  // Integer
-        #elseif  // o.a.f.c.ASTDirIfOrElseOrElseIf; Location 7:10-7:22
+        #elseIf  // o.a.f.c.ASTDirIfOrElseOrElseIf; Location 7:10-7:22
             - condition: exp  // o.a.f.c.ASTExpVariable; Location 7:19-7:21
             - AST-node subtype: "2"  // Integer
-    #if-#elseif-#else-container  // o.a.f.c.ASTDirIfElseIfElseContainer; Location 8:1-8:29
+    #if-#elseIf-#else-container  // o.a.f.c.ASTDirIfElseIfElseContainer; Location 8:1-8:29
         #if  // o.a.f.c.ASTDirIfOrElseOrElseIf; Location 8:1-8:9
             - condition: exp  // o.a.f.c.ASTExpVariable; Location 8:6-8:8
             - AST-node subtype: "0"  // Integer
-        #elseif  // o.a.f.c.ASTDirIfOrElseOrElseIf; Location 8:10-8:23
+        #elseIf  // o.a.f.c.ASTDirIfOrElseOrElseIf; Location 8:10-8:23
             - condition: exp  // o.a.f.c.ASTExpVariable; Location 8:19-8:21
             - AST-node subtype: "2"  // Integer
             #text  // o.a.f.c.ASTStaticText; Location 8:23-8:23

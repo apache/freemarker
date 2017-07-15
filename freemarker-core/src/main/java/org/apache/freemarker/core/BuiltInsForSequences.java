@@ -702,9 +702,9 @@ class BuiltInsForSequences {
                             throw new _TemplateModelException(
                                     startErrorMessage(keyNamesLn, i),
                                     (keyNameI == 0
-                                            ? "Sequence items must be hashes when using ?sort_by. "
+                                            ? "Sequence items must be hashes when using ?sortBy. "
                                             : "The " + _StringUtil.jQuote(keyNames[keyNameI - 1])),
-                                    " subvariable is not a hash, so ?sort_by ",
+                                    " subvariable is not a hash, so ?sortBy ",
                                     "can't proceed with getting the ",
                                     new _DelayedJQuote(keyNames[keyNameI]),
                                     " subvariable.");
@@ -818,12 +818,12 @@ class BuiltInsForSequences {
         }
 
         static Object[] startErrorMessage(int keyNamesLn) {
-            return new Object[] { (keyNamesLn == 0 ? "?sort" : "?sort_by(...)"), " failed: " };
+            return new Object[] { (keyNamesLn == 0 ? "?sort" : "?sortBy(...)"), " failed: " };
         }
         
         static Object[] startErrorMessage(int keyNamesLn, int index) {
             return new Object[] {
-                    (keyNamesLn == 0 ? "?sort" : "?sort_by(...)"),
+                    (keyNamesLn == 0 ? "?sort" : "?sortBy(...)"),
                     " failed at sequence index ", Integer.valueOf(index),
                     (index == 0 ? ": " : " (0-based): ") };
         }

@@ -118,16 +118,16 @@ public interface ProcessingConfiguration {
      *   default system time zone of the JDBC client, not just on the content of the database. (This used to be the
      *   default behavior of ORM-s, like Hibernate, too.)
      *
-     *   <li>The value of the {@code time_zone} FreeMarker configuration setting sets the time zone used for the
+     *   <li>The value of the {@code timeZone} FreeMarker configuration setting sets the time zone used for the
      *   template output. For example, when a web page visitor has a preferred time zone, the web application framework
      *   may calls {@link Environment#setTimeZone(TimeZone)} with that time zone. Thus, the visitor will
      *   see {@link java.sql.Timestamp java.sql.Timestamp} and plain {@link java.util.Date java.util.Date} values as
      *   they look in his own time zone. While
      *   this is desirable for those types, as they meant to represent physical points on the time line, this is not
-     *   necessarily desirable for date-only and time-only values. When {@code sql_date_and_time_time_zone} is
-     *   {@code null}, {@code time_zone} is used for rendering all kind of date/time/dateTime values, including
+     *   necessarily desirable for date-only and time-only values. When {@code sqlDateAndTimeTimeZone} is
+     *   {@code null}, {@code timeZone} is used for rendering all kind of date/time/dateTime values, including
      *   {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time}, and then if, for example,
-     *   {@code time_zone} is GMT+00:00, the
+     *   {@code timeZone} is GMT+00:00, the
      *   values from the earlier examples will be shown as 2014-07-11 (one day off) and 09:57:00 (2 hours off). While
      *   those are the time zone correct renderings, those values are probably meant to be shown "as is".
      *
@@ -183,7 +183,7 @@ public interface ProcessingConfiguration {
 
     /**
      * A {@link Map} that associates {@link TemplateNumberFormatFactory}-es to names, which then can be referred by the
-     * {@link #getNumberFormat() number_format} setting with values starting with <code>@<i>name</i></code>. The keys in
+     * {@link #getNumberFormat() numberFormat} setting with values starting with <code>@<i>name</i></code>. The keys in
      * the {@link Map} should start with an UNICODE letter, and should only contain UNICODE letters and digits (not
      * {@code _}), otherwise accessing the custom format from templates can be difficult or impossible. The
      * {@link Configuration}-level default of this setting is an empty  {@link Map}.
@@ -304,14 +304,14 @@ public interface ProcessingConfiguration {
      *                     and {@link java.sql.Time java.sql.Time}, and for {@code "iso"} date values.
      *
      *         <li><p>Time zone options:<br>
-     *             {@code u} = Use UTC instead of what the {@code time_zone} setting suggests. However,
+     *             {@code u} = Use UTC instead of what the {@code timeZone} setting suggests. However,
      *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} aren't affected
      *                     by this (see {@link #getSQLDateAndTimeTimeZone()} to understand why)<br>
-     *             {@code fu} = "Force UTC", that is, use UTC instead of what the {@code time_zone} or the
-     *                     {@code sql_date_and_time_time_zone} setting suggests. This also effects
+     *             {@code fu} = "Force UTC", that is, use UTC instead of what the {@code timeZone} or the
+     *                     {@code sqlDateAndTimeTimeZone} setting suggests. This also effects
      *                     {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values<br>
-     *             Neither = Use the time zone suggested by the {@code time_zone} or the
-     *                     {@code sql_date_and_time_time_zone} configuration setting ({@link #getTimeZone()} and
+     *             Neither = Use the time zone suggested by the {@code timeZone} or the
+     *                     {@code sqlDateAndTimeTimeZone} configuration setting ({@link #getTimeZone()} and
      *                     {@link #getSQLDateAndTimeTimeZone()}).
      *       </ul>
      *
@@ -364,8 +364,8 @@ public interface ProcessingConfiguration {
 
     /**
      * A {@link Map} that associates {@link TemplateDateFormatFactory}-es to names, which then can be referred by the
-     * {@link #getDateFormat() date_format}/{@link #getDateFormat() date_format }/{@link #getDateTimeFormat()
-     * datetime_format} settings with values starting with <code>@<i>name</i></code>. The keys in the {@link Map} should
+     * {@link #getDateFormat() dateFormat}/{@link #getDateFormat() dateFormat }/{@link #getDateTimeFormat()
+     * dateTimeFormat} settings with values starting with <code>@<i>name</i></code>. The keys in the {@link Map} should
      * start with an UNICODE letter, and should only contain UNICODE letters and digits (not {@code _}), otherwise
      * accessing the custom format from templates can be difficult or impossible. The {@link Configuration}-level
      * default of this setting is an empty {@link Map}.

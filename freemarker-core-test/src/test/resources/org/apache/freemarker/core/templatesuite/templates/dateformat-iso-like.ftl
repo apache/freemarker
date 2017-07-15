@@ -104,19 +104,19 @@
 <@assertEquals actual=d?string.iso expected="0000-05-13" />
 
 <#assign dt = "2010-05-15T01:02:03"?datetime.xs>
-<#setting datetimeFormat="xs">
+<#setting dateTimeFormat="xs">
 <@assertEquals actual=dt?string expected="2010-05-15T01:02:03-05:00" />
-<#setting datetimeFormat="xs u">
+<#setting dateTimeFormat="xs u">
 <@assertEquals actual=dt?string expected="2010-05-15T06:02:03Z" />
-<#setting datetimeFormat="iso u">
+<#setting dateTimeFormat="iso u">
 <@assertEquals actual=dt?string expected="2010-05-15T06:02:03Z" />
-<#setting datetimeFormat="xs fz">
+<#setting dateTimeFormat="xs fz">
 <@assertEquals actual=dt?string expected="2010-05-15T01:02:03-05:00" />
-<#setting datetimeFormat="xs fz u">
+<#setting dateTimeFormat="xs fz u">
 <@assertEquals actual=dt?string expected="2010-05-15T06:02:03Z" />
-<#setting datetimeFormat="xs nz u">
+<#setting dateTimeFormat="xs nz u">
 <@assertEquals actual=dt?string expected="2010-05-15T06:02:03" />
-<#setting datetimeFormat="iso m nz">
+<#setting dateTimeFormat="iso m nz">
 <@assertEquals actual=dt?string expected="2010-05-15T01:02" />
 
 <#assign d = dt?date>

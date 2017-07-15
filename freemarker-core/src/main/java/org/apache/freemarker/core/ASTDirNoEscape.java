@@ -22,7 +22,7 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 
 /**
- * AST directive node: {@code #noescape}.
+ * AST directive node: {@code #noEscape}.
  */
 class ASTDirNoEscape extends ASTDirective {
 
@@ -62,7 +62,7 @@ class ASTDirNoEscape extends ASTDirective {
     
     @Override
     String getASTNodeDescriptor() {
-        return "#noescape";
+        return "#noEscape";
     }
 
     @Override

@@ -30,7 +30,7 @@ import junit.framework.TestCase;
 
 /**
  * Test various generated templates (permutations), including some deliberately
- * wrong ones, with various tag_syntax settings.  
+ * wrong ones, with various tagSyntax settings.
  */
 public class TagSyntaxVariationsTest extends TestCase {
     

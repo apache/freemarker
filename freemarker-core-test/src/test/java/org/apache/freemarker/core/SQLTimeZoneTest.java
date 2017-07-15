@@ -94,7 +94,7 @@ public class SQLTimeZoneTest extends TemplateTest {
             + "${sqlTimestamp?string.xs_fz} ${javaDate?datetime?string.xs_fz}\n"
             + "${sqlDate?string.xs} ${sqlTime?string.xs} "
             + "${sqlTimestamp?string.xs} ${javaDate?datetime?string.xs}\n"
-            + "<#setting time_zone='GMT'>\n"
+            + "<#setting timeZone='GMT'>\n"
             + "${sqlDate} ${sqlTime} ${sqlTimestamp} ${javaDate?datetime}\n"
             + "${sqlDate?string.iso_fz} ${sqlTime?string.iso_fz} "
             + "${sqlTimestamp?string.iso_fz} ${javaDate?datetime?string.iso_fz}\n"
@@ -220,19 +220,19 @@ public class SQLTimeZoneTest extends TemplateTest {
                 + "2014-07-11 Fr, 10:30:05 Do, 2014-07-12T10:30:05 Sa, 2014-07-12T10:30:05 Sa, 2014-07-12 Sa, 10:30:05 Sa\n");
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
-                + "<#setting date_format='yyyy-MM-dd'>\n"
+                + "<#setting dateFormat='yyyy-MM-dd'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n",
                 "2014-07-11 Fri, 10:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
                 + "2014-07-11, 10:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12, 10:30:05 Sat\n");
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
-                + "<#setting time_format='HH:mm:ss'>\n"
+                + "<#setting timeFormat='HH:mm:ss'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n",
                 "2014-07-11 Fri, 10:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
                 + "2014-07-11 Fri, 10:30:05, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05\n");
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
-                + "<#setting datetime_format='yyyy-MM-dd\\'T\\'HH:mm:ss'>\n"
+                + "<#setting dateTimeFormat='yyyy-MM-dd\\'T\\'HH:mm:ss'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n",
                 "2014-07-11 Fri, 10:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
                 + "2014-07-11 Fri, 10:30:05 Thu, 2014-07-12T10:30:05, 2014-07-12T10:30:05, 2014-07-12 Sat, 10:30:05 Sat\n");
@@ -246,19 +246,19 @@ public class SQLTimeZoneTest extends TemplateTest {
                 + "2014-07-12 Sa, 12:30:05 Do, 2014-07-12T10:30:05 Sa, 2014-07-12T10:30:05 Sa, 2014-07-12 Sa, 10:30:05 Sa\n");
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
-                + "<#setting date_format='yyyy-MM-dd'>\n"
+                + "<#setting dateFormat='yyyy-MM-dd'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n",
                 "2014-07-12 Sat, 12:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
                 + "2014-07-12, 12:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12, 10:30:05 Sat\n");
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
-                + "<#setting time_format='HH:mm:ss'>\n"
+                + "<#setting timeFormat='HH:mm:ss'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n",
                 "2014-07-12 Sat, 12:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
                 + "2014-07-12 Sat, 12:30:05, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05\n");
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
-                + "<#setting datetime_format='yyyy-MM-dd\\'T\\'HH:mm:ss'>\n"
+                + "<#setting dateTimeFormat='yyyy-MM-dd\\'T\\'HH:mm:ss'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n",
                 "2014-07-12 Sat, 12:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
                 + "2014-07-12 Sat, 12:30:05 Thu, 2014-07-12T10:30:05, 2014-07-12T10:30:05, 2014-07-12 Sat, 10:30:05 Sat\n");
@@ -283,10 +283,10 @@ public class SQLTimeZoneTest extends TemplateTest {
         assertOutput(
                 "${javaDayErrorDate?date} ${javaDayErrorDate?time} ${sqlTimestamp?date} ${sqlTimestamp?time} "
                 + "${sqlDate?date} ${sqlTime?time}\n"
-                + "<#setting time_zone='GMT+02'>\n"
+                + "<#setting timeZone='GMT+02'>\n"
                 + "${javaDayErrorDate?date} ${javaDayErrorDate?time} ${sqlTimestamp?date} ${sqlTimestamp?time} "
                 + "${sqlDate?date} ${sqlTime?time}\n"
-                + "<#setting time_zone='GMT-11'>\n"
+                + "<#setting timeZone='GMT-11'>\n"
                 + "${javaDayErrorDate?date} ${javaDayErrorDate?time} ${sqlTimestamp?date} ${sqlTimestamp?time} "
                 + "${sqlDate?date} ${sqlTime?time}\n",
                 "2014-07-11 22:00:00 2014-07-12 10:30:05 2014-07-12 12:30:05\n"
@@ -303,21 +303,21 @@ public class SQLTimeZoneTest extends TemplateTest {
 
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n"
-                + "<#setting sql_date_and_time_time_zone='GMT+02'>\n"
+                + "<#setting sqlDateAndTimeTimeZone='GMT+02'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n"
-                + "<#setting sql_date_and_time_time_zone='null'>\n"
+                + "<#setting sqlDateAndTimeTimeZone='null'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n"
-                + "<#setting time_zone='GMT+03'>\n"
+                + "<#setting timeZone='GMT+03'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n"
-                + "<#setting sql_date_and_time_time_zone='GMT+02'>\n"
+                + "<#setting sqlDateAndTimeTimeZone='GMT+02'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n"
-                + "<#setting sql_date_and_time_time_zone='GMT-11'>\n"
+                + "<#setting sqlDateAndTimeTimeZone='GMT-11'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n"
-                + "<#setting date_format='xs fz'>\n"
+                + "<#setting dateFormat='xs fz'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n"
-                + "<#setting time_format='xs fz'>\n"
+                + "<#setting timeFormat='xs fz'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n"
-                + "<#setting datetime_format='iso m'>\n"
+                + "<#setting dateTimeFormat='iso m'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}\n",
                 "2014-07-11, 10:30:05, 2014-07-12T10:30:05, 2014-07-12T10:30:05\n"
                 + "2014-07-12, 12:30:05, 2014-07-12T10:30:05, 2014-07-12T10:30:05\n"
@@ -338,17 +338,17 @@ public class SQLTimeZoneTest extends TemplateTest {
                 .build());
         
         assertOutput(
-                "<#setting date_format='xs fz'><#setting time_format='xs fz'>\n"
+                "<#setting dateFormat='xs fz'><#setting timeFormat='xs fz'>\n"
                 + "${sqlDate}, ${sqlTime}, ${javaDate?time}\n"
-                + "<#setting date_format='xs fz u'><#setting time_format='xs fz u'>\n"
+                + "<#setting dateFormat='xs fz u'><#setting timeFormat='xs fz u'>\n"
                 + "${sqlDate}, ${sqlTime}, ${javaDate?time}\n"
-                + "<#setting sql_date_and_time_time_zone='GMT+03'>\n"
+                + "<#setting sqlDateAndTimeTimeZone='GMT+03'>\n"
                 + "${sqlDate}, ${sqlTime}, ${javaDate?time}\n"
-                + "<#setting sql_date_and_time_time_zone='null'>\n"
+                + "<#setting sqlDateAndTimeTimeZone='null'>\n"
                 + "${sqlDate}, ${sqlTime}, ${javaDate?time}\n"
-                + "<#setting date_format='xs fz'><#setting time_format='xs fz'>\n"
+                + "<#setting dateFormat='xs fz'><#setting timeFormat='xs fz'>\n"
                 + "${sqlDate}, ${sqlTime}, ${javaDate?time}\n"
-                + "<#setting date_format='xs fz fu'><#setting time_format='xs fz fu'>\n"
+                + "<#setting dateFormat='xs fz fu'><#setting timeFormat='xs fz fu'>\n"
                 + "${sqlDate}, ${sqlTime}, ${javaDate?time}\n",
                 "2014-07-12+02:00, 12:30:05+02:00, 09:30:05-01:00\n"
                 + "2014-07-12+02:00, 12:30:05+02:00, 10:30:05Z\n"

@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#mixed_content  // o.a.f.c.ASTImplicitParent
+#mixedContent  // o.a.f.c.ASTImplicitParent
     ${...}  // o.a.f.c.ASTDollarInterpolation
         - content: ?trim  // o.a.f.c.BuiltInsForStringsBasic$trimBI
             - left-hand operand: x  // o.a.f.c.ASTExpVariable

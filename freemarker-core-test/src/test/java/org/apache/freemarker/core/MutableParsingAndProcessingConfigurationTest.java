@@ -22,11 +22,9 @@ package org.apache.freemarker.core;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -55,19 +53,13 @@ public class MutableParsingAndProcessingConfigurationTest {
         cfgB.setAutoEscapingPolicy(AutoEscapingPolicy.DISABLE);
         assertEquals(AutoEscapingPolicy.DISABLE, cfgB.getAutoEscapingPolicy());
 
-        cfgB.setSetting(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enableIfSupported");
+        cfgB.setSetting(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY, "enableIfSupported");
         assertEquals(AutoEscapingPolicy.ENABLE_IF_SUPPORTED, cfgB.getAutoEscapingPolicy());
 
-        cfgB.setSetting(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enable_if_supported");
-        assertEquals(AutoEscapingPolicy.ENABLE_IF_SUPPORTED, cfgB.getAutoEscapingPolicy());
-
-        cfgB.setSetting(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enableIfDefault");
+        cfgB.setSetting(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY, "enableIfDefault");
         assertEquals(AutoEscapingPolicy.ENABLE_IF_DEFAULT, cfgB.getAutoEscapingPolicy());
 
-        cfgB.setSetting(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "enable_if_default");
-        assertEquals(AutoEscapingPolicy.ENABLE_IF_DEFAULT, cfgB.getAutoEscapingPolicy());
-
-        cfgB.setSetting(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE, "disable");
+        cfgB.setSetting(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY, "disable");
         assertEquals(AutoEscapingPolicy.DISABLE, cfgB.getAutoEscapingPolicy());
     }
 
@@ -87,10 +79,10 @@ public class MutableParsingAndProcessingConfigurationTest {
 
         assertFalse(cfgB.isOutputFormatSet());
 
-        cfgB.setSetting(Configuration.ExtendableBuilder.OUTPUT_FORMAT_KEY_CAMEL_CASE, XMLOutputFormat.class.getSimpleName());
+        cfgB.setSetting(Configuration.ExtendableBuilder.OUTPUT_FORMAT_KEY, XMLOutputFormat.class.getSimpleName());
         assertEquals(XMLOutputFormat.INSTANCE, cfgB.getOutputFormat());
 
-        cfgB.setSetting(Configuration.ExtendableBuilder.OUTPUT_FORMAT_KEY_SNAKE_CASE, HTMLOutputFormat.class.getSimpleName());
+        cfgB.setSetting(Configuration.ExtendableBuilder.OUTPUT_FORMAT_KEY, HTMLOutputFormat.class.getSimpleName());
         assertEquals(HTMLOutputFormat.INSTANCE, cfgB.getOutputFormat());
 
         cfgB.unsetOutputFormat();
@@ -99,7 +91,7 @@ public class MutableParsingAndProcessingConfigurationTest {
 
         cfgB.setOutputFormat(UndefinedOutputFormat.INSTANCE);
         assertTrue(cfgB.isOutputFormatSet());
-        cfgB.setSetting(Configuration.ExtendableBuilder.OUTPUT_FORMAT_KEY_CAMEL_CASE, "default");
+        cfgB.setSetting(Configuration.ExtendableBuilder.OUTPUT_FORMAT_KEY, "default");
         assertFalse(cfgB.isOutputFormatSet());
 
         try {
@@ -128,11 +120,11 @@ public class MutableParsingAndProcessingConfigurationTest {
         assertTrue(cfgB.getRecognizeStandardFileExtensions());
         assertTrue(cfgB.isRecognizeStandardFileExtensionsSet());
 
-        cfgB.setSetting(Configuration.ExtendableBuilder.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE, "false");
+        cfgB.setSetting(Configuration.ExtendableBuilder.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY, "false");
         assertFalse(cfgB.getRecognizeStandardFileExtensions());
         assertTrue(cfgB.isRecognizeStandardFileExtensionsSet());
 
-        cfgB.setSetting(Configuration.ExtendableBuilder.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE, "default");
+        cfgB.setSetting(Configuration.ExtendableBuilder.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY, "default");
         assertTrue(cfgB.getRecognizeStandardFileExtensions());
         assertFalse(cfgB.isRecognizeStandardFileExtensionsSet());
     }
@@ -176,33 +168,17 @@ public class MutableParsingAndProcessingConfigurationTest {
     public void testTabSizeSetting() throws Exception {
         Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
         assertEquals(8, cfgB.getTabSize());
-        cfgB.setSetting(Configuration.ExtendableBuilder.TAB_SIZE_KEY_CAMEL_CASE, "4");
+        cfgB.setSetting(Configuration.ExtendableBuilder.TAB_SIZE_KEY, "4");
         assertEquals(4, cfgB.getTabSize());
-        cfgB.setSetting(Configuration.ExtendableBuilder.TAB_SIZE_KEY_SNAKE_CASE, "1");
+        cfgB.setSetting(Configuration.ExtendableBuilder.TAB_SIZE_KEY, "1");
         assertEquals(1, cfgB.getTabSize());
 
         try {
-            cfgB.setSetting(Configuration.ExtendableBuilder.TAB_SIZE_KEY_SNAKE_CASE, "x");
+            cfgB.setSetting(Configuration.ExtendableBuilder.TAB_SIZE_KEY, "x");
             fail();
         } catch (ConfigurationException e) {
             assertThat(e.getCause(), instanceOf(NumberFormatException.class));
         }
-    }
-
-    @Test
-    public void testNamingConventionSetSetting() throws ConfigurationException {
-        Configuration.Builder cfg = new Configuration.Builder(Configuration.VERSION_3_0_0);
-
-        assertEquals(NamingConvention.AUTO_DETECT, cfg.getNamingConvention());
-
-        cfg.setSetting("naming_convention", "legacy");
-        assertEquals(NamingConvention.LEGACY, cfg.getNamingConvention());
-
-        cfg.setSetting("naming_convention", "camel_case");
-        assertEquals(NamingConvention.CAMEL_CASE, cfg.getNamingConvention());
-
-        cfg.setSetting("naming_convention", "auto_detect");
-        assertEquals(NamingConvention.AUTO_DETECT, cfg.getNamingConvention());
     }
 
     @Test
@@ -211,7 +187,7 @@ public class MutableParsingAndProcessingConfigurationTest {
 
         assertFalse(cfgB.getLazyImports());
         assertFalse(cfgB.isLazyImportsSet());
-        cfgB.setSetting("lazy_imports", "true");
+        cfgB.setSetting("lazyImports", "true");
         assertTrue(cfgB.getLazyImports());
         cfgB.setSetting("lazyImports", "false");
         assertFalse(cfgB.getLazyImports());
@@ -224,7 +200,7 @@ public class MutableParsingAndProcessingConfigurationTest {
 
         assertNull(cfgB.getLazyAutoImports());
         assertFalse(cfgB.isLazyAutoImportsSet());
-        cfgB.setSetting("lazy_auto_imports", "true");
+        cfgB.setSetting("lazyAutoImports", "true");
         assertEquals(Boolean.TRUE, cfgB.getLazyAutoImports());
         assertTrue(cfgB.isLazyAutoImportsSet());
         cfgB.setSetting("lazyAutoImports", "false");
@@ -304,8 +280,8 @@ public class MutableParsingAndProcessingConfigurationTest {
     @Test
     public void testGetSettingNamesAreSorted() throws Exception {
         for (boolean camelCase : new boolean[] { false, true }) {
-            List<String> names = new ArrayList<>(MutableParsingAndProcessingConfiguration.getSettingNames(camelCase));
-            List<String> inheritedNames = new ArrayList<>(MutableProcessingConfiguration.getSettingNames(camelCase));
+            List<String> names = new ArrayList<>(MutableParsingAndProcessingConfiguration.getSettingNames());
+            List<String> inheritedNames = new ArrayList<>(MutableProcessingConfiguration.getSettingNames());
             assertStartsWith(names, inheritedNames);
 
             String prevName = null;
@@ -320,39 +296,16 @@ public class MutableParsingAndProcessingConfigurationTest {
     }
 
     @Test
-    public void testGetSettingNamesNameConventionsContainTheSame() throws Exception {
-        MutableProcessingConfigurationTest.testGetSettingNamesNameConventionsContainTheSame(
-                new ArrayList<>(MutableParsingAndProcessingConfiguration.getSettingNames(false)),
-                new ArrayList<>(MutableParsingAndProcessingConfiguration.getSettingNames(true)));
+    public void testAllSettingsAreCoveredByMutableSettingsObject() throws Exception {
+        ConfigurationTest.testAllSettingsAreCoveredByMutableSettingsObject(
+                ParsingAndProcessingConfiguration.class,
+                MutableParsingAndProcessingConfiguration.class);
     }
 
     @Test
-    public void testStaticFieldKeysCoverAllGetSettingNames() throws Exception {
-        List<String> names = new ArrayList<>(MutableParsingAndProcessingConfiguration.getSettingNames(false));
-        for (String name :  names) {
-            assertTrue("No field was found for " + name, keyFieldExists(name));
-        }
-    }
-
-    @Test
-    public void testGetSettingNamesCoversAllStaticKeyFields() throws Exception {
-        Collection<String> names = MutableParsingAndProcessingConfiguration.getSettingNames(false);
-
-        for (Class<?> cfgableClass : new Class[] {
-                MutableParsingAndProcessingConfiguration.class,
-                MutableProcessingConfiguration.class }) {
-            for (Field f : cfgableClass.getFields()) {
-                if (f.getName().endsWith("_KEY")) {
-                    final String name = (String) f.get(null);
-                    assertTrue("Missing setting name: " + name, names.contains(name));
-                }
-            }
-        }
-    }
-
-    @Test
-    public void testKeyStaticFieldsHasAllVariationsAndCorrectFormat() throws IllegalArgumentException, IllegalAccessException {
-        MutableProcessingConfigurationTest.testKeyStaticFieldsHasAllVariationsAndCorrectFormat(
+    public void testGetSettingNamesCorrespondToStaticKeyFields() throws Exception {
+        ConfigurationTest.testGetSettingNamesCorrespondToStaticKeyFields(
+                MutableParsingAndProcessingConfiguration.getSettingNames(),
                 MutableParsingAndProcessingConfiguration.class);
     }
 
@@ -364,17 +317,6 @@ public class MutableParsingAndProcessingConfigurationTest {
             assertEquals(name, list.get(index));
             index++;
         }
-    }
-
-    private boolean keyFieldExists(String name) throws Exception {
-        Field field;
-        try {
-            field = MutableParsingAndProcessingConfiguration.class.getField(name.toUpperCase() + "_KEY");
-        } catch (NoSuchFieldException e) {
-            return false;
-        }
-        assertEquals(name, field.get(null));
-        return true;
     }
 
 }

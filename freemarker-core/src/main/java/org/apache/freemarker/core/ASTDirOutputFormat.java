@@ -22,7 +22,7 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 
 /**
- * AST directive node: {@code #outputformat}.
+ * AST directive node: {@code #outputFormat}.
  */
 final class ASTDirOutputFormat extends ASTDirective {
     
@@ -50,7 +50,7 @@ final class ASTDirOutputFormat extends ASTDirective {
     
     @Override
     String getASTNodeDescriptor() {
-        return "#outputformat";
+        return "#outputFormat";
     }
     
     @Override

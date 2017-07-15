@@ -43,16 +43,16 @@ ${message@#$%&}
 	</p>
 </#if>
 
-Here's another edge case, this time, trying to output a &lt;noparse&gt;
-inside another &lt;noparse&gt;
+Here's another edge case, this time, trying to output a &lt;noParse&gt;
+inside another &lt;noParse&gt;
 
 <#noParse>
 
-This is what the noparse instruction looks like:
+This is what the noParse instruction looks like:
 
-<#nop</#noParse><#noParse>arse>This part of the template wont be parsed by the 
+<#noP</#noParse><#noParse>arse>This part of the template wont be parsed by the
 FreeMarker parser. Instead, it will be treated as verbatim text information,
-and output as such.</#nop</#noParse><#noParse>arse>
+and output as such.</#noP</#noParse><#noParse>arse>
 
 The rest of the template appears here.
 </#noParse>

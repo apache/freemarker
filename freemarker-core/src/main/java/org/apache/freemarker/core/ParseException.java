@@ -401,7 +401,7 @@ public class ParseException extends IOException implements FMParserConstants {
                             endNames.add("#escape");
                             break;
                         case END_NOESCAPE:
-                            endNames.add("#noescape");
+                            endNames.add("#noEscape");
                             break;
                         case END_ASSIGN:
                             endNames.add("#assign");
@@ -434,11 +434,11 @@ public class ParseException extends IOException implements FMParserConstants {
                     + (endNames.size() == 0 ? "" : " You have an unclosed " + concatWithOrs(endNames) + ".");
         } else if (kind == ELSE) {
             return "Unexpected directive, \"#else\". "
-                    + "Check if you have a valid #if-#elseif-#else or #list-#else structure.";
+                    + "Check if you have a valid #if-#elseIf-#else or #list-#else structure.";
         } else if (kind == END_IF || kind == ELSE_IF) {
             return "Unexpected directive, "
                     + _StringUtil.jQuote(nextToken)
-                    + ". Check if you have a valid #if-#elseif-#else structure.";
+                    + ". Check if you have a valid #if-#elseIf-#else structure.";
         }
         return null;
     }

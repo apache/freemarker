@@ -50,7 +50,7 @@ public class DOMTest extends TemplateTest {
         addDocToDataModel("<root xmlns='http://example.com/ns1' xmlns:ns2='http://example.com/ns2'>"
                 + "<a>A</a><ns2:b>B</ns2:b><c a1='1' ns2:a2='2'/></root>");
 
-        String ftlHeader = "<#ftl ns_prefixes={'D':'http://example.com/ns1', 'n2':'http://example.com/ns2'}>";
+        String ftlHeader = "<#ftl nsPrefixes={'D':'http://example.com/ns1', 'n2':'http://example.com/ns2'}>";
         
         // @@markup:
         assertOutput("${doc.@@markup}",
@@ -61,7 +61,7 @@ public class DOMTest extends TemplateTest {
                 + "${doc.@@markup}",
                 "<root xmlns=\"http://example.com/ns1\" xmlns:n2=\"http://example.com/ns2\">"
                 + "<a>A</a><n2:b>B</n2:b><c a1=\"1\" n2:a2=\"2\" /></root>");
-        assertOutput("<#ftl ns_prefixes={'D':'http://example.com/ns1'}>"
+        assertOutput("<#ftl nsPrefixes={'D':'http://example.com/ns1'}>"
                 + "${doc.@@markup}",
                 "<root xmlns=\"http://example.com/ns1\" xmlns:a=\"http://example.com/ns2\">"
                 + "<a>A</a><a:b>B</a:b><c a1=\"1\" a:a2=\"2\" /></root>");

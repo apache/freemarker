@@ -123,7 +123,6 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     private Charset actualSourceEncoding;
     private TagSyntax actualTagSyntax;
 
-    private NamingConvention actualNamingConvention;
     // Custom state:
     private final Object customStateMapLock = new Object();
     private final ConcurrentHashMap<CustomStateKey, Object> customStateMap = new ConcurrentHashMap<>(0);
@@ -286,7 +285,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         _NullArgumentException.check("configuration", configuration);
         this.cfg = configuration;
         this.tCfg = templateConfiguration;
-        this.parsingConfiguration = tCfg != null ? new TemplateParsingConfigurationWithFallback(cfg, tCfg) : cfg;
+        this.parsingConfiguration = tCfg != null ? new ParsingConfigurationWithFallback(cfg, tCfg) : cfg;
         this.lookupName = lookupName;
         this.sourceName = sourceName;
 
@@ -319,7 +318,6 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
                     rootElement = null;
                 }
                 actualTagSyntax = parser._getLastTagSyntax();
-                actualNamingConvention = parser._getLastNamingConvention();
             } catch (TokenMgrError exc) {
                 // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it
                 // to ParseException
@@ -685,22 +683,11 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     }
     
     /**
-     * Returns the naming convention the parser has chosen for this template. If it could be determined, it's
-     * {@link NamingConvention#LEGACY} or {@link NamingConvention#CAMEL_CASE}. If it
-     * couldn't be determined (like because there no identifier that's part of the template language was used where
-     * the naming convention matters), this returns whatever the default is in the current configuration, so it's maybe
-     * {@link TagSyntax#AUTO_DETECT}.
-     */
-    public NamingConvention getActualNamingConvention() {
-        return actualNamingConvention;
-    }
-    
-    /**
      * Returns the output format (see {@link Configuration#getOutputFormat()}) used for this template.
      * The output format of a template can come from various places, in order of increasing priority:
      * {@link Configuration#getOutputFormat()}, {@link ParsingConfiguration#getOutputFormat()} (which is usually
      * provided by {@link Configuration#getTemplateConfigurations()}) and the {@code #ftl} header's
-     * {@code output_format} option in the template.
+     * {@code outputFormat} option in the template.
      */
     public OutputFormat getOutputFormat() {
         return outputFormat;

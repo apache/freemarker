@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#mixed_content  // o.a.f.c.ASTImplicitParent
+#mixedContent  // o.a.f.c.ASTImplicitParent
     #text  // o.a.f.c.ASTStaticText
         - content: "a\n"  // String
     #text  // o.a.f.c.ASTStaticText

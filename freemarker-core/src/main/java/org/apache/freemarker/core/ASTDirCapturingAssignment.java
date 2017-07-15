@@ -142,7 +142,7 @@ final class ASTDirCapturingAssignment extends ASTDirective {
             sb.append(getASTNodeDescriptor());
             sb.append('>');
         } else {
-            sb.append(" = .nested_output");
+            sb.append(" = .nestedOutput");
         }
         return sb.toString();
     }

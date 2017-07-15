@@ -72,7 +72,7 @@ final class ASTStaticText extends ASTElement {
         if (canonical) {
             String text = new String(this.text);
             if (unparsed) {
-                return "<#noparse>" + text + "</#noparse>";
+                return "<#noParse>" + text + "</#noParse>";
             }
             return text;
         } else {

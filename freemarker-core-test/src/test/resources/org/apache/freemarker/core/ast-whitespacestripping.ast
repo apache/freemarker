@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-#mixed_content  // o.a.f.c.ASTImplicitParent
+#mixedContent  // o.a.f.c.ASTImplicitParent
     #assign  // o.a.f.c.ASTDirAssignment
         - assignment target: "xs"  // String
         - assignment operator: "="  // String

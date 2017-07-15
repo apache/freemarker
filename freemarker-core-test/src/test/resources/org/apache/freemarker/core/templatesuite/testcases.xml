@@ -33,29 +33,29 @@
      
  <!ELEMENT setting EMPTY>
      <!ATTLIST setting 
-            auto_import CDATA #IMPLIED
-            source_encoding CDATA #IMPLIED
+            autoImports CDATA #IMPLIED
+            sourceEncoding CDATA #IMPLIED
             locale CDATA #IMPLIED
-            object_wrapper CDATA #IMPLIED
-            output_encoding CDATA #IMPLIED
+            objectWrapper CDATA #IMPLIED
+            outputEncoding CDATA #IMPLIED
             output_dir CDATA #IMPLIED
-            new_builtin_class_resolver CDATA #IMPLIED
-            url_escaping_charset CDATA #IMPLIED
-            incompatible_improvements CDATA #IMPLIED
-            time_zone CDATA #IMPLIED
-            api_builtin_enabled CDATA #IMPLIED
+            newBuiltinClassResolver CDATA #IMPLIED
+            urlEscapingCharset CDATA #IMPLIED
+            incompatibleImprovements CDATA #IMPLIED
+            timeZone CDATA #IMPLIED
+            apiBuiltinEnabled CDATA #IMPLIED
       >
 ]>
 <!--
-Note that for the incompatible_improvements setting you can specify a list of versions, for example:
-<setting incompatible_improvements="min, 3.0.5, max" /> 
+Note that for the incompatibleImprovements setting you can specify a list of versions, for example:
+<setting incompatibleImprovements="min, 3.0.5, max" />
 -->
 
 <testCases>
-   <setting source_encoding="UTF-8" output_encoding="UTF-8" />
+   <setting sourceEncoding="UTF-8" outputEncoding="UTF-8" />
    
    <testCase name="api-builtins" noOutput="true">
-      <setting api_builtin_enabled="true" />
+      <setting apiBuiltinEnabled="true" />
    </testCase>
    <testCase name="assignments" noOutput="true" />
    <testCase name="boolean" />
@@ -70,7 +70,7 @@ Note that for the incompatible_improvements setting you can specify a list of ve
    <testCase name="dateparsing" noOutput="true" />
    <testCase name="default"/>
    <testCase name="default-object-wrapper">
-      <setting api_builtin_enabled="true" />
+      <setting apiBuiltinEnabled="true" />
    </testCase>
    <testCase name="encoding-builtins" />
    <testCase name="escapes" />
@@ -78,36 +78,36 @@ Note that for the incompatible_improvements setting you can specify a list of ve
    <testCase name="identifier-non-ascii" />
    <testCase name="identifier-escaping" />
    <testCase name="import">
-      <setting auto_import="import_lib.ftl as my"/>
+      <setting autoImports="import_lib.ftl as my"/>
    </testCase>
    <testCase name="include" />
    <testCase name="include2">
-      <setting source_encoding="utf-8" />
+      <setting sourceEncoding="utf-8" />
    </testCase>
    <testCase name="interpret"/>
    <testCase name="iterators"/>
    <testCase name="lastcharacter"/>
    <testCase name="list[#endTN]-simpleTemplateModels" expected="list.txt">
-      <setting object_wrapper="org.apache.freemarker.core.templatesuite.models.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
+      <setting objectWrapper="org.apache.freemarker.core.templatesuite.models.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
    </testCase>
    <testCase name="list[#endTN]-collectionAdapter" expected="list.txt">
-      <setting object_wrapper="DefaultObjectWrapper(3.0.0)" />
+      <setting objectWrapper="DefaultObjectWrapper(3.0.0)" />
    </testCase>
    <testCase name="list2[#endTN]-simpleTemplateModels" expected="list2.txt">
-      <setting object_wrapper="org.apache.freemarker.core.templatesuite.models.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
+      <setting objectWrapper="org.apache.freemarker.core.templatesuite.models.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
    </testCase>
    <testCase name="list2[#endTN]-collectionAdapter" expected="list2.txt">
-      <setting object_wrapper="DefaultObjectWrapper(3.0.0)" />
+      <setting objectWrapper="DefaultObjectWrapper(3.0.0)" />
    </testCase>
    <testCase name="list3[#endTN]-simpleTemplateModels" expected="list3.txt">
-      <setting object_wrapper="org.apache.freemarker.core.templatesuite.models.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
+      <setting objectWrapper="org.apache.freemarker.core.templatesuite.models.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
    </testCase>
    <testCase name="list3[#endTN]-collectionAdapter" expected="list3.txt">
-      <setting object_wrapper="DefaultObjectWrapper(3.0.0)" />
+      <setting objectWrapper="DefaultObjectWrapper(3.0.0)" />
    </testCase>
    <testCase name="list-bis" />
    <testCase name="list-bis[#endTN]-collectionAdapter" expected="list-bis.txt">
-      <setting object_wrapper="DefaultObjectWrapper(3.0.0)" />
+      <setting objectWrapper="DefaultObjectWrapper(3.0.0)" />
    </testCase>
    <testCase name="listhash" />
    <testCase name="listhashliteral" />
@@ -131,10 +131,10 @@ Note that for the incompatible_improvements setting you can specify a list of ve
    <testCase name="numerical-cast" />
    <testCase name="output-encoding1"/>
    <testCase name="output-encoding2">
-       <setting output_encoding="UTF-16"/>
+       <setting outputEncoding="UTF-16"/>
    </testCase>
    <testCase name="output-encoding3">
-       <setting output_encoding="ISO-8859-1" url_escaping_charset="UTF-16" />
+       <setting outputEncoding="ISO-8859-1" urlEscapingCharset="UTF-16" />
    </testCase>
    <testCase name="precedence"/>
    <testCase name="range" noOutput="true" />
@@ -142,13 +142,13 @@ Note that for the incompatible_improvements setting you can specify a list of ve
    <testCase name="root" />
    <testCase name="setting" noOutput="true" />
    <testCase name="sequence-builtins[#endTN]-with-SimpleTemplateModel" expected="sequence-builtins.txt">
-      <setting object_wrapper="org.apache.freemarker.core.templatesuite.models.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
+      <setting objectWrapper="org.apache.freemarker.core.templatesuite.models.SimpleMapAndCollectionObjectWrapper(3.0.0)" />
    </testCase>
    <testCase name="sequence-builtins[#endTN]-with-DefaultObjectWrapper" expected="sequence-builtins.txt">
-      <setting object_wrapper="default"/> 
+      <setting objectWrapper="default"/>
    </testCase>
    <testCase name="sequence-builtins[#endTN]-with-DefaultObjectWrapper-collAdapters" expected="sequence-builtins.txt">
-      <setting object_wrapper="DefaultObjectWrapper(3.0.0)"/>
+      <setting objectWrapper="DefaultObjectWrapper(3.0.0)"/>
    </testCase>
    <testCase name="simplehash-char-key" noOutput="true" />
    <testCase name="existence-operators" noOutput="true" />
@@ -173,19 +173,19 @@ Note that for the incompatible_improvements setting you can specify a list of ve
    <testCase name="hashconcat"/>
    <testCase name="new-defaultresolver" />
    <testCase name="new-unrestricted" template="new-defaultresolver.ftl" expected="new-defaultresolver.txt">
-      <setting new_builtin_class_resolver="unrestricted"/>
+      <setting newBuiltinClassResolver="unrestricted"/>
    </testCase>   
    <testCase name="new-allowsnothing" template="new-defaultresolver.ftl">
-      <setting new_builtin_class_resolver="allow_nothing"/>
+      <setting newBuiltinClassResolver="allowNothing"/>
    </testCase>   
    <testCase name="new-optin">
-      <setting new_builtin_class_resolver="
-      		allowed_classes: org.apache.freemarker.core.templatesuite.models.NewTestModel,
-      		trusted_templates: subdir/new-optin.ftl, subdir/subsub/*"
+      <setting newBuiltinClassResolver="
+      		allowedClasses: org.apache.freemarker.core.templatesuite.models.NewTestModel,
+      		trustedTemplates: subdir/new-optin.ftl, subdir/subsub/*"
       />
    </testCase>   
    <testCase name="specialvars">
-      <setting locale="en_US" output_encoding="utf-8" url_escaping_charset="iso-8859-1"/>
+      <setting locale="en_US" outputEncoding="utf-8" urlEscapingCharset="iso-8859-1"/>
    </testCase>   
    <testCase name="number-to-date" />
    <testCase name="varargs" />
@@ -194,9 +194,9 @@ Note that for the incompatible_improvements setting you can specify a list of ve
    <testCase name="string-builtin-coercion" noOutput="true" />
    
    <testCase name="overloaded-methods[#endTN]-inc-dow" noOutput="true">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.DefaultObjectWrapperInc"/>
+      <setting objectWrapper="org.apache.freemarker.core.model.impl.DefaultObjectWrapperInc"/>
    </testCase>
    <testCase name="overloaded-methods[#endTN]-desc-dow" noOutput="true">
-      <setting object_wrapper="org.apache.freemarker.core.model.impl.DefaultObjectWrapperDesc"/>
+      <setting objectWrapper="org.apache.freemarker.core.model.impl.DefaultObjectWrapperDesc"/>
    </testCase>
 </testCases>
