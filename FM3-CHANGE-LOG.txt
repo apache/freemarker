@@ -18,13 +18,15 @@
  */
  
 Because the Manual won't be updated for a good while, we will lead
-the FreeMarer 3 changelog here:
+the FreeMarker 3 changelog here:
 
 - Switched to camel case as the only supported naming convention. This is as if in FM2 you set the "namingConvention"
   configuration setting to "camelCase", however the "namingConvention" setting was removed, as no other convention will
   be supported (for the default dialect at least). Also, configuration setting names and values must use camel case
-  too (FM2 was forgiving there). This means `#elseif` becomes to ``#elseIf`, ``?upper_case`, `?upperCase`, and
-  if you configure FreeMarker with Properties, then `template_loader` becomes to `templateLoader`.
+  too (FM2 was forgiving there). Also, in XML processing, the @@ names were also converted to camel case. This means
+  `#elseif` becomes to ``#elseIf`, ``?upper_case`, `?upperCase`, and if you configure FreeMarker with Properties,
+  then `template_loader` becomes to `templateLoader`, and if you use the XML features, then `node.@@nested_markup`
+  becomes to `node.@@nestedMarkup`.
   Note that the template converter tool takes care of this conversion.
 - Increased version number to 3.0.0 (nightly aka. SNAPSHOT)
 - Removed legacy extensions: rhyno, jython, xml (not to be confused with dom), jdom, ant.

@@ -46,6 +46,7 @@ import com.google.common.collect.ImmutableSet;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
+import freemarker.ext.dom.AtAtKeyAccessor;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.utility.StringUtil;
@@ -1524,8 +1525,34 @@ public class FM2ASTToFM3SourceConverter {
         Expression lho = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, Expression.class);
         String rho = getParam(node, 1, ParameterRole.RIGHT_HAND_OPERAND, String.class);
         printNode(lho);
+
         printSeparatorAndWSAndExpComments(getEndPositionExclusive(lho), ".");
+
+        rho = mapStringHashKey(rho);
         print(rho.startsWith("*") ? rho : FTLUtil.escapeIdentifier(rho));
+    }
+
+    private String mapStringHashKey(String key) {
+        if (key.startsWith("@@")) {
+            String mappedKey = DOM_KEY_MAPPING.get(key);
+            if (mappedKey != null) {
+                key = mappedKey;
+            }
+        }
+        return key;
+    }
+
+    private static final Map<String, String> DOM_KEY_MAPPING;
+    static {
+        Map<String, String> domKeyMapping = new HashMap<>();
+        for (String atAtKey : AtAtKeyAccessor.getAtAtKeys()) {
+            String atAtKeyCC = ConverterUtils.snakeCaseToCamelCase(atAtKey);
+            if (!atAtKeyCC.equals(atAtKey)) {
+                domKeyMapping.put(atAtKey, atAtKeyCC);
+            }
+        }
+
+        DOM_KEY_MAPPING = Collections.unmodifiableMap(domKeyMapping);
     }
 
     private void printExpDynamicKeyName(DynamicKeyName node) throws ConverterException {
@@ -1536,7 +1563,12 @@ public class FM2ASTToFM3SourceConverter {
 
         Expression keyExp = getParam(node, 1, ParameterRole.ENCLOSED_OPERAND, Expression.class);
         printParameterSeparatorSource(collExp, keyExp);
-        printExp(keyExp);
+        if (keyExp instanceof StringLiteral && keyExp.isLiteral()) {
+            StringLiteral keyStringLiteral = (StringLiteral) keyExp;
+            printExpStringLiteral(keyStringLiteral, mapStringHashKey((keyStringLiteral).getAsString()));
+        } else {
+            printExp(keyExp);
+        }
 
         printWithParamsTrailingSkippedTokens("]", node, 1);
     }
@@ -1725,6 +1757,10 @@ public class FM2ASTToFM3SourceConverter {
     private int stringLiteralNestingLevel;
 
     private void printExpStringLiteral(StringLiteral node) throws ConverterException {
+        printExpStringLiteral(node, node.isLiteral()     ? node.getAsString() : null);
+    }
+
+    private void printExpStringLiteral(StringLiteral node, String value) throws ConverterException {
         boolean escapeAmp, escapeLT, escapeGT;
         if (stringLiteralNestingLevel == 0) {
             // We check if the source code has avoided '&', '<', and '>'. If it did, we will escape them in the output.
@@ -1775,12 +1811,18 @@ public class FM2ASTToFM3SourceConverter {
 
         int parameterCount = node.getParameterCount();
         if (parameterCount == 0) {
+            _NullArgumentException.check("value", value);
             if (!rawString) {
-                print(FTLUtil.escapeStringLiteralPart(node.getAsString(), quote, escapeAmp, escapeLT, escapeGT));
+                print(FTLUtil.escapeStringLiteralPart(value, quote, escapeAmp, escapeLT, escapeGT));
             } else {
-                print(node.getAsString());
+                print(value);
             }
         } else {
+            if (value != null) {
+                throw new IllegalArgumentException("\"value\" argument must be null when the string contains "
+                        + "interpolations.");
+            }
+
             // Not really a literal; contains interpolations
             for (int paramIdx = 0; paramIdx < parameterCount; paramIdx++) {
                 Object param = getParam(node, paramIdx, ParameterRole.VALUE_PART, Object.class);

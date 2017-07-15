@@ -480,7 +480,19 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
 
     @Test
     public void testSquareBracketTagSyntax() throws IOException, ConverterException {
-        assertConvertedSame("[#if true <#-- c -->[#-- c --]]${v}[/#if]", true);
+        assertConverted("[#if true <#-- c -->[#-- c --]]${v}[#else][/#if]",
+                "[#if true <#-- c -->[#-- c --]]${v}[#else/][/#if]", true);
+        assertConverted("[#ftl][#if true <#-- c -->[#-- c --]]${v}[#else][/#if]",
+                "[#ftl][#if true <#-- c -->[#-- c --]]${v}[#else/][/#if]");
+    }
+
+    @Test
+    public void testXmlProcessing() throws IOException, ConverterException {
+        assertConverted("${node.@@nestedMarkup}", "${node.@@nested_markup}");
+        assertConverted("${node['@@nestedMarkup']}", "${node['@@nested_markup']}");
+
+        assertConvertedSame("${node.@@markup}");
+        assertConvertedSame("${node['@@markup']}");
     }
 
     @Test
