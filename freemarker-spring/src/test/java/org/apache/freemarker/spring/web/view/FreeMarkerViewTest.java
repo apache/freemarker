@@ -41,7 +41,7 @@ import org.springframework.mock.web.MockServletContext;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
-public class FreemarkerViewTest {
+public class FreeMarkerViewTest {
 
     private ServletContext servletContext;
     private GenericWebApplicationContext applicationContext;
@@ -53,7 +53,7 @@ public class FreemarkerViewTest {
     private GenericServlet pageContextServlet;
     private TaglibFactory taglibFactory;
 
-    private FreemarkerViewResolver viewResolver;
+    private FreeMarkerViewResolver viewResolver;
 
     private AtomicLong visitorCount;
 
@@ -74,7 +74,7 @@ public class FreemarkerViewTest {
         pageContextServlet.init(new PageContextServletConfig(servletContext, PageContextServlet.class.getSimpleName()));
         taglibFactory = new TaglibFactory.Builder(servletContext, objectWrapper).build();
 
-        viewResolver = new FreemarkerViewResolver();
+        viewResolver = new FreeMarkerViewResolver();
         viewResolver.setServletContext(servletContext);
         viewResolver.setApplicationContext(applicationContext);
         viewResolver.setConfiguration(configuration);
@@ -92,7 +92,7 @@ public class FreemarkerViewTest {
 
         templateLoader.putTemplate("hello.ftl", "Hello, ${name!\"World\"}! Visit count: ${visitCount!0}");
 
-        FreemarkerView view = createFreemarkerView("hello.ftl");
+        FreeMarkerView view = createFreemarkerView("hello.ftl");
 
         int visitCount = 0;
         Map<String, Object> model = new HashMap<String, Object>();
@@ -126,7 +126,7 @@ public class FreemarkerViewTest {
                         + "BTW, you're ${Application.visitorCount}th visitor. "
                         + "(token1: ${RequestParameters['token1']!})");
 
-        FreemarkerView view = createFreemarkerView("default-model.ftl");
+        FreeMarkerView view = createFreemarkerView("default-model.ftl");
 
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("name", "Dan");
@@ -149,7 +149,7 @@ public class FreemarkerViewTest {
                 + "<#assign msg=\"Hello!\" />"
                 + "<@e.echo message=msg />");
 
-        FreemarkerView view = createFreemarkerView("taglibs.ftl");
+        FreeMarkerView view = createFreemarkerView("taglibs.ftl");
 
         Map<String, Object> model = new HashMap<String, Object>();
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -157,8 +157,8 @@ public class FreemarkerViewTest {
         assertEquals("Hello!", response.getContentAsString());
     }
 
-    private FreemarkerView createFreemarkerView(final String name) throws Exception {
-        FreemarkerView view = new FreemarkerView();
+    private FreeMarkerView createFreemarkerView(final String name) throws Exception {
+        FreeMarkerView view = new FreeMarkerView();
 
         view.setServletContext(servletContext);
         view.setApplicationContext(applicationContext);
