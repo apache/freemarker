@@ -27,6 +27,10 @@ https://cwiki.apache.org/confluence/display/FREEMARKER/FreeMarker+3
 Template language changes
 =========================
 
+Note that the template converter tool (freemarker-converter) can automatically apply many of these changes on FM2
+templates. But changes that aren't purely syntactical (but behavioral) often can't be treated with 100% safety or at
+all, in which ase it's always noted for that change.
+
 Major changes / features
 ------------------------
 
@@ -44,26 +48,25 @@ Smaller changes
 
 Node: Changes already mentioned above aren't repeated here!
 
-- Renamed `?datetime` and `?datetimeIfUnknown` and the `datetimeFormat` setting to
-  `?dateTime` and `?dateTimeIfUnknown` and `dateTimeFormat`.
 - Removed support for all old glitches that you could turn on/off with incompatibleImprovements in FM2
+  (These are generally not covered by the converter tool.)
 - Removed some long deprecated template language directives:
   - <#call ...> (deprecated by <@... />)
   - <#comment>...</#comment> (deprecated by <#-- ... -->)
   - <#transform ...>...</#transform> (deprecated by <@...>...</@...>)
   - <#foreach x in xs>...</#foreach> (deprecated by <#list xs as x>...</#list>)
-- #include has no "encoding" parameter anymore (see reasons in the API changes)
 - Removed long deprecated `#{}` interpolations. They are treated as plain static text now. (The
   template converter tool translates these to `${}` interpolations. For example `#{x}` is simply
   translated to `${b}`, while `#{x; m1M3}` is translated to `${x?string('0.0##')}`).
+- #include has no "encoding" parameter anymore (as now only the Configuration is responsible ofr deciding the encoding)
 - You can't close #attempt/#recover with `</#recover>` anymore, only with `<#attempt>`. This was the
   standard form in FM2 as well, and is consistent with how #if/#else works. (The template converter
   tool does this conversion.)
 - Inside a #switch, #case can't be after #default anymore (this is actually a bug in FM2)
   (The template converter can't fix this automatically, but reports it as an error.)
 - #else and #elseIf tags must be ended without "/", for example, <#else/> is illegal now, <#else> is legal.
-  (The template converter tool does this conversion.)
-- .template_name now means the same as .current_template_name (it doesn't emulate 2.3 glitches anymore)
+- Renamed `?datetime` and `?datetimeIfUnknown` and the `datetimeFormat` setting to
+  `?dateTime` and `?dateTimeIfUnknown` and `dateTimeFormat`. (In general, it's `dateTime`, not `datetime` everywhere.)
 
 
 Java API changes
@@ -289,6 +292,7 @@ Core / Models and Object wrapping
 - Removed DefaultObjectWrapper.methodsShadowItems setting, in effect defaulting it to true. This has decided if the generic
   get method (`get(String)`) had priority over methods of similar name. The generic get method is only recognized from its
   name and parameter type, so it's a quite consfusing feature, and might will be removed alltogether.
+- Renamed TemplateDateModel.DATETIME to DATE_TIME (to be consistent with "dateTime" used elsewhere).
 
 Core / Template loading and caching
 ...................................

@@ -71,7 +71,7 @@ public abstract class TemplateDateFormat extends TemplateValueFormat {
     }
 
     /**
-     * Parsers a string to date/time/datetime, according to this format. Some format implementations may throw
+     * Parsers a string to date/time/dateTime, according to this format. Some format implementations may throw
      * {@link ParsingNotSupportedException} here.
      * 
      * @param s
@@ -79,8 +79,8 @@ public abstract class TemplateDateFormat extends TemplateValueFormat {
      * @param dateType
      *            The expected date type of the result. Not all {@link TemplateDateFormat}-s will care about this;
      *            though those who return a {@link TemplateDateModel} instead of {@link Date} often will. When strings
-     *            are parsed via {@code ?date}, {@code ?time}, or {@code ?datetime}, then this parameter is
-     *            {@link TemplateDateModel#DATE}, {@link TemplateDateModel#TIME}, or {@link TemplateDateModel#DATETIME},
+     *            are parsed via {@code ?date}, {@code ?time}, or {@code ?dateTime}, then this parameter is
+     *            {@link TemplateDateModel#DATE}, {@link TemplateDateModel#TIME}, or {@link TemplateDateModel#DATE_TIME},
      *            respectively. This parameter rarely if ever {@link TemplateDateModel#UNKNOWN}, but the implementation
      *            that cares about this parameter should be prepared for that. If nothing else, it should throw
      *            {@link UnknownDateTypeParsingUnsupportedException} then.
@@ -89,7 +89,7 @@ public abstract class TemplateDateFormat extends TemplateValueFormat {
      *         {@link Date}. {@link TemplateDateModel} is used if you have to attach some application-specific
      *         meta-information thats also extracted during {@link #formatToPlainText(TemplateDateModel)} (so if you format
      *         something and then parse it, you get back an equivalent result). It can't be {@code null}. Known issue
-     *         (at least in FTL 2): {@code ?date}/{@code ?time}/{@code ?datetime}, when not invoked as a method, can't
+     *         (at least in FTL 2): {@code ?date}/{@code ?time}/{@code ?dateTime}, when not invoked as a method, can't
      *         return the {@link TemplateDateModel}, only the {@link Date} from inside it, hence the additional
      *         application-specific meta-info will be lost.
      */

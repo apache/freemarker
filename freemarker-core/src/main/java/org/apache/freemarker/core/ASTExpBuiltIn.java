@@ -97,8 +97,8 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("contains", new BuiltInsForStringsBasic.containsBI());        
         putBI("date", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.DATE));
         putBI("dateIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATE));
-        putBI("datetime", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.DATETIME));
-        putBI("datetimeIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATETIME));
+        putBI("dateTime", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.DATE_TIME));
+        putBI("dateTimeIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATE_TIME));
         putBI("default", new BuiltInsForExistenceHandling.defaultBI());
         putBI("double", new doubleBI());
         putBI("endsWith", new BuiltInsForStringsBasic.ends_withBI());
@@ -133,7 +133,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("isFirst", new BuiltInsForLoopVariables.is_firstBI());
         putBI("isLast", new BuiltInsForLoopVariables.is_lastBI());
         putBI("isUnknownDateLike", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.UNKNOWN));
-        putBI("isDatetime", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.DATETIME));
+        putBI("isDatetime", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.DATE_TIME));
         putBI("isDirective", new BuiltInsForMultipleTypes.is_directiveBI());
         putBI("isEnumerable", new BuiltInsForMultipleTypes.is_enumerableBI());
         putBI("isHashEx", new BuiltInsForMultipleTypes.is_hash_exBI());
@@ -240,7 +240,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("number", new BuiltInsForStringsMisc.numberBI());
         putBI("numberToDate", new number_to_dateBI(TemplateDateModel.DATE));
         putBI("numberToTime", new number_to_dateBI(TemplateDateModel.TIME));
-        putBI("numberToDatetime", new number_to_dateBI(TemplateDateModel.DATETIME));
+        putBI("numberToDatetime", new number_to_dateBI(TemplateDateModel.DATE_TIME));
         putBI("parent", new parentBI());
         putBI("previousSibling", new previousSiblingBI());
         putBI("nextSibling", new nextSiblingBI());
@@ -315,12 +315,20 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
                         correctedKey = correctedKey.substring(0, correctedKey.length() - 2)
                                 + correctedKey.substring(correctedKey.length() - 2).toUpperCase();
                         if (!BUILT_INS_BY_NAME.containsKey(correctedKey)) {
-                            correctedKey = null;
+                            if (key.equals("datetime_if_unknown")) {
+                                correctedKey = "dateTimeIfUnknown";
+                            } else {
+                                correctedKey = null;
+                            }
                         }
                     } else {
                         correctedKey = null;
                     }
                 }
+            } else if (key.equals("datetime")) {
+                correctedKey = "dateTime";
+            } else if (key.equals("datetimeIfUnknown")) {
+                correctedKey = "dateTimeIfUnknown";
             } else {
                 correctedKey = null;
             }

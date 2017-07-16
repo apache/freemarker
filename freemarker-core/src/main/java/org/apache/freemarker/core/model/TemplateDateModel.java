@@ -53,12 +53,12 @@ public interface TemplateDateModel extends TemplateModel {
     /**
      * The date model represents a date-time value (also known as timestamp).
      */
-    int DATETIME = 3;
+    int DATE_TIME = 3;
     
     List TYPE_NAMES =
         Collections.unmodifiableList(
             Arrays.asList(
-                    "UNKNOWN", "TIME", "DATE", "DATETIME"));
+                    "UNKNOWN", "TIME", "DATE", "DATE_TIME"));
     /**
      * Returns the date value. The return value must not be {@code null}.
      */
@@ -66,7 +66,7 @@ public interface TemplateDateModel extends TemplateModel {
 
     /**
      * Returns the type of the date. It can be any of {@link #TIME}, 
-     * {@link #DATE}, or {@link #DATETIME}.
+     * {@link #DATE}, or {@link #DATE_TIME}.
      */
     int getDateType();
     

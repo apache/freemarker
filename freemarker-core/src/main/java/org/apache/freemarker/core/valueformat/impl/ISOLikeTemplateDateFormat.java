@@ -216,7 +216,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
                 return parseDate(s, tz, calToDateConverter);
             } else if (dateType == TemplateDateModel.TIME) {
                 return parseTime(s, tz, calToDateConverter);
-            } else if (dateType == TemplateDateModel.DATETIME) {
+            } else if (dateType == TemplateDateModel.DATE_TIME) {
                 return parseDateTime(s, tz, calToDateConverter);
             } else {
                 throw new BugException("Unexpected date type: " + dateType);
@@ -246,7 +246,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
         switch (dateType) {
             case TemplateDateModel.DATE: return getDateDescription();
             case TemplateDateModel.TIME: return getTimeDescription();
-            case TemplateDateModel.DATETIME: return getDateTimeDescription();
+            case TemplateDateModel.DATE_TIME: return getDateTimeDescription();
             default: return "<error: wrong format dateType>";
         }
     }

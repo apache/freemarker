@@ -39,7 +39,7 @@
 <@assert test=dateTime?isDatetime />
 
 <@assertFails message="isn't known if">${unknown?string.xs}</@>
-<@assertEquals expected="2003-04-05T06:07:08Z" actual=unknown?datetimeIfUnknown?string.xs />
+<@assertEquals expected="2003-04-05T06:07:08Z" actual=unknown?dateTimeIfUnknown?string.xs />
 <@assertEquals expected="2003-04-05Z" actual=unknown?dateIfUnknown?string.xs />
 <@assertEquals expected="06:07:08Z" actual=unknown?timeIfUnknown?string.xs />
 <@assertEquals expected="2003-04-05T06:07:08Z" actual=dateTime?dateIfUnknown?string.xs />

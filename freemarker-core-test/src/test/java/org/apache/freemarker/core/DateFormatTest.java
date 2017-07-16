@@ -53,7 +53,7 @@ public class DateFormatTest extends TemplateTest {
     
     /** 2015-09-06T12:00:00Z */
     private static long T = 1441540800000L;
-    private static TemplateDateModel TM = new SimpleDate(new Date(T), TemplateDateModel.DATETIME);
+    private static TemplateDateModel TM = new SimpleDate(new Date(T), TemplateDateModel.DATE_TIME);
     
     private TestConfigurationBuilder createConfigurationBuilder() {
         return new TestConfigurationBuilder()
@@ -82,13 +82,13 @@ public class DateFormatTest extends TemplateTest {
 
         setConfigurationWithDateTimeFormat("@epoch");
         assertOutput(
-                "<#assign d = d?datetime>"
+                "<#assign d = d?dateTime>"
                 + "${d} ${d?string} <#setting locale='de_DE'>${d}",
                 "123456789 123456789 123456789");
 
         setConfigurationWithDateTimeFormat("@htmlIso");
         assertOutput(
-                "<#assign d = d?datetime>"
+                "<#assign d = d?dateTime>"
                 + "${d} ${d?string} <#setting locale='de_DE'>${d}",
                 "1970-01-02<span class='T'>T</span>10:17:36Z "
                 + "1970-01-02T10:17:36Z "
@@ -110,7 +110,7 @@ public class DateFormatTest extends TemplateTest {
 
         setConfigurationWithDateTimeFormat("@loc");
         assertOutput(
-                "<#assign d = d?datetime>"
+                "<#assign d = d?dateTime>"
                 + "${d} ${d?string} "
                 + "<#setting locale='de_DE'>"
                 + "${d} ${d?string} "
@@ -126,18 +126,18 @@ public class DateFormatTest extends TemplateTest {
         addToDataModel("d", new Date(123456789));
         setConfigurationWithDateTimeFormat("iso");
         assertOutput(
-                "${d?string.@loc} ${d?string.@loc} ${d?datetime?isoLocal} "
+                "${d?string.@loc} ${d?string.@loc} ${d?dateTime?isoLocal} "
                 + "<#setting timeZone='GMT+02:00'>"
-                + "${d?string.@loc} ${d?string.@loc} ${d?datetime?isoLocal} "
+                + "${d?string.@loc} ${d?string.@loc} ${d?dateTime?isoLocal} "
                 + "<#setting timeZone='GMT+01:00'>"
-                + "${d?string.@loc} ${d?string.@loc} ${d?datetime?isoLocal}",
+                + "${d?string.@loc} ${d?string.@loc} ${d?dateTime?isoLocal}",
                 "123456789@en_US:GMT+01:00 123456789@en_US:GMT+01:00 1970-01-02T11:17:36+01:00 "
                 + "123456789@en_US:GMT+02:00 123456789@en_US:GMT+02:00 1970-01-02T12:17:36+02:00 "
                 + "123456789@en_US:GMT+01:00 123456789@en_US:GMT+01:00 1970-01-02T11:17:36+01:00");
 
         setConfigurationWithDateTimeFormat("@loc");
         assertOutput(
-                "<#assign d = d?datetime>"
+                "<#assign d = d?dateTime>"
                 + "${d} ${d?string} "
                 + "<#setting timeZone='GMT+02:00'>"
                 + "${d} ${d?string} "
@@ -163,14 +163,14 @@ public class DateFormatTest extends TemplateTest {
                 .timeFormat("[wrong t]")
                 .build());
         assertErrorContains("${.now?date}", "\"dateFormat\"", "[wrong d]");
-        assertErrorContains("${.now?datetime}", "\"dateTimeFormat\"", "[wrong dt]");
+        assertErrorContains("${.now?dateTime}", "\"dateTimeFormat\"", "[wrong dt]");
         assertErrorContains("${.now?time}", "\"timeFormat\"", "[wrong t]");
     }
 
     @Test
     public void testCustomParameterized() throws Exception {
         Configuration cfg = getConfiguration();
-        addToDataModel("d", new SimpleDate(new Date(12345678L), TemplateDateModel.DATETIME));
+        addToDataModel("d", new SimpleDate(new Date(12345678L), TemplateDateModel.DATE_TIME));
         setConfigurationWithDateTimeFormat("@div 1000");
         assertOutput("${d}", "12345");
         assertOutput("${d?string}", "12345");
@@ -225,7 +225,7 @@ public class DateFormatTest extends TemplateTest {
     
     @Test
     public void testIcIAndEscaping() throws Exception {
-        addToDataModel("d", new SimpleDate(new Date(12345678L), TemplateDateModel.DATETIME));
+        addToDataModel("d", new SimpleDate(new Date(12345678L), TemplateDateModel.DATE_TIME));
         
         setConfigurationWithDateTimeFormat("@epoch");
         assertOutput("${d}", "12345678");
@@ -261,7 +261,7 @@ public class DateFormatTest extends TemplateTest {
         // Test that values are coming from the cache if possible
         for (Class dateClass : new Class[] { Date.class, Timestamp.class, java.sql.Date.class, Time.class } ) {
             for (int dateType
-                    : new int[] { TemplateDateModel.DATE, TemplateDateModel.TIME, TemplateDateModel.DATETIME }) {
+                    : new int[] { TemplateDateModel.DATE, TemplateDateModel.TIME, TemplateDateModel.DATE_TIME }) {
                 String formatString =
                         dateType == TemplateDateModel.DATE ? cfg.getDateFormat() :
                         (dateType == TemplateDateModel.TIME ? cfg.getTimeFormat()
@@ -280,9 +280,9 @@ public class DateFormatTest extends TemplateTest {
         String dateTimeFormatStr2 = dateTimeFormatStr + "'!'";
         
         assertEquals("2015.09.06. 13:00",
-                env.getTemplateDateFormat(TemplateDateModel.DATETIME, Date.class).formatToPlainText(TM));
+                env.getTemplateDateFormat(TemplateDateModel.DATE_TIME, Date.class).formatToPlainText(TM));
         assertEquals("2015.09.06. 13:00!",
-                env.getTemplateDateFormat(dateTimeFormatStr2, TemplateDateModel.DATETIME, Date.class).formatToPlainText(TM));
+                env.getTemplateDateFormat(dateTimeFormatStr2, TemplateDateModel.DATE_TIME, Date.class).formatToPlainText(TM));
         
         assertEquals("2015.09.06. (+0100)",
                 env.getTemplateDateFormat(TemplateDateModel.DATE, Date.class).formatToPlainText(TM));
@@ -295,9 +295,9 @@ public class DateFormatTest extends TemplateTest {
                 env.getTemplateDateFormat(timeFormatStr2, TemplateDateModel.TIME, Date.class).formatToPlainText(TM));
         
         assertEquals("2015.09.06. 13:00",
-                env.getTemplateDateFormat(TemplateDateModel.DATETIME, Timestamp.class).formatToPlainText(TM));
+                env.getTemplateDateFormat(TemplateDateModel.DATE_TIME, Timestamp.class).formatToPlainText(TM));
         assertEquals("2015.09.06. 13:00!",
-                env.getTemplateDateFormat(dateTimeFormatStr2, TemplateDateModel.DATETIME, Timestamp.class).formatToPlainText(TM));
+                env.getTemplateDateFormat(dateTimeFormatStr2, TemplateDateModel.DATE_TIME, Timestamp.class).formatToPlainText(TM));
 
         assertEquals("2015.09.06. (+0000)",
                 env.getTemplateDateFormat(TemplateDateModel.DATE, java.sql.Date.class).formatToPlainText(TM));
@@ -313,23 +313,23 @@ public class DateFormatTest extends TemplateTest {
             String dateTimeFormatStrLoc = dateTimeFormatStr + " EEEE";
             // Gets into cache:
             TemplateDateFormat format1
-                    = env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATETIME, Date.class);
+                    = env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATE_TIME, Date.class);
             assertEquals("2015.09.06. 13:00 Sunday", format1.formatToPlainText(TM));
             // Different locale (not cached):
             assertEquals("2015.09.06. 13:00 Sonntag",
-                    env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATETIME, Date.class,
+                    env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATE_TIME, Date.class,
                             Locale.GERMANY).formatToPlainText(TM));
             // Different locale and zone (not cached):
             assertEquals("2015.09.06. 14:00 Sonntag",
-                    env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATETIME, Date.class,
+                    env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATE_TIME, Date.class,
                             Locale.GERMANY, TimeZone.getTimeZone("GMT+02"), TimeZone.getTimeZone("GMT+03")).formatToPlainText(TM));
             // Different locale and zone (not cached):
             assertEquals("2015.09.06. 15:00 Sonntag",
-                    env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATETIME, java.sql.Date.class,
+                    env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATE_TIME, java.sql.Date.class,
                             Locale.GERMANY, TimeZone.getTimeZone("GMT+02"), TimeZone.getTimeZone("GMT+03")).formatToPlainText(TM));
             // Check for corrupted cache:
             TemplateDateFormat format2
-                    = env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATETIME, Date.class);
+                    = env.getTemplateDateFormat(dateTimeFormatStrLoc, TemplateDateModel.DATE_TIME, Date.class);
             assertEquals("2015.09.06. 13:00 Sunday", format2.formatToPlainText(TM));
             assertSame(format1, format2);
         }
@@ -407,7 +407,7 @@ public class DateFormatTest extends TemplateTest {
                 "${t?time?string.xs_u} ${t?time()?string.xs_u}",
                 "12:00:00Z 12:00:00Z");
         assertOutput(
-                "${t?datetime?string.xs_u} ${t?datetime()?string.xs_u}",
+                "${t?dateTime?string.xs_u} ${t?dateTime()?string.xs_u}",
                 "2015-09-06T12:00:00Z 2015-09-06T12:00:00Z");
     }
 
@@ -429,7 +429,7 @@ public class DateFormatTest extends TemplateTest {
                 "${t?time} ${t?time()}",
                 T + " " + T + "/foo");
         assertOutput(
-                "${t?datetime} ${t?datetime()}",
+                "${t?dateTime} ${t?dateTime()}",
                 T + " " + T + "/foo");
     }
     
@@ -456,7 +456,7 @@ public class DateFormatTest extends TemplateTest {
 
         @Override
         public int getDateType() {
-            return DATETIME;
+            return DATE_TIME;
         }
         
     }

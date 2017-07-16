@@ -210,8 +210,8 @@ class BuiltInsForMultipleTypes {
                 if (dateType == dtype) {
                     return model;
                 }
-                // unknown and datetime can be coerced into any date type
-                if (dtype == TemplateDateModel.UNKNOWN || dtype == TemplateDateModel.DATETIME) {
+                // unknown and dateTime can be coerced into any date type
+                if (dtype == TemplateDateModel.UNKNOWN || dtype == TemplateDateModel.DATE_TIME) {
                     return new SimpleDate(dmodel.getAsDate(), dateType);
                 }
                 throw new _MiscTemplateException(this,
@@ -576,7 +576,7 @@ class BuiltInsForMultipleTypes {
                             throw MessageUtil.newCantFormatDateException(defaultFormat, target, e, true);
                         } catch (TemplateException e2) {
                             // `e` should always be a TemplateModelException here, but to be sure: 
-                            throw _CoreAPI.ensureIsTemplateModelException("Failed to format date/time/datetime", e2); 
+                            throw _CoreAPI.ensureIsTemplateModelException("Failed to format date/time/dateTime", e2);
                         }
                     }
                 }

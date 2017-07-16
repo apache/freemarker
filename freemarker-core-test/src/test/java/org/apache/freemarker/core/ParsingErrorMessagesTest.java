@@ -81,6 +81,9 @@ public class ParsingErrorMessagesTest {
         assertErrorContains("${x?iso_utc_nz}", "camel case", "The correct name is: isoUtcNZ");
         assertErrorContains("${x?no_such_name}", "camel case", "\\!The correct name is:", "alphabetical list");
         assertErrorContains("${x?nosuchname}", "\\!camel case", "\\!The correct name is:", "alphabetical list");
+        assertErrorContains("${x?datetime}", "The correct name is: dateTime");
+        assertErrorContains("${x?datetimeIfUnknown}", "The correct name is: dateTimeIfUnknown");
+        assertErrorContains("${x?datetime_if_unknown}", "The correct name is: dateTimeIfUnknown");
     }
 
     @Test
@@ -91,6 +94,9 @@ public class ParsingErrorMessagesTest {
                 "setting names are:");
         assertErrorContains("<#setting nosuchname=1>", "\\!The correct name is:", "\\!camel case",
                 "setting names are:");
+
+        assertErrorContains("<#setting datetime_format='HHmm'>", "The correct name is: dateTimeFormat");
+        assertErrorContains("<#setting datetimeFormat='HHmm'>", "The correct name is: dateTimeFormat");
     }
 
     @Test

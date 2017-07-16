@@ -67,8 +67,14 @@ final class ASTDirSetting extends ASTDirective {
                     sb.append(MessageUtil.FM3_SNAKE_CASE);
                     correctedKey = _StringUtil.snakeCaseToCamelCase(key);
                     if (!SETTING_NAMES.contains(correctedKey)) {
-                        correctedKey = null;
+                        if (key.equals("datetime_format")) {
+                            correctedKey = "dateTimeFormat";
+                        } else {
+                            correctedKey = null;
+                        }
                     }
+                } else if (key.equals("datetimeFormat")) {
+                    correctedKey = "dateTimeFormat";
                 } else {
                     correctedKey = null;
                 }

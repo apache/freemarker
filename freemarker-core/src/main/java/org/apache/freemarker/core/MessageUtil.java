@@ -39,7 +39,7 @@ class MessageUtil {
               + "known if it's a date (no time part), time or date-time value.";
     
     static final String UNKNOWN_DATE_TYPE_ERROR_TIP =
-            "Use ?date, ?time, or ?datetime to tell FreeMarker the exact type.";
+            "Use ?date, ?time, or ?dateTime to tell FreeMarker the exact type.";
 
     static final Object[] UNKNOWN_DATE_TO_STRING_TIPS = {
             UNKNOWN_DATE_TYPE_ERROR_TIP,
@@ -291,7 +291,7 @@ class MessageUtil {
     static TemplateException newCantFormatDateException(TemplateDateFormat format, ASTExpression dataSrcExp,
                                                         TemplateValueFormatException e, boolean useTempModelExc) {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
-                "Failed to format date/time/datetime with format ", new _DelayedJQuote(format.getDescription()), ": ",
+                "Failed to format date/time/dateTime with format ", new _DelayedJQuote(format.getDescription()), ": ",
                 e.getMessage())
                 .blame(dataSrcExp); 
         return useTempModelExc

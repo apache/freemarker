@@ -192,7 +192,7 @@ final class ASTExpBuiltInVariable extends ASTExpression {
             return new SimpleScalar(env.getCurrentRecoveredErrorMessage());
         }
         if (name == NOW) {
-            return new SimpleDate(new Date(), TemplateDateModel.DATETIME);
+            return new SimpleDate(new Date(), TemplateDateModel.DATE_TIME);
         }
         if (name == VERSION) {
             return new SimpleScalar(Configuration.getVersion().toString());

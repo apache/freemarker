@@ -16,7 +16,7 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<#assign d = "2010-05-15 22:38:05:23 +0200"?datetime("yyyy-MM-dd HH:mm:ss:S Z")>
+<#assign d = "2010-05-15 22:38:05:23 +0200"?dateTime("yyyy-MM-dd HH:mm:ss:S Z")>
 <#setting timeZone="GMT+02">
 <@assertEquals actual=d?isoUtc expected="2010-05-15T20:38:05Z" />
 <@assertEquals actual=d?isoUtcMs expected="2010-05-15T20:38:05.023Z" />
@@ -69,7 +69,7 @@
 <@assertEquals actual=d?time?isoLocalMNZ expected="22:38" />
 <@assertEquals actual=d?time?isoLocalHNZ expected="22" />
 
-<#assign dStrange = "600-01-01 23:59:59:123 +0000"?datetime("yyyy-MM-dd HH:mm:ss:S Z")>
+<#assign dStrange = "600-01-01 23:59:59:123 +0000"?dateTime("yyyy-MM-dd HH:mm:ss:S Z")>
 <@assertEquals actual=dStrange?isoUtcMs expected="0600-01-03T23:59:59.123Z" />
 
 <#-- java.sql treatment -->
@@ -149,12 +149,12 @@
 <@assertEquals actual=d?isoUtc expected="2010-05-14" />
 
 <#setting timeZone="GMT+02:30">
-<#assign d = "2010-05-15"?datetime("yyyy-MM-dd")>
+<#assign d = "2010-05-15"?dateTime("yyyy-MM-dd")>
 <@assertEquals actual=d?isoLocal expected="2010-05-15T00:00:00+02:30" />
 
 <#setting timeZone="America/New_York">
-<@assertEquals actual="2010-05-09 20:00 +0000"?datetime("yyyy-MM-dd HH:mm Z")?isoLocal expected="2010-05-09T16:00:00-04:00" />
-<@assertEquals actual="2010-01-01 20:00 +0000"?datetime("yyyy-MM-dd HH:mm Z")?isoLocal expected="2010-01-01T15:00:00-05:00" />
+<@assertEquals actual="2010-05-09 20:00 +0000"?dateTime("yyyy-MM-dd HH:mm Z")?isoLocal expected="2010-05-09T16:00:00-04:00" />
+<@assertEquals actual="2010-01-01 20:00 +0000"?dateTime("yyyy-MM-dd HH:mm Z")?isoLocal expected="2010-01-01T15:00:00-05:00" />
 
 <@assertFails>${d?iso("no such zone")}</@>
 

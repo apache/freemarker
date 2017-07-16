@@ -1884,6 +1884,9 @@ public class FM2ASTToFM3SourceConverter {
             .put("iso_ms_nz", "isoMsNZ")
             .put("iso_m_nz", "isoMNZ")
             .put("iso_h_nz", "isoHNZ")
+            .put("datetime", "dateTime")
+            .put("datetime_if_unknown", "dateTimeIfUnknown")
+            .put("datetimeIfUnknown", "dateTimeIfUnknown")
             .build();
 
     private void printParameterSeparatorSource(Expression lho, Expression rho) {

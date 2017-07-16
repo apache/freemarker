@@ -269,7 +269,7 @@ public interface ProcessingConfiguration {
 
     /**
      * The format used to convert {@link java.util.Date}-s that are date-time (timestamp) values to string-s,
-     * also the format that {@code someString?datetime} will use to parse strings.
+     * also the format that {@code someString?dateTime} will use to parse strings.
      *
      * <p>The possible setting values are (the quotation marks aren't part of the value itself):
      *
