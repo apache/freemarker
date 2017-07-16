@@ -19,12 +19,13 @@
 
 package org.apache.freemarker.core;
 
-import java.util.Arrays;
+import java.util.Set;
 
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.util._SortedArraySet;
 import org.apache.freemarker.core.util._StringUtil;
 
 /**
@@ -35,7 +36,7 @@ final class ASTDirSetting extends ASTDirective {
     private final String key;
     private final ASTExpression value;
     
-    static final String[] SETTING_NAMES = new String[] {
+    static final Set<String> SETTING_NAMES = new _SortedArraySet<String>(
             // Must be sorted alphabetically!
             MutableProcessingConfiguration.BOOLEAN_FORMAT_KEY,
             MutableProcessingConfiguration.DATE_FORMAT_KEY,
@@ -46,13 +47,13 @@ final class ASTDirSetting extends ASTDirective {
             MutableProcessingConfiguration.SQL_DATE_AND_TIME_TIME_ZONE_KEY,
             MutableProcessingConfiguration.TIME_FORMAT_KEY,
             MutableProcessingConfiguration.TIME_ZONE_KEY,
-            MutableProcessingConfiguration.URL_ESCAPING_CHARSET_KEY,
-    };
+            MutableProcessingConfiguration.URL_ESCAPING_CHARSET_KEY
+    );
 
     ASTDirSetting(Token keyTk, FMParserTokenManager tokenManager, ASTExpression value, Configuration cfg)
             throws ParseException {
         String key = keyTk.image;
-        if (Arrays.binarySearch(SETTING_NAMES, key) < 0) {
+        if (!SETTING_NAMES.contains(key)) {
             StringBuilder sb = new StringBuilder();
             if (Configuration.ExtendableBuilder.getSettingNames().contains(key)) {
                 sb.append("The setting name is recognized, but changing this setting from inside a template isn't "
@@ -60,17 +61,33 @@ final class ASTDirSetting extends ASTDirective {
             } else {
                 sb.append("Unknown setting name: ");
                 sb.append(_StringUtil.jQuote(key)).append(".");
-                sb.append(" The allowed setting names are: ");
 
-                boolean first = true;
-                for (String correctName : SETTING_NAMES) {
-                    if (first) {
-                        first = false;
-                    } else {
-                        sb.append(", ");
+                String correctedKey;
+                if (key.indexOf('_') != -1) {
+                    sb.append(MessageUtil.FM3_SNAKE_CASE);
+                    correctedKey = _StringUtil.snakeCaseToCamelCase(key);
+                    if (!SETTING_NAMES.contains(correctedKey)) {
+                        correctedKey = null;
                     }
+                } else {
+                    correctedKey = null;
+                }
 
-                    sb.append(correctName);
+                if (correctedKey != null) {
+                    sb.append("\nThe correct name is: ").append(correctedKey);
+                } else {
+                    sb.append("\nThe allowed setting names are: ");
+
+                    boolean first = true;
+                    for (String correctName : SETTING_NAMES) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            sb.append(", ");
+                        }
+
+                        sb.append(correctName);
+                    }
                 }
             }
             throw new ParseException(sb.toString(), null, keyTk);

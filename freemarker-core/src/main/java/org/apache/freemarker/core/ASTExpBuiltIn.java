@@ -304,34 +304,57 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         String key = keyTk.image;
         ASTExpBuiltIn bi = BUILT_INS_BY_NAME.get(key);
         if (bi == null) {
-            StringBuilder buf = new StringBuilder("Unknown built-in: ").append(_StringUtil.jQuote(key)).append(". ");
-            
-            buf.append(
-                    "Help (latest version): http://freemarker.org/docs/ref_builtins.html; "
-                    + "you're using FreeMarker ").append(Configuration.getVersion()).append(".\n" 
-                    + "The alphabetical list of built-ins:");
-            List<String> names = new ArrayList<>(BUILT_INS_BY_NAME.keySet().size());
-            names.addAll(BUILT_INS_BY_NAME.keySet());
-            Collections.sort(names);
-            char lastLetter = 0;
+            StringBuilder sb = new StringBuilder("Unknown built-in: ").append(_StringUtil.jQuote(key)).append(".");
 
-            boolean first = true;
-            for (String correctName : names) {
-                if (first) {
-                    first = false;
-                } else {
-                    buf.append(", ");
+            String correctedKey;
+            if (key.indexOf("_") != -1) {
+                sb.append(MessageUtil.FM3_SNAKE_CASE);
+                correctedKey = _StringUtil.snakeCaseToCamelCase(key);
+                if (!BUILT_INS_BY_NAME.containsKey(correctedKey)) {
+                    if (correctedKey.length() > 1) {
+                        correctedKey = correctedKey.substring(0, correctedKey.length() - 2)
+                                + correctedKey.substring(correctedKey.length() - 2).toUpperCase();
+                        if (!BUILT_INS_BY_NAME.containsKey(correctedKey)) {
+                            correctedKey = null;
+                        }
+                    } else {
+                        correctedKey = null;
+                    }
                 }
+            } else {
+                correctedKey = null;
+            }
 
-                char firstChar = correctName.charAt(0);
-                if (firstChar != lastLetter) {
-                    lastLetter = firstChar;
-                    buf.append('\n');
+            if (correctedKey != null) {
+                sb.append("\nThe correct name is: ").append(correctedKey);
+            } else {
+                sb.append(
+                        "\nHelp (latest version): http://freemarker.org/docs/ref_builtins.html; "
+                                + "you're using FreeMarker ").append(Configuration.getVersion()).append(".\n"
+                        + "The alphabetical list of built-ins:");
+                List<String> names = new ArrayList<>(BUILT_INS_BY_NAME.keySet().size());
+                names.addAll(BUILT_INS_BY_NAME.keySet());
+                Collections.sort(names);
+                char lastLetter = 0;
+
+                boolean first = true;
+                for (String correctName : names) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append(", ");
+                    }
+
+                    char firstChar = correctName.charAt(0);
+                    if (firstChar != lastLetter) {
+                        lastLetter = firstChar;
+                        sb.append('\n');
+                    }
+                    sb.append(correctName);
                 }
-                buf.append(correctName);
             }
                 
-            throw new ParseException(buf.toString(), null, keyTk);
+            throw new ParseException(sb.toString(), null, keyTk);
         }
         
         try {

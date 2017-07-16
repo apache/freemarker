@@ -20,8 +20,8 @@
 package org.apache.freemarker.core;
 
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.Set;
 
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
@@ -29,6 +29,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.util._SortedArraySet;
 import org.apache.freemarker.core.util._StringUtil;
 
 /**
@@ -60,7 +61,8 @@ final class ASTExpBuiltInVariable extends ASTExpression {
     static final String URL_ESCAPING_CHARSET = "urlEscapingCharset";
     static final String NOW = "now";
     
-    static final String[] BUILT_IN_VARIABLE_NAMES = new String[] {
+    static final Set<String> BUILT_IN_VARIABLE_NAMES = new _SortedArraySet<>(
+        // Must be sorted alphabetically!
         AUTO_ESC,
         CURRENT_NODE,
         CURRENT_TEMPLATE_NAME,
@@ -84,7 +86,7 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         URL_ESCAPING_CHARSET,
         VARS,
         VERSION
-    };
+    );
 
     private final String name;
     private final TemplateModel parseTimeValue;
@@ -93,35 +95,38 @@ final class ASTExpBuiltInVariable extends ASTExpression {
             throws ParseException {
         String name = nameTk.image;
         this.parseTimeValue = parseTimeValue;
-        if (Arrays.binarySearch(BUILT_IN_VARIABLE_NAMES, name) < 0) {
+        if (!BUILT_IN_VARIABLE_NAMES.contains(name)) {
             StringBuilder sb = new StringBuilder();
             sb.append("Unknown special variable name: ");
             sb.append(_StringUtil.jQuote(name)).append(".");
 
-            {
-                String correctName;
-                if (
-                        name.equals("auto_escape") || name.equals("auto_escaping") || name.equals("autoEsc") ||
-                        name.equals("autoEscape") || name.equals("autoEscaping")) {
-                    correctName = "autoEsc";
-                } else {
-                    correctName = null;
+            String correctedName;
+            if (name.indexOf('_') != -1) {
+                sb.append(MessageUtil.FM3_SNAKE_CASE);
+                correctedName = _StringUtil.snakeCaseToCamelCase(name);
+                if (!BUILT_IN_VARIABLE_NAMES.contains(correctedName)) {
+                    correctedName = null;
                 }
-                if (correctName != null) {
-                    sb.append(" You may meant: ");
-                    sb.append(_StringUtil.jQuote(correctName)).append(".");
-                }
+            } else if (name.equals("auto_escape") || name.equals("auto_escaping") || name.equals("autoEsc")
+                    || name.equals("autoEscape") || name.equals("autoEscaping")) {
+                correctedName = "autoEsc";
+            } else {
+                correctedName = null;
             }
-            
-            sb.append("\nThe allowed special variable names are: ");
-            boolean first = true;
-            for (final String correctName : BUILT_IN_VARIABLE_NAMES) {
-                if (first) {
-                    first = false;
-                } else {
-                    sb.append(", ");
+
+            if (correctedName != null) {
+                sb.append("\nThe correct name is: ").append(correctedName);
+            } else {
+                sb.append("\nThe supported special variable names are: ");
+                boolean first = true;
+                for (final String supportedName : BUILT_IN_VARIABLE_NAMES) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append(", ");
+                    }
+                    sb.append(supportedName);
                 }
-                sb.append(correctName);
             }
             throw new ParseException(sb.toString(), null, nameTk);
         }

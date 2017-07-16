@@ -25,34 +25,6 @@ public final class ConverterUtils {
         //
     }
 
-    public static String snakeCaseToCamelCase(String s) {
-        if (s == null) {
-            return null;
-        }
-
-        int wordEndIdx = s.indexOf('_');
-        if (wordEndIdx == -1) {
-            return s.toLowerCase();
-        }
-
-        StringBuilder sb = new StringBuilder(s.length());
-        int wordStartIdx = 0;
-        do {
-            if (wordStartIdx < wordEndIdx) {
-                char wordStartC = s.charAt(wordStartIdx);
-                sb.append(sb.length() != 0 ? Character.toUpperCase(wordStartC) : Character.toLowerCase(wordStartC));
-                sb.append(s.substring(wordStartIdx + 1, wordEndIdx).toLowerCase());
-            }
-
-            wordStartIdx = wordEndIdx + 1;
-            wordEndIdx = s.indexOf('_', wordStartIdx);
-            if (wordEndIdx == -1) {
-                wordEndIdx = s.length();
-            }
-        } while (wordStartIdx < s.length());
-        return sb.toString();
-    }
-
     public static boolean isUpperCaseLetter(char c) {
         return Character.isUpperCase(c) && Character.isLetter(c);
     }

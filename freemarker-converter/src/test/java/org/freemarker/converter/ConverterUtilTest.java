@@ -19,24 +19,6 @@
 
 package org.freemarker.converter;
 
-import static junit.framework.TestCase.assertNull;
-import static org.junit.Assert.assertEquals;
-
-import org.apache.freemarker.converter.ConverterUtils;
-import org.junit.Test;
-
 public class ConverterUtilTest {
-
-    @Test
-    public void snakeCaseToCamelCase() {
-        assertNull(ConverterUtils.snakeCaseToCamelCase(null));
-        assertEquals("", ConverterUtils.snakeCaseToCamelCase(""));
-        assertEquals("x", ConverterUtils.snakeCaseToCamelCase("x"));
-        assertEquals("xxx", ConverterUtils.snakeCaseToCamelCase("xXx"));
-        assertEquals("fooBar", ConverterUtils.snakeCaseToCamelCase("foo_bar"));
-        assertEquals("fooBar", ConverterUtils.snakeCaseToCamelCase("FOO_BAR"));
-        assertEquals("fooBar", ConverterUtils.snakeCaseToCamelCase("_foo__bar_"));
-        assertEquals("aBC", ConverterUtils.snakeCaseToCamelCase("a_b_c"));
-    }
 
 }

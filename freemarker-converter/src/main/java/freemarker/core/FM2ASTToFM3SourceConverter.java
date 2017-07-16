@@ -231,7 +231,7 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private String convertFtlHeaderParamName(String name) throws ConverterException {
-        String converted = name.indexOf('_') == -1 ? name : ConverterUtils.snakeCaseToCamelCase(name);
+        String converted = name.indexOf('_') == -1 ? name : _StringUtil.snakeCaseToCamelCase(name);
         if (converted.equals("attributes")) {
             converted = "customSettings";
         }
@@ -605,7 +605,7 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private String convertSettingName(String name, TemplateObject node) throws ConverterException {
-        String converted = name.indexOf('_') == -1 ? name : ConverterUtils.snakeCaseToCamelCase(name);
+        String converted = name.indexOf('_') == -1 ? name : _StringUtil.snakeCaseToCamelCase(name);
 
         if (converted.equals("classicCompatible")) {
             throw new UnconvertableLegacyFeatureException("There \"classicCompatible\" setting doesn't exist in "
@@ -1513,7 +1513,7 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private String convertBuiltInVariableName(String name) throws ConverterException {
-        String converted = name.indexOf('_') == -1 ? name : ConverterUtils.snakeCaseToCamelCase(name);
+        String converted = name.indexOf('_') == -1 ? name : _StringUtil.snakeCaseToCamelCase(name);
 
         // Will replace removed names here
 
@@ -1546,7 +1546,7 @@ public class FM2ASTToFM3SourceConverter {
     static {
         Map<String, String> domKeyMapping = new HashMap<>();
         for (String atAtKey : AtAtKeyAccessor.getAtAtKeys()) {
-            String atAtKeyCC = ConverterUtils.snakeCaseToCamelCase(atAtKey);
+            String atAtKeyCC = _StringUtil.snakeCaseToCamelCase(atAtKey);
             if (!atAtKeyCC.equals(atAtKey)) {
                 domKeyMapping.put(atAtKey, atAtKeyCC);
             }
@@ -1858,7 +1858,7 @@ public class FM2ASTToFM3SourceConverter {
     private String convertBuiltInName(String name) throws ConverterException {
         String converted = IRREGULAR_BUILT_IN_NAME_CONVERSIONS.get(name);
         if (converted == null) {
-            converted = name.indexOf('_') == -1 ? name : ConverterUtils.snakeCaseToCamelCase(name);
+            converted = name.indexOf('_') == -1 ? name : _StringUtil.snakeCaseToCamelCase(name);
         }
 
         if (!fm3BuiltInNames.contains(converted)) {

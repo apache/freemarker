@@ -47,6 +47,9 @@ class MessageUtil {
             + "to specify which fields to display. "
     };
 
+    static final String FM3_SNAKE_CASE = "\nThe name contains '_' character, but since FreeMarker 3 names defined "
+            + "by the template language use camel case (e.g. someExampleName).";
+
     static final String EMBEDDED_MESSAGE_BEGIN = "---begin-message---\n";
 
     static final String EMBEDDED_MESSAGE_END = "\n---end-message---";

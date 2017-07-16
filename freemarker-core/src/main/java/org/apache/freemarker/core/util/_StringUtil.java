@@ -1573,33 +1573,31 @@ public class _StringUtil {
         }
     }
 
-    // [2.4] Won't be needed anymore
-    /**
-     * A deliberately very inflexible camel case to underscored converter; it must not convert improper camel case
-     * names to a proper underscored name.
-     */
-    public static String camelCaseToUnderscored(String camelCaseName) {
-        int i = 0;
-        while (i < camelCaseName.length() && Character.isLowerCase(camelCaseName.charAt(i))) {
-            i++;
+    public static String snakeCaseToCamelCase(String s) {
+        if (s == null) {
+            return null;
         }
-        if (i == camelCaseName.length()) {
-            // No conversion needed
-            return camelCaseName;
+
+        int wordEndIdx = s.indexOf('_');
+        if (wordEndIdx == -1) {
+            return s.toLowerCase();
         }
-        
-        StringBuilder sb = new StringBuilder();
-        sb.append(camelCaseName.substring(0, i));
-        while (i < camelCaseName.length()) {
-            final char c = camelCaseName.charAt(i);
-            if (_StringUtil.isUpperUSASCII(c)) {
-                sb.append('_');
-                sb.append(Character.toLowerCase(c));
-            } else {
-                sb.append(c);
+
+        StringBuilder sb = new StringBuilder(s.length());
+        int wordStartIdx = 0;
+        do {
+            if (wordStartIdx < wordEndIdx) {
+                char wordStartC = s.charAt(wordStartIdx);
+                sb.append(sb.length() != 0 ? Character.toUpperCase(wordStartC) : Character.toLowerCase(wordStartC));
+                sb.append(s.substring(wordStartIdx + 1, wordEndIdx).toLowerCase());
             }
-            i++;
-        }
+
+            wordStartIdx = wordEndIdx + 1;
+            wordEndIdx = s.indexOf('_', wordStartIdx);
+            if (wordEndIdx == -1) {
+                wordEndIdx = s.length();
+            }
+        } while (wordStartIdx < s.length());
         return sb.toString();
     }
 
@@ -1623,5 +1621,5 @@ public class _StringUtil {
         }
         return NORMALIZE_EOLS_REGEXP.matcher(s).replaceAll("\n");
     }
-    
+
 }
