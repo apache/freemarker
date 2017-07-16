@@ -30,7 +30,6 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.NamingConvention;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.Version;
 
@@ -771,7 +770,7 @@ public class _StringUtil {
      * touching pieces that were escaped with this, no character sequence can occur that closes the
      * JavaScript/JSON string literal, or has a meaning in HTML/XML that causes the HTML script section to be closed.
      * (If, however, the escaped section is preceded by or followed by strings from other sources, this can't be
-     * guaranteed in some rare cases. Like <tt>x = "&lt;/${a?js_string}"</tt> might closes the "script"
+     * guaranteed in some rare cases. Like <tt>x = "&lt;/${a?jsString}"</tt> might closes the "script"
      * element if {@code a} is {@code "script>"}.)
      * 
      * The escaped characters are:
@@ -1572,24 +1571,6 @@ public class _StringUtil {
         default:
             throw new BugException();
         }
-    }
-
-    /**
-     * @return {@link NamingConvention#CAMEL_CASE}, or {@link NamingConvention#LEGACY}
-     *         or, {@link NamingConvention#AUTO_DETECT} when undecidable.
-     */
-    public static NamingConvention getIdentifierNamingConvention(String name) {
-        final int ln = name.length();
-        for (int i = 0; i < ln; i++) {
-            final char c = name.charAt(i);
-            if (c == '_') {
-                return NamingConvention.LEGACY;
-            }
-            if (_StringUtil.isUpperUSASCII(c)) {
-                return NamingConvention.CAMEL_CASE;
-            }
-        }
-        return NamingConvention.AUTO_DETECT;
     }
 
     // [2.4] Won't be needed anymore

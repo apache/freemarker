@@ -77,56 +77,6 @@ public interface ParsingConfiguration {
     boolean isTagSyntaxSet();
 
     /**
-     * The naming convention used for the identifiers that are part of the template language. The available naming
-     * conventions are legacy (directive (tag) names are all-lower-case {@code likethis}, others are snake case
-     * {@code like_this}), and camel case ({@code likeThis}). The default is auto-detect, which detects the naming
-     * convention used and enforces that same naming convention for the whole template.
-     *
-     * <p>
-     * This setting doesn't influence what naming convention is used for the setting names outside templates. Also, it
-     * won't ever convert the names of user-defined things, like of data-model members, or the names of user defined
-     * macros/functions. It only influences the names of the built-in directives ({@code #elseIf} VS {@code elseif}),
-     * built-ins ({@code ?upper_case} VS {@code ?upperCase} ), special variables ({@code .data_model} VS
-     * {@code .dataModel}).
-     *
-     * <p>
-     * Which convention to use: FreeMarker prior to 2.3.23 has only supported
-     * {@link NamingConvention#LEGACY}, so that's how most templates and examples out there are
-     * written
-     * as of 2015. But as templates today are mostly written by programmers and often access Java API-s which already
-     * use camel case, {@link NamingConvention#CAMEL_CASE} is the recommended option for most projects.
-     * However, it's no necessary to make a application-wide decision; see auto-detection below.
-     *
-     * <p>
-     * FreeMarker will decide the naming convention automatically for each template individually when this setting is
-     * set to {@link NamingConvention#AUTO_DETECT} (which is the default). The naming convention of a template is
-     * decided when the first core (non-user-defined) identifier is met during parsing (not during processing) where the
-     * naming convention is relevant (like for {@code s?upperCase} or {@code s?upper_case} it's relevant, but for
-     * {@code s?length} it isn't). At that point, the naming convention of the template is decided, and any later core
-     * identifier that uses a different convention will be a parsing error. As the naming convention is decided per
-     * template, it's not a problem if a template and the other template it {@code #include}-s/{@code #import} uses a
-     * different convention.
-     *
-     * <p>
-     * FreeMarker always enforces the same naming convention to be used consistently within the same template "file".
-     * Additionally, when this setting is set to non-{@link NamingConvention#AUTO_DETECT}, the selected naming
-     * convention is enforced on all templates. Thus such a setup can be used to enforce an application-wide naming
-     * convention.
-     *
-     * @return
-     *            One of the {@link NamingConvention#AUTO_DETECT} or
-     *            {@link NamingConvention#LEGACY} or {@link NamingConvention#CAMEL_CASE}.
-     */
-    NamingConvention getNamingConvention();
-
-    /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent parsing
-     * configuration or throws a {@link CoreSettingValueNotSetException}.
-     */
-    boolean isNamingConventionSet();
-
-    /**
      * Whether the template parser will try to remove superfluous white-space around certain tags.
      */
     boolean getWhitespaceStripping();
@@ -176,7 +126,7 @@ public interface ParsingConfiguration {
      * But if all templates will have the same output format, you may set the
      * {@link #getOutputFormat() outputFormat} setting of the {@link Configuration}
      * after all, to a value like {@link HTMLOutputFormat#INSTANCE}, {@link XMLOutputFormat#INSTANCE}, etc. Also
-     * note that templates can specify their own output format like {@code <#ftl output_format="HTML">}, which
+     * note that templates can specify their own output format like {@code <#ftl outputFormat="HTML">}, which
      * overrides any configuration settings.
      *
      * @see Configuration#getRegisteredCustomOutputFormats()
@@ -228,9 +178,16 @@ public interface ParsingConfiguration {
 
     /**
      * See {@link TopLevelConfiguration#getIncompatibleImprovements()}; this is normally directly delegates to
-     * {@link Configuration#getIncompatibleImprovements()}, and it's always set.
+     * {@link Configuration#getIncompatibleImprovements()}, and that's always set.
      */
     Version getIncompatibleImprovements();
+
+    /**
+     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
+     * the setting might returns a default value, or returns the value of the setting from a parent parsing
+     * configuration or throws a {@link CoreSettingValueNotSetException}.
+     */
+    boolean isIncompatibleImprovementsSet();
 
     /**
      * The assumed display width of the tab character (ASCII 9), which influences the column number shown in error

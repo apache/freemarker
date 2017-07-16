@@ -22,7 +22,7 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 
 /**
- * AST directive node: {@code #noautoesc}.
+ * AST directive node: {@code #noAutoEsc}.
  */
 final class ASTDirNoAutoEsc extends ASTDirective {
     
@@ -46,7 +46,7 @@ final class ASTDirNoAutoEsc extends ASTDirective {
     
     @Override
     String getASTNodeDescriptor() {
-        return "#noautoesc";
+        return "#noAutoEsc";
     }
     
     @Override

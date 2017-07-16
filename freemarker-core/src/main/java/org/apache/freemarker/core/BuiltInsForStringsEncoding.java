@@ -177,7 +177,7 @@ class BuiltInsForStringsEncoding {
                             + "programmers to fix it. Or, as a last chance, "
                             + "you can set the url_encoding_charset setting in "
                             + "the template, e.g. "
-                            + "<#setting url_escaping_charset='ISO-8859-1'>, or "
+                            + "<#setting urlEscapingCharset='ISO-8859-1'>, or "
                             + "give the charset explicitly to the buit-in, e.g. "
                             + "foo?url('ISO-8859-1').");
                 }

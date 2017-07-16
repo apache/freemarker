@@ -56,18 +56,18 @@
 
 		<!-- FreeMarker settings: -->
 		<init-param>
-			<param-name>incompatible_improvements</param-name>
+			<param-name>incompatibleImprovements</param-name>
 			<param-value>3.0.0</param-value>
             <!-- Recommended to set to a high value. For the details, see the Java API docs of
                  freemarker.template.Configuration#Configuration(Version). -->
 		</init-param>
 		<init-param>
-			<param-name>template_exception_handler</param-name>
-			<!-- Some may prefer "html_debug" for development. -->
+			<param-name>templateExceptionHandler</param-name>
+			<!-- Some may prefer "htmlDebug" for development. -->
 			<param-value>rethrow</param-value>
 		</init-param>
 		<init-param>
-			<param-name>template_update_delay</param-name>
+			<param-name>templateUpdateDelay</param-name>
 			<param-value>0</param-value> <!-- 0 is for development only! Use higher value otherwise. -->
 		</init-param>
 		<init-param>
@@ -79,7 +79,7 @@
             <param-value>en_US</param-value>
         </init-param>
 		<init-param>
-			<param-name>number_format</param-name>
+			<param-name>numberFormat</param-name>
 			<param-value>0.##########</param-value>
 		</init-param>
 
@@ -92,11 +92,11 @@
         
         <!-- Specific parts: -->
         <init-param>
-            <param-name>incompatible_improvements</param-name>
+            <param-name>incompatibleImprovements</param-name>
             <param-value>3.0.0</param-value>
         </init-param>
         <init-param>
-            <param-name>object_wrapper</param-name>
+            <param-name>objectWrapper</param-name>
             <param-value>DefaultObjectWrapper(3.0.0)</param-value>
         </init-param>
         
@@ -114,8 +114,8 @@
             <param-value>UTF-8</param-value> <!-- The encoding of the template files. -->
         </init-param>
         <init-param>
-            <param-name>template_exception_handler</param-name>
-            <!-- Some may prefer "html_debug" for development. -->
+            <param-name>templateExceptionHandler</param-name>
+            <!-- Some may prefer "htmlDebug" for development. -->
             <param-value>rethrow</param-value>
         </init-param>
     </servlet>

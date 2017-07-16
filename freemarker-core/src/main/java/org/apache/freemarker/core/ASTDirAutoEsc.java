@@ -46,7 +46,7 @@ final class ASTDirAutoEsc extends ASTDirective {
     
     @Override
     String getASTNodeDescriptor() {
-        return "#autoesc";
+        return "#autoEsc";
     }
     
     @Override

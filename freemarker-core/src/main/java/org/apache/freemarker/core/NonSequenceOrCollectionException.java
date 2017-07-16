@@ -35,7 +35,7 @@ public class NonSequenceOrCollectionException extends UnexpectedTypeException {
         TemplateSequenceModel.class, TemplateCollectionModel.class
     };
     private static final String ITERABLE_SUPPORT_HINT = "The problematic value is a java.lang.Iterable. Using "
-            + "DefaultObjectWrapper(..., iterableSupport=true) as the object_wrapper setting of the FreeMarker "
+            + "DefaultObjectWrapper(..., iterableSupport=true) as the objectWrapper setting of the FreeMarker "
             + "configuration should solve this.";
     
     public NonSequenceOrCollectionException(Environment env) {

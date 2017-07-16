@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-import org.apache.freemarker.core.NamingConvention;
 import org.apache.freemarker.core.util._NullArgumentException;
 
 import com.google.common.collect.ImmutableMap;
@@ -173,7 +172,6 @@ public class FM2ToFM3Converter extends Converter {
         try {
             org.apache.freemarker.core.Configuration fm3Config = new org.apache.freemarker.core.Configuration
                     .Builder(org.apache.freemarker.core.Configuration.getVersion() /* highest possible by design */)
-                    .namingConvention(NamingConvention.CAMEL_CASE)
                     .outputFormat(converOutputFormat(result.getFM2Template().getOutputFormat()))
                     .build();
             new org.apache.freemarker.core.Template(null, result.getFM3Content(), fm3Config);

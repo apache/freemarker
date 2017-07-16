@@ -33,7 +33,7 @@
 <#setting timeFormat="'tf'">
 <@assertEquals expected='tf' actual=.now?time?string />
 
-<#setting datetimeFormat="'dtf'">
+<#setting dateTimeFormat="'dtf'">
 <@assertEquals expected='dtf' actual=.now?string />
 
 <#setting timeZone='GMT+00'>

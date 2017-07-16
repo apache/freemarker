@@ -33,26 +33,26 @@
      
  <!ELEMENT setting EMPTY>
      <!ATTLIST setting 
-            auto_import CDATA #IMPLIED
-            source_encoding CDATA #IMPLIED
+            autoImports CDATA #IMPLIED
+            sourceEncoding CDATA #IMPLIED
             locale CDATA #IMPLIED
-            object_wrapper CDATA #IMPLIED
-            output_encoding CDATA #IMPLIED
+            objectWrapper CDATA #IMPLIED
+            outputEncoding CDATA #IMPLIED
             output_dir CDATA #IMPLIED
-            new_builtin_class_resolver CDATA #IMPLIED
-            url_escaping_charset CDATA #IMPLIED
-            incompatible_improvements CDATA #IMPLIED
-            time_zone CDATA #IMPLIED
-            api_builtin_enabled CDATA #IMPLIED
+            newBuiltinClassResolver CDATA #IMPLIED
+            urlEscapingCharset CDATA #IMPLIED
+            incompatibleImprovements CDATA #IMPLIED
+            timeZone CDATA #IMPLIED
+            apiBuiltinEnabled CDATA #IMPLIED
       >
 ]>
 <!--
-Note that for the incompatible_improvements setting you can specify a list of versions, for example:
-<setting incompatible_improvements="min, 3.0.5, max" /> 
+Note that for the incompatibleImprovements setting you can specify a list of versions, for example:
+<setting incompatibleImprovements="min, 3.0.5, max" />
 -->
 
 <testCases>
-   <setting source_encoding="UTF-8" output_encoding="UTF-8" />
+   <setting sourceEncoding="UTF-8" outputEncoding="UTF-8" />
 
    <testCase name="default-xmlns" />
    <testCase name="xml-fragment" />

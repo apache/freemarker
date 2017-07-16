@@ -83,7 +83,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     
     private final TemplateLanguage templateLanguage;
     private final TagSyntax tagSyntax;
-    private final NamingConvention namingConvention;
     private final Boolean whitespaceStripping;
     private final AutoEscapingPolicy autoEscapingPolicy;
     private final Boolean recognizeStandardFileExtensions;
@@ -125,7 +124,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
 
         templateLanguage = builder.isTemplateLanguageSet() ? builder.getTemplateLanguage() : null;
         tagSyntax = builder.isTagSyntaxSet() ? builder.getTagSyntax() : null;
-        namingConvention = builder.isNamingConventionSet() ? builder.getNamingConvention() : null;
         whitespaceStripping = builder.isWhitespaceStrippingSet() ? builder.getWhitespaceStripping() : null;
         autoEscapingPolicy = builder.isAutoEscapingPolicySet() ? builder.getAutoEscapingPolicy() : null;
         recognizeStandardFileExtensions = builder.isRecognizeStandardFileExtensionsSet() ? builder.getRecognizeStandardFileExtensions() : null;
@@ -158,19 +156,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public boolean isTemplateLanguageSet() {
         return templateLanguage != null;
-    }
-
-    @Override
-    public NamingConvention getNamingConvention() {
-        if (!isNamingConventionSet()) {
-            throw new CoreSettingValueNotSetException("namingConvention");
-        }
-        return namingConvention;
-    }
-
-    @Override
-    public boolean isNamingConventionSet() {
-        return namingConvention != null;
     }
 
     @Override
@@ -271,6 +256,11 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     @Override
     public Version getIncompatibleImprovements() {
         throw new CoreSettingValueNotSetException("incompatibleImprovements");
+    }
+
+    @Override
+    public boolean isIncompatibleImprovementsSet() {
+        return false;
     }
 
     @Override
@@ -811,9 +801,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
             if (tc.isLocaleSet()) {
                 setLocale(tc.getLocale());
             }
-            if (tc.isNamingConventionSet()) {
-                setNamingConvention(tc.getNamingConvention());
-            }
             if (tc.isNewBuiltinClassResolverSet()) {
                 setNewBuiltinClassResolver(tc.getNewBuiltinClassResolver());
             }
@@ -895,6 +882,11 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         }
 
         @Override
+        public boolean isIncompatibleImprovementsSet() {
+            return false;
+        }
+
+        @Override
         protected TagSyntax getDefaultTagSyntax() {
             throw new CoreSettingValueNotSetException("tagSyntax");
         }
@@ -902,11 +894,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         @Override
         protected TemplateLanguage getDefaultTemplateLanguage() {
             throw new CoreSettingValueNotSetException("templateLanguage");
-        }
-
-        @Override
-        protected NamingConvention getDefaultNamingConvention() {
-            throw new CoreSettingValueNotSetException("namingConvention");
         }
 
         @Override

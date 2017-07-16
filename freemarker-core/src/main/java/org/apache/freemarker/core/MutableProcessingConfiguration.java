@@ -81,221 +81,57 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     public static final String DEFAULT_VALUE = "default";
     public static final String JVM_DEFAULT_VALUE = "JVM default";
     
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String LOCALE_KEY_SNAKE_CASE = "locale";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String LOCALE_KEY_CAMEL_CASE = "locale";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String LOCALE_KEY = LOCALE_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String NUMBER_FORMAT_KEY_SNAKE_CASE = "number_format";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String NUMBER_FORMAT_KEY_CAMEL_CASE = "numberFormat";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String NUMBER_FORMAT_KEY = NUMBER_FORMAT_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE = "custom_number_formats";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE = "customNumberFormats";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String CUSTOM_NUMBER_FORMATS_KEY = CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String TIME_FORMAT_KEY_SNAKE_CASE = "time_format";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String TIME_FORMAT_KEY_CAMEL_CASE = "timeFormat";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String TIME_FORMAT_KEY = TIME_FORMAT_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String DATE_FORMAT_KEY_SNAKE_CASE = "date_format";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String DATE_FORMAT_KEY_CAMEL_CASE = "dateFormat";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String DATE_FORMAT_KEY = DATE_FORMAT_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE = "custom_date_formats";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE = "customDateFormats";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String CUSTOM_DATE_FORMATS_KEY = CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String DATETIME_FORMAT_KEY_SNAKE_CASE = "datetime_format";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String DATETIME_FORMAT_KEY_CAMEL_CASE = "datetimeFormat";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String DATETIME_FORMAT_KEY = DATETIME_FORMAT_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String TIME_ZONE_KEY_SNAKE_CASE = "time_zone";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String TIME_ZONE_KEY_CAMEL_CASE = "timeZone";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String TIME_ZONE_KEY = TIME_ZONE_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE = "sql_date_and_time_time_zone";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE = "sqlDateAndTimeTimeZone";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String SQL_DATE_AND_TIME_TIME_ZONE_KEY = SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE = "template_exception_handler";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String TEMPLATE_EXCEPTION_HANDLER_KEY_CAMEL_CASE = "templateExceptionHandler";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String TEMPLATE_EXCEPTION_HANDLER_KEY = TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE;
+    public static final String LOCALE_KEY = "locale";
+    public static final String NUMBER_FORMAT_KEY = "numberFormat";
+    public static final String CUSTOM_NUMBER_FORMATS_KEY = "customNumberFormats";
+    public static final String TIME_FORMAT_KEY = "timeFormat";
+    public static final String DATE_FORMAT_KEY = "dateFormat";
+    public static final String DATE_TIME_FORMAT_KEY = "dateTimeFormat";
+    public static final String CUSTOM_DATE_FORMATS_KEY = "customDateFormats";
+    public static final String TIME_ZONE_KEY = "timeZone";
+    public static final String SQL_DATE_AND_TIME_TIME_ZONE_KEY = "sqlDateAndTimeTimeZone";
+    public static final String TEMPLATE_EXCEPTION_HANDLER_KEY = "templateExceptionHandler";
+    public static final String ATTEMPT_EXCEPTION_REPORTER_KEY = "attemptExceptionReporter";
+    public static final String ARITHMETIC_ENGINE_KEY = "arithmeticEngine";
+    public static final String BOOLEAN_FORMAT_KEY = "booleanFormat";
+    public static final String OUTPUT_ENCODING_KEY = "outputEncoding";
+    public static final String URL_ESCAPING_CHARSET_KEY = "urlEscapingCharset";
+    public static final String AUTO_FLUSH_KEY = "autoFlush";
+    public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY = "newBuiltinClassResolver";
+    public static final String SHOW_ERROR_TIPS_KEY = "showErrorTips";
+    public static final String API_BUILTIN_ENABLED_KEY = "apiBuiltinEnabled";
+    public static final String LAZY_IMPORTS_KEY = "lazyImports";
+    public static final String LAZY_AUTO_IMPORTS_KEY = "lazyAutoImports";
+    public static final String AUTO_IMPORTS_KEY = "autoImports";
+    public static final String AUTO_INCLUDES_KEY = "autoIncludes";
 
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String ATTEMPT_EXCEPTION_REPORTER_KEY_SNAKE_CASE = "attempt_exception_reporter";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String ATTEMPT_EXCEPTION_REPORTER_KEY_CAMEL_CASE = "attemptExceptionReporter";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String ATTEMPT_EXCEPTION_REPORTER_KEY = ATTEMPT_EXCEPTION_REPORTER_KEY_SNAKE_CASE;
-
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String ARITHMETIC_ENGINE_KEY_SNAKE_CASE = "arithmetic_engine";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String ARITHMETIC_ENGINE_KEY_CAMEL_CASE = "arithmeticEngine";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String ARITHMETIC_ENGINE_KEY = ARITHMETIC_ENGINE_KEY_SNAKE_CASE;
-
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String BOOLEAN_FORMAT_KEY_SNAKE_CASE = "boolean_format";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String BOOLEAN_FORMAT_KEY_CAMEL_CASE = "booleanFormat";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String BOOLEAN_FORMAT_KEY = BOOLEAN_FORMAT_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String OUTPUT_ENCODING_KEY_SNAKE_CASE = "output_encoding";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String OUTPUT_ENCODING_KEY_CAMEL_CASE = "outputEncoding";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String OUTPUT_ENCODING_KEY = OUTPUT_ENCODING_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String URL_ESCAPING_CHARSET_KEY_SNAKE_CASE = "url_escaping_charset";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String URL_ESCAPING_CHARSET_KEY_CAMEL_CASE = "urlEscapingCharset";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String URL_ESCAPING_CHARSET_KEY = URL_ESCAPING_CHARSET_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String AUTO_FLUSH_KEY_SNAKE_CASE = "auto_flush";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String AUTO_FLUSH_KEY_CAMEL_CASE = "autoFlush";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String AUTO_FLUSH_KEY = AUTO_FLUSH_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE = "new_builtin_class_resolver";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY_CAMEL_CASE = "newBuiltinClassResolver";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String NEW_BUILTIN_CLASS_RESOLVER_KEY = NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String SHOW_ERROR_TIPS_KEY_SNAKE_CASE = "show_error_tips";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String SHOW_ERROR_TIPS_KEY_CAMEL_CASE = "showErrorTips";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String SHOW_ERROR_TIPS_KEY = SHOW_ERROR_TIPS_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String API_BUILTIN_ENABLED_KEY_SNAKE_CASE = "api_builtin_enabled";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String API_BUILTIN_ENABLED_KEY_CAMEL_CASE = "apiBuiltinEnabled";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String API_BUILTIN_ENABLED_KEY = API_BUILTIN_ENABLED_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String LAZY_IMPORTS_KEY_SNAKE_CASE = "lazy_imports";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String LAZY_IMPORTS_KEY_CAMEL_CASE = "lazyImports";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String LAZY_IMPORTS_KEY = LAZY_IMPORTS_KEY_SNAKE_CASE;
-
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE = "lazy_auto_imports";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String LAZY_AUTO_IMPORTS_KEY_CAMEL_CASE = "lazyAutoImports";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String LAZY_AUTO_IMPORTS_KEY = LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String AUTO_IMPORT_KEY_SNAKE_CASE = "auto_import";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String AUTO_IMPORT_KEY_CAMEL_CASE = "autoImport";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String AUTO_IMPORT_KEY = AUTO_IMPORT_KEY_SNAKE_CASE;
-    
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String AUTO_INCLUDE_KEY_SNAKE_CASE = "auto_include";
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String AUTO_INCLUDE_KEY_CAMEL_CASE = "autoInclude";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String AUTO_INCLUDE_KEY = AUTO_INCLUDE_KEY_SNAKE_CASE;
-    
-    private static final String[] SETTING_NAMES_SNAKE_CASE = new String[] {
+    private static final Set<String> SETTING_NAMES = new _SortedArraySet<>(
         // Must be sorted alphabetically!
-        API_BUILTIN_ENABLED_KEY_SNAKE_CASE,
-        ARITHMETIC_ENGINE_KEY_SNAKE_CASE,
-        ATTEMPT_EXCEPTION_REPORTER_KEY_SNAKE_CASE,
-        AUTO_FLUSH_KEY_SNAKE_CASE,
-        AUTO_IMPORT_KEY_SNAKE_CASE,
-        AUTO_INCLUDE_KEY_SNAKE_CASE,
-        BOOLEAN_FORMAT_KEY_SNAKE_CASE,
-        CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE,
-        CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE,
-        DATE_FORMAT_KEY_SNAKE_CASE,
-        DATETIME_FORMAT_KEY_SNAKE_CASE,
-        LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE,
-        LAZY_IMPORTS_KEY_SNAKE_CASE,
-        LOCALE_KEY_SNAKE_CASE,
-        NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE,
-        NUMBER_FORMAT_KEY_SNAKE_CASE,
-        OUTPUT_ENCODING_KEY_SNAKE_CASE,
-        SHOW_ERROR_TIPS_KEY_SNAKE_CASE,
-        SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE,
-        TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE,
-        TIME_FORMAT_KEY_SNAKE_CASE,
-        TIME_ZONE_KEY_SNAKE_CASE,
-        URL_ESCAPING_CHARSET_KEY_SNAKE_CASE
-    };
+        API_BUILTIN_ENABLED_KEY,
+        ARITHMETIC_ENGINE_KEY,
+        ATTEMPT_EXCEPTION_REPORTER_KEY,
+        AUTO_FLUSH_KEY,
+        AUTO_IMPORTS_KEY,
+        AUTO_INCLUDES_KEY,
+        BOOLEAN_FORMAT_KEY,
+        CUSTOM_DATE_FORMATS_KEY,
+        CUSTOM_NUMBER_FORMATS_KEY,
+        DATE_FORMAT_KEY,
+        DATE_TIME_FORMAT_KEY,
+        LAZY_AUTO_IMPORTS_KEY,
+        LAZY_IMPORTS_KEY,
+        LOCALE_KEY,
+        NEW_BUILTIN_CLASS_RESOLVER_KEY,
+        NUMBER_FORMAT_KEY,
+        OUTPUT_ENCODING_KEY,
+        SHOW_ERROR_TIPS_KEY,
+        SQL_DATE_AND_TIME_TIME_ZONE_KEY,
+        TEMPLATE_EXCEPTION_HANDLER_KEY,
+        TIME_FORMAT_KEY,
+        TIME_ZONE_KEY,
+        URL_ESCAPING_CHARSET_KEY
+    );
     
-    private static final String[] SETTING_NAMES_CAMEL_CASE = new String[] {
-        // Must be sorted alphabetically!
-        API_BUILTIN_ENABLED_KEY_CAMEL_CASE,
-        ARITHMETIC_ENGINE_KEY_CAMEL_CASE,
-        ATTEMPT_EXCEPTION_REPORTER_KEY_CAMEL_CASE,
-        AUTO_FLUSH_KEY_CAMEL_CASE,
-        AUTO_IMPORT_KEY_CAMEL_CASE,
-        AUTO_INCLUDE_KEY_CAMEL_CASE,
-        BOOLEAN_FORMAT_KEY_CAMEL_CASE,
-        CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE,
-        CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE,
-        DATE_FORMAT_KEY_CAMEL_CASE,
-        DATETIME_FORMAT_KEY_CAMEL_CASE,
-        LAZY_AUTO_IMPORTS_KEY_CAMEL_CASE,
-        LAZY_IMPORTS_KEY_CAMEL_CASE,
-        LOCALE_KEY_CAMEL_CASE,
-        NEW_BUILTIN_CLASS_RESOLVER_KEY_CAMEL_CASE,
-        NUMBER_FORMAT_KEY_CAMEL_CASE,
-        OUTPUT_ENCODING_KEY_CAMEL_CASE,
-        SHOW_ERROR_TIPS_KEY_CAMEL_CASE,
-        SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE,
-        TEMPLATE_EXCEPTION_HANDLER_KEY_CAMEL_CASE,
-        TIME_FORMAT_KEY_CAMEL_CASE,
-        TIME_ZONE_KEY_CAMEL_CASE,
-        URL_ESCAPING_CHARSET_KEY_CAMEL_CASE
-    };
-
     private Locale locale;
     private String numberFormat;
     private String timeFormat;
@@ -1420,8 +1256,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         return autoIncludes != null;
     }
     
-    private static final String ALLOWED_CLASSES = "allowed_classes";
-    private static final String TRUSTED_TEMPLATES = "trusted_templates";
+    private static final String ALLOWED_CLASSES = "allowedClasses";
+    private static final String TRUSTED_TEMPLATES = "trustedTemplates";
     
     /**
      * Sets a FreeMarker setting by a name and string value. If you can configure FreeMarker directly with Java (or
@@ -1431,7 +1267,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * overview of the settings available.
      * 
      * <p>Note: As of FreeMarker 2.3.23, setting names can be written in camel case too. For example, instead of
-     * {@code date_format} you can also use {@code dateFormat}. It's likely that camel case will become to the
+     * {@code dateFormat} you can also use {@code dateFormat}. It's likely that camel case will become to the
      * recommended convention in the future.
      * 
      * <p>The list of settings commonly supported in all {@link MutableProcessingConfiguration} subclasses:
@@ -1441,17 +1277,17 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       <br>String value: local codes with the usual format in Java, such as {@code "en_US"}, or
      *       "JVM default" (ignoring case) to use the default locale of the Java environment.
      *
-     *   <li><p>{@code "custom_number_formats"}: See {@link #setCustomNumberFormats(Map)}.
+     *   <li><p>{@code "customNumberFormat"}: See {@link #setCustomNumberFormats(Map)}.
      *   <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
      *   <br>Example: <code>{ "hex": com.example.HexTemplateNumberFormatFactory,
      *   "gps": com.example.GPSTemplateNumberFormatFactory }</code>
      *
-     *   <li><p>{@code "custom_date_formats"}: See {@link #setCustomDateFormats(Map)}.
+     *   <li><p>{@code "customDateFormat"}: See {@link #setCustomDateFormats(Map)}.
      *   <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>.
      *   <br>Example: <code>{ "trade": com.example.TradeTemplateDateFormatFactory,
      *   "log": com.example.LogTemplateDateFormatFactory }</code>
      *       
-     *   <li><p>{@code "template_exception_handler"}:
+     *   <li><p>{@code "templateExceptionHandler"}:
      *       See {@link #setTemplateExceptionHandler(TemplateExceptionHandler)}.
      *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
      *       expression</a>.
@@ -1462,7 +1298,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       {@code "ignore"} (means {@link TemplateExceptionHandler#IGNORE}), or
      *       {@code "default"} (only allowed for {@link Configuration} instances) for the default.
      *
-     *   <li><p>{@code "attempt_exception_reporter"}:
+     *   <li><p>{@code "attemptExceptionReporter"}:
      *       See {@link #setAttemptExceptionReporter(AttemptExceptionReporter)}.
      *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
      *       expression</a>.
@@ -1471,7 +1307,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       {@code "logWarn"} (means {@link AttemptExceptionReporter#LOG_WARN}), or
      *       {@code "default"} (only allowed for {@link Configuration} instances) for the default value.
      *       
-     *   <li><p>{@code "arithmetic_engine"}:
+     *   <li><p>{@code "arithmeticEngine"}:
      *       See {@link #setArithmeticEngine(ArithmeticEngine)}.  
      *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
      *       expression</a>.
@@ -1479,7 +1315,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       then it must be one of these special values (case insensitive):
      *       {@code "bigdecimal"}, {@code "conservative"}.
      *       
-     *   <li><p>{@code "object_wrapper"}:
+     *   <li><p>{@code "objectWrapper"}:
      *       See {@link Configuration.Builder#setObjectWrapper(ObjectWrapper)}.
      *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
      *       expression</a>, with the addition that {@link DefaultObjectWrapper}, {@link DefaultObjectWrapper} and
@@ -1489,23 +1325,23 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       <br>It also accepts the special value (case insensitive) {@code "default"}.
      *       <br>It also accepts the special value (case insensitive) {@code "default"}.
      *
-     *   <li><p>{@code "number_format"}: See {@link #setNumberFormat(String)}.
+     *   <li><p>{@code "numberFormat"}: See {@link #setNumberFormat(String)}.
      *   
-     *   <li><p>{@code "boolean_format"}: See {@link #setBooleanFormat(String)} .
+     *   <li><p>{@code "booleanFormat"}: See {@link #setBooleanFormat(String)} .
      *   
-     *   <li><p>{@code "date_format", "time_format", "datetime_format"}:
+     *   <li><p>{@code "dateFormat", "dateFormat", "dateTimeFormat"}:
      *       See {@link #setDateFormat(String)}, {@link #setTimeFormat(String)}, {@link #setDateTimeFormat(String)}. 
      *        
-     *   <li><p>{@code "time_zone"}:
+     *   <li><p>{@code "timeZone"}:
      *       See {@link #setTimeZone(TimeZone)}.
      *       <br>String value: With the format as {@link TimeZone#getTimeZone} defines it. Also, since 2.3.21
      *       {@code "JVM default"} can be used that will be replaced with the actual JVM default time zone when
      *       {@link #setSetting(String, String)} is called.
      *       For example {@code "GMT-8:00"} or {@code "America/Los_Angeles"}
-     *       <br>If you set this setting, consider setting {@code sql_date_and_time_time_zone}
+     *       <br>If you set this setting, consider setting {@code sqlDateAndTimeTimeZone}
      *       too (see below)! 
      *       
-     *   <li><p>{@code sql_date_and_time_time_zone}:
+     *   <li><p>{@code sqlDateAndTimeTimeZone}:
      *       See {@link #setSQLDateAndTimeTimeZone(TimeZone)}.
      *       Since 2.3.21.
      *       <br>String value: With the format as {@link TimeZone#getTimeZone} defines it. Also, {@code "JVM default"}
@@ -1513,61 +1349,61 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       {@link #setSetting(String, String)} is called. Also {@code "null"} can be used, which has the same effect
      *       as {@link #setSQLDateAndTimeTimeZone(TimeZone) setSQLDateAndTimeTimeZone(null)}.
      *       
-     *   <li><p>{@code "output_encoding"}:
+     *   <li><p>{@code "outputEncoding"}:
      *       See {@link #setOutputEncoding(Charset)}.
      *       
-     *   <li><p>{@code "url_escaping_charset"}:
+     *   <li><p>{@code "urlEscapingCharset"}:
      *       See {@link #setURLEscapingCharset(Charset)}.
      *       
-     *   <li><p>{@code "auto_flush"}:
+     *   <li><p>{@code "autoFlush"}:
      *       See {@link #setAutoFlush(boolean)}.
      *       Since 2.3.17.
      *       <br>String value: {@code "true"}, {@code "false"}, {@code "y"},  etc.
      *       
-     *   <li><p>{@code "auto_import"}:
+     *   <li><p>{@code "autoImports"}:
      *       See {@link Configuration#getAutoImports()}
      *       <br>String value is something like:
      *       <br>{@code /lib/form.ftl as f, /lib/widget as w, "/lib/odd name.ftl" as odd}
      *       
-     *   <li><p>{@code "auto_include"}: Sets the list of auto-includes.
+     *   <li><p>{@code "autoInclude"}: Sets the list of auto-includes.
      *       See {@link Configuration#getAutoIncludes()}
      *       <br>String value is something like:
      *       <br>{@code /include/common.ftl, "/include/evil name.ftl"}
      *       
-     *   <li><p>{@code "lazy_auto_imports"}:
+     *   <li><p>{@code "lazyAutoImports"}:
      *       See {@link Configuration#getLazyAutoImports()}.
      *       <br>String value: {@code "true"}, {@code "false"} (also the equivalents: {@code "yes"}, {@code "no"},
      *       {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}), case insensitive. Also can be {@code "null"}.
 
-     *   <li><p>{@code "lazy_imports"}:
+     *   <li><p>{@code "lazyImports"}:
      *       See {@link Configuration#getLazyImports()}.
      *       <br>String value: {@code "true"}, {@code "false"} (also the equivalents: {@code "yes"}, {@code "no"},
      *       {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}), case insensitive.
      *       
-     *   <li><p>{@code "new_builtin_class_resolver"}:
+     *   <li><p>{@code "newBuiltinClassResolver"}:
      *       See {@link #setNewBuiltinClassResolver(TemplateClassResolver)}.
      *       Since 2.3.17.
      *       The value must be one of these (ignore the quotation marks):
      *       <ol>
      *         <li><p>{@code "unrestricted"}:
      *             Use {@link TemplateClassResolver#UNRESTRICTED}
-     *         <li><p>{@code "allow_nothing"}:
+     *         <li><p>{@code "allowNothing"}:
      *             Use {@link TemplateClassResolver#ALLOW_NOTHING}
      *         <li><p>Something that contains colon will use
      *             {@link OptInTemplateClassResolver} and is expected to
      *             store comma separated values (possibly quoted) segmented
-     *             with {@code "allowed_classes:"} and/or
-     *             {@code "trusted_templates:"}. Examples of valid values:
+     *             with {@code "allowedClasses:"} and/or
+     *             {@code "trustedTemplates:"}. Examples of valid values:
      *             
      *             <table style="width: auto; border-collapse: collapse" border="1"
-     *                  summary="trusted_template value examples">
+     *                  summary="trustedTemplate value examples">
      *               <tr>
      *                 <th>Setting value
      *                 <th>Meaning
      *               <tr>
      *                 <td>
-     *                   {@code allowed_classes: com.example.C1, com.example.C2,
-     *                   trusted_templates: lib/*, safe.ftl}                 
+     *                   {@code allowedClasses: com.example.C1, com.example.C2,
+     *                   trustedTemplates: lib/*, safe.ftl}
      *                 <td>
      *                   Only allow instantiating the {@code com.example.C1} and
      *                   {@code com.example.C2} classes. But, allow templates
@@ -1578,13 +1414,13 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *                   that {@link TemplateClassResolver#UNRESTRICTED} allows.
      *               <tr>
      *                 <td>
-     *                   {@code allowed_classes: com.example.C1, com.example.C2}
+     *                   {@code allowedClasses: com.example.C1, com.example.C2}
      *                 <td>Only allow instantiating the {@code com.example.C1} and
      *                   {@code com.example.C2} classes. There are no
      *                   trusted templates.
      *               <tr>
      *                 <td>
-                         {@code trusted_templates: lib/*, safe.ftl}                 
+                         {@code trustedTemplates: lib/*, safe.ftl}
      *                 <td>
      *                   Do not allow instantiating any classes, except in
      *                   templates inside {@code lib/} or in template 
@@ -1598,12 +1434,12 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       </ol>
      *       Note that the {@code safer} option was removed in FreeMarker 3.0.0, as it has become equivalent with
      *       {@code "unrestricted"}, as the classes it has blocked were removed from FreeMarker.
-     *   <li><p>{@code "show_error_tips"}:
+     *   <li><p>{@code "showErrorTips"}:
      *       See {@link #setShowErrorTips(boolean)}.
      *       Since 2.3.21.
      *       <br>String value: {@code "true"}, {@code "false"}, {@code "y"},  etc.
      *       
-     *   <li><p>{@code api_builtin_enabled}:
+     *   <li><p>{@code apiBuiltinEnabled}:
      *       See {@link #setAPIBuiltinEnabled(boolean)}.
      *       Since 2.3.22.
      *       <br>String value: {@code "true"}, {@code "false"}, {@code "y"},  etc.
@@ -1614,9 +1450,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * <ul>
      *   <li><p>{@code "auto_escaping"}:
      *       See {@link Configuration#getAutoEscapingPolicy()}
-     *       <br>String value: {@code "enable_if_default"} or {@code "enableIfDefault"} for
+     *       <br>String value: {@code "enableIfDefault"} or {@code "enableIfDefault"} for
      *       {@link AutoEscapingPolicy#ENABLE_IF_DEFAULT},
-     *       {@code "enable_if_supported"} or {@code "enableIfSupported"} for
+     *       {@code "enableIfDefault"} or {@code "enableIfSupported"} for
      *       {@link AutoEscapingPolicy#ENABLE_IF_SUPPORTED}
      *       {@code "disable"} for {@link AutoEscapingPolicy#DISABLE}.
      *       
@@ -1626,29 +1462,29 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       <br>As the default value is the system default, which can change
      *       from one server to another, <b>you should always set this!</b>
      *       
-     *   <li><p>{@code "localized_template_lookup"}:
+     *   <li><p>{@code "localizedTemplateLookup"}:
      *       See {@link Configuration#getLocalizedTemplateLookup()}.
      *       <br>String value: {@code "true"}, {@code "false"} (also the equivalents: {@code "yes"}, {@code "no"},
      *       {@code "t"}, {@code "f"}, {@code "y"}, {@code "n"}).
      *       ASTDirCase insensitive.
      *       
-     *   <li><p>{@code "output_format"}:
+     *   <li><p>{@code "outputFormat"}:
      *       See {@link ParsingConfiguration#getOutputFormat()}.
      *       <br>String value: {@code "default"} (case insensitive) for the default, or an
      *       <a href="#fm_obe">object builder expression</a> that gives an {@link OutputFormat}, for example
      *       {@code HTMLOutputFormat} or {@code XMLOutputFormat}.
      *       
-     *   <li><p>{@code "registered_custom_output_formats"}:
+     *   <li><p>{@code "registeredCustomOutputFormats"}:
      *       See {@link Configuration#getRegisteredCustomOutputFormats()}.
      *       <br>String value: an <a href="#fm_obe">object builder expression</a> that gives a {@link List} of
      *       {@link OutputFormat}-s.
      *       Example: {@code [com.example.MyOutputFormat(), com.example.MyOtherOutputFormat()]}
      *       
-     *   <li><p>{@code "whitespace_stripping"}:
+     *   <li><p>{@code "whitespaceStripping"}:
      *       See {@link ParsingConfiguration#getWhitespaceStripping()}.
      *       <br>String value: {@code "true"}, {@code "false"}, {@code yes}, etc.
      *       
-     *   <li><p>{@code "template_cache_storage"}:
+     *   <li><p>{@code "templateCacheStorage"}:
      *       See {@link Configuration#getTemplateCacheStorage()}.
      *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
      *       expression</a>.
@@ -1657,7 +1493,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       maximum strong and soft sizes specified with the setting value. Examples
      *       of valid setting values:
      *       
-     *       <table style="width: auto; border-collapse: collapse" border="1" summary="template_cache_storage value
+     *       <table style="width: auto; border-collapse: collapse" border="1" summary="templateCacheStorage value
      *       examples">
      *         <tr><th>Setting value<th>max. strong size<th>max. soft size
      *         <tr><td>{@code "strong:50, soft:500"}<td>50<td>500
@@ -1671,7 +1507,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       <p>The value is not case sensitive. The order of <tt>soft</tt> and <tt>strong</tt>
      *       entries is not significant.
      *       
-     *   <li><p>{@code "template_update_delay"}:
+     *   <li><p>{@code "templateUpdateDelay"}:
      *       Template update delay in <b>seconds</b> (not in milliseconds) if no unit is specified; see
      *       {@link Configuration#getTemplateUpdateDelayMilliseconds()} for more.
      *       <br>String value: Valid positive integer, optionally followed by a time unit (recommended). The default
@@ -1679,41 +1515,36 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       Supported units are: "s" (seconds), "ms" (milliseconds), "m" (minutes), "h" (hours). The whitespace between
      *       the unit and the number is optional. Units are only supported since 2.3.23.
      *       
-     *   <li><p>{@code "tag_syntax"}:
+     *   <li><p>{@code "tagSyntax"}:
      *       See {@link ParsingConfiguration#getTagSyntax()}.
      *       <br>String value: Must be one of
-     *       {@code "auto_detect"}, {@code "angle_bracket"}, and {@code "square_bracket"}. 
+     *       {@code "autoDetect"}, {@code "squareBracket"}, and {@code "squareBracket"}.
      *       
-     *   <li><p>{@code "naming_convention"}:
-     *       See {@link ParsingConfiguration#getNamingConvention()}.
-     *       <br>String value: Must be one of
-     *       {@code "auto_detect"}, {@code "legacy"}, and {@code "camel_case"}.
-     *       
-     *   <li><p>{@code "incompatible_improvements"}:
+     *   <li><p>{@code "incompatibleImprovements"}:
      *       See {@link Configuration#getIncompatibleImprovements()}.
      *       <br>String value: version number like {@code 2.3.20}.
      *       
-     *   <li><p>{@code "recognize_standard_file_extensions"}:
+     *   <li><p>{@code "recognizeStandardFileExtensions"}:
      *       See {@link Configuration#getRecognizeStandardFileExtensions()}.
      *       <br>String value: {@code "default"} (case insensitive) for the default, or {@code "true"}, {@code "false"},
      *       {@code yes}, etc.
      *       
-     *   <li><p>{@code "template_configurations"}:
+     *   <li><p>{@code "templateConfigurations"}:
      *       See: {@link Configuration#getTemplateConfigurations()}.
      *       <br>String value: Interpreted as an <a href="#fm_obe">object builder expression</a>,
      *       can be {@code null}.
      *       
-     *   <li><p>{@code "template_loader"}:
+     *   <li><p>{@code "templateLoader"}:
      *       See: {@link Configuration#getTemplateLoader()}.
      *       <br>String value: {@code "default"} (case insensitive) for the default, or else interpreted as an
      *       <a href="#fm_obe">object builder expression</a>. {@code "null"} is also allowed.
      *       
-     *   <li><p>{@code "template_lookup_strategy"}:
+     *   <li><p>{@code "templateLookupStrategy"}:
      *       See: {@link Configuration#getTemplateLookupStrategy()}.
      *       <br>String value: {@code "default"} (case insensitive) for the default, or else interpreted as an
      *       <a href="#fm_obe">object builder expression</a>.
      *       
-     *   <li><p>{@code "template_name_format"}:
+     *   <li><p>{@code "templateNameFormat"}:
      *       See: {@link Configuration#getTemplateNameFormat()}.
      *       <br>String value: {@code "default"} (case insensitive) for the default,
      *       {@link DefaultTemplateNameFormat#INSTANCE}.
@@ -1794,8 +1625,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *     {@link AndMatcher}, {@link OrMatcher}, {@link NotMatcher}, {@link ConditionalTemplateConfigurationFactory},
      *     {@link MergingTemplateConfigurationFactory}, {@link FirstMatchTemplateConfigurationFactory},
      *     {@link HTMLOutputFormat}, {@link XMLOutputFormat}, {@link RTFOutputFormat}, {@link PlainTextOutputFormat},
-     *     {@link UndefinedOutputFormat}, {@link Configuration}, {@link TemplateLanguage}, {@link NamingConvention},
-     *     {@link TagSyntax}.
+     *     {@link UndefinedOutputFormat}, {@link Configuration}, {@link TemplateLanguage}, {@link TagSyntax}.
      *   </li>
      *   <li>
      *     <p>{@link TimeZone} objects can be created like {@code TimeZone("UTC")}, despite that there's no a such
@@ -1825,40 +1655,36 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                 } else {
                     setLocale(_StringUtil.deduceLocale(value));
                 }
-            } else if (NUMBER_FORMAT_KEY_SNAKE_CASE.equals(name) || NUMBER_FORMAT_KEY_CAMEL_CASE.equals(name)) {
+            } else if (NUMBER_FORMAT_KEY.equals(name)) {
                 setNumberFormat(value);
-            } else if (CUSTOM_NUMBER_FORMATS_KEY_SNAKE_CASE.equals(name)
-                    || CUSTOM_NUMBER_FORMATS_KEY_CAMEL_CASE.equals(name)) {
+            } else if (CUSTOM_NUMBER_FORMATS_KEY.equals(name)) {
                 Map map = (Map) _ObjectBuilderSettingEvaluator.eval(
                                 value, Map.class, false, _SettingEvaluationEnvironment.getCurrent());
                 checkSettingValueItemsType("Map keys", String.class, map.keySet());
                 checkSettingValueItemsType("Map values", TemplateNumberFormatFactory.class, map.values());
                 setCustomNumberFormats(map);
-            } else if (TIME_FORMAT_KEY_SNAKE_CASE.equals(name) || TIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
+            } else if (TIME_FORMAT_KEY.equals(name)) {
                 setTimeFormat(value);
-            } else if (DATE_FORMAT_KEY_SNAKE_CASE.equals(name) || DATE_FORMAT_KEY_CAMEL_CASE.equals(name)) {
+            } else if (DATE_FORMAT_KEY.equals(name)) {
                 setDateFormat(value);
-            } else if (DATETIME_FORMAT_KEY_SNAKE_CASE.equals(name) || DATETIME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
+            } else if (DATE_TIME_FORMAT_KEY.equals(name)) {
                 setDateTimeFormat(value);
-            } else if (CUSTOM_DATE_FORMATS_KEY_SNAKE_CASE.equals(name)
-                    || CUSTOM_DATE_FORMATS_KEY_CAMEL_CASE.equals(name)) {
+            } else if (CUSTOM_DATE_FORMATS_KEY.equals(name)) {
                 Map map = (Map) _ObjectBuilderSettingEvaluator.eval(
                                 value, Map.class, false, _SettingEvaluationEnvironment.getCurrent());
                 checkSettingValueItemsType("Map keys", String.class, map.keySet());
                 checkSettingValueItemsType("Map values", TemplateDateFormatFactory.class, map.values());
                 setCustomDateFormats(map);
-            } else if (TIME_ZONE_KEY_SNAKE_CASE.equals(name) || TIME_ZONE_KEY_CAMEL_CASE.equals(name)) {
+            } else if (TIME_ZONE_KEY.equals(name)) {
                 setTimeZone(parseTimeZoneSettingValue(value));
-            } else if (SQL_DATE_AND_TIME_TIME_ZONE_KEY_SNAKE_CASE.equals(name)
-                    || SQL_DATE_AND_TIME_TIME_ZONE_KEY_CAMEL_CASE.equals(name)) {
+            } else if (SQL_DATE_AND_TIME_TIME_ZONE_KEY.equals(name)) {
                 setSQLDateAndTimeTimeZone(value.equals("null") ? null : parseTimeZoneSettingValue(value));
-            } else if (TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE.equals(name)
-                    || TEMPLATE_EXCEPTION_HANDLER_KEY_CAMEL_CASE.equals(name)) {
+            } else if (TEMPLATE_EXCEPTION_HANDLER_KEY.equals(name)) {
                 if (value.indexOf('.') == -1) {
                     if ("debug".equalsIgnoreCase(value)) {
                         setTemplateExceptionHandler(
                                 TemplateExceptionHandler.DEBUG);
-                    } else if ("html_debug".equalsIgnoreCase(value) || "htmlDebug".equals(value)) {
+                    } else if ("htmlDebug".equals(value)) {
                         setTemplateExceptionHandler(
                                 TemplateExceptionHandler.HTML_DEBUG);
                     } else if ("ignore".equalsIgnoreCase(value)) {
@@ -1873,19 +1699,20 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                     } else {
                         throw new InvalidSettingValueException(
                                 name, value,
-                                "No such predefined template exception handler name");
+                                value.equalsIgnoreCase("html_debug")
+                                        ? "The correct value would be: htmlDebug"
+                                        : "No such predefined template exception handler name");
                     }
                 } else {
                     setTemplateExceptionHandler((TemplateExceptionHandler) _ObjectBuilderSettingEvaluator.eval(
                             value, TemplateExceptionHandler.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
-            } else if (ATTEMPT_EXCEPTION_REPORTER_KEY_SNAKE_CASE.equals(name)
-                    || ATTEMPT_EXCEPTION_REPORTER_KEY_CAMEL_CASE.equals(name)) {
+            } else if (ATTEMPT_EXCEPTION_REPORTER_KEY.equals(name)) {
                 if (value.indexOf('.') == -1) {
-                    if ("log_error".equalsIgnoreCase(value) || "logError".equals(value)) {
+                    if ("logError".equals(value)) {
                         setAttemptExceptionReporter(
                                 AttemptExceptionReporter.LOG_ERROR);
-                    } else if ("log_warn".equalsIgnoreCase(value) || "logWarn".equals(value)) {
+                    } else if ("logWarn".equals(value)) {
                         setAttemptExceptionReporter(
                                 AttemptExceptionReporter.LOG_WARN);
                     } else if (DEFAULT_VALUE.equalsIgnoreCase(value)
@@ -1894,13 +1721,17 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                     } else {
                         throw new InvalidSettingValueException(
                                 name, value,
-                                "No such predefined template exception handler name");
+                                value.equalsIgnoreCase("log_error") ? "The correct value would be: "
+                                        + "logError"
+                                : value.equalsIgnoreCase("log_wran") ? "The correct value would be: "
+                                        + "logWarn"
+                                : "No such predefined template exception handler name");
                     }
                 } else {
                     setTemplateExceptionHandler((TemplateExceptionHandler) _ObjectBuilderSettingEvaluator.eval(
                             value, TemplateExceptionHandler.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
-            } else if (ARITHMETIC_ENGINE_KEY_SNAKE_CASE.equals(name) || ARITHMETIC_ENGINE_KEY_CAMEL_CASE.equals(name)) {
+            } else if (ARITHMETIC_ENGINE_KEY.equals(name)) {
                 if (value.indexOf('.') == -1) { 
                     if ("bigdecimal".equalsIgnoreCase(value)) {
                         setArithmeticEngine(BigDecimalArithmeticEngine.INSTANCE);
@@ -1914,25 +1745,22 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                     setArithmeticEngine((ArithmeticEngine) _ObjectBuilderSettingEvaluator.eval(
                             value, ArithmeticEngine.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
-            } else if (BOOLEAN_FORMAT_KEY_SNAKE_CASE.equals(name) || BOOLEAN_FORMAT_KEY_CAMEL_CASE.equals(name)) {
+            } else if (BOOLEAN_FORMAT_KEY.equals(name)) {
                 setBooleanFormat(value);
-            } else if (OUTPUT_ENCODING_KEY_SNAKE_CASE.equals(name) || OUTPUT_ENCODING_KEY_CAMEL_CASE.equals(name)) {
+            } else if (OUTPUT_ENCODING_KEY.equals(name)) {
                 setOutputEncoding(Charset.forName(value));
-            } else if (URL_ESCAPING_CHARSET_KEY_SNAKE_CASE.equals(name)
-                    || URL_ESCAPING_CHARSET_KEY_CAMEL_CASE.equals(name)) {
+            } else if (URL_ESCAPING_CHARSET_KEY.equals(name)) {
                 setURLEscapingCharset(Charset.forName(value));
-            } else if (AUTO_FLUSH_KEY_SNAKE_CASE.equals(name) || AUTO_FLUSH_KEY_CAMEL_CASE.equals(name)) {
+            } else if (AUTO_FLUSH_KEY.equals(name)) {
                 setAutoFlush(_StringUtil.getYesNo(value));
-            } else if (SHOW_ERROR_TIPS_KEY_SNAKE_CASE.equals(name) || SHOW_ERROR_TIPS_KEY_CAMEL_CASE.equals(name)) {
+            } else if (SHOW_ERROR_TIPS_KEY.equals(name)) {
                 setShowErrorTips(_StringUtil.getYesNo(value));
-            } else if (API_BUILTIN_ENABLED_KEY_SNAKE_CASE.equals(name)
-                    || API_BUILTIN_ENABLED_KEY_CAMEL_CASE.equals(name)) {
+            } else if (API_BUILTIN_ENABLED_KEY.equals(name)) {
                 setAPIBuiltinEnabled(_StringUtil.getYesNo(value));
-            } else if (NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE.equals(name)
-                    || NEW_BUILTIN_CLASS_RESOLVER_KEY_CAMEL_CASE.equals(name)) {
+            } else if (NEW_BUILTIN_CLASS_RESOLVER_KEY.equals(name)) {
                 if ("unrestricted".equals(value)) {
                     setNewBuiltinClassResolver(TemplateClassResolver.UNRESTRICTED);
-                } else if ("allow_nothing".equals(value) || "allowNothing".equals(value)) {
+                } else if ("allowNothing".equals(value)) {
                     setNewBuiltinClassResolver(TemplateClassResolver.ALLOW_NOTHING);
                 } else if (value.indexOf(":") != -1) {
                     List<_KeyValuePair<String, List<String>>> segments = parseAsSegmentedList(value);
@@ -1954,10 +1782,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                     }
                     setNewBuiltinClassResolver(
                             new OptInTemplateClassResolver(allowedClasses, trustedTemplates));
-                } else if ("allows_nothing".equals(value)) {
-                    throw new InvalidSettingValueException(
-                            name, value, "The correct value would be: allow_nothing");
-                } else if ("allowsNothing".equals(value)) {
+                } else if ("allowsNothing".equals(value) || "allows_nothing".equals(value)) {
                     throw new InvalidSettingValueException(
                             name, value, "The correct value would be: allowNothing");
                 } else if (value.indexOf('.') != -1) {
@@ -1970,14 +1795,13 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                             "Not predefined class resolved name, nor follows class resolver definition syntax, nor "
                             + "looks like class name");
                 }
-            } else if (LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE.equals(name) || LAZY_AUTO_IMPORTS_KEY_CAMEL_CASE.equals(name)) {
+            } else if (LAZY_AUTO_IMPORTS_KEY.equals(name)) {
                 setLazyAutoImports(value.equals(NULL_VALUE) ? null : Boolean.valueOf(_StringUtil.getYesNo(value)));
-            } else if (LAZY_IMPORTS_KEY_SNAKE_CASE.equals(name) || LAZY_IMPORTS_KEY_CAMEL_CASE.equals(name)) {
+            } else if (LAZY_IMPORTS_KEY.equals(name)) {
                 setLazyImports(_StringUtil.getYesNo(value));
-            } else if (AUTO_INCLUDE_KEY_SNAKE_CASE.equals(name)
-                    || AUTO_INCLUDE_KEY_CAMEL_CASE.equals(name)) {
+            } else if (AUTO_INCLUDES_KEY.equals(name)) {
                 setAutoIncludes(parseAsList(value));
-            } else if (AUTO_IMPORT_KEY_SNAKE_CASE.equals(name) || AUTO_IMPORT_KEY_CAMEL_CASE.equals(name)) {
+            } else if (AUTO_IMPORTS_KEY.equals(name)) {
                 setAutoImports(parseAsImportList(value));
             } else {
                 unknown = true;
@@ -2017,16 +1841,12 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
     }
 
     /**
-     * Returns the valid setting names that aren't {@link Configuration}-only.
+     * Returns the valid setting names for a {@link ProcessingConfiguration}.
      *
-     * @param camelCase
-     *            If we want the setting names with camel case naming convention, or with snake case (legacy) naming
-     *            convention.
-     * 
-     * @see Configuration.ExtendableBuilder#getSettingNames(boolean)
+     * @see Configuration.ExtendableBuilder#getSettingNames()
      */
-    public static Set<String> getSettingNames(boolean camelCase) {
-        return new _SortedArraySet<>(camelCase ? SETTING_NAMES_CAMEL_CASE : SETTING_NAMES_SNAKE_CASE);
+    public static Set<String> getSettingNames() {
+        return SETTING_NAMES;
     }
 
     private TimeZone parseTimeZoneSettingValue(String value) {
@@ -2043,7 +1863,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * Creates the exception that should be thrown when a setting name isn't recognized.
      */
     protected final InvalidSettingNameException unknownSettingException(String name) {
-        Version removalVersion = getRemovalVersionForUnknownSetting(name);
+         Version removalVersion = getRemovalVersionForUnknownSetting(name);
          return removalVersion != null
                 ? new InvalidSettingNameException(name, removalVersion)
                 : new InvalidSettingNameException(name, getCorrectedNameForUnknownSetting(name));
@@ -2065,7 +1885,22 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * @return The corrected name, or {@code null} if there's no known correction
      */
     protected String getCorrectedNameForUnknownSetting(String name) {
-        return null;
+        switch(name.toLowerCase()) {
+            case "autoinclude":
+            case "auto_include":
+            case "auto_includes":
+                return AUTO_INCLUDES_KEY;
+            case "autoimport":
+            case "auto_import":
+            case "auto_imports":
+                return AUTO_IMPORTS_KEY;
+            case "datetimeformat":
+            case "datetime_format":
+            case "date_time_format":
+                return DATE_TIME_FORMAT_KEY;
+            default:
+                return null;
+        }
     }
     
     /**

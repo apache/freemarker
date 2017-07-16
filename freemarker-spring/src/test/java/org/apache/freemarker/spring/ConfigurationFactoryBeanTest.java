@@ -18,9 +18,7 @@
  */
 package org.apache.freemarker.spring;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -31,7 +29,6 @@ import org.apache.freemarker.core.AutoEscapingPolicy;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Configuration.ExtendableBuilder;
 import org.apache.freemarker.core.MutableParsingAndProcessingConfiguration;
-import org.apache.freemarker.core.NamingConvention;
 import org.apache.freemarker.core.TagSyntax;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateLanguage;
@@ -77,7 +74,6 @@ public class ConfigurationFactoryBeanTest {
         settings.setProperty(MutableParsingAndProcessingConfiguration.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY, "true");
         settings.setProperty(MutableParsingAndProcessingConfiguration.TEMPLATE_LANGUAGE_KEY, "FTL");
         settings.setProperty(MutableParsingAndProcessingConfiguration.TAG_SYNTAX_KEY, "squareBracket");
-        settings.setProperty(MutableParsingAndProcessingConfiguration.NAMING_CONVENTION_KEY, "camelCase");
         settings.setProperty(MutableParsingAndProcessingConfiguration.TAB_SIZE_KEY, "4");
 
         settings.setProperty(ExtendableBuilder.OBJECT_WRAPPER_KEY, "restricted");
@@ -100,10 +96,10 @@ public class ConfigurationFactoryBeanTest {
         //   <property name="incompatibleImprovements" value="3.0.0" />
         //   <property name="settings">
         //     <props>
-        //       <prop key="source_encoding">UTF-8</prop>
-        //       <prop key="whitespace_stripping">true</prop>
+        //       <prop key="sourceEncoding">UTF-8</prop>
+        //       <prop key="whitespaceStripping">true</prop>
         //       <!-- SNIP -->
-        //       <prop key="template_cache_storage">strong:20, soft:250</prop>
+        //       <prop key="templateCacheStorage">strong:20, soft:250</prop>
         //     </props>
         //   </property>
         //   <property name="sharedVariables">
@@ -154,7 +150,6 @@ public class ConfigurationFactoryBeanTest {
         assertTrue(config.isRecognizeStandardFileExtensionsSet());
         assertEquals(TemplateLanguage.FTL, config.getTemplateLanguage());
         assertEquals(TagSyntax.SQUARE_BRACKET, config.getTagSyntax());
-        assertEquals(NamingConvention.CAMEL_CASE, config.getNamingConvention());
         assertEquals(4, config.getTabSize());
 
         assertTrue(config.getObjectWrapper() instanceof RestrictedObjectWrapper);

@@ -28,7 +28,7 @@ public class _SortedArraySet<E> extends _UnmodifiableSet<E> {
 
     private final E[] array;
 
-    public _SortedArraySet(E[] array) {
+    public _SortedArraySet(E... array) {
         this.array = array;
     }
 

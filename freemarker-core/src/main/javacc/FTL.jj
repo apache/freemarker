@@ -155,9 +155,6 @@ public class FMParser {
             throw new BugException("Unsupported tagSyntax: " + tagSyntax);
         }
 
-        token_source.initialNamingConvention = pCfg.getNamingConvention();
-        token_source.namingConvention = token_source.initialNamingConvention;
-
         this.stripWhitespace = pCfg.getWhitespaceStripping();
 
         // If this is a Template under construction, we do the below.
@@ -169,9 +166,6 @@ public class FMParser {
     }
     
     void setupStringLiteralMode(FMParserTokenManager parentTokenSource, OutputFormat outputFormat) {
-        token_source.initialNamingConvention = parentTokenSource.initialNamingConvention;
-        token_source.namingConvention = parentTokenSource.namingConvention;
-        token_source.namingConventionEstabilisher = parentTokenSource.namingConventionEstabilisher;
         token_source.SwitchTo(NODIRECTIVE);
         
         this.outputFormat = outputFormat;
@@ -179,8 +173,7 @@ public class FMParser {
     }
 
     void tearDownStringLiteralMode(FMParserTokenManager parentTokenSource) {
-        parentTokenSource.namingConvention = token_source.namingConvention;
-        parentTokenSource.namingConventionEstabilisher = token_source.namingConventionEstabilisher;
+        // Nothing to do ATM
     }
 
     private OutputFormat getFormatFromStdFileExt() {
@@ -247,15 +240,6 @@ public class FMParser {
      */
     public TagSyntax _getLastTagSyntax() {
         return token_source.squBracTagSyntax ? TagSyntax.SQUARE_BRACKET : TagSyntax.ANGLE_BRACKET;
-    }
-    
-    /**
-     * Don't use it, unless you are developing FreeMarker itself.
-     * The naming convention used by this template; if it couldn't be detected so far, it will be the most probable one.
-     * This could be used for formatting error messages, but not for anything serious.
-     */
-    public NamingConvention _getLastNamingConvention() {
-        return token_source.namingConvention;
     }
 
     /**
@@ -470,11 +454,12 @@ TOKEN_MGR_DECLS:
                 + "so maybe you need to upgrade FreeMarker.)";
 
     /**
-     * The noparseTag is set when we enter a block of text that the parser more or less ignores. These are <noparse> and
+     * The noParseTag is set when we enter a block of text that the parser more or less ignores. These are <#noParse>
+      a    nd
      * <#-- ... --->. This variable tells us what the closing tag should be, and when we hit that, we resume parsing.
-     * Note that with this scheme, <noparse> tags and comments cannot nest recursively.
+     * Note that with this scheme, <#noParse> tags and comments cannot nest recursively.
      */
-    String noparseTag;
+    String noParseTag;
 
     /**
      * Keeps track of how deeply nested we have the hash literals. This is necessary since we need to be able to
@@ -490,9 +475,6 @@ TOKEN_MGR_DECLS:
             autodetectTagSyntax,
             directiveSyntaxEstablished,
             inInvocation;
-    NamingConvention initialNamingConvention;
-    NamingConvention namingConvention;
-    Token namingConventionEstabilisher;
     int incompatibleImprovements;
 
     void setParser(FMParser parser) {
@@ -503,7 +485,7 @@ TOKEN_MGR_DECLS:
      * This method handles tag syntax ('<' VS '['), and also participates in naming convention detection.
      * If you update this logic, take a look at the UNKNOWN_DIRECTIVE token too. 
      */
-    private void handleTagSyntaxAndSwitch(Token tok, NamingConvention tokenNamingConvention, int newLexState) {
+    private void handleTagSyntaxAndSwitch(Token tok, int newLexState) {
         final String image = tok.image;
         
         char firstChar = image.charAt(0);
@@ -517,68 +499,7 @@ TOKEN_MGR_DECLS:
         
         directiveSyntaxEstablished = true;
         
-        checkNamingConvention(tok, tokenNamingConvention);
-        
         SwitchTo(newLexState);
-    }
-
-    /**
-     * Used for tags whose name isn't affected by naming convention.
-     */
-    private void handleTagSyntaxAndSwitch(Token tok, int newLexState) {
-        handleTagSyntaxAndSwitch(tok, NamingConvention.AUTO_DETECT, newLexState);
-    }
-
-    void checkNamingConvention(Token tok) {
-        checkNamingConvention(tok, _StringUtil.getIdentifierNamingConvention(tok.image)); 
-    }
-    
-    void checkNamingConvention(Token tok, NamingConvention tokenNamingConvention) {
-        if (tokenNamingConvention != NamingConvention.AUTO_DETECT) {
-	        if (namingConvention == NamingConvention.AUTO_DETECT) {
-	            namingConvention = tokenNamingConvention;
-	            namingConventionEstabilisher = tok;
-	        } else if (namingConvention != tokenNamingConvention) {
-                throw newNameConventionMismatchException(tok);
-	        }
-        }
-    }
-    
-    private TokenMgrError newNameConventionMismatchException(Token tok) {
-        return new TokenMgrError(
-                "Naming convention mismatch. "
-                + "Identifiers that are part of the template language (not the user specified ones) "
-                + (initialNamingConvention == NamingConvention.AUTO_DETECT
-                    ? "must consistently use the same naming convention within the same template. This template uses "
-                    : "must use the configured naming convention, which is the ")
-                + (namingConvention == NamingConvention.CAMEL_CASE
-                            ? "camel case naming convention (like: exampleName) "
-                            : (namingConvention == NamingConvention.LEGACY
-                                    ? "legacy naming convention (directive (tag) names are like examplename, " 
-                                      + "everything else is like example_name) "
-                                    : "??? (internal error)"
-                                    ))
-                + (namingConventionEstabilisher != null
-                        ? "estabilished by auto-detection at "
-                            + MessageUtil.formatPosition(
-                                    namingConventionEstabilisher.beginLine, namingConventionEstabilisher.beginColumn)
-                            + " by token " + _StringUtil.jQuote(namingConventionEstabilisher.image.trim())
-                        : "")
-                + ", but the problematic token, " + _StringUtil.jQuote(tok.image.trim())
-                + ", uses a different convention.",
-                TokenMgrError.LEXICAL_ERROR,
-                tok.beginLine, tok.beginColumn, tok.endLine, tok.endColumn);
-    }
-
-    /**
-     * Detects the naming convention used, both in start- and end-tag tokens.
-     *
-     * @param charIdxInName
-     *         The index of the deciding character relatively to the first letter of the name.
-     */
-    private static NamingConvention getTagNamingConvention(Token tok, int charIdxInName) {
-        return _StringUtil.isUpperUSASCII(getTagNameCharAt(tok, charIdxInName))
-                ? NamingConvention.CAMEL_CASE : NamingConvention.LEGACY;
     }
 
     static char getTagNameCharAt(Token tok, int charIdxInName) {
@@ -739,8 +660,8 @@ TOKEN:
     |
     <IF : <START_TAG> "if" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <ELSE_IF : <START_TAG> "else" ("i" | "I") "f" <BLANK>> {
-        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 4), FM_EXPRESSION);
+    <ELSE_IF : <START_TAG> "elseIf" <BLANK>> {
+        handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION);
     }
     |
     <LIST : <START_TAG> "list" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
@@ -775,26 +696,25 @@ TOKEN:
     |
     <SETTING : <START_TAG> "setting" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <OUTPUTFORMAT : <START_TAG> "output" ("f"|"F") "ormat" <BLANK>> {
-        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 6), FM_EXPRESSION);
+    <OUTPUTFORMAT : <START_TAG> "outputFormat" <BLANK>> {
+        handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION);
     }
     |
-    <AUTOESC : <START_TAG> "auto" ("e"|"E") "sc" <CLOSE_TAG1>> {
-        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 4), DEFAULT);
+    <AUTOESC : <START_TAG> "autoEsc" <CLOSE_TAG1>> {
+        handleTagSyntaxAndSwitch(matchedToken, DEFAULT);
     }
     |
-    <NOAUTOESC : <START_TAG> "no" ("autoe"|"AutoE") "sc" <CLOSE_TAG1>> {
-        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 2), DEFAULT);
+    <NOAUTOESC : <START_TAG> "noAutoEsc" <CLOSE_TAG1>> {
+        handleTagSyntaxAndSwitch(matchedToken, DEFAULT);
     }
     |
     <COMPRESS : <START_TAG> "compress" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <TERSE_COMMENT : ("<" | "[") "#--" > { noparseTag = "-->"; handleTagSyntaxAndSwitch(matchedToken, NO_PARSE); }
+    <TERSE_COMMENT : ("<" | "[") "#--" > { noParseTag = "-->"; handleTagSyntaxAndSwitch(matchedToken, NO_PARSE); }
     |
-    <NOPARSE: <START_TAG> "no" ("p" | "P") "arse" <CLOSE_TAG1>> {
-        NamingConvention tagNamingConvention = getTagNamingConvention(matchedToken, 2);
-        handleTagSyntaxAndSwitch(matchedToken, tagNamingConvention, NO_PARSE);
-        noparseTag = tagNamingConvention == NamingConvention.CAMEL_CASE ? "noParse" : "noparse";
+    <NOPARSE: <START_TAG> "noParse" <CLOSE_TAG1>> {
+        handleTagSyntaxAndSwitch(matchedToken, NO_PARSE);
+        noParseTag = "noParse";
     }
     |
     <END_IF : <END_TAG> "if" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
@@ -817,16 +737,16 @@ TOKEN:
     |
     <END_MACRO : <END_TAG> "macro" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <END_OUTPUTFORMAT : <END_TAG> "output" ("f" | "F") "ormat" <CLOSE_TAG1>> {
-        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 6), DEFAULT);
+    <END_OUTPUTFORMAT : <END_TAG> "outputFormat" <CLOSE_TAG1>> {
+        handleTagSyntaxAndSwitch(matchedToken, DEFAULT);
     }
     |
-    <END_AUTOESC : <END_TAG> "auto" ("e" | "E") "sc" <CLOSE_TAG1>> {
-        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 4), DEFAULT);
+    <END_AUTOESC : <END_TAG> "autoEsc" <CLOSE_TAG1>> {
+        handleTagSyntaxAndSwitch(matchedToken, DEFAULT);
     }
     |
     <END_NOAUTOESC : <END_TAG> "no" ("autoe"|"AutoE") "sc" <CLOSE_TAG1>> {
-        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 2), DEFAULT);
+        handleTagSyntaxAndSwitch(matchedToken, DEFAULT);
     }
     |
     <END_COMPRESS : <END_TAG> "compress" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
@@ -867,12 +787,12 @@ TOKEN:
     |
     <END_ESCAPE : <END_TAG> "escape" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <NOESCAPE : <START_TAG> "no" ("e" | "E") "scape" <CLOSE_TAG1>> {
-        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 2), DEFAULT);
+    <NOESCAPE : <START_TAG> "noEscape" <CLOSE_TAG1>> {
+        handleTagSyntaxAndSwitch(matchedToken, DEFAULT);
     }
     |
-    <END_NOESCAPE : <END_TAG> "no" ("e" | "E") "scape" <CLOSE_TAG1>> {
-        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 2), DEFAULT);
+    <END_NOESCAPE : <END_TAG> "noEscape" <CLOSE_TAG1>> {
+        handleTagSyntaxAndSwitch(matchedToken, DEFAULT);
     }
     |
     <UNIFIED_CALL : "<@" | "[@" > { unifiedCall(matchedToken); }
@@ -908,7 +828,7 @@ TOKEN:
             // doesn't match any directive starter tokens, because that token requires whitespace after the
             // name as it should be followed by parameters. For now we work this around so we don't report
             // unknown directive:
-            if (ASTDirective.ALL_BUILT_IN_DIRECTIVE_NAMES.contains(dn)) {
+            if (ASTDirective.BUILT_IN_DIRECTIVE_NAMES.contains(dn)) {
                 throw new TokenMgrError(
                         "#" + dn + " is an existing directive, but the tag is malformed. " 
                         + " (See FreeMarker Manual / Directive Reference.)",
@@ -922,9 +842,9 @@ TOKEN:
                 tip = "Use #assign or #local or #global, depending on the intented scope "
                       + "(#assign is template-scope). " + PLANNED_DIRECTIVE_HINT;
             } else if (dn.equals("else_if") || dn.equals("elif")) {
-            	tip = "Use #elseif.";
+            	tip = "Use #elseIf.";
             } else if (dn.equals("no_escape")) {
-            	tip = "Use #noescape instead.";
+            	tip = "Use #noEscape instead.";
             } else if (dn.equals("method")) {
             	tip = "Use #function instead.";
             } else if (dn.equals("head") || dn.equals("template") || dn.equals("fm")) {
@@ -1351,7 +1271,7 @@ TOKEN:
 {
     <TERSE_COMMENT_END : "-->" | "--]">
     {
-        if (noparseTag.equals("-->")) {
+        if (noParseTag.equals("-->")) {
             boolean squareBracket = matchedToken.image.endsWith("]");
             if ((squBracTagSyntax && squareBracket) || (!squBracTagSyntax && !squareBracket)) {
                 matchedToken.image = matchedToken.image + ";"; 
@@ -1369,7 +1289,7 @@ TOKEN:
     >
     {
         StringTokenizer st = new StringTokenizer(image.toString(), " \t\n\r<>[]/#", false);
-        if (st.nextToken().equals(noparseTag)) {
+        if (st.nextToken().equals(noParseTag)) {
             matchedToken.image = matchedToken.image + ";"; 
             SwitchTo(DEFAULT);
         }
@@ -1833,13 +1753,12 @@ ASTExpBuiltInVariable ASTExpBuiltInVariable() :
     name = <ID>
     {
         ASTExpBuiltInVariable result = null;
-        token_source.checkNamingConvention(name);
 
         TemplateModel parseTimeValue;
         String nameStr = name.image;
-        if (nameStr.equals(ASTExpBuiltInVariable.OUTPUT_FORMAT) || nameStr.equals(ASTExpBuiltInVariable.OUTPUT_FORMAT_CC)) {
+        if (nameStr.equals(ASTExpBuiltInVariable.OUTPUT_FORMAT)) {
             parseTimeValue = new SimpleScalar(outputFormat.getName());
-        } else if (nameStr.equals(ASTExpBuiltInVariable.AUTO_ESC) || nameStr.equals(ASTExpBuiltInVariable.AUTO_ESC_CC)) {
+        } else if (nameStr.equals(ASTExpBuiltInVariable.AUTO_ESC)) {
             parseTimeValue = autoEscaping ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         } else {
             parseTimeValue = null;
@@ -1933,7 +1852,6 @@ ASTExpression ASTExpBuiltIn(ASTExpression lhoExp) :
     <BUILT_IN>
     t = <ID>
     {
-        token_source.checkNamingConvention(t);
         result = ASTExpBuiltIn.newBuiltIn(incompatibleImprovements, lhoExp, t, token_source);
         result.setLocation(template, lhoExp, t);
         
@@ -2856,7 +2774,6 @@ ASTDirInclude Include() :
         {
             String attString = att.image;
             if (attString.equalsIgnoreCase("ignore_missing") || attString.equals("ignoreMissing")) {
-                token_source.checkNamingConvention(att);
             	ignoreMissingExp = exp;
             } else {
                 String correctedName = attString.equals("ignoreMissing") ? "ignore_missing" : null;
@@ -3306,7 +3223,7 @@ ASTDirNoEscape NoEscape() :
     start = <NOESCAPE>
     {
         if (escapes.isEmpty()) {
-            throw new ParseException("#noescape with no matching #escape encountered.", template, start);
+            throw new ParseException("#noEscape with no matching #escape encountered.", template, start);
         }
         Object escape = escapes.removeFirst();
     }
@@ -3490,7 +3407,6 @@ ASTDirSetting Setting() :
     value = ASTExpression()
     end = LooseDirectiveEnd()
     {
-        token_source.checkNamingConvention(key);
         ASTDirSetting result = new ASTDirSetting(key, token_source, value, template.getConfiguration());
         result.setLocation(template, start, end);
         return result;
@@ -3623,7 +3539,7 @@ ASTStaticText WhitespaceText() :
 
 /**
  * Production for dealing with unparsed content,
- * i.e. what is inside a comment or noparse tag.
+ * i.e. what is inside a comment or noParse tag.
  * It returns the ending token. The content
  * of the tag is put in buf.
  */
@@ -3829,8 +3745,6 @@ void HeaderElement() :
                 <EQUALS>
                 exp = ASTExpression()
                 {
-                    token_source.checkNamingConvention(key);
-                
                     String ks = key.image;
                     TemplateModel value = null;
                     try {
@@ -3872,11 +3786,11 @@ void HeaderElement() :
                                 streamToUnmarkWhenEncEstabd.mark(0);
                                 streamToUnmarkWhenEncEstabd = null;
                             }
-                        } else if (ks.equalsIgnoreCase("STRIP_WHITESPACE") || ks.equals("stripWhitespace")) {
+                        } else if (ks.equals("stripWhitespace")) {
                             this.stripWhitespace = getBoolean(exp, true);
-                        } else if (ks.equalsIgnoreCase("STRIP_TEXT") || ks.equals("stripText")) {
+                        } else if (ks.equals("stripText")) {
                             this.stripText = getBoolean(exp, true);
-                        } else if (ks.equalsIgnoreCase("auto_esc") || ks.equals("autoEsc")) {
+                        } else if (ks.equals("autoEsc")) {
                             if (getBoolean(exp, false)) {
                                 autoEscRequester = key;
                                 autoEscapingPolicy = AutoEscapingPolicy.ENABLE_IF_SUPPORTED;
@@ -3886,7 +3800,7 @@ void HeaderElement() :
                             recalculateAutoEscapingField();
 
                             template.setAutoEscapingPolicy(autoEscapingPolicy);
-                        } else if (ks.equalsIgnoreCase("output_format") || ks.equals("outputFormat")) {
+                        } else if (ks.equals("outputFormat")) {
                             if (vs == null) {
                                 throw new ParseException("Expected a string constant for \"" + ks + "\".", exp);
                             }
@@ -3900,7 +3814,7 @@ void HeaderElement() :
                             recalculateAutoEscapingField();
 
                             template.setOutputFormat(outputFormat);
-                        } else if (ks.equalsIgnoreCase("ns_prefixes") || ks.equals("nsPrefixes")) {
+                        } else if (ks.equals("nsPrefixes")) {
                             if (!(value instanceof TemplateHashModelEx)) {
                                 throw new ParseException("Expecting a hash of prefixes to namespace URI's.", exp);
                             }
@@ -3922,7 +3836,7 @@ void HeaderElement() :
                                 }
                             } catch (TemplateModelException tme) {
                             }
-                        } else if (ks.equalsIgnoreCase("custom_settings") || ks.equals("customSettings")) {
+                        } else if (ks.equals("customSettings")) {
                             if (!(value instanceof TemplateHashModelEx)) {
                                 throw new ParseException("Expecting a hash value for custom settings.", exp);
                             }
@@ -3944,19 +3858,31 @@ void HeaderElement() :
                             }
                         } else {
                             String correctName;
-	                        if (ks.equals("charset") || ks.equals("source_encoding") || ks.equals("sourceEncoding")) {
+                            String ksLC = ks.toLowerCase();
+	                        if (ksLC.equals("charset") || ksLC.equals("source_encoding")
+	                                || ksLC.equals("sourcerncoding")) {
 	                            correctName = "encoding";
-	                        } else if (ks.equals("attributes")) {
-	                            correctName = token_source.namingConvention == NamingConvention.CAMEL_CASE
-	                                    ? "customSettings" : "custom_settings";
-	                        } else if (ks.equals("xmlns")) {
-	                            // [2.4] If camel case will be the default, update this
-                                correctName
-                                        = token_source.namingConvention == NamingConvention.CAMEL_CASE
-                                                ? "nsPrefixes" : "ns_prefixes";
-                            } else if (ks.equals("auto_escape") || ks.equals("auto_escaping") || ks.equals("autoesc")) {
-                                correctName = "auto_esc";
-                            } else if (ks.equals("autoEscape") || ks.equals("autoEscaping")) {
+	                        } else if (ksLC.equals("attributes") || ksLC.equals("customsettings")
+	                                || ksLC.equals("custom_settings") || ksLC.equals("settings")) {
+	                            correctName = "customSettings";
+	                        } else if (ksLC.equalsIgnoreCase("strip_whitespace")
+	                                || ksLC.equalsIgnoreCase("stripwhitespace")
+	                                || ksLC.equalsIgnoreCase("remove_whitespace")
+	                                || ksLC.equalsIgnoreCase("removewhitespace")) {
+	                            correctName = "stripWhitespace";
+	                        } else if (ksLC.equalsIgnoreCase("strip_text") || ksLC.equalsIgnoreCase("striptext")
+	                                || ksLC.equalsIgnoreCase("remove_text") || ksLC.equalsIgnoreCase("removetext")) {
+	                            correctName = "stripText";
+	                        } else if (ksLC.equals("xmlns") || ksLC.equalsIgnoreCase("ns_prefixes")
+	                                || ksLC.equalsIgnoreCase("nsprefixes")) {
+                                correctName = "nsPrefixes";
+	                        } else if (ksLC.equalsIgnoreCase("output_format")
+	                                || ksLC.equalsIgnoreCase("outputformat")) {
+                                correctName = "outputFormat";
+                            } else if (ksLC.equals("autoEscape") || ksLC.equals("autoEscaping")
+                                    || ksLC.equals("autoesc")
+                                    || ksLC.equals("auto_escape") || ksLC.equals("auto_escaping")
+                                    || ksLC.equalsIgnoreCase("auto_esc")) {
                                 correctName = "autoEsc";
 	                        } else {
                                 correctName = null;

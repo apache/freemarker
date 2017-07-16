@@ -36,99 +36,33 @@ public abstract class MutableParsingAndProcessingConfiguration<
         extends MutableProcessingConfiguration<SelfT>
         implements ParsingAndProcessingConfiguration {
 
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String OUTPUT_FORMAT_KEY_SNAKE_CASE = "output_format";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String OUTPUT_FORMAT_KEY = OUTPUT_FORMAT_KEY_SNAKE_CASE;
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String OUTPUT_FORMAT_KEY_CAMEL_CASE = "outputFormat";
+    public static final String OUTPUT_FORMAT_KEY = "outputFormat";
+    public static final String SOURCE_ENCODING_KEY = "sourceEncoding";
+    public static final String WHITESPACE_STRIPPING_KEY = "whitespaceStripping";
+    public static final String AUTO_ESCAPING_POLICY_KEY = "autoEscapingPolicy";
+    public static final String RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY = "recognizeStandardFileExtensions";
+    public static final String TEMPLATE_LANGUAGE_KEY = "templateLanguage";
+    public static final String TAG_SYNTAX_KEY = "tagSyntax";
+    public static final String TAB_SIZE_KEY = "tabSize";
+    public static final String INCOMPATIBLE_IMPROVEMENTS_KEY = "incompatibleImprovements";
 
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String SOURCE_ENCODING_KEY_SNAKE_CASE = "source_encoding";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String SOURCE_ENCODING_KEY = SOURCE_ENCODING_KEY_SNAKE_CASE;
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String SOURCE_ENCODING_KEY_CAMEL_CASE = "sourceEncoding";
-
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String WHITESPACE_STRIPPING_KEY_SNAKE_CASE = "whitespace_stripping";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String WHITESPACE_STRIPPING_KEY = WHITESPACE_STRIPPING_KEY_SNAKE_CASE;
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String WHITESPACE_STRIPPING_KEY_CAMEL_CASE = "whitespaceStripping";
-
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String AUTO_ESCAPING_POLICY_KEY_SNAKE_CASE = "auto_escaping_policy";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String AUTO_ESCAPING_POLICY_KEY = AUTO_ESCAPING_POLICY_KEY_SNAKE_CASE;
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE = "autoEscapingPolicy";
-
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE = "recognize_standard_file_extensions";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY
-            = RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE;
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE = "recognizeStandardFileExtensions";
-
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String TEMPLATE_LANGUAGE_KEY_SNAKE_CASE = "template_language";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String TEMPLATE_LANGUAGE_KEY = TEMPLATE_LANGUAGE_KEY_SNAKE_CASE;
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String TEMPLATE_LANGUAGE_KEY_CAMEL_CASE = "templateLanguage";
-
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String TAG_SYNTAX_KEY_SNAKE_CASE = "tag_syntax";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String TAG_SYNTAX_KEY = TAG_SYNTAX_KEY_SNAKE_CASE;
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String TAG_SYNTAX_KEY_CAMEL_CASE = "tagSyntax";
-
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String NAMING_CONVENTION_KEY_SNAKE_CASE = "naming_convention";
-    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-    public static final String NAMING_CONVENTION_KEY = NAMING_CONVENTION_KEY_SNAKE_CASE;
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String NAMING_CONVENTION_KEY_CAMEL_CASE = "namingConvention";
-
-    /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-    public static final String TAB_SIZE_KEY_SNAKE_CASE = "tab_size";
-    /** Alias to the {@code ..._SNAKE_CASE} variation. */
-    public static final String TAB_SIZE_KEY = TAB_SIZE_KEY_SNAKE_CASE;
-    /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-    public static final String TAB_SIZE_KEY_CAMEL_CASE = "tabSize";
-
-    private static final String[] SETTING_NAMES_SNAKE_CASE = new String[] {
-            // Must be sorted alphabetically!
-            AUTO_ESCAPING_POLICY_KEY_SNAKE_CASE,
-            NAMING_CONVENTION_KEY_SNAKE_CASE,
-            OUTPUT_FORMAT_KEY_SNAKE_CASE,
-            RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE,
-            SOURCE_ENCODING_KEY_SNAKE_CASE,
-            TAB_SIZE_KEY_SNAKE_CASE,
-            TAG_SYNTAX_KEY_SNAKE_CASE,
-            TEMPLATE_LANGUAGE_KEY_SNAKE_CASE,
-            WHITESPACE_STRIPPING_KEY_SNAKE_CASE
-    };
-
-    private static final String[] SETTING_NAMES_CAMEL_CASE = new String[] {
-            // Must be sorted alphabetically!
-            AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE,
-            NAMING_CONVENTION_KEY_CAMEL_CASE,
-            OUTPUT_FORMAT_KEY_CAMEL_CASE,
-            RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE,
-            SOURCE_ENCODING_KEY_CAMEL_CASE,
-            TAB_SIZE_KEY_CAMEL_CASE,
-            TAG_SYNTAX_KEY_CAMEL_CASE,
-            TEMPLATE_LANGUAGE_KEY_CAMEL_CASE,
-            WHITESPACE_STRIPPING_KEY_CAMEL_CASE
-    };
+    private static final _UnmodifiableCompositeSet<String> SETTING_NAMES = new _UnmodifiableCompositeSet<>(
+            MutableProcessingConfiguration.getSettingNames(),
+            new _SortedArraySet<>(
+                // Must be sorted alphabetically!
+                AUTO_ESCAPING_POLICY_KEY,
+                INCOMPATIBLE_IMPROVEMENTS_KEY,
+                OUTPUT_FORMAT_KEY,
+                RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY,
+                SOURCE_ENCODING_KEY,
+                TAB_SIZE_KEY,
+                TAG_SYNTAX_KEY,
+                TEMPLATE_LANGUAGE_KEY,
+                WHITESPACE_STRIPPING_KEY
+            ));
 
     private TemplateLanguage templateLanguage;
     private TagSyntax tagSyntax;
-    private NamingConvention namingConvention;
     private Boolean whitespaceStripping;
     private AutoEscapingPolicy autoEscapingPolicy;
     private Boolean recognizeStandardFileExtensions;
@@ -144,70 +78,63 @@ public abstract class MutableParsingAndProcessingConfiguration<
     public void setSetting(String name, String value) throws ConfigurationException {
         boolean nameUnhandled = false;
         try {
-            if (SOURCE_ENCODING_KEY_SNAKE_CASE.equals(name) || SOURCE_ENCODING_KEY_CAMEL_CASE.equals(name)) {
+            if (SOURCE_ENCODING_KEY.equals(name)) {
                 if (JVM_DEFAULT_VALUE.equalsIgnoreCase(value)) {
                     setSourceEncoding(Charset.defaultCharset());
                 } else {
                     setSourceEncoding(Charset.forName(value));
                 }
-            } else if (OUTPUT_FORMAT_KEY_SNAKE_CASE.equals(name) || OUTPUT_FORMAT_KEY_CAMEL_CASE.equals(name)) {
+            } else if (OUTPUT_FORMAT_KEY.equals(name)) {
                 if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
                     unsetOutputFormat();
                 } else {
                     setOutputFormat((OutputFormat) _ObjectBuilderSettingEvaluator.eval(
                             value, OutputFormat.class, true, _SettingEvaluationEnvironment.getCurrent()));
                 }
-            } else if (WHITESPACE_STRIPPING_KEY_SNAKE_CASE.equals(name)
-                    || WHITESPACE_STRIPPING_KEY_CAMEL_CASE.equals(name)) {
+            } else if (WHITESPACE_STRIPPING_KEY.equals(name)) {
                 setWhitespaceStripping(_StringUtil.getYesNo(value));
-            } else if (AUTO_ESCAPING_POLICY_KEY_SNAKE_CASE.equals(name) || AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE.equals(name)) {
-                if ("enable_if_default".equals(value) || "enableIfDefault".equals(value)) {
+            } else if (AUTO_ESCAPING_POLICY_KEY.equals(name)) {
+                if ("enableIfDefault".equals(value)) {
                     setAutoEscapingPolicy(AutoEscapingPolicy.ENABLE_IF_DEFAULT);
-                } else if ("enable_if_supported".equals(value) || "enableIfSupported".equals(value)) {
+                } else if ("enableIfSupported".equals(value)) {
                     setAutoEscapingPolicy(AutoEscapingPolicy.ENABLE_IF_SUPPORTED);
                 } else if ("disable".equals(value)) {
                     setAutoEscapingPolicy(AutoEscapingPolicy.DISABLE);
                 } else {
                     throw new InvalidSettingValueException( name, value,
+                            "enable_if_default".equals(value) ? "The correct value is: enableIfDefault" :
+                            "enable_if_supported".equals(value) ? "The correct value is: enableIfSupported" :
                             "No such predefined auto escaping policy name");
                 }
-            } else if (RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_SNAKE_CASE.equals(name)
-                    || RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE.equals(name)) {
+            } else if (RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY.equals(name)) {
                 if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
                     unsetRecognizeStandardFileExtensions();
                 } else {
                     setRecognizeStandardFileExtensions(_StringUtil.getYesNo(value));
                 }
-            } else if (TEMPLATE_LANGUAGE_KEY_SNAKE_CASE.equals(name) || TEMPLATE_LANGUAGE_KEY_CAMEL_CASE.equals(name)) {
+            } else if (TEMPLATE_LANGUAGE_KEY.equals(name)) {
                 if ("FTL".equals(value)) {
                     setTemplateLanguage(TemplateLanguage.FTL);
-                } else if ("static_text".equals(value) || "staticText".equals(value)) {
+                } else if ("staticText".equals(value)) {
                     setTemplateLanguage(TemplateLanguage.STATIC_TEXT);
                 } else {
                     throw new InvalidSettingValueException(name, value, "Unsupported template language name");
                 }
-            } else if (TAG_SYNTAX_KEY_SNAKE_CASE.equals(name) || TAG_SYNTAX_KEY_CAMEL_CASE.equals(name)) {
-                if ("auto_detect".equals(value) || "autoDetect".equals(value)) {
+            } else if (TAG_SYNTAX_KEY.equals(name)) {
+                if ("autoDetect".equals(value)) {
                     setTagSyntax(TagSyntax.AUTO_DETECT);
-                } else if ("angle_bracket".equals(value) || "angleBracket".equals(value)) {
+                } else if ("angleBracket".equals(value)) {
                     setTagSyntax(TagSyntax.ANGLE_BRACKET);
-                } else if ("square_bracket".equals(value) || "squareBracket".equals(value)) {
+                } else if ("squareBracket".equals(value)) {
                     setTagSyntax(TagSyntax.SQUARE_BRACKET);
                 } else {
-                    throw new InvalidSettingValueException(name, value, "No such predefined tag syntax name");
-                }
-            } else if (NAMING_CONVENTION_KEY_SNAKE_CASE.equals(name) || NAMING_CONVENTION_KEY_CAMEL_CASE.equals(name)) {
-                if ("auto_detect".equals(value) || "autoDetect".equals(value)) {
-                    setNamingConvention(NamingConvention.AUTO_DETECT);
-                } else if ("legacy".equals(value)) {
-                    setNamingConvention(NamingConvention.LEGACY);
-                } else if ("camel_case".equals(value) || "camelCase".equals(value)) {
-                    setNamingConvention(NamingConvention.CAMEL_CASE);
-                } else {
                     throw new InvalidSettingValueException(name, value,
-                            "No such predefined naming convention name.");
+                            "auto_detect".equals(value) ? "The correct value is: autoDetect" :
+                            "angle_bracket".equals(value) ? "The correct value is: angleBracket" :
+                            "square_bracket".equals(value) ? "The correct value is: squareBracket" :
+                            "No such predefined tag syntax name");
                 }
-            } else if (TAB_SIZE_KEY_SNAKE_CASE.equals(name) || TAB_SIZE_KEY_CAMEL_CASE.equals(name)) {
+            } else if (TAB_SIZE_KEY.equals(name)) {
                 setTabSize(Integer.parseInt(value));
             } else {
                 nameUnhandled = true;
@@ -222,10 +149,16 @@ public abstract class MutableParsingAndProcessingConfiguration<
         }
     }
 
-    public static Set<String> getSettingNames(boolean camelCase) {
-        return new _UnmodifiableCompositeSet<>(
-                MutableProcessingConfiguration.getSettingNames(camelCase),
-                new _SortedArraySet<>(camelCase ? SETTING_NAMES_CAMEL_CASE : SETTING_NAMES_SNAKE_CASE));
+    @Override
+    protected Version getRemovalVersionForUnknownSetting(String name) {
+        if (name.equals("namingConvention") || name.equalsIgnoreCase("naming_convention")) {
+            return Configuration.VERSION_3_0_0;
+        }
+        return super.getRemovalVersionForUnknownSetting(name);
+    }
+
+    public static Set<String> getSettingNames() {
+        return SETTING_NAMES;
     }
 
     /**
@@ -309,56 +242,6 @@ public abstract class MutableParsingAndProcessingConfiguration<
     @Override
     public boolean isTemplateLanguageSet() {
         return templateLanguage != null;
-    }
-
-    /**
-     * Setter pair of {@link #getNamingConvention()}.
-     *
-     * @param namingConvention
-     *         Can't be {@code null}
-     */
-    public void setNamingConvention(NamingConvention namingConvention) {
-        _NullArgumentException.check("namingConvention", namingConvention);
-        this.namingConvention = namingConvention;
-    }
-
-    /**
-     * Fluent API equivalent of {@link #setNamingConvention(NamingConvention)}
-     */
-    public SelfT namingConvention(NamingConvention namingConvention) {
-        setNamingConvention(namingConvention);
-        return self();
-    }
-
-    /**
-     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
-     * {@link ParsingConfiguration}).
-     */
-    public void unsetNamingConvention() {
-        this.namingConvention = null;
-    }
-
-    /**
-     * The getter pair of {@link #setNamingConvention(NamingConvention)}.
-     */
-    @Override
-    public NamingConvention getNamingConvention() {
-         return isNamingConventionSet() ? namingConvention
-                : getDefaultNamingConvention();
-    }
-
-    /**
-     * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
-     * from another {@link ParsingConfiguration}, or throws {@link CoreSettingValueNotSetException}.
-     */
-    protected abstract NamingConvention getDefaultNamingConvention();
-
-    /**
-     * Tells if this setting is set directly in this object or its value is inherited from the parent parsing configuration..
-     */
-    @Override
-    public boolean isNamingConventionSet() {
-        return namingConvention != null;
     }
 
     /**

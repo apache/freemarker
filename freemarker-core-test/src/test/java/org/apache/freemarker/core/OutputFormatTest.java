@@ -439,7 +439,7 @@ public class OutputFormatTest extends TemplateTest {
     
     @Test
     public void testStringBIsFail() {
-        assertErrorContains("<#ftl outputFormat='HTML'>${'<b>foo</b>'?esc?upperCase}", "string", "markup_output");
+        assertErrorContains("<#ftl outputFormat='HTML'>${'<b>foo</b>'?esc?upperCase}", "string", "markupOutput");
     }
 
     @Test
@@ -544,7 +544,7 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("tN.ftl", "<#ftl outputFormat='RTF' autoEsc=false>" + commonFTL);
         assertOutputForNamed("tN.ftl", "RTF false");
         
-        assertOutput("${.output_format} ${.auto_esc?c}", "undefined false");
+        assertOutput("${.outputFormat} ${.autoEsc?c}", "undefined false");
     }
     
     @Test
@@ -613,10 +613,10 @@ public class OutputFormatTest extends TemplateTest {
                 + "${.outputFormat}${'\\''}",
                 "undefined' HTML&#39; XML&apos; HTML&#39; undefined'");
         assertOutput(
-                "<#ftl output_format='XML'>"
-                + "${.output_format}${'\\''} "
-                + "<#outputformat 'HTML'>${.output_format}${'\\''}</#outputformat> "
-                + "${.output_format}${'\\''}",
+                "<#ftl outputFormat='XML'>"
+                + "${.outputFormat}${'\\''} "
+                + "<#outputFormat 'HTML'>${.outputFormat}${'\\''}</#outputFormat> "
+                + "${.outputFormat}${'\\''}",
                 "XML&apos; HTML&#39; XML&apos;");
         
         // Custom format:
@@ -644,28 +644,20 @@ public class OutputFormatTest extends TemplateTest {
                 "<#outputFormat true></#outputFormat>",
                 "string", "boolean");
         
-        // Naming convention:
-        assertErrorContains(
-                "<#outputFormat 'HTML'></#outputformat>",
-                "convention", "#outputFormat", "#outputformat");
-        assertErrorContains(
-                "<#outputformat 'HTML'></#outputFormat>",
-                "convention", "#outputFormat", "#outputformat");
-        
         // Empty block:
         assertOutput(
-                "${.output_format} "
-                + "<#outputformat 'HTML'></#outputformat>"
-                + "${.output_format}",
+                "${.outputFormat} "
+                + "<#outputFormat 'HTML'></#outputFormat>"
+                + "${.outputFormat}",
                 "undefined undefined");
         
         // WS stripping:
         assertOutput(
-                "${.output_format}\n"
-                + "<#outputformat 'HTML'>\n"
+                "${.outputFormat}\n"
+                + "<#outputFormat 'HTML'>\n"
                 + "  x\n"
-                + "</#outputformat>\n"
-                + "${.output_format}",
+                + "</#outputFormat>\n"
+                + "${.outputFormat}",
                 "undefined\n  x\nundefined");
     }
 
@@ -682,13 +674,13 @@ public class OutputFormatTest extends TemplateTest {
                 + "${.autoEsc?c}${'&'}",
                 "true&amp; false& true&amp; false& true&amp;");
         assertOutput(
-                "<#ftl auto_esc=false output_format='XML'>"
-                + "${.auto_esc?c}${'&'} "
-                + "<#autoesc>${.auto_esc?c}${'&'}</#autoesc> "
-                + "${.auto_esc?c}${'&'}",
+                "<#ftl autoEsc=false outputFormat='XML'>"
+                + "${.autoEsc?c}${'&'} "
+                + "<#autoEsc>${.autoEsc?c}${'&'}</#autoEsc> "
+                + "${.autoEsc?c}${'&'}",
                 "false& true&amp; false&");
         
-        // Bad came case:
+        // Bad camel case:
         assertErrorContains(
                 "<#noAutoesc></#noAutoesc>",
                 "Unknown directive");
@@ -702,34 +694,19 @@ public class OutputFormatTest extends TemplateTest {
         
         // Empty block:
         assertOutput(
-                "${.auto_esc?c} "
-                + "<#noautoesc></#noautoesc>"
-                + "${.auto_esc?c}",
+                "${.autoEsc?c} "
+                + "<#noAutoEsc></#noAutoEsc>"
+                + "${.autoEsc?c}",
                 "true true");
         
         // WS stripping:
         assertOutput(
-                "${.auto_esc?c}\n"
-                + "<#noautoesc>\n"
+                "${.autoEsc?c}\n"
+                + "<#noAutoEsc>\n"
                 + "  x\n"
-                + "</#noautoesc>\n"
-                + "${.auto_esc?c}",
+                + "</#noAutoEsc>\n"
+                + "${.autoEsc?c}",
                 "true\n  x\ntrue");
-        
-        
-        // Naming convention:
-        assertErrorContains(
-                "<#autoEsc></#autoesc>",
-                "convention", "#autoEsc", "#autoesc");
-        assertErrorContains(
-                "<#autoesc></#autoEsc>",
-                "convention", "#autoEsc", "#autoesc");
-        assertErrorContains(
-                "<#noAutoEsc></#noautoesc>",
-                "convention", "#noAutoEsc", "#noautoesc");
-        assertErrorContains(
-                "<#noautoesc></#noAutoEsc>",
-                "convention", "#noAutoEsc", "#noautoesc");
     }
     
     @Test
@@ -910,27 +887,27 @@ public class OutputFormatTest extends TemplateTest {
     @Test
     public void testLegacyEscaperBIsBypassMOs() throws Exception {
         assertOutput("${htmlPlain?html} ${htmlMarkup?html}", "a &lt; {h&#39;} <p>c");
-        assertErrorContains("${xmlPlain?html}", "?html", "string", "markup_output", "XML");
-        assertErrorContains("${xmlMarkup?html}", "?html", "string", "markup_output", "XML");
-        assertErrorContains("${rtfPlain?html}", "?html", "string", "markup_output", "RTF");
-        assertErrorContains("${rtfMarkup?html}", "?html", "string", "markup_output", "RTF");
+        assertErrorContains("${xmlPlain?html}", "?html", "string", "markupOutput", "XML");
+        assertErrorContains("${xmlMarkup?html}", "?html", "string", "markupOutput", "XML");
+        assertErrorContains("${rtfPlain?html}", "?html", "string", "markupOutput", "RTF");
+        assertErrorContains("${rtfMarkup?html}", "?html", "string", "markupOutput", "RTF");
 
         assertOutput("${htmlPlain?xhtml} ${htmlMarkup?xhtml}", "a &lt; {h&#39;} <p>c");
-        assertErrorContains("${xmlPlain?xhtml}", "?xhtml", "string", "markup_output", "XML");
-        assertErrorContains("${xmlMarkup?xhtml}", "?xhtml", "string", "markup_output", "XML");
-        assertErrorContains("${rtfPlain?xhtml}", "?xhtml", "string", "markup_output", "RTF");
-        assertErrorContains("${rtfMarkup?xhtml}", "?xhtml", "string", "markup_output", "RTF");
+        assertErrorContains("${xmlPlain?xhtml}", "?xhtml", "string", "markupOutput", "XML");
+        assertErrorContains("${xmlMarkup?xhtml}", "?xhtml", "string", "markupOutput", "XML");
+        assertErrorContains("${rtfPlain?xhtml}", "?xhtml", "string", "markupOutput", "RTF");
+        assertErrorContains("${rtfMarkup?xhtml}", "?xhtml", "string", "markupOutput", "RTF");
         
         assertOutput("${xmlPlain?xml} ${xmlMarkup?xml}", "a &lt; {x&apos;} <p>c</p>");
         assertOutput("${htmlPlain?xml} ${htmlMarkup?xml}", "a &lt; {h&#39;} <p>c");
-        assertErrorContains("${rtfPlain?xml}", "?xml", "string", "markup_output", "RTF");
-        assertErrorContains("${rtfMarkup?xml}", "?xml", "string", "markup_output", "RTF");
+        assertErrorContains("${rtfPlain?xml}", "?xml", "string", "markupOutput", "RTF");
+        assertErrorContains("${rtfMarkup?xml}", "?xml", "string", "markupOutput", "RTF");
         
         assertOutput("${rtfPlain?rtf} ${rtfMarkup?rtf}", "\\\\par a & b \\par c");
-        assertErrorContains("${xmlPlain?rtf}", "?rtf", "string", "markup_output", "XML");
-        assertErrorContains("${xmlMarkup?rtf}", "?rtf", "string", "markup_output", "XML");
-        assertErrorContains("${htmlPlain?rtf}", "?rtf", "string", "markup_output", "HTML");
-        assertErrorContains("${htmlMarkup?rtf}", "?rtf", "string", "markup_output", "HTML");
+        assertErrorContains("${xmlPlain?rtf}", "?rtf", "string", "markupOutput", "XML");
+        assertErrorContains("${xmlMarkup?rtf}", "?rtf", "string", "markupOutput", "XML");
+        assertErrorContains("${htmlPlain?rtf}", "?rtf", "string", "markupOutput", "HTML");
+        assertErrorContains("${htmlMarkup?rtf}", "?rtf", "string", "markupOutput", "HTML");
     }
     
     @Test
@@ -1010,7 +987,6 @@ public class OutputFormatTest extends TemplateTest {
         addToDataModel("m2", HTMLOutputFormat.INSTANCE.fromMarkup("x"));
         addToDataModel("s", "x");
         assertOutput("${m1?isMarkupOutput?c} ${m2?isMarkupOutput?c} ${s?isMarkupOutput?c}", "true true false");
-        assertOutput("${m1?is_markup_output?c}", "true");
     }
 
     private TestConfigurationBuilder createDefaultConfigurationBuilder() throws TemplateModelException {

@@ -18,22 +18,22 @@
 -->
 FreeMarker: Encoding string built-in tests
 
-<#assign x = r'  dieBugsDie! * vazzZE 123456 --cdc-- --<<--@ x ${"kigyo"?upper_case}  '>
+<#assign x = r'  dieBugsDie! * vazzZE 123456 --cdc-- --<<--@ x ${"kigyo"?upperCase}  '>
   
-cap_first:  ${x?capFirst}
-uncap_first:${x?uncapFirst}
-uncap_first:${"Blah"?uncapFirst}
-capitalize: ${x?capitalize}
-html:       ${x?html}
-length:     ${x?length}
-lower_case: ${x?lowerCase}
-rtf:        ${x?rtf}
-trim:       ${x?trim}
+capFirst:   ${x?capFirst};
+uncapFirst: ${x?uncapFirst};
+uncapFirst: ${"Blah"?uncapFirst}
+capitalize: ${x?capitalize};
+html:       ${x?html};
+length:     ${x?length};
+lowerCase:  ${x?lowerCase};
+rtf:        ${x?rtf};
+trim:       ${x?trim};
 trim2:      ${"foo bar"?trim}
 trim3:      ${" foo bar"?trim}
 trim4:      ${"foo bar "?trim}
-upper_case: ${x?upperCase}
-xml:        ${x?xml}
+upperCase:  ${x?upperCase};
+xml:        ${x?xml};
 xhtml:      ${"\"Blah's is > 1 & < 2\""?xhtml}
 <@assertEquals actual="'"?html expected="&#39;" />
 <@assertEquals actual="'"?xhtml expected="&#39;" />
@@ -105,7 +105,7 @@ ${matches?groups[2]}
 </#list>
 
 
-<#assign a = "foo", b="bar", c="(a+b)?upper_case">
+<#assign a = "foo", b="bar", c="(a+b)?upperCase">
 ${c?eval}
 
 [${"a"?jString}] = [a]

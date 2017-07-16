@@ -80,7 +80,6 @@ import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameForma
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.MruCacheStorage;
 import org.apache.freemarker.core.templateresolver.impl.SoftCacheStorage;
-import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.CaptureOutput;
 import org.apache.freemarker.core.util.HtmlEscape;
 import org.apache.freemarker.core.util.NormalizeNewlines;
@@ -139,36 +138,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     
     private static final String VERSION_PROPERTIES_PATH = "org/apache/freemarker/core/version.properties";
 
-    private static final String[] SETTING_NAMES_SNAKE_CASE = new String[] {
-            // Must be sorted alphabetically!
-            ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE,
-            ExtendableBuilder.LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE,
-            ExtendableBuilder.OBJECT_WRAPPER_KEY_SNAKE_CASE,
-            ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE,
-            ExtendableBuilder.SHARED_VARIABLES_KEY_SNAKE_CASE,
-            ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY_SNAKE_CASE,
-            ExtendableBuilder.TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE,
-            ExtendableBuilder.TEMPLATE_LOADER_KEY_SNAKE_CASE,
-            ExtendableBuilder.TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE,
-            ExtendableBuilder.TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE,
-            ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY_SNAKE_CASE
-    };
-
-    private static final String[] SETTING_NAMES_CAMEL_CASE = new String[] {
-            // Must be sorted alphabetically!
-            ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE,
-            ExtendableBuilder.LOCALIZED_TEMPLATE_LOOKUP_KEY_CAMEL_CASE,
-            ExtendableBuilder.OBJECT_WRAPPER_KEY_CAMEL_CASE,
-            ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE,
-            ExtendableBuilder.SHARED_VARIABLES_KEY_CAMEL_CASE,
-            ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY_CAMEL_CASE,
-            ExtendableBuilder.TEMPLATE_CONFIGURATIONS_KEY_CAMEL_CASE,
-            ExtendableBuilder.TEMPLATE_LOADER_KEY_CAMEL_CASE,
-            ExtendableBuilder.TEMPLATE_LOOKUP_STRATEGY_KEY_CAMEL_CASE,
-            ExtendableBuilder.TEMPLATE_NAME_FORMAT_KEY_CAMEL_CASE,
-            ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY_CAMEL_CASE
-    };
-    
     private static final Map<String, OutputFormat> STANDARD_OUTPUT_FORMATS;
     static {
         STANDARD_OUTPUT_FORMATS = new HashMap<>();
@@ -235,7 +204,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
     private final TemplateLanguage templateLanguage;
     private final TagSyntax tagSyntax;
-    private final NamingConvention namingConvention;
     private final boolean whitespaceStripping;
     private final AutoEscapingPolicy autoEscapingPolicy;
     private final OutputFormat outputFormat;
@@ -401,7 +369,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
         templateLanguage = builder.getTemplateLanguage();
         tagSyntax = builder.getTagSyntax();
-        namingConvention = builder.getNamingConvention();
         whitespaceStripping = builder.getWhitespaceStripping();
         autoEscapingPolicy = builder.getAutoEscapingPolicy();
         outputFormat = builder.getOutputFormat();
@@ -650,6 +617,11 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     }
 
     @Override
+    public boolean isIncompatibleImprovementsSet() {
+        return true;
+    }
+
+    @Override
     public boolean getWhitespaceStripping() {
         return whitespaceStripping;
     }
@@ -869,20 +841,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
      */
     @Override
     public boolean isTagSyntaxSet() {
-        return true;
-    }
-
-    @Override
-    public NamingConvention getNamingConvention() {
-        return namingConvention;
-    }
-
-    /**
-     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
-     * value in the {@link Configuration}.
-     */
-    @Override
-    public boolean isNamingConventionSet() {
         return true;
     }
 
@@ -1354,7 +1312,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
      *            not {@code null}). This parameter also drives localized template lookup. Assuming that you have
      *            specified {@code en_US} as the locale and {@code myTemplate.ftl} as the name of the template, and the
      *            default {@link TemplateLookupStrategy} is used and
-     *            {@code #setLocalizedTemplateLookup(boolean) localized_template_lookup} is {@code true}, FreeMarker will first try to
+     *            {@code #setLocalizedTemplateLookup(boolean) localizedTemplateLookup} is {@code true}, FreeMarker will first try to
      *            retrieve {@code myTemplate_en_US.html}, then {@code myTemplate.en.ftl}, and finally
      *            {@code myTemplate.ftl}. Note that that the template's locale will be {@code en_US} even if it only
      *            finds {@code myTemplate.ftl}. Note that when the {@code locale} setting is overridden with a
@@ -1406,7 +1364,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             String msg; 
             if (tl == null) {
                 msg = "Don't know where to load template " + _StringUtil.jQuote(name)
-                      + " from because the \"template_loader\" FreeMarker "
+                      + " from because the \"templateLoader\" FreeMarker "
                       + "setting wasn't set (Configuration.setTemplateLoader), so it's null.";
             } else {
                 final String missingTempNormName = maybeTemp.getMissingTemplateNormalizedName();
@@ -1544,67 +1502,20 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     }
     
     /**
-     * Same as {@link #getSupportedBuiltInNames(NamingConvention)} with argument {@link #getNamingConvention()}.
-     */
-    public Set getSupportedBuiltInNames() {
-        return getSupportedBuiltInNames(getNamingConvention());
-    }
-
-    /**
      * Returns the names of the supported "built-ins". These are the ({@code expr?builtin_name}-like things). As of this
      * writing, this information doesn't depend on the configuration options, so it could be a static method, but
      * to be future-proof, it's an instance method. 
-     * 
-     * @param namingConvention
-     *            One of {@link NamingConvention#AUTO_DETECT},
-     *            {@link NamingConvention#LEGACY}, and
-     *            {@link NamingConvention#CAMEL_CASE}. If it's
-     *            {@link NamingConvention#AUTO_DETECT} then the union
-     *            of the names in all the naming conventions is returned.
      */
-    public Set<String> getSupportedBuiltInNames(NamingConvention namingConvention) {
-        Set<String> names;
-        if (namingConvention == NamingConvention.AUTO_DETECT) {
-            names = ASTExpBuiltIn.BUILT_INS_BY_NAME.keySet();
-        } else if (namingConvention == NamingConvention.LEGACY) {
-            names = ASTExpBuiltIn.SNAKE_CASE_NAMES;
-        } else if (namingConvention == NamingConvention.CAMEL_CASE) {
-            names = ASTExpBuiltIn.CAMEL_CASE_NAMES;
-        } else {
-            throw new BugException("Unsupported naming convention constant: " + namingConvention);
-        }
-        return Collections.unmodifiableSet(names);
+    public Set<String> getSupportedBuiltInNames() {
+        return Collections.unmodifiableSet(ASTExpBuiltIn.BUILT_INS_BY_NAME.keySet());
     }
     
     /**
-     * Same as {@link #getSupportedBuiltInDirectiveNames(NamingConvention)} with argument
-     * {@link #getNamingConvention()}.
-     */
-    public Set getSupportedBuiltInDirectiveNames() {
-        return getSupportedBuiltInDirectiveNames(getNamingConvention());
-    }
-
-    /**
      * Returns the names of the directives that are predefined by FreeMarker. These are the things that you call like
      * <tt>&lt;#directiveName ...&gt;</tt>.
-     * 
-     * @param namingConvention
-     *            One of {@link NamingConvention#AUTO_DETECT},
-     *            {@link NamingConvention#LEGACY}, and
-     *            {@link NamingConvention#CAMEL_CASE}. If it's
-     *            {@link NamingConvention#AUTO_DETECT} then the union
-     *            of the names in all the naming conventions is returned. 
      */
-    public Set<String> getSupportedBuiltInDirectiveNames(NamingConvention namingConvention) {
-        if (namingConvention == NamingConvention.AUTO_DETECT) {
-            return ASTDirective.ALL_BUILT_IN_DIRECTIVE_NAMES;
-        } else if (namingConvention == NamingConvention.LEGACY) {
-            return ASTDirective.LEGACY_BUILT_IN_DIRECTIVE_NAMES;
-        } else if (namingConvention == NamingConvention.CAMEL_CASE) {
-            return ASTDirective.CAMEL_CASE_BUILT_IN_DIRECTIVE_NAMES;
-        } else {
-            throw new BugException("Unsupported naming convention constant: " + namingConvention);
-        }
+    public Set<String> getSupportedBuiltInDirectiveNames() {
+        return ASTDirective.BUILT_IN_DIRECTIVE_NAMES;
     }
     
     private static String getRequiredVersionProperty(Properties vp, String properyName) {
@@ -1626,82 +1537,34 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             extends MutableParsingAndProcessingConfiguration<SelfT>
             implements TopLevelConfiguration, org.apache.freemarker.core.util.CommonBuilder<Configuration> {
 
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE = "localized_template_lookup";
-        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String LOCALIZED_TEMPLATE_LOOKUP_KEY = LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String LOCALIZED_TEMPLATE_LOOKUP_KEY_CAMEL_CASE = "localizedTemplateLookup";
+        public static final String LOCALIZED_TEMPLATE_LOOKUP_KEY = "localizedTemplateLookup";
+        public static final String REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY = "registeredCustomOutputFormats";
+        public static final String TEMPLATE_RESOLVER_KEY = "templateResolver";
+        public static final String TEMPLATE_CACHE_STORAGE_KEY = "templateCacheStorage";
+        public static final String TEMPLATE_UPDATE_DELAY_KEY = "templateUpdateDelay";
+        public static final String TEMPLATE_LOADER_KEY = "templateLoader";
+        public static final String TEMPLATE_LOOKUP_STRATEGY_KEY = "templateLookupStrategy";
+        public static final String TEMPLATE_NAME_FORMAT_KEY = "templateNameFormat";
+        public static final String SHARED_VARIABLES_KEY = "sharedVariables";
+        public static final String TEMPLATE_CONFIGURATIONS_KEY = "templateConfigurations";
+        public static final String OBJECT_WRAPPER_KEY = "objectWrapper";
 
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE = "registered_custom_output_formats";
-        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY = REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE = "registeredCustomOutputFormats";
-
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String TEMPLATE_CACHE_STORAGE_KEY_SNAKE_CASE = "template_cache_storage";
-        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String TEMPLATE_CACHE_STORAGE_KEY = TEMPLATE_CACHE_STORAGE_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String TEMPLATE_CACHE_STORAGE_KEY_CAMEL_CASE = "templateCacheStorage";
-
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String TEMPLATE_UPDATE_DELAY_KEY_SNAKE_CASE = "template_update_delay";
-        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String TEMPLATE_UPDATE_DELAY_KEY = TEMPLATE_UPDATE_DELAY_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String TEMPLATE_UPDATE_DELAY_KEY_CAMEL_CASE = "templateUpdateDelay";
-
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String TEMPLATE_LOADER_KEY_SNAKE_CASE = "template_loader";
-        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String TEMPLATE_LOADER_KEY = TEMPLATE_LOADER_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String TEMPLATE_LOADER_KEY_CAMEL_CASE = "templateLoader";
-
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE = "template_lookup_strategy";
-        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String TEMPLATE_LOOKUP_STRATEGY_KEY = TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String TEMPLATE_LOOKUP_STRATEGY_KEY_CAMEL_CASE = "templateLookupStrategy";
-
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE = "template_name_format";
-        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String TEMPLATE_NAME_FORMAT_KEY = TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String TEMPLATE_NAME_FORMAT_KEY_CAMEL_CASE = "templateNameFormat";
-
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String SHARED_VARIABLES_KEY_SNAKE_CASE = "shared_variables";
-        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String SHARED_VARIABLES_KEY = SHARED_VARIABLES_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String SHARED_VARIABLES_KEY_CAMEL_CASE = "sharedVariables";
-
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE = "template_configurations";
-        /** Alias to the {@code ..._SNAKE_CASE} variation. */
-        public static final String TEMPLATE_CONFIGURATIONS_KEY = TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String TEMPLATE_CONFIGURATIONS_KEY_CAMEL_CASE = "templateConfigurations";
-
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String OBJECT_WRAPPER_KEY_SNAKE_CASE = "object_wrapper";
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String OBJECT_WRAPPER_KEY_CAMEL_CASE = "objectWrapper";
-        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String OBJECT_WRAPPER_KEY = OBJECT_WRAPPER_KEY_SNAKE_CASE;
-
-        /** Legacy, snake case ({@code like_this}) variation of the setting name. */
-        public static final String INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE = "incompatible_improvements";
-        /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
-        public static final String INCOMPATIBLE_IMPROVEMENTS_KEY = INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE;
-        /** Modern, camel case ({@code likeThis}) variation of the setting name. */
-        public static final String INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE = "incompatibleImprovements";
+        private static final _UnmodifiableCompositeSet<String> SETTING_NAMES = new _UnmodifiableCompositeSet<>(
+                MutableParsingAndProcessingConfiguration.getSettingNames(),
+                new _SortedArraySet<>(
+                        // Must be sorted alphabetically!
+                        ExtendableBuilder.LOCALIZED_TEMPLATE_LOOKUP_KEY,
+                        ExtendableBuilder.OBJECT_WRAPPER_KEY,
+                        ExtendableBuilder.REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY,
+                        ExtendableBuilder.SHARED_VARIABLES_KEY,
+                        ExtendableBuilder.TEMPLATE_CACHE_STORAGE_KEY,
+                        ExtendableBuilder.TEMPLATE_CONFIGURATIONS_KEY,
+                        ExtendableBuilder.TEMPLATE_LOADER_KEY,
+                        ExtendableBuilder.TEMPLATE_LOOKUP_STRATEGY_KEY,
+                        ExtendableBuilder.TEMPLATE_NAME_FORMAT_KEY,
+                        ExtendableBuilder.TEMPLATE_RESOLVER_KEY,
+                        ExtendableBuilder.TEMPLATE_UPDATE_DELAY_KEY
+                ));
 
         private Version incompatibleImprovements = Configuration.VERSION_3_0_0;
 
@@ -1754,11 +1617,9 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         public void setSetting(String name, String value) throws ConfigurationException {
             boolean nameUnhandled = false;
             try {
-                if (LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE.equals(name)
-                        || LOCALIZED_TEMPLATE_LOOKUP_KEY_CAMEL_CASE.equals(name)) {
+                if (LOCALIZED_TEMPLATE_LOOKUP_KEY.equals(name)) {
                     setLocalizedTemplateLookup(_StringUtil.getYesNo(value));
-                } else if (REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE.equals(name)
-                        || REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE.equals(name)) {
+                } else if (REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY.equals(name)) {
                     List list = (List) _ObjectBuilderSettingEvaluator.eval(
                             value, List.class, true, _SettingEvaluationEnvironment.getCurrent());
                     for (Object item : list) {
@@ -1768,7 +1629,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                         }
                     }
                     setRegisteredCustomOutputFormats(list);
-                } else if (TEMPLATE_CACHE_STORAGE_KEY_SNAKE_CASE.equals(name) || TEMPLATE_CACHE_STORAGE_KEY_CAMEL_CASE.equals(name)) {
+                } else if (TEMPLATE_CACHE_STORAGE_KEY.equals(name)) {
                     if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
                         unsetTemplateCacheStorage();
                     } if (value.indexOf('.') == -1) {
@@ -1806,8 +1667,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                         setTemplateCacheStorage((CacheStorage) _ObjectBuilderSettingEvaluator.eval(
                                 value, CacheStorage.class, false, _SettingEvaluationEnvironment.getCurrent()));
                     }
-                } else if (TEMPLATE_UPDATE_DELAY_KEY_SNAKE_CASE.equals(name)
-                        || TEMPLATE_UPDATE_DELAY_KEY_CAMEL_CASE.equals(name)) {
+                } else if (TEMPLATE_UPDATE_DELAY_KEY.equals(name)) {
                     final String valueWithoutUnit;
                     final String unit;
                     int numberEnd = 0;
@@ -1840,8 +1700,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     }
 
                     setTemplateUpdateDelayMilliseconds(parsedValue * multipier);
-                } else if (SHARED_VARIABLES_KEY_SNAKE_CASE.equals(name)
-                        || SHARED_VARIABLES_KEY_CAMEL_CASE.equals(name)) {
+                } else if (SHARED_VARIABLES_KEY.equals(name)) {
                     Map<?, ?> sharedVariables = (Map<?, ?>) _ObjectBuilderSettingEvaluator.eval(
                             value, Map.class, false, _SettingEvaluationEnvironment.getCurrent());
                     for (Object key : sharedVariables.keySet()) {
@@ -1852,42 +1711,48 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                         }
                     }
                     setSharedVariables((Map) sharedVariables);
-                } else if (INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE.equals(name)
-                        || INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE.equals(name)) {
+                } else if (INCOMPATIBLE_IMPROVEMENTS_KEY.equals(name)) {
                     setIncompatibleImprovements(new Version(value));
-                } else if (TEMPLATE_LOADER_KEY_SNAKE_CASE.equals(name) || TEMPLATE_LOADER_KEY_CAMEL_CASE.equals(name)) {
+                } else if (TEMPLATE_RESOLVER_KEY.equals(name)) {
+                    if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
+                        unsetTemplateResolver();
+                    } else {
+                        setTemplateResolver((TemplateResolver) _ObjectBuilderSettingEvaluator.eval(
+                                value, TemplateResolver.class, false,
+                                _SettingEvaluationEnvironment.getCurrent()));
+                    }
+                } else if (TEMPLATE_LOADER_KEY.equals(name)) {
                     if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
                         unsetTemplateLoader();
                     } else {
                         setTemplateLoader((TemplateLoader) _ObjectBuilderSettingEvaluator.eval(
-                                value, TemplateLoader.class, true, _SettingEvaluationEnvironment.getCurrent()));
+                                value, TemplateLoader.class, true,
+                                _SettingEvaluationEnvironment.getCurrent()));
                     }
-                } else if (TEMPLATE_LOOKUP_STRATEGY_KEY_SNAKE_CASE.equals(name)
-                        || TEMPLATE_LOOKUP_STRATEGY_KEY_CAMEL_CASE.equals(name)) {
+                } else if (TEMPLATE_LOOKUP_STRATEGY_KEY.equals(name)) {
                     if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
                         unsetTemplateLookupStrategy();
                     } else {
                         setTemplateLookupStrategy((TemplateLookupStrategy) _ObjectBuilderSettingEvaluator.eval(
-                                value, TemplateLookupStrategy.class, false, _SettingEvaluationEnvironment.getCurrent()));
+                                value, TemplateLookupStrategy.class, false,
+                                _SettingEvaluationEnvironment.getCurrent()));
                     }
-                } else if (TEMPLATE_NAME_FORMAT_KEY_SNAKE_CASE.equals(name)
-                        || TEMPLATE_NAME_FORMAT_KEY_CAMEL_CASE.equals(name)) {
+                } else if (TEMPLATE_NAME_FORMAT_KEY.equals(name)) {
                     if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
                         unsetTemplateNameFormat();
                     } else {
                         throw new InvalidSettingValueException(name, value,
                                 "No such predefined template name format");
                     }
-                } else if (TEMPLATE_CONFIGURATIONS_KEY_SNAKE_CASE.equals(name)
-                        || TEMPLATE_CONFIGURATIONS_KEY_CAMEL_CASE.equals(name)) {
+                } else if (TEMPLATE_CONFIGURATIONS_KEY.equals(name)) {
                     if (value.equals(NULL_VALUE)) {
                         setTemplateConfigurations(null);
                     } else {
                         setTemplateConfigurations((TemplateConfigurationFactory) _ObjectBuilderSettingEvaluator.eval(
-                                value, TemplateConfigurationFactory.class, false, _SettingEvaluationEnvironment.getCurrent()));
+                                value, TemplateConfigurationFactory.class, false,
+                                _SettingEvaluationEnvironment.getCurrent()));
                     }
-                } else if (OBJECT_WRAPPER_KEY_SNAKE_CASE.equals(name)
-                        || OBJECT_WRAPPER_KEY_CAMEL_CASE.equals(name)) {
+                } else if (OBJECT_WRAPPER_KEY.equals(name)) {
                     if (DEFAULT_VALUE.equalsIgnoreCase(value)) {
                         this.unsetObjectWrapper();
                     } else if ("restricted".equalsIgnoreCase(value)) {
@@ -1911,24 +1776,18 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         }
 
         /**
-         * Returns the valid {@link Configuration} setting names. Naturally, this includes the {@link MutableProcessingConfiguration} setting
-         * names too.
+         * Returns the valid {@link Configuration} setting names. Naturally, this includes the
+         * {@link MutableProcessingConfiguration} setting names too.
          *
-         * @param camelCase
-         *            If we want the setting names with camel case naming convention, or with snake case (legacy) naming
-         *            convention.
-         *
-         * @see MutableProcessingConfiguration#getSettingNames(boolean)
+         * @see MutableProcessingConfiguration#getSettingNames()
          */
-        public static Set<String> getSettingNames(boolean camelCase) {
-            return new _UnmodifiableCompositeSet<>(
-                    MutableParsingAndProcessingConfiguration.getSettingNames(camelCase),
-                    new _SortedArraySet<>(camelCase ? SETTING_NAMES_CAMEL_CASE : SETTING_NAMES_SNAKE_CASE));
+        public static Set<String> getSettingNames() {
+            return SETTING_NAMES;
         }
 
         @Override
         protected Version getRemovalVersionForUnknownSetting(String name) {
-            if (name.equals("strictSyntax") || name.equals("strict_syntax")) {
+            if (name.equals("strictSyntax") || name.equalsIgnoreCase("strict_syntax")) {
                 return Configuration.VERSION_3_0_0;
             }
             return super.getRemovalVersionForUnknownSetting(name);
@@ -1936,37 +1795,39 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
         @Override
         protected String getCorrectedNameForUnknownSetting(String name) {
-            if ("encoding".equals(name) || "default_encoding".equals(name) || "charset".equals(name)
-                    || "default_charset".equals(name)) {
-                // [2.4] Default might changes to camel-case
-                return SOURCE_ENCODING_KEY;
-            }
-            if ("defaultEncoding".equalsIgnoreCase(name) || "defaultCharset".equals(name)) {
-                return SOURCE_ENCODING_KEY_CAMEL_CASE;
-            }
-            if (name.equals("incompatible_enhancements")) {
-                return INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE;
-            }
-            if (name.equals("incompatibleEnhancements")) {
-                return INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE;
-            }
-            if (name.equals("cacheStorage")) {
-                return TEMPLATE_CACHE_STORAGE_KEY_CAMEL_CASE;
-            }
-            if (name.equals("cache_storage")) {
-                return TEMPLATE_CACHE_STORAGE_KEY_SNAKE_CASE;
-            }
-            if (name.equals("localizedLookup")) {
-                return LOCALIZED_TEMPLATE_LOOKUP_KEY_CAMEL_CASE;
-            }
-            if (name.equals("localized_lookup")) {
-                return LOCALIZED_TEMPLATE_LOOKUP_KEY_SNAKE_CASE;
-            }
-            if ("TemplateUpdateInterval".equalsIgnoreCase(name)) {
-                return TEMPLATE_UPDATE_DELAY_KEY;
+            switch(name.toLowerCase()) {
+                case "encoding":
+                case "default_encoding":
+                case "charset":
+                case "default_charset":
+                case "defaultencoding":
+                case "defaultcharset":
+                case "sourceencoding":
+                case "source_encoding":
+                    return SOURCE_ENCODING_KEY;
+                case "incompatible_enhancements":
+                case "incompatibleenhancements":
+                case "incompatibleimprovements":
+                case "incompatibleImprovements":
+                    return INCOMPATIBLE_IMPROVEMENTS_KEY;
+                case "cachestorage":
+                case "cache_storage":
+                case "templatecachestorage":
+                case "template_cache_storage":
+                    return TEMPLATE_CACHE_STORAGE_KEY;
+                case "localizedlookup":
+                case "localized_lookup":
+                case "localizedtemplatelookup":
+                case "localized_template_lookup":
+                    return LOCALIZED_TEMPLATE_LOOKUP_KEY;
+                case "templateupdateinterval":
+                case "templateupdatedelay":
+                case "template_update_delay":
+                    return TEMPLATE_UPDATE_DELAY_KEY;
+                default:
+                    return super.getCorrectedNameForUnknownSetting(name);
             }
 
-            return super.getCorrectedNameForUnknownSetting(name);
         }
 
         @Override
@@ -2503,13 +2364,13 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         }
 
         @Override
-        protected NamingConvention getDefaultNamingConvention() {
-            return NamingConvention.AUTO_DETECT;
+        public Version getIncompatibleImprovements() {
+            return incompatibleImprovements;
         }
 
         @Override
-        public Version getIncompatibleImprovements() {
-            return incompatibleImprovements;
+        public boolean isIncompatibleImprovementsSet() {
+            return true;
         }
 
         /**

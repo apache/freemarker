@@ -179,7 +179,6 @@ public class TemplateConfigurationTest {
         // Parser-only settings:
         SETTING_ASSIGNMENTS.put("templateLanguage", TemplateLanguage.STATIC_TEXT);
         SETTING_ASSIGNMENTS.put("tagSyntax", TagSyntax.SQUARE_BRACKET);
-        SETTING_ASSIGNMENTS.put("namingConvention", NamingConvention.LEGACY);
         SETTING_ASSIGNMENTS.put("whitespaceStripping", false);
         SETTING_ASSIGNMENTS.put("strictSyntaxMode", false);
         SETTING_ASSIGNMENTS.put("autoEscapingPolicy", AutoEscapingPolicy.DISABLE);
@@ -535,15 +534,7 @@ public class TemplateConfigurationTest {
             tcb.setTagSyntax(TagSyntax.SQUARE_BRACKET);
             TemplateConfiguration tc = tcb.build();
             assertOutputWithoutAndWithTC(tc, "[#if true]y[/#if]", "[#if true]y[/#if]", "y");
-            testedProps.add(Configuration.ExtendableBuilder.TAG_SYNTAX_KEY_CAMEL_CASE);
-        }
-        
-        {
-            TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
-            tcb.setNamingConvention(NamingConvention.CAMEL_CASE);
-            TemplateConfiguration tc = tcb.build();
-            assertOutputWithoutAndWithTC(tc, "<#if true>y<#elseif false>n</#if>", "y", null);
-            testedProps.add(Configuration.ExtendableBuilder.NAMING_CONVENTION_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.TAG_SYNTAX_KEY);
         }
         
         {
@@ -551,7 +542,7 @@ public class TemplateConfigurationTest {
             tcb.setWhitespaceStripping(false);
             TemplateConfiguration tc = tcb.build();
             assertOutputWithoutAndWithTC(tc, "<#if true>\nx\n</#if>\n", "x\n", "\nx\n\n");
-            testedProps.add(Configuration.ExtendableBuilder.WHITESPACE_STRIPPING_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.WHITESPACE_STRIPPING_KEY);
         }
 
         {
@@ -559,7 +550,7 @@ public class TemplateConfigurationTest {
             tcb.setArithmeticEngine(new DummyArithmeticEngine());
             TemplateConfiguration tc = tcb.build();
             assertOutputWithoutAndWithTC(tc, "${1} ${1+1}", "1 2", "11 22");
-            testedProps.add(Configuration.ExtendableBuilder.ARITHMETIC_ENGINE_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.ARITHMETIC_ENGINE_KEY);
         }
 
         {
@@ -569,7 +560,7 @@ public class TemplateConfigurationTest {
             assertOutputWithoutAndWithTC(tc, "${.outputFormat} ${\"a'b\"}",
                     UndefinedOutputFormat.INSTANCE.getName() + " a'b",
                     XMLOutputFormat.INSTANCE.getName() + " a&apos;b");
-            testedProps.add(Configuration.ExtendableBuilder.OUTPUT_FORMAT_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.OUTPUT_FORMAT_KEY);
         }
 
         {
@@ -578,7 +569,7 @@ public class TemplateConfigurationTest {
             tcb.setAutoEscapingPolicy(AutoEscapingPolicy.DISABLE);
             TemplateConfiguration tc = tcb.build();
             assertOutputWithoutAndWithTC(tc, "${'a&b'}", "a&b", "a&b");
-            testedProps.add(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.AUTO_ESCAPING_POLICY_KEY);
         }
         
         {
@@ -588,7 +579,7 @@ public class TemplateConfigurationTest {
             tc.setParentConfiguration(new Configuration(new Version(2, 3, 0)));
             assertOutputWithoutAndWithTC(tc, "<#foo>", null, "<#foo>");
             */
-            testedProps.add(Configuration.ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY);
         }
 
         {
@@ -597,7 +588,7 @@ public class TemplateConfigurationTest {
             TemplateConfiguration tc = tcb.build();
             assertOutputWithoutAndWithTC(tc, "adhoc.ftlh", "${.outputFormat}",
                     HTMLOutputFormat.INSTANCE.getName(), UndefinedOutputFormat.INSTANCE.getName());
-            testedProps.add(Configuration.ExtendableBuilder.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY);
         }
 
         {
@@ -609,7 +600,7 @@ public class TemplateConfigurationTest {
                     + "${.error?replace('(?s).*?column ([0-9]+).*', '$1', 'r')}"
                     + "</#attempt>",
                     "13", "8");
-            testedProps.add(Configuration.ExtendableBuilder.TAB_SIZE_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.TAB_SIZE_KEY);
         }
 
         {
@@ -641,7 +632,7 @@ public class TemplateConfigurationTest {
                 assertEquals("${1+1}", out.toString());
             }
 
-            testedProps.add(Configuration.ExtendableBuilder.TEMPLATE_LANGUAGE_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.TEMPLATE_LANGUAGE_KEY);
         }
 
         {
@@ -674,7 +665,7 @@ public class TemplateConfigurationTest {
                 assertEquals("próba", out.toString());
             }
 
-            testedProps.add(Configuration.ExtendableBuilder.SOURCE_ENCODING_KEY_CAMEL_CASE);
+            testedProps.add(Configuration.ExtendableBuilder.SOURCE_ENCODING_KEY);
         }
 
         if (!PARSER_PROP_NAMES.equals(testedProps)) {
@@ -764,39 +755,13 @@ public class TemplateConfigurationTest {
         
         {
             Charset outputEncoding = ISO_8859_2;
+            TemplateConfiguration tc = new TemplateConfiguration.Builder()
+                    .outputEncoding(outputEncoding)
+                    .build();
 
-            String legacyNCFtl = "${r'.output_encoding!\"null\"'?eval}";
-            String camelCaseNCFtl = "${r'.outputEncoding!\"null\"'?eval}";
-
-            {
-                TemplateConfiguration tc = new TemplateConfiguration.Builder()
-                        .outputEncoding(outputEncoding)
-                        .build();
-
-                // Default is re-auto-detecting in ?eval:
-                assertOutputWithoutAndWithTC(tc, legacyNCFtl, "null", outputEncoding.name());
-                assertOutputWithoutAndWithTC(tc, camelCaseNCFtl, "null", outputEncoding.name());
-            }
-
-            {
-                TemplateConfiguration tc = new TemplateConfiguration.Builder()
-                        .outputEncoding(outputEncoding)
-                        .namingConvention(NamingConvention.CAMEL_CASE) // Force camelCase
-                        .build();
-
-                assertOutputWithoutAndWithTC(tc, legacyNCFtl, "null", null);
-                assertOutputWithoutAndWithTC(tc, camelCaseNCFtl, "null", outputEncoding.name());
-            }
-
-            {
-                TemplateConfiguration tc = new TemplateConfiguration.Builder()
-                        .outputEncoding(outputEncoding)
-                        .namingConvention(NamingConvention.LEGACY) // Force legacy
-                        .build();
-
-                assertOutputWithoutAndWithTC(tc, legacyNCFtl, "null", outputEncoding.name());
-                assertOutputWithoutAndWithTC(tc, camelCaseNCFtl, "null", null);
-            }
+            // Default is re-auto-detecting in ?eval:
+            assertOutputWithoutAndWithTC(tc, "${r'.outputEncoding!\"null\"'?eval}",
+                    "null", outputEncoding.name());
         }
     }
     

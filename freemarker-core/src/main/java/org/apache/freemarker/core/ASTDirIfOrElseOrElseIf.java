@@ -24,8 +24,8 @@ import java.io.IOException;
 import org.apache.freemarker.core.util.BugException;
 
 /**
- * AST directive node: An element that represents a conditionally executed block: {@code #if}, {@code #elseif} or
- * {@code #elseif}. Note that when an {@code #if} has related {@code #elseif}-s or {@code #else}, an
+ * AST directive node: An element that represents a conditionally executed block: {@code #if}, {@code #elseIf} or
+ * {@code #elseIf}. Note that when an {@code #if} has related {@code #elseIf}-s or {@code #else}, an
  * {@link ASTDirIfElseIfElseContainer} parent must be used. For a lonely {@code #if}, no such parent is needed. 
  */
 final class ASTDirIfOrElseOrElseIf extends ASTDirective {
@@ -77,7 +77,7 @@ final class ASTDirIfOrElseOrElseIf extends ASTDirective {
         } else if (type == TYPE_IF) {
             return "#if";
         } else if (type == TYPE_ELSE_IF) {
-            return "#elseif";
+            return "#elseIf";
         } else {
             throw new BugException("Unknown type");
         }

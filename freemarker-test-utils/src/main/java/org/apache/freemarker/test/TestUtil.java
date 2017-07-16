@@ -189,7 +189,7 @@ public final class TestUtil {
     }
 
     public static String removeFTLCopyrightComment(String ftl) {
-        if (ftl.contains("<#ftl ns_prefixes = {\"D\" : \"http://example.com/eBook\"}>")) {
+        if (ftl.contains("<#ftl nsPrefixes = {\"D\" : \"http://example.com/eBook\"}>")) {
             System.out.println();
         }
 

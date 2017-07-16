@@ -79,7 +79,6 @@ public class CustomTemplateResolverTest {
         assertNotNull(cfg.getLocalizedTemplateLookup());
         assertNotNull(cfg.getTemplateCacheStorage());
         assertNotNull(cfg.getTemplateUpdateDelayMilliseconds());
-        assertNotNull(cfg.getNamingConvention());
 
         assertNull(cfg.getTemplateLoader());
         assertNull(cfg.getTemplateConfigurations());
@@ -111,14 +110,13 @@ public class CustomTemplateResolverTest {
     @Test
     public void testConfigurationDefaultForCustomTemplateResolver2() {
         Configuration cfg = new Configuration.Builder(Configuration.VERSION_3_0_0)
-                .templateResolver(new CustomTemplateResolver(NAMING_CONVENTION_KEY))
+                .templateResolver(new CustomTemplateResolver(null))
                 .build();
 
         assertNull(cfg.getTemplateLookupStrategy());
         assertNull(cfg.getLocalizedTemplateLookup());
         assertNull(cfg.getTemplateCacheStorage());
         assertNull(cfg.getTemplateUpdateDelayMilliseconds());
-        assertNotNull(cfg.getNamingConvention()); //!
 
         assertNull(cfg.getTemplateLoader());
         assertNull(cfg.getTemplateConfigurations());

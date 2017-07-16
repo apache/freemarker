@@ -96,7 +96,7 @@ class TemplateTestCase extends FileTestCase {
     }
     
     void setSetting(String param, String value) throws IOException {
-        if ("auto_import".equals(param)) {
+        if ("autoImports".equals(param)) {
             StringTokenizer st = new StringTokenizer(value);
             if (!st.hasMoreTokens()) fail("Expecting libname");
             String libname = st.nextToken();
@@ -106,7 +106,7 @@ class TemplateTestCase extends FileTestCase {
             if (!st.hasMoreTokens()) fail("Expecting alias after 'as' in autoimport");
             String alias = st.nextToken();
             confB.setAutoImports(ImmutableMap.of(alias, libname));
-        } else if ("source_encoding".equals(param)) {
+        } else if ("sourceEncoding".equals(param)) {
             confB.setSourceEncoding(Charset.forName(value));
         // INCOMPATIBLE_IMPROVEMENTS is a list here, and was already set in the constructor.
         } else if (!Configuration.ExtendableBuilder.INCOMPATIBLE_IMPROVEMENTS_KEY.equals(param)) {

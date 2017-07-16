@@ -63,7 +63,7 @@ class ASTDebugBreak extends ASTElement {
     
     @Override
     String getASTNodeDescriptor() {
-        return "#debug_break";
+        return "#debugBreak";
     }
 
     @Override

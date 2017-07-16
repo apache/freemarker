@@ -31,7 +31,7 @@ import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.util._NullArgumentException;
 
 /**
- * This class allows user to fully implement the template lookup, loading and caching logic,
+ * This class allows users to fully implement the template lookup, loading and caching logic,
  * in case the standard mechanism (a {@link DefaultTemplateResolver} combined with all the {@link Configuration}
  * settings like {@link Configuration#getTemplateLoader() templateLoader},
  * {@link Configuration#getTemplateConfigurations() templateConfigurations}, etc.) is not flexible enough.
@@ -45,8 +45,9 @@ import org.apache.freemarker.core.util._NullArgumentException;
  * settings, which should be reflected by the return value of the {@code supportsXxxSetting} methods (like
  * {@link #supportsTemplateLoaderSetting()}). (Note that there's no {@code supportsXxxSetting} method for
  * {@link Configuration#getTemplateLanguage() templateLanguage} and {@link Configuration#getSourceEncoding()
- * sourceEncoding} and these settings are always exposed.) {@link TemplateResolverDependencies} will also expose the
- * {@link TemplateResolverDependencies#parse} method, which is used to create a {@link Template} from its source code.
+ * sourceEncoding}, as the must always be supported and are always exposed.) {@link TemplateResolverDependencies}
+ * will also expose the {@link TemplateResolverDependencies#parse} method, which is used to create a {@link Template}
+ * from its source code in the later {@link #getTemplate(String, Locale, Serializable)} calls.
  */
 public abstract class TemplateResolver {
 
@@ -213,7 +214,7 @@ public abstract class TemplateResolver {
      * {@link Configuration} constructor will throw an exception to tell the user that the {@code templateLoader}
      * setting is not supported by this {@link TemplateResolver} class. Some may feel tempted to return {@code true}
      * to avoid such error, but consider that as the user has explicitly set this setting, they certainly expect it
-     * have an effect, and will be frustrated when its ignored.
+     * have an effect, and will be frustrated when it doesn't have any.
      */
     public abstract boolean supportsTemplateLoaderSetting();
 

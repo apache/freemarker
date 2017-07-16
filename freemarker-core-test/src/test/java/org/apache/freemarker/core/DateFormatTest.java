@@ -162,9 +162,9 @@ public class DateFormatTest extends TemplateTest {
                 .dateTimeFormat("[wrong dt]")
                 .timeFormat("[wrong t]")
                 .build());
-        assertErrorContains("${.now?date}", "\"date_format\"", "[wrong d]");
-        assertErrorContains("${.now?datetime}", "\"datetime_format\"", "[wrong dt]");
-        assertErrorContains("${.now?time}", "\"time_format\"", "[wrong t]");
+        assertErrorContains("${.now?date}", "\"dateFormat\"", "[wrong d]");
+        assertErrorContains("${.now?datetime}", "\"dateTimeFormat\"", "[wrong dt]");
+        assertErrorContains("${.now?time}", "\"timeFormat\"", "[wrong t]");
     }
 
     @Test
@@ -178,7 +178,7 @@ public class DateFormatTest extends TemplateTest {
         
         assertErrorContains("${d?string.@div_xyz}", "\"@div_xyz\"", "\"xyz\"");
         setConfigurationWithDateTimeFormat("@div");
-        assertErrorContains("${d}", "\"datetime_format\"", "\"@div\"", "format parameter is required");
+        assertErrorContains("${d}", "\"dateTimeFormat\"", "\"@div\"", "format parameter is required");
     }
     
     @Test
@@ -187,7 +187,7 @@ public class DateFormatTest extends TemplateTest {
             setConfigurationWithDateTimeFormat("@noSuchFormat");
             Throwable exc = assertErrorContains(
                     "${.now}",
-                    "\"@noSuchFormat\"", "\"noSuchFormat\"", "\"datetime_format\"");
+                    "\"@noSuchFormat\"", "\"noSuchFormat\"", "\"dateTimeFormat\"");
             assertThat(exc.getCause(), instanceOf(UndefinedCustomFormatException.class));
             
         }
@@ -195,13 +195,13 @@ public class DateFormatTest extends TemplateTest {
             setConfiguration(createConfigurationBuilder().dateFormat("@noSuchFormatD").build());
             assertErrorContains(
                     "${.now?date}",
-                    "\"@noSuchFormatD\"", "\"noSuchFormatD\"", "\"date_format\"");
+                    "\"@noSuchFormatD\"", "\"noSuchFormatD\"", "\"dateFormat\"");
         }
         {
             setConfiguration(createConfigurationBuilder().timeFormat("@noSuchFormatT").build());
             assertErrorContains(
                     "${.now?time}",
-                    "\"@noSuchFormatT\"", "\"noSuchFormatT\"", "\"time_format\"");
+                    "\"@noSuchFormatT\"", "\"noSuchFormatT\"", "\"timeFormat\"");
         }
 
         {

@@ -19,20 +19,20 @@
 FreeMarker: Encoding string built-in tests
 
   
-cap_first:    DieBugsDie! * vazzZE 123456 --cdc-- --<<--@ x ${"kigyo"?upper_case}  
-uncap_first:  dieBugsDie! * vazzZE 123456 --cdc-- --<<--@ x ${"kigyo"?upper_case}  
-uncap_first:blah
-capitalize:   Diebugsdie! * Vazzze 123456 --cdc-- --<<--@ X ${"kigyo"?upper_case}  
-html:         dieBugsDie! * vazzZE 123456 --cdc-- --&lt;&lt;--@ x ${&quot;kigyo&quot;?upper_case}  
-length:     71
-lower_case:   diebugsdie! * vazzze 123456 --cdc-- --<<--@ x ${"kigyo"?upper_case}  
-rtf:          dieBugsDie! * vazzZE 123456 --cdc-- --<<--@ x $\{"kigyo"?upper_case\}  
-trim:       dieBugsDie! * vazzZE 123456 --cdc-- --<<--@ x ${"kigyo"?upper_case}
+capFirst:     DieBugsDie! * vazzZE 123456 --cdc-- --<<--@ x ${"kigyo"?upperCase}  ;
+uncapFirst:   dieBugsDie! * vazzZE 123456 --cdc-- --<<--@ x ${"kigyo"?upperCase}  ;
+uncapFirst: blah
+capitalize:   Diebugsdie! * Vazzze 123456 --cdc-- --<<--@ X ${"kigyo"?uppercase}  ;
+html:         dieBugsDie! * vazzZE 123456 --cdc-- --&lt;&lt;--@ x ${&quot;kigyo&quot;?upperCase}  ;
+length:     70;
+lowerCase:    diebugsdie! * vazzze 123456 --cdc-- --<<--@ x ${"kigyo"?uppercase}  ;
+rtf:          dieBugsDie! * vazzZE 123456 --cdc-- --<<--@ x $\{"kigyo"?upperCase\}  ;
+trim:       dieBugsDie! * vazzZE 123456 --cdc-- --<<--@ x ${"kigyo"?upperCase};
 trim2:      foo bar
 trim3:      foo bar
 trim4:      foo bar
-upper_case:   DIEBUGSDIE! * VAZZZE 123456 --CDC-- --<<--@ X ${"KIGYO"?UPPER_CASE}  
-xml:          dieBugsDie! * vazzZE 123456 --cdc-- --&lt;&lt;--@ x ${&quot;kigyo&quot;?upper_case}  
+upperCase:    DIEBUGSDIE! * VAZZZE 123456 --CDC-- --<<--@ X ${"KIGYO"?UPPERCASE}  ;
+xml:          dieBugsDie! * vazzZE 123456 --cdc-- --&lt;&lt;--@ x ${&quot;kigyo&quot;?upperCase}  ;
 xhtml:      &quot;Blah&#39;s is &gt; 1 &amp; &lt; 2&quot;
 
 word_list:
@@ -43,7 +43,7 @@ word_list:
 - --cdc--
 - --<<--@
 - x
-- ${"kigyo"?upper_case}
+- ${"kigyo"?upperCase}
 
 interpret:   dieBugsDie! * vazzZE 123456 --cdc-- --<<--@ x KIGYO  
 number: -122,35

@@ -116,8 +116,7 @@ public class ParsingErrorMessagesTest {
     @Test
     public void testUnknownHeaderParameter() {
         assertErrorContains("<#ftl foo=1>", "Unknown", "foo");
-        assertErrorContains("<#ftl attributes={}>", "Unknown", "attributes", "custom_settings");
-        assertErrorContains("<#ftl outputFormat='HTML' attributes={}>", "Unknown", "attributes", "customSettings");
+        assertErrorContains("<#ftl attributes={}>", "Unknown", "attributes", "customSettings");
     }
 
 }

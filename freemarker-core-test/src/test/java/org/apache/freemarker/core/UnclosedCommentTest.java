@@ -32,10 +32,10 @@ public class UnclosedCommentTest extends TemplateTest {
         assertErrorContains("foo<#-- ", "Unclosed", "<#--");
         assertErrorContains("foo<#--bar", "Unclosed", "<#--");
         assertErrorContains("foo\n<#--\n", "Unclosed", "<#--");
-        assertErrorContains("foo<#noparse>", "end of file");  // Not too good...
-        assertErrorContains("foo<#noparse> ", "Unclosed", "#noparse");
-        assertErrorContains("foo<#noparse>bar", "Unclosed", "#noparse");
-        assertErrorContains("foo\n<#noparse>\n", "Unclosed", "#noparse");
+        assertErrorContains("foo<#noParse>", "end of file");  // Not too good...
+        assertErrorContains("foo<#noParse> ", "Unclosed", "#noParse");
+        assertErrorContains("foo<#noParse>bar", "Unclosed", "#noParse");
+        assertErrorContains("foo\n<#noParse>\n", "Unclosed", "#noParse");
     }
     
 }

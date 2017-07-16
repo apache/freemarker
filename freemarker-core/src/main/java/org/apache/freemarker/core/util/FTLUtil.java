@@ -793,7 +793,7 @@ public final class FTLUtil {
         if (Environment.Namespace.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "namespace");
         } else if (TemplateHashModelEx.class.isAssignableFrom(cl)) {
-            appendTypeName(sb, typeNamesAppended, "extended_hash");
+            appendTypeName(sb, typeNamesAppended, "extendedHash");
         } else if (TemplateHashModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "hash");
         }
@@ -815,11 +815,11 @@ public final class FTLUtil {
         }
 
         if (TemplateMarkupOutputModel.class.isAssignableFrom(cl)) {
-            appendTypeName(sb, typeNamesAppended, "markup_output");
+            appendTypeName(sb, typeNamesAppended, "markupOutput");
         }
 
         if (sb.length() == initalLength) {
-            appendTypeName(sb, typeNamesAppended, "misc_template_model");
+            appendTypeName(sb, typeNamesAppended, "miscTemplateModel");
         }
     }
 

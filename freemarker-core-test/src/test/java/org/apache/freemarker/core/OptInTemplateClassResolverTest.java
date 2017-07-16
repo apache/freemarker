@@ -128,8 +128,8 @@ public class OptInTemplateClassResolverTest extends TestCase {
         {
             Configuration cfg = new TestConfigurationBuilder()
                     .setting(
-                            "new_builtin_class_resolver",
-                            "trusted_templates: foo.ftl, \"lib/*\"")
+                            "newBuiltinClassResolver",
+                            "trustedTemplates: foo.ftl, \"lib/*\"")
                     .build();
 
             TemplateClassResolver res = cfg.getNewBuiltinClassResolver();
@@ -149,8 +149,8 @@ public class OptInTemplateClassResolverTest extends TestCase {
         {
             Configuration cfg = new TestConfigurationBuilder()
                     .setting(
-                            "new_builtin_class_resolver",
-                            "allowed_classes: java.lang.String, java.lang.Integer")
+                            "newBuiltinClassResolver",
+                            "allowedClasses: java.lang.String, java.lang.Integer")
                     .build();
 
             TemplateClassResolver res = cfg.getNewBuiltinClassResolver();
@@ -170,8 +170,8 @@ public class OptInTemplateClassResolverTest extends TestCase {
         {
             Configuration cfg = new TestConfigurationBuilder()
                     .setting(
-                            "new_builtin_class_resolver",
-                            "trusted_templates: foo.ftl, 'lib/*', allowed_classes: 'java.lang.String',"
+                            "newBuiltinClassResolver",
+                            "trustedTemplates: foo.ftl, 'lib/*', allowedClasses: 'java.lang.String',"
                             + " java.lang.Integer")
                     .build();
             TemplateClassResolver res = cfg.getNewBuiltinClassResolver();
@@ -200,7 +200,7 @@ public class OptInTemplateClassResolverTest extends TestCase {
         }
         
         try {
-            new TestConfigurationBuilder().setSetting("new_builtin_class_resolver", "wrong: foo");
+            new TestConfigurationBuilder().setSetting("newBuiltinClassResolver", "wrong: foo");
             fail();
         } catch (ConfigurationException e) {
             // Expected
@@ -209,8 +209,8 @@ public class OptInTemplateClassResolverTest extends TestCase {
         {
             Configuration cfg = new TestConfigurationBuilder()
                     .setting(
-                            "new_builtin_class_resolver",
-                            "\"allowed_classes\"  :  java.lang.String  ,  'trusted_templates' :\"lib:*\"")
+                            "newBuiltinClassResolver",
+                            "\"allowedClasses\"  :  java.lang.String  ,  'trustedTemplates' :\"lib:*\"")
                     .build();
             TemplateClassResolver res = cfg.getNewBuiltinClassResolver();
             assertEquals(String.class, res.resolve("java.lang.String", null,

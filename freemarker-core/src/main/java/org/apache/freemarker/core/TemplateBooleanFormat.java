@@ -66,7 +66,7 @@ final class TemplateBooleanFormat extends TemplateValueFormat {
      * Returns the string to which {@code true} is converted to for human audience, or {@code null} if automatic
      * coercion to string is not allowed. The default value is {@code null}.
      *
-     * <p>This value is deduced from the {@code "boolean_format"} setting.
+     * <p>This value is deduced from the {@code "booleanFormat"} setting.
      * Confusingly, for backward compatibility (at least until 2.4) that defaults to {@code "true,false"}, yet this
      * defaults to {@code null}. That's so because {@code "true,false"} is treated exceptionally, as that default is a
      * historical mistake in FreeMarker, since it targets computer language output, not human writing. Thus it's
