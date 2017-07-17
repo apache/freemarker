@@ -29,7 +29,7 @@ Template language changes
 
 Note that the template converter tool (freemarker-converter) can automatically apply many of these changes on FM2
 templates. But changes that aren't purely syntactical (but behavioral) often can't be treated with 100% safety or at
-all, in which ase it's always noted for that change.
+all, in which case it's always noted for that change as "Converter note:".
 
 Major changes / features
 ------------------------
@@ -48,16 +48,17 @@ Smaller changes
 
 Node: Changes already mentioned above aren't repeated here!
 
-- Removed support for all old glitches that you could turn on/off with incompatibleImprovements in FM2
-  (These are generally not covered by the converter tool.)
+- Removed support for all old glitches that you could turn on/off with `incompatibleImprovements` in FM2 (see
+  them in the JavaDoc of FM2 `Configuration`).
+  Converter note: The otherwise very low risk behavioral changes here aren't covered by the converter tool.
 - Removed some long deprecated template language directives:
   - <#call ...> (deprecated by <@... />)
   - <#comment>...</#comment> (deprecated by <#-- ... -->)
   - <#transform ...>...</#transform> (deprecated by <@...>...</@...>)
   - <#foreach x in xs>...</#foreach> (deprecated by <#list xs as x>...</#list>)
-- Removed long deprecated `#{}` interpolations. They are treated as plain static text now. (The
-  template converter tool translates these to `${}` interpolations. For example `#{x}` is simply
-  translated to `${b}`, while `#{x; m1M3}` is translated to `${x?string('0.0##')}`).
+- Removed long deprecated `#{}` interpolations. They are treated as plain static text now.
+  Converter note: The template converter tool translates these to `${}` interpolations. For example `#{x}` is simply
+  translated to `${b}`, while `#{x; m1M3}` is translated to `${x?string('0.0##')}`). The output should remain the same.
 - #include has no "encoding" parameter anymore (as now only the Configuration is responsible ofr deciding the encoding)
 - You can't close #attempt/#recover with `</#recover>` anymore, only with `<#attempt>`. This was the
   standard form in FM2 as well, and is consistent with how #if/#else works. (The template converter
