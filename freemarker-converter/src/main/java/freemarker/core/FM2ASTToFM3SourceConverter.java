@@ -23,7 +23,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -612,8 +611,11 @@ public class FM2ASTToFM3SourceConverter {
                     + "FreeMarker 3. You have to remove it manually before conversion.",
                     node.getBeginLine(), node.getBeginColumn());
         }
+        if (converted.equals("datetimeFormat")) {
+            converted = "dateTimeFormat";
+        }
 
-        if (!Arrays.asList(PropertySetting.SETTING_NAMES).contains(converted)) {
+        if (!org.apache.freemarker.core.Environment.getSettingNames().contains(converted)) {
             throw new ConverterException("Couldn't map \"" + name + "\" to a valid FreeMarker 3 setting name "
                     + "(tried: " + converted + ")");
         }
