@@ -1183,13 +1183,13 @@ public class FM2ASTToFM3SourceConverter {
         Expression callee = getParam(node, 0, ParameterRole.CALLEE, Expression.class);
         printExp(callee);
 
-        int calleEnd = getEndPositionExclusive(callee);
-        int lastParamEnd = printWSAndExpComments(calleEnd);
+        int calleeEnd = getEndPositionExclusive(callee);
+        int lastParamEnd = printWSAndExpComments(calleeEnd);
         boolean legacyCallDirWithParenthesis = false;
         boolean legacyCallDirNeedsSeparatorSpace = false;
         if (legacyCallDirMode) {
             if (src.charAt(lastParamEnd) == '(') {
-                if (calleEnd == lastParamEnd) {
+                if (calleeEnd == lastParamEnd) {
                     legacyCallDirNeedsSeparatorSpace = true;
                 }
                 lastParamEnd++; // skip '('
