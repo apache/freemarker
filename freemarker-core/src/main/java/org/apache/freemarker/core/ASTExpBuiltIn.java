@@ -77,7 +77,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
     protected ASTExpression target;
     protected String key;
 
-    static final int NUMBER_OF_BIS = 263;
+    static final int NUMBER_OF_BIS = 262;
     static final HashMap<String, ASTExpBuiltIn> BUILT_INS_BY_NAME = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
 
     static {
@@ -275,7 +275,6 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("url", new BuiltInsForStringsEncoding.urlBI());
         putBI("urlPath", new BuiltInsForStringsEncoding.urlPathBI());
         putBI("values", new BuiltInsForHashes.valuesBI());
-        putBI("webSafe", BUILT_INS_BY_NAME.get("html"));  // deprecated; use ?html instead
         putBI("wordList", new BuiltInsForStringsBasic.word_listBI());
         putBI("xhtml", new BuiltInsForStringsEncoding.xhtmlBI());
         putBI("xml", new BuiltInsForStringsEncoding.xmlBI());

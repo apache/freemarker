@@ -59,6 +59,8 @@ Node: Changes already mentioned above aren't repeated here!
 - Removed long deprecated `#{}` interpolations. They are treated as plain static text now.
   Converter note: The template converter tool translates these to `${}` interpolations. For example `#{x}` is simply
   translated to `${b}`, while `#{x; m1M3}` is translated to `${x?string('0.0##')}`). The output should remain the same.
+- Removed some long deprecated built-ins:
+  - `webSafe` (converted to `html`)
 - #include has no "encoding" parameter anymore (as now only the Configuration is responsible ofr deciding the encoding)
 - You can't close #attempt/#recover with `</#recover>` anymore, only with `<#attempt>`. This was the
   standard form in FM2 as well, and is consistent with how #if/#else works. (The template converter
