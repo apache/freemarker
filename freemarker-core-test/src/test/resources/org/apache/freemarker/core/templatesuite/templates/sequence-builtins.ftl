@@ -322,7 +322,7 @@ Chunk
 
 <#macro printTable ls columns fill>
   columns = ${columns}, fill = ${fill}:<#lt>
-  <#if fill='NULL'>
+  <#if fill=='NULL'>
     <#local rows = ls?chunk(columns)>
   <#else>
     <#local rows = ls?chunk(columns, fill)>

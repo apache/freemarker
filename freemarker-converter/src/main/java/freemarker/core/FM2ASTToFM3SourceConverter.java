@@ -1431,7 +1431,7 @@ public class FM2ASTToFM3SourceConverter {
         COMPARATOR_OP_MAP = new HashMap<String, String>();
         // For now we leave FM2 ops as is, but later in many cases they will be replaced.
         COMPARATOR_OP_MAP.put("==", "==");
-        COMPARATOR_OP_MAP.put("=", "=");
+        COMPARATOR_OP_MAP.put("=", "==");
         COMPARATOR_OP_MAP.put("!=", "!=");
         COMPARATOR_OP_MAP.put("<", "<");
         COMPARATOR_OP_MAP.put("lt", "lt");
@@ -1459,9 +1459,8 @@ public class FM2ASTToFM3SourceConverter {
 
     static {
         AND_OP_MAP = new HashMap<String, String>();
-        // For now we leave FM2 ops as is, but later in many cases they will be replaced.
         AND_OP_MAP.put("&&", "&&");
-        AND_OP_MAP.put("&", "&");
+        AND_OP_MAP.put("&", "&&");
         AND_OP_MAP.put("\\and", "\\and");
         AND_OP_MAP.put("&amp;&amp;", "&amp;&amp;");
     }
@@ -1474,9 +1473,8 @@ public class FM2ASTToFM3SourceConverter {
 
     static {
         OR_OP_MAP = new HashMap<String, String>();
-        // For now we leave FM2 ops as is, but later in many cases they will be replaced.
         OR_OP_MAP.put("||", "||");
-        OR_OP_MAP.put("|", "|");
+        OR_OP_MAP.put("|", "||");
     }
 
     private void printExpOr(OrExpression node) throws ConverterException {

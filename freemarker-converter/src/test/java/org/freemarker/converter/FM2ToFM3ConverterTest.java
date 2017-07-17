@@ -128,16 +128,17 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
                 + "${(a<#--7-->><#--8-->b)}${(a<#--9-->>=<#--A-->b)}"
                 + "${a<#--B-->==<#--C-->b}${a<#--D-->!=<#--E-->b}");
         // "Same" for now, will be different later.
-        assertConvertedSame("${a = b}${a == b}");
+        assertConverted("${a == b}${a == b}", "${a = b}${a == b}");
         assertConvertedSame("${a &lt; b}${a lt b}${a \\lt b}");
         assertConvertedSame("${a &lt;= b}${a lte b}${a \\lte b}");
         assertConvertedSame("${a &gt; b}${a gt b}${a \\gt b}");
         assertConvertedSame("${a &gt;= b}${a gte b}${a \\gte b}");
 
         // [FM3] Add \and and &amp;&amp; tests when 2.3.27 is released
-        assertConvertedSame("${a && b}${a & b}${a || b}${a | b}");
-        assertConvertedSame("${a<#--1-->&&<#--2-->b}${a<#--3-->&<#--4-->b}"
-                + "${a<#--5-->||<#--6-->b}${a<#--7-->|<#--8-->b}");
+        assertConverted("${a && b}${a && b}${a || b}${a || b}", "${a && b}${a & b}${a || b}${a | b}");
+        assertConverted(
+                "${a<#--1-->&&<#--2-->b}${a<#--3-->&&<#--4-->b}${a<#--5-->||<#--6-->b}${a<#--7-->||<#--8-->b}",
+                "${a<#--1-->&&<#--2-->b}${a<#--3-->&<#--4-->b}${a<#--5-->||<#--6-->b}${a<#--7-->|<#--8-->b}");
 
         assertConvertedSame("${!a}${! foo}${! <#--1--> bar}${!!c}");
 

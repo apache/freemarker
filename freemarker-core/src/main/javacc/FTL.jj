@@ -966,9 +966,9 @@ TOKEN:
     |
     <EXISTS : "??">
     |
-    <EQUALS : "=">
+    <ASSIGNMENT_EQUALS : "=">
     |
-    <DOUBLE_EQUALS : "==">
+    <COMPARISON_EQUALS : "==">
     |
     <NOT_EQUALS : "!=">
     |
@@ -1008,9 +1008,9 @@ TOKEN:
     |
     <PERCENT : "%">
     |
-    <AND : "&" | "&&" | "&amp;&amp;" | "\\and">
+    <AND : "&&" | "&amp;&amp;" | "\\and">
     |
-    <OR : "|" | "||">
+    <OR : "||">
     |
     <EXCLAM : "!">
     |
@@ -1527,13 +1527,11 @@ ASTExpression EqualityExpression() :
 {
     lhs = RelationalExpression() { result = lhs; }
     [
-        LOOKAHEAD(<NOT_EQUALS>|<EQUALS>|<DOUBLE_EQUALS>)
+        LOOKAHEAD(<NOT_EQUALS>|<COMPARISON_EQUALS>)
         (
             t = <NOT_EQUALS> 
             |
-            t = <EQUALS> 
-            |
-            t = <DOUBLE_EQUALS>
+            t = <COMPARISON_EQUALS>
         )
         rhs = RelationalExpression()
         {
@@ -2628,7 +2626,7 @@ ASTElement Assign() :
     	(
             (
 	    	    (
-			        (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
+			        (<ASSIGNMENT_EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
 			        {
 			           equalsOp = token;
 			        }
@@ -2656,7 +2654,7 @@ ASTElement Assign() :
 	            LOOKAHEAD(
 	               [<COMMA>]
 	               (<ID>|<STRING_LITERAL>)
-	               (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>
+	               (<ASSIGNMENT_EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>
 	                       |<PLUS_PLUS>|<MINUS_MINUS>)
 	            )
 	            [<COMMA>]
@@ -2668,7 +2666,7 @@ ASTElement Assign() :
 	            }
 	            (
 	                (
-	                    (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
+	                    (<ASSIGNMENT_EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
 	                    {
 	                       equalsOp = token;
 	                    }
@@ -2777,7 +2775,7 @@ ASTDirInclude Include() :
     [<SEMICOLON>]
     (
         att = <ID>
-        <EQUALS>
+        <ASSIGNMENT_EQUALS>
         exp = ASTExpression()
         {
             String attString = att.image;
@@ -2865,7 +2863,7 @@ ASTDirMacro Macro() :
             <ELLIPSIS> { isCatchAll = true; }
         ]
         [
-            <EQUALS>
+            <ASSIGNMENT_EQUALS>
             defValue = ASTExpression()
             {
                 defNames.add(arg.image);
@@ -2969,7 +2967,7 @@ ASTElement UnifiedMacroTransform() :
     }
     [<TERMINATING_WHITESPACE>]
     (
-        LOOKAHEAD(<ID><EQUALS>)
+        LOOKAHEAD(<ID><ASSIGNMENT_EQUALS>)
         namedArgs = NamedArgs()
         |
         positionalArgs = PositionalArgs()
@@ -3051,7 +3049,7 @@ HashMap NamedArgs() :
 {
     (
         t = <ID>
-        <EQUALS>
+        <ASSIGNMENT_EQUALS>
         {
             token_source.SwitchTo(token_source.NAMED_PARAMETER_EXPRESSION);
             token_source.inInvocation = true;
@@ -3411,7 +3409,7 @@ ASTDirSetting Setting() :
 {
     start = <SETTING>
     key = <ID>
-    <EQUALS>
+    <ASSIGNMENT_EQUALS>
     value = ASTExpression()
     end = LooseDirectiveEnd()
     {
@@ -3750,7 +3748,7 @@ void HeaderElement() :
             <FTL_HEADER>
             (
                 key = <ID>
-                <EQUALS>
+                <ASSIGNMENT_EQUALS>
                 exp = ASTExpression()
                 {
                     String ks = key.image;
@@ -3946,7 +3944,7 @@ Map ParamList() :
 {
     (
         id = ASTExpVariable()
-        <EQUALS>
+        <ASSIGNMENT_EQUALS>
         exp = ASTExpression() { result.put(id.toString(), exp); }
         [<COMMA>]
     )+

@@ -56,6 +56,10 @@ Node: Changes already mentioned above aren't repeated here!
   - <#comment>...</#comment> (deprecated by <#-- ... -->)
   - <#transform ...>...</#transform> (deprecated by <@...>...</@...>)
   - <#foreach x in xs>...</#foreach> (deprecated by <#list xs as x>...</#list>)
+- Removed the following operator aliases:
+  - `=` for comparison (it can only be used for assignment now). Use `==` instead.
+  - `&` for logical "and". Use `&&` instead.
+  - `|` for logical "or". Use `||` instead.
 - Removed long deprecated `#{}` interpolations. They are treated as plain static text now.
   Converter note: The template converter tool translates these to `${}` interpolations. For example `#{x}` is simply
   translated to `${b}`, while `#{x; m1M3}` is translated to `${x?string('0.0##')}`). The output should remain the same.
