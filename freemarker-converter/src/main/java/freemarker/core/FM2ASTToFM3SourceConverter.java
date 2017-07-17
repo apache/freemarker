@@ -1517,6 +1517,8 @@ public class FM2ASTToFM3SourceConverter {
 
         if (converted.equals("currentNode")) {
             converted = "node";
+        } else if (converted.equals("templateName")) {
+            converted = "currentTemplateName";
         }
 
         return converted;

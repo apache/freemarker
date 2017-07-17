@@ -69,6 +69,11 @@ Node: Changes already mentioned above aren't repeated here!
   `?dateTime` and `?dateTimeIfUnknown` and `dateTimeFormat`. (In general, it's `dateTime`, not `datetime` everywhere.)
           assertConverted("${.outputFormat}","${.output_format}");
 - Removed the `.currentNode` (`.current_node`) special variable, which was a deprecated alias to `.node`
+- Removed the `.templateName` (`.template_name`) special variable, which was deprecated by `.currentTemplateName`
+  since 2.3.23.
+  Converter note: This conversion is done, but note that in the rare case where a template has no name (when
+  creating a `Template` directly with its constructor using `null` as the `name` parameter) `.templateName` was an
+  empty string, while `.currentTemplateName` will be null.
 
 
 Java API changes

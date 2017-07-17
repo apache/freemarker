@@ -121,6 +121,7 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("${. <#-- C --> outputFormat}");
         assertConverted("${.outputFormat}","${.output_format}");
         assertConverted("${.node}","${.current_node}");
+        assertConverted("${.currentTemplateName}","${.template_name}");
 
         assertConvertedSame("${a < b}${a <= b}${(a > b)}${(a >= b)}${a == b}${a != b}");
         assertConvertedSame("${a<#--1--><<#--2-->b}${a<#--3--><=<#--4-->b}"

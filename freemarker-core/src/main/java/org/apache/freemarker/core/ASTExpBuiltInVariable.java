@@ -37,7 +37,6 @@ import org.apache.freemarker.core.util._StringUtil;
  */
 final class ASTExpBuiltInVariable extends ASTExpression {
 
-    static final String TEMPLATE_NAME = "templateName";
     static final String MAIN_TEMPLATE_NAME = "mainTemplateName";
     static final String CURRENT_TEMPLATE_NAME = "currentTemplateName";
     static final String NAMESPACE = "namespace";
@@ -80,7 +79,6 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         OUTPUT_ENCODING,
         OUTPUT_FORMAT,
         PASS,
-        TEMPLATE_NAME,
         URL_ESCAPING_CHARSET,
         VARS,
         VERSION
@@ -171,8 +169,7 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         if (name == MAIN_TEMPLATE_NAME) {
             return SimpleScalar.newInstanceOrNull(env.getMainTemplate().getLookupName());
         }
-        // [FM3] Some of these two should be removed.
-        if (name == CURRENT_TEMPLATE_NAME || name == TEMPLATE_NAME) {
+        if (name == CURRENT_TEMPLATE_NAME) {
             return SimpleScalar.newInstanceOrNull(env.getCurrentTemplate().getLookupName());
         }
         if (name == PASS) {

@@ -30,7 +30,7 @@ ${.locale} == en_US
 <#assign works = .main>
 <#assign works = .node!>
 ${.outputEncoding?lowerCase} == utf-8
-${.templateName} == specialvars.ftl
+${.currentTemplateName} == specialvars.ftl
 ${.urlEscapingCharset?lowerCase} == iso-8859-1
 <#assign foo = "x">
 ${.vars['foo']} == x
