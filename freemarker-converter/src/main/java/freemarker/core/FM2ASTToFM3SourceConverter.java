@@ -1515,7 +1515,9 @@ public class FM2ASTToFM3SourceConverter {
     private String convertBuiltInVariableName(String name) throws ConverterException {
         String converted = name.indexOf('_') == -1 ? name : _StringUtil.snakeCaseToCamelCase(name);
 
-        // Will replace removed names here
+        if (converted.equals("currentNode")) {
+            converted = "node";
+        }
 
         return converted;
     }

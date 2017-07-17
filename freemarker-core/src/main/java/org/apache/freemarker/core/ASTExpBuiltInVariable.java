@@ -48,7 +48,6 @@ final class ASTExpBuiltInVariable extends ASTExpression {
     static final String LANG = "lang";
     static final String LOCALE = "locale";
     static final String LOCALE_OBJECT = "localeObject";
-    static final String CURRENT_NODE = "currentNode";
     static final String NODE = "node";
     static final String PASS = "pass";
     static final String VARS = "vars";
@@ -64,7 +63,6 @@ final class ASTExpBuiltInVariable extends ASTExpression {
     static final Set<String> BUILT_IN_VARIABLE_NAMES = new _SortedArraySet<>(
         // Must be sorted alphabetically!
         AUTO_ESC,
-        CURRENT_NODE,
         CURRENT_TEMPLATE_NAME,
         DATA_MODEL,
         ERROR,
@@ -167,7 +165,7 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         if (name == LANG) {
             return new SimpleScalar(env.getLocale().getLanguage());
         }
-        if (name == CURRENT_NODE || name == NODE) {
+        if (name == NODE) {
             return env.getCurrentVisitorNode();
         }
         if (name == MAIN_TEMPLATE_NAME) {

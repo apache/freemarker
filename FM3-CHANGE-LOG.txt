@@ -67,6 +67,8 @@ Node: Changes already mentioned above aren't repeated here!
 - #else and #elseIf tags must be ended without "/", for example, <#else/> is illegal now, <#else> is legal.
 - Renamed `?datetime` and `?datetimeIfUnknown` and the `datetimeFormat` setting to
   `?dateTime` and `?dateTimeIfUnknown` and `dateTimeFormat`. (In general, it's `dateTime`, not `datetime` everywhere.)
+          assertConverted("${.outputFormat}","${.output_format}");
+- Removed the `.currentNode` (`.current_node`) special variable, which was a deprecated alias to `.node`
 
 
 Java API changes

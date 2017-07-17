@@ -2505,7 +2505,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     /**
-     * sets TemplateNodeModel as the current visitor node. <tt>.current_node</tt>
+     * sets TemplateNodeModel as the current visitor node. <tt>.node</tt>
      */
     public void setCurrentVisitorNode(TemplateNodeModel node) {
         currentVisitorNode = node;
