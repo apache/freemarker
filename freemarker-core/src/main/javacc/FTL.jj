@@ -3074,7 +3074,7 @@ ArrayList PositionalArgs() :
     [
         arg = ASTExpression() { result.add(arg); }
         (
-            [<COMMA>]
+            <COMMA>
             arg = ASTExpression() { result.add(arg); }
         )*
     ]

@@ -19,16 +19,33 @@
 
 package org.apache.freemarker.core;
 
+import java.io.IOException;
+
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
 
+@SuppressWarnings("ThrowableNotThrown")
 public class RemovedFM2SyntaxTest extends TemplateTest {
 
     @Test
-    public void testRemovedOperators() {
-       assertErrorContains("<#if a & b></#if>", ParseException.class);
-       assertErrorContains("<#if a | b></#if>", ParseException.class);
-       assertErrorContains("<#if a = b></#if>", ParseException.class);
+    public void testRemovedOperators() throws IOException, TemplateException {
+        assertErrorContains("<#if true & true>x</#if>", ParseException.class);
+        assertOutput("<#if true && true>x</#if>", "x");
+
+        assertErrorContains("<#if false | true>x</#if>", ParseException.class);
+        assertOutput("<#if false || true>x</#if>", "x");
+
+        assertErrorContains("<#if 'a' = 'a'>x</#if>", ParseException.class);
+        assertOutput("<#if 'a' == 'a'>x</#if>", "x");
+    }
+
+    @Test
+    public void testCallSyntax() throws IOException, TemplateException {
+        assertErrorContains("<@m 1 2 />", ParseException.class);
+        assertErrorContains("<@m 1, 2 />", InvalidReferenceException.class);
+
+        assertErrorContains("\"<#macro m><#nested 1 2></#macro>\"", ParseException.class);
+        assertOutput("<#macro m><#nested 1, 2></#macro>", "");
     }
 
 }

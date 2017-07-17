@@ -42,6 +42,10 @@ Major changes / features
   then `template_loader` becomes to `templateLoader`, and if you use the XML features, then `node.@@nested_markup`
   becomes to `node.@@nestedMarkup`.
   Note that the template converter tool takes care of this conversion.
+- Parameters passed by position (as opposed to by name) must be separated by comma. Earlier the comma was optional
+  Examples:
+  `<@x x + 1 2 3 />` now must be written as `<@x x + 1, 2, 3 />`
+  `<#nested x y>` now must be written as `<#nested x, y>`
 
 Smaller changes
 ---------------
@@ -65,6 +69,8 @@ Node: Changes already mentioned above aren't repeated here!
   translated to `${b}`, while `#{x; m1M3}` is translated to `${x?string('0.0##')}`). The output should remain the same.
 - Removed some long deprecated built-ins:
   - `webSafe` (converted to `html`)
+- Comma is now required between sequence literal items (such as `[a, b, c]`). It's not well known, but in FM2 the comma
+  could be omitted.
 - #include has no "encoding" parameter anymore (as now only the Configuration is responsible ofr deciding the encoding)
 - You can't close #attempt/#recover with `</#recover>` anymore, only with `<#attempt>`. This was the
   standard form in FM2 as well, and is consistent with how #if/#else works. (The template converter

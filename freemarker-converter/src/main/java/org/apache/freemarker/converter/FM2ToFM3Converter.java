@@ -84,6 +84,7 @@ public class FM2ToFM3Converter extends Converter {
     private Properties freeMarker2Settings;
     private Configuration fm2Cfg;
     private StringTemplateLoader stringTemplateLoader;
+    private boolean validateOutput = true;
 
     @Override
     protected Pattern getDefaultInclude() {
@@ -169,16 +170,18 @@ public class FM2ToFM3Converter extends Converter {
         fileTransCtx.getDestinationStream().write(
                 result.getFM3Content().getBytes(getTemplateEncoding(result.getFM2Template())));
 
-        try {
-            org.apache.freemarker.core.Configuration fm3Config = new org.apache.freemarker.core.Configuration
-                    .Builder(org.apache.freemarker.core.Configuration.getVersion() /* highest possible by design */)
-                    .outputFormat(converOutputFormat(result.getFM2Template().getOutputFormat()))
-                    .build();
-            new org.apache.freemarker.core.Template(null, result.getFM3Content(), fm3Config);
-        } catch (Exception e) {
-            throw new ConverterException(
-                    "The result of the conversion wasn't valid FreeMarker 3 template; see cause exception and "
-                    + fileTransCtx.getDestinationFile(), e);
+        if (validateOutput) {
+            try {
+                org.apache.freemarker.core.Configuration fm3Config = new org.apache.freemarker.core.Configuration
+                        .Builder(org.apache.freemarker.core.Configuration.getVersion() /* highest possible by design */)
+                        .outputFormat(converOutputFormat(result.getFM2Template().getOutputFormat()))
+                        .build();
+                new org.apache.freemarker.core.Template(null, result.getFM3Content(), fm3Config);
+            } catch (Exception e) {
+                throw new ConverterException(
+                        "The result of the conversion wasn't valid FreeMarker 3 template; see cause exception and "
+                                + fileTransCtx.getDestinationFile(), e);
+            }
         }
     }
 
@@ -233,6 +236,14 @@ public class FM2ToFM3Converter extends Converter {
     public void setFreeMarker2Settings(Properties freeMarker2Settings) {
         _NullArgumentException.check("freeMarker2Settings", freeMarker2Settings);
         this.freeMarker2Settings = freeMarker2Settings;
+    }
+
+    public boolean getValidateOutput() {
+        return validateOutput;
+    }
+
+    public void setValidateOutput(boolean validateOutput) {
+        this.validateOutput = validateOutput;
     }
 
 }

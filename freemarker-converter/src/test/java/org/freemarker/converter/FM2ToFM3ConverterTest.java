@@ -82,6 +82,10 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("${f([1])}");
         assertConvertedSame("${f([1, [x,y], 3])}");
         assertConvertedSame("${f([<#--1--> 1, <#--2--> 2, <#--3--> 3 <#--4-->])}");
+        assertConverted("${f([1, 2, 3])}", "${f([1 2 3])}");
+        assertConverted(
+                "${f([<#--1--> 1, <#--2--> 2, <#--3--> 3 <#--4-->])}",
+                "${f([<#--1--> 1 <#--2--> 2 <#--3--> 3 <#--4-->])}");
 
         assertConvertedSame("${f({})}");
         assertConvertedSame("${f({k: v})}");
@@ -208,9 +212,12 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("<#macro \"m 1\"></#macro>");
         assertConvertedSame("<#macro m><#nested x + 1, 2, 3></#macro>");
         assertConvertedSame("<#macro m><#nested <#--1--> x + 1 <#--2-->, <#--3--> 2 <#--4-->></#macro>");
-        // [FM3] Will be different (comma)
-        assertConvertedSame("<#macro m><#nested x + 1 2 3></#macro>");
-        assertConvertedSame("<#macro m><#nested <#--1--> x + 1 <#--2--> 2 <#--3-->></#macro>");
+        assertConverted(
+                "<#macro m><#nested x + 1, 2, 3></#macro>",
+                "<#macro m><#nested x + 1  2 3></#macro>");
+        assertConverted(
+                "<#macro m><#nested <#--1--> x + 1, <#--2--> 2 <#--3-->></#macro>",
+                "<#macro m><#nested <#--1--> x + 1 <#--2--> 2 <#--3-->></#macro>");
         assertConvertedSame("<#macro m><#nested x /></#macro>");
         assertConvertedSame("<#macro m><#return><#return ></#macro>");
 
@@ -419,15 +426,18 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("<@foo x=1 y=2 />");
         assertConvertedSame("<@foo x\\-y=1 />");
         assertConvertedSame("<@foo\n\tx = 1\n\ty = 2\n/>");
-        assertConvertedSame("<@foo 1 2 />");
-        assertConvertedSame("<@foo <#--1--> 1 <#--2--> 2 <#--3--> />");
+        assertConverted("<@foo 1, 2 />", "<@foo 1 2 />");
+        assertConverted("<@foo <#--1--> 1, <#--2--> 2 <#--3--> />", "<@foo <#--1--> 1 <#--2--> 2 <#--3--> />");
         assertConvertedSame("<@foo 1, 2 />");
         assertConvertedSame("<@foo <#--1--> 1 <#--2-->, <#--3--> 2 <#--4--> />");
         assertConvertedSame("<@foo x=1; i, j></@>");
         assertConvertedSame("<@foo 1; i, j></@>");
-        assertConvertedSame("<@foo 1 2; i\\-2, j></@>");
+        assertConverted("<@foo 1, 2; i\\-2, j></@>", "<@foo 1 2; i\\-2, j></@>");
         assertConvertedSame("<@foo x=1 y=2; i></@>");
         assertConvertedSame("<@foo x=1 ;\n    i <#-- C0 --> , <#--1-->\n\t<!-- C2 --> j <#--3-->\n></@>");
+        assertConverted("<@m 0, 1 .. n - 1, 2 />", "<@m 0 1 .. n - 1 2 />");
+        assertConverted("<@m 0, 1 .. n - 1, 2 />", "<@m 0  1 .. n - 1  2 />");
+        assertConverted("<@recurse dummy, a - 1 />", "<@recurse dummy  a - 1 />");
     }
 
     @Test
@@ -619,6 +629,7 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         converter.setSource(srcFile);
         converter.setDestinationDirectory(dstDir);
         converter.setInclude(null);
+        // converter.setValidateOutput(false);
         Properties properties = new Properties();
         properties.setProperty(Configuration.DEFAULT_ENCODING_KEY, UTF_8.name());
         if (squareBracketTagSyntax) {
