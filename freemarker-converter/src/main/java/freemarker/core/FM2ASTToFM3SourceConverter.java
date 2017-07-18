@@ -23,7 +23,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -39,6 +38,7 @@ import org.apache.freemarker.converter.UnconvertableLegacyFeatureException;
 import org.apache.freemarker.core.util.FTLUtil;
 import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.core.util._NullArgumentException;
+import org.apache.freemarker.core.util._ObjectHolder;
 import org.apache.freemarker.core.util._StringUtil;
 
 import com.google.common.collect.ImmutableMap;
@@ -46,6 +46,7 @@ import com.google.common.collect.ImmutableSet;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
+import freemarker.ext.dom.AtAtKeyAccessor;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.utility.StringUtil;
@@ -230,7 +231,7 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private String convertFtlHeaderParamName(String name) throws ConverterException {
-        String converted = name.indexOf('_') == -1 ? name : ConverterUtils.snakeCaseToCamelCase(name);
+        String converted = name.indexOf('_') == -1 ? name : _StringUtil.snakeCaseToCamelCase(name);
         if (converted.equals("attributes")) {
             converted = "customSettings";
         }
@@ -604,15 +605,18 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private String convertSettingName(String name, TemplateObject node) throws ConverterException {
-        String converted = name.indexOf('_') == -1 ? name : ConverterUtils.snakeCaseToCamelCase(name);
+        String converted = name.indexOf('_') == -1 ? name : _StringUtil.snakeCaseToCamelCase(name);
 
         if (converted.equals("classicCompatible")) {
             throw new UnconvertableLegacyFeatureException("There \"classicCompatible\" setting doesn't exist in "
                     + "FreeMarker 3. You have to remove it manually before conversion.",
                     node.getBeginLine(), node.getBeginColumn());
         }
+        if (converted.equals("datetimeFormat")) {
+            converted = "dateTimeFormat";
+        }
 
-        if (!Arrays.asList(PropertySetting.SETTING_NAMES).contains(converted)) {
+        if (!org.apache.freemarker.core.Environment.getSettingNames().contains(converted)) {
             throw new ConverterException("Couldn't map \"" + name + "\" to a valid FreeMarker 3 setting name "
                     + "(tried: " + converted + ")");
         }
@@ -645,7 +649,12 @@ public class FM2ASTToFM3SourceConverter {
             printExp(passedValue);
             pos = getEndPositionExclusive(passedValue);
             if (paramIdx < paramCnt - 1) {
-                printOptionalSeparatorAndWSAndExpComments(pos, ",");
+                _ObjectHolder<Boolean> hadSeparatorSymbol = new _ObjectHolder<>(null);
+                int spacingStartPos = out.length();
+                pos = printOptionalSeparatorAndWSAndExpComments(pos, ",", hadSeparatorSymbol);
+                if (!hadSeparatorSymbol.get()) {
+                    insertOmittedSeparatorComma(spacingStartPos);
+                }
             }
         }
         printDirStartTagEnd(node, pos, false);
@@ -1180,13 +1189,13 @@ public class FM2ASTToFM3SourceConverter {
         Expression callee = getParam(node, 0, ParameterRole.CALLEE, Expression.class);
         printExp(callee);
 
-        int calleEnd = getEndPositionExclusive(callee);
-        int lastParamEnd = printWSAndExpComments(calleEnd);
+        int calleeEnd = getEndPositionExclusive(callee);
+        int lastParamEnd = printWSAndExpComments(calleeEnd);
         boolean legacyCallDirWithParenthesis = false;
         boolean legacyCallDirNeedsSeparatorSpace = false;
         if (legacyCallDirMode) {
             if (src.charAt(lastParamEnd) == '(') {
-                if (calleEnd == lastParamEnd) {
+                if (calleeEnd == lastParamEnd) {
                     legacyCallDirNeedsSeparatorSpace = true;
                 }
                 lastParamEnd++; // skip '('
@@ -1205,7 +1214,20 @@ public class FM2ASTToFM3SourceConverter {
                 print(' ');
                 legacyCallDirNeedsSeparatorSpace = false;
             }
-            printSeparatorAndWSAndExpComments(lastParamEnd, ",", true);
+
+            int spacingEndPos;
+            if (paramIdx > 1) {
+                _ObjectHolder<Boolean> hadSeparatorSymbol = new _ObjectHolder<>(null);
+                int spacingStartPos = out.length();
+                spacingEndPos = printOptionalSeparatorAndWSAndExpComments(lastParamEnd, ",", hadSeparatorSymbol);
+                if (!hadSeparatorSymbol.get()) {
+                    insertOmittedSeparatorComma(spacingStartPos);
+                }
+            } else {
+                spacingEndPos = printWSAndExpComments(lastParamEnd);
+            }
+            assertNodeContent(spacingEndPos == getStartPosition(argValue), node,
+                    "Preceding spacing end position and positional parameter value start position differs.");
             printExp(argValue);
 
             lastParamEnd = getEndPositionExclusive(argValue);
@@ -1292,6 +1314,15 @@ public class FM2ASTToFM3SourceConverter {
             assertNodeContent(node.getChildCount() == 0, node,
                     "Expected no children");
         }
+    }
+
+    private void insertOmittedSeparatorComma(int spacingStartPos) {
+        // "x  y" -> "x y" (-> "x, y")
+        if (out.length() > spacingStartPos + 1
+                && out.charAt(spacingStartPos) == ' ' && out.charAt(spacingStartPos + 1) == ' ') {
+            out.deleteCharAt(spacingStartPos + 1);
+        }
+        out.insert(spacingStartPos, ',');
     }
 
     private void printDirIfOrElseOrElseIf(ConditionalBlock node) throws ConverterException {
@@ -1428,7 +1459,7 @@ public class FM2ASTToFM3SourceConverter {
         COMPARATOR_OP_MAP = new HashMap<String, String>();
         // For now we leave FM2 ops as is, but later in many cases they will be replaced.
         COMPARATOR_OP_MAP.put("==", "==");
-        COMPARATOR_OP_MAP.put("=", "=");
+        COMPARATOR_OP_MAP.put("=", "==");
         COMPARATOR_OP_MAP.put("!=", "!=");
         COMPARATOR_OP_MAP.put("<", "<");
         COMPARATOR_OP_MAP.put("lt", "lt");
@@ -1456,9 +1487,8 @@ public class FM2ASTToFM3SourceConverter {
 
     static {
         AND_OP_MAP = new HashMap<String, String>();
-        // For now we leave FM2 ops as is, but later in many cases they will be replaced.
         AND_OP_MAP.put("&&", "&&");
-        AND_OP_MAP.put("&", "&");
+        AND_OP_MAP.put("&", "&&");
         AND_OP_MAP.put("\\and", "\\and");
         AND_OP_MAP.put("&amp;&amp;", "&amp;&amp;");
     }
@@ -1471,9 +1501,8 @@ public class FM2ASTToFM3SourceConverter {
 
     static {
         OR_OP_MAP = new HashMap<String, String>();
-        // For now we leave FM2 ops as is, but later in many cases they will be replaced.
         OR_OP_MAP.put("||", "||");
-        OR_OP_MAP.put("|", "|");
+        OR_OP_MAP.put("|", "||");
     }
 
     private void printExpOr(OrExpression node) throws ConverterException {
@@ -1512,9 +1541,13 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private String convertBuiltInVariableName(String name) throws ConverterException {
-        String converted = name.indexOf('_') == -1 ? name : ConverterUtils.snakeCaseToCamelCase(name);
+        String converted = name.indexOf('_') == -1 ? name : _StringUtil.snakeCaseToCamelCase(name);
 
-        // Will replace removed names here
+        if (converted.equals("currentNode")) {
+            converted = "node";
+        } else if (converted.equals("templateName")) {
+            converted = "currentTemplateName";
+        }
 
         return converted;
     }
@@ -1524,8 +1557,34 @@ public class FM2ASTToFM3SourceConverter {
         Expression lho = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, Expression.class);
         String rho = getParam(node, 1, ParameterRole.RIGHT_HAND_OPERAND, String.class);
         printNode(lho);
+
         printSeparatorAndWSAndExpComments(getEndPositionExclusive(lho), ".");
+
+        rho = mapStringHashKey(rho);
         print(rho.startsWith("*") ? rho : FTLUtil.escapeIdentifier(rho));
+    }
+
+    private String mapStringHashKey(String key) {
+        if (key.startsWith("@@")) {
+            String mappedKey = DOM_KEY_MAPPING.get(key);
+            if (mappedKey != null) {
+                key = mappedKey;
+            }
+        }
+        return key;
+    }
+
+    private static final Map<String, String> DOM_KEY_MAPPING;
+    static {
+        Map<String, String> domKeyMapping = new HashMap<>();
+        for (String atAtKey : AtAtKeyAccessor.getAtAtKeys()) {
+            String atAtKeyCC = _StringUtil.snakeCaseToCamelCase(atAtKey);
+            if (!atAtKeyCC.equals(atAtKey)) {
+                domKeyMapping.put(atAtKey, atAtKeyCC);
+            }
+        }
+
+        DOM_KEY_MAPPING = Collections.unmodifiableMap(domKeyMapping);
     }
 
     private void printExpDynamicKeyName(DynamicKeyName node) throws ConverterException {
@@ -1536,7 +1595,12 @@ public class FM2ASTToFM3SourceConverter {
 
         Expression keyExp = getParam(node, 1, ParameterRole.ENCLOSED_OPERAND, Expression.class);
         printParameterSeparatorSource(collExp, keyExp);
-        printExp(keyExp);
+        if (keyExp instanceof StringLiteral && keyExp.isLiteral()) {
+            StringLiteral keyStringLiteral = (StringLiteral) keyExp;
+            printExpStringLiteral(keyStringLiteral, mapStringHashKey((keyStringLiteral).getAsString()));
+        } else {
+            printExp(keyExp);
+        }
 
         printWithParamsTrailingSkippedTokens("]", node, 1);
     }
@@ -1599,26 +1663,32 @@ public class FM2ASTToFM3SourceConverter {
         assertNodeContent(src.charAt(closeCharPos) == ']', node,
                 "Expected ']'");
 
+        print('[');
         int paramCnt = node.getParameterCount();
         if (paramCnt == 0) {
-            print('[');
             printWithConvertedExpComments(src.substring(openCharPos + 1, closeCharPos));
-            print(']');
         } else {
-            printWithParamsLeadingSkippedTokens("[", node);
+            int pos = openCharPos + 1;
+            pos = printWSAndExpComments(pos);
             Expression prevItem = null;
             for (int paramIdx = 0; paramIdx < paramCnt; paramIdx++) {
                 Expression item = getParam(node, paramIdx, ParameterRole.ITEM_VALUE, Expression.class);
 
-                if (prevItem != null) {
-                    printParameterSeparatorSource(prevItem, item);
+                if (paramIdx != 0) {
+                    _ObjectHolder<Boolean> hadSeparatorSymbol = new _ObjectHolder<>(null);
+                    int spacingStartPos = out.length();
+                    printOptionalSeparatorAndWSAndExpComments(pos, ",", hadSeparatorSymbol);
+                    if (!hadSeparatorSymbol.get()) {
+                        insertOmittedSeparatorComma(spacingStartPos);
+                    }
                 }
                 printExp(item);
-
-                prevItem = item;
+                pos = getEndPositionExclusive(item);
             }
-            printWithParamsTrailingSkippedTokens("]", node, node.getParameterCount() - 1);
+            pos = printWSAndExpComments(pos);
+            assertNodeContent(pos == closeCharPos, node, "Couldn't reach the ']'");
         }
+        print(']');
     }
 
     private void printExpParenthetical(ParentheticalExpression node) throws ConverterException {
@@ -1725,6 +1795,10 @@ public class FM2ASTToFM3SourceConverter {
     private int stringLiteralNestingLevel;
 
     private void printExpStringLiteral(StringLiteral node) throws ConverterException {
+        printExpStringLiteral(node, node.isLiteral()     ? node.getAsString() : null);
+    }
+
+    private void printExpStringLiteral(StringLiteral node, String value) throws ConverterException {
         boolean escapeAmp, escapeLT, escapeGT;
         if (stringLiteralNestingLevel == 0) {
             // We check if the source code has avoided '&', '<', and '>'. If it did, we will escape them in the output.
@@ -1775,12 +1849,18 @@ public class FM2ASTToFM3SourceConverter {
 
         int parameterCount = node.getParameterCount();
         if (parameterCount == 0) {
+            _NullArgumentException.check("value", value);
             if (!rawString) {
-                print(FTLUtil.escapeStringLiteralPart(node.getAsString(), quote, escapeAmp, escapeLT, escapeGT));
+                print(FTLUtil.escapeStringLiteralPart(value, quote, escapeAmp, escapeLT, escapeGT));
             } else {
-                print(node.getAsString());
+                print(value);
             }
         } else {
+            if (value != null) {
+                throw new IllegalArgumentException("\"value\" argument must be null when the string contains "
+                        + "interpolations.");
+            }
+
             // Not really a literal; contains interpolations
             for (int paramIdx = 0; paramIdx < parameterCount; paramIdx++) {
                 Object param = getParam(node, paramIdx, ParameterRole.VALUE_PART, Object.class);
@@ -1816,7 +1896,7 @@ public class FM2ASTToFM3SourceConverter {
     private String convertBuiltInName(String name) throws ConverterException {
         String converted = IRREGULAR_BUILT_IN_NAME_CONVERSIONS.get(name);
         if (converted == null) {
-            converted = name.indexOf('_') == -1 ? name : ConverterUtils.snakeCaseToCamelCase(name);
+            converted = name.indexOf('_') == -1 ? name : _StringUtil.snakeCaseToCamelCase(name);
         }
 
         if (!fm3BuiltInNames.contains(converted)) {
@@ -1842,6 +1922,9 @@ public class FM2ASTToFM3SourceConverter {
             .put("iso_ms_nz", "isoMsNZ")
             .put("iso_m_nz", "isoMNZ")
             .put("iso_h_nz", "isoHNZ")
+            .put("datetime", "dateTime")
+            .put("datetime_if_unknown", "dateTimeIfUnknown")
+            .put("datetimeIfUnknown", "dateTimeIfUnknown")
             .build();
 
     private void printParameterSeparatorSource(Expression lho, Expression rho) {
@@ -2232,18 +2315,25 @@ public class FM2ASTToFM3SourceConverter {
         return src.substring(startPos, getPositionAfterWSAndExpComments(startPos));
     }
 
-    private String readSeparatorAndWSAndExpComments(int startPos, String separator, boolean separatorOptional)
+    private String readSeparatorAndWSAndExpComments(int startPos, String separatorSymbol, boolean separatorOptional,
+            _ObjectHolder<Boolean> hadSeparatorSymbol)
             throws ConverterException {
         int pos = getPositionAfterWSAndExpComments(startPos);
 
-        if (pos == src.length() || !src.startsWith(separator, pos)) {
+        if (pos == src.length() || !src.startsWith(separatorSymbol, pos)) {
             if (!separatorOptional) {
                 throw new ConverterException(
-                        "Expected separator " + _StringUtil.jQuote(separator) + " at position " + pos + ".");
+                        "Expected separator " + _StringUtil.jQuote(separatorSymbol) + " at position " + pos + ".");
+            }
+            if (hadSeparatorSymbol != null) {
+                hadSeparatorSymbol.set(false);
             }
             return src.substring(startPos, pos);
         }
-        pos += separator.length();
+        pos += separatorSymbol.length();
+        if (hadSeparatorSymbol != null) {
+            hadSeparatorSymbol.set(true);
+        }
 
         pos = getPositionAfterWSAndExpComments(pos);
 
@@ -2258,16 +2348,25 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private int printSeparatorAndWSAndExpComments(int pos, String separator) throws ConverterException {
-        return printSeparatorAndWSAndExpComments(pos, separator, false);
+        return printSeparatorAndWSAndExpComments(pos, separator, false, null);
     }
 
-    private int printOptionalSeparatorAndWSAndExpComments(int pos, String separator) throws ConverterException {
-        return printSeparatorAndWSAndExpComments(pos, separator, true);
-    }
-
-    private int printSeparatorAndWSAndExpComments(int pos, String separator, boolean sepOptional)
+    private int printOptionalSeparatorAndWSAndExpComments(
+            int pos, String separator)
             throws ConverterException {
-        String sep = readSeparatorAndWSAndExpComments(pos, separator, sepOptional);
+        return printOptionalSeparatorAndWSAndExpComments(pos, separator, null);
+    }
+
+    private int printOptionalSeparatorAndWSAndExpComments(
+            int pos, String separator, _ObjectHolder<Boolean> hadSeparatorSymbol)
+            throws ConverterException {
+        return printSeparatorAndWSAndExpComments(pos, separator, true, hadSeparatorSymbol);
+    }
+
+    private int printSeparatorAndWSAndExpComments(int pos, String separator, boolean sepOptional,
+            _ObjectHolder<Boolean> hadSeparatorSymbol)
+            throws ConverterException {
+        String sep = readSeparatorAndWSAndExpComments(pos, separator, sepOptional, hadSeparatorSymbol);
         printWithConvertedExpComments(sep);
         pos += sep.length();
         return pos;
@@ -2408,5 +2507,7 @@ public class FM2ASTToFM3SourceConverter {
             return fm3Content;
         }
     }
+
+
 
 }

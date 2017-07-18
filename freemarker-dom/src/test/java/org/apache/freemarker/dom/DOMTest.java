@@ -78,8 +78,8 @@ public class DOMTest extends TemplateTest {
         assertOutput(ftlHeader + "${doc?children[0]?children[2]['@*'][0].@@qname}", "a1");
         assertOutput(ftlHeader + "${doc?children[0]?children[2]['@*'][1].@@qname}", "n2:a2");
         // Unfortunately these include the xmlns attributes, but that would be non-BC to fix now:
-        assertThat(getOutput(ftlHeader + "${doc?children[0].@@start_tag}"), startsWith("<root"));
-        assertThat(getOutput(ftlHeader + "${doc?children[0]?children[1].@@start_tag}"), startsWith("<n2:b"));
+        assertThat(getOutput(ftlHeader + "${doc?children[0].@@startTag}"), startsWith("<root"));
+        assertThat(getOutput(ftlHeader + "${doc?children[0]?children[1].@@startTag}"), startsWith("<n2:b"));
     }
     
     @Test
@@ -115,45 +115,45 @@ public class DOMTest extends TemplateTest {
     public void testInvalidAtAtKeyErrors() throws Exception {
         addDocToDataModel("<r><multipleMatches /><multipleMatches /></r>");
         assertErrorContains("${doc.r.@@invalid_key}", "Unsupported @@ key", "@invalid_key");
-        assertErrorContains("${doc.@@start_tag}", "@@start_tag", "not supported", "document");
+        assertErrorContains("${doc.@@startTag}", "@@startTag", "not supported", "document");
         assertErrorContains("${doc.@@}", "\"@@\"", "not supported", "document");
         assertErrorContains("${doc.r.noMatch.@@invalid_key}", "Unsupported @@ key", "@invalid_key");
         assertErrorContains("${doc.r.multipleMatches.@@invalid_key}", "Unsupported @@ key", "@invalid_key");
-        assertErrorContains("${doc.r.noMatch.@@attributes_markup}", "single XML node", "@@attributes_markup");
-        assertErrorContains("${doc.r.multipleMatches.@@attributes_markup}", "single XML node", "@@attributes_markup");
+        assertErrorContains("${doc.r.noMatch.@@attributesMarkup}", "single XML node", "@@attributesMarkup");
+        assertErrorContains("${doc.r.multipleMatches.@@attributesMarkup}", "single XML node", "@@attributesMarkup");
     }
     
     @Test
     public void testAtAtSiblingElement() throws Exception {
         addDocToDataModel("<r><a/><b/></r>");
-        assertOutput("${doc.r.@@previous_sibling_element?size}", "0");
-        assertOutput("${doc.r.@@next_sibling_element?size}", "0");
-        assertOutput("${doc.r.a.@@previous_sibling_element?size}", "0");
-        assertOutput("${doc.r.a.@@next_sibling_element.@@qname}", "b");
-        assertOutput("${doc.r.b.@@previous_sibling_element.@@qname}", "a");
-        assertOutput("${doc.r.b.@@next_sibling_element?size}", "0");
+        assertOutput("${doc.r.@@previousSiblingElement?size}", "0");
+        assertOutput("${doc.r.@@nextSiblingElement?size}", "0");
+        assertOutput("${doc.r.a.@@previousSiblingElement?size}", "0");
+        assertOutput("${doc.r.a.@@nextSiblingElement.@@qname}", "b");
+        assertOutput("${doc.r.b.@@previousSiblingElement.@@qname}", "a");
+        assertOutput("${doc.r.b.@@nextSiblingElement?size}", "0");
         
         addDocToDataModel("<r>\r\n\t <a/>\r\n\t <b/>\r\n\t </r>");
-        assertOutput("${doc.r.@@previous_sibling_element?size}", "0");
-        assertOutput("${doc.r.@@next_sibling_element?size}", "0");
-        assertOutput("${doc.r.a.@@previous_sibling_element?size}", "0");
-        assertOutput("${doc.r.a.@@next_sibling_element.@@qname}", "b");
-        assertOutput("${doc.r.b.@@previous_sibling_element.@@qname}", "a");
-        assertOutput("${doc.r.b.@@next_sibling_element?size}", "0");
+        assertOutput("${doc.r.@@previousSiblingElement?size}", "0");
+        assertOutput("${doc.r.@@nextSiblingElement?size}", "0");
+        assertOutput("${doc.r.a.@@previousSiblingElement?size}", "0");
+        assertOutput("${doc.r.a.@@nextSiblingElement.@@qname}", "b");
+        assertOutput("${doc.r.b.@@previousSiblingElement.@@qname}", "a");
+        assertOutput("${doc.r.b.@@nextSiblingElement?size}", "0");
         
         addDocToDataModel("<r>t<a/>t<b/>t</r>");
-        assertOutput("${doc.r.a.@@previous_sibling_element?size}", "0");
-        assertOutput("${doc.r.a.@@next_sibling_element?size}", "0");
-        assertOutput("${doc.r.b.@@previous_sibling_element?size}", "0");
-        assertOutput("${doc.r.b.@@next_sibling_element?size}", "0");
+        assertOutput("${doc.r.a.@@previousSiblingElement?size}", "0");
+        assertOutput("${doc.r.a.@@nextSiblingElement?size}", "0");
+        assertOutput("${doc.r.b.@@previousSiblingElement?size}", "0");
+        assertOutput("${doc.r.b.@@nextSiblingElement?size}", "0");
         
         addDocToDataModelNoSimplification("<r><a/> <!-- --><?pi?>&#x20;<b/></r>");
-        assertOutput("${doc.r.a.@@next_sibling_element.@@qname}", "b");
-        assertOutput("${doc.r.b.@@previous_sibling_element.@@qname}", "a");
+        assertOutput("${doc.r.a.@@nextSiblingElement.@@qname}", "b");
+        assertOutput("${doc.r.b.@@previousSiblingElement.@@qname}", "a");
         
         addDocToDataModelNoSimplification("<r><a/> <!-- -->t<!-- --> <b/></r>");
-        assertOutput("${doc.r.a.@@next_sibling_element?size}", "0");
-        assertOutput("${doc.r.b.@@previous_sibling_element?size}", "0");
+        assertOutput("${doc.r.a.@@nextSiblingElement?size}", "0");
+        assertOutput("${doc.r.b.@@previousSiblingElement?size}", "0");
     }
     
 }

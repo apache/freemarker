@@ -200,12 +200,12 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         {
             DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
                     .strict(true)
-                    .defaultDateType(TemplateDateModel.DATETIME)
+                    .defaultDateType(TemplateDateModel.DATE_TIME)
                     .outerIdentity(new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build())
                     .build();
             assertEquals(5, getDefaultObjectWrapperInstanceCacheSize());
             assertTrue(ow.isStrict());
-            assertEquals(TemplateDateModel.DATETIME, ow.getDefaultDateType());
+            assertEquals(TemplateDateModel.DATE_TIME, ow.getDefaultDateType());
             assertSame(RestrictedObjectWrapper.class, ow.getOuterIdentity().getClass());
             
             hardReferences.add(ow);

@@ -53,7 +53,7 @@ public abstract class TemplateDateFormatFactory extends TemplateValueFormatFacto
      *            {@code "1, 2"} (and {@code "@fooBar"} selects the factory). The format of this string is up to the
      *            {@link TemplateDateFormatFactory} implementation. Not {@code null}, often an empty string.
      * @param dateType
-     *            {@link TemplateDateModel#DATE}, {@link TemplateDateModel#TIME}, {@link TemplateDateModel#DATETIME} or
+     *            {@link TemplateDateModel#DATE}, {@link TemplateDateModel#TIME}, {@link TemplateDateModel#DATE_TIME} or
      *            {@link TemplateDateModel#UNKNOWN}. Supporting {@link TemplateDateModel#UNKNOWN} is not necessary, in
      *            which case the method should throw an {@link UnknownDateTypeFormattingUnsupportedException} exception.
      * @param locale

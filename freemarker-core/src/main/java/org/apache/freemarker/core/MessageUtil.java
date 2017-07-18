@@ -39,13 +39,16 @@ class MessageUtil {
               + "known if it's a date (no time part), time or date-time value.";
     
     static final String UNKNOWN_DATE_TYPE_ERROR_TIP =
-            "Use ?date, ?time, or ?datetime to tell FreeMarker the exact type.";
+            "Use ?date, ?time, or ?dateTime to tell FreeMarker the exact type.";
 
     static final Object[] UNKNOWN_DATE_TO_STRING_TIPS = {
             UNKNOWN_DATE_TYPE_ERROR_TIP,
             "If you need a particular format only once, use ?string(pattern), like ?string('dd.MM.yyyy HH:mm:ss'), "
             + "to specify which fields to display. "
     };
+
+    static final String FM3_SNAKE_CASE = "\nThe name contains '_' character, but since FreeMarker 3 names defined "
+            + "by the template language use camel case (e.g. someExampleName).";
 
     static final String EMBEDDED_MESSAGE_BEGIN = "---begin-message---\n";
 
@@ -288,7 +291,7 @@ class MessageUtil {
     static TemplateException newCantFormatDateException(TemplateDateFormat format, ASTExpression dataSrcExp,
                                                         TemplateValueFormatException e, boolean useTempModelExc) {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
-                "Failed to format date/time/datetime with format ", new _DelayedJQuote(format.getDescription()), ": ",
+                "Failed to format date/time/dateTime with format ", new _DelayedJQuote(format.getDescription()), ": ",
                 e.getMessage())
                 .blame(dataSrcExp); 
         return useTempModelExc

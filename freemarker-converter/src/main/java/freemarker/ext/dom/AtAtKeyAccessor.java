@@ -17,8 +17,19 @@
  * under the License.
  */
 
-package org.freemarker.converter;
+package freemarker.ext.dom;
 
-public class ConverterUtilTest {
+import java.util.HashSet;
+import java.util.Set;
+
+public class AtAtKeyAccessor {
+
+    public static Set<String> getAtAtKeys() {
+        Set<String> keys = new HashSet<>();
+        for (AtAtKey atAtKey : AtAtKey.values()) {
+            keys.add(atAtKey.getKey());
+        }
+        return keys;
+    }
 
 }

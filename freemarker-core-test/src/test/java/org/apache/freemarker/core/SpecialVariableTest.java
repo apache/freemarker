@@ -118,7 +118,7 @@ public class SpecialVariableTest extends TemplateTest {
                 "false true false "
                 + "true false true false true");
         
-        assertErrorContains("${.autoEscaping}", "You may meant: \"autoEsc\"");
+        assertErrorContains("${.autoEscaping}", "The correct name is: autoEsc");
     }
     
 }

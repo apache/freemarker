@@ -111,7 +111,7 @@ public class AllTemplateModels implements
 
     @Override
     public int getDateType() {
-        return TemplateDateModel.DATETIME;
+        return TemplateDateModel.DATE_TIME;
     }
 
     @Override

@@ -803,7 +803,7 @@ public final class FTLUtil {
         }
 
         if (TemplateDateModel.class.isAssignableFrom(cl)) {
-            appendTypeName(sb, typeNamesAppended, "date_or_time_or_datetime");
+            appendTypeName(sb, typeNamesAppended, "date_or_time_or_dateTime");
         }
 
         if (TemplateBooleanModel.class.isAssignableFrom(cl)) {

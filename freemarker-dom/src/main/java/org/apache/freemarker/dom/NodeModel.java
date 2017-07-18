@@ -601,8 +601,8 @@ abstract public class NodeModel implements TemplateNodeModelEx, TemplateHashMode
                     || TemplateBooleanModel.class.isAssignableFrom(expectedClass)) {
                 return new Object[]{
                         "XML node values are always strings (text), that is, they can't be used as number, "
-                                + "date/time/datetime or boolean without explicit conversion (such as "
-                                + "someNode?number, someNode?datetime.xs, someNode?date.xs, someNode?time.xs, "
+                                + "date/time/dateTime or boolean without explicit conversion (such as "
+                                + "someNode?number, someNode?dateTime.xs, someNode?date.xs, someNode?time.xs, "
                                 + "someNode?boolean).",
                 };
             }

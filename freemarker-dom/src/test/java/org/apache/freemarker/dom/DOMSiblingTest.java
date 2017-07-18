@@ -64,32 +64,32 @@ public class DOMSiblingTest extends TemplateTest {
 
     @Test
     public void testSignificantPreviousSibling() throws IOException, TemplateException {
-        assertOutput("${doc.person.name.@@previous_sibling_element}", "male");
+        assertOutput("${doc.person.name.@@previousSiblingElement}", "male");
     }
 
     @Test
     public void testSignificantNextSibling() throws IOException, TemplateException {
-        assertOutput("${doc.person.name.@@next_sibling_element}", "12th August");
+        assertOutput("${doc.person.name.@@nextSiblingElement}", "12th August");
     }
 
     @Test
     public void testNullSignificantPreviousSibling() throws IOException, TemplateException {
-        assertOutput("${doc.person.phone.@@next_sibling_element?size}", "0");
+        assertOutput("${doc.person.phone.@@nextSiblingElement?size}", "0");
     }
 
     @Test
     public void testSkippingCommentNode() throws IOException, TemplateException {
-        assertOutput("${doc.person.profession.@@previous_sibling_element}", "Chennai, India");
+        assertOutput("${doc.person.profession.@@previousSiblingElement}", "Chennai, India");
     }
 
     @Test
     public void testSkippingEmptyCDataNode() throws IOException, TemplateException {
-        assertOutput("${doc.person.hobby.@@previous_sibling_element}", "Software Engineer");
+        assertOutput("${doc.person.hobby.@@previousSiblingElement}", "Software Engineer");
     }
 
     @Test
     public void testValidCDataNode() throws IOException, TemplateException {
-        assertOutput("${doc.person.phone.@@previous_sibling_element?size}", "0");
+        assertOutput("${doc.person.phone.@@previousSiblingElement?size}", "0");
     }
     
 }

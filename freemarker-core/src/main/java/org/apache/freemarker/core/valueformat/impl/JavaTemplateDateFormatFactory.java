@@ -95,7 +95,7 @@ public class JavaTemplateDateFormatFactory extends TemplateDateFormatFactory {
                         jFormat = DateFormat.getDateInstance(tok1Style, cacheKey.locale);
                         break;
                     }
-                    case TemplateDateModel.DATETIME: {
+                    case TemplateDateModel.DATE_TIME: {
                         int tok2Style = tok.hasMoreTokens() ? parseDateStyleToken(tok.nextToken()) : tok1Style;
                         if (tok2Style != -1) {
                             jFormat = DateFormat.getDateTimeInstance(tok1Style, tok2Style, cacheKey.locale);

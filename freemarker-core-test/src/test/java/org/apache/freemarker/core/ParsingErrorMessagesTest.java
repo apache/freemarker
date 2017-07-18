@@ -45,6 +45,10 @@ public class ParsingErrorMessagesTest {
         assertErrorContains("<#foo />", "nknown directive", "#foo");
         assertErrorContains("<#set x = 1 />", "nknown directive", "#set", "#assign");
         assertErrorContains("<#iterator></#iterator>", "nknown directive", "#iterator", "#list");
+        assertErrorContains("<#if x><#elseif y></#if>", "nknown directive", "#elseIf");
+        assertErrorContains("<#outputformat 'HTML'></#outputformat>", "nknown directive", "#outputFormat");
+        assertErrorContains("<#autoesc></#autoesc>", "nknown directive", "#autoEsc");
+        assertErrorContains("<#noautoesc></#noautoesc>", "nknown directive", "#noAutoEsc");
     }
 
     @Test
@@ -70,7 +74,48 @@ public class ParsingErrorMessagesTest {
         assertErrorContains("${(blah", "\"(\"", "unclosed");
         assertErrorContains("${blah", "\"{\"", "unclosed");
     }
-    
+
+    @Test
+    public void testBuiltInWrongNames() {
+        assertErrorContains("${x?lower_case}", "camel case", "The correct name is: lowerCase");
+        assertErrorContains("${x?iso_utc_nz}", "camel case", "The correct name is: isoUtcNZ");
+        assertErrorContains("${x?no_such_name}", "camel case", "\\!The correct name is:", "alphabetical list");
+        assertErrorContains("${x?nosuchname}", "\\!camel case", "\\!The correct name is:", "alphabetical list");
+        assertErrorContains("${x?datetime}", "The correct name is: dateTime");
+        assertErrorContains("${x?datetimeIfUnknown}", "The correct name is: dateTimeIfUnknown");
+        assertErrorContains("${x?datetime_if_unknown}", "The correct name is: dateTimeIfUnknown");
+    }
+
+    @Test
+    public void testSettingWrongNames() {
+        assertErrorContains("<#setting time_format='HHmm'>", "camel case", "The correct name is: timeFormat",
+                "\\!setting names are:");
+        assertErrorContains("<#setting no_such_name=1>", "camel case", "\\!The correct name is:",
+                "setting names are:");
+        assertErrorContains("<#setting nosuchname=1>", "\\!The correct name is:", "\\!camel case",
+                "setting names are:");
+
+        assertErrorContains("<#setting datetime_format='HHmm'>", "The correct name is: dateTimeFormat");
+        assertErrorContains("<#setting datetimeFormat='HHmm'>", "The correct name is: dateTimeFormat");
+    }
+
+    @Test
+    public void testSpecialVariableWrongNames() {
+        assertErrorContains("${.data_model}", "camel case", "The correct name is: dataModel",
+                "\\!variable names are:");
+        assertErrorContains("${.no_such_name}", "camel case", "\\!The correct name is:",
+                "variable names are:");
+        assertErrorContains("${.nosuchname}", "\\!camel case", "\\!The correct name is:",
+                "variable names are:");
+    }
+
+    @Test
+    public void testFtlParameterWrongNames() {
+        assertErrorContains("<#ftl strip_whitespace=false>", "camel case", "The correct name is: stripWhitespace");
+        assertErrorContains("<#ftl no_such_name=1>", "camel case", "\\!The correct name is:");
+        assertErrorContains("<#ftl nosuchname=1>", "\\!camel case", "\\!The correct name is:");
+    }
+
     @Test
     public void testInterpolatingClosingsErrors() {
         assertErrorContains("${x", "unclosed");

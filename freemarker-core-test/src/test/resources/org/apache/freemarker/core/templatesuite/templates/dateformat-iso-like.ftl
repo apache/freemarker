@@ -16,7 +16,7 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<#assign d = "2010-05-15 22:38:05:23 +0200"?datetime("yyyy-MM-dd HH:mm:ss:S Z")>
+<#assign d = "2010-05-15 22:38:05:23 +0200"?dateTime("yyyy-MM-dd HH:mm:ss:S Z")>
 <#setting timeZone="GMT+02">
 <@assertEquals actual=d?string.xs  expected="2010-05-15T22:38:05.023+02:00" />
 <@assertEquals actual=d?string.iso expected="2010-05-15T22:38:05.023+02:00" />
@@ -92,7 +92,7 @@
 <@assertEquals actual=d?string.iso expected="2010-05-14" />
 
 <#setting timeZone="GMT+02:30">
-<#assign d = "2010-05-15"?datetime("yyyy-MM-dd")>
+<#assign d = "2010-05-15"?dateTime("yyyy-MM-dd")>
 <@assertEquals actual=d?string.xs  expected="2010-05-15T00:00:00+02:30" />
 <@assertEquals actual=d?string.iso expected="2010-05-15T00:00:00+02:30" />
 
@@ -103,7 +103,7 @@
 <@assertEquals actual=d?string.xs  expected="-1-05-13-05:00" />
 <@assertEquals actual=d?string.iso expected="0000-05-13" />
 
-<#assign dt = "2010-05-15T01:02:03"?datetime.xs>
+<#assign dt = "2010-05-15T01:02:03"?dateTime.xs>
 <#setting dateTimeFormat="xs">
 <@assertEquals actual=dt?string expected="2010-05-15T01:02:03-05:00" />
 <#setting dateTimeFormat="xs u">
@@ -146,8 +146,8 @@
 <#setting timeFormat="iso nz ms">
 <@assertEquals actual=t?string expected="01:02:03.000" />
 
-<@assertFails message="Use ?date, ?time, or ?datetime">${unknownDate?string.xs}</@>
-<@assertFails message="Use ?date, ?time, or ?datetime">${unknownDate?string.iso}</@>
+<@assertFails message="Use ?date, ?time, or ?dateTime">${unknownDate?string.xs}</@>
+<@assertFails message="Use ?date, ?time, or ?dateTime">${unknownDate?string.iso}</@>
 <@assertFails message="format string">${.now?string.xs_fz_nz}</@>
 <@assertFails message="format string">${.now?string.xs_u_fu}</@>
 <@assertFails message="format string">${.now?string.xs_s_ms}</@>

@@ -45,7 +45,7 @@
 
 <p>Function is defined, now let's call it:</p>
 
-   <@español urls.home images.home "Home" /><#t>
+   <@español urls.home, images.home, "Home" /><#t>
 
 <p>Again, but with different parameters:</p>
 
@@ -65,7 +65,7 @@
 
 <#macro recurse(dummy, a=3)>
     <#if (a > 0)>
-        <@recurse dummy  a - 1 />
+        <@recurse dummy, a - 1 />
     </#if>
     ${a}
 </#macro>
@@ -93,7 +93,7 @@ foo=${foo} baz=[<#list bar?keys?sort as key>${key}=${bar[key]}<#if key_has_next>
 <#macro m a=1 b=2>
 </#macro>
 <@assertFails message='"c"'><@m c=3 /></@>
-<@assertFails message='3'><@m 9 8 7 /></@>
+<@assertFails message='3'><@m 9, 8, 7 /></@>
 
 <@fmt "Hello {0}! Today is {1}.", "World", "Monday" />
 

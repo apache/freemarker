@@ -301,7 +301,7 @@ Sequence built-ins failing on date-type mismatch
 <@assertEquals actual=x?seqIndexOf('foo') expected=1 />
 <@assertEquals actual=x?seqIndexOf('1992-02-21'?date('yyyy-MM-dd')) expected=0 />
 <@assertFails message="dates of different types">
-  0 = ${x?seqIndexOf('1992-02-21 00:00:00'?datetime('yyyy-MM-dd HH:mm:ss'))}
+  0 = ${x?seqIndexOf('1992-02-21 00:00:00'?dateTime('yyyy-MM-dd HH:mm:ss'))}
 </@>
 
 Chunk
@@ -322,7 +322,7 @@ Chunk
 
 <#macro printTable ls columns fill>
   columns = ${columns}, fill = ${fill}:<#lt>
-  <#if fill='NULL'>
+  <#if fill=='NULL'>
     <#local rows = ls?chunk(columns)>
   <#else>
     <#local rows = ls?chunk(columns, fill)>

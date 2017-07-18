@@ -63,7 +63,7 @@ final class ASTDirAssignment extends ASTDirective {
         
         this.variableName = variableName;
         
-        if (operator == FMParserConstants.EQUALS) {
+        if (operator == FMParserConstants.ASSIGNMENT_EQUALS) {
             operatorType = OPERATOR_TYPE_EQUALS;
         } else {
             switch (operator) {

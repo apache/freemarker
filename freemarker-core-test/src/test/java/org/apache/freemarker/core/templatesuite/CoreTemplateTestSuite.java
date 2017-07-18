@@ -102,7 +102,7 @@ public class CoreTemplateTestSuite extends TemplateTestSuite {
         } else if (simpleTestName.startsWith("dateformat")) {
             GregorianCalendar cal = new GregorianCalendar(2002, 10, 15, 14, 54, 13);
             cal.setTimeZone(TimeZone.getTimeZone("GMT"));
-            dataModel.put("date", new SimpleDate(cal.getTime(), TemplateDateModel.DATETIME));
+            dataModel.put("date", new SimpleDate(cal.getTime(), TemplateDateModel.DATE_TIME));
             dataModel.put("unknownDate", new SimpleDate(cal.getTime(), TemplateDateModel.UNKNOWN));
             dataModel.put("javaGMT02", TimeZone.getTimeZone("GMT+02"));
             dataModel.put("javaUTC", TimeZone.getTimeZone("UTC"));

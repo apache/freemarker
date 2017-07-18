@@ -24,17 +24,17 @@ package org.apache.freemarker.dom;
 enum AtAtKey {
     
     MARKUP("@@markup"),
-    NESTED_MARKUP("@@nested_markup"),
-    ATTRIBUTES_MARKUP("@@attributes_markup"),
+    NESTED_MARKUP("@@nestedMarkup"),
+    ATTRIBUTES_MARKUP("@@attributesMarkup"),
     TEXT("@@text"),
-    START_TAG("@@start_tag"),
-    END_TAG("@@end_tag"),
+    START_TAG("@@startTag"),
+    END_TAG("@@endTag"),
     QNAME("@@qname"),
     NAMESPACE("@@namespace"),
-    LOCAL_NAME("@@local_name"),
+    LOCAL_NAME("@@localName"),
     ATTRIBUTES("@@"),
-    PREVIOUS_SIBLING_ELEMENT("@@previous_sibling_element"),
-    NEXT_SIBLING_ELEMENT("@@next_sibling_element");
+    PREVIOUS_SIBLING_ELEMENT("@@previousSiblingElement"),
+    NEXT_SIBLING_ELEMENT("@@nextSiblingElement");
 
     private final String key;
 

@@ -841,8 +841,8 @@ TOKEN:
             if (dn.equals("set") || dn.equals("var")) {
                 tip = "Use #assign or #local or #global, depending on the intented scope "
                       + "(#assign is template-scope). " + PLANNED_DIRECTIVE_HINT;
-            } else if (dn.equals("else_if") || dn.equals("elif")) {
-            	tip = "Use #elseIf.";
+            } else if (dn.equals("else_if") || dn.equals("elif") || dn.equals("elseif")) {
+            	tip = "Use #elseIf instead.";
             } else if (dn.equals("no_escape")) {
             	tip = "Use #noEscape instead.";
             } else if (dn.equals("method")) {
@@ -859,6 +859,14 @@ TOKEN:
                 tip = "You may meant #items.";
             } else if (dn.equals("separator") || dn.equals("separate") || dn.equals("separ")) {
                 tip = "You may meant #sep.";
+            } else if (dn.equals("outputformat")) {
+            	tip = "Use #outputFormat instead.";
+            } else if (dn.equals("noautoesc")) {
+            	tip = "Use #noAutoEsc instead.";
+            } else if (dn.equals("autoesc")) {
+            	tip = "Use #autoEsc instead.";
+            } else if (dn.equals("noparse")) {
+            	tip = "Use #noParse instead.";
             } else {
                 tip = "Help (latest version): http://freemarker.org/docs/ref_directive_alphaidx.html; "
                         + "you're using FreeMarker " + Configuration.getVersion() + ".";
@@ -958,9 +966,9 @@ TOKEN:
     |
     <EXISTS : "??">
     |
-    <EQUALS : "=">
+    <ASSIGNMENT_EQUALS : "=">
     |
-    <DOUBLE_EQUALS : "==">
+    <COMPARISON_EQUALS : "==">
     |
     <NOT_EQUALS : "!=">
     |
@@ -1000,9 +1008,9 @@ TOKEN:
     |
     <PERCENT : "%">
     |
-    <AND : "&" | "&&" | "&amp;&amp;" | "\\and">
+    <AND : "&&" | "&amp;&amp;" | "\\and">
     |
-    <OR : "|" | "||">
+    <OR : "||">
     |
     <EXCLAM : "!">
     |
@@ -1519,13 +1527,11 @@ ASTExpression EqualityExpression() :
 {
     lhs = RelationalExpression() { result = lhs; }
     [
-        LOOKAHEAD(<NOT_EQUALS>|<EQUALS>|<DOUBLE_EQUALS>)
+        LOOKAHEAD(<NOT_EQUALS>|<COMPARISON_EQUALS>)
         (
             t = <NOT_EQUALS> 
             |
-            t = <EQUALS> 
-            |
-            t = <DOUBLE_EQUALS>
+            t = <COMPARISON_EQUALS>
         )
         rhs = RelationalExpression()
         {
@@ -2620,7 +2626,7 @@ ASTElement Assign() :
     	(
             (
 	    	    (
-			        (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
+			        (<ASSIGNMENT_EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
 			        {
 			           equalsOp = token;
 			        }
@@ -2648,7 +2654,7 @@ ASTElement Assign() :
 	            LOOKAHEAD(
 	               [<COMMA>]
 	               (<ID>|<STRING_LITERAL>)
-	               (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>
+	               (<ASSIGNMENT_EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>
 	                       |<PLUS_PLUS>|<MINUS_MINUS>)
 	            )
 	            [<COMMA>]
@@ -2660,7 +2666,7 @@ ASTElement Assign() :
 	            }
 	            (
 	                (
-	                    (<EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
+	                    (<ASSIGNMENT_EQUALS>|<PLUS_EQUALS>|<MINUS_EQUALS>|<TIMES_EQUALS>|<DIV_EQUALS>|<MOD_EQUALS>)
 	                    {
 	                       equalsOp = token;
 	                    }
@@ -2769,7 +2775,7 @@ ASTDirInclude Include() :
     [<SEMICOLON>]
     (
         att = <ID>
-        <EQUALS>
+        <ASSIGNMENT_EQUALS>
         exp = ASTExpression()
         {
             String attString = att.image;
@@ -2857,7 +2863,7 @@ ASTDirMacro Macro() :
             <ELLIPSIS> { isCatchAll = true; }
         ]
         [
-            <EQUALS>
+            <ASSIGNMENT_EQUALS>
             defValue = ASTExpression()
             {
                 defNames.add(arg.image);
@@ -2961,7 +2967,7 @@ ASTElement UnifiedMacroTransform() :
     }
     [<TERMINATING_WHITESPACE>]
     (
-        LOOKAHEAD(<ID><EQUALS>)
+        LOOKAHEAD(<ID><ASSIGNMENT_EQUALS>)
         namedArgs = NamedArgs()
         |
         positionalArgs = PositionalArgs()
@@ -3043,7 +3049,7 @@ HashMap NamedArgs() :
 {
     (
         t = <ID>
-        <EQUALS>
+        <ASSIGNMENT_EQUALS>
         {
             token_source.SwitchTo(token_source.NAMED_PARAMETER_EXPRESSION);
             token_source.inInvocation = true;
@@ -3068,7 +3074,7 @@ ArrayList PositionalArgs() :
     [
         arg = ASTExpression() { result.add(arg); }
         (
-            [<COMMA>]
+            <COMMA>
             arg = ASTExpression() { result.add(arg); }
         )*
     ]
@@ -3403,7 +3409,7 @@ ASTDirSetting Setting() :
 {
     start = <SETTING>
     key = <ID>
-    <EQUALS>
+    <ASSIGNMENT_EQUALS>
     value = ASTExpression()
     end = LooseDirectiveEnd()
     {
@@ -3742,7 +3748,7 @@ void HeaderElement() :
             <FTL_HEADER>
             (
                 key = <ID>
-                <EQUALS>
+                <ASSIGNMENT_EQUALS>
                 exp = ASTExpression()
                 {
                     String ks = key.image;
@@ -3857,40 +3863,64 @@ void HeaderElement() :
                             } catch (TemplateModelException tme) {
                             }
                         } else {
+                            StringBuilder sb = new StringBuilder();
+                            sb.append("Unknown header parameter: ").append(ks);
+
+                            if (ks.indexOf('_') != -1) {
+                                sb.append(MessageUtil.FM3_SNAKE_CASE);
+                            }
+
                             String correctName;
-                            String ksLC = ks.toLowerCase();
-	                        if (ksLC.equals("charset") || ksLC.equals("source_encoding")
-	                                || ksLC.equals("sourcerncoding")) {
+                            switch (ks.toLowerCase()) {
+	                        case "charset":
+	                        case "source_encoding":
+	                        case "sourcerncoding":
 	                            correctName = "encoding";
-	                        } else if (ksLC.equals("attributes") || ksLC.equals("customsettings")
-	                                || ksLC.equals("custom_settings") || ksLC.equals("settings")) {
+	                            break;
+	                        case "attributes":
+	                        case "customsettings":
+                            case "custom_settings":
+                            case "settings":
 	                            correctName = "customSettings";
-	                        } else if (ksLC.equalsIgnoreCase("strip_whitespace")
-	                                || ksLC.equalsIgnoreCase("stripwhitespace")
-	                                || ksLC.equalsIgnoreCase("remove_whitespace")
-	                                || ksLC.equalsIgnoreCase("removewhitespace")) {
+	                            break;
+	                        case "strip_whitespace":
+                            case "stripwhitespace":
+                            case "remove_whitespace":
+                            case "removewhitespace":
 	                            correctName = "stripWhitespace";
-	                        } else if (ksLC.equalsIgnoreCase("strip_text") || ksLC.equalsIgnoreCase("striptext")
-	                                || ksLC.equalsIgnoreCase("remove_text") || ksLC.equalsIgnoreCase("removetext")) {
+	                            break;
+	                        case "strip_text":
+	                        case "striptext":
+                            case "remove_text":
+                            case "removetext":
 	                            correctName = "stripText";
-	                        } else if (ksLC.equals("xmlns") || ksLC.equalsIgnoreCase("ns_prefixes")
-	                                || ksLC.equalsIgnoreCase("nsprefixes")) {
+	                            break;
+	                        case "xmlns":
+	                        case "ns_prefixes":
+	                        case "nsprefixes":
                                 correctName = "nsPrefixes";
-	                        } else if (ksLC.equalsIgnoreCase("output_format")
-	                                || ksLC.equalsIgnoreCase("outputformat")) {
+                                break;
+	                        case "output_format":
+                            case "outputformat":
                                 correctName = "outputFormat";
-                            } else if (ksLC.equals("autoEscape") || ksLC.equals("autoEscaping")
-                                    || ksLC.equals("autoesc")
-                                    || ksLC.equals("auto_escape") || ksLC.equals("auto_escaping")
-                                    || ksLC.equalsIgnoreCase("auto_esc")) {
+                                break;
+                            case "autoescape":
+                            case "autoescaping":
+                            case "autoesc":
+                            case "auto_escape":
+                            case "auto_escaping":
+                            case "auto_esc":
                                 correctName = "autoEsc";
-	                        } else {
+                                break;
+	                        default:
                                 correctName = null;
 	                        }
-                            throw new ParseException(
-                                    "Unknown FTL header parameter: " + key.image
-                                    + (correctName == null ? "" : ". You may meant: " + correctName),
-                                    template, key);
+
+	                        if (correctName != null) {
+	                            sb.append("\nThe correct name is: ").append(correctName);
+	                        }
+
+                            throw new ParseException(sb.toString(), template, key);
                         }
                     }
                 }
@@ -3914,7 +3944,7 @@ Map ParamList() :
 {
     (
         id = ASTExpVariable()
-        <EQUALS>
+        <ASSIGNMENT_EQUALS>
         exp = ASTExpression() { result.put(id.toString(), exp); }
         [<COMMA>]
     )+

@@ -20,8 +20,8 @@
 package org.apache.freemarker.core;
 
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.Set;
 
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
@@ -29,6 +29,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.util._SortedArraySet;
 import org.apache.freemarker.core.util._StringUtil;
 
 /**
@@ -36,7 +37,6 @@ import org.apache.freemarker.core.util._StringUtil;
  */
 final class ASTExpBuiltInVariable extends ASTExpression {
 
-    static final String TEMPLATE_NAME = "templateName";
     static final String MAIN_TEMPLATE_NAME = "mainTemplateName";
     static final String CURRENT_TEMPLATE_NAME = "currentTemplateName";
     static final String NAMESPACE = "namespace";
@@ -47,7 +47,6 @@ final class ASTExpBuiltInVariable extends ASTExpression {
     static final String LANG = "lang";
     static final String LOCALE = "locale";
     static final String LOCALE_OBJECT = "localeObject";
-    static final String CURRENT_NODE = "currentNode";
     static final String NODE = "node";
     static final String PASS = "pass";
     static final String VARS = "vars";
@@ -60,9 +59,9 @@ final class ASTExpBuiltInVariable extends ASTExpression {
     static final String URL_ESCAPING_CHARSET = "urlEscapingCharset";
     static final String NOW = "now";
     
-    static final String[] BUILT_IN_VARIABLE_NAMES = new String[] {
+    static final Set<String> BUILT_IN_VARIABLE_NAMES = new _SortedArraySet<>(
+        // Must be sorted alphabetically!
         AUTO_ESC,
-        CURRENT_NODE,
         CURRENT_TEMPLATE_NAME,
         DATA_MODEL,
         ERROR,
@@ -80,11 +79,10 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         OUTPUT_ENCODING,
         OUTPUT_FORMAT,
         PASS,
-        TEMPLATE_NAME,
         URL_ESCAPING_CHARSET,
         VARS,
         VERSION
-    };
+    );
 
     private final String name;
     private final TemplateModel parseTimeValue;
@@ -93,35 +91,38 @@ final class ASTExpBuiltInVariable extends ASTExpression {
             throws ParseException {
         String name = nameTk.image;
         this.parseTimeValue = parseTimeValue;
-        if (Arrays.binarySearch(BUILT_IN_VARIABLE_NAMES, name) < 0) {
+        if (!BUILT_IN_VARIABLE_NAMES.contains(name)) {
             StringBuilder sb = new StringBuilder();
             sb.append("Unknown special variable name: ");
             sb.append(_StringUtil.jQuote(name)).append(".");
 
-            {
-                String correctName;
-                if (
-                        name.equals("auto_escape") || name.equals("auto_escaping") || name.equals("autoEsc") ||
-                        name.equals("autoEscape") || name.equals("autoEscaping")) {
-                    correctName = "autoEsc";
-                } else {
-                    correctName = null;
+            String correctedName;
+            if (name.indexOf('_') != -1) {
+                sb.append(MessageUtil.FM3_SNAKE_CASE);
+                correctedName = _StringUtil.snakeCaseToCamelCase(name);
+                if (!BUILT_IN_VARIABLE_NAMES.contains(correctedName)) {
+                    correctedName = null;
                 }
-                if (correctName != null) {
-                    sb.append(" You may meant: ");
-                    sb.append(_StringUtil.jQuote(correctName)).append(".");
-                }
+            } else if (name.equals("auto_escape") || name.equals("auto_escaping") || name.equals("autoEsc")
+                    || name.equals("autoEscape") || name.equals("autoEscaping")) {
+                correctedName = "autoEsc";
+            } else {
+                correctedName = null;
             }
-            
-            sb.append("\nThe allowed special variable names are: ");
-            boolean first = true;
-            for (final String correctName : BUILT_IN_VARIABLE_NAMES) {
-                if (first) {
-                    first = false;
-                } else {
-                    sb.append(", ");
+
+            if (correctedName != null) {
+                sb.append("\nThe correct name is: ").append(correctedName);
+            } else {
+                sb.append("\nThe supported special variable names are: ");
+                boolean first = true;
+                for (final String supportedName : BUILT_IN_VARIABLE_NAMES) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append(", ");
+                    }
+                    sb.append(supportedName);
                 }
-                sb.append(correctName);
             }
             throw new ParseException(sb.toString(), null, nameTk);
         }
@@ -162,14 +163,13 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         if (name == LANG) {
             return new SimpleScalar(env.getLocale().getLanguage());
         }
-        if (name == CURRENT_NODE || name == NODE) {
+        if (name == NODE) {
             return env.getCurrentVisitorNode();
         }
         if (name == MAIN_TEMPLATE_NAME) {
             return SimpleScalar.newInstanceOrNull(env.getMainTemplate().getLookupName());
         }
-        // [FM3] Some of these two should be removed.
-        if (name == CURRENT_TEMPLATE_NAME || name == TEMPLATE_NAME) {
+        if (name == CURRENT_TEMPLATE_NAME) {
             return SimpleScalar.newInstanceOrNull(env.getCurrentTemplate().getLookupName());
         }
         if (name == PASS) {
@@ -187,7 +187,7 @@ final class ASTExpBuiltInVariable extends ASTExpression {
             return new SimpleScalar(env.getCurrentRecoveredErrorMessage());
         }
         if (name == NOW) {
-            return new SimpleDate(new Date(), TemplateDateModel.DATETIME);
+            return new SimpleDate(new Date(), TemplateDateModel.DATE_TIME);
         }
         if (name == VERSION) {
             return new SimpleScalar(Configuration.getVersion().toString());

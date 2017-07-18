@@ -170,7 +170,7 @@ public class TemplateConfigurationExamples extends TemplateTest {
         }
         setConfiguration(cfgB.build());
 
-        addTemplate("t.stats.html", "${ts?datetime} ${ts?date} ${ts?time}");
+        addTemplate("t.stats.html", "${ts?dateTime} ${ts?date} ${ts?time}");
         addTemplate("t.html", "");
         addTemplate("t.htm", "");
         addTemplate("t.xml", "");

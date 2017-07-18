@@ -37,9 +37,9 @@
 <@assertEquals expected='dtf' actual=.now?string />
 
 <#setting timeZone='GMT+00'>
-<#assign t1='2000'?datetime('yyyy')>
+<#assign t1='2000'?dateTime('yyyy')>
 <#setting timeZone='GMT+01'>
-<#assign t2='2000'?datetime('yyyy')>
+<#assign t2='2000'?dateTime('yyyy')>
 <@assertEquals expected=1000*60*60 actual=t1?long-t2?long />
 
 <#setting sqlDateAndTimeTimeZone='GMT+01'>

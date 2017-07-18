@@ -20,7 +20,7 @@
 <#setting timeZone="GMT">
 <#setting dateTimeFormat="">
 ${date}
-${unknownDate?datetime}
+${unknownDate?dateTime}
 ${date?string}
 ${date?string[""]}
 ${date?string.short}

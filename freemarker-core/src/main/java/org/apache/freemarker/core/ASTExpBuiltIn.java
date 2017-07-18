@@ -77,7 +77,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
     protected ASTExpression target;
     protected String key;
 
-    static final int NUMBER_OF_BIS = 263;
+    static final int NUMBER_OF_BIS = 262;
     static final HashMap<String, ASTExpBuiltIn> BUILT_INS_BY_NAME = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
 
     static {
@@ -97,8 +97,8 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("contains", new BuiltInsForStringsBasic.containsBI());        
         putBI("date", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.DATE));
         putBI("dateIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATE));
-        putBI("datetime", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.DATETIME));
-        putBI("datetimeIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATETIME));
+        putBI("dateTime", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.DATE_TIME));
+        putBI("dateTimeIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATE_TIME));
         putBI("default", new BuiltInsForExistenceHandling.defaultBI());
         putBI("double", new doubleBI());
         putBI("endsWith", new BuiltInsForStringsBasic.ends_withBI());
@@ -133,7 +133,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("isFirst", new BuiltInsForLoopVariables.is_firstBI());
         putBI("isLast", new BuiltInsForLoopVariables.is_lastBI());
         putBI("isUnknownDateLike", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.UNKNOWN));
-        putBI("isDatetime", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.DATETIME));
+        putBI("isDatetime", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.DATE_TIME));
         putBI("isDirective", new BuiltInsForMultipleTypes.is_directiveBI());
         putBI("isEnumerable", new BuiltInsForMultipleTypes.is_enumerableBI());
         putBI("isHashEx", new BuiltInsForMultipleTypes.is_hash_exBI());
@@ -240,7 +240,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("number", new BuiltInsForStringsMisc.numberBI());
         putBI("numberToDate", new number_to_dateBI(TemplateDateModel.DATE));
         putBI("numberToTime", new number_to_dateBI(TemplateDateModel.TIME));
-        putBI("numberToDatetime", new number_to_dateBI(TemplateDateModel.DATETIME));
+        putBI("numberToDatetime", new number_to_dateBI(TemplateDateModel.DATE_TIME));
         putBI("parent", new parentBI());
         putBI("previousSibling", new previousSiblingBI());
         putBI("nextSibling", new nextSiblingBI());
@@ -275,7 +275,6 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("url", new BuiltInsForStringsEncoding.urlBI());
         putBI("urlPath", new BuiltInsForStringsEncoding.urlPathBI());
         putBI("values", new BuiltInsForHashes.valuesBI());
-        putBI("webSafe", BUILT_INS_BY_NAME.get("html"));  // deprecated; use ?html instead
         putBI("wordList", new BuiltInsForStringsBasic.word_listBI());
         putBI("xhtml", new BuiltInsForStringsEncoding.xhtmlBI());
         putBI("xml", new BuiltInsForStringsEncoding.xmlBI());
@@ -304,34 +303,65 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         String key = keyTk.image;
         ASTExpBuiltIn bi = BUILT_INS_BY_NAME.get(key);
         if (bi == null) {
-            StringBuilder buf = new StringBuilder("Unknown built-in: ").append(_StringUtil.jQuote(key)).append(". ");
-            
-            buf.append(
-                    "Help (latest version): http://freemarker.org/docs/ref_builtins.html; "
-                    + "you're using FreeMarker ").append(Configuration.getVersion()).append(".\n" 
-                    + "The alphabetical list of built-ins:");
-            List<String> names = new ArrayList<>(BUILT_INS_BY_NAME.keySet().size());
-            names.addAll(BUILT_INS_BY_NAME.keySet());
-            Collections.sort(names);
-            char lastLetter = 0;
+            StringBuilder sb = new StringBuilder("Unknown built-in: ").append(_StringUtil.jQuote(key)).append(".");
 
-            boolean first = true;
-            for (String correctName : names) {
-                if (first) {
-                    first = false;
-                } else {
-                    buf.append(", ");
+            String correctedKey;
+            if (key.indexOf("_") != -1) {
+                sb.append(MessageUtil.FM3_SNAKE_CASE);
+                correctedKey = _StringUtil.snakeCaseToCamelCase(key);
+                if (!BUILT_INS_BY_NAME.containsKey(correctedKey)) {
+                    if (correctedKey.length() > 1) {
+                        correctedKey = correctedKey.substring(0, correctedKey.length() - 2)
+                                + correctedKey.substring(correctedKey.length() - 2).toUpperCase();
+                        if (!BUILT_INS_BY_NAME.containsKey(correctedKey)) {
+                            if (key.equals("datetime_if_unknown")) {
+                                correctedKey = "dateTimeIfUnknown";
+                            } else {
+                                correctedKey = null;
+                            }
+                        }
+                    } else {
+                        correctedKey = null;
+                    }
                 }
+            } else if (key.equals("datetime")) {
+                correctedKey = "dateTime";
+            } else if (key.equals("datetimeIfUnknown")) {
+                correctedKey = "dateTimeIfUnknown";
+            } else {
+                correctedKey = null;
+            }
 
-                char firstChar = correctName.charAt(0);
-                if (firstChar != lastLetter) {
-                    lastLetter = firstChar;
-                    buf.append('\n');
+            if (correctedKey != null) {
+                sb.append("\nThe correct name is: ").append(correctedKey);
+            } else {
+                sb.append(
+                        "\nHelp (latest version): http://freemarker.org/docs/ref_builtins.html; "
+                                + "you're using FreeMarker ").append(Configuration.getVersion()).append(".\n"
+                        + "The alphabetical list of built-ins:");
+                List<String> names = new ArrayList<>(BUILT_INS_BY_NAME.keySet().size());
+                names.addAll(BUILT_INS_BY_NAME.keySet());
+                Collections.sort(names);
+                char lastLetter = 0;
+
+                boolean first = true;
+                for (String correctName : names) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append(", ");
+                    }
+
+                    char firstChar = correctName.charAt(0);
+                    if (firstChar != lastLetter) {
+                        lastLetter = firstChar;
+                        sb.append('\n');
+                    }
+                    sb.append(correctName);
                 }
-                buf.append(correctName);
             }
                 
-            throw new ParseException(buf.toString(), null, keyTk);
+            throw new ParseException(sb.toString(), null, keyTk);
         }
         
         try {

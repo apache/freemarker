@@ -50,10 +50,10 @@ public class SimpleDate implements TemplateDateModel, Serializable {
     
     /**
      * Creates a new date model wrapping the specified time object and
-     * having DATETIME type.
+     * having DATE_TIME type.
      */
-    public SimpleDate(java.sql.Timestamp datetime) {
-        this(datetime, DATETIME);
+    public SimpleDate(java.sql.Timestamp dateTime) {
+        this(dateTime, DATE_TIME);
     }
     
     /**

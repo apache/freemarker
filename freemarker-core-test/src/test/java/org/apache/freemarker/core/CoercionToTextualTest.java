@@ -40,7 +40,7 @@ public class CoercionToTextualTest extends TemplateTest {
     
     /** 2015-09-06T12:00:00Z */
     private static long T = 1441540800000L;
-    private static TemplateDateModel TM = new SimpleDate(new Date(T), TemplateDateModel.DATETIME);
+    private static TemplateDateModel TM = new SimpleDate(new Date(T), TemplateDateModel.DATE_TIME);
     
     @Test
     public void testBasicStringBuiltins() throws IOException, TemplateException {

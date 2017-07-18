@@ -1526,7 +1526,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         if (!dateTimeFormat.equals(prevDateTimeFormat)) {
             if (cachedTempDateFormatArray != null) {
                 for (int i = 0; i < CACHED_TDFS_LENGTH; i += CACHED_TDFS_ZONELESS_INPUT_OFFS) {
-                    cachedTempDateFormatArray[i + TemplateDateModel.DATETIME] = null;
+                    cachedTempDateFormatArray[i + TemplateDateModel.DATE_TIME] = null;
                 }
             }
         }
@@ -1602,7 +1602,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     /**
-     * Gets a {@link TemplateDateFormat} using the date/time/datetime format settings and the current locale and time
+     * Gets a {@link TemplateDateFormat} using the date/time/dateTime format settings and the current locale and time
      * zone. (The current locale is the locale returned by {@link #getLocale()}. The current time zone is
      * {@link #getTimeZone()} or {@link #getSQLDateAndTimeTimeZone()}).
      * 
@@ -1626,7 +1626,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * 
      * <p>
      * Note on performance: The result will be cached in the {@link Environment} instance. However, at least in 2.3.24
-     * the cached entries that depend on the current locale or the current time zone or the current date/time/datetime
+     * the cached entries that depend on the current locale or the current time zone or the current date/time/dateTime
      * format of the {@link Environment} will be lost when those settings are changed.
      * 
      * @param formatString
@@ -1788,7 +1788,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                 settingName = MutableProcessingConfiguration.DATE_FORMAT_KEY;
                 settingValue = getDateFormat();
                 break;
-            case TemplateDateModel.DATETIME:
+            case TemplateDateModel.DATE_TIME:
                 settingName = MutableProcessingConfiguration.DATE_TIME_FORMAT_KEY;
                 settingValue = getDateTimeFormat();
                 break;
@@ -1799,7 +1799,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             
             _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                     "The value of the \"", settingName,
-                    "\" FreeMarker configuration setting is a malformed date/time/datetime format string: ",
+                    "\" FreeMarker configuration setting is a malformed date/time/dateTime format string: ",
                     new _DelayedJQuote(settingValue), ". Reason given: ",
                     e.getMessage());                    
             throw useTempModelExc ? new _TemplateModelException(e, desc) : new _MiscTemplateException(e, desc);
@@ -1821,7 +1821,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             throw MessageUtil.newCantFormatUnknownTypeDateException(blamedDateSourceExp, e);
         } catch (TemplateValueFormatException e) {
             _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
-                    "Can't invoke date/time/datetime format based on format string ",
+                    "Can't invoke date/time/dateTime format based on format string ",
                     new _DelayedJQuote(formatString), ". Reason given: ",
                     e.getMessage())
                     .blame(blamedFormatterExp);
@@ -1830,7 +1830,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     /**
-     * Used to get the {@link TemplateDateFormat} according the date/time/datetime format settings, for the current
+     * Used to get the {@link TemplateDateFormat} according the date/time/dateTime format settings, for the current
      * locale and time zone. See {@link #getTemplateDateFormat(String, int, Locale, TimeZone, boolean)} for the meaning
      * of some of the parameters.
      */
@@ -1855,7 +1855,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             case TemplateDateModel.DATE:
                 formatString = getDateFormat();
                 break;
-            case TemplateDateModel.DATETIME:
+            case TemplateDateModel.DATE_TIME:
                 formatString = getDateTimeFormat();
                 break;
             default:
@@ -2505,7 +2505,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     /**
-     * sets TemplateNodeModel as the current visitor node. <tt>.current_node</tt>
+     * sets TemplateNodeModel as the current visitor node. <tt>.node</tt>
      */
     public void setCurrentVisitorNode(TemplateNodeModel node) {
         currentVisitorNode = node;

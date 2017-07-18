@@ -36,7 +36,7 @@ final class ASTExpComparison extends ASTExpBoolean {
         this.right = right;
         opString = opString.intern();
         this.opString = opString;
-        if (opString == "==" || opString == "=") {
+        if (opString == "==") {
             operation = _EvalUtil.CMP_OP_EQUALS;
         } else if (opString == "!=") {
             operation = _EvalUtil.CMP_OP_NOT_EQUALS;

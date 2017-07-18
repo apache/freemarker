@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core.util;
 
+import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -399,5 +400,17 @@ public class StringUtilTest {
         assertEquals("x\ny", _StringUtil.normalizeEOLs("x\ry"));
         assertEquals("\n\n\n\n\n\n", _StringUtil.normalizeEOLs("\n\r\r\r\n\r\n\r"));
     }
-    
+
+    @Test
+    public void snakeCaseToCamelCase() {
+        assertNull(_StringUtil.snakeCaseToCamelCase(null));
+        assertEquals("", _StringUtil.snakeCaseToCamelCase(""));
+        assertEquals("x", _StringUtil.snakeCaseToCamelCase("x"));
+        assertEquals("xxx", _StringUtil.snakeCaseToCamelCase("xXx"));
+        assertEquals("fooBar", _StringUtil.snakeCaseToCamelCase("foo_bar"));
+        assertEquals("fooBar", _StringUtil.snakeCaseToCamelCase("FOO_BAR"));
+        assertEquals("fooBar", _StringUtil.snakeCaseToCamelCase("_foo__bar_"));
+        assertEquals("aBC", _StringUtil.snakeCaseToCamelCase("a_b_c"));
+    }
+
 }
