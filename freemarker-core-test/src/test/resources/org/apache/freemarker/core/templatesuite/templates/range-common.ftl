@@ -17,7 +17,7 @@
   under the License.
 -->
 <#-- A version of "?join" that fails at null-s in the sequence: -->
-<#function join seq sep=''>
+<#function join(seq, sep='')>
   <#local r = "">
   <#list seq as i>
     <#local r = r + i>

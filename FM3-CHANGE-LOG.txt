@@ -69,6 +69,15 @@ Node: Changes already mentioned above aren't repeated here!
 - Removed long deprecated `#{}` interpolations. They are treated as plain static text now.
   Converter note: The template converter tool translates these to `${}` interpolations. For example `#{x}` is simply
   translated to `${b}`, while `#{x; m1M3}` is translated to `${x?string('0.0##')}`). The output should remain the same.
+- In `#macro` and `#function` the comma must only be used between by-position parameters (earlier the comma was
+  optional).
+  TODO As of this writing, the by-position VS by-name feature isn't implemented yet, so
+  comma is to be used for `#function`, and comma must not be used for `#macro` (even though for now macros are always
+  allowed to be called with by-position parameters as well, just as in FM2).
+- In `#function`, parentheses are now required around parameter list (as in `<#function f(a, b)>`), even if there are
+  zero parameters (as in `<#function f()>`). In `#macro`, parentheses are not allowed around parameter list anymore
+  (so `#macro m(a b)` becomes to `#macro m a b`). This is to remain more consistent with the look-and-feel of the
+  invocation of the function or macro.
 - Removed some long deprecated built-ins:
   - `webSafe` (converted to `html`)
   - TODO Add the further ones here as they are removed

@@ -80,7 +80,7 @@
 --
 </#macro>
 
-<#function resolve xs>
+<#function resolve(xs)>
     <#assign resolveCallCnt = (resolveCallCnt!0) + 1>
     <#if xs?isMethod>
         <#return xs()>

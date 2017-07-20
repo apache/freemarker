@@ -38,7 +38,7 @@
 <@assertEquals actual=r[0] expected=-2 />
 <@assertEquals actual=r[1] expected=-1 />
 
-<#function limitedJoin range limit>
+<#function limitedJoin(range, limit)>
 	<#assign joined="">
 	<#list range as i>
 		<#assign joined = joined + i?c>

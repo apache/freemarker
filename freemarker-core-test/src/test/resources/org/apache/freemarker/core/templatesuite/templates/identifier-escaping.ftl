@@ -25,7 +25,7 @@
 
 <@m\-a data\-color="red"; loop\-var>${loop\-var}</@>
 
-<#function f\-a p\-a>
+<#function f\-a(p\-a)>
     <#return p\-a + " works">
 </#function>
 ${f\-a("f-a")}

@@ -24,7 +24,7 @@
   </#if>
 </#macro>
 
-<#function doubleUp foo>
+<#function doubleUp(foo)>
    <#return foo+foo>
 </#function>
 

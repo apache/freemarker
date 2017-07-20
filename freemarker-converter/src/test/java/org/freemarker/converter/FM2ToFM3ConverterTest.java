@@ -189,27 +189,55 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
 
         assertConvertedSame("<#macro m>body</#macro>");
         assertConvertedSame("<#macro <#--1--> m <#--2-->></#macro >");
-        assertConvertedSame("<#macro m()></#macro>");
-        assertConvertedSame("<#macro m <#--1--> ( <#--2--> ) <#--3--> ></#macro>");
+        assertConverted("<#macro m <#--1--> <#--2--> <#--3--> ></#macro>", "<#macro m <#--1--> ( <#--2--> ) "
+                + "<#--3--> ></#macro>");
         assertConvertedSame("<#macro m p1></#macro>");
-        assertConvertedSame("<#macro m(p1)></#macro>");
+        assertConverted("<#macro m p1></#macro>", "<#macro m(p1)></#macro>");
         assertConvertedSame("<#macro m p1 p2 p3></#macro>");
         assertConvertedSame("<#macro m p1 <#--1--> p2 <#--2--> p3 <#--3-->></#macro>");
-        assertConvertedSame("<#macro m(p1<#--1-->,<#--2--> p2<#--3-->,<#--4-->"
-                + " p5<#--5-->)<#--6-->></#macro>");
+        assertConverted(
+                "<#macro m<#--0--> p1<#--1--> <#--2-->p2<#--3--> <#--4--> p5<#--5--><#--6-->></#macro>",
+                "<#macro m<#--0-->(p1<#--1-->,<#--2-->p2<#--3-->,<#--4--> p5<#--5-->)<#--6-->></#macro>");
         assertConvertedSame("<#macro m p1=11 p2=foo p3=a+b></#macro>");
-        assertConvertedSame("<#macro m(p1=11, p2=foo, p3=a+b)></#macro>");
-        assertConvertedSame("<#macro m p1<#--1-->=<#--2-->11<#--3-->,<#--4-->p2=22></#macro>");
+        assertConverted("<#macro m p1=11 p2=foo p3=a+b></#macro>", "<#macro m(p1=11, p2=foo, p3=a+b)></#macro>");
+        assertConverted(
+                "<#macro m p1<#--1-->=<#--2-->11<#--3--> <#--4-->p2=22></#macro>",
+                "<#macro m p1<#--1-->=<#--2-->11<#--3-->,<#--4-->p2=22></#macro>");
         assertConvertedSame("<#macro m others...></#macro>");
         assertConvertedSame("<#macro m p1 others...></#macro>");
         assertConvertedSame("<#macro m p1 p2=22 others...></#macro>");
-        assertConvertedSame("<#macro m(others...)></#macro>");
-        assertConvertedSame("<#macro m(others <#--1--> ... <#--2--> )></#macro>");
-        assertConvertedSame("<#function f x y><#return x + y></#function>");
-        assertConvertedSame("<#function f(x, y=0 <#--0-->)><#return <#--1--> x + y <#--2-->></#function>");
+        assertConverted("<#macro m others...></#macro>", "<#macro m(others...)></#macro>");
+        assertConverted(
+                "<#macro m others <#--1--> ... <#--2-->></#macro>",
+                "<#macro m(others <#--1--> ... <#--2--> )></#macro>");
         assertConvertedSame("<#macro m\\-1 p\\-1></#macro>");
         // Only works with " now, as it doesn't keep the literal kind. Later we will escape differently anyway:
         assertConvertedSame("<#macro \"m 1\"></#macro>");
+        // Tests made for macro definition syntax tightening (may unintendedly repeats earlier tests...):
+        assertConverted("<#macro m></#macro>", "<#macro m()></#macro>");
+        assertConverted("<#macro m></#macro>", "<#macro m ( )></#macro>");
+        assertConverted("<#macro m p></#macro>", "<#macro m(p)></#macro>");
+        assertConverted("<#macro m p></#macro>", "<#macro m ( p)></#macro>");
+        assertConverted("<#macro m p></#macro>", "<#macro m (p)></#macro>");
+        assertConverted("<#macro m p></#macro>", "<#macro m( p)></#macro>");
+        assertConverted("<#macro m p></#macro>", "<#macro m(p )></#macro>");
+        assertConverted("<#macro m p1 p2 p3></#macro>", "<#macro m(p1, p2, p3)></#macro>");
+        assertConverted("<#macro m p1 p2 p3></#macro>", "<#macro m p1, p2, p3></#macro>");
+        assertConverted("<#macro m p1 p2 p3></#macro>", "<#macro m p1,p2,p3></#macro>");
+        assertConverted("<#macro m p1 p2=2 p3=3></#macro>", "<#macro m p1, p2=2, p3=3></#macro>");
+        assertConverted("<#macro m p1 others...></#macro>", "<#macro m p1, others...></#macro>");
+        assertConverted("<#macro m p1 others...></#macro>", "<#macro m(p1, others...)></#macro>");
+
+        assertConvertedSame("<#function f(x, y=0 <#--0-->)><#return <#--1--> x + y <#--2-->></#function>");
+        assertConverted("<#function f(x, y)><#return x + y></#function>",
+                "<#function f x y><#return x + y></#function>");
+        // Tests made for function definition syntax tightening (may unintendedly repeats earlier tests...):
+        assertConverted("<#function f(p)></#function>", "<#function f p></#function>");
+        assertConverted("<#function f()></#function>", "<#function f></#function>");
+        assertConverted("<#function f(p1, p2, p3)></#function>", "<#function f p1 p2 p3></#function>");
+        assertConverted("<#function f(p1, p2, p3)></#function>", "<#function f(p1 p2 p3)></#function>");
+        assertConverted("<#function f ( p1, p2, p3 ) ></#function>", "<#function f ( p1 p2 p3 ) ></#function>");
+
         assertConvertedSame("<#macro m><#nested x + 1, 2, 3></#macro>");
         assertConvertedSame("<#macro m><#nested <#--1--> x + 1 <#--2-->, <#--3--> 2 <#--4-->></#macro>");
         assertConverted(
@@ -629,7 +657,7 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         converter.setSource(srcFile);
         converter.setDestinationDirectory(dstDir);
         converter.setInclude(null);
-        // converter.setValidateOutput(false);
+        converter.setValidateOutput(false); //!!T
         Properties properties = new Properties();
         properties.setProperty(Configuration.DEFAULT_ENCODING_KEY, UTF_8.name());
         if (squareBracketTagSyntax) {

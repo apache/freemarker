@@ -134,8 +134,8 @@ ${(callMacroFromExpression(attemptTest))!}
 
 <#macro isIRE><@assertFails exception="InvalidReferenceException"><#nested></@></#macro>
 <#macro isNonFastIRE><@assertFails exception="InvalidReferenceException" message="Tip:"><#nested></@></#macro>
-<#function isNonFastIREMessage msg><#return msg?contains('Tip:') && msg?contains('null or missing')></#function>
-<#function callMacroFromExpression m>
+<#function isNonFastIREMessage(msg)><#return msg?contains('Tip:') && msg?contains('null or missing')></#function>
+<#function callMacroFromExpression(m)>
   <#local captured><@m /></#local>
   <#return captured>
 </#function>
