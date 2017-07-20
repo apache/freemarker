@@ -42,7 +42,9 @@ Major changes / features
   then `template_loader` becomes to `templateLoader`, and if you use the XML features, then `node.@@nested_markup`
   becomes to `node.@@nestedMarkup`.
   Note that the template converter tool takes care of this conversion.
-- Parameters passed by position (as opposed to by name) must be separated by comma. Earlier the comma was optional
+- Parameters passed by position (as opposed to by name) must be separated by comma. Earlier the comma was optional.
+  (This is needed to allow passing parameters both by-position and by-name in the same invocation, which is not yet
+  implemented though.)
   Examples:
   `<@x x + 1 2 3 />` now must be written as `<@x x + 1, 2, 3 />`
   `<#nested x y>` now must be written as `<#nested x, y>`
@@ -55,20 +57,21 @@ Node: Changes already mentioned above aren't repeated here!
 - Removed support for all old glitches that you could turn on/off with `incompatibleImprovements` in FM2 (see
   them in the JavaDoc of FM2 `Configuration`).
   Converter note: The otherwise very low risk behavioral changes here aren't covered by the converter tool.
+- Removed the following operator aliases:
+  - `=` for comparison (it can only be used for assignment now). Use `==` instead.
+  - `&` for logical "and". Use `&&` instead.
+  - `|` for logical "or". Use `||` instead.
 - Removed some long deprecated template language directives:
   - <#call ...> (deprecated by <@... />)
   - <#comment>...</#comment> (deprecated by <#-- ... -->)
   - <#transform ...>...</#transform> (deprecated by <@...>...</@...>)
   - <#foreach x in xs>...</#foreach> (deprecated by <#list xs as x>...</#list>)
-- Removed the following operator aliases:
-  - `=` for comparison (it can only be used for assignment now). Use `==` instead.
-  - `&` for logical "and". Use `&&` instead.
-  - `|` for logical "or". Use `||` instead.
 - Removed long deprecated `#{}` interpolations. They are treated as plain static text now.
   Converter note: The template converter tool translates these to `${}` interpolations. For example `#{x}` is simply
   translated to `${b}`, while `#{x; m1M3}` is translated to `${x?string('0.0##')}`). The output should remain the same.
 - Removed some long deprecated built-ins:
   - `webSafe` (converted to `html`)
+  - TODO Add the further ones here as they are removed
 - Comma is now required between sequence literal items (such as `[a, b, c]`). It's not well known, but in FM2 the comma
   could be omitted.
 - #include has no "encoding" parameter anymore (as now only the Configuration is responsible ofr deciding the encoding)
