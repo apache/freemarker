@@ -137,12 +137,12 @@ To generate the FreeMarker Manual, issue `./gradlew manualOffline`
 `freemarker-manual/build/docgen`.
 
 
-Eclipse and other IDE setup
----------------------------
+IDE setup
+---------
 
-Below you find the step-by-step setup for Eclipse Neon.1. If you are using a
-different version or an entierly different IDE, still read this, and try to
-apply it to your development environment:
+### Eclipse
+
+Last tested Eclipse Neon.1.
 
 - Start Eclipse
 - You may prefer to start a new workspace (File -> "Switch workspace"), but
@@ -156,13 +156,9 @@ apply it to your development environment:
   - Java -> Code Style -> Formatter -> Import...
     Select src\ide-settings\Eclipse\Formatter-profile-FreeMarker.xml
     inside the FreeMarker project directory.
-    (On IntelliJ IDEA, import
-    src/ide-settings/IntelliJ-IDEA/Java-code-style-FreeMarker.xml instead)
     This profile uses space-only indentation policy and 120 character line
     width, and formatting rules that are pretty much standard in modern Java.
   - Java -> Code Style -> Organize imports
-    (On IntelliJ IDEA, this was already configured by the Java code style
-    import earlier.)
     The order is this (the Eclipse default): java, javax, org, com.
     Number of imports required for .*: 99
     Number of static imports needed for .*: 1
@@ -176,14 +172,6 @@ apply it to your development environment:
     "Missing tag descriptions": Validate @return tags
     "Missing Javadoc tags": Ignore
     "Missing Javadoc comments": Ignore
-- TODO: How to import the Gradle project into Eclipse
-  On IntelliJ:
-  - Import the whole FreeMarker project as a Gradle project. There are things that you
-    will have to set manually, but first, build the project with Gradle if you haven't
-    (see earlier how).
-  - Open Project Structure (Alt+Ctrl+Shift+S), and in the "Dependencies" tab of each
-    module, set "Module SDK" to "1.7", except for freemarker-core-java8, where it should
-    be "1.8". [TODO: Check if now it happens automatically]
 - Project -> Properties -> Java Compiler -> Errors/Warnings:
   Check in "Enable project specific settings", then set "Forbidden reference
   (access rules)" from "Error" to "Warning".
@@ -205,3 +193,36 @@ apply it to your development environment:
   - Project -> Properties -> FindBugs -> [x] Run Automatically
   - There should 0 errors. But sometimes the plugin fails to take the
     @SuppressFBWarnings annotations into account; then use Project -> Clean. 
+
+### IntelliJ IDEA
+
+Last tested on IntelliJ IDEA Community 2017.1.5.
+    
+- First build the project with Gradle if you haven't yet (see earlier how)
+- "New..." -> "Project from existing source"
+  - Point to the root project `incubator-freemarker`) directory
+  - On the next screen, select "Import project from external model" and "Gradle"
+  - On the next screen, select "Use gradle wrapper task configuration".
+    Be sure at least Java 8 is selected for Gradle. Other defaults should be fine.
+  - On the next window, all modules will be selected, that's fine, go on
+  - On the next window, it will prompt to remove the `incubator-freemarker` from the project.
+    Let it do it (as it's an incorrect duplication of the `freemarker` root project).
+  - At the end of this process you should have all modules Project tree view.
+- "File" -> "Project Structure..."
+  Under "Project", set the SDK to 1.7, and the language level to 7.
+  Under "Modules", for "freemarker-core-test-java8" / "freemarker-core-test-java8_main" and
+  "freemarker-core-test-java8_test", change the "Module SDK" to 1.8 (on the "Dependencies" tab).
+- "File" -> "Settings"
+  - Under "Editor" / "Code style", import and use
+    incubator-freemarker/src/ide-settings/IntelliJ-IDEA/Java-code-style-FreeMarker.xml
+  - Under "Editor" / "Inspections", import and use
+    incubator-freemarker/src/ide-settings/IntelliJ-IDEA/Editor-Inspections-FreeMarker.xml
+- Testing your setup:
+  - You may do "Bulild"/"Build project" (Ctrl+F9) to see if everyting compiles now.
+  - You may ran the `test` task of the root project with Gradle to see that everything works as
+    expected. To do that from IntelliJ, create a run configuration:
+    "Run" \ "Run Configurations..." \ "+" \ "Gradle" then:
+    - Set "Name" to `All tests` for example
+    - Set "Gradle project" to the root project (`freemarker` aka. `incubator-freemarker`)
+    - Set "Tasks" to `test`
+- TODO Setting up the FindBugs plugin
