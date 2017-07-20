@@ -104,7 +104,6 @@ public class FM2ToFM3ConverterCLITest extends ConverterTest {
         assertCLIResult(SUCCESS_EXIT_STATUS, null, null,
                 srcDir.toString(), "-d", dstDir.toString(),
                 "--include", ".*",
-                "--no-predef-file-ext-substs",
                 "--file-ext-subst", "txt=txt3",
                 "--no-predef-file-ext-substs"
         );
