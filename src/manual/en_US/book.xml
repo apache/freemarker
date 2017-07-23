@@ -26966,6 +26966,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>output_format=freemarker.core.XHTMLOutputFormat()</literal>
               did).</para>
             </listitem>
+
+            <listitem>
+              <para><literal>Constants.EMPTY_HASH</literal> now implements
+              <literal>TemplateHashModelEx2</literal>, so it can be listed
+              with <literal>&lt;#list ... as k, v&gt;</literal>. Earlier it
+              was only a <literal>TemplateHashModelEx</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>Constants.EMPTY_KEY_VALUE_PAIR_ITERATOR</literal></para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>

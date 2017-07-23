@@ -20,11 +20,14 @@
 package freemarker.template.utility;
 
 import java.io.Serializable;
+import java.util.NoSuchElementException;
 
 import freemarker.template.SimpleNumber;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateHashModelEx2;
+import freemarker.template.TemplateHashModelEx2.KeyValuePairIterator;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
@@ -95,7 +98,11 @@ public class Constants {
     
     public static final TemplateHashModelEx EMPTY_HASH = new EmptyHashModel();
     
-    private static class EmptyHashModel implements TemplateHashModelEx, Serializable {
+    /**
+     * An empty hash. Since 2.3.27, it implements {@link TemplateHashModelEx2}, before that it was only
+     * {@link TemplateHashModelEx}.
+     */
+    private static class EmptyHashModel implements TemplateHashModelEx2, Serializable {
         
         public int size() throws TemplateModelException {
             return 0;
@@ -116,7 +123,34 @@ public class Constants {
         public boolean isEmpty() throws TemplateModelException {
             return true;
         }
+
+        public KeyValuePairIterator keyValuePairIterator() throws TemplateModelException {
+            return EMPTY_KEY_VALUE_PAIR_ITERATOR;
+        }
         
     }
+    
+    /**
+     * @since 2.3.27
+     */
+    public static final KeyValuePairIterator EMPTY_KEY_VALUE_PAIR_ITERATOR = EmptyKeyValuePairIterator.INSTANCE;
+    
+    private static class EmptyKeyValuePairIterator implements TemplateHashModelEx2.KeyValuePairIterator {
+
+        static final EmptyKeyValuePairIterator INSTANCE = new EmptyKeyValuePairIterator();
+
+        private EmptyKeyValuePairIterator() {
+            //
+        }
+
+        public boolean hasNext() throws TemplateModelException {
+            return false;
+        }
+
+        public TemplateHashModelEx2.KeyValuePair next() throws TemplateModelException {
+            throw new NoSuchElementException("Can't retrieve element from empty key-value pair iterator.");
+        }
+
+    }    
     
 }
