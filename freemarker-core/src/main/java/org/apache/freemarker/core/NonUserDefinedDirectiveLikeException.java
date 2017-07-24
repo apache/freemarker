@@ -23,6 +23,7 @@ import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateTransformModel;
 
+// TODO [FM3][CF] Review and rename this when TDM2 and TFM are in place
 /**
  * Indicates that a {@link TemplateDirectiveModel} or {@link TemplateTransformModel} or {@link ASTDirMacro} value was
  * expected, but the value had a different type.

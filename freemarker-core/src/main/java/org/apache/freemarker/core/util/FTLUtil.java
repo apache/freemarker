@@ -49,6 +49,7 @@ import org.apache.freemarker.core.model.impl.BeanModel;
  * Static utility methods that perform tasks specific to the FreeMarker Template Language (FTL).
  * This is meant to be used from outside FreeMarker (i.e., it's an official, published API), not just from inside it.
  */
+// TODO [FM3] This name won't be good if the template language isn't called "FTL"...
 public final class FTLUtil {
 
     private static final char[] ESCAPES = createEscapes();

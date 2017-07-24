@@ -35,6 +35,7 @@ import org.apache.freemarker.core.outputformat.impl.*;
 import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.model.impl.*;
 import org.apache.freemarker.core.util.*;
+import org.apache.freemarker.core.ASTDirDynamicDirectiveCall.NamedArgument;
 import java.io.*;
 import java.util.*;
 import java.nio.charset.Charset;
@@ -94,6 +95,16 @@ public class FMParser {
     private boolean inMacro, inFunction;
     private LinkedList escapes = new LinkedList();
     private int mixedContentNesting; // for stripText
+
+    // Argument arrays reused for top-level invocations, purely for a bit of optimization.
+    private static final int INITAL_TOP_ARGS_BUFFER_SIZE = 8;
+    private ASTExpression[] topPositionalArgsBuffer;
+    private int topPositionalArgsLength;
+    private NamedArgument[] topNamedArgsBuffer;
+    private int topNamedArgsLength;
+    private static final int INITAL_TOP_LOOP_VAR_NAMES_BUFFER_SIZE = 4;
+    private String[] topLoopVarNamesBuffer;
+    private int topLoopVarNamesLength;
 
     FMParser(Template template, Reader reader,
             ParsingConfiguration pCfg, OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy,
@@ -411,6 +422,45 @@ public class FMParser {
                 lhoExp);
     }
 
+    private void addToTopNamedArgs(NamedArgument namedArg) {
+        if (topNamedArgsBuffer == null) {
+            topNamedArgsBuffer = new NamedArgument[INITAL_TOP_ARGS_BUFFER_SIZE];
+        } else if (topNamedArgsBuffer.length == topNamedArgsLength) {
+            NamedArgument[] newNamedTopArgsBuffer =  new NamedArgument[topNamedArgsBuffer.length * 2];
+            for (int i = 0; i < topNamedArgsBuffer.length; i++) {
+                newNamedTopArgsBuffer[i] = topNamedArgsBuffer[i];
+            }
+            topNamedArgsBuffer = newNamedTopArgsBuffer;
+        }
+        topNamedArgsBuffer[topNamedArgsLength++] = namedArg;
+    }
+
+    private void addToTopPositionalArgs(ASTExpression argValue) {
+        if (topPositionalArgsBuffer == null) {
+            topPositionalArgsBuffer = new ASTExpression[INITAL_TOP_ARGS_BUFFER_SIZE];
+        } else if (topPositionalArgsBuffer.length == topPositionalArgsLength) {
+            ASTExpression[] newPositionalArgsBuffer =  new ASTExpression[topPositionalArgsBuffer.length * 2];
+            for (int i = 0; i < topPositionalArgsBuffer.length; i++) {
+                newPositionalArgsBuffer[i] = topPositionalArgsBuffer[i];
+            }
+            topPositionalArgsBuffer = newPositionalArgsBuffer;
+        }
+        topPositionalArgsBuffer[topPositionalArgsLength++] = argValue;
+    }
+
+    private void addToTopLoopVarNames(String loopVarName) {
+        if (topLoopVarNamesBuffer == null) {
+            topLoopVarNamesBuffer = new String[INITAL_TOP_LOOP_VAR_NAMES_BUFFER_SIZE];
+        } else if (topLoopVarNamesBuffer.length == topLoopVarNamesLength) {
+            String[] newLoopVarNamesBuffer =  new String[topLoopVarNamesBuffer.length * 2];
+            for (int i = 0; i < topLoopVarNamesBuffer.length; i++) {
+                newLoopVarNamesBuffer[i] = topLoopVarNamesBuffer[i];
+            }
+            topLoopVarNamesBuffer = newLoopVarNamesBuffer;
+        }
+        topLoopVarNamesBuffer[topLoopVarNamesLength++] = loopVarName;
+    }
+
 }
 
 PARSER_END(FMParser)
@@ -474,7 +524,7 @@ TOKEN_MGR_DECLS:
     boolean squBracTagSyntax,
             autodetectTagSyntax,
             directiveSyntaxEstablished,
-            inInvocation;
+            inNamedParameterExpression;
     int incompatibleImprovements;
 
     void setParser(FMParser parser) {
@@ -799,6 +849,10 @@ TOKEN:
     |
     <UNIFIED_CALL_END : ("<" | "[") "/@" ((<ID>) ("."<ID>)*)? <CLOSE_TAG1>> { unifiedCallEnd(matchedToken); }
     |
+    <DYNAMIC_DIRECTIVE_CALL : "<~" | "[~" > { unifiedCall(matchedToken); }
+    |
+    <DYNAMIC_DIRECTIVE_CALL_END : ("<" | "[") "/~" ((<ID>) ("."<ID>)*)? <CLOSE_TAG1>> { unifiedCallEnd(matchedToken); }
+    |
     <FTL_HEADER : ("<#ftl" | "[#ftl") <BLANK>> { ftlHeader(matchedToken); }
     |
     <TRIVIAL_FTL_HEADER : ("<#ftl" | "[#ftl") ("/")? (">" | "]")> { ftlHeader(matchedToken); }
@@ -914,7 +968,7 @@ TOKEN:
     < "-->" | "--]">
     {
         if (parenthesisNesting > 0) SwitchTo(IN_PAREN);
-        else if (inInvocation) SwitchTo(NAMED_PARAMETER_EXPRESSION);
+        else if (inNamedParameterExpression) SwitchTo(NAMED_PARAMETER_EXPRESSION);
         else SwitchTo(FM_EXPRESSION);
     }
 }
@@ -1016,7 +1070,7 @@ TOKEN:
     |
     <COMMA : ",">
     |
-    <SEMICOLON : ";">
+    <SEMICOLON : ";"> : FM_EXPRESSION  // FM_EXPRESSION to exit WS-less expression mode in <@foo; x>
     |
     <COLON : ":">
     |
@@ -1040,7 +1094,7 @@ TOKEN:
     {
         --parenthesisNesting;
         if (parenthesisNesting == 0) {
-            if (inInvocation) SwitchTo(NAMED_PARAMETER_EXPRESSION);
+            if (inNamedParameterExpression) SwitchTo(NAMED_PARAMETER_EXPRESSION);
             else SwitchTo(FM_EXPRESSION);
         }
     }
@@ -1816,10 +1870,14 @@ ASTExpression DefaultTo(ASTExpression exp) :
         |
         (
             t = <EXCLAM>
-            [
-                LOOKAHEAD(ASTExpression())
-                rhs = ASTExpression()
-            ]
+            (
+                LOOKAHEAD(<ID><ASSIGNMENT_EQUALS>) { /* Do not consume */ }
+                |
+                [
+                    LOOKAHEAD(ASTExpression())
+                    rhs = ASTExpression()
+                ]
+            )
         )
     )
     {
@@ -3005,10 +3063,10 @@ ASTElement UnifiedMacroTransform() :
     [
         <SEMICOLON>{bodyParameters = new ArrayList(4); }
         [
-            [<TERMINATING_WHITESPACE>] t = <ID> { bodyParameters.add(t.image); }
+            t = <ID> { bodyParameters.add(t.image); }
             (
-                [<TERMINATING_WHITESPACE>] <COMMA>
-                [<TERMINATING_WHITESPACE>] t = <ID>{bodyParameters.add(t.image); }
+                <COMMA>
+                t = <ID>{bodyParameters.add(t.image); }
             )*
         ]
     ]
@@ -3070,6 +3128,194 @@ ASTElement UnifiedMacroTransform() :
     }
 }
 
+ASTElement DynamicDirectiveCall() :
+{
+    Token t;
+    ASTExpression exp;
+
+    Token start = null, end;
+    ASTExpression callableValueExp;
+    ASTExpression endTagNameExp;
+    Token prevChoiceComma = null;
+    TemplateElements children;
+    int pushedCtxCount = 0;
+}
+{
+    start = <DYNAMIC_DIRECTIVE_CALL>
+    callableValueExp = ASTExpression()
+    [<TERMINATING_WHITESPACE>]
+    {
+        topPositionalArgsLength = 0;
+        topNamedArgsLength = 0;
+        topLoopVarNamesLength = 0;
+    }
+
+    (
+        LOOKAHEAD(<ID><ASSIGNMENT_EQUALS>)
+        (
+            t = <ID>
+            <ASSIGNMENT_EQUALS>
+            exp = ASTExpression()
+            {
+                if (prevChoiceComma != null) {
+                    throw new ParseException(
+                            "Remove comma (\",\"); it can only be used between arguments passed by position.",
+                            template, prevChoiceComma);
+                }
+                prevChoiceComma = null;
+
+                addToTopNamedArgs(new NamedArgument(t.image, exp));
+            }
+        )
+        |
+        (
+            // This could be part of the positional paramter choice, but we can give better error messages this way.
+            t = <COMMA>
+            {
+                if (prevChoiceComma != null) {
+                    throw new ParseException("Two commas (\",\") without argument between.",
+                            template, t);
+                }
+                prevChoiceComma = t;
+
+                if (topNamedArgsLength != 0 || topPositionalArgsLength == 0) {
+                    throw new ParseException(
+                            "Remove comma (\",\"); it can only be used between arguments passed by position.",
+                            template, t);
+                }
+            }
+        )
+        |
+        (
+            exp = ASTExpression()
+            {
+                if (topNamedArgsLength != 0) {
+                    throw new ParseException(
+                            "Expression looks like an argument passed by position (no preceding \"<argName>=\"), "
+                            + " but those must be earlier than arguments passed by name.",
+                            exp);
+                }
+
+                if (prevChoiceComma == null && topPositionalArgsLength != 0) {
+                        throw new ParseException("Missing comma (\",\") before expression. "
+                                + "Arguments passed by position must be separated by comma.", exp);
+                }
+                prevChoiceComma = null;
+
+                addToTopPositionalArgs(exp);
+            }
+        )
+    )*
+
+    [
+        <SEMICOLON>
+        [
+            t = <ID> { addToTopLoopVarNames(t.image); }
+            (
+                <COMMA>
+                t = <ID> { addToTopLoopVarNames(t.image); }
+            )*
+        ]
+    ]
+
+    {
+        // We must copy the top level arrays (as they will be reused). The copies will have the minimum length. Also,
+        // they will be null instead of an empty array.
+
+        ASTExpression[] trimmedPositionalArgs;
+        if (topPositionalArgsLength == 0) {
+            trimmedPositionalArgs = null;
+        } else {
+            trimmedPositionalArgs = new ASTExpression[topPositionalArgsLength];
+            for (int i = 0; i < topPositionalArgsLength; i++) {
+                trimmedPositionalArgs[i] = topPositionalArgsBuffer[i];
+            }
+        }
+
+        NamedArgument[] trimmedNamedArgs;
+        if (topNamedArgsLength == 0) {
+            trimmedNamedArgs = null;
+        } else {
+            trimmedNamedArgs = new NamedArgument[topNamedArgsLength];
+            for (int i = 0; i < topNamedArgsLength; i++) {
+                trimmedNamedArgs[i] = topNamedArgsBuffer[i];
+            }
+        }
+
+        String[] trimmedLoopVarNames;
+        if (topLoopVarNamesLength == 0) {
+            trimmedLoopVarNames = null;
+        } else {
+            trimmedLoopVarNames = new String[topLoopVarNamesLength];
+            for (int i = 0; i < topLoopVarNamesLength; i++) {
+                trimmedLoopVarNames[i] = topLoopVarNamesBuffer[i];
+            }
+        }
+    }
+
+    (
+        end = <EMPTY_DIRECTIVE_END> { children = TemplateElements.EMPTY; }
+        |
+        (
+            <DIRECTIVE_END>
+            {
+                if (topLoopVarNamesLength != 0 && iteratorBlockContexts != null && !iteratorBlockContexts.isEmpty()) {
+                    // It's possible that we shadow a #list/#items loop variable, in which case that must be noted.
+                    int ctxsLen = iteratorBlockContexts.size();
+	                for (int loopVarIdx = 0; loopVarIdx < topLoopVarNamesLength; loopVarIdx++) {
+                        String loopVarName = (String) topLoopVarNamesBuffer[loopVarIdx];
+                        walkCtxStack: for (int ctxIdx = ctxsLen - 1; ctxIdx >= 0; ctxIdx--) {
+                            ParserIteratorBlockContext ctx
+                                    = (ParserIteratorBlockContext) iteratorBlockContexts.get(ctxIdx);
+                            if (ctx.loopVarName != null && ctx.loopVarName.equals(loopVarName)) {
+                                // If it wasn't already shadowed, shadow it:
+                                if (ctx.kind != ITERATOR_BLOCK_KIND_USER_DIRECTIVE) {
+                                    ParserIteratorBlockContext shadowingCtx = pushIteratorBlockContext();
+                                    shadowingCtx.loopVarName = loopVarName;
+                                    shadowingCtx.kind = ITERATOR_BLOCK_KIND_USER_DIRECTIVE;
+                                    pushedCtxCount++;
+                                }
+                                break walkCtxStack;
+                            }
+                        }
+                   }
+                }
+            }
+
+            children = MixedContentElements()
+
+            end = <DYNAMIC_DIRECTIVE_CALL_END>
+            {
+                for (int i = 0; i < pushedCtxCount; i++) {
+                    popIteratorBlockContext();
+                }
+
+                String endTagName = end.image.substring(3, end.image.length() - 1).trim();
+                if (endTagName.length() > 0) {
+                    if (callableValueExp instanceof ASTExpVariable
+                            || (callableValueExp instanceof ASTExpDot
+                                    && ((ASTExpDot) callableValueExp).onlyHasIdentifiers())) {
+                        String startTagName = callableValueExp.getCanonicalForm(); // TODO [FM3] Why the canonical form?
+                        if (!endTagName.equals(startTagName)) {
+                            throw new ParseException("Expecting </@> or </@" + startTagName + ">", template, end);
+                        }
+                    } else {
+                        throw new ParseException("Expecting </@>", template, end);
+                    }
+                }
+            }
+        )
+    )
+    {
+        ASTElement result = new ASTDirDynamicDirectiveCall(
+                callableValueExp, false,
+                trimmedPositionalArgs, trimmedNamedArgs, trimmedLoopVarNames,
+                children);
+        result.setLocation(template, start, end);
+        return result;
+    }
+}
+
 HashMap NamedArgs() :
 {
     HashMap result = new HashMap();
@@ -3082,7 +3328,7 @@ HashMap NamedArgs() :
         <ASSIGNMENT_EQUALS>
         {
             token_source.SwitchTo(token_source.NAMED_PARAMETER_EXPRESSION);
-            token_source.inInvocation = true;
+            token_source.inNamedParameterExpression = true;
         }             
         exp = ASTExpression()
         {
@@ -3090,7 +3336,7 @@ HashMap NamedArgs() :
         }
     )+
     {
-        token_source.inInvocation = false;
+        token_source.inNamedParameterExpression = false;
         return result;
     }
 }
@@ -3166,25 +3412,26 @@ ASTDirSwitch Switch() :
         breakableDirectiveNesting++;
         switchBlock = new ASTDirSwitch(switchExp, ignoredSectionBeforeFirstCase);
     }
-    (
-        LOOKAHEAD(2)
-        caseOrDefault = ASTDirCase()
-        {
-            if (caseOrDefault.condition == null) {
-                if (defaultFound) {
-                    throw new ParseException(
-                            "You can only have one default case in a switch statement", template, start);
+    [
+        (
+            caseOrDefault = ASTDirCase()
+            {
+                if (caseOrDefault.condition == null) {
+                    if (defaultFound) {
+                        throw new ParseException(
+                                "You can only have one default case in a switch statement", template, start);
+                    }
+                    defaultFound = true;
+                } else if (defaultFound) {
+                        throw new ParseException(
+                                "You can't have a \"case\" directive after the \"default\" directive",
+                                caseOrDefault);
                 }
-                defaultFound = true;
-            } else if (defaultFound) {
-                    throw new ParseException(
-                            "You can't have a \"case\" directive after the \"default\" directive",
-                            caseOrDefault);
+                switchBlock.addCase(caseOrDefault);
             }
-            switchBlock.addCase(caseOrDefault);
-        }
-    )*
-    [<STATIC_TEXT_WS>]
+        )+
+        [<STATIC_TEXT_WS>]
+    ]
     end = <END_SWITCH>
     {
         breakableDirectiveNesting--;
@@ -3475,6 +3722,8 @@ ASTElement FreemarkerDirective() :
         tp = Compress()
         |
         tp = UnifiedMacroTransform()
+        |
+        tp = DynamicDirectiveCall()
         |
         tp = Items()
         |
