@@ -3601,21 +3601,22 @@ SwitchBlock Switch() :
         breakableDirectiveNesting++;
         switchBlock = new SwitchBlock(switchExp, ignoredSectionBeforeFirstCase);
     }
-    (
-        LOOKAHEAD(2)
-        caseIns = Case()
-        {
-            if (caseIns.condition == null) {
-                if (defaultFound) {
-                    throw new ParseException(
-                    "You can only have one default case in a switch statement", template, start);
-                }
-                defaultFound = true;
-            }
-            switchBlock.addCase(caseIns);
-        }
-    )*
-    [<STATIC_TEXT_WS>]
+    [
+	    (
+	        caseIns = Case()
+	        {
+	            if (caseIns.condition == null) {
+	                if (defaultFound) {
+	                    throw new ParseException(
+	                    "You can only have one default case in a switch statement", template, start);
+	                }
+	                defaultFound = true;
+	            }
+	            switchBlock.addCase(caseIns);
+	        }
+	    )+
+	    [<STATIC_TEXT_WS>]
+    ]
     end = <END_SWITCH>
     {
         breakableDirectiveNesting--;
