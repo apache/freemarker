@@ -202,7 +202,7 @@ Last tested on IntelliJ IDEA Community 2017.1.5.
 - "New..." -> "Project from existing source"
   - Point to the root project `incubator-freemarker`) directory
   - On the next screen, select "Import project from external model" and "Gradle"
-  - On the next screen, select "Use gradle wrapper task configuration".
+  - On the next screen, select "Use gradle wrapper task configuration" [TODO: or keep default?].
     Be sure at least Java 8 is selected for Gradle. Other defaults should be fine.
   - On the next window, all modules will be selected, that's fine, go on
   - On the next window, it will prompt to remove the `incubator-freemarker` from the project.
@@ -217,6 +217,11 @@ Last tested on IntelliJ IDEA Community 2017.1.5.
     incubator-freemarker/src/ide-settings/IntelliJ-IDEA/Java-code-style-FreeMarker.xml
   - Under "Editor" / "Inspections", import and use
     incubator-freemarker/src/ide-settings/IntelliJ-IDEA/Editor-Inspections-FreeMarker.xml
+  - Copy the copyright header comment from some of the java files, then
+    under "Editor" / "Copyrigth" / "Copyrigth Profiles" click "+", enter "ASL2" as name,
+    then pase the copyright header. Delete the `/*` and ` */` lines, and the ` *`
+    prefixes (to select columns of text, hold Alt while selecting with the mouse.) Then
+    go back to "Copyrigth" in the tree, and set "Default project copyright" to "ASL2".
 - Testing your setup:
   - You may do "Bulild"/"Build project" (Ctrl+F9) to see if everyting compiles now.
   - You may ran the `test` task of the root project with Gradle to see that everything works as
