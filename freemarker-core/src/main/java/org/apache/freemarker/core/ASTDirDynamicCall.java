@@ -31,11 +31,22 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.CommonSupplier;
+import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util._StringUtil;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-class ASTDirDynamicDirectiveCall extends ASTDirective implements CallPlace {
+/**
+ * AST directive node: {@code <@exp ...>}.
+ * Executes a {@link TemplateCallableModel} that's embedded directly into the static text. At least in the default
+ * template language the value must be a {@link TemplateDirectiveModel2}, though technically calling a
+ * {@link TemplateFunctionModel} is possible as well.
+ * <p>
+ * The {@link TemplateCallableModel} object is obtained on runtime by evaluating an expression, and the parameter list
+ * is also validated (how many positional parameters are allowed, what named parameters are supported) then. Hence, the
+ * call is "dynamic".
+ */
+class ASTDirDynamicCall extends ASTDirective implements CallPlace {
 
     static final class NamedArgument {
         private final String name;
@@ -50,7 +61,7 @@ class ASTDirDynamicDirectiveCall extends ASTDirective implements CallPlace {
     private final ASTExpression callableValueExp;
     private final ASTExpression[] positionalArgs;
     private final NamedArgument[] namedArgs;
-    private final String[] loopVarNames;
+    private final StringToIndexMap loopVarNames;
     private final boolean allowCallingFunctions;
 
     private CustomDataHolder customDataHolder;
@@ -59,13 +70,18 @@ class ASTDirDynamicDirectiveCall extends ASTDirective implements CallPlace {
      * @param allowCallingFunctions Some template languages may allow calling {@link TemplateFunctionModel}-s
      *                              directly embedded into the static text, in which case this should be {@code true}.
      */
-    ASTDirDynamicDirectiveCall(
+    ASTDirDynamicCall(
             ASTExpression callableValueExp, boolean allowCallingFunctions,
-            ASTExpression[] positionalArgs, NamedArgument[] namedArgs, String[] loopVarNames,
+            ASTExpression[] positionalArgs, NamedArgument[] namedArgs, StringToIndexMap loopVarNames,
             TemplateElements children) {
         this.callableValueExp = callableValueExp;
         this.allowCallingFunctions = allowCallingFunctions;
 
+        if (positionalArgs != null && positionalArgs.length == 0
+                || namedArgs != null && namedArgs.length == 0
+                || loopVarNames != null && loopVarNames.size() == 0) {
+            throw new IllegalArgumentException("Use null instead of empty collections");
+        }
         this.positionalArgs = positionalArgs;
         this.namedArgs = namedArgs;
         this.loopVarNames = loopVarNames;
@@ -104,7 +120,6 @@ class ASTDirDynamicDirectiveCall extends ASTDirective implements CallPlace {
         boolean hasPosVarargsArg = callableValue.hasPositionalVarargsArgument();
 
         if (positionalArgs != null && positionalArgs.length > predefPosArgCnt && !hasPosVarargsArg) {
-            // TODO [FM3][CF] Better exception
             throw new _MiscTemplateException(this,
                     "The target callable ",
                     (predefPosArgCnt != 0
@@ -152,7 +167,6 @@ class ASTDirDynamicDirectiveCall extends ASTDirective implements CallPlace {
                         if (namedVarargsArgumentIndex == -1) {
                             Collection<String> validNames = callableValue.getPredefinedNamedArgumentNames();
                             throw new _MiscTemplateException(this,
-                                    // TODO [FM3][CF] Better exception, esp. list the supported names
                                     validNames == null || validNames.isEmpty()
                                     ? new Object[] {
                                             "The target callable doesn't have any by-name-passed parameters (like ",
@@ -202,7 +216,7 @@ class ASTDirDynamicDirectiveCall extends ASTDirective implements CallPlace {
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
-        sb.append('~');
+        sb.append('@');
         MessageUtil.appendExpressionAsUntearable(sb, callableValueExp);
         boolean nameIsInParen = sb.charAt(sb.length() - 1) == ')';
         if (positionalArgs != null) {
@@ -223,13 +237,16 @@ class ASTDirDynamicDirectiveCall extends ASTDirective implements CallPlace {
                 MessageUtil.appendExpressionAsUntearable(sb, namedArg.value);
             }
         }
-        if (loopVarNames != null && loopVarNames.length != 0) {
+        if (loopVarNames != null) {
             sb.append("; ");
-            for (int i = 0; i < loopVarNames.length; i++) {
-                if (i != 0) {
+            boolean first = true;
+            for (String loopVarName : loopVarNames.getKeys()) {
+                if (!first) {
                     sb.append(", ");
+                } else {
+                    first = false;
                 }
-                sb.append(_StringUtil.toFTLTopLevelIdentifierReference((String) loopVarNames[i]));
+                sb.append(_StringUtil.toFTLTopLevelIdentifierReference(loopVarName));
             }
         }
         if (canonical) {
@@ -238,7 +255,7 @@ class ASTDirDynamicDirectiveCall extends ASTDirective implements CallPlace {
             } else {
                 sb.append('>');
                 sb.append(getChildrenCanonicalForm());
-                sb.append("</~");
+                sb.append("</@");
                 if (!nameIsInParen
                         && (callableValueExp instanceof ASTExpVariable
                         || (callableValueExp instanceof ASTExpDot && ((ASTExpDot) callableValueExp).onlyHasIdentifiers()))) {
@@ -260,7 +277,7 @@ class ASTDirDynamicDirectiveCall extends ASTDirective implements CallPlace {
         return 1/*nameExp*/
                 + (positionalArgs != null ? positionalArgs.length : 0)
                 + (namedArgs != null ? namedArgs.length * 2 : 0)
-                + (loopVarNames != null ? loopVarNames.length : 0);
+                + (loopVarNames != null ? loopVarNames.size() : 0);
     }
 
     @Override
@@ -280,9 +297,9 @@ class ASTDirDynamicDirectiveCall extends ASTDirective implements CallPlace {
                     return (idx - base) % 2 == 0 ? namedArg.name : namedArg.value;
                 } else {
                     base += namedArgsSize * 2;
-                    final int bodyParameterNamesSize = loopVarNames != null ? loopVarNames.length : 0;
+                    final int bodyParameterNamesSize = loopVarNames != null ? loopVarNames.size() : 0;
                     if (idx - base < bodyParameterNamesSize) {
-                        return loopVarNames[idx - base];
+                        return loopVarNames.getKeys().get(idx - base);
                     } else {
                         throw new IndexOutOfBoundsException();
                     }
@@ -307,7 +324,7 @@ class ASTDirDynamicDirectiveCall extends ASTDirective implements CallPlace {
                     return (idx - base) % 2 == 0 ? ParameterRole.ARGUMENT_NAME : ParameterRole.ARGUMENT_VALUE;
                 } else {
                     base += namedArgsSize * 2;
-                    final int bodyParameterNamesSize = loopVarNames != null ? loopVarNames.length : 0;
+                    final int bodyParameterNamesSize = loopVarNames != null ? loopVarNames.size() : 0;
                     if (idx - base < bodyParameterNamesSize) {
                         return ParameterRole.TARGET_LOOP_VARIABLE;
                     } else {
@@ -328,18 +345,18 @@ class ASTDirDynamicDirectiveCall extends ASTDirective implements CallPlace {
 
     @Override
     public int getLoopVariableCount() {
-        return loopVarNames != null ? loopVarNames.length : 0;
+        return loopVarNames != null ? loopVarNames.size() : 0;
     }
 
     @Override
-    public void executeNestedContent(TemplateModel[] loopVariableValues, Environment env) throws TemplateException {
-        // TODO Automatically generated method
-        throw new BugException("Not implemented");
+    public void executeNestedContent(TemplateModel[] loopVariableValues, Environment env)
+            throws TemplateException, IOException {
+        env.visit(getChildBuffer(), loopVarNames, loopVariableValues);
     }
 
     @Override
     @SuppressFBWarnings(value={ "IS2_INCONSISTENT_SYNC", "DC_DOUBLECHECK" }, justification="Performance tricks")
-    public Object getOrCreateCustomData(Object providerIdentity, CommonSupplier supplier)
+    public Object getOrCreateCustomData(Object providerIdentity, CommonSupplier<?> supplier)
             throws CallPlaceCustomDataInitializationException {
         // We are using double-checked locking, utilizing Java memory model "final" trick.
         // Note that this.customDataHolder is NOT volatile.

@@ -38,7 +38,7 @@ public class TemplateCallableModelTest extends TemplateTest {
     }
 
     @Test
-    public void testBasicCall() throws IOException, TemplateException {
+    public void testArguments() throws IOException, TemplateException {
         assertOutput("<~p />",
                 "#p(p1=null, p2=null)");
         assertOutput("<~p 1 />",
@@ -80,11 +80,25 @@ public class TemplateCallableModelTest extends TemplateTest {
                 "#a(p1=null, p2=null, pOthers=[], n1=11, n2=22, nOthers={}; 3)");
         assertOutput("<~a 1, 2 n1=11 n2=22; a, b, c />",
                 "#a(p1=1, p2=2, pOthers=[], n1=11, n2=22, nOthers={}; 3)");
+    }
 
+    @Test
+    public void testNestedContent() throws IOException, TemplateException {
+        assertOutput("<~a />",
+                "#a(p1=null, p2=null, pOthers=[], n1=null, n2=null, nOthers={})");
         assertOutput("<~a></~a>",
                 "#a(p1=null, p2=null, pOthers=[], n1=null, n2=null, nOthers={})");
+
         assertOutput("<~a>x</~a>",
-                "#a(p1=null, p2=null, pOthers=[], n1=null, n2=null, nOthers={}) {...}");
+                "#a(p1=null, p2=null, pOthers=[], n1=null, n2=null, nOthers={}) {}");
+        assertOutput("<~a 1>x</~a>",
+                "#a(p1=1, p2=null, pOthers=[], n1=null, n2=null, nOthers={}) {x}");
+        assertOutput("<~a 3>x</~a>",
+                "#a(p1=3, p2=null, pOthers=[], n1=null, n2=null, nOthers={}) {xxx}");
+        assertOutput("<~a 3; i, j, k>[${i}${j}${k}]</~a>",
+                "#a(p1=3, p2=null, pOthers=[], n1=null, n2=null, nOthers={}; 3) {[123][246][369]}");
+        assertOutput("<#assign i = '-'>${i} <~a 3; i>${i}</~a> ${i}",
+                "- #a(p1=3, p2=null, pOthers=[], n1=null, n2=null, nOthers={}; 1) {123} -");
     }
 
     @Test
@@ -109,6 +123,7 @@ public class TemplateCallableModelTest extends TemplateTest {
     }
 
     @Test
+    @SuppressWarnings("ThrowableNotThrown")
     public void testParsingErrors() throws IOException, TemplateException {
         assertErrorContains("<~a, n1=1 />", "Remove comma", "between", "by position");
         assertErrorContains("<~a n1=1, n2=1 />", "Remove comma", "between", "by position");
@@ -120,6 +135,7 @@ public class TemplateCallableModelTest extends TemplateTest {
     }
 
     @Test
+    @SuppressWarnings("ThrowableNotThrown")
     public void testRuntimeErrors() throws IOException, TemplateException {
         assertErrorContains("<~p 9, 9, 9 />", "can only have 2", "3", "by position");
         assertErrorContains("<~n 9 />", "can't have arguments passed by position");

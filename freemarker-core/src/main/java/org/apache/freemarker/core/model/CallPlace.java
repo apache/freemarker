@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core.model;
 
+import java.io.IOException;
 import java.util.IdentityHashMap;
 
 import org.apache.freemarker.core.CallPlaceCustomDataInitializationException;
@@ -59,7 +60,8 @@ public interface CallPlace {
      *         TemplateCallableModelUtils#EMPTY_TEMPLATE_MODEL_ARRAY}. Its length must be equal to
      *         {@link #getLoopVariableCount()}.
      */
-    void executeNestedContent(TemplateModel[] loopVariableValues, Environment env) throws TemplateException;
+    void executeNestedContent(TemplateModel[] loopVariableValues, Environment env) throws TemplateException,
+            IOException;
 
     // -------------------------------------------------------------------------------------------------------------
     // Source code info:
@@ -135,7 +137,7 @@ public interface CallPlace {
      * @throws CallPlaceCustomDataInitializationException
      *             If the {@link CommonSupplier} had to be invoked but failed.
      */
-    Object getOrCreateCustomData(Object providerIdentity, CommonSupplier supplier)
+    Object getOrCreateCustomData(Object providerIdentity, CommonSupplier<?> supplier)
             throws CallPlaceCustomDataInitializationException;
 
     /**

@@ -35,7 +35,7 @@ import org.apache.freemarker.core.outputformat.impl.*;
 import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.model.impl.*;
 import org.apache.freemarker.core.util.*;
-import org.apache.freemarker.core.ASTDirDynamicDirectiveCall.NamedArgument;
+import org.apache.freemarker.core.ASTDirDynamicCall.NamedArgument;
 import java.io.*;
 import java.util.*;
 import java.nio.charset.Charset;
@@ -103,7 +103,7 @@ public class FMParser {
     private NamedArgument[] topNamedArgsBuffer;
     private int topNamedArgsLength;
     private static final int INITAL_TOP_LOOP_VAR_NAMES_BUFFER_SIZE = 4;
-    private String[] topLoopVarNamesBuffer;
+    private StringToIndexMap.Entry[] topLoopVarNamesBuffer;
     private int topLoopVarNamesLength;
 
     FMParser(Template template, Reader reader,
@@ -450,15 +450,16 @@ public class FMParser {
 
     private void addToTopLoopVarNames(String loopVarName) {
         if (topLoopVarNamesBuffer == null) {
-            topLoopVarNamesBuffer = new String[INITAL_TOP_LOOP_VAR_NAMES_BUFFER_SIZE];
+            topLoopVarNamesBuffer = new StringToIndexMap.Entry[INITAL_TOP_LOOP_VAR_NAMES_BUFFER_SIZE];
         } else if (topLoopVarNamesBuffer.length == topLoopVarNamesLength) {
-            String[] newLoopVarNamesBuffer =  new String[topLoopVarNamesBuffer.length * 2];
+            StringToIndexMap.Entry[] newLoopVarsBuffer = new StringToIndexMap.Entry[topLoopVarNamesBuffer.length * 2];
             for (int i = 0; i < topLoopVarNamesBuffer.length; i++) {
-                newLoopVarNamesBuffer[i] = topLoopVarNamesBuffer[i];
+                newLoopVarsBuffer[i] = topLoopVarNamesBuffer[i];
             }
-            topLoopVarNamesBuffer = newLoopVarNamesBuffer;
+            topLoopVarNamesBuffer = newLoopVarsBuffer;
         }
-        topLoopVarNamesBuffer[topLoopVarNamesLength++] = loopVarName;
+        topLoopVarNamesBuffer[topLoopVarNamesLength] = new StringToIndexMap.Entry(loopVarName, topLoopVarNamesLength);
+        topLoopVarNamesLength++;
     }
 
 }
@@ -3242,15 +3243,8 @@ ASTElement DynamicDirectiveCall() :
             }
         }
 
-        String[] trimmedLoopVarNames;
-        if (topLoopVarNamesLength == 0) {
-            trimmedLoopVarNames = null;
-        } else {
-            trimmedLoopVarNames = new String[topLoopVarNamesLength];
-            for (int i = 0; i < topLoopVarNamesLength; i++) {
-                trimmedLoopVarNames[i] = topLoopVarNamesBuffer[i];
-            }
-        }
+        StringToIndexMap loopVarNames = topLoopVarNamesLength == 0 ? null
+                : StringToIndexMap.of(topLoopVarNamesBuffer, topLoopVarNamesLength);
     }
 
     (
@@ -3263,7 +3257,7 @@ ASTElement DynamicDirectiveCall() :
                     // It's possible that we shadow a #list/#items loop variable, in which case that must be noted.
                     int ctxsLen = iteratorBlockContexts.size();
 	                for (int loopVarIdx = 0; loopVarIdx < topLoopVarNamesLength; loopVarIdx++) {
-                        String loopVarName = (String) topLoopVarNamesBuffer[loopVarIdx];
+                        String loopVarName = topLoopVarNamesBuffer[loopVarIdx].getKey();
                         walkCtxStack: for (int ctxIdx = ctxsLen - 1; ctxIdx >= 0; ctxIdx--) {
                             ParserIteratorBlockContext ctx
                                     = (ParserIteratorBlockContext) iteratorBlockContexts.get(ctxIdx);
@@ -3307,9 +3301,9 @@ ASTElement DynamicDirectiveCall() :
         )
     )
     {
-        ASTElement result = new ASTDirDynamicDirectiveCall(
+        ASTElement result = new ASTDirDynamicCall(
                 callableValueExp, false,
-                trimmedPositionalArgs, trimmedNamedArgs, trimmedLoopVarNames,
+                trimmedPositionalArgs, trimmedNamedArgs, loopVarNames,
                 children);
         result.setLocation(template, start, end);
         return result;

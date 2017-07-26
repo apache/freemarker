@@ -22,14 +22,12 @@ package org.apache.freemarker.core.userpkg;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
-import java.util.Map;
 
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.CallPlace;
 import org.apache.freemarker.core.model.TemplateModel;
-
-import com.google.common.collect.ImmutableMap;
+import org.apache.freemarker.core.util.StringToIndexMap;
 
 public class TwoNamedParamsDirective extends TestTemplateDirectiveModel {
 
@@ -38,10 +36,9 @@ public class TwoNamedParamsDirective extends TestTemplateDirectiveModel {
     private static final int N1_ARG_IDX = 0;
     private static final int N2_ARG_IDX = 1;
 
-    private static final Map<String, Integer> PARAM_NAME_TO_IDX = new ImmutableMap.Builder<String, Integer>()
-            .put(N1_ARG_NAME, N1_ARG_IDX)
-            .put(N2_ARG_NAME, N2_ARG_IDX)
-            .build();
+    private static final StringToIndexMap PARAM_NAME_TO_IDX = StringToIndexMap.of(
+            N1_ARG_NAME, N1_ARG_IDX,
+            N2_ARG_NAME, N2_ARG_IDX);
 
     @Override
     public void execute(TemplateModel[] args, Writer out, Environment env, CallPlace callPlace)
@@ -64,8 +61,7 @@ public class TwoNamedParamsDirective extends TestTemplateDirectiveModel {
 
     @Override
     public int getNamedArgumentIndex(String name) {
-        Integer idx = PARAM_NAME_TO_IDX.get(name);
-        return idx != null ? idx : -1;
+        return PARAM_NAME_TO_IDX.get(name);
     }
 
     @Override
@@ -80,6 +76,6 @@ public class TwoNamedParamsDirective extends TestTemplateDirectiveModel {
 
     @Override
     public Collection<String> getPredefinedNamedArgumentNames() {
-        return PARAM_NAME_TO_IDX.keySet();
+        return PARAM_NAME_TO_IDX.getKeys();
     }
 }

@@ -21,6 +21,8 @@ package org.apache.freemarker.core.model;
 
 import java.util.Collection;
 
+import org.apache.freemarker.core.util.StringToIndexMap;
+
 /**
  * Super interface of {@link TemplateFunctionModel} and {@link TemplateDirectiveModel2}.
  */
@@ -48,6 +50,7 @@ public interface TemplateCallableModel extends TemplateModel {
 
     /**
      * Returns if with what array index should the given named argument by passed to the {@code execute} method.
+     * Consider using a static final {@link StringToIndexMap} field to implement this.
      *
      * @return -1 if there's no such named argument
      */

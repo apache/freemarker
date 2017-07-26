@@ -63,6 +63,7 @@ import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
+import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.apache.freemarker.core.util._DateUtil;
 import org.apache.freemarker.core.util._DateUtil.DateToISO8601CalendarFactory;
@@ -489,7 +490,34 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             directiveModel.execute(this, args, outArgs, nested);
         } finally {
             if (outArgs.length > 0) {
-                localContextStack.pop();
+                popLocalContext();
+            }
+        }
+    }
+
+    void visit(
+            ASTElement[] childBuffer,
+            final StringToIndexMap loopVarNames, final TemplateModel[] loopVarValues)
+            throws IOException, TemplateException {
+        if (loopVarNames == null) {
+            visit(childBuffer);
+        } else {
+            pushLocalContext(new LocalContext() {
+                @Override
+                public TemplateModel getLocalVariable(String name) throws TemplateModelException {
+                    int index = loopVarNames.get(name);
+                    return index != -1 ? loopVarValues[index] : null;
+                }
+
+                @Override
+                public Collection getLocalVariableNames() throws TemplateModelException {
+                    return loopVarNames.getKeys();
+                }
+            });
+            try {
+                visit(childBuffer);
+            } finally {
+                popLocalContext();
             }
         }
     }
@@ -619,7 +647,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                 visit(nestedContentBuffer);
             } finally {
                 if (invokingMacroContext.nestedContentParameterNames != null) {
-                    localContextStack.pop();
+                    popLocalContext();
                 }
                 currentMacroContext = invokingMacroContext;
                 currentNamespace = getMacroNamespace(invokingMacroContext.getMacro());
@@ -640,7 +668,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             handleTemplateException(te);
             return true;
         } finally {
-            localContextStack.pop();
+            popLocalContext();
         }
     }
 
@@ -2346,6 +2374,10 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             localContextStack = new LocalContextStack();
         }
         localContextStack.push(localContext);
+    }
+
+    private void popLocalContext() {
+        localContextStack.pop();
     }
 
     LocalContextStack getLocalContextStack() {

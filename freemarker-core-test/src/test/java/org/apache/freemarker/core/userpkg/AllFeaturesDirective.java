@@ -24,7 +24,6 @@ import static org.apache.freemarker.core.TemplateCallableModelUtils.*;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
-import java.util.Map;
 
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
@@ -33,8 +32,8 @@ import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-
-import com.google.common.collect.ImmutableMap;
+import org.apache.freemarker.core.model.impl.SimpleNumber;
+import org.apache.freemarker.core.util.StringToIndexMap;
 
 public class AllFeaturesDirective extends TestTemplateDirectiveModel {
 
@@ -64,10 +63,9 @@ public class AllFeaturesDirective extends TestTemplateDirectiveModel {
         this.n2AllowNull = n2AllowNull;
     }
 
-    private static final Map<String, Integer> PARAM_NAME_TO_IDX = new ImmutableMap.Builder<String, Integer>()
-            .put(N1_ARG_NAME, N1_ARG_IDX)
-            .put(N2_ARG_NAME, N2_ARG_IDX)
-            .build();
+    private static final StringToIndexMap PARAM_NAME_TO_IDX = StringToIndexMap.of(
+            N1_ARG_NAME, N1_ARG_IDX,
+            N2_ARG_NAME, N2_ARG_IDX);
 
     @Override
     public void execute(TemplateModel[] args, Writer out, Environment env, CallPlace callPlace)
@@ -91,12 +89,25 @@ public class AllFeaturesDirective extends TestTemplateDirectiveModel {
         printParam(N1_ARG_NAME, n1, out);
         printParam(N2_ARG_NAME, n2, out);
         printParam("nOthers", nOthers, out);
-        if (callPlace.getLoopVariableCount() != 0) {
-            out.write("; " + callPlace.getLoopVariableCount());
+        int loopVariableCount = callPlace.getLoopVariableCount();
+        if (loopVariableCount != 0) {
+            out.write("; " + loopVariableCount);
         }
         out.write(")");
+
         if (callPlace.hasNestedContent()) {
-            out.write(" {...}");
+            out.write(" {");
+            if (p1 != null) {
+                int intP1 = p1.getAsNumber().intValue();
+                for (int i = 0; i < intP1; i++) {
+                    TemplateModel[] loopVariableValues = new TemplateModel[loopVariableCount];
+                    for (int loopVarIdx = 0; loopVarIdx < loopVariableCount; loopVarIdx++) {
+                        loopVariableValues[loopVarIdx] = new SimpleNumber((i + 1) * (loopVarIdx + 1));
+                    }
+                    callPlace.executeNestedContent(loopVariableValues, env);
+                }
+            }
+            out.write("}");
         }
     }
 
@@ -112,8 +123,7 @@ public class AllFeaturesDirective extends TestTemplateDirectiveModel {
 
     @Override
     public int getNamedArgumentIndex(String name) {
-        Integer idx = PARAM_NAME_TO_IDX.get(name);
-        return idx != null ? idx : -1;
+        return PARAM_NAME_TO_IDX.get(name);
     }
 
     @Override
@@ -123,7 +133,7 @@ public class AllFeaturesDirective extends TestTemplateDirectiveModel {
 
     @Override
     public Collection<String> getPredefinedNamedArgumentNames() {
-        return PARAM_NAME_TO_IDX.keySet();
+        return PARAM_NAME_TO_IDX.getKeys();
     }
 
     @Override
