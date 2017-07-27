@@ -121,8 +121,6 @@ Note that for the incompatibleImprovements setting you can specify a list of ver
    <testCase name="macros-return"/>
    <testCase name="multimodels"/>
    <testCase name="nested" />
-   <testCase name="newlines1" />
-   <testCase name="newlines2" />
    <testCase name="noparse" />
    <testCase name="number-format" />
    <testCase name="number-literal" >
@@ -162,7 +160,6 @@ Note that for the incompatibleImprovements setting you can specify a list of ver
    <testCase name="if" />
    <testCase name="switch" />
    <testCase name="switch-builtin" noOutput="true" />
-   <testCase name="transforms"/>
    <testCase name="type-builtins" />
    <testCase name="date-type-builtins" noOutput="true" />
    <testCase name="url" noOutput="true" />

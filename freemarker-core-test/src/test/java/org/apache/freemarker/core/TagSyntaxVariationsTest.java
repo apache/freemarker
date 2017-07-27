@@ -22,7 +22,12 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Collections;
+import java.util.Map;
 
+import org.apache.freemarker.core.model.TemplateDirectiveBody;
+import org.apache.freemarker.core.model.TemplateDirectiveModel;
+import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.test.TestConfigurationBuilder;
 
@@ -46,9 +51,9 @@ public class TagSyntaxVariationsTest extends TestCase {
     private static final String WRONG_SQU = squarify(WRONG_ANG);
     private static final String WRONGC_ANG = "</#wrong>";
     private static final String WRONGC_SQU = squarify(WRONGC_ANG );
-    private static final String CUST_ANG = "<@compress> z </@>";
+    private static final String CUST_ANG = "<@upperCase>z</@>";
     private static final String CUST_SQU = squarify(CUST_ANG);
-    private static final String CUST_OUT = "z";
+    private static final String CUST_OUT = "Z";
     
     public TagSyntaxVariationsTest(String name) {
         super(name);
@@ -60,6 +65,9 @@ public class TagSyntaxVariationsTest extends TestCase {
 
     public final void test()
             throws TemplateException, IOException {
+        Map<String, UpperCaseDirective> sharedVariables =
+                Collections.singletonMap("upperCase", UpperCaseDirective.INSTANCE);
+
         // Permutations
         for (int ifOrAssign = 0; ifOrAssign < 2; ifOrAssign++) {
             String dir_ang = ifOrAssign == 0 ? IF_ANG : ASSIGN_ANG;
@@ -72,6 +80,7 @@ public class TagSyntaxVariationsTest extends TestCase {
                         .tagSyntax(angOrSqu == 0
                                 ? TagSyntax.ANGLE_BRACKET
                                 : TagSyntax.SQUARE_BRACKET)
+                        .sharedVariables(sharedVariables)
                         .build();
 
                 String dir_xxx = angOrSqu == 0 ? dir_ang : dir_squ;
@@ -109,6 +118,7 @@ public class TagSyntaxVariationsTest extends TestCase {
             {
                 Configuration cfg = new TestConfigurationBuilder()
                         .tagSyntax(TagSyntax.AUTO_DETECT)
+                        .sharedVariables(sharedVariables)
                         .build();
                 for (int perm = 0; perm < 4; perm++) {
                     // All 4 permutations
@@ -124,6 +134,7 @@ public class TagSyntaxVariationsTest extends TestCase {
             {
                 Configuration cfg = new TestConfigurationBuilder()
                         .tagSyntax(TagSyntax.AUTO_DETECT)
+                        .sharedVariables(sharedVariables)
                         .build();
                 // Permutations
                 for (int angOrSquStart = 0; angOrSquStart < 2; angOrSquStart++) {
@@ -181,6 +192,21 @@ public class TagSyntaxVariationsTest extends TestCase {
         StringWriter out = new StringWriter();
         t.process(new Object(), out);
         assertEquals(expected, out.toString());
+    }
+
+    // This will be removed when the legacy TemplateDirectiveModel is removed; the use the other UpperCaseDirective
+    // instead!
+    private static class UpperCaseDirective implements TemplateDirectiveModel {
+
+        private static final UpperCaseDirective INSTANCE = new UpperCaseDirective();
+
+        @Override
+        public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+                throws TemplateException, IOException {
+            StringWriter sw = new StringWriter();
+            body.render(sw);
+            env.getOut().write(sw.toString().toUpperCase());
+        }
     }
 
 }

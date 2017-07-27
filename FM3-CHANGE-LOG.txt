@@ -412,6 +412,8 @@ Core / Miscellaneous
   future.)
 - util.ObjectFactory was renamed to CommonSupplier, and its createObject() method was renamed to
   get(), to be more similar to the Java 8 API.
+- Removed the legacy predefined shared variables: "html_escape", "normalize_newlines", "xml_escape", "capture_output",
+  "compress"
 
 
 Build / development process changes
