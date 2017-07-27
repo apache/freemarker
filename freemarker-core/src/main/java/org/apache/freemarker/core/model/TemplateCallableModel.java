@@ -55,17 +55,25 @@ public interface TemplateCallableModel extends TemplateModel {
      *
      * @return -1 if there's no such named argument
      */
-    int getNamedArgumentIndex(String name);
+    int getPredefinedNamedArgumentIndex(String name);
 
     /**
      * Returns the index of the named varargs argument in the argument array, or -1 if there's no named varargs
      * argument. The named varargs argument is a {@link TemplateHashModelEx2} with string keys that collects all
-     * the named arguments for which {@link #getNamedArgumentIndex(String)} returns -1. The iteration order of this
+     * the named arguments for which {@link #getPredefinedNamedArgumentIndex(String)} returns -1. The iteration order of this
      * hash follows the order in which the arguments were specified in the calling template.
      *
      * @return -1 if there's no named varargs argument
      */
     int getNamedVarargsArgumentIndex();
+
+    /**
+     * The valid names for arguments that are passed by name (not by position), in the order as they should be displayed
+     * in error messages, or {@code null} if there's none. If you have implemented
+     * {@link #getPredefinedNamedArgumentIndex(String)} with a {@link StringToIndexMap}, you should return
+     * {@link StringToIndexMap#getKeys()} here.
+     */
+    Collection<String> getPredefinedNamedArgumentNames();
 
     /**
      * The required (minimum) length of the {@code args} array passed to the {@code execute} method. This length always
@@ -82,14 +90,6 @@ public interface TemplateCallableModel extends TemplateModel {
      *     {@link #getNamedVarargsArgumentIndex()} is not -1, then it's one less than the return value of this method.)
      * </ul>
      */
-    int getTotalArgumentCount();
-
-    /**
-     * The valid names for arguments that are passed by name (not by position), in the order as they should be displayed
-     * in error messages, or {@code null} if there's none. If you have implemented
-     * {@link #getNamedArgumentIndex(String)} with a {@link StringToIndexMap}, you should return
-     * {@link StringToIndexMap#getKeys()} here.
-     */
-    Collection<String> getPredefinedNamedArgumentNames();
+    int getArgumentArraySize();
 
 }

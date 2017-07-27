@@ -159,7 +159,7 @@ class ASTDirDynamicCall extends ASTDirective implements CallPlace {
                     positionalArgs.length, " such arguments.");
         }
 
-        TemplateModel[] execArgs = new TemplateModel[callableValue.getTotalArgumentCount()];
+        TemplateModel[] execArgs = new TemplateModel[callableValue.getArgumentArraySize()];
 
         // Fill predefined positional args:
         if (positionalArgs != null) {
@@ -188,7 +188,7 @@ class ASTDirDynamicCall extends ASTDirective implements CallPlace {
         NativeHashEx2 namedVarargsHash = null;
         if (namedArgs != null) {
             for (NamedArgument namedArg : namedArgs) {
-                int argIdx = callableValue.getNamedArgumentIndex(namedArg.name);
+                int argIdx = callableValue.getPredefinedNamedArgumentIndex(namedArg.name);
                 if (argIdx != -1) {
                     execArgs[argIdx] = namedArg.value.eval(env);
                 } else {

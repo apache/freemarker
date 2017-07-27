@@ -21,12 +21,13 @@ package org.apache.freemarker.core;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
+import org.apache.freemarker.core.model.TemplateDirectiveBody;
+import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
@@ -189,19 +190,18 @@ class BuiltInsForStringsMisc {
             return new TemplateProcessorModel(interpretedTemplate);
         }
 
-        private class TemplateProcessorModel
-        implements
-            TemplateTransformModel {
+        private class TemplateProcessorModel implements TemplateDirectiveModel {
             private final Template template;
             
             TemplateProcessorModel(Template template) {
                 this.template = template;
             }
-            
+
             @Override
-            public Writer getWriter(final Writer out, Map args) throws TemplateModelException, IOException {
+            public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+                    throws TemplateException, IOException {
+                // TODO [FM3] Disallow params, loop vars, and nested content
                 try {
-                    Environment env = Environment.getCurrentEnvironment();
                     boolean lastFIRE = env.setFastInvalidReferenceExceptions(false);
                     try {
                         env.include(template);
@@ -215,23 +215,9 @@ class BuiltInsForStringsMisc {
                             new _DelayedGetMessage(e),
                             MessageUtil.EMBEDDED_MESSAGE_END);
                 }
-        
-                return new Writer(out)
-                {
-                    @Override
-                    public void close() {
-                    }
-                    
-                    @Override
-                    public void flush() throws IOException {
-                        out.flush();
-                    }
-                    
-                    @Override
-                    public void write(char[] cbuf, int off, int len) throws IOException {
-                        out.write(cbuf, off, len);
-                    }
-                };
+                if (body != null) {
+                    body.render(env.getOut());
+                }
             }
         }
 

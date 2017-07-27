@@ -50,7 +50,7 @@ public class UpperCaseDirective extends TestTemplateDirectiveModel {
     }
 
     @Override
-    public int getNamedArgumentIndex(String name) {
+    public int getPredefinedNamedArgumentIndex(String name) {
         return -1;
     }
 
@@ -60,7 +60,7 @@ public class UpperCaseDirective extends TestTemplateDirectiveModel {
     }
 
     @Override
-    public int getTotalArgumentCount() {
+    public int getArgumentArraySize() {
         return 0;
     }
 

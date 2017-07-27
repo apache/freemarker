@@ -22,16 +22,28 @@ public interface TemplateDirectiveModel2 extends TemplateCallableModel {
 
     /**
      * @param args
-     *         Array with {@link #getTotalArgumentCount()} elements (or more, in which case the extra elements should be
-     *         ignored). Not {@code null}. If a parameter was omitted, the corresponding array element will be {@code
-     *         null}.
+     *         Array with {@link #getArgumentArraySize()} elements (or more, in which case the extra elements should be
+     *         ignored). Not {@code null}. If a parameter was omitted on the caller side, the corresponding array
+     *         element will be {@code null}. Parameters passed by position will be at the index that corresponds to the
+     *         position (the 1st argument is at index 0). However, positional parameters over {@link
+     *         #getPredefinedPositionalArgumentCount()} will be in the positional varargs sequence at index one higher,
+     *         assuming {@link #hasPositionalVarargsArgument()} is {@code true}. Parameters passed by name (rather than
+     *         by position) will be at the index returned be {@link #getPredefinedNamedArgumentIndex(String)}, or in the
+     *         named varargs hash at index {@link #getNamedVarargsArgumentIndex()}, assuming that's not -1.
      * @param callPlace
      *         The place (in a template, normally) where this directive was called from. Not {@code null}. Note that
-     *         {@link CallPlace#executeNestedContent(TemplateModel[], Writer, Environment)} can be used to
+     *         {@link CallPlace#executeNestedContent(TemplateModel[], Writer, Environment)} can be used to execute the
+     *         nested content. If the directive doesn't support nested content, it should check {@link
+     *         CallPlace#hasNestedContent()} that return {@code false}, and otherwise throw exception.
      * @param out
      *         Print the output here (if there's any)
      * @param env
      *         The current processing environment. Not {@code null}.
+     *
+     * @throws TemplateException
+     *         If any problem occurs that's not an {@link IOException} during writing the template output.
+     * @throws IOException
+     *         When writing the template output fails.
      */
     void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException;

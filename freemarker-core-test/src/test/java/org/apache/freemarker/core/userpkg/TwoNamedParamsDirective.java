@@ -60,7 +60,7 @@ public class TwoNamedParamsDirective extends TestTemplateDirectiveModel {
     }
 
     @Override
-    public int getNamedArgumentIndex(String name) {
+    public int getPredefinedNamedArgumentIndex(String name) {
         return PARAM_NAME_TO_IDX.get(name);
     }
 
@@ -70,7 +70,7 @@ public class TwoNamedParamsDirective extends TestTemplateDirectiveModel {
     }
 
     @Override
-    public int getTotalArgumentCount() {
+    public int getArgumentArraySize() {
         return PARAM_NAME_TO_IDX.size();
     }
 
