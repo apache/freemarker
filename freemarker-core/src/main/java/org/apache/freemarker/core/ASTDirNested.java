@@ -124,13 +124,13 @@ final class ASTDirNested extends ASTDirective {
         
         Context(Environment env) throws TemplateException {
             invokingMacroContext = env.getCurrentMacroContext();
-            List bodyParameterNames = invokingMacroContext.nestedContentParameterNames;
+            List<String> bodyParameterNames = invokingMacroContext.nestedContentParameterNames;
             if (bodyParameters != null) {
                 for (int i = 0; i < bodyParameters.size(); i++) {
                     ASTExpression exp = (ASTExpression) bodyParameters.get(i);
                     TemplateModel tm = exp.eval(env);
                     if (bodyParameterNames != null && i < bodyParameterNames.size()) {
-                        String bodyParameterName = (String) bodyParameterNames.get(i);
+                        String bodyParameterName = bodyParameterNames.get(i);
                         if (bodyVars == null) {
                             bodyVars = env.new Namespace();
                         }
@@ -146,9 +146,9 @@ final class ASTDirNested extends ASTDirective {
         }
         
         @Override
-        public Collection getLocalVariableNames() {
-            List bodyParameterNames = invokingMacroContext.nestedContentParameterNames;
-            return bodyParameterNames == null ? Collections.EMPTY_LIST : bodyParameterNames;
+        public Collection<String> getLocalVariableNames() {
+            List<String> bodyParameterNames = invokingMacroContext.nestedContentParameterNames;
+            return bodyParameterNames == null ? Collections.<String>emptyList() : bodyParameterNames;
         }
     }
 

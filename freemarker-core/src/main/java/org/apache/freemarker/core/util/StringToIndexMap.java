@@ -145,7 +145,7 @@ public final class StringToIndexMap {
             for (int i = 0; i < entriesLength; i++) {
                 keyArray[i] = entries[i].key;
             }
-            keys = new _ArrayList<>(keyArray);
+            keys = _ArrayAdapterList.adapt(keyArray);
 
             // We try to find the best hash algorithm parameter (variation) for the known key set:
             int variation = 0;

@@ -20,7 +20,9 @@
 package org.apache.freemarker.core;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 
 import org.apache.freemarker.core.model.CallPlace;
 import org.apache.freemarker.core.model.Constants;
@@ -32,6 +34,7 @@ import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.CommonSupplier;
 import org.apache.freemarker.core.util.StringToIndexMap;
+import org.apache.freemarker.core.util._ArrayAdapterList;
 import org.apache.freemarker.core.util._StringUtil;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -109,6 +112,32 @@ class ASTDirDynamicCall extends ASTDirective implements CallPlace {
                 callableValue = (TemplateCallableModel) callableValueTM;
                 directive = null;
                 function = (TemplateFunctionModel) callableValue;
+            } else if (callableValueTM instanceof ASTDirMacro) {
+                // TODO [FM3][CF] Until macros were refactored to be TemplateDirectiveModel2-s, we have this hack here.
+                ASTDirMacro macro = (ASTDirMacro) callableValueTM;
+                if (macro.isFunction()) {
+                    throw new _MiscTemplateException(env,
+                            "Routine ", new _DelayedJQuote(macro.getName()), " is a function, not a directive. "
+                            + "Functions can only be called from expressions, like in ${f()}, ${x + f()} or ",
+                            "<@someDirective someParam=f() />", ".");
+                }
+
+                // We have to convert arguments to the legacy data structures... yet again, it's only a temporary hack.
+                LinkedHashMap<String, ASTExpression> macroNamedArgs;
+                if (namedArgs != null) {
+                    macroNamedArgs = new LinkedHashMap<>(namedArgs.length * 4 / 3);
+                    for (NamedArgument namedArg : namedArgs) {
+                        macroNamedArgs.put(namedArg.name, namedArg.value);
+                    }
+                } else {
+                    macroNamedArgs = null;
+                }
+                env.invoke(macro,
+                        macroNamedArgs,
+                        _ArrayAdapterList.adapt(positionalArgs),
+                        loopVarNames != null ? loopVarNames.getKeys() : null,
+                        getChildBuffer());
+                return null;
             } else if (callableValueTM == null) {
                 throw InvalidReferenceException.getInstance(callableValueExp, env);
             } else {
@@ -189,7 +218,7 @@ class ASTDirDynamicCall extends ASTDirective implements CallPlace {
         }
 
         if (directive != null) {
-            directive.execute(execArgs, env.getOut(), env, this);
+            directive.execute(execArgs, this, env.getOut(), env);
         } else {
             TemplateModel result = function.execute(execArgs, env, this);
             if (result == null) {
@@ -349,9 +378,9 @@ class ASTDirDynamicCall extends ASTDirective implements CallPlace {
     }
 
     @Override
-    public void executeNestedContent(TemplateModel[] loopVariableValues, Environment env)
+    public void executeNestedContent(TemplateModel[] loopVariableValues, Writer out, Environment env)
             throws TemplateException, IOException {
-        env.visit(getChildBuffer(), loopVarNames, loopVariableValues);
+        env.visit(getChildBuffer(), loopVarNames, loopVariableValues, out);
     }
 
     @Override

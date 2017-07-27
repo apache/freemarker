@@ -31,7 +31,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 public class TwoPositionalParamsDirective extends TestTemplateDirectiveModel {
 
     @Override
-    public void execute(TemplateModel[] args, Writer out, Environment env, CallPlace callPlace)
+    public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
         out.write("#p(");
         printParam("p1", args[0], out, true);

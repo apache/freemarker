@@ -27,11 +27,15 @@ import java.util.Iterator;
  * Don't use this; used internally by FreeMarker, might changes without notice.
  * Immutable list that wraps an array that's known to be non-changing.
  */
-public class _ArrayList<E> extends AbstractList<E> {
+public class _ArrayAdapterList<E> extends AbstractList<E> {
 
     private final E[] array;
 
-    public _ArrayList(E[] array) {
+    public static <E> _ArrayAdapterList<E> adapt(E[] array) {
+        return  array != null ? new _ArrayAdapterList<E>(array) : null;
+    }
+
+    private _ArrayAdapterList(E[] array) {
         this.array = array;
     }
 

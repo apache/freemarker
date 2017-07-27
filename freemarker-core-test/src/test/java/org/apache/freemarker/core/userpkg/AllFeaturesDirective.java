@@ -68,7 +68,7 @@ public class AllFeaturesDirective extends TestTemplateDirectiveModel {
             N2_ARG_NAME, N2_ARG_IDX);
 
     @Override
-    public void execute(TemplateModel[] args, Writer out, Environment env, CallPlace callPlace)
+    public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
         execute(castArgumentToNumber(args, P1_ARG_IDX, p1AllowNull, env),
                 castArgumentToNumber(args, P2_ARG_IDX, p2AllowNull, env),
@@ -104,7 +104,7 @@ public class AllFeaturesDirective extends TestTemplateDirectiveModel {
                     for (int loopVarIdx = 0; loopVarIdx < loopVariableCount; loopVarIdx++) {
                         loopVariableValues[loopVarIdx] = new SimpleNumber((i + 1) * (loopVarIdx + 1));
                     }
-                    callPlace.executeNestedContent(loopVariableValues, env);
+                    callPlace.executeNestedContent(loopVariableValues, out, env);
                 }
             }
             out.write("}");

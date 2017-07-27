@@ -151,13 +151,13 @@ final class ASTDirMacro extends ASTDirective implements TemplateModel {
         final Environment.Namespace localVars; 
         final ASTElement[] nestedContentBuffer;
         final Environment.Namespace nestedContentNamespace;
-        final List nestedContentParameterNames;
+        final List<String> nestedContentParameterNames;
         final LocalContextStack prevLocalContextStack;
         final Context prevMacroContext;
         
         Context(Environment env, 
                 ASTElement[] nestedContentBuffer,
-                List nestedContentParameterNames) {
+                List<String> nestedContentParameterNames) {
             localVars = env.new Namespace();
             this.nestedContentBuffer = nestedContentBuffer;
             nestedContentNamespace = env.getCurrentNamespace();
@@ -257,8 +257,8 @@ final class ASTDirMacro extends ASTDirective implements TemplateModel {
         }
 
         @Override
-        public Collection getLocalVariableNames() throws TemplateModelException {
-            HashSet result = new HashSet();
+        public Collection<String> getLocalVariableNames() throws TemplateModelException {
+            HashSet<String> result = new HashSet<>();
             for (TemplateModelIterator it = localVars.keys().iterator(); it.hasNext(); ) {
                 result.add(it.next().toString());
             }
@@ -287,7 +287,7 @@ final class ASTDirMacro extends ASTDirective implements TemplateModel {
             } else if (idx == argDescsEnd) {
                 return catchAllParamName;
             } else if (idx == argDescsEnd + 1) {
-                return Integer.valueOf(function ? TYPE_FUNCTION : TYPE_MACRO);
+                return function ? TYPE_FUNCTION : TYPE_MACRO;
             } else {
                 throw new IndexOutOfBoundsException();
             }

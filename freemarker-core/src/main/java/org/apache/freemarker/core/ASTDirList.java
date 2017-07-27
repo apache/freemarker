@@ -434,7 +434,7 @@ final class ASTDirList extends ASTDirective {
         }
         
         @Override
-        public Collection getLocalVariableNames() {
+        public Collection<String> getLocalVariableNames() {
             String loopVarName = this.loopVarName;
             if (loopVarName != null) {
                 if (localVarNames == null) {

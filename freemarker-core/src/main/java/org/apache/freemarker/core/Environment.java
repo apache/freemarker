@@ -481,7 +481,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                 }
 
                 @Override
-                public Collection getLocalVariableNames() {
+                public Collection<String> getLocalVariableNames() {
                     return bodyParameterNames;
                 }
             });
@@ -497,28 +497,36 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     void visit(
             ASTElement[] childBuffer,
-            final StringToIndexMap loopVarNames, final TemplateModel[] loopVarValues)
+            final StringToIndexMap loopVarNames, final TemplateModel[] loopVarValues,
+            Writer out)
             throws IOException, TemplateException {
-        if (loopVarNames == null) {
-            visit(childBuffer);
-        } else {
-            pushLocalContext(new LocalContext() {
-                @Override
-                public TemplateModel getLocalVariable(String name) throws TemplateModelException {
-                    int index = loopVarNames.get(name);
-                    return index != -1 ? loopVarValues[index] : null;
-                }
-
-                @Override
-                public Collection getLocalVariableNames() throws TemplateModelException {
-                    return loopVarNames.getKeys();
-                }
-            });
-            try {
+        // TODO [FM][CF] The plan is that `out` will be the root read only sink, so then this won't be here.
+        Writer prevOut = this.out;
+        this.out = out;
+        try {
+            if (loopVarNames == null) {
                 visit(childBuffer);
-            } finally {
-                popLocalContext();
+            } else {
+                pushLocalContext(new LocalContext() {
+                    @Override
+                    public TemplateModel getLocalVariable(String name) throws TemplateModelException {
+                        int index = loopVarNames.get(name);
+                        return index != -1 ? loopVarValues[index] : null;
+                    }
+
+                    @Override
+                    public Collection<String> getLocalVariableNames() throws TemplateModelException {
+                        return loopVarNames.getKeys();
+                    }
+                });
+                try {
+                    visit(childBuffer);
+                } finally {
+                    popLocalContext();
+                }
             }
+        } finally {
+            this.out = prevOut;
         }
     }
 
@@ -760,8 +768,8 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * Calls the macro or function with the given arguments and nested block.
      */
     void invoke(ASTDirMacro macro,
-            Map namedArgs, List positionalArgs,
-            List bodyParameterNames, ASTElement[] childBuffer) throws TemplateException, IOException {
+            Map<String, ASTExpression> namedArgs, List<ASTExpression> positionalArgs,
+            List<String> bodyParameterNames, ASTElement[] childBuffer) throws TemplateException, IOException {
         if (macro == ASTDirMacro.DO_NOTHING_MACRO) {
             return;
         }
@@ -803,7 +811,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     private void setMacroContextLocalsFromArguments(
             final ASTDirMacro.Context macroCtx,
             final ASTDirMacro macro,
-            final Map namedArgs, final List positionalArgs) throws TemplateException {
+            final Map<String, ASTExpression> namedArgs, final List<ASTExpression> positionalArgs) throws TemplateException {
         String catchAllParamName = macro.getCatchAll();
         if (namedArgs != null) {
             final NativeHashEx2 catchAllParamValue;
@@ -814,11 +822,11 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                 catchAllParamValue = null;
             }
 
-             for (Map.Entry argNameAndValExp : (Set<Map.Entry>) namedArgs.entrySet()) {
-                final String argName = (String) argNameAndValExp.getKey();
+             for (Map.Entry<String, ASTExpression> argNameAndValExp : namedArgs.entrySet()) {
+                final String argName = argNameAndValExp.getKey();
                 final boolean isArgNameDeclared = macro.hasArgNamed(argName);
                 if (isArgNameDeclared || catchAllParamName != null) {
-                    ASTExpression argValueExp = (ASTExpression) argNameAndValExp.getValue();
+                    ASTExpression argValueExp = argNameAndValExp.getValue();
                     TemplateModel argValue = argValueExp.eval(this);
                     if (isArgNameDeclared) {
                         macroCtx.setLocalVar(argName, argValue);
@@ -849,7 +857,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                         new _DelayedToString(argsCnt), ".");
             }
             for (int i = 0; i < argsCnt; i++) {
-                ASTExpression argValueExp = (ASTExpression) positionalArgs.get(i);
+                ASTExpression argValueExp = positionalArgs.get(i);
                 TemplateModel argValue = argValueExp.eval(this);
                 try {
                     if (i < argNames.length) {

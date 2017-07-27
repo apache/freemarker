@@ -24,6 +24,7 @@ import java.io.IOException;
 import org.apache.freemarker.core.userpkg.AllFeaturesDirective;
 import org.apache.freemarker.core.userpkg.TwoNamedParamsDirective;
 import org.apache.freemarker.core.userpkg.TwoPositionalParamsDirective;
+import org.apache.freemarker.core.userpkg.UpperCaseDirective;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -141,6 +142,28 @@ public class TemplateCallableModelTest extends TemplateTest {
         assertErrorContains("<~n 9 />", "can't have arguments passed by position");
         assertErrorContains("<~n n3=9 />", "has no", "\"n3\"", "supported", "\"n1\", \"n2\"");
         assertErrorContains("<~p n1=9 />", "doesn't have any by-name-passed");
+    }
+
+    @Test
+    public void testMacros() throws IOException, TemplateException {
+        assertOutput("<#macro m a b=22><#list 1..2 as n>[<#nested a * n, b * n>]</#list></#macro>"
+                + "<~m 11; i, j>${i} ${j}</~m> <~m a=1 b=2; i, j>${i} ${j}</~m>",
+                "[11 22][22 44] [1 2][2 4]");
+        assertOutput("<#macro m a b others...>[a=${a}, b=${b}<#if others?hasContent>, </#if>"
+                        + "<#if others?isSequence>"
+                        + "<#list others as v>${v}<#sep>, </#list>"
+                        + "<#else>"
+                        + "<#list others as k, v>${k}=${v}<#sep>, </#list>"
+                        + "</#if>]"
+                        + "</#macro>"
+                        + "<~m 1, 2 /> <~m 1, 2, 3, 4 /> <~m a=1 b=2 /> <~m a=1 b=2 c=3 d=4 />",
+                "[a=1, b=2] [a=1, b=2, 3, 4] [a=1, b=2] [a=1, b=2, c=3, d=4]");
+    }
+
+    @Test
+    public void testFilterDirective() throws IOException, TemplateException {
+        addToDataModel("uc", new UpperCaseDirective());
+        assertOutput("<~uc>foo ${1 + 1}</~>", "FOO 2");
     }
 
 }

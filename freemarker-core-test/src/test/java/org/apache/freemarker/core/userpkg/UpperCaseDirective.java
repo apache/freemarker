@@ -20,6 +20,7 @@
 package org.apache.freemarker.core.userpkg;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collection;
 
@@ -27,26 +28,15 @@ import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.CallPlace;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util.StringToIndexMap;
 
-public class TwoNamedParamsDirective extends TestTemplateDirectiveModel {
-
-    private static final String N1_ARG_NAME = "n1";
-    private static final String N2_ARG_NAME = "n2";
-    private static final int N1_ARG_IDX = 0;
-    private static final int N2_ARG_IDX = 1;
-
-    private static final StringToIndexMap PARAM_NAME_TO_IDX = StringToIndexMap.of(
-            N1_ARG_NAME, N1_ARG_IDX,
-            N2_ARG_NAME, N2_ARG_IDX);
+public class UpperCaseDirective extends TestTemplateDirectiveModel {
 
     @Override
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
-        out.write("#n(");
-        printParam(N1_ARG_NAME, args[N1_ARG_IDX], out, true);
-        printParam(N2_ARG_NAME, args[N2_ARG_IDX], out);
-        out.write(")");
+        StringWriter capturingOut = new StringWriter();
+        callPlace.executeNestedContent(null, capturingOut, env);
+        out.write(capturingOut.toString().toUpperCase());
     }
 
     @Override
@@ -61,7 +51,7 @@ public class TwoNamedParamsDirective extends TestTemplateDirectiveModel {
 
     @Override
     public int getNamedArgumentIndex(String name) {
-        return PARAM_NAME_TO_IDX.get(name);
+        return -1;
     }
 
     @Override
@@ -71,11 +61,11 @@ public class TwoNamedParamsDirective extends TestTemplateDirectiveModel {
 
     @Override
     public int getTotalArgumentCount() {
-        return PARAM_NAME_TO_IDX.size();
+        return 0;
     }
 
     @Override
     public Collection<String> getPredefinedNamedArgumentNames() {
-        return PARAM_NAME_TO_IDX.getKeys();
+        return null;
     }
 }

@@ -20,6 +20,7 @@
 package org.apache.freemarker.core.model;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.util.IdentityHashMap;
 
 import org.apache.freemarker.core.CallPlaceCustomDataInitializationException;
@@ -60,8 +61,8 @@ public interface CallPlace {
      *         TemplateCallableModelUtils#EMPTY_TEMPLATE_MODEL_ARRAY}. Its length must be equal to
      *         {@link #getLoopVariableCount()}.
      */
-    void executeNestedContent(TemplateModel[] loopVariableValues, Environment env) throws TemplateException,
-            IOException;
+    void executeNestedContent(TemplateModel[] loopVariableValues, Writer out, Environment env)
+            throws TemplateException, IOException;
 
     // -------------------------------------------------------------------------------------------------------------
     // Source code info:

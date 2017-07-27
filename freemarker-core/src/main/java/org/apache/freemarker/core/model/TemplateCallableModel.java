@@ -49,8 +49,9 @@ public interface TemplateCallableModel extends TemplateModel {
     boolean hasPositionalVarargsArgument();
 
     /**
-     * Returns if with what array index should the given named argument by passed to the {@code execute} method.
-     * Consider using a static final {@link StringToIndexMap} field to implement this.
+     * For the given argument name (that corresponds to a parameter that meant to be passed by name, not by position)
+     * return its intended index in the {@code args} array argument of the {@code execute} method, or -1 if there's
+     * no such parameter. Consider using a static final {@link StringToIndexMap} field to implement this.
      *
      * @return -1 if there's no such named argument
      */
@@ -67,14 +68,16 @@ public interface TemplateCallableModel extends TemplateModel {
     int getNamedVarargsArgumentIndex();
 
     /**
-     * The required length of the arguments array passed to the {@code execute} method. (It's possible that a longer
-     * array will be passed, in which case the extra elements should be ignored by {@code execute}.)
-     * The return value should be equal to the sum of these (but we don't want to calculate it on-the-fly, for speed),
-     * or else FreeMarker might fails later with {@link IndexOutOfBoundsException}:
+     * The required (minimum) length of the {@code args} array passed to the {@code execute} method. This length always
+     * includes the space reserved for optional arguments; it's not why it's said to be a minimum length. It's a minimum
+     * length because a longer array might be reused for better performance (but {@code execute} should never read
+     * those excess elements).
+     * The return value should be equal to the sum of these (but we don't want to calculate it on-the-fly,
+     * for speed), or else {@link IndexOutOfBoundsException}-s might will occur:
      * <ul>
-     *     <li>{@link #getPredefinedPositionalArgumentCount()}
+     *     <li>{@link #getPredefinedPositionalArgumentCount()} (note that predefined optional arguments are counted in)
      *     <li>If {@link #hasPositionalVarargsArgument()} is {@code true}, then 1, else 0.
-     *     <li>Size of {@link #getPredefinedNamedArgumentNames()}
+     *     <li>Size of {@link #getPredefinedNamedArgumentNames()} (again, predefined optional arguments are counted in)
      *     <li>If {@link #getNamedVarargsArgumentIndex()} is not -1, then 1, else 0. (Also, obviously, if
      *     {@link #getNamedVarargsArgumentIndex()} is not -1, then it's one less than the return value of this method.)
      * </ul>
@@ -82,7 +85,10 @@ public interface TemplateCallableModel extends TemplateModel {
     int getTotalArgumentCount();
 
     /**
-     * The valid named argument names in the order as they should be displayed in error messages, or {@code null}.
+     * The valid names for arguments that are passed by name (not by position), in the order as they should be displayed
+     * in error messages, or {@code null} if there's none. If you have implemented
+     * {@link #getNamedArgumentIndex(String)} with a {@link StringToIndexMap}, you should return
+     * {@link StringToIndexMap#getKeys()} here.
      */
     Collection<String> getPredefinedNamedArgumentNames();
 

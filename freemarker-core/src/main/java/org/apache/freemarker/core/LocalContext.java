@@ -31,6 +31,5 @@ import org.apache.freemarker.core.model.TemplateModelException;
   */
 public interface LocalContext {
     TemplateModel getLocalVariable(String name) throws TemplateModelException;
-    Collection getLocalVariableNames() throws TemplateModelException;
-    
+    Collection<String> getLocalVariableNames() throws TemplateModelException;
 }
