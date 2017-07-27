@@ -499,32 +499,36 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             ASTElement[] childBuffer,
             final StringToIndexMap loopVarNames, final TemplateModel[] loopVarValues,
             Writer out)
-            throws IOException, TemplateException {
-        // TODO [FM][CF] The plan is that `out` will be the root read only sink, so then this won't be here.
+        throws IOException, TemplateException {
+        if (loopVarNames == null) { // This is by far the most frequent case
+            visit(childBuffer, out);
+        } else {
+            pushLocalContext(new LocalContext() {
+                @Override
+                public TemplateModel getLocalVariable(String name) throws TemplateModelException {
+                    int index = loopVarNames.get(name);
+                    return index != -1 ? loopVarValues[index] : null;
+                }
+
+                @Override
+                public Collection<String> getLocalVariableNames() throws TemplateModelException {
+                    return loopVarNames.getKeys();
+                }
+            });
+            try {
+                visit(childBuffer, out);
+            } finally {
+                popLocalContext();
+            }
+        }
+    }
+
+    void visit(ASTElement[] childBuffer, Writer out) throws IOException, TemplateException {
+        // TODO [FM][CF] The plan is that `out` will be the root read only sink, so then it will work differently
         Writer prevOut = this.out;
         this.out = out;
         try {
-            if (loopVarNames == null) {
-                visit(childBuffer);
-            } else {
-                pushLocalContext(new LocalContext() {
-                    @Override
-                    public TemplateModel getLocalVariable(String name) throws TemplateModelException {
-                        int index = loopVarNames.get(name);
-                        return index != -1 ? loopVarValues[index] : null;
-                    }
-
-                    @Override
-                    public Collection<String> getLocalVariableNames() throws TemplateModelException {
-                        return loopVarNames.getKeys();
-                    }
-                });
-                try {
-                    visit(childBuffer);
-                } finally {
-                    popLocalContext();
-                }
-            }
+            visit(childBuffer);
         } finally {
             this.out = prevOut;
         }

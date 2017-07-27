@@ -58,7 +58,7 @@ public abstract class TemplateTest {
     private Map<String, String> addedTemplates = new HashMap<>();
 
     /**
-     * Gets the {@link Configuration} used, automaticlly creating and setting if it wasn't yet.
+     * Gets the {@link Configuration} used, automatically creating and setting if it wasn't yet.
      */
     protected final Configuration getConfiguration() {
         if (configuration == null) {

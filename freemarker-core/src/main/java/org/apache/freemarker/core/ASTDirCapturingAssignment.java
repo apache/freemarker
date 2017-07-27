@@ -21,14 +21,12 @@ package org.apache.freemarker.core;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.io.Writer;
-import java.util.Map;
 
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
+import org.apache.freemarker.core.util.BugException;
 
 /**
  * AST directive node: Like {@code <#local x>...</#local>}.
@@ -51,21 +49,29 @@ final class ASTDirCapturingAssignment extends ASTDirective {
     @Override
     ASTElement[] accept(Environment env) throws TemplateException, IOException {
         ASTElement[] children = getChildBuffer();
+
+        TemplateModel capturedValue;
         if (children != null) {
-            env.visitAndTransform(children, new CaptureOutput(env), null);
+            StringWriter out = new StringWriter();
+            env.visit(children, out);
+            capturedValue = capturedStringToModel(out.toString());
         } else {
-            TemplateModel value = capturedStringToModel("");
-            if (namespaceExp != null) {
-                Environment.Namespace ns = (Environment.Namespace) namespaceExp.eval(env);
-                ns.put(varName, value);
-            } else if (scope == ASTDirAssignment.NAMESPACE) {
-                env.setVariable(varName, value);
-            } else if (scope == ASTDirAssignment.GLOBAL) {
-                env.setGlobalVariable(varName, value);
-            } else if (scope == ASTDirAssignment.LOCAL) {
-                env.setLocalVariable(varName, value);
-            }
+            capturedValue = capturedStringToModel("");
         }
+
+        if (namespaceExp != null) {
+            Environment.Namespace ns = (Environment.Namespace) namespaceExp.eval(env);
+            ns.put(varName, capturedValue);
+        } else if (scope == ASTDirAssignment.NAMESPACE) {
+            env.setVariable(varName, capturedValue);
+        } else if (scope == ASTDirAssignment.GLOBAL) {
+            env.setGlobalVariable(varName, capturedValue);
+        } else if (scope == ASTDirAssignment.LOCAL) {
+            env.setLocalVariable(varName, capturedValue);
+        } else {
+            throw new BugException("Unhandled scope");
+        }
+
         return null;
     }
 
@@ -73,57 +79,6 @@ final class ASTDirCapturingAssignment extends ASTDirective {
         return markupOutputFormat == null ? new SimpleScalar(s) : markupOutputFormat.fromMarkup(s);
     }
 
-    private class CaptureOutput implements TemplateTransformModel {
-        private final Environment env;
-        private final Environment.Namespace fnsModel;
-        
-        CaptureOutput(Environment env) throws TemplateException {
-            this.env = env;
-            TemplateModel nsModel = null;
-            if (namespaceExp != null) {
-                nsModel = namespaceExp.eval(env);
-                if (!(nsModel instanceof Environment.Namespace)) {
-                    throw new NonNamespaceException(namespaceExp, nsModel, env);
-                }
-            }
-            fnsModel = (Environment.Namespace ) nsModel; 
-        }
-        
-        @Override
-        public Writer getWriter(Writer out, Map args) {
-            return new StringWriter() {
-                @Override
-                public void close() throws IOException {
-                    TemplateModel result;
-                    try {
-                        result = capturedStringToModel(toString());
-                    } catch (TemplateModelException e) {
-                        // [Java 1.6] e to cause
-                        throw new IOException("Failed to invoke FTL value from captured string: " + e);
-                    }
-                    switch(scope) {
-                        case ASTDirAssignment.NAMESPACE: {
-                            if (fnsModel != null) {
-                                fnsModel.put(varName, result);
-                            } else {
-                                env.setVariable(varName, result);
-                            }
-                            break;
-                        }
-                        case ASTDirAssignment.LOCAL: {
-                            env.setLocalVariable(varName, result);
-                            break;
-                        }
-                        case ASTDirAssignment.GLOBAL: {
-                            env.setGlobalVariable(varName, result);
-                            break;
-                        }
-                    }
-                }
-            };
-        }
-    }
-    
     @Override
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();
