@@ -377,6 +377,21 @@ public final class Environment extends Configurable {
         }
     }
 
+    /**
+     * Visits the elements while temporarily using the parameter output {@link Writer}.
+     * 
+     * @since 2.3.27
+     */
+    final void visit(TemplateElement[] elementBuffer, Writer out) throws IOException, TemplateException {
+        Writer prevOut = this.out;
+        this.out = out;
+        try {
+            visit(elementBuffer);
+        } finally {
+            this.out = prevOut;
+        }
+    }
+    
     @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "Not called when stack is empty")
     private TemplateElement replaceTopElement(TemplateElement element) {
         return instructionStack[instructionStackSize - 1] = element;
