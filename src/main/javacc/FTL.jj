@@ -3360,12 +3360,13 @@ TemplateElement UnifiedMacroTransform() :
         positionalArgs = PositionalArgs()
     )
     [
-        <SEMICOLON>{bodyParameters = new ArrayList(4); }
+        <SEMICOLON>
+        { bodyParameters = new ArrayList(4); }
         [
             [<TERMINATING_WHITESPACE>] t = <ID> { bodyParameters.add(t.image); }
             (
                 [<TERMINATING_WHITESPACE>] <COMMA>
-                [<TERMINATING_WHITESPACE>] t = <ID>{bodyParameters.add(t.image); }
+                [<TERMINATING_WHITESPACE>] t = <ID> {bodyParameters.add(t.image); }
             )*
         ]
     ]
