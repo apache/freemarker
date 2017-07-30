@@ -21,18 +21,30 @@ package org.apache.freemarker.core.userpkg;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Collection;
 
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.NestedContentNotSupportedException;
 import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.CallPlace;
 import org.apache.freemarker.core.model.TemplateModel;
 
 public class TwoPositionalParamsDirective extends TestTemplateDirectiveModel {
 
+    public static final TwoPositionalParamsDirective INSTANCE = new TwoPositionalParamsDirective();
+
+    private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
+            2, false,
+            null, false);
+
+    private TwoPositionalParamsDirective() {
+        //
+    }
+
     @Override
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
+        NestedContentNotSupportedException.check(callPlace);
         out.write("#p(");
         printParam("p1", args[0], out, true);
         printParam("p2", args[1], out);
@@ -40,32 +52,7 @@ public class TwoPositionalParamsDirective extends TestTemplateDirectiveModel {
     }
 
     @Override
-    public int getPredefinedPositionalArgumentCount() {
-        return 2;
-    }
-
-    @Override
-    public boolean hasPositionalVarargsArgument() {
-        return false;
-    }
-
-    @Override
-    public int getPredefinedNamedArgumentIndex(String name) {
-        return -1;
-    }
-
-    @Override
-    public int getNamedVarargsArgumentIndex() {
-        return -1;
-    }
-
-    @Override
-    public int getArgumentArraySize() {
-        return getPredefinedPositionalArgumentCount();
-    }
-
-    @Override
-    public Collection<String> getPredefinedNamedArgumentNames() {
-        return null;
+    public ArgumentArrayLayout getArgumentArrayLayout() {
+        return ARGS_LAYOUT;
     }
 }

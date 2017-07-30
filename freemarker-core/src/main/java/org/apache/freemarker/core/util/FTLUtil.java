@@ -40,7 +40,6 @@ import org.apache.freemarker.core.model.TemplateNodeModelEx;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.impl.BeanAndStringModel;
 import org.apache.freemarker.core.model.impl.BeanModel;
@@ -774,8 +773,6 @@ public final class FTLUtil {
 
         if (TemplateDirectiveModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "directive");
-        } else if (TemplateTransformModel.class.isAssignableFrom(cl)) {
-            appendTypeName(sb, typeNamesAppended, "transform");
         }
 
         if (TemplateSequenceModel.class.isAssignableFrom(cl)) {

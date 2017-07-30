@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.freemarker.test.templateutil;
+package org.apache.freemarker.core.userpkg;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -27,43 +27,29 @@ import org.apache.freemarker.core.NestedContentNotSupportedException;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.CallPlace;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util.FTLUtil;
-import org.apache.freemarker.core.util.StringToIndexMap;
 
-public class AssertDirective implements TemplateDirectiveModel {
-    public static AssertDirective INSTANCE = new AssertDirective();
+public class NamedVarargsOnlyDirective extends TestTemplateDirectiveModel {
 
-    private static final String TEST_ARG_NAME = "test";
-    private static final int TEST_ARG_IDX = 0;
-    private static final StringToIndexMap ARG_NAMES_TO_IDX = StringToIndexMap.of(TEST_ARG_NAME, TEST_ARG_IDX);
+    public static final NamedVarargsOnlyDirective INSTANCE = new NamedVarargsOnlyDirective();
+
     private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
             0, false,
-            ARG_NAMES_TO_IDX, false);
+            null, true);
 
-    private AssertDirective() { }
-    
+    private static final int NAMED_VARARGS_ARG_IDX = ARGS_LAYOUT.getNamedVarargsArgumentIndex();
+
+    private NamedVarargsOnlyDirective() {
+        //
+    }
+
     @Override
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
         NestedContentNotSupportedException.check(callPlace);
-
-        TemplateModel test = args[TEST_ARG_IDX];
-        if (test == null) {
-            throw new MissingRequiredParameterException(TEST_ARG_NAME, env);
-        }
-        if (!(test instanceof TemplateBooleanModel)) {
-            throw new AssertationFailedInTemplateException("Assertion failed:\n"
-                    + "The value had to be boolean, but it was of type" + FTLUtil.getTypeDescription(test),
-                    env);
-        }
-        if (!((TemplateBooleanModel) test).getAsBoolean()) {
-            throw new AssertationFailedInTemplateException("Assertion failed:\n"
-                    + "the value was false.",
-                    env);
-        }
+        out.write("#nvo(");
+        printParam("nVarargs", args[NAMED_VARARGS_ARG_IDX], out, true);
+        out.write(")");
     }
 
     @Override

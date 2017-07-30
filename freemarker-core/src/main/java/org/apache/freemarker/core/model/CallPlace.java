@@ -24,10 +24,8 @@ import java.io.Writer;
 import java.util.IdentityHashMap;
 
 import org.apache.freemarker.core.CallPlaceCustomDataInitializationException;
-import org.apache.freemarker.core.DirectiveCallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateCallableModelUtils;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.util.CommonSupplier;
 
@@ -49,19 +47,29 @@ public interface CallPlace {
     boolean hasNestedContent();
 
     /**
-     * The number of loop variables specified for this call.
+     * The number of loop variables specified for this call. Note that users are generally allowed to omit loop
+     * variables when calling a directive. So this can be useful to avoid calculating the values of loop variables that
+     * the caller will not receive anyway. While it's an error if the user specifies too many loop variables, the
+     * implementor of the {@link TemplateDirectiveModel} shouldn't check for that condition, as far as they will call
+     * {@link #executeNestedContent(TemplateModel[], Writer, Environment)}, which will the should throw a {@link
+     * TemplateException} with a descriptive error message then.
      */
     int getLoopVariableCount();
 
     /**
      * Executed the nested content; it there's none, it just does nothing.
      *
-     * @param loopVariableValues
-     *         The loop variables to pass to the nested content; not {@code null} (use {@link
-     *         TemplateCallableModelUtils#EMPTY_TEMPLATE_MODEL_ARRAY}. Its length must be equal to
-     *         {@link #getLoopVariableCount()}.
+     * @param loopVarValues
+     *         The loop variable values to pass to the nested content, or {@code null} if there's none. It's not a
+     *         problem if this array is longer than the number of loop variables than the caller of the directive has
+     *         declared (as in {@code <@foo bar; i, j />} there are 2 loop variables declared); the directive
+     *         caller simply won't receive the excess variables. If the caller declares more loop variables than the
+     *         length of this array though, then a {@link TemplateException} will thrown by FreeMarker with a
+     *         descriptive error message. Thus, the caller of this method need not be concerned about the
+     *         number of loop variables declared by the caller (unless to avoid calculating loop variable values
+     *         unnecessarily, in which case use {@link #getLoopVariableCount()}).
      */
-    void executeNestedContent(TemplateModel[] loopVariableValues, Writer out, Environment env)
+    void executeNestedContent(TemplateModel[] loopVarValues, Writer out, Environment env)
             throws TemplateException, IOException;
 
     // -------------------------------------------------------------------------------------------------------------
@@ -102,41 +110,38 @@ public interface CallPlace {
     /**
      * Returns the custom data, or if that's {@code null}, then it creates and stores it in an atomic operation then
      * returns it. This method is thread-safe, however, it doesn't ensure thread safe (like synchronized) access to the
-     * custom data itself. See the top-level documentation of {@link DirectiveCallPlace} to understand the scope and
-     * life-cycle of the custom data. Be sure that the custom data only depends on things that get their final value
-     * during template parsing, not on runtime settings.
-     *
+     * custom data itself. Be sure that the custom data only depends on things that get their final value during
+     * template parsing, not on runtime settings.
      * <p>
      * This method will block other calls while the {@code supplier} is executing, thus, the object will be
      * <em>usually</em> created only once, even if multiple threads request the value when it's still {@code null}. It
      * doesn't stand though when {@code providerIdentity} mismatches occur (see later). Furthermore, then it's also
-     * possible that multiple objects created by the same {@link CommonSupplier} will be in use on the same time, because
-     * of directive executions already running in parallel, and because of memory synchronization delays (hardware
-     * dependent) between the threads.
+     * possible that multiple objects created by the same {@link CommonSupplier} will be in use on the same time,
+     * because of directive executions already running in parallel, and because of memory synchronization delays
+     * (hardware dependent) between the threads.
      *
      * @param providerIdentity
-     *            This is usually the class of the {@link TemplateDirectiveModel} that creates (and uses) the custom
-     *            data, or if you are using your own class for the custom data object (as opposed to a class from some
-     *            more generic API), then that class. This is needed as the same call place might calls different
-     *            directives depending on runtime conditions, and so it must be ensured that these directives won't
-     *            accidentally read each other's custom data, ending up with class cast exceptions or worse. In the
-     *            current implementation, if there's a {@code providerIdentity} mismatch (means, the
-     *            {@code providerIdentity} object used when the custom data was last set isn't the exactly same object
-     *            as the one provided with the parameter now), the previous custom data will be just ignored as if it
-     *            was {@code null}. So if multiple directives that use the custom data feature use the same call place,
-     *            the caching of the custom data can be inefficient, as they will keep overwriting each other's custom
-     *            data. (In a more generic implementation the {@code providerIdentity} would be a key in a
-     *            {@link IdentityHashMap}, but then this feature would be slower, while {@code providerIdentity}
-     *            mismatches aren't occurring in most applications.)
+     *         This is usually the class of the {@link TemplateDirectiveModel} that creates (and uses) the custom data,
+     *         or if you are using your own class for the custom data object (as opposed to a class from some more
+     *         generic API), then that class. This is needed as the same call place might calls different directives
+     *         depending on runtime conditions, and so it must be ensured that these directives won't accidentally read
+     *         each other's custom data, ending up with class cast exceptions or worse. In the current implementation,
+     *         if there's a {@code providerIdentity} mismatch (means, the {@code providerIdentity} object used when the
+     *         custom data was last set isn't the exactly same object as the one provided with the parameter now), the
+     *         previous custom data will be just ignored as if it was {@code null}. So if multiple directives that use
+     *         the custom data feature use the same call place, the caching of the custom data can be inefficient, as
+     *         they will keep overwriting each other's custom data. (In a more generic implementation the {@code
+     *         providerIdentity} would be a key in a {@link IdentityHashMap}, but then this feature would be slower,
+     *         while {@code providerIdentity} mismatches aren't occurring in most applications.)
      * @param supplier
-     *            Called when the custom data wasn't yet set, to invoke its initial value. If this parameter is
-     *            {@code null} and the custom data wasn't set yet, then {@code null} will be returned. The returned
-     *            value of {@link CommonSupplier#get()} can be any kind of object, but can't be {@code null}.
+     *         Called when the custom data wasn't yet set, to invoke its initial value. If this parameter is {@code
+     *         null} and the custom data wasn't set yet, then {@code null} will be returned. The returned value of
+     *         {@link CommonSupplier#get()} can be any kind of object, but can't be {@code null}.
      *
      * @return The current custom data object, or possibly {@code null} if there was no {@link CommonSupplier} provided.
      *
      * @throws CallPlaceCustomDataInitializationException
-     *             If the {@link CommonSupplier} had to be invoked but failed.
+     *         If the {@link CommonSupplier} had to be invoked but failed.
      */
     Object getOrCreateCustomData(Object providerIdentity, CommonSupplier<?> supplier)
             throws CallPlaceCustomDataInitializationException;

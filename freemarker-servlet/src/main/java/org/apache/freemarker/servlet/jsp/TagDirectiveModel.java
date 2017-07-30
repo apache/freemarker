@@ -20,25 +20,25 @@
 package org.apache.freemarker.servlet.jsp;
 
 import java.beans.IntrospectionException;
-import java.io.CharArrayReader;
-import java.io.CharArrayWriter;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.Writer;
-import java.util.Map;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.BodyTag;
 import javax.servlet.jsp.tagext.IterationTag;
 import javax.servlet.jsp.tagext.SimpleTag;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TryCatchFinally;
 
+import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
+import org.apache.freemarker.core.model.CallPlace;
+import org.apache.freemarker.core.model.TemplateDirectiveModel;
+import org.apache.freemarker.core.model.TemplateHashModelEx2;
+import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.model.TemplateTransformModel;
-import org.apache.freemarker.core.model.TransformControl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,29 +46,35 @@ import org.slf4j.LoggerFactory;
  * Adapts a {@link Tag}-based custom JSP tag to be a value that's callable in templates as an user-defined directive.
  * For {@link SimpleTag}-based custom JSP tags {@link SimpleTagDirectiveModel} is used instead.
  */
-class TagTransformModel extends JspTagModelBase implements TemplateTransformModel {
-    private static final Logger LOG = LoggerFactory.getLogger(TagTransformModel.class);
-    
+class TagDirectiveModel extends JspTagModelBase implements TemplateDirectiveModel {
+    private static final Logger LOG = LoggerFactory.getLogger(TagDirectiveModel.class);
+
+    private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
+            0, false,
+            null, true);
+
     private final boolean isBodyTag;
     private final boolean isIterationTag;
     private final boolean isTryCatchFinally;
-            
-    public TagTransformModel(String tagName, Class tagClass) throws IntrospectionException {
+
+    public TagDirectiveModel(String tagName, Class tagClass) throws IntrospectionException {
         super(tagName, tagClass);
         isIterationTag = IterationTag.class.isAssignableFrom(tagClass);
         isBodyTag = isIterationTag && BodyTag.class.isAssignableFrom(tagClass);
         isTryCatchFinally = TryCatchFinally.class.isAssignableFrom(tagClass);
     }
-    
+
     @Override
-    public Writer getWriter(Writer out, Map args) throws TemplateModelException {
+    public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
+            throws TemplateException, IOException {
         try {
             Tag tag = (Tag) getTagInstance();
             FreeMarkerPageContext pageContext = PageContextFactory.getCurrentPageContext();
             Tag parentTag = (Tag) pageContext.peekTopTag(Tag.class);
             tag.setParent(parentTag);
             tag.setPageContext(pageContext);
-            setupTag(tag, args, pageContext.getObjectWrapper());
+            setupTag(tag, (TemplateHashModelEx2) args[ARGS_LAYOUT.getNamedVarargsArgumentIndex()],
+                    pageContext.getObjectWrapper());
             // If the parent of this writer is not a JspWriter itself, use
             // a little Writer-to-JspWriter adapter...
             boolean usesAdapter;
@@ -87,215 +93,45 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
                 pageContext.pushWriter((JspWriter) out);
                 usesAdapter = true;
             }
-            JspWriter w = new TagWriter(out, tag, pageContext, usesAdapter);
+
+            // TODO [FM3] In FM2 this was done with a TemplateTransformModel, which has returned a Writer that
+            // encapsulated the logic. See if there's a better solution now that we use the redesigned
+            // TemplateDirectiveModel.
+            TagBodyContent bodyContent = new TagBodyContent(out, tag, pageContext, usesAdapter);
             pageContext.pushTopTag(tag);
-            pageContext.pushWriter(w);
-            return w;
-        } catch (Exception e) {
+            pageContext.pushWriter(bodyContent);
+            try {
+                if (bodyContent.doStartTag()) {
+                    do {
+                        callPlace.executeNestedContent(null, bodyContent, env);
+                    } while (bodyContent.doAfterBody());
+                }
+            } catch (Throwable e) {
+                bodyContent.doCatch(e);
+            } finally {
+                bodyContent.close(); // Pops `topTag` and `writer`
+            }
+        } catch (Throwable e) {
             throw toTemplateModelExceptionOrRethrow(e);
         }
     }
 
-    /**
-     * An implementation of BodyContent that buffers it's input to a char[].
-     */
-    static class BodyContentImpl extends BodyContent {
-        private CharArrayWriter buf;
-
-        BodyContentImpl(JspWriter out, boolean buffer) {
-            super(out);
-            if (buffer) initBuffer();
-        }
-
-        void initBuffer() {
-            buf = new CharArrayWriter();
-        }
-
-        @Override
-        public void flush() throws IOException {
-            if (buf == null) {
-                getEnclosingWriter().flush();
-            }
-        }
-
-        @Override
-        public void clear() throws IOException {
-            if (buf != null) {
-                buf = new CharArrayWriter();
-            } else {
-                throw new IOException("Can't clear");
-            }
-        }
-
-        @Override
-        public void clearBuffer() throws IOException {
-            if (buf != null) {
-                buf = new CharArrayWriter();
-            } else {
-                throw new IOException("Can't clear");
-            }
-        }
-
-        @Override
-        public int getRemaining() {
-            return Integer.MAX_VALUE;
-        }
-
-        @Override
-        public void newLine() throws IOException {
-            write(JspWriterAdapter.NEWLINE);
-        }
-
-        @Override
-        public void close() throws IOException {
-        }
-
-        @Override
-        public void print(boolean arg0) throws IOException {
-            write(arg0 ? Boolean.TRUE.toString() : Boolean.FALSE.toString());
-        }
-
-        @Override
-        public void print(char arg0) throws IOException {
-            write(arg0);
-        }
-
-        @Override
-        public void print(char[] arg0) throws IOException {
-            write(arg0);
-        }
-
-        @Override
-        public void print(double arg0) throws IOException {
-            write(Double.toString(arg0));
-        }
-
-        @Override
-        public void print(float arg0) throws IOException {
-            write(Float.toString(arg0));
-        }
-
-        @Override
-        public void print(int arg0) throws IOException {
-            write(Integer.toString(arg0));
-        }
-
-        @Override
-        public void print(long arg0) throws IOException {
-            write(Long.toString(arg0));
-        }
-
-        @Override
-        public void print(Object arg0) throws IOException {
-            write(arg0 == null ? "null" : arg0.toString());
-        }
-
-        @Override
-        public void print(String arg0) throws IOException {
-            write(arg0);
-        }
-
-        @Override
-        public void println() throws IOException {
-            newLine();
-        }
-
-        @Override
-        public void println(boolean arg0) throws IOException {
-            print(arg0);
-            newLine();
-        }
-
-        @Override
-        public void println(char arg0) throws IOException {
-            print(arg0);
-            newLine();
-        }
-
-        @Override
-        public void println(char[] arg0) throws IOException {
-            print(arg0);
-            newLine();
-        }
-
-        @Override
-        public void println(double arg0) throws IOException {
-            print(arg0);
-            newLine();
-        }
-
-        @Override
-        public void println(float arg0) throws IOException {
-            print(arg0);
-            newLine();
-        }
-
-        @Override
-        public void println(int arg0) throws IOException {
-            print(arg0);
-            newLine();
-        }
-
-        @Override
-        public void println(long arg0) throws IOException {
-            print(arg0);
-            newLine();
-        }
-
-        @Override
-        public void println(Object arg0) throws IOException {
-            print(arg0);
-            newLine();
-        }
-
-        @Override
-        public void println(String arg0) throws IOException {
-            print(arg0);
-            newLine();
-        }
-
-        @Override
-        public void write(int c) throws IOException {
-            if (buf != null) {
-                buf.write(c);
-            } else {
-                getEnclosingWriter().write(c);
-            }
-        }
-
-        @Override
-        public void write(char[] cbuf, int off, int len) throws IOException {
-            if (buf != null) {
-                buf.write(cbuf, off, len);
-            } else {
-                getEnclosingWriter().write(cbuf, off, len);
-            }
-        }
-
-        @Override
-        public String getString() {
-            return buf.toString();
-        }
-
-        @Override
-        public Reader getReader() {
-            return new CharArrayReader(buf.toCharArray());
-        }
-
-        @Override
-        public void writeOut(Writer out) throws IOException {
-            buf.writeTo(out);
-        }
-
+    @Override
+    public ArgumentArrayLayout getArgumentArrayLayout() {
+        return ARGS_LAYOUT;
     }
 
-    class TagWriter extends BodyContentImpl implements TransformControl {
+    /**
+     * Implements extra methods to help mimicking JSP container behavior around the
+     * {@link TemplateDirectiveModel#execute(TemplateModel[], CallPlace, Writer, Environment)} call.
+     */
+    class TagBodyContent extends BodyContentImpl {
         private final Tag tag;
         private final FreeMarkerPageContext pageContext;
         private boolean needPop = true;
         private final boolean needDoublePop;
-        
-        TagWriter(Writer out, Tag tag, FreeMarkerPageContext pageContext, boolean needDoublePop) {
+
+        TagBodyContent(Writer out, Tag tag, FreeMarkerPageContext pageContext, boolean needDoublePop) {
             super((JspWriter) out, false);
             this.needDoublePop = needDoublePop;
             this.tag = tag;
@@ -304,7 +140,7 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
         
         @Override
         public String toString() {
-            return "TagWriter for " + tag.getClass().getName() + " wrapping a " + getEnclosingWriter().toString();
+            return "TagBodyContent for " + tag.getClass().getName() + " wrapping a " + getEnclosingWriter().toString();
         }
 
         Tag getTag() {
@@ -314,10 +150,11 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
         FreeMarkerPageContext getPageContext() {
             return pageContext;
         }
-        
-        @Override
-        public int onStart()
-        throws TemplateModelException {
+
+        /**
+         * @return Whether to execute the nested content (the body, with JSP terminology)
+         */
+        private boolean doStartTag() throws TemplateModelException {
             try {
                 int dst = tag.doStartTag();
                 switch(dst) {
@@ -329,7 +166,7 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
                     // it's in violation of the spec.
                     case Tag.EVAL_PAGE: {
                         endEvaluation();
-                        return TransformControl.SKIP_BODY;
+                        return false;
                     }
                     case BodyTag.EVAL_BODY_BUFFERED: {
                         if (isBodyTag) {
@@ -343,7 +180,7 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
                         // Intentional fall-through
                     }
                     case Tag.EVAL_BODY_INCLUDE: {
-                        return TransformControl.EVALUATE_BODY;
+                        return true;
                     }
                     default: {
                         throw new RuntimeException("Illegal return value " + dst + " from " + tag.getClass().getName() + ".doStartTag()");
@@ -353,25 +190,26 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
                 throw toTemplateModelExceptionOrRethrow(e);
             }
         }
-        
-        @Override
-        public int afterBody()
-        throws TemplateModelException {
+
+        /**
+         * @return Whether to execute the nested content again (the body, with JSP terminology)
+         */
+        private boolean doAfterBody() throws TemplateModelException {
             try {
                 if (isIterationTag) {
                     int dab = ((IterationTag) tag).doAfterBody();
                     switch(dab) {
                         case Tag.SKIP_BODY:
                             endEvaluation();
-                            return END_EVALUATION;
+                            return false;
                         case IterationTag.EVAL_BODY_AGAIN:
-                            return REPEAT_EVALUATION;
+                            return true;
                         default:
                             throw new TemplateModelException("Unexpected return value " + dab + "from " + tag.getClass().getName() + ".doAfterBody()");
                     }
                 }
                 endEvaluation();
-                return END_EVALUATION;
+                return false;
             } catch (Exception e) {
                 throw toTemplateModelExceptionOrRethrow(e);
             }
@@ -386,16 +224,15 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
                 LOG.warn("Tag.SKIP_PAGE was ignored from a {} tag.", tag.getClass().getName());
             }
         }
-        
-        @Override
-        public void onError(Throwable t) throws Throwable {
+
+        private void doCatch(Throwable t) throws Throwable {
             if (isTryCatchFinally) {
                 ((TryCatchFinally) tag).doCatch(t);
             } else {
                 throw t;
             }
         }
-        
+
         @Override
         public void close() {
             if (needPop) {
@@ -414,6 +251,6 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
                 }
             }
         }
-        
+
     }
 }

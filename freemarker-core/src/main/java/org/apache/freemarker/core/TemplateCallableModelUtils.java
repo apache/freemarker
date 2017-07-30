@@ -5,8 +5,6 @@ import org.apache.freemarker.core.model.TemplateNumberModel;
 
 public class TemplateCallableModelUtils {
 
-    public static final TemplateModel[] EMPTY_TEMPLATE_MODEL_ARRAY = new TemplateModel[0];
-
     // TODO [FM3][CF] Add this to the other exception classes too
     public static TemplateNumberModel castArgumentToNumber(TemplateModel[] args, int argIndex, boolean allowNull,
             Environment env) throws TemplateException {

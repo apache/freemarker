@@ -21,8 +21,8 @@ package org.apache.freemarker.core;
 
 import java.io.IOException;
 
+import org.apache.freemarker.core.model.CallPlace;
 import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateDirectiveBody;
 
 /**
  * Not yet public; subject to change.
@@ -32,10 +32,10 @@ import org.apache.freemarker.core.model.TemplateDirectiveBody;
  * <ul>
  * <li>{@link TemplateDateModel}-s that care to explicitly check if their nested content is {@code null} might start to
  *   complain that you have specified a body despite that the directive doesn't support that. Directives should use
- *   {@link NestedContentNotSupportedException#check(TemplateDirectiveBody)} instead of a simple
+ *   {@link NestedContentNotSupportedException#check(CallPlace)} instead of a simple
  *   {@code null}-check to avoid this problem.</li>
  * <li>
- *   Software that uses {@link DirectiveCallPlace#isNestedOutputCacheable()} will always get {@code false}, because
+ *   Software that uses {@link CallPlace#isNestedOutputCacheable()} will always get {@code false}, because
  *   interruption checks ({@link ASTThreadInterruptionCheck} elements) are, obviously, not cacheable. This should only
  *   impact the performance.
  * <li>

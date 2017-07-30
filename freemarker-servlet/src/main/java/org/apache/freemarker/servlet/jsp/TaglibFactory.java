@@ -64,11 +64,11 @@ import javax.xml.parsers.SAXParserFactory;
 import org.apache.freemarker.core.ConfigurationException;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.CommonBuilder;
@@ -232,7 +232,7 @@ public class TaglibFactory implements TemplateHashModel {
      *            to integrate JSP taglib support should do the same.
      * 
      * @return a {@link TemplateHashModel} representing the JSP taglib. Each element of this hash represents a single
-     *         custom tag or EL function from the library, implemented as a {@link TemplateTransformModel} or
+     *         custom tag or EL function from the library, implemented as a {@link TemplateDirectiveModel} or
      *         {@link TemplateMethodModelEx}, respectively.
      */
     @Override
@@ -1762,7 +1762,7 @@ public class TaglibFactory implements TemplateHashModel {
                     final TemplateModel customTagModel;
                     try {
                         if (Tag.class.isAssignableFrom(tagClass)) {
-                            customTagModel = new TagTransformModel(tagNameCData, tagClass);
+                            customTagModel = new TagDirectiveModel(tagNameCData, tagClass);
                         } else {
                             customTagModel = new SimpleTagDirectiveModel(tagNameCData, tagClass);
                         }

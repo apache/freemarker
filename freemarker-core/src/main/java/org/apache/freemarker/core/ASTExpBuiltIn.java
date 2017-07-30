@@ -150,8 +150,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("isSequence", new BuiltInsForMultipleTypes.is_sequenceBI());
         putBI("isString", new BuiltInsForMultipleTypes.is_stringBI());
         putBI("isTime", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.TIME));
-        putBI("isTransform", new BuiltInsForMultipleTypes.is_transformBI());
-        
+
         putBI("isoUtc", new iso_utc_or_local_BI(
                 /* showOffset = */ null, _DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
         putBI("isoUtcFZ", new iso_utc_or_local_BI(

@@ -24,10 +24,12 @@ import java.io.Writer;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 
+import org.apache.freemarker.core.ThreadInterruptionSupportTemplatePostProcessor.ASTThreadInterruptionCheck;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.CallPlace;
 import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.TemplateCallableModel;
-import org.apache.freemarker.core.model.TemplateDirectiveModel2;
+import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
@@ -40,16 +42,16 @@ import org.apache.freemarker.core.util._StringUtil;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
- * AST directive node: {@code <@exp ...>}.
- * Executes a {@link TemplateCallableModel} that's embedded directly into the static text. At least in the default
- * template language the value must be a {@link TemplateDirectiveModel2}, though technically calling a
- * {@link TemplateFunctionModel} is possible as well.
+ * AST node: {@code <@exp ...>}.
+ * Executes a {@link TemplateCallableModel} that's embeddable directly into the static text (hence "top level"). At
+ * least in the default template language the value must be a {@link TemplateDirectiveModel}, though technically
+ * calling a {@link TemplateFunctionModel} is possible as well (hence it's not called "dynamic directive call").
  * <p>
  * The {@link TemplateCallableModel} object is obtained on runtime by evaluating an expression, and the parameter list
  * is also validated (how many positional parameters are allowed, what named parameters are supported) then. Hence, the
  * call is "dynamic".
  */
-class ASTDirDynamicCall extends ASTDirective implements CallPlace {
+class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
 
     static final class NamedArgument {
         private final String name;
@@ -73,7 +75,7 @@ class ASTDirDynamicCall extends ASTDirective implements CallPlace {
      * @param allowCallingFunctions Some template languages may allow calling {@link TemplateFunctionModel}-s
      *                              directly embedded into the static text, in which case this should be {@code true}.
      */
-    ASTDirDynamicCall(
+    ASTDynamicTopLevelCall(
             ASTExpression callableValueExp, boolean allowCallingFunctions,
             ASTExpression[] positionalArgs, NamedArgument[] namedArgs, StringToIndexMap loopVarNames,
             TemplateElements children) {
@@ -95,13 +97,13 @@ class ASTDirDynamicCall extends ASTDirective implements CallPlace {
     @Override
     ASTElement[] accept(Environment env) throws TemplateException, IOException {
         TemplateCallableModel callableValue;
-        TemplateDirectiveModel2 directive;
+        TemplateDirectiveModel directive;
         TemplateFunctionModel function;
         {
             TemplateModel callableValueTM = callableValueExp._eval(env);
-            if (callableValueTM instanceof TemplateDirectiveModel2) {
+            if (callableValueTM instanceof TemplateDirectiveModel) {
                 callableValue = (TemplateCallableModel) callableValueTM;
-                directive = (TemplateDirectiveModel2) callableValueTM;
+                directive = (TemplateDirectiveModel) callableValueTM;
                 function = null;
             } else if (callableValueTM instanceof TemplateFunctionModel) {
                 if (!allowCallingFunctions) {
@@ -113,7 +115,7 @@ class ASTDirDynamicCall extends ASTDirective implements CallPlace {
                 directive = null;
                 function = (TemplateFunctionModel) callableValue;
             } else if (callableValueTM instanceof ASTDirMacro) {
-                // TODO [FM3][CF] Until macros were refactored to be TemplateDirectiveModel2-s, we have this hack here.
+                // TODO [FM3][CF] Until macros were refactored to be TemplateDirectiveModel-s, we have this hack here.
                 ASTDirMacro macro = (ASTDirMacro) callableValueTM;
                 if (macro.isFunction()) {
                     throw new _MiscTemplateException(env,
@@ -145,21 +147,11 @@ class ASTDirDynamicCall extends ASTDirective implements CallPlace {
             }
         }
 
-        int predefPosArgCnt = callableValue.getPredefinedPositionalArgumentCount();
-        boolean hasPosVarargsArg = callableValue.hasPositionalVarargsArgument();
+        ArgumentArrayLayout argsLayout = callableValue.getArgumentArrayLayout();
+        int predefPosArgCnt = argsLayout.getPredefinedPositionalArgumentCount();
+        int posVarargsArgIdx = argsLayout.getPositionalVarargsArgumentIndex();
 
-        if (positionalArgs != null && positionalArgs.length > predefPosArgCnt && !hasPosVarargsArg) {
-            throw new _MiscTemplateException(this,
-                    "The target callable ",
-                    (predefPosArgCnt != 0
-                        ? new Object[] { "can only have ", predefPosArgCnt }
-                        : "can't have"
-                    ),
-                    " arguments passed by position, but the invocation has ",
-                    positionalArgs.length, " such arguments.");
-        }
-
-        TemplateModel[] execArgs = new TemplateModel[callableValue.getArgumentArraySize()];
+        TemplateModel[] execArgs = new TemplateModel[argsLayout.getTotalLength()];
 
         // Fill predefined positional args:
         if (positionalArgs != null) {
@@ -169,7 +161,7 @@ class ASTDirDynamicCall extends ASTDirective implements CallPlace {
             }
         }
 
-        if (hasPosVarargsArg) {
+        if (posVarargsArgIdx != -1) {
             int posVarargCnt = positionalArgs != null ? positionalArgs.length - predefPosArgCnt : 0;
             TemplateSequenceModel varargsSeq;
             if (posVarargCnt <= 0) {
@@ -181,20 +173,30 @@ class ASTDirDynamicCall extends ASTDirective implements CallPlace {
                     nativeSeq.add(positionalArgs[predefPosArgCnt + posVarargIdx].eval(env));
                 }
             }
-            execArgs[predefPosArgCnt] = varargsSeq;
+            execArgs[posVarargsArgIdx] = varargsSeq;
+        } else if (positionalArgs != null && positionalArgs.length > predefPosArgCnt) {
+            throw new _MiscTemplateException(this,
+                    "The target callable ",
+                    (predefPosArgCnt != 0
+                            ? new Object[] { "can only have ", predefPosArgCnt }
+                            : "can't have"
+                    ),
+                    " arguments passed by position, but the invocation has ",
+                    positionalArgs.length, " such arguments.");
         }
 
-        int namedVarargsArgumentIndex = callableValue.getNamedVarargsArgumentIndex();
+        int namedVarargsArgumentIndex = argsLayout.getNamedVarargsArgumentIndex();
         NativeHashEx2 namedVarargsHash = null;
         if (namedArgs != null) {
+            StringToIndexMap predefNamedArgsMap = argsLayout.getPredefinedNamedArgumentsMap();
             for (NamedArgument namedArg : namedArgs) {
-                int argIdx = callableValue.getPredefinedNamedArgumentIndex(namedArg.name);
+                int argIdx = predefNamedArgsMap.get(namedArg.name);
                 if (argIdx != -1) {
                     execArgs[argIdx] = namedArg.value.eval(env);
                 } else {
                     if (namedVarargsHash == null) {
                         if (namedVarargsArgumentIndex == -1) {
-                            Collection<String> validNames = callableValue.getPredefinedNamedArgumentNames();
+                            Collection<String> validNames = predefNamedArgsMap.getKeys();
                             throw new _MiscTemplateException(this,
                                     validNames == null || validNames.isEmpty()
                                     ? new Object[] {
@@ -207,6 +209,7 @@ class ASTDirDynamicCall extends ASTDirective implements CallPlace {
                                             new _DelayedJQuotedListing(validNames)
                                     });
                         }
+
                         namedVarargsHash = new NativeHashEx2();
                     }
                     namedVarargsHash.put(namedArg.name, namedArg.value.eval(env));
@@ -298,7 +301,7 @@ class ASTDirDynamicCall extends ASTDirective implements CallPlace {
 
     @Override
     String getASTNodeDescriptor() {
-        return "~";
+        return "@";
     }
 
     @Override
@@ -369,7 +372,8 @@ class ASTDirDynamicCall extends ASTDirective implements CallPlace {
 
     @Override
     public boolean hasNestedContent() {
-        return getChildCount() != 0;
+        int childCount = getChildCount();
+        return childCount != 0 && (childCount > 1 || !(getChild(0) instanceof ASTThreadInterruptionCheck));
     }
 
     @Override
@@ -378,9 +382,21 @@ class ASTDirDynamicCall extends ASTDirective implements CallPlace {
     }
 
     @Override
-    public void executeNestedContent(TemplateModel[] loopVariableValues, Writer out, Environment env)
+    public void executeNestedContent(TemplateModel[] loopVarValues, Writer out, Environment env)
             throws TemplateException, IOException {
-        env.visit(getChildBuffer(), loopVarNames, loopVariableValues, out);
+        if (loopVarNames != null) {
+            int loopVarNamesSize = loopVarNames.size();
+            int loopVarValuesSize = loopVarValues != null ? loopVarValues.length : 0;
+            if (loopVarValuesSize < loopVarNamesSize) {
+                throw new _MiscTemplateException(this,
+                        "The invocation declares more nested content parameters (",
+                        loopVarNamesSize, ": ", new _DelayedJQuotedListing(loopVarNames.getKeys()),
+                        ") than what the called object intends to pass (",
+                        loopVarValuesSize, "). Declare no more than ", loopVarValuesSize,
+                        " nested content parameters.");
+            }
+        }
+        env.visit(getChildBuffer(), loopVarNames, loopVarValues, out);
     }
 
     @Override

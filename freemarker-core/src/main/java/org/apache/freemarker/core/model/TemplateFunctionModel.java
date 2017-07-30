@@ -7,7 +7,7 @@ import org.apache.freemarker.core.outputformat.OutputFormat;
 
 /**
  * A {@link TemplateCallableModel}, which returns its result as a {@link TemplateModel} at the end of the execution.
- * This is in contrast with {@link TemplateDirectiveModel2}, which writes its result progressively to the output.
+ * This is in contrast with {@link TemplateDirectiveModel}, which writes its result progressively to the output.
  *
  * <p>Some template languages may allow function calls directly embedded into static text, as in
  * <code>text#f()text</code>. In that case, the language has to ensure that the return value is formatted according

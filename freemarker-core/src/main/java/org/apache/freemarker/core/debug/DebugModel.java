@@ -47,7 +47,7 @@ public interface DebugModel extends Remote {
     public static final int TYPE_HASH_EX       =  128;
     public static final int TYPE_METHOD        =  256;
     public static final int TYPE_METHOD_EX     =  512;
-    public static final int TYPE_TRANSFORM     = 1024;
+    public static final int TYPE_DIRECTIVE     = 1024;
     public static final int TYPE_ENVIRONMENT   = 2048;
     public static final int TYPE_TEMPLATE      = 4096;
     public static final int TYPE_CONFIGURATION = 8192;

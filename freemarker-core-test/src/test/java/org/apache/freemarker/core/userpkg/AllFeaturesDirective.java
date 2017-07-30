@@ -23,10 +23,10 @@ import static org.apache.freemarker.core.TemplateCallableModelUtils.*;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Collection;
 
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.CallPlace;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -39,13 +39,23 @@ public class AllFeaturesDirective extends TestTemplateDirectiveModel {
 
     private static final int P1_ARG_IDX = 0;
     private static final int P2_ARG_IDX = 1;
-    private static final int P_OTHERS_ARG_IDX = 2;
-    private static final int N1_ARG_IDX = 3;
-    private static final int N2_ARG_IDX = 4;
-    private static final int N_OTHERS_IDX = 5;
+    private static final int N1_ARG_IDX = 2;
+    private static final int N2_ARG_IDX = 3;
 
     private static final String N1_ARG_NAME = "n1";
     private static final String N2_ARG_NAME = "n2";
+
+    private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
+            2,
+            true,
+            StringToIndexMap.of(
+                    N1_ARG_NAME, N1_ARG_IDX,
+                    N2_ARG_NAME, N2_ARG_IDX),
+            true
+    );
+
+    private static final int P_VARARGS_ARG_IDX = ARGS_LAYOUT.getPositionalVarargsArgumentIndex();
+    private static final int N_VARARGS_ARG_IDX = ARGS_LAYOUT.getNamedVarargsArgumentIndex();
 
     private final boolean p1AllowNull;
     private final boolean p2AllowNull;
@@ -63,19 +73,15 @@ public class AllFeaturesDirective extends TestTemplateDirectiveModel {
         this.n2AllowNull = n2AllowNull;
     }
 
-    private static final StringToIndexMap PARAM_NAME_TO_IDX = StringToIndexMap.of(
-            N1_ARG_NAME, N1_ARG_IDX,
-            N2_ARG_NAME, N2_ARG_IDX);
-
     @Override
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
         execute(castArgumentToNumber(args, P1_ARG_IDX, p1AllowNull, env),
                 castArgumentToNumber(args, P2_ARG_IDX, p2AllowNull, env),
-                (TemplateSequenceModel) args[P_OTHERS_ARG_IDX],
+                (TemplateSequenceModel) args[P_VARARGS_ARG_IDX],
                 castArgumentToNumber(args[N1_ARG_IDX], N1_ARG_NAME, n1AllowNull, env),
                 castArgumentToNumber(args[N2_ARG_IDX], N2_ARG_NAME, n2AllowNull, env),
-                (TemplateHashModelEx2) args[N_OTHERS_IDX],
+                (TemplateHashModelEx2) args[N_VARARGS_ARG_IDX],
                 out, env, callPlace);
     }
 
@@ -85,10 +91,10 @@ public class AllFeaturesDirective extends TestTemplateDirectiveModel {
         out.write("#a(");
         printParam("p1", p1, out, true);
         printParam("p2", p2, out);
-        printParam("pOthers", pOthers, out);
+        printParam("pVarargs", pOthers, out);
         printParam(N1_ARG_NAME, n1, out);
         printParam(N2_ARG_NAME, n2, out);
-        printParam("nOthers", nOthers, out);
+        printParam("nVarargs", nOthers, out);
         int loopVariableCount = callPlace.getLoopVariableCount();
         if (loopVariableCount != 0) {
             out.write("; " + loopVariableCount);
@@ -100,8 +106,9 @@ public class AllFeaturesDirective extends TestTemplateDirectiveModel {
             if (p1 != null) {
                 int intP1 = p1.getAsNumber().intValue();
                 for (int i = 0; i < intP1; i++) {
-                    TemplateModel[] loopVariableValues = new TemplateModel[loopVariableCount];
-                    for (int loopVarIdx = 0; loopVarIdx < loopVariableCount; loopVarIdx++) {
+                    // We limit the number of loop variables passed to 3, so that related errors can be tested.
+                    TemplateModel[] loopVariableValues = new TemplateModel[Math.min(loopVariableCount, 3)];
+                    for (int loopVarIdx = 0; loopVarIdx < loopVariableValues.length; loopVarIdx++) {
                         loopVariableValues[loopVarIdx] = new SimpleNumber((i + 1) * (loopVarIdx + 1));
                     }
                     callPlace.executeNestedContent(loopVariableValues, out, env);
@@ -112,32 +119,7 @@ public class AllFeaturesDirective extends TestTemplateDirectiveModel {
     }
 
     @Override
-    public int getPredefinedPositionalArgumentCount() {
-        return 2;
-    }
-
-    @Override
-    public boolean hasPositionalVarargsArgument() {
-        return true;
-    }
-
-    @Override
-    public int getPredefinedNamedArgumentIndex(String name) {
-        return PARAM_NAME_TO_IDX.get(name);
-    }
-
-    @Override
-    public int getNamedVarargsArgumentIndex() {
-        return N_OTHERS_IDX;
-    }
-
-    @Override
-    public Collection<String> getPredefinedNamedArgumentNames() {
-        return PARAM_NAME_TO_IDX.getKeys();
-    }
-
-    @Override
-    public int getArgumentArraySize() {
-        return N_OTHERS_IDX + 1;
+    public ArgumentArrayLayout getArgumentArrayLayout() {
+        return ARGS_LAYOUT;
     }
 }

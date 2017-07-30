@@ -38,7 +38,6 @@ import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
@@ -314,7 +313,7 @@ class BuiltInsForMultipleTypes {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
             // WRONG: it also had to check ASTDirMacro.isFunction()
-            return (tm instanceof TemplateTransformModel || tm instanceof ASTDirMacro || tm instanceof TemplateDirectiveModel) ?
+            return (tm instanceof ASTDirMacro || tm instanceof TemplateDirectiveModel) ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
@@ -423,16 +422,6 @@ class BuiltInsForMultipleTypes {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
             return (tm instanceof TemplateScalarModel)  ?
-                TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
-        }
-    }
-
-    static class is_transformBI extends ASTExpBuiltIn {
-        @Override
-        TemplateModel _eval(Environment env) throws TemplateException {
-            TemplateModel tm = target.eval(env);
-            target.assertNonNull(tm, env);
-            return (tm instanceof TemplateTransformModel)  ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }

@@ -22,7 +22,6 @@ package org.apache.freemarker.servlet.jsp;
 import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Map;
 
 import javax.servlet.jsp.JspContext;
 import javax.servlet.jsp.JspException;
@@ -33,15 +32,22 @@ import javax.servlet.jsp.tagext.Tag;
 
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.TemplateDirectiveBody;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
+import org.apache.freemarker.core.model.CallPlace;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
+import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 
 /**
  * Adapts a {@link SimpleTag}-based custom JSP tag to be a value that's callable in templates as an user-defined
- * directive. For {@link Tag}-based custom JSP tags {@link TagTransformModel} is used instead.
+ * directive. For {@link Tag}-based custom JSP tags {@link TagDirectiveModel} is used instead.
  */
 class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirectiveModel {
+
+    private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
+            0, false,
+            null, true);
+
     protected SimpleTagDirectiveModel(String tagName, Class tagClass) throws IntrospectionException {
         super(tagName, tagClass);
         if (!SimpleTag.class.isAssignableFrom(tagClass)) {
@@ -53,9 +59,8 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
     }
 
     @Override
-    public void execute(Environment env, Map args, TemplateModel[] outArgs,
-                        final TemplateDirectiveBody body)
-    throws TemplateException, IOException {
+    public void execute(TemplateModel[] args, final CallPlace callPlace, Writer out, final Environment env)
+            throws TemplateException, IOException {
         try {
             SimpleTag tag = (SimpleTag) getTagInstance();
             final FreeMarkerPageContext pageContext = PageContextFactory.getCurrentPageContext();
@@ -66,8 +71,9 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
                 if (parentTag != null) {
                     tag.setParent(parentTag);
                 }
-                setupTag(tag, args, pageContext.getObjectWrapper());
-                if (body != null) {
+                setupTag(tag, (TemplateHashModelEx2) args[ARGS_LAYOUT.getNamedVarargsArgumentIndex()],
+                        pageContext.getObjectWrapper());
+                if (callPlace.hasNestedContent()) {
                     tag.setJspBody(new JspFragment() {
                         @Override
                         public JspContext getJspContext() {
@@ -77,7 +83,7 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
                         @Override
                         public void invoke(Writer out) throws JspException, IOException {
                             try {
-                                body.render(out == null ? pageContext.getOut() : out);
+                                callPlace.executeNestedContent(null, out == null ? pageContext.getOut() : out, env);
                             } catch (TemplateException e) {
                                 throw new TemplateExceptionWrapperJspException(e);
                             }
@@ -99,7 +105,12 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
             throw toTemplateModelExceptionOrRethrow(e);
         }
     }
-    
+
+    @Override
+    public ArgumentArrayLayout getArgumentArrayLayout() {
+        return ARGS_LAYOUT;
+    }
+
     static final class TemplateExceptionWrapperJspException extends JspException {
 
         public TemplateExceptionWrapperJspException(Throwable cause) {

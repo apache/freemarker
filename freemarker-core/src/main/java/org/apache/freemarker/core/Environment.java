@@ -46,7 +46,6 @@ import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
@@ -57,14 +56,11 @@ import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.TemplateTransformModel;
-import org.apache.freemarker.core.model.TransformControl;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
 import org.apache.freemarker.core.util.StringToIndexMap;
-import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.apache.freemarker.core.util._DateUtil;
 import org.apache.freemarker.core.util._DateUtil.DateToISO8601CalendarFactory;
 import org.apache.freemarker.core.util._NullWriter;
@@ -237,8 +233,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     /**
      * Returns the {@link Template} that we are "lexically" inside at the moment. This template will change when
      * entering an {@code #include} or calling a macro or function in another template, or returning to yet another
-     * template with {@code #nested}. As such, it's useful in {@link TemplateDirectiveModel} to find out if from where
-     * the directive was called from.
+     * template with {@code #nested}.
      * 
      * @see #getMainTemplate()
      * @see #getCurrentNamespace()
@@ -255,24 +250,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             throw new IllegalStateException("There's no current template at the moment.");
         }
         return currentTemplate;
-    }
-
-    /**
-     * Gets the currently executing <em>custom</em> directive's call place information, or {@code null} if there's no
-     * executing custom directive. This currently only works for calls made from templates with the {@code <@...>}
-     * syntax. This should only be called from the {@link TemplateDirectiveModel} that was invoked with {@code <@...>},
-     * otherwise its return value is not defined by this API (it's usually {@code null}).
-     */
-    @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "False alarm")
-    public DirectiveCallPlace getCurrentDirectiveCallPlace() {
-        int ln = instructionStackSize;
-        if (ln == 0) return null;
-        ASTElement te = instructionStack[ln - 1];
-        if (te instanceof ASTDirUserDefined) return (ASTDirUserDefined) te;
-        if (te instanceof ASTDirMacro && ln > 1 && instructionStack[ln - 2] instanceof ASTDirUserDefined) {
-            return (ASTDirUserDefined) instructionStack[ln - 2];
-        }
-        return null;
     }
 
     /**
@@ -450,51 +427,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     private static final TemplateModel[] NO_OUT_ARGS = new TemplateModel[0];
 
-    void visit(final ASTElement element,
-            TemplateDirectiveModel directiveModel, Map args,
-            final List bodyParameterNames) throws TemplateException, IOException {
-        visit(new ASTElement[] { element }, directiveModel, args, bodyParameterNames);
-    }
-    
-    void visit(final ASTElement[] childBuffer,
-            TemplateDirectiveModel directiveModel, Map args,
-            final List bodyParameterNames) throws TemplateException, IOException {
-        TemplateDirectiveBody nested;
-        if (childBuffer == null) {
-            nested = null;
-        } else {
-            nested = new NestedElementTemplateDirectiveBody(childBuffer);
-        }
-        final TemplateModel[] outArgs;
-        if (bodyParameterNames == null || bodyParameterNames.isEmpty()) {
-            outArgs = NO_OUT_ARGS;
-        } else {
-            outArgs = new TemplateModel[bodyParameterNames.size()];
-        }
-        if (outArgs.length > 0) {
-            pushLocalContext(new LocalContext() {
-
-                @Override
-                public TemplateModel getLocalVariable(String name) {
-                    int index = bodyParameterNames.indexOf(name);
-                    return index != -1 ? outArgs[index] : null;
-                }
-
-                @Override
-                public Collection<String> getLocalVariableNames() {
-                    return bodyParameterNames;
-                }
-            });
-        }
-        try {
-            directiveModel.execute(this, args, outArgs, nested);
-        } finally {
-            if (outArgs.length > 0) {
-                popLocalContext();
-            }
-        }
-    }
-
     void visit(
             ASTElement[] childBuffer,
             final StringToIndexMap loopVarNames, final TemplateModel[] loopVarValues,
@@ -531,62 +463,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             visit(childBuffer);
         } finally {
             this.out = prevOut;
-        }
-    }
-
-    /**
-     * "Visit" the template element, passing the output through a TemplateTransformModel
-     * 
-     * @param elementBuffer
-     *            the element to visit through a transform; might contains trailing {@code null}-s
-     * @param transform
-     *            the transform to pass the element output through
-     * @param args
-     *            optional arguments fed to the transform
-     */
-    void visitAndTransform(ASTElement[] elementBuffer,
-            TemplateTransformModel transform,
-            Map args)
-                    throws TemplateException, IOException {
-        try {
-            Writer tw = transform.getWriter(out, args);
-            if (tw == null) tw = EMPTY_BODY_WRITER;
-            TransformControl tc = tw instanceof TransformControl
-                    ? (TransformControl) tw
-                    : null;
-
-            Writer prevOut = out;
-            out = tw;
-            try {
-                if (tc == null || tc.onStart() != TransformControl.SKIP_BODY) {
-                    do {
-                        visit(elementBuffer);
-                    } while (tc != null && tc.afterBody() == TransformControl.REPEAT_EVALUATION);
-                }
-            } catch (Throwable t) {
-                try {
-                    if (tc != null) {
-                        tc.onError(t);
-                    } else {
-                        throw t;
-                    }
-                } catch (TemplateException e) {
-                    throw e;
-                } catch (IOException e) {
-                    throw e;
-                } catch (RuntimeException e) {
-                    throw e;
-                } catch (Error e) {
-                    throw e;
-                } catch (Throwable e) {
-                    throw new UndeclaredThrowableException(e);
-                }
-            } finally {
-                out = prevOut;
-                tw.close();
-            }
-        } catch (TemplateException te) {
-            handleTemplateException(te);
         }
     }
 
@@ -704,11 +580,12 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             nodeNamespaces = namespaces;
         }
         try {
-            TemplateModel macroOrTransform = getNodeProcessor(node);
-            if (macroOrTransform instanceof ASTDirMacro) {
-                invoke((ASTDirMacro) macroOrTransform, null, null, null, null);
-            } else if (macroOrTransform instanceof TemplateTransformModel) {
-                visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null);
+            TemplateModel macroOrDirective = getNodeProcessor(node);
+            if (macroOrDirective instanceof ASTDirMacro) {
+                invoke((ASTDirMacro) macroOrDirective, null, null, null, null);
+            } else if (macroOrDirective instanceof TemplateDirectiveModel) {
+                ((TemplateDirectiveModel) macroOrDirective).execute(
+                        null, null /* TODO [FM3][CF] */, out, this);
             } else {
                 String nodeType = node.getNodeType();
                 if (nodeType != null) {
@@ -760,11 +637,12 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     void fallback() throws TemplateException, IOException {
-        TemplateModel macroOrTransform = getNodeProcessor(currentNodeName, currentNodeNS, nodeNamespaceIndex);
-        if (macroOrTransform instanceof ASTDirMacro) {
-            invoke((ASTDirMacro) macroOrTransform, null, null, null, null);
-        } else if (macroOrTransform instanceof TemplateTransformModel) {
-            visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null);
+        TemplateModel macroOrDirective = getNodeProcessor(currentNodeName, currentNodeNS, nodeNamespaceIndex);
+        if (macroOrDirective instanceof ASTDirMacro) {
+            invoke((ASTDirMacro) macroOrDirective, null, null, null, null);
+        } else if (macroOrDirective instanceof TemplateDirectiveModel) {
+            ((TemplateDirectiveModel) macroOrDirective).execute(
+                    null, null /* TODO [FM3][CF] */, out, this);
         }
     }
 
@@ -2076,20 +1954,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         return isoBuiltInCalendarFactory;
     }
 
-    TemplateTransformModel getTransform(ASTExpression exp) throws TemplateException {
-        TemplateTransformModel ttm = null;
-        TemplateModel tm = exp.eval(this);
-        if (tm instanceof TemplateTransformModel) {
-            ttm = (TemplateTransformModel) tm;
-        } else if (exp instanceof ASTExpVariable) {
-            tm = configuration.getWrappedSharedVariable(exp.toString());
-            if (tm instanceof TemplateTransformModel) {
-                ttm = (TemplateTransformModel) tm;
-            }
-        }
-        return ttm;
-    }
-
     /**
      * Returns the loop or macro local variable corresponding to this variable name. Possibly null. (Note that the
      * misnomer is kept for backward compatibility: loop variables are not local variables according to our
@@ -2609,7 +2473,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         TemplateModel result = null;
         if (nsURI == null) {
             result = ns.get(localName);
-            if (!(result instanceof ASTDirMacro) && !(result instanceof TemplateTransformModel)) {
+            if (!(result instanceof ASTDirMacro) && !(result instanceof TemplateDirectiveModel)) {
                 result = null;
             }
         } else {
@@ -2622,25 +2486,25 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             }
             if (prefix.length() > 0) {
                 result = ns.get(prefix + ":" + localName);
-                if (!(result instanceof ASTDirMacro) && !(result instanceof TemplateTransformModel)) {
+                if (!(result instanceof ASTDirMacro) && !(result instanceof TemplateDirectiveModel)) {
                     result = null;
                 }
             } else {
                 if (nsURI.length() == 0) {
                     result = ns.get(Template.NO_NS_PREFIX + ":" + localName);
-                    if (!(result instanceof ASTDirMacro) && !(result instanceof TemplateTransformModel)) {
+                    if (!(result instanceof ASTDirMacro) && !(result instanceof TemplateDirectiveModel)) {
                         result = null;
                     }
                 }
                 if (nsURI.equals(template.getDefaultNS())) {
                     result = ns.get(Template.DEFAULT_NAMESPACE_PREFIX + ":" + localName);
-                    if (!(result instanceof ASTDirMacro) && !(result instanceof TemplateTransformModel)) {
+                    if (!(result instanceof ASTDirMacro) && !(result instanceof TemplateDirectiveModel)) {
                         result = null;
                     }
                 }
                 if (result == null) {
                     result = ns.get(localName);
-                    if (!(result instanceof ASTDirMacro) && !(result instanceof TemplateTransformModel)) {
+                    if (!(result instanceof ASTDirMacro) && !(result instanceof TemplateDirectiveModel)) {
                         result = null;
                     }
                 }
@@ -2940,31 +2804,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      */
     public ObjectWrapper getObjectWrapper() {
         return getConfiguration().getObjectWrapper();
-    }
-
-    final class NestedElementTemplateDirectiveBody implements TemplateDirectiveBody {
-
-        private final ASTElement[] childBuffer;
-
-        private NestedElementTemplateDirectiveBody(ASTElement[] childBuffer) {
-            this.childBuffer = childBuffer;
-        }
-
-        @Override
-        public void render(Writer newOut) throws TemplateException, IOException {
-            Writer prevOut = out;
-            out = newOut;
-            try {
-                visit(childBuffer);
-            } finally {
-                out = prevOut;
-            }
-        }
-        
-        ASTElement[] getChildrenBuffer() {
-            return childBuffer;
-        }
-
     }
 
     public class Namespace extends SimpleHash {

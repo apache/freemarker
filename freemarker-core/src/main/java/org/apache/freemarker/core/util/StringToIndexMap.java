@@ -28,6 +28,8 @@ import java.util.Map;
  * Maps string keys to non-negative int-s. This isn't a {@link Map}, but a more specialized class. It's immutable.
  * It's slower to create than {@link HashMap}, but usually is a bit faster to read, and when {@link HashMap} gets
  * unlucky with clashing hash keys, then it can be significantly faster.
+ * <p>
+ * Instances of this class are immutable, thread-safe objects.
  */
 public final class StringToIndexMap {
 
@@ -237,6 +239,31 @@ public final class StringToIndexMap {
 
     public int size() {
         return keys != null ? keys.size() : 1;
+    }
+
+    /**
+     * Checks if all entries are in the {@code start} - {@code start}+{@code size()} (exclusive) index range.
+     *
+     * @throws IllegalArgumentException If some entry is not in the specified index range.
+     */
+    public void checkIndexRange(int start) {
+        if (buckets == null) {
+            return;
+        }
+
+        int end = start + size();
+        for (Entry bucket : buckets) {
+            Entry entry = bucket;
+            while (entry != null) {
+                if (entry.value < start || entry.value >= end) {
+                    throw new IllegalArgumentException(
+                            "Entry " + _StringUtil.jQuote(entry.key) + " -> " + entry.value
+                            + " is out of allowed index range: " + start + " ..< " + end);
+                }
+                entry = entry.nextInSameBucket;
+            }
+        }
+
     }
 
     private static int getPowerOf2GreaterThanOrEqualTo(int n) {

@@ -25,9 +25,7 @@ import java.io.StringWriter;
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.freemarker.core.model.TemplateDirectiveBody;
-import org.apache.freemarker.core.model.TemplateDirectiveModel;
-import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.userpkg.UpperCaseDirective;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.test.TestConfigurationBuilder;
 
@@ -192,21 +190,6 @@ public class TagSyntaxVariationsTest extends TestCase {
         StringWriter out = new StringWriter();
         t.process(new Object(), out);
         assertEquals(expected, out.toString());
-    }
-
-    // This will be removed when the legacy TemplateDirectiveModel is removed; the use the other UpperCaseDirective
-    // instead!
-    private static class UpperCaseDirective implements TemplateDirectiveModel {
-
-        private static final UpperCaseDirective INSTANCE = new UpperCaseDirective();
-
-        @Override
-        public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
-                throws TemplateException, IOException {
-            StringWriter sw = new StringWriter();
-            body.render(sw);
-            env.getOut().write(sw.toString().toUpperCase());
-        }
     }
 
 }

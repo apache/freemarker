@@ -24,9 +24,9 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collections;
-import java.util.Map;
 
-import org.apache.freemarker.core.model.TemplateDirectiveBody;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
+import org.apache.freemarker.core.model.CallPlace;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
@@ -197,17 +197,20 @@ public class EnvironmentGetTemplateVariantsTest extends TemplateTest {
     @Override
     protected Object createDataModel() {
         return Collections.singletonMap("tNames", new TemplateDirectiveModel() {
-
             @Override
-            public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
-                    throws TemplateException, IOException {
-                Writer out = env.getOut();
+            public void execute(TemplateModel[] args, CallPlace callPlace, Writer out,
+                    Environment env) throws
+                    IOException {
                 final String r = "<ct=" + env.getCurrentTemplate().getLookupName() + " mt="
                         + env.getMainTemplate().getLookupName() + ">";
                 out.write(r);
                 env.setGlobalVariable("lastTNamesResult", new SimpleScalar(r));
             }
-            
+
+            @Override
+            public ArgumentArrayLayout getArgumentArrayLayout() {
+                return ArgumentArrayLayout.PARAMETERLESS;
+            }
         });
     }
 

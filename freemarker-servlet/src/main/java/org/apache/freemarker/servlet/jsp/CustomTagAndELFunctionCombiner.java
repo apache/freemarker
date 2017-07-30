@@ -21,17 +21,16 @@ package org.apache.freemarker.servlet.jsp;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
-import org.apache.freemarker.core.model.TemplateDirectiveBody;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
+import org.apache.freemarker.core.model.CallPlace;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.impl.JavaMethodModel;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._ClassUtil;
@@ -46,7 +45,7 @@ class CustomTagAndELFunctionCombiner {
 
     /**
      * @param customTag
-     *            Either a {@link TemplateDirectiveModel} or a {@link TemplateTransformModel}.
+     *            A {@link TemplateDirectiveModel}.
      */
     static TemplateModel combine(TemplateModel customTag, TemplateMethodModelEx elFunction) {
         if (customTag instanceof TemplateDirectiveModel) {
@@ -55,12 +54,6 @@ class CustomTagAndELFunctionCombiner {
                             (TemplateDirectiveModel) customTag, (JavaMethodModel) elFunction) //
                     : new TemplateDirectiveModelAndTemplateMethodModelEx( //
                             (TemplateDirectiveModel) customTag, elFunction);
-        } else if (customTag instanceof TemplateTransformModel) {
-            return (elFunction instanceof JavaMethodModel)
-                    ? new TemplateTransformModelAndSimpleMethodModel( //
-                            (TemplateTransformModel) customTag, (JavaMethodModel) elFunction) //
-                    : new TemplateTransformModelAndTemplateMethodModelEx( //
-                            (TemplateTransformModel) customTag, elFunction);
         } else {
             throw new BugException(
                     "Unexpected custom JSP tag class: " + _ClassUtil.getShortClassNameOfObject(customTag));
@@ -72,8 +65,7 @@ class CustomTagAndELFunctionCombiner {
      * {@link #combine(TemplateModel, TemplateMethodModelEx)}.
      */
     static boolean canBeCombinedAsCustomTag(TemplateModel tm) {
-        return (tm instanceof TemplateDirectiveModel || tm instanceof TemplateTransformModel)
-                && !(tm instanceof CombinedTemplateModel);
+        return (tm instanceof TemplateDirectiveModel) && !(tm instanceof CombinedTemplateModel);
     }
 
     /**
@@ -107,16 +99,20 @@ class CustomTagAndELFunctionCombiner {
         }
 
         @Override
-        public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
-                throws TemplateException, IOException {
-            templateDirectiveModel.execute(env, params, loopVars, body);
-        }
-
-        @Override
         public Object[] explainTypeError(Class[] expectedClasses) {
             return simpleMethodModel.explainTypeError(expectedClasses);
         }
 
+        @Override
+        public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
+                throws TemplateException, IOException {
+            templateDirectiveModel.execute(args, callPlace, out, env);
+        }
+
+        @Override
+        public ArgumentArrayLayout getArgumentArrayLayout() {
+            return templateDirectiveModel.getArgumentArrayLayout();
+        }
     }
 
     private static class TemplateDirectiveModelAndTemplateMethodModelEx extends CombinedTemplateModel
@@ -137,64 +133,15 @@ class CustomTagAndELFunctionCombiner {
         }
 
         @Override
-        public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+        public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
                 throws TemplateException, IOException {
-            templateDirectiveModel.execute(env, params, loopVars, body);
-        }
-
-    }
-
-    private static class TemplateTransformModelAndTemplateMethodModelEx extends CombinedTemplateModel
-            implements TemplateTransformModel, TemplateMethodModelEx {
-
-        private final TemplateTransformModel templateTransformModel;
-        private final TemplateMethodModelEx templateMethodModelEx;
-
-        public TemplateTransformModelAndTemplateMethodModelEx( //
-                TemplateTransformModel templateTransformModel, TemplateMethodModelEx templateMethodModelEx) {
-            this.templateTransformModel = templateTransformModel;
-            this.templateMethodModelEx = templateMethodModelEx;
+            templateDirectiveModel.execute(args, callPlace, out, env);
         }
 
         @Override
-        public Object exec(List arguments) throws TemplateModelException {
-            return templateMethodModelEx.exec(arguments);
+        public ArgumentArrayLayout getArgumentArrayLayout() {
+            return templateDirectiveModel.getArgumentArrayLayout();
         }
-
-        @Override
-        public Writer getWriter(Writer out, Map args) throws TemplateModelException, IOException {
-            return templateTransformModel.getWriter(out, args);
-        }
-
-    }
-
-    private static class TemplateTransformModelAndSimpleMethodModel extends CombinedTemplateModel
-            implements TemplateTransformModel, TemplateMethodModelEx, _UnexpectedTypeErrorExplainerTemplateModel {
-
-        private final TemplateTransformModel templateTransformModel;
-        private final JavaMethodModel simpleMethodModel;
-
-        public TemplateTransformModelAndSimpleMethodModel( //
-                TemplateTransformModel templateTransformModel, JavaMethodModel simpleMethodModel) {
-            this.templateTransformModel = templateTransformModel;
-            this.simpleMethodModel = simpleMethodModel;
-        }
-
-        @Override
-        public Object exec(List arguments) throws TemplateModelException {
-            return simpleMethodModel.exec(arguments);
-        }
-
-        @Override
-        public Object[] explainTypeError(Class[] expectedClasses) {
-            return simpleMethodModel.explainTypeError(expectedClasses);
-        }
-
-        @Override
-        public Writer getWriter(Writer out, Map args) throws TemplateModelException, IOException {
-            return templateTransformModel.getWriter(out, args);
-        }
-
     }
 
 }

@@ -22,14 +22,21 @@ package org.apache.freemarker.core.userpkg;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Collection;
 
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.CallPlace;
+import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 
-public class UpperCaseDirective extends TestTemplateDirectiveModel {
+public class UpperCaseDirective implements TemplateDirectiveModel {
+
+    public static final UpperCaseDirective INSTANCE = new UpperCaseDirective();
+
+    private UpperCaseDirective() {
+        //
+    }
 
     @Override
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
@@ -40,32 +47,7 @@ public class UpperCaseDirective extends TestTemplateDirectiveModel {
     }
 
     @Override
-    public int getPredefinedPositionalArgumentCount() {
-        return 0;
-    }
-
-    @Override
-    public boolean hasPositionalVarargsArgument() {
-        return false;
-    }
-
-    @Override
-    public int getPredefinedNamedArgumentIndex(String name) {
-        return -1;
-    }
-
-    @Override
-    public int getNamedVarargsArgumentIndex() {
-        return -1;
-    }
-
-    @Override
-    public int getArgumentArraySize() {
-        return 0;
-    }
-
-    @Override
-    public Collection<String> getPredefinedNamedArgumentNames() {
-        return null;
+    public ArgumentArrayLayout getArgumentArrayLayout() {
+        return ArgumentArrayLayout.PARAMETERLESS;
     }
 }

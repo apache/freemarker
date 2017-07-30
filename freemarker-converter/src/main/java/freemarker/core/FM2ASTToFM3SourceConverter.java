@@ -1967,6 +1967,8 @@ public class FM2ASTToFM3SourceConverter {
     private static Map<String, String> IRREGULAR_BUILT_IN_NAME_CONVERSIONS = new ImmutableMap.Builder<String, String>()
             .put("webSafe", "html")
             .put("web_safe", "html")
+            .put("is_transform", "isDirective")
+            .put("isTransform", "isDirective")
             .put("iso_utc_fz", "isoUtcFZ")
             .put("iso_utc_nz", "isoUtcNZ")
             .put("iso_utc_ms_nz", "isoUtcMsNZ")

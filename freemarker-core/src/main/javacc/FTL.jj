@@ -35,7 +35,7 @@ import org.apache.freemarker.core.outputformat.impl.*;
 import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.model.impl.*;
 import org.apache.freemarker.core.util.*;
-import org.apache.freemarker.core.ASTDirDynamicCall.NamedArgument;
+import org.apache.freemarker.core.ASTDynamicTopLevelCall.NamedArgument;
 import java.io.*;
 import java.util.*;
 import java.nio.charset.Charset;
@@ -569,7 +569,7 @@ TOKEN_MGR_DECLS:
         return image.charAt(idx + charIdxInName);
     }
 
-    private void unifiedCall(Token tok) {
+    private void dynamicTopLevelCall(Token tok) {
         char firstChar = tok.image.charAt(0);
         if (autodetectTagSyntax && !directiveSyntaxEstablished) {
             squBracTagSyntax = (firstChar == '[');
@@ -586,7 +586,7 @@ TOKEN_MGR_DECLS:
         SwitchTo(NO_SPACE_EXPRESSION);
     }
 
-    private void unifiedCallEnd(Token tok) {
+    private void dynamicTopLevelCallEnd(Token tok) {
         char firstChar = tok.image.charAt(0);
         if (squBracTagSyntax && firstChar == '<') {
             tok.kind = STATIC_TEXT_NON_WS;
@@ -846,13 +846,9 @@ TOKEN:
         handleTagSyntaxAndSwitch(matchedToken, DEFAULT);
     }
     |
-    <UNIFIED_CALL : "<@" | "[@" > { unifiedCall(matchedToken); }
+    <DYNAMIC_TOP_LEVEL_CALL : "<@" | "[@" > { dynamicTopLevelCall(matchedToken); }
     |
-    <UNIFIED_CALL_END : ("<" | "[") "/@" ((<ID>) ("."<ID>)*)? <CLOSE_TAG1>> { unifiedCallEnd(matchedToken); }
-    |
-    <DYNAMIC_DIRECTIVE_CALL : "<~" | "[~" > { unifiedCall(matchedToken); }
-    |
-    <DYNAMIC_DIRECTIVE_CALL_END : ("<" | "[") "/~" ((<ID>) ("."<ID>)*)? <CLOSE_TAG1>> { unifiedCallEnd(matchedToken); }
+    <DYNAMIC_TOP_LEVEL_CALL_END : ("<" | "[") "/@" ((<ID>) ("."<ID>)*)? <CLOSE_TAG1>> { dynamicTopLevelCallEnd(matchedToken); }
     |
     <FTL_HEADER : ("<#ftl" | "[#ftl") <BLANK>> { ftlHeader(matchedToken); }
     |
@@ -3034,102 +3030,7 @@ ASTDirCompress Compress() :
     }
 }
 
-ASTElement UnifiedMacroTransform() :
-{
-    Token start = null, end, t;
-    HashMap namedArgs = null;
-    ArrayList positionalArgs = null, bodyParameters = null;
-    ASTExpression startTagNameExp;
-    TemplateElements children;
-    ASTExpression exp;
-    int pushedCtxCount = 0;
-}
-{
-    start = <UNIFIED_CALL>
-    exp = ASTExpression()
-    {
-        if (exp instanceof ASTExpVariable || (exp instanceof ASTExpDot && ((ASTExpDot) exp).onlyHasIdentifiers())) {
-            startTagNameExp = exp;
-        } else {
-            startTagNameExp = null;
-        }
-    }
-    [<TERMINATING_WHITESPACE>]
-    (
-        LOOKAHEAD(<ID><ASSIGNMENT_EQUALS>)
-        namedArgs = NamedArgs()
-        |
-        positionalArgs = PositionalArgs()
-    )
-    [
-        <SEMICOLON>{bodyParameters = new ArrayList(4); }
-        [
-            t = <ID> { bodyParameters.add(t.image); }
-            (
-                <COMMA>
-                t = <ID>{bodyParameters.add(t.image); }
-            )*
-        ]
-    ]
-    (
-        end = <EMPTY_DIRECTIVE_END> { children = TemplateElements.EMPTY; }
-        |
-        (
-            <DIRECTIVE_END> {
-                if (bodyParameters != null && iteratorBlockContexts != null && !iteratorBlockContexts.isEmpty()) {
-                    // It's possible that we shadow a #list/#items loop variable, in which case that must be noted.
-                    int ctxsLen = iteratorBlockContexts.size();
-                    int bodyParsLen = bodyParameters.size();
-	                for (int bodyParIdx = 0; bodyParIdx < bodyParsLen; bodyParIdx++) {
-                        String bodyParName = (String) bodyParameters.get(bodyParIdx);
-                        walkCtxSack: for (int ctxIdx = ctxsLen - 1; ctxIdx >= 0; ctxIdx--) {
-                            ParserIteratorBlockContext ctx
-                                    = (ParserIteratorBlockContext) iteratorBlockContexts.get(ctxIdx);
-                            if (ctx.loopVarName != null && ctx.loopVarName.equals(bodyParName)) {
-                                // If it wasn't already shadowed, shadow it:
-                                if (ctx.kind != ITERATOR_BLOCK_KIND_USER_DIRECTIVE) {
-                                    ParserIteratorBlockContext shadowingCtx = pushIteratorBlockContext();
-                                    shadowingCtx.loopVarName = bodyParName;
-                                    shadowingCtx.kind = ITERATOR_BLOCK_KIND_USER_DIRECTIVE;
-                                    pushedCtxCount++;
-                                }
-                                break walkCtxSack;
-                            }
-                        }
-                   }
-                }
-            }
-            children = MixedContentElements()
-            end = <UNIFIED_CALL_END>
-            {
-                for (int i = 0; i < pushedCtxCount; i++) {
-                    popIteratorBlockContext();
-                }
-            
-                String endTagName = end.image.substring(3, end.image.length() - 1).trim();
-                if (endTagName.length() > 0) {
-                    if (startTagNameExp == null) {
-                        throw new ParseException("Expecting </@>", template, end);
-                    } else {
-                        String startTagName = startTagNameExp.getCanonicalForm();
-                        if (!endTagName.equals(startTagName)) {
-                            throw new ParseException("Expecting </@> or </@" + startTagName + ">", template, end);
-                        }
-                    }
-                }
-            }
-        )
-    )
-    {
-        ASTElement result = (positionalArgs != null)
-        		? new ASTDirUserDefined(exp, positionalArgs, children, bodyParameters)
-	            : new ASTDirUserDefined(exp, namedArgs, children, bodyParameters);
-        result.setLocation(template, start, end);
-        return result;
-    }
-}
-
-ASTElement DynamicDirectiveCall() :
+ASTElement DynamicTopLevelCall() :
 {
     Token t;
     ASTExpression exp;
@@ -3142,7 +3043,7 @@ ASTElement DynamicDirectiveCall() :
     int pushedCtxCount = 0;
 }
 {
-    start = <DYNAMIC_DIRECTIVE_CALL>
+    start = <DYNAMIC_TOP_LEVEL_CALL>
     callableValueExp = ASTExpression()
     [<TERMINATING_WHITESPACE>]
     {
@@ -3278,7 +3179,7 @@ ASTElement DynamicDirectiveCall() :
 
             children = MixedContentElements()
 
-            end = <DYNAMIC_DIRECTIVE_CALL_END>
+            end = <DYNAMIC_TOP_LEVEL_CALL_END>
             {
                 for (int i = 0; i < pushedCtxCount; i++) {
                     popIteratorBlockContext();
@@ -3301,7 +3202,7 @@ ASTElement DynamicDirectiveCall() :
         )
     )
     {
-        ASTElement result = new ASTDirDynamicCall(
+        ASTElement result = new ASTDynamicTopLevelCall(
                 callableValueExp, false,
                 trimmedPositionalArgs, trimmedNamedArgs, loopVarNames,
                 children);
@@ -3715,9 +3616,7 @@ ASTElement FreemarkerDirective() :
         |
         tp = Compress()
         |
-        tp = UnifiedMacroTransform()
-        |
-        tp = DynamicDirectiveCall()
+        tp = DynamicTopLevelCall()
         |
         tp = Items()
         |

@@ -387,7 +387,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
 
     @Override
     public BodyContent pushBody() {
-      return (BodyContent) pushWriter(new TagTransformModel.BodyContentImpl(getOut(), true));
+      return (BodyContent) pushWriter(new BodyContentImpl(getOut(), true));
   }
 
   @Override

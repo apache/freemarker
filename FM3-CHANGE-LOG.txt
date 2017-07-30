@@ -48,6 +48,7 @@ Major changes / features
   Examples:
   `<@x x + 1 2 3 />` now must be written as `<@x x + 1, 2, 3 />`
   `<#nested x y>` now must be written as `<#nested x, y>`
+- TemplateDirectiveModel was redesigned to be more universal.
 
 Smaller changes
 ---------------
@@ -99,7 +100,14 @@ Node: Changes already mentioned above aren't repeated here!
   Converter note: This conversion is done, but note that in the rare case where a template has no name (when
   creating a `Template` directly with its constructor using `null` as the `name` parameter) `.templateName` was an
   empty string, while `.currentTemplateName` will be null.
-
+- Refactroing of callable TemplateModel interfaces and related classes:
+  - TemplateDirectiveModel was redesigend (see in the major changes section)
+  - Removed `TemplateTransformModel`; `TemplateDirectiveModel` can do the same things, and more.
+  - Renamed `DirectiveCallPlace` to `CallPlace`
+  - Removed Environment.getDirectiveCallPlace(), as TemplateDirectiveModel-s now get the CallPlace as the parameter
+    of the `execute` method.
+  - ?isTransform was removed (as there are no transforms anymore).
+    Converter note: The template converter tool replaces it with ?isDirective
 
 Java API changes
 ================

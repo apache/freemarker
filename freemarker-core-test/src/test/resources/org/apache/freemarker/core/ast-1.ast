@@ -19,7 +19,7 @@
 #mixedContent  // o.a.f.c.ASTImplicitParent
     #text  // o.a.f.c.ASTStaticText
         - content: "1 "  // String
-    @  // o.a.f.c.ASTDirUserDefined
+    @  // o.a.f.c.ASTDynamicTopLevelCall
         - callee: foo  // o.a.f.c.ASTExpVariable
         - argument name: "x"  // String
         - argument value: 1  // o.a.f.c.ASTExpNumberLiteral
@@ -31,7 +31,7 @@
             - content: "x"  // String
     #text  // o.a.f.c.ASTStaticText
         - content: "\n2 "  // String
-    @  // o.a.f.c.ASTDirUserDefined
+    @  // o.a.f.c.ASTDynamicTopLevelCall
         - callee: .  // o.a.f.c.ASTExpDot
             - left-hand operand: ns  // o.a.f.c.ASTExpVariable
             - right-hand operand: "bar"  // String

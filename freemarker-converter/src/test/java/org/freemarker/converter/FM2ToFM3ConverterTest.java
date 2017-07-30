@@ -472,6 +472,9 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
     public void testBuiltInExpressions() throws IOException, ConverterException {
         assertConverted("${s?upperCase} ${s?leftPad(123)}", "${s?upper_case} ${s?left_pad(123)}");
         assertConverted("${s?html}", "${s?web_safe}");
+        assertConverted("${s?html}", "${s?webSafe}");
+        assertConverted("${s?isDirective}", "${s?is_transform}");
+        assertConverted("${s?isDirective}", "${s?isTransform}");
         assertConvertedSame("${s  ?   upperCase\t?\t\tleftPad(5)}");
         assertConvertedSame("${s <#--1--> ? <#--2--> upperCase}");
         // Runtime params:

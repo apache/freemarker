@@ -19,33 +19,23 @@
 
 package org.apache.freemarker.core;
 
-import org.apache.freemarker.core.Environment.NestedElementTemplateDirectiveBody;
-import org.apache.freemarker.core.ThreadInterruptionSupportTemplatePostProcessor.ASTThreadInterruptionCheck;
-import org.apache.freemarker.core.model.TemplateDirectiveBody;
+import org.apache.freemarker.core.model.CallPlace;
+import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.util._StringUtil;
 
 /**
- * Used in custom {@link org.apache.freemarker.core.model.TemplateDirectiveModel}-s to check if the directive invocation
- * has no body. This is more intelligent than a {@code null} check; for example, when the body
- * only contains a thread interruption check node, it treats it as valid.
+ * Used in custom {@link TemplateDirectiveModel}-s to check if the directive invocation has no body. This is more
+ * intelligent than a {@code null} check; for example, when the body only contains a thread interruption check node, it
+ * treats it as valid.
  */
 public class NestedContentNotSupportedException extends TemplateException {
 
-    public static void check(TemplateDirectiveBody body) throws NestedContentNotSupportedException {
-        if (body == null) {
-            return;
+    public static void check(CallPlace body) throws NestedContentNotSupportedException {
+        if (body.hasNestedContent()) {
+            throw new NestedContentNotSupportedException(Environment.getCurrentEnvironment());
         }
-        if (body instanceof NestedElementTemplateDirectiveBody) {
-            ASTElement[] tes = ((NestedElementTemplateDirectiveBody) body).getChildrenBuffer();
-            if (tes == null || tes.length == 0
-                    || tes[0] instanceof ASTThreadInterruptionCheck && (tes.length == 1 || tes[1] == null)) {
-                return;
-            }
-        }
-        throw new NestedContentNotSupportedException(Environment.getCurrentEnvironment());
     }
-    
-    
+
     private NestedContentNotSupportedException(Environment env) {
         this(null, null, env);
     }

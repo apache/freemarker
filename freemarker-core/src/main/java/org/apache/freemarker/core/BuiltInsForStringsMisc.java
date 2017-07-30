@@ -21,19 +21,19 @@ package org.apache.freemarker.core;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.Writer;
 import java.util.List;
-import java.util.Map;
 
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
+import org.apache.freemarker.core.model.CallPlace;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.TemplateTransformModel;
 import org.apache.freemarker.core.model.impl.BeanModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
@@ -133,7 +133,7 @@ class BuiltInsForStringsMisc {
         
         /**
          * Constructs a template on-the-fly and returns it embedded in a
-         * {@link TemplateTransformModel}.
+         * {@link TemplateDirectiveModel}.
          * 
          * <p>The built-in has two arguments:
          * the arguments passed to the method. It can receive at
@@ -142,7 +142,7 @@ class BuiltInsForStringsMisc {
          * is built from it. The second (optional) is used to give the generated
          * template a name.
          * 
-         * @return a {@link TemplateTransformModel} that when executed inside
+         * @return a {@link TemplateDirectiveModel} that when executed inside
          * a <tt>&lt;transform></tt> block will process the generated template
          * just as if it had been <tt>&lt;transform></tt>-ed at that point.
          */
@@ -198,9 +198,9 @@ class BuiltInsForStringsMisc {
             }
 
             @Override
-            public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+            public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
                     throws TemplateException, IOException {
-                // TODO [FM3] Disallow params, loop vars, and nested content
+                // TODO [FM3] Disallow loop vars, and nested content
                 try {
                     boolean lastFIRE = env.setFastInvalidReferenceExceptions(false);
                     try {
@@ -215,9 +215,12 @@ class BuiltInsForStringsMisc {
                             new _DelayedGetMessage(e),
                             MessageUtil.EMBEDDED_MESSAGE_END);
                 }
-                if (body != null) {
-                    body.render(env.getOut());
-                }
+                callPlace.executeNestedContent(null, out, env);
+            }
+
+            @Override
+            public ArgumentArrayLayout getArgumentArrayLayout() {
+                return ArgumentArrayLayout.PARAMETERLESS;
             }
         }
 

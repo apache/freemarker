@@ -21,17 +21,16 @@ package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateTransformModel;
 
 // TODO [FM3][CF] Review and rename this when TDM2 and TFM are in place
 /**
- * Indicates that a {@link TemplateDirectiveModel} or {@link TemplateTransformModel} or {@link ASTDirMacro} value was
+ * Indicates that a {@link TemplateDirectiveModel} or {@link ASTDirMacro} value was
  * expected, but the value had a different type.
  */
 class NonUserDefinedDirectiveLikeException extends UnexpectedTypeException {
 
     private static final Class[] EXPECTED_TYPES = new Class[] {
-        TemplateDirectiveModel.class, TemplateTransformModel.class, ASTDirMacro.class };
+        TemplateDirectiveModel.class, ASTDirMacro.class };
     
     public NonUserDefinedDirectiveLikeException(Environment env) {
         super(env, "Expecting user-defined directive, transform or macro value here");
