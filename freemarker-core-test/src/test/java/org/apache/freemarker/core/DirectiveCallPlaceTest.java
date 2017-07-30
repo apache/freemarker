@@ -110,12 +110,11 @@ public class DirectiveCallPlaceTest extends TemplateTest {
         @Override
         public void execute(TemplateModel[] args, final CallPlace callPlace, Writer out, final Environment env)
                 throws TemplateException, IOException {
-            if (callPlace.hasNestedContent()) {
+            if (!callPlace.hasNestedContent()) {
                 return;
             }
             
             final String convertedText;
-
             if (callPlace.isNestedOutputCacheable()) {
                 try {
                     convertedText = (String) callPlace.getOrCreateCustomData(
@@ -135,7 +134,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
                 convertedText = convertBodyText(callPlace, env);
             }
 
-            env.getOut().write(convertedText);
+            out.write(convertedText);
         }
 
         @Override
