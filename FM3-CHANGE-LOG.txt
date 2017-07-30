@@ -424,6 +424,8 @@ Core / Miscellaneous
   get(), to be more similar to the Java 8 API.
 - Removed the legacy predefined shared variables: "html_escape", "normalize_newlines", "xml_escape", "capture_output",
   "compress"
+- Removed `NestedContentNotSupportedException`, as `TemplateDirectiveModel.isNestedContentSupported()` now takes care
+  of that problem.
 
 
 Build / development process changes

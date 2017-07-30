@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.Writer;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.NestedContentNotSupportedException;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.CallPlace;
@@ -60,8 +59,6 @@ public class AssertEqualsDirective implements TemplateDirectiveModel {
     @Override
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
-        NestedContentNotSupportedException.check(callPlace);
-
         TemplateModel actual = args[ACTUAL_ARG_IDX];
         if (actual == null) {
             throw new MissingRequiredParameterException(ACTUAL_ARG_NAME, env);

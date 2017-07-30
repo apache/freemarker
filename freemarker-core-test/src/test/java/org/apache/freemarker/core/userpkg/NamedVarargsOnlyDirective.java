@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.Writer;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.NestedContentNotSupportedException;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.CallPlace;
@@ -46,7 +45,6 @@ public class NamedVarargsOnlyDirective extends TestTemplateDirectiveModel {
     @Override
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
-        NestedContentNotSupportedException.check(callPlace);
         out.write("#nvo(");
         printParam("nVarargs", args[NAMED_VARARGS_ARG_IDX], out, true);
         out.write(")");
