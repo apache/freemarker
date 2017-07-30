@@ -66,7 +66,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
     private final ASTExpression callableValueExp;
     private final ASTExpression[] positionalArgs;
     private final NamedArgument[] namedArgs;
-    private final StringToIndexMap loopVarNames;
+    private final StringToIndexMap nestedContentParamNames;
     private final boolean allowCallingFunctions;
 
     private CustomDataHolder customDataHolder;
@@ -77,19 +77,19 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
      */
     ASTDynamicTopLevelCall(
             ASTExpression callableValueExp, boolean allowCallingFunctions,
-            ASTExpression[] positionalArgs, NamedArgument[] namedArgs, StringToIndexMap loopVarNames,
+            ASTExpression[] positionalArgs, NamedArgument[] namedArgs, StringToIndexMap nestedContentParamNames,
             TemplateElements children) {
         this.callableValueExp = callableValueExp;
         this.allowCallingFunctions = allowCallingFunctions;
 
         if (positionalArgs != null && positionalArgs.length == 0
                 || namedArgs != null && namedArgs.length == 0
-                || loopVarNames != null && loopVarNames.size() == 0) {
+                || nestedContentParamNames != null && nestedContentParamNames.size() == 0) {
             throw new IllegalArgumentException("Use null instead of empty collections");
         }
         this.positionalArgs = positionalArgs;
         this.namedArgs = namedArgs;
-        this.loopVarNames = loopVarNames;
+        this.nestedContentParamNames = nestedContentParamNames;
 
         setChildren(children);
     }
@@ -137,7 +137,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
                 env.invoke(macro,
                         macroNamedArgs,
                         _ArrayAdapterList.adapt(positionalArgs),
-                        loopVarNames != null ? loopVarNames.getKeys() : null,
+                        nestedContentParamNames != null ? nestedContentParamNames.getKeys() : null,
                         getChildBuffer());
                 return null;
             } else if (callableValueTM == null) {
@@ -269,16 +269,16 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
                 MessageUtil.appendExpressionAsUntearable(sb, namedArg.value);
             }
         }
-        if (loopVarNames != null) {
+        if (nestedContentParamNames != null) {
             sb.append("; ");
             boolean first = true;
-            for (String loopVarName : loopVarNames.getKeys()) {
+            for (String nestedContentParamName : nestedContentParamNames.getKeys()) {
                 if (!first) {
                     sb.append(", ");
                 } else {
                     first = false;
                 }
-                sb.append(_StringUtil.toFTLTopLevelIdentifierReference(loopVarName));
+                sb.append(_StringUtil.toFTLTopLevelIdentifierReference(nestedContentParamName));
             }
         }
         if (canonical) {
@@ -309,7 +309,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
         return 1/*nameExp*/
                 + (positionalArgs != null ? positionalArgs.length : 0)
                 + (namedArgs != null ? namedArgs.length * 2 : 0)
-                + (loopVarNames != null ? loopVarNames.size() : 0);
+                + (nestedContentParamNames != null ? nestedContentParamNames.size() : 0);
     }
 
     @Override
@@ -329,9 +329,10 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
                     return (idx - base) % 2 == 0 ? namedArg.name : namedArg.value;
                 } else {
                     base += namedArgsSize * 2;
-                    final int bodyParameterNamesSize = loopVarNames != null ? loopVarNames.size() : 0;
+                    final int bodyParameterNamesSize = nestedContentParamNames != null
+                            ? nestedContentParamNames.size() : 0;
                     if (idx - base < bodyParameterNamesSize) {
-                        return loopVarNames.getKeys().get(idx - base);
+                        return nestedContentParamNames.getKeys().get(idx - base);
                     } else {
                         throw new IndexOutOfBoundsException();
                     }
@@ -356,9 +357,10 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
                     return (idx - base) % 2 == 0 ? ParameterRole.ARGUMENT_NAME : ParameterRole.ARGUMENT_VALUE;
                 } else {
                     base += namedArgsSize * 2;
-                    final int bodyParameterNamesSize = loopVarNames != null ? loopVarNames.size() : 0;
+                    final int bodyParameterNamesSize = nestedContentParamNames != null
+                            ? nestedContentParamNames.size() : 0;
                     if (idx - base < bodyParameterNamesSize) {
-                        return ParameterRole.TARGET_LOOP_VARIABLE;
+                        return ParameterRole.NESTED_CONTENT_PARAMETER;
                     } else {
                         throw new IndexOutOfBoundsException();
                     }
@@ -377,26 +379,27 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
     }
 
     @Override
-    public int getLoopVariableCount() {
-        return loopVarNames != null ? loopVarNames.size() : 0;
+    public int getNestedContentParameterCount() {
+        return nestedContentParamNames != null ? nestedContentParamNames.size() : 0;
     }
 
     @Override
-    public void executeNestedContent(TemplateModel[] loopVarValues, Writer out, Environment env)
+    public void executeNestedContent(TemplateModel[] nestedContentParamValues, Writer out, Environment env)
             throws TemplateException, IOException {
-        if (loopVarNames != null) {
-            int loopVarNamesSize = loopVarNames.size();
-            int loopVarValuesSize = loopVarValues != null ? loopVarValues.length : 0;
-            if (loopVarValuesSize < loopVarNamesSize) {
-                throw new _MiscTemplateException(this,
-                        "The invocation declares more nested content parameters (",
-                        loopVarNamesSize, ": ", new _DelayedJQuotedListing(loopVarNames.getKeys()),
-                        ") than what the called object intends to pass (",
-                        loopVarValuesSize, "). Declare no more than ", loopVarValuesSize,
-                        " nested content parameters.");
-            }
+        int nestedContentParamNamesSize = nestedContentParamNames != null ? nestedContentParamNames.size() : 0;
+        int nestedContentParamValuesSize = nestedContentParamValues != null ? nestedContentParamValues.length : 0;
+        if (nestedContentParamValuesSize != nestedContentParamNamesSize) {
+            throw new _MiscTemplateException(this,
+                    "The invocation declares ", (nestedContentParamNamesSize != 0 ? nestedContentParamNamesSize : "no"),
+                    " nested content parameter(s)",
+                    (nestedContentParamNamesSize != 0
+                            ? new Object[] { " (", new _DelayedJQuotedListing(nestedContentParamNames.getKeys()), ")", }
+                            : ""),
+                    ", but the called object intends to pass ",
+                    nestedContentParamValuesSize, " parameters. You need to declare ", nestedContentParamValuesSize,
+                    " nested content parameters.");
         }
-        env.visit(getChildBuffer(), loopVarNames, loopVarValues, out);
+        env.visit(getChildBuffer(), nestedContentParamNames, nestedContentParamValues, out);
     }
 
     @Override

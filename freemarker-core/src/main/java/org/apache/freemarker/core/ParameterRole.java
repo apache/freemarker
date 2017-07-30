@@ -50,7 +50,7 @@ final class ParameterRole {
     static final ParameterRole PLACEHOLDER_VARIABLE = new ParameterRole("placeholder variable");
     static final ParameterRole EXPRESSION_TEMPLATE = new ParameterRole("expression template");
     static final ParameterRole LIST_SOURCE = new ParameterRole("list source");
-    static final ParameterRole TARGET_LOOP_VARIABLE = new ParameterRole("target loop variable");
+    static final ParameterRole NESTED_CONTENT_PARAMETER = new ParameterRole("nested content parameter");
     static final ParameterRole TEMPLATE_NAME = new ParameterRole("template name");
     static final ParameterRole IGNORE_MISSING_PARAMETER = new ParameterRole("\"ignore_missing\" parameter");
     static final ParameterRole PARAMETER_NAME = new ParameterRole("parameter name");

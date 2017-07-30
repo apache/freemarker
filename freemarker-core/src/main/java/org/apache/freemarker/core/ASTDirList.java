@@ -44,36 +44,36 @@ import org.apache.freemarker.core.util._StringUtil;
 final class ASTDirList extends ASTDirective {
 
     private final ASTExpression listedExp;
-    private final String loopVarName;
-    private final String loopVar2Name;
+    private final String nestedContentParamName;
+    private final String nestedContentParam2Name;
     private final boolean hashListing;
 
     /**
      * @param listedExp
      *            a variable referring to a sequence or collection or extended hash to list
-     * @param loopVarName
+     * @param nestedContentParamName
      *            The name of the variable that will hold the value of the current item when looping through listed value,
      *            or {@code null} if we have a nested {@code #items}. If this is a hash listing then this variable will holds the value
      *            of the hash key.
-     * @param loopVar2Name
+     * @param nestedContentParam2Name
      *            The name of the variable that will hold the value of the current item when looping through the list,
      *            or {@code null} if we have a nested {@code #items}. If this is a hash listing then it variable will hold the value
      *            from the key-value pair.
      * @param childrenBeforeElse
-     *            The nested content to execute if the listed value wasn't empty; can't be {@code null}. If the loop variable
-     *            was specified in the start tag, this is also what we will iterate over.
+     *            The nested content to execute if the listed value wasn't empty; can't be {@code null}. If the
+     *            nested content parameter is specified in the start tag, this is also what we will iterate over.
      * @param hashListing
      *            Whether this is a key-value pair listing, or a usual listing. This is properly set even if we have
      *            a nested {@code #items}.
      */
     ASTDirList(ASTExpression listedExp,
-                  String loopVarName,
-                  String loopVar2Name,
+                  String nestedContentParamName,
+                  String nestedContentParam2Name,
                   TemplateElements childrenBeforeElse,
                   boolean hashListing) {
         this.listedExp = listedExp;
-        this.loopVarName = loopVarName;
-        this.loopVar2Name = loopVar2Name;
+        this.nestedContentParamName = nestedContentParamName;
+        this.nestedContentParam2Name = nestedContentParam2Name;
         setChildren(childrenBeforeElse);
         this.hashListing = hashListing;
     }
@@ -94,25 +94,25 @@ final class ASTDirList extends ASTDirective {
             listedExp.assertNonNull(null, env);
         }
 
-        return env.visitIteratorBlock(new IterationContext(listedValue, loopVarName, loopVar2Name));
+        return env.visitIteratorBlock(new IterationContext(listedValue, nestedContentParamName, nestedContentParam2Name));
     }
 
     /**
-     * @param loopVariableName
-     *            Then name of the loop variable whose context we are looking for, or {@code null} if we simply look for
-     *            the innermost context.
+     * @param nestedContentParamName
+     *            Then name of the nested content parameter whose context we are looking for, or {@code null} if we
+     *            simply look for the innermost context.
      * @return The matching context or {@code null} if no such context exists.
      */
-    static IterationContext findEnclosingIterationContext(Environment env, String loopVariableName)
+    static IterationContext findEnclosingIterationContext(Environment env, String nestedContentParamName)
             throws _MiscTemplateException {
         LocalContextStack ctxStack = env.getLocalContextStack();
         if (ctxStack != null) {
             for (int i = ctxStack.size() - 1; i >= 0; i--) {
                 Object ctx = ctxStack.get(i);
                 if (ctx instanceof IterationContext
-                        && (loopVariableName == null
-                            || loopVariableName.equals(((IterationContext) ctx).getLoopVariableName())
-                            || loopVariableName.equals(((IterationContext) ctx).getLoopVariable2Name())
+                        && (nestedContentParamName == null
+                            || nestedContentParamName.equals(((IterationContext) ctx).getNestedContentParameter1Name())
+                            || nestedContentParamName.equals(((IterationContext) ctx).getNestedContentParameter2Name())
                             )) {
                     return (IterationContext) ctx;
                 }
@@ -128,12 +128,12 @@ final class ASTDirList extends ASTDirective {
         buf.append(getASTNodeDescriptor());
         buf.append(' ');
         buf.append(listedExp.getCanonicalForm());
-        if (loopVarName != null) {
+        if (nestedContentParamName != null) {
             buf.append(" as ");
-            buf.append(_StringUtil.toFTLTopLevelIdentifierReference(loopVarName));
-            if (loopVar2Name != null) {
+            buf.append(_StringUtil.toFTLTopLevelIdentifierReference(nestedContentParamName));
+            if (nestedContentParam2Name != null) {
                 buf.append(", ");
-                buf.append(_StringUtil.toFTLTopLevelIdentifierReference(loopVar2Name));
+                buf.append(_StringUtil.toFTLTopLevelIdentifierReference(nestedContentParam2Name));
             }
         }
         if (canonical) {
@@ -150,7 +150,7 @@ final class ASTDirList extends ASTDirective {
     
     @Override
     int getParameterCount() {
-        return 1 + (loopVarName != null ? 1 : 0) + (loopVar2Name != null ? 1 : 0);
+        return 1 + (nestedContentParamName != null ? 1 : 0) + (nestedContentParam2Name != null ? 1 : 0);
     }
 
     @Override
@@ -159,11 +159,11 @@ final class ASTDirList extends ASTDirective {
         case 0:
             return listedExp;
         case 1:
-            if (loopVarName == null) throw new IndexOutOfBoundsException();
-            return loopVarName;
+            if (nestedContentParamName == null) throw new IndexOutOfBoundsException();
+            return nestedContentParamName;
         case 2:
-            if (loopVar2Name == null) throw new IndexOutOfBoundsException();
-            return loopVar2Name;
+            if (nestedContentParam2Name == null) throw new IndexOutOfBoundsException();
+            return nestedContentParam2Name;
         default: throw new IndexOutOfBoundsException();
         }
     }
@@ -174,11 +174,11 @@ final class ASTDirList extends ASTDirective {
         case 0:
             return ParameterRole.LIST_SOURCE;
         case 1:
-            if (loopVarName == null) throw new IndexOutOfBoundsException();
-            return ParameterRole.TARGET_LOOP_VARIABLE;
+            if (nestedContentParamName == null) throw new IndexOutOfBoundsException();
+            return ParameterRole.NESTED_CONTENT_PARAMETER;
         case 2:
-            if (loopVar2Name == null) throw new IndexOutOfBoundsException();
-            return ParameterRole.TARGET_LOOP_VARIABLE;
+            if (nestedContentParam2Name == null) throw new IndexOutOfBoundsException();
+            return ParameterRole.NESTED_CONTENT_PARAMETER;
         default: throw new IndexOutOfBoundsException();
         }
     }    
@@ -190,7 +190,7 @@ final class ASTDirList extends ASTDirective {
 
     @Override
     boolean isNestedBlockRepeater() {
-        return loopVarName != null;
+        return nestedContentParamName != null;
     }
 
     /**
@@ -203,50 +203,51 @@ final class ASTDirList extends ASTDirective {
         
         private Object openedIterator;
         private boolean hasNext;
-        private TemplateModel loopVar;
-        private TemplateModel loopVar2;
+        private TemplateModel nestedContentParam;
+        private TemplateModel nestedContentParam2;
         private int index;
         private boolean alreadyEntered;
         private Collection localVarNames = null;
         
         /** If the {@code #list} has nested {@code #items}, it's {@code null} outside the {@code #items}. */
-        private String loopVarName;
+        private String nestedContentParam1Name;
         /** Used if we list key-value pairs */
-        private String loopVar2Name;
+        private String nestedContentParam2Name;
         
         private final TemplateModel listedValue;
         
-        public IterationContext(TemplateModel listedValue, String loopVarName, String loopVar2Name) {
+        public IterationContext(TemplateModel listedValue,
+                String nestedContentParamName, String nestedContentParam2Name) {
             this.listedValue = listedValue;
-            this.loopVarName = loopVarName;
-            this.loopVar2Name = loopVar2Name;
+            this.nestedContentParam1Name = nestedContentParamName;
+            this.nestedContentParam2Name = nestedContentParam2Name;
         }
         
         boolean accept(Environment env) throws TemplateException, IOException {
             return executeNestedContent(env, getChildBuffer());
         }
 
-        void loopForItemsElement(Environment env, ASTElement[] childBuffer, String loopVarName, String loopVar2Name)
-                    throws
-                TemplateException, IOException {
+        void loopForItemsElement(Environment env, ASTElement[] childBuffer,
+                String nestedContentParamName, String nestedContentParam2Name)
+                throws TemplateException, IOException {
             try {
                 if (alreadyEntered) {
                     throw new _MiscTemplateException(env,
                             "The #items directive was already entered earlier for this listing.");
                 }
                 alreadyEntered = true;
-                this.loopVarName = loopVarName;
-                this.loopVar2Name = loopVar2Name;
+                this.nestedContentParam1Name = nestedContentParamName;
+                this.nestedContentParam2Name = nestedContentParam2Name;
                 executeNestedContent(env, childBuffer);
             } finally {
-                this.loopVarName = null;
-                this.loopVar2Name = null;
+                this.nestedContentParam1Name = null;
+                this.nestedContentParam2Name = null;
             }
         }
 
         /**
-         * Executes the given block for the {@link #listedValue}: if {@link #loopVarName} is non-{@code null}, then for
-         * each list item once, otherwise once if {@link #listedValue} isn't empty.
+         * Executes the given block for the {@link #listedValue}: if {@link #nestedContentParam1Name} is non-{@code
+         * null}, then for each list item once, otherwise once if {@link #listedValue} isn't empty.
          */
         private boolean executeNestedContent(Environment env, ASTElement[] childBuffer)
                 throws TemplateException, IOException {
@@ -265,10 +266,10 @@ final class ASTDirList extends ASTDirective {
                                 : ((TemplateModelIterator) openedIterator);
                 listNotEmpty = iterModel.hasNext();
                 if (listNotEmpty) {
-                    if (loopVarName != null) {
+                    if (nestedContentParam1Name != null) {
                         try {
                             do {
-                                loopVar = iterModel.next();
+                                nestedContentParam = iterModel.next();
                                 hasNext = iterModel.hasNext();
                                 env.visit(childBuffer);
                                 index++;
@@ -289,10 +290,10 @@ final class ASTDirList extends ASTDirective {
                 final int size = seqModel.size();
                 listNotEmpty = size != 0;
                 if (listNotEmpty) {
-                    if (loopVarName != null) {
+                    if (nestedContentParam1Name != null) {
                         try {
                             for (index = 0; index < size; index++) {
-                                loopVar = seqModel.get(index);
+                                nestedContentParam = seqModel.get(index);
                                 hasNext = (size > index + 1);
                                 env.visit(childBuffer);
                             }
@@ -308,8 +309,8 @@ final class ASTDirList extends ASTDirective {
                 throw new NonSequenceOrCollectionException(env,
                         new _ErrorDescriptionBuilder("The value you try to list is ",
                                 new _DelayedAOrAn(new _DelayedFTLTypeDescription(listedValue)),
-                                ", thus you must specify two loop variables after the \"as\"; one for the key, and "
-                                + "another for the value, like ", "<#... as k, v>", ")."
+                                ", thus you must declare two nested content parameters after the \"as\"; one for the "
+                                + "key, and another for the value, like ", "<#... as k, v>", ")."
                                 ));
             } else {
                 throw new NonSequenceOrCollectionException(
@@ -329,12 +330,12 @@ final class ASTDirList extends ASTDirective {
                                     : (KeyValuePairIterator) openedIterator;
                     hashNotEmpty = kvpIter.hasNext();
                     if (hashNotEmpty) {
-                        if (loopVarName != null) {
+                        if (nestedContentParam1Name != null) {
                             try {
                                 do {
                                     KeyValuePair kvp = kvpIter.next();
-                                    loopVar = kvp.getKey();
-                                    loopVar2 = kvp.getValue();
+                                    nestedContentParam = kvp.getKey();
+                                    nestedContentParam2 = kvp.getValue();
                                     hasNext = kvpIter.hasNext();
                                     env.visit(childBuffer);
                                     index++;
@@ -353,24 +354,27 @@ final class ASTDirList extends ASTDirective {
                     TemplateModelIterator keysIter = listedHash.keys().iterator();
                     hashNotEmpty = keysIter.hasNext();
                     if (hashNotEmpty) {
-                        if (loopVarName != null) {
+                        if (nestedContentParam1Name != null) {
                             try {
                                 do {
-                                    loopVar = keysIter.next();
-                                    if (!(loopVar instanceof TemplateScalarModel)) {
+                                    nestedContentParam = keysIter.next();
+                                    if (!(nestedContentParam instanceof TemplateScalarModel)) {
                                         throw new NonStringException(env,
                                                 new _ErrorDescriptionBuilder(
                                                         "When listing key-value pairs of traditional hash "
                                                         + "implementations, all keys must be strings, but one of them "
                                                         + "was ",
-                                                        new _DelayedAOrAn(new _DelayedFTLTypeDescription(loopVar)), "."
+                                                        new _DelayedAOrAn(
+                                                                new _DelayedFTLTypeDescription(nestedContentParam)),
+                                                        "."
                                                         ).tip("The listed value's TemplateModel class was ",
                                                                 new _DelayedShortClassName(listedValue.getClass()),
                                                                 ", which doesn't implement ",
                                                                 new _DelayedShortClassName(TemplateHashModelEx2.class),
                                                                 ", which leads to this restriction."));
                                     }
-                                    loopVar2 = listedHash.get(((TemplateScalarModel) loopVar).getAsString());
+                                    nestedContentParam2 = listedHash.get(((TemplateScalarModel) nestedContentParam)
+                                            .getAsString());
                                     hasNext = keysIter.hasNext();
                                     env.visit(childBuffer);
                                     index++;
@@ -388,8 +392,8 @@ final class ASTDirList extends ASTDirective {
                 throw new NonSequenceOrCollectionException(env,
                         new _ErrorDescriptionBuilder("The value you try to list is ",
                                 new _DelayedAOrAn(new _DelayedFTLTypeDescription(listedValue)),
-                                ", thus you must specify only one loop variable after the \"as\" (there's no separate "
-                                + "key and value)."
+                                ", thus you must declare only one nested content parameter after the \"as\" (there's "
+                                + "no separate key and value)."
                                 ));
             } else {
                 throw new NonExtendedHashException(
@@ -398,21 +402,21 @@ final class ASTDirList extends ASTDirective {
             return hashNotEmpty;
         }
 
-        String getLoopVariableName() {
-            return loopVarName;
+        String getNestedContentParameter1Name() {
+            return nestedContentParam1Name;
         }
 
-        String getLoopVariable2Name() {
-            return loopVar2Name;
+        String getNestedContentParameter2Name() {
+            return nestedContentParam2Name;
         }
         
         @Override
         public TemplateModel getLocalVariable(String name) {
-            String loopVarName = this.loopVarName;
-            if (loopVarName != null && name.startsWith(loopVarName)) {
-                switch(name.length() - loopVarName.length()) {
+            String nestedContentParamName = this.nestedContentParam1Name;
+            if (nestedContentParamName != null && name.startsWith(nestedContentParamName)) {
+                switch(name.length() - nestedContentParamName.length()) {
                     case 0: 
-                        return loopVar;
+                        return nestedContentParam;
                     case 6: 
                         if (name.endsWith(LOOP_STATE_INDEX)) {
                             return new SimpleNumber(index);
@@ -426,8 +430,8 @@ final class ASTDirList extends ASTDirective {
                 }
             }
             
-            if (name.equals(loopVar2Name)) {
-                return loopVar2;
+            if (name.equals(nestedContentParam2Name)) {
+                return nestedContentParam2;
             }
             
             return null;
@@ -435,13 +439,13 @@ final class ASTDirList extends ASTDirective {
         
         @Override
         public Collection<String> getLocalVariableNames() {
-            String loopVarName = this.loopVarName;
-            if (loopVarName != null) {
+            String nestedContentParamName = this.nestedContentParam1Name;
+            if (nestedContentParamName != null) {
                 if (localVarNames == null) {
                     localVarNames = new ArrayList(3);
-                    localVarNames.add(loopVarName);
-                    localVarNames.add(loopVarName + LOOP_STATE_INDEX);
-                    localVarNames.add(loopVarName + LOOP_STATE_HAS_NEXT);
+                    localVarNames.add(nestedContentParamName);
+                    localVarNames.add(nestedContentParamName + LOOP_STATE_INDEX);
+                    localVarNames.add(nestedContentParamName + LOOP_STATE_HAS_NEXT);
                 }
                 return localVarNames;
             } else {

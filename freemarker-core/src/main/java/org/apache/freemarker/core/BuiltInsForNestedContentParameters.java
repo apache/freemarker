@@ -29,9 +29,9 @@ import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 
 
-class BuiltInsForLoopVariables {
+class BuiltInsForNestedContentParameters {
     
-    static class indexBI extends BuiltInForLoopVariable {
+    static class indexBI extends BuiltInForNestedContentParameter {
 
         @Override
         TemplateModel calculateResult(IterationContext iterCtx, Environment env) throws TemplateException {
@@ -40,7 +40,7 @@ class BuiltInsForLoopVariables {
         
     }
     
-    static class counterBI extends BuiltInForLoopVariable {
+    static class counterBI extends BuiltInForNestedContentParameter {
 
         @Override
         TemplateModel calculateResult(IterationContext iterCtx, Environment env) throws TemplateException {
@@ -49,7 +49,7 @@ class BuiltInsForLoopVariables {
         
     }
 
-    static abstract class BooleanBuiltInForLoopVariable extends BuiltInForLoopVariable {
+    static abstract class BooleanBuiltInForNestedContentParameter extends BuiltInForNestedContentParameter {
 
         @Override
         final TemplateModel calculateResult(IterationContext iterCtx, Environment env) throws TemplateException {
@@ -60,7 +60,7 @@ class BuiltInsForLoopVariables {
         
     }
     
-    static class has_nextBI extends BooleanBuiltInForLoopVariable {
+    static class has_nextBI extends BooleanBuiltInForNestedContentParameter {
 
         @Override
         protected boolean calculateBooleanResult(IterationContext iterCtx, Environment env) {
@@ -69,7 +69,7 @@ class BuiltInsForLoopVariables {
 
     }
 
-    static class is_lastBI extends BooleanBuiltInForLoopVariable {
+    static class is_lastBI extends BooleanBuiltInForNestedContentParameter {
 
         @Override
         protected boolean calculateBooleanResult(IterationContext iterCtx, Environment env) {
@@ -78,7 +78,7 @@ class BuiltInsForLoopVariables {
         
     }
 
-    static class is_firstBI extends BooleanBuiltInForLoopVariable {
+    static class is_firstBI extends BooleanBuiltInForNestedContentParameter {
 
         @Override
         protected boolean calculateBooleanResult(IterationContext iterCtx, Environment env) {
@@ -87,7 +87,7 @@ class BuiltInsForLoopVariables {
         
     }
 
-    static class is_odd_itemBI extends BooleanBuiltInForLoopVariable {
+    static class is_odd_itemBI extends BooleanBuiltInForNestedContentParameter {
 
         @Override
         protected boolean calculateBooleanResult(IterationContext iterCtx, Environment env) {
@@ -96,7 +96,7 @@ class BuiltInsForLoopVariables {
         
     }
 
-    static class is_even_itemBI extends BooleanBuiltInForLoopVariable {
+    static class is_even_itemBI extends BooleanBuiltInForNestedContentParameter {
 
         @Override
         protected boolean calculateBooleanResult(IterationContext iterCtx, Environment env) {
@@ -105,7 +105,7 @@ class BuiltInsForLoopVariables {
         
     }
     
-    static class item_parityBI extends BuiltInForLoopVariable {
+    static class item_parityBI extends BuiltInForNestedContentParameter {
         
         private static final SimpleScalar ODD = new SimpleScalar("odd");
         private static final SimpleScalar EVEN = new SimpleScalar("even");
@@ -117,7 +117,7 @@ class BuiltInsForLoopVariables {
         
     }
 
-    static class item_parity_capBI extends BuiltInForLoopVariable {
+    static class item_parity_capBI extends BuiltInForNestedContentParameter {
         
         private static final SimpleScalar ODD = new SimpleScalar("Odd");
         private static final SimpleScalar EVEN = new SimpleScalar("Even");
@@ -129,7 +129,7 @@ class BuiltInsForLoopVariables {
         
     }
 
-    static class item_cycleBI extends BuiltInForLoopVariable {
+    static class item_cycleBI extends BuiltInForNestedContentParameter {
 
         private class BIMethod implements TemplateMethodModelEx {
             

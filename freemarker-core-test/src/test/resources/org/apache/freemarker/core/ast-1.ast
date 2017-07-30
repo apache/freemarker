@@ -25,8 +25,8 @@
         - argument value: 1  // o.a.f.c.ASTExpNumberLiteral
         - argument name: "y"  // String
         - argument value: 2  // o.a.f.c.ASTExpNumberLiteral
-        - target loop variable: "b1"  // String
-        - target loop variable: "b2"  // String
+        - nested content parameter: "b1"  // String
+        - nested content parameter: "b2"  // String
         #text  // o.a.f.c.ASTStaticText
             - content: "x"  // String
     #text  // o.a.f.c.ASTStaticText
@@ -37,8 +37,8 @@
             - right-hand operand: "bar"  // String
         - argument value: 1  // o.a.f.c.ASTExpNumberLiteral
         - argument value: 2  // o.a.f.c.ASTExpNumberLiteral
-        - target loop variable: "b1"  // String
-        - target loop variable: "b2"  // String
+        - nested content parameter: "b1"  // String
+        - nested content parameter: "b2"  // String
         #text  // o.a.f.c.ASTStaticText
             - content: "y"  // String
     #text  // o.a.f.c.ASTStaticText
@@ -149,7 +149,7 @@
         - content: "\n8 "  // String
     #list  // o.a.f.c.ASTDirList
         - list source: xs  // o.a.f.c.ASTExpVariable
-        - target loop variable: "x"  // String
+        - nested content parameter: "x"  // String
     #text  // o.a.f.c.ASTStaticText
         - content: "\n9 "  // String
     #list-#else-container  // o.a.f.c.ASTDirListElseContainer
@@ -158,7 +158,7 @@
             #text  // o.a.f.c.ASTStaticText
                 - content: "["  // String
             #items  // o.a.f.c.ASTDirItems
-                - target loop variable: "x"  // String
+                - nested content parameter: "x"  // String
                 ${...}  // o.a.f.c.ASTDollarInterpolation
                     - content: x  // o.a.f.c.ASTExpVariable
                 #sep  // o.a.f.c.ASTDirSep

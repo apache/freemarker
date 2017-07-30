@@ -52,16 +52,17 @@ public class FMParser {
 
     private static class ParserIteratorBlockContext {
         /**
-         * loopVarName in <#list ... as loopVarName> or <#items as loopVarName>; null after we left the nested
-         * block of #list or #items, respectively.
+         * nestedContentParamName in <#list ... as nestedContentParamName> or <#items as nestedContentParamName>;
+         * null after we left the nested block of #list or #items, respectively.
          */
-        private String loopVarName;
+        private String nestedContentParamName;
         
         /**
-         * loopVar1Name in <#list ... as k, loopVar2Name> or <#items as k, loopVar2Name>; null after we left the nested
-         * block of #list or #items, respectively.
+         * nestedContentParam1Name in <#list ... as k, nestedContentParam2Name> or
+         * <#items as k, nestedContentParam2Name>; null after we left the nested block of #list or #items,
+         * respectively.
          */
-        private String loopVar2Name;
+        private String nestedContentParam2Name;
         
         /**
          * See the ITERATOR_BLOCK_KIND_... costants.
@@ -103,8 +104,8 @@ public class FMParser {
     private NamedArgument[] topNamedArgsBuffer;
     private int topNamedArgsLength;
     private static final int INITAL_TOP_LOOP_VAR_NAMES_BUFFER_SIZE = 4;
-    private StringToIndexMap.Entry[] topLoopVarNamesBuffer;
-    private int topLoopVarNamesLength;
+    private StringToIndexMap.Entry[] topNestedContentParamNamesBuffer;
+    private int topNestedContentParamNamesLength;
 
     FMParser(Template template, Reader reader,
             ParsingConfiguration pCfg, OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy,
@@ -400,25 +401,26 @@ public class FMParser {
         return size != 0 ? (ParserIteratorBlockContext) iteratorBlockContexts.get(size - 1) : null; 
     }
     
-    private void checkLoopVariableBuiltInLHO(String loopVarName, ASTExpression lhoExp, Token biName)
+    private void checkNestedContentParameterBuiltInLHO(String nestedContentParamName, ASTExpression lhoExp, Token biName)
             throws ParseException {
         int size = iteratorBlockContexts != null ? iteratorBlockContexts.size() : 0;
         for (int i = size - 1; i >= 0; i--) {
             ParserIteratorBlockContext ctx = (ParserIteratorBlockContext) iteratorBlockContexts.get(i);
-            if (loopVarName.equals(ctx.loopVarName) || loopVarName.equals(ctx.loopVar2Name)) {
+            if (nestedContentParamName.equals(ctx.nestedContentParamName)
+                    || nestedContentParamName.equals(ctx.nestedContentParam2Name)) {
                 if (ctx.kind == ITERATOR_BLOCK_KIND_USER_DIRECTIVE) {
 			        throw new ParseException(
 			                "The left hand operand of ?" + biName.image
-			                + " can't be the loop variable of an user defined directive: "
-			                +  loopVarName,
+			                + " can't be a nested content parameter of a user defined directive: "
+			                +  nestedContentParamName,
 			                lhoExp);
                 }
                 return;  // success
             }
         }
         throw new ParseException(
-                "The left hand operand of ?" + biName.image + " must be a loop variable, "
-                + "but there's no loop variable in scope with this name: " + loopVarName,
+                "The left hand operand of ?" + biName.image + " must be a nested content parameter, "
+                + "but there's none in scope with this name: " + nestedContentParamName,
                 lhoExp);
     }
 
@@ -448,18 +450,18 @@ public class FMParser {
         topPositionalArgsBuffer[topPositionalArgsLength++] = argValue;
     }
 
-    private void addToTopLoopVarNames(String loopVarName) {
-        if (topLoopVarNamesBuffer == null) {
-            topLoopVarNamesBuffer = new StringToIndexMap.Entry[INITAL_TOP_LOOP_VAR_NAMES_BUFFER_SIZE];
-        } else if (topLoopVarNamesBuffer.length == topLoopVarNamesLength) {
-            StringToIndexMap.Entry[] newLoopVarsBuffer = new StringToIndexMap.Entry[topLoopVarNamesBuffer.length * 2];
-            for (int i = 0; i < topLoopVarNamesBuffer.length; i++) {
-                newLoopVarsBuffer[i] = topLoopVarNamesBuffer[i];
+    private void addToTopNestedContentParamNames(String nestedContentParamName) {
+        if (topNestedContentParamNamesBuffer == null) {
+            topNestedContentParamNamesBuffer = new StringToIndexMap.Entry[INITAL_TOP_LOOP_VAR_NAMES_BUFFER_SIZE];
+        } else if (topNestedContentParamNamesBuffer.length == topNestedContentParamNamesLength) {
+            StringToIndexMap.Entry[] newNestedContentParamsBuffer = new StringToIndexMap.Entry[topNestedContentParamNamesBuffer.length * 2];
+            for (int i = 0; i < topNestedContentParamNamesBuffer.length; i++) {
+                newNestedContentParamsBuffer[i] = topNestedContentParamNamesBuffer[i];
             }
-            topLoopVarNamesBuffer = newLoopVarsBuffer;
+            topNestedContentParamNamesBuffer = newNestedContentParamsBuffer;
         }
-        topLoopVarNamesBuffer[topLoopVarNamesLength] = new StringToIndexMap.Entry(loopVarName, topLoopVarNamesLength);
-        topLoopVarNamesLength++;
+        topNestedContentParamNamesBuffer[topNestedContentParamNamesLength] = new StringToIndexMap.Entry(nestedContentParamName, topNestedContentParamNamesLength);
+        topNestedContentParamNamesLength++;
     }
 
 }
@@ -1920,15 +1922,15 @@ ASTExpression ASTExpBuiltIn(ASTExpression lhoExp) :
             return result;
         }
 
-        if (result instanceof BuiltInForLoopVariable) {
+        if (result instanceof BuiltInForNestedContentParameter) {
             if (!(lhoExp instanceof ASTExpVariable)) {
                 throw new ParseException(
                         "Expression used as the left hand operand of ?" + t.image
-                        + " must be a simple loop variable name.", lhoExp);
+                        + " must be a simple nested content parameter name.", lhoExp);
             }
-            String loopVarName = ((ASTExpVariable) lhoExp).getName();
-            checkLoopVariableBuiltInLHO(loopVarName, lhoExp, t);
-            ((BuiltInForLoopVariable) result).bindToLoopVariable(loopVarName);
+            String nestedContentParamName = ((ASTExpVariable) lhoExp).getName();
+            checkNestedContentParameterBuiltInLHO(nestedContentParamName, lhoExp, t);
+            ((BuiltInForNestedContentParameter) result).bindToNestedContentParameter(nestedContentParamName);
             
             return result;
         }
@@ -2264,7 +2266,7 @@ ASTDirRecover Recover() :
 ASTElement List() :
 {
     ASTExpression exp;
-    Token loopVar = null, loopVar2 = null, start, end;
+    Token nestedContentParam = null, nestedContentParam2 = null, start, end;
     TemplateElements childrendBeforeElse;
     ASTDirElseOfList elseOfList = null;
     ParserIteratorBlockContext iterCtx;
@@ -2274,24 +2276,25 @@ ASTElement List() :
     exp = ASTExpression()
     [
         <AS>
-        loopVar = <ID>
+        nestedContentParam = <ID>
         [
             <COMMA>
-            loopVar2 = <ID>
+            nestedContentParam2 = <ID>
         ]
     ]
     <DIRECTIVE_END>
     {
         iterCtx = pushIteratorBlockContext();
-        if (loopVar != null) {
-            iterCtx.loopVarName = loopVar.image;
+        if (nestedContentParam != null) {
+            iterCtx.nestedContentParamName = nestedContentParam.image;
             breakableDirectiveNesting++;
-            if (loopVar2 != null) {
-                iterCtx.loopVar2Name = loopVar2.image;
+            if (nestedContentParam2 != null) {
+                iterCtx.nestedContentParam2Name = nestedContentParam2.image;
                 iterCtx.hashListing = true;
-                if (iterCtx.loopVar2Name.equals(iterCtx.loopVarName)) {
+                if (iterCtx.nestedContentParam2Name.equals(iterCtx.nestedContentParamName)) {
                     throw new ParseException(
-                            "The key and value loop variable names must differ, but both were: " + iterCtx.loopVarName,
+                            "The name of the key and value nested content parameter variable names must differ, but "
+                            + "both were: " + iterCtx.nestedContentParamName,
                             template, start);
                 }
             }
@@ -2300,11 +2303,11 @@ ASTElement List() :
     
     childrendBeforeElse = MixedContentElements()
     {
-        if (loopVar != null) {
+        if (nestedContentParam != null) {
             breakableDirectiveNesting--;
         } else if (iterCtx.kind != ITERATOR_BLOCK_KIND_ITEMS) {
             throw new ParseException(
-                    "#list must have either \"as loopVar\" parameter or nested #items that belongs to it.",
+                    "#list must have either \"as someItem\" parameter or nested #items that belongs to it.",
                     template, start);
         }
         popIteratorBlockContext();
@@ -2318,8 +2321,8 @@ ASTElement List() :
     {
         ASTDirList list = new ASTDirList(
                 exp,
-                loopVar != null ? loopVar.image : null,  // null when we have a nested #items
-                loopVar2 != null ? loopVar2.image : null,
+                nestedContentParam != null ? nestedContentParam.image : null,  // null when we have a nested #items
+                nestedContentParam2 != null ? nestedContentParam2.image : null,
                 childrendBeforeElse, iterCtx.hashListing);
         list.setLocation(template, start, end);
 
@@ -2351,16 +2354,16 @@ ASTDirElseOfList ASTDirElseOfList() :
 
 ASTDirItems Items() :
 {
-    Token loopVar, loopVar2 = null, start, end;
+    Token nestedContentParam, nestedContentParam2 = null, start, end;
     TemplateElements children;
     ParserIteratorBlockContext iterCtx;
 }
 {
     start = <ITEMS>
-    loopVar = <ID>
+    nestedContentParam = <ID>
     [
         <COMMA>
-        loopVar2 = <ID>
+        nestedContentParam2 = <ID>
     ]
     <DIRECTIVE_END>
     {
@@ -2368,23 +2371,24 @@ ASTDirItems Items() :
         if (iterCtx == null) {
             throw new ParseException("#items must be inside a #list block.", template, start);
         }
-        if (iterCtx.loopVarName != null) {
+        if (iterCtx.nestedContentParamName != null) {
             String msg;
 	        if (iterCtx.kind == ITERATOR_BLOCK_KIND_ITEMS) {
                 msg = "Can't nest #items into each other when they belong to the same #list.";
 	        } else {
-	            msg = "The parent #list of the #items must not have \"as loopVar\" parameter.";
+	            msg = "The parent #list of the #items must not have \"as someItem\" parameter.";
             }
             throw new ParseException(msg, template, start);
         }
         iterCtx.kind = ITERATOR_BLOCK_KIND_ITEMS;
-        iterCtx.loopVarName = loopVar.image;
-        if (loopVar2 != null) {
-            iterCtx.loopVar2Name = loopVar2.image;
+        iterCtx.nestedContentParamName = nestedContentParam.image;
+        if (nestedContentParam2 != null) {
+            iterCtx.nestedContentParam2Name = nestedContentParam2.image;
             iterCtx.hashListing = true;
-            if (iterCtx.loopVar2Name.equals(iterCtx.loopVarName)) {
+            if (iterCtx.nestedContentParam2Name.equals(iterCtx.nestedContentParamName)) {
                 throw new ParseException(
-                        "The key and value loop variable names must differ, but both were: " + iterCtx.loopVarName,
+                        "The name of the key and value nested content parameters must differ, but both were: " +
+                        iterCtx.nestedContentParamName,
                         template, start);
             }
         }
@@ -2397,10 +2401,10 @@ ASTDirItems Items() :
     end = <END_ITEMS>
     {
         breakableDirectiveNesting--;
-        iterCtx.loopVarName = null;
-        iterCtx.loopVar2Name = null;
+        iterCtx.nestedContentParamName = null;
+        iterCtx.nestedContentParam2Name = null;
         
-        ASTDirItems result = new ASTDirItems(loopVar.image, loopVar2 != null ? loopVar2.image : null, children);
+        ASTDirItems result = new ASTDirItems(nestedContentParam.image, nestedContentParam2 != null ? nestedContentParam2.image : null, children);
         result.setLocation(template, start, end);
         return result;
     }
@@ -2408,7 +2412,7 @@ ASTDirItems Items() :
 
 ASTDirSep Sep() :
 {
-    Token loopVar, start, end = null;
+    Token nestedContentParam, start, end = null;
     TemplateElements children;
 }
 {
@@ -3049,7 +3053,7 @@ ASTElement DynamicTopLevelCall() :
     {
         topPositionalArgsLength = 0;
         topNamedArgsLength = 0;
-        topLoopVarNamesLength = 0;
+        topNestedContentParamNamesLength = 0;
     }
 
     (
@@ -3112,10 +3116,10 @@ ASTElement DynamicTopLevelCall() :
     [
         <SEMICOLON>
         [
-            t = <ID> { addToTopLoopVarNames(t.image); }
+            t = <ID> { addToTopNestedContentParamNames(t.image); }
             (
                 <COMMA>
-                t = <ID> { addToTopLoopVarNames(t.image); }
+                t = <ID> { addToTopNestedContentParamNames(t.image); }
             )*
         ]
     ]
@@ -3144,8 +3148,8 @@ ASTElement DynamicTopLevelCall() :
             }
         }
 
-        StringToIndexMap loopVarNames = topLoopVarNamesLength == 0 ? null
-                : StringToIndexMap.of(topLoopVarNamesBuffer, topLoopVarNamesLength);
+        StringToIndexMap nestedContentParamNames = topNestedContentParamNamesLength == 0 ? null
+                : StringToIndexMap.of(topNestedContentParamNamesBuffer, topNestedContentParamNamesLength);
     }
 
     (
@@ -3154,19 +3158,21 @@ ASTElement DynamicTopLevelCall() :
         (
             <DIRECTIVE_END>
             {
-                if (topLoopVarNamesLength != 0 && iteratorBlockContexts != null && !iteratorBlockContexts.isEmpty()) {
-                    // It's possible that we shadow a #list/#items loop variable, in which case that must be noted.
+                if (topNestedContentParamNamesLength != 0 && iteratorBlockContexts != null && !iteratorBlockContexts.isEmpty()) {
+                    // It's possible that we shadow a #list/#items nested content parameters, in which case that must
+                    // be noted.
                     int ctxsLen = iteratorBlockContexts.size();
-	                for (int loopVarIdx = 0; loopVarIdx < topLoopVarNamesLength; loopVarIdx++) {
-                        String loopVarName = topLoopVarNamesBuffer[loopVarIdx].getKey();
+	                for (int nestedContentParamIdx = 0; nestedContentParamIdx < topNestedContentParamNamesLength; nestedContentParamIdx++) {
+                        String nestedContentParamName = topNestedContentParamNamesBuffer[nestedContentParamIdx].getKey();
                         walkCtxStack: for (int ctxIdx = ctxsLen - 1; ctxIdx >= 0; ctxIdx--) {
                             ParserIteratorBlockContext ctx
                                     = (ParserIteratorBlockContext) iteratorBlockContexts.get(ctxIdx);
-                            if (ctx.loopVarName != null && ctx.loopVarName.equals(loopVarName)) {
+                            if (ctx.nestedContentParamName != null
+                                    && ctx.nestedContentParamName.equals(nestedContentParamName)) {
                                 // If it wasn't already shadowed, shadow it:
                                 if (ctx.kind != ITERATOR_BLOCK_KIND_USER_DIRECTIVE) {
                                     ParserIteratorBlockContext shadowingCtx = pushIteratorBlockContext();
-                                    shadowingCtx.loopVarName = loopVarName;
+                                    shadowingCtx.nestedContentParamName = nestedContentParamName;
                                     shadowingCtx.kind = ITERATOR_BLOCK_KIND_USER_DIRECTIVE;
                                     pushedCtxCount++;
                                 }
@@ -3204,7 +3210,7 @@ ASTElement DynamicTopLevelCall() :
     {
         ASTElement result = new ASTDynamicTopLevelCall(
                 callableValueExp, false,
-                trimmedPositionalArgs, trimmedNamedArgs, loopVarNames,
+                trimmedPositionalArgs, trimmedNamedArgs, nestedContentParamNames,
                 children);
         result.setLocation(template, start, end);
         return result;

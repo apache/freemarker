@@ -25,6 +25,7 @@ import org.apache.freemarker.core.userpkg.AllFeaturesDirective;
 import org.apache.freemarker.core.userpkg.NamedVarargsOnlyDirective;
 import org.apache.freemarker.core.userpkg.PositionalVarargsOnlyDirective;
 import org.apache.freemarker.core.userpkg.TwoNamedParamsDirective;
+import org.apache.freemarker.core.userpkg.TwoNestedContentParamsDirective;
 import org.apache.freemarker.core.userpkg.TwoPositionalParamsDirective;
 import org.apache.freemarker.core.userpkg.UpperCaseDirective;
 import org.apache.freemarker.test.TemplateTest;
@@ -160,7 +161,12 @@ public class TemplateCallableModelTest extends TemplateTest {
         assertErrorContains("<@n 9 />", "can't have arguments passed by position");
         assertErrorContains("<@n n3=9 />", "has no", "\"n3\"", "supported", "\"n1\", \"n2\"");
         assertErrorContains("<@p n1=9 />", "doesn't have any by-name-passed");
-        assertErrorContains("<@a 1; i, j, k, l>x</@a>", "(4: \"i\", \"j\", \"k\", \"l\")", "(3)");
+
+        addToDataModel("tncp", TwoNestedContentParamsDirective.INSTANCE);
+        assertErrorContains("<@tncp />", " no ", " 2 ");
+        assertErrorContains("<@tncp ; i>${i}</@>", " 1 ", "\"i\"", " 2 ");
+        assertOutput("<@tncp ; i, j>${i} ${j}</@>", "1 2");
+        assertErrorContains("<@tncp ; i, j, k>${i}</@>", " 3 ", "\"i\", \"j\", \"k\"", " 2 ");
     }
 
     @Test

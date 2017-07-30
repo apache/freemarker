@@ -671,14 +671,16 @@ public class FM2ASTToFM3SourceConverter {
 
         int paramCnt = node.getParameterCount();
         assertNodeContent(paramCnt <= 2, node, "Expected at most 2 parameters");
-        String loopVar1 = getParam(node, 0, ParameterRole.TARGET_LOOP_VARIABLE, String.class);
-        String loopVar2 = paramCnt >= 2 ? getParam(node, 1, ParameterRole.TARGET_LOOP_VARIABLE, String.class) : null;
+        String nestedContParamName1 = getParam(node, 0, ParameterRole.TARGET_LOOP_VARIABLE, String.class);
+        String nestedContParamName2 =
+                paramCnt >= 2 ? getParam(node, 1, ParameterRole.TARGET_LOOP_VARIABLE, String.class)
+                : null;
 
-        print(FTLUtil.escapeIdentifier(loopVar1));
+        print(FTLUtil.escapeIdentifier(nestedContParamName1));
         pos = getPositionAfterIdentifier(pos);
-        if (loopVar2 != null) {
+        if (nestedContParamName2 != null) {
             pos = printSeparatorAndWSAndExpComments(pos, ",");
-            print(FTLUtil.escapeIdentifier(loopVar2));
+            print(FTLUtil.escapeIdentifier(nestedContParamName2));
             pos = getPositionAfterIdentifier(pos);
         }
 
@@ -1318,20 +1320,20 @@ public class FM2ASTToFM3SourceConverter {
             paramIdx += 2;
         }
 
-        // Print loop variables:
+        // Print nested content parameters (aka. loop variables):
         int pos = lastParamEnd;
-        boolean beforeFirstLoopVar = true;
+        boolean beforeFirstNestedContParam = true;
         while (paramIdx < paramCount) {
-            pos = printSeparatorAndWSAndExpComments(pos, beforeFirstLoopVar ? ";" : ",");
+            pos = printSeparatorAndWSAndExpComments(pos, beforeFirstNestedContParam ? ";" : ",");
 
-            String loopVarName = getParam(node, paramIdx, ParameterRole.TARGET_LOOP_VARIABLE, String.class);
-            print(_StringUtil.toFTLTopLevelIdentifierReference(loopVarName));
+            String nestedContParamName = getParam(node, paramIdx, ParameterRole.TARGET_LOOP_VARIABLE, String.class);
+            print(_StringUtil.toFTLTopLevelIdentifierReference(nestedContParamName));
             String identifierInSrc = readIdentifier(pos);
             assertNodeContent(identifierInSrc.length() != 0, node,
-                    "Can't find loop variable identifier in source");
+                    "Can't find nested content parameter name in the source");
             pos += identifierInSrc.length(); // skip loop var name
 
-            beforeFirstLoopVar = false;
+            beforeFirstNestedContParam = false;
             paramIdx++;
         }
 

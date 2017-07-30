@@ -95,9 +95,9 @@ public class AllFeaturesDirective extends TestTemplateDirectiveModel {
         printParam(N1_ARG_NAME, n1, out);
         printParam(N2_ARG_NAME, n2, out);
         printParam("nVarargs", nOthers, out);
-        int loopVariableCount = callPlace.getLoopVariableCount();
-        if (loopVariableCount != 0) {
-            out.write("; " + loopVariableCount);
+        int nestedContParamCnt = callPlace.getNestedContentParameterCount();
+        if (nestedContParamCnt != 0) {
+            out.write("; " + nestedContParamCnt);
         }
         out.write(")");
 
@@ -106,12 +106,13 @@ public class AllFeaturesDirective extends TestTemplateDirectiveModel {
             if (p1 != null) {
                 int intP1 = p1.getAsNumber().intValue();
                 for (int i = 0; i < intP1; i++) {
-                    // We limit the number of loop variables passed to 3, so that related errors can be tested.
-                    TemplateModel[] loopVariableValues = new TemplateModel[Math.min(loopVariableCount, 3)];
-                    for (int loopVarIdx = 0; loopVarIdx < loopVariableValues.length; loopVarIdx++) {
-                        loopVariableValues[loopVarIdx] = new SimpleNumber((i + 1) * (loopVarIdx + 1));
+                    // We dynamically set as many nested content parameters as many the caller has declared; this is
+                    // unusual, and is for testing purposes only.
+                    TemplateModel[] nestedContParamValues = new TemplateModel[nestedContParamCnt];
+                    for (int paramIdx = 0; paramIdx < nestedContParamValues.length; paramIdx++) {
+                        nestedContParamValues[paramIdx] = new SimpleNumber((i + 1) * (paramIdx + 1));
                     }
-                    callPlace.executeNestedContent(loopVariableValues, out, env);
+                    callPlace.executeNestedContent(nestedContParamValues, out, env);
                 }
             }
             out.write("}");

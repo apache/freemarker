@@ -111,14 +111,14 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("float", new floatBI());
         putBI("floor", new floorBI());
         putBI("chunk", new chunkBI());
-        putBI("counter", new BuiltInsForLoopVariables.counterBI());
-        putBI("itemCycle", new BuiltInsForLoopVariables.item_cycleBI());
+        putBI("counter", new BuiltInsForNestedContentParameters.counterBI());
+        putBI("itemCycle", new BuiltInsForNestedContentParameters.item_cycleBI());
         putBI("hasApi", new BuiltInsForMultipleTypes.has_apiBI());
         putBI("hasContent", new BuiltInsForExistenceHandling.has_contentBI());
-        putBI("hasNext", new BuiltInsForLoopVariables.has_nextBI());
+        putBI("hasNext", new BuiltInsForNestedContentParameters.has_nextBI());
         putBI("html", new BuiltInsForStringsEncoding.htmlBI());
         putBI("ifExists", new BuiltInsForExistenceHandling.if_existsBI());
-        putBI("index", new BuiltInsForLoopVariables.indexBI());
+        putBI("index", new BuiltInsForNestedContentParameters.indexBI());
         putBI("indexOf", new BuiltInsForStringsBasic.index_ofBI(false));
         putBI("int", new intBI());
         putBI("interpret", new BuiltInsForStringsMisc.interpretBI());
@@ -129,9 +129,9 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("isDate", bi);  // misnomer
         putBI("isDateLike", bi);
         putBI("isDateOnly", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.DATE));
-        putBI("isEvenItem", new BuiltInsForLoopVariables.is_even_itemBI());
-        putBI("isFirst", new BuiltInsForLoopVariables.is_firstBI());
-        putBI("isLast", new BuiltInsForLoopVariables.is_lastBI());
+        putBI("isEvenItem", new BuiltInsForNestedContentParameters.is_even_itemBI());
+        putBI("isFirst", new BuiltInsForNestedContentParameters.is_firstBI());
+        putBI("isLast", new BuiltInsForNestedContentParameters.is_lastBI());
         putBI("isUnknownDateLike", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.UNKNOWN));
         putBI("isDatetime", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.DATE_TIME));
         putBI("isDirective", new BuiltInsForMultipleTypes.is_directiveBI());
@@ -146,7 +146,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("isNan", new is_nanBI());
         putBI("isNode", new BuiltInsForMultipleTypes.is_nodeBI());
         putBI("isNumber", new BuiltInsForMultipleTypes.is_numberBI());
-        putBI("isOddItem", new BuiltInsForLoopVariables.is_odd_itemBI());
+        putBI("isOddItem", new BuiltInsForNestedContentParameters.is_odd_itemBI());
         putBI("isSequence", new BuiltInsForMultipleTypes.is_sequenceBI());
         putBI("isString", new BuiltInsForMultipleTypes.is_stringBI());
         putBI("isTime", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.TIME));
@@ -243,8 +243,8 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("parent", new parentBI());
         putBI("previousSibling", new previousSiblingBI());
         putBI("nextSibling", new nextSiblingBI());
-        putBI("itemParity", new BuiltInsForLoopVariables.item_parityBI());
-        putBI("itemParityCap", new BuiltInsForLoopVariables.item_parity_capBI());
+        putBI("itemParity", new BuiltInsForNestedContentParameters.item_parityBI());
+        putBI("itemParityCap", new BuiltInsForNestedContentParameters.item_parity_capBI());
         putBI("reverse", new reverseBI());
         putBI("rightPad", new BuiltInsForStringsBasic.padBI(false));
         putBI("root", new rootBI());

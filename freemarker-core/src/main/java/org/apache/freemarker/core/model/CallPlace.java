@@ -47,29 +47,27 @@ public interface CallPlace {
     boolean hasNestedContent();
 
     /**
-     * The number of loop variables specified for this call. Note that users are generally allowed to omit loop
-     * variables when calling a directive. So this can be useful to avoid calculating the values of loop variables that
-     * the caller will not receive anyway. While it's an error if the user specifies too many loop variables, the
-     * implementor of the {@link TemplateDirectiveModel} shouldn't check for that condition, as far as they will call
-     * {@link #executeNestedContent(TemplateModel[], Writer, Environment)}, which will the should throw a {@link
-     * TemplateException} with a descriptive error message then.
+     * The number of nested content parameters in this call (like 2 in {@code <@foo xs; k, v>...</@>}). If you want the
+     * caller to specify a predefined number of nested content parameters, then this is not interesting for you, and
+     * just pass an array of that length to {@link #executeNestedContent(TemplateModel[], Writer, Environment)}. If,
+     * however, you want to allow the caller to declare less parameters, then this is how you know how much
+     * parameters you should omit when calling {@link #executeNestedContent(TemplateModel[], Writer, Environment)}.
      */
-    int getLoopVariableCount();
+    int getNestedContentParameterCount();
 
     /**
      * Executed the nested content; it there's none, it just does nothing.
      *
-     * @param loopVarValues
-     *         The loop variable values to pass to the nested content, or {@code null} if there's none. It's not a
-     *         problem if this array is longer than the number of loop variables than the caller of the directive has
-     *         declared (as in {@code <@foo bar; i, j />} there are 2 loop variables declared); the directive
-     *         caller simply won't receive the excess variables. If the caller declares more loop variables than the
-     *         length of this array though, then a {@link TemplateException} will thrown by FreeMarker with a
-     *         descriptive error message. Thus, the caller of this method need not be concerned about the
-     *         number of loop variables declared by the caller (unless to avoid calculating loop variable values
-     *         unnecessarily, in which case use {@link #getLoopVariableCount()}).
+     * @param nestedContentParamValues
+     *         The nested content parameter values to pass to the nested content (as in {@code <@foo bar; i, j>${i},
+     *         ${j}</@foo>} there are 2 such parameters, whose value you set here), or {@code null} if there's none.
+     *         This array must be {@link #getNestedContentParameterCount()} long, or else {@link TemplateException} will thrown by
+     *         FreeMarker with a descriptive error message that tells to user the they need to declare that many nested
+     *         content parameters as the length of this array. If you want to allow the the caller to not declare some
+     *         of nested content parameters, then you have to make this array shorter according to {@link
+     *         #getNestedContentParameterCount()}.
      */
-    void executeNestedContent(TemplateModel[] loopVarValues, Writer out, Environment env)
+    void executeNestedContent(TemplateModel[] nestedContentParamValues, Writer out, Environment env)
             throws TemplateException, IOException;
 
     // -------------------------------------------------------------------------------------------------------------

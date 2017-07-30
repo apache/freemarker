@@ -429,22 +429,22 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     void visit(
             ASTElement[] childBuffer,
-            final StringToIndexMap loopVarNames, final TemplateModel[] loopVarValues,
+            final StringToIndexMap nestedContentParamNames, final TemplateModel[] nestedContentParamValues,
             Writer out)
         throws IOException, TemplateException {
-        if (loopVarNames == null) { // This is by far the most frequent case
+        if (nestedContentParamNames == null) { // This is by far the most frequent case
             visit(childBuffer, out);
         } else {
             pushLocalContext(new LocalContext() {
                 @Override
                 public TemplateModel getLocalVariable(String name) throws TemplateModelException {
-                    int index = loopVarNames.get(name);
-                    return index != -1 ? loopVarValues[index] : null;
+                    int index = nestedContentParamNames.get(name);
+                    return index != -1 ? nestedContentParamValues[index] : null;
                 }
 
                 @Override
                 public Collection<String> getLocalVariableNames() throws TemplateModelException {
-                    return loopVarNames.getKeys();
+                    return nestedContentParamNames.getKeys();
                 }
             });
             try {
@@ -1955,10 +1955,11 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     /**
-     * Returns the loop or macro local variable corresponding to this variable name. Possibly null. (Note that the
-     * misnomer is kept for backward compatibility: loop variables are not local variables according to our
-     * terminology.)
+     * Returns the loop or macro nested content parameter variables corresponding to this variable name. Possibly null.
+     * (Note that the misnomer is kept for backward compatibility: nested content parameters are not local variables
+     * according to our terminology.)
      */
+    // TODO [FM3] Don't return nested content params anymore (see JavaDoc)? But, LocalContext does return them...
     public TemplateModel getLocalVariable(String name) throws TemplateModelException {
         if (localContextStack != null) {
             for (int i = localContextStack.size() - 1; i >= 0; i--) {
@@ -1977,7 +1978,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * correspondent to an FTL top-level variable reading expression. That is, it tries to find the the variable in this
      * order:
      * <ol>
-     * <li>An loop variable (if we're in a loop or user defined directive body) such as foo_has_next
+     * <li>A nested content parameter such as {@code x} in {@code <#list xs as x>}
      * <li>A local variable (if we're in a macro)
      * <li>A variable defined in the current namespace (say, via &lt;#assign ...&gt;)
      * <li>A variable defined globally (say, via &lt;#global ....&gt;)
@@ -2055,11 +2056,11 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     /**
      * Returns a set of variable names that are known at the time of call. This includes names of all shared variables
      * in the {@link Configuration}, names of all global variables that were assigned during the template processing,
-     * names of all variables in the current name-space, names of all local variables and loop variables. If the passed
-     * root data model implements the {@link TemplateHashModelEx} interface, then all names it retrieves through a call
-     * to {@link TemplateHashModelEx#keys()} method are returned as well. The method returns a new Set object on each
-     * call that is completely disconnected from the Environment. That is, modifying the set will have no effect on the
-     * Environment object.
+     * names of all variables in the current name-space, names of all local variables and nested content parameters. If
+     * the passed root data model implements the {@link TemplateHashModelEx} interface, then all names it retrieves
+     * through a call to {@link TemplateHashModelEx#keys()} method are returned as well. The method returns a new Set
+     * object on each call that is completely disconnected from the Environment. That is, modifying the set will have no
+     * effect on the Environment object.
      */
     public Set getKnownVariableNames() throws TemplateModelException {
         // shared vars.

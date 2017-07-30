@@ -22,22 +22,23 @@ package org.apache.freemarker.core;
 import org.apache.freemarker.core.ASTDirList.IterationContext;
 import org.apache.freemarker.core.model.TemplateModel;
 
-abstract class BuiltInForLoopVariable extends SpecialBuiltIn {
+abstract class BuiltInForNestedContentParameter extends SpecialBuiltIn {
     
-    private String loopVarName;
+    private String nestedContentParamName;
     
-    void bindToLoopVariable(String loopVarName) {
-        this.loopVarName = loopVarName;
+    void bindToNestedContentParameter(String nestedContentParamName) {
+        this.nestedContentParamName = nestedContentParamName;
     }
     
     @Override
     TemplateModel _eval(Environment env) throws TemplateException {
-        IterationContext iterCtx = ASTDirList.findEnclosingIterationContext(env, loopVarName);
+        IterationContext iterCtx = ASTDirList.findEnclosingIterationContext(env, nestedContentParamName);
         if (iterCtx == null) {
             // The parser should prevent this situation
             throw new _MiscTemplateException(
                     this, env,
-                    "There's no iteration in context that uses loop variable ", new _DelayedJQuote(loopVarName), ".");
+                    "There's no iteration in context that uses the nested content parameter ",
+                    new _DelayedJQuote( nestedContentParamName), ".");
         }
         
         return calculateResult(iterCtx, env);

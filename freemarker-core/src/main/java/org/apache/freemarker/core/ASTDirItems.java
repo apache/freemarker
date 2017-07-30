@@ -28,17 +28,17 @@ import org.apache.freemarker.core.util._StringUtil;
  */
 class ASTDirItems extends ASTDirective {
 
-    private final String loopVarName;
-    private final String loopVar2Name;
+    private final String nestedContentParamName;
+    private final String nestedContentParam2Name;
 
     /**
-     * @param loopVar2Name
-     *            For non-hash listings always {@code null}, for hash listings {@code loopVarName} and
-     *            {@code loopVarName2} holds the key- and value loop variable names.
+     * @param nestedContentParam2Name
+     *            For non-hash listings always {@code null}, for hash listings {@code nestedContentParamName} and
+     *            {@code nestedContentParamName2} holds the key- and value nested content parameter names.
      */
-    ASTDirItems(String loopVarName, String loopVar2Name, TemplateElements children) {
-        this.loopVarName = loopVarName;
-        this.loopVar2Name = loopVar2Name;
+    ASTDirItems(String nestedContentParamName, String nestedContentParam2Name, TemplateElements children) {
+        this.nestedContentParamName = nestedContentParamName;
+        this.nestedContentParam2Name = nestedContentParam2Name;
         setChildren(children);
     }
 
@@ -51,7 +51,7 @@ class ASTDirItems extends ASTDirective {
                     getASTNodeDescriptor(), " without iteration in context");
         }
         
-        iterCtx.loopForItemsElement(env, getChildBuffer(), loopVarName, loopVar2Name);
+        iterCtx.loopForItemsElement(env, getChildBuffer(), nestedContentParamName, nestedContentParam2Name);
         return null;
     }
 
@@ -66,10 +66,10 @@ class ASTDirItems extends ASTDirective {
         if (canonical) sb.append('<');
         sb.append(getASTNodeDescriptor());
         sb.append(" as ");
-        sb.append(_StringUtil.toFTLTopLevelIdentifierReference(loopVarName));
-        if (loopVar2Name != null) {
+        sb.append(_StringUtil.toFTLTopLevelIdentifierReference(nestedContentParamName));
+        if (nestedContentParam2Name != null) {
             sb.append(", ");
-            sb.append(_StringUtil.toFTLTopLevelIdentifierReference(loopVar2Name));
+            sb.append(_StringUtil.toFTLTopLevelIdentifierReference(nestedContentParam2Name));
         }
         if (canonical) {
             sb.append('>');
@@ -88,18 +88,18 @@ class ASTDirItems extends ASTDirective {
 
     @Override
     int getParameterCount() {
-        return loopVar2Name != null ? 2 : 1;
+        return nestedContentParam2Name != null ? 2 : 1;
     }
 
     @Override
     Object getParameterValue(int idx) {
         switch (idx) {
         case 0:
-            if (loopVarName == null) throw new IndexOutOfBoundsException();
-            return loopVarName;
+            if (nestedContentParamName == null) throw new IndexOutOfBoundsException();
+            return nestedContentParamName;
         case 1:
-            if (loopVar2Name == null) throw new IndexOutOfBoundsException();
-            return loopVar2Name;
+            if (nestedContentParam2Name == null) throw new IndexOutOfBoundsException();
+            return nestedContentParam2Name;
         default: throw new IndexOutOfBoundsException();
         }
     }
@@ -108,11 +108,11 @@ class ASTDirItems extends ASTDirective {
     ParameterRole getParameterRole(int idx) {
         switch (idx) {
         case 0:
-            if (loopVarName == null) throw new IndexOutOfBoundsException();
-            return ParameterRole.TARGET_LOOP_VARIABLE;
+            if (nestedContentParamName == null) throw new IndexOutOfBoundsException();
+            return ParameterRole.NESTED_CONTENT_PARAMETER;
         case 1:
-            if (loopVar2Name == null) throw new IndexOutOfBoundsException();
-            return ParameterRole.TARGET_LOOP_VARIABLE;
+            if (nestedContentParam2Name == null) throw new IndexOutOfBoundsException();
+            return ParameterRole.NESTED_CONTENT_PARAMETER;
         default: throw new IndexOutOfBoundsException();
         }
     }

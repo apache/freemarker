@@ -27,7 +27,7 @@
         - content: "\n"  // String
     #list  // o.a.f.c.ASTDirList
         - list source: x  // o.a.f.c.ASTExpVariable
-        - target loop variable: "xs"  // String
+        - nested content parameter: "xs"  // String
         #text  // o.a.f.c.ASTStaticText
             - content: "    "  // String
         ${...}  // o.a.f.c.ASTDollarInterpolation
