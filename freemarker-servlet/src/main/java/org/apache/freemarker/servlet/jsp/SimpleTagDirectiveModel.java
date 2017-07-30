@@ -111,6 +111,11 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
         return ARGS_LAYOUT;
     }
 
+    @Override
+    public boolean isNestedContentSupported() {
+        return true;
+    }
+
     static final class TemplateExceptionWrapperJspException extends JspException {
 
         public TemplateExceptionWrapperJspException(Throwable cause) {

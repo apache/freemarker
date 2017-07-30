@@ -45,4 +45,17 @@ public interface TemplateDirectiveModel extends TemplateCallableModel {
     void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException;
 
+    /**
+     * Tells if this directive supports having nested content. If {@code false}, yet the caller specifies a non-empty
+     * (strictly 0-length, not even whitespace is allowed), FreeMarker will throw a {@link TemplateException} with
+     * descriptive error message, and {@link #execute(TemplateModel[], CallPlace, Writer, Environment)} won't be called.
+     * If {@code true}, the author of the directive shouldn't forget calling {@link
+     * CallPlace#executeNestedContent(TemplateModel[], Writer, Environment)}, unless the intent was to skip the nested
+     * content. (This property was added to prevent the frequent oversight (in FreeMarker 2) where a directive that
+     * isn't supposed to have nested content doesn't examine if there's a nested content to throw an exception in that
+     * case. Then if there's nested content, it will be silently skipped during execution, as the directive never
+     * calls {@link CallPlace#executeNestedContent(TemplateModel[], Writer, Environment)}.)
+     */
+    boolean isNestedContentSupported();
+
 }

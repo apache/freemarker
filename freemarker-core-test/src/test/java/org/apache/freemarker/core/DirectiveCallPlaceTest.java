@@ -142,6 +142,11 @@ public class DirectiveCallPlaceTest extends TemplateTest {
             return ArgumentArrayLayout.PARAMETERLESS;
         }
 
+        @Override
+        public boolean isNestedContentSupported() {
+            return true;
+        }
+
         protected abstract Class getTextConversionIdentity();
 
         private String convertBodyText(CallPlace callPlace, Environment env) throws TemplateException,
@@ -207,6 +212,11 @@ public class DirectiveCallPlaceTest extends TemplateTest {
             return ArgumentArrayLayout.PARAMETERLESS;
         }
 
+        @Override
+        public boolean isNestedContentSupported() {
+            return true;
+        }
+
         private String getTemplateSourceName(CallPlace callPlace) {
             return callPlace.getTemplate().getSourceName();
         }
@@ -239,6 +249,12 @@ public class DirectiveCallPlaceTest extends TemplateTest {
         public ArgumentArrayLayout getArgumentArrayLayout() {
             return ARGS_LAYOUT;
         }
+
+        @Override
+        public boolean isNestedContentSupported() {
+            return true;
+        }
+
     }
 
 }

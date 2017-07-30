@@ -133,10 +133,14 @@ public class TheadInterruptingSupportTest {
             public ArgumentArrayLayout getArgumentArrayLayout() {
                 return ArgumentArrayLayout.PARAMETERLESS;
             }
+
+            @Override
+            public boolean isNestedContentSupported() {
+                return false;
+            }
         }
 
         public class CustomLoopDirective implements TemplateDirectiveModel {
-
             @Override
             public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
                     throws TemplateException, IOException {
@@ -149,6 +153,11 @@ public class TheadInterruptingSupportTest {
             @Override
             public ArgumentArrayLayout getArgumentArrayLayout() {
                 return ArgumentArrayLayout.PARAMETERLESS;
+            }
+
+            @Override
+            public boolean isNestedContentSupported() {
+                return true;
             }
         }
         
@@ -167,6 +176,11 @@ public class TheadInterruptingSupportTest {
             @Override
             public ArgumentArrayLayout getArgumentArrayLayout() {
                 return ArgumentArrayLayout.PARAMETERLESS;
+            }
+
+            @Override
+            public boolean isNestedContentSupported() {
+                return false;
             }
         }
         

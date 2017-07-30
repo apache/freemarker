@@ -70,4 +70,9 @@ public class AssertDirective implements TemplateDirectiveModel {
     public ArgumentArrayLayout getArgumentArrayLayout() {
         return ARGS_LAYOUT;
     }
+
+    @Override
+    public boolean isNestedContentSupported() {
+        return false;
+    }
 }

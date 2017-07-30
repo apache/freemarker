@@ -189,6 +189,11 @@ public class NumberFormatTest extends TemplateTest {
             public ArgumentArrayLayout getArgumentArrayLayout() {
                 return ArgumentArrayLayout.PARAMETERLESS;
             }
+
+            @Override
+            public boolean isNestedContentSupported() {
+                return false;
+            }
         });
         assertOutput(
                 "<#assign s1 = n?string>"

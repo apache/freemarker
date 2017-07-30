@@ -211,6 +211,12 @@ public class EnvironmentGetTemplateVariantsTest extends TemplateTest {
             public ArgumentArrayLayout getArgumentArrayLayout() {
                 return ArgumentArrayLayout.PARAMETERLESS;
             }
+
+
+            @Override
+            public boolean isNestedContentSupported() {
+                return false;
+            }
         });
     }
 

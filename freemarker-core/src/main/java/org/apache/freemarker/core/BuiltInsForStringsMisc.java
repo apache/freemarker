@@ -200,7 +200,6 @@ class BuiltInsForStringsMisc {
             @Override
             public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
                     throws TemplateException, IOException {
-                // TODO [FM3] Disallow loop vars, and nested content
                 try {
                     boolean lastFIRE = env.setFastInvalidReferenceExceptions(false);
                     try {
@@ -221,6 +220,11 @@ class BuiltInsForStringsMisc {
             @Override
             public ArgumentArrayLayout getArgumentArrayLayout() {
                 return ArgumentArrayLayout.PARAMETERLESS;
+            }
+
+            @Override
+            public boolean isNestedContentSupported() {
+                return false;
             }
         }
 

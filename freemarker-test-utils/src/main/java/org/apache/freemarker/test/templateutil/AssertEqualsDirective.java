@@ -80,6 +80,16 @@ public class AssertEqualsDirective implements TemplateDirectiveModel {
         }
     }
 
+    @Override
+    public ArgumentArrayLayout getArgumentArrayLayout() {
+        return ARGS_LAYOUT;
+    }
+
+    @Override
+    public boolean isNestedContentSupported() {
+        return false;
+    }
+
     private String tryUnwrap(TemplateModel value) throws TemplateModelException {
         if (value == null) return "null";
             // This is the same order as comparison goes:
@@ -91,8 +101,4 @@ public class AssertEqualsDirective implements TemplateDirectiveModel {
         else return value.toString();
     }
 
-    @Override
-    public ArgumentArrayLayout getArgumentArrayLayout() {
-        return ARGS_LAYOUT;
-    }
 }

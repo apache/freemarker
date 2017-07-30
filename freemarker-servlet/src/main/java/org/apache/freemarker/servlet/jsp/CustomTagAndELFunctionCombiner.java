@@ -113,6 +113,11 @@ class CustomTagAndELFunctionCombiner {
         public ArgumentArrayLayout getArgumentArrayLayout() {
             return templateDirectiveModel.getArgumentArrayLayout();
         }
+
+        @Override
+        public boolean isNestedContentSupported() {
+            return templateDirectiveModel.isNestedContentSupported();
+        }
     }
 
     private static class TemplateDirectiveModelAndTemplateMethodModelEx extends CombinedTemplateModel
@@ -141,6 +146,11 @@ class CustomTagAndELFunctionCombiner {
         @Override
         public ArgumentArrayLayout getArgumentArrayLayout() {
             return templateDirectiveModel.getArgumentArrayLayout();
+        }
+
+        @Override
+        public boolean isNestedContentSupported() {
+            return templateDirectiveModel.isNestedContentSupported();
         }
     }
 

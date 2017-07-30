@@ -48,4 +48,10 @@ public class NoOutputDirective implements TemplateDirectiveModel {
     public ArgumentArrayLayout getArgumentArrayLayout() {
         return ArgumentArrayLayout.PARAMETERLESS;
     }
+
+    @Override
+    public boolean isNestedContentSupported() {
+        return true;
+    }
+
 }

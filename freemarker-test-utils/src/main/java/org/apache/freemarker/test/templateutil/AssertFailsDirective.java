@@ -135,6 +135,16 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
         }
     }
 
+    @Override
+    public ArgumentArrayLayout getArgumentArrayLayout() {
+        return ARGS_LAYOUT;
+    }
+
+    @Override
+    public boolean isNestedContentSupported() {
+        return true;
+    }
+
     private String getAsString(TemplateModel value, String paramName, Environment env)
             throws BadParameterTypeException, TemplateModelException {
         if (value == null) {
@@ -166,8 +176,4 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
         }
     }
 
-    @Override
-    public ArgumentArrayLayout getArgumentArrayLayout() {
-        return ARGS_LAYOUT;
-    }
 }

@@ -56,4 +56,11 @@ public class NamedVarargsOnlyDirective extends TestTemplateDirectiveModel {
     public ArgumentArrayLayout getArgumentArrayLayout() {
         return ARGS_LAYOUT;
     }
+
+
+    @Override
+    public boolean isNestedContentSupported() {
+        return false;
+    }
+
 }

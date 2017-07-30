@@ -45,7 +45,8 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * AST node: {@code <@exp ...>}.
  * Executes a {@link TemplateCallableModel} that's embeddable directly into the static text (hence "top level"). At
  * least in the default template language the value must be a {@link TemplateDirectiveModel}, though technically
- * calling a {@link TemplateFunctionModel} is possible as well (hence it's not called "dynamic directive call").
+ * calling a {@link TemplateFunctionModel} is possible as well (hence this class is not called "dynamic directive
+ * call").
  * <p>
  * The {@link TemplateCallableModel} object is obtained on runtime by evaluating an expression, and the parameter list
  * is also validated (how many positional parameters are allowed, what named parameters are supported) then. Hence, the
@@ -99,12 +100,14 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
         TemplateCallableModel callableValue;
         TemplateDirectiveModel directive;
         TemplateFunctionModel function;
+        boolean nestedContentSupported;
         {
             TemplateModel callableValueTM = callableValueExp._eval(env);
             if (callableValueTM instanceof TemplateDirectiveModel) {
                 callableValue = (TemplateCallableModel) callableValueTM;
                 directive = (TemplateDirectiveModel) callableValueTM;
                 function = null;
+                nestedContentSupported = directive.isNestedContentSupported();
             } else if (callableValueTM instanceof TemplateFunctionModel) {
                 if (!allowCallingFunctions) {
                     // TODO [FM3][CF] Better exception
@@ -114,6 +117,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
                 callableValue = (TemplateCallableModel) callableValueTM;
                 directive = null;
                 function = (TemplateFunctionModel) callableValue;
+                nestedContentSupported = false;
             } else if (callableValueTM instanceof ASTDirMacro) {
                 // TODO [FM3][CF] Until macros were refactored to be TemplateDirectiveModel-s, we have this hack here.
                 ASTDirMacro macro = (ASTDirMacro) callableValueTM;
@@ -147,6 +151,10 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
             }
         }
 
+        if (!nestedContentSupported && hasNestedContent()) {
+            throw new _MiscTemplateException(env, "Nested content is not supported by this directive.");
+        }
+
         ArgumentArrayLayout argsLayout = callableValue.getArgumentArrayLayout();
         int predefPosArgCnt = argsLayout.getPredefinedPositionalArgumentCount();
         int posVarargsArgIdx = argsLayout.getPositionalVarargsArgumentIndex();
@@ -175,7 +183,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
             }
             execArgs[posVarargsArgIdx] = varargsSeq;
         } else if (positionalArgs != null && positionalArgs.length > predefPosArgCnt) {
-            throw new _MiscTemplateException(this,
+            throw new _MiscTemplateException(env,
                     "The target callable ",
                     (predefPosArgCnt != 0
                             ? new Object[] { "can only have ", predefPosArgCnt }
@@ -197,7 +205,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
                     if (namedVarargsHash == null) {
                         if (namedVarargsArgumentIndex == -1) {
                             Collection<String> validNames = predefNamedArgsMap.getKeys();
-                            throw new _MiscTemplateException(this,
+                            throw new _MiscTemplateException(env,
                                     validNames == null || validNames.isEmpty()
                                     ? new Object[] {
                                             "The target callable doesn't have any by-name-passed parameters (like ",
@@ -225,7 +233,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
         } else {
             TemplateModel result = function.execute(execArgs, env, this);
             if (result == null) {
-                throw new _MiscTemplateException(this, "Function has returned no value (or null)");
+                throw new _MiscTemplateException(env, "Function has returned no value (or null)");
             }
             // TODO [FM3][CF]
             throw new BugException("Top-level function call not yet implemented");
@@ -389,7 +397,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
         int nestedContentParamNamesSize = nestedContentParamNames != null ? nestedContentParamNames.size() : 0;
         int nestedContentParamValuesSize = nestedContentParamValues != null ? nestedContentParamValues.length : 0;
         if (nestedContentParamValuesSize != nestedContentParamNamesSize) {
-            throw new _MiscTemplateException(this,
+            throw new _MiscTemplateException(env,
                     "The invocation declares ", (nestedContentParamNamesSize != 0 ? nestedContentParamNamesSize : "no"),
                     " nested content parameter(s)",
                     (nestedContentParamNamesSize != 0

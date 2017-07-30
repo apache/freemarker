@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.Writer;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.NestedContentNotSupportedException;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.CallPlace;
@@ -44,7 +43,6 @@ public class TwoPositionalParamsDirective extends TestTemplateDirectiveModel {
     @Override
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
-        NestedContentNotSupportedException.check(callPlace);
         out.write("#p(");
         printParam("p1", args[0], out, true);
         printParam("p2", args[1], out);
@@ -55,4 +53,10 @@ public class TwoPositionalParamsDirective extends TestTemplateDirectiveModel {
     public ArgumentArrayLayout getArgumentArrayLayout() {
         return ARGS_LAYOUT;
     }
+
+    @Override
+    public boolean isNestedContentSupported() {
+        return false;
+    }
+
 }

@@ -189,6 +189,11 @@ public class IncludePage implements TemplateDirectiveModel {
         return ARGS_LAYOUT;
     }
 
+    @Override
+    public boolean isNestedContentSupported() {
+        return false;
+    }
+
     private static final class CustomParamsRequest extends HttpServletRequestWrapper {
         private final HashMap paramsMap;
 

@@ -18,8 +18,9 @@
 -->
 <#global x=["a", "b", "c"]>
 <#global templateSource = r"<#list x as y>${y}</#list>">
-<@templateSource?interpret>def</@>
-<@[templateSource]?interpret>def</@>
-<@[templateSource,"id"]?interpret>def</@>
+<@templateSource?interpret />
+<@[templateSource]?interpret />
+<@[templateSource,"id"]?interpret />
+<@assertFails message="nested content"><@templateSource?interpret>x</@></@>
 
 <#assign t = '<#macro m>M</#macro>'?interpret><@t /><@m/>

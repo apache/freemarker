@@ -121,6 +121,11 @@ class TagDirectiveModel extends JspTagModelBase implements TemplateDirectiveMode
         return ARGS_LAYOUT;
     }
 
+    @Override
+    public boolean isNestedContentSupported() {
+        return true;
+    }
+
     /**
      * Implements extra methods to help mimicking JSP container behavior around the
      * {@link TemplateDirectiveModel#execute(TemplateModel[], CallPlace, Writer, Environment)} call.

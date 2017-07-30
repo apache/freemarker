@@ -167,6 +167,10 @@ public class TemplateCallableModelTest extends TemplateTest {
         assertErrorContains("<@tncp ; i>${i}</@>", " 1 ", "\"i\"", " 2 ");
         assertOutput("<@tncp ; i, j>${i} ${j}</@>", "1 2");
         assertErrorContains("<@tncp ; i, j, k>${i}</@>", " 3 ", "\"i\", \"j\", \"k\"", " 2 ");
+
+        assertOutput("<@p></@p>",
+                "#p(p1=null, p2=null)");
+        assertErrorContains("<@p> </@p>", "Nested content", "not supported");
     }
 
     @Test

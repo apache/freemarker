@@ -108,6 +108,8 @@ Node: Changes already mentioned above aren't repeated here!
     of the `execute` method.
   - ?isTransform was removed (as there are no transforms anymore).
     Converter note: The template converter tool replaces it with ?isDirective
+- The directive returned by `?interpret` doesn't allow nested content anymore. (It wasn't useful earlier either;
+  the nested content was simply executed after the interpreted string.)
 
 Java API changes
 ================
