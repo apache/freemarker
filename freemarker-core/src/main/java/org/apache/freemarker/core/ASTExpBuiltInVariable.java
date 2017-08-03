@@ -145,7 +145,7 @@ final class ASTExpBuiltInVariable extends ASTExpression {
             return env.getGlobalVariables();
         }
         if (name == LOCALS) {
-            ASTDirMacro.Context ctx = env.getCurrentMacroContext();
+            ASTDirMacroOrFunction.Context ctx = env.getCurrentMacroContext();
             return ctx == null ? null : ctx.getLocals();
         }
         if (name == DATA_MODEL) {
@@ -173,7 +173,7 @@ final class ASTExpBuiltInVariable extends ASTExpression {
             return SimpleScalar.newInstanceOrNull(env.getCurrentTemplate().getLookupName());
         }
         if (name == PASS) {
-            return ASTDirMacro.DO_NOTHING_MACRO;
+            return ASTDirMacroOrFunction.PASS_MACRO;
         }
         if (name == OUTPUT_ENCODING) {
             Charset encoding = env.getOutputEncoding();

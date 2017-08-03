@@ -25,16 +25,13 @@ import java.io.Writer;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.CallPlace;
+import org.apache.freemarker.core.CallPlace;
+import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 
-public class PositionalVarargsOnlyDirective extends TestTemplateDirectiveModel {
+public class PositionalVarargsOnlyDirective extends TestTemplateCallableModel implements TemplateDirectiveModel {
 
     public static final PositionalVarargsOnlyDirective INSTANCE = new PositionalVarargsOnlyDirective();
-
-    private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
-            0, true,
-            null, false);
 
     private PositionalVarargsOnlyDirective() {
         //
@@ -44,13 +41,13 @@ public class PositionalVarargsOnlyDirective extends TestTemplateDirectiveModel {
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
         out.write("#pvo(");
-        printParam("pVarargs", args[ARGS_LAYOUT.getPositionalVarargsArgumentIndex()], out, true);
+        printParam("pVarargs", args[0], out, true);
         out.write(")");
     }
 
     @Override
     public ArgumentArrayLayout getArgumentArrayLayout() {
-        return ARGS_LAYOUT;
+        return ArgumentArrayLayout.POSITIONAL_VARARGS_PARAMETER_ONLY;
     }
 
 

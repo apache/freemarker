@@ -1,25 +1,38 @@
 package org.apache.freemarker.core.model;
 
+import java.io.Writer;
+
+import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.ProcessingConfiguration;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.outputformat.OutputFormat;
 
 /**
- * A {@link TemplateCallableModel}, which returns its result as a {@link TemplateModel} at the end of the execution.
- * This is in contrast with {@link TemplateDirectiveModel}, which writes its result progressively to the output.
- *
- * <p>Some template languages may allow function calls directly embedded into static text, as in
- * <code>text#f()text</code>. In that case, the language has to ensure that the return value is formatted according
- * the {@link ProcessingConfiguration} settings (such as {@link ProcessingConfiguration#getNumberFormat()} and
- * {@link ProcessingConfiguration#getDateFormat()}), and is printed to the output after escaping according the
- * {@link OutputFormat} of the context. Some template languages instead require using an explicit expression value
- * printer statement, as in <code>text${f()}text</code>.
+ * A {@link TemplateCallableModel}, which returns its result as a {@link TemplateModel} at the end of its execution.
+ * This is in contrast with {@link TemplateDirectiveModel}, which writes its result progressively to the output, if it
+ * has output at all. Also, {@link TemplateFunctionModel}-s can only be called where an expression is expected. (If
+ * some future template languages allows calling functions outside expression context, on the top-level, then
+ * that's a shorthand to doing that in with interpolation, like {@code ${f()}}.)
+ * <p>
+ * Example usage in templates: {@code < a href="${my.toProductURL(product.id)}">},
+ * {@code <#list my.groupByFirstLetter(products, property="name") as productGroup>}
  */
 public interface TemplateFunctionModel extends TemplateCallableModel {
 
-    TemplateModel execute(
-            TemplateModel[] args, Environment env, CallPlace callPlace)
-            throws TemplateException;
+    /**
+     * Invokes the function.
+     *
+     * @param args
+     *         See the similar parameter of {@link TemplateDirectiveModel#execute(TemplateModel[], CallPlace, Writer,
+     *         Environment)}
+     * @param callPlace
+     *         See the similar parameter of {@link TemplateDirectiveModel#execute(TemplateModel[], CallPlace, Writer,
+     *         Environment)}
+     * @param env
+     *         See the similar parameter of {@link TemplateDirectiveModel#execute(TemplateModel[], CallPlace, Writer,
+     *         Environment)}
+     *
+     * @return The return value of the function.
+     */
+    TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env) throws TemplateException;
 
 }

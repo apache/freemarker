@@ -16,7 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-1 1
-2 2
-4
-m3 with d="4" Failed!
+
+package org.apache.freemarker.core.util;
+
+/**
+ * A string key is duplicated in something where keys must be unique. For example thrown by {@link StringToIndexMap}
+ * creator methods.
+ */
+public class DuplicateStringKeyException extends IllegalArgumentException {
+
+    private final String key;
+
+    public DuplicateStringKeyException(String key) {
+        super("Duplicate key: " + _StringUtil.jQuote(key));
+        this.key = key;
+    }
+
+    public String getKey() {
+        return key;
+    }
+}

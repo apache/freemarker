@@ -46,19 +46,19 @@
 <#list ['V', 1.5] as v>
 	<@assertEquals actual=v!'-' expected=v />
 	<@assertEquals actual=(v)!'-' expected=v />
-	<@assert test=v?? />
-	<@assert test=(v)?? />
+	<@assert v?? />
+	<@assert (v)?? />
 	<@assertEquals actual=v?default('-') expected=v />
 	<@assertEquals actual=(v)?default('-') expected=v />
-	<@assert test=v?exists />
-	<@assert test=(v)?exists />
+	<@assert v?exists />
+	<@assert (v)?exists />
 	<@assertEquals actual=v?ifExists expected=v />
 	<@assertEquals actual=(v)?ifExists expected=v />
-	<@assert test=v?hasContent />
-	<@assert test=(v)?hasContent />
+	<@assert v?hasContent />
+	<@assert (v)?hasContent />
 </#list>
-<@assert test=!v?? />
-<@assert test=!v?exists />
+<@assert !v?? />
+<@assert !v?exists />
 <@isNonFastIRE>${v}</@> <#-- To check that it isn't an IRE.FAST_INSTANCE -->
 
 <@isIRE>${u.v!'-'}</@>
@@ -91,16 +91,16 @@
 <#assign u = { 'v': 'V' } >
 <@assertEquals actual=u.v!'-' expected='V' />
 <@assertEquals actual=(u.v)!'-' expected='V' />
-<@assert test=u.v?? />
-<@assert test=(u.v)?? />
+<@assert u.v?? />
+<@assert (u.v)?? />
 <@assertEquals actual=u.v?default('-') expected='V' />
 <@assertEquals actual=(u.v)?default('-') expected='V' />
-<@assert test=u.v?exists />
-<@assert test=(u.v)?exists />
+<@assert u.v?exists />
+<@assert (u.v)?exists />
 <@assertEquals actual=u.v?ifExists expected='V' />
 <@assertEquals actual=(u.v)?ifExists expected='V' />
-<@assert test=u.v?hasContent />
-<@assert test=(u.v)?hasContent />
+<@assert u.v?hasContent />
+<@assert (u.v)?hasContent />
 
 <#list 1..4 as i>
   <#if i == 3><#assign x = 'X'></#if>
@@ -111,7 +111,7 @@
   <#attempt>
     ${fails}
   <#recover>
-    <@assert test=isNonFastIREMessage(.error) />
+    <@assert isNonFastIREMessage(.error) />
   </#attempt>
 </#macro>
 <@attemptTest />
@@ -121,12 +121,12 @@ ${(callMacroFromExpression(attemptTest))!}
 <#attempt>
   <@interpretTest />
 <#recover>
-  <@assert test=isNonFastIREMessage(.error) />
+  <@assert isNonFastIREMessage(.error) />
 </#attempt>
 <#attempt>
   ${(callMacroFromExpression(interpretTest))!}
 <#recover>
-  <@assert test=isNonFastIREMessage(.error) />
+  <@assert isNonFastIREMessage(.error) />
 </#attempt>
 
 <@assertEquals actual='fails'?eval!'-' expected='-' />

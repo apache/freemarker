@@ -26,7 +26,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
   * An interface that represents a local context. This is used as the abstraction for  
-  * the context of a ASTDirMacro invocation, a loop, or the nested block call from within 
+  * the context of a ASTDirMacroOrFunction invocation, a loop, or the nested block call from within
   * a macro.
   */
 public interface LocalContext {

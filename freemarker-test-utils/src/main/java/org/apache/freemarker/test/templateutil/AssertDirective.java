@@ -22,34 +22,26 @@ package org.apache.freemarker.test.templateutil;
 import java.io.IOException;
 import java.io.Writer;
 
+import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.CallPlace;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util.FTLUtil;
-import org.apache.freemarker.core.util.StringToIndexMap;
 
 public class AssertDirective implements TemplateDirectiveModel {
     public static AssertDirective INSTANCE = new AssertDirective();
-
-    private static final String TEST_ARG_NAME = "test";
-    private static final int TEST_ARG_IDX = 0;
-    private static final StringToIndexMap ARG_NAMES_TO_IDX = StringToIndexMap.of(TEST_ARG_NAME, TEST_ARG_IDX);
-    private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
-            0, false,
-            ARG_NAMES_TO_IDX, false);
 
     private AssertDirective() { }
     
     @Override
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
-        TemplateModel test = args[TEST_ARG_IDX];
+        TemplateModel test = args[0];
         if (test == null) {
-            throw new MissingRequiredParameterException(TEST_ARG_NAME, env);
+            throw new MissingRequiredParameterException("test", env);
         }
         if (!(test instanceof TemplateBooleanModel)) {
             throw new AssertationFailedInTemplateException("Assertion failed:\n"
@@ -65,7 +57,7 @@ public class AssertDirective implements TemplateDirectiveModel {
 
     @Override
     public ArgumentArrayLayout getArgumentArrayLayout() {
-        return ARGS_LAYOUT;
+        return ArgumentArrayLayout.SINGLE_POSITIONAL_PARAMETER;
     }
 
     @Override

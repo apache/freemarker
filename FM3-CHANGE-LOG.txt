@@ -48,7 +48,21 @@ Major changes / features
   Examples:
   `<@x x + 1 2 3 />` now must be written as `<@x x + 1, 2, 3 />`
   `<#nested x y>` now must be written as `<#nested x, y>`
-- TemplateDirectiveModel was redesigned to be more universal.
+- #macro-s and #function  
+  - Both #macro-s and #function-s can now define parameters that are passed by position, and that are passed by name.
+    Function parameters are by default positional, which can be changed by adding `{named}` after the parameter name.
+    Macro parameters are by default named, which can be changed by adding `{positional}` after the parameter name.
+    Positional parameters always precede the named ones. There can be both a positional and a named varargs parameter;
+    the first is always a sequnce, the later is always a hash.
+    Examples:
+    - All named: `<#macro heading title icon>...</#macro>` `<@heading title="Test" icon="foo.jpg" />`
+    - Mixed: `<#macro heading title{positional} icon>...</#macro>` `<@heading "Test" icon="foo.jpg" />`
+    - All positional: `<#function f(x, y, r=0)>...</#function>` `${f(1, 2)} ${f(1, 2, 10)}`
+    - Mixed: `<#function f(x, y, r{named}=0)>...</#function>` `${f(1, 2)} ${f(1, 2, r=10)}`
+    - Positional varargs: `<#function sum(xs... abs{named}=false)>...</#function>` `${sum(1, 2, 3, abs=true)}
+    - Positional and named varargs: `<#function f(xs..., props{named}...)>...</#function>` `${f(1, 2, 3, x=1, y=2)}`
+  - In FM2, the same macro could be called with specifying all parameters by position, or by specifying all parameters
+    by name. In FM3 that won't work anymore, as now a parameter is either strictly positional or strictly named.
 
 Smaller changes
 ---------------
@@ -104,13 +118,25 @@ Node: Changes already mentioned above aren't repeated here!
   - TemplateDirectiveModel was redesigend (see in the major changes section)
   - Removed `TemplateTransformModel`; `TemplateDirectiveModel` can do the same things, and more.
   - Renamed `DirectiveCallPlace` to `CallPlace`
-  - Removed Environment.getDirectiveCallPlace(), as TemplateDirectiveModel-s now get the CallPlace as the parameter
-    of the `execute` method.
+  - Removed Environment.getDirectiveCallPlace(), as TemplateDirectiveModel-s now get the CallPlace as the
+    parameter of the `execute` method.
   - ?isTransform was removed (as there are no transforms anymore).
     Converter note: The template converter tool replaces it with ?isDirective
 - The directive returned by `?interpret` doesn't allow nested content anymore. (It wasn't useful earlier either;
   the nested content was simply executed after the interpreted string.)
+- Changes in #macro/#functions
+  - See major changes first, in the earlier chapter
+  - It's not tolerated anymore if the caller of a macro has declared more nested content parameters than
+    what `#nested` passes to it (like in `<#macro m><#nested 1, 2></#macro> <@m ; i, j, k>...</@>`, where `k` has
+    no corresponding value in `#nested`).
+  - In `#macro` (and `function`) named parameters with default values need not be at the end of the parameter list
+    anymore. (Positional parameters with default values need to be at the end of the list of positional parameters
+    only.)
+  - When parameter default expressions are evaluated, only the parameters defined earlier are already set.
+    So `<#macro m a b=a>` works, but `<#macro m a=b b>` won't work anymore (unless there's `b` outside the
+    parameter list), as `b` is not yet set when the default of `a` is calculated.
 
+  
 Java API changes
 ================
 
@@ -165,7 +191,18 @@ Major changes / features
 - Configuration is now immutable. You should use Configuration.Builder to set up the setting values, then create
   the Configuration with the builder's build() method.
 - Configuration defaults were changed to follow the current best practices (like default charset is UTF-8 everywhere)
-- Removed freemarker.ext.log, our log abstraction layer from the old times when there was no clear winner on this field.
+- Reworked callable `TemplateModel`-s (i.e., models that can be called like `foo(...)` or as `<@foo .../>`)
+  - Earlier there were several callable `TemplateModel` internfaces (`TemplateMethodModel`, `TemplateMethodModelEx`,
+    `TemplateDirectiveModel`, `TemplateTransformModel`). FM3 replaces them with only two new interfaces,
+    `TemplateDirectiveModel` (differs from the interface with identical name in FM2) and `TemplateFunctionModel`.
+    (These are both the subinterfaces of another new interface `TemplateCallableModel`.)
+    [TODO: TemplateMethodModel[Ex] wasn't yet replaced by TemplateFunctionModel.]
+  - All callable TempalteModel-s support passing parameters by position and by name, even in the same call
+    (e.g., `<@heading "Some title" icon="foo.jpg" />`, `sum(1, 2, 3, abs=true)`)
+  - `#macro` now produces a `TemplateDirectiveModel` and `#function` produces a `TemplateFunctionModel`. (Earlier, the
+    product was just a generic `TemplateModel` that could only be invoked using internal API-s, and had capabilities
+    that the callable TemplateModel-s coulnd't have.)
+- Removed freemarker.ext.log, our log abstraction layer from the times when there was no clear winner on this field.
   Added org.slf4j:slf4j-api as required dependency instead.
 - Added Spring support to the FreeMarker project (freemarker-spring module), instead of relying Spring developers
   [Note: This is in very early stage, as of 2017-07-06.]
@@ -426,6 +463,7 @@ Core / Miscellaneous
   "compress"
 - Removed `NestedContentNotSupportedException`, as `TemplateDirectiveModel.isNestedContentSupported()` now takes care
   of that problem.
+- CallPlaceCustomDataInitializationException is not a checked exception anymore (now it extends RuntimeException)
 
 
 Build / development process changes

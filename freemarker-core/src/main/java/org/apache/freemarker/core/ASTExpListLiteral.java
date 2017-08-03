@@ -81,11 +81,11 @@ final class ASTExpListLiteral extends ASTExpression {
     /**
      * For {@link TemplateMethodModelEx} calls, returns the list of arguments as {@link TemplateModel}-s.
      */
-    List/*<TemplateModel>*/ getModelList(Environment env) throws TemplateException {
+    List<TemplateModel> getModelList(Environment env) throws TemplateException {
         int size = items.size();
         switch(size) {
             case 0: {
-                return Collections.EMPTY_LIST;
+                return Collections.emptyList();
             }
             case 1: {
                 return Collections.singletonList(((ASTExpression) items.get(0)).eval(env));
@@ -99,6 +99,10 @@ final class ASTExpListLiteral extends ASTExpression {
                 return result;
             }
         }
+    }
+
+    public int size() {
+        return items.size();
     }
 
     @Override

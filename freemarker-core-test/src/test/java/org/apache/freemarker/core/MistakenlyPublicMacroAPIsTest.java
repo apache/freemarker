@@ -19,15 +19,12 @@
 
 package org.apache.freemarker.core;
 
-import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Map;
 
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util._NullWriter;
 import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
@@ -44,7 +41,7 @@ public class MistakenlyPublicMacroAPIsTest {
     @Test
     public void testMacroCopyingExploit() throws IOException, TemplateException {
         Template tMacros = new Template(null, "<#macro m1>1</#macro><#macro m2>2</#macro>", cfg);
-        Map<String, ASTDirMacro> macros = tMacros.getMacros();
+        Map<String, ASTDirMacroOrFunction> macros = tMacros.getMacros();
         
         Template t = new Template(null,
                 "<@m1/><@m2/><@m3/>"
@@ -60,25 +57,11 @@ public class MistakenlyPublicMacroAPIsTest {
     public void testMacroCopyingExploitAndNamespaces() throws IOException, TemplateException {
         Template tMacros = new Template(null, "<#assign x = 0><#macro m1>${x}</#macro>", cfg);
         Template t = new Template(null, "<#assign x = 1><@m1/>", cfg);
-        t.addMacro((ASTDirMacro) tMacros.getMacros().get("m1"));
+        t.addMacro((ASTDirMacroOrFunction) tMacros.getMacros().get("m1"));
         
         assertEquals("1", getTemplateOutput(t));
     }
 
-    @Test
-    public void testMacroCopyingFromFTLVariable() throws IOException, TemplateException {
-        Template tMacros = new Template(null, "<#assign x = 0><#macro m1>${x}</#macro>", cfg);
-        Environment env = tMacros.createProcessingEnvironment(null, _NullWriter.INSTANCE);
-        env.process();
-        TemplateModel m1 = env.getVariable("m1");
-        assertThat(m1, instanceOf(ASTDirMacro.class));
-        
-        Template t = new Template(null, "<#assign x = 1><@m1/>", cfg);
-        t.addMacro((ASTDirMacro) m1);
-        
-        assertEquals("1", getTemplateOutput(t));
-    }
-    
     private String getTemplateOutput(Template t) throws TemplateException, IOException {
         StringWriter sw = new StringWriter();
         t.process(null, sw);

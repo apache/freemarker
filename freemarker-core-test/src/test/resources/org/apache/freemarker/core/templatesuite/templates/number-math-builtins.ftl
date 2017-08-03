@@ -22,14 +22,14 @@
 <@assertEquals actual=3.5?abs expected=3.5 />
 <@assertEquals actual=(-3.5)?abs expected=3.5 />
 
-<@assert test=fNan?abs?isNan />
-<@assert test=dNan?abs?isNan />
-<@assert test=fNinf?abs?isInfinite />
-<@assert test=dPinf?abs?isInfinite />
-<@assert test=fNinf lt 0 />
-<@assert test=dPinf gt 0 />
-<@assert test=fNinf?abs gt 0 />
-<@assert test=dPinf?abs gt 0 />
+<@assert fNan?abs?isNan />
+<@assert dNan?abs?isNan />
+<@assert fNinf?abs?isInfinite />
+<@assert dPinf?abs?isInfinite />
+<@assert fNinf lt 0 />
+<@assert dPinf gt 0 />
+<@assert fNinf?abs gt 0 />
+<@assert dPinf?abs gt 0 />
 
 <@assertEquals actual=fn?abs expected=0.05 />
 <@assertEquals actual=dn?abs expected=0.05 />
@@ -49,30 +49,30 @@
 <@assertEquals actual=bip?abs expected=5 />
 <@assertEquals actual=bdp?abs expected=0.05 />
 
-<@assert test=!0?isInfinite />
-<@assert test=!fn?isInfinite />
-<@assert test=!dn?isInfinite />
-<@assert test=!ineg?isInfinite />
-<@assert test=!ln?isInfinite />
-<@assert test=!sn?isInfinite />
-<@assert test=!bn?isInfinite />
-<@assert test=!bin?isInfinite />
-<@assert test=!bdn?isInfinite />
-<@assert test=!fNan?isInfinite />
-<@assert test=!dNan?isInfinite />
-<@assert test=fNinf?isInfinite />
-<@assert test=dPinf?isInfinite />
+<@assert !0?isInfinite />
+<@assert !fn?isInfinite />
+<@assert !dn?isInfinite />
+<@assert !ineg?isInfinite />
+<@assert !ln?isInfinite />
+<@assert !sn?isInfinite />
+<@assert !bn?isInfinite />
+<@assert !bin?isInfinite />
+<@assert !bdn?isInfinite />
+<@assert !fNan?isInfinite />
+<@assert !dNan?isInfinite />
+<@assert fNinf?isInfinite />
+<@assert dPinf?isInfinite />
 
-<@assert test=!0?isNan />
-<@assert test=!fn?isNan />
-<@assert test=!dn?isNan />
-<@assert test=!ineg?isNan />
-<@assert test=!ln?isNan />
-<@assert test=!sn?isNan />
-<@assert test=!bn?isNan />
-<@assert test=!bin?isNan />
-<@assert test=!bdn?isNan />
-<@assert test=fNan?isNan />
-<@assert test=dNan?isNan />
-<@assert test=!fNinf?isNan />
-<@assert test=!dPinf?isNan />
+<@assert !0?isNan />
+<@assert !fn?isNan />
+<@assert !dn?isNan />
+<@assert !ineg?isNan />
+<@assert !ln?isNan />
+<@assert !sn?isNan />
+<@assert !bn?isNan />
+<@assert !bin?isNan />
+<@assert !bdn?isNan />
+<@assert fNan?isNan />
+<@assert dNan?isNan />
+<@assert !fNinf?isNan />
+<@assert !dPinf?isNan />

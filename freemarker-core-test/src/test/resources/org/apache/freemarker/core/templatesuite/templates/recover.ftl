@@ -25,15 +25,15 @@
 <#attempt>
  Let's try to output an undefined variable: ${undefinedVariable}
 <#recover>
- Well, that did not work.<@assert test=.error?contains('undefinedVariable') />
+ Well, that did not work.<@assert .error?contains('undefinedVariable') />
  Now we nest another attempt/recover here:
  <#attempt>
    ${sequence[1]}
  <#recover>
-   Oops...<@assert test=.error?contains('sequence[1]') />
+   Oops...<@assert .error?contains('sequence[1]') />
    Remember, freeMarker sequences are zero-based! ${sequence[0]}
  </#attempt>
- Now we check the current error message.<@assert test=.error?contains('undefinedVariable') />
+ Now we check the current error message.<@assert .error?contains('undefinedVariable') />
 </#attempt>
 <#attempt>
   <#include "nonexistent_template">
@@ -43,5 +43,5 @@
 <#attempt>
   <#include "undefined.ftl">
 <#recover>
-  The included template had a problem.<@assert test=.error?contains('undefined_variable') />
+  The included template had a problem.<@assert .error?contains('undefined_variable') />
 </#attempt>

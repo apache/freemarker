@@ -947,7 +947,7 @@ TOKEN:
     <DOLLAR_INTERPOLATION_OPENING : "${"> { startInterpolation(matchedToken); }
 }
 
-<FM_EXPRESSION, IN_PAREN, NAMED_PARAMETER_EXPRESSION> SKIP :
+<FM_EXPRESSION, IN_PAREN> SKIP :
 {
     < ( " " | "\t" | "\n" | "\r" )+ >
     |
@@ -967,12 +967,11 @@ TOKEN:
     < "-->" | "--]">
     {
         if (parenthesisNesting > 0) SwitchTo(IN_PAREN);
-        else if (inNamedParameterExpression) SwitchTo(NAMED_PARAMETER_EXPRESSION);
         else SwitchTo(FM_EXPRESSION);
     }
 }
 
-<FM_EXPRESSION, IN_PAREN, NO_SPACE_EXPRESSION, NAMED_PARAMETER_EXPRESSION> TOKEN :
+<FM_EXPRESSION, IN_PAREN, NO_SPACE_EXPRESSION> TOKEN :
 {
     <#ESCAPED_CHAR :
         "\\"
@@ -1093,8 +1092,7 @@ TOKEN:
     {
         --parenthesisNesting;
         if (parenthesisNesting == 0) {
-            if (inNamedParameterExpression) SwitchTo(NAMED_PARAMETER_EXPRESSION);
-            else SwitchTo(FM_EXPRESSION);
+            SwitchTo(FM_EXPRESSION);
         }
     }
     |
@@ -1290,7 +1288,7 @@ TOKEN:
     <#ASCII_DIGIT: ["0" - "9"]>
 }
 
-<FM_EXPRESSION, NO_SPACE_EXPRESSION, NAMED_PARAMETER_EXPRESSION> TOKEN :
+<FM_EXPRESSION, NO_SPACE_EXPRESSION> TOKEN :
 {
     <DIRECTIVE_END : ">">
     {
@@ -1321,11 +1319,6 @@ TOKEN:
 <NO_SPACE_EXPRESSION> TOKEN :
 {
     <TERMINATING_WHITESPACE :  (["\n", "\r", "\t", " "])+> : FM_EXPRESSION
-}
-
-<NAMED_PARAMETER_EXPRESSION> TOKEN :
-{
-    <TERMINATING_EXCLAM : "!" (["\n", "\r", "\t", " "])+> : FM_EXPRESSION
 }
 
 <NO_PARSE> TOKEN :
@@ -1409,7 +1402,7 @@ ASTExpression PrimaryExpression() :
         exp = ASTExpBuiltInVariable()
     )
     (
-        LOOKAHEAD(<DOT> | <OPEN_BRACKET> |<OPEN_PAREN> | <BUILT_IN> | <EXCLAM> | <TERMINATING_EXCLAM> | <EXISTS>)
+        LOOKAHEAD(<DOT> | <OPEN_BRACKET> |<OPEN_PAREN> | <BUILT_IN> | <EXCLAM> | <EXISTS>)
         exp = AddSubExpression(exp)
     )*
     {
@@ -1864,20 +1857,14 @@ ASTExpression DefaultTo(ASTExpression exp) :
     Token t;
 }
 {
+    t = <EXCLAM>
     (
-        t = <TERMINATING_EXCLAM>
+        LOOKAHEAD(<ID><ASSIGNMENT_EQUALS>) { /* Do not consume */ }
         |
-        (
-            t = <EXCLAM>
-            (
-                LOOKAHEAD(<ID><ASSIGNMENT_EQUALS>) { /* Do not consume */ }
-                |
-                [
-                    LOOKAHEAD(ASTExpression())
-                    rhs = ASTExpression()
-                ]
-            )
-        )
+        [
+            LOOKAHEAD(ASTExpression())
+            rhs = ASTExpression()
+        ]
     )
     {
         ASTExpDefault result = new ASTExpDefault(exp, rhs);
@@ -2583,7 +2570,7 @@ ASTDirStop Stop() :
 ASTElement Nested() :
 {
     Token t, end;
-    ArrayList bodyParameters;
+    ArrayList<ASTExpression> nestedContentParams;
     ASTDirNested result = null;
 }
 {
@@ -2598,10 +2585,10 @@ ASTElement Nested() :
         |
         (
             t = <NESTED>
-            bodyParameters = PositionalArgs()
+            nestedContentParams = PositionalArgs()
             end = LooseDirectiveEnd()
             {
-                result = new ASTDirNested(bodyParameters);
+                result = new ASTDirNested(nestedContentParams);
                 result.setLocation(template, t, end);
             }
         )
@@ -2881,112 +2868,220 @@ ASTDirImport Import() :
     }
 }
 
-ASTDirMacro Macro() :
+ASTDirMacroOrFunction Macro() :
 {
-    Token arg, start, end;
-    ASTExpression nameExp;
+    Token tk = null, tk2, start, end;
+    ASTExpression exp;
+
+    Token paramNameTk;
+    Token commaTk = null;
+
+    boolean isFunction;
     String name;
-    ArrayList argNames = new ArrayList();
-    HashMap args = new HashMap();
-    ArrayList defNames = new ArrayList();
-    ASTExpression defValue = null;
+    List<ASTDirMacroOrFunction.ParameterDefinition> predefPosParamDefs = null;
+    ASTDirMacroOrFunction.ParameterDefinition posVarargsParamDef = null;
+    List<ASTDirMacroOrFunction.ParameterDefinition> predefNamedParamDefs = null;
+    ASTDirMacroOrFunction.ParameterDefinition namedVarargsParamDef = null;
+    TemplateElements children;
+
+    boolean isPositional;
+    ASTExpression defaultValueExp = null;
+    boolean isVarargs = false;
+
+    boolean isFirstParam = true;
+    boolean hasOpenParen;
+    boolean hasPendingComma = false;
+
     List lastIteratorBlockContexts;
     int lastBreakableDirectiveNesting;
-    TemplateElements children;
-    boolean isFunction = false, hasDefaults = false;
-    boolean isCatchAll = false;
-    String catchAll = null;
-    boolean hasOpenParen = false;
-    boolean hasComma = false;
-    boolean hasCloseParen = false;
 }
 {
     (
-        start = <MACRO>
+        start = <MACRO> { isFunction = false; }
         |
         start = <FUNCTION> { isFunction = true; }
     )
     {
         if (inMacro || inFunction) {
-            throw new ParseException("Macros cannot be nested.", template, start);
+            throw new ParseException("Macro or function definitions can't be nested into each other.", template, start);
         }
         if (isFunction) inFunction = true; else inMacro = true;
     }
-    nameExp = IdentifierOrStringLiteral()
+
+    exp = IdentifierOrStringLiteral()
     {
-        name = (nameExp instanceof ASTExpStringLiteral)
-                ? ((ASTExpStringLiteral) nameExp).getAsString()
-                : ((ASTExpVariable) nameExp).getName();
+        name = (exp instanceof ASTExpStringLiteral)
+                ? ((ASTExpStringLiteral) exp).getAsString()
+                : ((ASTExpVariable) exp).getName();
     }
-    [<OPEN_PAREN> { hasOpenParen = true; }]
+
+    { hasOpenParen = false; }
+    [ tk = <OPEN_PAREN> { hasOpenParen = true; } ]
     {
         if (hasOpenParen != isFunction) {
-    		throw new ParseException(
-                    isFunction ? "#function must use \"(\" after the function name."
-                            : "#macro can't use \"(\" after the macro name.",
-                            template, start);
+            if (isFunction) {
+                throw new ParseException("#function must use \"(\" after the function name.", template, start);
+            } else {
+    		    throw new ParseException("#macro can't use \"(\" after the macro name.", template, tk);
+            }
         }
     }
+
+
     (
-        arg = <ID> {
-            defValue = null;
-            if (!argNames.isEmpty() && hasComma != isFunction) {
-                throw new ParseException(
-                        isFunction ? "#function must have comma between the declared parameters."
-                                : "#macro must not have comma between the declared parameters.",
-                                template, start);
-            }
-            hasComma = false;
+        paramNameTk = <ID>
+
+        {
+            // Function parameters are positional by default, while macro parameters are named by default.
+            isPositional = isFunction;
         }
         [
-            <ELLIPSIS> { isCatchAll = true; }
+            <OPENING_CURLY_BRACKET>
+            // TODO [FM3] Support multiple options inside the {}, and value assignment to them (`=true` is implied).
+            [
+                tk = <ID>
+                {
+                    switch (tk.image) {
+                        case ASTDirMacroOrFunction.NAMED_PARAMETER_OPTION_NAME:
+                            isPositional = false;
+                            break;
+                        case ASTDirMacroOrFunction.POSITIONAL_PARAMETER_OPTION_NAME:
+                            isPositional = true;
+                            break;
+                        default:
+                            throw new ParseException(
+                                    "Unsupported parameter option " + _StringUtil.jQuote(tk.image) + ". "
+                                    + "The supported options are: \""
+                                    + ASTDirMacroOrFunction.NAMED_PARAMETER_OPTION_NAME + "\", \""
+                                    + ASTDirMacroOrFunction.POSITIONAL_PARAMETER_OPTION_NAME + "\".",
+                                    template, tk);
+                    }
+                }
+            ]
+            <CLOSING_CURLY_BRACKET>
         ]
-        [
-            <ASSIGNMENT_EQUALS>
-            defValue = ASTExpression()
-            {
-                defNames.add(arg.image);
-                hasDefaults = true;
-            }
-        ]
-        [<COMMA> { hasComma = true; } ]
         {
-            if (catchAll != null) {
-                throw new ParseException(
-                "There may only be one \"catch-all\" parameter in a macro declaration, and it must be the last parameter.",
-                template, arg);
-            }
-            if (isCatchAll) {
-                if (defValue != null) {
+            if (isPositional) {
+                if (predefNamedParamDefs != null || namedVarargsParamDef != null) {
                     throw new ParseException(
-                    "\"Catch-all\" macro parameter may not have a default value.",
-                    template, arg);
+                            "Positional parameters must precede named parameters.",
+                            template, paramNameTk);
                 }
-                catchAll = arg.image;
-            } else {
-                argNames.add(arg.image);
-                if (hasDefaults && defValue == null) {
+                if (posVarargsParamDef != null) {
                     throw new ParseException(
-		                    "In a macro declaration, parameters without a default value "
-		                    + "must all occur before the parameters with default values.",
-                    template, arg);
+                            "Can't define another positional parameter after the \"positional varargs\" parameter.",
+                            template, paramNameTk);
                 }
-                args.put(arg.image, defValue);
+            } else { // named parameter
+                if (namedVarargsParamDef != null) {
+                    throw new ParseException(
+                            "Can't define another parameter after the \"named varargs\" parameter.",
+                            template, paramNameTk);
+                }
             }
+
+            if (isFunction) {
+                if (!hasPendingComma && !isFirstParam) {
+                    throw new ParseException(
+                            "Function parameters must have comma between them; insert comma before the parameter.",
+                            template, paramNameTk);
+                }
+            } else { // macro
+                if (hasPendingComma) {
+                    if (!isPositional) {
+                        throw new ParseException(
+                                "Named parameters of macros need no comma before them; remove the comma.",
+                                template, commaTk);
+                    }
+                } else {
+                    if (isPositional && !isFirstParam) {
+                        throw new ParseException(
+                                "Positional parameters must have comma between them; "
+                                + "insert comma before the parameter.",
+                                template, paramNameTk);
+                    }
+                }
+            }
+            hasPendingComma = false; // It has found it's role
+        }
+
+        {
+            isVarargs = false;
+        }
+        [
+            tk = <ELLIPSIS> { isVarargs = true; }
+            // Note that because it's ensured earlier that varargs are the last in the positonal and named sublists,
+            // we don't have to check here if we already have a positional or named varargs parameter.
+        ]
+
+        {
+            defaultValueExp = null;
+        }
+        [
+            tk = <ASSIGNMENT_EQUALS>
+            {
+                if (isVarargs) {
+                    throw new ParseException("Varargs parameters can't have default value.", template, tk);
+                }
+            }
+            defaultValueExp = ASTExpression()
+        ]
+        {
+            if (defaultValueExp == null && isPositional && !isVarargs) {
+                if (predefPosParamDefs != null
+                        && predefPosParamDefs.get(predefPosParamDefs.size() - 1).getDefaultExpression() != null) {
+                    throw new ParseException(
+                            "Parameters without a default value must be before parameters with default values, "
+                            + "among the positional parameters.", template, paramNameTk);
+                }
+            }
+        }
+
+        [ commaTk = <COMMA> { hasPendingComma = true; } ]
+
+        {
+            String paramName = paramNameTk.image;
+            if (isPositional) {
+                if (isVarargs) {
+                    posVarargsParamDef = new ASTDirMacroOrFunction.ParameterDefinition(paramName, null);
+                } else {
+                    if (predefPosParamDefs == null) {
+                        predefPosParamDefs = new ArrayList<ASTDirMacroOrFunction.ParameterDefinition>();
+                    }
+                    predefPosParamDefs.add(new ASTDirMacroOrFunction.ParameterDefinition(paramName, defaultValueExp));
+                }
+            } else { // named parameter
+                if (isVarargs) {
+                    namedVarargsParamDef = new ASTDirMacroOrFunction.ParameterDefinition(paramName, null);
+                } else {
+                    if (predefNamedParamDefs == null) {
+                        predefNamedParamDefs = new ArrayList<ASTDirMacroOrFunction.ParameterDefinition>();
+                    }
+                    predefNamedParamDefs.add(new ASTDirMacroOrFunction.ParameterDefinition(paramName, defaultValueExp));
+                }
+            }
+
+            isFirstParam = false;
         }
     )*
-    [<CLOSE_PAREN> { hasCloseParen = true; } ] {
-        if (hasComma) {
-            throw new ParseException("You can't have comma after the last parameter.", template, start);
+
+    { tk = null; }
+    [ tk = <CLOSE_PAREN> ]
+    tk2 = <DIRECTIVE_END>
+    {
+        if (hasPendingComma) {
+            throw new ParseException("Comma without parameter after it.", template, commaTk);
         }
-        if (hasCloseParen != hasOpenParen) {
-    		throw new ParseException(
-                    hasOpenParen ? "Missing closing \")\"."
-                            : "Closing \")\" without corresponding opening \"(\".",
-                            template, start);
+        if ((tk != null) != hasOpenParen) {
+            if (hasOpenParen) {
+                // Note that parenhesis expression mode may aborts at the ">", so we don't get this far.
+                throw new ParseException("Missing closing \")\".", template, tk2);
+            } else {
+        		throw new ParseException("Closing \")\" without corresponding opening \"(\".", template, tk);
+            }
         }
     }
-    <DIRECTIVE_END>
+
     {
         // To prevent parser check loopholes like <#list ...><#macro ...><#break></#macro></#list>.
         lastIteratorBlockContexts = iteratorBlockContexts;
@@ -2998,12 +3093,12 @@ ASTDirMacro Macro() :
     (
         end = <END_MACRO>
         {
-        	if (isFunction) throw new ParseException("Expected function end tag here.", template, start);
+        	if (isFunction) throw new ParseException("Expected function end tag here.", template, end);
     	}
         |
         end = <END_FUNCTION>
         {
-    		if (!isFunction) throw new ParseException("Expected macro end tag here.", template, start);
+    		if (!isFunction) throw new ParseException("Expected macro end tag here.", template, end);
     	}
     )
     {
@@ -3011,7 +3106,19 @@ ASTDirMacro Macro() :
         breakableDirectiveNesting = lastBreakableDirectiveNesting;
         
         inMacro = inFunction = false;
-        ASTDirMacro result = new ASTDirMacro(name, argNames, args, catchAll, isFunction, children);
+
+        ASTDirMacroOrFunction result;
+        try {
+            result = new ASTDirMacroOrFunction(
+                    isFunction,
+                    name,
+                    predefPosParamDefs, posVarargsParamDef,
+                    predefNamedParamDefs, namedVarargsParamDef,
+                    children);
+        } catch (DuplicateStringKeyException e) {
+            throw new ParseException("The parameter list contains the parameter name "
+                    + _StringUtil.jQuote(e.getKey()) + " for multiple times.", template, start);
+        }
         result.setLocation(template, start, end);
         template.addMacro(result);
         return result;
@@ -3217,34 +3324,9 @@ ASTElement DynamicTopLevelCall() :
     }
 }
 
-HashMap NamedArgs() :
+ArrayList<ASTExpression> PositionalArgs() :
 {
-    HashMap result = new HashMap();
-    Token t;
-    ASTExpression exp;
-}
-{
-    (
-        t = <ID>
-        <ASSIGNMENT_EQUALS>
-        {
-            token_source.SwitchTo(token_source.NAMED_PARAMETER_EXPRESSION);
-            token_source.inNamedParameterExpression = true;
-        }             
-        exp = ASTExpression()
-        {
-            result.put(t.image, exp);
-        }
-    )+
-    {
-        token_source.inNamedParameterExpression = false;
-        return result;
-    }
-}
-
-ArrayList PositionalArgs() :
-{
-    ArrayList result = new ArrayList();
+    ArrayList<ASTExpression> result = new ArrayList<ASTExpression>();
     ASTExpression arg;
 }
 {

@@ -92,9 +92,8 @@
             - assignment source: 2  // o.a.f.c.ASTExpNumberLiteral
             - variable scope: "3"  // Integer
             - namespace: null  // Null
-    #macro  // o.a.f.c.ASTDirMacro
+    #macro  // o.a.f.c.ASTDirMacroOrFunction
         - assignment target: "m"  // String
-        - catch-all parameter name: null  // Null
         - AST-node subtype: "0"  // Integer
         #text  // o.a.f.c.ASTStaticText
             - content: "  7 "  // String

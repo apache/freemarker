@@ -28,16 +28,21 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
+import org.apache.freemarker.core.model.Constants;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util._NullWriter;
+import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.util.CommonSupplier;
+import org.apache.freemarker.core.util.FTLUtil;
 
 
 /**
  * AST expression node: {@code exp(args)}.
  */
-final class ASTExpMethodCall extends ASTExpression {
+final class ASTExpMethodCall extends ASTExpression implements CallPlace {
 
     private final ASTExpression target;
     private final ASTExpListLiteral arguments;
@@ -62,23 +67,55 @@ final class ASTExpMethodCall extends ASTExpression {
             : arguments.getValueList(env);
             Object result = targetMethod.exec(argumentStrings);
             return env.getObjectWrapper().wrap(result);
-        } else if (targetModel instanceof ASTDirMacro) {
-            ASTDirMacro func = (ASTDirMacro) targetModel;
-            env.setLastReturnValue(null);
-            if (!func.isFunction()) {
-                throw new _MiscTemplateException(env, "A macro cannot be called in an expression. (Functions can be.)");
+        } else if (targetModel instanceof TemplateFunctionModel) {
+            TemplateFunctionModel func = (TemplateFunctionModel) targetModel;
+
+            ArgumentArrayLayout arrayLayout = func.getArgumentArrayLayout();
+
+            // TODO [FM3] This is just temporary, until we support named args. Then the logic in ASTDynamicTopLevelCall
+            // should be reused.
+
+            int posVarargsLength;
+            int callArgCnt = arguments.size();
+            int predefPosArgCnt = arrayLayout.getPredefinedPositionalArgumentCount();
+            int posVarargsIdx = arrayLayout.getPositionalVarargsArgumentIndex();
+            if (callArgCnt > predefPosArgCnt) {
+                if (posVarargsIdx == -1) {
+                    throw new _MiscTemplateException(env,
+                            "Too many arguments; the target ", FTLUtil.getCallableTypeName(func),
+                            " has ", predefPosArgCnt, " arguments.");
+                }
             }
-            Writer prevOut = env.getOut();
-            try {
-                env.setOut(_NullWriter.INSTANCE);
-                env.invoke(func, null, arguments.items, null, null);
-            } catch (IOException e) {
-                // Should not occur
-                throw new TemplateException("Unexpected exception during function execution", e, env);
-            } finally {
-                env.setOut(prevOut);
+
+            List<TemplateModel> callArgList = arguments.getModelList(env);
+
+            TemplateModel[] args = new TemplateModel[arrayLayout.getTotalLength()];
+            int callPredefArgCnt = Math.min(callArgCnt, predefPosArgCnt);
+            for (int argIdx = 0; argIdx < callPredefArgCnt; argIdx++) {
+                args[argIdx] = callArgList.get(argIdx);
             }
-            return env.getLastReturnValue();
+
+            if (posVarargsIdx != -1) {
+                TemplateSequenceModel varargsSeq;
+                posVarargsLength = callArgCnt - predefPosArgCnt;
+                if (posVarargsLength <= 0) {
+                    varargsSeq = Constants.EMPTY_SEQUENCE;
+                } else {
+                    NativeSequence nativeSeq = new NativeSequence(posVarargsLength);
+                    varargsSeq = nativeSeq;
+                    for (int posVarargIdx = 0; posVarargIdx < posVarargsLength; posVarargIdx++) {
+                        nativeSeq.add(callArgList.get(predefPosArgCnt + posVarargIdx));
+                    }
+                }
+                args[posVarargsIdx] = varargsSeq;
+            }
+
+            int namedVarargsArgIdx = arrayLayout.getNamedVarargsArgumentIndex();
+            if (namedVarargsArgIdx != -1) {
+                args[namedVarargsArgIdx] = Constants.EMPTY_HASH;
+            }
+
+            return func.execute(args, this, env);
         } else {
             throw new NonMethodException(target, targetModel, env);
         }
@@ -144,4 +181,50 @@ final class ASTExpMethodCall extends ASTExpression {
         }
     }
 
+    // -----------------------------------------------------------------------------------------------------------------
+    // CallPlace API
+
+    @Override
+    public boolean hasNestedContent() {
+        return false;
+    }
+
+    @Override
+    public int getNestedContentParameterCount() {
+        return 0;
+    }
+
+    @Override
+    public void executeNestedContent(TemplateModel[] nestedContentArgs, Writer out, Environment env)
+            throws TemplateException, IOException {
+        // Do nothing
+    }
+
+    @Override
+    public Object getOrCreateCustomData(Object providerIdentity, CommonSupplier<?> supplier)
+            throws CallPlaceCustomDataInitializationException {
+        throw new UnsupportedOperationException("Expression call places don't store custom data");
+    }
+
+    @Override
+    public boolean isCustomDataSupported() {
+        return false;
+    }
+
+    @Override
+    public boolean isNestedOutputCacheable() {
+        return false;
+    }
+
+    @Override
+    public int getFirstTargetJavaParameterTypeIndex() {
+        // TODO [FM3]
+        return -1;
+    }
+
+    @Override
+    public Class<?> getTargetJavaParameterType(int argIndex) {
+        // TODO [FM3]
+        return null;
+    }
 }

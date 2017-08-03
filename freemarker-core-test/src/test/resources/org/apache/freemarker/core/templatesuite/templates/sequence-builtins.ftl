@@ -310,17 +310,17 @@ Chunk
 <#assign ls = ['a', 'b', 'c', 'd', 'e', 'f', 'g']>
 <#list ['NULL', '-'] as fill>
   <#list [1, 2, 3, 4, 5, 10] as columns>
-    <@printTable ls, columns, fill />
+    <@printTable ls columns=columns fill=fill />
   </#list>
 </#list>
-<@printTable [1, 2, 3, 4, 5, 6, 7, 8, 9], 3, 'NULL' />
-<@printTable [1, 2, 3, 4, 5, 6, 7, 8, 9], 3, '-' />
-<@printTable [1], 3, 'NULL' />
-<@printTable [1], 3, '-' />
-<@printTable [], 3, 'NULL' />
-<@printTable [], 3, '-' />
+<@printTable [1, 2, 3, 4, 5, 6, 7, 8, 9] columns=3 fill='NULL' />
+<@printTable [1, 2, 3, 4, 5, 6, 7, 8, 9] columns=3 fill='-' />
+<@printTable [1] columns=3 fill='NULL' />
+<@printTable [1] columns=3 fill='-' />
+<@printTable [] columns=3 fill='NULL' />
+<@printTable [] columns=3 fill='-' />
 
-<#macro printTable ls columns fill>
+<#macro printTable ls{positional} columns fill>
   columns = ${columns}, fill = ${fill}:<#lt>
   <#if fill=='NULL'>
     <#local rows = ls?chunk(columns)>

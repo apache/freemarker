@@ -312,8 +312,8 @@ class BuiltInsForMultipleTypes {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
-            // WRONG: it also had to check ASTDirMacro.isFunction()
-            return (tm instanceof ASTDirMacro || tm instanceof TemplateDirectiveModel) ?
+            // WRONG: it also had to check ASTDirMacroOrFunction.isFunction()
+            return (tm instanceof ASTDirMacroOrFunction || tm instanceof TemplateDirectiveModel) ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
@@ -360,8 +360,7 @@ class BuiltInsForMultipleTypes {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
-            // WRONG: it also had to check ASTDirMacro.isFunction()
-            return (tm instanceof ASTDirMacro)  ?
+            return (tm instanceof Environment.TemplateLanguageDirective)  ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
@@ -430,14 +429,13 @@ class BuiltInsForMultipleTypes {
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
-            if (!(tm instanceof ASTDirMacro)) {
+            if (!(tm instanceof Environment.TemplateLanguageCallable)) {
                 throw new UnexpectedTypeException(
                         target, tm,
-                        "macro or function", new Class[] { ASTDirMacro.class },
+                        "macro or function", new Class[] { Environment.TemplateLanguageCallable.class },
                         env);
-            } else {
-                return env.getMacroNamespace((ASTDirMacro) tm);
             }
+            return ((Environment.TemplateLanguageCallable) tm).getNamespace();
         }
     }
 

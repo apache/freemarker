@@ -17,24 +17,22 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.model;
+package org.apache.freemarker.core;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.IdentityHashMap;
 
-import org.apache.freemarker.core.CallPlaceCustomDataInitializationException;
-import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.TemplateDirectiveModel;
+import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util.CommonSupplier;
 
 /**
- * The place in a template from where a directive (like a macro) or function (like a method) is called;
+ * The place (in a template, usually) from where a directive (like a macro) or function was called;
  * <b>Do not implement this interface yourself</b>, as new methods may be added any time! Only FreeMarker itself
- * should provide implementations.
+ * should provide implementations. In case you have to call something from outside a template, use
+ * {@link NonTemplateCallPlace#INSTANCE}.
  */
-// TODO [FM3][CF] Should also replace DirectiveCallPlace
 public interface CallPlace {
 
     // -------------------------------------------------------------------------------------------------------------
@@ -48,33 +46,34 @@ public interface CallPlace {
 
     /**
      * The number of nested content parameters in this call (like 2 in {@code <@foo xs; k, v>...</@>}). If you want the
-     * caller to specify a predefined number of nested content parameters, then this is not interesting for you, and
-     * just pass an array of that length to {@link #executeNestedContent(TemplateModel[], Writer, Environment)}. If,
-     * however, you want to allow the caller to declare less parameters, then this is how you know how much
-     * parameters you should omit when calling {@link #executeNestedContent(TemplateModel[], Writer, Environment)}.
+     * caller to specify a fixed number of nested content parameters, then this is not interesting for you, and just
+     * pass an array of that length to {@link #executeNestedContent(TemplateModel[], Writer, Environment)}. If, however,
+     * you want to allow the caller to declare less parameters, then this is how you know how much parameters you should
+     * calculate and pass to {@link #executeNestedContent(TemplateModel[], Writer, Environment)}.
      */
     int getNestedContentParameterCount();
 
     /**
-     * Executed the nested content; it there's none, it just does nothing.
+     * Executes the nested content; it there's none, it just does nothing.
      *
-     * @param nestedContentParamValues
+     * @param nestedContentArgs
      *         The nested content parameter values to pass to the nested content (as in {@code <@foo bar; i, j>${i},
      *         ${j}</@foo>} there are 2 such parameters, whose value you set here), or {@code null} if there's none.
-     *         This array must be {@link #getNestedContentParameterCount()} long, or else {@link TemplateException} will thrown by
-     *         FreeMarker with a descriptive error message that tells to user the they need to declare that many nested
-     *         content parameters as the length of this array. If you want to allow the the caller to not declare some
-     *         of nested content parameters, then you have to make this array shorter according to {@link
-     *         #getNestedContentParameterCount()}.
+     *         This array must be {@link #getNestedContentParameterCount()} long, or else FreeMarker will throw an
+     *         {@link TemplateException} with a descriptive error message that tells to user that they need to declare
+     *         that many nested content parameters as the length of this array. If you want to allow the  caller to not
+     *         declare some of the nested content parameters, then you have to make this array shorter according to
+     *         {@link #getNestedContentParameterCount()}.
      */
-    void executeNestedContent(TemplateModel[] nestedContentParamValues, Writer out, Environment env)
+    void executeNestedContent(TemplateModel[] nestedContentArgs, Writer out, Environment env)
             throws TemplateException, IOException;
 
     // -------------------------------------------------------------------------------------------------------------
     // Source code info:
 
     /**
-     * The template that contains this call.
+     * The template that contains this call; {@code null} if the call is not from a template (but directly from
+     * user Java code, for example).
      */
     Template getTemplate();
 
@@ -140,17 +139,25 @@ public interface CallPlace {
      *
      * @throws CallPlaceCustomDataInitializationException
      *         If the {@link CommonSupplier} had to be invoked but failed.
+     * @throws UnsupportedOperationException
+     *         If this call place doesn't support storing custom date; see {@link #isCustomDataSupported()}.
      */
     Object getOrCreateCustomData(Object providerIdentity, CommonSupplier<?> supplier)
             throws CallPlaceCustomDataInitializationException;
 
     /**
-     * Tells if the nested content (the body) can be safely cached, as it only depends on the template content (not on
-     * variable values and such) and has no side-effects (other than writing to the output). Examples of cases that give
-     * {@code false}: {@code <@foo>Name: } <tt>${name}</tt>{@code</@foo>},
-     * {@code <@foo>Name: <#if showIt>Joe</#if></@foo>}. Examples of cases that give {@code true}:
-     * {@code <@foo>Name: Joe</@foo>}, {@code <@foo />}. Note that we get {@code true} for no nested content, because
-     * that's equivalent to 0-length nested content.
+     * Tells if this call place supports storing custom data. As of this writing, only top-level (i.e., outside
+     * expression) directive calls do.
+     */
+    boolean isCustomDataSupported();
+
+    /**
+     * Tells if the output of the nested content can be safely cached, as it only depends on the template content (not
+     * on variable values and such) and has no side-effects (other than writing to the output). Examples of cases that
+     * give {@code false}: {@code <@foo>Name: } <tt>${name}</tt>{@code</@foo>}, {@code <@foo>Name: <#if
+     * condition>bar</#if></@foo>}. Examples of cases that give {@code true}: {@code <@foo>Name: Joe</@foo>}, {@code
+     * <@foo />}. Note that we get {@code true} for no nested content, because that's equivalent to 0-length nested
+     * content.
      * <p>
      * This method returns a pessimistic result. For example, if it sees a custom directive call, it can't know what it
      * does, so it will assume that it's not cacheable.
@@ -158,9 +165,10 @@ public interface CallPlace {
     boolean isNestedOutputCacheable();
 
     // -------------------------------------------------------------------------------------------------------------
-    // Miscellaneous:
+    // Overloaded method selection:
 
     /**
+     * The index of the first item in the argument array passed to {@code execute} that has this information.
      * Used solely for speed optimization (to minimize the number of
      * {@link #getTargetJavaParameterType(int)} calls).
      *
@@ -169,10 +177,18 @@ public interface CallPlace {
     int getFirstTargetJavaParameterTypeIndex();
 
     /**
-     * The type of the parameter in the target Java method; used for overloaded Java method selection.
-     * This optional information is specified by the template author in the source code.
+     * The type of the parameter in the target Java method; used for overloaded Java method selection. This optional
+     * information is specified by the template author in the source code (the syntax is not yet decided when I write
+     * this).
      *
-     * @return The desired type or {@code null} if this information wasn't specified in the template.
+     * @param argIndex
+     *         The index of the argument in the argument array
+     *
+     * @return The desired Java type or {@code null} if this information wasn't specified in the template.
+     *
+     * @throws IndexOutOfBoundsException
+     *         Might be thrown if {@code argIndex} is an invalid index according the number of arguments on the call
+     *         site. Some implementations may just return {@code null} in that case though.
      */
     Class<?> getTargetJavaParameterType(int argIndex);
 

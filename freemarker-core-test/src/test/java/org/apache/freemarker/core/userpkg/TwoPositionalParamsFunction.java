@@ -20,44 +20,44 @@
 package org.apache.freemarker.core.userpkg;
 
 import java.io.IOException;
-import java.io.Writer;
+import java.io.StringWriter;
 
+import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.CallPlace;
-import org.apache.freemarker.core.model.TemplateDirectiveModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.impl.SimpleScalar;
 
-public class TwoPositionalParamsDirective extends TestTemplateCallableModel implements TemplateDirectiveModel {
+public class TwoPositionalParamsFunction extends TestTemplateCallableModel implements TemplateFunctionModel {
 
-    public static final TwoPositionalParamsDirective INSTANCE = new TwoPositionalParamsDirective();
+    public static TwoPositionalParamsFunction INSTANCE = new TwoPositionalParamsFunction();
+
+    private TwoPositionalParamsFunction() {
+        //
+    }
 
     private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
             2, false,
             null, false);
 
-    private TwoPositionalParamsDirective() {
-        //
-    }
-
     @Override
-    public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
-            throws TemplateException, IOException {
-        out.write("#p(");
-        printParam("p1", args[0], out, true);
-        printParam("p2", args[1], out);
-        out.write(")");
+    public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env) throws TemplateException {
+        try {
+            StringWriter out = new StringWriter();
+            out.write("fp(");
+            printParam("p1", args[0], out, true);
+            printParam("p2", args[1], out);
+            out.write(")");
+            return new SimpleScalar(out.toString());
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     @Override
     public ArgumentArrayLayout getArgumentArrayLayout() {
         return ARGS_LAYOUT;
     }
-
-    @Override
-    public boolean isNestedContentSupported() {
-        return false;
-    }
-
 }

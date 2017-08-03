@@ -21,7 +21,6 @@ package org.apache.freemarker.core;
 
 import java.io.IOException;
 
-import org.apache.freemarker.core.model.CallPlace;
 import org.apache.freemarker.core.model.TemplateDateModel;
 
 /**

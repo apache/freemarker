@@ -62,7 +62,9 @@ public class ParsingErrorMessagesTest {
     @Test
     public void testUnclosedDirectives() {
         assertErrorContains("<#macro x>", "#macro", "unclosed");
+        assertErrorContains("<#macro x></#function>", "macro end tag");
         assertErrorContains("<#function x()>", "#macro", "unclosed");
+        assertErrorContains("<#function x()></#macro>", "function end tag");
         assertErrorContains("<#assign x>", "#assign", "unclosed");
         assertErrorContains("<#macro m><#local x>", "#local", "unclosed");
         assertErrorContains("<#global x>", "#global", "unclosed");
@@ -122,15 +124,62 @@ public class ParsingErrorMessagesTest {
         assertErrorContains("<#assign x = x}>", "\"}\"", "open");
         // TODO assertErrorContains("<#assign x = '${x'>", "unclosed");
     }
-    
+
+    @Test
+    public void testUnknownHeaderParameter() {
+        assertErrorContains("<#ftl foo=1>", "Unknown", "foo");
+        assertErrorContains("<#ftl attributes={}>", "Unknown", "attributes", "customSettings");
+    }
+
+    @Test
+    public void testDynamicTopCalls() throws IOException, TemplateException {
+        assertErrorContains("<@a, n1=1 />", "Remove comma", "between", "by position");
+        assertErrorContains("<@a n1=1, n2=1 />", "Remove comma", "between", "by position");
+        assertErrorContains("<@a n1=1, 2 />", "Remove comma", "between", "by position");
+        assertErrorContains("<@a, 1 />", "Remove comma", "between", "by position");
+        assertErrorContains("<@a 1, , 2 />", "Two commas");
+        assertErrorContains("<@a 1 2 />", "Missing comma");
+        assertErrorContains("<@a n1=1 2 />", "must be earlier than arguments passed by name");
+    }
+
+    @Test
+    public void testMacroAndFunctionDefinitions() {
+        assertErrorContains("<#macro m><#macro n></#macro></#macro>", "nested into each other");
+        assertErrorContains("<#macro m(a)></#macro>", "can't use \"(\"");
+        assertErrorContains("<#function f a></#function>", "must use \"(\"");
+        assertErrorContains("<#macro m a{badOption})></#macro>", "\"badOption\"",
+                "\"" + ASTDirMacroOrFunction.POSITIONAL_PARAMETER_OPTION_NAME + "\"",
+                "\"" + ASTDirMacroOrFunction.NAMED_PARAMETER_OPTION_NAME + "\"");
+        assertErrorContains("<#function f(a{named}, b)></#function>", "Positional", "must precede named");
+        assertErrorContains("<#function f(a..., b)></#function>", "another", "after", "positional varargs");
+        assertErrorContains("<#function f(a..., b...)></#function>", "another", "after", "positional varargs");
+        assertErrorContains("<#macro m a... b></#macro>", "another", "after", "named varargs");
+        assertErrorContains("<#macro m a... b...></#macro>", "another", "after", "named varargs");
+        assertErrorContains("<#function f(a b)></#function>", "Function", "must have comma");
+        assertErrorContains("<#function f(a{named} b{named})></#function>", "Function", "must have comma");
+        assertErrorContains("<#macro m a, b></#macro>", "Named param", "macro", "need no comma");
+        assertErrorContains("<#macro m a{positional} b{positional}></#macro>",
+                "Positional param", "must have comma");
+        assertErrorContains("<#macro m a...=[]></#macro>", "Varargs", "default");
+        assertErrorContains("<#function f(a=0, b)></#function>", "with default", "without a default");
+        assertErrorContains("<#function f(a,)></#function>", "Comma without");
+        assertErrorContains("<#macro m a{positional}, b{positional},></#macro>", "Comma without");
+        assertErrorContains(false, "<#function f(a, b></#function>");
+        assertErrorContains(false, "<#function f(></#function>");
+        assertErrorContains(false, "[#ftl][#function f(a, b][/#function]", "Missing closing \")\"");
+        assertErrorContains(false, "[#ftl][#function f(][/#function]", "Missing closing \")\"");
+        assertErrorContains("<#macro m a b)></#macro>", "\")\" without", "opening");
+        assertErrorContains("<#macro m a b a></#macro>", "\"a\"", "multiple");
+    }
+
     private void assertErrorContains(String ftl, String... expectedSubstrings) {
         assertErrorContains(false, ftl, expectedSubstrings);
         assertErrorContains(true, ftl, expectedSubstrings);
     }
 
-    private void assertErrorContains(boolean squareTags, String ftl, String... expectedSubstrings) {
+    private void assertErrorContains(boolean convertToSquare, String ftl, String... expectedSubstrings) {
         try {
-            if (squareTags) {
+            if (convertToSquare) {
                 ftl = ftl.replace('<', '[').replace('>', ']');
             }
             new Template("adhoc", ftl, cfg);
@@ -139,7 +188,7 @@ public class ParsingErrorMessagesTest {
             String msg = e.getMessage();
             for (String needle: expectedSubstrings) {
                 if (needle.startsWith("\\!")) {
-                    String netNeedle = needle.substring(2); 
+                    String netNeedle = needle.substring(2);
                     if (msg.contains(netNeedle)) {
                         fail("The message shouldn't contain substring " + _StringUtil.jQuote(netNeedle) + ":\n" + msg);
                     }
@@ -153,15 +202,9 @@ public class ParsingErrorMessagesTest {
             throw new RuntimeException(e);
         }
     }
-    
+
     private void showError(Throwable e) {
         //System.out.println(e);
-    }
-
-    @Test
-    public void testUnknownHeaderParameter() {
-        assertErrorContains("<#ftl foo=1>", "Unknown", "foo");
-        assertErrorContains("<#ftl attributes={}>", "Unknown", "attributes", "customSettings");
     }
 
 }

@@ -50,6 +50,8 @@ public class Constants {
     
     public static final TemplateModelIterator EMPTY_ITERATOR = new EmptyIteratorModel();
 
+    public static final TemplateModel[] EMPTY_TEMPLATE_MODEL_ARRAY = new TemplateModel[0];
+
     private static class EmptyIteratorModel implements TemplateModelIterator, Serializable {
 
         @Override

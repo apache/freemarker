@@ -735,7 +735,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         out.write(rootElement != null ? rootElement.getCanonicalForm() : "Unfinished template");
     }
 
-    void addMacro(ASTDirMacro macro) {
+    void addMacro(ASTDirMacroOrFunction macro) {
         macros.put(macro.getName(), macro);
     }
 

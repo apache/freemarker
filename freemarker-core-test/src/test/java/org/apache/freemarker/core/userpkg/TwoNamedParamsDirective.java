@@ -25,11 +25,12 @@ import java.io.Writer;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.CallPlace;
+import org.apache.freemarker.core.CallPlace;
+import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util.StringToIndexMap;
 
-public class TwoNamedParamsDirective extends TestTemplateDirectiveModel {
+public class TwoNamedParamsDirective extends TestTemplateCallableModel implements TemplateDirectiveModel {
 
     public static final TwoNamedParamsDirective INSTANCE = new TwoNamedParamsDirective();
 

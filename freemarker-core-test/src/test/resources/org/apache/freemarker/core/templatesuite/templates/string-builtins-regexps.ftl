@@ -42,8 +42,8 @@ ${"test\nFoo"?matches('.*\n^foo', 'mi')?string} == true
 ${"test\nFoo"?matches('.*^foo', 'ism')?string} == true
 ${"test\nFoo"?matches('.*^foo', 'smi')?string} == true
 <#setting booleanFormat="True,False">
-<@assert test=false?matches('[eslaF]+') />
-<@assert test='False'?matches('[eslaF]+') />
+<@assert false?matches('[eslaF]+') />
+<@assert 'False'?matches('[eslaF]+') />
 
 <#assign s = "Code without test coverage\nis considered to be BROKEN">
 
@@ -124,7 +124,7 @@ ${false?replace('[abc]', 'A', 'r')} == FAlse
   Fails in 2.4
 </#attempt>
 
-<#macro dumpList xs>[<#list xs as x>${x}<#if x_has_next>, </#if></#list>]</#macro>
+<#macro dumpList xs{positional}>[<#list xs as x>${x}<#if x_has_next>, </#if></#list>]</#macro>
 <@dumpList "fooXbarxbaaz"?split("X") /> == [foo, barxbaaz]
 <@dumpList "fooXbarxbaaz"?split("X", "") /> == [foo, barxbaaz]
 <@dumpList "fooXbarxbaaz"?split("X", "i") /> == [foo, bar, baaz]

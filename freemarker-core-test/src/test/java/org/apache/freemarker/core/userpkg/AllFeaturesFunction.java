@@ -22,23 +22,23 @@ package org.apache.freemarker.core.userpkg;
 import static org.apache.freemarker.core._TemplateCallableModelUtils.*;
 
 import java.io.IOException;
-import java.io.Writer;
+import java.io.StringWriter;
 
+import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.CallPlace;
-import org.apache.freemarker.core.model.TemplateDirectiveModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.SimpleNumber;
+import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.util.StringToIndexMap;
 
-public class AllFeaturesDirective extends TestTemplateCallableModel implements TemplateDirectiveModel {
+public class AllFeaturesFunction extends TestTemplateCallableModel implements TemplateFunctionModel {
 
-    public static final AllFeaturesDirective INSTANCE = new AllFeaturesDirective();
+    public static final AllFeaturesFunction INSTANCE = new AllFeaturesFunction();
 
     private static final int P1_ARG_IDX = 0;
     private static final int P2_ARG_IDX = 1;
@@ -65,11 +65,11 @@ public class AllFeaturesDirective extends TestTemplateCallableModel implements T
     private final boolean n1AllowNull;
     private final boolean n2AllowNull;
 
-    public AllFeaturesDirective() {
+    public AllFeaturesFunction() {
         this(true, true, true, true);
     }
 
-    public AllFeaturesDirective(boolean p1AllowNull, boolean p2AllowNull, boolean n1AllowNull, boolean n2AllowNull) {
+    public AllFeaturesFunction(boolean p1AllowNull, boolean p2AllowNull, boolean n1AllowNull, boolean n2AllowNull) {
         this.p1AllowNull = p1AllowNull;
         this.p2AllowNull = p2AllowNull;
         this.n1AllowNull = n1AllowNull;
@@ -77,59 +77,38 @@ public class AllFeaturesDirective extends TestTemplateCallableModel implements T
     }
 
     @Override
-    public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
-            throws TemplateException, IOException {
-        execute(castArgumentToNumber(args, P1_ARG_IDX, p1AllowNull, env),
+    public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env) throws TemplateException {
+        return execute(castArgumentToNumber(args, P1_ARG_IDX, p1AllowNull, env),
                 castArgumentToNumber(args, P2_ARG_IDX, p2AllowNull, env),
                 (TemplateSequenceModel) args[P_VARARGS_ARG_IDX],
                 castArgumentToNumber(args[N1_ARG_IDX], N1_ARG_NAME, n1AllowNull, env),
                 castArgumentToNumber(args[N2_ARG_IDX], N2_ARG_NAME, n2AllowNull, env),
                 (TemplateHashModelEx2) args[N_VARARGS_ARG_IDX],
-                out, env, callPlace);
+                env);
     }
 
-    private void execute(TemplateNumberModel p1, TemplateNumberModel p2, TemplateSequenceModel pOthers,
+    private TemplateModel execute(TemplateNumberModel p1, TemplateNumberModel p2, TemplateSequenceModel pOthers,
             TemplateNumberModel n1, TemplateNumberModel n2, TemplateHashModelEx2 nOthers,
-            Writer out, Environment env, CallPlace callPlace) throws IOException, TemplateException {
-        out.write("#a(");
-        printParam("p1", p1, out, true);
-        printParam("p2", p2, out);
-        printParam("pVarargs", pOthers, out);
-        printParam(N1_ARG_NAME, n1, out);
-        printParam(N2_ARG_NAME, n2, out);
-        printParam("nVarargs", nOthers, out);
-        int nestedContParamCnt = callPlace.getNestedContentParameterCount();
-        if (nestedContParamCnt != 0) {
-            out.write("; " + nestedContParamCnt);
+            Environment env) throws TemplateException {
+        StringWriter out = new StringWriter();
+        try {
+            out.write("fa(");
+            printParam("p1", p1, out, true);
+            printParam("p2", p2, out);
+            printParam("pVarargs", pOthers, out);
+            printParam(N1_ARG_NAME, n1, out);
+            printParam(N2_ARG_NAME, n2, out);
+            printParam("nVarargs", nOthers, out);
+            out.write(")");
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
-        out.write(")");
-
-        if (callPlace.hasNestedContent()) {
-            out.write(" {");
-            if (p1 != null) {
-                int intP1 = p1.getAsNumber().intValue();
-                for (int i = 0; i < intP1; i++) {
-                    // We dynamically set as many nested content parameters as many the caller has declared; this is
-                    // unusual, and is for testing purposes only.
-                    TemplateModel[] nestedContParamValues = new TemplateModel[nestedContParamCnt];
-                    for (int paramIdx = 0; paramIdx < nestedContParamValues.length; paramIdx++) {
-                        nestedContParamValues[paramIdx] = new SimpleNumber((i + 1) * (paramIdx + 1));
-                    }
-                    callPlace.executeNestedContent(nestedContParamValues, out, env);
-                }
-            }
-            out.write("}");
-        }
+        return new SimpleScalar(out.toString());
     }
 
     @Override
     public ArgumentArrayLayout getArgumentArrayLayout() {
         return ARGS_LAYOUT;
-    }
-
-    @Override
-    public boolean isNestedContentSupported() {
-        return true;
     }
 
 }

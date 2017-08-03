@@ -22,42 +22,40 @@ package org.apache.freemarker.core;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 
-// TODO [FM3][CF] Review and rename this when TDM2 and TFM are in place
 /**
- * Indicates that a {@link TemplateDirectiveModel} or {@link ASTDirMacro} value was
- * expected, but the value had a different type.
+ * Indicates that a {@link TemplateDirectiveModel} was expected, but the value had a different type.
  */
-class NonUserDefinedDirectiveLikeException extends UnexpectedTypeException {
+class NonDirectiveException extends UnexpectedTypeException {
 
     private static final Class[] EXPECTED_TYPES = new Class[] {
-        TemplateDirectiveModel.class, ASTDirMacro.class };
+        TemplateDirectiveModel.class, ASTDirMacroOrFunction.class };
     
-    public NonUserDefinedDirectiveLikeException(Environment env) {
+    public NonDirectiveException(Environment env) {
         super(env, "Expecting user-defined directive, transform or macro value here");
     }
 
-    public NonUserDefinedDirectiveLikeException(String description, Environment env) {
+    public NonDirectiveException(String description, Environment env) {
         super(env, description);
     }
 
-    NonUserDefinedDirectiveLikeException(Environment env, _ErrorDescriptionBuilder description) {
+    NonDirectiveException(Environment env, _ErrorDescriptionBuilder description) {
         super(env, description);
     }
 
-    NonUserDefinedDirectiveLikeException(
+    NonDirectiveException(
             ASTExpression blamed, TemplateModel model, Environment env)
             throws InvalidReferenceException {
         super(blamed, model, "user-defined directive, transform or macro", EXPECTED_TYPES, env);
     }
 
-    NonUserDefinedDirectiveLikeException(
+    NonDirectiveException(
             ASTExpression blamed, TemplateModel model, String tip,
             Environment env)
             throws InvalidReferenceException {
         super(blamed, model, "user-defined directive, transform or macro", EXPECTED_TYPES, tip, env);
     }
 
-    NonUserDefinedDirectiveLikeException(
+    NonDirectiveException(
             ASTExpression blamed, TemplateModel model, String[] tips, Environment env) throws InvalidReferenceException {
         super(blamed, model, "user-defined directive, transform or macro", EXPECTED_TYPES, tips, env);
     }    

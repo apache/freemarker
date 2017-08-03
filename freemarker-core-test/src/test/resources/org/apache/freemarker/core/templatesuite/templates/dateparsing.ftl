@@ -42,8 +42,8 @@
 <#assign gmt01Str='1998-10-30T19:30:44.512'?dateTime.xs?string />
 <#setting timeZone="default">
 <#assign defStr='1998-10-30T19:30:44.512'?dateTime.xs?string />
-<@assert test = gmtStr != gmt01Str />
-<@assert test = defStr != gmtStr || defStr != gmt01Str />
+<@assert gmtStr != gmt01Str />
+<@assert defStr != gmtStr || defStr != gmt01Str />
 
 <#assign refDate = "AD 1998-10-30 +0000"?date>
 <#assign refTime = "15:30:44.512 +0000"?time>

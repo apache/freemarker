@@ -23,33 +23,45 @@ import org.apache.freemarker.core.util.StringToIndexMap;
 
 /**
  * {@link TemplateCallableModel} subinterfaces define a method called {@code execute}, which has an argument array
- * parameter, whose layout this class describes. Each parameter has a constant index in this array, which is the same
- * for all invocations of the same {@link TemplateCallableModel} object (regardless if there are omitted optional
- * parameters). Thus, the argument values can always be accessed at these constant indexes; no runtime name lookup is
- * needed inside the {@code execute} method of the {@link TemplateCallableModel} implementation. The
- * {@link ArgumentArrayLayout} object is usually stored a static final field of the {@link TemplateCallableModel}
- * implementation class.
+ * parameter, whose layout this class describes. The layout specifies the (minimum) array length, what's the index
+ * of which parameters, and if there are varargs parameters, in which case they must not be left {@code null}.
+ * <p>
+ * Each parameter has a constant index in this array, which is the same for all invocations of the same
+ * {@link TemplateCallableModel} object (regardless if there are omitted optional parameters). Thus, the argument
+ * values can always be accessed at these constant indexes; no runtime name lookup is needed inside the {@code
+ * execute} method of the {@link TemplateCallableModel} implementation. The {@link ArgumentArrayLayout} object is
+ * usually stored in a static final field of the {@link TemplateCallableModel} implementation class. Said constant
+ * indexes are alsi usually defined in the {@link TemplateCallableModel} implementation as static final constants
+ * (then feed into the {@link ArgumentArrayLayout}). Some {@link TemplateCallableModel} implementations, such those
+ * stand for macros and functions defined in the template, decide the layout on runtime instead. Note the less, once
+ * the {@link TemplateCallableModel} was crated, the layout is fixed.
  * <p>
  * The layout of the array is as follows:
  * <ol>
  * <li>
  *     {@link #getPredefinedPositionalArgumentCount()} elements for the predefined positional parameters. Index 0
- *     corresponds to the 1st positional parameter. For omitted parameters the corresponding array element is {@code
- *     null}.
+ *     corresponds to the 1st positional parameter, index 1 for the second, etc. For omitted parameters (optional
+ *     parameters usually) the corresponding array element is {@code null}.
  * <li>
- *     {@link #getPredefinedNamedArgumentsMap()}{@code .size()} elements for the predefined named arguments. These are at
- *     the indexes returned by {@link #getPredefinedNamedArgumentsMap()}{@code .get(String name)}. For omitted arguments
- *     the corresponding array element is {@code null}.
+ *     {@link #getPredefinedNamedArgumentsMap()}{@code .size()} elements for the predefined named arguments. These are
+ *     at the indexes returned by {@link #getPredefinedNamedArgumentsMap()}{@code .get(String name)}. Yet again, for
+ *     omitted arguments the corresponding array element is {@code null}. Within this index range reserved for the
+ *     named arguments, the {@link TemplateCallableModel} object is free to chose what index belongs to which name (as
+ *     far as two names don't share the same index).
  * <li>
- *     If there's a positional varargs argument, then one element for the positional varargs parameter, at
- *     index {@link #getPositionalVarargsArgumentIndex()}.
+ *     If there's a positional varargs argument, then 1 element for the positional varargs parameter (whose value
+ *     will be a {@link TemplateSequenceModel}), at index {@link #getPositionalVarargsArgumentIndex()}. This must not
+ *     be left {@code null} in the argument array. In case there are 0 positional varargs, the caller must set it to
+ *     an empty {@link TemplateSequenceModel} (like {@link Constants#EMPTY_SEQUENCE}).
  * <li>
- *     If there's a named varargs argument, then one element for the positional varargs parameter, at
- *     index {@link #getNamedVarargsArgumentIndex()}.
+ *     If there's a named varargs argument, then 1 element for the positional varargs parameter (whose value will be
+ *     a {@link TemplateHashModelEx2}), at index {@link #getNamedVarargsArgumentIndex()}. This must not be left
+ *     {@code null} in the argument array. In case there are 0 named varargs, the caller must set it to an empty
+ *     {@link TemplateHashModelEx2} (like {@link Constants#EMPTY_HASH}).
  * </ol>
  * <p>
- * The length of the array is {@link #getTotalLength()}}, or more, in which case the extra elements should be
- * ignored.
+ * The length of the argument array (allocated by the caller of {@code execute}) is {@link #getTotalLength()}}, or
+ * more (in case you have a longer array for reuse), in which case the extra elements should be ignored by the callee.
  * <p>
  * Instances of this class are immutable, thread-safe objects.
  */
@@ -66,14 +78,24 @@ public final class ArgumentArrayLayout {
             0, false,
             null, false);
 
-    /** Constant to be used when the {@link TemplateCallableModel} has 1 positional parameter, and no others. */
+    /**
+     * Constant to be used when the {@link TemplateCallableModel} has 1 positional parameter, and no others.
+     * (The argument array index of the single positional parameter will be 0.)
+     */
     public static final ArgumentArrayLayout SINGLE_POSITIONAL_PARAMETER = new ArgumentArrayLayout(
             1, false,
             null, false);
 
     /**
-     * Creates a new instance, or returns some of the equivalent static constants (such as {@link #PARAMETERLESS} or
-     * {@link #SINGLE_POSITIONAL_PARAMETER}).
+     * Constant to be used when the {@link TemplateCallableModel} has 1 positional varargs parameter, and no others.
+     * (The argument array index of the positional varargs parameter will be 0.)
+     *  */
+    public static final ArgumentArrayLayout POSITIONAL_VARARGS_PARAMETER_ONLY = new ArgumentArrayLayout(
+            0, true,
+            null, false);
+
+    /**
+     * Creates a new instance, or returns some of the equivalent static constants (for example {@link #PARAMETERLESS}).
      *
      * @param predefinedPositionalArgumentCount
      *         The highest allowed number of positional arguments, not counting the positional varargs argument. The
@@ -107,11 +129,11 @@ public final class ArgumentArrayLayout {
             int predefinedPositionalArgumentCount, boolean hasPositionalVarargsArgument,
             StringToIndexMap predefinedNamedArgumentsMap, boolean hasNamedVarargsArgument) {
         if ((predefinedNamedArgumentsMap == null || predefinedNamedArgumentsMap == StringToIndexMap.EMPTY)
-                && !hasPositionalVarargsArgument && !hasNamedVarargsArgument) {
+                && !hasNamedVarargsArgument) {
             if (predefinedPositionalArgumentCount == 0) {
-                return PARAMETERLESS;
+                return hasPositionalVarargsArgument ? POSITIONAL_VARARGS_PARAMETER_ONLY : PARAMETERLESS;
             }
-            if (predefinedPositionalArgumentCount == 1) {
+            if (predefinedPositionalArgumentCount == 1 && !hasPositionalVarargsArgument) {
                 return SINGLE_POSITIONAL_PARAMETER;
             }
         }
@@ -120,6 +142,11 @@ public final class ArgumentArrayLayout {
                 predefinedNamedArgumentsMap, hasNamedVarargsArgument);
     }
 
+    /**
+     * Creates a new instance. Note that the index layout rules are not internal implementation details; they can't be
+     * changed without breaking backward compatibility. Also some internal parts, such as macro definitions, depend on
+     * those rules.
+     */
     private ArgumentArrayLayout(int predefinedPositionalArgumentCount, boolean hasPositionalVarargsArgument,
             StringToIndexMap predefinedNamedArgumentsMap, boolean hasNamedVarargsArgument) {
         if (predefinedNamedArgumentsMap == null) {
@@ -165,35 +192,37 @@ public final class ArgumentArrayLayout {
      * Returns the index of the varargs argument into which positional arguments that aren't predefined are collected,
      * or -1 if there's no such varargs argument. The value of the positional varargs argument is a {@link
      * TemplateSequenceModel} that collects all positional arguments whose index would be greater than or equal to
-     * {@link #getPredefinedPositionalArgumentCount()}.
+     * {@link #getPredefinedPositionalArgumentCount()}. The value of this argument can't be {@code null}.
      *
-     * @return -1 if there's no such named argument
+     * @return -1 if there's no positional varargs argument
      */
     public int getPositionalVarargsArgumentIndex() {
         return positionalVarargsArgumentIndex;
     }
 
     /**
-     * Returns the index of the varargs argument into which named arguments that aren't predefined are collected, or -1
-     * if there's no such varargs argument. The value of the named varargs argument is a {@link TemplateHashModelEx2}
-     * with string keys that collects all the named arguments that aren't present in the {@link
-     * #getPredefinedNamedArgumentsMap()}. The iteration order of this hash follows the order in which the arguments
-     * were specified on the call site (in the template, typically).
+     * Returns the index of the varargs argument into which named arguments that aren't predefined (via {@link
+     * #getPredefinedNamedArgumentsMap()}) are collected, or -1 if there's no such varargs argument. The value of the
+     * named varargs argument is a {@link TemplateHashModelEx2} with string keys that collects all the named arguments
+     * that aren't present in the {@link #getPredefinedNamedArgumentsMap()}. The iteration order of this hash
+     * corresponds to the order in which the arguments were specified on the call site (in a template, typically).
+     * The value of this argument can't be {@code null}.
      *
-     * @return -1 if there's no such named argument
+     * @return -1 if there's no named varargs argument
      */
     public int getNamedVarargsArgumentIndex() {
         return namedVarargsArgumentIndex;
     }
 
     /**
-     * Returns the required (minimum) length of the {@code args} array that's passed to the {@code execute} method. As
-     * there's an index reserved for each predefined parameters, this length always includes the space reserved for
-     * optional parameters as well; it's not why it's said to be a minimum length. It's a minimum length because a
-     * longer array might be reused for better performance (but {@code execute} should never read those excess
-     * elements).
+     * Returns the required (minimum) length of the {@code args} array that's passed to the {@code execute} method of
+     * the {@link TemplateCallableModel} subinterface. As there's an index reserved for each predefined parameters (and
+     * a varargs parameter always counts as 1 parameter), this length always includes the space reserved for optional
+     * parameters as well; it's not why it's said to be a minimum length. It's a minimum length because a longer array
+     * might be reused for better performance (but {@code execute} should never read those excess elements).
      */
     public int getTotalLength() {
         return arrayLength;
     }
+
 }

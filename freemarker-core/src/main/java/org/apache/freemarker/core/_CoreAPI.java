@@ -61,14 +61,12 @@ public final class _CoreAPI {
         }
     }
 
-    // [FM3] Should become unnecessary as custom directive classes are reworked
-    public static boolean isMacroOrFunction(TemplateModel m) {
-        return m instanceof ASTDirMacro;
+    public static boolean isMacro(Class<? extends TemplateModel> cl) {
+        return Environment.TemplateLanguageDirective.class.isAssignableFrom(cl);
     }
 
-    // [FM3] Should become unnecessary as custom directive classes are reworked
-    public static boolean isFunction(TemplateModel m) {
-        return m instanceof ASTDirMacro && ((ASTDirMacro) m).isFunction();
+    public static boolean isFunction(Class<? extends TemplateModel> cl) {
+        return Environment.TemplateLanguageFunction.class.isAssignableFrom(cl);
     }
 
     public static void checkVersionNotNullAndSupported(Version incompatibleImprovements) {

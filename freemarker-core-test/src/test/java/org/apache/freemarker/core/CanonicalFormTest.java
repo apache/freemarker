@@ -33,8 +33,8 @@ public class CanonicalFormTest extends FileTestCase {
         super(name);
     }
 
-    public void testMacrosCanonicalForm() throws Exception {
-        assertCanonicalFormOf("cano-macros.ftl");
+    public void testCallableDefinitionCanonicalForm() throws Exception {
+        assertCanonicalFormOf("cano-macro-and-function.ftl");
     }
     
     public void testIdentifierEscapingCanonicalForm() throws Exception {

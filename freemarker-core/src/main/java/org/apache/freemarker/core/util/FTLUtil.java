@@ -25,10 +25,12 @@ import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core._CoreAPI;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
+import org.apache.freemarker.core.model.TemplateCallableModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateCollectionModelEx;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
@@ -714,10 +716,6 @@ public final class FTLUtil {
                 appendTemplateModelTypeName(sb, typeNamesAppended, primaryInterface);
             }
 
-            if (_CoreAPI.isMacroOrFunction(tm)) {
-                appendTypeName(sb, typeNamesAppended, _CoreAPI.isFunction(tm) ? "function" : "macro");
-            }
-
             appendTemplateModelTypeName(sb, typeNamesAppended, tm.getClass());
 
             String javaClassName;
@@ -742,6 +740,31 @@ public final class FTLUtil {
 
             return sb.toString();
         }
+    }
+
+    /**
+     * Return the template language type name of callable class, as it should be shown in error messages.
+     *
+     * @param callable
+     *         Can't be {@code null}.
+     */
+    public static String getCallableTypeName(TemplateCallableModel callable) {
+        _NullArgumentException.check("callable", callable);
+
+        String result = "callable-of-unknown-kind";
+
+        String d = null;
+        if (callable instanceof TemplateDirectiveModel) {
+            d = _CoreAPI.isMacro(callable.getClass()) ? "macro" : "directive";
+            result = d;
+        }
+
+        if (callable instanceof TemplateFunctionModel) {
+            String f = "function"; // TODO [FM3][CF] Should say "method" sometimes
+            result = d == null ? f : d + "+" + f;
+        }
+
+        return result;
     }
 
     /**
@@ -771,8 +794,13 @@ public final class FTLUtil {
             appendTypeName(sb, typeNamesAppended, "node");
         }
 
-        if (TemplateDirectiveModel.class.isAssignableFrom(cl)) {
-            appendTypeName(sb, typeNamesAppended, "directive");
+        if (TemplateCallableModel.class.isAssignableFrom(cl)) {
+            if (TemplateDirectiveModel.class.isAssignableFrom(cl)) {
+                appendTypeName(sb, typeNamesAppended, _CoreAPI.isMacro(cl) ? "macro" : "directive");
+            }
+            if (TemplateFunctionModel.class.isAssignableFrom(cl)) {
+                appendTypeName(sb, typeNamesAppended, "function"); // TODO [FM3][CF] should say "method" sometimes
+            }
         }
 
         if (TemplateSequenceModel.class.isAssignableFrom(cl)) {

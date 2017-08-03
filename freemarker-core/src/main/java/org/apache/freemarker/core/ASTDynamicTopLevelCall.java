@@ -22,11 +22,10 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.apache.freemarker.core.ThreadInterruptionSupportTemplatePostProcessor.ASTThreadInterruptionCheck;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.CallPlace;
 import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.TemplateCallableModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
@@ -35,8 +34,9 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.CommonSupplier;
+import org.apache.freemarker.core.util.FTLUtil;
 import org.apache.freemarker.core.util.StringToIndexMap;
-import org.apache.freemarker.core.util._ArrayAdapterList;
+import org.apache.freemarker.core.util._CollectionUtil;
 import org.apache.freemarker.core.util._StringUtil;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -52,7 +52,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * is also validated (how many positional parameters are allowed, what named parameters are supported) then. Hence, the
  * call is "dynamic".
  */
-class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
+class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
 
     static final class NamedArgument {
         private final String name;
@@ -70,6 +70,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
     private final StringToIndexMap nestedContentParamNames;
     private final boolean allowCallingFunctions;
 
+    // Concurrently accessed, but need not be volatile
     private CustomDataHolder customDataHolder;
 
     /**
@@ -110,44 +111,17 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
                 nestedContentSupported = directive.isNestedContentSupported();
             } else if (callableValueTM instanceof TemplateFunctionModel) {
                 if (!allowCallingFunctions) {
-                    // TODO [FM3][CF] Better exception
-                    throw new NonUserDefinedDirectiveLikeException(
-                            "Calling functions is not allowed on the top level in this template language", env);
+                    throw new NonDirectiveException(
+                            "Calling functions is not allowed. You can only call directives (like macros) here.", env);
                 }
                 callableValue = (TemplateCallableModel) callableValueTM;
                 directive = null;
                 function = (TemplateFunctionModel) callableValue;
                 nestedContentSupported = false;
-            } else if (callableValueTM instanceof ASTDirMacro) {
-                // TODO [FM3][CF] Until macros were refactored to be TemplateDirectiveModel-s, we have this hack here.
-                ASTDirMacro macro = (ASTDirMacro) callableValueTM;
-                if (macro.isFunction()) {
-                    throw new _MiscTemplateException(env,
-                            "Routine ", new _DelayedJQuote(macro.getName()), " is a function, not a directive. "
-                            + "Functions can only be called from expressions, like in ${f()}, ${x + f()} or ",
-                            "<@someDirective someParam=f() />", ".");
-                }
-
-                // We have to convert arguments to the legacy data structures... yet again, it's only a temporary hack.
-                LinkedHashMap<String, ASTExpression> macroNamedArgs;
-                if (namedArgs != null) {
-                    macroNamedArgs = new LinkedHashMap<>(namedArgs.length * 4 / 3);
-                    for (NamedArgument namedArg : namedArgs) {
-                        macroNamedArgs.put(namedArg.name, namedArg.value);
-                    }
-                } else {
-                    macroNamedArgs = null;
-                }
-                env.invoke(macro,
-                        macroNamedArgs,
-                        _ArrayAdapterList.adapt(positionalArgs),
-                        nestedContentParamNames != null ? nestedContentParamNames.getKeys() : null,
-                        getChildBuffer());
-                return null;
             } else if (callableValueTM == null) {
                 throw InvalidReferenceException.getInstance(callableValueExp, env);
             } else {
-                throw new NonUserDefinedDirectiveLikeException(callableValueExp, callableValueTM, env);
+                throw new NonDirectiveException(callableValueExp, callableValueTM, env);
             }
         }
 
@@ -170,27 +144,43 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
         }
 
         if (posVarargsArgIdx != -1) {
-            int posVarargCnt = positionalArgs != null ? positionalArgs.length - predefPosArgCnt : 0;
+            int posVarargsLength = positionalArgs != null ? positionalArgs.length - predefPosArgCnt : 0;
             TemplateSequenceModel varargsSeq;
-            if (posVarargCnt <= 0) {
+            if (posVarargsLength <= 0) {
                 varargsSeq = Constants.EMPTY_SEQUENCE;
             } else {
-                NativeSequence nativeSeq = new NativeSequence(posVarargCnt);
+                NativeSequence nativeSeq = new NativeSequence(posVarargsLength);
                 varargsSeq = nativeSeq;
-                for (int posVarargIdx = 0; posVarargIdx < posVarargCnt; posVarargIdx++) {
+                for (int posVarargIdx = 0; posVarargIdx < posVarargsLength; posVarargIdx++) {
                     nativeSeq.add(positionalArgs[predefPosArgCnt + posVarargIdx].eval(env));
                 }
             }
             execArgs[posVarargsArgIdx] = varargsSeq;
         } else if (positionalArgs != null && positionalArgs.length > predefPosArgCnt) {
-            throw new _MiscTemplateException(env,
-                    "The target callable ",
+            checkSupportsAnyParameters(callableValue, env);
+            List<String> validPredefNames = argsLayout.getPredefinedNamedArgumentsMap().getKeys();
+            _ErrorDescriptionBuilder errorDesc = new _ErrorDescriptionBuilder(
+                    "The target ", FTLUtil.getCallableTypeName(callableValue), " ",
                     (predefPosArgCnt != 0
-                            ? new Object[] { "can only have ", predefPosArgCnt }
+                            ? new Object[]{ "can only have ", predefPosArgCnt }
                             : "can't have"
                     ),
                     " arguments passed by position, but the invocation has ",
-                    positionalArgs.length, " such arguments.");
+                    positionalArgs.length, " such arguments. Try to pass arguments by name (as in ",
+                    "<@example x=1 y=2 />", ").",
+                    (!validPredefNames.isEmpty()
+                            ? new Object[] { " The supported parameter names are:\n",
+                                    new _DelayedJQuotedListing(validPredefNames)}
+                            : _CollectionUtil.EMPTY_OBJECT_ARRAY)
+            );
+            if (callableValue instanceof Environment.TemplateLanguageDirective) {
+                errorDesc.tip("You can pass a parameter by position (i.e., without specifying its name, as you"
+                        + " have tried now) when the macro has defined that parameter to be a positional parameter. "
+                        + "See in the documentation how, and when that's a good practice.");
+            }
+            throw new _MiscTemplateException(env,
+                    errorDesc
+            );
         }
 
         int namedVarargsArgumentIndex = argsLayout.getNamedVarargsArgumentIndex();
@@ -204,15 +194,19 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
                 } else {
                     if (namedVarargsHash == null) {
                         if (namedVarargsArgumentIndex == -1) {
+                            checkSupportsAnyParameters(callableValue, env);
                             Collection<String> validNames = predefNamedArgsMap.getKeys();
                             throw new _MiscTemplateException(env,
                                     validNames == null || validNames.isEmpty()
                                     ? new Object[] {
-                                            "The target callable doesn't have any by-name-passed parameters (like ",
-                                            new _DelayedJQuote(namedArg.name), ")"
+                                            "The called ", FTLUtil.getCallableTypeName(callableValue),
+                                            " can't have arguments that are passed by name (like ",
+                                            new _DelayedJQuote(namedArg.name), "). Try to pass arguments by position "
+                                            + "(i.e, without name, as in ", "<@example 1, 2, 3 />" ,  ")."
                                     }
                                     : new Object[] {
-                                            "The target callable has no by-name-passed parameter called ",
+                                            "The called ", FTLUtil.getCallableTypeName(callableValue),
+                                            " has no parameter that's passed by name and is called ",
                                             new _DelayedJQuote(namedArg.name), ". The supported parameter names are:\n",
                                             new _DelayedJQuotedListing(validNames)
                                     });
@@ -231,15 +225,23 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
         if (directive != null) {
             directive.execute(execArgs, this, env.getOut(), env);
         } else {
-            TemplateModel result = function.execute(execArgs, env, this);
+            TemplateModel result = function.execute(execArgs, this, env);
             if (result == null) {
                 throw new _MiscTemplateException(env, "Function has returned no value (or null)");
             }
-            // TODO [FM3][CF]
+            // TODO [FM3] Implement it when we have a such language... it should work like `${f()}`.
             throw new BugException("Top-level function call not yet implemented");
         }
 
         return null;
+    }
+
+    private void checkSupportsAnyParameters(TemplateCallableModel callableValue, Environment env)
+            throws _MiscTemplateException {
+        if (callableValue.getArgumentArrayLayout().getTotalLength() == 0) {
+            throw new _MiscTemplateException(env,
+                    "The called ", FTLUtil.getCallableTypeName(callableValue), " doesn't support any parameters.");
+        }
     }
 
     @Override
@@ -392,10 +394,10 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
     }
 
     @Override
-    public void executeNestedContent(TemplateModel[] nestedContentParamValues, Writer out, Environment env)
+    public void executeNestedContent(TemplateModel[] nestedContentArgs, Writer out, Environment env)
             throws TemplateException, IOException {
         int nestedContentParamNamesSize = nestedContentParamNames != null ? nestedContentParamNames.size() : 0;
-        int nestedContentParamValuesSize = nestedContentParamValues != null ? nestedContentParamValues.length : 0;
+        int nestedContentParamValuesSize = nestedContentArgs != null ? nestedContentArgs.length : 0;
         if (nestedContentParamValuesSize != nestedContentParamNamesSize) {
             throw new _MiscTemplateException(env,
                     "The invocation declares ", (nestedContentParamNamesSize != 0 ? nestedContentParamNamesSize : "no"),
@@ -407,62 +409,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
                     nestedContentParamValuesSize, " parameters. You need to declare ", nestedContentParamValuesSize,
                     " nested content parameters.");
         }
-        env.visit(getChildBuffer(), nestedContentParamNames, nestedContentParamValues, out);
-    }
-
-    @Override
-    @SuppressFBWarnings(value={ "IS2_INCONSISTENT_SYNC", "DC_DOUBLECHECK" }, justification="Performance tricks")
-    public Object getOrCreateCustomData(Object providerIdentity, CommonSupplier<?> supplier)
-            throws CallPlaceCustomDataInitializationException {
-        // We are using double-checked locking, utilizing Java memory model "final" trick.
-        // Note that this.customDataHolder is NOT volatile.
-
-        CustomDataHolder customDataHolder = this.customDataHolder;  // Findbugs false alarm
-        if (customDataHolder == null) {  // Findbugs false alarm
-            synchronized (this) {
-                customDataHolder = this.customDataHolder;
-                if (customDataHolder == null || customDataHolder.providerIdentity != providerIdentity) {
-                    customDataHolder = createNewCustomData(providerIdentity, supplier);
-                    this.customDataHolder = customDataHolder;
-                }
-            }
-        }
-
-        if (customDataHolder.providerIdentity != providerIdentity) {
-            synchronized (this) {
-                customDataHolder = this.customDataHolder;
-                if (customDataHolder == null || customDataHolder.providerIdentity != providerIdentity) {
-                    customDataHolder = createNewCustomData(providerIdentity, supplier);
-                    this.customDataHolder = customDataHolder;
-                }
-            }
-        }
-
-        return customDataHolder.customData;
-    }
-
-    private CustomDataHolder createNewCustomData(Object provierIdentity, CommonSupplier supplier)
-            throws CallPlaceCustomDataInitializationException {
-        CustomDataHolder customDataHolder;
-        Object customData;
-        try {
-            customData = supplier.get();
-        } catch (Exception e) {
-            throw new CallPlaceCustomDataInitializationException(
-                    "Failed to initialize custom data for provider identity "
-                            + _StringUtil.tryToString(provierIdentity) + " via factory "
-                            + _StringUtil.tryToString(supplier), e);
-        }
-        if (customData == null) {
-            throw new NullPointerException("CommonSupplier.get() has returned null");
-        }
-        customDataHolder = new CustomDataHolder(provierIdentity, customData);
-        return customDataHolder;
-    }
-
-    @Override
-    public boolean isNestedOutputCacheable() {
-        return isChildrenOutputCacheable();
+        env.visit(getChildBuffer(), nestedContentParamNames, nestedContentArgs, out);
     }
 
     @Override
@@ -477,15 +424,70 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace {
         return null;
     }
 
-    /**
-     * Used for implementing double check locking in implementing the
-     * {@link #getOrCreateCustomData(Object, CommonSupplier)}.
-     */
-    private static class CustomDataHolder {
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
+    @SuppressFBWarnings(value={ "IS2_INCONSISTENT_SYNC", "DC_DOUBLECHECK" }, justification="Performance tricks")
+    public Object getOrCreateCustomData(Object providerIdentity, CommonSupplier<?> supplier)
+            throws CallPlaceCustomDataInitializationException {
+        // We are using double-checked locking, but utilizing Java Memory Model "final" behavior, so it's correct.
 
+        CustomDataHolder customDataHolder = this.customDataHolder;  // Findbugs false alarm
+        if (customDataHolder == null) {  // Findbugs false alarm
+            synchronized (this) {
+                customDataHolder = this.customDataHolder;
+                if (customDataHolder == null || customDataHolder.providerIdentity != providerIdentity) {
+                    customDataHolder = createNewCustomData(providerIdentity, supplier);
+                    this.customDataHolder = customDataHolder;
+                }
+            }
+        } else if (customDataHolder.providerIdentity != providerIdentity) {
+            synchronized (this) {
+                customDataHolder = this.customDataHolder;
+                if (customDataHolder == null || customDataHolder.providerIdentity != providerIdentity) {
+                    customDataHolder = createNewCustomData(providerIdentity, supplier);
+                    this.customDataHolder = customDataHolder;
+                }
+            }
+        }
+
+        return customDataHolder.customData;
+    }
+
+    @Override
+    public boolean isCustomDataSupported() {
+        return true;
+    }
+
+    @Override
+    public boolean isNestedOutputCacheable() {
+        return isChildrenOutputCacheable();
+    }
+
+    private static CustomDataHolder createNewCustomData(Object providerIdentity, CommonSupplier<?> supplier)
+            throws CallPlaceCustomDataInitializationException {
+        CustomDataHolder customDataHolder;
+        Object customData;
+        try {
+            customData = supplier.get();
+        } catch (Exception e) {
+            throw new CallPlaceCustomDataInitializationException(
+                    "Failed to initialize custom data for provider identity "
+                            + _StringUtil.tryToString(providerIdentity) + " via factory "
+                            + _StringUtil.tryToString(supplier), e);
+        }
+        if (customData == null) {
+            throw new NullPointerException("CommonSupplier.get() has returned null");
+        }
+        customDataHolder = new CustomDataHolder(providerIdentity, customData);
+        return customDataHolder;
+    }
+
+    static class CustomDataHolder {
+
+        // It's important that all fields are final (Java Memory Model behaves specially with finals)!
         private final Object providerIdentity;
         private final Object customData;
-        public CustomDataHolder(Object providerIdentity, Object customData) {
+
+        private CustomDataHolder(Object providerIdentity, Object customData) {
             this.providerIdentity = providerIdentity;
             this.customData = customData;
         }

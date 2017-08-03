@@ -22,7 +22,7 @@ package org.apache.freemarker.core.userpkg;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.apache.freemarker.core.model.TemplateDirectiveModel;
+import org.apache.freemarker.core.model.TemplateCallableModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
@@ -31,7 +31,7 @@ import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.util.FTLUtil;
 
-public abstract class TestTemplateDirectiveModel implements TemplateDirectiveModel {
+public abstract class TestTemplateCallableModel implements TemplateCallableModel {
 
     protected void printParam(String name, TemplateModel value, Writer out) throws IOException, TemplateModelException {
         printParam(name, value, out, false);

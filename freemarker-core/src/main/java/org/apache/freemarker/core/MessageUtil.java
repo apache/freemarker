@@ -71,7 +71,7 @@ class MessageUtil {
         return formatLocation("at", template, line, column);
     }
 
-    static String formatLocationForEvaluationError(ASTDirMacro macro, int line, int column) {
+    static String formatLocationForEvaluationError(ASTDirMacroOrFunction macro, int line, int column) {
         Template t = macro.getTemplate();
         return formatLocation("at", t != null ? t.getSourceOrLookupName() : null, macro.getName(), macro.isFunction(),
                 line, column);

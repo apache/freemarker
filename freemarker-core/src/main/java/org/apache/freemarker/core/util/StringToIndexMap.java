@@ -102,9 +102,14 @@ public final class StringToIndexMap {
     }
 
     /**
-     * @param entries Contains the entries that will be copied into the created object.
-     * @param entriesLength The method assumes that we only have this many elements; the {@code entries} parameter
-     *                      array might be longer than this.
+     * @param entries
+     *         Contains the entries that will be copied into the created object.
+     * @param entriesLength
+     *         The method assumes that we only have this many elements; the {@code entries} parameter array might be
+     *         longer than this.
+     *
+     * @throws DuplicateStringKeyException
+     *         if the same key occurs twice
      */
     public static StringToIndexMap of(Entry[] entries, int entriesLength) {
         return entriesLength == 0 ? EMPTY
@@ -281,7 +286,7 @@ public final class StringToIndexMap {
     private static void checkNameUnique(Entry entry, String key) {
         while (entry != null) {
             if (entry.key.equals(key)) {
-                throw new IllegalArgumentException("Duplicate key: " + _StringUtil.jQuote(key));
+                throw new DuplicateStringKeyException(key);
             }
             entry = entry.nextInSameBucket;
         }
@@ -309,6 +314,22 @@ public final class StringToIndexMap {
         public int getValue() {
             return value;
         }
+    }
+
+    /** Returns the key for a value, or {@code null} if the value wasn't found; this is a slow (O(N)) operation! */
+    public String getKeyOfValue(int value) {
+        if (buckets == null) {
+            return null;
+        }
+        for (Entry entry : buckets) {
+            while (entry != null) {
+                if (entry.getValue() == value) {
+                    return entry.getKey();
+                }
+                entry = entry.nextInSameBucket;
+            }
+        }
+        return null;
     }
 
     /*

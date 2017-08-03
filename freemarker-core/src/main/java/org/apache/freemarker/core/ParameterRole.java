@@ -54,15 +54,11 @@ final class ParameterRole {
     static final ParameterRole TEMPLATE_NAME = new ParameterRole("template name");
     static final ParameterRole IGNORE_MISSING_PARAMETER = new ParameterRole("\"ignore_missing\" parameter");
     static final ParameterRole PARAMETER_NAME = new ParameterRole("parameter name");
-    static final ParameterRole PARAMETER_DEFAULT = new ParameterRole("parameter default");
-    static final ParameterRole CATCH_ALL_PARAMETER_NAME = new ParameterRole("catch-all parameter name");
+    static final ParameterRole PARAMETER_DEFINITION = new ParameterRole("parameter definition");
     static final ParameterRole ARGUMENT_NAME = new ParameterRole("argument name");
     static final ParameterRole ARGUMENT_VALUE = new ParameterRole("argument value");
     static final ParameterRole CONTENT = new ParameterRole("content");
-    static final ParameterRole EMBEDDED_TEMPLATE = new ParameterRole("embedded template");
     static final ParameterRole VALUE_PART = new ParameterRole("value part");
-    static final ParameterRole MINIMUM_DECIMALS = new ParameterRole("minimum decimals");
-    static final ParameterRole MAXIMUM_DECIMALS = new ParameterRole("maximum decimals");
     static final ParameterRole NODE = new ParameterRole("node");
     static final ParameterRole CALLEE = new ParameterRole("callee");
     static final ParameterRole MESSAGE = new ParameterRole("message");

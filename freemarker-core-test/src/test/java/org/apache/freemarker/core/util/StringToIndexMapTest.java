@@ -47,6 +47,8 @@ public class StringToIndexMapTest {
         assertEquals(-1, m.get("a"));
         assertEquals(0, m.get("i"));
         assertEquals(ImmutableList.of("i"), m.getKeys());
+        assertEquals("i", m.getKeyOfValue(0));
+        assertNull(m.getKeyOfValue(1));
     }
 
     @Test
@@ -57,6 +59,9 @@ public class StringToIndexMapTest {
         assertEquals(0, m.get("i"));
         assertEquals(1, m.get("j"));
         assertEquals(ImmutableList.of("i", "j"), m.getKeys());
+        assertEquals("i", m.getKeyOfValue(0));
+        assertEquals("j", m.getKeyOfValue(1));
+        assertNull(m.getKeyOfValue(2));
     }
 
     @Test
