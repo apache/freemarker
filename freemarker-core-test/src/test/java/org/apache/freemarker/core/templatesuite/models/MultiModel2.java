@@ -19,10 +19,12 @@
 
 package org.apache.freemarker.core.templatesuite.models;
 
-import java.util.Iterator;
 import java.util.List;
 
+import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core._CallableUtils;
 import org.apache.freemarker.core.model.TemplateMethodModel;
+import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 
@@ -44,18 +46,17 @@ public class MultiModel2 implements TemplateScalarModel, TemplateMethodModel {
     /**
      * Executes a method call.
      *
-     * @param arguments a <tt>List</tt> of <tt>String</tt> objects containing the values
+     * @param args a <tt>List</tt> of <tt>String</tt> objects containing the values
      * of the arguments passed to the method.
      * @return the <tt>TemplateModel</tt> produced by the method, or null.
      */
     @Override
-    public Object exec(List arguments) {
+    public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateException {
         StringBuilder  aResults = new StringBuilder( "Arguments are:<br />" );
-        Iterator    iList = arguments.iterator();
-
-        while ( iList.hasNext() ) {
-            aResults.append( (String) iList.next() );
-            aResults.append( "<br />" );
+        for (int i = 0; i < args.size(); i++) {
+            TemplateModel arg = args.get(i);
+            aResults.append(_CallableUtils.castArgToString(arg, i));
+            aResults.append("<br />");
         }
 
         return new SimpleScalar( aResults.toString() );

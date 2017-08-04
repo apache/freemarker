@@ -135,7 +135,10 @@ Node: Changes already mentioned above aren't repeated here!
   - When parameter default expressions are evaluated, only the parameters defined earlier are already set.
     So `<#macro m a b=a>` works, but `<#macro m a=b b>` won't work anymore (unless there's `b` outside the
     parameter list), as `b` is not yet set when the default of `a` is calculated.
-
+- Built-ins don't convert their parameters to tring anymore; in FM some (not all) of them did, because they
+  were based on the TemplateMethod interface (deprecated even in FM2) that required String paramteters and
+  was auto-converted by FM2.
+    
   
 Java API changes
 ================
@@ -372,6 +375,11 @@ Core / Models and Object wrapping
   get method (`get(String)`) had priority over methods of similar name. The generic get method is only recognized from its
   name and parameter type, so it's a quite consfusing feature, and might will be removed alltogether.
 - Renamed TemplateDateModel.DATETIME to DATE_TIME (to be consistent with "dateTime" used elsewhere).
+- TemplateModel and TemplateModelEx changes (but they will be probably replaced by TemplateFunctionModel later):
+  Removed FM2 `TemplateMethodModel`, then renamed `TemplateMethodModelEx` to `TemplateMethodModel`. Then changed it further to return
+  `TemplateModel` (instead of `Object`, which allowed returning a non-wrapped value by design in FM2), changed the parameter `List` to
+  `List<? extends TemplateModel>` (which it was earlier too, but there were no generic paramters back then), and allowed throwing
+  `TemplateException` instead of the more restrictive `TemplateModelException`.
 
 Core / Template loading and caching
 ...................................

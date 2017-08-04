@@ -22,6 +22,7 @@ package org.apache.freemarker.core.templatesuite.models;
 import java.util.List;
 
 import org.apache.freemarker.core.model.TemplateMethodModel;
+import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 
 /**
@@ -32,18 +33,18 @@ public class SimpleTestMethod implements TemplateMethodModel {
     /**
      * Executes a method call.
      *
-     * @param arguments a <tt>List</tt> of <tt>String</tt> objects containing
+     * @param args a <tt>List</tt> of <tt>String</tt> objects containing
      * the values of the arguments passed to the method.
      * @return the <tt>TemplateModel</tt> produced by the method, or null.
      */
     @Override
-    public Object exec(List arguments) {
-        if ( arguments.size() == 0 ) {
+    public TemplateModel execute(List<? extends TemplateModel> args) {
+        if ( args.size() == 0 ) {
             return new SimpleScalar( "Empty list provided" );
-        } else if ( arguments.size() > 1 ) {
-            return new SimpleScalar( "Argument size is: " + arguments.size() );
+        } else if ( args.size() > 1 ) {
+            return new SimpleScalar( "Argument size is: " + args.size() );
         } else {
-            return new SimpleScalar( "Single argument value is: " + arguments.get(0) );
+            return new SimpleScalar( "Single argument value is: " + args.get(0) );
         }
     }
 }

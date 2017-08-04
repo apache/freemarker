@@ -581,7 +581,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         try {
             TemplateDirectiveModel nodeProcessor = getNodeProcessor(node);
             if (nodeProcessor != null) {
-                _TemplateCallableModelUtils.executeWith0Arguments(
+                _CallableUtils.executeWith0Arguments(
                         nodeProcessor, NonTemplateCallPlace.INSTANCE, out, this);
             } else if (nodeProcessor == null) {
                 String nodeType = node.getNodeType();
@@ -640,7 +640,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     void fallback() throws TemplateException, IOException {
         TemplateDirectiveModel nodeProcessor = getNodeProcessor(currentNodeName, currentNodeNS, nodeNamespaceIndex);
         if (nodeProcessor != null) {
-            _TemplateCallableModelUtils.executeWith0Arguments(
+            _CallableUtils.executeWith0Arguments(
                     nodeProcessor, NonTemplateCallPlace.INSTANCE, out, this);
         }
     }

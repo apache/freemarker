@@ -31,7 +31,7 @@ import java.util.Set;
 
 import org.apache.freemarker.core._DelayedJQuote;
 import org.apache.freemarker.core._TemplateModelException;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
+import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 
@@ -54,9 +54,9 @@ public class ResourceBundleModel
     extends
     BeanModel
     implements
-    TemplateMethodModelEx {
+        TemplateMethodModel {
 
-    private Hashtable formats = null;
+    private Hashtable<String, MessageFormat> formats = null;
 
     public ResourceBundleModel(ResourceBundle bundle, DefaultObjectWrapper wrapper) {
         super(bundle, wrapper);
@@ -108,13 +108,13 @@ public class ResourceBundleModel
      * rest of the arguments. The created MessageFormats are cached for later reuse.
      */
     @Override
-    public Object exec(List arguments)
+    public TemplateModel execute(List<? extends TemplateModel> args)
         throws TemplateModelException {
         // Must have at least one argument - the key
-        if (arguments.size() < 1)
+        if (args.size() < 1)
             throw new TemplateModelException("No message key was specified");
         // Read it
-        Iterator it = arguments.iterator();
+        Iterator<? extends TemplateModel> it = args.iterator();
         String key = unwrap((TemplateModel) it.next()).toString();
         try {
             if (!it.hasNext()) {
@@ -122,10 +122,10 @@ public class ResourceBundleModel
             }
     
             // Copy remaining arguments into an Object[]
-            int args = arguments.size() - 1;
-            Object[] params = new Object[args];
-            for (int i = 0; i < args; ++i)
-                params[i] = unwrap((TemplateModel) it.next());
+            int paramsLen = args.size() - 1;
+            Object[] params = new Object[paramsLen];
+            for (int i = 0; i < paramsLen; ++i)
+                params[i] = unwrap(it.next());
     
             // Invoke format
             return new BeanAndStringModel(format(key, params), wrapper);

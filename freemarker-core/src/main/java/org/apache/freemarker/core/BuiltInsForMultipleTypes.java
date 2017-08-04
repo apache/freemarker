@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -110,7 +111,7 @@ class BuiltInsForMultipleTypes {
         private class DateParser
         implements
             TemplateDateModel,
-            TemplateMethodModel,
+                TemplateMethodModel,
             TemplateHashModel {
             private final String text;
             private final Environment env;
@@ -125,9 +126,9 @@ class BuiltInsForMultipleTypes {
             }
             
             @Override
-            public Object exec(List args) throws TemplateModelException {
+            public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateException {
                 checkMethodArgCount(args, 0, 1);
-                return args.size() == 0 ? getAsDateModel() : get((String) args.get(0));
+                return args.size() == 0 ? getAsDateModel() : get(_CallableUtils.castArgToString(args, 0));
             }
             
             @Override
@@ -470,8 +471,8 @@ class BuiltInsForMultipleTypes {
         
         private class BooleanFormatter
         implements 
-            TemplateScalarModel, 
-            TemplateMethodModel {
+            TemplateScalarModel,
+                TemplateMethodModel {
             private final TemplateBooleanModel bool;
             private final Environment env;
             
@@ -481,9 +482,14 @@ class BuiltInsForMultipleTypes {
             }
     
             @Override
-            public Object exec(List args) throws TemplateModelException {
+            public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateException {
                 checkMethodArgCount(args, 2);
-                return new SimpleScalar((String) args.get(bool.getAsBoolean() ? 0 : 1));
+                int argIdx = bool.getAsBoolean() ? 0 : 1;
+                TemplateModel result = args.get(argIdx);
+                if (!(result instanceof TemplateScalarModel)) {
+                    throw new NonStringException((Serializable) argIdx, result, null, null);
+                }
+                return result;
             }
     
             @Override
@@ -505,7 +511,7 @@ class BuiltInsForMultipleTypes {
         implements
             TemplateScalarModel,
             TemplateHashModel,
-            TemplateMethodModel {
+                TemplateMethodModel {
             private final TemplateDateModel dateModel;
             private final Environment env;
             private final TemplateDateFormat defaultFormat;
@@ -524,9 +530,9 @@ class BuiltInsForMultipleTypes {
             }
     
             @Override
-            public Object exec(List args) throws TemplateModelException {
+            public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateException {
                 checkMethodArgCount(args, 1);
-                return formatWith((String) args.get(0));
+                return formatWith(_CallableUtils.castArgToString(args, 0));
             }
 
             @Override
@@ -580,7 +586,7 @@ class BuiltInsForMultipleTypes {
         implements
             TemplateScalarModel,
             TemplateHashModel,
-            TemplateMethodModel {
+                TemplateMethodModel {
             private final TemplateNumberModel numberModel;
             private final Number number;
             private final Environment env;
@@ -602,9 +608,9 @@ class BuiltInsForMultipleTypes {
             }
     
             @Override
-            public Object exec(List args) throws TemplateModelException {
+            public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateException {
                 checkMethodArgCount(args, 1);
-                return get((String) args.get(0));
+                return get(_CallableUtils.castArgToString(args, 0));
             }
     
             @Override

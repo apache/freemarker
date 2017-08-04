@@ -38,6 +38,7 @@ import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
+import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
@@ -105,7 +106,7 @@ public class BeanModel
     /**
      * Uses Beans introspection to locate a property or method with name
      * matching the key name. If a method or property is found, it's wrapped
-     * into {@link org.apache.freemarker.core.model.TemplateMethodModelEx} (for a method or
+     * into {@link TemplateMethodModel} (for a method or
      * indexed property), or evaluated on-the-fly and the return value wrapped
      * into appropriate model (for a simple property) Models for various
      * properties and methods are cached on a per-class basis, so the costly

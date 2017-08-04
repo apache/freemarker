@@ -126,7 +126,7 @@ class BuiltInsForNodes {
         }
         
         @Override
-        public Object exec(List names) throws TemplateModelException {
+        public TemplateModel execute(List<? extends TemplateModel> names) throws TemplateException {
             if (names == null || names.isEmpty()) {
                 return this;
             }
@@ -141,7 +141,7 @@ class BuiltInsForNodes {
                     }
                 } else {
                     for (int j = 0; j < names.size(); j++) {
-                        if (_StringUtil.matchesQName((String) names.get(j), nodeName, nsURI, env)) {
+                        if (_StringUtil.matchesQName(_CallableUtils.castArgToString(names, j), nodeName, nsURI, env)) {
                             result.add(tnm);
                             break;
                         }

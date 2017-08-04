@@ -30,7 +30,3 @@ ${a?string} ${b?string}
 ${a?string("yes", "no")} ${b?string("yes", "no")}
 <#setting booleanFormat="igen,nem"/>
 ${a?string} ${b?string}
-<#setting numberFormat="0.0">
-${a?string(0, 1)} ${b?string(0, 1)}
-<#setting booleanFormat="true,false"/>
-${a?string(0, 1)?isString?string} ${b?string(0, 1)?isString?string}

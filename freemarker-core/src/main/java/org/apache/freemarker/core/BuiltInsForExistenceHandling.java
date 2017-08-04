@@ -22,7 +22,7 @@ package org.apache.freemarker.core;
 import java.util.List;
 
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
+import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 
@@ -63,7 +63,7 @@ class BuiltInsForExistenceHandling {
             return model == null ? FIRST_NON_NULL_METHOD : new ConstantMethod(model);
         }
 
-        private static class ConstantMethod implements TemplateMethodModelEx {
+        private static class ConstantMethod implements TemplateMethodModel {
             private final TemplateModel constant;
 
             ConstantMethod(TemplateModel constant) {
@@ -71,7 +71,7 @@ class BuiltInsForExistenceHandling {
             }
 
             @Override
-            public Object exec(List args) {
+            public TemplateModel execute(List<? extends TemplateModel> args) {
                 return constant;
             }
         }
@@ -80,14 +80,14 @@ class BuiltInsForExistenceHandling {
          * A method that goes through the arguments one by one and returns
          * the first one that is non-null. If all args are null, returns null.
          */
-        private static final TemplateMethodModelEx FIRST_NON_NULL_METHOD =
-            new TemplateMethodModelEx() {
+        private static final TemplateMethodModel FIRST_NON_NULL_METHOD =
+            new TemplateMethodModel() {
                 @Override
-                public Object exec(List args) throws TemplateModelException {
+                public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateModelException {
                     int argCnt = args.size();
                     if (argCnt == 0) throw MessageUtil.newArgCntError("?default", argCnt, 1, Integer.MAX_VALUE);
                     for (int i = 0; i < argCnt; i++ ) {
-                        TemplateModel result = (TemplateModel) args.get(i);
+                        TemplateModel result = args.get(i);
                         if (result != null) return result;
                     }
                     return null;

@@ -25,7 +25,7 @@ import java.util.TimeZone;
 
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
+import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
@@ -63,11 +63,6 @@ class BuiltInsForDates {
             }
         }
 
-        protected TemplateModel calculateResult(Date date, int dateType, Environment env) throws TemplateException {
-            // TODO Auto-generated method stub
-            return null;
-        }
-        
     }
     
     /**
@@ -75,7 +70,7 @@ class BuiltInsForDates {
      */
     static class iso_BI extends AbstractISOBI {
         
-        class Result implements TemplateMethodModelEx {
+        class Result implements TemplateMethodModel {
             private final Date date;
             private final int dateType;
             private final Environment env;
@@ -87,10 +82,10 @@ class BuiltInsForDates {
             }
 
             @Override
-            public Object exec(List args) throws TemplateModelException {
+            public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateModelException {
                 checkMethodArgCount(args, 1);
                 
-                TemplateModel tzArgTM = (TemplateModel) args.get(0);
+                TemplateModel tzArgTM = args.get(0);
                 TimeZone tzArg; 
                 Object adaptedObj;
                 if (tzArgTM instanceof AdapterTemplateModel
@@ -178,15 +173,15 @@ class BuiltInsForDates {
     private BuiltInsForDates() { }
 
     static abstract class AbstractISOBI extends BuiltInForDate {
-        protected final Boolean showOffset;
-        protected final int accuracy;
+        final Boolean showOffset;
+        final int accuracy;
     
-        protected AbstractISOBI(Boolean showOffset, int accuracy) {
+        AbstractISOBI(Boolean showOffset, int accuracy) {
             this.showOffset = showOffset;
             this.accuracy = accuracy;
         }
         
-        protected void checkDateTypeNotUnknown(int dateType)
+        void checkDateTypeNotUnknown(int dateType)
         throws TemplateException {
             if (dateType == TemplateDateModel.UNKNOWN) {
                 throw new _MiscTemplateException(new _ErrorDescriptionBuilder(
@@ -196,11 +191,11 @@ class BuiltInsForDates {
             }
         }
     
-        protected boolean shouldShowOffset(Date date, int dateType, Environment env) {
+        boolean shouldShowOffset(Date date, int dateType, Environment env) {
             if (dateType == TemplateDateModel.DATE) {
                 return false;  // ISO 8061 doesn't allow zone for date-only values
             } else if (showOffset != null) {
-                return showOffset.booleanValue();
+                return showOffset;
             } else {
                 // java.sql.Time values meant to carry calendar field values only, so we don't show offset for them.
                 return !(date instanceof java.sql.Time);

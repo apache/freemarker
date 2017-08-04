@@ -28,6 +28,7 @@ import java.util.Map;
 
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
+import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.slf4j.Logger;
@@ -37,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * Wraps the static fields and methods of a class in a
  * {@link org.apache.freemarker.core.model.TemplateHashModel}.
  * Fields are wrapped using {@link DefaultObjectWrapper#wrap(Object)}, and
- * methods are wrapped into an appropriate {@link org.apache.freemarker.core.model.TemplateMethodModelEx} instance.
+ * methods are wrapped into an appropriate {@link TemplateMethodModel} instance.
  * Unfortunately, there is currently no support for bean property-style
  * calls of static methods, similar to that in {@link BeanModel}.
  */

@@ -17,44 +17,37 @@
  * under the License.
  */
 
-/*
- * 22 October 1999: This class added by Holger Arendt.
- */
-
 package org.apache.freemarker.core.model;
 
 import java.util.List;
 
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.util.DeepUnwrap;
 
 /**
- * "method" template language data type: Objects that act like functions. The name comes from that their original
- * application was calling Java methods via {@link org.apache.freemarker.core.model.impl.DefaultObjectWrapper}.
+ * "method" template language data type: Objects that act like functions. Their main application is calling
+ * Java methods via {@link org.apache.freemarker.core.model.impl.DefaultObjectWrapper}, but you can implement this
+ * interface to invoke top-level functions too.
  * 
- * <p>In templates they are used like {@code myMethod("foo", "bar")} or {@code myJavaObject.myJavaMethod("foo", "bar")}. 
- * 
- * @deprecated Use {@link TemplateMethodModelEx} instead. This interface is from the old times when the only kind of
- *    value you could pass in was string.
+ * <p>In templates they are used like {@code myMethod(1, "foo")} or {@code myJavaObject.myJavaMethod(1, "foo")}.
  */
-@Deprecated
 public interface TemplateMethodModel extends TemplateModel {
 
     /**
-     * Executes the method call. All arguments passed to the method call are 
-     * coerced to strings before being passed, if the FreeMarker rules allow
-     * the coercion. If some of the passed arguments can not be coerced to a
-     * string, an exception will be raised in the engine and the method will 
-     * not be called. If your method would like to act on actual data model 
-     * objects instead of on their string representations, implement the 
-     * {@link TemplateMethodModelEx} instead.
-     * 
-     * @param arguments a <tt>List</tt> of <tt>String</tt> objects
-     *     containing the values of the arguments passed to the method.
+     * Executes the method call.
      *  
+     * @param args a {@link List} of {@link TemplateModel}-s,
+     *     containing the arguments passed to the method. If the implementation absolutely wants
+     *     to operate on POJOs, it can use the static utility methods in the {@link DeepUnwrap}
+     *     class to easily obtain them. However, unwrapping is not always possible (or not perfectly), and isn't always
+     *     efficient, so it's recommended to use the original {@link TemplateModel} value as much as possible.
+     *
      * @return the return value of the method, or {@code null}. If the returned value
      *     does not implement {@link TemplateModel}, it will be automatically 
-     *     wrapped using the {@link Environment#getObjectWrapper() environment 
+     *     wrapped using the {@link Environment#getObjectWrapper() environment's 
      *     object wrapper}.
      */
-    Object exec(List arguments) throws TemplateModelException;
+    TemplateModel execute(List<? extends TemplateModel> args) throws TemplateException;
+    
 }

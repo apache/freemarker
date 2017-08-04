@@ -27,7 +27,7 @@ import java.util.Date;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
+import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
@@ -60,9 +60,9 @@ public class ErrorMessagesTest {
         TemplateHashModel thm = (TemplateHashModel) ow.wrap(new TestBean());
         
         {
-            TemplateMethodModelEx m = (TemplateMethodModelEx) thm.get("m1");
+            TemplateMethodModel m = (TemplateMethodModel) thm.get("m1");
             try {
-                m.exec(Collections.singletonList(html));
+                m.execute(Collections.singletonList(html));
                 fail();
             } catch (TemplateModelException e) {
                 assertThat(e.getMessage(), allOf(
@@ -72,9 +72,9 @@ public class ErrorMessagesTest {
         }
         
         {
-            TemplateMethodModelEx m = (TemplateMethodModelEx) thm.get("m2");
+            TemplateMethodModel m = (TemplateMethodModel) thm.get("m2");
             try {
-                m.exec(Collections.singletonList(html));
+                m.execute(Collections.singletonList(html));
                 fail();
             } catch (TemplateModelException e) {
                 assertThat(e.getMessage(), allOf(
@@ -84,9 +84,9 @@ public class ErrorMessagesTest {
         }
         
         for (String methodName : new String[] { "mOverloaded", "mOverloaded3" }) {
-            TemplateMethodModelEx m = (TemplateMethodModelEx) thm.get(methodName);
+            TemplateMethodModel m = (TemplateMethodModel) thm.get(methodName);
             try {
-                m.exec(Collections.singletonList(html));
+                m.execute(Collections.singletonList(html));
                 fail();
             } catch (TemplateModelException e) {
                 assertThat(e.getMessage(), allOf(
@@ -97,9 +97,9 @@ public class ErrorMessagesTest {
         }
         
         {
-            TemplateMethodModelEx m = (TemplateMethodModelEx) thm.get("mOverloaded2");
+            TemplateMethodModel m = (TemplateMethodModel) thm.get("mOverloaded2");
             try {
-                m.exec(Collections.singletonList(html));
+                m.execute(Collections.singletonList(html));
                 fail();
             } catch (TemplateModelException e) {
                 assertThat(e.getMessage(), allOf(
@@ -110,8 +110,8 @@ public class ErrorMessagesTest {
         }
         
         {
-            TemplateMethodModelEx m = (TemplateMethodModelEx) thm.get("mOverloaded4");
-            Object r = m.exec(Collections.singletonList(html));
+            TemplateMethodModel m = (TemplateMethodModel) thm.get("mOverloaded4");
+            Object r = m.execute(Collections.singletonList(html));
             if (r instanceof TemplateScalarModel) {
                 r = ((TemplateScalarModel) r).getAsString();
             }

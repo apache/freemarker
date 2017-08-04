@@ -26,7 +26,7 @@ import java.util.ArrayList;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
+import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
@@ -65,8 +65,8 @@ public class StaticModelsTest {
         assertEquals(((TemplateScalarModel) f).getAsString(), "F OK");
         
         TemplateModel m = s.get("m");
-        assertTrue(m instanceof TemplateMethodModelEx);
-        assertEquals(((TemplateScalarModel) ((TemplateMethodModelEx) m).exec(new ArrayList())).getAsString(), "m OK");
+        assertTrue(m instanceof TemplateMethodModel);
+        assertEquals(((TemplateScalarModel) ((TemplateMethodModel) m).execute(new ArrayList())).getAsString(), "m OK");
         
         assertSame(s, statics.get(S.class.getName()));
         

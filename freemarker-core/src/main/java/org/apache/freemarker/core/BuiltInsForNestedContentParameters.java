@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.apache.freemarker.core.ASTDirList.IterationContext;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
+import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
@@ -131,7 +131,7 @@ class BuiltInsForNestedContentParameters {
 
     static class item_cycleBI extends BuiltInForNestedContentParameter {
 
-        private class BIMethod implements TemplateMethodModelEx {
+        private class BIMethod implements TemplateMethodModel {
             
             private final IterationContext iterCtx;
     
@@ -140,7 +140,7 @@ class BuiltInsForNestedContentParameters {
             }
     
             @Override
-            public Object exec(List args) throws TemplateModelException {
+            public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateModelException {
                 checkMethodArgCount(args, 1, Integer.MAX_VALUE);
                 return args.get(iterCtx.getIndex() % args.size());
             }

@@ -23,14 +23,14 @@ package org.apache.freemarker.core.model.impl;
 import java.util.List;
 
 import org.apache.freemarker.core.model.TemplateMethodModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
+import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
  * Wraps a set of same-name overloaded methods behind {@link TemplateMethodModel} interface,
  * like if it was a single method, chooses among them behind the scenes on call-time based on the argument values.
  */
-class OverloadedMethodsModel implements TemplateMethodModelEx {
+class OverloadedMethodsModel implements TemplateMethodModel {
     private final Object object;
     private final OverloadedMethods overloadedMethods;
     private final DefaultObjectWrapper wrapper;
@@ -49,8 +49,8 @@ class OverloadedMethodsModel implements TemplateMethodModelEx {
      * unambiguously.
      */
     @Override
-    public Object exec(List arguments) throws TemplateModelException {
-        MemberAndArguments maa = overloadedMethods.getMemberAndArguments(arguments, wrapper);
+    public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateModelException {
+        MemberAndArguments maa = overloadedMethods.getMemberAndArguments(args, wrapper);
         try {
             return maa.invokeMethod(wrapper, object);
         } catch (Exception e) {

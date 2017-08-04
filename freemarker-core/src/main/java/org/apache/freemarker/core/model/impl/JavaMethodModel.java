@@ -24,14 +24,15 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import org.apache.freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
+import org.apache.freemarker.core.model.TemplateMethodModel;
+import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
- * Wraps a {@link Method} into the {@link TemplateMethodModelEx} interface. It is used by {@link BeanModel} to wrap
+ * Wraps a {@link Method} into the {@link TemplateMethodModel} interface. It is used by {@link BeanModel} to wrap
  * non-overloaded methods.
  */
-public final class JavaMethodModel extends SimpleMethod implements TemplateMethodModelEx,
+public final class JavaMethodModel extends SimpleMethod implements TemplateMethodModel,
         _UnexpectedTypeErrorExplainerTemplateModel {
     private final Object object;
     private final DefaultObjectWrapper wrapper;
@@ -53,10 +54,10 @@ public final class JavaMethodModel extends SimpleMethod implements TemplateMetho
      * Invokes the method, passing it the arguments from the list.
      */
     @Override
-    public Object exec(List arguments) throws TemplateModelException {
+    public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateModelException {
         try {
             return wrapper.invokeMethod(object, (Method) getMember(), 
-                    unwrapArguments(arguments, wrapper));
+                    unwrapArguments(args, wrapper));
         } catch (TemplateModelException e) {
             throw e;
         } catch (Exception e) {

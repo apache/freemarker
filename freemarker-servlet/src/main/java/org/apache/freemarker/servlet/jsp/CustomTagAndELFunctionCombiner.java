@@ -28,7 +28,7 @@ import org.apache.freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
+import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.JavaMethodModel;
@@ -47,7 +47,7 @@ class CustomTagAndELFunctionCombiner {
      * @param customTag
      *            A {@link TemplateDirectiveModel}.
      */
-    static TemplateModel combine(TemplateModel customTag, TemplateMethodModelEx elFunction) {
+    static TemplateModel combine(TemplateModel customTag, TemplateMethodModel elFunction) {
         if (customTag instanceof TemplateDirectiveModel) {
             return elFunction instanceof JavaMethodModel //
                     ? new TemplateDirectiveModelAndSimpleMethodModel( //
@@ -62,7 +62,7 @@ class CustomTagAndELFunctionCombiner {
 
     /**
      * Tells if the value can be used as the "custom tag" parameter to
-     * {@link #combine(TemplateModel, TemplateMethodModelEx)}.
+     * {@link #combine(TemplateModel, TemplateMethodModel)}.
      */
     static boolean canBeCombinedAsCustomTag(TemplateModel tm) {
         return (tm instanceof TemplateDirectiveModel) && !(tm instanceof CombinedTemplateModel);
@@ -70,10 +70,10 @@ class CustomTagAndELFunctionCombiner {
 
     /**
      * Tells if the value can be used as the "EL function" parameter to
-     * {@link #combine(TemplateModel, TemplateMethodModelEx)}.
+     * {@link #combine(TemplateModel, TemplateMethodModel)}.
      */
     static boolean canBeCombinedAsELFunction(TemplateModel tm) {
-        return tm instanceof TemplateMethodModelEx && !(tm instanceof CombinedTemplateModel);
+        return tm instanceof TemplateMethodModel && !(tm instanceof CombinedTemplateModel);
     }
 
     private static class CombinedTemplateModel {
@@ -81,7 +81,7 @@ class CustomTagAndELFunctionCombiner {
     }
 
     private static class TemplateDirectiveModelAndSimpleMethodModel extends CombinedTemplateModel
-            implements TemplateDirectiveModel, TemplateMethodModelEx,
+            implements TemplateDirectiveModel, TemplateMethodModel,
             _UnexpectedTypeErrorExplainerTemplateModel {
 
         private final TemplateDirectiveModel templateDirectiveModel;
@@ -94,8 +94,8 @@ class CustomTagAndELFunctionCombiner {
         }
 
         @Override
-        public Object exec(List arguments) throws TemplateModelException {
-            return simpleMethodModel.exec(arguments);
+        public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateModelException {
+            return simpleMethodModel.execute(args);
         }
 
         @Override
@@ -121,20 +121,20 @@ class CustomTagAndELFunctionCombiner {
     }
 
     private static class TemplateDirectiveModelAndTemplateMethodModelEx extends CombinedTemplateModel
-            implements TemplateDirectiveModel, TemplateMethodModelEx {
+            implements TemplateDirectiveModel, TemplateMethodModel {
 
         private final TemplateDirectiveModel templateDirectiveModel;
-        private final TemplateMethodModelEx templateMethodModelEx;
+        private final TemplateMethodModel templateMethodModelEx;
 
         public TemplateDirectiveModelAndTemplateMethodModelEx( //
-                TemplateDirectiveModel templateDirectiveModel, TemplateMethodModelEx templateMethodModelEx) {
+                TemplateDirectiveModel templateDirectiveModel, TemplateMethodModel templateMethodModelEx) {
             this.templateDirectiveModel = templateDirectiveModel;
             this.templateMethodModelEx = templateMethodModelEx;
         }
 
         @Override
-        public Object exec(List arguments) throws TemplateModelException {
-            return templateMethodModelEx.exec(arguments);
+        public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateException {
+            return templateMethodModelEx.execute(args);
         }
 
         @Override

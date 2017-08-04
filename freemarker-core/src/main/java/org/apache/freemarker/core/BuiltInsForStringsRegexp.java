@@ -70,12 +70,14 @@ class BuiltInsForStringsRegexp {
             }
             
             @Override
-            public Object exec(List args) throws TemplateModelException {
+            public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateException {
                 int argCnt = args.size();
                 checkMethodArgCount(argCnt, 1, 2);
                 
-                String patternString = (String) args.get(0);
-                long flags = argCnt > 1 ? RegexpHelper.parseFlagString((String) args.get(1)) : 0;
+                String patternString = _CallableUtils.castArgToString(args, 0);
+                long flags = argCnt > 1
+                        ? RegexpHelper.parseFlagString(_CallableUtils.castArgToString(args, 1))
+                        : 0;
                 if ((flags & RegexpHelper.RE_FLAG_FIRST_ONLY) != 0) {
                     RegexpHelper.logFlagWarning("?" + key + " doesn't support the \"f\" flag.");
                 }
@@ -101,12 +103,14 @@ class BuiltInsForStringsRegexp {
             }
 
             @Override
-            public Object exec(List args) throws TemplateModelException {
+            public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateException {
                 int argCnt = args.size();
                 checkMethodArgCount(argCnt, 2, 3);
-                String arg1 = (String) args.get(0);
-                String arg2 = (String) args.get(1);
-                long flags = argCnt > 2 ? RegexpHelper.parseFlagString((String) args.get(2)) : 0;
+                String arg1 = _CallableUtils.castArgToString(args, 0);
+                String arg2 = _CallableUtils.castArgToString(args, 1);
+                long flags = argCnt > 2
+                        ? RegexpHelper.parseFlagString(_CallableUtils.castArgToString(args, 2))
+                        : 0;
                 String result;
                 if ((flags & RegexpHelper.RE_FLAG_REGEXP) == 0) {
                     RegexpHelper.checkNonRegexpFlags("replace", flags);

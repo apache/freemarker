@@ -32,7 +32,6 @@ import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateMethodModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.util.CommonSupplier;
@@ -61,11 +60,8 @@ final class ASTExpMethodCall extends ASTExpression implements CallPlace {
         TemplateModel targetModel = target.eval(env);
         if (targetModel instanceof TemplateMethodModel) {
             TemplateMethodModel targetMethod = (TemplateMethodModel) targetModel;
-            List argumentStrings = 
-            targetMethod instanceof TemplateMethodModelEx
-            ? arguments.getModelList(env)
-            : arguments.getValueList(env);
-            Object result = targetMethod.exec(argumentStrings);
+            List<TemplateModel> argumentStrings = arguments.getModelList(env);
+            Object result = targetMethod.execute(argumentStrings);
             return env.getObjectWrapper().wrap(result);
         } else if (targetModel instanceof TemplateFunctionModel) {
             TemplateFunctionModel func = (TemplateFunctionModel) targetModel;

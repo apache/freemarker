@@ -66,7 +66,7 @@ import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
+import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
@@ -233,7 +233,7 @@ public class TaglibFactory implements TemplateHashModel {
      * 
      * @return a {@link TemplateHashModel} representing the JSP taglib. Each element of this hash represents a single
      *         custom tag or EL function from the library, implemented as a {@link TemplateDirectiveModel} or
-     *         {@link TemplateMethodModelEx}, respectively.
+     *         {@link TemplateMethodModel}, respectively.
      */
     @Override
     public TemplateModel get(final String taglibUri) throws TemplateModelException {
@@ -1777,7 +1777,7 @@ public class TaglibFactory implements TemplateHashModel {
                     if (replacedTagOrFunction != null) {
                         if (CustomTagAndELFunctionCombiner.canBeCombinedAsELFunction(replacedTagOrFunction)) {
                             tagsAndFunctions.put(tagNameCData, CustomTagAndELFunctionCombiner.combine(
-                                    customTagModel, (TemplateMethodModelEx) replacedTagOrFunction));
+                                    customTagModel, (TemplateMethodModel) replacedTagOrFunction));
                         } else {
                             if (LOG.isWarnEnabled()) {
                                 LOG.warn("TLD contains multiple tags with name " + _StringUtil.jQuote(tagNameCData)
@@ -1816,7 +1816,7 @@ public class TaglibFactory implements TemplateHashModel {
                                 locator);
                     }
 
-                    final TemplateMethodModelEx elFunctionModel;
+                    final TemplateMethodModel elFunctionModel;
                     try {
                         elFunctionModel = defaultObjectWrapper.wrap(null, functionMethod);
                     } catch (Exception e) {

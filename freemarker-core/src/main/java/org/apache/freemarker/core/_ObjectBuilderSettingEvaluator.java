@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
+import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
@@ -763,13 +763,13 @@ public class _ObjectBuilderSettingEvaluator {
                     throw new _ObjectBuilderSettingEvaluationException(
                             "Can't find " + beanPropSetter + " as FreeMarker method.");
                 }
-                if (!(m instanceof TemplateMethodModelEx)) {
+                if (!(m instanceof TemplateMethodModel)) {
                     throw new _ObjectBuilderSettingEvaluationException(
-                            _StringUtil.jQuote(beanPropSetter.getName()) + " wasn't a TemplateMethodModelEx.");
+                            _StringUtil.jQuote(beanPropSetter.getName()) + " wasn't a TemplateMethodModel.");
                 }
                 List/*TemplateModel*/ args = new ArrayList();
                 args.add(env.getObjectWrapper().wrap(namedParamValues.get(i)));
-                ((TemplateMethodModelEx) m).exec(args);
+                ((TemplateMethodModel) m).execute(args);
             } catch (Exception e) {
                 throw new _ObjectBuilderSettingEvaluationException(
                         "Failed to set " + _StringUtil.jQuote(name), e);

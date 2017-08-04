@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.userpkg;
 
-import static org.apache.freemarker.core._TemplateCallableModelUtils.*;
+import static org.apache.freemarker.core._CallableUtils.*;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -31,7 +31,6 @@ import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.util.StringToIndexMap;
@@ -78,18 +77,17 @@ public class AllFeaturesFunction extends TestTemplateCallableModel implements Te
 
     @Override
     public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env) throws TemplateException {
-        return execute(castArgumentToNumber(args, P1_ARG_IDX, p1AllowNull, env),
-                castArgumentToNumber(args, P2_ARG_IDX, p2AllowNull, env),
+        return execute(
+                castArgToNumber(args, P1_ARG_IDX, p1AllowNull),
+                castArgToNumber(args, P2_ARG_IDX, p2AllowNull),
                 (TemplateSequenceModel) args[P_VARARGS_ARG_IDX],
-                castArgumentToNumber(args[N1_ARG_IDX], N1_ARG_NAME, n1AllowNull, env),
-                castArgumentToNumber(args[N2_ARG_IDX], N2_ARG_NAME, n2AllowNull, env),
-                (TemplateHashModelEx2) args[N_VARARGS_ARG_IDX],
-                env);
+                castArgToNumber(args[N1_ARG_IDX], N1_ARG_NAME, n1AllowNull),
+                castArgToNumber(args[N2_ARG_IDX], N2_ARG_NAME, n2AllowNull),
+                (TemplateHashModelEx2) args[N_VARARGS_ARG_IDX]);
     }
 
-    private TemplateModel execute(TemplateNumberModel p1, TemplateNumberModel p2, TemplateSequenceModel pOthers,
-            TemplateNumberModel n1, TemplateNumberModel n2, TemplateHashModelEx2 nOthers,
-            Environment env) throws TemplateException {
+    private TemplateModel execute(Number p1, Number p2, TemplateSequenceModel pOthers,
+            Number n1, Number n2, TemplateHashModelEx2 nOthers) throws TemplateException {
         StringWriter out = new StringWriter();
         try {
             out.write("fa(");

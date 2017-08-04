@@ -56,7 +56,7 @@ import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
+import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelAdapter;
 import org.apache.freemarker.core.model.TemplateModelException;
@@ -481,7 +481,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * Wraps a Java method so that it can be called from templates, without wrapping its parent ("this") object. The
      * result is almost the same as that you would get by wrapping the parent object then getting the method from the
      * resulting {@link TemplateHashModel} by name. Except, if the wrapped method is overloaded, with this method you
-     * explicitly select a an overload, while otherwise you would get a {@link TemplateMethodModelEx} that selects an
+     * explicitly select a an overload, while otherwise you would get a {@link TemplateMethodModel} that selects an
      * overload each time it's called based on the argument values.
      *
      * @param object The object whose method will be called, or {@code null} if {@code method} is a static method.
@@ -489,7 +489,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * @param method The method to call, which must be an (inherited) member of the class of {@code object}, as
      *          described by {@link Method#invoke(Object, Object...)}
      */
-    public TemplateMethodModelEx wrap(Object object, Method method) {
+    public TemplateMethodModel wrap(Object object, Method method) {
         return new JavaMethodModel(object, method, method.getParameterTypes(), this);
     }
 
@@ -582,7 +582,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         // This is for transparent interop with other wrappers (and ourselves)
         // Passing the targetClass allows e.g. a Jython-aware method that declares a
         // PyObject as its argument to receive a PyObject from a Jython-aware TemplateModel
-        // passed as an argument to TemplateMethodModelEx etc.
+        // passed as an argument to TemplateMethodModel etc.
         if (model instanceof AdapterTemplateModel) {
             Object wrapped = ((AdapterTemplateModel) model).getAdaptedObject(targetClass);
             if (targetClass == Object.class || targetClass.isInstance(wrapped)) {

@@ -28,7 +28,7 @@ import java.util.List;
  */
 
 final class GeneralPurposeNothing
-implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, TemplateHashModelEx, TemplateMethodModelEx {
+implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, TemplateHashModelEx, TemplateMethodModel {
 
     public static final TemplateModel INSTANCE = new GeneralPurposeNothing();
       
@@ -66,7 +66,7 @@ implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, Tem
     }
 
     @Override
-    public Object exec(List args) {
+    public TemplateModel execute(List<? extends TemplateModel> args) {
         return null;
     }
     

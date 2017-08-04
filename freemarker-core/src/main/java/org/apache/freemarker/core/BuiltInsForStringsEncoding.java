@@ -148,11 +148,11 @@ class BuiltInsForStringsEncoding {
         protected abstract String encodeWithCharset(Charset charset) throws UnsupportedEncodingException;
     
         @Override
-        public Object exec(List args) throws TemplateModelException {
+        public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateModelException {
             parent.checkMethodArgCount(args.size(), 1);
             try {
-                String charsetName = (String) args.get(0);
-                Charset charset = null;
+                String charsetName = _CallableUtils.castArgToString(args,0);
+                Charset charset;
                 try {
                     charset = Charset.forName(charsetName);
                 } catch (UnsupportedCharsetException e) {

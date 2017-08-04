@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core;
 
+import java.io.Serializable;
+
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -37,7 +39,9 @@ public class NonStringException extends UnexpectedTypeException {
     static final Class[] STRING_COERCABLE_TYPES = new Class[] {
         TemplateScalarModel.class, TemplateNumberModel.class, TemplateDateModel.class, TemplateBooleanModel.class
     };
-    
+
+    private static final Class<?>[] EXPECTED_TYPES = { TemplateScalarModel.class };
+
     private static final String DEFAULT_DESCRIPTION
             = "Expecting " + NonStringException.STRING_COERCABLE_TYPES_DESC + " value here";
 
@@ -70,5 +74,11 @@ public class NonStringException extends UnexpectedTypeException {
             ASTExpression blamed, TemplateModel model, String[] tips, Environment env) throws InvalidReferenceException {
         super(blamed, model, NonStringException.STRING_COERCABLE_TYPES_DESC, STRING_COERCABLE_TYPES, tips, env);
     }
-        
+
+    NonStringException(
+            Serializable argumentNameOrIndex, TemplateModel model, String[] tips, Environment env)
+            throws InvalidReferenceException {
+        super(argumentNameOrIndex, model, "string", EXPECTED_TYPES, tips, env);
+    }
+
 }

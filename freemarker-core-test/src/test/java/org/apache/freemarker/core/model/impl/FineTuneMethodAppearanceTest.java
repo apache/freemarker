@@ -23,7 +23,7 @@ import static org.junit.Assert.*;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
+import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
@@ -48,7 +48,7 @@ public class FineTuneMethodAppearanceTest {
         assertEquals("v1", ((TemplateScalarModel) thm.get("v1")).getAsString());
         assertEquals("v2()", ((TemplateScalarModel) thm.get("v2")).getAsString());
         assertEquals("getV3()", ((TemplateScalarModel) thm.get("v3")).getAsString());
-        assertTrue(thm.get("getV3") instanceof TemplateMethodModelEx);
+        assertTrue(thm.get("getV3") instanceof TemplateMethodModel);
     }
     
     static public class C {

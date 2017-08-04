@@ -25,7 +25,7 @@ import java.util.ArrayList;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
+import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
@@ -58,8 +58,8 @@ public class EnumModelsTest {
         assertTrue(a instanceof TemplateScalarModel);
         assertTrue(a instanceof TemplateHashModel);
         assertEquals(((TemplateScalarModel) a).getAsString(), "ts:A");
-        TemplateMethodModelEx nameMethod = (TemplateMethodModelEx) ((TemplateHashModel) a).get("name");
-        assertEquals(((TemplateScalarModel) nameMethod.exec(new ArrayList())).getAsString(), "A");
+        TemplateMethodModel nameMethod = (TemplateMethodModel) ((TemplateHashModel) a).get("name");
+        assertEquals(((TemplateScalarModel) nameMethod.execute(new ArrayList())).getAsString(), "A");
         
         assertSame(e, enums.get(E.class.getName()));
         
