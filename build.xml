@@ -140,18 +140,6 @@
     <get src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
          dest="${ivy.jar.file}" usetimestamp="true"/>
   </target>
-
-  <!-- Since 2017-08-05 or so, ant-junit was gone from Ant on Travis, hence we need this there: -->
-  <antversion property="antVersionNumber"/>
-  <property name="ant-junit.install.version" value="${antVersionNumber}" />
-  <property name="ant-junit.home" value="${user.home}/.ant" />
-  <property name="ant-junit.jar.dir" value="${ant-junit.home}/lib" />
-  <property name="ant-junit.jar.file" value="${ant-junit.jar.dir}/ant-junit.jar" />
-  <target name="download-ant-junit">
-    <mkdir dir="${ant-junit.jar.dir}"/>
-    <get src="https://repo1.maven.org/maven2/org/apache/ant/ant-junit/${ant-junit.install.version}/ant-junit-${ant-junit.install.version}.jar"
-         dest="${ant-junit.jar.file}" usetimestamp="true"/>
-  </target>
   
   <!-- ================================================================= -->
   <!-- Compilation                                                       -->
@@ -460,7 +448,7 @@
   <target name="test" depends="compileTest" description="Run test cases">
     <mkdir dir="build/junit-reports" />
     <ivy:cachepath conf="run.test" pathid="ivy.dep.run.test" />
-    <junit haltonfailure="on" fork="true" forkmode="once">
+    <junit haltonfailure="off" logfailedtests="true" fork="true" forkmode="once">
       <classpath>
         <pathelement path="build/test-classes" />
         <pathelement path="build/classes" />
