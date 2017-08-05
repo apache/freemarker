@@ -142,7 +142,8 @@
   </target>
 
   <!-- Since 2017-08-05 or so, ant-junit was gone from Ant on Travis, hence we need this there: -->
-  <property name="ant-junit.install.version" value="${ant.version}" />
+  <antversion property="antVersionNumber"/>
+  <property name="ant-junit.install.version" value="${antVersionNumber}" />
   <property name="ant-junit.home" value="${user.home}/.ant" />
   <property name="ant-junit.jar.dir" value="${ant-junit.home}/lib" />
   <property name="ant-junit.jar.file" value="${ant-junit.jar.dir}/ant-junit.jar" />
