@@ -135,11 +135,20 @@
   <property name="ivy.home" value="${user.home}/.ant" />
   <property name="ivy.jar.dir" value="${ivy.home}/lib" />
   <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
-
   <target name="download-ivy">
     <mkdir dir="${ivy.jar.dir}"/>
     <get src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar"
          dest="${ivy.jar.file}" usetimestamp="true"/>
+  </target>
+
+  <property name="ant-junit.install.version" value="1.10.1" />
+  <property name="ant-junit.home" value="${user.home}/.ant" />
+  <property name="ant-junit.jar.dir" value="${ant-junit.home}/lib" />
+  <property name="ant-junit.jar.file" value="${ant-junit.jar.dir}/ant-junit.jar" />
+  <target name="download-ant-junit">
+    <mkdir dir="${ant-junit.jar.dir}"/>
+    <get src="https://repo1.maven.org/maven2/org/apache/ant/ant-junit/${ant-junit.install.version}/ant-junit-${ant-junit.install.version}.jar"
+         dest="${ant-junit.jar.file}" usetimestamp="true"/>
   </target>
   
   <!-- ================================================================= -->

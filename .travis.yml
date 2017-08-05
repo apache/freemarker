@@ -1,6 +1,5 @@
-dist: trusty
 language: java
-install: ant download-ivy
+install: ant download-ivy download-junit
 script: ant ci
 jdk:
   - oraclejdk8
