@@ -26982,10 +26982,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para><literal>Constants.EMPTY_HASH</literal> now implements
+              <para><literal>Constants.EMPTY_HASH</literal> and
+              <literal>GeneralPurposeNothing</literal> (the value of
+              <literal>missingVar!</literal>) now implements
               <literal>TemplateHashModelEx2</literal>, so it can be listed
-              with <literal>&lt;#list ... as k, v&gt;</literal>. Earlier it
-              was only a <literal>TemplateHashModelEx</literal>.</para>
+              with <literal>&lt;#list ... as k, v&gt;</literal>. Earlier they
+              were only a <literal>TemplateHashModelEx</literal>-s.</para>
             </listitem>
 
             <listitem>
