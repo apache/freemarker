@@ -1,42 +1,23 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
+Apache FreeMarker {version}
+===========================
 
-===============================================================================
+[![Build Status](https://travis-ci.org/apache/incubator-freemarker.svg?branch=2.3-gae)](https://travis-ci.org/apache/incubator-freemarker)
 
- Apache FreeMarker {version}
+For the latest version or to report bugs visit:
+http://freemarker.org/
 
- For the latest version or to report bugs visit:
 
- http://freemarker.org/
+DISCLAIMER
+----------
 
-===============================================================================
-
-  DISCLAIMER
-
-  Apache FreeMarker is an effort undergoing incubation at The Apache
-  Software Foundation (ASF). Incubation is required of all newly accepted
-  projects until a further review indicates that the infrastructure,
-  communications, and decision making process have stabilized in a manner
-  consistent with other successful ASF projects. While incubation status is
-  not necessarily a reflection of the completeness or stability of the
-  code, it does indicate that the project has yet to be fully endorsed by
-  the ASF.
+Apache FreeMarker is an effort undergoing incubation at The Apache
+Software Foundation (ASF). Incubation is required of all newly accepted
+projects until a further review indicates that the infrastructure,
+communications, and decision making process have stabilized in a manner
+consistent with other successful ASF projects. While incubation status is
+not necessarily a reflection of the completeness or stability of the
+code, it does indicate that the project has yet to be fully endorsed by
+the ASF.
 
 
 What is Apache FreeMarker?
@@ -74,6 +55,7 @@ Installing
 
 If you are using Maven, just add this dependency:
 
+```xml
   <!--
   Attention: Be sure nothing pulls in an old dependency with groupId
   "freemarker" (without the "org."), because then you will end up with
@@ -84,6 +66,7 @@ If you are using Maven, just add this dependency:
     <artifactId>freemarker</artifactId>
     <version>{version}</version>
   </dependency>
+```
 
 Otherwise simply copy freemarker.jar to a location where your Java
 application's ClassLoader will find it. For example, if you are using
@@ -111,27 +94,32 @@ In the binary release, open documentation/index.html, and you will find the
 link.
 
 
-Building
---------
+Building FreeMarker
+-------------------
 
-First of all, if you haven't yet, download the source release, or check
-out FreeMarker from the source code repository.
+If you haven't yet, download the source release, or checkout FreeMarker from
+the source code repository. See repository locations here:
+http://freemarker.org/sourcecode.html
 
-You need JDK 8(!), Apache Ant and Ivy to be installed. (As of this writing
-it was tested with Ant 1.8.1 and Ivy 2.3.0.) Note that the ivy-<version>.jar
-should be copied to your Ant home directory "lib" subfolder.
+You need JDK 8, Apache Ant (tested with 1.8.1) and Ivy (tested with 2.4.0) to
+be installed. To install Ivy (but be sure it's not already installed), issue
+`ant download-ivy`; it will copy Ivy under `~/.ant/lib`. (Alternatively, you
+can copy `ivy-<version>.jar` into the Ant home `lib` subfolder manually.)
 
-It's recommended to copy build.properties.sample into build.properties, and
-edit its content to fit your system. (Although basic jar building should
+It's recommended to copy `build.properties.sample` into `build.properties`,
+and edit its content to fit your system. (Although basic jar building should
 succeeds without the build.properties file too.)
 
-To build freemarker.jar, just issue "ant" in the project root
-directory, and it should download all dependencies automatically and
-build freemarker.jar.
+To build `freemarker.jar`, just issue `ant` in the project root directory, and
+it should download all dependencies automatically and build `freemarker.jar`. 
 
-If later you change the dependencies in ivy.xml, or otherwise want to
-re-download some of them, it will not happen automatically anymore.
-You have to issue "ant update-deps" for that.
+If later you change the dependencies in `ivy.xml`, or otherwise want to
+re-download some of them, it will not happen automatically anymore, and you
+must issue `ant update-deps`.
+
+To test your build, issue `ant test`.
+
+To generate documentation, issue `ant javadoc` and `ant manualOffline`.
 
 
 Eclipse and other IDE setup
@@ -142,8 +130,9 @@ different version or an entierly different IDE, still read this, and try to
 apply it to your development environment:
 
 - Install Ant and Ivy, if you haven't yet; see earlier.
-- From the command line, run `ant clean jar ide-dependencies`. (Note that
-  now the folders "ide-dependencies", "build/generated-sources" and "META-INF" were created.)
+- From the command line, run  `ant clean jar ide-dependencies`
+  (Note that now the folders `ide-dependencies`, `build/generated-sources` and
+  `META-INF` were created.)
 - Start Eclipse
 - You may prefer to start a new workspace (File -> "Switch workspace"), but
   it's optional.

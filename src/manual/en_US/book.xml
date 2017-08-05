@@ -30,7 +30,7 @@
 
     <titleabbrev>Manual</titleabbrev>
 
-    <productname>Freemarker 2.3.26</productname>
+    <productname>Freemarker 2.3.27</productname>
   </info>
 
   <preface role="index.html" xml:id="preface">
@@ -1012,7 +1012,7 @@ All Rights Reserved.
  |   |
  |   +- (1st) = 20
  |   |
- |   +- (2st) = 14
+ |   +- (2nd) = 14
  |   |
  |   +- (3rd) = 42
  |   |
@@ -2724,7 +2724,7 @@ baz
             <literal>book[test]</literal>. More examples; these are all
             equivalent: <literal>book.author.name</literal>,
             <literal>book["author"].name</literal>,
-            <literal>book.author.["name"]</literal>,
+            <literal>book.author["name"]</literal>,
             <literal>book["author"]["name"]</literal>.</para>
 
             <para>When you use the dot syntax, the same restrictions apply
@@ -2971,7 +2971,7 @@ J</programlisting>
               <secondary>substring</secondary>
             </indexterm>
 
-            <para>You can a slice a string in the same way as you <link
+            <para>You can slice a string in the same way as you <link
             linkend="dgui_template_exp_seqenceop_slice">slice a
             sequence</link> (see there), only here instead of sequence items
             you work with characters. Some differences are:</para>
@@ -2989,7 +2989,8 @@ J</programlisting>
                 multi-typed value), then slicing will slice the sequence
                 instead of the string. When you are processing XML, such
                 values are common. In such cases you can use
-                <literal><replaceable>someXMLnode</replaceable>?string[<replaceable>range</replaceable>]</literal>.</para>
+                <literal><replaceable>someXMLnode</replaceable>?string[<replaceable>range</replaceable>]</literal>
+                to fore string slicing.</para>
               </listitem>
 
               <listitem>
@@ -3303,8 +3304,6 @@ Slicing with right-unlimited ranges:
             </listitem>
           </itemizedlist>
 
-          <remark>Information about the precision?</remark>
-
           <para>Example:</para>
 
           <programlisting role="template">${100 - x * x}
@@ -3384,6 +3383,22 @@ ${12 % 6.9} &lt;#-- Prints 0 --&gt;</programlisting>
 ${-12 % 5} &lt;#-- Prints -2 --&gt;
 ${12 % -5} &lt;#-- Prints 2 --&gt;
 </programlisting>
+
+          <para role="forProgrammers">About the precision of the operations:
+          By default FreeMarker uses <literal>BigDecimal</literal>-s for all
+          arithmetical calculations, to avoid rounding and overflow/underflow
+          artifacts, and also keeps the result as
+          <literal>BigDecimal</literal>-s. So <literal>+</literal> (addition),
+          <literal>-</literal> (subtraction) and <literal>*</literal>
+          (multiplication) are <quote>lossless</quote>. Again by default,
+          <literal>/</literal> (division) results are calculated to 12
+          decimals with half-up rounding (unless some operands have even more
+          decimals, in which case it's calculated with that much decimals).
+          All this behavior depends on the
+          <literal>arithmetic_engine</literal> configuration setting
+          (<literal>Configurable.setArithmericEngine(ArithmericEngine)</literal>)
+          though, and some application might use a different value than the
+          default, although that's highly uncommon.</para>
         </section>
 
         <section xml:id="dgui_template_exp_comparison">
@@ -3457,30 +3472,29 @@ ${12 % -5} &lt;#-- Prints 2 --&gt;
           <literal>&lt;#if (x &gt; y)&gt;</literal>, although it's considered
           to be less elegant.</para>
 
-          <note>
-            <para>FreeMarker supports some other alternatives too, but these
-            are deprecated:</para>
+          <para>FreeMarker supports some more syntactical alternatives:</para>
 
-            <itemizedlist>
-              <listitem>
-                <para>Writing <literal>&amp;gt;</literal> and
-                <literal>&amp;lt;</literal> on the place of the problematic
-                relation marks, like in: <literal>&lt;#if x &amp;gt;
-                y&gt;</literal> or <literal>&lt;#if x &amp;gt;=
-                y&gt;</literal> . Note that in general FTL does not support
-                entity references (the
-                <literal>&amp;<replaceable>...</replaceable>;</literal>
-                things) in FTL tags; it's just an exception with the
-                arithmetical comparisons.</para>
-              </listitem>
+          <itemizedlist>
+            <listitem>
+              <para><literal>&amp;gt;</literal> and
+              <literal>&amp;lt;</literal> can also be used, like in:
+              <literal>&lt;#if x &amp;gt; y&gt;</literal> or <literal>&lt;#if
+              x &amp;gt;= y&gt;</literal>. This isn't meant to be entered
+              manually; it's to work around cases where the template gets
+              XML/HTML escaped and the user can't easily prevent that
+              happening. Note that in general FTL does not support entity
+              references (the
+              <literal>&amp;<replaceable>...</replaceable>;</literal> things)
+              in FTL tags; it's just an exception with these operators.</para>
+            </listitem>
 
-              <listitem>
-                <para><literal>\lt</literal>, <literal>\lte</literal>,
-                <literal>\gt</literal> and <literal>\gte</literal> which are
-                the same as the ones without the backslash</para>
-              </listitem>
-            </itemizedlist>
-          </note>
+            <listitem>
+              <para>Deprecated forms: <literal>\lt</literal>,
+              <literal>\lte</literal>, <literal>\gt</literal> and
+              <literal>\gte</literal>. These are the same as the ones without
+              the backslash.</para>
+            </listitem>
+          </itemizedlist>
         </section>
 
         <section xml:id="dgui_template_exp_logicalop">
@@ -3535,6 +3549,38 @@ ${12 % -5} &lt;#-- Prints 2 --&gt;
 &lt;#if <emphasis>!</emphasis>hot&gt; &lt;#-- here hot must be a boolean --&gt;
   It's not hot.
 &lt;/#if&gt;</programlisting>
+
+          <para>FreeMarker supports some more syntactical alternatives:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><literal>\and</literal> (since FreeMarker 2.3.27): In some
+              applications using <literal>&amp;&amp;</literal> causes problems
+              as it's not valid in XML or HTML. While FreeMarker templates was
+              never intended to be valid XML/HTML, only their output should be
+              that, in reality there are some applications that expect the
+              template itself to be valid XML/HTML regardless. This syntax is
+              a workaround for such cases. Also note that unlike with the
+              comparison operators, <literal>and</literal> without
+              <literal>\</literal> is not supported due to backward
+              compatibility restrictions.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>&amp;amp;&amp;amp;</literal> (since FreeMarker
+              2.3.27): This isn't meant to be entered manually; it's to work
+              around cases where the template gets XML/HTML escaped and the
+              user can't easily prevent that happening. Note that in general
+              FTL does not support entity references (the
+              <literal>&amp;<replaceable>...</replaceable>;</literal> things)
+              in FTL tags; it's just an exception with these operators.</para>
+            </listitem>
+
+            <listitem>
+              <para>Deprecated forms: <literal>&amp;</literal> and
+              <literal>|</literal>. Don't use them anymore.</para>
+            </listitem>
+          </itemizedlist>
         </section>
 
         <section xml:id="dgui_template_exp_builtin">
@@ -5151,9 +5197,9 @@ other@example.com</programlisting>
           <literal>namespace</literal> parameter:</para>
 
           <programlisting role="template">&lt;#import "/lib/example.ftl" as e&gt;
-${my.mail}
+${e.mail}
 &lt;#assign mail="other@example.com" <emphasis>in e</emphasis>&gt;
-${my.mail}</programlisting>
+${e.mail}</programlisting>
 
           <programlisting role="output">user@example.com
 other@example.com</programlisting>
@@ -5218,7 +5264,7 @@ User is: ${user}
 &lt;#import "/lib/example.ftl" as e2&gt;
 &lt;#import "/lib/example.ftl" as e3&gt;
 ${e.mail}, ${e2.mail}, ${e3.mail}
-&lt;#assign mail="other@example.com" in my&gt;
+&lt;#assign mail="other@example.com" in e&gt;
 ${e.mail}, ${e2.mail}, ${e3.mail}</programlisting>
 
           <programlisting role="output">user@example.com, user@example.com, user@example.com
@@ -18670,9 +18716,11 @@ or
 
             <listitem>
               <para><literal><replaceable>namespacehash</replaceable></literal>:
-              a hash that was created for a namespace (by <link
+              a hash that was created for a <link
+              linkend="dgui_misc_namespace">namespace</link> (by <link
               linkend="ref.directive.import"><literal>import</literal></link>).
-              Expression.</para>
+              Expression. If not specified, it defaults to the namespace that
+              belongs to the containing template.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -18688,6 +18736,20 @@ or
 
           <para>For more information about variables, read this: <xref
           linkend="dgui_misc_var"/></para>
+
+          <note>
+            <para>A frequent mistake is trying to use
+            <literal>assign</literal> to change a local variable like:
+            <literal>&lt;#macro m&gt;&lt;#local x = 1&gt;${x}&lt;#assign x =
+            2&gt;${x}&lt;/#macro&gt;</literal>. This prints
+            <literal>11</literal>, not <literal>12</literal>, because
+            <literal>assign</literal> creates/replaces the
+            <literal>x</literal> of the namespace that the template belongs
+            to, and doesn't change the <literal>x</literal> local variable.
+            Local variables should be always set with the <link
+            linkend="ref.directive.local"><literal>local</literal>
+            directive</link>, not just for the fist time.</para>
+          </note>
 
           <para>Example: variable <literal>seq</literal> will store a
           sequence:</para>
@@ -18709,7 +18771,7 @@ or
 &gt;</programlisting>
 
           <para>If you know what namespaces are: <literal>assign</literal>
-          directive creates variables in namespaces. Normally it creates the
+          directive creates variables in a namespace. Normally it creates the
           variable in the current namespace (i.e. in the namespace associated
           with the template where the tag is). However, if you use <literal>in
           <replaceable>namespacehash</replaceable></literal> then you can
@@ -18829,13 +18891,16 @@ ${x}</programlisting>
           outputted even if the outputting of a certain part of the page
           fails. If an error occurs during the execution of the
           <literal><replaceable>attempt block</replaceable></literal>, then
-          the template execution is not aborted, but the
+          the output of the <literal><replaceable>attempt
+          block</replaceable></literal> is rolled back <phrase
+          role="forProgrammers">(and the error is logged, with the default
+          configuration at least)</phrase>, and the
           <literal><replaceable>recover block</replaceable></literal> is
-          executed instead of the <literal><replaceable>attempt
-          block</replaceable></literal>. If no error occurs during the
-          execution of the <literal><replaceable>attempt
-          block</replaceable></literal>, then the
-          <literal><replaceable>recover block</replaceable></literal> is
+          executed instead, then template execution continues normally after
+          the <literal><replaceable>recover block</replaceable></literal>. If
+          no error occurs during the execution of the
+          <literal><replaceable>attempt block</replaceable></literal>, then
+          the <literal><replaceable>recover block</replaceable></literal> is
           ignored. A simple example:</para>
 
           <programlisting role="template">Primary content
@@ -18846,8 +18911,9 @@ ${x}</programlisting>
 &lt;/#attempt&gt;
 Primary content continued</programlisting>
 
-          <para>If the <literal>thisMayFails</literal> variable doesn't exist,
-          then the output is:</para>
+          <para>If the <literal>thisMayFails</literal> variable doesn't exist
+          (or any other error occurs at that place), then the output
+          is:</para>
 
           <programlisting role="output">Primary content
   Ops! The optional content is not available.
@@ -18880,15 +18946,14 @@ Primary content continued</programlisting>
           linkend="dgui_template_exp_missing">missing value handler
           operators</link>). It can handle all kind of errors that occurs when
           the block is executed (i.e. not syntactical errors, which are
-          detected earlier). And it's meant to enclose bigger template
-          fragments, where error can occur at various points. For example, you
-          have a part in your template that deals with printing
-          advertisements, but that's not the primary content of the page, so
-          you don't want your whole page be down just because some error
-          occurs with the printing of the advertisements (say, because of a
-          temporal database server faliure). So you put the whole
-          advertisement printing into an <literal><replaceable>attempt
-          block</replaceable></literal>.</para>
+          detected earlier). It meant to enclose bigger template fragments,
+          where error can occur at various points. For example, you have a
+          part in your template that deals with printing advertisements, but
+          that's not the primary content of the page, so you don't want your
+          whole page be down just because some error occurs with the printing
+          of the advertisements (say, because of a database server outage). So
+          you put the whole advertisement printing into an
+          <literal><replaceable>attempt block</replaceable></literal>.</para>
 
           <para>In some environments programmers configure FreeMarker so that
           it doesn't abort template execution for certain errors, but
@@ -18905,11 +18970,20 @@ Primary content continued</programlisting>
           references to special variable are started with dot (for example:
           <literal>${.error}</literal>).</para>
 
-          <para><phrase role="forProgrammers">Errors occurring during template
-          execution are always <link
-          linkend="pgui_misc_logging">logged</link>, even if they occur inside
-          an <literal><replaceable>attempt
-          block</replaceable></literal>.</phrase></para>
+          <para><phrase role="forProgrammers">By default errors occurring
+          inside an <literal><replaceable>attempt
+          block</replaceable></literal> are <link
+          linkend="pgui_misc_logging">logged</link> with
+          <literal>ERROR</literal> level, despite that the template recovers
+          from them. This is because <literal>attempt</literal> is not meant
+          to be a general purpose error handler mechanism, like
+          <literal>try</literal> is in Java. It's for decreasing the impact of
+          unexpected errors on the visitors, by making it possible that only
+          part of the page is going down, instead of the whole page. But it's
+          still an error, something that needs the attention of the operators.
+          (The way this error is reported can be customized with the
+          <literal>attempt_exception_reporter</literal> configuration setting,
+          since FreeMarker 2.3.27.)</phrase></para>
         </section>
       </section>
 
@@ -20852,7 +20926,7 @@ All rights reserved.</emphasis></programlisting>
             <literal>list</literal> accepts a scalar too and treats it as a
             single-element sequence.</phrase></para>
 
-            <para><phrase role="forProgrammers">If you pass an collection that
+            <para><phrase role="forProgrammers">If you pass a collection that
             wraps an <literal>java.util.Iterator</literal> to the
             <literal>list</literal>, you can iterate over its elements only
             once, since <literal>Iterator</literal>s are by their nature
@@ -20919,10 +20993,24 @@ or
 
           <para>It is similar to <link linkend="ref.directive.assign">assign
           directive</link>, but it creates or replaces local variables. This
-          only works inside macro definitions and function definitons.</para>
+          only works inside macro definitions and function definitions.</para>
 
           <para>For more information about variables, read this: <xref
           linkend="dgui_misc_var"/></para>
+
+          <note>
+            <para>A frequent mistake is trying to use
+            <literal>assign</literal> to change a local variable like:
+            <literal>&lt;#macro m&gt;&lt;#local x = 1&gt;${x}&lt;#assign x =
+            2&gt;${x}&lt;/#macro&gt;</literal>. This prints
+            <literal>11</literal>, not <literal>12</literal>, because
+            <literal>assign</literal> creates/replaces the
+            <literal>x</literal> of the namespace that the template belongs
+            to, and doesn't change the <literal>x</literal> local variable.
+            Local variables should be always set with the <link
+            linkend="ref.directive.local"><literal>local</literal>
+            directive</link>, not just for the fist time.</para>
+          </note>
         </section>
       </section>
 
@@ -22975,7 +23063,7 @@ There was no specific handler for node y
               <primary>incomplatible_improvements</primary>
             </indexterm><literal>incompatible_improvements</literal> (since
           FreeMarker 2.3.24): The <link
-          linkend="pgui_config_incompatible_improvements"><literal>incompatbile_improvements</literal>
+          linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
           setting</link> of the current FreeMarker configuration, as a
           string.</para>
         </listitem>
@@ -23783,12 +23871,12 @@ or
           linkend="ref.setting.number_format"><literal>number_format</literal>
           setting</link>. This is actually a backward compatibility quirk, but
           it can be useful when you print numbers in situations like
-          <literal>&lt;a href="quertyDatabase?id=#{id}"&gt;</literal>, where
+          <literal>&lt;a href="queryDatabase?id=#{id}"&gt;</literal>, where
           you surely don't want grouping separators or something fancy like
           that. However, starting from FreeMarker 2.3.3 rather use the <link
           linkend="ref_builtin_c"><literal>?c</literal> built-in</link> for
           this purpose, like <literal>&lt;a
-          href="quertyDatabase?id=${id?c}"&gt;</literal>.</para>
+          href="queryDatabase?id=${id?c}"&gt;</literal>.</para>
 
           <para>Examples. Assume that <literal>x</literal> is
           <literal>2.582</literal> and <literal>y</literal> is
@@ -24944,7 +25032,7 @@ Test Book</programlisting>
             level, and there's no other element or non-whitespace character
             data (text or CDATA) between the two elements. For example in
             <literal>&lt;a/&gt;&lt;!-- comment
-            --&gt;#&amp;x20;&lt;b/&gt;</literal> the two elements are
+            --&gt;&amp;#x20;&lt;b/&gt;</literal> the two elements are
             siblings, but not in <literal>&lt;a/&gt;text&lt;b/&gt;</literal>
             or <literal>&lt;a/&gt;&lt;x/&gt;&lt;b/&gt;</literal>.</para>
           </listitem>
@@ -25067,7 +25155,7 @@ Test Book</programlisting>
         in the previous chapter -- you write an FTL program that walks the
         tree to find the different kind of nodes. With the declarative
         approach, you rather define how to handle the different kind of nodes,
-        and then let FreeMarker walk the tree an call the handlers you have
+        and then let FreeMarker walk the tree and call the handlers you have
         defined. This approach is useful for complex XML schemas, where the
         same element can occur as the child of many other elements. Examples
         of such schemas are XHTML and XDocBook.</para>
@@ -26810,6 +26898,106 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Version history</title>
 
+      <section xml:id="versions_2_3_27">
+        <title>2.3.27 (incubating at Apache)</title>
+
+        <para>Release date: FIXME</para>
+
+        <para><emphasis role="bold">This is a stable, final
+        release.</emphasis> The <quote>incubating</quote> suffix is required
+        by the Apache Software Foundation until the project becomes a fully
+        accepted (graduated) Apache project.</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Added alternative syntaxes for the
+              <literal>&amp;&amp;</literal> (logical <quote>and</quote>)
+              operator: <literal>\and</literal> and
+              <literal>&amp;amp;&amp;amp;</literal>. These are to work around
+              issues in applications where the template must be a valid XML
+              (<literal>&amp;&amp;</literal> is not valid XML/HTML, at most
+              places), or where the template entered is stored after XML or
+              HTML escaping. Note that lonely <literal>&amp;amp;</literal>,
+              and <literal>and</literal> without <literal>\</literal> is not
+              recognized for backward compatibility.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: Comments were not allowed by the parser between
+              the <literal>switch</literal> tag and the first
+              <literal>case</literal> tag.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Added new configuration setting,
+              <literal>attempt_exception_reporter</literal>
+              (<literal>Configurable.setAttemptExceptionReporter(AttemptExceptionReporter)</literal>),
+              to allow the customization of how the exceptions handled (and
+              thus suppressed) by the <link
+              linkend="ref.directive.attempt"><literal>attempt</literal>
+              directive</link> are reported. The default
+              <literal>AttemptExceptionReporter</literal> logs the exception
+              as an error, just as it was in earlier versions, though now the
+              error message will indicate that the exception was thrown inside
+              an <literal>attempt</literal> directive block.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: When the
+              <literal>TemplateExceptionHandler</literal> suppresses (i.e.,
+              doesn't re-throw) an exception, the <link
+              linkend="ref.directive.attempt"><literal>attempt</literal>
+              directive</link> won't log it anymore. (To be precise, the
+              <literal>AttemptExceptionReporter</literal> won't be invoked for
+              it anymore; the default one logs as error.)</para>
+            </listitem>
+
+            <listitem>
+              <para>When logging error due to an error in an <link
+              linkend="ref.directive.attempt"><literal>attempt</literal>
+              directive</link> block, the log message now indicates that error
+              was inside an <literal>attempt</literal> block.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-52">FREEMARKER-52</link>):
+              When setting the <literal>output_format</literal> with
+              <literal>Properties</literal>, the
+              <literal>XHTMLOutputFormat</literal> abbreviation wasn't
+              recognized (for example in a <literal>.properties</literal>
+              file, <literal>output_format=XHTMLOutputFormat</literal> didn't
+              work, only
+              <literal>output_format=freemarker.core.XHTMLOutputFormat()</literal>
+              did).</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>Constants.EMPTY_HASH</literal> and
+              <literal>GeneralPurposeNothing</literal> (the value of
+              <literal>missingVar!</literal>) now implements
+              <literal>TemplateHashModelEx2</literal>, so it can be listed
+              with <literal>&lt;#list ... as k, v&gt;</literal>. Earlier they
+              were only a <literal>TemplateHashModelEx</literal>-s.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>Constants.EMPTY_KEY_VALUE_PAIR_ITERATOR</literal></para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
+
       <section xml:id="versions_2_3_26">
         <title>2.3.26 (incubating at Apache)</title>
 
@@ -27464,7 +27652,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Added new special variable:
               <literal>.incompatible_improvements</literal>, which returns the
               <link
-              linkend="pgui_config_incompatible_improvements"><literal>incompatbile_improvements</literal>
+              linkend="pgui_config_incompatible_improvements"><literal>incompatible_improvements</literal>
               setting</link> of the current FreeMarker configuration, as a
               string.</para>
             </listitem>
@@ -30749,9 +30937,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                       <literal>f(Object[])</literal>, the last will always
                       win. This might sounds controversial, but as we can't
                       efficiently tell the common type of all the items in a
-                      sequence or <literal>List</literal>, an so we don't know
-                      if both arrays are indeed valid targets, we go for the
-                      safest choice.</para>
+                      sequence or <literal>List</literal>, and so we don't
+                      know if both arrays are indeed valid targets, we go for
+                      the safest choice.</para>
                     </listitem>
                   </itemizedlist>
                 </listitem>

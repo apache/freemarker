@@ -19,8 +19,9 @@
 
 package freemarker.template;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import freemarker.template.utility.Constants;
 
 /**
  * Singleton object representing nothing, used by ?if_exists built-in.
@@ -29,11 +30,9 @@ import java.util.List;
  */
 
 final class GeneralPurposeNothing
-implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, TemplateHashModelEx, TemplateMethodModelEx {
+implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, TemplateHashModelEx2, TemplateMethodModelEx {
 
     private static final TemplateModel instance = new GeneralPurposeNothing();
-      
-    private static final TemplateCollectionModel EMPTY_COLLECTION = new SimpleCollection(new ArrayList(0));
 
     private GeneralPurposeNothing() {
     }
@@ -71,10 +70,14 @@ implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, Tem
     }
     
     public TemplateCollectionModel keys() {
-        return EMPTY_COLLECTION;
+        return Constants.EMPTY_COLLECTION;
     }
 
     public TemplateCollectionModel values() {
-        return EMPTY_COLLECTION;
+        return Constants.EMPTY_COLLECTION;
+    }
+
+    public KeyValuePairIterator keyValuePairIterator() throws TemplateModelException {
+        return Constants.EMPTY_KEY_VALUE_PAIR_ITERATOR;
     }
 }

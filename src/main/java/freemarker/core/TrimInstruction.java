@@ -25,10 +25,10 @@ package freemarker.core;
  */
 final class TrimInstruction extends TemplateElement {
     
-    private static final int TYPE_T = 0;  
-    private static final int TYPE_LT = 1;  
-    private static final int TYPE_RT = 2;  
-    private static final int TYPE_NT = 3;  
+    static final int TYPE_T = 0;  
+    static final int TYPE_LT = 1;  
+    static final int TYPE_RT = 2;  
+    static final int TYPE_NT = 3;  
 
     final boolean left, right;
 

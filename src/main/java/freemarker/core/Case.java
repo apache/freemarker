@@ -24,8 +24,8 @@ package freemarker.core;
  */
 final class Case extends TemplateElement {
 
-    final int TYPE_CASE = 0;
-    final int TYPE_DEFAULT = 1;
+    static final int TYPE_CASE = 0;
+    static final int TYPE_DEFAULT = 1;
     
     Expression condition;
 

@@ -115,14 +115,14 @@ import freemarker.template.utility.XmlEscape;
  * <pre>
  *  // Where the application is initialized; in general you do this ONLY ONCE in the application life-cycle!
  *  Configuration cfg = new Configuration(VERSION_<i>X</i>_<i>Y</i>_<i>Z</i>));
- *  // Where X, Y, Z enables the not-100%-backward-compatible fixes introduced in
+ *  // Where VERSION_<i>X</i>_<i>Y</i>_<i>Z</i> enables the not-100%-backward-compatible fixes introduced in
  *  // FreeMarker version X.Y.Z  and earlier (see {@link #Configuration(Version)}).
  *  cfg.set<i>SomeSetting</i>(...);
  *  cfg.set<i>OtherSetting</i>(...);
  *  ...
  *  
  *  // Later, whenever the application needs a template (so you may do this a lot, and from multiple threads):
- *  {@link Template Template} myTemplate = cfg.{@link #getTemplate(String) getTemplate}("myTemplate.html");
+ *  {@link Template Template} myTemplate = cfg.{@link #getTemplate(String) getTemplate}("myTemplate.ftlh");
  *  myTemplate.{@link Template#process(Object, java.io.Writer) process}(dataModel, out);</pre>
  * 
  * <p>A couple of settings that you should not leave on its default value are:
@@ -499,7 +499,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private Version incompatibleImprovements;
     private int tagSyntax = ANGLE_BRACKET_TAG_SYNTAX;
     private int namingConvention = AUTO_DETECT_NAMING_CONVENTION;
-    private int tabSize = 8;  // Default from JavaCC 3.x 
+    private int tabSize = 8;  // Default from JavaCC 3.x
+    private boolean preventStrippings;
 
     private TemplateCache cache;
     
@@ -510,6 +511,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     private boolean objectWrapperExplicitlySet;
     private boolean templateExceptionHandlerExplicitlySet;
+    private boolean attemptExceptionReporterExplicitlySet;
     private boolean logTemplateExceptionsExplicitlySet;
     private boolean localeExplicitlySet;
     private boolean defaultEncodingExplicitlySet;
@@ -961,6 +963,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private TemplateExceptionHandler getDefaultTemplateExceptionHandler() {
         return getDefaultTemplateExceptionHandler(getIncompatibleImprovements());
     }
+
+    private AttemptExceptionReporter getDefaultAttemptExceptionReporter() {
+        return getDefaultAttemptExceptionReporter(getIncompatibleImprovements());
+    }
     
     private boolean getDefaultLogTemplateExceptions() {
         return getDefaultLogTemplateExceptions(getIncompatibleImprovements());
@@ -975,6 +981,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         return TemplateExceptionHandler.DEBUG_HANDLER;
     }
 
+    // Package visible as Configurable needs this to initialize the field defaults.
+    final static AttemptExceptionReporter getDefaultAttemptExceptionReporter(Version incompatibleImprovements) {
+        return AttemptExceptionReporter.LOG_ERROR_REPORTER;
+    }
+    
     // Package visible as Configurable needs this to initialize the field defaults.
     final static boolean getDefaultLogTemplateExceptions(Version incompatibleImprovements) {
         return true;
@@ -1219,7 +1230,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Sets a {@link TemplateLookupStrategy} that is used to look up templates based on the requested name; as a side
+     * Sets the {@link TemplateLookupStrategy} that is used to look up templates based on the requested name; as a side
      * effect the template cache will be emptied. The default value is {@link TemplateLookupStrategy#DEFAULT_2_3_0}.
      * 
      * @since 2.3.22
@@ -1530,7 +1541,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
 
     /**
      * Sets the time in milliseconds that must elapse before checking whether there is a newer version of a template
-     * "file" exists than the cached one. Defaults to 5000 ms.
+     * "file" than the cached one. Defaults to 5000 ms.
      * 
      * <p>
      * When you get a template via {@link #getTemplate(String)} (or some of its overloads). FreeMarker will try to get
@@ -1703,6 +1714,36 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      */
     public boolean isTemplateExceptionHandlerExplicitlySet() {
         return templateExceptionHandlerExplicitlySet;
+    }
+    
+    @Override
+    public void setAttemptExceptionReporter(AttemptExceptionReporter attemptExceptionReporter) {
+        super.setAttemptExceptionReporter(attemptExceptionReporter);
+        attemptExceptionReporterExplicitlySet = true;
+    }
+
+    /**
+     * Resets the setting to its default, as if it was never set. This means that when you change the
+     * {@code incompatibe_improvements} setting later, the default will also change as appropriate. Also 
+     * {@link #isAttemptExceptionReporterExplicitlySet()} will return {@code false}.
+     * 
+     * @since 2.3.27
+     */
+    public void unsetAttemptExceptionReporter() {
+        if (attemptExceptionReporterExplicitlySet) {
+            setAttemptExceptionReporter(getDefaultAttemptExceptionReporter());
+            attemptExceptionReporterExplicitlySet = false;
+        }
+    }
+    
+    /**
+     * Tells if {@link #setAttemptExceptionReporter(AttemptExceptionReporter)} (or equivalent) was already called on
+     * this instance.
+     * 
+     * @since 2.3.27
+     */
+    public boolean isAttemptExceptionReporterExplicitlySet() {
+        return attemptExceptionReporterExplicitlySet;
     }    
     
     /**
@@ -1788,6 +1829,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             if (!templateExceptionHandlerExplicitlySet) {
                 templateExceptionHandlerExplicitlySet = true;
                 unsetTemplateExceptionHandler();
+            }
+
+            if (!attemptExceptionReporterExplicitlySet) {
+                attemptExceptionReporterExplicitlySet = true;
+                unsetAttemptExceptionReporter();
             }
             
             if (!logTemplateExceptionsExplicitlySet) {
@@ -1927,7 +1973,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * Where you can't use the standard extensions, templates still can be associated to output formats with
      * patterns matching their name (their path) using {@link #setTemplateConfigurations(TemplateConfigurationFactory)}.
      * But if all templates will have the same output format, you may use {@link #setOutputFormat(OutputFormat)} after
-     * all, to set a value like {@link HTMLOutputFormat#INSTANCE}, {@link XMLOutputFormat#INSTANCE}, etc. Also note
+     * all, to a value like {@link HTMLOutputFormat#INSTANCE}, {@link XMLOutputFormat#INSTANCE}, etc. Also note
      * that templates can specify their own output format like {@code 
      * <#ftl output_format="HTML">}, which overrides any configuration settings.
      * 
@@ -1992,7 +2038,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * @param name
      *            Either the name of the output format as it was registered with
      *            {@link Configuration#setRegisteredCustomOutputFormats(Collection)}, or a combined output format name.
-     *            A output combined format is created ad-hoc from the registered formats. For example, if you need RTF
+     *            A combined output format is created ad-hoc from the registered formats. For example, if you need RTF
      *            embedded into HTML, the name will be <code>HTML{RTF}</code>, where "HTML" and "RTF" refer to the
      *            existing formats. This logic can be used recursively, so for example <code>XML{HTML{RTF}}</code> is
      *            also valid.
@@ -2324,7 +2370,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * messages (or the column number you get through other API-s). So for example if the users edit templates in an
      * editor where the tab width is set to 4, you should set this to 4 so that the column numbers printed by FreeMarker
      * will match the column number shown in the editor. This setting doesn't affect the output of templates, as a tab
-     * in the template will remain a tab in the output too.
+     * in the template will remain a tab in the output too. If you set this setting to 1, then tab characters will be
+     * kept in the return value of {@link Template#getSource(int, int, int, int)}, otherwise they will be replaced with
+     * the appropriate number of spaces.
      * 
      * @param tabSize
      *            At least 1, at most 256.
@@ -2337,7 +2385,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         }
         // To avoid integer overflows:
         if (tabSize > 256) {
-            throw new IllegalArgumentException("\"tabSize\" can be more than 256, but was " + tabSize);
+            throw new IllegalArgumentException("\"tabSize\" can't be more than 256, but was " + tabSize);
         }
         this.tabSize = tabSize;
     }
@@ -2351,6 +2399,25 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         return tabSize;
     }
     
+    /**
+     * Getter pair of {@link #setPreventStrippings(boolean)}.
+     * 
+     * @since 2.3.27
+     */
+    boolean getPreventStrippings() {
+        return preventStrippings;
+    }
+
+    /**
+     * Used internally; added for the FreeMarker 2 to FreeMarker 3 converter, prevents the stripping/removal of AST
+     * nodes so that the source code can be fully reproduced from the AST.
+     * 
+     * @since 2.3.27
+     */
+    void setPreventStrippings(boolean preventStrippings) {
+        this.preventStrippings = preventStrippings;
+    }
+
     /**
      * Retrieves the template with the given name from the template cache, loading it into the cache first if it's
      * missing/staled.
@@ -2651,12 +2718,16 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * default encoding if no encoding is set explicitly for the specified
      * locale. You can associate encodings with locales using 
      * {@link #setEncoding(Locale, String)} or {@link #loadBuiltInEncodingMap()}.
+     * 
+     * @param locale Shouldn't be {@code null}, though for backward compatibility it's accepted when the locale to
+     *               encoding {@link Map} (see earlier) is empty.
      */
     public String getEncoding(Locale locale) {
         if (localeToCharsetMap.isEmpty()) {
             return defaultEncoding;
         } else {
             // Try for a full name match (may include country and variant)
+            NullArgumentException.check("locale", locale);
             String charset = (String) localeToCharsetMap.get(locale.toString());
             if (charset == null) {
                 if (locale.getVariant().length() > 0) {
@@ -2983,7 +3054,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     if (!(item instanceof OutputFormat)) {
                         throw new _MiscTemplateException(getEnvironment(),
                                 "Invalid value for setting ", new _DelayedJQuote(name), ": List items must be "
-                                + OutputFormat.class.getName() + " intances, in: ", value);
+                                + OutputFormat.class.getName() + " instances, in: ", value);
                     }
                 }
                 setRegisteredCustomOutputFormats(list);

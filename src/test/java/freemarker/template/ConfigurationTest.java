@@ -1206,6 +1206,18 @@ public class ConfigurationTest extends TestCase {
         cfg.setSetting(Configurable.LOG_TEMPLATE_EXCEPTIONS_KEY, "false");
         assertEquals(false, cfg.getLogTemplateExceptions());
     }
+
+    public void testSetAttemptExceptionReporter() throws TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        assertEquals(AttemptExceptionReporter.LOG_ERROR_REPORTER, cfg.getAttemptExceptionReporter());
+        assertFalse(cfg.isAttemptExceptionReporterExplicitlySet());
+        cfg.setSetting(Configurable.ATTEMPT_EXCEPTION_REPORTER_KEY, "log_warn");
+        assertEquals(AttemptExceptionReporter.LOG_WARN_REPORTER, cfg.getAttemptExceptionReporter());
+        assertTrue(cfg.isAttemptExceptionReporterExplicitlySet());
+        cfg.setSetting(Configurable.ATTEMPT_EXCEPTION_REPORTER_KEY, "default");
+        assertEquals(AttemptExceptionReporter.LOG_ERROR_REPORTER, cfg.getAttemptExceptionReporter());
+        assertFalse(cfg.isAttemptExceptionReporterExplicitlySet());
+    }
     
     public void testSharedVariables() throws TemplateModelException {
         Configuration cfg = new Configuration();

@@ -26,8 +26,8 @@ import freemarker.template.Version;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Symbolized template name format. The API of this class isn't exposed as it's too immature, so custom
- * template name formats aren't possible yet.
+ * Symbolizes a template name format, which defines the basic syntax of names through algorithms such as normalization.
+ * The API of this class isn't exposed as it's too immature, so custom template name formats aren't possible yet.
  *
  * @since 2.3.22
  */

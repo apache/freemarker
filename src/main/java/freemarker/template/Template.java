@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
 
@@ -226,9 +227,9 @@ public class Template extends Configurable {
      * @since 2.3.24
      */
     public Template(
-            String name, String sourceName, Reader reader,
-            Configuration cfg, ParserConfiguration customParserConfiguration,
-            String encoding) throws IOException {
+           String name, String sourceName, Reader reader,
+           Configuration cfg, ParserConfiguration customParserConfiguration,
+           String encoding) throws IOException {
         this(name, sourceName, cfg, customParserConfiguration);
         
         this.setEncoding(encoding);
@@ -244,6 +245,9 @@ public class Template extends Configurable {
             
             try {
                 FMParser parser = new FMParser(this, reader, actualParserConfiguration);
+                if (cfg != null) {
+                    _CoreAPI.setPreventStrippings(parser, cfg.getPreventStrippings());
+                }
                 try {
                     this.rootElement = parser.Root();
                 } catch (IndexOutOfBoundsException exc) {
@@ -600,7 +604,9 @@ public class Template extends Configurable {
     }
 
     /**
-     * Returns the default character encoding used for reading included files.
+     * The encoding that was (allegedly) used to read this template; also the the default character encoding used for
+     * reading files included from this template. Possibly {@code null}, in which case you are supposed to use
+     * {@link Configuration#getEncoding(Locale)}. 
      */
     public String getEncoding() {
         return this.encoding;

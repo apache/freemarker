@@ -22,7 +22,7 @@ import java.lang.reflect.Method;
 
 /**
  * Used internally only, might changes without notice!
- * Used for accessing functionality that's only present in Java 6 or later.
+ * Used for accessing functionality that's only present in Java 8 or later.
  */
 // Compile this against Java 8
 @SuppressWarnings("Since15") // For IntelliJ inspection

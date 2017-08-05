@@ -70,7 +70,7 @@ public class FMParser {
 
     private Template template;
 
-    private boolean stripWhitespace, stripText;
+    private boolean stripWhitespace, stripText, preventStrippings;
     private int incompatibleImprovements;
     private OutputFormat outputFormat;
     private int autoEscapingPolicy;
@@ -290,6 +290,13 @@ public class FMParser {
     void tearDownStringLiteralMode(FMParserTokenManager parentTokenSource) {
         parentTokenSource.namingConvention = token_source.namingConvention;
         parentTokenSource.namingConventionEstabilisher = token_source.namingConventionEstabilisher;
+    }
+    
+    /**
+     * Used when we need to recreate the source code from the AST (such as for the FM2 to FM3 converter).
+     */
+    void setPreventStrippings(boolean preventStrippings) {
+        this.preventStrippings = preventStrippings;
     }
 
     private OutputFormat getFormatFromStdFileExt() {
@@ -1251,7 +1258,7 @@ TOKEN:
     |
     <PERCENT : "%">
     |
-    <AND : "&" | "&&" >
+    <AND : "&" | "&&" | "&amp;&amp;" | "\\and" >
     |
     <OR : "|" | "||">
     |
@@ -3220,7 +3227,7 @@ Macro Macro() :
     )
     {
         if (inMacro || inFunction) {
-            throw new ParseException("Macros cannot be nested.", template, start);
+            throw new ParseException("Macro or function definitions can't be nested into each other.", template, start);
         }
         if (isFunction) inFunction = true; else inMacro = true;
     }
@@ -3287,12 +3294,12 @@ Macro Macro() :
     (
         end = <END_MACRO>
         {
-        	if (isFunction) throw new ParseException("Expected function end tag here.", template, start);
+        	if (isFunction) throw new ParseException("Expected function end tag here.", template, end);
     	}
         |
         end = <END_FUNCTION>
         {
-    		if (!isFunction) throw new ParseException("Expected macro end tag here.", template, start);
+    		if (!isFunction) throw new ParseException("Expected macro end tag here.", template, end);
     	}
     )
     {
@@ -3353,12 +3360,13 @@ TemplateElement UnifiedMacroTransform() :
         positionalArgs = PositionalArgs()
     )
     [
-        <SEMICOLON>{bodyParameters = new ArrayList(4); }
+        <SEMICOLON>
+        { bodyParameters = new ArrayList(4); }
         [
             [<TERMINATING_WHITESPACE>] t = <ID> { bodyParameters.add(t.image); }
             (
                 [<TERMINATING_WHITESPACE>] <COMMA>
-                [<TERMINATING_WHITESPACE>] t = <ID>{bodyParameters.add(t.image); }
+                [<TERMINATING_WHITESPACE>] t = <ID> {bodyParameters.add(t.image); }
             )*
         ]
     ]
@@ -3425,11 +3433,14 @@ TemplateElement Call() :
     Token start, end, id;
     HashMap namedArgs = null;
     ArrayList positionalArgs = null;
-    String macroName= null;
+    Identifier macroName= null;
 }
 {
     start = <CALL>
-    id = <ID> { macroName = id.image; }
+    id = <ID> {
+        macroName = new Identifier(id.image);
+        macroName.setLocation(template, id, id);
+    }
     (
         LOOKAHEAD(<ID><EQUALS>)
         namedArgs = NamedArgs()
@@ -3447,9 +3458,9 @@ TemplateElement Call() :
     {
         UnifiedCall result = null;
         if (positionalArgs != null) {
-            result = new UnifiedCall(new Identifier(macroName), positionalArgs, TemplateElements.EMPTY, null);
+            result = new UnifiedCall(macroName, positionalArgs, TemplateElements.EMPTY, null);
         } else {
-            result = new UnifiedCall(new Identifier(macroName), namedArgs, TemplateElements.EMPTY, null);
+            result = new UnifiedCall(macroName, namedArgs, TemplateElements.EMPTY, null);
         }
         result.legacySyntax = true;
         result.setLocation(template, start, end);
@@ -3574,34 +3585,39 @@ TransformBlock Transform() :
 SwitchBlock Switch() :
 {
     SwitchBlock switchBlock;
+    MixedContent ignoredSectionBeforeFirstCase = null;
     Case caseIns;
     Expression switchExp;
     Token start, end;
     boolean defaultFound = false;
 }
 {
-    start = <SWITCH>
-    switchExp = Expression()
-    <DIRECTIVE_END>
+    (
+	    start = <SWITCH>
+	    switchExp = Expression()
+	    <DIRECTIVE_END>
+        [ ignoredSectionBeforeFirstCase = WhitespaceAndComments() ]
+    )
     {
         breakableDirectiveNesting++;
-        switchBlock = new SwitchBlock(switchExp);
+        switchBlock = new SwitchBlock(switchExp, ignoredSectionBeforeFirstCase);
     }
-    (
-        LOOKAHEAD(2)
-        caseIns = Case()
-        {
-            if (caseIns.condition == null) {
-                if (defaultFound) {
-                    throw new ParseException(
-                    "You can only have one default case in a switch statement", template, start);
-                }
-                defaultFound = true;
-            }
-            switchBlock.addCase(caseIns);
-        }
-    )*
-    [<STATIC_TEXT_WS>]
+    [
+	    (
+	        caseIns = Case()
+	        {
+	            if (caseIns.condition == null) {
+	                if (defaultFound) {
+	                    throw new ParseException(
+	                    "You can only have one default case in a switch statement", template, start);
+	                }
+	                defaultFound = true;
+	            }
+	            switchBlock.addCase(caseIns);
+	        }
+	    )+
+	    [<STATIC_TEXT_WS>]
+    ]
     end = <END_SWITCH>
     {
         breakableDirectiveNesting--;
@@ -3617,7 +3633,6 @@ Case Case() :
     Token start;
 }
 {
-    [<STATIC_TEXT_WS>]
     (
         start = <CASE> exp = Expression() <DIRECTIVE_END>
         |
@@ -3975,10 +3990,25 @@ TextBlock PCData() :
         }
     )+
     {
-        if (stripText && mixedContentNesting == 1) return null;
+        if (stripText && mixedContentNesting == 1 && !preventStrippings) return null;
 
         TextBlock result = new TextBlock(buf.toString(), false);
         result.setLocation(template, start, t);
+        return result;
+    }
+}
+
+TextBlock WhitespaceText() :
+{
+    Token t = null, start = null;
+}
+{
+    t = <STATIC_TEXT_WS>
+    {
+        if (stripText && mixedContentNesting == 1 && !preventStrippings) return null;
+
+        TextBlock result = new TextBlock(t.image, false);
+        result.setLocation(template, t, t);
         return result;
     }
 }
@@ -4138,6 +4168,44 @@ TemplateElement FreeMarkerText() :
         }
     )+
     {
+        nodes.setLocation(template, begin, elem);
+        return nodes;
+    }
+}
+
+/**
+ * To be used between tags that in theory has nothing between, such between #switch and the first #case.
+ */
+MixedContent WhitespaceAndComments() :
+{
+    MixedContent nodes = new MixedContent();
+    TemplateElement elem, begin = null;
+}
+{
+    (
+        (
+            elem = WhitespaceText()
+            |
+            elem = Comment()
+        )
+        {
+            if (elem != null) { // not removed by stripText
+	            if (begin == null) {
+	                begin = elem;
+	            }
+	            nodes.addChild(elem);
+            }
+        }
+    )+
+    {
+        if (begin == null // Was is removed by stripText?
+                // Nodes here won't be ever executed anyway, but whitespace stripping should still remove the
+                // lonely TextBlock from the AST, as that's purely source code formatting. If it's not lonely, then
+                // there must be a comment, in which case the generic whitespace stripping algorithm will kick in.
+                || stripWhitespace && !preventStrippings
+                        && nodes.getChildCount() == 1 && nodes.getChild(0) instanceof TextBlock) {
+            return null;
+        }
         nodes.setLocation(template, begin, elem);
         return nodes;
     }
@@ -4383,7 +4451,9 @@ TemplateElement Root() :
     {
         TemplateElement root = children.asSingleElement(); 
         root.setFieldsForRootElement();
-        root = root.postParseCleanup(stripWhitespace);
+        if (!preventStrippings) {
+            root = root.postParseCleanup(stripWhitespace);
+        }
         // The cleanup result is possibly an element from deeper:
         root.setFieldsForRootElement();
         return root;

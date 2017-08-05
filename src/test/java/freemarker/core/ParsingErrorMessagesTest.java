@@ -61,7 +61,9 @@ public class ParsingErrorMessagesTest {
     @Test
     public void testUnclosedDirectives() {
         assertErrorContains("<#macro x>", "#macro", "unclosed");
+        assertErrorContains("<#macro x></#function>", "macro end tag");
         assertErrorContains("<#function x>", "#macro", "unclosed");
+        assertErrorContains("<#function x></#macro>", "function end tag");
         assertErrorContains("<#assign x>", "#assign", "unclosed");
         assertErrorContains("<#macro m><#local x>", "#local", "unclosed");
         assertErrorContains("<#global x>", "#global", "unclosed");

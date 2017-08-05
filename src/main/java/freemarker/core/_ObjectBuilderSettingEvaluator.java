@@ -683,6 +683,7 @@ public class _ObjectBuilderSettingEvaluator {
             addWithSimpleName(SHORTHANDS, FirstMatchTemplateConfigurationFactory.class);
 
             addWithSimpleName(SHORTHANDS, HTMLOutputFormat.class);
+            addWithSimpleName(SHORTHANDS, XHTMLOutputFormat.class);
             addWithSimpleName(SHORTHANDS, XMLOutputFormat.class);
             addWithSimpleName(SHORTHANDS, RTFOutputFormat.class);
             addWithSimpleName(SHORTHANDS, PlainTextOutputFormat.class);
@@ -878,7 +879,7 @@ public class _ObjectBuilderSettingEvaluator {
                         throw new LegacyExceptionWrapperSettingEvaluationExpression(e);
                     }
                 } catch (LegacyExceptionWrapperSettingEvaluationExpression e) {
-                    if (!canBeStaticField) {
+                    if (!canBeStaticField || className.indexOf('.') == -1) {
                         throw e;
                     }
                     // Silently try to interpret className as static filed, throw the original exception if that fails. 

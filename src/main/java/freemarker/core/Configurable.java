@@ -52,6 +52,7 @@ import freemarker.cache.PathRegexMatcher;
 import freemarker.cache.TemplateLoader;
 import freemarker.ext.beans.BeansWrapper;
 import freemarker.ext.beans.BeansWrapperBuilder;
+import freemarker.template.AttemptExceptionReporter;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.ObjectWrapper;
@@ -161,6 +162,13 @@ public class Configurable {
     public static final String TEMPLATE_EXCEPTION_HANDLER_KEY_CAMEL_CASE = "templateExceptionHandler";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String TEMPLATE_EXCEPTION_HANDLER_KEY = TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE;
+    
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.27 */
+    public static final String ATTEMPT_EXCEPTION_REPORTER_KEY_SNAKE_CASE = "attempt_exception_reporter";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.27 */
+    public static final String ATTEMPT_EXCEPTION_REPORTER_KEY_CAMEL_CASE = "attemptExceptionReporter";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String ATTEMPT_EXCEPTION_REPORTER_KEY = ATTEMPT_EXCEPTION_REPORTER_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String ARITHMETIC_ENGINE_KEY_SNAKE_CASE = "arithmetic_engine";
@@ -275,6 +283,7 @@ public class Configurable {
         // Must be sorted alphabetically!
         API_BUILTIN_ENABLED_KEY_SNAKE_CASE,
         ARITHMETIC_ENGINE_KEY_SNAKE_CASE,
+        ATTEMPT_EXCEPTION_REPORTER_KEY_SNAKE_CASE,
         AUTO_FLUSH_KEY_SNAKE_CASE,
         AUTO_IMPORT_KEY_SNAKE_CASE,
         AUTO_INCLUDE_KEY_SNAKE_CASE,
@@ -305,6 +314,7 @@ public class Configurable {
         // Must be sorted alphabetically!
         API_BUILTIN_ENABLED_KEY_CAMEL_CASE,
         ARITHMETIC_ENGINE_KEY_CAMEL_CASE,
+        ATTEMPT_EXCEPTION_REPORTER_KEY_CAMEL_CASE,
         AUTO_FLUSH_KEY_CAMEL_CASE,
         AUTO_IMPORT_KEY_CAMEL_CASE,
         AUTO_INCLUDE_KEY_CAMEL_CASE,
@@ -348,6 +358,7 @@ public class Configurable {
     private String falseStringValue;  // deduced from booleanFormat
     private Integer classicCompatible;
     private TemplateExceptionHandler templateExceptionHandler;
+    private AttemptExceptionReporter attemptExceptionReporter;
     private ArithmeticEngine arithmeticEngine;
     private ObjectWrapper objectWrapper;
     private String outputEncoding;
@@ -412,9 +423,10 @@ public class Configurable {
         classicCompatible = Integer.valueOf(0);
         properties.setProperty(CLASSIC_COMPATIBLE_KEY, classicCompatible.toString());
         
-        templateExceptionHandler = _TemplateAPI.getDefaultTemplateExceptionHandler(
-                incompatibleImprovements);
+        templateExceptionHandler = _TemplateAPI.getDefaultTemplateExceptionHandler(incompatibleImprovements);
         properties.setProperty(TEMPLATE_EXCEPTION_HANDLER_KEY, templateExceptionHandler.getClass().getName());
+
+        attemptExceptionReporter = _TemplateAPI.getDefaultAttemptExceptionReporter(incompatibleImprovements);
         
         arithmeticEngine = ArithmeticEngine.BIGDECIMAL_ENGINE;
         properties.setProperty(ARITHMETIC_ENGINE_KEY, arithmeticEngine.getClass().getName());
@@ -461,12 +473,8 @@ public class Configurable {
      */
     public Configurable(Configurable parent) {
         this.parent = parent;
-        locale = null;
-        numberFormat = null;
-        classicCompatible = null;
-        templateExceptionHandler = null;
         properties = new Properties(parent.properties);
-        customAttributes = new HashMap(0);
+        customAttributes = new HashMap<Object, Object>(0);
     }
     
     @Override
@@ -684,7 +692,7 @@ public class Configurable {
     /**
      * Sets the time zone used when dealing with {@link java.sql.Date java.sql.Date} and
      * {@link java.sql.Time java.sql.Time} values. It defaults to {@code null} for backward compatibility, but in most
-     * application this should be set to the JVM default time zone (server default time zone), because that's what
+     * applications this should be set to the JVM default time zone (server default time zone), because that's what
      * most JDBC drivers will use when constructing the {@link java.sql.Date java.sql.Date} and
      * {@link java.sql.Time java.sql.Time} values. If this setting is {@code null}, FreeMarker will use the value of
      * ({@link #getTimeZone()}) for {@link java.sql.Date java.sql.Date} and {@link java.sql.Time java.sql.Time} values,
@@ -695,7 +703,7 @@ public class Configurable {
      * 
      * <p>To decide what value you need, a few things has to be understood:
      * <ul>
-     *   <li>Date-only and time-only values in SQL-oriented databases are usually store calendar and clock field
+     *   <li>Date-only and time-only values in SQL-oriented databases usually store calendar and clock field
      *   values directly (year, month, day, or hour, minute, seconds (with decimals)), as opposed to a set of points
      *   on the physical time line. Thus, unlike SQL timestamps, these values usually aren't meant to be shown
      *   differently depending on the time zone of the audience.
@@ -709,7 +717,7 @@ public class Configurable {
      *   Then, 2014-07-12 in the database will be translated to physical time 2014-07-11 22:00:00 UTC, because that
      *   rendered in GMT+02:00 gives 2014-07-12 00:00:00. Similarly, 11:57:00 in the database will be translated to
      *   physical time 1970-01-01 09:57:00 UTC. Thus, the physical time stored in the returned value depends on the
-     *   default system time zone of the JDBC client, not just on the content in the database. (This used to be the
+     *   default system time zone of the JDBC client, not just on the content of the database. (This used to be the
      *   default behavior of ORM-s, like Hibernate, too.)
      *   
      *   <li>The value of the {@code time_zone} FreeMarker configuration setting sets the time zone used for the
@@ -725,11 +733,12 @@ public class Configurable {
      *   values from the earlier examples will be shown as 2014-07-11 (one day off) and 09:57:00 (2 hours off). While
      *   those are the time zone correct renderings, those values are probably meant to be shown "as is".
      *   
-     *   <li>You may wonder why this setting isn't simply "SQL time zone", since the time zone related behavior of JDBC
-     *   applies to {@link java.sql.Timestamp java.sql.Timestamp} too. FreeMarker assumes that you have set up your
-     *   application so that time stamps coming from the database go through the necessary conversion to store the
-     *   correct distance from the epoch (1970-01-01 00:00:00 UTC), as requested by {@link java.util.Date}. In that case
-     *   the time stamp can be safely rendered in different time zones, and thus it needs no special treatment.
+     *   <li>You may wonder why this setting isn't simply "SQL time zone", that is, why's this time zone not applied to
+     *   {@link java.sql.Timestamp java.sql.Timestamp} values as well. Timestamps in databases refer to a point on
+     *   the physical time line, and thus doesn't have the inherent problem of date-only and time-only values.
+     *   FreeMarker assumes that the JDBC driver converts time stamps coming from the database so that they store
+     *   the distance from the epoch (1970-01-01 00:00:00 UTC), as requested by the {@link java.util.Date} API.
+     *   Then time stamps can be safely rendered in different time zones, and thus need no special treatment.
      * </ul>
      * 
      * @param tz Maybe {@code null}, in which case {@link java.sql.Date java.sql.Date} and
@@ -779,8 +788,8 @@ public class Configurable {
      *   <li>{@code "currency"}: The number format returned by {@link NumberFormat#getCurrencyInstance(Locale)}</li>
      *   <li>{@code "percent"}: The number format returned by {@link NumberFormat#getPercentInstance(Locale)}</li>
      *   <li>{@code "computer"}: The number format used by FTL's {@code c} built-in (like in {@code someNumber?c}).</li>
-     *   <li>{@link java.text.DecimalFormat} pattern (like {@code "0.##"}). This syntax has a FreeMarker-specific
-     *       extension, so that you can specify options like the rounding mode and the symbols used in this string. For
+     *   <li>{@link java.text.DecimalFormat} pattern (like {@code "0.##"}). This syntax is extended by FreeMarker
+     *       so that you can specify options like the rounding mode and the symbols used after a 2nd semicolon. For
      *       example, {@code ",000;; roundingMode=halfUp groupingSeparator=_"} will format numbers like {@code ",000"}
      *       would, but with half-up rounding mode, and {@code _} as the group separator. See more about "extended Java
      *       decimal format" in the FreeMarker Manual.
@@ -946,7 +955,7 @@ public class Configurable {
         int commaIdx = booleanFormat.indexOf(',');
         if (commaIdx == -1) {
             throw new IllegalArgumentException(
-                    "Setting value must be string that contains two comma-separated values for true and false, " +
+                    "Setting value must be a string that contains two comma-separated values for true and false, " +
                     "respectively.");
         }
         
@@ -1050,12 +1059,12 @@ public class Configurable {
     }
 
     /**
-     * Sets the format used to convert {@link java.util.Date}-s to string-s that are time (no date part) values,
-     * also the format that {@code someString?time} will use to parse strings.
-     * 
+     * Sets the format used to convert {@link java.util.Date}-s that are time (no date part) values to string-s, also
+     * the format that {@code someString?time} will use to parse strings.
+     *
      * <p>For the possible values see {@link #setDateTimeFormat(String)}.
-     *   
-     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "medium"}.
+     *
+     * <p>Defaults to {@code ""}, which is equivalent to {@code "medium"}.
      */
     public void setTimeFormat(String timeFormat) {
         NullArgumentException.check("timeFormat", timeFormat);
@@ -1080,12 +1089,12 @@ public class Configurable {
     }
     
     /**
-     * Sets the format used to convert {@link java.util.Date}-s to string-s that are date (no time part) values,
+     * Sets the format used to convert {@link java.util.Date}-s that are date-only (no time part) values to string-s,
      * also the format that {@code someString?date} will use to parse strings.
      * 
      * <p>For the possible values see {@link #setDateTimeFormat(String)}.
      *   
-     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "medium"}.
+     * <p>Defaults to {@code ""} which is equivalent to {@code "medium"}.
      */
     public void setDateFormat(String dateFormat) {
         NullArgumentException.check("dateFormat", dateFormat);
@@ -1110,7 +1119,7 @@ public class Configurable {
     }
     
     /**
-     * Sets the format used to convert {@link java.util.Date}-s to string-s that are date-time (timestamp) values,
+     * Sets the format used to convert {@link java.util.Date}-s that are date-time (timestamp) values to string-s,
      * also the format that {@code someString?datetime} will use to parse strings.
      * 
      * <p>The possible setting values are (the quotation marks aren't part of the value itself):
@@ -1193,7 +1202,7 @@ public class Configurable {
      *       
      * </ul> 
      * 
-     * <p>Defaults to {@code ""}, which means "use the FreeMarker default", which is currently {@code "medium_medium"}.
+     * <p>Defaults to {@code ""}, which is equivalent to {@code "medium_medium"}.
      */
     public void setDateTimeFormat(String dateTimeFormat) {
         NullArgumentException.check("dateTimeFormat", dateTimeFormat);
@@ -1312,7 +1321,12 @@ public class Configurable {
      * Neither is it meant to be used to roll back the printed output. These should be solved outside template
      * processing when the exception raises from {@link Template#process(Object, Writer) Template.process}.
      * {@link TemplateExceptionHandler} meant to be used if you want to include special content <em>in</em> the template
-     * output, or if you want to suppress certain exceptions. 
+     * output, or if you want to suppress certain exceptions. If you suppress an exception, and the
+     * {@link Environment#getLogTemplateExceptions()} returns {@code false}, then it's the responsibility of the
+     * {@link TemplateExceptionHandler} to log the exception (if you want it to be logged).  
+     * 
+     * @see #setLogTemplateExceptions(boolean)
+     * @see #setAttemptExceptionReporter(AttemptExceptionReporter)
      */
     public void setTemplateExceptionHandler(TemplateExceptionHandler templateExceptionHandler) {
         NullArgumentException.check("templateExceptionHandler", templateExceptionHandler);
@@ -1335,6 +1349,46 @@ public class Configurable {
      */
     public boolean isTemplateExceptionHandlerSet() {
         return templateExceptionHandler != null;
+    }
+    
+    /**
+     * Specifies how exceptions handled (and hence suppressed) by an {@code #attempt} blocks will be logged or otherwise
+     * reported. The default value is {@link AttemptExceptionReporter#LOG_ERROR_REPORTER}.
+     * 
+     * <p>Note that {@code #attempt} is not supposed to be a general purpose error handler mechanism, like {@code try}
+     * is in Java. It's for decreasing the impact of unexpected errors, by making it possible that only part of the
+     * page is going down, instead of the whole page. But it's still an error, something that someone should fix. So the
+     * error should be reported, not just ignored in a custom {@link AttemptExceptionReporter}-s.
+     * 
+     * <p>The {@link AttemptExceptionReporter} is invoked regardless of the value of the
+     * {@link #setLogTemplateExceptions(boolean) log_template_exceptions} setting.
+     * The {@link AttemptExceptionReporter} is not invoked if the {@link TemplateExceptionHandler} has suppressed the
+     * exception.
+     * 
+     * @since 2.3.27
+     */
+    public void setAttemptExceptionReporter(AttemptExceptionReporter attemptExceptionReporter) {
+        NullArgumentException.check("attemptExceptionReporter", attemptExceptionReporter);
+        this.attemptExceptionReporter = attemptExceptionReporter;
+    }
+    
+    /**
+     * The getter pair of {@link #setAttemptExceptionReporter(AttemptExceptionReporter)}.
+     * 
+     * @since 2.3.27
+     */
+    public AttemptExceptionReporter getAttemptExceptionReporter() {
+        return attemptExceptionReporter != null
+                ? attemptExceptionReporter : parent.getAttemptExceptionReporter();
+    }
+    
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     *  
+     * @since 2.3.27
+     */
+    public boolean isAttemptExceptionReporterSet() {
+        return attemptExceptionReporter != null;
     }
 
     /**
@@ -1426,7 +1480,7 @@ public class Configurable {
     }
     
     /**
-     * Sets the URL escaping charset. If not set ({@code null}), the output encoding
+     * Sets the URL escaping (URL encoding, percentage encoding) charset. If {@code null}, the output encoding
      * ({@link #setOutputEncoding(String)}) will be used for URL escaping.
      * 
      * Defaults to {@code null}.
@@ -1606,8 +1660,9 @@ public class Configurable {
      * written applications, because there the {@link TemplateException} thrown by the public FreeMarker API is also
      * logged by the caller (even if only as the cause exception of a higher level exception). Hence, in modern
      * applications it should be set to {@code false}. Note that this setting has no effect on the logging of exceptions
-     * caught by {@code #attempt}; those are always logged, no mater what (because those exceptions won't bubble up
-     * until the API caller).
+     * caught by {@code #attempt}; by default those are always logged as errors (because those exceptions won't bubble
+     * up to the API caller), however, that can be changed with the {@link
+     * #setAttemptExceptionReporter(AttemptExceptionReporter) attempt_exception_reporter} setting.
      * 
      * @since 2.3.22
      */
@@ -1648,16 +1703,20 @@ public class Configurable {
     /**
      * Specifies if {@code <#import ...>} (and {@link Environment#importLib(String, String)}) should delay the loading
      * and processing of the imported templates until the content of the imported namespace is actually accessed. This
-     * makes the overhead of <em>unused</em> imports negligible. A drawback is that importing a missing or otherwise
-     * broken template will be successful, and the problem will remain hidden until (and if) the namespace content is
-     * actually used. Also, you lose the strict control over when the namespace initializing code in the imported
-     * template will be executed, though it shouldn't mater for well written imported templates anyway. Note that the
-     * namespace initializing code will run with the same {@linkplain Configurable#getLocale() locale} as it was at the
-     * point of the {@code <#import ...>} call (other settings won't be handled specially like that).
+     * makes the overhead of <em>unused</em> imports negligible. Note that turning on lazy importing isn't entirely
+     * transparent, as accessing global variables (usually created with {@code <#global ...=...>}) that should be
+     * created by the imported template won't trigger the loading and processing of the lazily imported template
+     * (because globals aren't accessed through the namespace variable), so the global variable will just be missing.
+     * In general, you lose the strict control over when the namespace initializing code in the imported template will
+     * be executed, though it shouldn't mater for most well designed imported templates.
+     * Another drawback is that importing a missing or otherwise broken template will be successful, and the problem
+     * will remain hidden until (and if) the namespace content is actually used. Note that the namespace initializing
+     * code will run with the same {@linkplain Configurable#getLocale() locale} as it was at the point of the
+     * {@code <#import ...>} call (other settings won't be handled specially like that).
      * 
      * <p>
      * The default is {@code false} (and thus imports are eager) for backward compatibility, which can cause
-     * perceivable overhead if you have many imports and only a few of them is used.
+     * perceivable overhead if you have many imports and only a few of them is actually used.
      * 
      * <p>
      * This setting also affects {@linkplain #setAutoImports(Map) auto-imports}, unless you have set a non-{@code null}
@@ -1719,7 +1778,7 @@ public class Configurable {
      * set to 2.3.24 fixes a rarely surfacing bug with that).
      * 
      * <p>
-     * It's recommended to set the {@code auto_impots_lazy} setting ({@link Configuration#setLazyAutoImports(Boolean)})
+     * It's recommended to set the {@code lazy_auto_imports} setting ({@link Configuration#setLazyAutoImports(Boolean)})
      * to {@code true} when using this, so that auto-imports that are unused in a template won't degrade performance by
      * unnecessary loading and initializing the imported library.
      * 
@@ -2019,8 +2078,17 @@ public class Configurable {
      *       {@code "rethrow"} (means {@link TemplateExceptionHandler#RETHROW_HANDLER}),
      *       {@code "debug"} (means {@link TemplateExceptionHandler#DEBUG_HANDLER}),
      *       {@code "html_debug"} (means {@link TemplateExceptionHandler#HTML_DEBUG_HANDLER}),
-     *       {@code "ignore"} (means {@link TemplateExceptionHandler#IGNORE_HANDLER}),
-     *       {@code "default"} (only allowed for {@link Configuration} instances) for the default.
+     *       {@code "ignore"} (means {@link TemplateExceptionHandler#IGNORE_HANDLER}), or
+     *       {@code "default"} (only allowed for {@link Configuration} instances) for the default value.
+     *       
+     *   <li><p>{@code "attempt_exception_reporter"}:
+     *       See {@link #setAttemptExceptionReporter(AttemptExceptionReporter)}.
+     *       <br>String value: If the value contains dot, then it's interpreted as an <a href="#fm_obe">object builder
+     *       expression</a>.
+     *       If the value does not contain dot, then it must be one of these predefined values (case insensitive):
+     *       {@code "log_error"} (means {@link AttemptExceptionReporter#LOG_ERROR_REPORTER}),
+     *       {@code "log_warn"} (means {@link AttemptExceptionReporter#LOG_WARN_REPORTER}), or
+     *       {@code "default"} (only allowed for {@link Configuration} instances) for the default value.
      *       
      *   <li><p>{@code "arithmetic_engine"}:
      *       See {@link #setArithmeticEngine(ArithmeticEngine)}.  
@@ -2456,6 +2524,24 @@ public class Configurable {
                     setTemplateExceptionHandler((TemplateExceptionHandler) _ObjectBuilderSettingEvaluator.eval(
                             value, TemplateExceptionHandler.class, false, _SettingEvaluationEnvironment.getCurrent()));
                 }
+            } else if (ATTEMPT_EXCEPTION_REPORTER_KEY_SNAKE_CASE.equals(name)
+                    || ATTEMPT_EXCEPTION_REPORTER_KEY_CAMEL_CASE.equals(name)) {
+                if (value.indexOf('.') == -1) {
+                    if ("log_error".equalsIgnoreCase(value) || "logError".equals(value)) {
+                        setAttemptExceptionReporter(
+                                AttemptExceptionReporter.LOG_ERROR_REPORTER);
+                    } else if ("log_warn".equalsIgnoreCase(value) || "logWarn".equals(value)) {
+                        setAttemptExceptionReporter(
+                                AttemptExceptionReporter.LOG_WARN_REPORTER);
+                    } else if (DEFAULT.equalsIgnoreCase(value) && this instanceof Configuration) {
+                        ((Configuration) this).unsetAttemptExceptionReporter();
+                    } else {
+                        throw invalidSettingValueException(name, value);
+                    }
+                } else {
+                    setAttemptExceptionReporter((AttemptExceptionReporter) _ObjectBuilderSettingEvaluator.eval(
+                            value, AttemptExceptionReporter.class, false, _SettingEvaluationEnvironment.getCurrent()));
+                }
             } else if (ARITHMETIC_ENGINE_KEY_SNAKE_CASE.equals(name) || ARITHMETIC_ENGINE_KEY_CAMEL_CASE.equals(name)) {
                 if (value.indexOf('.') == -1) { 
                     if ("bigdecimal".equalsIgnoreCase(value)) {
@@ -2537,6 +2623,12 @@ public class Configurable {
                     }
                     setNewBuiltinClassResolver(
                             new OptInTemplateClassResolver(allowedClasses, trustedTemplates));
+                } else if ("allow_nothing".equals(value)) {
+                    throw new IllegalArgumentException(
+                            "The correct value would be: allows_nothing");
+                } else if ("allowNothing".equals(value)) {
+                    throw new IllegalArgumentException(
+                            "The correct value would be: allowsNothing");
                 } else if (value.indexOf('.') != -1) {
                     setNewBuiltinClassResolver((TemplateClassResolver) _ObjectBuilderSettingEvaluator.eval(
                                     value, TemplateClassResolver.class, false,

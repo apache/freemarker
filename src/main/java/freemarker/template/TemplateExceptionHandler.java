@@ -29,8 +29,8 @@ import freemarker.core.StopException;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Used for the {@code template_exception_handler} configuration setting;
- * see {@link Configurable#setTemplateExceptionHandler(TemplateExceptionHandler)} for more.
+ * Used for the {@link Configurable#setTemplateExceptionHandler(TemplateExceptionHandler) template_exception_handler}
+ * configuration setting.
  */
 public interface TemplateExceptionHandler {
     
@@ -39,9 +39,9 @@ public interface TemplateExceptionHandler {
      * unless you want to suppress the exception.
      * 
      * <p>Note that you can check with {@link Environment#isInAttemptBlock()} if you are inside a {@code #attempt}
-     * block, which then will handle handle this exception and roll back the output generated inside it.
+     * block, which then will handle this exception and roll back the output generated inside it.
      * 
-     * <p>Note that {@link StopException}-s (raised by {@code #stop}) won't be captured.
+     * <p>Note that {@link StopException}-s (raised by {@code #stop}) won't be captured here.
      * 
      * <p>Note that you shouldn't log the exception in this method unless you suppress it. If there's a concern that the
      * exception might won't be logged after it bubbles up from {@link Template#process(Object, Writer)}, simply

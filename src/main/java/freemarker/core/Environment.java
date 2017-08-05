@@ -242,8 +242,7 @@ public final class Environment extends Configurable {
     /**
      * Returns the {@link Template} that we are "lexically" inside at the moment. This template will change when
      * entering an {@code #include} or calling a macro or function in another template, or returning to yet another
-     * template with {@code #nested}. As such, it's useful in {@link TemplateDirectiveModel} to find out if from where
-     * the directive was called from.
+     * template with {@code #nested}.
      * 
      * @see #getMainTemplate()
      * @see #getCurrentNamespace()
@@ -377,6 +376,21 @@ public final class Environment extends Configurable {
         }
     }
 
+    /**
+     * Visits the elements while temporarily using the parameter output {@link Writer}.
+     * 
+     * @since 2.3.27
+     */
+    final void visit(TemplateElement[] elementBuffer, Writer out) throws IOException, TemplateException {
+        Writer prevOut = this.out;
+        this.out = out;
+        try {
+            visit(elementBuffer);
+        } finally {
+            this.out = prevOut;
+        }
+    }
+    
     @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "Not called when stack is empty")
     private TemplateElement replaceTopElement(TemplateElement element) {
         return instructionStack[instructionStackSize - 1] = element;
@@ -839,20 +853,27 @@ public final class Environment extends Configurable {
         }
         lastThrowable = templateException;
 
-        // Log the exception, if logTemplateExceptions isn't false. However, even if it's false, if we are inside
-        // an #attempt block, it has to be logged, as it certainly won't bubble up to the caller of FreeMarker.
-        if (LOG.isErrorEnabled() && (isInAttemptBlock() || getLogTemplateExceptions())) {
+        if (getLogTemplateExceptions() && LOG.isErrorEnabled()
+                && !isInAttemptBlock() /* because then the AttemptExceptionReporter will report this */) {
             LOG.error("Error executing FreeMarker template", templateException);
         }
 
-        // Stop exception is not passed to the handler, but
-        // explicitly rethrown.
-        if (templateException instanceof StopException) {
-            throw templateException;
+        try {
+            // Stop exception is not passed to the handler, but
+            // explicitly rethrown.
+            if (templateException instanceof StopException) {
+                throw templateException;
+            }
+    
+            // Finally, pass the exception to the handler
+            getTemplateExceptionHandler().handleTemplateException(templateException, this, out);
+        } catch (TemplateException e) {
+            // Note that if the TemplateExceptionHandler doesn't rethrow the exception, we don't get in there.
+            if (isInAttemptBlock()) {
+                this.getAttemptExceptionReporter().report(templateException, this);
+            }
+            throw e;
         }
-
-        // Finally, pass the exception to the handler
-        getTemplateExceptionHandler().handleTemplateException(templateException, this, out);
     }
 
     @Override

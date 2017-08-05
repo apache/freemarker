@@ -143,8 +143,8 @@ public final class TextBlock extends TemplateElement {
     private boolean deliberateLeftTrim() {
         boolean result = false;
         for (TemplateElement elem = this.nextTerminalNode(); 
-             elem != null && elem.beginLine == this.endLine;
-             elem = elem.nextTerminalNode()) {
+            elem != null && elem.beginLine == this.endLine;
+            elem = elem.nextTerminalNode()) {
             if (elem instanceof TrimInstruction) {
                 TrimInstruction ti = (TrimInstruction) elem;
                 if (!ti.left && !ti.right) {

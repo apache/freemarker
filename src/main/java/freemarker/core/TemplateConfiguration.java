@@ -234,6 +234,9 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         if (tc.isTemplateExceptionHandlerSet()) {
             setTemplateExceptionHandler(tc.getTemplateExceptionHandler());
         }
+        if (tc.isAttemptExceptionReporterSet()) {
+            setAttemptExceptionReporter(tc.getAttemptExceptionReporter());
+        }
         if (tc.isTimeFormatSet()) {
             setTimeFormat(tc.getTimeFormat());
         }
@@ -348,6 +351,9 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         }
         if (isTemplateExceptionHandlerSet() && !template.isTemplateExceptionHandlerSet()) {
             template.setTemplateExceptionHandler(getTemplateExceptionHandler());
+        }
+        if (isAttemptExceptionReporterSet() && !template.isAttemptExceptionReporterSet()) {
+            template.setAttemptExceptionReporter(getAttemptExceptionReporter());
         }
         if (isTimeFormatSet() && !template.isTimeFormatSet()) {
             template.setTimeFormat(getTimeFormat());
@@ -635,6 +641,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
                 || isShowErrorTipsSet()
                 || isSQLDateAndTimeTimeZoneSet()
                 || isTemplateExceptionHandlerSet()
+                || isAttemptExceptionReporterSet()
                 || isTimeFormatSet()
                 || isTimeZoneSet()
                 || isURLEscapingCharsetSet();
@@ -643,8 +650,8 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     private Map mergeMaps(Map m1, Map m2, boolean overwriteUpdatesOrder) {
         if (m1 == null) return m2;
         if (m2 == null) return m1;
-        if (m1.isEmpty()) return m2 != null ? m2 : m1;
-        if (m2.isEmpty()) return m1 != null ? m1 : m2;
+        if (m1.isEmpty()) return m2;
+        if (m2.isEmpty()) return m1;
         
         LinkedHashMap mergedM = new LinkedHashMap((m1.size() + m2.size()) * 4 / 3 + 1, 0.75f);
         mergedM.putAll(m1);
@@ -658,8 +665,8 @@ public final class TemplateConfiguration extends Configurable implements ParserC
     private List<String> mergeLists(List<String> list1, List<String> list2) {
         if (list1 == null) return list2;
         if (list2 == null) return list1;
-        if (list1.isEmpty()) return list2 != null ? list2 : list1;
-        if (list2.isEmpty()) return list1 != null ? list1 : list2;
+        if (list1.isEmpty()) return list2;
+        if (list2.isEmpty()) return list1;
         
         ArrayList<String> mergedList = new ArrayList<String>(list1.size() + list2.size());
         mergedList.addAll(list1);

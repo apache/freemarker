@@ -21,14 +21,11 @@ package freemarker.core;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.io.Writer;
-import java.util.Map;
 
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
-import freemarker.template.TemplateTransformModel;
 
 /**
  * Like [#local x]...[/#local].
@@ -51,21 +48,28 @@ final class BlockAssignment extends TemplateElement {
     @Override
     TemplateElement[] accept(Environment env) throws TemplateException, IOException {
         TemplateElement[] children = getChildBuffer();
+        
+        TemplateModel value;
         if (children != null) {
-            env.visitAndTransform(children, new CaptureOutput(env), null);
+            StringWriter out = new StringWriter();
+            env.visit(children, out);
+            value = capturedStringToModel(out.toString());
         } else {
-            TemplateModel value = capturedStringToModel("");
-            if (namespaceExp != null) {
-                Environment.Namespace ns = (Environment.Namespace) namespaceExp.eval(env);
-                ns.put(varName, value);
-            } else if (scope == Assignment.NAMESPACE) {
-                env.setVariable(varName, value);
-            } else if (scope == Assignment.GLOBAL) {
-                env.setGlobalVariable(varName, value);
-            } else if (scope == Assignment.LOCAL) {
-                env.setLocalVariable(varName, value);
-            }
+            value = capturedStringToModel("");
         }
+        
+        if (namespaceExp != null) {
+            ((Environment.Namespace) namespaceExp.eval(env)).put(varName, value);
+        } else if (scope == Assignment.NAMESPACE) {
+            env.setVariable(varName, value);
+        } else if (scope == Assignment.GLOBAL) {
+            env.setGlobalVariable(varName, value);
+        } else if (scope == Assignment.LOCAL) {
+            env.setLocalVariable(varName, value);
+        } else {
+            throw new BugException("Unhandled scope");
+        }
+        
         return null;
     }
 
@@ -73,56 +77,6 @@ final class BlockAssignment extends TemplateElement {
         return markupOutputFormat == null ? new SimpleScalar(s) : markupOutputFormat.fromMarkup(s);
     }
 
-    private class CaptureOutput implements TemplateTransformModel {
-        private final Environment env;
-        private final Environment.Namespace fnsModel;
-        
-        CaptureOutput(Environment env) throws TemplateException {
-            this.env = env;
-            TemplateModel nsModel = null;
-            if (namespaceExp != null) {
-                nsModel = namespaceExp.eval(env);
-                if (!(nsModel instanceof Environment.Namespace)) {
-                    throw new NonNamespaceException(namespaceExp, nsModel, env);
-                }
-            }
-            fnsModel = (Environment.Namespace ) nsModel; 
-        }
-        
-        public Writer getWriter(Writer out, Map args) {
-            return new StringWriter() {
-                @Override
-                public void close() throws IOException {
-                    TemplateModel result;
-                    try {
-                        result = capturedStringToModel(toString());
-                    } catch (TemplateModelException e) {
-                        // [Java 1.6] e to cause
-                        throw new IOException("Failed to create FTL value from captured string: " + e);
-                    }
-                    switch(scope) {
-                        case Assignment.NAMESPACE: {
-                            if (fnsModel != null) {
-                                fnsModel.put(varName, result);
-                            } else {
-                                env.setVariable(varName, result);
-                            }
-                            break;
-                        }
-                        case Assignment.LOCAL: {
-                            env.setLocalVariable(varName, result);
-                            break;
-                        }
-                        case Assignment.GLOBAL: {
-                            env.setGlobalVariable(varName, result);
-                            break;
-                        }
-                    }
-                }
-            };
-        }
-    }
-    
     @Override
     protected String dump(boolean canonical) {
         StringBuilder sb = new StringBuilder();

@@ -60,8 +60,8 @@
                 - content: x  // f.c.Identifier
             - value part: #{...}  // f.c.NumericalOutput
                 - content: y  // f.c.Identifier
-                - minimum decimals: "0"  // Integer
-                - maximum decimals: "0"  // Integer
+                - minimum decimals: null  // Null
+                - maximum decimals: null  // Null
     #text  // f.c.TextBlock
         - content: "\n6. "  // String
     ${...}  // f.c.DollarVariable
