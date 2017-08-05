@@ -1,3 +1,4 @@
+dist: trusty
 language: java
 install: ant download-ivy
 script: ant ci
