@@ -38,7 +38,8 @@ public abstract class ArithmeticEngine {
 
     /**
      * Arithmetic engine that converts all numbers to {@link BigDecimal} and
-     * then operates on them. This is FreeMarker's default arithmetic engine.
+     * then operates on them, and also keeps the result as a {@link BigDecimal}. This is FreeMarker's default arithmetic
+     * engine.
      */
     public static final BigDecimalEngine BIGDECIMAL_ENGINE = new BigDecimalEngine();
     /**
