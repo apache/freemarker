@@ -242,8 +242,7 @@ public final class Environment extends Configurable {
     /**
      * Returns the {@link Template} that we are "lexically" inside at the moment. This template will change when
      * entering an {@code #include} or calling a macro or function in another template, or returning to yet another
-     * template with {@code #nested}. As such, it's useful in {@link TemplateDirectiveModel} to find out if from where
-     * the directive was called from.
+     * template with {@code #nested}.
      * 
      * @see #getMainTemplate()
      * @see #getCurrentNamespace()
