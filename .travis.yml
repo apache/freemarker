@@ -1,5 +1,5 @@
 language: java
-install: ant download-ivy download-junit
+install: ant download-ivy download-ant-junit
 script: ant ci
 jdk:
   - oraclejdk8
