@@ -30,9 +30,10 @@ import freemarker.template.utility.OptimizerUtil;
 import freemarker.template.utility.StringUtil;
 
 /**
- * Class to perform arithmetic operations.
+ * Used for implementing the arithmetic operations and number comparisons in the template language. The concrete
+ * implementation is plugged into the configuration with the {@code arithmetical_engine} setting. 
+ * (See {@link Configurable#setArithmeticEngine(ArithmeticEngine)}.)
  */
-
 public abstract class ArithmeticEngine {
 
     /**

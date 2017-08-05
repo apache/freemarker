@@ -3304,8 +3304,6 @@ Slicing with right-unlimited ranges:
             </listitem>
           </itemizedlist>
 
-          <remark>Information about the precision?</remark>
-
           <para>Example:</para>
 
           <programlisting role="template">${100 - x * x}
@@ -3385,6 +3383,22 @@ ${12 % 6.9} &lt;#-- Prints 0 --&gt;</programlisting>
 ${-12 % 5} &lt;#-- Prints -2 --&gt;
 ${12 % -5} &lt;#-- Prints 2 --&gt;
 </programlisting>
+
+          <para role="forProgrammers">About the precision of the operations:
+          By default FreeMarker uses <literal>BigDecimal</literal>-s for all
+          arithmetical calculations, to avoid rounding and overflow/underflow
+          artifacts, and also keeps the result as
+          <literal>BigDecimal</literal>-s. So <literal>+</literal> (addition),
+          <literal>-</literal> (subtraction) and <literal>*</literal>
+          (multiplication) are <quote>lossless</quote>. Again by default,
+          <literal>/</literal> (division) results are calculated to 12
+          decimals with half-up rounding (unless some operands have even more
+          decimals, in which case it's calculated with that much decimals).
+          All this behavior depends on the
+          <literal>arithmetic_engine</literal> configuration setting
+          (<literal>Configurable.setArithmericEngine(ArithmericEngine)</literal>)
+          though, and some application might use a different value than the
+          default, although that's highly uncommon.</para>
         </section>
 
         <section xml:id="dgui_template_exp_comparison">
