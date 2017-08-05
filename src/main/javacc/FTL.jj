@@ -3227,7 +3227,7 @@ Macro Macro() :
     )
     {
         if (inMacro || inFunction) {
-            throw new ParseException("Macros cannot be nested.", template, start);
+            throw new ParseException("Macro or function definitions can't be nested into each other.", template, start);
         }
         if (isFunction) inFunction = true; else inMacro = true;
     }
@@ -3294,12 +3294,12 @@ Macro Macro() :
     (
         end = <END_MACRO>
         {
-        	if (isFunction) throw new ParseException("Expected function end tag here.", template, start);
+        	if (isFunction) throw new ParseException("Expected function end tag here.", template, end);
     	}
         |
         end = <END_FUNCTION>
         {
-    		if (!isFunction) throw new ParseException("Expected macro end tag here.", template, start);
+    		if (!isFunction) throw new ParseException("Expected macro end tag here.", template, end);
     	}
     )
     {
