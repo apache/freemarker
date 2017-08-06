@@ -48,4 +48,18 @@ public class RemovedFM2SyntaxTest extends TemplateTest {
         assertOutput("<#macro m><#nested 1, 2></#macro>", "");
     }
 
+    @Test
+    public void testDefinitionSyntax() throws IOException, TemplateException {
+        assertOutput("<#macro m a b></#macro>", "");
+        assertErrorContains("<#macro m a, b></#macro>", ParseException.class);
+        assertErrorContains("<#macro m(a b)></#macro>", ParseException.class);
+        assertErrorContains("<#macro m a b)></#macro>", ParseException.class);
+
+        assertOutput("<#function f(a, b)><#return 0></#function>", "");
+        assertErrorContains("<#function f(a, b,)><#return 0></#function>", ParseException.class);
+        assertErrorContains("<#function f(a, b><#return 0></#function>", ParseException.class);
+        assertErrorContains("<#function f(a b)><#return 0></#function>", ParseException.class);
+        assertErrorContains("<#function f a, b><#return 0></#function>", ParseException.class);
+    }
+
 }

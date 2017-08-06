@@ -26,12 +26,12 @@
 <@assertEquals expected=2 actual=f1InvocationCnt />
 <@assertEquals expected=2 actual=f2InvocationCnt />
 
-<#function f1>
+<#function f1()>
   <#assign f1InvocationCnt++>
   <#return "f1 " + f1InvocationCnt>
 </#function>
 
-<#function f2>
+<#function f2()>
   <#assign f2InvocationCnt++>
   <#return "f2 " + f2InvocationCnt>
 </#function>

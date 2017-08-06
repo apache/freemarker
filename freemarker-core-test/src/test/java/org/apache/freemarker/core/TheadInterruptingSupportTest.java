@@ -53,7 +53,8 @@ public class TheadInterruptingSupportTest {
         assertCanBeInterrupted("<@customLoopDirective>x</@>");
         assertCanBeInterrupted("<@customLoopDirective><#if true>x</#if></@>");
         assertCanBeInterrupted("<#macro selfCalling><@sleepDirective/><@selfCalling /></#macro><@selfCalling />");
-        assertCanBeInterrupted("<#function selfCalling><@sleepDirective/>${selfCalling()}</#function>${selfCalling()}");
+        assertCanBeInterrupted("<#function selfCalling()><@sleepDirective/>${selfCalling()}</#function>"
+                + "${selfCalling()}");
         assertCanBeInterrupted("<#list 1.. as _><#attempt><@sleepDirective/><#recover>suppress</#attempt></#list>");
         assertCanBeInterrupted("<#attempt><#list 1.. as _></#list><#recover>suppress</#attempt>");
     }

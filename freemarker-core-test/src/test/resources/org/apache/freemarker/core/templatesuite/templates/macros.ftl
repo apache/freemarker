@@ -31,7 +31,7 @@
 <#assign urls = {"home" : "/home.html", "about" : "/about.html"}>
 <#assign images = {"home" : "/images/home.png", "about" : "/image/about-us.jpeg"}>
 <#assign preferences = {"showImages" : true}>
-<#assign español = français><#macro français(url, image, alt)>
+<#assign español = français><#macro français url image alt>
     <#local var = "Kilroy">
     <a href="${url}">
     <#if preferences.showImages>
@@ -63,7 +63,7 @@
 
 <p>A recursive function call:</p>
 
-<#macro recurse(dummy, a=3)>
+<#macro recurse dummy a=3>
     <#if (a > 0)>
         <@recurse dummy, a - 1 />
     </#if>

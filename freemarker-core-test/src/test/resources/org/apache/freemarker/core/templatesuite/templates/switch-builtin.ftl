@@ -37,7 +37,7 @@
 </#list>
 <@assertEquals expected="low;low;medium;medium;high;high;" actual=out />
 
-<#function f x>
+<#function f(x)>
   <#assign fInvocationCnt++>
   <#return x>
 </#function>

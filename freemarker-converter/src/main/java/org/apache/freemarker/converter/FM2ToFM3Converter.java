@@ -72,7 +72,7 @@ public class FM2ToFM3Converter extends Converter {
 
     public static final Pattern DEFAULT_INCLUDE = Pattern.compile("(?i).*\\.(fm|ftl(x|h)?)");
 
-    public static final Map<String, String> DEFAULT_FILE_EXTENSION_SUBSTITUTIONS
+    public static final Map<String, String> PREDEFINED_FILE_EXTENSION_SUBSTITUTIONS
             = new ImmutableMap.Builder<String,String>()
                     .put("ftl", "fm3")
                     .put("ftlh", "fm3h")
@@ -80,7 +80,8 @@ public class FM2ToFM3Converter extends Converter {
                     .put("fm", "fm3")
                     .build();
 
-    private Map<String, String> fileExtensionSubtitutions = DEFAULT_FILE_EXTENSION_SUBSTITUTIONS;
+    private boolean predefinedFileExtensionSubstitutionsEnabled;
+    private Map<String, String> fileExtensionSubstitutions = PREDEFINED_FILE_EXTENSION_SUBSTITUTIONS;
     private Properties freeMarker2Settings;
     private Configuration fm2Cfg;
     private StringTemplateLoader stringTemplateLoader;
@@ -138,9 +139,12 @@ public class FM2ToFM3Converter extends Converter {
 
         String ext = srcFileName.substring(lastDotIdx + 1);
 
-        String replacementExt = getFileExtensionSubtitutions().get(ext);
+        String replacementExt = getFileExtensionSubstitutions().get(ext);
         if (replacementExt == null) {
-            replacementExt = getFileExtensionSubtitutions().get(ext.toLowerCase());
+            replacementExt = getFileExtensionSubstitutions().get(ext.toLowerCase());
+        }
+        if (replacementExt == null && getPredefinedFileExtensionSubstitutionsEnabled()) {
+            replacementExt = PREDEFINED_FILE_EXTENSION_SUBSTITUTIONS.get(ext.toLowerCase());
         }
         if (replacementExt == null) {
             return srcFileName;
@@ -220,13 +224,39 @@ public class FM2ToFM3Converter extends Converter {
         return encoding != null ? encoding : fm2Cfg.getEncoding(template.getLocale());
     }
 
-    public Map<String, String> getFileExtensionSubtitutions() {
-        return fileExtensionSubtitutions;
+    /**
+     * Getter pair of {@link #setPredefinedFileExtensionSubstitutionsEnabled(boolean)}
+     */
+    public boolean getPredefinedFileExtensionSubstitutionsEnabled() {
+        return predefinedFileExtensionSubstitutionsEnabled;
     }
 
-    public void setFileExtensionSubtitutions(Map<String, String> fileExtensionSubtitutions) {
-        _NullArgumentException.check("fileExtensionSubtitutions", fileExtensionSubtitutions);
-        this.fileExtensionSubtitutions = fileExtensionSubtitutions;
+    /**
+     * Whether to use {@link #PREDEFINED_FILE_EXTENSION_SUBSTITUTIONS} when {@link #getFileExtensionSubstitutions()}
+     * contains no mapping for the source file extension; defaults to {@code true}.
+     */
+    public void setPredefinedFileExtensionSubstitutionsEnabled(boolean predefinedFileExtensionSubstitutionsEnabled) {
+        this.predefinedFileExtensionSubstitutionsEnabled = predefinedFileExtensionSubstitutionsEnabled;
+    }
+
+    /**
+     * Getter pair of {@link #setFileExtensionSubstitutions(Map)} .
+     */
+    public Map<String, String> getFileExtensionSubstitutions() {
+        return fileExtensionSubstitutions;
+    }
+
+    /**
+     * Defines source file file extensions to destination file extensions mappings, in additionally to the
+     * {@linkplain #setPredefinedFileExtensionSubstitutionsEnabled(boolean) predefined file extension substitutions}.
+     * It's recommended to use lower case file extensions as keys, as if there's no hit with case sensitive lookup,
+     * it will be retried with the source file extension converted to lower case (so it will be a case insensitive
+     * lookup in effect). Mappings given here has higher priority than those coming from the
+     * {@linkplain #setPredefinedFileExtensionSubstitutionsEnabled(boolean) predefined file extension substitutions}.
+     */
+    public void setFileExtensionSubstitutions(Map<String, String> fileExtensionSubstitutions) {
+        _NullArgumentException.check("fileExtensionSubstitutions", fileExtensionSubstitutions);
+        this.fileExtensionSubstitutions = fileExtensionSubstitutions;
     }
 
     public Properties getFreeMarker2Settings() {

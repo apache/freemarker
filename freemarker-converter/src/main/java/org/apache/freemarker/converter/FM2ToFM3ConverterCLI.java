@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -115,6 +114,7 @@ public class FM2ToFM3ConverterCLI {
         return new FM2ToFM3ConverterCLI(out).executeInternal(args);
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private int executeInternal(String... args) {
         if (args.length == 0) {
             printHelp(true);
@@ -155,14 +155,11 @@ public class FM2ToFM3ConverterCLI {
                     converter.setExclude(getRegexpOption(cl, EXCLUDE_OPTION));
                 }
 
-                Map<String, String> fileExtensionSubtitutions = cl.hasOption(NO_PREDEFINED_FILE_EXTENSION_SUBSTITUTIONS)
-                        ? new HashMap<String, String>()
-                        : new HashMap<String, String>(FM2ToFM3Converter.DEFAULT_FILE_EXTENSION_SUBSTITUTIONS);
-                for (Map.Entry<Object, Object> entry
-                        : cl.getOptionProperties(FILE_EXTENSION_SUBSTITUTION).entrySet()) {
-                    fileExtensionSubtitutions.put((String) entry.getKey(), (String) entry.getValue());
-                }
-                converter.setFileExtensionSubtitutions(Collections.unmodifiableMap(fileExtensionSubtitutions));
+                converter.setPredefinedFileExtensionSubstitutionsEnabled(
+                        !cl.hasOption(NO_PREDEFINED_FILE_EXTENSION_SUBSTITUTIONS));
+
+                converter.setFileExtensionSubstitutions((Map) Collections.unmodifiableMap(
+                        cl.getOptionProperties(FILE_EXTENSION_SUBSTITUTION)));
 
                 converter.setFreeMarker2Settings(cl.getOptionProperties(FREEMARKER_2_SETTING_OPTION));
                 try {

@@ -2837,6 +2837,9 @@ ASTDirMacro Macro() :
     boolean isFunction = false, hasDefaults = false;
     boolean isCatchAll = false;
     String catchAll = null;
+    boolean hasOpenParen = false;
+    boolean hasComma = false;
+    boolean hasCloseParen = false;
 }
 {
     (
@@ -2856,9 +2859,26 @@ ASTDirMacro Macro() :
                 ? ((ASTExpStringLiteral) nameExp).getAsString()
                 : ((ASTExpVariable) nameExp).getName();
     }
-    [<OPEN_PAREN>]
+    [<OPEN_PAREN> { hasOpenParen = true; }]
+    {
+        if (hasOpenParen != isFunction) {
+    		throw new ParseException(
+                    isFunction ? "#function must use \"(\" after the function name."
+                            : "#macro can't use \"(\" after the macro name.",
+                            template, start);
+        }
+    }
     (
-        arg = <ID> { defValue = null; }
+        arg = <ID> {
+            defValue = null;
+            if (!argNames.isEmpty() && hasComma != isFunction) {
+                throw new ParseException(
+                        isFunction ? "#function must have comma between the declared parameters."
+                                : "#macro must not have comma between the declared parameters.",
+                                template, start);
+            }
+            hasComma = false;
+        }
         [
             <ELLIPSIS> { isCatchAll = true; }
         ]
@@ -2870,7 +2890,7 @@ ASTDirMacro Macro() :
                 hasDefaults = true;
             }
         ]
-        [<COMMA>]
+        [<COMMA> { hasComma = true; } ]
         {
             if (catchAll != null) {
                 throw new ParseException(
@@ -2896,7 +2916,17 @@ ASTDirMacro Macro() :
             }
         }
     )*
-    [<CLOSE_PAREN>]
+    [<CLOSE_PAREN> { hasCloseParen = true; } ] {
+        if (hasComma) {
+            throw new ParseException("You can't have comma after the last parameter.", template, start);
+        }
+        if (hasCloseParen != hasOpenParen) {
+    		throw new ParseException(
+                    hasOpenParen ? "Missing closing \")\"."
+                            : "Closing \")\" without corresponding opening \"(\".",
+                            template, start);
+        }
+    }
     <DIRECTIVE_END>
     {
         // To prevent parser check loopholes like <#list ...><#macro ...><#break></#macro></#list>.
