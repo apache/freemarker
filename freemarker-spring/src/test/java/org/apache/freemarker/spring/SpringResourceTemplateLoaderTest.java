@@ -28,7 +28,6 @@ import java.io.IOException;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateNotFoundException;
-import org.apache.freemarker.spring.SpringResourceTemplateLoader;
 import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.After;
 import org.junit.Before;
@@ -81,4 +80,13 @@ public class SpringResourceTemplateLoaderTest {
         }
     }
 
+    @Test
+    public void testSystemTemplates() throws Exception {
+        try {
+            cfg.getTemplate("/spring.ftl");
+        } catch (TemplateNotFoundException e) {
+            fail("Cannot find /spring.ftl");
+            throw e;
+        }
+    }
 }
