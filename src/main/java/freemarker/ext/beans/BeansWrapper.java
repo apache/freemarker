@@ -898,7 +898,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      * Wraps a Java method so that it can be called from templates, without wrapping its parent ("this") object. The
      * result is almost the same as that you would get by wrapping the parent object then getting the method from the
      * resulting {@link TemplateHashModel} by name. Except, if the wrapped method is overloaded, with this method you
-     * explicitly select a an overload, while otherwise you would get a {@link TemplateMethodModelEx} that selects an
+     * explicitly select an overload, while otherwise you would get a {@link TemplateMethodModelEx} that selects an
      * overload each time it's called based on the argument values.
      * 
      * @param object The object whose method will be called, or {@code null} if {@code method} is a static method.

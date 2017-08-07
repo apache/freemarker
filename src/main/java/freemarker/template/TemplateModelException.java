@@ -23,7 +23,8 @@ import freemarker.core.Environment;
 import freemarker.core._ErrorDescriptionBuilder;
 
 /**
- * {@link TemplateModel} methods throw this exception if the requested data can't be retrieved.  
+ * {@link ObjectWrapper}-s may throw this when wrapping/unwrapping fails, or {@link TemplateModel} methods throw this
+ * if the requested data can't be retrieved.
  */
 public class TemplateModelException extends TemplateException {
 
