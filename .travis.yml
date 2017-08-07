@@ -6,7 +6,7 @@ jdk:
 - openjdk8
 env:
   global:
-  - freemarker_build_boot_classpath_java_7=/usr/lib/jvm/java-7-openjdk/jre/lib/rt.jar
-  - freemarker_build_boot_classpath_java_8=/usr/lib/jvm/java-8-openjdk/jre/lib/rt.jar
+  - freemarker_build_boot_classpath_java_7=/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/rt.jar
+  - freemarker_build_boot_classpath_java_8=/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar
 install:
 - ./gradlew assemble javadoc
