@@ -22,11 +22,10 @@ package org.apache.freemarker.core.model.impl;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.NonTemplateCallPlace;
+import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
@@ -65,8 +64,10 @@ public class StaticModelsTest {
         assertEquals(((TemplateScalarModel) f).getAsString(), "F OK");
         
         TemplateModel m = s.get("m");
-        assertTrue(m instanceof TemplateMethodModel);
-        assertEquals(((TemplateScalarModel) ((TemplateMethodModel) m).execute(new ArrayList())).getAsString(), "m OK");
+        assertTrue(m instanceof JavaMethodModel);
+        assertEquals(((TemplateScalarModel) ((JavaMethodModel) m).execute(
+                Constants.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE)).getAsString(),
+                "m OK");
         
         assertSame(s, statics.get(S.class.getName()));
         

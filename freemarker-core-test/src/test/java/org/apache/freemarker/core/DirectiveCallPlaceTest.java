@@ -137,7 +137,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
         }
 
         @Override
-        public ArgumentArrayLayout getArgumentArrayLayout() {
+        public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
             return ArgumentArrayLayout.PARAMETERLESS;
         }
 
@@ -207,7 +207,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
         }
 
         @Override
-        public ArgumentArrayLayout getArgumentArrayLayout() {
+        public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
             return ArgumentArrayLayout.PARAMETERLESS;
         }
 
@@ -245,7 +245,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
         }
 
         @Override
-        public ArgumentArrayLayout getArgumentArrayLayout() {
+        public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
             return ARGS_LAYOUT;
         }
 

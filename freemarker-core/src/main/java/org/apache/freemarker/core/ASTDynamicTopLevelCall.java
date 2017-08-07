@@ -101,6 +101,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
         TemplateCallableModel callableValue;
         TemplateDirectiveModel directive;
         TemplateFunctionModel function;
+        ArgumentArrayLayout argsLayout;
         boolean nestedContentSupported;
         {
             TemplateModel callableValueTM = callableValueExp._eval(env);
@@ -108,6 +109,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
                 callableValue = (TemplateCallableModel) callableValueTM;
                 directive = (TemplateDirectiveModel) callableValueTM;
                 function = null;
+                argsLayout = directive.getDirectiveArgumentArrayLayout();
                 nestedContentSupported = directive.isNestedContentSupported();
             } else if (callableValueTM instanceof TemplateFunctionModel) {
                 if (!allowCallingFunctions) {
@@ -117,6 +119,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
                 callableValue = (TemplateCallableModel) callableValueTM;
                 directive = null;
                 function = (TemplateFunctionModel) callableValue;
+                argsLayout = function.getFunctionArgumentArrayLayout();
                 nestedContentSupported = false;
             } else if (callableValueTM == null) {
                 throw InvalidReferenceException.getInstance(callableValueExp, env);
@@ -129,7 +132,39 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
             throw new _MiscTemplateException(env, "Nested content is not supported by this directive.");
         }
 
-        ArgumentArrayLayout argsLayout = callableValue.getArgumentArrayLayout();
+        TemplateModel[] execArgs = argsLayout != null
+                ? getExecuteArgsBasedOnLayout(argsLayout, callableValue, env)
+                : getExecuteArgsWithoutLayout(callableValue, env);
+
+        if (directive != null) {
+            directive.execute(execArgs, this, env.getOut(), env);
+        } else {
+            TemplateModel result = function.execute(execArgs, this, env);
+            if (result == null) {
+                throw new _MiscTemplateException(env, "Function has returned no value (or null)");
+            }
+            // TODO [FM3] Implement it when we have a such language... it should work like `${f()}`.
+            throw new BugException("Top-level function call not yet implemented");
+        }
+
+        return null;
+    }
+
+    private TemplateModel[] getExecuteArgsWithoutLayout(TemplateCallableModel callableValue, Environment env)
+            throws TemplateException {
+        if (namedArgs != null) {
+            throw new _MiscTemplateException(env, getNamedArgumentsNotSupportedMessage(callableValue, namedArgs[0]));
+        }
+        TemplateModel[] execArgs = new TemplateModel[positionalArgs.length];
+        for (int i = 0; i < positionalArgs.length; i++) {
+            ASTExpression positionalArg = positionalArgs[i];
+            execArgs[i] = positionalArg.eval(env);
+        }
+        return execArgs;
+    }
+
+    private TemplateModel[] getExecuteArgsBasedOnLayout(ArgumentArrayLayout argsLayout, TemplateCallableModel callableValue,
+            Environment env) throws TemplateException {
         int predefPosArgCnt = argsLayout.getPredefinedPositionalArgumentCount();
         int posVarargsArgIdx = argsLayout.getPositionalVarargsArgumentIndex();
 
@@ -157,7 +192,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
             }
             execArgs[posVarargsArgIdx] = varargsSeq;
         } else if (positionalArgs != null && positionalArgs.length > predefPosArgCnt) {
-            checkSupportsAnyParameters(callableValue, env);
+            checkSupportsAnyParameters(callableValue, argsLayout, env);
             List<String> validPredefNames = argsLayout.getPredefinedNamedArgumentsMap().getKeys();
             _ErrorDescriptionBuilder errorDesc = new _ErrorDescriptionBuilder(
                     "The target ", FTLUtil.getCallableTypeName(callableValue), " ",
@@ -194,16 +229,11 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
                 } else {
                     if (namedVarargsHash == null) {
                         if (namedVarargsArgumentIndex == -1) {
-                            checkSupportsAnyParameters(callableValue, env);
+                            checkSupportsAnyParameters(callableValue, argsLayout, env);
                             Collection<String> validNames = predefNamedArgsMap.getKeys();
                             throw new _MiscTemplateException(env,
                                     validNames == null || validNames.isEmpty()
-                                    ? new Object[] {
-                                            "The called ", FTLUtil.getCallableTypeName(callableValue),
-                                            " can't have arguments that are passed by name (like ",
-                                            new _DelayedJQuote(namedArg.name), "). Try to pass arguments by position "
-                                            + "(i.e, without name, as in ", "<@example 1, 2, 3 />" ,  ")."
-                                    }
+                                    ? getNamedArgumentsNotSupportedMessage(callableValue, namedArg)
                                     : new Object[] {
                                             "The called ", FTLUtil.getCallableTypeName(callableValue),
                                             " has no parameter that's passed by name and is called ",
@@ -221,24 +251,23 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
         if (namedVarargsArgumentIndex != -1) {
             execArgs[namedVarargsArgumentIndex] = namedVarargsHash != null ? namedVarargsHash : Constants.EMPTY_HASH;
         }
-
-        if (directive != null) {
-            directive.execute(execArgs, this, env.getOut(), env);
-        } else {
-            TemplateModel result = function.execute(execArgs, this, env);
-            if (result == null) {
-                throw new _MiscTemplateException(env, "Function has returned no value (or null)");
-            }
-            // TODO [FM3] Implement it when we have a such language... it should work like `${f()}`.
-            throw new BugException("Top-level function call not yet implemented");
-        }
-
-        return null;
+        return execArgs;
     }
 
-    private void checkSupportsAnyParameters(TemplateCallableModel callableValue, Environment env)
-            throws _MiscTemplateException {
-        if (callableValue.getArgumentArrayLayout().getTotalLength() == 0) {
+    private Object[] getNamedArgumentsNotSupportedMessage(TemplateCallableModel callableValue,
+            NamedArgument namedArg) {
+        return new Object[] {
+                "The called ", FTLUtil.getCallableTypeName(callableValue),
+                " can't have arguments that are passed by name (like ",
+                new _DelayedJQuote(namedArg.name), "). Try to pass arguments by position "
+                + "(i.e, without name, as in ", "<@example 1, 2, 3 />" ,  ")."
+        };
+    }
+
+    private void checkSupportsAnyParameters(
+            TemplateCallableModel callableValue, ArgumentArrayLayout argsLayout, Environment env)
+            throws TemplateException {
+        if (argsLayout.getTotalLength() == 0) {
             throw new _MiscTemplateException(env,
                     "The called ", FTLUtil.getCallableTypeName(callableValue), " doesn't support any parameters.");
         }

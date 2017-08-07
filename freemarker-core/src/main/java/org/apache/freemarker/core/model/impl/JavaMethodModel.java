@@ -19,88 +19,34 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.lang.reflect.Member;
-import java.lang.reflect.Method;
-import java.util.List;
-
-import org.apache.freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
-import org.apache.freemarker.core.model.TemplateMethodModel;
+import org.apache.freemarker.core.CallPlace;
+import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
- * Wraps a {@link Method} into the {@link TemplateMethodModel} interface. It is used by {@link BeanModel} to wrap
- * non-overloaded methods.
+ * Common super interface (marker interface) for {@link TemplateFunctionModel}-s that stand for Java methods; do not
+ * implement it yourself! It meant to be implemented inside FreeMarker only.
  */
-public final class JavaMethodModel extends SimpleMethod implements TemplateMethodModel,
-        _UnexpectedTypeErrorExplainerTemplateModel {
-    private final Object object;
-    private final DefaultObjectWrapper wrapper;
+public interface JavaMethodModel extends TemplateFunctionModel {
 
     /**
-     * Creates a model for a specific method on a specific object.
-     * @param object the object to call the method on, or {@code null} for a static method.
-     * @param method the method that will be invoked.
-     * @param argTypes Either pass in {@code Method#getParameterTypes() method.getParameterTypes()} here,
-     *          or reuse an earlier result of that call (for speed). Not {@code null}.
+     * Calls {@link #execute(TemplateModel[], CallPlace, Environment)}, but it emphasizes that the
+     * {@link Environment} parameters is ignored, and passes {@code null} for it.
+     *
+     * @param args As {@link #getFunctionArgumentArrayLayout()} always return {@code null} in
+     *             {@link JavaMethodModel}-s, the length of this array corresponds to the number of actual arguments
+     *             specified on the call site, and all parameters will be positional.
+     *
+     * @param callPlace Same as with {@link #execute(TemplateModel[], CallPlace, Environment)}.
      */
-    JavaMethodModel(Object object, Method method, Class[] argTypes, DefaultObjectWrapper wrapper) {
-        super(method, argTypes);
-        this.object = object;
-        this.wrapper = wrapper;
-    }
+    TemplateModel execute(TemplateModel[] args, CallPlace callPlace) throws TemplateException;
 
     /**
-     * Invokes the method, passing it the arguments from the list.
+     * Always returns {@code null} for {@link JavaMethodModel}-s; hence, only positional parameters are supported.
      */
     @Override
-    public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateModelException {
-        try {
-            return wrapper.invokeMethod(object, (Method) getMember(), 
-                    unwrapArguments(args, wrapper));
-        } catch (TemplateModelException e) {
-            throw e;
-        } catch (Exception e) {
-            throw _MethodUtil.newInvocationTemplateModelException(object, getMember(), e);
-        }
-    }
-
-    @Override
-    public String toString() {
-        return getMember().toString();
-    }
-
-    /**
-     * Implementation of experimental interface; don't use it, no backward compatibility guarantee!
-     */
-    @Override
-    public Object[] explainTypeError(Class[] expectedClasses) {
-        final Member member = getMember();
-        if (!(member instanceof Method)) {
-            return null;  // This shouldn't occur
-        }
-        Method m = (Method) member;
-        
-        final Class returnType = m.getReturnType();
-        if (returnType == null || returnType == void.class || returnType == Void.class) {
-            return null;  // Calling it won't help
-        }
-        
-        String mName = m.getName();
-        if (mName.startsWith("get") && mName.length() > 3 && Character.isUpperCase(mName.charAt(3))
-                && (m.getParameterTypes().length == 0)) {
-            return new Object[] {
-                    "Maybe using obj.something instead of obj.getSomething will yield the desired value." };
-        } else if (mName.startsWith("is") && mName.length() > 2 && Character.isUpperCase(mName.charAt(2))
-                && (m.getParameterTypes().length == 0)) {
-            return new Object[] {
-                    "Maybe using obj.something instead of obj.isSomething will yield the desired value." };
-        } else {
-            return new Object[] {
-                    "Maybe using obj.something(",
-                    (m.getParameterTypes().length != 0 ? "params" : ""),
-                    ") instead of obj.something will yield the desired value" };
-        }
-    }
-    
+    ArgumentArrayLayout getFunctionArgumentArrayLayout();
 }

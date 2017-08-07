@@ -2040,7 +2040,7 @@ ASTExpression DynamicKey(ASTExpression exp) :
 /**
  * production for an arglist part of a method invocation.
  */
-ASTExpMethodCall MethodArgs(ASTExpression exp) :
+ASTExpFunctionCall MethodArgs(ASTExpression exp) :
 {
         ArrayList args = new ArrayList();
         Token end;
@@ -2051,7 +2051,7 @@ ASTExpMethodCall MethodArgs(ASTExpression exp) :
         end = <CLOSE_PAREN>
         {
             args.trimToSize();
-            ASTExpMethodCall result = new ASTExpMethodCall(exp, args);
+            ASTExpFunctionCall result = new ASTExpFunctionCall(exp, args);
             result.setLocation(template, exp, end);
             return result;
         }

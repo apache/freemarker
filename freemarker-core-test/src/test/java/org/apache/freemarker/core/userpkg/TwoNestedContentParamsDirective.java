@@ -48,7 +48,7 @@ public class TwoNestedContentParamsDirective extends TestTemplateCallableModel i
     }
 
     @Override
-    public ArgumentArrayLayout getArgumentArrayLayout() {
+    public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
         return ArgumentArrayLayout.PARAMETERLESS;
     }
 

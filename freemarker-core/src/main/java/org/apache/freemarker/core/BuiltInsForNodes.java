@@ -19,9 +19,8 @@
 
 package org.apache.freemarker.core;
 
-import java.util.List;
-
-import org.apache.freemarker.core.model.TemplateMethodModel;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNodeModel;
@@ -114,7 +113,7 @@ class BuiltInsForNodes {
     // Can't be instantiated
     private BuiltInsForNodes() { }
 
-    static class AncestorSequence extends NativeSequence implements TemplateMethodModel {
+    static class AncestorSequence extends NativeSequence implements TemplateFunctionModel {
 
         private static final int INITIAL_CAPACITY = 12;
 
@@ -124,24 +123,30 @@ class BuiltInsForNodes {
             super(INITIAL_CAPACITY);
             this.env = env;
         }
-        
+
         @Override
-        public TemplateModel execute(List<? extends TemplateModel> names) throws TemplateException {
-            if (names == null || names.isEmpty()) {
+        public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                throws TemplateException {
+            if (args.length == 0) {
                 return this;
             }
             AncestorSequence result = new AncestorSequence(env);
-            for (int i = 0; i < size(); i++) {
-                TemplateNodeModel tnm = (TemplateNodeModel) get(i);
+            for (int seqIdx = 0; seqIdx < size(); seqIdx++) {
+                TemplateNodeModel tnm = (TemplateNodeModel) get(seqIdx);
                 String nodeName = tnm.getNodeName();
                 String nsURI = tnm.getNodeNamespace();
                 if (nsURI == null) {
-                    if (names.contains(nodeName)) {
-                        result.add(tnm);
+                    for (int argIdx = 0; argIdx < args.length; argIdx++) {
+                        String name = _CallableUtils.castArgToString(args, argIdx);
+                        if (name.equals(nodeName)) {
+                            result.add(tnm);
+                            break;
+                        }
                     }
                 } else {
-                    for (int j = 0; j < names.size(); j++) {
-                        if (_StringUtil.matchesQName(_CallableUtils.castArgToString(names, j), nodeName, nsURI, env)) {
+                    for (int argIdx = 0; argIdx < args.length; argIdx++) {
+                        if (_StringUtil.matchesQName(
+                                _CallableUtils.castArgToString(args, argIdx), nodeName, nsURI, env)) {
                             result.add(tnm);
                             break;
                         }
@@ -150,5 +155,10 @@ class BuiltInsForNodes {
             }
             return result;
         }
-    }    
+
+        @Override
+        public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+            return null;
+        }
+    }
 }

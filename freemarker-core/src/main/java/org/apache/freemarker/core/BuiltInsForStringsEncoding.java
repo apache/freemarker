@@ -22,9 +22,9 @@ package org.apache.freemarker.core;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.List;
 
-import org.apache.freemarker.core.model.TemplateMethodModel;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
@@ -132,7 +132,7 @@ class BuiltInsForStringsEncoding {
     private BuiltInsForStringsEncoding() { }
 
     static abstract class AbstractUrlBIResult implements
-    TemplateScalarModel, TemplateMethodModel {
+    TemplateScalarModel, TemplateFunctionModel {
         
         protected final ASTExpBuiltIn parent;
         protected final String targetAsString;
@@ -146,10 +146,10 @@ class BuiltInsForStringsEncoding {
         }
         
         protected abstract String encodeWithCharset(Charset charset) throws UnsupportedEncodingException;
-    
+
         @Override
-        public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateModelException {
-            parent.checkMethodArgCount(args.size(), 1);
+        public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                throws TemplateException {
             try {
                 String charsetName = _CallableUtils.castArgToString(args,0);
                 Charset charset;
@@ -164,7 +164,12 @@ class BuiltInsForStringsEncoding {
                 throw new _TemplateModelException(e, "Failed to execute URL encoding.");
             }
         }
-        
+
+        @Override
+        public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+            return ArgumentArrayLayout.SINGLE_POSITIONAL_PARAMETER;
+        }
+
         @Override
         public String getAsString() throws TemplateModelException {
             if (cachedResult == null) {

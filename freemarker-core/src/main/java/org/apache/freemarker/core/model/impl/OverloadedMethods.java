@@ -23,7 +23,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 
 import org.apache.freemarker.core._DelayedConversionToString;
 import org.apache.freemarker.core._ErrorDescriptionBuilder;
@@ -52,12 +51,12 @@ final class OverloadedMethods {
     }
     
     void addMethod(Method method) {
-        final Class[] paramTypes = method.getParameterTypes();
+        final Class<?>[] paramTypes = method.getParameterTypes();
         addCallableMemberDescriptor(new ReflectionCallableMemberDescriptor(method, paramTypes));
     }
 
-    void addConstructor(Constructor constr) {
-        final Class[] paramTypes = constr.getParameterTypes();
+    void addConstructor(Constructor<?> constr) {
+        final Class<?>[] paramTypes = constr.getParameterTypes();
         addCallableMemberDescriptor(new ReflectionCallableMemberDescriptor(constr, paramTypes));
     }
     
@@ -72,7 +71,7 @@ final class OverloadedMethods {
         }
     }
     
-    MemberAndArguments getMemberAndArguments(List/*<TemplateModel>*/ tmArgs, DefaultObjectWrapper unwrapper)
+    MemberAndArguments getMemberAndArguments(TemplateModel[] tmArgs, DefaultObjectWrapper unwrapper)
     throws TemplateModelException {
         // Try to find a oms args match:
         MaybeEmptyMemberAndArguments fixArgsRes = fixArgMethods.getMemberAndArguments(tmArgs, unwrapper);
@@ -104,7 +103,7 @@ final class OverloadedMethods {
 
     private Object[] toCompositeErrorMessage(
             final EmptyMemberAndArguments fixArgsEmptyRes, final EmptyMemberAndArguments varargsEmptyRes,
-            List tmArgs) {
+            TemplateModel[] tmArgs) {
         final Object[] argsErrorMsg;
         if (varargsEmptyRes != null) {
             if (fixArgsEmptyRes == null || fixArgsEmptyRes.isNumberOfArgumentsWrong()) {
@@ -123,7 +122,7 @@ final class OverloadedMethods {
         return argsErrorMsg;
     }
 
-    private Object[] toErrorMessage(EmptyMemberAndArguments res, List/*<TemplateModel>*/ tmArgs) {
+    private Object[] toErrorMessage(EmptyMemberAndArguments res, TemplateModel[] tmArgs) {
         final Object[] unwrappedArgs = res.getUnwrappedArguments();
         return new Object[] {
                 res.getErrorDescription(),
@@ -143,23 +142,26 @@ final class OverloadedMethods {
             
             @Override
             protected String doConversion(Object obj) {
-                final Iterator fixArgMethodsIter = fixArgMethods.getMemberDescriptors();
-                final Iterator varargMethodsIter = varargMethods != null ? varargMethods.getMemberDescriptors() : null;
+                final Iterator<ReflectionCallableMemberDescriptor> fixArgMethodsIter
+                        = fixArgMethods.getMemberDescriptors();
+                final Iterator<ReflectionCallableMemberDescriptor> varargMethodsIter
+                        = varargMethods != null ? varargMethods.getMemberDescriptors() : null;
                 
-                boolean hasMethods = fixArgMethodsIter.hasNext() || (varargMethodsIter != null && varargMethodsIter.hasNext()); 
+                boolean hasMethods = fixArgMethodsIter.hasNext()
+                        || (varargMethodsIter != null && varargMethodsIter.hasNext());
                 if (hasMethods) {
                     StringBuilder sb = new StringBuilder();
-                    HashSet fixArgMethods = new HashSet();
+                    HashSet<CallableMemberDescriptor> fixArgMethods = new HashSet<>();
                     while (fixArgMethodsIter.hasNext()) {
                         if (sb.length() != 0) sb.append(",\n");
                         sb.append("    ");
-                        CallableMemberDescriptor callableMemberDesc = (CallableMemberDescriptor) fixArgMethodsIter.next();
+                        CallableMemberDescriptor callableMemberDesc = fixArgMethodsIter.next();
                         fixArgMethods.add(callableMemberDesc);
                         sb.append(callableMemberDesc.getDeclaration());
                     }
                     if (varargMethodsIter != null) {
                         while (varargMethodsIter.hasNext()) {
-                            CallableMemberDescriptor callableMemberDesc = (CallableMemberDescriptor) varargMethodsIter.next();
+                            CallableMemberDescriptor callableMemberDesc = varargMethodsIter.next();
                             if (!fixArgMethods.contains(callableMemberDesc)) {
                                 if (sb.length() != 0) sb.append(",\n");
                                 sb.append("    ");
@@ -181,15 +183,16 @@ final class OverloadedMethods {
      * allows finding a matching overload. 
      */
     private void addMarkupBITipAfterNoNoMarchIfApplicable(_ErrorDescriptionBuilder edb,
-            List tmArgs) {
-        for (int argIdx = 0; argIdx < tmArgs.size(); argIdx++) {
-            Object tmArg = tmArgs.get(argIdx);
+            TemplateModel[] tmArgs) {
+        for (int argIdx = 0; argIdx < tmArgs.length; argIdx++) {
+            TemplateModel tmArg = tmArgs[argIdx];
             if (tmArg instanceof TemplateMarkupOutputModel) {
-                for (Iterator membDescs = fixArgMethods.getMemberDescriptors(); membDescs.hasNext();) {
-                    CallableMemberDescriptor membDesc = (CallableMemberDescriptor) membDescs.next();
-                    Class[] paramTypes = membDesc.getParamTypes();
+                for (Iterator<ReflectionCallableMemberDescriptor> membDescs = fixArgMethods.getMemberDescriptors();
+                        membDescs.hasNext(); ) {
+                    CallableMemberDescriptor membDesc = membDescs.next();
+                    Class<?>[] paramTypes = membDesc.getParamTypes();
                     
-                    Class paramType = null;
+                    Class<?> paramType = null;
                     if (membDesc.isVarargs() && argIdx >= paramTypes.length - 1) {
                         paramType = paramTypes[paramTypes.length - 1];
                         if (paramType.isArray()) {
@@ -201,7 +204,7 @@ final class OverloadedMethods {
                     }
                     if (paramType != null) {
                         if (paramType.isAssignableFrom(String.class) && !paramType.isAssignableFrom(tmArg.getClass())) {
-                            edb.tip(JavaMethodModel.MARKUP_OUTPUT_TO_STRING_TIP);
+                            edb.tip(SimpleJavaMethodModel.MARKUP_OUTPUT_TO_STRING_TIP);
                             return;
                         }
                     }
@@ -210,10 +213,10 @@ final class OverloadedMethods {
         }
     }
 
-    private _DelayedConversionToString getTMActualParameterTypes(List arguments) {
-        final String[] argumentTypeDescs = new String[arguments.size()];
-        for (int i = 0; i < arguments.size(); i++) {
-            argumentTypeDescs[i] = FTLUtil.getTypeDescription((TemplateModel) arguments.get(i));
+    private _DelayedConversionToString getTMActualParameterTypes(TemplateModel[] args) {
+        final String[] argumentTypeDescs = new String[args.length];
+        for (int i = 0; i < args.length; i++) {
+            argumentTypeDescs[i] = FTLUtil.getTypeDescription(args[i]);
         }
         
         return new DelayedCallSignatureToString(argumentTypeDescs) {
@@ -227,7 +230,7 @@ final class OverloadedMethods {
     }
     
     private Object getUnwrappedActualParameterTypes(Object[] unwrappedArgs) {
-        final Class[] argumentTypes = new Class[unwrappedArgs.length];
+        final Class<?>[] argumentTypes = new Class<?>[unwrappedArgs.length];
         for (int i = 0; i < unwrappedArgs.length; i++) {
             Object unwrappedArg = unwrappedArgs[i];
             argumentTypes[i] = unwrappedArg != null ? unwrappedArg.getClass() : null;
@@ -238,7 +241,7 @@ final class OverloadedMethods {
             @Override
             String argumentToString(Object argType) {
                 return argType != null
-                        ? _ClassUtil.getShortClassName((Class) argType)
+                        ? _ClassUtil.getShortClassName((Class<?>) argType)
                         : _ClassUtil.getShortClassNameOfObject(null);
             }
             
@@ -247,7 +250,7 @@ final class OverloadedMethods {
     
     private abstract class DelayedCallSignatureToString extends _DelayedConversionToString {
 
-        public DelayedCallSignatureToString(Object[] argTypeArray) {
+        DelayedCallSignatureToString(Object[] argTypeArray) {
             super(argTypeArray);
         }
 

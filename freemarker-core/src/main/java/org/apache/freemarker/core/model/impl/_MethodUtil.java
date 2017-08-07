@@ -64,7 +64,7 @@ public final class _MethodUtil {
      *         </ul> 
      */
     // TODO Seems that we don't use the full functionality of this anymore, so we could simplify this. See usages.
-    public static int isMoreOrSameSpecificParameterType(final Class specific, final Class generic, boolean bugfixed,
+    static int isMoreOrSameSpecificParameterType(final Class<?> specific, final Class<?> generic, boolean bugfixed,
             int ifHigherThan) {
         if (ifHigherThan >= 4) return 0;
         if (generic.isAssignableFrom(specific)) {
@@ -79,7 +79,7 @@ public final class _MethodUtil {
                     return isWideningPrimitiveNumberConversion(specific, generic) ? 3 : 0;
                 } else {  // => specificIsPrim && !genericIsPrim
                     if (bugfixed) {
-                        final Class specificAsBoxed = _ClassUtil.primitiveClassToBoxingClass(specific);
+                        final Class<?> specificAsBoxed = _ClassUtil.primitiveClassToBoxingClass(specific);
                         if (specificAsBoxed == generic) {
                             // A primitive class is more specific than its boxing class, because it can't store null
                             return 2;
@@ -110,7 +110,7 @@ public final class _MethodUtil {
         }  // of: !generic.isAssignableFrom(specific) 
     }
 
-    private static boolean isWideningPrimitiveNumberConversion(final Class source, final Class target) {
+    private static boolean isWideningPrimitiveNumberConversion(final Class<?> source, final Class<?> target) {
         if (target == Short.TYPE && (source == Byte.TYPE)) {
             return true;
         } else if (target == Integer.TYPE && 
@@ -134,7 +134,7 @@ public final class _MethodUtil {
         }
     }
 
-    private static boolean isWideningBoxedNumberConversion(final Class source, final Class target) {
+    private static boolean isWideningBoxedNumberConversion(final Class<?> source, final Class<?> target) {
         if (target == Short.class && source == Byte.class) {
             return true;
         } else if (target == Integer.class && 
@@ -161,42 +161,42 @@ public final class _MethodUtil {
     /**
      * Attention, this doesn't handle primitive classes correctly, nor numerical conversions.
      */
-    public static Set getAssignables(Class c1, Class c2) {
-        Set s = new HashSet();
+    static Set<Class<?>> getAssignables(Class<?> c1, Class<?> c2) {
+        Set<Class<?>> s = new HashSet<>();
         collectAssignables(c1, c2, s);
         return s;
     }
     
-    private static void collectAssignables(Class c1, Class c2, Set s) {
+    private static void collectAssignables(Class<?> c1, Class<?> c2, Set<Class<?>> s) {
         if (c1.isAssignableFrom(c2)) {
             s.add(c1);
         }
-        Class sc = c1.getSuperclass();
+        Class<?> sc = c1.getSuperclass();
         if (sc != null) {
             collectAssignables(sc, c2, s);
         }
-        Class[] itf = c1.getInterfaces();
-        for (Class anItf : itf) {
+        Class<?>[] itf = c1.getInterfaces();
+        for (Class<?> anItf : itf) {
             collectAssignables(anItf, c2, s);
         }
     }
 
-    public static Class[] getParameterTypes(Member member) {
+    public static Class<?>[] getParameterTypes(Member member) {
         if (member instanceof Method) {
             return ((Method) member).getParameterTypes();
         }
-        if (member instanceof Constructor) {
-            return ((Constructor) member).getParameterTypes();
+        if (member instanceof Constructor<?>) {
+            return ((Constructor<?>) member).getParameterTypes();
         }
         throw new IllegalArgumentException("\"member\" must be Method or Constructor");
     }
 
-    public static boolean isVarargs(Member member) {
+    static boolean isVarargs(Member member) {
         if (member instanceof Method) { 
             return ((Method) member).isVarArgs();
         }
         if (member instanceof Constructor) {
-            return ((Constructor) member).isVarArgs();
+            return ((Constructor<?>) member).isVarArgs();
         }
         throw new BugException();
     }
@@ -223,7 +223,7 @@ public final class _MethodUtil {
         sb.append(member.getName());
 
         sb.append('(');
-        Class[] paramTypes = _MethodUtil.getParameterTypes(member);
+        Class<?>[] paramTypes = _MethodUtil.getParameterTypes(member);
         for (int i = 0; i < paramTypes.length; i++) {
             if (i != 0) sb.append(", ");
             String paramTypeDecl = _ClassUtil.getShortClassName(paramTypes[i]);
@@ -239,7 +239,7 @@ public final class _MethodUtil {
         return sb.toString();
     }
 
-    public static Object[] invocationErrorMessageStart(Member member) {
+    static Object[] invocationErrorMessageStart(Member member) {
         return invocationErrorMessageStart(member, member instanceof Constructor);
     }
     
@@ -247,7 +247,7 @@ public final class _MethodUtil {
         return new Object[] { "Java ", isConstructor ? "constructor " : "method ", new _DelayedJQuote(member) };
     }
 
-    public static TemplateModelException newInvocationTemplateModelException(Object object, Member member, Throwable e) {
+    static TemplateModelException newInvocationTemplateModelException(Object object, Member member, Throwable e) {
         return newInvocationTemplateModelException(
                 object,
                 member,
@@ -256,7 +256,7 @@ public final class _MethodUtil {
                 e);
     }
 
-    public static TemplateModelException newInvocationTemplateModelException(Object object, CallableMemberDescriptor callableMemberDescriptor, Throwable e) {
+    static TemplateModelException newInvocationTemplateModelException(Object object, CallableMemberDescriptor callableMemberDescriptor, Throwable e) {
         return newInvocationTemplateModelException(
                 object,
                 new _DelayedConversionToString(callableMemberDescriptor) {
@@ -294,7 +294,7 @@ public final class _MethodUtil {
      * Extracts the JavaBeans property from a reader method name, or returns {@code null} if the method name doesn't
      * look like a reader method name.
      */
-    public static String getBeanPropertyNameFromReaderMethodName(String name, Class<?> returnType) {
+    static String getBeanPropertyNameFromReaderMethodName(String name, Class<?> returnType) {
         int start;
         if (name.startsWith("get")) {
             start = 3;

@@ -19,7 +19,9 @@
 
 package org.apache.freemarker.core.model;
 
-import java.util.List;
+import org.apache.freemarker.core.CallPlace;
+import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
 
 /**
  * Singleton object representing nothing, used by ?if_exists built-in.
@@ -28,7 +30,8 @@ import java.util.List;
  */
 
 final class GeneralPurposeNothing
-implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, TemplateHashModelEx, TemplateMethodModel {
+implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, TemplateHashModelEx,
+        TemplateFunctionModel {
 
     public static final TemplateModel INSTANCE = new GeneralPurposeNothing();
       
@@ -66,10 +69,17 @@ implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, Tem
     }
 
     @Override
-    public TemplateModel execute(List<? extends TemplateModel> args) {
+    public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env) throws TemplateException {
         return null;
     }
-    
+
+    @Override
+    public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+        return ArgumentArrayLayout.create(
+                0, true,
+                null, true);
+    }
+
     @Override
     public TemplateCollectionModel keys() {
         return Constants.EMPTY_COLLECTION;

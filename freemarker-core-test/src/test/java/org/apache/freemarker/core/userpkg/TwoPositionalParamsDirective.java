@@ -51,7 +51,7 @@ public class TwoPositionalParamsDirective extends TestTemplateCallableModel impl
     }
 
     @Override
-    public ArgumentArrayLayout getArgumentArrayLayout() {
+    public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
         return ARGS_LAYOUT;
     }
 

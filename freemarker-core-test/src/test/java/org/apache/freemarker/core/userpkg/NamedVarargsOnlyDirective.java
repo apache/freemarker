@@ -52,7 +52,7 @@ public class NamedVarargsOnlyDirective extends TestTemplateCallableModel impleme
     }
 
     @Override
-    public ArgumentArrayLayout getArgumentArrayLayout() {
+    public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
         return ARGS_LAYOUT;
     }
 

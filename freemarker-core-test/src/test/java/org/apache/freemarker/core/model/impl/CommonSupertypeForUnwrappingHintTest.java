@@ -22,6 +22,7 @@ package org.apache.freemarker.core.model.impl;
 import java.io.Serializable;
 import java.util.List;
 
+import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 
 import junit.framework.TestCase;
@@ -110,17 +111,18 @@ public class CommonSupertypeForUnwrappingHintTest extends TestCase {
         }
 
         @Override
-        Class[] preprocessParameterTypes(CallableMemberDescriptor memberDesc) {
+        Class<?>[] preprocessParameterTypes(CallableMemberDescriptor memberDesc) {
             return memberDesc.getParamTypes();
         }
 
         @Override
-        void afterWideningUnwrappingHints(Class[] paramTypes, int[] paramNumericalTypes) {
+        void afterWideningUnwrappingHints(Class<?>[] paramTypes, int[] paramNumericalTypes) {
             // Do nothing
         }
 
         @Override
-        MaybeEmptyMemberAndArguments getMemberAndArguments(List tmArgs, DefaultObjectWrapper w) throws TemplateModelException {
+        MaybeEmptyMemberAndArguments getMemberAndArguments(TemplateModel[] tmArgs, DefaultObjectWrapper w) throws
+                TemplateModelException {
             throw new RuntimeException("Not implemented in this dummy.");
         }
         

@@ -69,11 +69,11 @@ twelve
 
 <p>Numbers in method calls:</p>
 
-Single argument value is: 1
-Single argument value is: 1
-Single argument value is: 12
-Single argument value is: 3
-Single argument value is: 3
+Argument value is: 1
+Argument value is: 1
+Argument value is: 12
+Argument value is: 3
+Argument value is: 3
 
 </body>
 </html>

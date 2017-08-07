@@ -19,19 +19,18 @@
 
 package org.apache.freemarker.core;
 
-import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateCollectionModelEx;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
-import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
@@ -108,29 +107,30 @@ class BuiltInsForMultipleTypes {
     }
 
     static class dateBI extends ASTExpBuiltIn {
-        private class DateParser
-        implements
-            TemplateDateModel,
-                TemplateMethodModel,
-            TemplateHashModel {
+        private class DateParser implements TemplateDateModel, TemplateFunctionModel, TemplateHashModel {
             private final String text;
             private final Environment env;
             private final TemplateDateFormat defaultFormat;
             private TemplateDateModel cachedValue;
             
-            DateParser(String text, Environment env)
-            throws TemplateException {
+            DateParser(String text, Environment env) throws TemplateException {
                 this.text = text;
                 this.env = env;
                 defaultFormat = env.getTemplateDateFormat(dateType, Date.class, target, false);
             }
-            
+
             @Override
-            public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateException {
-                checkMethodArgCount(args, 0, 1);
-                return args.size() == 0 ? getAsDateModel() : get(_CallableUtils.castArgToString(args, 0));
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateException {
+                TemplateModel arg1 = args[0];
+                return arg1 == null ? getAsDateModel() : get(_CallableUtils.castArgToString(arg1, 0));
             }
-            
+
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return ArgumentArrayLayout.SINGLE_POSITIONAL_PARAMETER;
+            }
+
             @Override
             public TemplateModel get(String pattern) throws TemplateModelException {
                 TemplateDateFormat format;
@@ -258,7 +258,7 @@ class BuiltInsForMultipleTypes {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
-            return (tm instanceof TemplateBooleanModel)  ?
+            return (tm instanceof TemplateBooleanModel) ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
@@ -286,7 +286,7 @@ class BuiltInsForMultipleTypes {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
-            return (tm instanceof TemplateDateModel)  ?
+            return (tm instanceof TemplateDateModel) ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
@@ -356,32 +356,22 @@ class BuiltInsForMultipleTypes {
         }
     }
 
-    static class is_macroBI extends ASTExpBuiltIn {
-        @Override
-        TemplateModel _eval(Environment env) throws TemplateException {
-            TemplateModel tm = target.eval(env);
-            target.assertNonNull(tm, env);
-            return (tm instanceof Environment.TemplateLanguageDirective)  ?
-                TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
-        }
-    }
-
     static class is_markup_outputBI extends ASTExpBuiltIn {
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
-            return (tm instanceof TemplateMarkupOutputModel)  ?
+            return (tm instanceof TemplateMarkupOutputModel) ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
     
-    static class is_methodBI extends ASTExpBuiltIn {
+    static class is_functionBI extends ASTExpBuiltIn {
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
-            return (tm instanceof TemplateMethodModel)  ?
+            return (tm instanceof TemplateFunctionModel) ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
@@ -391,7 +381,7 @@ class BuiltInsForMultipleTypes {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
-            return (tm instanceof TemplateNodeModel)  ?
+            return (tm instanceof TemplateNodeModel) ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
@@ -401,7 +391,7 @@ class BuiltInsForMultipleTypes {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
-            return (tm instanceof TemplateNumberModel)  ?
+            return (tm instanceof TemplateNumberModel) ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
@@ -421,7 +411,7 @@ class BuiltInsForMultipleTypes {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
-            return (tm instanceof TemplateScalarModel)  ?
+            return (tm instanceof TemplateScalarModel) ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
@@ -469,10 +459,7 @@ class BuiltInsForMultipleTypes {
     
     static class stringBI extends ASTExpBuiltIn {
         
-        private class BooleanFormatter
-        implements 
-            TemplateScalarModel,
-                TemplateMethodModel {
+        private class BooleanFormatter implements TemplateScalarModel, TemplateFunctionModel {
             private final TemplateBooleanModel bool;
             private final Environment env;
             
@@ -480,18 +467,23 @@ class BuiltInsForMultipleTypes {
                 this.bool = bool;
                 this.env = env;
             }
-    
+
             @Override
-            public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateException {
-                checkMethodArgCount(args, 2);
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateException {
                 int argIdx = bool.getAsBoolean() ? 0 : 1;
-                TemplateModel result = args.get(argIdx);
+                TemplateModel result = args[argIdx];
                 if (!(result instanceof TemplateScalarModel)) {
-                    throw new NonStringException((Serializable) argIdx, result, null, null);
+                    throw new NonStringException(argIdx, result, null, null);
                 }
                 return result;
             }
-    
+
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return ArgumentArrayLayout.TWO_POSITIONAL_PARAMETERS;
+            }
+
             @Override
             public String getAsString() throws TemplateModelException {
                 // Boolean should have come first... but that change would be non-BC. 
@@ -507,11 +499,7 @@ class BuiltInsForMultipleTypes {
             }
         }
     
-        private class DateFormatter
-        implements
-            TemplateScalarModel,
-            TemplateHashModel,
-                TemplateMethodModel {
+        private class DateFormatter implements TemplateScalarModel, TemplateHashModel, TemplateFunctionModel {
             private final TemplateDateModel dateModel;
             private final Environment env;
             private final TemplateDateFormat defaultFormat;
@@ -528,11 +516,16 @@ class BuiltInsForMultipleTypes {
                         : env.getTemplateDateFormat(
                                 dateType, _EvalUtil.modelToDate(dateModel, target).getClass(), target, true);
             }
-    
+
             @Override
-            public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateException {
-                checkMethodArgCount(args, 1);
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateException {
                 return formatWith(_CallableUtils.castArgToString(args, 0));
+            }
+
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return ArgumentArrayLayout.SINGLE_POSITIONAL_PARAMETER;
             }
 
             @Override
@@ -582,11 +575,7 @@ class BuiltInsForMultipleTypes {
             }
         }
         
-        private class NumberFormatter
-        implements
-            TemplateScalarModel,
-            TemplateHashModel,
-                TemplateMethodModel {
+        private class NumberFormatter implements TemplateScalarModel, TemplateHashModel, TemplateFunctionModel {
             private final TemplateNumberModel numberModel;
             private final Number number;
             private final Environment env;
@@ -606,13 +595,18 @@ class BuiltInsForMultipleTypes {
                     throw _CoreAPI.ensureIsTemplateModelException("Failed to get default number format", e); 
                 }
             }
-    
+
             @Override
-            public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateException {
-                checkMethodArgCount(args, 1);
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateException {
                 return get(_CallableUtils.castArgToString(args, 0));
             }
-    
+
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return ArgumentArrayLayout.SINGLE_POSITIONAL_PARAMETER;
+            }
+
             @Override
             public TemplateModel get(String key) throws TemplateModelException {
                 TemplateNumberFormat format;

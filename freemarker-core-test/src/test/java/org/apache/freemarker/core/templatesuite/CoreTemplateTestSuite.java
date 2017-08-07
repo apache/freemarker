@@ -36,9 +36,9 @@ import org.apache.freemarker.core.templatesuite.models.JavaObjectInfo;
 import org.apache.freemarker.core.templatesuite.models.Listables;
 import org.apache.freemarker.core.templatesuite.models.MultiModel1;
 import org.apache.freemarker.core.templatesuite.models.OverloadedMethods2;
+import org.apache.freemarker.core.templatesuite.models.SimpleTestFunction;
 import org.apache.freemarker.core.templatesuite.models.TestBean;
 import org.apache.freemarker.core.templatesuite.models.TestBoolean;
-import org.apache.freemarker.core.templatesuite.models.TestMethod;
 import org.apache.freemarker.core.templatesuite.models.TestNode;
 import org.apache.freemarker.core.templatesuite.models.VarArgTestModel;
 import org.apache.freemarker.test.TemplateTestSuite;
@@ -158,7 +158,7 @@ public class CoreTemplateTestSuite extends TemplateTestSuite {
         } else if (simpleTestName.equals("stringbimethods")) {
             dataModel.put("multi", new TestBoolean());
         } else if (simpleTestName.startsWith("type-builtins")) {
-            dataModel.put("testmethod", new TestMethod());
+            dataModel.put("testfunction", new SimpleTestFunction());
             dataModel.put("testnode", new TestNode());
             dataModel.put("testcollection", new SimpleCollection(new ArrayList<>(), dow));
             dataModel.put("testcollectionEx", DefaultNonListCollectionAdapter.adapt(new HashSet<>(), dow));

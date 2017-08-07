@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.apache.freemarker.core.model.TemplateMethodModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 
@@ -54,8 +54,9 @@ final class ASTExpListLiteral extends ASTExpression {
     }
 
     /**
-     * For {@link TemplateMethodModel} calls, returns the list of arguments as {@link TemplateModel}-s.
+     * For {@link TemplateFunctionModel} calls, returns the list of arguments as {@link TemplateModel}-s.
      */
+    // TODO [FM3][CF] This will be removed
     List<TemplateModel> getModelList(Environment env) throws TemplateException {
         int size = items.size();
         switch(size) {

@@ -20,14 +20,12 @@ package org.apache.freemarker.core.model.impl;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Member;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 
 import org.apache.freemarker.core._DelayedFTLTypeDescription;
 import org.apache.freemarker.core._DelayedOrdinal;
 import org.apache.freemarker.core._ErrorDescriptionBuilder;
 import org.apache.freemarker.core._TemplateModelException;
+import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -35,7 +33,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.util._ClassUtil;
 
 /**
- * This class is used for as a base for non-overloaded method models and for constructors.
+ * This class is used as a base for non-overloaded method models and for constructors.
  * (For overloaded methods and constructors see {@link OverloadedMethods}.)
  */
 class SimpleMethod {
@@ -45,101 +43,101 @@ class SimpleMethod {
               + "But consider if the Java method whose argument it will be can handle markup strings properly.";
     
     private final Member member;
-    private final Class[] argTypes;
+    private final Class<?>[] argTypes;
     
-    protected SimpleMethod(Member member, Class[] argTypes) {
+    SimpleMethod(Member member, Class<?>[] argTypes) {
         this.member = member;
         this.argTypes = argTypes;
     }
     
-    Object[] unwrapArguments(List arguments, DefaultObjectWrapper wrapper) throws TemplateModelException {
-        if (arguments == null) {
-            arguments = Collections.EMPTY_LIST;
+    Object[] unwrapArguments(TemplateModel[] args, DefaultObjectWrapper wrapper) throws TemplateModelException {
+        if (args == null) {
+            args = Constants.EMPTY_TEMPLATE_MODEL_ARRAY;
         }
         boolean isVarArg = _MethodUtil.isVarargs(member);
         int typesLen = argTypes.length;
         if (isVarArg) {
-            if (typesLen - 1 > arguments.size()) {
+            if (typesLen - 1 > args.length) {
                 throw new _TemplateModelException(
                         _MethodUtil.invocationErrorMessageStart(member),
-                        " takes at least ", Integer.valueOf(typesLen - 1),
+                        " takes at least ", typesLen - 1,
                         typesLen - 1 == 1 ? " argument" : " arguments", ", but ",
-                        Integer.valueOf(arguments.size()), " was given.");
+                        args.length, " was given.");
             }
-        } else if (typesLen != arguments.size()) {
+        } else if (typesLen != args.length) {
             throw new _TemplateModelException(
                     _MethodUtil.invocationErrorMessageStart(member), 
-                    " takes ", Integer.valueOf(typesLen), typesLen == 1 ? " argument" : " arguments", ", but ",
-                    Integer.valueOf(arguments.size()), " was given.");
+                    " takes ", typesLen, typesLen == 1 ? " argument" : " arguments", ", but ",
+                    args.length, " was given.");
         }
          
-        return unwrapArguments(arguments, argTypes, isVarArg, wrapper);
+        return unwrapArguments(args, argTypes, isVarArg, wrapper);
     }
 
-    private Object[] unwrapArguments(List args, Class[] argTypes, boolean isVarargs,
+    private Object[] unwrapArguments(TemplateModel[] args, Class<?>[] argTypes, boolean isVarargs,
             DefaultObjectWrapper w)
     throws TemplateModelException {
         if (args == null) return null;
         
         int typesLen = argTypes.length;
-        int argsLen = args.size();
+        int argsLen = args.length;
         
         Object[] unwrappedArgs = new Object[typesLen];
         
         // Unwrap arguments:
-        Iterator it = args.iterator();
+        int argsIdx = 0;
         int normalArgCnt = isVarargs ? typesLen - 1 : typesLen; 
-        int argIdx = 0;
-        while (argIdx < normalArgCnt) {
-            Class argType = argTypes[argIdx];
-            TemplateModel argVal = (TemplateModel) it.next();
+        int unwrappedArgsIdx = 0;
+        while (unwrappedArgsIdx < normalArgCnt) {
+            Class<?> argType = argTypes[unwrappedArgsIdx];
+            TemplateModel argVal = args[argsIdx++];
             Object unwrappedArgVal = w.tryUnwrapTo(argVal, argType);
             if (unwrappedArgVal == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
-                throw createArgumentTypeMismarchException(argIdx, argVal, argType);
+                throw createArgumentTypeMismatchException(unwrappedArgsIdx, argVal, argType);
             }
             if (unwrappedArgVal == null && argType.isPrimitive()) {
-                throw createNullToPrimitiveArgumentException(argIdx, argType); 
+                throw createNullToPrimitiveArgumentException(unwrappedArgsIdx, argType);
             }
             
-            unwrappedArgs[argIdx++] = unwrappedArgVal;
+            unwrappedArgs[unwrappedArgsIdx++] = unwrappedArgVal;
         }
         if (isVarargs) {
             // The last argType, which is the vararg type, wasn't processed yet.
             
-            Class varargType = argTypes[typesLen - 1];
-            Class varargItemType = varargType.getComponentType();
-            if (!it.hasNext()) {
-                unwrappedArgs[argIdx++] = Array.newInstance(varargItemType, 0);
+            Class<?> varargType = argTypes[typesLen - 1];
+            Class<?> varargItemType = varargType.getComponentType();
+            if (argsIdx >= args.length) {
+                unwrappedArgs[unwrappedArgsIdx] = Array.newInstance(varargItemType, 0);
             } else {
-                TemplateModel argVal = (TemplateModel) it.next();
+                TemplateModel argVal = args[argsIdx++];
                 
                 Object unwrappedArgVal;
                 // We first try to treat the last argument as a vararg *array*.
                 // This is consistent to what OverloadedVarArgMethod does.
-                if (argsLen - argIdx == 1
+                if (argsLen - unwrappedArgsIdx == 1
                         && (unwrappedArgVal = w.tryUnwrapTo(argVal, varargType))
                             != ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
                     // It was a vararg array.
-                    unwrappedArgs[argIdx++] = unwrappedArgVal;
+                    unwrappedArgs[unwrappedArgsIdx] = unwrappedArgVal;
                 } else {
                     // It wasn't a vararg array, so we assume it's a vararg
                     // array *item*, possibly followed by further ones.
-                    int varargArrayLen = argsLen - argIdx;
+                    int varargArrayLen = argsLen - unwrappedArgsIdx;
                     Object varargArray = Array.newInstance(varargItemType, varargArrayLen);
                     for (int varargIdx = 0; varargIdx < varargArrayLen; varargIdx++) {
-                        TemplateModel varargVal = (TemplateModel) (varargIdx == 0 ? argVal : it.next());
+                        TemplateModel varargVal = varargIdx == 0 ? argVal : args[argsIdx++];
                         Object unwrappedVarargVal = w.tryUnwrapTo(varargVal, varargItemType);
                         if (unwrappedVarargVal == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
-                            throw createArgumentTypeMismarchException(
-                                    argIdx + varargIdx, varargVal, varargItemType);
+                            throw createArgumentTypeMismatchException(
+                                    unwrappedArgsIdx + varargIdx, varargVal, varargItemType);
                         }
                         
                         if (unwrappedVarargVal == null && varargItemType.isPrimitive()) {
-                            throw createNullToPrimitiveArgumentException(argIdx + varargIdx, varargItemType); 
+                            throw createNullToPrimitiveArgumentException(unwrappedArgsIdx + varargIdx, varargItemType);
                         }
                         Array.set(varargArray, varargIdx, unwrappedVarargVal);
                     }
-                    unwrappedArgs[argIdx++] = varargArray;
+                    unwrappedArgs[unwrappedArgsIdx] = varargArray;
                 }
             }
         }
@@ -147,11 +145,11 @@ class SimpleMethod {
         return unwrappedArgs;
     }
 
-    private TemplateModelException createArgumentTypeMismarchException(
-            int argIdx, TemplateModel argVal, Class targetType) {
+    private TemplateModelException createArgumentTypeMismatchException(
+            int argIdx, TemplateModel argVal, Class<?> targetType) {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                 _MethodUtil.invocationErrorMessageStart(member), " couldn't be called: Can't convert the ",
-                new _DelayedOrdinal(Integer.valueOf(argIdx + 1)),
+                new _DelayedOrdinal(argIdx + 1),
                 " argument's value to the target Java type, ", _ClassUtil.getShortClassName(targetType),
                 ". The type of the actual value was: ", new _DelayedFTLTypeDescription(argVal));
         if (argVal instanceof TemplateMarkupOutputModel && (targetType.isAssignableFrom(String.class))) {
@@ -160,10 +158,10 @@ class SimpleMethod {
         return new _TemplateModelException(desc);
     }
 
-    private TemplateModelException createNullToPrimitiveArgumentException(int argIdx, Class targetType) {
+    private TemplateModelException createNullToPrimitiveArgumentException(int argIdx, Class<?> targetType) {
         return new _TemplateModelException(
                 _MethodUtil.invocationErrorMessageStart(member), " couldn't be called: The value of the ",
-                new _DelayedOrdinal(Integer.valueOf(argIdx + 1)),
+                new _DelayedOrdinal(argIdx + 1),
                 " argument was null, but the target Java parameter type (", _ClassUtil.getShortClassName(targetType),
                 ") is primitive and so can't store null.");
     }

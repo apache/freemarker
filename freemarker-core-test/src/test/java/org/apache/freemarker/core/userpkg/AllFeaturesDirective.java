@@ -122,7 +122,7 @@ public class AllFeaturesDirective extends TestTemplateCallableModel implements T
     }
 
     @Override
-    public ArgumentArrayLayout getArgumentArrayLayout() {
+    public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
         return ARGS_LAYOUT;
     }
 

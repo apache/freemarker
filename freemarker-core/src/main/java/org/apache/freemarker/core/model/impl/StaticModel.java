@@ -27,20 +27,18 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Wraps the static fields and methods of a class in a
- * {@link org.apache.freemarker.core.model.TemplateHashModel}.
- * Fields are wrapped using {@link DefaultObjectWrapper#wrap(Object)}, and
- * methods are wrapped into an appropriate {@link TemplateMethodModel} instance.
- * Unfortunately, there is currently no support for bean property-style
- * calls of static methods, similar to that in {@link BeanModel}.
+ * Wraps the static fields and methods of a class in a {@link org.apache.freemarker.core.model.TemplateHashModel}.
+ * Fields are wrapped using {@link DefaultObjectWrapper#wrap(Object)}, and methods are wrapped into an appropriate
+ * {@link TemplateFunctionModel} instance. There is currently no support for bean property-style calls of static
+ * methods, similar to that in {@link BeanModel} (as it's not part for the JavaBeans specification).
  */
 final class StaticModel implements TemplateHashModelEx {
     
@@ -167,10 +165,10 @@ final class StaticModel implements TemplateHashModelEx {
                 Object value = entry.getValue();
                 if (value instanceof Method) {
                     Method method = (Method) value;
-                    entry.setValue(new JavaMethodModel(null, method,
+                    entry.setValue(new SimpleJavaMethodModel(null, method,
                             method.getParameterTypes(), wrapper));
                 } else if (value instanceof OverloadedMethods) {
-                    entry.setValue(new OverloadedMethodsModel(null, (OverloadedMethods) value, wrapper));
+                    entry.setValue(new OverloadedJavaMethodModel(null, (OverloadedMethods) value, wrapper));
                 }
             }
         }

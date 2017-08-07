@@ -20,14 +20,13 @@
 package org.apache.freemarker.core;
 
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
 
 import org.apache.freemarker.core.model.AdapterTemplateModel;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateMethodModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
@@ -70,7 +69,7 @@ class BuiltInsForDates {
      */
     static class iso_BI extends AbstractISOBI {
         
-        class Result implements TemplateMethodModel {
+        class Result implements TemplateFunctionModel {
             private final Date date;
             private final int dateType;
             private final Environment env;
@@ -81,19 +80,19 @@ class BuiltInsForDates {
                 this.env = env;
             }
 
+
             @Override
-            public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateModelException {
-                checkMethodArgCount(args, 1);
-                
-                TemplateModel tzArgTM = args.get(0);
-                TimeZone tzArg; 
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateException {
+                TemplateModel tzArgTM = args[0];
+                TimeZone tzArg;
                 Object adaptedObj;
                 if (tzArgTM instanceof AdapterTemplateModel
                         && (adaptedObj =
                                 ((AdapterTemplateModel) tzArgTM)
                                 .getAdaptedObject(TimeZone.class))
                             instanceof TimeZone) {
-                    tzArg = (TimeZone) adaptedObj;                    
+                    tzArg = (TimeZone) adaptedObj;
                 } else if (tzArgTM instanceof TemplateScalarModel) {
                     String tzName = _EvalUtil.modelToString((TemplateScalarModel) tzArgTM, null, null);
                     try {
@@ -108,17 +107,22 @@ class BuiltInsForDates {
                     throw MessageUtil.newMethodArgUnexpectedTypeException(
                             "?" + key, 0, "string or java.util.TimeZone", tzArgTM);
                 }
-                
+
                 return new SimpleScalar(_DateUtil.dateToISO8601String(
                         date,
                         dateType != TemplateDateModel.TIME,
                         dateType != TemplateDateModel.DATE,
                         shouldShowOffset(date, dateType, env),
                         accuracy,
-                        tzArg, 
+                        tzArg,
                         env.getISOBuiltInCalendarFactory()));
             }
-            
+
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return ArgumentArrayLayout.SINGLE_POSITIONAL_PARAMETER;
+            }
+
         }
 
         iso_BI(Boolean showOffset, int accuracy) {

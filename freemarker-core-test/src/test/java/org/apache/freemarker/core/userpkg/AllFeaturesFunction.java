@@ -105,7 +105,7 @@ public class AllFeaturesFunction extends TestTemplateCallableModel implements Te
     }
 
     @Override
-    public ArgumentArrayLayout getArgumentArrayLayout() {
+    public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
         return ARGS_LAYOUT;
     }
 

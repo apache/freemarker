@@ -35,10 +35,10 @@
 <@assertFails message='"m" flag'>
     ${'x'?keepBefore('x', 'm')}
 </@assertFails>
-<@assertFails message='3'>
+<@assertFails message='Too many arguments'>
     ${'x'?keepBefore('x', 'i', 'x')}
 </@assertFails>
-<@assertFails message='none'>
+<@assertFails message='argument'>
     ${'x'?keepBefore()}
 </@assertFails>
 
@@ -61,10 +61,10 @@
 <@assertFails message='"m" flag'>
     ${'x'?keepBeforeLast('x', 'm')}
 </@assertFails>
-<@assertFails message='3'>
+<@assertFails message='Too many arguments'>
     ${'x'?keepBeforeLast('x', 'i', 'x')}
 </@assertFails>
-<@assertFails message='none'>
+<@assertFails message='argument'>
     ${'x'?keepBeforeLast()}
 </@assertFails>
 
@@ -87,10 +87,10 @@
 <@assertFails message='"m" flag'>
     ${'x'?keepAfter('x', 'm')}
 </@assertFails>
-<@assertFails message='3'>
+<@assertFails message='Too many arguments'>
     ${'x'?keepAfter('x', 'i', 'x')}
 </@assertFails>
-<@assertFails message='none'>
+<@assertFails message='argument'>
     ${'x'?keepAfter()}
 </@assertFails>
 
@@ -115,10 +115,10 @@
 <@assertFails message='"m" flag'>
     ${'x'?keepAfterLast('x', 'm')}
 </@assertFails>
-<@assertFails message='3'>
+<@assertFails message='Too many arguments'>
     ${'x'?keepAfterLast('x', 'i', 'x')}
 </@assertFails>
-<@assertFails message='none'>
+<@assertFails message='argument'>
     ${'x'?keepAfterLast()}
 </@assertFails>
 
@@ -129,10 +129,10 @@
 <@assertEquals expected='o' actual='foo'?removeBeginning('fo') />
 <@assertEquals expected='' actual='foo'?removeBeginning('foo') />
 <@assertEquals expected='foo' actual='foo'?removeBeginning('') />
-<@assertFails message='2'>
+<@assertFails message='Too many arguments'>
     ${'x'?removeBeginning('x', 'x')}
 </@assertFails>
-<@assertFails message='none'>
+<@assertFails message='argument'>
     ${'x'?removeBeginning()}
 </@assertFails>
 
@@ -143,10 +143,10 @@
 <@assertEquals expected='b' actual='bar'?removeEnding('ar') />
 <@assertEquals expected='' actual='bar'?removeEnding('bar') />
 <@assertEquals expected='bar' actual='bar'?removeEnding('') />
-<@assertFails message='2'>
+<@assertFails message='Too many arguments'>
     ${'x'?removeEnding('x', 'x')}
 </@assertFails>
-<@assertFails message='none'>
+<@assertFails message='argument'>
     ${'x'?removeEnding()}
 </@assertFails>
 
@@ -171,10 +171,10 @@
 <@assertEquals expected='https://example.com' actual="https://example.com"?ensureStartsWith("[a-z]+://", "http://") />
 <@assertEquals expected='http://HTTP://example.com' actual="HTTP://example.com"?ensureStartsWith("[a-z]+://", "http://") />
 <@assertEquals expected='HTTP://example.com' actual="HTTP://example.com"?ensureStartsWith("[a-z]+://", "http://", "ir") />
-<@assertFails message='4'>
+<@assertFails message='Too many arguments'>
     ${'x'?ensureStartsWith('x', 'x', 'x', 'x')}
 </@assertFails>
-<@assertFails message='none'>
+<@assertFails message='argument'>
     ${'x'?ensureStartsWith()}
 </@assertFails>
 
@@ -185,10 +185,10 @@
 <@assertEquals expected='foo' actual='foo'?ensureEndsWith('') />
 <@assertEquals expected='x' actual=''?ensureEndsWith('x') />
 <@assertEquals expected='' actual=''?ensureEndsWith('') />
-<@assertFails message='2'>
+<@assertFails message='Too many arguments'>
     ${'x'?ensureEndsWith('x', 'x')}
 </@assertFails>
-<@assertFails message='none'>
+<@assertFails message='argument'>
     ${'x'?ensureEndsWith()}
 </@assertFails>
 

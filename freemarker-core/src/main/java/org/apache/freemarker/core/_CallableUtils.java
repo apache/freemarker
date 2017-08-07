@@ -26,7 +26,6 @@ import java.util.List;
 
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.Constants;
-import org.apache.freemarker.core.model.TemplateCallableModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -47,18 +46,19 @@ public final class _CallableUtils {
     public static void executeWith0Arguments(
             TemplateDirectiveModel directive, CallPlace callPlace, Writer out, Environment env)
             throws IOException, TemplateException {
-        directive.execute(getArgumentArrayWithNoArguments(directive), callPlace, out, env);
+        directive.execute(
+                getArgumentArrayWithNoArguments(directive.getDirectiveArgumentArrayLayout()), callPlace, out, env);
     }
 
     public static TemplateModel executeWith0Arguments(
             TemplateFunctionModel function, CallPlace callPlace, Environment env)
             throws TemplateException {
-        return function.execute(getArgumentArrayWithNoArguments(function), callPlace, env);
+        return function.execute(
+                getArgumentArrayWithNoArguments(function.getFunctionArgumentArrayLayout()), callPlace, env);
     }
 
-    private static TemplateModel[] getArgumentArrayWithNoArguments(TemplateCallableModel callable) {
-        ArgumentArrayLayout argsLayout = callable.getArgumentArrayLayout();
-        int totalLength = argsLayout.getTotalLength();
+    private static TemplateModel[] getArgumentArrayWithNoArguments(ArgumentArrayLayout argsLayout) {
+        int totalLength = argsLayout != null ? argsLayout.getTotalLength() : 0;
         if (totalLength == 0) {
             return Constants.EMPTY_TEMPLATE_MODEL_ARRAY;
         } else {
@@ -78,28 +78,37 @@ public final class _CallableUtils {
         }
     }
 
-    public static Number castArgToNumber(TemplateModel[] args, int argIndex, boolean allowNull)
-            throws TemplateException {
-        return castArgToNumber(args[argIndex], argIndex, allowNull);
+    public static Number castArgToNumber(TemplateModel[] args, int argIndex) throws TemplateException {
+        return castArgToNumber(args, argIndex, false);
     }
 
-    public static Number castArgToNumber(TemplateModel argValue, int argIndex, boolean allowNull)
+    public static Number castArgToNumber(TemplateModel[] args, int argIndex, boolean optional)
             throws TemplateException {
-        return castArgToNumber(argValue, null, argIndex, allowNull);
+        return castArgToNumber(args[argIndex], argIndex, optional);
     }
 
-    public static Number castArgToNumber(TemplateModel argValue, String argName, boolean allowNull)
+    public static Number castArgToNumber(TemplateModel argValue, int argIndex)
             throws TemplateException {
-        return castArgToNumber(argValue, argName, -1, allowNull);
+        return castArgToNumber(argValue, argIndex, false);
     }
 
-    private static Number castArgToNumber(TemplateModel argValue, String argName, int argIndex, boolean allowNull)
+    public static Number castArgToNumber(TemplateModel argValue, int argIndex, boolean optional)
+            throws TemplateException {
+        return castArgToNumber(argValue, null, argIndex, optional);
+    }
+
+    public static Number castArgToNumber(TemplateModel argValue, String argName, boolean optional)
+            throws TemplateException {
+        return castArgToNumber(argValue, argName, -1, optional);
+    }
+
+    private static Number castArgToNumber(TemplateModel argValue, String argName, int argIndex, boolean optional)
             throws TemplateException {
         if (argValue instanceof TemplateNumberModel) {
             return ((TemplateNumberModel) argValue).getAsNumber();
         }
         if (argValue == null) {
-            if (allowNull) {
+            if (optional) {
                 return null;
             }
             throw new _MiscTemplateException(
@@ -115,35 +124,39 @@ public final class _CallableUtils {
         return castArgToString(args, argIndex, false);
     }
 
-    public static String castArgToString(List<? extends TemplateModel> args, int argIndex, boolean allowNull) throws
+    public static String castArgToString(List<? extends TemplateModel> args, int argIndex, boolean optional) throws
             TemplateException {
-        return castArgToString(args.get(argIndex), argIndex, allowNull);
+        return castArgToString(args.get(argIndex), argIndex, optional);
     }
 
-    public static String castArgToString(TemplateModel[] args, int argIndex, boolean allowNull) throws TemplateException {
-        return castArgToString(args[argIndex], argIndex, allowNull);
+    public static String castArgToString(TemplateModel[] args, int argIndex) throws TemplateException {
+        return castArgToString(args, argIndex, false);
+    }
+
+    public static String castArgToString(TemplateModel[] args, int argIndex, boolean optional) throws TemplateException {
+        return castArgToString(args[argIndex], argIndex, optional);
     }
 
     public static String castArgToString(TemplateModel argValue, int argIndex) throws TemplateException {
         return castArgToString(argValue, argIndex, false);
     }
 
-    public static String castArgToString(TemplateModel argValue, int argIndex, boolean allowNull) throws TemplateException {
-        return castArgToString(argValue, null, argIndex, allowNull);
+    public static String castArgToString(TemplateModel argValue, int argIndex, boolean optional) throws TemplateException {
+        return castArgToString(argValue, null, argIndex, optional);
     }
 
-    public static String castArgToString(TemplateModel argValue, String argName, boolean allowNull) throws TemplateException {
-        return castArgToString(argValue, argName, -1, allowNull);
+    public static String castArgToString(TemplateModel argValue, String argName, boolean optional) throws TemplateException {
+        return castArgToString(argValue, argName, -1, optional);
     }
 
     private static String castArgToString(
             TemplateModel argValue, String argName, int argIndex,
-            boolean allowNull) throws TemplateException {
+            boolean optional) throws TemplateException {
         if (argValue instanceof TemplateScalarModel) {
             return _EvalUtil.modelToString((TemplateScalarModel) argValue, null, null);
         }
         if (argValue == null) {
-            if (allowNull) {
+            if (optional) {
                 return null;
             }
             throw new _MiscTemplateException(

@@ -22,12 +22,12 @@ package org.apache.freemarker.core.model.impl;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import java.util.Collections;
 import java.util.Date;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.NonTemplateCallPlace;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateMethodModel;
+import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
@@ -60,9 +60,9 @@ public class ErrorMessagesTest {
         TemplateHashModel thm = (TemplateHashModel) ow.wrap(new TestBean());
         
         {
-            TemplateMethodModel m = (TemplateMethodModel) thm.get("m1");
+            JavaMethodModel m = (JavaMethodModel) thm.get("m1");
             try {
-                m.execute(Collections.singletonList(html));
+                m.execute(new TemplateModel[] { html }, NonTemplateCallPlace.INSTANCE);
                 fail();
             } catch (TemplateModelException e) {
                 assertThat(e.getMessage(), allOf(
@@ -72,9 +72,9 @@ public class ErrorMessagesTest {
         }
         
         {
-            TemplateMethodModel m = (TemplateMethodModel) thm.get("m2");
+            JavaMethodModel m = (JavaMethodModel) thm.get("m2");
             try {
-                m.execute(Collections.singletonList(html));
+                m.execute(new TemplateModel[] { html }, NonTemplateCallPlace.INSTANCE);
                 fail();
             } catch (TemplateModelException e) {
                 assertThat(e.getMessage(), allOf(
@@ -84,9 +84,9 @@ public class ErrorMessagesTest {
         }
         
         for (String methodName : new String[] { "mOverloaded", "mOverloaded3" }) {
-            TemplateMethodModel m = (TemplateMethodModel) thm.get(methodName);
+            JavaMethodModel m = (JavaMethodModel)thm.get(methodName);
             try {
-                m.execute(Collections.singletonList(html));
+                m.execute(new TemplateModel[] { html }, NonTemplateCallPlace.INSTANCE);
                 fail();
             } catch (TemplateModelException e) {
                 assertThat(e.getMessage(), allOf(
@@ -97,9 +97,9 @@ public class ErrorMessagesTest {
         }
         
         {
-            TemplateMethodModel m = (TemplateMethodModel) thm.get("mOverloaded2");
+            JavaMethodModel m = (JavaMethodModel)thm.get("mOverloaded2");
             try {
-                m.execute(Collections.singletonList(html));
+                m.execute(new TemplateModel[] { html }, NonTemplateCallPlace.INSTANCE);
                 fail();
             } catch (TemplateModelException e) {
                 assertThat(e.getMessage(), allOf(
@@ -110,8 +110,8 @@ public class ErrorMessagesTest {
         }
         
         {
-            TemplateMethodModel m = (TemplateMethodModel) thm.get("mOverloaded4");
-            Object r = m.execute(Collections.singletonList(html));
+            JavaMethodModel m = (JavaMethodModel)thm.get("mOverloaded4");
+            Object r = m.execute(new TemplateModel[] { html }, NonTemplateCallPlace.INSTANCE);
             if (r instanceof TemplateScalarModel) {
                 r = ((TemplateScalarModel) r).getAsString();
             }

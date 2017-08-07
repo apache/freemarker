@@ -19,12 +19,10 @@
 
 package org.apache.freemarker.core;
 
-import java.util.List;
-
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateMethodModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
  * A holder for builtins that deal with null left-hand values.
@@ -56,14 +54,14 @@ class BuiltInsForExistenceHandling {
     }
     
     static class defaultBI extends BuiltInsForExistenceHandling.ExistenceBuiltIn {
-        
+
         @Override
         TemplateModel _eval(final Environment env) throws TemplateException {
             TemplateModel model = evalMaybeNonexistentTarget(env);
             return model == null ? FIRST_NON_NULL_METHOD : new ConstantMethod(model);
         }
 
-        private static class ConstantMethod implements TemplateMethodModel {
+        private static class ConstantMethod implements TemplateFunctionModel {
             private final TemplateModel constant;
 
             ConstantMethod(TemplateModel constant) {
@@ -71,28 +69,43 @@ class BuiltInsForExistenceHandling {
             }
 
             @Override
-            public TemplateModel execute(List<? extends TemplateModel> args) {
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateException {
                 return constant;
             }
+
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return null;
+            }
+
         }
 
         /**
          * A method that goes through the arguments one by one and returns
          * the first one that is non-null. If all args are null, returns null.
          */
-        private static final TemplateMethodModel FIRST_NON_NULL_METHOD =
-            new TemplateMethodModel() {
-                @Override
-                public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateModelException {
-                    int argCnt = args.size();
-                    if (argCnt == 0) throw MessageUtil.newArgCntError("?default", argCnt, 1, Integer.MAX_VALUE);
-                    for (int i = 0; i < argCnt; i++ ) {
-                        TemplateModel result = args.get(i);
-                        if (result != null) return result;
+        private static final TemplateFunctionModel FIRST_NON_NULL_METHOD = new TemplateFunctionModel() {
+
+            @Override
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateException {
+                int argsLen = args.length;
+                for (int i = 0; i < argsLen; i++ ) {
+                    TemplateModel result = args[i];
+                    if (result != null) {
+                        return result;
                     }
-                    return null;
                 }
-            };
+                return null;
+            }
+
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return null;
+            }
+
+        };
     }
     
     static class existsBI extends BuiltInsForExistenceHandling.ExistenceBuiltIn {

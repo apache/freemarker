@@ -44,7 +44,7 @@
           "12" = "twelve",
           "2one" = "two-one",
           one2 = "one-two",
-          call = "org.apache.freemarker.core.templatesuite.models.SimpleTestMethod"?new()
+          call = "org.apache.freemarker.core.templatesuite.models.SimpleTestFunction"?new()
 >
 
 <p>A simple test follows:</p>

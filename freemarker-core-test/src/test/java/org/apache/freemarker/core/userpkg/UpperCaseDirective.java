@@ -47,7 +47,7 @@ public class UpperCaseDirective implements TemplateDirectiveModel {
     }
 
     @Override
-    public ArgumentArrayLayout getArgumentArrayLayout() {
+    public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
         return ArgumentArrayLayout.PARAMETERLESS;
     }
 

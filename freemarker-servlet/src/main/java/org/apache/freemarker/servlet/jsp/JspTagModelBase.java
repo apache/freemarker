@@ -29,10 +29,16 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.DynamicAttributes;
+import javax.servlet.jsp.tagext.JspTag;
+
 import org.apache.freemarker.core.Template;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._DelayedJQuote;
 import org.apache.freemarker.core._DelayedShortClassName;
 import org.apache.freemarker.core._ErrorDescriptionBuilder;
+import org.apache.freemarker.core._MiscTemplateException;
 import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
@@ -45,7 +51,6 @@ import org.apache.freemarker.servlet.jsp.SimpleTagDirectiveModel.TemplateExcepti
 class JspTagModelBase {
     protected final String tagName;
     private final Class tagClass;
-    private final Method dynaSetter;
     private final Map propertySetters = new HashMap();
     
     protected JspTagModelBase(String tagName, Class tagClass) throws IntrospectionException {
@@ -59,24 +64,14 @@ class JspTagModelBase {
                 propertySetters.put(pd.getName(), m);
             }
         }
-        // Check to see if the tag implements the JSP2.0 DynamicAttributes
-        // interface, to allow setting of arbitrary attributes
-        Method dynaSetter;
-        try {
-            dynaSetter = tagClass.getMethod("setDynamicAttribute",
-                    String.class, String.class, Object.class);
-        } catch (NoSuchMethodException nsme) {
-            dynaSetter = null;
-        }
-        this.dynaSetter = dynaSetter;
     }
     
     Object getTagInstance() throws IllegalAccessException, InstantiationException {
         return tagClass.newInstance();
     }
     
-    void setupTag(Object tag, TemplateHashModelEx2 args, ObjectWrapperAndUnwrapper wrapper)
-            throws TemplateModelException,
+    void setupTag(JspTag tag, TemplateHashModelEx2 args, ObjectWrapperAndUnwrapper wrapper)
+            throws TemplateException,
         InvocationTargetException, 
         IllegalAccessException {
         if (args != null && !args.isEmpty()) {
@@ -88,12 +83,18 @@ class JspTagModelBase {
                 final String paramName = ((TemplateScalarModel) entry.getKey()).getAsString();
                 Method setterMethod = (Method) propertySetters.get(paramName);
                 if (setterMethod == null) {
-                    if (dynaSetter == null) {
+                    if (tag instanceof DynamicAttributes) {
+                        try {
+                            ((DynamicAttributes) tag).setDynamicAttribute(null, paramName, argArray[0]);
+                        } catch (JspException e) {
+                            throw new _MiscTemplateException(
+                                    "Failed to set JSP tag dynamic attribute ", new _DelayedJQuote(paramName), ".",
+                                    e);
+                        }
+                    } else {
                         throw new TemplateModelException("Unknown property "
                                 + _StringUtil.jQuote(paramName.toString())
                                 + " on instance of " + tagClass.getName());
-                    } else {
-                        dynaSetter.invoke(tag, null, paramName, argArray[0]);
                     }
                 } else {
                     if (arg instanceof BigDecimal) {

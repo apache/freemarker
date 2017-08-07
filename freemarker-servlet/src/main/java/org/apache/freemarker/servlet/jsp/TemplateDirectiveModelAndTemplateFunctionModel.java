@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.freemarker.test.templateutil;
+package org.apache.freemarker.servlet.jsp;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -26,42 +26,52 @@ import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util.FTLUtil;
 
-public class AssertDirective implements TemplateDirectiveModel {
-    public static AssertDirective INSTANCE = new AssertDirective();
+/**
+ * Used when a custom JSP tag and an EL function uses the same name in a tag library, to invoke a single FTL value from
+ * the two. As FTL as no separate namespace for "tags" and functions, both aspect has to be implemented by the same
+ * value.
+ */
+class TemplateDirectiveModelAndTemplateFunctionModel
+        implements TemplateDirectiveModel, TemplateFunctionModel {
 
-    private AssertDirective() { }
-    
+    private final TemplateDirectiveModel templateDirectiveModel;
+    private final TemplateFunctionModel templateFunctionModel;
+
+    TemplateDirectiveModelAndTemplateFunctionModel( //
+            TemplateDirectiveModel templateDirectiveModel, TemplateFunctionModel templateMethodModelEx) {
+        this.templateDirectiveModel = templateDirectiveModel;
+        this.templateFunctionModel = templateMethodModelEx;
+    }
+
     @Override
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
-        TemplateModel test = args[0];
-        if (test == null) {
-            throw new MissingRequiredParameterException("test", env);
-        }
-        if (!(test instanceof TemplateBooleanModel)) {
-            throw new AssertationFailedInTemplateException("Assertion failed:\n"
-                    + "The value had to be boolean, but it was of type" + FTLUtil.getTypeDescription(test),
-                    env);
-        }
-        if (!((TemplateBooleanModel) test).getAsBoolean()) {
-            throw new AssertationFailedInTemplateException("Assertion failed:\n"
-                    + "the value was false.",
-                    env);
-        }
+        templateDirectiveModel.execute(args, callPlace, out, env);
     }
 
     @Override
     public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
-        return ArgumentArrayLayout.SINGLE_POSITIONAL_PARAMETER;
+        return templateDirectiveModel.getDirectiveArgumentArrayLayout();
     }
 
     @Override
     public boolean isNestedContentSupported() {
-        return false;
+        return templateDirectiveModel.isNestedContentSupported();
     }
+
+    @Override
+    public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+        return templateFunctionModel.getFunctionArgumentArrayLayout();
+    }
+
+    @Override
+    public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+            throws TemplateException {
+        return templateFunctionModel.execute(args, callPlace, env);
+    }
+
 }

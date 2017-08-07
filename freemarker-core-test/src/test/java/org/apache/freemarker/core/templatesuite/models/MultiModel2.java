@@ -19,11 +19,12 @@
 
 package org.apache.freemarker.core.templatesuite.models;
 
-import java.util.List;
-
+import org.apache.freemarker.core.CallPlace;
+import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._CallableUtils;
-import org.apache.freemarker.core.model.TemplateMethodModel;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
@@ -31,34 +32,26 @@ import org.apache.freemarker.core.model.impl.SimpleScalar;
 /**
  * Testcase to see how FreeMarker deals with multiple Template models.
  */
-public class MultiModel2 implements TemplateScalarModel, TemplateMethodModel {
+public class MultiModel2 implements TemplateScalarModel, TemplateFunctionModel {
 
-    /**
-     * Returns the scalar's value as a String.
-     *
-     * @return the String value of this scalar.
-     */
     @Override
     public String getAsString() {
         return "Model2 is alive!";
     }
 
-    /**
-     * Executes a method call.
-     *
-     * @param args a <tt>List</tt> of <tt>String</tt> objects containing the values
-     * of the arguments passed to the method.
-     * @return the <tt>TemplateModel</tt> produced by the method, or null.
-     */
     @Override
-    public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateException {
+    public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env) throws TemplateException {
         StringBuilder  aResults = new StringBuilder( "Arguments are:<br />" );
-        for (int i = 0; i < args.size(); i++) {
-            TemplateModel arg = args.get(i);
-            aResults.append(_CallableUtils.castArgToString(arg, i));
+        for (int i = 0; i < args.length; i++) {
+            aResults.append(_CallableUtils.castArgToString(args, i));
             aResults.append("<br />");
         }
 
         return new SimpleScalar( aResults.toString() );
+    }
+
+    @Override
+    public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+        return null;
     }
 }

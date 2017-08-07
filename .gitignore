@@ -32,3 +32,5 @@
 
 .directory
 .Trash*
+
+**/adhoctest/

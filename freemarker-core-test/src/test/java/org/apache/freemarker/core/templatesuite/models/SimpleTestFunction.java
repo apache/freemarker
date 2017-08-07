@@ -19,32 +19,26 @@
 
 package org.apache.freemarker.core.templatesuite.models;
 
-import java.util.List;
-
-import org.apache.freemarker.core.model.TemplateMethodModel;
+import org.apache.freemarker.core.CallPlace;
+import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 
 /**
  * A simple method model used as a test bed.
  */
-public class SimpleTestMethod implements TemplateMethodModel {
+public class SimpleTestFunction implements TemplateFunctionModel {
 
-    /**
-     * Executes a method call.
-     *
-     * @param args a <tt>List</tt> of <tt>String</tt> objects containing
-     * the values of the arguments passed to the method.
-     * @return the <tt>TemplateModel</tt> produced by the method, or null.
-     */
     @Override
-    public TemplateModel execute(List<? extends TemplateModel> args) {
-        if ( args.size() == 0 ) {
-            return new SimpleScalar( "Empty list provided" );
-        } else if ( args.size() > 1 ) {
-            return new SimpleScalar( "Argument size is: " + args.size() );
-        } else {
-            return new SimpleScalar( "Single argument value is: " + args.get(0) );
-        }
+    public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env) throws TemplateException {
+        return new SimpleScalar("Argument value is: " + args[0]);
+    }
+
+    @Override
+    public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+        return ArgumentArrayLayout.SINGLE_POSITIONAL_PARAMETER;
     }
 }

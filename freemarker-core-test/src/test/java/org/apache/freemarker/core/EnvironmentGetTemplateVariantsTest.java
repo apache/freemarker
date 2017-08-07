@@ -207,7 +207,7 @@ public class EnvironmentGetTemplateVariantsTest extends TemplateTest {
             }
 
             @Override
-            public ArgumentArrayLayout getArgumentArrayLayout() {
+            public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
                 return ArgumentArrayLayout.PARAMETERLESS;
             }
 

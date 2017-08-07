@@ -57,7 +57,7 @@ public class TwoPositionalParamsFunction extends TestTemplateCallableModel imple
     }
 
     @Override
-    public ArgumentArrayLayout getArgumentArrayLayout() {
+    public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
         return ARGS_LAYOUT;
     }
 }

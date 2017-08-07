@@ -46,7 +46,7 @@ public class PositionalVarargsOnlyDirective extends TestTemplateCallableModel im
     }
 
     @Override
-    public ArgumentArrayLayout getArgumentArrayLayout() {
+    public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
         return ArgumentArrayLayout.POSITIONAL_VARARGS_PARAMETER_ONLY;
     }
 

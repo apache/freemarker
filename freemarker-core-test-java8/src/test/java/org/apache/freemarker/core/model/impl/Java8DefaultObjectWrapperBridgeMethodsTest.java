@@ -20,12 +20,11 @@ package org.apache.freemarker.core.model.impl;
 
 import static org.junit.Assert.*;
 
-import java.util.Collections;
-
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.NonTemplateCallPlace;
 import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.junit.Test;
 
 public class Java8DefaultObjectWrapperBridgeMethodsTest {
@@ -53,12 +52,14 @@ public class Java8DefaultObjectWrapperBridgeMethodsTest {
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
-        
-        TemplateMethodModel m1 = (TemplateMethodModel) wrapped.get("m1");
-        assertEquals(BridgeMethodsBean.M1_RETURN_VALUE, "" + m1.execute(Collections.emptyList()));
-        
-        TemplateMethodModel m2 = (TemplateMethodModel) wrapped.get("m2");
-        assertNull(m2.execute(Collections.emptyList()));
+
+        JavaMethodModel m1 = (JavaMethodModel) wrapped.get("m1");
+        assertEquals(
+                BridgeMethodsBean.M1_RETURN_VALUE,
+                "" + m1.execute(Constants.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE));
+
+        JavaMethodModel m2 = (JavaMethodModel) wrapped.get("m2");
+        assertNull(m2.execute(Constants.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE));
     }
     
 }

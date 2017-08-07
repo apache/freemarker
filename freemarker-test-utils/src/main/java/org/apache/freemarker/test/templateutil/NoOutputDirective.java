@@ -45,7 +45,7 @@ public class NoOutputDirective implements TemplateDirectiveModel {
     }
 
     @Override
-    public ArgumentArrayLayout getArgumentArrayLayout() {
+    public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
         return ArgumentArrayLayout.PARAMETERLESS;
     }
 

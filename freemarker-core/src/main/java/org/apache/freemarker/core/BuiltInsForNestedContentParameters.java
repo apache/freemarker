@@ -18,13 +18,11 @@
  */
 package org.apache.freemarker.core;
 
-import java.util.List;
-
 import org.apache.freemarker.core.ASTDirList.IterationContext;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateMethodModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 
@@ -131,18 +129,24 @@ class BuiltInsForNestedContentParameters {
 
     static class item_cycleBI extends BuiltInForNestedContentParameter {
 
-        private class BIMethod implements TemplateMethodModel {
+        private class BIMethod implements TemplateFunctionModel {
             
             private final IterationContext iterCtx;
     
             private BIMethod(IterationContext iterCtx) {
                 this.iterCtx = iterCtx;
             }
-    
+
             @Override
-            public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateModelException {
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateException {
                 checkMethodArgCount(args, 1, Integer.MAX_VALUE);
-                return args.get(iterCtx.getIndex() % args.size());
+                return args[iterCtx.getIndex() % args.length];
+            }
+
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return null;
             }
         }
         

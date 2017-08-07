@@ -2929,7 +2929,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * Superclass of {@link TemplateCallableModel}-s implemented in the template language.
      */
     abstract class TemplateLanguageCallable implements TemplateCallableModel {
-        private final ASTDirMacroOrFunction callableDefinition;
+        final ASTDirMacroOrFunction callableDefinition;
         private final Namespace namespace;
 
         public TemplateLanguageCallable(ASTDirMacroOrFunction callableDefinition, Namespace namespace) {
@@ -2993,7 +2993,8 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                                 new _ErrorDescriptionBuilder(
                                         "When calling macro ", new _DelayedJQuote(callableDefinition.getName()),
                                         ", required parameter ", new _DelayedJQuote(paramDef.getName()),
-                                        (argIdx < getArgumentArrayLayout().getPredefinedPositionalArgumentCount()
+                                        (argIdx < callableDefinition.getArgumentArrayLayout()
+                                                        .getPredefinedPositionalArgumentCount()
                                                 ? new Object[] { " (parameter #", (argIdx + 1), ")" }
                                                 : ""),
                                         " was either not specified, or had null/missing value.")
@@ -3011,11 +3012,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                 }
                 macroCtx.setLocalVar(paramDef.getName(), arg);
             }
-        }
-
-        @Override
-        public ArgumentArrayLayout getArgumentArrayLayout() {
-            return callableDefinition.getArgumentArrayLayout();
         }
 
         ASTDirMacroOrFunction getCallableDefinition() {
@@ -3053,6 +3049,11 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             return true;
         }
 
+        @Override
+        public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
+            return callableDefinition.getArgumentArrayLayout();
+        }
+
     }
 
     /**
@@ -3077,6 +3078,12 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             }
             return env.getLastReturnValue();
         }
+
+        @Override
+        public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+            return callableDefinition.getArgumentArrayLayout();
+        }
+
     }
 
 }

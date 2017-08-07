@@ -23,7 +23,6 @@ import static org.junit.Assert.*;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Map;
 
 import javax.servlet.ServletContextEvent;
@@ -33,9 +32,11 @@ import javax.servlet.jsp.tagext.TagSupport;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.core.model.TemplateMethodModel;
+import org.apache.freemarker.core.NonTemplateCallPlace;
+import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
+import org.apache.freemarker.core.model.impl.JavaMethodModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.junit.Before;
 import org.junit.Test;
@@ -74,7 +75,7 @@ public class TLDParsingTest {
         assertEquals(1, tldParser.getListeners().size());
         assertTrue(tldParser.getListeners().get(0) instanceof ExampleContextListener);
 
-        Map tagsAndFunctions = tldParser.getTagsAndFunctions();
+        Map<String, TemplateModel> tagsAndFunctions = tldParser.getTagsAndFunctions();
         assertEquals(4, tagsAndFunctions.size());
 
         JspTagModelBase tag = (JspTagModelBase) tagsAndFunctions.get("setStringAttributeTag");
@@ -82,13 +83,15 @@ public class TLDParsingTest {
         tag = (JspTagModelBase) tagsAndFunctions.get("setStringAttributeTag2");
         assertNotNull(tag);
 
-        TemplateMethodModel function = (TemplateMethodModel) tagsAndFunctions.get("toUpperCase");
+        JavaMethodModel function = (JavaMethodModel) tagsAndFunctions.get("toUpperCase");
         assertNotNull(function);
-        TemplateScalarModel result = (TemplateScalarModel) function.execute(Arrays.asList(new SimpleScalar("abc")));
+        TemplateScalarModel result = (TemplateScalarModel) function.execute(
+                new TemplateModel[] { new SimpleScalar("abc") }, NonTemplateCallPlace.INSTANCE);
         assertEquals("ABC", result.getAsString());
-        function = (TemplateMethodModel) tagsAndFunctions.get("toUpperCase2");
+        function = (JavaMethodModel) tagsAndFunctions.get("toUpperCase2");
         assertNotNull(function);
-        result = (TemplateScalarModel) function.execute(Arrays.asList(new SimpleScalar("abc")));
+        result = (TemplateScalarModel) function.execute(
+                new TemplateModel[] { new SimpleScalar("abc") }, NonTemplateCallPlace.INSTANCE);
         assertEquals("ABC", result.getAsString());
     }
 

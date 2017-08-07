@@ -19,44 +19,44 @@
 
 package org.apache.freemarker.core;
 
-import org.apache.freemarker.core.model.TemplateMethodModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 
 /**
- * Indicates that a {@link TemplateMethodModel} value was expected, but the value had a different type.
+ * Indicates that a {@link TemplateFunctionModel} value was expected, but the value had a different type.
  */
-public class NonMethodException extends UnexpectedTypeException {
+public class NonFunctionException extends UnexpectedTypeException {
 
-    private static final Class[] EXPECTED_TYPES = new Class[] { TemplateMethodModel.class };
+    private static final Class[] EXPECTED_TYPES = new Class[] { TemplateFunctionModel.class };
     
-    public NonMethodException(Environment env) {
+    public NonFunctionException(Environment env) {
         super(env, "Expecting method value here");
     }
 
-    public NonMethodException(String description, Environment env) {
+    public NonFunctionException(String description, Environment env) {
         super(env, description);
     }
 
-    NonMethodException(Environment env, _ErrorDescriptionBuilder description) {
+    NonFunctionException(Environment env, _ErrorDescriptionBuilder description) {
         super(env, description);
     }
 
-    NonMethodException(
+    NonFunctionException(
             ASTExpression blamed, TemplateModel model, Environment env)
             throws InvalidReferenceException {
-        super(blamed, model, "method", EXPECTED_TYPES, env);
+        super(blamed, model, "function", EXPECTED_TYPES, env);
     }
 
-    NonMethodException(
+    NonFunctionException(
             ASTExpression blamed, TemplateModel model, String tip,
             Environment env)
             throws InvalidReferenceException {
-        super(blamed, model, "method", EXPECTED_TYPES, tip, env);
+        super(blamed, model, "function", EXPECTED_TYPES, tip, env);
     }
 
-    NonMethodException(
+    NonFunctionException(
             ASTExpression blamed, TemplateModel model, String[] tips, Environment env) throws InvalidReferenceException {
-        super(blamed, model, "method", EXPECTED_TYPES, tips, env);
+        super(blamed, model, "function", EXPECTED_TYPES, tips, env);
     }    
 
 }

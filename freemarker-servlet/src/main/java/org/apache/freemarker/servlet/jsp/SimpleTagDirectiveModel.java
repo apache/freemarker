@@ -107,7 +107,7 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
     }
 
     @Override
-    public ArgumentArrayLayout getArgumentArrayLayout() {
+    public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
         return ARGS_LAYOUT;
     }
 

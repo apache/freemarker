@@ -22,13 +22,12 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.Writer;
-import java.util.List;
 
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
-import org.apache.freemarker.core.model.TemplateMethodModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
@@ -219,7 +218,7 @@ class BuiltInsForStringsMisc {
             }
 
             @Override
-            public ArgumentArrayLayout getArgumentArrayLayout() {
+            public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
                 return ArgumentArrayLayout.PARAMETERLESS;
             }
 
@@ -254,7 +253,7 @@ class BuiltInsForStringsMisc {
             return new ConstructorFunction(target.evalAndCoerceToPlainText(env), env, target.getTemplate());
         }
 
-        class ConstructorFunction implements TemplateMethodModel {
+        class ConstructorFunction implements TemplateFunctionModel {
 
             private final Class<?> cl;
             private final Environment env;
@@ -273,13 +272,14 @@ class BuiltInsForStringsMisc {
             }
 
             @Override
-            public TemplateModel execute(List<? extends TemplateModel> args) throws TemplateModelException {
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateModelException {
                 ObjectWrapper ow = env.getObjectWrapper();
                 if (ow instanceof DefaultObjectWrapper) {
-                    return ow.wrap(((DefaultObjectWrapper) ow).newInstance(cl, args));
+                    return ow.wrap(((DefaultObjectWrapper) ow).newInstance(cl, args, callPlace));
                 }
 
-                if (!args.isEmpty()) {
+                if (args.length != 0) {
                     throw new TemplateModelException(
                             "className?new(args) only supports 0 arguments in the current configuration, because "
                             + " the objectWrapper setting value is not a "
@@ -293,6 +293,12 @@ class BuiltInsForStringsMisc {
                             + cl.getName() + " with its parameterless constructor; see cause exception", e);
                 }
             }
+
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return null;
+            }
+
         }
     }
     
