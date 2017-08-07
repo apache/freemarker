@@ -18,7 +18,7 @@
 -->
 <#setting booleanFormat='Y,N'>
 
-<#macro listings maps>
+<#macro listings maps{positional}>
   <#list maps as m>
     Map:
     

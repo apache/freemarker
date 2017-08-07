@@ -257,7 +257,7 @@
                     - AST-node subtype: "0"  // Integer
     #text  // o.a.f.c.ASTStaticText
         - content: "\n\n"  // String
-    @  // o.a.f.c.ASTDirUserDefined
+    @  // o.a.f.c.ASTDynamicTopLevelCall
         - callee: m  // o.a.f.c.ASTExpVariable
         - argument value: ..  // o.a.f.c.ASTExpRange
             - left-hand operand: *  // o.a.f.c.ASTExpArithmetic

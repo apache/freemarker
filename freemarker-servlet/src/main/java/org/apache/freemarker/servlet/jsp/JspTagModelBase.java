@@ -27,7 +27,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.freemarker.core.Template;
@@ -36,8 +35,9 @@ import org.apache.freemarker.core._DelayedShortClassName;
 import org.apache.freemarker.core._ErrorDescriptionBuilder;
 import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
-import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.util._StringUtil;
 import org.apache.freemarker.servlet.jsp.SimpleTagDirectiveModel.TemplateExceptionWrapperJspException;
@@ -75,17 +75,17 @@ class JspTagModelBase {
         return tagClass.newInstance();
     }
     
-    void setupTag(Object tag, Map args, ObjectWrapperAndUnwrapper wrapper)
-    throws TemplateModelException, 
+    void setupTag(Object tag, TemplateHashModelEx2 args, ObjectWrapperAndUnwrapper wrapper)
+            throws TemplateModelException,
         InvocationTargetException, 
         IllegalAccessException {
         if (args != null && !args.isEmpty()) {
             final Object[] argArray = new Object[1];
-            for (Iterator iter = args.entrySet().iterator(); iter.hasNext(); ) {
-                final Map.Entry entry = (Map.Entry) iter.next();
-                final Object arg = wrapper.unwrap((TemplateModel) entry.getValue());
+            for (TemplateHashModelEx2.KeyValuePairIterator iter = args.keyValuePairIterator(); iter.hasNext(); ) {
+                final TemplateHashModelEx2.KeyValuePair entry = iter.next();
+                final Object arg = wrapper.unwrap(entry.getValue());
                 argArray[0] = arg;
-                final Object paramName = entry.getKey();
+                final String paramName = ((TemplateScalarModel) entry.getKey()).getAsString();
                 Method setterMethod = (Method) propertySetters.get(paramName);
                 if (setterMethod == null) {
                     if (dynaSetter == null) {
@@ -130,7 +130,8 @@ class JspTagModelBase {
         }
     }
 
-    protected final TemplateModelException toTemplateModelExceptionOrRethrow(Exception e) throws TemplateModelException {
+    protected final TemplateModelException toTemplateModelExceptionOrRethrow(Throwable e)
+            throws TemplateModelException {
         if (e instanceof RuntimeException && !isCommonRuntimeException((RuntimeException) e)) {
             throw (RuntimeException) e;
         }

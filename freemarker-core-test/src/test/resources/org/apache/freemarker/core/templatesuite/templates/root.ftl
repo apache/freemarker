@@ -36,7 +36,7 @@
 
 <p>Ensure that root lookups are unaffected by local variables:</p>
 
-<#macro test message>
+<#macro test message{positional}>
   ${.dataModel.message}
   ${message}
 </#macro>

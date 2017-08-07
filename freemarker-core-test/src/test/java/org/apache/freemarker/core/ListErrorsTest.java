@@ -53,11 +53,11 @@ public class ListErrorsTest extends TemplateTest {
         assertErrorContains("<#list xs><#macro m><#items as x></#items></#macro></#list>",
                 "#items", "must be inside", "#list");
         assertErrorContains("<#list xs as x><#items as x>${x}</#items></#list>",
-                "#list", "must not have", "#items", "as loopVar");
+                "#list", "must not have", "#items", "as someItem");
         assertErrorContains("<#list xs><#list xs as x><#items as x>${x}</#items></#list></#list>",
-                "#list", "must not have", "#items", "as loopVar");
+                "#list", "must not have", "#items", "as someItem");
         assertErrorContains("<#list xs></#list>",
-                "#list", "must have", "#items", "as loopVar");
+                "#list", "must have", "#items", "as someItem");
     }
 
     @Test
@@ -81,17 +81,17 @@ public class ListErrorsTest extends TemplateTest {
     }
     
     @Test
-    public void testInvalidLoopVarBuiltinLHO() {
+    public void testInvalidNestedContentParameterBuiltinLHO() {
         assertErrorContains("<#list foos>${foo?index}</#list>",
-                "?index", "foo", "no loop variable");
+                "?index", "foo", "nested content parameter", "none in scope");
         assertErrorContains("<#list foos as foo></#list>${foo?index}",
-                "?index", "foo" , "no loop variable");
+                "?index", "foo" , "nested content parameter", "none in scope");
         assertErrorContains("<#list foos as foo><#macro m>${foo?index}</#macro></#list>",
-                "?index", "foo" , "no loop variable");
+                "?index", "foo" , "nested content parameter", "none in scope");
         assertErrorContains("<#list foos as foo><#function f()>${foo?index}</#function></#list>",
-                "?index", "foo" , "no loop variable");
+                "?index", "foo" , "nested content parameter", "none in scope");
         assertErrorContains("<#list xs as x>${foo?index}</#list>",
-                "?index", "foo" , "no loop variable");
+                "?index", "foo" , "nested content parameter", "none in scope");
         assertErrorContains("<#list foos as foo><@m; foo>${foo?index}</@></#list>",
                 "?index", "foo" , "user defined directive");
         assertErrorContains(
@@ -115,7 +115,7 @@ public class ListErrorsTest extends TemplateTest {
         assertErrorContains("<#list {} as i></#list>",
                 "as k, v");
         assertErrorContains("<#list [] as k, v></#list>",
-                "only one loop variable");
+                "only one nested content parameter");
     }
 
     @Test

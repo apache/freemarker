@@ -370,7 +370,7 @@ final class ASTStaticText extends ASTElement {
     
 
     private boolean nonOutputtingType(ASTElement element) {
-        return (element instanceof ASTDirMacro ||
+        return (element instanceof ASTDirMacroOrFunction ||
                 element instanceof ASTDirAssignment || 
                 element instanceof ASTDirAssignmentsContainer ||
                 element instanceof ASTDirSetting ||

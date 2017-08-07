@@ -17,10 +17,10 @@
   under the License.
 -->
 <#setting booleanFormat="1,0">
-StNuBoMeTaMaHaHxSeCoCxEnInDiNo
+StNuBoMeMaHaHxSeCoCxEnInDiNo
 <#list [
   "a", 1, false,
-  testmethod, testmacro, html_escape,
+  testmethod, testmacro,
   {"a":1}, [1], testcollection, testcollectionEx,
   testnode,
   bean, bean.m, bean.mOverloaded
@@ -30,7 +30,6 @@ StNuBoMeTaMaHaHxSeCoCxEnInDiNo
   ${x?isBoolean} <#t>
   ${x?isMethod} <#t>
   ${x?isMacro} <#t>
-  ${x?isTransform} <#t>
   ${x?isHash} <#t>
   ${x?isHashEx} <#t>
   ${x?isSequence} <#t>

@@ -34,7 +34,7 @@
 
 <@testList listables.getEmptyIterator />
 
-<#macro testList xs>
+<#macro testList xs{positional}>
 === [${resolve(xs)?join(", ")}] ===
 <#assign resolveCallCnt = 0>
 

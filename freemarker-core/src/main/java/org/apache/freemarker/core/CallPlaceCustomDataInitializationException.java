@@ -22,9 +22,9 @@ package org.apache.freemarker.core;
 import org.apache.freemarker.core.util.CommonSupplier;
 
 /**
- * Thrown by {@link DirectiveCallPlace#getOrCreateCustomData(Object, CommonSupplier)}
+ * Thrown by {@link CallPlace#getOrCreateCustomData(Object, CommonSupplier)}
  */
-public class CallPlaceCustomDataInitializationException extends Exception {
+public class CallPlaceCustomDataInitializationException extends RuntimeException {
 
     public CallPlaceCustomDataInitializationException(String message, Throwable cause) {
         super(message, cause);

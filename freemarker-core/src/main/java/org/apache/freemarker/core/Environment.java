@@ -43,11 +43,13 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.TemplateCallableModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -57,13 +59,11 @@ import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.TemplateTransformModel;
-import org.apache.freemarker.core.model.TransformControl;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
-import org.apache.freemarker.core.util.UndeclaredThrowableException;
+import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util._DateUtil;
 import org.apache.freemarker.core.util._DateUtil.DateToISO8601CalendarFactory;
 import org.apache.freemarker.core.util._NullWriter;
@@ -167,7 +167,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     private Collator cachedCollator;
 
     private Writer out;
-    private ASTDirMacro.Context currentMacroContext;
+    private ASTDirMacroOrFunction.Context currentMacroContext;
     private LocalContextStack localContextStack;
     private final Template mainTemplate;
     private final Namespace mainNamespace;
@@ -178,7 +178,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     private Throwable lastThrowable;
 
     private TemplateModel lastReturnValue;
-    private HashMap macroToNamespaceLookup = new HashMap();
 
     private TemplateNodeModel currentVisitorNode;
     private TemplateSequenceModel nodeNamespaces;
@@ -236,8 +235,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     /**
      * Returns the {@link Template} that we are "lexically" inside at the moment. This template will change when
      * entering an {@code #include} or calling a macro or function in another template, or returning to yet another
-     * template with {@code #nested}. As such, it's useful in {@link TemplateDirectiveModel} to find out if from where
-     * the directive was called from.
+     * template with {@code #nested}.
      * 
      * @see #getMainTemplate()
      * @see #getCurrentNamespace()
@@ -254,24 +252,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             throw new IllegalStateException("There's no current template at the moment.");
         }
         return currentTemplate;
-    }
-
-    /**
-     * Gets the currently executing <em>custom</em> directive's call place information, or {@code null} if there's no
-     * executing custom directive. This currently only works for calls made from templates with the {@code <@...>}
-     * syntax. This should only be called from the {@link TemplateDirectiveModel} that was invoked with {@code <@...>},
-     * otherwise its return value is not defined by this API (it's usually {@code null}).
-     */
-    @SuppressFBWarnings(value = "RANGE_ARRAY_INDEX", justification = "False alarm")
-    public DirectiveCallPlace getCurrentDirectiveCallPlace() {
-        int ln = instructionStackSize;
-        if (ln == 0) return null;
-        ASTElement te = instructionStack[ln - 1];
-        if (te instanceof ASTDirUserDefined) return (ASTDirUserDefined) te;
-        if (te instanceof ASTDirMacro && ln > 1 && instructionStack[ln - 2] instanceof ASTDirUserDefined) {
-            return (ASTDirUserDefined) instructionStack[ln - 2];
-        }
-        return null;
     }
 
     /**
@@ -449,104 +429,42 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     private static final TemplateModel[] NO_OUT_ARGS = new TemplateModel[0];
 
-    void visit(final ASTElement element,
-            TemplateDirectiveModel directiveModel, Map args,
-            final List bodyParameterNames) throws TemplateException, IOException {
-        visit(new ASTElement[] { element }, directiveModel, args, bodyParameterNames);
-    }
-    
-    void visit(final ASTElement[] childBuffer,
-            TemplateDirectiveModel directiveModel, Map args,
-            final List bodyParameterNames) throws TemplateException, IOException {
-        TemplateDirectiveBody nested;
-        if (childBuffer == null) {
-            nested = null;
+    void visit(
+            ASTElement[] childBuffer,
+            final StringToIndexMap nestedContentParamNames, final TemplateModel[] nestedContentParamValues,
+            Writer out)
+        throws IOException, TemplateException {
+        if (nestedContentParamNames == null) { // This is by far the most frequent case
+            visit(childBuffer, out);
         } else {
-            nested = new NestedElementTemplateDirectiveBody(childBuffer);
-        }
-        final TemplateModel[] outArgs;
-        if (bodyParameterNames == null || bodyParameterNames.isEmpty()) {
-            outArgs = NO_OUT_ARGS;
-        } else {
-            outArgs = new TemplateModel[bodyParameterNames.size()];
-        }
-        if (outArgs.length > 0) {
             pushLocalContext(new LocalContext() {
-
                 @Override
-                public TemplateModel getLocalVariable(String name) {
-                    int index = bodyParameterNames.indexOf(name);
-                    return index != -1 ? outArgs[index] : null;
+                public TemplateModel getLocalVariable(String name) throws TemplateModelException {
+                    int index = nestedContentParamNames.get(name);
+                    return index != -1 ? nestedContentParamValues[index] : null;
                 }
 
                 @Override
-                public Collection getLocalVariableNames() {
-                    return bodyParameterNames;
+                public Collection<String> getLocalVariableNames() throws TemplateModelException {
+                    return nestedContentParamNames.getKeys();
                 }
             });
-        }
-        try {
-            directiveModel.execute(this, args, outArgs, nested);
-        } finally {
-            if (outArgs.length > 0) {
-                localContextStack.pop();
+            try {
+                visit(childBuffer, out);
+            } finally {
+                popLocalContext();
             }
         }
     }
 
-    /**
-     * "Visit" the template element, passing the output through a TemplateTransformModel
-     * 
-     * @param elementBuffer
-     *            the element to visit through a transform; might contains trailing {@code null}-s
-     * @param transform
-     *            the transform to pass the element output through
-     * @param args
-     *            optional arguments fed to the transform
-     */
-    void visitAndTransform(ASTElement[] elementBuffer,
-            TemplateTransformModel transform,
-            Map args)
-                    throws TemplateException, IOException {
+    void visit(ASTElement[] childBuffer, Writer out) throws IOException, TemplateException {
+        // TODO [FM][CF] The plan is that `out` will be the root read only sink, so then it will work differently
+        Writer prevOut = this.out;
+        this.out = out;
         try {
-            Writer tw = transform.getWriter(out, args);
-            if (tw == null) tw = EMPTY_BODY_WRITER;
-            TransformControl tc = tw instanceof TransformControl
-                    ? (TransformControl) tw
-                    : null;
-
-            Writer prevOut = out;
-            out = tw;
-            try {
-                if (tc == null || tc.onStart() != TransformControl.SKIP_BODY) {
-                    do {
-                        visit(elementBuffer);
-                    } while (tc != null && tc.afterBody() == TransformControl.REPEAT_EVALUATION);
-                }
-            } catch (Throwable t) {
-                try {
-                    if (tc != null) {
-                        tc.onError(t);
-                    } else {
-                        throw t;
-                    }
-                } catch (TemplateException e) {
-                    throw e;
-                } catch (IOException e) {
-                    throw e;
-                } catch (RuntimeException e) {
-                    throw e;
-                } catch (Error e) {
-                    throw e;
-                } catch (Throwable e) {
-                    throw new UndeclaredThrowableException(e);
-                }
-            } finally {
-                out = prevOut;
-                tw.close();
-            }
-        } catch (TemplateException te) {
-            handleTemplateException(te);
+            visit(childBuffer);
+        } finally {
+            this.out = prevOut;
         }
     }
 
@@ -601,28 +519,25 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     /**
-     * Used for {@code #nested}.
+     * Used to execute the nested content of a macro call during a macro execution. It's not enough to simply call
+     * {@link CallPlace#executeNestedContent(TemplateModel[], Writer, Environment)} in such case, because an executing
+     * macro modifies the template language environment for its purposes, and the nested content expects that to be
+     * like before the macro invocation. So things has to be temporarily restored.
      */
-    void invokeNestedContent(ASTDirNested.Context bodyCtx) throws TemplateException, IOException {
-        ASTDirMacro.Context invokingMacroContext = getCurrentMacroContext();
-        LocalContextStack prevLocalContextStack = localContextStack;
-        ASTElement[] nestedContentBuffer = invokingMacroContext.nestedContentBuffer;
-        if (nestedContentBuffer != null) {
+    void executeNestedContentOfMacro(TemplateModel[] nestedContentParamValues)
+            throws TemplateException, IOException {
+        ASTDirMacroOrFunction.Context invokingMacroContext = getCurrentMacroContext();
+        CallPlace callPlace = invokingMacroContext.callPlace;
+        if (callPlace.hasNestedContent()) {
             currentMacroContext = invokingMacroContext.prevMacroContext;
             currentNamespace = invokingMacroContext.nestedContentNamespace;
-
+            LocalContextStack prevLocalContextStack = localContextStack;
             localContextStack = invokingMacroContext.prevLocalContextStack;
-            if (invokingMacroContext.nestedContentParameterNames != null) {
-                pushLocalContext(bodyCtx);
-            }
             try {
-                visit(nestedContentBuffer);
+                callPlace.executeNestedContent(nestedContentParamValues, out, this);
             } finally {
-                if (invokingMacroContext.nestedContentParameterNames != null) {
-                    localContextStack.pop();
-                }
                 currentMacroContext = invokingMacroContext;
-                currentNamespace = getMacroNamespace(invokingMacroContext.getMacro());
+                currentNamespace = invokingMacroContext.callable.namespace;
                 localContextStack = prevLocalContextStack;
             }
         }
@@ -640,7 +555,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             handleTemplateException(te);
             return true;
         } finally {
-            localContextStack.pop();
+            popLocalContext();
         }
     }
 
@@ -664,17 +579,20 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             nodeNamespaces = namespaces;
         }
         try {
-            TemplateModel macroOrTransform = getNodeProcessor(node);
-            if (macroOrTransform instanceof ASTDirMacro) {
-                invoke((ASTDirMacro) macroOrTransform, null, null, null, null);
-            } else if (macroOrTransform instanceof TemplateTransformModel) {
-                visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null);
-            } else {
+            TemplateDirectiveModel nodeProcessor = getNodeProcessor(node);
+            if (nodeProcessor != null) {
+                _TemplateCallableModelUtils.executeWith0Arguments(
+                        nodeProcessor, NonTemplateCallPlace.INSTANCE, out, this);
+            } else if (nodeProcessor == null) {
                 String nodeType = node.getNodeType();
                 if (nodeType != null) {
+                    // TODO [FM3] We are supposed to be o.a.f.dom unaware in the core, plus these types can mean
+                    // something else with another wrapper. So we should encode the default behavior into the
+                    // // TemplateNodeModel somehow.
+
                     // If the node's type is 'text', we just output it.
                     if ((nodeType.equals("text") && node instanceof TemplateScalarModel)) {
-                        out.write(((TemplateScalarModel) node).getAsString());
+                        out.write(((TemplateScalarModel) node).getAsString()); // TODO [FM3] Escaping?
                     } else if (nodeType.equals("document")) {
                         recurse(node, namespaces);
                     }
@@ -720,133 +638,23 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     void fallback() throws TemplateException, IOException {
-        TemplateModel macroOrTransform = getNodeProcessor(currentNodeName, currentNodeNS, nodeNamespaceIndex);
-        if (macroOrTransform instanceof ASTDirMacro) {
-            invoke((ASTDirMacro) macroOrTransform, null, null, null, null);
-        } else if (macroOrTransform instanceof TemplateTransformModel) {
-            visitAndTransform(null, (TemplateTransformModel) macroOrTransform, null);
-        }
-    }
-
-    /**
-     * Calls the macro or function with the given arguments and nested block.
-     */
-    void invoke(ASTDirMacro macro,
-            Map namedArgs, List positionalArgs,
-            List bodyParameterNames, ASTElement[] childBuffer) throws TemplateException, IOException {
-        if (macro == ASTDirMacro.DO_NOTHING_MACRO) {
-            return;
-        }
-
-        pushElement(macro);
-        try {
-            final ASTDirMacro.Context macroCtx = macro.new Context(this, childBuffer, bodyParameterNames);
-            setMacroContextLocalsFromArguments(macroCtx, macro, namedArgs, positionalArgs);
-
-            final ASTDirMacro.Context prevMacroCtx = currentMacroContext;
-            currentMacroContext = macroCtx;
-
-            final LocalContextStack prevLocalContextStack = localContextStack;
-            localContextStack = null;
-
-            final Namespace prevNamespace = currentNamespace;
-            currentNamespace = (Namespace) macroToNamespaceLookup.get(macro);
-
-            try {
-                macroCtx.sanityCheck(this);
-                visit(macro.getChildBuffer());
-            } catch (ASTDirReturn.Return re) {
-                // Not an error, just a <#return>
-            } catch (TemplateException te) {
-                handleTemplateException(te);
-            } finally {
-                currentMacroContext = prevMacroCtx;
-                localContextStack = prevLocalContextStack;
-                currentNamespace = prevNamespace;
-            }
-        } finally {
-            popElement();
-        }
-    }
-
-    /**
-     * Sets the local variables corresponding to the macro call arguments in the macro context.
-     */
-    private void setMacroContextLocalsFromArguments(
-            final ASTDirMacro.Context macroCtx,
-            final ASTDirMacro macro,
-            final Map namedArgs, final List positionalArgs) throws TemplateException {
-        String catchAllParamName = macro.getCatchAll();
-        if (namedArgs != null) {
-            final NativeHashEx2 catchAllParamValue;
-            if (catchAllParamName != null) {
-                catchAllParamValue = new NativeHashEx2();
-                macroCtx.setLocalVar(catchAllParamName, catchAllParamValue);
-            } else {
-                catchAllParamValue = null;
-            }
-
-             for (Map.Entry argNameAndValExp : (Set<Map.Entry>) namedArgs.entrySet()) {
-                final String argName = (String) argNameAndValExp.getKey();
-                final boolean isArgNameDeclared = macro.hasArgNamed(argName);
-                if (isArgNameDeclared || catchAllParamName != null) {
-                    ASTExpression argValueExp = (ASTExpression) argNameAndValExp.getValue();
-                    TemplateModel argValue = argValueExp.eval(this);
-                    if (isArgNameDeclared) {
-                        macroCtx.setLocalVar(argName, argValue);
-                    } else {
-                        catchAllParamValue.put(argName, argValue);
-                    }
-                } else {
-                    throw new _MiscTemplateException(this,
-                            (macro.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(macro.getName()),
-                            " has no parameter with name ", new _DelayedJQuote(argName), ".");
-                }
-            }
-        } else if (positionalArgs != null) {
-            final NativeSequence catchAllParamValue;
-            if (catchAllParamName != null) {
-                catchAllParamValue = new NativeSequence(8);
-                macroCtx.setLocalVar(catchAllParamName, catchAllParamValue);
-            } else {
-                catchAllParamValue = null;
-            }
-
-            String[] argNames = macro.getArgumentNamesInternal();
-            final int argsCnt = positionalArgs.size();
-            if (argNames.length < argsCnt && catchAllParamName == null) {
-                throw new _MiscTemplateException(this,
-                        (macro.isFunction() ? "Function " : "Macro "), new _DelayedJQuote(macro.getName()),
-                        " only accepts ", new _DelayedToString(argNames.length), " parameters, but got ",
-                        new _DelayedToString(argsCnt), ".");
-            }
-            for (int i = 0; i < argsCnt; i++) {
-                ASTExpression argValueExp = (ASTExpression) positionalArgs.get(i);
-                TemplateModel argValue = argValueExp.eval(this);
-                try {
-                    if (i < argNames.length) {
-                        String argName = argNames[i];
-                        macroCtx.setLocalVar(argName, argValue);
-                    } else {
-                        catchAllParamValue.add(argValue);
-                    }
-                } catch (RuntimeException re) {
-                    throw new _MiscTemplateException(re, this);
-                }
-            }
+        TemplateDirectiveModel nodeProcessor = getNodeProcessor(currentNodeName, currentNodeNS, nodeNamespaceIndex);
+        if (nodeProcessor != null) {
+            _TemplateCallableModelUtils.executeWith0Arguments(
+                    nodeProcessor, NonTemplateCallPlace.INSTANCE, out, this);
         }
     }
 
     /**
      * Defines the given macro in the current namespace (doesn't call it).
      */
-    void visitMacroDef(ASTDirMacro macro) {
-        macroToNamespaceLookup.put(macro, currentNamespace);
-        currentNamespace.put(macro.getName(), macro);
-    }
-
-    Namespace getMacroNamespace(ASTDirMacro macro) {
-        return (Namespace) macroToNamespaceLookup.get(macro);
+    void visitMacroOrFunctionDefinition(ASTDirMacroOrFunction definition) {
+        Namespace currentNamespace = this.getCurrentNamespace();
+        currentNamespace.put(
+                definition.getName(),
+                definition.isFunction()
+                        ? new TemplateLanguageFunction(definition, currentNamespace)
+                        : new TemplateLanguageDirective(definition, currentNamespace));
     }
 
     void recurse(TemplateNodeModel node, TemplateSequenceModel namespaces)
@@ -868,7 +676,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         }
     }
 
-    ASTDirMacro.Context getCurrentMacroContext() {
+    ASTDirMacroOrFunction.Context getCurrentMacroContext() {
         return currentMacroContext;
     }
 
@@ -1019,7 +827,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * Tells if the same concrete time zone is used for SQL date-only and time-only values as for other
      * date/time/date-time values.
      */
-    boolean isSQLDateAndTimeTimeZoneSameAsNormal() {
+    private boolean isSQLDateAndTimeTimeZoneSameAsNormal() {
         if (cachedSQLDateAndTimeTimeZoneSameAsNormal == null) {
             cachedSQLDateAndTimeTimeZoneSameAsNormal = Boolean.valueOf(
                     getSQLDateAndTimeTimeZone() == null
@@ -2036,25 +1844,12 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         return isoBuiltInCalendarFactory;
     }
 
-    TemplateTransformModel getTransform(ASTExpression exp) throws TemplateException {
-        TemplateTransformModel ttm = null;
-        TemplateModel tm = exp.eval(this);
-        if (tm instanceof TemplateTransformModel) {
-            ttm = (TemplateTransformModel) tm;
-        } else if (exp instanceof ASTExpVariable) {
-            tm = configuration.getWrappedSharedVariable(exp.toString());
-            if (tm instanceof TemplateTransformModel) {
-                ttm = (TemplateTransformModel) tm;
-            }
-        }
-        return ttm;
-    }
-
     /**
-     * Returns the loop or macro local variable corresponding to this variable name. Possibly null. (Note that the
-     * misnomer is kept for backward compatibility: loop variables are not local variables according to our
-     * terminology.)
+     * Returns the loop or macro nested content parameter variables corresponding to this variable name. Possibly null.
+     * (Note that the misnomer is kept for backward compatibility: nested content parameters are not local variables
+     * according to our terminology.)
      */
+    // TODO [FM3] Don't return nested content params anymore (see JavaDoc)
     public TemplateModel getLocalVariable(String name) throws TemplateModelException {
         if (localContextStack != null) {
             for (int i = localContextStack.size() - 1; i >= 0; i--) {
@@ -2073,7 +1868,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * correspondent to an FTL top-level variable reading expression. That is, it tries to find the the variable in this
      * order:
      * <ol>
-     * <li>An loop variable (if we're in a loop or user defined directive body) such as foo_has_next
+     * <li>A nested content parameter such as {@code x} in {@code <#list xs as x>}
      * <li>A local variable (if we're in a macro)
      * <li>A variable defined in the current namespace (say, via &lt;#assign ...&gt;)
      * <li>A variable defined globally (say, via &lt;#global ....&gt;)
@@ -2151,11 +1946,11 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     /**
      * Returns a set of variable names that are known at the time of call. This includes names of all shared variables
      * in the {@link Configuration}, names of all global variables that were assigned during the template processing,
-     * names of all variables in the current name-space, names of all local variables and loop variables. If the passed
-     * root data model implements the {@link TemplateHashModelEx} interface, then all names it retrieves through a call
-     * to {@link TemplateHashModelEx#keys()} method are returned as well. The method returns a new Set object on each
-     * call that is completely disconnected from the Environment. That is, modifying the set will have no effect on the
-     * Environment object.
+     * names of all variables in the current name-space, names of all local variables and nested content parameters. If
+     * the passed root data model implements the {@link TemplateHashModelEx} interface, then all names it retrieves
+     * through a call to {@link TemplateHashModelEx#keys()} method are returned as well. The method returns a new Set
+     * object on each call that is completely disconnected from the Environment. That is, modifying the set will have no
+     * effect on the Environment object.
      */
     public Set getKnownVariableNames() throws TemplateModelException {
         // shared vars.
@@ -2322,7 +2117,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         sb.append(MessageUtil.shorten(stackEl.getDescription(), 40));
 
         sb.append("  [");
-        ASTDirMacro enclosingMacro = getEnclosingMacro(stackEl);
+        ASTDirMacroOrFunction enclosingMacro = getEnclosingMacro(stackEl);
         if (enclosingMacro != null) {
             sb.append(MessageUtil.formatLocationForEvaluationError(
                     enclosingMacro, stackEl.beginLine, stackEl.beginColumn));
@@ -2333,9 +2128,9 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         sb.append("]");
     }
 
-    static private ASTDirMacro getEnclosingMacro(ASTElement stackEl) {
+    static private ASTDirMacroOrFunction getEnclosingMacro(ASTElement stackEl) {
         while (stackEl != null) {
-            if (stackEl instanceof ASTDirMacro) return (ASTDirMacro) stackEl;
+            if (stackEl instanceof ASTDirMacroOrFunction) return (ASTDirMacroOrFunction) stackEl;
             stackEl = stackEl.getParent();
         }
         return null;
@@ -2346,6 +2141,10 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             localContextStack = new LocalContextStack();
         }
         localContextStack.push(localContext);
+    }
+
+    private void popLocalContext() {
+        localContextStack.pop();
     }
 
     LocalContextStack getLocalContextStack() {
@@ -2511,12 +2310,12 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         currentVisitorNode = node;
     }
 
-    TemplateModel getNodeProcessor(TemplateNodeModel node) throws TemplateException {
+    TemplateDirectiveModel getNodeProcessor(TemplateNodeModel node) throws TemplateException {
         String nodeName = node.getNodeName();
         if (nodeName == null) {
-            throw new _MiscTemplateException(this, "Node name is null.");
+            throw new _MiscTemplateException(this, "Node name was null.");
         }
-        TemplateModel result = getNodeProcessor(nodeName, node.getNodeNamespace(), 0);
+        TemplateDirectiveModel result = getNodeProcessor(nodeName, node.getNodeNamespace(), 0);
 
         if (result == null) {
             String type = node.getNodeType();
@@ -2536,9 +2335,9 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         return result;
     }
 
-    private TemplateModel getNodeProcessor(final String nodeName, final String nsURI, int startIndex)
+    private TemplateDirectiveModel getNodeProcessor(final String nodeName, final String nsURI, int startIndex)
             throws TemplateException {
-        TemplateModel result = null;
+        TemplateDirectiveModel result = null;
         int i;
         for (i = startIndex; i < nodeNamespaces.size(); i++) {
             Namespace ns = null;
@@ -2561,11 +2360,12 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         return result;
     }
 
-    private TemplateModel getNodeProcessor(Namespace ns, String localName, String nsURI) throws TemplateException {
+    private TemplateDirectiveModel getNodeProcessor(Namespace ns, String localName, String nsURI)
+            throws TemplateException {
         TemplateModel result = null;
         if (nsURI == null) {
             result = ns.get(localName);
-            if (!(result instanceof ASTDirMacro) && !(result instanceof TemplateTransformModel)) {
+            if (!(result instanceof TemplateDirectiveModel)) {
                 result = null;
             }
         } else {
@@ -2578,31 +2378,31 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             }
             if (prefix.length() > 0) {
                 result = ns.get(prefix + ":" + localName);
-                if (!(result instanceof ASTDirMacro) && !(result instanceof TemplateTransformModel)) {
+                if (!(result instanceof TemplateDirectiveModel)) {
                     result = null;
                 }
             } else {
-                if (nsURI.length() == 0) {
+                if (nsURI.isEmpty()) {
                     result = ns.get(Template.NO_NS_PREFIX + ":" + localName);
-                    if (!(result instanceof ASTDirMacro) && !(result instanceof TemplateTransformModel)) {
+                    if (!(result instanceof TemplateDirectiveModel)) {
                         result = null;
                     }
                 }
                 if (nsURI.equals(template.getDefaultNS())) {
                     result = ns.get(Template.DEFAULT_NAMESPACE_PREFIX + ":" + localName);
-                    if (!(result instanceof ASTDirMacro) && !(result instanceof TemplateTransformModel)) {
+                    if (!(result instanceof TemplateDirectiveModel)) {
                         result = null;
                     }
                 }
                 if (result == null) {
                     result = ns.get(localName);
-                    if (!(result instanceof ASTDirMacro) && !(result instanceof TemplateTransformModel)) {
+                    if (!(result instanceof TemplateDirectiveModel)) {
                         result = null;
                     }
                 }
             }
         }
-        return result;
+        return (TemplateDirectiveModel) result;
     }
 
     /**
@@ -2850,7 +2650,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     void importMacros(Template template) {
         for (Object macro : template.getMacros().values()) {
-            visitMacroDef((ASTDirMacro) macro);
+            visitMacroOrFunctionDefinition((ASTDirMacroOrFunction) macro);
         }
     }
 
@@ -2896,31 +2696,6 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      */
     public ObjectWrapper getObjectWrapper() {
         return getConfiguration().getObjectWrapper();
-    }
-
-    final class NestedElementTemplateDirectiveBody implements TemplateDirectiveBody {
-
-        private final ASTElement[] childBuffer;
-
-        private NestedElementTemplateDirectiveBody(ASTElement[] childBuffer) {
-            this.childBuffer = childBuffer;
-        }
-
-        @Override
-        public void render(Writer newOut) throws TemplateException, IOException {
-            Writer prevOut = out;
-            out = newOut;
-            try {
-                visit(childBuffer);
-            } finally {
-                out = prevOut;
-            }
-        }
-        
-        ASTElement[] getChildrenBuffer() {
-            return childBuffer;
-        }
-
     }
 
     public class Namespace extends SimpleHash {
@@ -3148,6 +2923,160 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         boolean res = fastInvalidReferenceExceptions;
         fastInvalidReferenceExceptions = b;
         return res;
+    }
+
+    /**
+     * Superclass of {@link TemplateCallableModel}-s implemented in the template language.
+     */
+    abstract class TemplateLanguageCallable implements TemplateCallableModel {
+        private final ASTDirMacroOrFunction callableDefinition;
+        private final Namespace namespace;
+
+        public TemplateLanguageCallable(ASTDirMacroOrFunction callableDefinition, Namespace namespace) {
+            this.callableDefinition = callableDefinition;
+            this.namespace = namespace;
+        }
+
+        protected void genericExecute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
+                throws TemplateException, IOException {
+            pushElement(callableDefinition);
+            try {
+                final ASTDirMacroOrFunction.Context macroCtx = callableDefinition.new Context(
+                        this, callPlace, Environment.this);
+
+                final ASTDirMacroOrFunction.Context prevMacroCtx = currentMacroContext;
+                currentMacroContext = macroCtx;
+
+                final LocalContextStack prevLocalContextStack = localContextStack;
+                localContextStack = null;
+
+                final Namespace prevNamespace = currentNamespace;
+                currentNamespace = namespace;
+
+                try {
+                    // Note: Default expressions are evaluated here, so namespace, stack, etc. must be already set
+                    setLocalsFromArguments(macroCtx, args);
+
+                    visit(callableDefinition.getChildBuffer(), out);
+                } catch (ASTDirReturn.Return re) {
+                    // Not an error, just a <#return>
+                } catch (TemplateException te) {
+                    handleTemplateException(te);
+                } finally {
+                    currentMacroContext = prevMacroCtx;
+                    localContextStack = prevLocalContextStack;
+                    currentNamespace = prevNamespace;
+                }
+            } finally {
+                popElement();
+            }
+        }
+
+        private void setLocalsFromArguments(ASTDirMacroOrFunction.Context macroCtx, TemplateModel[] args)
+                throws TemplateException {
+            ASTDirMacroOrFunction.ParameterDefinition[] paramDefsByArgIdx =
+                    callableDefinition.getParameterDefinitionByArgumentArrayIndex();
+            for (int argIdx = 0; argIdx < args.length; argIdx++) {
+                TemplateModel arg = args[argIdx];
+                ASTDirMacroOrFunction.ParameterDefinition paramDef = paramDefsByArgIdx[argIdx];
+                if (arg == null) { // TODO [FM3] FM2 doesn't differentiate omitted and null, but FM3 will.
+                    ASTExpression defaultExp = paramDef.getDefaultExpression();
+                    if (defaultExp != null) {
+                        arg = defaultExp.eval(Environment.this);
+                        if (arg == null) {
+                            throw InvalidReferenceException.getInstance(defaultExp, Environment.this);
+                        }
+                    } else {
+                        // TODO [FM3] Had to give different messages depending on if the argument was omitted, or if
+                        // it was null, but this will be fixed with the null related refactoring.
+                        throw new _MiscTemplateException(Environment.this,
+                                new _ErrorDescriptionBuilder(
+                                        "When calling macro ", new _DelayedJQuote(callableDefinition.getName()),
+                                        ", required parameter ", new _DelayedJQuote(paramDef.getName()),
+                                        (argIdx < getArgumentArrayLayout().getPredefinedPositionalArgumentCount()
+                                                ? new Object[] { " (parameter #", (argIdx + 1), ")" }
+                                                : ""),
+                                        " was either not specified, or had null/missing value.")
+                                        .tip("If the parameter value expression on the caller side is known to "
+                                                + "be legally null/missing, you may want to specify a default "
+                                                + "value for it on the caller side with the \"!\" operator, like "
+                                                + "paramValue!defaultValue.")
+                                        .tip("If the parameter was omitted on the caller side, and the omission was "
+                                                + "deliberate, you may consider making the parameter optional in the macro "
+                                                + "by specifying a default value for it, like <#macro macroName "
+                                                + "paramName=defaultExpr>."
+                                        )
+                        );
+                    }
+                }
+                macroCtx.setLocalVar(paramDef.getName(), arg);
+            }
+        }
+
+        @Override
+        public ArgumentArrayLayout getArgumentArrayLayout() {
+            return callableDefinition.getArgumentArrayLayout();
+        }
+
+        ASTDirMacroOrFunction getCallableDefinition() {
+            return callableDefinition;
+        }
+
+        Namespace getNamespace() {
+            return namespace;
+        }
+    }
+
+    /**
+     * {@link TemplateDirectiveModel} implemented in the template language (such as with the {@code #macro} directive).
+     * This is the value that {@code #macro} creates on runtime, not the {@code #macro} directive itself.
+     */
+    final class TemplateLanguageDirective extends TemplateLanguageCallable implements TemplateDirectiveModel {
+
+        public TemplateLanguageDirective(ASTDirMacroOrFunction macroDef, Namespace namespace) {
+            super(macroDef, namespace);
+        }
+
+        @Override
+        public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
+                throws IOException, TemplateException {
+            if (getCallableDefinition() == ASTDirMacroOrFunction.PASS_MACRO) {
+                return;
+            }
+            genericExecute(args, callPlace, out, env);
+        }
+
+        @Override
+        public boolean isNestedContentSupported() {
+            // TODO [FM3] We should detect if #nested is called anywhere (also maybe something like
+            // `<#macro m{supportsNested[=true|false]}>`) should be added.
+            return true;
+        }
+
+    }
+
+    /**
+     * {@link TemplateFunctionModel} implemented in the template language (such as with the {@code #function}
+     * directive). This is the value that {@code #function} creates on runtime, not the {@code #macro} directive itself.
+     */
+    final class TemplateLanguageFunction extends TemplateLanguageCallable implements TemplateFunctionModel {
+
+        public TemplateLanguageFunction(ASTDirMacroOrFunction callableDefinition, Namespace namespace) {
+            super(callableDefinition, namespace);
+        }
+
+        @Override
+        public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                throws TemplateException {
+            env.setLastReturnValue(null);
+            try {
+                genericExecute(args, callPlace, _NullWriter.INSTANCE, env);
+            } catch (IOException e) {
+                // Should not occur
+                throw new TemplateException("Unexpected exception during function execution", e, env);
+            }
+            return env.getLastReturnValue();
+        }
     }
 
 }

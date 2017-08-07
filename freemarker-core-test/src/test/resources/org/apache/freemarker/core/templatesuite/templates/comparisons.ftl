@@ -85,134 +85,134 @@
 
 <#-- Signum-based optimization test, all 9 permutations: -->
 <#-- 1 -->
-<@assert test= !(0 != 0) />
-<@assert test= (0 == 0) />
-<@assert test= !(0 > 0) />
-<@assert test= (0 >= 0) />
-<@assert test= !(0 < 0) />
-<@assert test= (0 <= 0) />
+<@assert !(0 != 0) />
+<@assert (0 == 0) />
+<@assert !(0 > 0) />
+<@assert (0 >= 0) />
+<@assert !(0 < 0) />
+<@assert (0 <= 0) />
 <#-- 2 -->
-<@assert test= !(3 != 3) />
-<@assert test= (3 == 3) />
-<@assert test= !(3 > 3) />
-<@assert test= (3 >= 3) />
-<@assert test= !(3 < 3) />
-<@assert test= (3 <= 3) />
+<@assert !(3 != 3) />
+<@assert (3 == 3) />
+<@assert !(3 > 3) />
+<@assert (3 >= 3) />
+<@assert !(3 < 3) />
+<@assert (3 <= 3) />
 <#-- 3 -->
-<@assert test= !(-3 != -3) />
-<@assert test= (-3 == -3) />
-<@assert test= !(-3 > -3) />
-<@assert test= (-3 >= -3) />
-<@assert test= !(-3 < -3) />
-<@assert test= (-3 <= -3) />
+<@assert !(-3 != -3) />
+<@assert (-3 == -3) />
+<@assert !(-3 > -3) />
+<@assert (-3 >= -3) />
+<@assert !(-3 < -3) />
+<@assert (-3 <= -3) />
 <#-- 4 -->
-<@assert test= (3 != 0) />
-<@assert test= !(3 == 0) />
-<@assert test= (3 > 0) />
-<@assert test= (3 >= 0) />
-<@assert test= !(3 < 0) />
-<@assert test= !(3 <= 0) />
+<@assert (3 != 0) />
+<@assert !(3 == 0) />
+<@assert (3 > 0) />
+<@assert (3 >= 0) />
+<@assert !(3 < 0) />
+<@assert !(3 <= 0) />
 <#-- 5 -->
-<@assert test= (0 != 3) />
-<@assert test= !(0 == 3) />
-<@assert test= !(0 > 3) />
-<@assert test= !(0 >= 3) />
-<@assert test= (0 < 3) />
-<@assert test= (0 <= 3) />
+<@assert (0 != 3) />
+<@assert !(0 == 3) />
+<@assert !(0 > 3) />
+<@assert !(0 >= 3) />
+<@assert (0 < 3) />
+<@assert (0 <= 3) />
 <#-- 6 -->
-<@assert test= (-3 != 0) />
-<@assert test= !(-3 == 0) />
-<@assert test= !(-3 > 0) />
-<@assert test= !(-3 >= 0) />
-<@assert test= (-3 < 0) />
-<@assert test= (-3 <= 0) />
+<@assert (-3 != 0) />
+<@assert !(-3 == 0) />
+<@assert !(-3 > 0) />
+<@assert !(-3 >= 0) />
+<@assert (-3 < 0) />
+<@assert (-3 <= 0) />
 <#-- 7 -->
-<@assert test= (0 != -3) />
-<@assert test= !(0 == -3) />
-<@assert test= (0 > -3) />
-<@assert test= (0 >= -3) />
-<@assert test= !(0 < -3) />
-<@assert test= !(0 <= -3) />
+<@assert (0 != -3) />
+<@assert !(0 == -3) />
+<@assert (0 > -3) />
+<@assert (0 >= -3) />
+<@assert !(0 < -3) />
+<@assert !(0 <= -3) />
 <#-- 8 -->
-<@assert test= (-3 != 3) />
-<@assert test= !(-3 == 3) />
-<@assert test= !(-3 > 3) />
-<@assert test= !(-3 >= 3) />
-<@assert test= (-3 < 3) />
-<@assert test= (-3 <= 3) />
+<@assert (-3 != 3) />
+<@assert !(-3 == 3) />
+<@assert !(-3 > 3) />
+<@assert !(-3 >= 3) />
+<@assert (-3 < 3) />
+<@assert (-3 <= 3) />
 <#-- 9 -->
-<@assert test= (3 != -3) />
-<@assert test= !(3 == -3) />
-<@assert test= (3 > -3) />
-<@assert test= (3 >= -3) />
-<@assert test= !(3 < -3) />
-<@assert test= !(3 <= -3) />
+<@assert (3 != -3) />
+<@assert !(3 == -3) />
+<@assert (3 > -3) />
+<@assert (3 >= -3) />
+<@assert !(3 < -3) />
+<@assert !(3 <= -3) />
 <#-- Again, now on runtime: -->
 <#assign m3 = -3>
 <#assign p3 = 3>
 <#assign z = 0>
 <#-- 1 -->
-<@assert test= !(z != z) />
-<@assert test= (z == z) />
-<@assert test= !(z > z) />
-<@assert test= (z >= z) />
-<@assert test= !(z < z) />
-<@assert test= (z <= z) />
+<@assert !(z != z) />
+<@assert (z == z) />
+<@assert !(z > z) />
+<@assert (z >= z) />
+<@assert !(z < z) />
+<@assert (z <= z) />
 <#-- 2 -->
-<@assert test= !(p3 != p3) />
-<@assert test= (p3 == p3) />
-<@assert test= !(p3 > p3) />
-<@assert test= (p3 >= p3) />
-<@assert test= !(p3 < p3) />
-<@assert test= (p3 <= p3) />
+<@assert !(p3 != p3) />
+<@assert (p3 == p3) />
+<@assert !(p3 > p3) />
+<@assert (p3 >= p3) />
+<@assert !(p3 < p3) />
+<@assert (p3 <= p3) />
 <#-- 3 -->
-<@assert test= !(m3 != m3) />
-<@assert test= (m3 == m3) />
-<@assert test= !(m3 > m3) />
-<@assert test= (m3 >= m3) />
-<@assert test= !(m3 < m3) />
-<@assert test= (m3 <= m3) />
+<@assert !(m3 != m3) />
+<@assert (m3 == m3) />
+<@assert !(m3 > m3) />
+<@assert (m3 >= m3) />
+<@assert !(m3 < m3) />
+<@assert (m3 <= m3) />
 <#-- 4 -->
-<@assert test= (p3 != z) />
-<@assert test= !(p3 == z) />
-<@assert test= (p3 > z) />
-<@assert test= (p3 >= z) />
-<@assert test= !(p3 < z) />
-<@assert test= !(p3 <= z) />
+<@assert (p3 != z) />
+<@assert !(p3 == z) />
+<@assert (p3 > z) />
+<@assert (p3 >= z) />
+<@assert !(p3 < z) />
+<@assert !(p3 <= z) />
 <#-- 5 -->
-<@assert test= (z != p3) />
-<@assert test= !(z == p3) />
-<@assert test= !(z > p3) />
-<@assert test= !(z >= p3) />
-<@assert test= (z < p3) />
-<@assert test= (z <= p3) />
+<@assert (z != p3) />
+<@assert !(z == p3) />
+<@assert !(z > p3) />
+<@assert !(z >= p3) />
+<@assert (z < p3) />
+<@assert (z <= p3) />
 <#-- 6 -->
-<@assert test= (m3 != z) />
-<@assert test= !(m3 == z) />
-<@assert test= !(m3 > z) />
-<@assert test= !(m3 >= z) />
-<@assert test= (m3 < z) />
-<@assert test= (m3 <= z) />
+<@assert (m3 != z) />
+<@assert !(m3 == z) />
+<@assert !(m3 > z) />
+<@assert !(m3 >= z) />
+<@assert (m3 < z) />
+<@assert (m3 <= z) />
 <#-- 7 -->
-<@assert test= (z != m3) />
-<@assert test= !(z == m3) />
-<@assert test= (z > m3) />
-<@assert test= (z >= m3) />
-<@assert test= !(z < m3) />
-<@assert test= !(z <= m3) />
+<@assert (z != m3) />
+<@assert !(z == m3) />
+<@assert (z > m3) />
+<@assert (z >= m3) />
+<@assert !(z < m3) />
+<@assert !(z <= m3) />
 <#-- 8 -->
-<@assert test= (m3 != p3) />
-<@assert test= !(m3 == p3) />
-<@assert test= !(m3 > p3) />
-<@assert test= !(m3 >= p3) />
-<@assert test= (m3 < p3) />
-<@assert test= (m3 <= p3) />
+<@assert (m3 != p3) />
+<@assert !(m3 == p3) />
+<@assert !(m3 > p3) />
+<@assert !(m3 >= p3) />
+<@assert (m3 < p3) />
+<@assert (m3 <= p3) />
 <#-- 9 -->
-<@assert test= (p3 != m3) />
-<@assert test= !(p3 == m3) />
-<@assert test= (p3 > m3) />
-<@assert test= (p3 >= m3) />
-<@assert test= !(p3 < m3) />
-<@assert test= !(p3 <= m3) />
+<@assert (p3 != m3) />
+<@assert !(p3 == m3) />
+<@assert (p3 > m3) />
+<@assert (p3 >= m3) />
+<@assert !(p3 < m3) />
+<@assert !(p3 <= m3) />
 </body>
 </html>

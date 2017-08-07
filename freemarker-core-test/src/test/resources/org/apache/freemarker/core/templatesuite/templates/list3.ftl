@@ -22,7 +22,7 @@
 </#list>
 ]
 
-<#macro hits xs style="">
+<#macro hits xs{positional} style="">
     <#list xs>
         <p>${xs?size} hits:
         <div class="hits">
@@ -50,9 +50,9 @@
 
 <@hits ['a', 'b'] />
 
-<@hits ['a', 'b'], "other" />
+<@hits ['a', 'b'] style="other" />
 
-<@hits ['a', 'b'], "hidden" />
+<@hits ['a', 'b'] style="hidden" />
 
 <@hits [] />
 
@@ -63,7 +63,7 @@
 <@testAutoClosedSep [1] />
 <@testAutoClosedSep [] />
 
-<#macro testAutoClosedSep xs>
+<#macro testAutoClosedSep xs{positional}>
 <#list xs as x>${x}<#sep>, <#else>Empty</#list>
 <#list xs as x>${x}<#sep><#if x_index == 0> /*first*/, <#else>, </#if><#else>Empty</#list>
 <#list xs>[<#items as x>${x}<#sep>, </#items>]<#else>Empty</#list>

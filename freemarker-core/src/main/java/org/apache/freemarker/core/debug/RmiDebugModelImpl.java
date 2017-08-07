@@ -28,6 +28,7 @@ import java.util.List;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
+import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateMethodModel;
@@ -38,7 +39,6 @@ import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.TemplateTransformModel;
 
 /**
  */
@@ -158,7 +158,7 @@ class RmiDebugModelImpl extends UnicastRemoteObject implements DebugModel {
         else if (model instanceof TemplateHashModel) type += TYPE_HASH;
         if (model instanceof TemplateMethodModelEx) type += TYPE_METHOD_EX;
         else if (model instanceof TemplateMethodModel) type += TYPE_METHOD;
-        if (model instanceof TemplateTransformModel) type += TYPE_TRANSFORM;
+        if (model instanceof TemplateDirectiveModel) type += TYPE_DIRECTIVE;
         return type;
     }
 }

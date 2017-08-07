@@ -424,7 +424,7 @@ public class ParseException extends IOException implements FMParserConstants {
                         case CLOSE_PAREN:
                             endNames.add("\"(\"");
                             break;
-                        case UNIFIED_CALL_END:
+                        case DYNAMIC_TOP_LEVEL_CALL_END:
                             endNames.add("@...");
                             break;
                     }

@@ -20,14 +20,14 @@
 package org.apache.freemarker.test.templateutil;
 
 import java.io.IOException;
-import java.util.Map;
+import java.io.Writer;
 
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.TemplateDirectiveBody;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
+import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.util._NullWriter;
 
 public class NoOutputDirective implements TemplateDirectiveModel {
@@ -39,12 +39,19 @@ public class NoOutputDirective implements TemplateDirectiveModel {
     }
 
     @Override
-    public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+    public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
-        if (!params.isEmpty()) {
-            throw new TemplateModelException("This directivey doesn't support any parameters.");
-        }
-        body.render(_NullWriter.INSTANCE);
+        callPlace.executeNestedContent(null, _NullWriter.INSTANCE, env);
+    }
+
+    @Override
+    public ArgumentArrayLayout getArgumentArrayLayout() {
+        return ArgumentArrayLayout.PARAMETERLESS;
+    }
+
+    @Override
+    public boolean isNestedContentSupported() {
+        return true;
     }
 
 }

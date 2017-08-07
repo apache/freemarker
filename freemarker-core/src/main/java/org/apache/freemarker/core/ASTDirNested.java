@@ -20,12 +20,9 @@
 package org.apache.freemarker.core;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
  * AST directive node: {@code #nested}.
@@ -33,30 +30,40 @@ import org.apache.freemarker.core.model.TemplateModelException;
 final class ASTDirNested extends ASTDirective {
     
     
-    private List bodyParameters;
+    private List<ASTExpression> nestedContentParameters;
     
     
-    ASTDirNested(List bodyParameters) {
-        this.bodyParameters = bodyParameters;
+    ASTDirNested(List nestedContentParameters) {
+        this.nestedContentParameters = nestedContentParameters;
     }
     
-    List getBodyParameters() {
-        return bodyParameters;
+    List getNestedContentParameters() {
+        return nestedContentParameters;
     }
 
-    /**
-     * There is actually a subtle but essential point in the code below.
-     * A macro operates in the context in which it's defined. However, 
-     * a nested block within a macro instruction is defined in the 
-     * context in which the macro was invoked. So, we actually need to
-     * temporarily switch the namespace and macro context back to
-     * what it was before macro invocation to implement this properly.
-     * I (JR) realized this thanks to some incisive comments from Daniel Dekany.
-     */
     @Override
     ASTElement[] accept(Environment env) throws IOException, TemplateException {
-        Context bodyContext = new Context(env);
-        env.invokeNestedContent(bodyContext);
+        CallPlace macroCallPlace = env.getCurrentMacroContext().callPlace;
+
+        // When nestedContParamCnt < nestedContentParameters.size(), then we just skip calculating the extra parameters,
+        // and CallPlace.executeNestedContent will be successful. Note sure if this lenient behavior is a good idea,
+        // but for now it's inherited from FM2, so TODO [FM3].
+        // When nestedContParamCnt > nestedContentParameters.size(), then later
+        // CallPlace.executeNestedContent will throw exception, but we let that happen so that the error message
+        // generation remains centralized. (In FM2 not even this was an error.)
+        TemplateModel[] nestedContParamValues;
+        if (nestedContentParameters != null) {
+            nestedContParamValues = new TemplateModel[
+                    Math.min(macroCallPlace.getNestedContentParameterCount(), nestedContentParameters.size())];
+            for (int i = 0; i < nestedContParamValues.length; i++) {
+                nestedContParamValues[i] = nestedContentParameters.get(i).eval(env);
+            }
+        } else {
+            nestedContParamValues = null;
+        }
+
+        env.executeNestedContentOfMacro(nestedContParamValues);
+
         return null;
     }
 
@@ -65,10 +72,10 @@ final class ASTDirNested extends ASTDirective {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
         sb.append(getASTNodeDescriptor());
-        if (bodyParameters != null) {
-            for (int i = 0; i < bodyParameters.size(); i++) {
+        if (nestedContentParameters != null) {
+            for (int i = 0; i < nestedContentParameters.size(); i++) {
                 sb.append(' ');
-                sb.append(((ASTExpression) bodyParameters.get(i)).getCanonicalForm());
+                sb.append(nestedContentParameters.get(i).getCanonicalForm());
             }
         }
         if (canonical) sb.append('>');
@@ -82,13 +89,13 @@ final class ASTDirNested extends ASTDirective {
     
     @Override
     int getParameterCount() {
-        return bodyParameters != null ? bodyParameters.size() : 0;
+        return nestedContentParameters != null ? nestedContentParameters.size() : 0;
     }
 
     @Override
     Object getParameterValue(int idx) {
         checkIndex(idx);
-        return bodyParameters.get(idx);
+        return nestedContentParameters.get(idx);
     }
 
     @Override
@@ -98,7 +105,7 @@ final class ASTDirNested extends ASTDirective {
     }
 
     private void checkIndex(int idx) {
-        if (bodyParameters == null || idx >= bodyParameters.size()) {
+        if (nestedContentParameters == null || idx >= nestedContentParameters.size()) {
             throw new IndexOutOfBoundsException();
         }
     }
@@ -116,40 +123,6 @@ final class ASTDirNested extends ASTDirective {
     @Override
     boolean isShownInStackTrace() {
         return true;
-    }
-
-    class Context implements LocalContext {
-        ASTDirMacro.Context invokingMacroContext;
-        Environment.Namespace bodyVars;
-        
-        Context(Environment env) throws TemplateException {
-            invokingMacroContext = env.getCurrentMacroContext();
-            List bodyParameterNames = invokingMacroContext.nestedContentParameterNames;
-            if (bodyParameters != null) {
-                for (int i = 0; i < bodyParameters.size(); i++) {
-                    ASTExpression exp = (ASTExpression) bodyParameters.get(i);
-                    TemplateModel tm = exp.eval(env);
-                    if (bodyParameterNames != null && i < bodyParameterNames.size()) {
-                        String bodyParameterName = (String) bodyParameterNames.get(i);
-                        if (bodyVars == null) {
-                            bodyVars = env.new Namespace();
-                        }
-                        bodyVars.put(bodyParameterName, tm);
-                    }
-                }
-            }
-        }
-        
-        @Override
-        public TemplateModel getLocalVariable(String name) throws TemplateModelException {
-            return bodyVars == null ? null : bodyVars.get(name);
-        }
-        
-        @Override
-        public Collection getLocalVariableNames() {
-            List bodyParameterNames = invokingMacroContext.nestedContentParameterNames;
-            return bodyParameterNames == null ? Collections.EMPTY_LIST : bodyParameterNames;
-        }
     }
 
     @Override

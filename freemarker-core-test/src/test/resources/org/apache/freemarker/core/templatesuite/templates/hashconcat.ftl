@@ -48,7 +48,7 @@ a + b + {} + b + {} + a:
 [@dump a + b + {} + b + {} + a /]
 
 
-[#macro dump s]
+[#macro dump s{positional}]
 [#list s?keys as k]
   ${k} = ${s[k]}
 [/#list]

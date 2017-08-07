@@ -18,25 +18,25 @@
 -->
 <#setting timeZone = "UTC">
 
-<@assert test=unknown?isUnknownDateLike />
-<@assert test=!timeOnly?isUnknownDateLike />
-<@assert test=!dateOnly?isUnknownDateLike />
-<@assert test=!dateTime?isUnknownDateLike />
+<@assert unknown?isUnknownDateLike />
+<@assert !timeOnly?isUnknownDateLike />
+<@assert !dateOnly?isUnknownDateLike />
+<@assert !dateTime?isUnknownDateLike />
 
-<@assert test=!unknown?isDateOnly />
-<@assert test=!timeOnly?isDateOnly />
-<@assert test=dateOnly?isDateOnly />
-<@assert test=!dateTime?isDateOnly />
+<@assert !unknown?isDateOnly />
+<@assert !timeOnly?isDateOnly />
+<@assert dateOnly?isDateOnly />
+<@assert !dateTime?isDateOnly />
 
-<@assert test=!unknown?isTime />
-<@assert test=timeOnly?isTime />
-<@assert test=!dateOnly?isTime />
-<@assert test=!dateTime?isTime />
+<@assert !unknown?isTime />
+<@assert timeOnly?isTime />
+<@assert !dateOnly?isTime />
+<@assert !dateTime?isTime />
 
-<@assert test=!unknown?isDatetime />
-<@assert test=!timeOnly?isDatetime />
-<@assert test=!dateOnly?isDatetime />
-<@assert test=dateTime?isDatetime />
+<@assert !unknown?isDatetime />
+<@assert !timeOnly?isDatetime />
+<@assert !dateOnly?isDatetime />
+<@assert dateTime?isDatetime />
 
 <@assertFails message="isn't known if">${unknown?string.xs}</@>
 <@assertEquals expected="2003-04-05T06:07:08Z" actual=unknown?dateTimeIfUnknown?string.xs />

@@ -30,7 +30,7 @@ Invisiblity test 3.: <#global q = 1><#if .main.q?exists || .namespace.q?exists |
 --
 <@lib.foo/>
 --
-<#macro foo x>
+<#macro foo x{positional}>
   ${x} = ${.locals.x}
   <#local x = 2>
   ${x} = ${.locals.x}

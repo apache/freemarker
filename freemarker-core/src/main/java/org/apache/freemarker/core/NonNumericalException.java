@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core;
 
+import java.io.Serializable;
+
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 
@@ -28,7 +30,7 @@ import org.apache.freemarker.core.model.TemplateNumberModel;
 public class NonNumericalException extends UnexpectedTypeException {
 
     private static final Class[] EXPECTED_TYPES = new Class[] { TemplateNumberModel.class };
-    
+
     public NonNumericalException(Environment env) {
         super(env, "Expecting numerical value here");
     }
@@ -64,6 +66,14 @@ public class NonNumericalException extends UnexpectedTypeException {
             throws InvalidReferenceException {
         super(assignmentTargetVarName, model, "number", EXPECTED_TYPES, tips, env);
     }
+
+
+    NonNumericalException(
+            Serializable argumentNameOrIndex, TemplateModel model, String[] tips, Environment env)
+            throws InvalidReferenceException {
+        super(argumentNameOrIndex, model, "number", EXPECTED_TYPES, tips, env);
+    }
+
     static NonNumericalException newMalformedNumberException(ASTExpression blamed, String text, Environment env) {
         return new NonNumericalException(
                 new _ErrorDescriptionBuilder("Can't convert this string to number: ", new _DelayedJQuote(text))

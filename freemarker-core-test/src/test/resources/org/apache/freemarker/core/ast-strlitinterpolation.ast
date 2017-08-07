@@ -19,7 +19,7 @@
 #mixedContent  // o.a.f.c.ASTImplicitParent
     #text  // o.a.f.c.ASTStaticText
         - content: "1. "  // String
-    @  // o.a.f.c.ASTDirUserDefined
+    @  // o.a.f.c.ASTDynamicTopLevelCall
         - callee: m  // o.a.f.c.ASTExpVariable
         - argument name: "x"  // String
         - argument value: dynamic "..."  // o.a.f.c.ASTExpStringLiteral

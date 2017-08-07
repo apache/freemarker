@@ -20,43 +20,29 @@
 package org.apache.freemarker.test.templateutil;
 
 import java.io.IOException;
-import java.util.Map;
+import java.io.Writer;
 
+import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.NestedContentNotSupportedException;
 import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateDirectiveBody;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util.FTLUtil;
 
 public class AssertDirective implements TemplateDirectiveModel {
-
     public static AssertDirective INSTANCE = new AssertDirective();
-    
-    private static final String TEST_PARAM = "test";
-    
+
     private AssertDirective() { }
     
     @Override
-    public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+    public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
-        TemplateModel test = null;
-        for (Object paramEnt  : params.entrySet()) {
-            Map.Entry<String, TemplateModel> param = (Map.Entry) paramEnt;
-            String paramName = param.getKey();
-            if (paramName.equals(TEST_PARAM)) {
-                test = param.getValue();
-            } else {
-                throw new UnsupportedParameterException(paramName, env);
-            }
-        }
+        TemplateModel test = args[0];
         if (test == null) {
-            throw new MissingRequiredParameterException(TEST_PARAM, env);
+            throw new MissingRequiredParameterException("test", env);
         }
-        NestedContentNotSupportedException.check(body);
-        
         if (!(test instanceof TemplateBooleanModel)) {
             throw new AssertationFailedInTemplateException("Assertion failed:\n"
                     + "The value had to be boolean, but it was of type" + FTLUtil.getTypeDescription(test),
@@ -67,7 +53,15 @@ public class AssertDirective implements TemplateDirectiveModel {
                     + "the value was false.",
                     env);
         }
-        
     }
 
+    @Override
+    public ArgumentArrayLayout getArgumentArrayLayout() {
+        return ArgumentArrayLayout.SINGLE_POSITIONAL_PARAMETER;
+    }
+
+    @Override
+    public boolean isNestedContentSupported() {
+        return false;
+    }
 }

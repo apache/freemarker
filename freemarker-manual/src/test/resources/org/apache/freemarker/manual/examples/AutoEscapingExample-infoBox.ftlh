@@ -19,7 +19,7 @@
 <@infoBox "Foo & bar" />
 <@infoBox "Foo <b>bar</b>"?noEsc />
 
-<#macro infoBox message>
+<#macro infoBox message{positional}>
   <div class="infoBox">
     ${message}
   </div>

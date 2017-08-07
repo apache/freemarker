@@ -389,7 +389,7 @@ abstract class ASTElement extends ASTNode {
 
     private ASTElement getFirstLeaf() {
         ASTElement te = this;
-        while (!te.isLeaf() && !(te instanceof ASTDirMacro) && !(te instanceof ASTDirCapturingAssignment)) {
+        while (!te.isLeaf() && !(te instanceof ASTDirMacroOrFunction) && !(te instanceof ASTDirCapturingAssignment)) {
             // A macro or macro invocation is treated as a leaf here for special reasons
             te = te.getFirstChild();
         }
@@ -398,7 +398,7 @@ abstract class ASTElement extends ASTNode {
 
     private ASTElement getLastLeaf() {
         ASTElement te = this;
-        while (!te.isLeaf() && !(te instanceof ASTDirMacro) && !(te instanceof ASTDirCapturingAssignment)) {
+        while (!te.isLeaf() && !(te instanceof ASTDirMacroOrFunction) && !(te instanceof ASTDirCapturingAssignment)) {
             // A macro or macro invocation is treated as a leaf here for special reasons
             te = te.getLastChild();
         }

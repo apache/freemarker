@@ -35,6 +35,7 @@ import org.apache.freemarker.core.outputformat.impl.*;
 import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.model.impl.*;
 import org.apache.freemarker.core.util.*;
+import org.apache.freemarker.core.ASTDynamicTopLevelCall.NamedArgument;
 import java.io.*;
 import java.util.*;
 import java.nio.charset.Charset;
@@ -51,16 +52,17 @@ public class FMParser {
 
     private static class ParserIteratorBlockContext {
         /**
-         * loopVarName in <#list ... as loopVarName> or <#items as loopVarName>; null after we left the nested
-         * block of #list or #items, respectively.
+         * nestedContentParamName in <#list ... as nestedContentParamName> or <#items as nestedContentParamName>;
+         * null after we left the nested block of #list or #items, respectively.
          */
-        private String loopVarName;
+        private String nestedContentParamName;
         
         /**
-         * loopVar1Name in <#list ... as k, loopVar2Name> or <#items as k, loopVar2Name>; null after we left the nested
-         * block of #list or #items, respectively.
+         * nestedContentParam1Name in <#list ... as k, nestedContentParam2Name> or
+         * <#items as k, nestedContentParam2Name>; null after we left the nested block of #list or #items,
+         * respectively.
          */
-        private String loopVar2Name;
+        private String nestedContentParam2Name;
         
         /**
          * See the ITERATOR_BLOCK_KIND_... costants.
@@ -94,6 +96,16 @@ public class FMParser {
     private boolean inMacro, inFunction;
     private LinkedList escapes = new LinkedList();
     private int mixedContentNesting; // for stripText
+
+    // Argument arrays reused for top-level invocations, purely for a bit of optimization.
+    private static final int INITAL_TOP_ARGS_BUFFER_SIZE = 8;
+    private ASTExpression[] topPositionalArgsBuffer;
+    private int topPositionalArgsLength;
+    private NamedArgument[] topNamedArgsBuffer;
+    private int topNamedArgsLength;
+    private static final int INITAL_TOP_LOOP_VAR_NAMES_BUFFER_SIZE = 4;
+    private StringToIndexMap.Entry[] topNestedContentParamNamesBuffer;
+    private int topNestedContentParamNamesLength;
 
     FMParser(Template template, Reader reader,
             ParsingConfiguration pCfg, OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy,
@@ -389,26 +401,67 @@ public class FMParser {
         return size != 0 ? (ParserIteratorBlockContext) iteratorBlockContexts.get(size - 1) : null; 
     }
     
-    private void checkLoopVariableBuiltInLHO(String loopVarName, ASTExpression lhoExp, Token biName)
+    private void checkNestedContentParameterBuiltInLHO(String nestedContentParamName, ASTExpression lhoExp, Token biName)
             throws ParseException {
         int size = iteratorBlockContexts != null ? iteratorBlockContexts.size() : 0;
         for (int i = size - 1; i >= 0; i--) {
             ParserIteratorBlockContext ctx = (ParserIteratorBlockContext) iteratorBlockContexts.get(i);
-            if (loopVarName.equals(ctx.loopVarName) || loopVarName.equals(ctx.loopVar2Name)) {
+            if (nestedContentParamName.equals(ctx.nestedContentParamName)
+                    || nestedContentParamName.equals(ctx.nestedContentParam2Name)) {
                 if (ctx.kind == ITERATOR_BLOCK_KIND_USER_DIRECTIVE) {
 			        throw new ParseException(
 			                "The left hand operand of ?" + biName.image
-			                + " can't be the loop variable of an user defined directive: "
-			                +  loopVarName,
+			                + " can't be a nested content parameter of a user defined directive: "
+			                +  nestedContentParamName,
 			                lhoExp);
                 }
                 return;  // success
             }
         }
         throw new ParseException(
-                "The left hand operand of ?" + biName.image + " must be a loop variable, "
-                + "but there's no loop variable in scope with this name: " + loopVarName,
+                "The left hand operand of ?" + biName.image + " must be a nested content parameter, "
+                + "but there's none in scope with this name: " + nestedContentParamName,
                 lhoExp);
+    }
+
+    private void addToTopNamedArgs(NamedArgument namedArg) {
+        if (topNamedArgsBuffer == null) {
+            topNamedArgsBuffer = new NamedArgument[INITAL_TOP_ARGS_BUFFER_SIZE];
+        } else if (topNamedArgsBuffer.length == topNamedArgsLength) {
+            NamedArgument[] newNamedTopArgsBuffer =  new NamedArgument[topNamedArgsBuffer.length * 2];
+            for (int i = 0; i < topNamedArgsBuffer.length; i++) {
+                newNamedTopArgsBuffer[i] = topNamedArgsBuffer[i];
+            }
+            topNamedArgsBuffer = newNamedTopArgsBuffer;
+        }
+        topNamedArgsBuffer[topNamedArgsLength++] = namedArg;
+    }
+
+    private void addToTopPositionalArgs(ASTExpression argValue) {
+        if (topPositionalArgsBuffer == null) {
+            topPositionalArgsBuffer = new ASTExpression[INITAL_TOP_ARGS_BUFFER_SIZE];
+        } else if (topPositionalArgsBuffer.length == topPositionalArgsLength) {
+            ASTExpression[] newPositionalArgsBuffer =  new ASTExpression[topPositionalArgsBuffer.length * 2];
+            for (int i = 0; i < topPositionalArgsBuffer.length; i++) {
+                newPositionalArgsBuffer[i] = topPositionalArgsBuffer[i];
+            }
+            topPositionalArgsBuffer = newPositionalArgsBuffer;
+        }
+        topPositionalArgsBuffer[topPositionalArgsLength++] = argValue;
+    }
+
+    private void addToTopNestedContentParamNames(String nestedContentParamName) {
+        if (topNestedContentParamNamesBuffer == null) {
+            topNestedContentParamNamesBuffer = new StringToIndexMap.Entry[INITAL_TOP_LOOP_VAR_NAMES_BUFFER_SIZE];
+        } else if (topNestedContentParamNamesBuffer.length == topNestedContentParamNamesLength) {
+            StringToIndexMap.Entry[] newNestedContentParamsBuffer = new StringToIndexMap.Entry[topNestedContentParamNamesBuffer.length * 2];
+            for (int i = 0; i < topNestedContentParamNamesBuffer.length; i++) {
+                newNestedContentParamsBuffer[i] = topNestedContentParamNamesBuffer[i];
+            }
+            topNestedContentParamNamesBuffer = newNestedContentParamsBuffer;
+        }
+        topNestedContentParamNamesBuffer[topNestedContentParamNamesLength] = new StringToIndexMap.Entry(nestedContentParamName, topNestedContentParamNamesLength);
+        topNestedContentParamNamesLength++;
     }
 
 }
@@ -474,7 +527,7 @@ TOKEN_MGR_DECLS:
     boolean squBracTagSyntax,
             autodetectTagSyntax,
             directiveSyntaxEstablished,
-            inInvocation;
+            inNamedParameterExpression;
     int incompatibleImprovements;
 
     void setParser(FMParser parser) {
@@ -518,7 +571,7 @@ TOKEN_MGR_DECLS:
         return image.charAt(idx + charIdxInName);
     }
 
-    private void unifiedCall(Token tok) {
+    private void dynamicTopLevelCall(Token tok) {
         char firstChar = tok.image.charAt(0);
         if (autodetectTagSyntax && !directiveSyntaxEstablished) {
             squBracTagSyntax = (firstChar == '[');
@@ -535,7 +588,7 @@ TOKEN_MGR_DECLS:
         SwitchTo(NO_SPACE_EXPRESSION);
     }
 
-    private void unifiedCallEnd(Token tok) {
+    private void dynamicTopLevelCallEnd(Token tok) {
         char firstChar = tok.image.charAt(0);
         if (squBracTagSyntax && firstChar == '<') {
             tok.kind = STATIC_TEXT_NON_WS;
@@ -795,9 +848,9 @@ TOKEN:
         handleTagSyntaxAndSwitch(matchedToken, DEFAULT);
     }
     |
-    <UNIFIED_CALL : "<@" | "[@" > { unifiedCall(matchedToken); }
+    <DYNAMIC_TOP_LEVEL_CALL : "<@" | "[@" > { dynamicTopLevelCall(matchedToken); }
     |
-    <UNIFIED_CALL_END : ("<" | "[") "/@" ((<ID>) ("."<ID>)*)? <CLOSE_TAG1>> { unifiedCallEnd(matchedToken); }
+    <DYNAMIC_TOP_LEVEL_CALL_END : ("<" | "[") "/@" ((<ID>) ("."<ID>)*)? <CLOSE_TAG1>> { dynamicTopLevelCallEnd(matchedToken); }
     |
     <FTL_HEADER : ("<#ftl" | "[#ftl") <BLANK>> { ftlHeader(matchedToken); }
     |
@@ -894,7 +947,7 @@ TOKEN:
     <DOLLAR_INTERPOLATION_OPENING : "${"> { startInterpolation(matchedToken); }
 }
 
-<FM_EXPRESSION, IN_PAREN, NAMED_PARAMETER_EXPRESSION> SKIP :
+<FM_EXPRESSION, IN_PAREN> SKIP :
 {
     < ( " " | "\t" | "\n" | "\r" )+ >
     |
@@ -914,12 +967,11 @@ TOKEN:
     < "-->" | "--]">
     {
         if (parenthesisNesting > 0) SwitchTo(IN_PAREN);
-        else if (inInvocation) SwitchTo(NAMED_PARAMETER_EXPRESSION);
         else SwitchTo(FM_EXPRESSION);
     }
 }
 
-<FM_EXPRESSION, IN_PAREN, NO_SPACE_EXPRESSION, NAMED_PARAMETER_EXPRESSION> TOKEN :
+<FM_EXPRESSION, IN_PAREN, NO_SPACE_EXPRESSION> TOKEN :
 {
     <#ESCAPED_CHAR :
         "\\"
@@ -1016,7 +1068,7 @@ TOKEN:
     |
     <COMMA : ",">
     |
-    <SEMICOLON : ";">
+    <SEMICOLON : ";"> : FM_EXPRESSION  // FM_EXPRESSION to exit WS-less expression mode in <@foo; x>
     |
     <COLON : ":">
     |
@@ -1040,8 +1092,7 @@ TOKEN:
     {
         --parenthesisNesting;
         if (parenthesisNesting == 0) {
-            if (inInvocation) SwitchTo(NAMED_PARAMETER_EXPRESSION);
-            else SwitchTo(FM_EXPRESSION);
+            SwitchTo(FM_EXPRESSION);
         }
     }
     |
@@ -1237,7 +1288,7 @@ TOKEN:
     <#ASCII_DIGIT: ["0" - "9"]>
 }
 
-<FM_EXPRESSION, NO_SPACE_EXPRESSION, NAMED_PARAMETER_EXPRESSION> TOKEN :
+<FM_EXPRESSION, NO_SPACE_EXPRESSION> TOKEN :
 {
     <DIRECTIVE_END : ">">
     {
@@ -1268,11 +1319,6 @@ TOKEN:
 <NO_SPACE_EXPRESSION> TOKEN :
 {
     <TERMINATING_WHITESPACE :  (["\n", "\r", "\t", " "])+> : FM_EXPRESSION
-}
-
-<NAMED_PARAMETER_EXPRESSION> TOKEN :
-{
-    <TERMINATING_EXCLAM : "!" (["\n", "\r", "\t", " "])+> : FM_EXPRESSION
 }
 
 <NO_PARSE> TOKEN :
@@ -1356,7 +1402,7 @@ ASTExpression PrimaryExpression() :
         exp = ASTExpBuiltInVariable()
     )
     (
-        LOOKAHEAD(<DOT> | <OPEN_BRACKET> |<OPEN_PAREN> | <BUILT_IN> | <EXCLAM> | <TERMINATING_EXCLAM> | <EXISTS>)
+        LOOKAHEAD(<DOT> | <OPEN_BRACKET> |<OPEN_PAREN> | <BUILT_IN> | <EXCLAM> | <EXISTS>)
         exp = AddSubExpression(exp)
     )*
     {
@@ -1811,16 +1857,14 @@ ASTExpression DefaultTo(ASTExpression exp) :
     Token t;
 }
 {
+    t = <EXCLAM>
     (
-        t = <TERMINATING_EXCLAM>
+        LOOKAHEAD(<ID><ASSIGNMENT_EQUALS>) { /* Do not consume */ }
         |
-        (
-            t = <EXCLAM>
-            [
-                LOOKAHEAD(ASTExpression())
-                rhs = ASTExpression()
-            ]
-        )
+        [
+            LOOKAHEAD(ASTExpression())
+            rhs = ASTExpression()
+        ]
     )
     {
         ASTExpDefault result = new ASTExpDefault(exp, rhs);
@@ -1865,15 +1909,15 @@ ASTExpression ASTExpBuiltIn(ASTExpression lhoExp) :
             return result;
         }
 
-        if (result instanceof BuiltInForLoopVariable) {
+        if (result instanceof BuiltInForNestedContentParameter) {
             if (!(lhoExp instanceof ASTExpVariable)) {
                 throw new ParseException(
                         "Expression used as the left hand operand of ?" + t.image
-                        + " must be a simple loop variable name.", lhoExp);
+                        + " must be a simple nested content parameter name.", lhoExp);
             }
-            String loopVarName = ((ASTExpVariable) lhoExp).getName();
-            checkLoopVariableBuiltInLHO(loopVarName, lhoExp, t);
-            ((BuiltInForLoopVariable) result).bindToLoopVariable(loopVarName);
+            String nestedContentParamName = ((ASTExpVariable) lhoExp).getName();
+            checkNestedContentParameterBuiltInLHO(nestedContentParamName, lhoExp, t);
+            ((BuiltInForNestedContentParameter) result).bindToNestedContentParameter(nestedContentParamName);
             
             return result;
         }
@@ -2209,7 +2253,7 @@ ASTDirRecover Recover() :
 ASTElement List() :
 {
     ASTExpression exp;
-    Token loopVar = null, loopVar2 = null, start, end;
+    Token nestedContentParam = null, nestedContentParam2 = null, start, end;
     TemplateElements childrendBeforeElse;
     ASTDirElseOfList elseOfList = null;
     ParserIteratorBlockContext iterCtx;
@@ -2219,24 +2263,25 @@ ASTElement List() :
     exp = ASTExpression()
     [
         <AS>
-        loopVar = <ID>
+        nestedContentParam = <ID>
         [
             <COMMA>
-            loopVar2 = <ID>
+            nestedContentParam2 = <ID>
         ]
     ]
     <DIRECTIVE_END>
     {
         iterCtx = pushIteratorBlockContext();
-        if (loopVar != null) {
-            iterCtx.loopVarName = loopVar.image;
+        if (nestedContentParam != null) {
+            iterCtx.nestedContentParamName = nestedContentParam.image;
             breakableDirectiveNesting++;
-            if (loopVar2 != null) {
-                iterCtx.loopVar2Name = loopVar2.image;
+            if (nestedContentParam2 != null) {
+                iterCtx.nestedContentParam2Name = nestedContentParam2.image;
                 iterCtx.hashListing = true;
-                if (iterCtx.loopVar2Name.equals(iterCtx.loopVarName)) {
+                if (iterCtx.nestedContentParam2Name.equals(iterCtx.nestedContentParamName)) {
                     throw new ParseException(
-                            "The key and value loop variable names must differ, but both were: " + iterCtx.loopVarName,
+                            "The name of the key and value nested content parameter variable names must differ, but "
+                            + "both were: " + iterCtx.nestedContentParamName,
                             template, start);
                 }
             }
@@ -2245,11 +2290,11 @@ ASTElement List() :
     
     childrendBeforeElse = MixedContentElements()
     {
-        if (loopVar != null) {
+        if (nestedContentParam != null) {
             breakableDirectiveNesting--;
         } else if (iterCtx.kind != ITERATOR_BLOCK_KIND_ITEMS) {
             throw new ParseException(
-                    "#list must have either \"as loopVar\" parameter or nested #items that belongs to it.",
+                    "#list must have either \"as someItem\" parameter or nested #items that belongs to it.",
                     template, start);
         }
         popIteratorBlockContext();
@@ -2263,8 +2308,8 @@ ASTElement List() :
     {
         ASTDirList list = new ASTDirList(
                 exp,
-                loopVar != null ? loopVar.image : null,  // null when we have a nested #items
-                loopVar2 != null ? loopVar2.image : null,
+                nestedContentParam != null ? nestedContentParam.image : null,  // null when we have a nested #items
+                nestedContentParam2 != null ? nestedContentParam2.image : null,
                 childrendBeforeElse, iterCtx.hashListing);
         list.setLocation(template, start, end);
 
@@ -2296,16 +2341,16 @@ ASTDirElseOfList ASTDirElseOfList() :
 
 ASTDirItems Items() :
 {
-    Token loopVar, loopVar2 = null, start, end;
+    Token nestedContentParam, nestedContentParam2 = null, start, end;
     TemplateElements children;
     ParserIteratorBlockContext iterCtx;
 }
 {
     start = <ITEMS>
-    loopVar = <ID>
+    nestedContentParam = <ID>
     [
         <COMMA>
-        loopVar2 = <ID>
+        nestedContentParam2 = <ID>
     ]
     <DIRECTIVE_END>
     {
@@ -2313,23 +2358,24 @@ ASTDirItems Items() :
         if (iterCtx == null) {
             throw new ParseException("#items must be inside a #list block.", template, start);
         }
-        if (iterCtx.loopVarName != null) {
+        if (iterCtx.nestedContentParamName != null) {
             String msg;
 	        if (iterCtx.kind == ITERATOR_BLOCK_KIND_ITEMS) {
                 msg = "Can't nest #items into each other when they belong to the same #list.";
 	        } else {
-	            msg = "The parent #list of the #items must not have \"as loopVar\" parameter.";
+	            msg = "The parent #list of the #items must not have \"as someItem\" parameter.";
             }
             throw new ParseException(msg, template, start);
         }
         iterCtx.kind = ITERATOR_BLOCK_KIND_ITEMS;
-        iterCtx.loopVarName = loopVar.image;
-        if (loopVar2 != null) {
-            iterCtx.loopVar2Name = loopVar2.image;
+        iterCtx.nestedContentParamName = nestedContentParam.image;
+        if (nestedContentParam2 != null) {
+            iterCtx.nestedContentParam2Name = nestedContentParam2.image;
             iterCtx.hashListing = true;
-            if (iterCtx.loopVar2Name.equals(iterCtx.loopVarName)) {
+            if (iterCtx.nestedContentParam2Name.equals(iterCtx.nestedContentParamName)) {
                 throw new ParseException(
-                        "The key and value loop variable names must differ, but both were: " + iterCtx.loopVarName,
+                        "The name of the key and value nested content parameters must differ, but both were: " +
+                        iterCtx.nestedContentParamName,
                         template, start);
             }
         }
@@ -2342,10 +2388,10 @@ ASTDirItems Items() :
     end = <END_ITEMS>
     {
         breakableDirectiveNesting--;
-        iterCtx.loopVarName = null;
-        iterCtx.loopVar2Name = null;
+        iterCtx.nestedContentParamName = null;
+        iterCtx.nestedContentParam2Name = null;
         
-        ASTDirItems result = new ASTDirItems(loopVar.image, loopVar2 != null ? loopVar2.image : null, children);
+        ASTDirItems result = new ASTDirItems(nestedContentParam.image, nestedContentParam2 != null ? nestedContentParam2.image : null, children);
         result.setLocation(template, start, end);
         return result;
     }
@@ -2353,7 +2399,7 @@ ASTDirItems Items() :
 
 ASTDirSep Sep() :
 {
-    Token loopVar, start, end = null;
+    Token nestedContentParam, start, end = null;
     TemplateElements children;
 }
 {
@@ -2524,7 +2570,7 @@ ASTDirStop Stop() :
 ASTElement Nested() :
 {
     Token t, end;
-    ArrayList bodyParameters;
+    ArrayList<ASTExpression> nestedContentParams;
     ASTDirNested result = null;
 }
 {
@@ -2539,10 +2585,10 @@ ASTElement Nested() :
         |
         (
             t = <NESTED>
-            bodyParameters = PositionalArgs()
+            nestedContentParams = PositionalArgs()
             end = LooseDirectiveEnd()
             {
-                result = new ASTDirNested(bodyParameters);
+                result = new ASTDirNested(nestedContentParams);
                 result.setLocation(template, t, end);
             }
         )
@@ -2822,112 +2868,220 @@ ASTDirImport Import() :
     }
 }
 
-ASTDirMacro Macro() :
+ASTDirMacroOrFunction Macro() :
 {
-    Token arg, start, end;
-    ASTExpression nameExp;
+    Token tk = null, tk2, start, end;
+    ASTExpression exp;
+
+    Token paramNameTk;
+    Token commaTk = null;
+
+    boolean isFunction;
     String name;
-    ArrayList argNames = new ArrayList();
-    HashMap args = new HashMap();
-    ArrayList defNames = new ArrayList();
-    ASTExpression defValue = null;
+    List<ASTDirMacroOrFunction.ParameterDefinition> predefPosParamDefs = null;
+    ASTDirMacroOrFunction.ParameterDefinition posVarargsParamDef = null;
+    List<ASTDirMacroOrFunction.ParameterDefinition> predefNamedParamDefs = null;
+    ASTDirMacroOrFunction.ParameterDefinition namedVarargsParamDef = null;
+    TemplateElements children;
+
+    boolean isPositional;
+    ASTExpression defaultValueExp = null;
+    boolean isVarargs = false;
+
+    boolean isFirstParam = true;
+    boolean hasOpenParen;
+    boolean hasPendingComma = false;
+
     List lastIteratorBlockContexts;
     int lastBreakableDirectiveNesting;
-    TemplateElements children;
-    boolean isFunction = false, hasDefaults = false;
-    boolean isCatchAll = false;
-    String catchAll = null;
-    boolean hasOpenParen = false;
-    boolean hasComma = false;
-    boolean hasCloseParen = false;
 }
 {
     (
-        start = <MACRO>
+        start = <MACRO> { isFunction = false; }
         |
         start = <FUNCTION> { isFunction = true; }
     )
     {
         if (inMacro || inFunction) {
-            throw new ParseException("Macros cannot be nested.", template, start);
+            throw new ParseException("Macro or function definitions can't be nested into each other.", template, start);
         }
         if (isFunction) inFunction = true; else inMacro = true;
     }
-    nameExp = IdentifierOrStringLiteral()
+
+    exp = IdentifierOrStringLiteral()
     {
-        name = (nameExp instanceof ASTExpStringLiteral)
-                ? ((ASTExpStringLiteral) nameExp).getAsString()
-                : ((ASTExpVariable) nameExp).getName();
+        name = (exp instanceof ASTExpStringLiteral)
+                ? ((ASTExpStringLiteral) exp).getAsString()
+                : ((ASTExpVariable) exp).getName();
     }
-    [<OPEN_PAREN> { hasOpenParen = true; }]
+
+    { hasOpenParen = false; }
+    [ tk = <OPEN_PAREN> { hasOpenParen = true; } ]
     {
         if (hasOpenParen != isFunction) {
-    		throw new ParseException(
-                    isFunction ? "#function must use \"(\" after the function name."
-                            : "#macro can't use \"(\" after the macro name.",
-                            template, start);
+            if (isFunction) {
+                throw new ParseException("#function must use \"(\" after the function name.", template, start);
+            } else {
+    		    throw new ParseException("#macro can't use \"(\" after the macro name.", template, tk);
+            }
         }
     }
+
+
     (
-        arg = <ID> {
-            defValue = null;
-            if (!argNames.isEmpty() && hasComma != isFunction) {
-                throw new ParseException(
-                        isFunction ? "#function must have comma between the declared parameters."
-                                : "#macro must not have comma between the declared parameters.",
-                                template, start);
-            }
-            hasComma = false;
+        paramNameTk = <ID>
+
+        {
+            // Function parameters are positional by default, while macro parameters are named by default.
+            isPositional = isFunction;
         }
         [
-            <ELLIPSIS> { isCatchAll = true; }
+            <OPENING_CURLY_BRACKET>
+            // TODO [FM3] Support multiple options inside the {}, and value assignment to them (`=true` is implied).
+            [
+                tk = <ID>
+                {
+                    switch (tk.image) {
+                        case ASTDirMacroOrFunction.NAMED_PARAMETER_OPTION_NAME:
+                            isPositional = false;
+                            break;
+                        case ASTDirMacroOrFunction.POSITIONAL_PARAMETER_OPTION_NAME:
+                            isPositional = true;
+                            break;
+                        default:
+                            throw new ParseException(
+                                    "Unsupported parameter option " + _StringUtil.jQuote(tk.image) + ". "
+                                    + "The supported options are: \""
+                                    + ASTDirMacroOrFunction.NAMED_PARAMETER_OPTION_NAME + "\", \""
+                                    + ASTDirMacroOrFunction.POSITIONAL_PARAMETER_OPTION_NAME + "\".",
+                                    template, tk);
+                    }
+                }
+            ]
+            <CLOSING_CURLY_BRACKET>
         ]
-        [
-            <ASSIGNMENT_EQUALS>
-            defValue = ASTExpression()
-            {
-                defNames.add(arg.image);
-                hasDefaults = true;
-            }
-        ]
-        [<COMMA> { hasComma = true; } ]
         {
-            if (catchAll != null) {
-                throw new ParseException(
-                "There may only be one \"catch-all\" parameter in a macro declaration, and it must be the last parameter.",
-                template, arg);
-            }
-            if (isCatchAll) {
-                if (defValue != null) {
+            if (isPositional) {
+                if (predefNamedParamDefs != null || namedVarargsParamDef != null) {
                     throw new ParseException(
-                    "\"Catch-all\" macro parameter may not have a default value.",
-                    template, arg);
+                            "Positional parameters must precede named parameters.",
+                            template, paramNameTk);
                 }
-                catchAll = arg.image;
-            } else {
-                argNames.add(arg.image);
-                if (hasDefaults && defValue == null) {
+                if (posVarargsParamDef != null) {
                     throw new ParseException(
-		                    "In a macro declaration, parameters without a default value "
-		                    + "must all occur before the parameters with default values.",
-                    template, arg);
+                            "Can't define another positional parameter after the \"positional varargs\" parameter.",
+                            template, paramNameTk);
                 }
-                args.put(arg.image, defValue);
+            } else { // named parameter
+                if (namedVarargsParamDef != null) {
+                    throw new ParseException(
+                            "Can't define another parameter after the \"named varargs\" parameter.",
+                            template, paramNameTk);
+                }
             }
+
+            if (isFunction) {
+                if (!hasPendingComma && !isFirstParam) {
+                    throw new ParseException(
+                            "Function parameters must have comma between them; insert comma before the parameter.",
+                            template, paramNameTk);
+                }
+            } else { // macro
+                if (hasPendingComma) {
+                    if (!isPositional) {
+                        throw new ParseException(
+                                "Named parameters of macros need no comma before them; remove the comma.",
+                                template, commaTk);
+                    }
+                } else {
+                    if (isPositional && !isFirstParam) {
+                        throw new ParseException(
+                                "Positional parameters must have comma between them; "
+                                + "insert comma before the parameter.",
+                                template, paramNameTk);
+                    }
+                }
+            }
+            hasPendingComma = false; // It has found it's role
+        }
+
+        {
+            isVarargs = false;
+        }
+        [
+            tk = <ELLIPSIS> { isVarargs = true; }
+            // Note that because it's ensured earlier that varargs are the last in the positonal and named sublists,
+            // we don't have to check here if we already have a positional or named varargs parameter.
+        ]
+
+        {
+            defaultValueExp = null;
+        }
+        [
+            tk = <ASSIGNMENT_EQUALS>
+            {
+                if (isVarargs) {
+                    throw new ParseException("Varargs parameters can't have default value.", template, tk);
+                }
+            }
+            defaultValueExp = ASTExpression()
+        ]
+        {
+            if (defaultValueExp == null && isPositional && !isVarargs) {
+                if (predefPosParamDefs != null
+                        && predefPosParamDefs.get(predefPosParamDefs.size() - 1).getDefaultExpression() != null) {
+                    throw new ParseException(
+                            "Parameters without a default value must be before parameters with default values, "
+                            + "among the positional parameters.", template, paramNameTk);
+                }
+            }
+        }
+
+        [ commaTk = <COMMA> { hasPendingComma = true; } ]
+
+        {
+            String paramName = paramNameTk.image;
+            if (isPositional) {
+                if (isVarargs) {
+                    posVarargsParamDef = new ASTDirMacroOrFunction.ParameterDefinition(paramName, null);
+                } else {
+                    if (predefPosParamDefs == null) {
+                        predefPosParamDefs = new ArrayList<ASTDirMacroOrFunction.ParameterDefinition>();
+                    }
+                    predefPosParamDefs.add(new ASTDirMacroOrFunction.ParameterDefinition(paramName, defaultValueExp));
+                }
+            } else { // named parameter
+                if (isVarargs) {
+                    namedVarargsParamDef = new ASTDirMacroOrFunction.ParameterDefinition(paramName, null);
+                } else {
+                    if (predefNamedParamDefs == null) {
+                        predefNamedParamDefs = new ArrayList<ASTDirMacroOrFunction.ParameterDefinition>();
+                    }
+                    predefNamedParamDefs.add(new ASTDirMacroOrFunction.ParameterDefinition(paramName, defaultValueExp));
+                }
+            }
+
+            isFirstParam = false;
         }
     )*
-    [<CLOSE_PAREN> { hasCloseParen = true; } ] {
-        if (hasComma) {
-            throw new ParseException("You can't have comma after the last parameter.", template, start);
+
+    { tk = null; }
+    [ tk = <CLOSE_PAREN> ]
+    tk2 = <DIRECTIVE_END>
+    {
+        if (hasPendingComma) {
+            throw new ParseException("Comma without parameter after it.", template, commaTk);
         }
-        if (hasCloseParen != hasOpenParen) {
-    		throw new ParseException(
-                    hasOpenParen ? "Missing closing \")\"."
-                            : "Closing \")\" without corresponding opening \"(\".",
-                            template, start);
+        if ((tk != null) != hasOpenParen) {
+            if (hasOpenParen) {
+                // Note that parenhesis expression mode may aborts at the ">", so we don't get this far.
+                throw new ParseException("Missing closing \")\".", template, tk2);
+            } else {
+        		throw new ParseException("Closing \")\" without corresponding opening \"(\".", template, tk);
+            }
         }
     }
-    <DIRECTIVE_END>
+
     {
         // To prevent parser check loopholes like <#list ...><#macro ...><#break></#macro></#list>.
         lastIteratorBlockContexts = iteratorBlockContexts;
@@ -2939,12 +3093,12 @@ ASTDirMacro Macro() :
     (
         end = <END_MACRO>
         {
-        	if (isFunction) throw new ParseException("Expected function end tag here.", template, start);
+        	if (isFunction) throw new ParseException("Expected function end tag here.", template, end);
     	}
         |
         end = <END_FUNCTION>
         {
-    		if (!isFunction) throw new ParseException("Expected macro end tag here.", template, start);
+    		if (!isFunction) throw new ParseException("Expected macro end tag here.", template, end);
     	}
     )
     {
@@ -2952,7 +3106,19 @@ ASTDirMacro Macro() :
         breakableDirectiveNesting = lastBreakableDirectiveNesting;
         
         inMacro = inFunction = false;
-        ASTDirMacro result = new ASTDirMacro(name, argNames, args, catchAll, isFunction, children);
+
+        ASTDirMacroOrFunction result;
+        try {
+            result = new ASTDirMacroOrFunction(
+                    isFunction,
+                    name,
+                    predefPosParamDefs, posVarargsParamDef,
+                    predefNamedParamDefs, namedVarargsParamDef,
+                    children);
+        } catch (DuplicateStringKeyException e) {
+            throw new ParseException("The parameter list contains the parameter name "
+                    + _StringUtil.jQuote(e.getKey()) + " for multiple times.", template, start);
+        }
         result.setLocation(template, start, end);
         template.addMacro(result);
         return result;
@@ -2975,129 +3141,192 @@ ASTDirCompress Compress() :
     }
 }
 
-ASTElement UnifiedMacroTransform() :
+ASTElement DynamicTopLevelCall() :
 {
-    Token start = null, end, t;
-    HashMap namedArgs = null;
-    ArrayList positionalArgs = null, bodyParameters = null;
-    ASTExpression startTagNameExp;
-    TemplateElements children;
+    Token t;
     ASTExpression exp;
+
+    Token start = null, end;
+    ASTExpression callableValueExp;
+    ASTExpression endTagNameExp;
+    Token prevChoiceComma = null;
+    TemplateElements children;
     int pushedCtxCount = 0;
 }
 {
-    start = <UNIFIED_CALL>
-    exp = ASTExpression()
-    {
-        if (exp instanceof ASTExpVariable || (exp instanceof ASTExpDot && ((ASTExpDot) exp).onlyHasIdentifiers())) {
-            startTagNameExp = exp;
-        } else {
-            startTagNameExp = null;
-        }
-    }
+    start = <DYNAMIC_TOP_LEVEL_CALL>
+    callableValueExp = ASTExpression()
     [<TERMINATING_WHITESPACE>]
+    {
+        topPositionalArgsLength = 0;
+        topNamedArgsLength = 0;
+        topNestedContentParamNamesLength = 0;
+    }
+
     (
         LOOKAHEAD(<ID><ASSIGNMENT_EQUALS>)
-        namedArgs = NamedArgs()
+        (
+            t = <ID>
+            <ASSIGNMENT_EQUALS>
+            exp = ASTExpression()
+            {
+                if (prevChoiceComma != null) {
+                    throw new ParseException(
+                            "Remove comma (\",\"); it can only be used between arguments passed by position.",
+                            template, prevChoiceComma);
+                }
+                prevChoiceComma = null;
+
+                addToTopNamedArgs(new NamedArgument(t.image, exp));
+            }
+        )
         |
-        positionalArgs = PositionalArgs()
-    )
+        (
+            // This could be part of the positional paramter choice, but we can give better error messages this way.
+            t = <COMMA>
+            {
+                if (prevChoiceComma != null) {
+                    throw new ParseException("Two commas (\",\") without argument between.",
+                            template, t);
+                }
+                prevChoiceComma = t;
+
+                if (topNamedArgsLength != 0 || topPositionalArgsLength == 0) {
+                    throw new ParseException(
+                            "Remove comma (\",\"); it can only be used between arguments passed by position.",
+                            template, t);
+                }
+            }
+        )
+        |
+        (
+            exp = ASTExpression()
+            {
+                if (topNamedArgsLength != 0) {
+                    throw new ParseException(
+                            "Expression looks like an argument passed by position (no preceding \"<argName>=\"), "
+                            + " but those must be earlier than arguments passed by name.",
+                            exp);
+                }
+
+                if (prevChoiceComma == null && topPositionalArgsLength != 0) {
+                        throw new ParseException("Missing comma (\",\") before expression. "
+                                + "Arguments passed by position must be separated by comma.", exp);
+                }
+                prevChoiceComma = null;
+
+                addToTopPositionalArgs(exp);
+            }
+        )
+    )*
+
     [
-        <SEMICOLON>{bodyParameters = new ArrayList(4); }
+        <SEMICOLON>
         [
-            [<TERMINATING_WHITESPACE>] t = <ID> { bodyParameters.add(t.image); }
+            t = <ID> { addToTopNestedContentParamNames(t.image); }
             (
-                [<TERMINATING_WHITESPACE>] <COMMA>
-                [<TERMINATING_WHITESPACE>] t = <ID>{bodyParameters.add(t.image); }
+                <COMMA>
+                t = <ID> { addToTopNestedContentParamNames(t.image); }
             )*
         ]
     ]
+
+    {
+        // We must copy the top level arrays (as they will be reused). The copies will have the minimum length. Also,
+        // they will be null instead of an empty array.
+
+        ASTExpression[] trimmedPositionalArgs;
+        if (topPositionalArgsLength == 0) {
+            trimmedPositionalArgs = null;
+        } else {
+            trimmedPositionalArgs = new ASTExpression[topPositionalArgsLength];
+            for (int i = 0; i < topPositionalArgsLength; i++) {
+                trimmedPositionalArgs[i] = topPositionalArgsBuffer[i];
+            }
+        }
+
+        NamedArgument[] trimmedNamedArgs;
+        if (topNamedArgsLength == 0) {
+            trimmedNamedArgs = null;
+        } else {
+            trimmedNamedArgs = new NamedArgument[topNamedArgsLength];
+            for (int i = 0; i < topNamedArgsLength; i++) {
+                trimmedNamedArgs[i] = topNamedArgsBuffer[i];
+            }
+        }
+
+        StringToIndexMap nestedContentParamNames = topNestedContentParamNamesLength == 0 ? null
+                : StringToIndexMap.of(topNestedContentParamNamesBuffer, topNestedContentParamNamesLength);
+    }
+
     (
         end = <EMPTY_DIRECTIVE_END> { children = TemplateElements.EMPTY; }
         |
         (
-            <DIRECTIVE_END> {
-                if (bodyParameters != null && iteratorBlockContexts != null && !iteratorBlockContexts.isEmpty()) {
-                    // It's possible that we shadow a #list/#items loop variable, in which case that must be noted.
+            <DIRECTIVE_END>
+            {
+                if (topNestedContentParamNamesLength != 0 && iteratorBlockContexts != null && !iteratorBlockContexts.isEmpty()) {
+                    // It's possible that we shadow a #list/#items nested content parameters, in which case that must
+                    // be noted.
                     int ctxsLen = iteratorBlockContexts.size();
-                    int bodyParsLen = bodyParameters.size();
-	                for (int bodyParIdx = 0; bodyParIdx < bodyParsLen; bodyParIdx++) {
-                        String bodyParName = (String) bodyParameters.get(bodyParIdx);
-                        walkCtxSack: for (int ctxIdx = ctxsLen - 1; ctxIdx >= 0; ctxIdx--) {
+	                for (int nestedContentParamIdx = 0; nestedContentParamIdx < topNestedContentParamNamesLength; nestedContentParamIdx++) {
+                        String nestedContentParamName = topNestedContentParamNamesBuffer[nestedContentParamIdx].getKey();
+                        walkCtxStack: for (int ctxIdx = ctxsLen - 1; ctxIdx >= 0; ctxIdx--) {
                             ParserIteratorBlockContext ctx
                                     = (ParserIteratorBlockContext) iteratorBlockContexts.get(ctxIdx);
-                            if (ctx.loopVarName != null && ctx.loopVarName.equals(bodyParName)) {
+                            if (ctx.nestedContentParamName != null
+                                    && ctx.nestedContentParamName.equals(nestedContentParamName)) {
                                 // If it wasn't already shadowed, shadow it:
                                 if (ctx.kind != ITERATOR_BLOCK_KIND_USER_DIRECTIVE) {
                                     ParserIteratorBlockContext shadowingCtx = pushIteratorBlockContext();
-                                    shadowingCtx.loopVarName = bodyParName;
+                                    shadowingCtx.nestedContentParamName = nestedContentParamName;
                                     shadowingCtx.kind = ITERATOR_BLOCK_KIND_USER_DIRECTIVE;
                                     pushedCtxCount++;
                                 }
-                                break walkCtxSack;
+                                break walkCtxStack;
                             }
                         }
                    }
                 }
             }
+
             children = MixedContentElements()
-            end = <UNIFIED_CALL_END>
+
+            end = <DYNAMIC_TOP_LEVEL_CALL_END>
             {
                 for (int i = 0; i < pushedCtxCount; i++) {
                     popIteratorBlockContext();
                 }
-            
+
                 String endTagName = end.image.substring(3, end.image.length() - 1).trim();
                 if (endTagName.length() > 0) {
-                    if (startTagNameExp == null) {
-                        throw new ParseException("Expecting </@>", template, end);
-                    } else {
-                        String startTagName = startTagNameExp.getCanonicalForm();
+                    if (callableValueExp instanceof ASTExpVariable
+                            || (callableValueExp instanceof ASTExpDot
+                                    && ((ASTExpDot) callableValueExp).onlyHasIdentifiers())) {
+                        String startTagName = callableValueExp.getCanonicalForm(); // TODO [FM3] Why the canonical form?
                         if (!endTagName.equals(startTagName)) {
                             throw new ParseException("Expecting </@> or </@" + startTagName + ">", template, end);
                         }
+                    } else {
+                        throw new ParseException("Expecting </@>", template, end);
                     }
                 }
             }
         )
     )
     {
-        ASTElement result = (positionalArgs != null)
-        		? new ASTDirUserDefined(exp, positionalArgs, children, bodyParameters)
-	            : new ASTDirUserDefined(exp, namedArgs, children, bodyParameters);
+        ASTElement result = new ASTDynamicTopLevelCall(
+                callableValueExp, false,
+                trimmedPositionalArgs, trimmedNamedArgs, nestedContentParamNames,
+                children);
         result.setLocation(template, start, end);
         return result;
     }
 }
 
-HashMap NamedArgs() :
+ArrayList<ASTExpression> PositionalArgs() :
 {
-    HashMap result = new HashMap();
-    Token t;
-    ASTExpression exp;
-}
-{
-    (
-        t = <ID>
-        <ASSIGNMENT_EQUALS>
-        {
-            token_source.SwitchTo(token_source.NAMED_PARAMETER_EXPRESSION);
-            token_source.inInvocation = true;
-        }             
-        exp = ASTExpression()
-        {
-            result.put(t.image, exp);
-        }
-    )+
-    {
-        token_source.inInvocation = false;
-        return result;
-    }
-}
-
-ArrayList PositionalArgs() :
-{
-    ArrayList result = new ArrayList();
+    ArrayList<ASTExpression> result = new ArrayList<ASTExpression>();
     ASTExpression arg;
 }
 {
@@ -3166,25 +3395,26 @@ ASTDirSwitch Switch() :
         breakableDirectiveNesting++;
         switchBlock = new ASTDirSwitch(switchExp, ignoredSectionBeforeFirstCase);
     }
-    (
-        LOOKAHEAD(2)
-        caseOrDefault = ASTDirCase()
-        {
-            if (caseOrDefault.condition == null) {
-                if (defaultFound) {
-                    throw new ParseException(
-                            "You can only have one default case in a switch statement", template, start);
+    [
+        (
+            caseOrDefault = ASTDirCase()
+            {
+                if (caseOrDefault.condition == null) {
+                    if (defaultFound) {
+                        throw new ParseException(
+                                "You can only have one default case in a switch statement", template, start);
+                    }
+                    defaultFound = true;
+                } else if (defaultFound) {
+                        throw new ParseException(
+                                "You can't have a \"case\" directive after the \"default\" directive",
+                                caseOrDefault);
                 }
-                defaultFound = true;
-            } else if (defaultFound) {
-                    throw new ParseException(
-                            "You can't have a \"case\" directive after the \"default\" directive",
-                            caseOrDefault);
+                switchBlock.addCase(caseOrDefault);
             }
-            switchBlock.addCase(caseOrDefault);
-        }
-    )*
-    [<STATIC_TEXT_WS>]
+        )+
+        [<STATIC_TEXT_WS>]
+    ]
     end = <END_SWITCH>
     {
         breakableDirectiveNesting--;
@@ -3474,7 +3704,7 @@ ASTElement FreemarkerDirective() :
         |
         tp = Compress()
         |
-        tp = UnifiedMacroTransform()
+        tp = DynamicTopLevelCall()
         |
         tp = Items()
         |

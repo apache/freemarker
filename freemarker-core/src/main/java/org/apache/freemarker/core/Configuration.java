@@ -80,11 +80,6 @@ import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameForma
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.MruCacheStorage;
 import org.apache.freemarker.core.templateresolver.impl.SoftCacheStorage;
-import org.apache.freemarker.core.util.CaptureOutput;
-import org.apache.freemarker.core.util.HtmlEscape;
-import org.apache.freemarker.core.util.NormalizeNewlines;
-import org.apache.freemarker.core.util.StandardCompress;
-import org.apache.freemarker.core.util.XmlEscape;
 import org.apache.freemarker.core.util._ClassUtil;
 import org.apache.freemarker.core.util._CollectionUtil;
 import org.apache.freemarker.core.util._NullArgumentException;
@@ -2304,18 +2299,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             return Collections.emptyMap();
         }
 
-        private static final Map<String, Object> DEFAULT_SHARED_VARIABLES;
-        static {
-            // TODO [FM3] Get rid of these
-            Map<String, Object> sharedVariables = new HashMap<>();
-            sharedVariables.put("capture_output", new CaptureOutput());
-            sharedVariables.put("compress", StandardCompress.INSTANCE);
-            sharedVariables.put("html_escape", new HtmlEscape());
-            sharedVariables.put("normalize_newlines", new NormalizeNewlines());
-            sharedVariables.put("xml_escape", new XmlEscape());
-            DEFAULT_SHARED_VARIABLES = Collections.unmodifiableMap(sharedVariables);
-        }
-
         /**
          * The shared variables that will be added to the built {@link Configuration} before the ones coming from
          * {@link #getSharedVariables()}. When overriding this method, always consider adding to the return value
@@ -2324,7 +2307,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
          * @return Immutable {@link Map}; not {@code null}
          */
         protected Map<String, Object> getImpliedSharedVariables() {
-            return DEFAULT_SHARED_VARIABLES;
+            return Collections.emptyMap();
         }
 
         /**

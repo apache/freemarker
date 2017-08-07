@@ -22,7 +22,6 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 
 import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateDirectiveBody;
 
 /**
  * Not yet public; subject to change.
@@ -30,18 +29,16 @@ import org.apache.freemarker.core.model.TemplateDirectiveBody;
  * <p>
  * Known compatibility risks when using this post-processor:
  * <ul>
- * <li>{@link TemplateDateModel}-s that care to explicitly check if their nested content is {@code null} might start to
- *   complain that you have specified a body despite that the directive doesn't support that. Directives should use
- *   {@link NestedContentNotSupportedException#check(TemplateDirectiveBody)} instead of a simple
- *   {@code null}-check to avoid this problem.</li>
  * <li>
- *   Software that uses {@link DirectiveCallPlace#isNestedOutputCacheable()} will always get {@code false}, because
+ *   Software that uses {@link CallPlace#isNestedOutputCacheable()} will always get {@code false}, because
  *   interruption checks ({@link ASTThreadInterruptionCheck} elements) are, obviously, not cacheable. This should only
  *   impact the performance.
  * <li>
  *   Software that investigates the AST will see the injected {@link ASTThreadInterruptionCheck} elements. As of this
  *   writing the AST API-s aren't published, also such software need to be able to deal with new kind of elements
- *   anyway, so this shouldn't be a problem.
+ *   anyway, so this shouldn't be a problem. When a {@link TemplateDateModel} checks if it has no nested content, it
+ *   should always use {@link CallPlace#hasNestedContent()}, which will ignore nested content that only
+ *   contains a {@link ASTThreadInterruptionCheck}.
  * </ul>
  */
 class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcessor {

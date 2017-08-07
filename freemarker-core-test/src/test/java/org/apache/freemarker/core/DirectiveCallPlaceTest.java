@@ -26,8 +26,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.freemarker.core.model.TemplateDirectiveBody;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
+import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
@@ -73,20 +74,14 @@ public class DirectiveCallPlaceTest extends TemplateTest {
                 "<@pa />\n"
                 + "..<@pa\n"
                 + "/><@pa>xxx</@>\n"
-                + "<@pa>{<@pa/> <@pa/>}</@>\n"
-                + "${curDirLine}<@argP p=curDirLine?string>${curDirLine}</@argP>${curDirLine}\n"
-                + "<#macro m p>(p=${p}){<#nested>}</#macro>\n"
-                + "${curDirLine}<@m p=curDirLine?string>${curDirLine}</@m>${curDirLine}");
+                + "<@pa>{<@pa/> <@pa/>}</@>\n");
         
         assertOutputForNamed(
                 "positions.ftl",
                 "[positions.ftl:1:1-1:7]"
                 + "..[positions.ftl:2:3-3:2]"
                 + "[positions.ftl:3:3-3:14]xxx\n"
-                + "[positions.ftl:4:1-4:24]{[positions.ftl:4:7-4:12] [positions.ftl:4:14-4:19]}\n"
-                + "-(p=5){-}-\n"
-                + "-(p=7){-}-"
-                );
+                + "[positions.ftl:4:1-4:24]{[positions.ftl:4:7-4:12] [positions.ftl:4:14-4:19]}\n");
     }
     
     @SuppressWarnings("boxing")
@@ -97,7 +92,6 @@ public class DirectiveCallPlaceTest extends TemplateTest {
         dm.put("lc", new CachingLowerCaseDirective());
         dm.put("pa", new PositionAwareDirective());
         dm.put("argP", new ArgPrinterDirective());
-        dm.put("curDirLine", new CurDirLineScalar());
         dm.put("x", 123);
         return dm;
     }
@@ -111,17 +105,15 @@ public class DirectiveCallPlaceTest extends TemplateTest {
         static void resetCacheRecreationCount() {
             cacheRecreationCount.set(0);
         }
-        
+
         @Override
-        public void execute(Environment env, Map params, TemplateModel[] loopVars, final TemplateDirectiveBody body)
+        public void execute(TemplateModel[] args, final CallPlace callPlace, Writer out, final Environment env)
                 throws TemplateException, IOException {
-            if (body == null) {
+            if (!callPlace.hasNestedContent()) {
                 return;
             }
             
             final String convertedText;
-
-            final DirectiveCallPlace callPlace = env.getCurrentDirectiveCallPlace();
             if (callPlace.isNestedOutputCacheable()) {
                 try {
                     convertedText = (String) callPlace.getOrCreateCustomData(
@@ -129,7 +121,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
 
                                 @Override
                                 public String get() throws TemplateException, IOException {
-                                    return convertBodyText(body)
+                                    return convertBodyText(callPlace, env)
                                             + "[cached " + cacheRecreationCount.incrementAndGet() + "]";
                                 }
 
@@ -138,18 +130,28 @@ public class DirectiveCallPlaceTest extends TemplateTest {
                     throw new TemplateModelException("Failed to pre-render nested content", e);
                 }
             } else {
-                convertedText = convertBodyText(body);
+                convertedText = convertBodyText(callPlace, env);
             }
 
-            env.getOut().write(convertedText);
+            out.write(convertedText);
+        }
+
+        @Override
+        public ArgumentArrayLayout getArgumentArrayLayout() {
+            return ArgumentArrayLayout.PARAMETERLESS;
+        }
+
+        @Override
+        public boolean isNestedContentSupported() {
+            return true;
         }
 
         protected abstract Class getTextConversionIdentity();
 
-        private String convertBodyText(TemplateDirectiveBody body) throws TemplateException,
+        private String convertBodyText(CallPlace callPlace, Environment env) throws TemplateException,
                 IOException {
             StringWriter sw = new StringWriter();
-            body.render(sw);
+            callPlace.executeNestedContent(null, sw, env);
             return convertText(sw.toString());
         }
         
@@ -188,10 +190,8 @@ public class DirectiveCallPlaceTest extends TemplateTest {
     private static class PositionAwareDirective implements TemplateDirectiveModel {
 
         @Override
-        public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+        public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
                 throws TemplateException, IOException {
-            Writer out = env.getOut();
-            DirectiveCallPlace callPlace = env.getCurrentDirectiveCallPlace();
             out.write("[");
             out.write(getTemplateSourceName(callPlace));
             out.write(":");
@@ -203,47 +203,57 @@ public class DirectiveCallPlaceTest extends TemplateTest {
             out.write(":");
             out.write(Integer.toString(callPlace.getEndColumn()));
             out.write("]");
-            if (body != null) {
-                body.render(out);
-            }
+            callPlace.executeNestedContent(null, out, env);
         }
 
-        private String getTemplateSourceName(DirectiveCallPlace callPlace) {
-            return ((ASTDirUserDefined) callPlace).getTemplate().getSourceName();
+        @Override
+        public ArgumentArrayLayout getArgumentArrayLayout() {
+            return ArgumentArrayLayout.PARAMETERLESS;
         }
-        
+
+        @Override
+        public boolean isNestedContentSupported() {
+            return true;
+        }
+
+        private String getTemplateSourceName(CallPlace callPlace) {
+            return callPlace.getTemplate().getSourceName();
+        }
     }
 
     private static class ArgPrinterDirective implements TemplateDirectiveModel {
 
+        private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
+                0, false,
+                null, true
+        );
+
         @Override
-        public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+        public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
                 throws TemplateException, IOException {
-            final Writer out = env.getOut();
-            if (params.size() > 0) {
+            TemplateHashModelEx2 varargs = (TemplateHashModelEx2) args[ARGS_LAYOUT.getNamedVarargsArgumentIndex()];
+            if (varargs.size() > 0) {
                 out.write("(p=");
-                out.write(((TemplateScalarModel) params.get("p")).getAsString());
+                out.write(((TemplateScalarModel) varargs.get("p")).getAsString());
                 out.write(")");
             }
-            if (body != null) {
+            if (callPlace.hasNestedContent()) {
                 out.write("{");
-                body.render(out);
+                callPlace.executeNestedContent(null, out, env);
                 out.write("}");
             }
         }
-        
-    }
-    
-    private static class CurDirLineScalar implements TemplateScalarModel {
 
         @Override
-        public String getAsString() throws TemplateModelException {
-            DirectiveCallPlace callPlace = Environment.getCurrentEnvironment().getCurrentDirectiveCallPlace();
-            return callPlace != null
-                    ? String.valueOf(Environment.getCurrentEnvironment().getCurrentDirectiveCallPlace().getBeginLine())
-                    : "-";
+        public ArgumentArrayLayout getArgumentArrayLayout() {
+            return ARGS_LAYOUT;
         }
-        
+
+        @Override
+        public boolean isNestedContentSupported() {
+            return true;
+        }
+
     }
 
 }

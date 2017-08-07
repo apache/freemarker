@@ -35,7 +35,7 @@ final class ASTDirReturn extends ASTDirective {
         if (exp != null) {
             env.setLastReturnValue(exp.eval(env));
         }
-        if (nextSibling() == null && getParent() instanceof ASTDirMacro) {
+        if (nextSibling() == null && getParent() instanceof ASTDirMacroOrFunction) {
             // Avoid unnecessary exception throwing 
             return null;
         }

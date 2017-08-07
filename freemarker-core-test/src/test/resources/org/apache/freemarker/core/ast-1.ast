@@ -19,26 +19,26 @@
 #mixedContent  // o.a.f.c.ASTImplicitParent
     #text  // o.a.f.c.ASTStaticText
         - content: "1 "  // String
-    @  // o.a.f.c.ASTDirUserDefined
+    @  // o.a.f.c.ASTDynamicTopLevelCall
         - callee: foo  // o.a.f.c.ASTExpVariable
         - argument name: "x"  // String
         - argument value: 1  // o.a.f.c.ASTExpNumberLiteral
         - argument name: "y"  // String
         - argument value: 2  // o.a.f.c.ASTExpNumberLiteral
-        - target loop variable: "b1"  // String
-        - target loop variable: "b2"  // String
+        - nested content parameter: "b1"  // String
+        - nested content parameter: "b2"  // String
         #text  // o.a.f.c.ASTStaticText
             - content: "x"  // String
     #text  // o.a.f.c.ASTStaticText
         - content: "\n2 "  // String
-    @  // o.a.f.c.ASTDirUserDefined
+    @  // o.a.f.c.ASTDynamicTopLevelCall
         - callee: .  // o.a.f.c.ASTExpDot
             - left-hand operand: ns  // o.a.f.c.ASTExpVariable
             - right-hand operand: "bar"  // String
         - argument value: 1  // o.a.f.c.ASTExpNumberLiteral
         - argument value: 2  // o.a.f.c.ASTExpNumberLiteral
-        - target loop variable: "b1"  // String
-        - target loop variable: "b2"  // String
+        - nested content parameter: "b1"  // String
+        - nested content parameter: "b2"  // String
         #text  // o.a.f.c.ASTStaticText
             - content: "y"  // String
     #text  // o.a.f.c.ASTStaticText
@@ -112,30 +112,22 @@
                 - content: "more"  // String
     #text  // o.a.f.c.ASTStaticText
         - content: "\n6 "  // String
-    #macro  // o.a.f.c.ASTDirMacro
+    #macro  // o.a.f.c.ASTDirMacroOrFunction
         - assignment target: "foo"  // String
-        - parameter name: "x"  // String
-        - parameter default: null  // Null
-        - parameter name: "y"  // String
-        - parameter default: 2  // o.a.f.c.ASTExpNumberLiteral
-        - parameter name: "z"  // String
-        - parameter default: +  // o.a.f.c.ASTExpAddOrConcat
-            - left-hand operand: y  // o.a.f.c.ASTExpVariable
-            - right-hand operand: 1  // o.a.f.c.ASTExpNumberLiteral
-        - catch-all parameter name: "q"  // String
+        - parameter definition: "ParameterDefinition(name=\"x\")"  // o.a.f.c.ASTDirMacroOrFunction$ParameterDefinition
+        - parameter definition: "ParameterDefinition(name=\"y\", default=2)"  // o.a.f.c.ASTDirMacroOrFunction$ParameterDefinition
+        - parameter definition: "ParameterDefinition(name=\"z\", default=y + 1)"  // o.a.f.c.ASTDirMacroOrFunction$ParameterDefinition
+        - parameter definition: "ParameterDefinition(name=\"q\")"  // o.a.f.c.ASTDirMacroOrFunction$ParameterDefinition
         - AST-node subtype: "0"  // Integer
         #nested  // o.a.f.c.ASTDirNested
             - passed value: x  // o.a.f.c.ASTExpVariable
             - passed value: y  // o.a.f.c.ASTExpVariable
     #text  // o.a.f.c.ASTStaticText
         - content: "\n7 "  // String
-    #function  // o.a.f.c.ASTDirMacro
+    #function  // o.a.f.c.ASTDirMacroOrFunction
         - assignment target: "foo"  // String
-        - parameter name: "x"  // String
-        - parameter default: null  // Null
-        - parameter name: "y"  // String
-        - parameter default: null  // Null
-        - catch-all parameter name: null  // Null
+        - parameter definition: "ParameterDefinition(name=\"x\")"  // o.a.f.c.ASTDirMacroOrFunction$ParameterDefinition
+        - parameter definition: "ParameterDefinition(name=\"y\")"  // o.a.f.c.ASTDirMacroOrFunction$ParameterDefinition
         - AST-node subtype: "1"  // Integer
         #local  // o.a.f.c.ASTDirAssignment
             - assignment target: "x"  // String
@@ -149,7 +141,7 @@
         - content: "\n8 "  // String
     #list  // o.a.f.c.ASTDirList
         - list source: xs  // o.a.f.c.ASTExpVariable
-        - target loop variable: "x"  // String
+        - nested content parameter: "x"  // String
     #text  // o.a.f.c.ASTStaticText
         - content: "\n9 "  // String
     #list-#else-container  // o.a.f.c.ASTDirListElseContainer
@@ -158,7 +150,7 @@
             #text  // o.a.f.c.ASTStaticText
                 - content: "["  // String
             #items  // o.a.f.c.ASTDirItems
-                - target loop variable: "x"  // String
+                - nested content parameter: "x"  // String
                 ${...}  // o.a.f.c.ASTDollarInterpolation
                     - content: x  // o.a.f.c.ASTExpVariable
                 #sep  // o.a.f.c.ASTDirSep

@@ -22,10 +22,10 @@ package org.apache.freemarker.core;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
-import java.util.Map;
+import java.io.Writer;
 
 import org.apache.freemarker.core.ThreadInterruptionSupportTemplatePostProcessor.TemplateProcessingThreadInterruptedException;
-import org.apache.freemarker.core.model.TemplateDirectiveBody;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util._NullWriter;
@@ -119,35 +119,50 @@ public class TheadInterruptingSupportTest {
         }
 
         public class StartedDirective implements TemplateDirectiveModel {
-            
             @Override
-            public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+            public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
                     throws TemplateException, IOException {
                 synchronized (TemplateRunnerThread.this) {
                     started = true;
                     TemplateRunnerThread.this.notifyAll();
                 }
             }
-            
+
+            @Override
+            public ArgumentArrayLayout getArgumentArrayLayout() {
+                return ArgumentArrayLayout.PARAMETERLESS;
+            }
+
+            @Override
+            public boolean isNestedContentSupported() {
+                return false;
+            }
         }
 
         public class CustomLoopDirective implements TemplateDirectiveModel {
-
             @Override
-            public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+            public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
                     throws TemplateException, IOException {
                 // Deliberate infinite loop
                 while (true) {
-                    body.render(_NullWriter.INSTANCE);
+                    callPlace.executeNestedContent(null, _NullWriter.INSTANCE, env);
                 }
             }
-            
+
+            @Override
+            public ArgumentArrayLayout getArgumentArrayLayout() {
+                return ArgumentArrayLayout.PARAMETERLESS;
+            }
+
+            @Override
+            public boolean isNestedContentSupported() {
+                return true;
+            }
         }
         
         public class SleepDirective implements TemplateDirectiveModel {
-
             @Override
-            public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+            public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
                     throws TemplateException, IOException {
                 try {
                     Thread.sleep(100);
@@ -156,7 +171,16 @@ public class TheadInterruptingSupportTest {
                     Thread.currentThread().interrupt();
                 }
             }
-            
+
+            @Override
+            public ArgumentArrayLayout getArgumentArrayLayout() {
+                return ArgumentArrayLayout.PARAMETERLESS;
+            }
+
+            @Override
+            public boolean isNestedContentSupported() {
+                return false;
+            }
         }
         
     }

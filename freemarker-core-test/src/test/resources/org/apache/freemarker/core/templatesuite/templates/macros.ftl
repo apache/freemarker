@@ -45,7 +45,7 @@
 
 <p>Function is defined, now let's call it:</p>
 
-   <@español urls.home, images.home, "Home" /><#t>
+   <@español url=urls.home image=images.home alt="Home" /><#t>
 
 <p>Again, but with different parameters:</p>
 
@@ -63,7 +63,7 @@
 
 <p>A recursive function call:</p>
 
-<#macro recurse dummy a=3>
+<#macro recurse dummy{positional}, a{positional}=3>
     <#if (a > 0)>
         <@recurse dummy, a - 1 />
     </#if>
@@ -83,19 +83,18 @@ foo=${foo} baz=[<#list bar?keys?sort as key>${key}=${bar[key]}<#if key_has_next>
 <@catchall foo="a" bar="b"/>
 <@catchall foo="a" bar="b" baz="c"/>
 
-<#macro fmt pattern args...>
-  <#list args as arg>
-    <#local pattern = pattern?replace("{" + arg_index + "}", arg)>
+<#macro fmt pattern{positional} args...>
+  <#list args as k, v>
+    <#local pattern = pattern?replace("{" + k + "}", v)>
   </#list>
   ${pattern}<#lt>
 </#macro>
 
-<#macro m a=1 b=2>
-</#macro>
+<#macro m a=1 b=2></#macro>
 <@assertFails message='"c"'><@m c=3 /></@>
-<@assertFails message='3'><@m 9, 8, 7 /></@>
+<@assertFails message='position'><@m 1, 2 /></@>
 
-<@fmt "Hello {0}! Today is {1}.", "World", "Monday" />
+<@fmt "Hello {name}! Today is {today}." name="World" today="Monday" />
 
 </body>
 </html>

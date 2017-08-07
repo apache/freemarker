@@ -211,6 +211,8 @@ public class _ErrorDescriptionBuilder {
         for (Object partObj : parts) {
             if (partObj instanceof Object[]) {
                 appendParts(sb, (Object[]) partObj);
+            } else if (partObj instanceof Class<?>) {
+                sb.append(((Class<?>) partObj).getName());
             } else {
                 String partStr;
                 partStr = tryToString(partObj);
@@ -219,12 +221,13 @@ public class _ErrorDescriptionBuilder {
                 }
 
                 if (template != null) {
+                    // Translate tag syntax of the part looks like an FTL tag
                     if (partStr.length() > 4
                             && partStr.charAt(0) == '<'
                             && (
                             (partStr.charAt(1) == '#' || partStr.charAt(1) == '@')
                                     || (partStr.charAt(1) == '/') && (partStr.charAt(2) == '#' || partStr.charAt(2) == '@')
-                    )
+                            )
                             && partStr.charAt(partStr.length() - 1) == '>') {
                         if (template.getActualTagSyntax() == TagSyntax.SQUARE_BRACKET) {
                             sb.append('[');

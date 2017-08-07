@@ -107,21 +107,21 @@
         - content: "\n"  // String
     #list  // o.a.f.c.ASTDirList; Location 11:1-11:22
         - list source: s  // o.a.f.c.ASTExpVariable; Location 11:8-11:8
-        - target loop variable: "i"  // String
+        - nested content parameter: "i"  // String
     #list  // o.a.f.c.ASTDirList; Location 12:1-12:23
         - list source: s  // o.a.f.c.ASTExpVariable; Location 12:8-12:8
-        - target loop variable: "i"  // String
+        - nested content parameter: "i"  // String
         #text  // o.a.f.c.ASTStaticText; Location 12:15-12:15
             - content: "1"  // String
     #text  // o.a.f.c.ASTStaticText; Location 12:24-12:24
         - content: "\n"  // String
     #list  // o.a.f.c.ASTDirList; Location 13:1-13:28
         - list source: s  // o.a.f.c.ASTExpVariable; Location 13:8-13:8
-        - target loop variable: "i"  // String
+        - nested content parameter: "i"  // String
         #sep  // o.a.f.c.ASTDirSep; Location 13:15-13:20
     #list  // o.a.f.c.ASTDirList; Location 14:1-14:30
         - list source: s  // o.a.f.c.ASTExpVariable; Location 14:8-14:8
-        - target loop variable: "i"  // String
+        - nested content parameter: "i"  // String
         #text  // o.a.f.c.ASTStaticText; Location 14:15-14:15
             - content: "1"  // String
         #sep  // o.a.f.c.ASTDirSep; Location 14:16-14:22
@@ -132,14 +132,14 @@
     #list  // o.a.f.c.ASTDirList; Location 15:1-15:45
         - list source: s  // o.a.f.c.ASTExpVariable; Location 15:8-15:8
         #items  // o.a.f.c.ASTDirItems; Location 15:10-15:37
-            - target loop variable: "i"  // String
+            - nested content parameter: "i"  // String
             #sep  // o.a.f.c.ASTDirSep; Location 15:23-15:28
     #list  // o.a.f.c.ASTDirList; Location 16:1-16:49
         - list source: s  // o.a.f.c.ASTExpVariable; Location 16:8-16:8
         #text  // o.a.f.c.ASTStaticText; Location 16:10-16:10
             - content: "1"  // String
         #items  // o.a.f.c.ASTDirItems; Location 16:11-16:40
-            - target loop variable: "i"  // String
+            - nested content parameter: "i"  // String
             #text  // o.a.f.c.ASTStaticText; Location 16:24-16:24
                 - content: "1"  // String
             #sep  // o.a.f.c.ASTDirSep; Location 16:25-16:31

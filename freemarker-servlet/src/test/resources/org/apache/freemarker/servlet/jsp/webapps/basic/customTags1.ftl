@@ -44,11 +44,11 @@
 <!-- Test nested execution with intermittent non-JSP transform -->
 <@t.testtag repeatCount=2 throwException=false>
 Outer Blah
-<@compress>
+<#compress>
 <@t.testtag repeatCount=2 throwException=false>
 Inner Blah
 </@>
-</@>
+</#compress>
 </@>
 
 <@t.simpletag bodyLoopCount=2 name="simpletag1">

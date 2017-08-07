@@ -38,7 +38,7 @@
 
 <@testList listables.emptyIterator />
 
-<#macro testList seq>
+<#macro testList seq{positional}>
 Size: <#attempt>${seq?size}<#recover>failed</#attempt>
 Items: <#list seq as i>@${i_index} ${i}<#if i_has_next>, <#else>.</#if></#list>
 </#macro>

@@ -18,8 +18,8 @@
 -->
 <@assertEquals expected="b" actual=map?api.get(2?int) />
 <@assertEquals expected=2 actual=list?api.indexOf(3?int) />
-<@assert test=set?api.contains("b") />
-<@assert test=!set?api.contains("d") />
+<@assert set?api.contains("b") />
+<@assert !set?api.contains("d") />
 
 <#assign dump = "">
 <#list map?api.entrySet() as entry>
@@ -30,11 +30,11 @@
 </#list>
 <@assertEquals expected="1: a, 2: b, 3: c" actual=dump />
 
-<@assert test=map?hasApi />
-<@assert test=list?hasApi />
-<@assert test=set?hasApi />
-<@assert test=!s?hasApi />
-<@assert test=!1?hasApi />
-<@assert test=!""?hasApi />
-<@assert test=!{}?hasApi />
-<@assert test=!true?hasApi />
+<@assert map?hasApi />
+<@assert list?hasApi />
+<@assert set?hasApi />
+<@assert !s?hasApi />
+<@assert !1?hasApi />
+<@assert !""?hasApi />
+<@assert !{}?hasApi />
+<@assert !true?hasApi />

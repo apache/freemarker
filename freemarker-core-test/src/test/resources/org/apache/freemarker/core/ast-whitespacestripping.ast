@@ -27,7 +27,7 @@
         - content: "\n"  // String
     #list  // o.a.f.c.ASTDirList
         - list source: x  // o.a.f.c.ASTExpVariable
-        - target loop variable: "xs"  // String
+        - nested content parameter: "xs"  // String
         #text  // o.a.f.c.ASTStaticText
             - content: "    "  // String
         ${...}  // o.a.f.c.ASTDollarInterpolation
@@ -50,17 +50,17 @@
         - namespace: null  // Null
     #text  // o.a.f.c.ASTStaticText
         - content: "\n"  // String
-    @  // o.a.f.c.ASTDirUserDefined
+    @  // o.a.f.c.ASTDynamicTopLevelCall
         - callee: b  // o.a.f.c.ASTExpVariable
         #text  // o.a.f.c.ASTStaticText
             - content: "    x\n"  // String
     #text  // o.a.f.c.ASTStaticText
         - content: "\n"  // String
-    @  // o.a.f.c.ASTDirUserDefined
+    @  // o.a.f.c.ASTDynamicTopLevelCall
         - callee: c  // o.a.f.c.ASTExpVariable
     #text  // o.a.f.c.ASTStaticText
         - content: "\n"  // String
-    @  // o.a.f.c.ASTDirUserDefined
+    @  // o.a.f.c.ASTDynamicTopLevelCall
         - callee: d  // o.a.f.c.ASTExpVariable
     #text  // o.a.f.c.ASTStaticText
         - content: "\na\n"  // String
