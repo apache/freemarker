@@ -22,16 +22,19 @@ package org.apache.freemarker.core.model.impl;
 import java.text.MessageFormat;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import org.apache.freemarker.core.CallPlace;
+import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core._CallableUtils;
 import org.apache.freemarker.core._DelayedJQuote;
 import org.apache.freemarker.core._TemplateModelException;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 
@@ -50,13 +53,9 @@ import org.apache.freemarker.core.model.TemplateModelException;
  * for MessageFormat with arguments arg1, arg2 and arg3</li>
  * </ul>
  */
-public class ResourceBundleModel
-    extends
-    BeanModel
-    implements
-    TemplateMethodModelEx {
+public class ResourceBundleModel extends BeanModel implements TemplateFunctionModel {
 
-    private Hashtable formats = null;
+    private Hashtable<String, MessageFormat> formats = null;
 
     public ResourceBundleModel(ResourceBundle bundle, DefaultObjectWrapper wrapper) {
         super(bundle, wrapper);
@@ -108,25 +107,23 @@ public class ResourceBundleModel
      * rest of the arguments. The created MessageFormats are cached for later reuse.
      */
     @Override
-    public Object exec(List arguments)
-        throws TemplateModelException {
+    public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env) throws TemplateException {
         // Must have at least one argument - the key
-        if (arguments.size() < 1)
-            throw new TemplateModelException("No message key was specified");
+        if (args.length < 1)
+            throw new TemplateException("No message key was specified", env);
         // Read it
-        Iterator it = arguments.iterator();
-        String key = unwrap((TemplateModel) it.next()).toString();
+        String key = _CallableUtils.castArgToString(args, 0);
         try {
-            if (!it.hasNext()) {
+            if (args.length == 1) {
                 return wrap(((ResourceBundle) object).getObject(key));
             }
-    
+
             // Copy remaining arguments into an Object[]
-            int args = arguments.size() - 1;
-            Object[] params = new Object[args];
-            for (int i = 0; i < args; ++i)
-                params[i] = unwrap((TemplateModel) it.next());
-    
+            int paramsLen = args.length - 1;
+            Object[] params = new Object[paramsLen];
+            for (int i = 0; i < paramsLen; ++i)
+                params[i] = unwrap(args[1 + i]);
+
             // Invoke format
             return new BeanAndStringModel(format(key, params), wrapper);
         } catch (MissingResourceException e) {
@@ -134,6 +131,11 @@ public class ResourceBundleModel
         } catch (Exception e) {
             throw new TemplateModelException(e.getMessage());
         }
+    }
+
+    @Override
+    public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+        return null;
     }
 
     /**

@@ -56,7 +56,7 @@ public class PositionalVarargsOnlyFunction extends TestTemplateCallableModel imp
     }
 
     @Override
-    public ArgumentArrayLayout getArgumentArrayLayout() {
+    public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
         return ARGS_LAYOUT;
     }
 }

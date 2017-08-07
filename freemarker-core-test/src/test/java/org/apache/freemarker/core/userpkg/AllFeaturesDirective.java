@@ -19,19 +19,18 @@
 
 package org.apache.freemarker.core.userpkg;
 
-import static org.apache.freemarker.core._TemplateCallableModelUtils.*;
+import static org.apache.freemarker.core._CallableUtils.*;
 
 import java.io.IOException;
 import java.io.Writer;
 
+import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.util.StringToIndexMap;
@@ -79,17 +78,17 @@ public class AllFeaturesDirective extends TestTemplateCallableModel implements T
     @Override
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
-        execute(castArgumentToNumber(args, P1_ARG_IDX, p1AllowNull, env),
-                castArgumentToNumber(args, P2_ARG_IDX, p2AllowNull, env),
+        execute(castArgToNumber(args, P1_ARG_IDX, p1AllowNull),
+                castArgToNumber(args, P2_ARG_IDX, p2AllowNull),
                 (TemplateSequenceModel) args[P_VARARGS_ARG_IDX],
-                castArgumentToNumber(args[N1_ARG_IDX], N1_ARG_NAME, n1AllowNull, env),
-                castArgumentToNumber(args[N2_ARG_IDX], N2_ARG_NAME, n2AllowNull, env),
+                castArgToNumber(args[N1_ARG_IDX], N1_ARG_NAME, n1AllowNull),
+                castArgToNumber(args[N2_ARG_IDX], N2_ARG_NAME, n2AllowNull),
                 (TemplateHashModelEx2) args[N_VARARGS_ARG_IDX],
                 out, env, callPlace);
     }
 
-    private void execute(TemplateNumberModel p1, TemplateNumberModel p2, TemplateSequenceModel pOthers,
-            TemplateNumberModel n1, TemplateNumberModel n2, TemplateHashModelEx2 nOthers,
+    private void execute(Number p1, Number p2, TemplateSequenceModel pOthers,
+            Number n1, Number n2, TemplateHashModelEx2 nOthers,
             Writer out, Environment env, CallPlace callPlace) throws IOException, TemplateException {
         out.write("#a(");
         printParam("p1", p1, out, true);
@@ -107,7 +106,7 @@ public class AllFeaturesDirective extends TestTemplateCallableModel implements T
         if (callPlace.hasNestedContent()) {
             out.write(" {");
             if (p1 != null) {
-                int intP1 = p1.getAsNumber().intValue();
+                int intP1 = p1.intValue();
                 for (int i = 0; i < intP1; i++) {
                     // We dynamically set as many nested content parameters as many the caller has declared; this is
                     // unusual, and is for testing purposes only.
@@ -123,7 +122,7 @@ public class AllFeaturesDirective extends TestTemplateCallableModel implements T
     }
 
     @Override
-    public ArgumentArrayLayout getArgumentArrayLayout() {
+    public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
         return ARGS_LAYOUT;
     }
 

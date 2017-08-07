@@ -86,9 +86,6 @@ Node: Changes already mentioned above aren't repeated here!
   translated to `${b}`, while `#{x; m1M3}` is translated to `${x?string('0.0##')}`). The output should remain the same.
 - In `#macro` and `#function` the comma must only be used between by-position parameters (earlier the comma was
   optional).
-  TODO As of this writing, the by-position VS by-name feature isn't implemented yet, so
-  comma is to be used for `#function`, and comma must not be used for `#macro` (even though for now macros are always
-  allowed to be called with by-position parameters as well, just as in FM2).
 - In `#function`, parentheses are now required around parameter list (as in `<#function f(a, b)>`), even if there are
   zero parameters (as in `<#function f()>`). In `#macro`, parentheses are not allowed around parameter list anymore
   (so `#macro m(a b)` becomes to `#macro m a b`). This is to remain more consistent with the look-and-feel of the
@@ -120,8 +117,10 @@ Node: Changes already mentioned above aren't repeated here!
   - Renamed `DirectiveCallPlace` to `CallPlace`
   - Removed Environment.getDirectiveCallPlace(), as TemplateDirectiveModel-s now get the CallPlace as the
     parameter of the `execute` method.
-  - ?isTransform was removed (as there are no transforms anymore).
-    Converter note: The template converter tool replaces it with ?isDirective
+  - `?isTransform` was removed (as there are no transforms anymore); use `?isDirective` instead.
+  - `?isMacro` was removed; use `?isDirective` instead, which returns `true` both for macros and directives defined otherwise.
+  - `?isMethod` was removed; use `?isFunction` instead, which returns `true` both for Java methods and functions defined
+     otherwise (such as with `#function`).
 - The directive returned by `?interpret` doesn't allow nested content anymore. (It wasn't useful earlier either;
   the nested content was simply executed after the interpreted string.)
 - Changes in #macro/#functions
@@ -135,7 +134,10 @@ Node: Changes already mentioned above aren't repeated here!
   - When parameter default expressions are evaluated, only the parameters defined earlier are already set.
     So `<#macro m a b=a>` works, but `<#macro m a=b b>` won't work anymore (unless there's `b` outside the
     parameter list), as `b` is not yet set when the default of `a` is calculated.
-
+- Built-ins don't convert their parameters to tring anymore; in FM some (not all) of them did, because they
+  were based on the TemplateMethod interface (deprecated even in FM2) that required String paramteters and
+  was auto-converted by FM2.
+    
   
 Java API changes
 ================
@@ -196,7 +198,6 @@ Major changes / features
     `TemplateDirectiveModel`, `TemplateTransformModel`). FM3 replaces them with only two new interfaces,
     `TemplateDirectiveModel` (differs from the interface with identical name in FM2) and `TemplateFunctionModel`.
     (These are both the subinterfaces of another new interface `TemplateCallableModel`.)
-    [TODO: TemplateMethodModel[Ex] wasn't yet replaced by TemplateFunctionModel.]
   - All callable TempalteModel-s support passing parameters by position and by name, even in the same call
     (e.g., `<@heading "Some title" icon="foo.jpg" />`, `sum(1, 2, 3, abs=true)`)
   - `#macro` now produces a `TemplateDirectiveModel` and `#function` produces a `TemplateFunctionModel`. (Earlier, the
@@ -372,6 +373,10 @@ Core / Models and Object wrapping
   get method (`get(String)`) had priority over methods of similar name. The generic get method is only recognized from its
   name and parameter type, so it's a quite consfusing feature, and might will be removed alltogether.
 - Renamed TemplateDateModel.DATETIME to DATE_TIME (to be consistent with "dateTime" used elsewhere).
+- `TemplateMethod` and `TemplateMethodEx` was removed, taken over by `TemplateFunctionModel`. `TemplateFunctionModel` is
+  the common interface bith for wrapped Java methods and functions defined in the templates, or on any other ways.
+  `OverloadedMethodsModel` and `SimpleMethodModel` were renamed to `OverloadJavaMethodModel` and  `SimpleJavaMethodModel`,
+  which of course extend `TemplateFunctionModel`, but allow inocations without `Environment` parameter.
 
 Core / Template loading and caching
 ...................................

@@ -20,8 +20,10 @@
 package org.apache.freemarker.core.model.impl;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.NonTemplateCallPlace;
+import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 
@@ -111,12 +113,14 @@ public abstract class AbstractParallelIntrospectionTest extends TestCase {
         }
 
         private void testMethod(TemplateHashModel h, int objIdx, int mIdx)
-                throws TemplateModelException, AssertionError {
-            TemplateMethodModel pv = (TemplateMethodModel) h.get("m" + mIdx);
+                throws TemplateException, AssertionError {
+            JavaMethodModel pv = (JavaMethodModel) h.get("m" + mIdx);
             final int expected = objIdx * 1000 + mIdx;
-            final int got = ((TemplateNumberModel) pv.exec(null)).getAsNumber().intValue();
+            final int got = ((TemplateNumberModel) pv.execute(
+                    Constants.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE))
+                    .getAsNumber().intValue();
             if (got != expected) {
-                throw new AssertionError("Method assertation failed; " +
+                throw new AssertionError("Method assertion failed; " +
                         "expected " + expected + ", but got " + got);
             }
         }

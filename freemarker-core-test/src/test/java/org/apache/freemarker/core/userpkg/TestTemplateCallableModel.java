@@ -24,20 +24,20 @@ import java.io.Writer;
 
 import org.apache.freemarker.core.model.TemplateCallableModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
-import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.util.FTLUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 public abstract class TestTemplateCallableModel implements TemplateCallableModel {
 
-    protected void printParam(String name, TemplateModel value, Writer out) throws IOException, TemplateModelException {
+    protected void printParam(String name, Object value, Writer out) throws IOException, TemplateModelException {
         printParam(name, value, out, false);
     }
 
-    protected void printParam(String name, TemplateModel value, Writer out, boolean first)
+    protected void printParam(String name, Object value, Writer out, boolean first)
             throws IOException, TemplateModelException {
         if (!first) {
             out.write(", ");
@@ -47,7 +47,7 @@ public abstract class TestTemplateCallableModel implements TemplateCallableModel
         printValue(value, out);
     }
 
-    private void printValue(TemplateModel value, Writer out) throws IOException, TemplateModelException {
+    private void printValue(Object value, Writer out) throws IOException, TemplateModelException {
         if (value == null) {
             out.write("null");
         } else if (value instanceof TemplateNumberModel) {
@@ -79,6 +79,12 @@ public abstract class TestTemplateCallableModel implements TemplateCallableModel
                 }
             }
             out.write('}');
+        } else if (value instanceof String) {
+            out.write(_StringUtil.jQuote(value));
+        } else if (value instanceof Number) {
+            out.write(value.toString());
+        } else if (value instanceof Boolean) {
+            out.write(value.toString());
         } else {
             throw new IllegalArgumentException("Unsupported value class: " + value.getClass().getName());
         }

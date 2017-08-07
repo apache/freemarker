@@ -115,12 +115,12 @@
         - assignment target: "x"  // String
         - assignment operator: "="  // String
         - assignment source: ..  // o.a.f.c.ASTExpRange
-            - left-hand operand: ...(...)  // o.a.f.c.ASTExpMethodCall
+            - left-hand operand: ...(...)  // o.a.f.c.ASTExpFunctionCall
                 - callee: ?indexOf  // o.a.f.c.BuiltInsForStringsBasic$index_ofBI
                     - left-hand operand: n  // o.a.f.c.ASTExpVariable
                     - right-hand operand: "indexOf"  // String
                 - argument value: "x"  // o.a.f.c.ASTExpStringLiteral
-            - right-hand operand: ...(...)  // o.a.f.c.ASTExpMethodCall
+            - right-hand operand: ...(...)  // o.a.f.c.ASTExpFunctionCall
                 - callee: ?indexOf  // o.a.f.c.BuiltInsForStringsBasic$index_ofBI
                     - left-hand operand: m  // o.a.f.c.ASTExpVariable
                     - right-hand operand: "indexOf"  // String
@@ -236,7 +236,7 @@
     #text  // o.a.f.c.ASTStaticText
         - content: "\n"  // String
     ${...}  // o.a.f.c.ASTDollarInterpolation
-        - content: ...(...)  // o.a.f.c.ASTExpMethodCall
+        - content: ...(...)  // o.a.f.c.ASTExpFunctionCall
             - callee: f  // o.a.f.c.ASTExpVariable
             - argument value: ..  // o.a.f.c.ASTExpRange
                 - left-hand operand: m  // o.a.f.c.ASTExpVariable

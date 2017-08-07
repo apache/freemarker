@@ -117,7 +117,7 @@ class TagDirectiveModel extends JspTagModelBase implements TemplateDirectiveMode
     }
 
     @Override
-    public ArgumentArrayLayout getArgumentArrayLayout() {
+    public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
         return ARGS_LAYOUT;
     }
 

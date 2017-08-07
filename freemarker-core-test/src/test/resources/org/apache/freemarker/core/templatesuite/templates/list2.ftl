@@ -82,7 +82,7 @@
 
 <#function resolve(xs)>
     <#assign resolveCallCnt = (resolveCallCnt!0) + 1>
-    <#if xs?isMethod>
+    <#if xs?isFunction>
         <#return xs()>
     <#else>
         <#return xs>

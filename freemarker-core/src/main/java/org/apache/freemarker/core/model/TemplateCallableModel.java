@@ -20,14 +20,9 @@
 package org.apache.freemarker.core.model;
 
 /**
- * Super interface of {@link TemplateFunctionModel} and {@link TemplateDirectiveModel}; don' extended (or implement) it
- * yourself!
+ * Super interface (marker interface) of {@link TemplateFunctionModel} and {@link TemplateDirectiveModel}; don' extended
+ * (or implement) it yourself!
  */
 public interface TemplateCallableModel extends TemplateModel {
-
-    /**
-     * Returns the argument array layout to use when calling the {@code execute} method.
-     */
-    ArgumentArrayLayout getArgumentArrayLayout();
-
+    //
 }

@@ -42,7 +42,9 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.NonTemplateCallPlace;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core._CoreAPI;
 import org.apache.freemarker.core._DelayedFTLTypeDescription;
@@ -55,8 +57,8 @@ import org.apache.freemarker.core.model.RichObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelAdapter;
 import org.apache.freemarker.core.model.TemplateModelException;
@@ -481,7 +483,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * Wraps a Java method so that it can be called from templates, without wrapping its parent ("this") object. The
      * result is almost the same as that you would get by wrapping the parent object then getting the method from the
      * resulting {@link TemplateHashModel} by name. Except, if the wrapped method is overloaded, with this method you
-     * explicitly select a an overload, while otherwise you would get a {@link TemplateMethodModelEx} that selects an
+     * explicitly select an overload, while otherwise you would get a {@link OverloadedJavaMethodModel} that selects an
      * overload each time it's called based on the argument values.
      *
      * @param object The object whose method will be called, or {@code null} if {@code method} is a static method.
@@ -489,8 +491,8 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * @param method The method to call, which must be an (inherited) member of the class of {@code object}, as
      *          described by {@link Method#invoke(Object, Object...)}
      */
-    public TemplateMethodModelEx wrap(Object object, Method method) {
-        return new JavaMethodModel(object, method, method.getParameterTypes(), this);
+    public TemplateFunctionModel wrap(Object object, Method method) {
+        return new SimpleJavaMethodModel(object, method, method.getParameterTypes(), this);
     }
 
     /**
@@ -582,7 +584,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         // This is for transparent interop with other wrappers (and ourselves)
         // Passing the targetClass allows e.g. a Jython-aware method that declares a
         // PyObject as its argument to receive a PyObject from a Jython-aware TemplateModel
-        // passed as an argument to TemplateMethodModelEx etc.
+        // passed as an argument to TemplateFunctionModel etc.
         if (model instanceof AdapterTemplateModel) {
             Object wrapped = ((AdapterTemplateModel) model).getAdaptedObject(targetClass);
             if (targetClass == Object.class || targetClass.isInstance(wrapped)) {
@@ -1040,10 +1042,13 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * constructor. Overloaded constructors and varargs are supported. Only public constructors will be called.
      *
      * @param clazz The class whose constructor we will call.
-     * @param arguments The list of {@link TemplateModel}-s to pass to the constructor after unwrapping them
+     * @param args The list of {@link TemplateModel}-s to pass to the constructor after unwrapping them
+     * @param callPlace Where the constructor is called from (which may contains information useful for overloaded
+     *                  constructor selection); you may want to use {@link NonTemplateCallPlace#INSTANCE}.
+     *                 if you call this from Java code.
      * @return The instance created; it's not wrapped into {@link TemplateModel}.
      */
-    public Object newInstance(Class<?> clazz, List/*<? extends TemplateModel>*/ arguments)
+    public Object newInstance(Class<?> clazz, TemplateModel[] args, CallPlace callPlace)
             throws TemplateModelException {
         try {
             Object ctors = classIntrospector.get(clazz).get(ClassIntrospector.CONSTRUCTORS_KEY);
@@ -1052,19 +1057,19 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
                         " has no public constructors.");
             }
             Constructor<?> ctor = null;
-            Object[] objargs;
+            Object[] pojoArgs;
             if (ctors instanceof SimpleMethod) {
                 SimpleMethod sm = (SimpleMethod) ctors;
                 ctor = (Constructor<?>) sm.getMember();
-                objargs = sm.unwrapArguments(arguments, this);
+                pojoArgs = sm.unwrapArguments(args, this);
                 try {
-                    return ctor.newInstance(objargs);
+                    return ctor.newInstance(pojoArgs);
                 } catch (Exception e) {
-                    if (e instanceof TemplateModelException) throw (TemplateModelException) e;
                     throw _MethodUtil.newInvocationTemplateModelException(null, ctor, e);
                 }
             } else if (ctors instanceof OverloadedMethods) {
-                final MemberAndArguments mma = ((OverloadedMethods) ctors).getMemberAndArguments(arguments, this);
+                // TODO [FM3] Utilize optional java type info in callPlace for overloaded method selection
+                final MemberAndArguments mma = ((OverloadedMethods) ctors).getMemberAndArguments(args, this);
                 try {
                     return mma.invokeConstructor(this);
                 } catch (Exception e) {

@@ -18,10 +18,7 @@
  */
 package org.apache.freemarker.core.model.impl;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
+import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
@@ -36,28 +33,28 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
     }
 
     @Override
-    Class[] preprocessParameterTypes(CallableMemberDescriptor memberDesc) {
+    Class<?>[] preprocessParameterTypes(CallableMemberDescriptor memberDesc) {
         return memberDesc.getParamTypes();
     }
     
     @Override
-    void afterWideningUnwrappingHints(Class[] paramTypes, int[] paramNumericalTypes) {
+    void afterWideningUnwrappingHints(Class<?>[] paramTypes, int[] paramNumericalTypes) {
         // Do nothing
     }
 
     @Override
-    MaybeEmptyMemberAndArguments getMemberAndArguments(List tmArgs, DefaultObjectWrapper unwrapper)
+    MaybeEmptyMemberAndArguments getMemberAndArguments(TemplateModel[] tmArgs, DefaultObjectWrapper unwrapper)
     throws TemplateModelException {
         if (tmArgs == null) {
             // null is treated as empty args
-            tmArgs = Collections.EMPTY_LIST;
+            tmArgs = Constants.EMPTY_TEMPLATE_MODEL_ARRAY;
         }
-        final int argCount = tmArgs.size();
-        final Class[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();
+        final int argCount = tmArgs.length;
+        final Class<?>[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();
         if (unwrappingHintsByParamCount.length <= argCount) {
             return EmptyMemberAndArguments.WRONG_NUMBER_OF_ARGUMENTS;
         }
-        Class[] unwarppingHints = unwrappingHintsByParamCount[argCount];
+        Class<?>[] unwarppingHints = unwrappingHintsByParamCount[argCount];
         if (unwarppingHints == null) {
             return EmptyMemberAndArguments.WRONG_NUMBER_OF_ARGUMENTS;
         }
@@ -69,10 +66,9 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
             typeFlags = null;
         }
 
-        Iterator it = tmArgs.iterator();
-        for (int i = 0; i < argCount; ++i) {
+        for (int i = 0; i < argCount; i++) {
             Object pojo = unwrapper.tryUnwrapTo(
-                    (TemplateModel) it.next(),
+                    tmArgs[i],
                     unwarppingHints[i],
                     typeFlags != null ? typeFlags[i] : 0);
             if (pojo == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {

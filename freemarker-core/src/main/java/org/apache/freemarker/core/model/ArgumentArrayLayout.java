@@ -25,6 +25,8 @@ import org.apache.freemarker.core.util.StringToIndexMap;
  * {@link TemplateCallableModel} subinterfaces define a method called {@code execute}, which has an argument array
  * parameter, whose layout this class describes. The layout specifies the (minimum) array length, what's the index
  * of which parameters, and if there are varargs parameters, in which case they must not be left {@code null}.
+ * (Note that a {@link TemplateCallableModel} may have {@code null} layout; see the documentation of {@code execute}
+ * for more.)
  * <p>
  * Each parameter has a constant index in this array, which is the same for all invocations of the same
  * {@link TemplateCallableModel} object (regardless if there are omitted optional parameters). Thus, the argument
@@ -84,6 +86,22 @@ public final class ArgumentArrayLayout {
      */
     public static final ArgumentArrayLayout SINGLE_POSITIONAL_PARAMETER = new ArgumentArrayLayout(
             1, false,
+            null, false);
+
+    /**
+     * Constant to be used when the {@link TemplateCallableModel} has 2 positional parameter, and no others.
+     * (The argument array index of the positional parameters will be 0 and 1.)
+     */
+    public static final ArgumentArrayLayout TWO_POSITIONAL_PARAMETERS = new ArgumentArrayLayout(
+            2, false,
+            null, false);
+
+    /**
+     * Constant to be used when the {@link TemplateCallableModel} has 3 positional parameter, and no others.
+     * (The argument array index of the positional parameters will be 0, 1, and 2.)
+     */
+    public static final ArgumentArrayLayout THREE_POSITIONAL_PARAMETERS = new ArgumentArrayLayout(
+            3, false,
             null, false);
 
     /**

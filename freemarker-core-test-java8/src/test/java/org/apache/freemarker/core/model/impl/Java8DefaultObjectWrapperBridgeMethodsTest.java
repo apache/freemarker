@@ -20,33 +20,31 @@ package org.apache.freemarker.core.model.impl;
 
 import static org.junit.Assert.*;
 
-import java.util.Collections;
-
-import org.junit.Test;
-
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.NonTemplateCallPlace;
+import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.junit.Test;
 
 public class Java8DefaultObjectWrapperBridgeMethodsTest {
     
     @Test
-    public void testWithoutDefaultMethod() throws TemplateModelException {
+    public void testWithoutDefaultMethod() throws TemplateException {
         test(BridgeMethodsBean.class);
     }
 
     @Test
-    public void testWithDefaultMethod() throws TemplateModelException {
+    public void testWithDefaultMethod() throws TemplateException {
         test(Java8BridgeMethodsWithDefaultMethodBean.class);
     }
 
     @Test
-    public void testWithDefaultMethod2() throws TemplateModelException {
+    public void testWithDefaultMethod2() throws TemplateException {
         test(Java8BridgeMethodsWithDefaultMethodBean2.class);
     }
 
-    private void test(Class<?> pClass) throws TemplateModelException {
+    private void test(Class<?> pClass) throws TemplateException {
         DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         TemplateHashModel wrapped;
         try {
@@ -54,12 +52,14 @@ public class Java8DefaultObjectWrapperBridgeMethodsTest {
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
-        
-        TemplateMethodModelEx m1 = (TemplateMethodModelEx) wrapped.get("m1");
-        assertEquals(BridgeMethodsBean.M1_RETURN_VALUE, "" + m1.exec(Collections.emptyList()));
-        
-        TemplateMethodModelEx m2 = (TemplateMethodModelEx) wrapped.get("m2");
-        assertNull(m2.exec(Collections.emptyList()));
+
+        JavaMethodModel m1 = (JavaMethodModel) wrapped.get("m1");
+        assertEquals(
+                BridgeMethodsBean.M1_RETURN_VALUE,
+                "" + m1.execute(Constants.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE));
+
+        JavaMethodModel m2 = (JavaMethodModel) wrapped.get("m2");
+        assertNull(m2.execute(Constants.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE));
     }
     
 }

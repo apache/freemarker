@@ -136,7 +136,7 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
     }
 
     @Override
-    public ArgumentArrayLayout getArgumentArrayLayout() {
+    public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
         return ARGS_LAYOUT;
     }
 

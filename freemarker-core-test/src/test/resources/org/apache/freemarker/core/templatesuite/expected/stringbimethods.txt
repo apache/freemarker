@@ -25,5 +25,3 @@ de
 true false
 yes no
 igen nem
-0.0 1.0
-true true

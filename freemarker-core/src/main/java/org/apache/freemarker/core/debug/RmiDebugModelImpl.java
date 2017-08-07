@@ -29,10 +29,9 @@ import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateMethodModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
@@ -155,9 +154,8 @@ class RmiDebugModelImpl extends UnicastRemoteObject implements DebugModel {
         if (model instanceof TemplateSequenceModel) type += TYPE_SEQUENCE;
         if (model instanceof TemplateCollectionModel) type += TYPE_COLLECTION;
         if (model instanceof TemplateHashModelEx) type += TYPE_HASH_EX;
-        else if (model instanceof TemplateHashModel) type += TYPE_HASH;
-        if (model instanceof TemplateMethodModelEx) type += TYPE_METHOD_EX;
-        else if (model instanceof TemplateMethodModel) type += TYPE_METHOD;
+        if (model instanceof TemplateHashModel) type += TYPE_HASH;
+        if (model instanceof TemplateFunctionModel) type += TYPE_FUNCTION;
         if (model instanceof TemplateDirectiveModel) type += TYPE_DIRECTIVE;
         return type;
     }

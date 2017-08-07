@@ -37,6 +37,7 @@ import org.apache.freemarker.core._DelayedJQuote;
 import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
@@ -103,12 +104,11 @@ public class BeanModel
     }
     
     /**
-     * Uses Beans introspection to locate a property or method with name
-     * matching the key name. If a method or property is found, it's wrapped
-     * into {@link org.apache.freemarker.core.model.TemplateMethodModelEx} (for a method or
-     * indexed property), or evaluated on-the-fly and the return value wrapped
-     * into appropriate model (for a simple property) Models for various
-     * properties and methods are cached on a per-class basis, so the costly
+     * Uses Beans introspection to locate a JavaBean property or method with name
+     * matching the key name. If a method is found, it's wrapped
+     * into {@link TemplateFunctionModel} (a {@link JavaMethodModel} more specifically).
+     * If a JavaBean property is found, its value is returned. Introspection results
+     * for various properties and methods are cached on a per-class basis, so the costly
      * introspection is performed only once per property or method of a class.
      * (Side-note: this also implies that any class whose method has been called
      * will be strongly referred to by the framework and will not become
@@ -211,10 +211,10 @@ public class BeanModel
             // cachedModel remains null, as we don't cache these
         } else if (desc instanceof Method) {
             Method method = (Method) desc;
-            resultModel = cachedModel = new JavaMethodModel(
+            resultModel = cachedModel = new SimpleJavaMethodModel(
                     object, method, ClassIntrospector.getArgTypes(classInfo, method), wrapper);
         } else if (desc instanceof OverloadedMethods) {
-            resultModel = cachedModel = new OverloadedMethodsModel(
+            resultModel = cachedModel = new OverloadedJavaMethodModel(
                     object, (OverloadedMethods) desc, wrapper);
         }
         

@@ -186,7 +186,7 @@ public class NumberFormatTest extends TemplateTest {
             }
 
             @Override
-            public ArgumentArrayLayout getArgumentArrayLayout() {
+            public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
                 return ArgumentArrayLayout.PARAMETERLESS;
             }
 

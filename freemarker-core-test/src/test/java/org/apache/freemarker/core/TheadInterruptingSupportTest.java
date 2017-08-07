@@ -129,7 +129,7 @@ public class TheadInterruptingSupportTest {
             }
 
             @Override
-            public ArgumentArrayLayout getArgumentArrayLayout() {
+            public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
                 return ArgumentArrayLayout.PARAMETERLESS;
             }
 
@@ -150,7 +150,7 @@ public class TheadInterruptingSupportTest {
             }
 
             @Override
-            public ArgumentArrayLayout getArgumentArrayLayout() {
+            public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
                 return ArgumentArrayLayout.PARAMETERLESS;
             }
 
@@ -173,7 +173,7 @@ public class TheadInterruptingSupportTest {
             }
 
             @Override
-            public ArgumentArrayLayout getArgumentArrayLayout() {
+            public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
                 return ArgumentArrayLayout.PARAMETERLESS;
             }
 

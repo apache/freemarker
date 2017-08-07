@@ -140,9 +140,8 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("isHash", new BuiltInsForMultipleTypes.is_hashBI());
         putBI("isInfinite", new is_infiniteBI());
         putBI("isIndexable", new BuiltInsForMultipleTypes.is_indexableBI());
-        putBI("isMacro", new BuiltInsForMultipleTypes.is_macroBI());
         putBI("isMarkupOutput", new BuiltInsForMultipleTypes.is_markup_outputBI());
-        putBI("isMethod", new BuiltInsForMultipleTypes.is_methodBI());
+        putBI("isFunction", new BuiltInsForMultipleTypes.is_functionBI());
         putBI("isNan", new is_nanBI());
         putBI("isNode", new BuiltInsForMultipleTypes.is_nodeBI());
         putBI("isNumber", new BuiltInsForMultipleTypes.is_numberBI());
@@ -391,7 +390,11 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
     protected final void checkMethodArgCount(List args, int expectedCnt) throws TemplateModelException {
         checkMethodArgCount(args.size(), expectedCnt);
     }
-    
+
+    protected final void checkMethodArgCount(TemplateModel[] args, int expectedCnt) throws TemplateModelException {
+        checkMethodArgCount(args.length, expectedCnt);
+    }
+
     protected final void checkMethodArgCount(int argCnt, int expectedCnt) throws TemplateModelException {
         if (argCnt != expectedCnt) {
             throw MessageUtil.newArgCntError("?" + key, argCnt, expectedCnt);
@@ -401,48 +404,79 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
     protected final void checkMethodArgCount(List args, int minCnt, int maxCnt) throws TemplateModelException {
         checkMethodArgCount(args.size(), minCnt, maxCnt);
     }
-    
+
+    protected final void checkMethodArgCount(TemplateModel[] args, int minCnt, int maxCnt) throws
+            TemplateModelException {
+        checkMethodArgCount(args.length, minCnt, maxCnt);
+    }
+
     protected final void checkMethodArgCount(int argCnt, int minCnt, int maxCnt) throws TemplateModelException {
         if (argCnt < minCnt || argCnt > maxCnt) {
             throw MessageUtil.newArgCntError("?" + key, argCnt, minCnt, maxCnt);
         }
     }
 
-    /**
-     * Same as {@link #getStringMethodArg}, but checks if {@code args} is big enough, and returns {@code null} if it
-     * isn't.
-     */
-    protected final String getOptStringMethodArg(List args, int argIdx)
-            throws TemplateModelException {
-        return args.size() > argIdx ? getStringMethodArg(args, argIdx) : null;
+    protected final String getStringMethodArg(TemplateModel[] args, int argIdx) throws TemplateModelException {
+        return getStringMethodArg(args, argIdx, false);
     }
-    
+
     /**
      * Gets a method argument and checks if it's a string; it does NOT check if {@code args} is big enough.
      */
-    protected final String getStringMethodArg(List args, int argIdx)
+    protected final String getStringMethodArg(TemplateModel[] args, int argIdx, boolean optional)
             throws TemplateModelException {
-        TemplateModel arg = (TemplateModel) args.get(argIdx);
+        TemplateModel arg = args[argIdx];
+        return getStringMethodArg(arg, argIdx, optional);
+    }
+
+    protected String getStringMethodArg(TemplateModel arg, int argIdx)
+            throws TemplateModelException {
+        return getStringMethodArg(arg, argIdx, false);
+    }
+
+    protected String getStringMethodArg(TemplateModel arg, int argIdx, boolean optional)
+            throws TemplateModelException {
         if (!(arg instanceof TemplateScalarModel)) {
+            if (optional && arg == null) {
+                return null;
+            }
             throw MessageUtil.newMethodArgMustBeStringException("?" + key, argIdx, arg);
         } else {
             return _EvalUtil.modelToString((TemplateScalarModel) arg, null, null);
         }
     }
 
+    protected final Number getNumberMethodArg(TemplateModel[] args, int argIdx)
+            throws TemplateModelException {
+        return getNumberMethodArg(args, argIdx, false);
+    }
+
     /**
      * Gets a method argument and checks if it's a number; it does NOT check if {@code args} is big enough.
      */
-    protected final Number getNumberMethodArg(List args, int argIdx)
+    protected final Number getNumberMethodArg(TemplateModel[] args, int argIdx, boolean optional)
             throws TemplateModelException {
-        TemplateModel arg = (TemplateModel) args.get(argIdx);
+        TemplateModel arg = args[argIdx];
+        return getNumberMethodArg(arg, argIdx, optional);
+    }
+
+    protected Number getNumberMethodArg(TemplateModel arg, int argIdx)
+            throws TemplateModelException {
+        return getNumberMethodArg(arg, argIdx, false);
+    }
+
+    protected Number getNumberMethodArg(TemplateModel arg, int argIdx, boolean optional)
+            throws TemplateModelException {
         if (!(arg instanceof TemplateNumberModel)) {
+            if (optional && arg == null) {
+                return null;
+            }
             throw MessageUtil.newMethodArgMustBeNumberException("?" + key, argIdx, arg);
         } else {
             return _EvalUtil.modelToNumber((TemplateNumberModel) arg, null);
         }
     }
-    
+
     protected final TemplateModelException newMethodArgInvalidValueException(int argIdx, Object[] details) {
         return MessageUtil.newMethodArgInvalidValueException("?" + key, argIdx, details);
     }

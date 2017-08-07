@@ -20,13 +20,13 @@
 package org.apache.freemarker.core;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateMethodModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
@@ -61,26 +61,34 @@ class BuiltInsForStringsRegexp {
     }
     
     static class matchesBI extends BuiltInForString {
-        class MatcherBuilder implements TemplateMethodModel {
+        class MatcherBuilder implements TemplateFunctionModel {
             
             String matchString;
             
             MatcherBuilder(String matchString) throws TemplateModelException {
                 this.matchString = matchString;
             }
-            
+
+
             @Override
-            public Object exec(List args) throws TemplateModelException {
-                int argCnt = args.size();
-                checkMethodArgCount(argCnt, 1, 2);
-                
-                String patternString = (String) args.get(0);
-                long flags = argCnt > 1 ? RegexpHelper.parseFlagString((String) args.get(1)) : 0;
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateException {
+                String patternString = getStringMethodArg(args, 0);
+                String flagString = getStringMethodArg(args, 1, true);
+                long flags = flagString != null
+                        ? RegexpHelper.parseFlagString(flagString)
+                        : 0;
                 if ((flags & RegexpHelper.RE_FLAG_FIRST_ONLY) != 0) {
+                    // TODO [FM3] Should be an error?
                     RegexpHelper.logFlagWarning("?" + key + " doesn't support the \"f\" flag.");
                 }
                 Pattern pattern = RegexpHelper.getPattern(patternString, (int) flags);
                 return new RegexMatchModel(pattern, matchString);
+            }
+
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return ArgumentArrayLayout.TWO_POSITIONAL_PARAMETERS;
             }
         }
         
@@ -93,7 +101,7 @@ class BuiltInsForStringsRegexp {
     
     static class replace_reBI extends BuiltInForString {
         
-        class ReplaceMethod implements TemplateMethodModel {
+        class ReplaceMethod implements TemplateFunctionModel {
             private String s;
 
             ReplaceMethod(String s) {
@@ -101,12 +109,14 @@ class BuiltInsForStringsRegexp {
             }
 
             @Override
-            public Object exec(List args) throws TemplateModelException {
-                int argCnt = args.size();
-                checkMethodArgCount(argCnt, 2, 3);
-                String arg1 = (String) args.get(0);
-                String arg2 = (String) args.get(1);
-                long flags = argCnt > 2 ? RegexpHelper.parseFlagString((String) args.get(2)) : 0;
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateException {
+                String arg1 = getStringMethodArg(args, 0);
+                String arg2 = getStringMethodArg(args, 1);
+                String flagString = getStringMethodArg(args, 2, true);
+                long flags = flagString != null
+                        ? RegexpHelper.parseFlagString(flagString)
+                        : 0;
                 String result;
                 if ((flags & RegexpHelper.RE_FLAG_REGEXP) == 0) {
                     RegexpHelper.checkNonRegexpFlags("replace", flags);
@@ -119,8 +129,13 @@ class BuiltInsForStringsRegexp {
                     result = (flags & RegexpHelper.RE_FLAG_FIRST_ONLY) != 0
                             ? matcher.replaceFirst(arg2)
                             : matcher.replaceAll(arg2);
-                } 
+                }
                 return new SimpleScalar(result);
+            }
+
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return ArgumentArrayLayout.THREE_POSITIONAL_PARAMETERS;
             }
 
         }

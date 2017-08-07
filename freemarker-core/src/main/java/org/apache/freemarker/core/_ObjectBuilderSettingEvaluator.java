@@ -36,10 +36,10 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
+import org.apache.freemarker.core.model.impl.JavaMethodModel;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
@@ -712,17 +712,17 @@ public class _ObjectBuilderSettingEvaluator {
     }
 
     private void setJavaBeanProperties(Object bean,
-            List/*<String>*/ namedParamNames, List/*<Object>*/ namedParamValues)
+            List<String> namedParamNames, List<Object> namedParamValues)
             throws _ObjectBuilderSettingEvaluationException {
         if (namedParamNames.isEmpty()) {
             return;
         }
         
-        final Class cl = bean.getClass();
-        Map/*<String,Method>*/ beanPropSetters;
+        final Class<?> cl = bean.getClass();
+        Map<String, Method> beanPropSetters;
         try {
             PropertyDescriptor[] propDescs = Introspector.getBeanInfo(cl).getPropertyDescriptors();
-            beanPropSetters = new HashMap(propDescs.length * 4 / 3, 1.0f);
+            beanPropSetters = new HashMap<>(propDescs.length * 4 / 3, 1.0f);
             for (PropertyDescriptor propDesc : propDescs) {
                 final Method writeMethod = propDesc.getWriteMethod();
                 if (writeMethod != null) {
@@ -735,14 +735,14 @@ public class _ObjectBuilderSettingEvaluator {
 
         TemplateHashModel beanTM = null;
         for (int i = 0; i < namedParamNames.size(); i++) {
-            String name = (String) namedParamNames.get(i);
+            String name = namedParamNames.get(i);
             if (!beanPropSetters.containsKey(name)) {
                 throw new _ObjectBuilderSettingEvaluationException(
                         "The " + cl.getName() + " class has no writeable JavaBeans property called "
                         + _StringUtil.jQuote(name) + ".");
             }
             
-            Method beanPropSetter = (Method) beanPropSetters.put(name, null);
+            Method beanPropSetter = beanPropSetters.put(name, null);
             if (beanPropSetter == null) {
                     throw new _ObjectBuilderSettingEvaluationException(
                             "JavaBeans property " + _StringUtil.jQuote(name) + " is set twice.");
@@ -757,19 +757,20 @@ public class _ObjectBuilderSettingEvaluator {
                     }
                     beanTM = (TemplateHashModel) wrappedObj;
                 }
-                
+
                 TemplateModel m = beanTM.get(beanPropSetter.getName());
                 if (m == null) {
                     throw new _ObjectBuilderSettingEvaluationException(
                             "Can't find " + beanPropSetter + " as FreeMarker method.");
                 }
-                if (!(m instanceof TemplateMethodModelEx)) {
+                if (!(m instanceof JavaMethodModel)) {
                     throw new _ObjectBuilderSettingEvaluationException(
-                            _StringUtil.jQuote(beanPropSetter.getName()) + " wasn't a TemplateMethodModelEx.");
+                            _StringUtil.jQuote(beanPropSetter.getName()) + " wasn't a JavaMethodModel.");
                 }
                 List/*TemplateModel*/ args = new ArrayList();
-                args.add(env.getObjectWrapper().wrap(namedParamValues.get(i)));
-                ((TemplateMethodModelEx) m).exec(args);
+                ((JavaMethodModel) m).execute(
+                        new TemplateModel[] { env.getObjectWrapper().wrap(namedParamValues.get(i)) },
+                        NonTemplateCallPlace.INSTANCE);
             } catch (Exception e) {
                 throw new _ObjectBuilderSettingEvaluationException(
                         "Failed to set " + _StringUtil.jQuote(name), e);
@@ -992,16 +993,16 @@ public class _ObjectBuilderSettingEvaluator {
                 }
             } else {
                 DefaultObjectWrapper ow = env.getObjectWrapper();
-                List/*<TemplateModel>*/ tmArgs = new ArrayList(positionalParamValues.size());
+                TemplateModel[] tmArgs = new TemplateModel[positionalParamValues.size()];
                 for (int i = 0; i < positionalParamValues.size(); i++) {
                     try {
-                        tmArgs.add(ow.wrap(positionalParamValues.get(i)));
+                        tmArgs[i] = ow.wrap(positionalParamValues.get(i));
                     } catch (TemplateModelException e) {
                         throw new _ObjectBuilderSettingEvaluationException("Failed to wrap arg #" + (i + 1), e);
                     }
                 }
                 try {
-                    return ow.newInstance(cl, tmArgs);
+                    return ow.newInstance(cl, tmArgs, NonTemplateCallPlace.INSTANCE);
                 } catch (Exception e) {
                     throw new _ObjectBuilderSettingEvaluationException(
                             "Failed to call " + cl.getName() + " constructor", e);

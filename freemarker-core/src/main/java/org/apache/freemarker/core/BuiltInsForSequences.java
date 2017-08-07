@@ -25,15 +25,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
@@ -54,7 +54,7 @@ class BuiltInsForSequences {
     
     static class chunkBI extends BuiltInForSequence {
 
-        private class BIMethod implements TemplateMethodModelEx {
+        private class BIMethod implements TemplateFunctionModel {
             
             private final TemplateSequenceModel tsm;
 
@@ -63,14 +63,16 @@ class BuiltInsForSequences {
             }
 
             @Override
-            public Object exec(List args) throws TemplateModelException {
-                checkMethodArgCount(args, 1, 2);
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateException {
                 int chunkSize = getNumberMethodArg(args, 0).intValue();
-                
-                return new ChunkedSequence(
-                        tsm,
-                        chunkSize,
-                        args.size() > 1 ? (TemplateModel) args.get(1) : null);
+
+                return new ChunkedSequence(tsm, chunkSize, args[1]);
+            }
+
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return ArgumentArrayLayout.TWO_POSITIONAL_PARAMETERS;
             }
         }
 
@@ -182,7 +184,7 @@ class BuiltInsForSequences {
 
     static class joinBI extends ASTExpBuiltIn {
         
-        private class BIMethodForCollection implements TemplateMethodModelEx {
+        private class BIMethodForCollection implements TemplateFunctionModel {
             
             private final Environment env;
             private final TemplateCollectionModel coll;
@@ -193,17 +195,16 @@ class BuiltInsForSequences {
             }
 
             @Override
-            public Object exec(List args)
-                    throws TemplateModelException {
-                checkMethodArgCount(args, 1, 3);
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateException {
                 final String separator = getStringMethodArg(args, 0);
-                final String whenEmpty = getOptStringMethodArg(args, 1);
-                final String afterLast = getOptStringMethodArg(args, 2);
-                
+                final String whenEmpty = getStringMethodArg(args, 1, true);
+                final String afterLast = getStringMethodArg(args, 2, true);
+
                 StringBuilder sb = new StringBuilder();
-                
+
                 TemplateModelIterator it = coll.iterator();
-                
+
                 int idx = 0;
                 boolean hadItem = false;
                 while (it.hasNext()) {
@@ -218,7 +219,7 @@ class BuiltInsForSequences {
                             sb.append(_EvalUtil.coerceModelToStringOrUnsupportedMarkup(item, null, null, env));
                         } catch (TemplateException e) {
                             throw new _TemplateModelException(e,
-                                    "\"?", key, "\" failed at index ", Integer.valueOf(idx), " with this error:\n\n",
+                                    "\"?", key, "\" failed at index ", idx, " with this error:\n\n",
                                     MessageUtil.EMBEDDED_MESSAGE_BEGIN,
                                     new _DelayedGetMessageWithoutStackTop(e),
                                     MessageUtil.EMBEDDED_MESSAGE_END);
@@ -232,7 +233,12 @@ class BuiltInsForSequences {
                     if (whenEmpty != null) sb.append(whenEmpty);
                 }
                 return new SimpleScalar(sb.toString());
-           }
+            }
+
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return ArgumentArrayLayout.THREE_POSITIONAL_PARAMETERS;
+            }
 
         }
 
@@ -295,7 +301,7 @@ class BuiltInsForSequences {
     }
 
     static class seq_containsBI extends ASTExpBuiltIn {
-        private class BIMethodForCollection implements TemplateMethodModelEx {
+        private class BIMethodForCollection implements TemplateFunctionModel {
             private TemplateCollectionModel m_coll;
             private Environment m_env;
 
@@ -305,10 +311,9 @@ class BuiltInsForSequences {
             }
 
             @Override
-            public Object exec(List args)
-                    throws TemplateModelException {
-                checkMethodArgCount(args, 1);
-                TemplateModel arg = (TemplateModel) args.get(0);
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateException {
+                TemplateModel arg = args[0];
                 TemplateModelIterator it = m_coll.iterator();
                 int idx = 0;
                 while (it.hasNext()) {
@@ -319,9 +324,14 @@ class BuiltInsForSequences {
                 return TemplateBooleanModel.FALSE;
             }
 
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return ArgumentArrayLayout.SINGLE_POSITIONAL_PARAMETER;
+            }
+
         }
 
-        private class BIMethodForSequence implements TemplateMethodModelEx {
+        private class BIMethodForSequence implements TemplateFunctionModel {
             private TemplateSequenceModel m_seq;
             private Environment m_env;
 
@@ -331,16 +341,20 @@ class BuiltInsForSequences {
             }
 
             @Override
-            public Object exec(List args)
-                    throws TemplateModelException {
-                checkMethodArgCount(args, 1);
-                TemplateModel arg = (TemplateModel) args.get(0);
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateException {
+                TemplateModel arg = args[0];
                 int size = m_seq.size();
                 for (int i = 0; i < size; i++) {
                     if (modelsEqual(i, m_seq.get(i), arg, m_env))
                         return TemplateBooleanModel.TRUE;
                 }
                 return TemplateBooleanModel.FALSE;
+            }
+
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return ArgumentArrayLayout.SINGLE_POSITIONAL_PARAMETER;
             }
 
         }
@@ -364,11 +378,11 @@ class BuiltInsForSequences {
     
     static class seq_index_ofBI extends ASTExpBuiltIn {
         
-        private class BIMethod implements TemplateMethodModelEx {
+        private class BIMethod implements TemplateFunctionModel {
             
-            protected final TemplateSequenceModel m_seq;
-            protected final TemplateCollectionModel m_col;
-            protected final Environment m_env;
+            final TemplateSequenceModel m_seq;
+            final TemplateCollectionModel m_col;
+            final Environment m_env;
 
             private BIMethod(Environment env)
                     throws TemplateException {
@@ -395,21 +409,20 @@ class BuiltInsForSequences {
             }
 
             @Override
-            public final Object exec(List args)
-                    throws TemplateModelException {
-                int argCnt = args.size();
-                checkMethodArgCount(argCnt, 1, 2);
-                
-                TemplateModel target = (TemplateModel) args.get(0);
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateException {
+                TemplateModel target = args[0];
+                Number startIndex = getNumberMethodArg(args, 1, true);
                 int foundAtIdx;
-                if (argCnt > 1) {
-                    int startIndex = getNumberMethodArg(args, 1).intValue();
+                if (startIndex != null) {
+                    // TODO [FM3] Prefer Col?
                     // In 2.3.x only, we prefer TemplateSequenceModel for
                     // backward compatibility:
                     foundAtIdx = m_seq != null
-                            ? findInSeq(target, startIndex)
-                            : findInCol(target, startIndex);
+                            ? findInSeq(target, startIndex.intValue())
+                            : findInCol(target, startIndex.intValue());
                 } else {
+                    // TODO [FM3] Prefer Col?
                     // In 2.3.x only, we prefer TemplateSequenceModel for
                     // backward compatibility:
                     foundAtIdx = m_seq != null
@@ -418,12 +431,17 @@ class BuiltInsForSequences {
                 }
                 return foundAtIdx == -1 ? Constants.MINUS_ONE : new SimpleNumber(foundAtIdx);
             }
-            
+
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return ArgumentArrayLayout.TWO_POSITIONAL_PARAMETERS;
+            }
+
             int findInCol(TemplateModel target) throws TemplateModelException {
                 return findInCol(target, 0, Integer.MAX_VALUE);
             }
             
-            protected int findInCol(TemplateModel target, int startIndex)
+            int findInCol(TemplateModel target, int startIndex)
                     throws TemplateModelException {
                 if (m_dir == 1) {
                     return findInCol(target, startIndex, Integer.MAX_VALUE);
@@ -432,7 +450,7 @@ class BuiltInsForSequences {
                 }
             }
         
-            protected int findInCol(TemplateModel target,
+            int findInCol(TemplateModel target,
                     final int allowedRangeStart, final int allowedRangeEnd)
                     throws TemplateModelException {
                 if (allowedRangeEnd < 0) return -1;
@@ -525,49 +543,45 @@ class BuiltInsForSequences {
     }
 
     static class sort_byBI extends sortBI {
-        class BIMethod implements TemplateMethodModelEx {
+        class BIMethod implements TemplateFunctionModel {
             TemplateSequenceModel seq;
             
             BIMethod(TemplateSequenceModel seq) {
                 this.seq = seq;
             }
-            
+
             @Override
-            public Object exec(List args)
-                    throws TemplateModelException {
-                // Should be:
-                // checkMethodArgCount(args, 1);
-                // But for BC:
-                if (args.size() < 1) throw MessageUtil.newArgCntError("?" + key, args.size(), 1);
-                
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateException {
                 String[] subvars;
-                Object obj = args.get(0);
+                TemplateModel obj = args[0];
                 if (obj instanceof TemplateScalarModel) {
-                    subvars = new String[]{((TemplateScalarModel) obj).getAsString()};
+                    subvars = new String[] { ((TemplateScalarModel) obj).getAsString() };
                 } else if (obj instanceof TemplateSequenceModel) {
                     TemplateSequenceModel seq = (TemplateSequenceModel) obj;
                     int ln = seq.size();
                     subvars = new String[ln];
                     for (int i = 0; i < ln; i++) {
-                        Object item = seq.get(i);
-                        try {
-                            subvars[i] = ((TemplateScalarModel) item)
-                                    .getAsString();
-                        } catch (ClassCastException e) {
-                            if (!(item instanceof TemplateScalarModel)) {
-                                throw new _TemplateModelException(
-                                        "The argument to ?", key, "(key), when it's a sequence, must be a "
-                                        + "sequence of strings, but the item at index ", Integer.valueOf(i),
-                                        " is not a string.");
-                            }
+                        TemplateModel item = seq.get(i);
+                        if (!(item instanceof  TemplateScalarModel)) {
+                            throw new _TemplateModelException(
+                                    "The argument to ?", key, "(key), when it's a sequence, must be a "
+                                    + "sequence of strings, but the item at index ", i,
+                                    " is not a string.");
                         }
+                        subvars[i] = ((TemplateScalarModel) item).getAsString();
                     }
                 } else {
                     throw new _TemplateModelException(
                             "The argument to ?", key, "(key) must be a string (the name of the subvariable), or a "
                             + "sequence of strings (the \"path\" to the subvariable).");
                 }
-                return sort(seq, subvars); 
+                return sort(seq, subvars);
+            }
+
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return ArgumentArrayLayout.SINGLE_POSITIONAL_PARAMETER;
             }
         }
         

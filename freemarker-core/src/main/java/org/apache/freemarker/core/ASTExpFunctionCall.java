@@ -31,8 +31,6 @@ import java.util.List;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
-import org.apache.freemarker.core.model.TemplateMethodModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.util.CommonSupplier;
@@ -42,16 +40,16 @@ import org.apache.freemarker.core.util.FTLUtil;
 /**
  * AST expression node: {@code exp(args)}.
  */
-final class ASTExpMethodCall extends ASTExpression implements CallPlace {
+final class ASTExpFunctionCall extends ASTExpression implements CallPlace {
 
     private final ASTExpression target;
     private final ASTExpListLiteral arguments;
 
-    ASTExpMethodCall(ASTExpression target, ArrayList arguments) {
+    ASTExpFunctionCall(ASTExpression target, ArrayList arguments) {
         this(target, new ASTExpListLiteral(arguments));
     }
 
-    private ASTExpMethodCall(ASTExpression target, ASTExpListLiteral arguments) {
+    private ASTExpFunctionCall(ASTExpression target, ASTExpListLiteral arguments) {
         this.target = target;
         this.arguments = arguments;
     }
@@ -59,22 +57,19 @@ final class ASTExpMethodCall extends ASTExpression implements CallPlace {
     @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         TemplateModel targetModel = target.eval(env);
-        if (targetModel instanceof TemplateMethodModel) {
-            TemplateMethodModel targetMethod = (TemplateMethodModel) targetModel;
-            List argumentStrings = 
-            targetMethod instanceof TemplateMethodModelEx
-            ? arguments.getModelList(env)
-            : arguments.getValueList(env);
-            Object result = targetMethod.exec(argumentStrings);
-            return env.getObjectWrapper().wrap(result);
-        } else if (targetModel instanceof TemplateFunctionModel) {
-            TemplateFunctionModel func = (TemplateFunctionModel) targetModel;
 
-            ArgumentArrayLayout arrayLayout = func.getArgumentArrayLayout();
+        if (!(targetModel instanceof TemplateFunctionModel)) {
+            throw new NonFunctionException(target, targetModel, env);
+        }
+        TemplateFunctionModel func = (TemplateFunctionModel) targetModel;
 
-            // TODO [FM3] This is just temporary, until we support named args. Then the logic in ASTDynamicTopLevelCall
-            // should be reused.
+        ArgumentArrayLayout arrayLayout = func.getFunctionArgumentArrayLayout();
 
+        // TODO [FM3] This is just temporary, until we support named args. Then the logic in ASTDynamicTopLevelCall
+        // should be reused.
+
+        TemplateModel[] args;
+        if (arrayLayout != null) {
             int posVarargsLength;
             int callArgCnt = arguments.size();
             int predefPosArgCnt = arrayLayout.getPredefinedPositionalArgumentCount();
@@ -83,13 +78,13 @@ final class ASTExpMethodCall extends ASTExpression implements CallPlace {
                 if (posVarargsIdx == -1) {
                     throw new _MiscTemplateException(env,
                             "Too many arguments; the target ", FTLUtil.getCallableTypeName(func),
-                            " has ", predefPosArgCnt, " arguments.");
+                            " only has ", predefPosArgCnt, " parameters.");
                 }
             }
 
             List<TemplateModel> callArgList = arguments.getModelList(env);
 
-            TemplateModel[] args = new TemplateModel[arrayLayout.getTotalLength()];
+            args = new TemplateModel[arrayLayout.getTotalLength()];
             int callPredefArgCnt = Math.min(callArgCnt, predefPosArgCnt);
             for (int argIdx = 0; argIdx < callPredefArgCnt; argIdx++) {
                 args[argIdx] = callArgList.get(argIdx);
@@ -114,11 +109,15 @@ final class ASTExpMethodCall extends ASTExpression implements CallPlace {
             if (namedVarargsArgIdx != -1) {
                 args[namedVarargsArgIdx] = Constants.EMPTY_HASH;
             }
-
-            return func.execute(args, this, env);
         } else {
-            throw new NonMethodException(target, targetModel, env);
+            List<TemplateModel> callArgList = arguments.getModelList(env);
+            args = new TemplateModel[callArgList.size()];
+            for (int i = 0; i < callArgList.size(); i++) {
+                args[i] = callArgList.get(i);
+            }
         }
+
+        return func.execute(args, this, env);
     }
 
     @Override
@@ -149,7 +148,7 @@ final class ASTExpMethodCall extends ASTExpression implements CallPlace {
     @Override
     protected ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
-        return new ASTExpMethodCall(
+        return new ASTExpFunctionCall(
                 target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
                 (ASTExpListLiteral) arguments.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
     }

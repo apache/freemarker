@@ -22,13 +22,12 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.Writer;
-import java.util.List;
 
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
@@ -72,7 +71,7 @@ class BuiltInsForStringsMisc {
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             Template parentTemplate = getTemplate();
             
-            ASTExpression exp = null;
+            ASTExpression exp;
             try {
                 try {
                     ParsingConfiguration pCfg = parentTemplate.getParsingConfiguration();
@@ -151,9 +150,11 @@ class BuiltInsForStringsMisc {
             ASTExpression sourceExpr = null;
             String id = "anonymous_interpreted";
             if (model instanceof TemplateSequenceModel) {
-                sourceExpr = ((ASTExpression) new ASTExpDynamicKeyName(target, new ASTExpNumberLiteral(Integer.valueOf(0))).copyLocationFrom(target));
+                sourceExpr = ((ASTExpression) new ASTExpDynamicKeyName(target, new ASTExpNumberLiteral(0))
+                        .copyLocationFrom(target));
                 if (((TemplateSequenceModel) model).size() > 1) {
-                    id = ((ASTExpression) new ASTExpDynamicKeyName(target, new ASTExpNumberLiteral(Integer.valueOf(1))).copyLocationFrom(target)).evalAndCoerceToPlainText(env);
+                    id = ((ASTExpression) new ASTExpDynamicKeyName(target, new ASTExpNumberLiteral(1))
+                            .copyLocationFrom(target)).evalAndCoerceToPlainText(env);
                 }
             } else if (model instanceof TemplateScalarModel) {
                 sourceExpr = target;
@@ -217,7 +218,7 @@ class BuiltInsForStringsMisc {
             }
 
             @Override
-            public ArgumentArrayLayout getArgumentArrayLayout() {
+            public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
                 return ArgumentArrayLayout.PARAMETERLESS;
             }
 
@@ -252,12 +253,12 @@ class BuiltInsForStringsMisc {
             return new ConstructorFunction(target.evalAndCoerceToPlainText(env), env, target.getTemplate());
         }
 
-        class ConstructorFunction implements TemplateMethodModelEx {
+        class ConstructorFunction implements TemplateFunctionModel {
 
             private final Class<?> cl;
             private final Environment env;
             
-            public ConstructorFunction(String classname, Environment env, Template template) throws TemplateException {
+            ConstructorFunction(String classname, Environment env, Template template) throws TemplateException {
                 this.env = env;
                 cl = env.getNewBuiltinClassResolver().resolve(classname, env, template);
                 if (!TemplateModel.class.isAssignableFrom(cl)) {
@@ -271,13 +272,14 @@ class BuiltInsForStringsMisc {
             }
 
             @Override
-            public Object exec(List arguments) throws TemplateModelException {
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateModelException {
                 ObjectWrapper ow = env.getObjectWrapper();
                 if (ow instanceof DefaultObjectWrapper) {
-                    return ((DefaultObjectWrapper) ow).newInstance(cl, arguments);
+                    return ow.wrap(((DefaultObjectWrapper) ow).newInstance(cl, args, callPlace));
                 }
 
-                if (!arguments.isEmpty()) {
+                if (args.length != 0) {
                     throw new TemplateModelException(
                             "className?new(args) only supports 0 arguments in the current configuration, because "
                             + " the objectWrapper setting value is not a "
@@ -285,12 +287,18 @@ class BuiltInsForStringsMisc {
                             " (or its subclass).");
                 }
                 try {
-                    return cl.newInstance();
+                    return ow.wrap(cl.newInstance());
                 } catch (Exception e) {
                     throw new TemplateModelException("Failed to instantiate "
                             + cl.getName() + " with its parameterless constructor; see cause exception", e);
                 }
             }
+
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return null;
+            }
+
         }
     }
     

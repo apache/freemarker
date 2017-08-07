@@ -20,22 +20,21 @@ package org.apache.freemarker.core.model.impl;
 
 import static org.junit.Assert.*;
 
-import java.util.Collections;
-
-import org.junit.Test;
-
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.NonTemplateCallPlace;
+import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.junit.Test;
 
 public class Java8DefaultObjectWrapperTest {
 
     @Test
-    public void testDefaultMethodRecognized() throws TemplateModelException {
+    public void testDefaultMethodRecognized() throws TemplateException {
         DefaultObjectWrapper.Builder owb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
         DefaultObjectWrapper ow = owb.build();
         TemplateHashModel wrappedBean = (TemplateHashModel) ow.wrap(new Java8DefaultMethodsBean());
@@ -62,13 +61,13 @@ public class Java8DefaultObjectWrapperTest {
             // Has only indexed read method, so it's not exposed as a property
             assertNull(wrappedBean.get(Java8DefaultMethodsBeanBase.DEFAULT_METHOD_INDEXED_PROP));
 
-            TemplateMethodModelEx indexedReadMethod = (TemplateMethodModelEx) wrappedBean.get(
+            JavaMethodModel indexedReadMethod = (JavaMethodModel) wrappedBean.get(
                     Java8DefaultMethodsBeanBase.DEFAULT_METHOD_INDEXED_PROP_GETTER);
             assertNotNull(indexedReadMethod);
             assertEquals(Java8DefaultMethodsBeanBase.DEFAULT_METHOD_INDEXED_PROP_VALUE,
-                    ((TemplateScalarModel) indexedReadMethod.exec(Collections.singletonList(new SimpleNumber(0))))
-                            .getAsString
-                            ());
+                    ((TemplateScalarModel) indexedReadMethod.execute(
+                            new TemplateModel[] { new SimpleNumber(0) }, NonTemplateCallPlace.INSTANCE))
+                            .getAsString());
         }
         {
             // We see default method indexed read method, but it's invalidated by normal getter in the subclass
@@ -115,45 +114,54 @@ public class Java8DefaultObjectWrapperTest {
             // Has only indexed read method, so it's not exposed as a property
             assertNull(wrappedBean.get(Java8DefaultMethodsBean.INDEXED_PROP_4));
 
-            TemplateMethodModelEx indexedReadMethod = (TemplateMethodModelEx) wrappedBean.get(
+            JavaMethodModel indexedReadMethod = (JavaMethodModel) wrappedBean.get(
                     Java8DefaultMethodsBean.INDEXED_PROP_GETTER_4);
             assertNotNull(indexedReadMethod);
             assertEquals(Java8DefaultMethodsBean.INDEXED_PROP_4_VALUE,
-                    ((TemplateScalarModel) indexedReadMethod.exec(Collections.singletonList(new SimpleNumber(0))))
+                    ((TemplateScalarModel) indexedReadMethod.execute(
+                            new TemplateModel[] { new SimpleNumber(0) }, NonTemplateCallPlace.INSTANCE))
                             .getAsString());
         }        
         {
-            TemplateMethodModelEx action = (TemplateMethodModelEx) wrappedBean.get(
+            JavaMethodModel action = (JavaMethodModel) wrappedBean.get(
                     Java8DefaultMethodsBean.NORMAL_ACTION);
             assertNotNull(action);
             assertEquals(
                     Java8DefaultMethodsBean.NORMAL_ACTION_RETURN_VALUE,
-                    ((TemplateScalarModel) action.exec(Collections.emptyList())).getAsString());
+                    ((TemplateScalarModel) action.execute(
+                            Constants.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE))
+                            .getAsString());
         }
         
         {
-            TemplateMethodModelEx action = (TemplateMethodModelEx) wrappedBean.get(
+            JavaMethodModel action = (JavaMethodModel) wrappedBean.get(
                     Java8DefaultMethodsBean.NORMAL_ACTION);
             assertNotNull(action);
             assertEquals(
                     Java8DefaultMethodsBean.NORMAL_ACTION_RETURN_VALUE,
-                    ((TemplateScalarModel) action.exec(Collections.emptyList())).getAsString());
+                    ((TemplateScalarModel) action.execute(
+                            Constants.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE))
+                            .getAsString());
         }
         {
-            TemplateMethodModelEx action = (TemplateMethodModelEx) wrappedBean.get(
+            JavaMethodModel action = (JavaMethodModel) wrappedBean.get(
                     Java8DefaultMethodsBean.DEFAULT_METHOD_ACTION);
             assertNotNull(action);
             assertEquals(
                     Java8DefaultMethodsBean.DEFAULT_METHOD_ACTION_RETURN_VALUE,
-                    ((TemplateScalarModel) action.exec(Collections.emptyList())).getAsString());
+                    ((TemplateScalarModel) action.execute(
+                            Constants.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE))
+                            .getAsString());
         }
         {
-            TemplateMethodModelEx action = (TemplateMethodModelEx) wrappedBean.get(
+            JavaMethodModel action = (JavaMethodModel) wrappedBean.get(
                     Java8DefaultMethodsBean.OVERRIDDEN_DEFAULT_METHOD_ACTION);
             assertNotNull(action);
             assertEquals(
                     Java8DefaultMethodsBean.OVERRIDDEN_DEFAULT_METHOD_ACTION_RETURN_VALUE,
-                    ((TemplateScalarModel) action.exec(Collections.emptyList())).getAsString());
+                    ((TemplateScalarModel) action.execute(
+                            Constants.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE))
+                            .getAsString());
         }
     }
 

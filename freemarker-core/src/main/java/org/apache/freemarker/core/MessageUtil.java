@@ -169,7 +169,7 @@ class MessageUtil {
                 && !(argExp instanceof ASTExpVariable)
                 && !(argExp instanceof ASTExpDot)
                 && !(argExp instanceof ASTExpDynamicKeyName)
-                && !(argExp instanceof ASTExpMethodCall)
+                && !(argExp instanceof ASTExpFunctionCall)
                 && !(argExp instanceof ASTExpBuiltIn);
         if (needParen) sb.append('(');
         sb.append(argExp.getCanonicalForm());

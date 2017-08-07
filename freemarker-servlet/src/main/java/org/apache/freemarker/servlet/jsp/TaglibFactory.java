@@ -65,8 +65,8 @@ import org.apache.freemarker.core.ConfigurationException;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
@@ -233,7 +233,7 @@ public class TaglibFactory implements TemplateHashModel {
      * 
      * @return a {@link TemplateHashModel} representing the JSP taglib. Each element of this hash represents a single
      *         custom tag or EL function from the library, implemented as a {@link TemplateDirectiveModel} or
-     *         {@link TemplateMethodModelEx}, respectively.
+     *         {@link TemplateFunctionModel}, respectively.
      */
     @Override
     public TemplateModel get(final String taglibUri) throws TemplateModelException {
@@ -1759,7 +1759,7 @@ public class TaglibFactory implements TemplateHashModel {
 
                     final Class<?> tagClass = resoveClassFromTLD(tagClassCData, "custom tag", tagNameCData);
 
-                    final TemplateModel customTagModel;
+                    final TemplateDirectiveModel customTagModel;
                     try {
                         if (Tag.class.isAssignableFrom(tagClass)) {
                             customTagModel = new TagDirectiveModel(tagNameCData, tagClass);
@@ -1775,9 +1775,10 @@ public class TaglibFactory implements TemplateHashModel {
 
                     TemplateModel replacedTagOrFunction = tagsAndFunctions.put(tagNameCData, customTagModel);
                     if (replacedTagOrFunction != null) {
-                        if (CustomTagAndELFunctionCombiner.canBeCombinedAsELFunction(replacedTagOrFunction)) {
-                            tagsAndFunctions.put(tagNameCData, CustomTagAndELFunctionCombiner.combine(
-                                    customTagModel, (TemplateMethodModelEx) replacedTagOrFunction));
+                        if (replacedTagOrFunction instanceof TemplateFunctionModel
+                                && !(replacedTagOrFunction instanceof  TemplateDirectiveModelAndTemplateFunctionModel)) {
+                            tagsAndFunctions.put(tagNameCData, new TemplateDirectiveModelAndTemplateFunctionModel(
+                                    customTagModel, (TemplateFunctionModel) replacedTagOrFunction));
                         } else {
                             if (LOG.isWarnEnabled()) {
                                 LOG.warn("TLD contains multiple tags with name " + _StringUtil.jQuote(tagNameCData)
@@ -1816,7 +1817,7 @@ public class TaglibFactory implements TemplateHashModel {
                                 locator);
                     }
 
-                    final TemplateMethodModelEx elFunctionModel;
+                    final TemplateFunctionModel elFunctionModel;
                     try {
                         elFunctionModel = defaultObjectWrapper.wrap(null, functionMethod);
                     } catch (Exception e) {
@@ -1827,9 +1828,10 @@ public class TaglibFactory implements TemplateHashModel {
 
                     TemplateModel replacedTagOrFunction = tagsAndFunctions.put(functionNameCData, elFunctionModel);
                     if (replacedTagOrFunction != null) {
-                        if (CustomTagAndELFunctionCombiner.canBeCombinedAsCustomTag(replacedTagOrFunction)) {
-                            tagsAndFunctions.put(functionNameCData, CustomTagAndELFunctionCombiner.combine(
-                                    replacedTagOrFunction, elFunctionModel));
+                        if (replacedTagOrFunction instanceof  TemplateDirectiveModel
+                                && !(replacedTagOrFunction instanceof  TemplateDirectiveModelAndTemplateFunctionModel)) {
+                            tagsAndFunctions.put(functionNameCData, new TemplateDirectiveModelAndTemplateFunctionModel(
+                                    (TemplateDirectiveModel) replacedTagOrFunction, elFunctionModel));
                         } else {
                             if (LOG.isWarnEnabled()) {
                                 LOG.warn("TLD contains multiple functions with name "

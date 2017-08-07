@@ -21,26 +21,29 @@ package org.apache.freemarker.core.model.impl;
 
 import java.util.List;
 
-import org.apache.freemarker.core.model.TemplateMethodModelEx;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 
 /**
  * A sequence that wraps a {@link List} of {@link TemplateModel}-s. It does not copy the original
- * list. It's mostly useful when implementing {@link TemplateMethodModelEx}-es that collect items from other
+ * list. It's mostly useful when implementing {@link TemplateFunctionModel}-es that collect items from other
  * {@link TemplateModel}-s.
  */
 public class TemplateModelListSequence implements TemplateSequenceModel {
     
-    private List/*<TemplateModel>*/ list;
+    private final List<? extends TemplateModel> list;
 
-    public TemplateModelListSequence(List list) {
+    /**
+     * @param list The list of items; will not be copied, will not be modified.
+     */
+    public TemplateModelListSequence(List<? extends TemplateModel> list) {
         this.list = list;
     }
 
     @Override
     public TemplateModel get(int index) {
-        return (TemplateModel) list.get(index);
+        return list.get(index);
     }
 
     @Override

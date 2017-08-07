@@ -34,7 +34,6 @@ import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
-import org.apache.freemarker.core.model.TemplateMethodModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNodeModel;
@@ -45,6 +44,7 @@ import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.impl.BeanAndStringModel;
 import org.apache.freemarker.core.model.impl.BeanModel;
+import org.apache.freemarker.core.model.impl.JavaMethodModel;
 
 /**
  * Static utility methods that perform tasks specific to the FreeMarker Template Language (FTL).
@@ -760,7 +760,7 @@ public final class FTLUtil {
         }
 
         if (callable instanceof TemplateFunctionModel) {
-            String f = "function"; // TODO [FM3][CF] Should say "method" sometimes
+            String f = callable instanceof JavaMethodModel ? "method" : "function";
             result = d == null ? f : d + "+" + f;
         }
 
@@ -799,7 +799,8 @@ public final class FTLUtil {
                 appendTypeName(sb, typeNamesAppended, _CoreAPI.isMacro(cl) ? "macro" : "directive");
             }
             if (TemplateFunctionModel.class.isAssignableFrom(cl)) {
-                appendTypeName(sb, typeNamesAppended, "function"); // TODO [FM3][CF] should say "method" sometimes
+                appendTypeName(sb, typeNamesAppended,
+                        JavaMethodModel.class.isAssignableFrom(cl) ? "method" : "function");
             }
         }
 
@@ -810,10 +811,6 @@ public final class FTLUtil {
                     TemplateCollectionModelEx.class.isAssignableFrom(cl) ? "extended_collection" : "collection");
         } else if (TemplateModelIterator.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "iterator");
-        }
-
-        if (TemplateMethodModel.class.isAssignableFrom(cl)) {
-            appendTypeName(sb, typeNamesAppended, "method");
         }
 
         if (Environment.Namespace.class.isAssignableFrom(cl)) {

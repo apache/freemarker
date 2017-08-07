@@ -24,7 +24,9 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._ErrorDescriptionBuilder;
 
 /**
- * {@link TemplateModel} methods throw this exception if the requested data can't be retrieved.  
+ * {@link ObjectWrapper}-s may throw this when wrapping/unwrapping fails, or {@link TemplateModel} methods throw this
+ * if the requested data can't be retrieved. {@link TemplateCallableModel}-s should typically throw
+ * {@link TemplateException} instead (like when a required argument is missing).
  */
 public class TemplateModelException extends TemplateException {
 
