@@ -234,7 +234,13 @@ subprojects {
             }
         }
     }
-
+    
+    test {
+        testLogging {
+            exceptionFormat = "full"
+        }
+    }
+    
     jar {
         manifest {   // org.gradle.api.plugins.osgi.OsgiManifest
             version versionForOSGi
