@@ -139,6 +139,20 @@ public class TemplateConfigurationTest {
         NON_DEFAULT_TZ = tz;
     }
 
+
+    private static final TimeZone NON_DEFAULT_SQL_TZ;
+    static {
+        TimeZone defaultTZ = DEFAULT_CFG.getSQLDateAndTimeTimeZone();
+        TimeZone tz = TimeZone.getTimeZone("UTC");
+        if (tz.equals(defaultTZ)) {
+            tz = TimeZone.getTimeZone("GMT+01");
+            if (tz.equals(defaultTZ)) {
+                throw new AssertionError("Couldn't chose a non-default SQL time zone");
+            }
+        }
+        NON_DEFAULT_SQL_TZ = tz;
+    }
+
     private static final Locale NON_DEFAULT_LOCALE =
             DEFAULT_CFG.getLocale().equals(Locale.US) ? Locale.GERMAN : Locale.US;
 
@@ -153,7 +167,7 @@ public class TemplateConfigurationTest {
 
         // "MutableProcessingConfiguration" settings:
         SETTING_ASSIGNMENTS.put("APIBuiltinEnabled", true);
-        SETTING_ASSIGNMENTS.put("SQLDateAndTimeTimeZone", NON_DEFAULT_TZ);
+        SETTING_ASSIGNMENTS.put("SQLDateAndTimeTimeZone", NON_DEFAULT_SQL_TZ);
         SETTING_ASSIGNMENTS.put("URLEscapingCharset", StandardCharsets.UTF_16);
         SETTING_ASSIGNMENTS.put("autoFlush", false);
         SETTING_ASSIGNMENTS.put("booleanFormat", "J,N");
