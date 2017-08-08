@@ -243,4 +243,18 @@ public final class ArgumentArrayLayout {
         return arrayLength;
     }
 
+    /**
+     * Tells if there can be any positional parameters (predefined or varargs).
+     */
+    public boolean isPositionalParametersSupported() {
+        return getPredefinedPositionalArgumentCount() != 0 || getPositionalVarargsArgumentIndex() != -1;
+    }
+
+    /**
+     * Tells if there can be any named parameters (predefined or varargs).
+     */
+    public boolean isNamedParametersSupported() {
+        return getPredefinedNamedArgumentsMap().size() != 0 || getNamedVarargsArgumentIndex() != -1;
+    }
+
 }

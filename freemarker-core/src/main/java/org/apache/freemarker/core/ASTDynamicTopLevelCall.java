@@ -21,22 +21,17 @@ package org.apache.freemarker.core;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Collection;
-import java.util.List;
 
 import org.apache.freemarker.core.ThreadInterruptionSupportTemplatePostProcessor.ASTThreadInterruptionCheck;
+import org.apache.freemarker.core._CallableUtils.NamedArgument;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.TemplateCallableModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.CommonSupplier;
-import org.apache.freemarker.core.util.FTLUtil;
 import org.apache.freemarker.core.util.StringToIndexMap;
-import org.apache.freemarker.core.util._CollectionUtil;
 import org.apache.freemarker.core.util._StringUtil;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -53,16 +48,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * call is "dynamic".
  */
 class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
-
-    static final class NamedArgument {
-        private final String name;
-        private final ASTExpression value;
-
-        public NamedArgument(String name, ASTExpression value) {
-            this.name = name;
-            this.value = value;
-        }
-    }
 
     private final ASTExpression callableValueExp;
     private final ASTExpression[] positionalArgs;
@@ -132,9 +117,8 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
             throw new _MiscTemplateException(env, "Nested content is not supported by this directive.");
         }
 
-        TemplateModel[] execArgs = argsLayout != null
-                ? getExecuteArgsBasedOnLayout(argsLayout, callableValue, env)
-                : getExecuteArgsWithoutLayout(callableValue, env);
+        TemplateModel[] execArgs = _CallableUtils.getExecuteArgs(
+                positionalArgs, namedArgs, argsLayout, callableValue, env);
 
         if (directive != null) {
             directive.execute(execArgs, this, env.getOut(), env);
@@ -148,129 +132,6 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
         }
 
         return null;
-    }
-
-    private TemplateModel[] getExecuteArgsWithoutLayout(TemplateCallableModel callableValue, Environment env)
-            throws TemplateException {
-        if (namedArgs != null) {
-            throw new _MiscTemplateException(env, getNamedArgumentsNotSupportedMessage(callableValue, namedArgs[0]));
-        }
-        TemplateModel[] execArgs = new TemplateModel[positionalArgs.length];
-        for (int i = 0; i < positionalArgs.length; i++) {
-            ASTExpression positionalArg = positionalArgs[i];
-            execArgs[i] = positionalArg.eval(env);
-        }
-        return execArgs;
-    }
-
-    private TemplateModel[] getExecuteArgsBasedOnLayout(ArgumentArrayLayout argsLayout, TemplateCallableModel callableValue,
-            Environment env) throws TemplateException {
-        int predefPosArgCnt = argsLayout.getPredefinedPositionalArgumentCount();
-        int posVarargsArgIdx = argsLayout.getPositionalVarargsArgumentIndex();
-
-        TemplateModel[] execArgs = new TemplateModel[argsLayout.getTotalLength()];
-
-        // Fill predefined positional args:
-        if (positionalArgs != null) {
-            int actualPredefPosArgCnt = Math.min(positionalArgs.length, predefPosArgCnt);
-            for (int argIdx = 0; argIdx < actualPredefPosArgCnt; argIdx++) {
-                execArgs[argIdx] = positionalArgs[argIdx].eval(env);
-            }
-        }
-
-        if (posVarargsArgIdx != -1) {
-            int posVarargsLength = positionalArgs != null ? positionalArgs.length - predefPosArgCnt : 0;
-            TemplateSequenceModel varargsSeq;
-            if (posVarargsLength <= 0) {
-                varargsSeq = Constants.EMPTY_SEQUENCE;
-            } else {
-                NativeSequence nativeSeq = new NativeSequence(posVarargsLength);
-                varargsSeq = nativeSeq;
-                for (int posVarargIdx = 0; posVarargIdx < posVarargsLength; posVarargIdx++) {
-                    nativeSeq.add(positionalArgs[predefPosArgCnt + posVarargIdx].eval(env));
-                }
-            }
-            execArgs[posVarargsArgIdx] = varargsSeq;
-        } else if (positionalArgs != null && positionalArgs.length > predefPosArgCnt) {
-            checkSupportsAnyParameters(callableValue, argsLayout, env);
-            List<String> validPredefNames = argsLayout.getPredefinedNamedArgumentsMap().getKeys();
-            _ErrorDescriptionBuilder errorDesc = new _ErrorDescriptionBuilder(
-                    "The target ", FTLUtil.getCallableTypeName(callableValue), " ",
-                    (predefPosArgCnt != 0
-                            ? new Object[]{ "can only have ", predefPosArgCnt }
-                            : "can't have"
-                    ),
-                    " arguments passed by position, but the invocation has ",
-                    positionalArgs.length, " such arguments. Try to pass arguments by name (as in ",
-                    "<@example x=1 y=2 />", ").",
-                    (!validPredefNames.isEmpty()
-                            ? new Object[] { " The supported parameter names are:\n",
-                                    new _DelayedJQuotedListing(validPredefNames)}
-                            : _CollectionUtil.EMPTY_OBJECT_ARRAY)
-            );
-            if (callableValue instanceof Environment.TemplateLanguageDirective) {
-                errorDesc.tip("You can pass a parameter by position (i.e., without specifying its name, as you"
-                        + " have tried now) when the macro has defined that parameter to be a positional parameter. "
-                        + "See in the documentation how, and when that's a good practice.");
-            }
-            throw new _MiscTemplateException(env,
-                    errorDesc
-            );
-        }
-
-        int namedVarargsArgumentIndex = argsLayout.getNamedVarargsArgumentIndex();
-        NativeHashEx2 namedVarargsHash = null;
-        if (namedArgs != null) {
-            StringToIndexMap predefNamedArgsMap = argsLayout.getPredefinedNamedArgumentsMap();
-            for (NamedArgument namedArg : namedArgs) {
-                int argIdx = predefNamedArgsMap.get(namedArg.name);
-                if (argIdx != -1) {
-                    execArgs[argIdx] = namedArg.value.eval(env);
-                } else {
-                    if (namedVarargsHash == null) {
-                        if (namedVarargsArgumentIndex == -1) {
-                            checkSupportsAnyParameters(callableValue, argsLayout, env);
-                            Collection<String> validNames = predefNamedArgsMap.getKeys();
-                            throw new _MiscTemplateException(env,
-                                    validNames == null || validNames.isEmpty()
-                                    ? getNamedArgumentsNotSupportedMessage(callableValue, namedArg)
-                                    : new Object[] {
-                                            "The called ", FTLUtil.getCallableTypeName(callableValue),
-                                            " has no parameter that's passed by name and is called ",
-                                            new _DelayedJQuote(namedArg.name), ". The supported parameter names are:\n",
-                                            new _DelayedJQuotedListing(validNames)
-                                    });
-                        }
-
-                        namedVarargsHash = new NativeHashEx2();
-                    }
-                    namedVarargsHash.put(namedArg.name, namedArg.value.eval(env));
-                }
-            }
-        }
-        if (namedVarargsArgumentIndex != -1) {
-            execArgs[namedVarargsArgumentIndex] = namedVarargsHash != null ? namedVarargsHash : Constants.EMPTY_HASH;
-        }
-        return execArgs;
-    }
-
-    private Object[] getNamedArgumentsNotSupportedMessage(TemplateCallableModel callableValue,
-            NamedArgument namedArg) {
-        return new Object[] {
-                "The called ", FTLUtil.getCallableTypeName(callableValue),
-                " can't have arguments that are passed by name (like ",
-                new _DelayedJQuote(namedArg.name), "). Try to pass arguments by position "
-                + "(i.e, without name, as in ", "<@example 1, 2, 3 />" ,  ")."
-        };
-    }
-
-    private void checkSupportsAnyParameters(
-            TemplateCallableModel callableValue, ArgumentArrayLayout argsLayout, Environment env)
-            throws TemplateException {
-        if (argsLayout.getTotalLength() == 0) {
-            throw new _MiscTemplateException(env,
-                    "The called ", FTLUtil.getCallableTypeName(callableValue), " doesn't support any parameters.");
-        }
     }
 
     @Override
@@ -292,20 +153,19 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
         boolean nameIsInParen = sb.charAt(sb.length() - 1) == ')';
         if (positionalArgs != null) {
             for (int i = 0; i < positionalArgs.length; i++) {
-                ASTExpression argExp = (ASTExpression) positionalArgs[i];
                 if (i != 0) {
                     sb.append(',');
                 }
                 sb.append(' ');
-                sb.append(argExp.getCanonicalForm());
+                sb.append(positionalArgs[i].getCanonicalForm());
             }
         }
         if (namedArgs != null) {
             for (NamedArgument namedArg : namedArgs) {
                 sb.append(' ');
-                sb.append(_StringUtil.toFTLTopLevelIdentifierReference(namedArg.name));
+                sb.append(_StringUtil.toFTLTopLevelIdentifierReference(namedArg.getName()));
                 sb.append('=');
-                MessageUtil.appendExpressionAsUntearable(sb, namedArg.value);
+                sb.append(namedArg.getValue().getCanonicalForm());
             }
         }
         if (nestedContentParamNames != null) {
@@ -365,7 +225,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
                 final int namedArgsSize = namedArgs != null ? namedArgs.length : 0;
                 if (idx - base < namedArgsSize * 2) {
                     NamedArgument namedArg = namedArgs[(idx - base) / 2];
-                    return (idx - base) % 2 == 0 ? namedArg.name : namedArg.value;
+                    return (idx - base) % 2 == 0 ? namedArg.getName() : namedArg.getValue();
                 } else {
                     base += namedArgsSize * 2;
                     final int bodyParameterNamesSize = nestedContentParamNames != null

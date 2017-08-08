@@ -33,62 +33,72 @@ import org.apache.freemarker.core.util._StringUtil;
 
 public abstract class TestTemplateCallableModel implements TemplateCallableModel {
 
+    protected void printParam(String name, Object value, StringBuilder sb) throws TemplateModelException {
+        printParam(name, value, sb, false);
+    }
+
+    protected void printParam(String name, Object value, StringBuilder sb, boolean first)
+            throws TemplateModelException {
+        if (!first) {
+            sb.append(", ");
+        }
+        sb.append(name);
+        sb.append("=");
+        printValue(value, sb);
+    }
+
     protected void printParam(String name, Object value, Writer out) throws IOException, TemplateModelException {
         printParam(name, value, out, false);
     }
 
     protected void printParam(String name, Object value, Writer out, boolean first)
             throws IOException, TemplateModelException {
-        if (!first) {
-            out.write(", ");
-        }
-        out.write(name);
-        out.write("=");
-        printValue(value, out);
+        StringBuilder sb = new StringBuilder();
+        printParam(name, value, sb, first);
+        out.write(sb.toString());
     }
 
-    private void printValue(Object value, Writer out) throws IOException, TemplateModelException {
+    private void printValue(Object value, StringBuilder sb) throws TemplateModelException {
         if (value == null) {
-            out.write("null");
+            sb.append("null");
         } else if (value instanceof TemplateNumberModel) {
-            out.write(((TemplateNumberModel) value).getAsNumber().toString());
+            sb.append(((TemplateNumberModel) value).getAsNumber().toString());
         } else if (value instanceof TemplateScalarModel) {
-            out.write(FTLUtil.toStringLiteral(((TemplateScalarModel) value).getAsString()));
+            sb.append(FTLUtil.toStringLiteral(((TemplateScalarModel) value).getAsString()));
         } else if (value instanceof TemplateSequenceModel) {
             int len = ((TemplateSequenceModel) value).size();
-            out.write('[');
+            sb.append('[');
             for (int i = 0; i < len; i++) {
                 if (i != 0) {
-                    out.write(", ");
+                    sb.append(", ");
                 }
-                printValue(((TemplateSequenceModel) value).get(i), out);
+                printValue(((TemplateSequenceModel) value).get(i), sb);
             }
-            out.write(']');
+            sb.append(']');
         } else if (value instanceof TemplateHashModelEx2) {
             TemplateHashModelEx2.KeyValuePairIterator it = ((TemplateHashModelEx2) value).keyValuePairIterator();
-            out.write('{');
+            sb.append('{');
             while (it.hasNext()) {
                 TemplateHashModelEx2.KeyValuePair kvp = it.next();
 
-                printValue(kvp.getKey(), out);
-                out.write(": ");
-                printValue(kvp.getValue(), out);
+                printValue(kvp.getKey(), sb);
+                sb.append(": ");
+                printValue(kvp.getValue(), sb);
 
                 if (it.hasNext()) {
-                    out.write(", ");
+                    sb.append(", ");
                 }
             }
-            out.write('}');
+            sb.append('}');
         } else if (value instanceof String) {
-            out.write(_StringUtil.jQuote(value));
+            sb.append(_StringUtil.jQuote(value));
         } else if (value instanceof Number) {
-            out.write(value.toString());
+            sb.append(value.toString());
         } else if (value instanceof Boolean) {
-            out.write(value.toString());
+            sb.append(value.toString());
         } else {
             throw new IllegalArgumentException("Unsupported value class: " + value.getClass().getName());
         }
     }
-
 
 }

@@ -25,16 +25,12 @@ package org.apache.freemarker.core;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.Constants;
+import org.apache.freemarker.core._CallableUtils.NamedArgument;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.util.CommonSupplier;
-import org.apache.freemarker.core.util.FTLUtil;
+import org.apache.freemarker.core.util._StringUtil;
 
 
 /**
@@ -42,93 +38,73 @@ import org.apache.freemarker.core.util.FTLUtil;
  */
 final class ASTExpFunctionCall extends ASTExpression implements CallPlace {
 
-    private final ASTExpression target;
-    private final ASTExpListLiteral arguments;
+    private final ASTExpression functionExp;
+    private final ASTExpression[] positionalArgs;
+    private final NamedArgument[] namedArgs;
 
-    ASTExpFunctionCall(ASTExpression target, ArrayList arguments) {
-        this(target, new ASTExpListLiteral(arguments));
-    }
+    ASTExpFunctionCall(
+            ASTExpression functionExp, ASTExpression[] positionalArgs, NamedArgument[] namedArgs) {
+        this.functionExp = functionExp;
 
-    private ASTExpFunctionCall(ASTExpression target, ASTExpListLiteral arguments) {
-        this.target = target;
-        this.arguments = arguments;
+        if (positionalArgs != null && positionalArgs.length == 0
+                || namedArgs != null && namedArgs.length == 0) {
+            throw new IllegalArgumentException("Use null instead of empty collections");
+        }
+
+        this.positionalArgs = positionalArgs;
+        this.namedArgs = namedArgs;
     }
 
     @Override
     TemplateModel _eval(Environment env) throws TemplateException {
-        TemplateModel targetModel = target.eval(env);
-
-        if (!(targetModel instanceof TemplateFunctionModel)) {
-            throw new NonFunctionException(target, targetModel, env);
-        }
-        TemplateFunctionModel func = (TemplateFunctionModel) targetModel;
-
-        ArgumentArrayLayout arrayLayout = func.getFunctionArgumentArrayLayout();
-
-        // TODO [FM3] This is just temporary, until we support named args. Then the logic in ASTDynamicTopLevelCall
-        // should be reused.
-
-        TemplateModel[] args;
-        if (arrayLayout != null) {
-            int posVarargsLength;
-            int callArgCnt = arguments.size();
-            int predefPosArgCnt = arrayLayout.getPredefinedPositionalArgumentCount();
-            int posVarargsIdx = arrayLayout.getPositionalVarargsArgumentIndex();
-            if (callArgCnt > predefPosArgCnt) {
-                if (posVarargsIdx == -1) {
-                    throw new _MiscTemplateException(env,
-                            "Too many arguments; the target ", FTLUtil.getCallableTypeName(func),
-                            " only has ", predefPosArgCnt, " parameters.");
-                }
+        TemplateFunctionModel function;
+        {
+            TemplateModel functionUncasted = functionExp.eval(env);
+            if (!(functionUncasted instanceof TemplateFunctionModel)) {
+                throw new NonFunctionException(functionExp, functionUncasted, env);
             }
-
-            List<TemplateModel> callArgList = arguments.getModelList(env);
-
-            args = new TemplateModel[arrayLayout.getTotalLength()];
-            int callPredefArgCnt = Math.min(callArgCnt, predefPosArgCnt);
-            for (int argIdx = 0; argIdx < callPredefArgCnt; argIdx++) {
-                args[argIdx] = callArgList.get(argIdx);
-            }
-
-            if (posVarargsIdx != -1) {
-                TemplateSequenceModel varargsSeq;
-                posVarargsLength = callArgCnt - predefPosArgCnt;
-                if (posVarargsLength <= 0) {
-                    varargsSeq = Constants.EMPTY_SEQUENCE;
-                } else {
-                    NativeSequence nativeSeq = new NativeSequence(posVarargsLength);
-                    varargsSeq = nativeSeq;
-                    for (int posVarargIdx = 0; posVarargIdx < posVarargsLength; posVarargIdx++) {
-                        nativeSeq.add(callArgList.get(predefPosArgCnt + posVarargIdx));
-                    }
-                }
-                args[posVarargsIdx] = varargsSeq;
-            }
-
-            int namedVarargsArgIdx = arrayLayout.getNamedVarargsArgumentIndex();
-            if (namedVarargsArgIdx != -1) {
-                args[namedVarargsArgIdx] = Constants.EMPTY_HASH;
-            }
-        } else {
-            List<TemplateModel> callArgList = arguments.getModelList(env);
-            args = new TemplateModel[callArgList.size()];
-            for (int i = 0; i < callArgList.size(); i++) {
-                args[i] = callArgList.get(i);
-            }
+            function = (TemplateFunctionModel) functionUncasted;
         }
 
-        return func.execute(args, this, env);
+        return function.execute(
+                _CallableUtils.getExecuteArgs(
+                        positionalArgs, namedArgs, function.getFunctionArgumentArrayLayout(), function, env),
+                this,
+                env);
     }
 
     @Override
     public String getCanonicalForm() {
-        StringBuilder buf = new StringBuilder();
-        buf.append(target.getCanonicalForm());
-        buf.append("(");
-        String list = arguments.getCanonicalForm();
-        buf.append(list.substring(1, list.length() - 1));
-        buf.append(")");
-        return buf.toString();
+        StringBuilder sb = new StringBuilder();
+        sb.append(functionExp.getCanonicalForm());
+        sb.append("(");
+
+        boolean first = true;
+        if (positionalArgs != null) {
+            for (ASTExpression positionalArg : positionalArgs) {
+                if (!first) {
+                    sb.append(", ");
+                } else {
+                    first = false;
+                }
+                sb.append(positionalArg.getCanonicalForm());
+            }
+        }
+        if (namedArgs != null) {
+            for (NamedArgument namedArg : namedArgs) {
+                if (!first) {
+                    sb.append(',');
+                } else {
+                    first = false;
+                }
+                sb.append(_StringUtil.toFTLTopLevelIdentifierReference(namedArg.getName()));
+                sb.append('=');
+                sb.append(namedArg.getValue().getCanonicalForm());
+            }
+        }
+
+        sb.append(")");
+        return sb.toString();
     }
 
     @Override
@@ -148,24 +124,63 @@ final class ASTExpFunctionCall extends ASTExpression implements CallPlace {
     @Override
     protected ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
+        ASTExpression[] positionalArgsClone;
+        if (positionalArgs != null) {
+            positionalArgsClone = new ASTExpression[positionalArgs.length];
+            for (int i = 0; i < positionalArgs.length; i++) {
+                positionalArgsClone[i] = positionalArgs[i].deepCloneWithIdentifierReplaced(
+                        replacedIdentifier, replacement, replacementState);
+            }
+        } else {
+            positionalArgsClone = null;
+        }
+
+        NamedArgument[] namedArgsClone;
+        if (namedArgs != null) {
+            namedArgsClone = new NamedArgument[namedArgs.length];
+            for (int i = 0; i < namedArgs.length; i++) {
+                NamedArgument namedArg = namedArgs[i];
+                namedArgsClone[i] = new NamedArgument(
+                        namedArg.getName(),
+                        namedArg.getValue().deepCloneWithIdentifierReplaced(
+                                replacedIdentifier, replacement, replacementState));
+
+            }
+        } else {
+            namedArgsClone = null;
+        }
+
         return new ASTExpFunctionCall(
-                target.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
-                (ASTExpListLiteral) arguments.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
+                functionExp.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+                positionalArgsClone, namedArgsClone);
     }
 
     @Override
     int getParameterCount() {
-        return 1 + arguments.items.size();
+        return 1/*nameExp*/
+                + (positionalArgs != null ? positionalArgs.length : 0)
+                + (namedArgs != null ? namedArgs.length * 2 : 0);
     }
 
     @Override
     Object getParameterValue(int idx) {
         if (idx == 0) {
-            return target;
-        } else if (idx < getParameterCount()) {
-            return arguments.items.get(idx - 1);
+            return functionExp;
         } else {
-            throw new IndexOutOfBoundsException();
+            int base = 1;
+            final int positionalArgsSize = positionalArgs != null ? positionalArgs.length : 0;
+            if (idx - base < positionalArgsSize) {
+                return positionalArgs[idx - base];
+            } else {
+                base += positionalArgsSize;
+                final int namedArgsSize = namedArgs != null ? namedArgs.length : 0;
+                if (idx - base < namedArgsSize * 2) {
+                    NamedArgument namedArg = namedArgs[(idx - base) / 2];
+                    return (idx - base) % 2 == 0 ? namedArg.getName() : namedArg.getValue();
+                } else {
+                    throw new IndexOutOfBoundsException();
+                }
+            }
         }
     }
 
@@ -173,10 +188,20 @@ final class ASTExpFunctionCall extends ASTExpression implements CallPlace {
     ParameterRole getParameterRole(int idx) {
         if (idx == 0) {
             return ParameterRole.CALLEE;
-        } else if (idx < getParameterCount()) {
-            return ParameterRole.ARGUMENT_VALUE;
         } else {
-            throw new IndexOutOfBoundsException();
+            int base = 1;
+            final int positionalArgsSize = positionalArgs != null ? positionalArgs.length : 0;
+            if (idx - base < positionalArgsSize) {
+                return ParameterRole.ARGUMENT_VALUE;
+            } else {
+                base += positionalArgsSize;
+                final int namedArgsSize = namedArgs != null ? namedArgs.length : 0;
+                if (idx - base < namedArgsSize * 2) {
+                    return (idx - base) % 2 == 0 ? ParameterRole.ARGUMENT_NAME : ParameterRole.ARGUMENT_VALUE;
+                } else {
+                    throw new IndexOutOfBoundsException();
+                }
+            }
         }
     }
 

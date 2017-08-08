@@ -26,25 +26,38 @@ import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.util.StringToIndexMap;
 
-public class PositionalVarargsOnlyFunction extends TestTemplateCallableModel implements TemplateFunctionModel {
+public class TwoNamedParamsFunction extends TestTemplateCallableModel implements TemplateFunctionModel {
 
-    public static final PositionalVarargsOnlyFunction INSTANCE = new PositionalVarargsOnlyFunction();
+    public static final TwoNamedParamsFunction INSTANCE = new TwoNamedParamsFunction();
+
+    private static final int N1_ARG_IDX = 0;
+    private static final int N2_ARG_IDX = 1;
+
+    private static final String N1_ARG_NAME = "n1";
+    private static final String N2_ARG_NAME = "n2";
+
+    private static final StringToIndexMap ARG_NAME_TO_IDX = StringToIndexMap.of(
+            N1_ARG_NAME, N1_ARG_IDX,
+            N2_ARG_NAME, N2_ARG_IDX);
 
     private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
-            0, true,
-            null, false);
+            0, false,
+            ARG_NAME_TO_IDX, false);
 
-    private PositionalVarargsOnlyFunction() {
+    private TwoNamedParamsFunction() {
         //
     }
 
     @Override
-    public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env) throws TemplateException {
+    public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+            throws TemplateException {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("fpvo(");
-        printParam("pVarargs", args[ARGS_LAYOUT.getPositionalVarargsArgumentIndex()], sb, true);
+        sb.append("fn(");
+        printParam(N1_ARG_NAME, args[N1_ARG_IDX], sb, true);
+        printParam(N2_ARG_NAME, args[N2_ARG_IDX], sb);
         sb.append(")");
 
         return new SimpleScalar(sb.toString());
@@ -54,4 +67,5 @@ public class PositionalVarargsOnlyFunction extends TestTemplateCallableModel imp
     public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
         return ARGS_LAYOUT;
     }
+
 }

@@ -19,9 +19,6 @@
 
 package org.apache.freemarker.core.userpkg;
 
-import java.io.IOException;
-import java.io.StringWriter;
-
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
@@ -44,16 +41,14 @@ public class TwoPositionalParamsFunction extends TestTemplateCallableModel imple
 
     @Override
     public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env) throws TemplateException {
-        try {
-            StringWriter out = new StringWriter();
-            out.write("fp(");
-            printParam("p1", args[0], out, true);
-            printParam("p2", args[1], out);
-            out.write(")");
-            return new SimpleScalar(out.toString());
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("fp(");
+        printParam("p1", args[0], sb, true);
+        printParam("p2", args[1], sb);
+        sb.append(")");
+
+        return new SimpleScalar(sb.toString());
     }
 
     @Override
