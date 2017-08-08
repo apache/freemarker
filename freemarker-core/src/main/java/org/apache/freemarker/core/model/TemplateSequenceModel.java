@@ -30,6 +30,8 @@ package org.apache.freemarker.core.model;
  */
 public interface TemplateSequenceModel extends TemplateModel {
 
+    TemplateSequenceModel EMPTY_SEQUENCE = new EmptySequenceModel();
+
     /**
      * Retrieves the i-th template model in this sequence.
      * 

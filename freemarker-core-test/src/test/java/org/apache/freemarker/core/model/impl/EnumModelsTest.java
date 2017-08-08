@@ -23,7 +23,7 @@ import static org.junit.Assert.*;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.NonTemplateCallPlace;
-import org.apache.freemarker.core.model.Constants;
+import org.apache.freemarker.core._CallableUtils;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
@@ -59,7 +59,7 @@ public class EnumModelsTest {
         assertEquals(((TemplateScalarModel) a).getAsString(), "ts:A");
         JavaMethodModel nameMethod = (JavaMethodModel) ((TemplateHashModel) a).get("name");
         assertEquals(((TemplateScalarModel) nameMethod.execute(
-                Constants.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE)).getAsString(),
+                _CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE)).getAsString(),
                 "A");
         
         assertSame(e, enums.get(E.class.getName()));

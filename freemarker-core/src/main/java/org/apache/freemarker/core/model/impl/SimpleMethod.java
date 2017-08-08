@@ -21,11 +21,11 @@ package org.apache.freemarker.core.model.impl;
 import java.lang.reflect.Array;
 import java.lang.reflect.Member;
 
+import org.apache.freemarker.core._CallableUtils;
 import org.apache.freemarker.core._DelayedFTLTypeDescription;
 import org.apache.freemarker.core._DelayedOrdinal;
 import org.apache.freemarker.core._ErrorDescriptionBuilder;
 import org.apache.freemarker.core._TemplateModelException;
-import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -52,7 +52,7 @@ class SimpleMethod {
     
     Object[] unwrapArguments(TemplateModel[] args, DefaultObjectWrapper wrapper) throws TemplateModelException {
         if (args == null) {
-            args = Constants.EMPTY_TEMPLATE_MODEL_ARRAY;
+            args = _CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY;
         }
         boolean isVarArg = _MethodUtil.isVarargs(member);
         int typesLen = argTypes.length;

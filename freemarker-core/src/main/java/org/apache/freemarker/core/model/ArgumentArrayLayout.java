@@ -54,12 +54,12 @@ import org.apache.freemarker.core.util.StringToIndexMap;
  *     If there's a positional varargs argument, then 1 element for the positional varargs parameter (whose value
  *     will be a {@link TemplateSequenceModel}), at index {@link #getPositionalVarargsArgumentIndex()}. This must not
  *     be left {@code null} in the argument array. In case there are 0 positional varargs, the caller must set it to
- *     an empty {@link TemplateSequenceModel} (like {@link Constants#EMPTY_SEQUENCE}).
+ *     an empty {@link TemplateSequenceModel} (like {@link TemplateSequenceModel#EMPTY_SEQUENCE}).
  * <li>
  *     If there's a named varargs argument, then 1 element for the positional varargs parameter (whose value will be
  *     a {@link TemplateHashModelEx2}), at index {@link #getNamedVarargsArgumentIndex()}. This must not be left
  *     {@code null} in the argument array. In case there are 0 named varargs, the caller must set it to an empty
- *     {@link TemplateHashModelEx2} (like {@link Constants#EMPTY_HASH}).
+ *     {@link TemplateHashModelEx2} (like {@link TemplateHashModel#EMPTY_HASH}).
  * </ol>
  * <p>
  * The length of the argument array (allocated by the caller of {@code execute}) is {@link #getTotalLength()}}, or

@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.Constants;
+import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateCallableModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
@@ -44,6 +44,8 @@ import org.apache.freemarker.core.util._CollectionUtil;
 // TODO [FM3] Most functionality here should be made public on some way. Also BuiltIn-s has some duplicates utiltity
 // methods for this functionality (checking arguments). Need to clean this up.
 public final class _CallableUtils {
+
+    public static final TemplateModel[] EMPTY_TEMPLATE_MODEL_ARRAY = new TemplateModel[0];
 
     private _CallableUtils() {
         //
@@ -66,18 +68,18 @@ public final class _CallableUtils {
     private static TemplateModel[] getArgumentArrayWithNoArguments(ArgumentArrayLayout argsLayout) {
         int totalLength = argsLayout != null ? argsLayout.getTotalLength() : 0;
         if (totalLength == 0) {
-            return Constants.EMPTY_TEMPLATE_MODEL_ARRAY;
+            return EMPTY_TEMPLATE_MODEL_ARRAY;
         } else {
             TemplateModel[] args = new TemplateModel[totalLength];
 
             int positionalVarargsArgumentIndex = argsLayout.getPositionalVarargsArgumentIndex();
             if (positionalVarargsArgumentIndex != -1) {
-                args[positionalVarargsArgumentIndex] = Constants.EMPTY_SEQUENCE;
+                args[positionalVarargsArgumentIndex] = TemplateSequenceModel.EMPTY_SEQUENCE;
             }
 
             int namedVarargsArgumentIndex = argsLayout.getNamedVarargsArgumentIndex();
             if (namedVarargsArgumentIndex != -1) {
-                args[namedVarargsArgumentIndex] = Constants.EMPTY_SEQUENCE;
+                args[namedVarargsArgumentIndex] = TemplateSequenceModel.EMPTY_SEQUENCE;
             }
             
             return args;
@@ -197,7 +199,7 @@ public final class _CallableUtils {
                 execArgs[i] = positionalArg.eval(env);
             }
         } else {
-            execArgs = Constants.EMPTY_TEMPLATE_MODEL_ARRAY;
+            execArgs = EMPTY_TEMPLATE_MODEL_ARRAY;
         }
         return execArgs;
     }
@@ -223,7 +225,7 @@ public final class _CallableUtils {
             int posVarargsLength = positionalArgs != null ? positionalArgs.length - predefPosArgCnt : 0;
             TemplateSequenceModel varargsSeq;
             if (posVarargsLength <= 0) {
-                varargsSeq = Constants.EMPTY_SEQUENCE;
+                varargsSeq = TemplateSequenceModel.EMPTY_SEQUENCE;
             } else {
                 NativeSequence nativeSeq = new NativeSequence(posVarargsLength);
                 varargsSeq = nativeSeq;
@@ -299,7 +301,7 @@ public final class _CallableUtils {
             }
         }
         if (namedVarargsArgumentIndex != -1) {
-            execArgs[namedVarargsArgumentIndex] = namedVarargsHash != null ? namedVarargsHash : Constants.EMPTY_HASH;
+            execArgs[namedVarargsArgumentIndex] = namedVarargsHash != null ? namedVarargsHash : TemplateHashModel.EMPTY_HASH;
         }
         return execArgs;
     }

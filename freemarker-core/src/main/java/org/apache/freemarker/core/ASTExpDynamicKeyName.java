@@ -19,7 +19,6 @@
 
 package org.apache.freemarker.core;
 
-import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
@@ -238,7 +237,7 @@ final class ASTExpDynamicKeyName extends ASTExpression {
     }
 
     private TemplateModel emptyResult(boolean seq) {
-        return seq ? Constants.EMPTY_SEQUENCE : TemplateScalarModel.EMPTY_STRING;
+        return seq ? TemplateSequenceModel.EMPTY_SEQUENCE : TemplateScalarModel.EMPTY_STRING;
     }
 
     @Override

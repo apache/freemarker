@@ -55,7 +55,9 @@ public interface TemplateHashModelEx2 extends TemplateHashModelEx {
      * type, can throw {@link TemplateModelException}-s, and has no {@code remove()} method. 
      */
     interface KeyValuePairIterator {
-        
+
+        TemplateHashModelEx2.KeyValuePairIterator EMPTY_KEY_VALUE_PAIR_ITERATOR = new EmptyKeyValuePairIterator();
+
         /**
          * Similar to {@link Iterator#hasNext()}.
          */

@@ -26,7 +26,9 @@ package org.apache.freemarker.core.model;
  * <p>In templates they are used like {@code myHash.myKey} or {@code myHash[myDynamicKey]}. 
  */
 public interface TemplateHashModel extends TemplateModel {
-    
+
+    TemplateHashModelEx2 EMPTY_HASH = new EmptyHashModel();
+
     /**
      * Gets a <tt>TemplateModel</tt> from the hash.
      *

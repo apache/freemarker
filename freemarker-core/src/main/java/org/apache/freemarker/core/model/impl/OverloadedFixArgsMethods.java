@@ -18,7 +18,7 @@
  */
 package org.apache.freemarker.core.model.impl;
 
-import org.apache.freemarker.core.model.Constants;
+import org.apache.freemarker.core._CallableUtils;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
@@ -47,7 +47,7 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
     throws TemplateModelException {
         if (tmArgs == null) {
             // null is treated as empty args
-            tmArgs = Constants.EMPTY_TEMPLATE_MODEL_ARRAY;
+            tmArgs = _CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY;
         }
         final int argCount = tmArgs.length;
         final Class<?>[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();

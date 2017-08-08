@@ -40,6 +40,8 @@ import java.util.Collection;
  */
 public interface TemplateCollectionModel extends TemplateModel {
 
+    TemplateCollectionModelEx EMPTY_COLLECTION = new EmptyCollectionExModel();
+
     /**
      * Retrieves a template model iterator that is used to iterate over the elements in this collection.
      */

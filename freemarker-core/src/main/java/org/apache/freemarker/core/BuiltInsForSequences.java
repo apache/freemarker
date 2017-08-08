@@ -28,7 +28,6 @@ import java.util.Date;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
@@ -429,7 +428,7 @@ class BuiltInsForSequences {
                             ? findInSeq(target)
                             : findInCol(target);
                 }
-                return foundAtIdx == -1 ? Constants.MINUS_ONE : new SimpleNumber(foundAtIdx);
+                return foundAtIdx == -1 ? TemplateNumberModel.MINUS_ONE : new SimpleNumber(foundAtIdx);
             }
 
             @Override

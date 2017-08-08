@@ -82,17 +82,17 @@ implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, Tem
 
     @Override
     public TemplateCollectionModel keys() {
-        return Constants.EMPTY_COLLECTION;
+        return TemplateCollectionModel.EMPTY_COLLECTION;
     }
 
     @Override
     public TemplateCollectionModel values() {
-        return Constants.EMPTY_COLLECTION;
+        return TemplateCollectionModel.EMPTY_COLLECTION;
     }
 
     @Override
     public KeyValuePairIterator keyValuePairIterator() throws TemplateModelException {
-        return Constants.EMPTY_KEY_VALUE_PAIR_ITERATOR;
+        return EmptyKeyValuePairIterator.EMPTY_KEY_VALUE_PAIR_ITERATOR;
     }
 
 }

@@ -45,9 +45,9 @@ import org.apache.freemarker.core.NonTemplateCallPlace;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.Version;
+import org.apache.freemarker.core._CallableUtils;
 import org.apache.freemarker.core._CoreAPI;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
-import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
@@ -193,7 +193,7 @@ public class DefaultObjectWrapperTest {
         {
             // Check method calls, and also if the return value is wrapped with the overidden "wrap".
             final TemplateModel mr = ((JavaMethodModel) bean.get("m")).execute(
-                    Constants.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE);
+                    _CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE);
             assertEquals(Collections.singletonList(1), ow.unwrap(mr));
             assertTrue(DefaultListAdapter.class.isInstance(mr));
         }
@@ -586,7 +586,7 @@ public class DefaultObjectWrapperTest {
 
         TemplateHashModel api = (TemplateHashModel) iteratorAdapter.getAPI();
         assertFalse(((TemplateBooleanModel) ((JavaMethodModel)
-                api.get("hasNext")).execute(Constants.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE))
+                api.get("hasNext")).execute(_CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE))
                 .getAsBoolean());
     }
 
@@ -677,7 +677,7 @@ public class DefaultObjectWrapperTest {
 
         TemplateHashModel api = (TemplateHashModel) enumAdapter.getAPI();
         assertFalse(((TemplateBooleanModel) ((JavaMethodModel) api.get("hasMoreElements"))
-                .execute(Constants.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE)).getAsBoolean());
+                .execute(_CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE)).getAsBoolean());
     }
 
     @Test
@@ -734,7 +734,7 @@ public class DefaultObjectWrapperTest {
         TemplateHashModel apiModel = (TemplateHashModel) ((TemplateModelWithAPISupport) normalModel).getAPI();
         JavaMethodModel sizeMethod = (JavaMethodModel) apiModel.get("size");
         TemplateNumberModel r = (TemplateNumberModel) sizeMethod.execute(
-                Constants.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE);
+                _CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE);
         assertEquals(expectedSize, r.getAsNumber().intValue());
     }
 

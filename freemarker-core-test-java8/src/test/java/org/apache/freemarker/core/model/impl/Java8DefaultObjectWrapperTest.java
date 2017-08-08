@@ -23,7 +23,7 @@ import static org.junit.Assert.*;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.NonTemplateCallPlace;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.Constants;
+import org.apache.freemarker.core._CallableUtils;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
@@ -129,7 +129,7 @@ public class Java8DefaultObjectWrapperTest {
             assertEquals(
                     Java8DefaultMethodsBean.NORMAL_ACTION_RETURN_VALUE,
                     ((TemplateScalarModel) action.execute(
-                            Constants.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE))
+                            _CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE))
                             .getAsString());
         }
         
@@ -140,7 +140,7 @@ public class Java8DefaultObjectWrapperTest {
             assertEquals(
                     Java8DefaultMethodsBean.NORMAL_ACTION_RETURN_VALUE,
                     ((TemplateScalarModel) action.execute(
-                            Constants.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE))
+                            _CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE))
                             .getAsString());
         }
         {
@@ -150,7 +150,7 @@ public class Java8DefaultObjectWrapperTest {
             assertEquals(
                     Java8DefaultMethodsBean.DEFAULT_METHOD_ACTION_RETURN_VALUE,
                     ((TemplateScalarModel) action.execute(
-                            Constants.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE))
+                            _CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE))
                             .getAsString());
         }
         {
@@ -160,7 +160,7 @@ public class Java8DefaultObjectWrapperTest {
             assertEquals(
                     Java8DefaultMethodsBean.OVERRIDDEN_DEFAULT_METHOD_ACTION_RETURN_VALUE,
                     ((TemplateScalarModel) action.execute(
-                            Constants.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE))
+                            _CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE))
                             .getAsString());
         }
     }

@@ -20,7 +20,6 @@
 package org.apache.freemarker.core;
 
 
-import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -54,11 +53,11 @@ class ASTExpDefault extends ASTExpression {
 		}
 		@Override
         public TemplateCollectionModel keys() {
-			return Constants.EMPTY_COLLECTION;
+			return TemplateCollectionModel.EMPTY_COLLECTION;
 		}
 		@Override
         public TemplateCollectionModel values() {
-			return Constants.EMPTY_COLLECTION;
+			return TemplateCollectionModel.EMPTY_COLLECTION;
 		}
 		
 	}

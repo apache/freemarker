@@ -139,7 +139,6 @@ public class TemplateConfigurationTest {
         NON_DEFAULT_TZ = tz;
     }
 
-
     private static final TimeZone NON_DEFAULT_SQL_TZ;
     static {
         TimeZone defaultTZ = DEFAULT_CFG.getSQLDateAndTimeTimeZone();

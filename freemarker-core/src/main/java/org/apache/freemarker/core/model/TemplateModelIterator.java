@@ -25,6 +25,8 @@ package org.apache.freemarker.core.model;
  */
 public interface TemplateModelIterator {
 
+    TemplateModelIterator EMPTY_ITERATOR = new EmptyIteratorModel();
+
     /**
      * Returns the next model.
      * @throws TemplateModelException if the next model can not be retrieved
@@ -36,4 +38,5 @@ public interface TemplateModelIterator {
      * @return whether there are any more items to iterate over.
      */
     boolean hasNext() throws TemplateModelException;
+
 }

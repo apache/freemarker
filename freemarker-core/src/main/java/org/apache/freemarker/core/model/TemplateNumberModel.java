@@ -20,6 +20,7 @@
 package org.apache.freemarker.core.model;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
+import org.apache.freemarker.core.model.impl.SimpleNumber;
 
 /**
  * "number" template language data type; an object that stores a number. There's only one numerical type as far as the
@@ -31,6 +32,10 @@ import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
  * as for the first time.
  */
 public interface TemplateNumberModel extends TemplateModel {
+
+    TemplateNumberModel ZERO = new SimpleNumber(0);
+    TemplateNumberModel ONE = new SimpleNumber(1);
+    TemplateNumberModel MINUS_ONE = new SimpleNumber(-1);
 
     /**
      * Returns the numeric value. The return value must not be {@code null}.

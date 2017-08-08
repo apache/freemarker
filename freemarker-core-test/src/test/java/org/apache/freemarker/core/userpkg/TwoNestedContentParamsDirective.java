@@ -26,9 +26,9 @@ import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.CallPlace;
-import org.apache.freemarker.core.model.Constants;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 
 public class TwoNestedContentParamsDirective extends TestTemplateCallableModel implements TemplateDirectiveModel {
@@ -43,7 +43,7 @@ public class TwoNestedContentParamsDirective extends TestTemplateCallableModel i
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
         callPlace.executeNestedContent(
-                new TemplateModel[] { Constants.ONE, new SimpleNumber(2) },
+                new TemplateModel[] { TemplateNumberModel.ONE, new SimpleNumber(2) },
                 out, env);
     }
 
