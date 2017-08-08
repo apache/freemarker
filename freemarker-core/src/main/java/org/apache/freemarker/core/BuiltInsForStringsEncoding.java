@@ -29,7 +29,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 class BuiltInsForStringsEncoding {
 
@@ -37,7 +37,7 @@ class BuiltInsForStringsEncoding {
         
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(_StringUtil.XHTMLEnc(s));
+            return new SimpleScalar(_StringUtils.XHTMLEnc(s));
         }
         
     }
@@ -45,28 +45,28 @@ class BuiltInsForStringsEncoding {
     static class j_stringBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(_StringUtil.javaStringEnc(s));
+            return new SimpleScalar(_StringUtils.javaStringEnc(s));
         }
     }
 
     static class js_stringBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(_StringUtil.javaScriptStringEnc(s));
+            return new SimpleScalar(_StringUtils.javaScriptStringEnc(s));
         }
     }
 
     static class json_stringBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(_StringUtil.jsonStringEnc(s));
+            return new SimpleScalar(_StringUtils.jsonStringEnc(s));
         }
     }
 
     static class rtfBI extends BuiltInForLegacyEscaping {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(_StringUtil.RTFEnc(s));
+            return new SimpleScalar(_StringUtils.RTFEnc(s));
         }
     }
 
@@ -80,7 +80,7 @@ class BuiltInsForStringsEncoding {
     
             @Override
             protected String encodeWithCharset(Charset charset) throws UnsupportedEncodingException {
-                return _StringUtil.URLEnc(targetAsString, charset);
+                return _StringUtils.URLEnc(targetAsString, charset);
             }
             
         }
@@ -102,7 +102,7 @@ class BuiltInsForStringsEncoding {
     
             @Override
             protected String encodeWithCharset(Charset charset) throws UnsupportedEncodingException {
-                return _StringUtil.URLPathEnc(targetAsString, charset);
+                return _StringUtils.URLPathEnc(targetAsString, charset);
             }
             
         }
@@ -117,14 +117,14 @@ class BuiltInsForStringsEncoding {
     static class xhtmlBI extends BuiltInForLegacyEscaping {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(_StringUtil.XHTMLEnc(s));
+            return new SimpleScalar(_StringUtils.XHTMLEnc(s));
         }
     }
 
     static class xmlBI extends BuiltInForLegacyEscaping {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(_StringUtil.XMLEnc(s));
+            return new SimpleScalar(_StringUtils.XMLEnc(s));
         }
     }
 
@@ -157,7 +157,7 @@ class BuiltInsForStringsEncoding {
                     charset = Charset.forName(charsetName);
                 } catch (UnsupportedCharsetException e) {
                     throw new _TemplateModelException(e, "Wrong charset name, or charset is unsupported by the runtime "
-                            + "environment: " + _StringUtil.jQuote(charsetName));
+                            + "environment: " + _StringUtils.jQuote(charsetName));
                 }
                 return new SimpleScalar(encodeWithCharset(charset));
             } catch (Exception e) {

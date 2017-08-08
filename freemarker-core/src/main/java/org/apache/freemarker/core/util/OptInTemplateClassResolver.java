@@ -108,7 +108,7 @@ public class OptInTemplateClassResolver implements TemplateClassResolver {
                         "\" setting in the FreeMarker configuration.)");
             } else {
                 try {
-                    return _ClassUtil.forName(className);
+                    return _ClassUtils.forName(className);
                 } catch (ClassNotFoundException e) {
                     throw new _MiscTemplateException(e, env);
                 }
@@ -129,12 +129,12 @@ public class OptInTemplateClassResolver implements TemplateClassResolver {
         // Detect exploits, return null if one is suspected:
         String decodedName = name;
         if (decodedName.indexOf('%') != -1) {
-            decodedName = _StringUtil.replace(decodedName, "%2e", ".", false, false);
-            decodedName = _StringUtil.replace(decodedName, "%2E", ".", false, false);
-            decodedName = _StringUtil.replace(decodedName, "%2f", "/", false, false);
-            decodedName = _StringUtil.replace(decodedName, "%2F", "/", false, false);
-            decodedName = _StringUtil.replace(decodedName, "%5c", "\\", false, false);
-            decodedName = _StringUtil.replace(decodedName, "%5C", "\\", false, false);
+            decodedName = _StringUtils.replace(decodedName, "%2e", ".", false, false);
+            decodedName = _StringUtils.replace(decodedName, "%2E", ".", false, false);
+            decodedName = _StringUtils.replace(decodedName, "%2f", "/", false, false);
+            decodedName = _StringUtils.replace(decodedName, "%2F", "/", false, false);
+            decodedName = _StringUtils.replace(decodedName, "%5c", "\\", false, false);
+            decodedName = _StringUtils.replace(decodedName, "%5C", "\\", false, false);
         }
         int dotDotIdx = decodedName.indexOf("..");
         if (dotDotIdx != -1) {

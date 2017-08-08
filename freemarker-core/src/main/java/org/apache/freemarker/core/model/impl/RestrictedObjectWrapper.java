@@ -83,14 +83,14 @@ public class RestrictedObjectWrapper extends DefaultObjectWrapper {
                 throw new IllegalStateException("build() can only be executed once.");
             }
 
-            RestrictedObjectWrapper singleton = DefaultObjectWrapperTCCLSingletonUtil.getSingleton(
+            RestrictedObjectWrapper singleton = DefaultObjectWrapperTCCLSingletonUtils.getSingleton(
                     this, INSTANCE_CACHE, INSTANCE_CACHE_REF_QUEUE, ConstructorInvoker.INSTANCE);
             alreadyBuilt = true;
             return singleton;
         }
 
         private static class ConstructorInvoker
-                implements DefaultObjectWrapperTCCLSingletonUtil._ConstructorInvoker<RestrictedObjectWrapper, Builder> {
+                implements DefaultObjectWrapperTCCLSingletonUtils._ConstructorInvoker<RestrictedObjectWrapper, Builder> {
 
             private static final ConstructorInvoker INSTANCE = new ConstructorInvoker();
 

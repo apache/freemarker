@@ -20,11 +20,11 @@
 package freemarker.core;
 
 import org.apache.freemarker.converter.ConverterException;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 public class UnexpectedNodeContentException extends ConverterException {
     public UnexpectedNodeContentException(TemplateObject node, String errorMessage, Object msgParam) {
-        super("Unexpected AST content for " + _StringUtil.jQuote(node.getNodeTypeSymbol()) + " node (class: "
+        super("Unexpected AST content for " + _StringUtils.jQuote(node.getNodeTypeSymbol()) + " node (class: "
                 + node.getClass().getName() + "):\n"
                 + renderMessage(errorMessage, msgParam),
                 node.getBeginLine(), node.getBeginColumn());
@@ -43,7 +43,7 @@ public class UnexpectedNodeContentException extends ConverterException {
             return "null";
         }
         if (param instanceof String || param instanceof Character) {
-            return _StringUtil.jQuote(param);
+            return _StringUtils.jQuote(param);
         }
         return param.toString();
     }

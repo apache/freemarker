@@ -23,16 +23,16 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.util._ClassUtil;
-import org.apache.freemarker.core.util._NumberUtil;
+import org.apache.freemarker.core.util._ClassUtils;
+import org.apache.freemarker.core.util._NumberUtils;
 
 /**
  * Everything related to coercion to ambiguous numerical types.  
  */
-class OverloadedNumberUtil {
+class OverloadedNumberUtils {
 
     // Can't be instantiated
-    private OverloadedNumberUtil() { }
+    private OverloadedNumberUtils() { }
 
     /**
      * The lower limit of conversion prices where there's a risk of significant mantissa loss.
@@ -101,7 +101,7 @@ class OverloadedNumberUtil {
             BigDecimal n = (BigDecimal) num; 
             if ((typeFlags & TypeFlags.MASK_KNOWN_INTEGERS) != 0
                     && (typeFlags & TypeFlags.MASK_KNOWN_NONINTEGERS) != 0
-                    && _NumberUtil.isIntegerBigDecimal(n) /* <- can be expensive */) {
+                    && _NumberUtils.isIntegerBigDecimal(n) /* <- can be expensive */) {
                 return new IntegerBigDecimal(n);
             } else {
                 // Either it was a non-integer, or it didn't mater what it was, as we don't have both integer and
@@ -1198,8 +1198,8 @@ class OverloadedNumberUtil {
     static int compareNumberTypeSpecificity(Class c1, Class c2) {
         // DO NOT EDIT, generated code!
         // See: src\main\misc\overloadedNumberRules\README.txt
-        c1 = _ClassUtil.primitiveClassToBoxingClass(c1);
-        c2 = _ClassUtil.primitiveClassToBoxingClass(c2);
+        c1 = _ClassUtils.primitiveClassToBoxingClass(c1);
+        c2 = _ClassUtils.primitiveClassToBoxingClass(c2);
         
         if (c1 == c2) return 0;
         

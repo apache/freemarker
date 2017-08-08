@@ -35,7 +35,7 @@ import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._NullWriter;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.test.templateutil.AssertDirective;
 import org.apache.freemarker.test.templateutil.AssertEqualsDirective;
 import org.apache.freemarker.test.templateutil.AssertFailsDirective;
@@ -115,8 +115,8 @@ class TemplateTestCase extends FileTestCase {
             } catch (ConfigurationException e) {
                 throw new RuntimeException(
                         "Failed to set setting " +
-                        _StringUtil.jQuote(param) + " to " +
-                        _StringUtil.jQuote(value) + "; see cause exception.",
+                        _StringUtils.jQuote(param) + " to " +
+                        _StringUtils.jQuote(value) + "; see cause exception.",
                         e);
             }
         }
@@ -153,7 +153,7 @@ class TemplateTestCase extends FileTestCase {
             template = confB.build().getTemplate(templateName);
         } catch (IOException e) {
             throw new AssertionFailedError(
-                    "Could not load template " + _StringUtil.jQuote(templateName) + ":\n" + getStackTrace(e));
+                    "Could not load template " + _StringUtils.jQuote(templateName) + ":\n" + getStackTrace(e));
         }
 
         testSuite.validateTemplate(template);
@@ -162,7 +162,7 @@ class TemplateTestCase extends FileTestCase {
         try {
             template.process(dataModel, out != null ? out : _NullWriter.INSTANCE);
         } catch (TemplateException e) {
-            throw new AssertionFailedError("Template " + _StringUtil.jQuote(templateName) + " has stopped with error:\n"
+            throw new AssertionFailedError("Template " + _StringUtils.jQuote(templateName) + " has stopped with error:\n"
                         + getStackTrace(e));
         }
         

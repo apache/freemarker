@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  * Don't use this; used internally by FreeMarker, might changes without notice.
  * Date and time related utilities.
  */
-public class _DateUtil {
+public class _DateUtils {
 
     /**
      * Show hours (24h); always 2 digits, like {@code 00}, {@code 05}, etc.
@@ -122,7 +122,7 @@ public class _DateUtil {
     private static final String MSG_YEAR_0_NOT_ALLOWED
             = "Year 0 is not allowed in XML schema dates. BC 1 is -1, AD 1 is 1.";
     
-    private _DateUtil() {
+    private _DateUtils() {
         // can't be instantiated
     }
     
@@ -231,7 +231,7 @@ public class _DateUtil {
      *        Thus, if the milliseconds happen to be exactly 0, no fraction
      *        seconds will be shown at all.
      * @param timeZone the time zone in which the date/time will be shown. (You
-     *        may find {@link _DateUtil#UTC} handy here.) Note
+     *        may find {@link _DateUtils#UTC} handy here.) Note
      *        that although date-only formats has no time zone offset part,
      *        the result still depends on the time zone, as days start and end
      *        at different points on the time line in different zones.      
@@ -768,7 +768,7 @@ public class _DateUtil {
             return defaultZone;
         }
         if (s.equals("Z")) {
-            return _DateUtil.UTC;
+            return _DateUtils.UTC;
         }
         
         StringBuilder sb = new StringBuilder(9);
@@ -806,7 +806,7 @@ public class _DateUtil {
     }
     
     /**
-     * Used internally by {@link _DateUtil}; don't use its implementations for
+     * Used internally by {@link _DateUtils}; don't use its implementations for
      * anything else.
      */
     public interface DateToISO8601CalendarFactory {
@@ -822,7 +822,7 @@ public class _DateUtil {
     }
 
     /**
-     * Used internally by {@link _DateUtil}; don't use its implementations for anything else.
+     * Used internally by {@link _DateUtils}; don't use its implementations for anything else.
      */
     public interface CalendarFieldsToDateConverter {
 

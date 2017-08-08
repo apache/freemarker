@@ -23,7 +23,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * Used for the {@code templateExceptionHandler} configuration setting;
@@ -134,7 +134,7 @@ public interface TemplateExceptionHandler {
                     te.printStackTrace(stackPW, false, true, true);
                     stackPW.close();
                     pw.println();
-                    pw.println(_StringUtil.XMLEncNQG(stackTraceSW.toString()));
+                    pw.println(_StringUtils.XMLEncNQG(stackTraceSW.toString()));
                     
                     pw.println("</pre></div></html>");
                     pw.flush();  // To commit the HTTP response

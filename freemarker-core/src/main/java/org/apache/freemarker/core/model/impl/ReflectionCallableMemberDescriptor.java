@@ -64,7 +64,7 @@ final class ReflectionCallableMemberDescriptor extends CallableMemberDescriptor 
 
     @Override
     String getDeclaration() {
-        return _MethodUtil.toString(member);
+        return _MethodUtils.toString(member);
     }
     
     @Override
@@ -79,7 +79,7 @@ final class ReflectionCallableMemberDescriptor extends CallableMemberDescriptor 
 
     @Override
     boolean isVarargs() {
-        return _MethodUtil.isVarargs(member);
+        return _MethodUtils.isVarargs(member);
     }
 
     @Override

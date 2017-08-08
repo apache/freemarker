@@ -66,9 +66,9 @@ final class ASTDirSwitch extends ASTDirective {
                     processCase = true;
                 } else if (cas.condition != null) {
                     // Otherwise, if this case isn't the default, test it.
-                    processCase = _EvalUtil.compare(
+                    processCase = _EvalUtils.compare(
                             searched,
-                            _EvalUtil.CMP_OP_EQUALS, "case==", cas.condition, cas.condition, env);
+                            _EvalUtils.CMP_OP_EQUALS, "case==", cas.condition, cas.condition, env);
                 }
                 if (processCase) {
                     env.visit(cas);

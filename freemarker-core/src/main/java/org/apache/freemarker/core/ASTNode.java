@@ -88,7 +88,7 @@ abstract class ASTNode {
      * where in the template source, this object is.
      */
     public String getStartLocation() {
-        return MessageUtil.formatLocationForEvaluationError(template, beginLine, beginColumn);
+        return MessageUtils.formatLocationForEvaluationError(template, beginLine, beginColumn);
     }
 
     /**
@@ -100,7 +100,7 @@ abstract class ASTNode {
     }
 
     public String getEndLocation() {
-        return MessageUtil.formatLocationForEvaluationError(template, endLine, endColumn);
+        return MessageUtils.formatLocationForEvaluationError(template, endLine, endColumn);
     }
 
     /**

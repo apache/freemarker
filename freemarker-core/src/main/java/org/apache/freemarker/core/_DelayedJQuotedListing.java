@@ -21,7 +21,7 @@ package org.apache.freemarker.core;
 
 import java.util.Collection;
 
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /** Don't use this; used internally by FreeMarker, might changes without notice. */
 public class _DelayedJQuotedListing extends _DelayedConversionToString {
@@ -37,7 +37,7 @@ public class _DelayedJQuotedListing extends _DelayedConversionToString {
             if (sb.length() != 0) {
                 sb.append(", ");
             }
-            sb.append(_StringUtil.jQuote(element));
+            sb.append(_StringUtils.jQuote(element));
         }
 
         return sb.toString();

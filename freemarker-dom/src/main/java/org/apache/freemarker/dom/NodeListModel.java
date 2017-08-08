@@ -137,9 +137,9 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
                 }
             }
         }
-        if (DomStringUtil.isXMLNameLike(key) 
+        if (DomStringUtils.isXMLNameLike(key)
                 || ((key.startsWith("@")
-                        && (DomStringUtil.isXMLNameLike(key, 1)  || key.equals("@@") || key.equals("@*"))))
+                        && (DomStringUtils.isXMLNameLike(key, 1)  || key.equals("@@") || key.equals("@*"))))
                 || key.equals("*") || key.equals("**")) {
             NodeListModel result = new NodeListModel(contextNode);
             for (int i = 0; i < size(); i++) {

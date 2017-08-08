@@ -21,7 +21,7 @@ package org.apache.freemarker.core.templateresolver;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * As opposed to {@link PathGlobMatcher}, it only compares the "file name" part (the part after the last {@code /}) of
@@ -38,7 +38,7 @@ public class FileNameGlobMatcher extends TemplateSourceMatcher {
     
     /**
      * @param glob
-     *            Glob with the syntax defined by {@link _StringUtil#globToRegularExpression(String, boolean)}. Must not
+     *            Glob with the syntax defined by {@link _StringUtils#globToRegularExpression(String, boolean)}. Must not
      *            start with {@code /}.
      */
     public FileNameGlobMatcher(String glob) {
@@ -50,7 +50,7 @@ public class FileNameGlobMatcher extends TemplateSourceMatcher {
     }
 
     private void buildPattern() {
-        pattern = _StringUtil.globToRegularExpression("**/" + glob, caseInsensitive);
+        pattern = _StringUtils.globToRegularExpression("**/" + glob, caseInsensitive);
     }
 
     @Override

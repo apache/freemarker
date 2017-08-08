@@ -20,7 +20,7 @@ package org.apache.freemarker.core.valueformat;
 
 import java.util.Date;
 
-import org.apache.freemarker.core._EvalUtil;
+import org.apache.freemarker.core._EvalUtils;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
@@ -53,7 +53,7 @@ public final class TemplateFormatUtil {
             throws TemplateModelException, UnformattableValueException {
         Number number = numberModel.getAsNumber();
         if (number == null) {
-            throw _EvalUtil.newModelHasStoredNullException(Number.class, numberModel, null);
+            throw _EvalUtils.newModelHasStoredNullException(Number.class, numberModel, null);
         }
         return number;
     }
@@ -67,7 +67,7 @@ public final class TemplateFormatUtil {
     public static Date getNonNullDate(TemplateDateModel dateModel) throws TemplateModelException {
         Date date = dateModel.getAsDate();
         if (date == null) {
-            throw _EvalUtil.newModelHasStoredNullException(Date.class, dateModel, null);
+            throw _EvalUtils.newModelHasStoredNullException(Date.class, dateModel, null);
         }
         return date;
     }

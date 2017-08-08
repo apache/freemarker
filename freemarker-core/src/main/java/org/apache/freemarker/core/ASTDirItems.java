@@ -21,7 +21,7 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 
 import org.apache.freemarker.core.ASTDirList.IterationContext;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * AST directive node: {@code #items}
@@ -66,10 +66,10 @@ class ASTDirItems extends ASTDirective {
         if (canonical) sb.append('<');
         sb.append(getASTNodeDescriptor());
         sb.append(" as ");
-        sb.append(_StringUtil.toFTLTopLevelIdentifierReference(nestedContentParamName));
+        sb.append(_StringUtils.toFTLTopLevelIdentifierReference(nestedContentParamName));
         if (nestedContentParam2Name != null) {
             sb.append(", ");
-            sb.append(_StringUtil.toFTLTopLevelIdentifierReference(nestedContentParam2Name));
+            sb.append(_StringUtils.toFTLTopLevelIdentifierReference(nestedContentParam2Name));
         }
         if (canonical) {
             sb.append('>');

@@ -34,7 +34,7 @@ import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoaderSession;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * A {@link TemplateLoader} that uses a {@link Map} with {@code byte[]} as its source of templates. This is similar to
@@ -132,7 +132,7 @@ public class ByteArrayTemplateLoader implements TemplateLoader {
                 sb.append("...");
                 break;
             }
-            sb.append(_StringUtil.jQuote(name));
+            sb.append(_StringUtils.jQuote(name));
             sb.append("=...");
         }
         if (cnt != 0) {

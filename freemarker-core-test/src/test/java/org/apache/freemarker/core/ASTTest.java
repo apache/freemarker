@@ -23,8 +23,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import org.apache.freemarker.core.ASTPrinter.Options;
-import org.apache.freemarker.core.util._StringUtil;
-import org.apache.freemarker.test.TestUtil;
+import org.apache.freemarker.core.util._StringUtils;
+import org.apache.freemarker.test.TestUtils;
 import org.apache.freemarker.test.FileTestCase;
 
 public class ASTTest extends FileTestCase {
@@ -88,7 +88,7 @@ public class ASTTest extends FileTestCase {
         assertExpectedFileEqualsString(
                 testName + ".ast",
                 ASTPrinter.getASTAsString(templateName,
-                        TestUtil.removeFTLCopyrightComment(
+                        TestUtils.removeFTLCopyrightComment(
                                 normalizeLineBreaks(
                                         loadTestTextResource(
                                                 getTestFileURL(
@@ -97,7 +97,7 @@ public class ASTTest extends FileTestCase {
     }
     
     private String normalizeLineBreaks(final String s) throws FileNotFoundException, IOException {
-        return _StringUtil.replace(s, "\r\n", "\n").replace('\r', '\n');
+        return _StringUtils.replace(s, "\r\n", "\n").replace('\r', '\n');
     }
     
 }

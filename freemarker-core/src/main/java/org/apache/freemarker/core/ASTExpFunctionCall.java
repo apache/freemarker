@@ -30,7 +30,7 @@ import org.apache.freemarker.core._CallableUtils.NamedArgument;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util.CommonSupplier;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 
 /**
@@ -97,7 +97,7 @@ final class ASTExpFunctionCall extends ASTExpression implements CallPlace {
                 } else {
                     first = false;
                 }
-                sb.append(_StringUtil.toFTLTopLevelIdentifierReference(namedArg.getName()));
+                sb.append(_StringUtils.toFTLTopLevelIdentifierReference(namedArg.getName()));
                 sb.append('=');
                 sb.append(namedArg.getValue().getCanonicalForm());
             }

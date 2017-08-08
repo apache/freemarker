@@ -22,8 +22,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.util._LocaleUtil;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._LocaleUtils;
+import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.core.valueformat.TemplateFormatUtil;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
@@ -75,7 +75,7 @@ public final class AliasTemplateNumberFormatFactory extends TemplateNumberFormat
                 Locale lookupLocale = locale;
                 targetFormatString = localizedTargetFormatStrings.get(lookupLocale);
                 while (targetFormatString == null
-                        && (lookupLocale = _LocaleUtil.getLessSpecificLocale(lookupLocale)) != null) {
+                        && (lookupLocale = _LocaleUtils.getLessSpecificLocale(lookupLocale)) != null) {
                     targetFormatString = localizedTargetFormatStrings.get(lookupLocale);
                 }
             } else {
@@ -87,7 +87,7 @@ public final class AliasTemplateNumberFormatFactory extends TemplateNumberFormat
             return env.getTemplateNumberFormat(targetFormatString, locale);
         } catch (TemplateValueFormatException e) {
             throw new AliasTargetTemplateValueFormatException("Failed to invoke format based on target format string,  "
-                    + _StringUtil.jQuote(params) + ". Reason given: " + e.getMessage(), e);
+                    + _StringUtils.jQuote(params) + ". Reason given: " + e.getMessage(), e);
         }
     }
 

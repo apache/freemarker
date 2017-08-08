@@ -24,7 +24,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
 
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * Represents a template language. Currently this class is not mature, so it can't be implemented outside FreeMarker,
@@ -105,7 +105,7 @@ public abstract class TemplateLanguage {
 
     @Override
     public final String toString() {
-        return "TemplateLanguage(" + _StringUtil.jQuote(name) + ")";
+        return "TemplateLanguage(" + _StringUtils.jQuote(name) + ")";
     }
 
 }

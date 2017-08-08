@@ -17,8 +17,27 @@
  * under the License.
  */
 
-package org.freemarker.converter;
+package org.apache.freemarker.core.util;
 
-public class ConverterUtilTest {
+import static org.junit.Assert.*;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.Test;
+
+public class CollectionUtilsTest {
+
+    @Test
+    public void unmodifiableMap() {
+        Map<Object, Object> modifiableMap = new HashMap<>();
+        assertNotSame(modifiableMap, _CollectionUtils.unmodifiableMap(modifiableMap));
+
+        Map<Object, Object> wrappedModifiableMap = Collections.unmodifiableMap(modifiableMap);
+        assertSame(wrappedModifiableMap, _CollectionUtils.unmodifiableMap(wrappedModifiableMap));
+
+        assertSame(Collections.emptyMap(), _CollectionUtils.unmodifiableMap(Collections.emptyMap()));
+    }
 
 }

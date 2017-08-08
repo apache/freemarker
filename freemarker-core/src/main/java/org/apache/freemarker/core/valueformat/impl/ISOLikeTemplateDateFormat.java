@@ -26,11 +26,11 @@ import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.util.BugException;
-import org.apache.freemarker.core.util._DateUtil;
-import org.apache.freemarker.core.util._DateUtil.CalendarFieldsToDateConverter;
-import org.apache.freemarker.core.util._DateUtil.DateParseException;
-import org.apache.freemarker.core.util._DateUtil.DateToISO8601CalendarFactory;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._DateUtils;
+import org.apache.freemarker.core.util._DateUtils.CalendarFieldsToDateConverter;
+import org.apache.freemarker.core.util._DateUtils.DateParseException;
+import org.apache.freemarker.core.util._DateUtils.DateToISO8601CalendarFactory;
+import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.core.valueformat.InvalidFormatParametersException;
 import org.apache.freemarker.core.valueformat.TemplateDateFormat;
 import org.apache.freemarker.core.valueformat.TemplateFormatUtil;
@@ -75,7 +75,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
         final int ln = formatString.length();
         boolean afterSeparator = false;
         int i = parsingStart;
-        int accuracy = _DateUtil.ACCURACY_MILLISECONDS;
+        int accuracy = _DateUtils.ACCURACY_MILLISECONDS;
         Boolean showZoneOffset = null;
         Boolean forceUTC = Boolean.FALSE;
         while (i < ln) {
@@ -92,7 +92,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
                 case 'h':
                 case 'm':
                 case 's':
-                    if (accuracy != _DateUtil.ACCURACY_MILLISECONDS) {
+                    if (accuracy != _DateUtils.ACCURACY_MILLISECONDS) {
                         throw new InvalidFormatParametersException(
                                 "Character \"" + c + "\" is unexpected as accuracy was already specified earlier "
                                 + "(at char pos. " + i + ").");
@@ -103,22 +103,22 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
                             throw new InvalidFormatParametersException(
                                     XS_LESS_THAN_SECONDS_ACCURACY_ERROR_MESSAGE);
                         }
-                        accuracy = _DateUtil.ACCURACY_HOURS;
+                        accuracy = _DateUtils.ACCURACY_HOURS;
                         break;
                     case 'm':
                         if (i < ln && formatString.charAt(i) == 's') {
                             i++;
-                            accuracy = _DateUtil.ACCURACY_MILLISECONDS_FORCED;
+                            accuracy = _DateUtils.ACCURACY_MILLISECONDS_FORCED;
                         } else {
                             if (isXSMode()) {
                                 throw new InvalidFormatParametersException(
                                         XS_LESS_THAN_SECONDS_ACCURACY_ERROR_MESSAGE);
                             }
-                            accuracy = _DateUtil.ACCURACY_MINUTES;
+                            accuracy = _DateUtils.ACCURACY_MINUTES;
                         }
                         break;
                     case 's':
-                        accuracy = _DateUtil.ACCURACY_SECONDS;
+                        accuracy = _DateUtils.ACCURACY_SECONDS;
                         break;
                     }
                     break;
@@ -163,7 +163,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
                     break;
                 default:
                     throw new InvalidFormatParametersException(
-                            "Unexpected character, " + _StringUtil.jQuote(String.valueOf(c))
+                            "Unexpected character, " + _StringUtils.jQuote(String.valueOf(c))
                             + ". Expected the beginning of one of: h, m, s, ms, nz, fz, u"
                             + " (at char pos. " + i + ").");
                 } // switch
@@ -195,7 +195,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
                         ? !zonelessInput
                         : showZoneOffset.booleanValue(),
                 accuracy,
-                (forceUTC == null ? !zonelessInput : forceUTC.booleanValue()) ? _DateUtil.UTC : timeZone,
+                (forceUTC == null ? !zonelessInput : forceUTC.booleanValue()) ? _DateUtils.UTC : timeZone,
                 factory.getISOBuiltInCalendar(env));
     }
     
@@ -210,7 +210,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
             justification = "Known to use the singleton Boolean-s only")
     public final Date parse(String s, int dateType) throws UnparsableValueException {
         CalendarFieldsToDateConverter calToDateConverter = factory.getCalendarFieldsToDateCalculator(env);
-        TimeZone tz = forceUTC != Boolean.FALSE ? _DateUtil.UTC : timeZone;
+        TimeZone tz = forceUTC != Boolean.FALSE ? _DateUtils.UTC : timeZone;
         try {
             if (dateType == TemplateDateModel.DATE) {
                 return parseDate(s, tz, calToDateConverter);

@@ -23,7 +23,7 @@ import java.io.IOException;
 
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.util.BugException;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * AST directive node: {@code #include} 
@@ -147,7 +147,7 @@ final class ASTDirInclude extends ASTDirective {
 
     private boolean getYesNo(ASTExpression exp, String s) throws TemplateException {
         try {
-           return _StringUtil.getYesNo(s);
+           return _StringUtils.getYesNo(s);
         } catch (IllegalArgumentException iae) {
             throw new _MiscTemplateException(exp,
                      "Value must be boolean (or one of these strings: "

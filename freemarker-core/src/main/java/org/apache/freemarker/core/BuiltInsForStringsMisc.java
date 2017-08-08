@@ -45,9 +45,9 @@ class BuiltInsForStringsMisc {
         @Override
         TemplateModel calculateResult(String s, Environment env)  throws TemplateException {
             final boolean b;
-            if (s.equals(MiscUtil.C_TRUE)) {
+            if (s.equals(TemplateBooleanFormat.C_TRUE)) {
                 b = true;
-            } else if (s.equals(MiscUtil.C_FALSE)) {
+            } else if (s.equals(TemplateBooleanFormat.C_FALSE)) {
                 b = false;
             } else if (s.equals(env.getTemplateBooleanFormat().getTrueStringValue())) {
                 b = true;
@@ -98,9 +98,9 @@ class BuiltInsForStringsMisc {
             } catch (ParseException e) {
                 throw new _MiscTemplateException(this, env,
                         "Failed to \"?", key, "\" string with this error:\n\n",
-                        MessageUtil.EMBEDDED_MESSAGE_BEGIN,
+                        MessageUtils.EMBEDDED_MESSAGE_BEGIN,
                         new _DelayedGetMessage(e),
-                        MessageUtil.EMBEDDED_MESSAGE_END,
+                        MessageUtils.EMBEDDED_MESSAGE_END,
                         "\n\nThe failing expression:");
             }
             try {
@@ -108,9 +108,9 @@ class BuiltInsForStringsMisc {
             } catch (TemplateException e) {
                 throw new _MiscTemplateException(this, env,
                         "Failed to \"?", key, "\" string with this error:\n\n",
-                        MessageUtil.EMBEDDED_MESSAGE_BEGIN,
+                        MessageUtils.EMBEDDED_MESSAGE_BEGIN,
                         new _DelayedGetMessageWithoutStackTop(e),
-                        MessageUtil.EMBEDDED_MESSAGE_END,
+                        MessageUtils.EMBEDDED_MESSAGE_END,
                         "\n\nThe failing expression:");
             }
         }
@@ -181,9 +181,9 @@ class BuiltInsForStringsMisc {
             } catch (IOException e) {
                 throw new _MiscTemplateException(this, e, env,
                         "Template parsing with \"?", key, "\" has failed with this error:\n\n",
-                        MessageUtil.EMBEDDED_MESSAGE_BEGIN,
+                        MessageUtils.EMBEDDED_MESSAGE_BEGIN,
                         new _DelayedGetMessage(e),
-                        MessageUtil.EMBEDDED_MESSAGE_END,
+                        MessageUtils.EMBEDDED_MESSAGE_END,
                         "\n\nThe failed expression:");
             }
             
@@ -210,9 +210,9 @@ class BuiltInsForStringsMisc {
                 } catch (Exception e) {
                     throw new _TemplateModelException(e,
                             "Template created with \"?", key, "\" has stopped with this error:\n\n",
-                            MessageUtil.EMBEDDED_MESSAGE_BEGIN,
+                            MessageUtils.EMBEDDED_MESSAGE_BEGIN,
                             new _DelayedGetMessage(e),
-                            MessageUtil.EMBEDDED_MESSAGE_END);
+                            MessageUtils.EMBEDDED_MESSAGE_END);
                 }
                 callPlace.executeNestedContent(null, out, env);
             }

@@ -23,7 +23,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
@@ -190,10 +190,10 @@ public class ParsingErrorMessagesTest {
                 if (needle.startsWith("\\!")) {
                     String netNeedle = needle.substring(2);
                     if (msg.contains(netNeedle)) {
-                        fail("The message shouldn't contain substring " + _StringUtil.jQuote(netNeedle) + ":\n" + msg);
+                        fail("The message shouldn't contain substring " + _StringUtils.jQuote(netNeedle) + ":\n" + msg);
                     }
                 } else if (!msg.contains(needle)) {
-                    fail("The message didn't contain substring " + _StringUtil.jQuote(needle) + ":\n" + msg);
+                    fail("The message didn't contain substring " + _StringUtils.jQuote(needle) + ":\n" + msg);
                 }
             }
             showError(e);

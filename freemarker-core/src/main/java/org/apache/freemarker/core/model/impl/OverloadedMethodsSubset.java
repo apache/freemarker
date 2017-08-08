@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._ClassUtils;
 import org.apache.freemarker.core.util._NullArgumentException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -176,7 +176,7 @@ abstract class OverloadedMethodsSubset {
         // c1 primitive class to boxing class:
         final boolean c1WasPrim; 
         if (c1.isPrimitive()) {
-            c1 = _ClassUtil.primitiveClassToBoxingClass(c1);
+            c1 = _ClassUtils.primitiveClassToBoxingClass(c1);
             c1WasPrim = true;
         } else {
             c1WasPrim = false;
@@ -185,7 +185,7 @@ abstract class OverloadedMethodsSubset {
         // c2 primitive class to boxing class:
         final boolean c2WasPrim; 
         if (c2.isPrimitive()) {
-            c2 = _ClassUtil.primitiveClassToBoxingClass(c2);
+            c2 = _ClassUtils.primitiveClassToBoxingClass(c2);
             c2WasPrim = true;
         } else {
             c2WasPrim = false;
@@ -214,8 +214,8 @@ abstract class OverloadedMethodsSubset {
         // - One of classes was a primitive type
         // - One of classes was a numerical type (either boxing type or primitive)
         
-        Set<Class<?>> commonTypes = _MethodUtil.getAssignables(c1, c2);
-        commonTypes.retainAll(_MethodUtil.getAssignables(c2, c1));
+        Set<Class<?>> commonTypes = _MethodUtils.getAssignables(c1, c2);
+        commonTypes.retainAll(_MethodUtils.getAssignables(c2, c1));
         if (commonTypes.isEmpty()) {
             // Can happen when at least one of the arguments is an interface, as
             // they don't have Object at the root of their hierarchy
@@ -231,11 +231,11 @@ abstract class OverloadedMethodsSubset {
         for (Class<?> clazz : commonTypes) {
             for (Iterator<Class<?>> maxIter = max.iterator(); maxIter.hasNext(); ) {
                 Class<?> maxClazz = maxIter.next();
-                if (_MethodUtil.isMoreOrSameSpecificParameterType(maxClazz, clazz, false /*bugfixed [1]*/, 0) != 0) {
+                if (_MethodUtils.isMoreOrSameSpecificParameterType(maxClazz, clazz, false /*bugfixed [1]*/, 0) != 0) {
                     // clazz can't be maximal, if there's already a more specific or equal maximal than it.
                     continue listCommonTypes;
                 }
-                if (_MethodUtil.isMoreOrSameSpecificParameterType(clazz, maxClazz, false /*bugfixed [1]*/, 0) != 0) {
+                if (_MethodUtils.isMoreOrSameSpecificParameterType(clazz, maxClazz, false /*bugfixed [1]*/, 0) != 0) {
                     // If it's more specific than a currently maximal element,
                     // that currently maximal is no longer a maximal.
                     maxIter.remove();

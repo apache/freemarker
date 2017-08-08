@@ -23,9 +23,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 
-import org.apache.freemarker.core.model.impl._MethodUtil;
-import org.apache.freemarker.core.util._ClassUtil;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.model.impl._MethodUtils;
+import org.apache.freemarker.core.util._ClassUtils;
+import org.apache.freemarker.core.util._StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,7 +150,7 @@ public class _ErrorDescriptionBuilder {
                 sb.append("\n\n");
                 for (int i = 0; i < allTips.length; i++) {
                     if (i != 0) sb.append('\n');
-                    sb.append(MessageUtil.ERROR_MESSAGE_HR).append('\n');
+                    sb.append(MessageUtils.ERROR_MESSAGE_HR).append('\n');
                     sb.append("Tip: ");
                     Object tip = allTips[i];
                     if (!(tip instanceof Object[])) {
@@ -159,7 +159,7 @@ public class _ErrorDescriptionBuilder {
                         appendParts(sb, (Object[]) tip);
                     }
                 }
-                sb.append('\n').append(MessageUtil.ERROR_MESSAGE_HR);
+                sb.append('\n').append(MessageUtils.ERROR_MESSAGE_HR);
             }
         }
         
@@ -262,19 +262,19 @@ public class _ErrorDescriptionBuilder {
         if (partObj == null) {
             return null;
         } else if (partObj instanceof Class) {
-            partStr = _ClassUtil.getShortClassName((Class) partObj);
+            partStr = _ClassUtils.getShortClassName((Class) partObj);
         } else if (partObj instanceof Method || partObj instanceof Constructor) {
-            partStr = _MethodUtil.toString((Member) partObj);
+            partStr = _MethodUtils.toString((Member) partObj);
         } else {
-            partStr = suppressToStringException ? _StringUtil.tryToString(partObj) : partObj.toString();
+            partStr = suppressToStringException ? _StringUtils.tryToString(partObj) : partObj.toString();
         }
         return partStr;
     }
 
     private String[] splitToLines(String s) {
-        s = _StringUtil.replace(s, "\r\n", "\n");
-        s = _StringUtil.replace(s, "\r", "\n");
-        return _StringUtil.split(s, '\n');
+        s = _StringUtils.replace(s, "\r\n", "\n");
+        s = _StringUtils.replace(s, "\r", "\n");
+        return _StringUtils.split(s, '\n');
     }
     
     /**

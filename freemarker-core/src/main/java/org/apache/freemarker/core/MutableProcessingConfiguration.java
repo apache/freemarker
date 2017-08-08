@@ -61,12 +61,12 @@ import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameForma
 import org.apache.freemarker.core.util.FTLUtil;
 import org.apache.freemarker.core.util.GenericParseException;
 import org.apache.freemarker.core.util.OptInTemplateClassResolver;
-import org.apache.freemarker.core.util._ClassUtil;
-import org.apache.freemarker.core.util._CollectionUtil;
+import org.apache.freemarker.core.util._ClassUtils;
+import org.apache.freemarker.core.util._CollectionUtils;
 import org.apache.freemarker.core.util._KeyValuePair;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._SortedArraySet;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 
@@ -367,7 +367,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
             if (customNumberFormats == this.customNumberFormats) {
                 return;
             }
-            _CollectionUtil.safeCastMap("customNumberFormats", customNumberFormats,
+            _CollectionUtils.safeCastMap("customNumberFormats", customNumberFormats,
                     String.class, false,
                     TemplateNumberFormatFactory.class, false);
             validateFormatNames(customNumberFormats.keySet());
@@ -638,7 +638,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
             if (customDateFormats == this.customDateFormats) {
                 return;
             }
-            _CollectionUtil.safeCastMap("customDateFormats", customDateFormats,
+            _CollectionUtils.safeCastMap("customDateFormats", customDateFormats,
                     String.class, false,
                     TemplateDateFormatFactory.class, false);
             validateFormatNames(customDateFormats.keySet());
@@ -1150,7 +1150,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
             if (autoImports == this.autoImports) {
                 return;
             }
-            _CollectionUtil.safeCastMap("autoImports", autoImports, String.class, false, String.class, false);
+            _CollectionUtils.safeCastMap("autoImports", autoImports, String.class, false, String.class, false);
             this.autoImports = Collections.unmodifiableMap(new LinkedHashMap<>(autoImports));
         } else {
             this.autoImports = autoImports;
@@ -1209,7 +1209,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
             if (autoIncludes == this.autoIncludes) {
                 return;
             }
-            _CollectionUtil.safeCastList("autoIncludes", autoIncludes, String.class, false);
+            _CollectionUtils.safeCastList("autoIncludes", autoIncludes, String.class, false);
             Set<String> uniqueItems = new LinkedHashSet<>(autoIncludes.size() * 4 / 3, 1f);
             for (String templateName : autoIncludes) {
                 if (!uniqueItems.add(templateName)) {
@@ -1653,7 +1653,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                 if (JVM_DEFAULT_VALUE.equalsIgnoreCase(value)) {
                     setLocale(Locale.getDefault());
                 } else {
-                    setLocale(_StringUtil.deduceLocale(value));
+                    setLocale(_StringUtils.deduceLocale(value));
                 }
             } else if (NUMBER_FORMAT_KEY.equals(name)) {
                 setNumberFormat(value);
@@ -1752,11 +1752,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
             } else if (URL_ESCAPING_CHARSET_KEY.equals(name)) {
                 setURLEscapingCharset(Charset.forName(value));
             } else if (AUTO_FLUSH_KEY.equals(name)) {
-                setAutoFlush(_StringUtil.getYesNo(value));
+                setAutoFlush(_StringUtils.getYesNo(value));
             } else if (SHOW_ERROR_TIPS_KEY.equals(name)) {
-                setShowErrorTips(_StringUtil.getYesNo(value));
+                setShowErrorTips(_StringUtils.getYesNo(value));
             } else if (API_BUILTIN_ENABLED_KEY.equals(name)) {
-                setAPIBuiltinEnabled(_StringUtil.getYesNo(value));
+                setAPIBuiltinEnabled(_StringUtils.getYesNo(value));
             } else if (NEW_BUILTIN_CLASS_RESOLVER_KEY.equals(name)) {
                 if ("unrestricted".equals(value)) {
                     setNewBuiltinClassResolver(TemplateClassResolver.UNRESTRICTED);
@@ -1775,7 +1775,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                             trustedTemplates = segmentValue;
                         } else {
                             throw new InvalidSettingValueException(name, value,
-                                    "Unrecognized list segment key: " + _StringUtil.jQuote(segmentKey) +
+                                    "Unrecognized list segment key: " + _StringUtils.jQuote(segmentKey) +
                                             ". Supported keys are: \"" + ALLOWED_CLASSES + "\", \"" +
                                             TRUSTED_TEMPLATES + "\"");
                         }
@@ -1796,9 +1796,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                             + "looks like class name");
                 }
             } else if (LAZY_AUTO_IMPORTS_KEY.equals(name)) {
-                setLazyAutoImports(value.equals(NULL_VALUE) ? null : Boolean.valueOf(_StringUtil.getYesNo(value)));
+                setLazyAutoImports(value.equals(NULL_VALUE) ? null : Boolean.valueOf(_StringUtils.getYesNo(value)));
             } else if (LAZY_IMPORTS_KEY.equals(name)) {
-                setLazyImports(_StringUtil.getYesNo(value));
+                setLazyImports(_StringUtils.getYesNo(value));
             } else if (AUTO_INCLUDES_KEY.equals(name)) {
                 setAutoIncludes(parseAsList(value));
             } else if (AUTO_IMPORTS_KEY.equals(name)) {
@@ -1834,8 +1834,8 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
         for (Object value : values) {
             if (!expectedClass.isInstance(value)) {
                 throw new IllegalArgumentException(somethingsSentenceStart + " must be instances of "
-                        + _ClassUtil.getShortClassName(expectedClass) + ", but one of them was a(n) "
-                        + _ClassUtil.getShortClassNameOfObject(value) + ".");
+                        + _ClassUtils.getShortClassName(expectedClass) + ", but one of them was a(n) "
+                        + _ClassUtils.getShortClassNameOfObject(value) + ".");
             }
         }
     }
@@ -2017,7 +2017,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
 
         // When there's no need for inheritance:
         customSettingsModifiable = false; // Copy-on-write on next modification
-        return _CollectionUtil.unmodifiableMap(customSettings);
+        return _CollectionUtils.unmodifiableMap(customSettings);
     }
 
     /**
@@ -2185,7 +2185,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
                         "Unexpected end of text: expected \"as\"");
                 String s = fetchKeyword();
                 if (!s.equalsIgnoreCase("as")) throw new GenericParseException(
-                        "Expected \"as\", but found " + _StringUtil.jQuote(s));
+                        "Expected \"as\", but found " + _StringUtils.jQuote(s));
 
                 c = skipWS();
                 if (c == ' ') throw new GenericParseException(

@@ -33,7 +33,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
-import org.apache.freemarker.core.util._SecurityUtil;
+import org.apache.freemarker.core.util._SecurityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,9 +54,9 @@ class DebuggerServer {
     private ServerSocket serverSocket;
     
     public DebuggerServer(Serializable debuggerStub) {
-        port = _SecurityUtil.getSystemProperty("org.apache.freemarker.core.debug.port", Debugger.DEFAULT_PORT).intValue();
+        port = _SecurityUtils.getSystemProperty("org.apache.freemarker.core.debug.port", Debugger.DEFAULT_PORT).intValue();
         try {
-            password = _SecurityUtil.getSystemProperty("org.apache.freemarker.core.debug.password", "").getBytes(
+            password = _SecurityUtils.getSystemProperty("org.apache.freemarker.core.debug.password", "").getBytes(
                     StandardCharsets.UTF_8);
         } catch (UnsupportedCharsetException e) {
             throw new UndeclaredThrowableException(e);

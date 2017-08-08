@@ -27,7 +27,7 @@ import java.util.List;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.util.BugException;
-import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._ClassUtils;
 
 /**
  * The argument types of a method call; usable as cache key.
@@ -152,7 +152,7 @@ final class ArgumentTypes {
      * specific than {@code Boolean}, because the former can't store {@code null}). The preferability decision gets
      * trickier when there's a possibility of numerical conversion from the actual argument type to the type of some of
      * the parameters. If such conversion is only possible for one of the competing parameter types, that parameter
-     * automatically wins. If it's possible for both, {@link OverloadedNumberUtil#getArgumentConversionPrice} will
+     * automatically wins. If it's possible for both, {@link OverloadedNumberUtils#getArgumentConversionPrice} will
      * be used to calculate the conversion "price", and the parameter type with lowest price wins. There are also
      * a twist with array-to-list and list-to-array conversions; we try to avoid those, so the parameter where such
      * conversion isn't needed will always win.
@@ -190,10 +190,10 @@ final class ArgumentTypes {
                 final boolean argIsNum = Number.class.isAssignableFrom(argType);
                 
                 final int numConvPrice1;
-                if (argIsNum && _ClassUtil.isNumerical(paramType1)) {
+                if (argIsNum && _ClassUtils.isNumerical(paramType1)) {
                     final Class<?> nonPrimParamType1 = paramType1.isPrimitive()
-                            ? _ClassUtil.primitiveClassToBoxingClass(paramType1) : paramType1;
-                    numConvPrice1 = OverloadedNumberUtil.getArgumentConversionPrice(argType, nonPrimParamType1);
+                            ? _ClassUtils.primitiveClassToBoxingClass(paramType1) : paramType1;
+                    numConvPrice1 = OverloadedNumberUtils.getArgumentConversionPrice(argType, nonPrimParamType1);
                 } else {
                     numConvPrice1 = Integer.MAX_VALUE;
                 }
@@ -202,10 +202,10 @@ final class ArgumentTypes {
                 // - FM doesn't know some of the numerical types, or the conversion between them is not allowed    
                 
                 final int numConvPrice2;
-                if (argIsNum && _ClassUtil.isNumerical(paramType2)) {
+                if (argIsNum && _ClassUtils.isNumerical(paramType2)) {
                     final Class<?> nonPrimParamType2 = paramType2.isPrimitive()
-                            ? _ClassUtil.primitiveClassToBoxingClass(paramType2) : paramType2;
-                    numConvPrice2 = OverloadedNumberUtil.getArgumentConversionPrice(argType, nonPrimParamType2);
+                            ? _ClassUtils.primitiveClassToBoxingClass(paramType2) : paramType2;
+                    numConvPrice2 = OverloadedNumberUtils.getArgumentConversionPrice(argType, nonPrimParamType2);
                 } else {
                     numConvPrice2 = Integer.MAX_VALUE;
                 }
@@ -300,16 +300,16 @@ final class ArgumentTypes {
                     if (numConvPrice1 != numConvPrice2) {
                         if (numConvPrice1 < numConvPrice2) {
                             winerParam = 1;
-                            if (numConvPrice1 < OverloadedNumberUtil.BIG_MANTISSA_LOSS_PRICE
-                                    && numConvPrice2 > OverloadedNumberUtil.BIG_MANTISSA_LOSS_PRICE) {
+                            if (numConvPrice1 < OverloadedNumberUtils.BIG_MANTISSA_LOSS_PRICE
+                                    && numConvPrice2 > OverloadedNumberUtils.BIG_MANTISSA_LOSS_PRICE) {
                                 paramList1StrongWinCnt++;
                             } else {
                                 paramList1WinCnt++;
                             }
                         } else {
                             winerParam = -1;
-                            if (numConvPrice2 < OverloadedNumberUtil.BIG_MANTISSA_LOSS_PRICE
-                                    && numConvPrice1 > OverloadedNumberUtil.BIG_MANTISSA_LOSS_PRICE) {
+                            if (numConvPrice2 < OverloadedNumberUtils.BIG_MANTISSA_LOSS_PRICE
+                                    && numConvPrice1 > OverloadedNumberUtils.BIG_MANTISSA_LOSS_PRICE) {
                                 paramList2StrongWinCnt++;
                             } else {
                                 paramList2WinCnt++;
@@ -347,8 +347,8 @@ final class ArgumentTypes {
                     if (argTypesLen == paramTypes1Len - 1) {
                         Class<?> paramType1 = getParamType(paramTypes1, paramTypes1Len, argTypesLen, true);
                         Class<?> paramType2 = getParamType(paramTypes2, paramTypes2Len, argTypesLen, true);
-                        if (_ClassUtil.isNumerical(paramType1) && _ClassUtil.isNumerical(paramType2)) {
-                            int r = OverloadedNumberUtil.compareNumberTypeSpecificity(paramType1, paramType2);
+                        if (_ClassUtils.isNumerical(paramType1) && _ClassUtils.isNumerical(paramType2)) {
+                            int r = OverloadedNumberUtils.compareNumberTypeSpecificity(paramType1, paramType2);
                             if (r != 0) return r;
                             // falls through
                         }
@@ -377,9 +377,9 @@ final class ArgumentTypes {
         // The more specific (smaller) type wins.
         
         final Class<?> nonPrimParamType1 = paramType1.isPrimitive()
-                ? _ClassUtil.primitiveClassToBoxingClass(paramType1) : paramType1;
+                ? _ClassUtils.primitiveClassToBoxingClass(paramType1) : paramType1;
         final Class<?> nonPrimParamType2 = paramType2.isPrimitive()
-                ? _ClassUtil.primitiveClassToBoxingClass(paramType2) : paramType2;
+                ? _ClassUtils.primitiveClassToBoxingClass(paramType2) : paramType2;
                 
         if (nonPrimParamType1 == nonPrimParamType2) {
             if (nonPrimParamType1 != paramType1) {
@@ -505,7 +505,7 @@ final class ArgumentTypes {
                     return CONVERSION_DIFFICULTY_IMPOSSIBLE;
                 }
                 
-                formalNP = _ClassUtil.primitiveClassToBoxingClass(formal);
+                formalNP = _ClassUtils.primitiveClassToBoxingClass(formal);
                 if (actual == formalNP) {
                     // Character and char, etc.
                     return CONVERSION_DIFFICULTY_REFLECTION;
@@ -518,7 +518,7 @@ final class ArgumentTypes {
                 formalNP = formal;
             }
             if (Number.class.isAssignableFrom(actual) && Number.class.isAssignableFrom(formalNP)) {
-                return OverloadedNumberUtil.getArgumentConversionPrice(actual, formalNP) == Integer.MAX_VALUE
+                return OverloadedNumberUtils.getArgumentConversionPrice(actual, formalNP) == Integer.MAX_VALUE
                         ? CONVERSION_DIFFICULTY_IMPOSSIBLE : CONVERSION_DIFFICULTY_REFLECTION;
             } else if (formal.isArray()) {
                 // DefaultObjectWrapper method/constructor calls convert from List to array automatically

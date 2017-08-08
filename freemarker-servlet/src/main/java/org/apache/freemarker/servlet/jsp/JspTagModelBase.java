@@ -45,7 +45,7 @@ import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.servlet.jsp.SimpleTagDirectiveModel.TemplateExceptionWrapperJspException;
 
 class JspTagModelBase {
@@ -93,7 +93,7 @@ class JspTagModelBase {
                         }
                     } else {
                         throw new TemplateModelException("Unknown property "
-                                + _StringUtil.jQuote(paramName.toString())
+                                + _StringUtils.jQuote(paramName.toString())
                                 + " on instance of " + tagClass.getName());
                     }
                 } else {

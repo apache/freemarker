@@ -20,7 +20,7 @@
 package org.apache.freemarker.test.templateutil;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * Indicates that a named directive/function parameter is unsupported (like a typo).  
@@ -42,8 +42,8 @@ class UnsupportedParameterException extends ParameterException {
 
     public UnsupportedParameterException(String parameterName, String description, Exception cause, Environment env) {
         super(parameterName,
-                "Unsuppored parameter: " + _StringUtil.jQuote(parameterName)
-                + (description == null ? "." : ". " + _StringUtil.jQuote(description)),
+                "Unsuppored parameter: " + _StringUtils.jQuote(parameterName)
+                + (description == null ? "." : ". " + _StringUtils.jQuote(description)),
                 cause, env);
     }
 

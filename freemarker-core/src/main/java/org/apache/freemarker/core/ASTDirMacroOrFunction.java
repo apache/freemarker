@@ -28,7 +28,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.util.StringToIndexMap;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * AST directive node: {@code #macro} or {@code #function}
@@ -143,7 +143,7 @@ final class ASTDirMacroOrFunction extends ASTDirective implements TemplateModel 
         if (canonical) sb.append('<');
         sb.append(getASTNodeDescriptor());
         sb.append(' ');
-        sb.append(_StringUtil.toFTLTopLevelTragetIdentifier(name));
+        sb.append(_StringUtils.toFTLTopLevelTragetIdentifier(name));
 
         if (function) sb.append('(');
 
@@ -160,7 +160,7 @@ final class ASTDirMacroOrFunction extends ASTDirective implements TemplateModel 
 
             ParameterDefinition paramDef = paramDefsByArgArrayIdx[idx];
 
-            sb.append(_StringUtil.toFTLTopLevelIdentifierReference(paramDef.name));
+            sb.append(_StringUtils.toFTLTopLevelIdentifierReference(paramDef.name));
             if (!function) {
                 sb.append("{").append(POSITIONAL_PARAMETER_OPTION_NAME).append("}");
             }
@@ -179,7 +179,7 @@ final class ASTDirMacroOrFunction extends ASTDirective implements TemplateModel 
                 firstParam = false;
             }
 
-            sb.append(_StringUtil.toFTLTopLevelIdentifierReference(paramDefsByArgArrayIdx[posVarargsArgIdx].name));
+            sb.append(_StringUtils.toFTLTopLevelIdentifierReference(paramDefsByArgArrayIdx[posVarargsArgIdx].name));
             if (!function) {
                 sb.append("{").append(POSITIONAL_PARAMETER_OPTION_NAME).append("}");
             }
@@ -201,7 +201,7 @@ final class ASTDirMacroOrFunction extends ASTDirective implements TemplateModel 
 
             ParameterDefinition paramDef = paramDefsByArgArrayIdx[idx];
 
-            sb.append(_StringUtil.toFTLTopLevelIdentifierReference(paramDef.name));
+            sb.append(_StringUtils.toFTLTopLevelIdentifierReference(paramDef.name));
             if (function) {
                 sb.append("{").append(NAMED_PARAMETER_OPTION_NAME).append("}");
             }
@@ -224,7 +224,7 @@ final class ASTDirMacroOrFunction extends ASTDirective implements TemplateModel 
                 firstParam = false;
             }
 
-            sb.append(_StringUtil.toFTLTopLevelIdentifierReference(paramDefsByArgArrayIdx[namedVarargsArgIdx].name));
+            sb.append(_StringUtils.toFTLTopLevelIdentifierReference(paramDefsByArgArrayIdx[namedVarargsArgIdx].name));
             if (function) {
                 sb.append("{").append(NAMED_PARAMETER_OPTION_NAME).append("}");
             }
@@ -360,7 +360,7 @@ final class ASTDirMacroOrFunction extends ASTDirective implements TemplateModel 
         @Override
         public String toString() {
             return "ParameterDefinition(" +
-                    "name=" + _StringUtil.jQuote(name)
+                    "name=" + _StringUtils.jQuote(name)
                     + (defaultExpression != null ? ", default=" + defaultExpression.getCanonicalForm() : "")
                     + ')';
         }

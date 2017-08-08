@@ -23,7 +23,7 @@ import java.io.Writer;
 
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.outputformat.CommonMarkupOutputFormat;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * Represents the HTML output format.
@@ -54,7 +54,7 @@ public final class CustomHTMLOutputFormat extends CommonMarkupOutputFormat<Custo
 
     @Override
     public String escapePlainText(String plainTextContent) {
-        return _StringUtil.XHTMLEnc(plainTextContent.replace('x', 'X'));
+        return _StringUtils.XHTMLEnc(plainTextContent.replace('x', 'X'));
     }
 
     @Override

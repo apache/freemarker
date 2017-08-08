@@ -22,7 +22,7 @@ package org.apache.freemarker.core;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.util.BugException;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * AST directive node: An instruction that makes a single assignment, like {@code <#local x=1>}, {@code <#global x=1>},
@@ -154,7 +154,7 @@ final class ASTDirAssignment extends ASTDirective {
             } else {  // Numerical operation
                 Number lhoNumber;
                 if (lhoValue instanceof TemplateNumberModel) {
-                    lhoNumber = _EvalUtil.modelToNumber((TemplateNumberModel) lhoValue, null);
+                    lhoNumber = _EvalUtils.modelToNumber((TemplateNumberModel) lhoValue, null);
                 } else if (lhoValue == null) {
                     throw InvalidReferenceException.getInstance(variableName, getOperatorTypeAsString(), env);
                 } else {
@@ -191,7 +191,7 @@ final class ASTDirAssignment extends ASTDirective {
             buf.append(' ');
         }
         
-        buf.append(_StringUtil.toFTLTopLevelTragetIdentifier(variableName));
+        buf.append(_StringUtils.toFTLTopLevelTragetIdentifier(variableName));
         
         if (valueExp != null) {
             buf.append(' ');

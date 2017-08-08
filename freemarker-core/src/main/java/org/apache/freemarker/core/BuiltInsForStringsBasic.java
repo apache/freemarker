@@ -32,7 +32,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 class BuiltInsForStringsBasic {
 
@@ -56,14 +56,14 @@ class BuiltInsForStringsBasic {
     static class capitalizeBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(_StringUtil.capitalize(s));
+            return new SimpleScalar(_StringUtils.capitalize(s));
         }
     }
 
     static class chop_linebreakBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(_StringUtil.chomp(s));
+            return new SimpleScalar(_StringUtils.chomp(s));
         }
     }
 
@@ -504,8 +504,8 @@ class BuiltInsForStringsBasic {
                     try {
                         return new SimpleScalar(
                                 leftPadder
-                                        ? _StringUtil.leftPad(s, width, filling)
-                                        : _StringUtil.rightPad(s, width, filling));
+                                        ? _StringUtils.leftPad(s, width, filling)
+                                        : _StringUtils.rightPad(s, width, filling));
                     } catch (IllegalArgumentException e) {
                         if (filling.length() == 0) {
                             throw new _TemplateModelException(
@@ -516,7 +516,7 @@ class BuiltInsForStringsBasic {
                         }
                     }
                 } else {
-                    return new SimpleScalar(leftPadder ? _StringUtil.leftPad(s, width) : _StringUtil.rightPad(s, width));
+                    return new SimpleScalar(leftPadder ? _StringUtils.leftPad(s, width) : _StringUtils.rightPad(s, width));
                 }
             }
 
@@ -614,7 +614,7 @@ class BuiltInsForStringsBasic {
                 String[] result;
                 if ((flags & RegexpHelper.RE_FLAG_REGEXP) == 0) {
                     RegexpHelper.checkNonRegexpFlags("split", flags);
-                    result = _StringUtil.split(s, splitString,
+                    result = _StringUtils.split(s, splitString,
                             (flags & RegexpHelper.RE_FLAG_CASE_INSENSITIVE) != 0);
                 } else {
                     Pattern pattern = RegexpHelper.getPattern(splitString, (int) flags);
@@ -692,7 +692,7 @@ class BuiltInsForStringsBasic {
                             throw newIndexGreaterThanLengthException(1, endIdx, len);
                         }
                         if (beginIdx > endIdx) {
-                            throw MessageUtil.newMethodArgsInvalidValueException("?" + key,
+                            throw MessageUtils.newMethodArgsInvalidValueException("?" + key,
                                     "The begin index argument, ", beginIdx,
                                     ", shouldn't be greater than the end index argument, ",
                                     endIdx, ".");
@@ -710,7 +710,7 @@ class BuiltInsForStringsBasic {
 
                 private TemplateModelException newIndexGreaterThanLengthException(
                         int argIdx, int idx, final int len) throws TemplateModelException {
-                    return MessageUtil.newMethodArgInvalidValueException(
+                    return MessageUtils.newMethodArgInvalidValueException(
                             "?" + key, argIdx,
                             "The index mustn't be greater than the length of the string, ",
                             len, ", but it was ", idx, ".");
@@ -718,7 +718,7 @@ class BuiltInsForStringsBasic {
     
                 private TemplateModelException newIndexLessThan0Exception(
                         int argIdx, int idx) throws TemplateModelException {
-                    return MessageUtil.newMethodArgInvalidValueException(
+                    return MessageUtils.newMethodArgInvalidValueException(
                             "?" + key, argIdx,
                             "The index must be at least 0, but was ", idx, ".");
                 }

@@ -721,13 +721,13 @@ public final class FTLUtil {
             String javaClassName;
             Class unwrappedClass = getUnwrappedClass(tm);
             if (unwrappedClass != null) {
-                javaClassName = _ClassUtil.getShortClassName(unwrappedClass, true);
+                javaClassName = _ClassUtils.getShortClassName(unwrappedClass, true);
             } else {
                 javaClassName = null;
             }
 
             sb.append(" (");
-            String modelClassName = _ClassUtil.getShortClassName(tm.getClass(), true);
+            String modelClassName = _ClassUtils.getShortClassName(tm.getClass(), true);
             if (javaClassName == null) {
                 sb.append("wrapper: ");
                 sb.append(modelClassName);

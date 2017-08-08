@@ -36,8 +36,8 @@ import org.apache.freemarker.core.userpkg.BaseNTemplateNumberFormatFactory;
 import org.apache.freemarker.core.userpkg.EpochMillisDivTemplateDateFormatFactory;
 import org.apache.freemarker.core.userpkg.EpochMillisTemplateDateFormatFactory;
 import org.apache.freemarker.core.userpkg.HexTemplateNumberFormatFactory;
-import org.apache.freemarker.core.util._CollectionUtil;
-import org.apache.freemarker.core.util._DateUtil;
+import org.apache.freemarker.core.util._CollectionUtils;
+import org.apache.freemarker.core.util._DateUtils;
 import org.apache.freemarker.core.util._NullWriter;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
@@ -80,52 +80,52 @@ public class MutableProcessingConfigurationTest {
         MutableProcessingConfiguration<?> mpc = new Configuration.Builder(Configuration.VERSION_3_0_0);
 
         {
-            assertTrue(_CollectionUtil.isListKnownToBeUnmodifiable(mpc.getAutoIncludes()));
+            assertTrue(_CollectionUtils.isListKnownToBeUnmodifiable(mpc.getAutoIncludes()));
             List<String> mutableValue = new ArrayList<>();
             mutableValue.add("x");
             mpc.setAutoIncludes(mutableValue);
             List<String> immutableValue = mpc.getAutoIncludes();
             assertNotSame(mutableValue, immutableValue); // Must be a copy
-            assertTrue(_CollectionUtil.isListKnownToBeUnmodifiable(immutableValue));
+            assertTrue(_CollectionUtils.isListKnownToBeUnmodifiable(immutableValue));
             assertEquals(mutableValue, immutableValue);
             mutableValue.add("y");
             assertNotEquals(mutableValue, immutableValue); // No aliasing
         }
 
         {
-            assertTrue(_CollectionUtil.isMapKnownToBeUnmodifiable(mpc.getAutoImports()));
+            assertTrue(_CollectionUtils.isMapKnownToBeUnmodifiable(mpc.getAutoImports()));
             Map<String, String> mutableValue = new HashMap<>();
             mutableValue.put("x", "x.ftl");
             mpc.setAutoImports(mutableValue);
             Map<String, String> immutableValue = mpc.getAutoImports();
             assertNotSame(mutableValue, immutableValue); // Must be a copy
-            assertTrue(_CollectionUtil.isMapKnownToBeUnmodifiable(immutableValue));
+            assertTrue(_CollectionUtils.isMapKnownToBeUnmodifiable(immutableValue));
             assertEquals(mutableValue, immutableValue);
             mutableValue.put("y", "y.ftl");
             assertNotEquals(mutableValue, immutableValue); // No aliasing
         }
 
         {
-            assertTrue(_CollectionUtil.isMapKnownToBeUnmodifiable(mpc.getCustomDateFormats()));
+            assertTrue(_CollectionUtils.isMapKnownToBeUnmodifiable(mpc.getCustomDateFormats()));
             Map<String, TemplateDateFormatFactory> mutableValue = new HashMap<>();
             mutableValue.put("x", EpochMillisTemplateDateFormatFactory.INSTANCE);
             mpc.setCustomDateFormats(mutableValue);
             Map<String, TemplateDateFormatFactory> immutableValue = mpc.getCustomDateFormats();
             assertNotSame(mutableValue, immutableValue); // Must be a copy
-            assertTrue(_CollectionUtil.isMapKnownToBeUnmodifiable(immutableValue));
+            assertTrue(_CollectionUtils.isMapKnownToBeUnmodifiable(immutableValue));
             assertEquals(mutableValue, immutableValue);
             mutableValue.put("y", EpochMillisDivTemplateDateFormatFactory.INSTANCE);
             assertNotEquals(mutableValue, immutableValue); // No aliasing
         }
 
         {
-            assertTrue(_CollectionUtil.isMapKnownToBeUnmodifiable(mpc.getCustomNumberFormats()));
+            assertTrue(_CollectionUtils.isMapKnownToBeUnmodifiable(mpc.getCustomNumberFormats()));
             Map<String, TemplateNumberFormatFactory> mutableValue = new HashMap<>();
             mutableValue.put("x", BaseNTemplateNumberFormatFactory.INSTANCE);
             mpc.setCustomNumberFormats(mutableValue);
             Map<String, TemplateNumberFormatFactory> immutableValue = mpc.getCustomNumberFormats();
             assertNotSame(mutableValue, immutableValue); // Must be a copy
-            assertTrue(_CollectionUtil.isMapKnownToBeUnmodifiable(immutableValue));
+            assertTrue(_CollectionUtils.isMapKnownToBeUnmodifiable(immutableValue));
             assertEquals(mutableValue, immutableValue);
             mutableValue.put("y", HexTemplateNumberFormatFactory.INSTANCE);
             assertNotEquals(mutableValue, immutableValue); // No aliasing
@@ -202,13 +202,13 @@ public class MutableProcessingConfigurationTest {
             assertEquals(TimeZone.getDefault(), env2.getTimeZone());
             assertNull(env2.getSQLDateAndTimeTimeZone());
 
-            env1.setSQLDateAndTimeTimeZone(_DateUtil.UTC);
+            env1.setSQLDateAndTimeTimeZone(_DateUtils.UTC);
             // cfg:
             assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
             assertNull(cfg.getSQLDateAndTimeTimeZone());
             // env:
             assertEquals(TimeZone.getDefault(), env1.getTimeZone());
-            assertEquals(_DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
+            assertEquals(_DateUtils.UTC, env1.getSQLDateAndTimeTimeZone());
 
             env1.setTimeZone(localTZ);
             // cfg:
@@ -216,7 +216,7 @@ public class MutableProcessingConfigurationTest {
             assertNull(cfg.getSQLDateAndTimeTimeZone());
             // env:
             assertEquals(localTZ, env1.getTimeZone());
-            assertEquals(_DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
+            assertEquals(_DateUtils.UTC, env1.getSQLDateAndTimeTimeZone());
             // env 2:
             assertEquals(TimeZone.getDefault(), env2.getTimeZone());
             assertNull(env2.getSQLDateAndTimeTimeZone());
@@ -235,14 +235,14 @@ public class MutableProcessingConfigurationTest {
             Environment env2 = t.createProcessingEnvironment(null, new StringWriter());
 
             env1.setTimeZone(localTZ);
-            env1.setSQLDateAndTimeTimeZone(_DateUtil.UTC);
+            env1.setSQLDateAndTimeTimeZone(_DateUtils.UTC);
 
             // cfg:
             assertEquals(otherTZ1, cfg.getTimeZone());
             assertEquals(otherTZ2, cfg.getSQLDateAndTimeTimeZone());
             // env:
             assertEquals(localTZ, env1.getTimeZone());
-            assertEquals(_DateUtil.UTC, env1.getSQLDateAndTimeTimeZone());
+            assertEquals(_DateUtils.UTC, env1.getSQLDateAndTimeTimeZone());
             // env 2:
             assertEquals(otherTZ1, env2.getTimeZone());
             assertEquals(otherTZ2, env2.getSQLDateAndTimeTimeZone());

@@ -32,7 +32,7 @@ import java.util.TimeZone;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
-import org.apache.freemarker.core.util._DateUtil;
+import org.apache.freemarker.core.util._DateUtils;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.junit.Test;
 
@@ -261,7 +261,7 @@ public class MutableParsingAndProcessingConfigurationTest {
         assertEquals(TimeZone.getDefault(), cfgB.getTimeZone());
         assertFalse(cfgB.isTimeZoneSet());
 
-        TimeZone nonDefault = TimeZone.getDefault().equals(_DateUtil.UTC) ? TimeZone.getTimeZone("PST") : _DateUtil.UTC;
+        TimeZone nonDefault = TimeZone.getDefault().equals(_DateUtils.UTC) ? TimeZone.getTimeZone("PST") : _DateUtils.UTC;
         cfgB.setTimeZone(nonDefault);
         assertTrue(cfgB.isTimeZoneSet());
         assertEquals(nonDefault, cfgB.getTimeZone());

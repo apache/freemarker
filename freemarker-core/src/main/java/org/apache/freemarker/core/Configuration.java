@@ -80,11 +80,11 @@ import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameForma
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.MruCacheStorage;
 import org.apache.freemarker.core.templateresolver.impl.SoftCacheStorage;
-import org.apache.freemarker.core.util._ClassUtil;
-import org.apache.freemarker.core.util._CollectionUtil;
+import org.apache.freemarker.core.util._ClassUtils;
+import org.apache.freemarker.core.util._CollectionUtils;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._SortedArraySet;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.core.util._UnmodifiableCompositeSet;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
@@ -340,7 +340,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         this.objectWrapper = builder.getObjectWrapper();
 
         {
-            Map<String, Object> sharedVariables = _CollectionUtil.mergeImmutableMaps(builder
+            Map<String, Object> sharedVariables = _CollectionUtils.mergeImmutableMaps(builder
                     .getImpliedSharedVariables(), builder.getSharedVariables(), false);
 
             HashMap<String, TemplateModel> wrappedSharedVariables = new HashMap<>(
@@ -351,7 +351,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                 } catch (TemplateModelException e) {
                     throw new InvalidSettingValueException(
                             ExtendableBuilder.SHARED_VARIABLES_KEY, null, false,
-                            "Failed to wrap shared variable " + _StringUtil.jQuote(ent.getKey()),
+                            "Failed to wrap shared variable " + _StringUtils.jQuote(ent.getKey()),
                             e);
                 }
             }
@@ -390,13 +390,13 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         newBuiltinClassResolver = builder.getNewBuiltinClassResolver();
         showErrorTips = builder.getShowErrorTips();
         apiBuiltinEnabled = builder.getAPIBuiltinEnabled();
-        customDateFormats = _CollectionUtil.mergeImmutableMaps(
+        customDateFormats = _CollectionUtils.mergeImmutableMaps(
                 builder.getImpliedCustomDateFormats(), builder.getCustomDateFormats(), false);
-        customNumberFormats = _CollectionUtil.mergeImmutableMaps(
+        customNumberFormats = _CollectionUtils.mergeImmutableMaps(
                 builder.getImpliedCustomNumberFormats(), builder.getCustomNumberFormats(), false);
-        autoImports = _CollectionUtil.mergeImmutableMaps(
+        autoImports = _CollectionUtils.mergeImmutableMaps(
                 builder.getImpliedAutoImports(), builder.getAutoImports(), true);
-        autoIncludes = _CollectionUtil.mergeImmutableLists(
+        autoIncludes = _CollectionUtils.mergeImmutableLists(
                 builder.getImpliedAutoIncludes(), builder.getAutoIncludes(), true);
         lazyImports = builder.getLazyImports();
         lazyAutoImports = builder.getLazyAutoImports();
@@ -744,7 +744,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             if (stdOF == null) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("Unregistered output format name, ");
-                sb.append(_StringUtil.jQuote(name));
+                sb.append(_StringUtils.jQuote(name));
                 sb.append(". The output formats registered in the Configuration are: ");
                 
                 Set<String> registeredNames = new TreeSet<>();
@@ -758,7 +758,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     } else {
                         sb.append(", ");
                     }
-                    sb.append(_StringUtil.jQuote(registeredName));
+                    sb.append(_StringUtils.jQuote(registeredName));
                 }
                 
                 throw new UnregisteredOutputFormatException(sb.toString());
@@ -1358,29 +1358,29 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             TemplateLoader tl = getTemplateLoader();  
             String msg; 
             if (tl == null) {
-                msg = "Don't know where to load template " + _StringUtil.jQuote(name)
+                msg = "Don't know where to load template " + _StringUtils.jQuote(name)
                       + " from because the \"templateLoader\" FreeMarker "
                       + "setting wasn't set (Configuration.setTemplateLoader), so it's null.";
             } else {
                 final String missingTempNormName = maybeTemp.getMissingTemplateNormalizedName();
                 final String missingTempReason = maybeTemp.getMissingTemplateReason();
                 final TemplateLookupStrategy templateLookupStrategy = getTemplateLookupStrategy();
-                msg = "Template not found for name " + _StringUtil.jQuote(name)
+                msg = "Template not found for name " + _StringUtils.jQuote(name)
                         + (missingTempNormName != null && name != null
                                 && !removeInitialSlash(name).equals(missingTempNormName)
-                                ? " (normalized: " + _StringUtil.jQuote(missingTempNormName) + ")"
+                                ? " (normalized: " + _StringUtils.jQuote(missingTempNormName) + ")"
                                 : "")
                         + (customLookupCondition != null ? " and custom lookup condition "
-                        + _StringUtil.jQuote(customLookupCondition) : "")
+                        + _StringUtils.jQuote(customLookupCondition) : "")
                         + "."
                         + (missingTempReason != null
                                 ? "\nReason given: " + ensureSentenceIsClosed(missingTempReason)
                                 : "")
                         + "\nThe name was interpreted by this TemplateLoader: "
-                        + _StringUtil.tryToString(tl) + "."
+                        + _StringUtils.tryToString(tl) + "."
                         + (!isKnownNonConfusingLookupStrategy(templateLookupStrategy)
                                 ? "\n(Before that, the name was possibly changed by this lookup strategy: "
-                                  + _StringUtil.tryToString(templateLookupStrategy) + ".)"
+                                  + _StringUtils.tryToString(templateLookupStrategy) + ".)"
                                 : "")
                         + (missingTempReason == null && name.indexOf('\\') != -1
                                 ? "\nWarning: The name contains backslash (\"\\\") instead of slash (\"/\"); "
@@ -1613,7 +1613,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             boolean nameUnhandled = false;
             try {
                 if (LOCALIZED_TEMPLATE_LOOKUP_KEY.equals(name)) {
-                    setLocalizedTemplateLookup(_StringUtil.getYesNo(value));
+                    setLocalizedTemplateLookup(_StringUtils.getYesNo(value));
                 } else if (REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY.equals(name)) {
                     List list = (List) _ObjectBuilderSettingEvaluator.eval(
                             value, List.class, true, _SettingEvaluationEnvironment.getCurrent());
@@ -1630,7 +1630,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                     } if (value.indexOf('.') == -1) {
                         int strongSize = 0;
                         int softSize = 0;
-                        Map map = _StringUtil.parseNameValuePairList(
+                        Map map = _StringUtils.parseNameValuePairList(
                                 value, String.valueOf(Integer.MAX_VALUE));
                         Iterator it = map.entrySet().iterator();
                         while (it.hasNext()) {
@@ -1641,7 +1641,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                                 pValue = Integer.parseInt((String) ent.getValue());
                             } catch (NumberFormatException e) {
                                 throw new InvalidSettingValueException(name, value,
-                                        "Malformed integer number (shown quoted): " + _StringUtil.jQuote(ent.getValue()));
+                                        "Malformed integer number (shown quoted): " + _StringUtils.jQuote(ent.getValue()));
                             }
                             if ("soft".equalsIgnoreCase(pName)) {
                                 softSize = pValue;
@@ -1650,7 +1650,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                             } else {
                                 throw new InvalidSettingValueException(name, value,
                                         "Unsupported cache parameter name (shown quoted): "
-                                                + _StringUtil.jQuote(ent.getValue()));
+                                                + _StringUtils.jQuote(ent.getValue()));
                             }
                         }
                         if (softSize == 0 && strongSize == 0) {
@@ -1683,7 +1683,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                         multipier = 1000 * 60 * 60;
                     } else if (!unit.isEmpty()) {
                         throw new InvalidSettingValueException(name, value,
-                                "Unrecognized time unit " + _StringUtil.jQuote(unit) + ". Valid units are: ms, s, m, h");
+                                "Unrecognized time unit " + _StringUtils.jQuote(unit) + ". Valid units are: ms, s, m, h");
                     } else {
                         multipier = 0;
                     }
@@ -1702,7 +1702,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
                         if (!(key instanceof String)) {
                             throw new InvalidSettingValueException(name, null, false,
                                     "All keys in this Map must be strings, but one of them is an instance of "
-                                    + "this class: " + _ClassUtil.getShortClassNameOfObject(key), null);
+                                    + "this class: " + _ClassUtils.getShortClassNameOfObject(key), null);
                         }
                     }
                     setSharedVariables((Map) sharedVariables);
@@ -2319,7 +2319,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
          */
         public void setSharedVariables(Map<String, ?> sharedVariables) {
             _NullArgumentException.check("sharedVariables", sharedVariables);
-            _CollectionUtil.safeCastMap(
+            _CollectionUtils.safeCastMap(
                     "sharedVariables", sharedVariables, String.class, false, Object.class,true);
             this.sharedVariables = Collections.unmodifiableMap(new HashMap<>(sharedVariables));
         }

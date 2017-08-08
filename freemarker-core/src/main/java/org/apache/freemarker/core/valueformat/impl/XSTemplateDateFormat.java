@@ -23,10 +23,10 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.util._DateUtil;
-import org.apache.freemarker.core.util._DateUtil.CalendarFieldsToDateConverter;
-import org.apache.freemarker.core.util._DateUtil.DateParseException;
-import org.apache.freemarker.core.util._DateUtil.DateToISO8601CalendarFactory;
+import org.apache.freemarker.core.util._DateUtils;
+import org.apache.freemarker.core.util._DateUtils.CalendarFieldsToDateConverter;
+import org.apache.freemarker.core.util._DateUtils.DateParseException;
+import org.apache.freemarker.core.util._DateUtils.DateToISO8601CalendarFactory;
 import org.apache.freemarker.core.valueformat.InvalidFormatParametersException;
 import org.apache.freemarker.core.valueformat.UnknownDateTypeFormattingUnsupportedException;
 
@@ -49,26 +49,26 @@ class XSTemplateDateFormat extends ISOLikeTemplateDateFormat {
     @Override
     protected String format(Date date, boolean datePart, boolean timePart, boolean offsetPart, int accuracy,
             TimeZone timeZone, DateToISO8601CalendarFactory calendarFactory) {
-        return _DateUtil.dateToXSString(
+        return _DateUtils.dateToXSString(
                 date, datePart, timePart, offsetPart, accuracy, timeZone, calendarFactory);
     }
 
     @Override
     protected Date parseDate(String s, TimeZone tz, CalendarFieldsToDateConverter calToDateConverter)
             throws DateParseException {
-        return _DateUtil.parseXSDate(s, tz, calToDateConverter);
+        return _DateUtils.parseXSDate(s, tz, calToDateConverter);
     }
 
     @Override
     protected Date parseTime(String s, TimeZone tz, CalendarFieldsToDateConverter calToDateConverter)
             throws DateParseException {
-        return _DateUtil.parseXSTime(s, tz, calToDateConverter);
+        return _DateUtils.parseXSTime(s, tz, calToDateConverter);
     }
 
     @Override
     protected Date parseDateTime(String s, TimeZone tz,
             CalendarFieldsToDateConverter calToDateConverter) throws DateParseException {
-        return _DateUtil.parseXSDateTime(s, tz, calToDateConverter);
+        return _DateUtils.parseXSDateTime(s, tz, calToDateConverter);
     }
 
     @Override

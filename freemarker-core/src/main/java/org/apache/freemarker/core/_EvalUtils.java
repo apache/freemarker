@@ -42,7 +42,7 @@ import org.apache.freemarker.core.valueformat.TemplateValueFormatException;
 /**
  * Internally used static utilities for evaluation expressions.
  */
-public class _EvalUtil {
+public class _EvalUtils {
     static final int CMP_OP_EQUALS = 1;
     static final int CMP_OP_NOT_EQUALS = 2;
     static final int CMP_OP_LESS_THAN = 3;
@@ -51,8 +51,8 @@ public class _EvalUtil {
     static final int CMP_OP_GREATER_THAN_EQUALS = 6;
     // If you add a new operator here, update the "compare" and "cmpOpToString" methods!
     
-    // Prevents instantination.
-    private _EvalUtil() { }
+    // Prevents instantiation.
+    private _EvalUtils() { }
     
     /**
      * @param expr {@code null} is allowed, but may results in less helpful error messages
@@ -214,8 +214,8 @@ public class _EvalUtil {
 
         final int cmpResult;
         if (leftValue instanceof TemplateNumberModel && rightValue instanceof TemplateNumberModel) {
-            Number leftNum = _EvalUtil.modelToNumber((TemplateNumberModel) leftValue, leftExp);
-            Number rightNum = _EvalUtil.modelToNumber((TemplateNumberModel) rightValue, rightExp);
+            Number leftNum = _EvalUtils.modelToNumber((TemplateNumberModel) leftValue, leftExp);
+            Number rightNum = _EvalUtils.modelToNumber((TemplateNumberModel) rightValue, rightExp);
             ArithmeticEngine ae =
                     env != null
                         ? env.getArithmeticEngine()
@@ -257,16 +257,16 @@ public class _EvalUtil {
                         TemplateDateModel.TYPE_NAMES.get(rightDateType), ".");
             }
 
-            Date leftDate = _EvalUtil.modelToDate(leftDateModel, leftExp);
-            Date rightDate = _EvalUtil.modelToDate(rightDateModel, rightExp);
+            Date leftDate = _EvalUtils.modelToDate(leftDateModel, leftExp);
+            Date rightDate = _EvalUtils.modelToDate(rightDateModel, rightExp);
             cmpResult = leftDate.compareTo(rightDate);
         } else if (leftValue instanceof TemplateScalarModel && rightValue instanceof TemplateScalarModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
                 throw new _MiscTemplateException(defaultBlamed, env,
                         "Can't use operator \"", cmpOpToString(operator, operatorString), "\" on string values.");
             }
-            String leftString = _EvalUtil.modelToString((TemplateScalarModel) leftValue, leftExp, env);
-            String rightString = _EvalUtil.modelToString((TemplateScalarModel) rightValue, rightExp, env);
+            String leftString = _EvalUtils.modelToString((TemplateScalarModel) leftValue, leftExp, env);
+            String rightString = _EvalUtils.modelToString((TemplateScalarModel) rightValue, rightExp, env);
             // FIXME NBC: Don't use the Collator here. That's locale-specific, but ==/!= should not be.
             cmpResult = env.getCollator().compare(leftString, rightString);
         } else if (leftValue instanceof TemplateBooleanModel && rightValue instanceof TemplateBooleanModel) {
@@ -358,7 +358,7 @@ public class _EvalUtil {
             try {
                 return assertFormatResultNotNull(format.format(tnm));
             } catch (TemplateValueFormatException e) {
-                throw MessageUtil.newCantFormatNumberException(format, exp, e, false);
+                throw MessageUtils.newCantFormatNumberException(format, exp, e, false);
             }
         } else if (tm instanceof TemplateDateModel) {
             TemplateDateModel tdm = (TemplateDateModel) tm;
@@ -366,7 +366,7 @@ public class _EvalUtil {
             try {
                 return assertFormatResultNotNull(format.format(tdm));
             } catch (TemplateValueFormatException e) {
-                throw MessageUtil.newCantFormatDateException(format, exp, e, false);
+                throw MessageUtils.newCantFormatDateException(format, exp, e, false);
             }
         } else if (tm instanceof TemplateMarkupOutputModel) {
             return tm;
@@ -393,7 +393,7 @@ public class _EvalUtil {
             try {
                 return ensureFormatResultString(format.format(tnm), exp, env);
             } catch (TemplateValueFormatException e) {
-                throw MessageUtil.newCantFormatNumberException(format, exp, e, false);
+                throw MessageUtils.newCantFormatNumberException(format, exp, e, false);
             }
         } else if (tm instanceof TemplateDateModel) {
             TemplateDateModel tdm = (TemplateDateModel) tm;
@@ -401,7 +401,7 @@ public class _EvalUtil {
             try {
                 return ensureFormatResultString(format.format(tdm), exp, env);
             } catch (TemplateValueFormatException e) {
-                throw MessageUtil.newCantFormatDateException(format, exp, e, false);
+                throw MessageUtils.newCantFormatDateException(format, exp, e, false);
             }
         } else { 
             return coerceModelToTextualCommon(tm, exp, seqTip, false, false, env);

@@ -23,7 +23,7 @@ import java.util.Locale;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.util._NumberUtil;
+import org.apache.freemarker.core.util._NumberUtils;
 import org.apache.freemarker.core.valueformat.InvalidFormatParametersException;
 import org.apache.freemarker.core.valueformat.TemplateFormatUtil;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
@@ -56,7 +56,7 @@ public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory 
                 throws UnformattableValueException, TemplateModelException {
             Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
             try {
-                return Integer.toHexString(_NumberUtil.toIntExact(n));
+                return Integer.toHexString(_NumberUtils.toIntExact(n));
             } catch (ArithmeticException e) {
                 throw new UnformattableValueException(n + " doesn't fit into an int");
             }

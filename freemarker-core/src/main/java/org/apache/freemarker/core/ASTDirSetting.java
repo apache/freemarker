@@ -26,7 +26,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.util._SortedArraySet;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * AST directive node: {@code #setting}.
@@ -60,12 +60,12 @@ final class ASTDirSetting extends ASTDirective {
                         + "supported.");                
             } else {
                 sb.append("Unknown setting name: ");
-                sb.append(_StringUtil.jQuote(key)).append(".");
+                sb.append(_StringUtils.jQuote(key)).append(".");
 
                 String correctedKey;
                 if (key.indexOf('_') != -1) {
-                    sb.append(MessageUtil.FM3_SNAKE_CASE);
-                    correctedKey = _StringUtil.snakeCaseToCamelCase(key);
+                    sb.append(MessageUtils.FM3_SNAKE_CASE);
+                    correctedKey = _StringUtils.snakeCaseToCamelCase(key);
                     if (!SETTING_NAMES.contains(correctedKey)) {
                         if (key.equals("datetime_format")) {
                             correctedKey = "dateTimeFormat";
@@ -130,7 +130,7 @@ final class ASTDirSetting extends ASTDirective {
         if (canonical) sb.append('<');
         sb.append(getASTNodeDescriptor());
         sb.append(' ');
-        sb.append(_StringUtil.toFTLTopLevelTragetIdentifier(key));
+        sb.append(_StringUtils.toFTLTopLevelTragetIdentifier(key));
         sb.append('=');
         sb.append(value.getCanonicalForm());
         if (canonical) sb.append("/>");

@@ -61,9 +61,9 @@ import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
-import org.apache.freemarker.core.util._CollectionUtil;
-import org.apache.freemarker.core.util._SecurityUtil;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._CollectionUtils;
+import org.apache.freemarker.core.util._SecurityUtils;
+import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.servlet.jsp.TaglibFactory;
 import org.apache.freemarker.servlet.jsp.TaglibFactory.ClasspathMetaInfTldSource;
 import org.apache.freemarker.servlet.jsp.TaglibFactory.MetaInfTldSource;
@@ -566,7 +566,7 @@ public class FreemarkerServlet extends HttpServlet {
             }
             if (value == null) {
                 throw new MalformedWebXmlException(
-                        "init-param " + _StringUtil.jQuote(name) + " without param-value. "
+                        "init-param " + _StringUtils.jQuote(name) + " without param-value. "
                         + "Maybe the web.xml is not well-formed?");
             }
 
@@ -611,16 +611,16 @@ public class FreemarkerServlet extends HttpServlet {
                                 "Not one of the supported values.");
                     }
                 } else if (name.equals(INIT_PARAM_NO_CACHE)) {
-                    noCache = _StringUtil.getYesNo(value);
+                    noCache = _StringUtils.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_BUFFER_SIZE)) {
                     bufferSize = Integer.valueOf(parseSize(value));
                 } else if (name.equals(DEPR_INITPARAM_DEBUG)) { // BC
                     if (getInitParameter(INIT_PARAM_DEBUG) != null) {
                         throw new ConflictingInitParamsException(INIT_PARAM_DEBUG, DEPR_INITPARAM_DEBUG);
                     }
-                    debug = _StringUtil.getYesNo(value);
+                    debug = _StringUtils.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_DEBUG)) {
-                    debug = _StringUtil.getYesNo(value);
+                    debug = _StringUtils.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_CONTENT_TYPE)) {
                     contentType = new ContentType(value);
                 } else if (name.equals(INIT_PARAM_OVERRIDE_RESPONSE_CONTENT_TYPE)) {
@@ -634,7 +634,7 @@ public class FreemarkerServlet extends HttpServlet {
                 } else if (name.equals(INIT_PARAM_OVERRIDE_RESPONSE_LOCALE)) {
                     overrideResponseLocale = initParamValueToEnum(value, OverrideResponseLocale.values());
                 } else if (name.equals(INIT_PARAM_EXCEPTION_ON_MISSING_TEMPLATE)) {
-                    exceptionOnMissingTemplate = _StringUtil.getYesNo(value);
+                    exceptionOnMissingTemplate = _StringUtils.getYesNo(value);
                 } else if (name.equals(INIT_PARAM_META_INF_TLD_LOCATIONS)) {
                     metaInfTldSources = TaglibFactory.parseMetaInfTldLocations(InitParamParser.parseCommaSeparatedList(value));
                 } else if (name.equals(INIT_PARAM_CLASSPATH_TLDS)) {
@@ -722,7 +722,7 @@ public class FreemarkerServlet extends HttpServlet {
         String templatePath = requestUrlToTemplatePath(request);
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Requested template " + _StringUtil.jQuoteNoXSS(templatePath) + ".");
+            LOG.debug("Requested template " + _StringUtils.jQuoteNoXSS(templatePath) + ".");
         }
 
         Locale locale = request.getLocale();
@@ -736,21 +736,21 @@ public class FreemarkerServlet extends HttpServlet {
         } catch (TemplateNotFoundException e) {
             if (exceptionOnMissingTemplate) {
                 throw newServletExceptionWithFreeMarkerLogging(
-                        "Template not found for name " + _StringUtil.jQuoteNoXSS(templatePath) + ".", e);
+                        "Template not found for name " + _StringUtils.jQuoteNoXSS(templatePath) + ".", e);
             } else {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Responding HTTP 404 \"Not found\" for missing template "
-                            + _StringUtil.jQuoteNoXSS(templatePath) + ".", e);
+                            + _StringUtils.jQuoteNoXSS(templatePath) + ".", e);
                 }
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "Page template not found");
                 return;
             }
         } catch (org.apache.freemarker.core.ParseException e) {
             throw newServletExceptionWithFreeMarkerLogging(
-                    "Parsing error with template " + _StringUtil.jQuoteNoXSS(templatePath) + ".", e);
+                    "Parsing error with template " + _StringUtils.jQuoteNoXSS(templatePath) + ".", e);
         } catch (Exception e) {
             throw newServletExceptionWithFreeMarkerLogging(
-                    "Unexpected error when loading template " + _StringUtil.jQuoteNoXSS(templatePath) + ".", e);
+                    "Unexpected error when loading template " + _StringUtils.jQuoteNoXSS(templatePath) + ".", e);
         }
 
         boolean tempSpecContentTypeContainsCharset = false;
@@ -810,7 +810,7 @@ public class FreemarkerServlet extends HttpServlet {
                                 throw new IllegalStateException(
                                         "Failed to resolve charset name returned by "
                                         + " HttpServletResponse.getCharacterEncoding(): "
-                                        + _StringUtil.jQuote(actualOutputCharsetName),
+                                        + _StringUtils.jQuote(actualOutputCharsetName),
                                         e);
                             }
                             env.setOutputEncoding(actualOutputCharset);
@@ -1001,7 +1001,7 @@ public class FreemarkerServlet extends HttpServlet {
 
         List<MetaInfTldSource> metaInfTldSourcesFromSysProp = null;
         try {
-            final String prop = _SecurityUtil.getSystemProperty(SYSTEM_PROPERTY_META_INF_TLD_SOURCES, null);
+            final String prop = _SecurityUtils.getSystemProperty(SYSTEM_PROPERTY_META_INF_TLD_SOURCES, null);
             metaInfTldSourcesFromSysProp = (List<MetaInfTldSource>) ((prop != null)
                     ? TaglibFactory.parseMetaInfTldLocations(InitParamParser.parseCommaSeparatedList(prop))
                     : Collections.emptyList());
@@ -1026,7 +1026,7 @@ public class FreemarkerServlet extends HttpServlet {
 
         List<String> classpathTldsFromSysProp = null;
         try {
-            final String prop = _SecurityUtil.getSystemProperty(SYSTEM_PROPERTY_CLASSPATH_TLDS, null);
+            final String prop = _SecurityUtils.getSystemProperty(SYSTEM_PROPERTY_CLASSPATH_TLDS, null);
             classpathTldsFromSysProp = (prop != null) ? InitParamParser.parseCommaSeparatedList(prop)
                     : Collections.<String>emptyList();
         } catch (ParseException e) {
@@ -1035,10 +1035,10 @@ public class FreemarkerServlet extends HttpServlet {
         }
 
         return new TaglibFactory.Builder(servletContext, objectWrapper)
-                .metaInfTldSources(_CollectionUtil.mergeImmutableLists(true, metaInfTldSources,
+                .metaInfTldSources(_CollectionUtils.mergeImmutableLists(true, metaInfTldSources,
                         metaInfTldSourcesFromSysProp, jettyMetaInfTldSources))
                 .classpathTlds(
-                        _CollectionUtil.mergeImmutableLists(classpathTlds, classpathTldsFromSysProp, true))
+                        _CollectionUtils.mergeImmutableLists(classpathTlds, classpathTldsFromSysProp, true))
                 .build();
     }
 
@@ -1329,14 +1329,14 @@ public class FreemarkerServlet extends HttpServlet {
     private static class InitParamValueException extends Exception {
 
         InitParamValueException(String initParamName, String initParamValue, Throwable casue) {
-            super("Failed to set the " + _StringUtil.jQuote(initParamName) + " servlet init-param to "
-                    + _StringUtil.jQuote(initParamValue) + "; see cause exception.",
+            super("Failed to set the " + _StringUtils.jQuote(initParamName) + " servlet init-param to "
+                    + _StringUtils.jQuote(initParamValue) + "; see cause exception.",
                     casue);
         }
 
         public InitParamValueException(String initParamName, String initParamValue, String cause) {
-            super("Failed to set the " + _StringUtil.jQuote(initParamName) + " servlet init-param to "
-                    + _StringUtil.jQuote(initParamValue) + ": " + cause);
+            super("Failed to set the " + _StringUtils.jQuote(initParamName) + " servlet init-param to "
+                    + _StringUtils.jQuote(initParamValue) + ": " + cause);
         }
 
     }
@@ -1346,8 +1346,8 @@ public class FreemarkerServlet extends HttpServlet {
 
         ConflictingInitParamsException(String recommendedName, String otherName) {
             super("Conflicting servlet init-params: "
-                    + _StringUtil.jQuote(recommendedName) + " and " + _StringUtil.jQuote(otherName)
-                    + ". Only use " + _StringUtil.jQuote(recommendedName) + ".");
+                    + _StringUtils.jQuote(recommendedName) + " and " + _StringUtils.jQuote(otherName)
+                    + ". Only use " + _StringUtils.jQuote(recommendedName) + ".");
         }
     }
 
@@ -1411,7 +1411,7 @@ public class FreemarkerServlet extends HttpServlet {
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append(_StringUtil.jQuote(initParamValue));
+        sb.append(_StringUtils.jQuote(initParamValue));
         sb.append(" is not a one of the enumeration values: ");
         boolean first = true;
         for (T value : enumValues) {
@@ -1420,7 +1420,7 @@ public class FreemarkerServlet extends HttpServlet {
             } else {
                 first = false;
             }
-            sb.append(_StringUtil.jQuote(value.getInitParamValue()));
+            sb.append(_StringUtils.jQuote(value.getInitParamValue()));
         }
         throw new IllegalArgumentException(sb.toString());
     }

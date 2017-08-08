@@ -21,8 +21,8 @@ package org.apache.freemarker.core.outputformat;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
-import org.apache.freemarker.core.util._ClassUtil;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._ClassUtils;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * Represents an output format. If you need auto-escaping, see its subclass, {@link MarkupOutputFormat}.
@@ -67,8 +67,8 @@ public abstract class OutputFormat {
     public final String toString() {
         String extras = toStringExtraProperties();
         return getName() + "("
-                + "mimeType=" + _StringUtil.jQuote(getMimeType()) + ", "
-                + "class=" + _ClassUtil.getShortClassNameOfObject(this, true)
+                + "mimeType=" + _StringUtils.jQuote(getMimeType()) + ", "
+                + "class=" + _ClassUtils.getShortClassNameOfObject(this, true)
                 + (extras.length() != 0 ? ", " : "") + extras
                 + ")";
     }

@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.freemarker.test.ResourcesExtractor;
-import org.apache.freemarker.test.TestUtil;
+import org.apache.freemarker.test.TestUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -192,7 +192,7 @@ public class WebAppTestCase {
                 throw new IOException("Test resource not found: " + expectedResource);
             }
             try {
-                expected = TestUtil.removeTxtCopyrightComment(normalizeWS(
+                expected = TestUtils.removeTxtCopyrightComment(normalizeWS(
                         IOUtils.toString(in, StandardCharsets.UTF_8.name()),
                         compressWS));
             } finally {

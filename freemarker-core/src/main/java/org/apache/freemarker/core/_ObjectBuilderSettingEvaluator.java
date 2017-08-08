@@ -60,8 +60,8 @@ import org.apache.freemarker.core.templateresolver.PathRegexMatcher;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.FTLUtil;
 import org.apache.freemarker.core.util.GenericParseException;
-import org.apache.freemarker.core.util._ClassUtil;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._ClassUtils;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * Don't use this; used internally by FreeMarker, might changes without notice.
@@ -634,7 +634,7 @@ public class _ObjectBuilderSettingEvaluator {
                 if (i != 0) {
                     sb.append(" or ");
                 }
-                sb.append(_StringUtil.jQuote(expectedChars.substring(i, i + 1)));
+                sb.append(_StringUtils.jQuote(expectedChars.substring(i, i + 1)));
             }
             throw new _ObjectBuilderSettingEvaluationException(
                     sb.toString(),
@@ -739,13 +739,13 @@ public class _ObjectBuilderSettingEvaluator {
             if (!beanPropSetters.containsKey(name)) {
                 throw new _ObjectBuilderSettingEvaluationException(
                         "The " + cl.getName() + " class has no writeable JavaBeans property called "
-                        + _StringUtil.jQuote(name) + ".");
+                        + _StringUtils.jQuote(name) + ".");
             }
             
             Method beanPropSetter = beanPropSetters.put(name, null);
             if (beanPropSetter == null) {
                     throw new _ObjectBuilderSettingEvaluationException(
-                            "JavaBeans property " + _StringUtil.jQuote(name) + " is set twice.");
+                            "JavaBeans property " + _StringUtils.jQuote(name) + " is set twice.");
             }
             
             try {
@@ -765,7 +765,7 @@ public class _ObjectBuilderSettingEvaluator {
                 }
                 if (!(m instanceof JavaMethodModel)) {
                     throw new _ObjectBuilderSettingEvaluationException(
-                            _StringUtil.jQuote(beanPropSetter.getName()) + " wasn't a JavaMethodModel.");
+                            _StringUtils.jQuote(beanPropSetter.getName()) + " wasn't a JavaMethodModel.");
                 }
                 List/*TemplateModel*/ args = new ArrayList();
                 ((JavaMethodModel) m).execute(
@@ -773,7 +773,7 @@ public class _ObjectBuilderSettingEvaluator {
                         NonTemplateCallPlace.INSTANCE);
             } catch (Exception e) {
                 throw new _ObjectBuilderSettingEvaluationException(
-                        "Failed to set " + _StringUtil.jQuote(name), e);
+                        "Failed to set " + _StringUtils.jQuote(name), e);
             }
         }
     }
@@ -877,16 +877,16 @@ public class _ObjectBuilderSettingEvaluator {
             
             boolean clIsBuilderClass;
             try {
-                cl = _ClassUtil.forName(className + BUILDER_CLASS_POSTFIX_1);
+                cl = _ClassUtils.forName(className + BUILDER_CLASS_POSTFIX_1);
                 clIsBuilderClass = true;
             } catch (ClassNotFoundException eIgnored) {
                 try {
-                    cl = _ClassUtil.forName(className + BUILDER_CLASS_POSTFIX_2);
+                    cl = _ClassUtils.forName(className + BUILDER_CLASS_POSTFIX_2);
                     clIsBuilderClass = true;
                 } catch (ClassNotFoundException e) {
                     clIsBuilderClass = false;
                     try {
-                        cl = _ClassUtil.forName(className);
+                        cl = _ClassUtils.forName(className);
                     } catch (Exception e2) {
                         boolean failedToGetAsStaticField;
                         if (canBeStaticField && className.indexOf('.') != -1) {
@@ -901,7 +901,7 @@ public class _ObjectBuilderSettingEvaluator {
                             failedToGetAsStaticField = false;
                         }
                         throw new _ObjectBuilderSettingEvaluationException(
-                                "Failed to get class " + _StringUtil.jQuote(className)
+                                "Failed to get class " + _StringUtils.jQuote(className)
                                         + (failedToGetAsStaticField ? " (also failed to resolve name as static field)" : "")
                                         + ".",
                                 e2);
@@ -920,7 +920,7 @@ public class _ObjectBuilderSettingEvaluator {
                     // Expected
                 } catch (Exception e) {
                     throw new _ObjectBuilderSettingEvaluationException(
-                            "Error when trying to access " + _StringUtil.jQuote(className) + "."
+                            "Error when trying to access " + _StringUtils.jQuote(className) + "."
                             + INSTANCE_FIELD_NAME, e);
                 }
             }
@@ -944,10 +944,10 @@ public class _ObjectBuilderSettingEvaluator {
 
             Class<?> cl;
             try {
-                cl = _ClassUtil.forName(className);
+                cl = _ClassUtils.forName(className);
             } catch (Exception e) {
                 throw new _ObjectBuilderSettingEvaluationException(
-                        "Failed to get field's parent class, " + _StringUtil.jQuote(className) + ".",
+                        "Failed to get field's parent class, " + _StringUtils.jQuote(className) + ".",
                         e);
             }
             
@@ -956,8 +956,8 @@ public class _ObjectBuilderSettingEvaluator {
                 field = cl.getField(fieldName);
             } catch (Exception e) {
                 throw new _ObjectBuilderSettingEvaluationException(
-                        "Failed to get field " + _StringUtil.jQuote(fieldName) + " from class "
-                        + _StringUtil.jQuote(className) + ".",
+                        "Failed to get field " + _StringUtils.jQuote(fieldName) + " from class "
+                        + _StringUtils.jQuote(className) + ".",
                         e);
             }
             

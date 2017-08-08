@@ -81,7 +81,7 @@ public class CopyrightCommentRemoverTemplateLoader implements TemplateLoader {
         }
         try {
             String content = IOUtils.toString(reader);
-            return new StringReader(TestUtil.removeFTLCopyrightComment(content));
+            return new StringReader(TestUtils.removeFTLCopyrightComment(content));
         } finally {
             reader.close();
         }
@@ -95,7 +95,7 @@ public class CopyrightCommentRemoverTemplateLoader implements TemplateLoader {
             // Encoding then decosing in ISO-8859-1 is binary loseless
             String content = IOUtils.toString(in, StandardCharsets.ISO_8859_1.name());
             return new ReaderInputStream(
-                    new StringReader(TestUtil.removeFTLCopyrightComment(content)),
+                    new StringReader(TestUtils.removeFTLCopyrightComment(content)),
                     StandardCharsets.ISO_8859_1);
         } finally {
             in.close();

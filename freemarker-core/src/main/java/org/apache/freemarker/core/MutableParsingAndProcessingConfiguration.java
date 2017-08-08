@@ -28,7 +28,7 @@ import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._SortedArraySet;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.core.util._UnmodifiableCompositeSet;
 
 public abstract class MutableParsingAndProcessingConfiguration<
@@ -92,7 +92,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
                             value, OutputFormat.class, true, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (WHITESPACE_STRIPPING_KEY.equals(name)) {
-                setWhitespaceStripping(_StringUtil.getYesNo(value));
+                setWhitespaceStripping(_StringUtils.getYesNo(value));
             } else if (AUTO_ESCAPING_POLICY_KEY.equals(name)) {
                 if ("enableIfDefault".equals(value)) {
                     setAutoEscapingPolicy(AutoEscapingPolicy.ENABLE_IF_DEFAULT);
@@ -110,7 +110,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
                 if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
                     unsetRecognizeStandardFileExtensions();
                 } else {
-                    setRecognizeStandardFileExtensions(_StringUtil.getYesNo(value));
+                    setRecognizeStandardFileExtensions(_StringUtils.getYesNo(value));
                 }
             } else if (TEMPLATE_LANGUAGE_KEY.equals(name)) {
                 if ("FTL".equals(value)) {

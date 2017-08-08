@@ -25,7 +25,7 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateNameFormat;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * The default {@linkplain Configuration#getTemplateNameFormat()} template name format}. This defines a format where
@@ -151,7 +151,7 @@ public final class DefaultTemplateNameFormat extends TemplateNameFormat {
         String prevName;
         do {
             prevName = path;
-            path = _StringUtil.replace(path, "//", "/");
+            path = _StringUtils.replace(path, "//", "/");
         } while (prevName != path);
         return path.startsWith("/") ? path.substring(1) : path;
     }

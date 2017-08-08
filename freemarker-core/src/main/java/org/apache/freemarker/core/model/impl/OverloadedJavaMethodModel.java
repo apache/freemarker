@@ -70,7 +70,7 @@ class OverloadedJavaMethodModel implements JavaMethodModel {
         } catch (Exception e) {
             if (e instanceof TemplateModelException) throw (TemplateModelException) e;
             
-            throw _MethodUtil.newInvocationTemplateModelException(
+            throw _MethodUtils.newInvocationTemplateModelException(
                     object,
                     maa.getCallableMemberDescriptor(),
                     e);

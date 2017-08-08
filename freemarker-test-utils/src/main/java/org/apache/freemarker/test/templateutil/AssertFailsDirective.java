@@ -34,7 +34,7 @@ import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util._NullWriter;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 public class AssertFailsDirective implements TemplateDirectiveModel {
 
@@ -93,7 +93,7 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
                     if (e.getMessage() == null) {
                         throw new AssertationFailedInTemplateException(
                                 "Failure is not like expected. The exception message was null, "
-                                        + "and thus it doesn't contain:\n" + _StringUtil.jQuote(message) + ".",
+                                        + "and thus it doesn't contain:\n" + _StringUtils.jQuote(message) + ".",
                                 env);
                     }
                     if (message != null) {
@@ -101,18 +101,18 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
                                 ? ((TemplateException) e).getMessageWithoutStackTop() : e.getMessage();
                         if (!actualMessage.toLowerCase().contains(message.toLowerCase())) {
                             throw new AssertationFailedInTemplateException(
-                                    "Failure is not like expected. The exception message:\n" + _StringUtil
+                                    "Failure is not like expected. The exception message:\n" + _StringUtils
                                             .jQuote(actualMessage)
-                                            + "\ndoesn't contain:\n" + _StringUtil.jQuote(message) + ".",
+                                            + "\ndoesn't contain:\n" + _StringUtils.jQuote(message) + ".",
                                     env);
                         }
                     }
                     if (messageRegexp != null) {
                         if (!messageRegexp.matcher(e.getMessage()).find()) {
                             throw new AssertationFailedInTemplateException(
-                                    "Failure is not like expected. The exception message:\n" + _StringUtil
+                                    "Failure is not like expected. The exception message:\n" + _StringUtils
                                             .jQuote(e.getMessage())
-                                            + "\ndoesn't match this regexp:\n" + _StringUtil
+                                            + "\ndoesn't match this regexp:\n" + _StringUtils
                                             .jQuote(messageRegexp.toString())
                                             + ".",
                                     env);
@@ -121,9 +121,9 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
                 }
                 if (exception != null && !e.getClass().getName().contains(exception)) {
                     throw new AssertationFailedInTemplateException(
-                            "Failure is not like expected. The exception class name " + _StringUtil
+                            "Failure is not like expected. The exception class name " + _StringUtils
                                     .jQuote(e.getClass().getName())
-                                    + " doesn't contain " + _StringUtil.jQuote(message) + ".",
+                                    + " doesn't contain " + _StringUtils.jQuote(message) + ".",
                             env);
                 }
             }

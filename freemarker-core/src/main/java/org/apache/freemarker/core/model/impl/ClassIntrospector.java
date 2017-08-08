@@ -411,7 +411,7 @@ class ClassIntrospector {
                 Class<?>[] paramTypes = method.getParameterTypes();
                 if (paramTypes.length == 0
                         || paramTypes.length == 1 && paramTypes[0] == int.class /* indexed property reader */) {
-                    String propName = _MethodUtil.getBeanPropertyNameFromReaderMethodName(
+                    String propName = _MethodUtils.getBeanPropertyNameFromReaderMethodName(
                             method.getName(), method.getReturnType());
                     if (propName != null) {
                         if (mergedPRMPs == null) {

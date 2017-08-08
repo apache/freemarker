@@ -27,7 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.freemarker.core.util._NumberUtil;
+import org.apache.freemarker.core.util._NumberUtils;
 
 import junit.framework.TestCase;
 
@@ -84,7 +84,7 @@ public class ParameterListPreferabilityTest extends TestCase {
                     new Class[] { Serializable.class },
                     new Class[] { Object.class },
                 },
-                new Object[] { new OverloadedNumberUtil.IntegerBigDecimal(new BigDecimal("1")) });
+                new Object[] { new OverloadedNumberUtils.IntegerBigDecimal(new BigDecimal("1")) });
 
         testAllCmpPermutationsInc(
                 new Class[][] {
@@ -128,7 +128,7 @@ public class ParameterListPreferabilityTest extends TestCase {
                     new Class[] { Serializable.class },
                     new Class[] { Object.class },
                 },
-                new Object[] { new OverloadedNumberUtil.FloatOrByte(1f, (byte) 1) });
+                new Object[] { new OverloadedNumberUtils.FloatOrByte(1f, (byte) 1) });
         
         testAllCmpPermutationsInc(
                 new Class[][] {
@@ -153,7 +153,7 @@ public class ParameterListPreferabilityTest extends TestCase {
                     new Class[] { Serializable.class },
                     new Class[] { Object.class }
                 },
-                new Object[] { new OverloadedNumberUtil.IntegerOrShort(1, (short) 1) });
+                new Object[] { new OverloadedNumberUtils.IntegerOrShort(1, (short) 1) });
         
         testAllCmpPermutationsInc(
                 new Class[][] {
@@ -422,9 +422,9 @@ public class ParameterListPreferabilityTest extends TestCase {
         for (int i = 0; i < sortedSignatures.length; i++) {
             for (int j = 0; j < sortedSignatures.length; j++) {
                 assertEquals("sortedSignatures[" + i + "] <==> sortedSignatures [" + j + "]",
-                        _NumberUtil.getSignum(
+                        _NumberUtils.getSignum(
                                 Integer.valueOf(j).compareTo(i)),
-                        _NumberUtil.getSignum(
+                        _NumberUtils.getSignum(
                                 argTs.compareParameterListPreferability(
                                         sortedSignatures[i], sortedSignatures[j], varargs)));
             }

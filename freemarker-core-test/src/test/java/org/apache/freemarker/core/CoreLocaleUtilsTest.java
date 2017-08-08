@@ -22,7 +22,7 @@ import static org.junit.Assert.*;
 
 import java.util.Locale;
 
-import org.apache.freemarker.core.util._LocaleUtil;
+import org.apache.freemarker.core.util._LocaleUtils;
 import org.junit.Test;
 
 public class CoreLocaleUtilsTest {
@@ -33,40 +33,40 @@ public class CoreLocaleUtilsTest {
         
         locale = new Locale("ru", "RU", "Linux");
         assertEquals("ru_RU_Linux", locale.toString());
-        locale = _LocaleUtil.getLessSpecificLocale(locale);
+        locale = _LocaleUtils.getLessSpecificLocale(locale);
         assertEquals("ru_RU", locale.toString());
-        locale = _LocaleUtil.getLessSpecificLocale(locale);
+        locale = _LocaleUtils.getLessSpecificLocale(locale);
         assertEquals("ru", locale.toString());
-        locale = _LocaleUtil.getLessSpecificLocale(locale);
+        locale = _LocaleUtils.getLessSpecificLocale(locale);
         assertNull(locale);
         
         locale = new Locale("ch", "CH");
         assertEquals("ch_CH", locale.toString());
-        locale = _LocaleUtil.getLessSpecificLocale(locale);
+        locale = _LocaleUtils.getLessSpecificLocale(locale);
         assertEquals("ch", locale.toString());
-        locale = _LocaleUtil.getLessSpecificLocale(locale);
+        locale = _LocaleUtils.getLessSpecificLocale(locale);
         assertNull(locale);
         
         locale = new Locale("ja");
         assertEquals("ja", locale.toString());
-        locale = _LocaleUtil.getLessSpecificLocale(locale);
+        locale = _LocaleUtils.getLessSpecificLocale(locale);
         assertNull(locale);
 
         locale = new Locale("ja", "", "");
         assertEquals("ja", locale.toString());
-        locale = _LocaleUtil.getLessSpecificLocale(locale);
+        locale = _LocaleUtils.getLessSpecificLocale(locale);
         assertNull(locale);
         
         locale = new Locale("");
         assertEquals("", locale.toString());
-        locale = _LocaleUtil.getLessSpecificLocale(locale);
+        locale = _LocaleUtils.getLessSpecificLocale(locale);
         assertNull(locale);
         
         locale = new Locale("hu", "", "Linux");
         assertEquals("hu__Linux", locale.toString());
-        locale = _LocaleUtil.getLessSpecificLocale(locale);
+        locale = _LocaleUtils.getLessSpecificLocale(locale);
         assertEquals("hu", locale.toString());
-        locale = _LocaleUtil.getLessSpecificLocale(locale);
+        locale = _LocaleUtils.getLessSpecificLocale(locale);
         assertNull(locale);
     }
     

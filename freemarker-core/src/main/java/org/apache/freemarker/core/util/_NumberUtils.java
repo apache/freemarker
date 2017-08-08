@@ -23,7 +23,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /** Don't use this; used internally by FreeMarker, might changes without notice. */
-public class _NumberUtil {
+public class _NumberUtils {
 
     private static final BigDecimal BIG_DECIMAL_INT_MIN = BigDecimal.valueOf(Integer.MIN_VALUE);
     private static final BigDecimal BIG_DECIMAL_INT_MAX = BigDecimal.valueOf(Integer.MAX_VALUE);
@@ -32,7 +32,7 @@ public class _NumberUtil {
     private static final BigInteger BIG_INTEGER_LONG_MIN = BigInteger.valueOf(Long.MIN_VALUE);
     private static final BigInteger BIG_INTEGER_LONG_MAX = BigInteger.valueOf(Long.MAX_VALUE);
 
-    private _NumberUtil() { }
+    private _NumberUtils() { }
     
     public static boolean isInfinite(Number num) {
         if (num instanceof Double) {
@@ -158,7 +158,7 @@ public class _NumberUtil {
 
     private static ArithmeticException newLossyConverionException(Number fromValue, Class/*<Number>*/ toType) {
         return new ArithmeticException(
-                "Can't convert " + fromValue + " to type " + _ClassUtil.getShortClassName(toType) + " without loss.");
+                "Can't convert " + fromValue + " to type " + _ClassUtils.getShortClassName(toType) + " without loss.");
     }
 
     /**
@@ -204,7 +204,7 @@ public class _NumberUtil {
             return num instanceof BigDecimal ? (BigDecimal) num : new BigDecimal(num.toString());
         } catch (NumberFormatException e) {
             // The exception message is useless, so we add a new one:
-            throw new NumberFormatException("Can't parse this as BigDecimal number: " + _StringUtil.jQuote(num));
+            throw new NumberFormatException("Can't parse this as BigDecimal number: " + _StringUtils.jQuote(num));
         }
     }
 

@@ -31,8 +31,8 @@ import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.util._NumberUtil;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._NumberUtils;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * A holder for builtins that operate exclusively on number left-hand value.
@@ -45,7 +45,7 @@ class BuiltInsForNumbers {
         TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
             final int n;
             try {
-                n = _NumberUtil.toIntExact(num);
+                n = _NumberUtils.toIntExact(num);
             } catch (ArithmeticException e) {
                 throw new _TemplateModelException(target,
                         "The left side operand value isn't compatible with ?", key, ": ", e.getMessage());
@@ -66,7 +66,7 @@ class BuiltInsForNumbers {
 
         @Override
         protected String toABC(int n) {
-            return _StringUtil.toLowerABC(n);
+            return _StringUtils.toLowerABC(n);
         }
         
     }
@@ -75,7 +75,7 @@ class BuiltInsForNumbers {
 
         @Override
         protected String toABC(int n) {
-            return _StringUtil.toUpperABC(n);
+            return _StringUtils.toUpperABC(n);
         }
         
     }
@@ -202,7 +202,7 @@ class BuiltInsForNumbers {
     static class is_infiniteBI extends BuiltInForNumber {
         @Override
         TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
-            return _NumberUtil.isInfinite(num) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+            return _NumberUtils.isInfinite(num) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
 
@@ -210,7 +210,7 @@ class BuiltInsForNumbers {
     static class is_nanBI extends BuiltInForNumber {
         @Override
         TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
-            return _NumberUtil.isNaN(num) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+            return _NumberUtils.isNaN(num) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
 
@@ -222,7 +222,7 @@ class BuiltInsForNumbers {
             TemplateModel model = target.eval(env);
             if (!(model instanceof TemplateNumberModel)
                     && model instanceof TemplateDateModel) {
-                Date date = _EvalUtil.modelToDate((TemplateDateModel) model, target);
+                Date date = _EvalUtils.modelToDate((TemplateDateModel) model, target);
                 return new SimpleNumber(date.getTime());
             } else {
                 Number num = target.modelToNumber(model, env);

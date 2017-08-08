@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._ClassUtils;
 
 /**
  * Used by built-ins and other template language features that get a class
@@ -34,7 +34,7 @@ import org.apache.freemarker.core.util._ClassUtil;
 public interface TemplateClassResolver {
     
     /**
-     * Simply calls {@link _ClassUtil#forName(String)}.
+     * Simply calls {@link _ClassUtils#forName(String)}.
      */
     TemplateClassResolver UNRESTRICTED = new TemplateClassResolver() {
 
@@ -42,7 +42,7 @@ public interface TemplateClassResolver {
         public Class resolve(String className, Environment env, Template template)
         throws TemplateException {
             try {
-                return _ClassUtil.forName(className);
+                return _ClassUtils.forName(className);
             } catch (ClassNotFoundException e) {
                 throw new _MiscTemplateException(e, env);
             }
@@ -58,7 +58,7 @@ public interface TemplateClassResolver {
         @Override
         public Class resolve(String className, Environment env, Template template)
         throws TemplateException {
-            throw MessageUtil.newInstantiatingClassNotAllowedException(className, env);
+            throw MessageUtils.newInstantiatingClassNotAllowedException(className, env);
         }
         
     };

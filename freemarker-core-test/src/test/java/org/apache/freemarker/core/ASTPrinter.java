@@ -41,8 +41,8 @@ import java.util.regex.PatternSyntaxException;
 
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util.FTLUtil;
-import org.apache.freemarker.core.util._ClassUtil;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._ClassUtils;
+import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.test.TestConfigurationBuilder;
 
 /**
@@ -109,7 +109,7 @@ public class ASTPrinter {
         try {
             fnPattern = Pattern.compile(args[2]);
         } catch (PatternSyntaxException e) {
-            p(_StringUtil.jQuote(args[2]) + " is not a valid regular expression");
+            p(_StringUtils.jQuote(args[2]) + " is not a valid regular expression");
             System.exit(-1);
             return;
         }
@@ -352,7 +352,7 @@ public class ASTPrinter {
             }
         } else {
             printNodeLineStart(paramRole, ind, out);
-            out.write(_StringUtil.jQuote(node));
+            out.write(_StringUtils.jQuote(node));
             printNodeLineEnd(node, out, opts);
         }
     }
@@ -362,7 +362,7 @@ public class ASTPrinter {
         if (opts.getShowJavaClass()) {
             out.write("  // ");
             commentStared = true;
-            out.write(_ClassUtil.getShortClassNameOfObject(node, true));
+            out.write(_ClassUtils.getShortClassNameOfObject(node, true));
         }
         if (opts.getShowLocation() && node instanceof ASTNode) {
             if (!commentStared) {

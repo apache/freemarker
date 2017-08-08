@@ -60,7 +60,7 @@ class BuiltInsForMultipleTypes {
                 return formatNumber(env, model);
             } else if (model instanceof TemplateBooleanModel) {
                 return new SimpleScalar(((TemplateBooleanModel) model).getAsBoolean()
-                        ? MiscUtil.C_TRUE : MiscUtil.C_FALSE);
+                        ? TemplateBooleanFormat.C_TRUE : TemplateBooleanFormat.C_FALSE);
             } else {
                 throw new UnexpectedTypeException(
                         target, model,
@@ -71,7 +71,7 @@ class BuiltInsForMultipleTypes {
 
         @Override
         protected TemplateModel formatNumber(Environment env, TemplateModel model) throws TemplateModelException {
-            Number num = _EvalUtil.modelToNumber((TemplateNumberModel) model, target);
+            Number num = _EvalUtils.modelToNumber((TemplateNumberModel) model, target);
             if (num instanceof Integer || num instanceof Long) {
                 // Accelerate these fairly common cases
                 return new SimpleScalar(num.toString());
@@ -514,7 +514,7 @@ class BuiltInsForMultipleTypes {
                 defaultFormat = dateType == TemplateDateModel.UNKNOWN
                         ? null  // Lazy unknown type error in getAsString()
                         : env.getTemplateDateFormat(
-                                dateType, _EvalUtil.modelToDate(dateModel, target).getClass(), target, true);
+                                dateType, _EvalUtils.modelToDate(dateModel, target).getClass(), target, true);
             }
 
             @Override
@@ -550,16 +550,16 @@ class BuiltInsForMultipleTypes {
                 if (cachedValue == null) {
                     if (defaultFormat == null) {
                         if (dateModel.getDateType() == TemplateDateModel.UNKNOWN) {
-                            throw MessageUtil.newCantFormatUnknownTypeDateException(target, null);
+                            throw MessageUtils.newCantFormatUnknownTypeDateException(target, null);
                         } else {
                             throw new BugException();
                         }
                     }
                     try {
-                        cachedValue = _EvalUtil.assertFormatResultNotNull(defaultFormat.formatToPlainText(dateModel));
+                        cachedValue = _EvalUtils.assertFormatResultNotNull(defaultFormat.formatToPlainText(dateModel));
                     } catch (TemplateValueFormatException e) {
                         try {
-                            throw MessageUtil.newCantFormatDateException(defaultFormat, target, e, true);
+                            throw MessageUtils.newCantFormatDateException(defaultFormat, target, e, true);
                         } catch (TemplateException e2) {
                             // `e` should always be a TemplateModelException here, but to be sure: 
                             throw _CoreAPI.ensureIsTemplateModelException("Failed to format date/time/dateTime", e2);
@@ -587,7 +587,7 @@ class BuiltInsForMultipleTypes {
                 
                 // As we format lazily, we need a snapshot of the format inputs:
                 this.numberModel = numberModel;
-                number = _EvalUtil.modelToNumber(numberModel, target);  // for BackwardCompatibleTemplateNumberFormat-s
+                number = _EvalUtils.modelToNumber(numberModel, target);  // for BackwardCompatibleTemplateNumberFormat-s
                 try {
                     defaultFormat = env.getTemplateNumberFormat(stringBI.this, true);
                 } catch (TemplateException e) {
@@ -652,7 +652,7 @@ class BuiltInsForMultipleTypes {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateNumberModel) {
                 TemplateNumberModel numberModel = (TemplateNumberModel) model;
-                Number num = _EvalUtil.modelToNumber(numberModel, target);
+                Number num = _EvalUtils.modelToNumber(numberModel, target);
                 return new NumberFormatter(numberModel, env);
             } else if (model instanceof TemplateDateModel) {
                 TemplateDateModel dm = (TemplateDateModel) model;
@@ -688,7 +688,7 @@ class BuiltInsForMultipleTypes {
                 return formatNumber(env, model);
             } else if (model instanceof TemplateBooleanModel) {
                 return new SimpleScalar(((TemplateBooleanModel) model).getAsBoolean()
-                        ? MiscUtil.C_TRUE : MiscUtil.C_FALSE);
+                        ? TemplateBooleanFormat.C_TRUE : TemplateBooleanFormat.C_FALSE);
             } else {
                 throw new UnexpectedTypeException(
                         target, model,

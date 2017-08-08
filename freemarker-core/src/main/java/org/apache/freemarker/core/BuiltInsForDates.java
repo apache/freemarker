@@ -31,7 +31,7 @@ import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.util.UnrecognizedTimeZoneException;
-import org.apache.freemarker.core.util._DateUtil;
+import org.apache.freemarker.core.util._DateUtils;
 
 /**
  * A holder for built-ins that operate exclusively on date left-hand values.
@@ -56,7 +56,7 @@ class BuiltInsForDates {
                 if (tdmDateType != TemplateDateModel.UNKNOWN) {
                     return tdm;
                 }
-                return new SimpleDate(_EvalUtil.modelToDate(tdm, target), dateType);
+                return new SimpleDate(_EvalUtils.modelToDate(tdm, target), dateType);
             } else {
                 throw BuiltInForDate.newNonDateException(env, model, target);
             }
@@ -94,9 +94,9 @@ class BuiltInsForDates {
                             instanceof TimeZone) {
                     tzArg = (TimeZone) adaptedObj;
                 } else if (tzArgTM instanceof TemplateScalarModel) {
-                    String tzName = _EvalUtil.modelToString((TemplateScalarModel) tzArgTM, null, null);
+                    String tzName = _EvalUtils.modelToString((TemplateScalarModel) tzArgTM, null, null);
                     try {
-                        tzArg = _DateUtil.getTimeZone(tzName);
+                        tzArg = _DateUtils.getTimeZone(tzName);
                     } catch (UnrecognizedTimeZoneException e) {
                         throw new _TemplateModelException(
                                 "The time zone string specified for ?", key,
@@ -104,11 +104,11 @@ class BuiltInsForDates {
                                 new _DelayedJQuote(tzName));
                     }
                 } else {
-                    throw MessageUtil.newMethodArgUnexpectedTypeException(
+                    throw MessageUtils.newMethodArgUnexpectedTypeException(
                             "?" + key, 0, "string or java.util.TimeZone", tzArgTM);
                 }
 
-                return new SimpleScalar(_DateUtil.dateToISO8601String(
+                return new SimpleScalar(_DateUtils.dateToISO8601String(
                         date,
                         dateType != TemplateDateModel.TIME,
                         dateType != TemplateDateModel.DATE,
@@ -157,14 +157,14 @@ class BuiltInsForDates {
                 Date date, int dateType, Environment env)
         throws TemplateException {
             checkDateTypeNotUnknown(dateType);
-            return new SimpleScalar(_DateUtil.dateToISO8601String(
+            return new SimpleScalar(_DateUtils.dateToISO8601String(
                     date,
                     dateType != TemplateDateModel.TIME,
                     dateType != TemplateDateModel.DATE,
                     shouldShowOffset(date, dateType, env),
                     accuracy,
                     useUTC
-                            ? _DateUtil.UTC
+                            ? _DateUtils.UTC
                             : env.shouldUseSQLDTTZ(date.getClass())
                                     ? env.getSQLDateAndTimeTimeZone()
                                     : env.getTimeZone(),
@@ -191,7 +191,7 @@ class BuiltInsForDates {
                 throw new _MiscTemplateException(new _ErrorDescriptionBuilder(
                             "The value of the following has unknown date type, but ?", key,
                             " needs a value where it's known if it's a date (no time part), time, or date-time value:"                        
-                        ).blame(target).tip(MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIP));
+                        ).blame(target).tip(MessageUtils.UNKNOWN_DATE_TYPE_ERROR_TIP));
             }
         }
     

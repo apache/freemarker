@@ -26,8 +26,8 @@ import javax.servlet.jsp.JspContext;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 
-import org.apache.freemarker.core.util._DateUtil;
-import org.apache.freemarker.core.util._DateUtil.TrivialDateToISO8601CalendarFactory;
+import org.apache.freemarker.core.util._DateUtils;
+import org.apache.freemarker.core.util._DateUtils.TrivialDateToISO8601CalendarFactory;
 
 public class AttributeInfoTag extends AttributeAccessorTag {
 
@@ -41,8 +41,8 @@ public class AttributeInfoTag extends AttributeAccessorTag {
         
         final String formattedVal;
         if (attrVal instanceof Date) {
-            formattedVal = _DateUtil.dateToISO8601String((Date) attrVal, true, true, true, _DateUtil.ACCURACY_SECONDS,
-                    _DateUtil.UTC,
+            formattedVal = _DateUtils.dateToISO8601String((Date) attrVal, true, true, true, _DateUtils.ACCURACY_SECONDS,
+                    _DateUtils.UTC,
                     new TrivialDateToISO8601CalendarFactory());
         } else {
             formattedVal = String.valueOf(attrVal);

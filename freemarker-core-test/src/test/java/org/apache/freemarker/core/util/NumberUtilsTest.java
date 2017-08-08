@@ -26,57 +26,57 @@ import org.junit.Test;
 
 import junit.framework.TestCase;
 
-public class NumberUtilTest extends TestCase {
+public class NumberUtilsTest extends TestCase {
 
     @Test
     public void testGetSignum() {
-        assertEquals(1, _NumberUtil.getSignum(Double.valueOf(Double.POSITIVE_INFINITY)));
-        assertEquals(1, _NumberUtil.getSignum(Double.valueOf(3)));
-        assertEquals(0, _NumberUtil.getSignum(Double.valueOf(0)));
-        assertEquals(-1, _NumberUtil.getSignum(Double.valueOf(-3)));
-        assertEquals(-1, _NumberUtil.getSignum(Double.valueOf(Double.NEGATIVE_INFINITY)));
+        assertEquals(1, _NumberUtils.getSignum(Double.valueOf(Double.POSITIVE_INFINITY)));
+        assertEquals(1, _NumberUtils.getSignum(Double.valueOf(3)));
+        assertEquals(0, _NumberUtils.getSignum(Double.valueOf(0)));
+        assertEquals(-1, _NumberUtils.getSignum(Double.valueOf(-3)));
+        assertEquals(-1, _NumberUtils.getSignum(Double.valueOf(Double.NEGATIVE_INFINITY)));
         try {
-            _NumberUtil.getSignum(Double.valueOf(Double.NaN));
+            _NumberUtils.getSignum(Double.valueOf(Double.NaN));
             fail();
         } catch (ArithmeticException e) {
             // expected
         }
         
-        assertEquals(1, _NumberUtil.getSignum(Float.valueOf(Float.POSITIVE_INFINITY)));
-        assertEquals(1, _NumberUtil.getSignum(Float.valueOf(3)));
-        assertEquals(0, _NumberUtil.getSignum(Float.valueOf(0)));
-        assertEquals(-1, _NumberUtil.getSignum(Float.valueOf(-3)));
-        assertEquals(-1, _NumberUtil.getSignum(Float.valueOf(Float.NEGATIVE_INFINITY)));
+        assertEquals(1, _NumberUtils.getSignum(Float.valueOf(Float.POSITIVE_INFINITY)));
+        assertEquals(1, _NumberUtils.getSignum(Float.valueOf(3)));
+        assertEquals(0, _NumberUtils.getSignum(Float.valueOf(0)));
+        assertEquals(-1, _NumberUtils.getSignum(Float.valueOf(-3)));
+        assertEquals(-1, _NumberUtils.getSignum(Float.valueOf(Float.NEGATIVE_INFINITY)));
         try {
-            _NumberUtil.getSignum(Float.valueOf(Float.NaN));
+            _NumberUtils.getSignum(Float.valueOf(Float.NaN));
             fail();
         } catch (ArithmeticException e) {
             // expected
         }
         
-        assertEquals(1, _NumberUtil.getSignum(Long.valueOf(3)));
-        assertEquals(0, _NumberUtil.getSignum(Long.valueOf(0)));
-        assertEquals(-1, _NumberUtil.getSignum(Long.valueOf(-3)));
+        assertEquals(1, _NumberUtils.getSignum(Long.valueOf(3)));
+        assertEquals(0, _NumberUtils.getSignum(Long.valueOf(0)));
+        assertEquals(-1, _NumberUtils.getSignum(Long.valueOf(-3)));
         
-        assertEquals(1, _NumberUtil.getSignum(Integer.valueOf(3)));
-        assertEquals(0, _NumberUtil.getSignum(Integer.valueOf(0)));
-        assertEquals(-1, _NumberUtil.getSignum(Integer.valueOf(-3)));
+        assertEquals(1, _NumberUtils.getSignum(Integer.valueOf(3)));
+        assertEquals(0, _NumberUtils.getSignum(Integer.valueOf(0)));
+        assertEquals(-1, _NumberUtils.getSignum(Integer.valueOf(-3)));
         
-        assertEquals(1, _NumberUtil.getSignum(Short.valueOf((short) 3)));
-        assertEquals(0, _NumberUtil.getSignum(Short.valueOf((short) 0)));
-        assertEquals(-1, _NumberUtil.getSignum(Short.valueOf((short) -3)));
+        assertEquals(1, _NumberUtils.getSignum(Short.valueOf((short) 3)));
+        assertEquals(0, _NumberUtils.getSignum(Short.valueOf((short) 0)));
+        assertEquals(-1, _NumberUtils.getSignum(Short.valueOf((short) -3)));
         
-        assertEquals(1, _NumberUtil.getSignum(Byte.valueOf((byte) 3)));
-        assertEquals(0, _NumberUtil.getSignum(Byte.valueOf((byte) 0)));
-        assertEquals(-1, _NumberUtil.getSignum(Byte.valueOf((byte) -3)));
+        assertEquals(1, _NumberUtils.getSignum(Byte.valueOf((byte) 3)));
+        assertEquals(0, _NumberUtils.getSignum(Byte.valueOf((byte) 0)));
+        assertEquals(-1, _NumberUtils.getSignum(Byte.valueOf((byte) -3)));
         
-        assertEquals(1, _NumberUtil.getSignum(BigDecimal.valueOf(3)));
-        assertEquals(0, _NumberUtil.getSignum(BigDecimal.valueOf(0)));
-        assertEquals(-1, _NumberUtil.getSignum(BigDecimal.valueOf(-3)));
+        assertEquals(1, _NumberUtils.getSignum(BigDecimal.valueOf(3)));
+        assertEquals(0, _NumberUtils.getSignum(BigDecimal.valueOf(0)));
+        assertEquals(-1, _NumberUtils.getSignum(BigDecimal.valueOf(-3)));
         
-        assertEquals(1, _NumberUtil.getSignum(BigInteger.valueOf(3)));
-        assertEquals(0, _NumberUtil.getSignum(BigInteger.valueOf(0)));
-        assertEquals(-1, _NumberUtil.getSignum(BigInteger.valueOf(-3)));
+        assertEquals(1, _NumberUtils.getSignum(BigInteger.valueOf(3)));
+        assertEquals(0, _NumberUtils.getSignum(BigInteger.valueOf(0)));
+        assertEquals(-1, _NumberUtils.getSignum(BigInteger.valueOf(-3)));
     }
     
     @Test
@@ -107,7 +107,7 @@ public class NumberUtilTest extends TestCase {
         };
         
         for (BigDecimal n : ns) {
-            assertEquals(n.doubleValue() == n.longValue(), _NumberUtil.isIntegerBigDecimal(n));
+            assertEquals(n.doubleValue() == n.longValue(), _NumberUtils.isIntegerBigDecimal(n));
         }
         
     }
@@ -116,96 +116,96 @@ public class NumberUtilTest extends TestCase {
     public void testToIntExcact() {
         for (int n : new int[] { Integer.MIN_VALUE, Byte.MIN_VALUE, -1, 0, 1, Byte.MAX_VALUE, Integer.MAX_VALUE }) {
             if (n != Integer.MIN_VALUE && n != Integer.MAX_VALUE) {
-                assertEquals(n, _NumberUtil.toIntExact(Byte.valueOf((byte) n)));
-                assertEquals(n, _NumberUtil.toIntExact(Short.valueOf((short) n)));
-                assertEquals(n, _NumberUtil.toIntExact(Float.valueOf(n)));
+                assertEquals(n, _NumberUtils.toIntExact(Byte.valueOf((byte) n)));
+                assertEquals(n, _NumberUtils.toIntExact(Short.valueOf((short) n)));
+                assertEquals(n, _NumberUtils.toIntExact(Float.valueOf(n)));
             }
-            assertEquals(n, _NumberUtil.toIntExact(Integer.valueOf(n)));
-            assertEquals(n, _NumberUtil.toIntExact(Long.valueOf(n)));
-            assertEquals(n, _NumberUtil.toIntExact(Double.valueOf(n)));
-            assertEquals(n, _NumberUtil.toIntExact(BigDecimal.valueOf(n)));
-            assertEquals(n, _NumberUtil.toIntExact(BigDecimal.valueOf(n * 10L).divide(BigDecimal.TEN)));
-            assertEquals(n, _NumberUtil.toIntExact(BigInteger.valueOf(n)));
+            assertEquals(n, _NumberUtils.toIntExact(Integer.valueOf(n)));
+            assertEquals(n, _NumberUtils.toIntExact(Long.valueOf(n)));
+            assertEquals(n, _NumberUtils.toIntExact(Double.valueOf(n)));
+            assertEquals(n, _NumberUtils.toIntExact(BigDecimal.valueOf(n)));
+            assertEquals(n, _NumberUtils.toIntExact(BigDecimal.valueOf(n * 10L).divide(BigDecimal.TEN)));
+            assertEquals(n, _NumberUtils.toIntExact(BigInteger.valueOf(n)));
         }
 
         try {
-            _NumberUtil.toIntExact(Long.valueOf(Integer.MIN_VALUE - 1L));
+            _NumberUtils.toIntExact(Long.valueOf(Integer.MIN_VALUE - 1L));
             fail();
         } catch (ArithmeticException e) {
             // Expected
         }
         try {
-            _NumberUtil.toIntExact(Long.valueOf(Integer.MAX_VALUE + 1L));
+            _NumberUtils.toIntExact(Long.valueOf(Integer.MAX_VALUE + 1L));
             fail();
         } catch (ArithmeticException e) {
             // Expected
         }
 
         try {
-            _NumberUtil.toIntExact(Float.valueOf(1.00001f));
+            _NumberUtils.toIntExact(Float.valueOf(1.00001f));
             fail();
         } catch (ArithmeticException e) {
             // Expected
         }
         try {
-            _NumberUtil.toIntExact(Float.valueOf(Integer.MIN_VALUE - 129L));
+            _NumberUtils.toIntExact(Float.valueOf(Integer.MIN_VALUE - 129L));
             fail();
         } catch (ArithmeticException e) {
             // Expected
         }
         try {
-            _NumberUtil.toIntExact(Float.valueOf(Integer.MAX_VALUE));
-            fail();
-        } catch (ArithmeticException e) {
-            // Expected
-        }
-        
-        try {
-            _NumberUtil.toIntExact(Double.valueOf(1.00001));
-            fail();
-        } catch (ArithmeticException e) {
-            // Expected
-        }
-        try {
-            _NumberUtil.toIntExact(Double.valueOf(Integer.MIN_VALUE - 1L));
-            fail();
-        } catch (ArithmeticException e) {
-            // Expected
-        }
-        try {
-            _NumberUtil.toIntExact(Double.valueOf(Integer.MAX_VALUE + 1L));
+            _NumberUtils.toIntExact(Float.valueOf(Integer.MAX_VALUE));
             fail();
         } catch (ArithmeticException e) {
             // Expected
         }
         
         try {
-            _NumberUtil.toIntExact(new BigDecimal("100.000001"));
+            _NumberUtils.toIntExact(Double.valueOf(1.00001));
             fail();
         } catch (ArithmeticException e) {
             // Expected
         }
         try {
-            _NumberUtil.toIntExact(BigDecimal.valueOf(Integer.MIN_VALUE - 1L));
+            _NumberUtils.toIntExact(Double.valueOf(Integer.MIN_VALUE - 1L));
             fail();
         } catch (ArithmeticException e) {
             // Expected
         }
         try {
-            _NumberUtil.toIntExact(BigDecimal.valueOf(Integer.MAX_VALUE + 1L));
+            _NumberUtils.toIntExact(Double.valueOf(Integer.MAX_VALUE + 1L));
             fail();
         } catch (ArithmeticException e) {
             // Expected
         }
         
         try {
-            _NumberUtil.toIntExact(BigInteger.valueOf(Integer.MIN_VALUE - 1L));
+            _NumberUtils.toIntExact(new BigDecimal("100.000001"));
             fail();
         } catch (ArithmeticException e) {
             // Expected
         }
         try {
-            _NumberUtil.toIntExact(BigInteger.valueOf(Integer.MAX_VALUE + 1L));
+            _NumberUtils.toIntExact(BigDecimal.valueOf(Integer.MIN_VALUE - 1L));
+            fail();
+        } catch (ArithmeticException e) {
+            // Expected
+        }
+        try {
+            _NumberUtils.toIntExact(BigDecimal.valueOf(Integer.MAX_VALUE + 1L));
+            fail();
+        } catch (ArithmeticException e) {
+            // Expected
+        }
+        
+        try {
+            _NumberUtils.toIntExact(BigInteger.valueOf(Integer.MIN_VALUE - 1L));
+            fail();
+        } catch (ArithmeticException e) {
+            // Expected
+        }
+        try {
+            _NumberUtils.toIntExact(BigInteger.valueOf(Integer.MAX_VALUE + 1L));
             fail();
         } catch (ArithmeticException e) {
             // Expected

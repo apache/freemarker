@@ -26,7 +26,7 @@ import java.net.URLConnection;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
 import org.apache.freemarker.core.util._NullArgumentException;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * A {@link TemplateLoader} that can load templates from the "classpath". Naturally, it can load from jar files, or from
@@ -128,10 +128,10 @@ public class ClassTemplateLoader extends URLTemplateLoader {
         return _TemplateLoaderUtils.getClassNameForToString(this) + "("
                 + (resourceLoaderClass != null
                         ? "resourceLoaderClass=" + resourceLoaderClass.getName()
-                        : "classLoader=" + _StringUtil.jQuote(classLoader))
+                        : "classLoader=" + _StringUtils.jQuote(classLoader))
                 + ", basePackagePath"
                 + "="
-                + _StringUtil.jQuote(basePackagePath)
+                + _StringUtils.jQuote(basePackagePath)
                 + (resourceLoaderClass != null
                         ? (basePackagePath.startsWith("/") ? "" : " /* relatively to resourceLoaderClass pkg */")
                         : ""

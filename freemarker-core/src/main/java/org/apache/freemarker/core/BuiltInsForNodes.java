@@ -26,7 +26,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNodeModelEx;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * A holder for builtins that operate exclusively on (XML-)node left-hand value.
@@ -145,7 +145,7 @@ class BuiltInsForNodes {
                     }
                 } else {
                     for (int argIdx = 0; argIdx < args.length; argIdx++) {
-                        if (_StringUtil.matchesQName(
+                        if (_StringUtils.matchesQName(
                                 _CallableUtils.castArgToString(args, argIdx), nodeName, nsURI, env)) {
                             result.add(tnm);
                             break;

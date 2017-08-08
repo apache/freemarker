@@ -22,7 +22,7 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * AST directive node: {@code #import}
@@ -75,7 +75,7 @@ final class ASTDirImport extends ASTDirective {
         buf.append(' ');
         buf.append(importedTemplateNameExp.getCanonicalForm());
         buf.append(" as ");
-        buf.append(_StringUtil.toFTLTopLevelTragetIdentifier(targetNsVarName));
+        buf.append(_StringUtils.toFTLTopLevelTragetIdentifier(targetNsVarName));
         if (canonical) buf.append("/>");
         return buf.toString();
     }

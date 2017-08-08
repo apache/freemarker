@@ -66,8 +66,8 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
-import org.apache.freemarker.core.util._DateUtil;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._DateUtils;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * AST expression node: {@code exp?name}
@@ -151,66 +151,66 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("isTime", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.TIME));
 
         putBI("isoUtc", new iso_utc_or_local_BI(
-                /* showOffset = */ null, _DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
+                /* showOffset = */ null, _DateUtils.ACCURACY_SECONDS, /* useUTC = */ true));
         putBI("isoUtcFZ", new iso_utc_or_local_BI(
-                /* showOffset = */ Boolean.TRUE, _DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
+                /* showOffset = */ Boolean.TRUE, _DateUtils.ACCURACY_SECONDS, /* useUTC = */ true));
         putBI("isoUtcNZ", new iso_utc_or_local_BI(
-                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_SECONDS, /* useUTC = */ true));
+                /* showOffset = */ Boolean.FALSE, _DateUtils.ACCURACY_SECONDS, /* useUTC = */ true));
         
         putBI("isoUtcMs", new iso_utc_or_local_BI(
-                /* showOffset = */ null, _DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ true));
+                /* showOffset = */ null, _DateUtils.ACCURACY_MILLISECONDS, /* useUTC = */ true));
         putBI("isoUtcMsNZ", new iso_utc_or_local_BI(
-                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ true));
+                /* showOffset = */ Boolean.FALSE, _DateUtils.ACCURACY_MILLISECONDS, /* useUTC = */ true));
         
         putBI("isoUtcM", new iso_utc_or_local_BI(
-                /* showOffset = */ null, _DateUtil.ACCURACY_MINUTES, /* useUTC = */ true));
+                /* showOffset = */ null, _DateUtils.ACCURACY_MINUTES, /* useUTC = */ true));
         putBI("isoUtcMNZ", new iso_utc_or_local_BI(
-                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_MINUTES, /* useUTC = */ true));
+                /* showOffset = */ Boolean.FALSE, _DateUtils.ACCURACY_MINUTES, /* useUTC = */ true));
         
         putBI("isoUtcH", new iso_utc_or_local_BI(
-                /* showOffset = */ null, _DateUtil.ACCURACY_HOURS, /* useUTC = */ true));
+                /* showOffset = */ null, _DateUtils.ACCURACY_HOURS, /* useUTC = */ true));
         putBI("isoUtcHNZ", new iso_utc_or_local_BI(
-                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_HOURS, /* useUTC = */ true));
+                /* showOffset = */ Boolean.FALSE, _DateUtils.ACCURACY_HOURS, /* useUTC = */ true));
         
         putBI("isoLocal", new iso_utc_or_local_BI(
-                /* showOffset = */ null, _DateUtil.ACCURACY_SECONDS, /* useUTC = */ false));
+                /* showOffset = */ null, _DateUtils.ACCURACY_SECONDS, /* useUTC = */ false));
         putBI("isoLocalNZ", new iso_utc_or_local_BI(
-                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_SECONDS, /* useUTC = */ false));
+                /* showOffset = */ Boolean.FALSE, _DateUtils.ACCURACY_SECONDS, /* useUTC = */ false));
         
         putBI("isoLocalMs", new iso_utc_or_local_BI(
-                /* showOffset = */ null, _DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ false));
+                /* showOffset = */ null, _DateUtils.ACCURACY_MILLISECONDS, /* useUTC = */ false));
         putBI("isoLocalMsNZ", new iso_utc_or_local_BI(
-                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_MILLISECONDS, /* useUTC = */ false));
+                /* showOffset = */ Boolean.FALSE, _DateUtils.ACCURACY_MILLISECONDS, /* useUTC = */ false));
         
         putBI("isoLocalM", new iso_utc_or_local_BI(
-                /* showOffset = */ null, _DateUtil.ACCURACY_MINUTES, /* useUTC = */ false));
+                /* showOffset = */ null, _DateUtils.ACCURACY_MINUTES, /* useUTC = */ false));
         putBI("isoLocalMNZ", new iso_utc_or_local_BI(
-                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_MINUTES, /* useUTC = */ false));
+                /* showOffset = */ Boolean.FALSE, _DateUtils.ACCURACY_MINUTES, /* useUTC = */ false));
         
         putBI("isoLocalH", new iso_utc_or_local_BI(
-                /* showOffset = */ null, _DateUtil.ACCURACY_HOURS, /* useUTC = */ false));
+                /* showOffset = */ null, _DateUtils.ACCURACY_HOURS, /* useUTC = */ false));
         putBI("isoLocalHNZ", new iso_utc_or_local_BI(
-                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_HOURS, /* useUTC = */ false));
+                /* showOffset = */ Boolean.FALSE, _DateUtils.ACCURACY_HOURS, /* useUTC = */ false));
         
         putBI("iso", new iso_BI(
-                /* showOffset = */ null, _DateUtil.ACCURACY_SECONDS));
+                /* showOffset = */ null, _DateUtils.ACCURACY_SECONDS));
         putBI("isoNZ", new iso_BI(
-                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_SECONDS));
+                /* showOffset = */ Boolean.FALSE, _DateUtils.ACCURACY_SECONDS));
         
         putBI("isoMs", new iso_BI(
-                /* showOffset = */ null, _DateUtil.ACCURACY_MILLISECONDS));
+                /* showOffset = */ null, _DateUtils.ACCURACY_MILLISECONDS));
         putBI("isoMsNZ", new iso_BI(
-                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_MILLISECONDS));
+                /* showOffset = */ Boolean.FALSE, _DateUtils.ACCURACY_MILLISECONDS));
         
         putBI("isoM", new iso_BI(
-                /* showOffset = */ null, _DateUtil.ACCURACY_MINUTES));
+                /* showOffset = */ null, _DateUtils.ACCURACY_MINUTES));
         putBI("isoMNZ", new iso_BI(
-                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_MINUTES));
+                /* showOffset = */ Boolean.FALSE, _DateUtils.ACCURACY_MINUTES));
         
         putBI("isoH", new iso_BI(
-                /* showOffset = */ null, _DateUtil.ACCURACY_HOURS));
+                /* showOffset = */ null, _DateUtils.ACCURACY_HOURS));
         putBI("isoHNZ", new iso_BI(
-                /* showOffset = */ Boolean.FALSE, _DateUtil.ACCURACY_HOURS));
+                /* showOffset = */ Boolean.FALSE, _DateUtils.ACCURACY_HOURS));
         
         putBI("jString", new BuiltInsForStringsEncoding.j_stringBI());
         putBI("join", new BuiltInsForSequences.joinBI());
@@ -301,12 +301,12 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         String key = keyTk.image;
         ASTExpBuiltIn bi = BUILT_INS_BY_NAME.get(key);
         if (bi == null) {
-            StringBuilder sb = new StringBuilder("Unknown built-in: ").append(_StringUtil.jQuote(key)).append(".");
+            StringBuilder sb = new StringBuilder("Unknown built-in: ").append(_StringUtils.jQuote(key)).append(".");
 
             String correctedKey;
             if (key.indexOf("_") != -1) {
-                sb.append(MessageUtil.FM3_SNAKE_CASE);
-                correctedKey = _StringUtil.snakeCaseToCamelCase(key);
+                sb.append(MessageUtils.FM3_SNAKE_CASE);
+                correctedKey = _StringUtils.snakeCaseToCamelCase(key);
                 if (!BUILT_INS_BY_NAME.containsKey(correctedKey)) {
                     if (correctedKey.length() > 1) {
                         correctedKey = correctedKey.substring(0, correctedKey.length() - 2)
@@ -397,7 +397,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
 
     protected final void checkMethodArgCount(int argCnt, int expectedCnt) throws TemplateModelException {
         if (argCnt != expectedCnt) {
-            throw MessageUtil.newArgCntError("?" + key, argCnt, expectedCnt);
+            throw MessageUtils.newArgCntError("?" + key, argCnt, expectedCnt);
         }
     }
 
@@ -412,7 +412,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
 
     protected final void checkMethodArgCount(int argCnt, int minCnt, int maxCnt) throws TemplateModelException {
         if (argCnt < minCnt || argCnt > maxCnt) {
-            throw MessageUtil.newArgCntError("?" + key, argCnt, minCnt, maxCnt);
+            throw MessageUtils.newArgCntError("?" + key, argCnt, minCnt, maxCnt);
         }
     }
 
@@ -440,9 +440,9 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
             if (optional && arg == null) {
                 return null;
             }
-            throw MessageUtil.newMethodArgMustBeStringException("?" + key, argIdx, arg);
+            throw MessageUtils.newMethodArgMustBeStringException("?" + key, argIdx, arg);
         } else {
-            return _EvalUtil.modelToString((TemplateScalarModel) arg, null, null);
+            return _EvalUtils.modelToString((TemplateScalarModel) arg, null, null);
         }
     }
 
@@ -471,18 +471,18 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
             if (optional && arg == null) {
                 return null;
             }
-            throw MessageUtil.newMethodArgMustBeNumberException("?" + key, argIdx, arg);
+            throw MessageUtils.newMethodArgMustBeNumberException("?" + key, argIdx, arg);
         } else {
-            return _EvalUtil.modelToNumber((TemplateNumberModel) arg, null);
+            return _EvalUtils.modelToNumber((TemplateNumberModel) arg, null);
         }
     }
 
     protected final TemplateModelException newMethodArgInvalidValueException(int argIdx, Object[] details) {
-        return MessageUtil.newMethodArgInvalidValueException("?" + key, argIdx, details);
+        return MessageUtils.newMethodArgInvalidValueException("?" + key, argIdx, details);
     }
 
     protected final TemplateModelException newMethodArgsInvalidValueException(Object[] details) {
-        return MessageUtil.newMethodArgsInvalidValueException("?" + key, details);
+        return MessageUtils.newMethodArgsInvalidValueException("?" + key, details);
     }
     
     @Override

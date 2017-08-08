@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.templatesuite.models;
 
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 public class JavaObjectInfo {
     
@@ -29,7 +29,7 @@ public class JavaObjectInfo {
     
     public String info(Object o) {
         if (o == null) return "null";
-        return o.getClass().getName() + " " + _StringUtil.jQuote(o.toString());
+        return o.getClass().getName() + " " + _StringUtils.jQuote(o.toString());
     }
 
 }

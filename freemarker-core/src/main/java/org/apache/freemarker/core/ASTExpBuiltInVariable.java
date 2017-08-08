@@ -30,7 +30,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.util._SortedArraySet;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * AST expression node: {@code .name}
@@ -94,12 +94,12 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         if (!BUILT_IN_VARIABLE_NAMES.contains(name)) {
             StringBuilder sb = new StringBuilder();
             sb.append("Unknown special variable name: ");
-            sb.append(_StringUtil.jQuote(name)).append(".");
+            sb.append(_StringUtils.jQuote(name)).append(".");
 
             String correctedName;
             if (name.indexOf('_') != -1) {
-                sb.append(MessageUtil.FM3_SNAKE_CASE);
-                correctedName = _StringUtil.snakeCaseToCamelCase(name);
+                sb.append(MessageUtils.FM3_SNAKE_CASE);
+                correctedName = _StringUtils.snakeCaseToCamelCase(name);
                 if (!BUILT_IN_VARIABLE_NAMES.contains(correctedName)) {
                     correctedName = null;
                 }

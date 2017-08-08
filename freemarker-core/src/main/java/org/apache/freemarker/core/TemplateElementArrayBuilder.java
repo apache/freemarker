@@ -18,7 +18,7 @@
  */
 package org.apache.freemarker.core;
 
-import org.apache.freemarker.core.util._CollectionUtil;
+import org.apache.freemarker.core.util._CollectionUtils;
 
 /**
  * Holds an buffer (array) of {@link ASTElement}-s with the count of the utilized items in it. The un-utilized tail
@@ -70,7 +70,7 @@ class TemplateElements {
      */
     ASTElement asSingleElement() {
         if (count == 0) {
-            return new ASTStaticText(_CollectionUtil.EMPTY_CHAR_ARRAY, false);
+            return new ASTStaticText(_CollectionUtils.EMPTY_CHAR_ARRAY, false);
         } else {
             ASTElement first = buffer[0];
             if (count == 1) {

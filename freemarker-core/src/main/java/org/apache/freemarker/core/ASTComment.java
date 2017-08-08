@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * AST comment node
@@ -43,7 +43,7 @@ final class ASTComment extends ASTElement {
         if (canonical) {
             return "<#--" + text + "-->";
         } else {
-            return "comment " + _StringUtil.jQuote(text.trim());
+            return "comment " + _StringUtils.jQuote(text.trim());
         }
     }
     

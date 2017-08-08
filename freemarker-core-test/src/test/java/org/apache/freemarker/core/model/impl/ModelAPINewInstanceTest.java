@@ -20,7 +20,7 @@
 package org.apache.freemarker.core.model.impl;
 
 import org.apache.freemarker.core.Configuration;
-import org.apache.freemarker.test.TestUtil;
+import org.apache.freemarker.test.TestUtils;
 
 import junit.framework.TestCase;
 
@@ -111,8 +111,8 @@ public class ModelAPINewInstanceTest extends TestCase {
         public Constructors(Integer x, Integer y) { s = "Integer " + x + ", Integer " + y; }
         public Constructors(Object x, Object y) { s = "Object " + x + ", Object " + y; }
 
-        public Constructors(int... xs) { s = "int... " + TestUtil.arrayToString(xs); }
-        public Constructors(Object x, int... ys) { s = "Object " + x + ", int... " + TestUtil.arrayToString(ys); }
+        public Constructors(int... xs) { s = "int... " + TestUtils.arrayToString(xs); }
+        public Constructors(Object x, int... ys) { s = "Object " + x + ", int... " + TestUtils.arrayToString(ys); }
         
         @Override
         public String toString() {

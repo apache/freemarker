@@ -21,7 +21,7 @@ package org.apache.freemarker.core;
 import java.util.Date;
 
 import org.apache.freemarker.core.Configuration.ExtendableBuilder;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * Thrown by {@link ExtendableBuilder#setSetting(String, String)}; The setting name was recognized, but its value
@@ -65,12 +65,12 @@ public class InvalidSettingValueException extends ConfigurationException {
 
     private static String createMessage(String name, Object value, boolean showValue, String detail1, String detail2) {
         StringBuilder sb = new StringBuilder(64);
-        sb.append("Failed to set FreeMarker configuration setting ").append(_StringUtil.jQuote(name));
+        sb.append("Failed to set FreeMarker configuration setting ").append(_StringUtils.jQuote(name));
         if (showValue) {
             sb.append(" to value ")
                     .append(
                             value instanceof Number || value instanceof Boolean || value instanceof Date ? value
-                            : _StringUtil.jQuote(value));
+                            : _StringUtils.jQuote(value));
         } else {
             sb.append(" to the specified value");
         }

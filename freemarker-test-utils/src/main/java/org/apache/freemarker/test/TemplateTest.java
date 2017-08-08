@@ -41,7 +41,7 @@ import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
 import org.apache.freemarker.core.util._NullArgumentException;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 import org.junit.Ignore;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -106,7 +106,7 @@ public abstract class TemplateTest {
                 throw new IOException("Reference output resource not found: " + getClass() + ", " + resName);
             }
             try {
-                expectedOut = TestUtil.removeTxtCopyrightComment(IOUtils.toString(in, StandardCharsets.UTF_8.name()));
+                expectedOut = TestUtils.removeTxtCopyrightComment(IOUtils.toString(in, StandardCharsets.UTF_8.name()));
             } finally {
                 in.close();
             }
@@ -300,16 +300,16 @@ public abstract class TemplateTest {
             if (needle.startsWith("\\!")) {
                 String netNeedle = needle.substring(2); 
                 if (msg.contains(netNeedle)) {
-                    fail("The message shouldn't contain substring " + _StringUtil.jQuote(netNeedle) + ":\n" + msg);
+                    fail("The message shouldn't contain substring " + _StringUtils.jQuote(netNeedle) + ":\n" + msg);
                 }
             } else if (!msg.contains(needle)) {
-                fail("The message didn't contain substring " + _StringUtil.jQuote(needle) + ":\n" + msg);
+                fail("The message didn't contain substring " + _StringUtils.jQuote(needle) + ":\n" + msg);
             }
         }
     }
     
     private String normalizeNewLines(String s) {
-        return _StringUtil.replace(s, "\r\n", "\n").replace('\r', '\n');
+        return _StringUtils.replace(s, "\r\n", "\n").replace('\r', '\n');
     }
 
     public static class TestBean {

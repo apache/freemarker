@@ -30,7 +30,7 @@ import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._ClassUtils;
 
 /**
  * This class is used as a base for non-overloaded method models and for constructors.
@@ -54,19 +54,19 @@ class SimpleMethod {
         if (args == null) {
             args = _CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY;
         }
-        boolean isVarArg = _MethodUtil.isVarargs(member);
+        boolean isVarArg = _MethodUtils.isVarargs(member);
         int typesLen = argTypes.length;
         if (isVarArg) {
             if (typesLen - 1 > args.length) {
                 throw new _TemplateModelException(
-                        _MethodUtil.invocationErrorMessageStart(member),
+                        _MethodUtils.invocationErrorMessageStart(member),
                         " takes at least ", typesLen - 1,
                         typesLen - 1 == 1 ? " argument" : " arguments", ", but ",
                         args.length, " was given.");
             }
         } else if (typesLen != args.length) {
             throw new _TemplateModelException(
-                    _MethodUtil.invocationErrorMessageStart(member), 
+                    _MethodUtils.invocationErrorMessageStart(member),
                     " takes ", typesLen, typesLen == 1 ? " argument" : " arguments", ", but ",
                     args.length, " was given.");
         }
@@ -148,9 +148,9 @@ class SimpleMethod {
     private TemplateModelException createArgumentTypeMismatchException(
             int argIdx, TemplateModel argVal, Class<?> targetType) {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
-                _MethodUtil.invocationErrorMessageStart(member), " couldn't be called: Can't convert the ",
+                _MethodUtils.invocationErrorMessageStart(member), " couldn't be called: Can't convert the ",
                 new _DelayedOrdinal(argIdx + 1),
-                " argument's value to the target Java type, ", _ClassUtil.getShortClassName(targetType),
+                " argument's value to the target Java type, ", _ClassUtils.getShortClassName(targetType),
                 ". The type of the actual value was: ", new _DelayedFTLTypeDescription(argVal));
         if (argVal instanceof TemplateMarkupOutputModel && (targetType.isAssignableFrom(String.class))) {
             desc.tip(MARKUP_OUTPUT_TO_STRING_TIP);
@@ -160,9 +160,9 @@ class SimpleMethod {
 
     private TemplateModelException createNullToPrimitiveArgumentException(int argIdx, Class<?> targetType) {
         return new _TemplateModelException(
-                _MethodUtil.invocationErrorMessageStart(member), " couldn't be called: The value of the ",
+                _MethodUtils.invocationErrorMessageStart(member), " couldn't be called: The value of the ",
                 new _DelayedOrdinal(argIdx + 1),
-                " argument was null, but the target Java parameter type (", _ClassUtil.getShortClassName(targetType),
+                " argument was null, but the target Java parameter type (", _ClassUtils.getShortClassName(targetType),
                 ") is primitive and so can't store null.");
     }
     

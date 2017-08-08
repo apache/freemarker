@@ -33,9 +33,9 @@ import org.apache.freemarker.core.util.CommonBuilder;
  * Loader.
  */
 // [FM3] Maybe generalize and publish this functionality
-final class DefaultObjectWrapperTCCLSingletonUtil {
+final class DefaultObjectWrapperTCCLSingletonUtils {
 
-    private DefaultObjectWrapperTCCLSingletonUtil() {
+    private DefaultObjectWrapperTCCLSingletonUtils() {
         // Not meant to be instantiated
     }
 

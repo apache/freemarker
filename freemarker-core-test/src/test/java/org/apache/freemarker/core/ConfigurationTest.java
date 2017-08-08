@@ -82,8 +82,8 @@ import org.apache.freemarker.core.userpkg.EpochMillisTemplateDateFormatFactory;
 import org.apache.freemarker.core.userpkg.HexTemplateNumberFormatFactory;
 import org.apache.freemarker.core.userpkg.NameClashingDummyOutputFormat;
 import org.apache.freemarker.core.userpkg.SeldomEscapedOutputFormat;
-import org.apache.freemarker.core.util._CollectionUtil;
-import org.apache.freemarker.core.util._DateUtil;
+import org.apache.freemarker.core.util._CollectionUtils;
+import org.apache.freemarker.core.util._DateUtils;
 import org.apache.freemarker.core.util._NullWriter;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
@@ -530,7 +530,7 @@ public class ConfigurationTest {
         {
             Template t = cfg.getTemplate("Stat/t.de.ftlx");
             assertEquals("TODO,XML", t.getBooleanFormat());
-            assertEquals(_DateUtil.UTC, t.getTimeZone());
+            assertEquals(_DateUtils.UTC, t.getTimeZone());
         }
         
         assertNotNull(cfgB.getTemplateConfigurations());
@@ -848,13 +848,13 @@ public class ConfigurationTest {
     public void testCollectionSettingMutability() throws IOException {
         Builder cb = new Builder(VERSION_3_0_0);
 
-        assertTrue(_CollectionUtil.isMapKnownToBeUnmodifiable(cb.getSharedVariables()));
+        assertTrue(_CollectionUtils.isMapKnownToBeUnmodifiable(cb.getSharedVariables()));
         Map<String, Object> mutableValue = new HashMap<>();
         mutableValue.put("x", "v1");
         cb.setSharedVariables(mutableValue);
         Map<String, Object> immutableValue = cb.getSharedVariables();
         assertNotSame(mutableValue, immutableValue); // Must be a copy
-        assertTrue(_CollectionUtil.isMapKnownToBeUnmodifiable(immutableValue));
+        assertTrue(_CollectionUtils.isMapKnownToBeUnmodifiable(immutableValue));
         assertEquals(mutableValue, immutableValue);
         mutableValue.put("y", "v2");
         assertNotEquals(mutableValue, immutableValue); // No aliasing

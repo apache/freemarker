@@ -21,10 +21,10 @@ package org.apache.freemarker.core.valueformat.impl;
 
 import org.apache.freemarker.core.CustomStateKey;
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.util._DateUtil.CalendarFieldsToDateConverter;
-import org.apache.freemarker.core.util._DateUtil.DateToISO8601CalendarFactory;
-import org.apache.freemarker.core.util._DateUtil.TrivialCalendarFieldsToDateConverter;
-import org.apache.freemarker.core.util._DateUtil.TrivialDateToISO8601CalendarFactory;
+import org.apache.freemarker.core.util._DateUtils.CalendarFieldsToDateConverter;
+import org.apache.freemarker.core.util._DateUtils.DateToISO8601CalendarFactory;
+import org.apache.freemarker.core.util._DateUtils.TrivialCalendarFieldsToDateConverter;
+import org.apache.freemarker.core.util._DateUtils.TrivialDateToISO8601CalendarFactory;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 
 abstract class ISOLikeTemplateDateFormatFactory extends TemplateDateFormatFactory {

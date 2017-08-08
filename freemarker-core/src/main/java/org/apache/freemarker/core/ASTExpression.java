@@ -72,36 +72,36 @@ abstract class ASTExpression extends ASTNode {
     }
     
     String evalAndCoerceToPlainText(Environment env) throws TemplateException {
-        return _EvalUtil.coerceModelToPlainText(eval(env), this, null, env);
+        return _EvalUtils.coerceModelToPlainText(eval(env), this, null, env);
     }
 
     /**
      * @param seqTip Tip to display if the value type is not coercable, but it's sequence or collection.
      */
     String evalAndCoerceToPlainText(Environment env, String seqTip) throws TemplateException {
-        return _EvalUtil.coerceModelToPlainText(eval(env), this, seqTip, env);
+        return _EvalUtils.coerceModelToPlainText(eval(env), this, seqTip, env);
     }
 
     Object evalAndCoerceToStringOrMarkup(Environment env) throws TemplateException {
-        return _EvalUtil.coerceModelToStringOrMarkup(eval(env), this, null, env);
+        return _EvalUtils.coerceModelToStringOrMarkup(eval(env), this, null, env);
     }
 
     /**
      * @param seqTip Tip to display if the value type is not coercable, but it's sequence or collection.
      */
     Object evalAndCoerceToStringOrMarkup(Environment env, String seqTip) throws TemplateException {
-        return _EvalUtil.coerceModelToStringOrMarkup(eval(env), this, seqTip, env);
+        return _EvalUtils.coerceModelToStringOrMarkup(eval(env), this, seqTip, env);
     }
     
     String evalAndCoerceToStringOrUnsupportedMarkup(Environment env) throws TemplateException {
-        return _EvalUtil.coerceModelToStringOrUnsupportedMarkup(eval(env), this, null, env);
+        return _EvalUtils.coerceModelToStringOrUnsupportedMarkup(eval(env), this, null, env);
     }
 
     /**
      * @param seqTip Tip to display if the value type is not coercable, but it's sequence or collection.
      */
     String evalAndCoerceToStringOrUnsupportedMarkup(Environment env, String seqTip) throws TemplateException {
-        return _EvalUtil.coerceModelToStringOrUnsupportedMarkup(eval(env), this, seqTip, env);
+        return _EvalUtils.coerceModelToStringOrUnsupportedMarkup(eval(env), this, seqTip, env);
     }
     
     Number evalToNumber(Environment env) throws TemplateException {
@@ -111,7 +111,7 @@ abstract class ASTExpression extends ASTNode {
 
     Number modelToNumber(TemplateModel model, Environment env) throws TemplateException {
         if (model instanceof TemplateNumberModel) {
-            return _EvalUtil.modelToNumber((TemplateNumberModel) model, this);
+            return _EvalUtils.modelToNumber((TemplateNumberModel) model, this);
         } else {
             throw new NonNumericalException(this, model, env);
         }

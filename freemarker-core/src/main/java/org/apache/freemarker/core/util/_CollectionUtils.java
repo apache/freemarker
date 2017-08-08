@@ -33,9 +33,9 @@ import java.util.Set;
  * Don't use this; used internally by FreeMarker, might changes without notice.
  * {@link Collection} and {@link Map}-related utilities.
  */
-public class _CollectionUtil {
+public class _CollectionUtils {
     
-    private _CollectionUtil() { }
+    private _CollectionUtils() { }
 
     public static final Object[] EMPTY_OBJECT_ARRAY = new Object[] { };
     public static final Class[] EMPTY_CLASS_ARRAY = new Class[] { };

@@ -64,10 +64,10 @@ import org.apache.freemarker.core.templateresolver.MalformedTemplateNameExceptio
 import org.apache.freemarker.core.templateresolver.TemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
 import org.apache.freemarker.core.util.StringToIndexMap;
-import org.apache.freemarker.core.util._DateUtil;
-import org.apache.freemarker.core.util._DateUtil.DateToISO8601CalendarFactory;
+import org.apache.freemarker.core.util._DateUtils;
+import org.apache.freemarker.core.util._DateUtils.DateToISO8601CalendarFactory;
 import org.apache.freemarker.core.util._NullWriter;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.core.valueformat.TemplateDateFormat;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
@@ -941,7 +941,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      */
     public boolean applyEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
-        return _EvalUtil.compare(leftValue, _EvalUtil.CMP_OP_EQUALS, rightValue, this);
+        return _EvalUtils.compare(leftValue, _EvalUtils.CMP_OP_EQUALS, rightValue, this);
     }
 
     /**
@@ -951,7 +951,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      */
     public boolean applyEqualsOperatorLenient(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
-        return _EvalUtil.compareLenient(leftValue, _EvalUtil.CMP_OP_EQUALS, rightValue, this);
+        return _EvalUtils.compareLenient(leftValue, _EvalUtils.CMP_OP_EQUALS, rightValue, this);
     }
 
     /**
@@ -959,7 +959,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      */
     public boolean applyLessThanOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
-        return _EvalUtil.compare(leftValue, _EvalUtil.CMP_OP_LESS_THAN, rightValue, this);
+        return _EvalUtils.compare(leftValue, _EvalUtils.CMP_OP_LESS_THAN, rightValue, this);
     }
 
     /**
@@ -967,7 +967,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      */
     public boolean applyLessThanOrEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
-        return _EvalUtil.compare(leftValue, _EvalUtil.CMP_OP_LESS_THAN_EQUALS, rightValue, this);
+        return _EvalUtils.compare(leftValue, _EvalUtils.CMP_OP_LESS_THAN_EQUALS, rightValue, this);
     }
 
     /**
@@ -975,7 +975,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      */
     public boolean applyGreaterThanOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
-        return _EvalUtil.compare(leftValue, _EvalUtil.CMP_OP_GREATER_THAN, rightValue, this);
+        return _EvalUtils.compare(leftValue, _EvalUtils.CMP_OP_GREATER_THAN, rightValue, this);
     }
 
     /**
@@ -983,7 +983,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      */
     public boolean applyWithGreaterThanOrEqualsOperator(TemplateModel leftValue, TemplateModel rightValue)
             throws TemplateException {
-        return _EvalUtil.compare(leftValue, _EvalUtil.CMP_OP_GREATER_THAN_EQUALS, rightValue, this);
+        return _EvalUtils.compare(leftValue, _EvalUtils.CMP_OP_GREATER_THAN_EQUALS, rightValue, this);
     }
 
     public void setOut(Writer out) {
@@ -1026,7 +1026,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             String s = templateBooleanFormat.getTrueStringValue();
             if (s == null) {
                 if (fallbackToTrueFalse) {
-                    return MiscUtil.C_TRUE;
+                    return TemplateBooleanFormat.C_TRUE;
                 } else {
                     throw new _MiscTemplateException(getNullBooleanFormatErrorDescription());
                 }
@@ -1037,7 +1037,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             String s = templateBooleanFormat.getFalseStringValue();
             if (s == null) {
                 if (fallbackToTrueFalse) {
-                    return MiscUtil.C_FALSE;
+                    return TemplateBooleanFormat.C_FALSE;
                 } else {
                     throw new _MiscTemplateException(getNullBooleanFormatErrorDescription());
                 }
@@ -1104,9 +1104,9 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             boolean useTempModelExc)
             throws TemplateException {
         try {
-            return _EvalUtil.assertFormatResultNotNull(format.formatToPlainText(number));
+            return _EvalUtils.assertFormatResultNotNull(format.formatToPlainText(number));
         } catch (TemplateValueFormatException e) {
-            throw MessageUtil.newCantFormatNumberException(format, exp, e, useTempModelExc);
+            throw MessageUtils.newCantFormatNumberException(format, exp, e, useTempModelExc);
         }
     }
 
@@ -1269,7 +1269,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             TemplateNumberFormatFactory formatFactory = getCustomNumberFormat(name);
             if (formatFactory == null) {
                 throw new UndefinedCustomFormatException(
-                        "No custom number format was defined with name " + _StringUtil.jQuote(name));
+                        "No custom number format was defined with name " + _StringUtils.jQuote(name));
             }
 
             return formatFactory.get(params, locale, this);
@@ -1380,9 +1380,9 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         TemplateDateFormat format = getTemplateDateFormat(tdm, tdmSourceExpr, useTempModelExc);
         
         try {
-            return _EvalUtil.assertFormatResultNotNull(format.formatToPlainText(tdm));
+            return _EvalUtils.assertFormatResultNotNull(format.formatToPlainText(tdm));
         } catch (TemplateValueFormatException e) {
-            throw MessageUtil.newCantFormatDateException(format, tdmSourceExpr, e, useTempModelExc);
+            throw MessageUtils.newCantFormatDateException(format, tdmSourceExpr, e, useTempModelExc);
         }
     }
 
@@ -1395,7 +1395,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     String formatDateToPlainText(TemplateDateModel tdm, String formatString,
             ASTExpression blamedDateSourceExp, ASTExpression blamedFormatterExp,
             boolean useTempModelExc) throws TemplateException {
-        Date date = _EvalUtil.modelToDate(tdm, blamedDateSourceExp);
+        Date date = _EvalUtils.modelToDate(tdm, blamedDateSourceExp);
         
         TemplateDateFormat format = getTemplateDateFormat(
                 formatString, tdm.getDateType(), date.getClass(),
@@ -1403,9 +1403,9 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                 useTempModelExc);
         
         try {
-            return _EvalUtil.assertFormatResultNotNull(format.formatToPlainText(tdm));
+            return _EvalUtils.assertFormatResultNotNull(format.formatToPlainText(tdm));
         } catch (TemplateValueFormatException e) {
-            throw MessageUtil.newCantFormatDateException(format, blamedDateSourceExp, e, useTempModelExc);
+            throw MessageUtils.newCantFormatDateException(format, blamedDateSourceExp, e, useTempModelExc);
         }
     }
 
@@ -1567,7 +1567,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     
     TemplateDateFormat getTemplateDateFormat(TemplateDateModel tdm, ASTExpression tdmSourceExpr, boolean useTempModelExc)
             throws TemplateException {
-        Date date = _EvalUtil.modelToDate(tdm, tdmSourceExpr);
+        Date date = _EvalUtils.modelToDate(tdm, tdmSourceExpr);
         
         return getTemplateDateFormat(
                 tdm.getDateType(), date.getClass(), tdmSourceExpr,
@@ -1583,7 +1583,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         try {
             return getTemplateDateFormat(dateType, dateClass);
         } catch (UnknownDateTypeFormattingUnsupportedException e) {
-            throw MessageUtil.newCantFormatUnknownTypeDateException(blamedDateSourceExp, e);
+            throw MessageUtils.newCantFormatUnknownTypeDateException(blamedDateSourceExp, e);
         } catch (TemplateValueFormatException e) {
             String settingName;
             String settingValue;
@@ -1626,7 +1626,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         try {
             return getTemplateDateFormat(formatString, dateType, dateClass);
         } catch (UnknownDateTypeFormattingUnsupportedException e) {
-            throw MessageUtil.newCantFormatUnknownTypeDateException(blamedDateSourceExp, e);
+            throw MessageUtils.newCantFormatUnknownTypeDateException(blamedDateSourceExp, e);
         } catch (TemplateValueFormatException e) {
             _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                     "Can't invoke date/time/dateTime format based on format string ",
@@ -1789,7 +1789,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             formatFactory = getCustomDateFormat(name);
             if (formatFactory == null) {
                 throw new UndefinedCustomFormatException(
-                        "No custom date format was defined with name " + _StringUtil.jQuote(name));
+                        "No custom date format was defined with name " + _StringUtils.jQuote(name));
             }
         } else {
             formatParams = formatString;
@@ -1833,13 +1833,13 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     /**
      * Returns the {@link DateToISO8601CalendarFactory} used by the the "iso_" built-ins. Be careful when using this; it
      * should only by used with
-     * {@link _DateUtil#dateToISO8601String(Date, boolean, boolean, boolean, int, TimeZone, DateToISO8601CalendarFactory)}
-     * and {@link _DateUtil#dateToXSString(Date, boolean, boolean, boolean, int, TimeZone, DateToISO8601CalendarFactory)}
+     * {@link _DateUtils#dateToISO8601String(Date, boolean, boolean, boolean, int, TimeZone, DateToISO8601CalendarFactory)}
+     * and {@link _DateUtils#dateToXSString(Date, boolean, boolean, boolean, int, TimeZone, DateToISO8601CalendarFactory)}
      * .
      */
     DateToISO8601CalendarFactory getISOBuiltInCalendarFactory() {
         if (isoBuiltInCalendarFactory == null) {
-            isoBuiltInCalendarFactory = new _DateUtil.TrivialDateToISO8601CalendarFactory();
+            isoBuiltInCalendarFactory = new _DateUtils.TrivialDateToISO8601CalendarFactory();
         }
         return isoBuiltInCalendarFactory;
     }
@@ -2114,15 +2114,15 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     static void appendInstructionStackItem(ASTElement stackEl, StringBuilder sb) {
-        sb.append(MessageUtil.shorten(stackEl.getDescription(), 40));
+        sb.append(MessageUtils.shorten(stackEl.getDescription(), 40));
 
         sb.append("  [");
         ASTDirMacroOrFunction enclosingMacro = getEnclosingMacro(stackEl);
         if (enclosingMacro != null) {
-            sb.append(MessageUtil.formatLocationForEvaluationError(
+            sb.append(MessageUtils.formatLocationForEvaluationError(
                     enclosingMacro, stackEl.beginLine, stackEl.beginColumn));
         } else {
-            sb.append(MessageUtil.formatLocationForEvaluationError(
+            sb.append(MessageUtils.formatLocationForEvaluationError(
                     stackEl.getTemplate(), stackEl.beginLine, stackEl.beginColumn));
         }
         sb.append("]");
@@ -2761,7 +2761,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                 if (status == InitializationStatus.FAILED) {
                     throw new TemplateModelException(
                             "Lazy initialization of the imported namespace for "
-                            + _StringUtil.jQuote(templateName)
+                            + _StringUtils.jQuote(templateName)
                             + " has already failed earlier; won't retry it.");
                 }
                 try {
@@ -2772,7 +2772,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                     // [FM3] Rethrow TemplateException-s as is
                     throw new TemplateModelException(
                             "Lazy initialization of the imported namespace for "
-                            + _StringUtil.jQuote(templateName)
+                            + _StringUtils.jQuote(templateName)
                             + " has failed; see cause exception", e);
                 } finally {
                     if (status != InitializationStatus.INITIALIZED) {

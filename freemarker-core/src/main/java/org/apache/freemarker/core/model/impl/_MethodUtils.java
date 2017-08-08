@@ -31,14 +31,14 @@ import org.apache.freemarker.core._DelayedJQuote;
 import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.util.BugException;
-import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._ClassUtils;
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
  */
-public final class _MethodUtil {
+public final class _MethodUtils {
     
-    private _MethodUtil() {
+    private _MethodUtils() {
         // Not meant to be instantiated
     }
 
@@ -79,7 +79,7 @@ public final class _MethodUtil {
                     return isWideningPrimitiveNumberConversion(specific, generic) ? 3 : 0;
                 } else {  // => specificIsPrim && !genericIsPrim
                     if (bugfixed) {
-                        final Class<?> specificAsBoxed = _ClassUtil.primitiveClassToBoxingClass(specific);
+                        final Class<?> specificAsBoxed = _ClassUtils.primitiveClassToBoxingClass(specific);
                         if (specificAsBoxed == generic) {
                             // A primitive class is more specific than its boxing class, because it can't store null
                             return 2;
@@ -215,7 +215,7 @@ public final class _MethodUtil {
             sb.append("static ");
         }
         
-        String className = _ClassUtil.getShortClassName(member.getDeclaringClass());
+        String className = _ClassUtils.getShortClassName(member.getDeclaringClass());
         if (className != null) {
             sb.append(className);
             sb.append('.');
@@ -223,11 +223,11 @@ public final class _MethodUtil {
         sb.append(member.getName());
 
         sb.append('(');
-        Class<?>[] paramTypes = _MethodUtil.getParameterTypes(member);
+        Class<?>[] paramTypes = _MethodUtils.getParameterTypes(member);
         for (int i = 0; i < paramTypes.length; i++) {
             if (i != 0) sb.append(", ");
-            String paramTypeDecl = _ClassUtil.getShortClassName(paramTypes[i]);
-            if (i == paramTypes.length - 1 && paramTypeDecl.endsWith("[]") && _MethodUtil.isVarargs(member)) {
+            String paramTypeDecl = _ClassUtils.getShortClassName(paramTypes[i]);
+            if (i == paramTypes.length - 1 && paramTypeDecl.endsWith("[]") && _MethodUtils.isVarargs(member)) {
                 sb.append(paramTypeDecl.substring(0, paramTypeDecl.length() - 2));
                 sb.append("...");
             } else {

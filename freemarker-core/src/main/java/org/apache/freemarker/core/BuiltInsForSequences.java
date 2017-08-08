@@ -44,7 +44,7 @@ import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl.TemplateModelListSequence;
 import org.apache.freemarker.core.util.BugException;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * A holder for builtins that operate exclusively on sequence or collection left-hand value.
@@ -215,13 +215,13 @@ class BuiltInsForSequences {
                             hadItem = true;
                         }
                         try {
-                            sb.append(_EvalUtil.coerceModelToStringOrUnsupportedMarkup(item, null, null, env));
+                            sb.append(_EvalUtils.coerceModelToStringOrUnsupportedMarkup(item, null, null, env));
                         } catch (TemplateException e) {
                             throw new _TemplateModelException(e,
                                     "\"?", key, "\" failed at index ", idx, " with this error:\n\n",
-                                    MessageUtil.EMBEDDED_MESSAGE_BEGIN,
+                                    MessageUtils.EMBEDDED_MESSAGE_BEGIN,
                                     new _DelayedGetMessageWithoutStackTop(e),
-                                    MessageUtil.EMBEDDED_MESSAGE_END);
+                                    MessageUtils.EMBEDDED_MESSAGE_END);
                         }
                     }
                     idx++;
@@ -716,7 +716,7 @@ class BuiltInsForSequences {
                                     startErrorMessage(keyNamesLn, i),
                                     (keyNameI == 0
                                             ? "Sequence items must be hashes when using ?sortBy. "
-                                            : "The " + _StringUtil.jQuote(keyNames[keyNameI - 1])),
+                                            : "The " + _StringUtils.jQuote(keyNames[keyNameI - 1])),
                                     " subvariable is not a hash, so ?sortBy ",
                                     "can't proceed with getting the ",
                                     new _DelayedJQuote(keyNames[keyNameI]),
@@ -728,7 +728,7 @@ class BuiltInsForSequences {
                     if (key == null) {
                         throw new _TemplateModelException(
                                 startErrorMessage(keyNamesLn, i),
-                                "The " + _StringUtil.jQuote(keyNames[keyNameI]), " subvariable was null or missing.");
+                                "The " + _StringUtils.jQuote(keyNames[keyNameI]), " subvariable was null or missing.");
                     }
                 } // for each key
                 
@@ -864,9 +864,9 @@ class BuiltInsForSequences {
             Environment env)
             throws TemplateModelException {
         try {
-            return _EvalUtil.compare(
+            return _EvalUtils.compare(
                     seqItem, null,
-                    _EvalUtil.CMP_OP_EQUALS, null,
+                    _EvalUtils.CMP_OP_EQUALS, null,
                     searchedItem, null,
                     null, false,
                     true, true, true, // The last one is true to emulate an old bug for BC 

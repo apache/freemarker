@@ -31,7 +31,7 @@ import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.util.FTLUtil;
-import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._ClassUtils;
 
 /**
  * Used instead of {@link java.lang.reflect.Method} or {@link java.lang.reflect.Constructor} for overloaded methods and
@@ -241,8 +241,8 @@ final class OverloadedMethods {
             @Override
             String argumentToString(Object argType) {
                 return argType != null
-                        ? _ClassUtil.getShortClassName((Class<?>) argType)
-                        : _ClassUtil.getShortClassNameOfObject(null);
+                        ? _ClassUtils.getShortClassName((Class<?>) argType)
+                        : _ClassUtils.getShortClassNameOfObject(null);
             }
             
         };

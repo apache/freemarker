@@ -55,7 +55,7 @@ import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
 import org.apache.freemarker.core.util.BugException;
-import org.apache.freemarker.core.util._CollectionUtil;
+import org.apache.freemarker.core.util._CollectionUtils;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
@@ -332,8 +332,8 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         ltbReader.throwFailure();
         
         _DebuggerService.registerTemplate(this);
-        namespaceURIToPrefixLookup = _CollectionUtil.unmodifiableMap(namespaceURIToPrefixLookup);
-        prefixToNamespaceURILookup = _CollectionUtil.unmodifiableMap(prefixToNamespaceURILookup);
+        namespaceURIToPrefixLookup = _CollectionUtils.unmodifiableMap(namespaceURIToPrefixLookup);
+        prefixToNamespaceURILookup = _CollectionUtils.unmodifiableMap(prefixToNamespaceURILookup);
 
        finishConstruction();
    }
@@ -343,8 +343,8 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * protected when construction is done.
      */
     private void finishConstruction() {
-        headerCustomSettings = _CollectionUtil.unmodifiableMap(headerCustomSettings);
-        tcAndHeaderCustomSettings = _CollectionUtil.unmodifiableMap(tcAndHeaderCustomSettings);
+        headerCustomSettings = _CollectionUtils.unmodifiableMap(headerCustomSettings);
+        tcAndHeaderCustomSettings = _CollectionUtils.unmodifiableMap(tcAndHeaderCustomSettings);
         writeProtected = true;
     }
 

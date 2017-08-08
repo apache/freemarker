@@ -37,7 +37,7 @@ public final class _JavaVersions {
     private static final boolean IS_AT_LEAST_8;
     static {
         boolean result = false;
-        String vStr = _SecurityUtil.getSystemProperty("java.version", null);
+        String vStr = _SecurityUtils.getSystemProperty("java.version", null);
         if (vStr != null) {
             try {
                 Version v = new Version(vStr);

@@ -262,7 +262,7 @@ public final class StringToIndexMap {
             while (entry != null) {
                 if (entry.value < start || entry.value >= end) {
                     throw new IllegalArgumentException(
-                            "Entry " + _StringUtil.jQuote(entry.key) + " -> " + entry.value
+                            "Entry " + _StringUtils.jQuote(entry.key) + " -> " + entry.value
                             + " is out of allowed index range: " + start + " ..< " + end);
                 }
                 entry = entry.nextInSameBucket;

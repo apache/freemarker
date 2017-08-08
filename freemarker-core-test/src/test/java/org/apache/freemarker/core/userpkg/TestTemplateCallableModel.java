@@ -29,7 +29,7 @@ import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.util.FTLUtil;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 public abstract class TestTemplateCallableModel implements TemplateCallableModel {
 
@@ -91,7 +91,7 @@ public abstract class TestTemplateCallableModel implements TemplateCallableModel
             }
             sb.append('}');
         } else if (value instanceof String) {
-            sb.append(_StringUtil.jQuote(value));
+            sb.append(_StringUtils.jQuote(value));
         } else if (value instanceof Number) {
             sb.append(value.toString());
         } else if (value instanceof Boolean) {

@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.freemarker.core.util._NullArgumentException;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -260,7 +260,7 @@ public abstract class Converter {
                     storeConversionMarkers(ctx.getConversionMarkers(), ctx);
                     convertedFileCount++;
                 } catch (IOException e) {
-                    throw new ConverterException("I/O exception while converting " + _StringUtil.jQuote(src) + ".", e);
+                    throw new ConverterException("I/O exception while converting " + _StringUtils.jQuote(src) + ".", e);
                 } finally {
                     try {
                         if (ctx != null && ctx.outputStream != null) {

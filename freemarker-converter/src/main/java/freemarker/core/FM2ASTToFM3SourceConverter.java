@@ -36,10 +36,10 @@ import org.apache.freemarker.converter.ConverterException;
 import org.apache.freemarker.converter.ConverterUtils;
 import org.apache.freemarker.converter.UnconvertableLegacyFeatureException;
 import org.apache.freemarker.core.util.FTLUtil;
-import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._ClassUtils;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._ObjectHolder;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -232,7 +232,7 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private String convertFtlHeaderParamName(String name) throws ConverterException {
-        String converted = name.indexOf('_') == -1 ? name : _StringUtil.snakeCaseToCamelCase(name);
+        String converted = name.indexOf('_') == -1 ? name : _StringUtils.snakeCaseToCamelCase(name);
         if (converted.equals("attributes")) {
             converted = "customSettings";
         }
@@ -246,7 +246,7 @@ public class FM2ASTToFM3SourceConverter {
             printExp((Expression) node);
         } else {
             throw new UnexpectedNodeContentException(node, "Unhandled node class",
-                    _ClassUtil.getShortClassNameOfObject(node));
+                    _ClassUtils.getShortClassNameOfObject(node));
         }
     }
 
@@ -606,7 +606,7 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private String convertSettingName(String name, TemplateObject node) throws ConverterException {
-        String converted = name.indexOf('_') == -1 ? name : _StringUtil.snakeCaseToCamelCase(name);
+        String converted = name.indexOf('_') == -1 ? name : _StringUtils.snakeCaseToCamelCase(name);
 
         if (converted.equals("classicCompatible")) {
             throw new UnconvertableLegacyFeatureException("There \"classicCompatible\" setting doesn't exist in "
@@ -1327,7 +1327,7 @@ public class FM2ASTToFM3SourceConverter {
             pos = printSeparatorAndWSAndExpComments(pos, beforeFirstNestedContParam ? ";" : ",");
 
             String nestedContParamName = getParam(node, paramIdx, ParameterRole.TARGET_LOOP_VARIABLE, String.class);
-            print(_StringUtil.toFTLTopLevelIdentifierReference(nestedContParamName));
+            print(_StringUtils.toFTLTopLevelIdentifierReference(nestedContParamName));
             String identifierInSrc = readIdentifier(pos);
             assertNodeContent(identifierInSrc.length() != 0, node,
                     "Can't find nested content parameter name in the source");
@@ -1485,7 +1485,7 @@ public class FM2ASTToFM3SourceConverter {
         printWithConvertedExpComments(src.substring(wsStartPos, opPos));
         String operatorInSrc = src.substring(opPos, opPos + operator.length());
         assertNodeContent(operatorInSrc.equals(operator), node,
-                "Expected " + _StringUtil.jQuote(operator) + ", found {}", operatorInSrc);
+                "Expected " + _StringUtils.jQuote(operator) + ", found {}", operatorInSrc);
         print(operator);
     }
 
@@ -1600,7 +1600,7 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private String convertBuiltInVariableName(String name) throws ConverterException {
-        String converted = name.indexOf('_') == -1 ? name : _StringUtil.snakeCaseToCamelCase(name);
+        String converted = name.indexOf('_') == -1 ? name : _StringUtils.snakeCaseToCamelCase(name);
 
         if (converted.equals("currentNode")) {
             converted = "node";
@@ -1638,7 +1638,7 @@ public class FM2ASTToFM3SourceConverter {
     static {
         Map<String, String> domKeyMapping = new HashMap<>();
         for (String atAtKey : AtAtKeyAccessor.getAtAtKeys()) {
-            String atAtKeyCC = _StringUtil.snakeCaseToCamelCase(atAtKey);
+            String atAtKeyCC = _StringUtils.snakeCaseToCamelCase(atAtKey);
             if (!atAtKeyCC.equals(atAtKey)) {
                 domKeyMapping.put(atAtKey, atAtKeyCC);
             }
@@ -1956,7 +1956,7 @@ public class FM2ASTToFM3SourceConverter {
     private String convertBuiltInName(String name) throws ConverterException {
         String converted = IRREGULAR_BUILT_IN_NAME_CONVERSIONS.get(name);
         if (converted == null) {
-            converted = name.indexOf('_') == -1 ? name : _StringUtil.snakeCaseToCamelCase(name);
+            converted = name.indexOf('_') == -1 ? name : _StringUtils.snakeCaseToCamelCase(name);
         }
 
         if (!fm3BuiltInNames.contains(converted)) {
@@ -2413,7 +2413,7 @@ public class FM2ASTToFM3SourceConverter {
         if (pos == src.length() || !src.startsWith(separatorSymbol, pos)) {
             if (!separatorOptional) {
                 throw new ConverterException(
-                        "Expected separator " + _StringUtil.jQuote(separatorSymbol) + " at position " + pos + ".");
+                        "Expected separator " + _StringUtils.jQuote(separatorSymbol) + " at position " + pos + ".");
             }
             if (separatorPosInOutput != null) {
                 separatorPosInOutput.set(null);

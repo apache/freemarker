@@ -25,8 +25,8 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.freemarker.core.util._NullArgumentException;
-import org.apache.freemarker.core.util._SecurityUtil;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._SecurityUtils;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * Parsing-time exception in a template (as opposed to a runtime exception, a {@link TemplateException}). This usually
@@ -76,7 +76,7 @@ public class ParseException extends IOException implements FMParserConstants {
     /**
      * The end of line string for this machine.
      */
-    protected String eol = _SecurityUtil.getSystemProperty("line.separator", "\n");
+    protected String eol = _SecurityUtils.getSystemProperty("line.separator", "\n");
 
     private String templateSourceName;
     private String templateLookupName;
@@ -287,7 +287,7 @@ public class ParseException extends IOException implements FMParserConstants {
         String prefix;
         if (!isInJBossToolsMode()) {
             prefix = "Syntax error "
-                    + MessageUtil.formatLocationForSimpleParsingError(getTemplateSourceOrLookupName(), lineNumber,
+                    + MessageUtils.formatLocationForSimpleParsingError(getTemplateSourceOrLookupName(), lineNumber,
                     columnNumber)
                     + ":\n";  
         } else {
@@ -437,7 +437,7 @@ public class ParseException extends IOException implements FMParserConstants {
                     + "Check if you have a valid #if-#elseIf-#else or #list-#else structure.";
         } else if (kind == END_IF || kind == ELSE_IF) {
             return "Unexpected directive, "
-                    + _StringUtil.jQuote(nextToken)
+                    + _StringUtils.jQuote(nextToken)
                     + ". Check if you have a valid #if-#elseIf-#else structure.";
         }
         return null;

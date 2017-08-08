@@ -32,7 +32,7 @@ import javax.servlet.jsp.el.ExpressionEvaluator;
 import javax.servlet.jsp.el.VariableResolver;
 
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,7 +111,7 @@ public class _FreeMarkerPageContext21 extends FreeMarkerPageContext {
             } else {
                 throw new UnsupportedOperationException(
                         "Can not invoke an ELContext using a foreign JspApplicationContext (of class "
-                        + _ClassUtil.getShortClassNameOfObject(jspctx) + ").\n" +
+                        + _ClassUtils.getShortClassNameOfObject(jspctx) + ").\n" +
                         "Hint: The cause of this is often that you are trying to use JSTL tags/functions in FTL. "
                         + "In that case, know that that's not really suppored, and you are supposed to use FTL "
                         + "constrcuts instead, like #list instead of JSTL's forEach, etc.");

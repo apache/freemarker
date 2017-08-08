@@ -40,7 +40,7 @@ import javax.servlet.jsp.JspApplicationContext;
 import javax.servlet.jsp.el.ImplicitObjectELResolver;
 import javax.servlet.jsp.el.ScopedAttributeELResolver;
 
-import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +85,7 @@ class FreeMarkerJspApplicationContext implements JspApplicationContext {
     private static ExpressionFactory tryExpressionFactoryImplementation(String packagePrefix) {
         String className = packagePrefix + ".el.ExpressionFactoryImpl";
         try {
-            Class cl = _ClassUtil.forName(className);
+            Class cl = _ClassUtils.forName(className);
             if (ExpressionFactory.class.isAssignableFrom(cl)) {
                 LOG.info("Using {} as implementation of {}", className, ExpressionFactory.class.getName());
                 return (ExpressionFactory) cl.newInstance();

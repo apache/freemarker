@@ -30,7 +30,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.dom.NodeModel;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -89,7 +89,7 @@ public final class DOMLoader {
         InputStream in = baseClass.getResourceAsStream(resourcePath);
         if (in == null) {
             throw new FileNotFoundException("Class loader resource not found: baseClass=" + baseClass.getName()
-                    + "; path=" + _StringUtil.jQuote(resourcePath));
+                    + "; path=" + _StringUtils.jQuote(resourcePath));
         }
         return toModel(new InputSource(in));
     }
@@ -121,7 +121,7 @@ public final class DOMLoader {
         InputStream in = baseClass.getResourceAsStream(resourcePath);
         if (in == null) {
             throw new FileNotFoundException("Class loader resource not found: baseClass="
-                    + baseClass.getName() + "; " + "path=" + _StringUtil.jQuote(resourcePath));
+                    + baseClass.getName() + "; " + "path=" + _StringUtils.jQuote(resourcePath));
         }
         return builder.parse(new InputSource(in));
     }

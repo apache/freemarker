@@ -27,7 +27,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 
-import org.apache.freemarker.core.util._CollectionUtil;
+import org.apache.freemarker.core.util._CollectionUtils;
 
 /**
  * Runtime exception in a template (as opposed to a parsing-time exception: {@link ParseException}).
@@ -170,10 +170,10 @@ public class TemplateException extends Exception {
         String stackTopFew = getFTLInstructionStackTopFew();
         if (stackTopFew != null) {
             message = messageWithoutStackTop + "\n\n"
-                    + MessageUtil.ERROR_MESSAGE_HR + "\n"
+                    + MessageUtils.ERROR_MESSAGE_HR + "\n"
                     + FTL_INSTRUCTION_STACK_TRACE_TITLE + "\n"
                     + stackTopFew
-                    + MessageUtil.ERROR_MESSAGE_HR;
+                    + MessageUtils.ERROR_MESSAGE_HR;
             messageWithoutStackTop = message.substring(0, messageWithoutStackTop.length());  // to reuse backing char[]
         } else {
             message = messageWithoutStackTop;
@@ -339,10 +339,10 @@ public class TemplateException extends Exception {
                 if (stackTrace != null) {
                     out.println(getMessageWithoutStackTop());  // Not getMessage()!
                     out.println();
-                    out.println(MessageUtil.ERROR_MESSAGE_HR);
+                    out.println(MessageUtils.ERROR_MESSAGE_HR);
                     out.println(FTL_INSTRUCTION_STACK_TRACE_TITLE);
                     out.print(stackTrace);
-                    out.println(MessageUtil.ERROR_MESSAGE_HR);
+                    out.println(MessageUtils.ERROR_MESSAGE_HR);
                 } else {
                     ftlStackTrace = false;
                     javaStackTrace = true;
@@ -353,7 +353,7 @@ public class TemplateException extends Exception {
                 if (ftlStackTrace) {  // We are after an FTL stack trace
                     out.println();
                     out.println("Java stack trace (for programmers):");
-                    out.println(MessageUtil.ERROR_MESSAGE_HR);
+                    out.println(MessageUtils.ERROR_MESSAGE_HR);
                     synchronized (lock) {
                         if (messageWasAlreadyPrintedForThisTrace == null) {
                             messageWasAlreadyPrintedForThisTrace = new ThreadLocal();
@@ -376,8 +376,8 @@ public class TemplateException extends Exception {
                     if (causeCause == null) {
                         try {
                             // Reflection is used to prevent dependency on Servlet classes.
-                            Method m = getCause().getClass().getMethod("getRootCause", _CollectionUtil.EMPTY_CLASS_ARRAY);
-                            Throwable rootCause = (Throwable) m.invoke(getCause(), _CollectionUtil.EMPTY_OBJECT_ARRAY);
+                            Method m = getCause().getClass().getMethod("getRootCause", _CollectionUtils.EMPTY_CLASS_ARRAY);
+                            Throwable rootCause = (Throwable) m.invoke(getCause(), _CollectionUtils.EMPTY_OBJECT_ARRAY);
                             if (rootCause != null) {
                                 out.println("ServletException root cause: ");
                                 out.printStandardStackTrace(rootCause);

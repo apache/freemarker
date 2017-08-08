@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * Thrown when you try to read a core (that is, non-custom) configuration setting which wasn't set and isn't inherited
@@ -39,7 +39,7 @@ public class CoreSettingValueNotSetException extends SettingValueNotSetException
     }
 
     public CoreSettingValueNotSetException(String settingName, Throwable cause) {
-        super("The " + _StringUtil.jQuote(settingName) + " setting is not set in this layer and has no default here "
+        super("The " + _StringUtils.jQuote(settingName) + " setting is not set in this layer and has no default here "
                 + "either.",  cause);
         this.settingName = settingName;
     }

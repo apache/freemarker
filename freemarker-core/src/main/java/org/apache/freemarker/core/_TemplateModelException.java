@@ -21,7 +21,7 @@ package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._ClassUtils;
 
 public class _TemplateModelException extends TemplateModelException {
 
@@ -126,7 +126,7 @@ public class _TemplateModelException extends TemplateModelException {
         return new Object[] {
                 "The FreeMarker value exists, but has nothing inside it; the TemplateModel object (class: ",
                 model.getClass().getName(), ") has returned a null",
-                (expected != null ? new Object[] { " instead of a ", _ClassUtil.getShortClassName(expected) } : ""),
+                (expected != null ? new Object[] { " instead of a ", _ClassUtils.getShortClassName(expected) } : ""),
                 ". This is possibly a bug in the non-FreeMarker code that builds the data-model." };
     }
     

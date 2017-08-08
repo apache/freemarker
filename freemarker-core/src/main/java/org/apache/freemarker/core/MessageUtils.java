@@ -23,7 +23,7 @@ import java.util.ArrayList;
 
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.core.valueformat.TemplateDateFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateValueFormatException;
@@ -32,7 +32,7 @@ import org.apache.freemarker.core.valueformat.UnknownDateTypeFormattingUnsupport
 /**
  * Utilities for creating error messages (and other messages).
  */
-class MessageUtil {
+class MessageUtils {
 
     static final String UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE
             = "Can't convert the date-like value to string because it isn't "
@@ -57,7 +57,7 @@ class MessageUtil {
     static final String ERROR_MESSAGE_HR = "----";
 
     // Can't be instantiated
-    private MessageUtil() { }
+    private MessageUtils() { }
 
     static String formatLocationForSimpleParsingError(Template template, int line, int column) {
         return formatLocation("in", template, line, column);
@@ -98,12 +98,12 @@ class MessageUtil {
             macroOrFuncName = null;
         } else {
             templateDesc = templateSourceName != null
-                ? "template " + _StringUtil.jQuoteNoXSS(templateSourceName)
+                ? "template " + _StringUtils.jQuoteNoXSS(templateSourceName)
                 : "nameless template";
         }
         return "in " + templateDesc
               + (macroOrFuncName != null
-                      ? " in " + (isFunction ? "function " : "macro ") + _StringUtil.jQuote(macroOrFuncName)
+                      ? " in " + (isFunction ? "function " : "macro ") + _StringUtils.jQuote(macroOrFuncName)
                       : "")
               + " "
               + preposition + " " + formatPosition(line, column);
@@ -283,9 +283,9 @@ class MessageUtil {
     static TemplateModelException newCantFormatUnknownTypeDateException(
             ASTExpression dateSourceExpr, UnknownDateTypeFormattingUnsupportedException cause) {
         return new _TemplateModelException(cause, null, new _ErrorDescriptionBuilder(
-                MessageUtil.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE)
+                MessageUtils.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE)
                 .blame(dateSourceExpr)
-                .tips(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
+                .tips(MessageUtils.UNKNOWN_DATE_TO_STRING_TIPS));
     }
 
     static TemplateException newCantFormatDateException(TemplateDateFormat format, ASTExpression dataSrcExp,

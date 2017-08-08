@@ -45,7 +45,7 @@ import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -164,7 +164,7 @@ public class BeanModel
 
     private void logNoSuchKey(String key, Map<?, ?> keyMap) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Key " + _StringUtil.jQuoteNoXSS(key) + " was not found on instance of " + 
+            LOG.debug("Key " + _StringUtils.jQuoteNoXSS(key) + " was not found on instance of " +
                 object.getClass().getName() + ". Introspection information for " +
                 "the class is: " + keyMap);
         }

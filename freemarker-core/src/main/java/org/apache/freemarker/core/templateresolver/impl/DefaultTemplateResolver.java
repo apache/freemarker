@@ -59,7 +59,7 @@ import org.apache.freemarker.core.templateresolver.TemplateResolverDependencies;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.apache.freemarker.core.util._NullArgumentException;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -309,8 +309,8 @@ public class DefaultTemplateResolver extends TemplateResolver {
                             Object newSource = newTemplateLoaderResult.getSource();
                             if (!nullSafeEquals(newSource, oldCachedResult.source)) {
                                 debugMsg.append("the source has been changed: ")
-                                        .append("cached.source=").append(_StringUtil.jQuoteNoXSS(oldCachedResult.source))
-                                        .append(", current.source=").append(_StringUtil.jQuoteNoXSS(newSource));
+                                        .append("cached.source=").append(_StringUtils.jQuoteNoXSS(oldCachedResult.source))
+                                        .append(", current.source=").append(_StringUtils.jQuoteNoXSS(newSource));
                             } else {
                                 Serializable newVersion = newTemplateLoaderResult.getVersion();
                                 if (!nullSafeEquals(oldCachedResult.version, newVersion)) {
@@ -354,7 +354,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
             // If we get here, then we need to (re)load the template
             if (debug) {
                 LOG.debug(debugPrefix + "Reading template content (source: "
-                        + _StringUtil.jQuoteNoXSS(newCachedResult.source) + ")");
+                        + _StringUtils.jQuoteNoXSS(newCachedResult.source) + ")");
             }
             
             Template template = loadTemplate(
@@ -576,7 +576,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
                         reader = new InputStreamReader(inputStream, templateSpecifiedEncoding);
                     } else {
                         throw new IllegalStateException(
-                                "TemplateLanguage " + _StringUtil.jQuote(templateLanguage.getName()) + " has thrown "
+                                "TemplateLanguage " + _StringUtils.jQuote(templateLanguage.getName()) + " has thrown "
                                 + WrongTemplateCharsetException.class.getName()
                                 + ", but its canSpecifyCharsetInContent property is false.");
                     }
@@ -650,9 +650,9 @@ public class DefaultTemplateResolver extends TemplateResolver {
     }
 
     private String getDebugPrefix(String operation, String name, Locale locale, Object customLookupCondition) {
-        return operation + " " + _StringUtil.jQuoteNoXSS(name) + "("
-                + _StringUtil.jQuoteNoXSS(locale)
-                + (customLookupCondition != null ? ", cond=" + _StringUtil.jQuoteNoXSS(customLookupCondition) : "")
+        return operation + " " + _StringUtils.jQuoteNoXSS(name) + "("
+                + _StringUtils.jQuoteNoXSS(locale)
+                + (customLookupCondition != null ? ", cond=" + _StringUtils.jQuoteNoXSS(customLookupCondition) : "")
                 + "): ";
     }    
 

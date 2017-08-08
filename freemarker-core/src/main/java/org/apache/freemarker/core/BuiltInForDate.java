@@ -31,7 +31,7 @@ abstract class BuiltInForDate extends ASTExpBuiltIn {
         TemplateModel model = target.eval(env);
         if (model instanceof TemplateDateModel) {
             TemplateDateModel tdm = (TemplateDateModel) model;
-            return calculateResult(_EvalUtil.modelToDate(tdm, target), tdm.getDateType(), env);
+            return calculateResult(_EvalUtils.modelToDate(tdm, target), tdm.getDateType(), env);
         } else {
             throw newNonDateException(env, model, target);
         }

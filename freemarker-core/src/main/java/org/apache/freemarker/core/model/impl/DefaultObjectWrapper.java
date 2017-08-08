@@ -68,7 +68,7 @@ import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.CommonBuilder;
-import org.apache.freemarker.core.util._ClassUtil;
+import org.apache.freemarker.core.util._ClassUtils;
 import org.apache.freemarker.core.util._NullArgumentException;
 
 /**
@@ -561,7 +561,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         Object res = tryUnwrapTo(model, targetClass, typeFlags, null);
         if ((typeFlags & TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT) != 0
                 && res instanceof Number) {
-            return OverloadedNumberUtil.addFallbackType((Number) res, typeFlags);
+            return OverloadedNumberUtils.addFallbackType((Number) res, typeFlags);
         } else {
             return res;
         }
@@ -578,7 +578,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         }
 
         if (targetClass.isPrimitive()) {
-            targetClass = _ClassUtil.primitiveClassToBoxingClass(targetClass);
+            targetClass = _ClassUtils.primitiveClassToBoxingClass(targetClass);
         }
 
         // This is for transparent interop with other wrappers (and ourselves)
@@ -592,7 +592,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
             }
 
             // Attempt numeric conversion:
-            if (targetClass != Object.class && (wrapped instanceof Number && _ClassUtil.isNumerical(targetClass))) {
+            if (targetClass != Object.class && (wrapped instanceof Number && _ClassUtils.isNumerical(targetClass))) {
                 Number number = forceUnwrappedNumberToType((Number) wrapped, targetClass);
                 if (number != null) return number;
             }
@@ -605,7 +605,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
             }
 
             // Attempt numeric conversion:
-            if (targetClass != Object.class && (wrapped instanceof Number && _ClassUtil.isNumerical(targetClass))) {
+            if (targetClass != Object.class && (wrapped instanceof Number && _ClassUtils.isNumerical(targetClass))) {
                 Number number = forceUnwrappedNumberToType((Number) wrapped, targetClass);
                 if (number != null) {
                     return number;
@@ -629,7 +629,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
             }
 
             // Primitive numeric types & Number.class and its subclasses
-            if (_ClassUtil.isNumerical(targetClass)) {
+            if (_ClassUtils.isNumerical(targetClass)) {
                 if (model instanceof TemplateNumberModel) {
                     Number number = forceUnwrappedNumberToType(
                             ((TemplateNumberModel) model).getAsNumber(), targetClass);
@@ -861,7 +861,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
                 if (listItem != null && !componentType.isInstance(listItem)) {
                     // Type conversion is needed. If we can't do it, we just let it fail at Array.set later.
                     if (!isComponentTypeExamined) {
-                        isComponentTypeNumerical = _ClassUtil.isNumerical(componentType);
+                        isComponentTypeNumerical = _ClassUtils.isNumerical(componentType);
                         isComponentTypeList = List.class.isAssignableFrom(componentType);
                         isComponentTypeExamined = true;
                     }
@@ -889,10 +889,10 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
                     Array.set(array, i, listItem);
                 } catch (IllegalArgumentException e) {
                     throw new TemplateModelException(
-                            "Failed to convert " + _ClassUtil.getShortClassNameOfObject(list)
-                                    + " object to " + _ClassUtil.getShortClassNameOfObject(array)
+                            "Failed to convert " + _ClassUtils.getShortClassNameOfObject(list)
+                                    + " object to " + _ClassUtils.getShortClassNameOfObject(array)
                                     + ": Problematic List item at index " + i + " with value type: "
-                                    + _ClassUtil.getShortClassNameOfObject(listItem), e);
+                                    + _ClassUtils.getShortClassNameOfObject(listItem), e);
                 }
                 i++;
             }
@@ -953,8 +953,8 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
             if (n instanceof BigInteger) {
                 return n;
             } else {
-                if (n instanceof OverloadedNumberUtil.IntegerBigDecimal) {
-                    return ((OverloadedNumberUtil.IntegerBigDecimal) n).bigIntegerValue();
+                if (n instanceof OverloadedNumberUtils.IntegerBigDecimal) {
+                    return ((OverloadedNumberUtils.IntegerBigDecimal) n).bigIntegerValue();
                 } else if (n instanceof BigDecimal) {
                     return ((BigDecimal) n).toBigInteger();
                 } else {
@@ -962,8 +962,8 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
                 }
             }
         } else {
-            final Number oriN = n instanceof OverloadedNumberUtil.NumberWithFallbackType
-                    ? ((OverloadedNumberUtil.NumberWithFallbackType) n).getSourceNumber() : n;
+            final Number oriN = n instanceof OverloadedNumberUtils.NumberWithFallbackType
+                    ? ((OverloadedNumberUtils.NumberWithFallbackType) n).getSourceNumber() : n;
             if (targetType.isInstance(oriN)) {
                 // Handle nonstandard Number subclasses as well as directly java.lang.Number.
                 return oriN;
@@ -1065,7 +1065,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
                 try {
                     return ctor.newInstance(pojoArgs);
                 } catch (Exception e) {
-                    throw _MethodUtil.newInvocationTemplateModelException(null, ctor, e);
+                    throw _MethodUtils.newInvocationTemplateModelException(null, ctor, e);
                 }
             } else if (ctors instanceof OverloadedMethods) {
                 // TODO [FM3] Utilize optional java type info in callPlace for overloaded method selection
@@ -1075,7 +1075,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
                 } catch (Exception e) {
                     if (e instanceof TemplateModelException) throw (TemplateModelException) e;
 
-                    throw _MethodUtil.newInvocationTemplateModelException(null, mma.getCallableMemberDescriptor(), e);
+                    throw _MethodUtils.newInvocationTemplateModelException(null, mma.getCallableMemberDescriptor(), e);
                 }
             } else {
                 // Cannot happen
@@ -1223,7 +1223,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
     @Override
     public String toString() {
         final String propsStr = toPropertiesString();
-        return _ClassUtil.getShortClassNameOfObject(this) + "@" + System.identityHashCode(this)
+        return _ClassUtils.getShortClassNameOfObject(this) + "@" + System.identityHashCode(this)
                 + "(" + incompatibleImprovements + ", "
                 + (propsStr.length() != 0 ? propsStr + ", ..." : "")
                 + ")";
@@ -1334,7 +1334,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
                 throw new IllegalStateException("build() can only be executed once.");
             }
 
-            DefaultObjectWrapper singleton = DefaultObjectWrapperTCCLSingletonUtil.getSingleton(
+            DefaultObjectWrapper singleton = DefaultObjectWrapperTCCLSingletonUtils.getSingleton(
                     this, INSTANCE_CACHE, INSTANCE_CACHE_REF_QUEUE, ConstructorInvoker.INSTANCE);
             alreadyBuilt = true;
             return singleton;
@@ -1348,7 +1348,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         }
 
         private static class ConstructorInvoker
-            implements DefaultObjectWrapperTCCLSingletonUtil._ConstructorInvoker<DefaultObjectWrapper, Builder> {
+            implements DefaultObjectWrapperTCCLSingletonUtils._ConstructorInvoker<DefaultObjectWrapper, Builder> {
 
             private static final ConstructorInvoker INSTANCE = new ConstructorInvoker();
 

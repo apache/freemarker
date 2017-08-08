@@ -25,7 +25,7 @@ import java.util.List;
 
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.util._SecurityUtil;
+import org.apache.freemarker.core.util._SecurityUtils;
 
 /**
  * Don't use this; used internally by FreeMarker, might changes without notice.
@@ -40,7 +40,7 @@ public abstract class _DebuggerService {
         // off, this is a fast no-op service, otherwise it's the real-thing
         // RMI service.
         return 
-            _SecurityUtil.getSystemProperty("org.apache.freemarker.core.debug.password", null) == null
+            _SecurityUtils.getSystemProperty("org.apache.freemarker.core.debug.password", null) == null
             ? new NoOpDebuggerService()
             : new RmiDebuggerService();
     }

@@ -21,7 +21,7 @@ package org.apache.freemarker.core;
 
 import java.io.Serializable;
 
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * Thrown by {@link ProcessingConfiguration#getCustomSetting(Serializable)} if the custom setting is not set.
@@ -41,7 +41,7 @@ public class CustomSettingValueNotSetException extends SettingValueNotSetExcepti
      * @param key {@link ProcessingConfiguration#getCustomSetting(Serializable)}
      */
     public CustomSettingValueNotSetException(Serializable key, Throwable cause) {
-        super("The " + _StringUtil.jQuote(key)
+        super("The " + _StringUtils.jQuote(key)
                 + (key instanceof String ? "" : " (key class " + key.getClass().getName() + ")")
                 + " setting is not set in this layer and has no default here either.",
                 cause);

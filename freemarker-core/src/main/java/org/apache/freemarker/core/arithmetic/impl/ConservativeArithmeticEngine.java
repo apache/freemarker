@@ -27,7 +27,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._MiscTemplateException;
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.util.BugException;
-import org.apache.freemarker.core.util._NumberUtil;
+import org.apache.freemarker.core.util._NumberUtils;
 
 /**
  * Arithmetic engine that uses (more-or-less) the widening conversions of
@@ -96,8 +96,8 @@ public class ConservativeArithmeticEngine extends ArithmeticEngine {
                 return n1.compareTo(n2);
             }
             case BIG_DECIMAL: {
-                BigDecimal n1 = _NumberUtil.toBigDecimal(first);
-                BigDecimal n2 = _NumberUtil.toBigDecimal(second);
+                BigDecimal n1 = _NumberUtils.toBigDecimal(first);
+                BigDecimal n2 = _NumberUtils.toBigDecimal(second);
                 return n1.compareTo(n2);
             }
         }
@@ -139,8 +139,8 @@ public class ConservativeArithmeticEngine extends ArithmeticEngine {
                 return n1.add(n2);
             }
             case BIG_DECIMAL: {
-                BigDecimal n1 = _NumberUtil.toBigDecimal(first);
-                BigDecimal n2 = _NumberUtil.toBigDecimal(second);
+                BigDecimal n1 = _NumberUtils.toBigDecimal(first);
+                BigDecimal n2 = _NumberUtils.toBigDecimal(second);
                 return n1.add(n2);
             }
         }
@@ -182,8 +182,8 @@ public class ConservativeArithmeticEngine extends ArithmeticEngine {
                 return n1.subtract(n2);
             }
             case BIG_DECIMAL: {
-                BigDecimal n1 = _NumberUtil.toBigDecimal(first);
-                BigDecimal n2 = _NumberUtil.toBigDecimal(second);
+                BigDecimal n1 = _NumberUtils.toBigDecimal(first);
+                BigDecimal n2 = _NumberUtils.toBigDecimal(second);
                 return n1.subtract(n2);
             }
         }
@@ -225,8 +225,8 @@ public class ConservativeArithmeticEngine extends ArithmeticEngine {
                 return n1.multiply(n2);
             }
             case BIG_DECIMAL: {
-                BigDecimal n1 = _NumberUtil.toBigDecimal(first);
-                BigDecimal n2 = _NumberUtil.toBigDecimal(second);
+                BigDecimal n1 = _NumberUtils.toBigDecimal(first);
+                BigDecimal n2 = _NumberUtils.toBigDecimal(second);
                 BigDecimal r = n1.multiply(n2);
                 return r.scale() > maxScale ? r.setScale(maxScale, roundingPolicy) : r;
             }
@@ -274,8 +274,8 @@ public class ConservativeArithmeticEngine extends ArithmeticEngine {
                 }
             }
             case BIG_DECIMAL: {
-                BigDecimal n1 = _NumberUtil.toBigDecimal(first);
-                BigDecimal n2 = _NumberUtil.toBigDecimal(second);
+                BigDecimal n1 = _NumberUtils.toBigDecimal(first);
+                BigDecimal n2 = _NumberUtils.toBigDecimal(second);
                 int scale1 = n1.scale();
                 int scale2 = n2.scale();
                 int scale = Math.max(scale1, scale2);
@@ -319,8 +319,8 @@ public class ConservativeArithmeticEngine extends ArithmeticEngine {
 
     @Override
     public Number toNumber(String s) {
-        Number n = _NumberUtil.toBigDecimalOrDouble(s);
-        return n instanceof BigDecimal ? _NumberUtil.optimizeNumberRepresentation(n) : n;
+        Number n = _NumberUtils.toBigDecimalOrDouble(s);
+        return n instanceof BigDecimal ? _NumberUtils.optimizeNumberRepresentation(n) : n;
     }
 
     private static Map createClassCodesMap() {

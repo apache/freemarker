@@ -32,7 +32,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.CommonSupplier;
 import org.apache.freemarker.core.util.StringToIndexMap;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -149,7 +149,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
         sb.append('@');
-        MessageUtil.appendExpressionAsUntearable(sb, callableValueExp);
+        MessageUtils.appendExpressionAsUntearable(sb, callableValueExp);
         boolean nameIsInParen = sb.charAt(sb.length() - 1) == ')';
         if (positionalArgs != null) {
             for (int i = 0; i < positionalArgs.length; i++) {
@@ -163,7 +163,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
         if (namedArgs != null) {
             for (NamedArgument namedArg : namedArgs) {
                 sb.append(' ');
-                sb.append(_StringUtil.toFTLTopLevelIdentifierReference(namedArg.getName()));
+                sb.append(_StringUtils.toFTLTopLevelIdentifierReference(namedArg.getName()));
                 sb.append('=');
                 sb.append(namedArg.getValue().getCanonicalForm());
             }
@@ -177,7 +177,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
                 } else {
                     first = false;
                 }
-                sb.append(_StringUtil.toFTLTopLevelIdentifierReference(nestedContentParamName));
+                sb.append(_StringUtils.toFTLTopLevelIdentifierReference(nestedContentParamName));
             }
         }
         if (canonical) {
@@ -360,8 +360,8 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
         } catch (Exception e) {
             throw new CallPlaceCustomDataInitializationException(
                     "Failed to initialize custom data for provider identity "
-                            + _StringUtil.tryToString(providerIdentity) + " via factory "
-                            + _StringUtil.tryToString(supplier), e);
+                            + _StringUtils.tryToString(providerIdentity) + " via factory "
+                            + _StringUtils.tryToString(supplier), e);
         }
         if (customData == null) {
             throw new NullPointerException("CommonSupplier.get() has returned null");

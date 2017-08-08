@@ -29,7 +29,7 @@ import java.nio.charset.StandardCharsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.freemarker.core.util._NullArgumentException;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,8 +68,8 @@ public abstract class FileTestCase extends TestCase {
     }
 
     private void multilineAssertEquals(String expected, String actual) {
-        String normExpected = _StringUtil.normalizeEOLs(expected);
-        final String normActual = _StringUtil.normalizeEOLs(actual);
+        String normExpected = _StringUtils.normalizeEOLs(expected);
+        final String normActual = _StringUtils.normalizeEOLs(actual);
         
         // Ignore final line-break difference:
         if (normActual.endsWith("\n") && !normExpected.endsWith("\n")) {
@@ -117,7 +117,7 @@ public abstract class FileTestCase extends TestCase {
         if (resource == null) {
             throw new FileNotFoundException("Class-loader resource not found for: "
                     + "baseClass: " + baseClass.getName() + "; "
-                    + "resourcePath (shown quoted): " + _StringUtil.jQuote(resourcePath));
+                    + "resourcePath (shown quoted): " + _StringUtils.jQuote(resourcePath));
         }
         return resource;
     }
@@ -205,7 +205,7 @@ public abstract class FileTestCase extends TestCase {
     }
     
     protected String loadTestTextResource(URL resource, Charset charset) throws IOException {
-        return TestUtil.removeTxtCopyrightComment(
+        return TestUtils.removeTxtCopyrightComment(
                 IOUtils.toString(resource, charset.name()));
     }
     

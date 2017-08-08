@@ -23,12 +23,12 @@ import java.lang.reflect.Method;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.freemarker.core.util._ClassUtil;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._ClassUtils;
+import org.apache.freemarker.core.util._StringUtils;
 
-final class TaglibMethodUtil {
+final class TaglibMethodUtils {
 
-    private TaglibMethodUtil() {
+    private TaglibMethodUtils() {
         // Not meant to be instantiated
     }
 
@@ -61,7 +61,7 @@ final class TaglibMethodUtil {
             if ("".equals(params)) {
                 paramTypes = new Class[0];
             } else {
-                String [] paramsArray = _StringUtil.split(params, ',');
+                String [] paramsArray = _StringUtils.split(params, ',');
                 paramTypes = new Class[paramsArray.length];
                 String token = null;
                 String paramType = null;
@@ -103,9 +103,9 @@ final class TaglibMethodUtil {
                         }
                     } else {
                         if (isArrayType) {
-                            paramTypes[i] = _ClassUtil.forName("[L" + paramType + ";");
+                            paramTypes[i] = _ClassUtils.forName("[L" + paramType + ";");
                         } else {
-                            paramTypes[i] = _ClassUtil.forName(paramType);
+                            paramTypes[i] = _ClassUtils.forName(paramType);
                         }
                     }
                 }

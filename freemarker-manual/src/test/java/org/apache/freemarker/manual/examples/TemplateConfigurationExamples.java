@@ -37,7 +37,7 @@ import org.apache.freemarker.core.templateresolver.FirstMatchTemplateConfigurati
 import org.apache.freemarker.core.templateresolver.MergingTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.OrMatcher;
 import org.apache.freemarker.core.templateresolver.PathGlobMatcher;
-import org.apache.freemarker.core.util._DateUtil;
+import org.apache.freemarker.core.util._DateUtils;
 import org.apache.freemarker.test.TemplateTest;
 import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
@@ -144,7 +144,7 @@ public class TemplateConfigurationExamples extends TemplateTest {
                                             .dateTimeFormat("iso")
                                             .dateFormat("iso")
                                             .timeFormat("iso")
-                                            .timeZone(_DateUtil.UTC)
+                                            .timeZone(_DateUtils.UTC)
                                             .build()),
                             new ConditionalTemplateConfigurationFactory(
                                     new PathGlobMatcher("mail/**"),

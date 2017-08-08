@@ -95,7 +95,7 @@ final class ASTDollarInterpolation extends ASTInterpolation {
 
     @Override
     protected Object calculateInterpolatedStringOrMarkup(Environment env) throws TemplateException {
-        return _EvalUtil.coerceModelToStringOrMarkup(escapedExpression.eval(env), escapedExpression, null, env);
+        return _EvalUtils.coerceModelToStringOrMarkup(escapedExpression.eval(env), escapedExpression, null, env);
     }
 
     @Override

@@ -23,41 +23,40 @@ import static org.junit.Assert.*;
 
 import java.lang.reflect.Method;
 
-import org.apache.freemarker.servlet.jsp.TaglibMethodUtil;
 import org.junit.Test;
 
-public class TaglibMethodUtilTest {
+public class TaglibMethodUtilsTest {
 
     @Test
     public void testGetMethodByFunctionSignature() throws Exception {
         Method expected = Functions.class.getMethod("plus", int.class, int.class);
         String signature = "int plus(int, int)";
-        Method method = TaglibMethodUtil.getMethodByFunctionSignature(Functions.class, signature);
+        Method method = TaglibMethodUtils.getMethodByFunctionSignature(Functions.class, signature);
         assertEquals(expected, method);
 
         expected = Functions.class.getMethod("plus", double.class, double.class);
         signature = "double  plus ( double , double )";
-        method = TaglibMethodUtil.getMethodByFunctionSignature(Functions.class, signature);
+        method = TaglibMethodUtils.getMethodByFunctionSignature(Functions.class, signature);
         assertEquals(expected, method);
 
         expected = Functions.class.getMethod("plus", String.class, String.class);
         signature = "java.lang.String plus ( java.lang.String  ,java.lang.String  )";
-        method = TaglibMethodUtil.getMethodByFunctionSignature(Functions.class, signature);
+        method = TaglibMethodUtils.getMethodByFunctionSignature(Functions.class, signature);
         assertEquals(expected, method);
 
         expected = Functions.class.getMethod("plus", double[].class, double[].class);
         signature = "double[] plus ( double[]  ,double []  )";
-        method = TaglibMethodUtil.getMethodByFunctionSignature(Functions.class, signature);
+        method = TaglibMethodUtils.getMethodByFunctionSignature(Functions.class, signature);
         assertEquals(expected, method);
 
         expected = Functions.class.getMethod("plus", String[].class, String[].class);
         signature = "java.lang.String [] plus ( java.lang.String[]  ,java.lang.String []  )";
-        method = TaglibMethodUtil.getMethodByFunctionSignature(Functions.class, signature);
+        method = TaglibMethodUtils.getMethodByFunctionSignature(Functions.class, signature);
         assertEquals(expected, method);
 
         expected = Functions.class.getMethod("sum", double[].class);
         signature = "double sum ( double[]  )";
-        method = TaglibMethodUtil.getMethodByFunctionSignature(Functions.class, signature);
+        method = TaglibMethodUtils.getMethodByFunctionSignature(Functions.class, signature);
         assertEquals(expected, method);
     }
 

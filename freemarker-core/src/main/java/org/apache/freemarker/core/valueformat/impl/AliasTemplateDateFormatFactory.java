@@ -23,8 +23,8 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.util._LocaleUtil;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._LocaleUtils;
+import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.core.valueformat.TemplateDateFormat;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateFormatUtil;
@@ -76,7 +76,7 @@ public final class AliasTemplateDateFormatFactory extends TemplateDateFormatFact
                 Locale lookupLocale = locale;
                 targetFormatString = localizedTargetFormatStrings.get(lookupLocale);
                 while (targetFormatString == null
-                        && (lookupLocale = _LocaleUtil.getLessSpecificLocale(lookupLocale)) != null) {
+                        && (lookupLocale = _LocaleUtils.getLessSpecificLocale(lookupLocale)) != null) {
                     targetFormatString = localizedTargetFormatStrings.get(lookupLocale);
                 }
             } else {
@@ -88,7 +88,7 @@ public final class AliasTemplateDateFormatFactory extends TemplateDateFormatFact
             return env.getTemplateDateFormat(targetFormatString, dateType, locale, timeZone, zonelessInput);
         } catch (TemplateValueFormatException e) {
             throw new AliasTargetTemplateValueFormatException("Failed to invoke format based on target format string,  "
-                    + _StringUtil.jQuote(params) + ". Reason given: " + e.getMessage(), e);
+                    + _StringUtils.jQuote(params) + ". Reason given: " + e.getMessage(), e);
         }
     }
 

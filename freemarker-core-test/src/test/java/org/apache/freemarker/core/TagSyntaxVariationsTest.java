@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.apache.freemarker.core.userpkg.UpperCaseDirective;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.test.TestConfigurationBuilder;
 
 import junit.framework.TestCase;
@@ -179,13 +179,13 @@ public class TagSyntaxVariationsTest extends TestCase {
         } catch (ParseException e) {
             if (expected != null) {
                 fail("Couldn't invoke Template from "
-                        + _StringUtil.jQuote(template) + ": " + e);
+                        + _StringUtils.jQuote(template) + ": " + e);
             } else {
                 return;
             }
         }
         if (expected == null) fail("Template parsing should have fail for "
-                + _StringUtil.jQuote(template));
+                + _StringUtils.jQuote(template));
         
         StringWriter out = new StringWriter();
         t.process(new Object(), out);

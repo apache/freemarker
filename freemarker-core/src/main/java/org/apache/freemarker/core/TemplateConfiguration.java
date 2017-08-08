@@ -29,7 +29,7 @@ import java.util.TimeZone;
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.util.CommonBuilder;
-import org.apache.freemarker.core.util._CollectionUtil;
+import org.apache.freemarker.core.util._CollectionUtils;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 
@@ -779,13 +779,13 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
                 setBooleanFormat(tc.getBooleanFormat());
             }
             if (tc.isCustomDateFormatsSet()) {
-                setCustomDateFormats(_CollectionUtil.mergeImmutableMaps(
+                setCustomDateFormats(_CollectionUtils.mergeImmutableMaps(
                         isCustomDateFormatsSet() ? getCustomDateFormats() : null, tc.getCustomDateFormats(), false),
                         true
                 );
             }
             if (tc.isCustomNumberFormatsSet()) {
-                setCustomNumberFormats(_CollectionUtil.mergeImmutableMaps(
+                setCustomNumberFormats(_CollectionUtils.mergeImmutableMaps(
                         isCustomNumberFormatsSet() ? getCustomNumberFormats() : null, tc.getCustomNumberFormats(), false),
                         true);
             }
@@ -856,21 +856,21 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
                 setLazyAutoImports(tc.getLazyAutoImports());
             }
             if (tc.isAutoImportsSet()) {
-                setAutoImports(_CollectionUtil.mergeImmutableMaps(
+                setAutoImports(_CollectionUtils.mergeImmutableMaps(
                         isAutoImportsSet() ? getAutoImports() : null,
                         tc.isAutoImportsSet() ? tc.getAutoImports() : null,
                         true),
                         true);
             }
             if (tc.isAutoIncludesSet()) {
-                setAutoIncludes(_CollectionUtil.mergeImmutableLists(
+                setAutoIncludes(_CollectionUtils.mergeImmutableLists(
                         isAutoIncludesSet() ? getAutoIncludes() : null,
                         tc.isAutoIncludesSet() ? tc.getAutoIncludes() : null,
                         true),
                         true);
             }
 
-            setCustomSettingsMap(_CollectionUtil.mergeImmutableMaps(
+            setCustomSettingsMap(_CollectionUtils.mergeImmutableMaps(
                     getCustomSettings(false),
                     tc.getCustomSettings(false),
                     false));

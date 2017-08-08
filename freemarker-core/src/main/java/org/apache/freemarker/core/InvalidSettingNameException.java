@@ -19,7 +19,7 @@
 package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.Configuration.ExtendableBuilder;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * Thrown by {@link ExtendableBuilder#setSetting(String, String)} if the setting name was not recognized.
@@ -28,12 +28,12 @@ import org.apache.freemarker.core.util._StringUtil;
 public class InvalidSettingNameException extends ConfigurationException {
 
     InvalidSettingNameException(String name, String correctedName) {
-        super("Unknown FreeMarker configuration setting: " + _StringUtil.jQuote(name)
-                + (correctedName == null ? "" : ". You may meant: " + _StringUtil.jQuote(correctedName)));
+        super("Unknown FreeMarker configuration setting: " + _StringUtils.jQuote(name)
+                + (correctedName == null ? "" : ". You may meant: " + _StringUtils.jQuote(correctedName)));
     }
 
     InvalidSettingNameException(String name, Version removedInVersion) {
-        super("Unknown FreeMarker configuration setting: " + _StringUtil.jQuote(name)
+        super("Unknown FreeMarker configuration setting: " + _StringUtils.jQuote(name)
                 + (removedInVersion == null ? "" : ". This setting was removed in version " + removedInVersion));
     }
 

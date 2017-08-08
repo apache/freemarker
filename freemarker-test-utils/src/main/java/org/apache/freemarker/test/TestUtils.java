@@ -7,9 +7,9 @@ import java.util.Set;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Version;
 
-public final class TestUtil {
+public final class TestUtils {
 
-    private TestUtil() {
+    private TestUtils() {
         // Not meant to be instantiated
     }
 

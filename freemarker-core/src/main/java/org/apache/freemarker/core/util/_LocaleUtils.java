@@ -23,7 +23,7 @@ import java.util.Locale;
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
  */
-public class _LocaleUtil {
+public class _LocaleUtils {
 
     /**
      * Returns a locale that's one less specific, or {@code null} if there's no less specific locale.

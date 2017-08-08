@@ -72,7 +72,7 @@ public final class SimpleJavaMethodModel extends SimpleMethod implements JavaMet
         } catch (TemplateModelException e) {
             throw e;
         } catch (Exception e) {
-            throw _MethodUtil.newInvocationTemplateModelException(object, getMember(), e);
+            throw _MethodUtils.newInvocationTemplateModelException(object, getMember(), e);
         }
     }
 

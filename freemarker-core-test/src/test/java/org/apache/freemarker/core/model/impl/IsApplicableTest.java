@@ -65,7 +65,7 @@ public class IsApplicableTest extends TestCase {
         assertApplicable(ats, BigDecimal.class);
         assertApplicable(ats, BigInteger.class);
 
-        ats = new ArgumentTypes(new Object[] { new OverloadedNumberUtil.IntegerOrByte(1, (byte) 1) });
+        ats = new ArgumentTypes(new Object[] { new OverloadedNumberUtils.IntegerOrByte(1, (byte) 1) });
         assertApplicable(ats, Object.class);
         assertNotApplicable(ats, CharSequence.class);
         assertNotApplicable(ats, String.class);

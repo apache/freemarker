@@ -20,7 +20,7 @@
 package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * AST expression node: Reference to a "top-level" (local, current namespace, global, data-model) variable
@@ -50,7 +50,7 @@ final class ASTExpVariable extends ASTExpression {
 
     @Override
     public String getCanonicalForm() {
-        return _StringUtil.toFTLTopLevelIdentifierReference(name);
+        return _StringUtils.toFTLTopLevelIdentifierReference(name);
     }
     
     /**

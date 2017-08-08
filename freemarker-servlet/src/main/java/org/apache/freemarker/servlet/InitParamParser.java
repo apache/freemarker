@@ -33,7 +33,7 @@ import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.MultiTemplateLoader;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,7 +127,7 @@ final class InitParamParser {
 
     static List<String> parseCommaSeparatedList(String value) throws ParseException {
         List<String> valuesList = new ArrayList<>();
-        String[] values = _StringUtil.split(value, ',');
+        String[] values = _StringUtils.split(value, ',');
         for (int i = 0; i < values.length; i++) {
             final String s = values[i].trim();
             if (s.length() != 0) {
@@ -243,7 +243,7 @@ final class InitParamParser {
         
         if (!biName.equals(TEMPLATE_PATH_SETTINGS_BI_NAME)) {
             throw new TemplatePathParsingException(
-                    _StringUtil.jQuote(biName) + " is unexpected after the \"?\". "
+                    _StringUtils.jQuote(biName) + " is unexpected after the \"?\". "
                     + "Expected \"" + TEMPLATE_PATH_SETTINGS_BI_NAME + "\".");
         }
         

@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util._CollectionUtil;
+import org.apache.freemarker.core.util._CollectionUtils;
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
@@ -50,7 +50,7 @@ public class _ModelAPI {
      */
     private static CallableMemberDescriptor getConstructorDescriptor(Class<?> pClass, Object[] args)
             throws NoSuchMethodException {
-        if (args == null) args = _CollectionUtil.EMPTY_OBJECT_ARRAY;
+        if (args == null) args = _CollectionUtils.EMPTY_OBJECT_ARRAY;
         
         final ArgumentTypes argTypes = new ArgumentTypes(args);
         final List<ReflectionCallableMemberDescriptor> fixedArgMemberDescs
@@ -59,7 +59,7 @@ public class _ModelAPI {
                 = new ArrayList<>();
         for (Constructor<?> constr : pClass.getConstructors()) {
             ReflectionCallableMemberDescriptor memberDesc = new ReflectionCallableMemberDescriptor(constr, constr.getParameterTypes());
-            if (!_MethodUtil.isVarargs(constr)) {
+            if (!_MethodUtils.isVarargs(constr)) {
                 fixedArgMemberDescs.add(memberDesc);
             } else {
                 varArgsMemberDescs.add(memberDesc);
@@ -91,7 +91,7 @@ public class _ModelAPI {
     private static Object newInstance(CallableMemberDescriptor constrDesc, Object[] args, DefaultObjectWrapper ow)
             throws InstantiationException, IllegalAccessException, InvocationTargetException, IllegalArgumentException,
             TemplateModelException {
-        if (args == null) args = _CollectionUtil.EMPTY_OBJECT_ARRAY;
+        if (args == null) args = _CollectionUtils.EMPTY_OBJECT_ARRAY;
         
         final Object[] packedArgs;
         if (constrDesc.isVarargs()) {

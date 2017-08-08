@@ -24,9 +24,9 @@ package org.apache.freemarker.dom;
  * This class is to work around the lack of module system in Java, i.e., so that other FreeMarker packages can
  * access things inside this package that users shouldn't. 
  */
-final class DomStringUtil {
+final class DomStringUtils {
 
-    private DomStringUtil() {
+    private DomStringUtils() {
         // Not meant to be instantiated
     }
 

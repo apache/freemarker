@@ -22,7 +22,7 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 
 import org.apache.freemarker.core.ASTExpression.ReplacemenetState;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * AST directive node: {@code #escape}.
@@ -60,7 +60,7 @@ class ASTDirEscape extends ASTDirective {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
         sb.append(getASTNodeDescriptor())
-                .append(' ').append(_StringUtil.toFTLTopLevelIdentifierReference(variable))
+                .append(' ').append(_StringUtils.toFTLTopLevelIdentifierReference(variable))
                 .append(" as ").append(expr.getCanonicalForm());
         if (canonical) {
             sb.append('>');

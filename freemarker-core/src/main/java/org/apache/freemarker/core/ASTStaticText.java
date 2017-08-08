@@ -21,8 +21,8 @@ package org.apache.freemarker.core;
 
 import java.io.IOException;
 
-import org.apache.freemarker.core.util._CollectionUtil;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._CollectionUtils;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * AST node representing static text.
@@ -76,7 +76,7 @@ final class ASTStaticText extends ASTElement {
             }
             return text;
         } else {
-            return "text " + _StringUtil.jQuote(new String(text));
+            return "text " + _StringUtils.jQuote(new String(text));
         }
     }
     
@@ -155,7 +155,7 @@ final class ASTStaticText extends ASTElement {
                     if (lastNewLineIndex >= 0  || beginColumn == 1) {
                         char[] firstPart = substring(text, 0, lastNewLineIndex + 1);
                         char[] lastLine = substring(text, 1 + lastNewLineIndex); 
-                        if (_StringUtil.isTrimmableToEmpty(lastLine)) {
+                        if (_StringUtils.isTrimmableToEmpty(lastLine)) {
                             text = firstPart;
                             endColumn = 0;
                         } else {
@@ -200,7 +200,7 @@ final class ASTStaticText extends ASTElement {
                     }
                     char[] trailingPart = substring(text, firstLineIndex);
                     char[] openingPart = substring(text, 0, firstLineIndex);
-                    if (_StringUtil.isTrimmableToEmpty(openingPart)) {
+                    if (_StringUtils.isTrimmableToEmpty(openingPart)) {
                         text = trailingPart;
                         beginLine++;
                         beginColumn = 1;
@@ -210,7 +210,7 @@ final class ASTStaticText extends ASTElement {
                             lastNonWS--;
                         }
                         char[] printablePart = substring(text, 0, lastNonWS + 1);
-                        if (_StringUtil.isTrimmableToEmpty(trailingPart)) {
+                        if (_StringUtils.isTrimmableToEmpty(trailingPart)) {
                         // THIS BLOCK IS HEINOUS! THERE MUST BE A BETTER WAY! REVISIT (JR)
                             boolean trimTrailingPart = true;
                             for (ASTElement te = nextTerminalNode();
@@ -224,7 +224,7 @@ final class ASTStaticText extends ASTElement {
                                     break;
                                 }
                             }
-                            if (trimTrailingPart) trailingPart = _CollectionUtil.EMPTY_CHAR_ARRAY;
+                            if (trimTrailingPart) trailingPart = _CollectionUtils.EMPTY_CHAR_ARRAY;
                         }
                         text = concat(printablePart, trailingPart);
                     }
@@ -271,7 +271,7 @@ final class ASTStaticText extends ASTElement {
                 ++newlineIndex;
             }
         }
-        if (!_StringUtil.isTrimmableToEmpty(text, 0, newlineIndex)) {
+        if (!_StringUtils.isTrimmableToEmpty(text, 0, newlineIndex)) {
             return 0;
         }
         // We look at the preceding elements on the line to see if we should
@@ -295,7 +295,7 @@ final class ASTStaticText extends ASTElement {
         if (lastNewlineIndex == -1 && beginColumn != 1) {
             return 0;
         }
-        if (!_StringUtil.isTrimmableToEmpty(text, lastNewlineIndex + 1)) {
+        if (!_StringUtils.isTrimmableToEmpty(text, lastNewlineIndex + 1)) {
             return 0;
         }
         // We look at the elements afterward on the same line to see if we should
@@ -349,7 +349,7 @@ final class ASTStaticText extends ASTElement {
             return true;
         }
         if (stripWhitespace) {
-            if (!_StringUtil.isTrimmableToEmpty(text)) {
+            if (!_StringUtils.isTrimmableToEmpty(text)) {
                 return false;
             }
             ASTElement parentElement = getParent();

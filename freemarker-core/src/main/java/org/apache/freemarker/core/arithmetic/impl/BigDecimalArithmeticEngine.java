@@ -21,7 +21,7 @@ package org.apache.freemarker.core.arithmetic.impl;
 import java.math.BigDecimal;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
-import org.apache.freemarker.core.util._NumberUtil;
+import org.apache.freemarker.core.util._NumberUtils;
 
 /**
  * Arithmetic engine that converts all numbers to {@link BigDecimal} and then operates on them, and also keeps the
@@ -40,37 +40,37 @@ public class BigDecimalArithmeticEngine extends ArithmeticEngine {
         // We try to find the result based on the sign (+/-/0) first, because:
         // - It's much faster than converting to BigDecial, and comparing to 0 is the most common comparison.
         // - It doesn't require any type conversions, and thus things like "Infinity > 0" won't fail.
-        int firstSignum = _NumberUtil.getSignum(first);
-        int secondSignum = _NumberUtil.getSignum(second);
+        int firstSignum = _NumberUtils.getSignum(first);
+        int secondSignum = _NumberUtils.getSignum(second);
         if (firstSignum != secondSignum) {
             return firstSignum < secondSignum ? -1 : (firstSignum > secondSignum ? 1 : 0);
         } else if (firstSignum == 0 && secondSignum == 0) {
             return 0;
         } else {
-            BigDecimal left = _NumberUtil.toBigDecimal(first);
-            BigDecimal right = _NumberUtil.toBigDecimal(second);
+            BigDecimal left = _NumberUtils.toBigDecimal(first);
+            BigDecimal right = _NumberUtils.toBigDecimal(second);
             return left.compareTo(right);
         }
     }
 
     @Override
     public Number add(Number first, Number second) {
-        BigDecimal left = _NumberUtil.toBigDecimal(first);
-        BigDecimal right = _NumberUtil.toBigDecimal(second);
+        BigDecimal left = _NumberUtils.toBigDecimal(first);
+        BigDecimal right = _NumberUtils.toBigDecimal(second);
         return left.add(right);
     }
 
     @Override
     public Number subtract(Number first, Number second) {
-        BigDecimal left = _NumberUtil.toBigDecimal(first);
-        BigDecimal right = _NumberUtil.toBigDecimal(second);
+        BigDecimal left = _NumberUtils.toBigDecimal(first);
+        BigDecimal right = _NumberUtils.toBigDecimal(second);
         return left.subtract(right);
     }
 
     @Override
     public Number multiply(Number first, Number second) {
-        BigDecimal left = _NumberUtil.toBigDecimal(first);
-        BigDecimal right = _NumberUtil.toBigDecimal(second);
+        BigDecimal left = _NumberUtils.toBigDecimal(first);
+        BigDecimal right = _NumberUtils.toBigDecimal(second);
         BigDecimal result = left.multiply(right);
         if (result.scale() > maxScale) {
             result = result.setScale(maxScale, roundingPolicy);
@@ -80,8 +80,8 @@ public class BigDecimalArithmeticEngine extends ArithmeticEngine {
 
     @Override
     public Number divide(Number first, Number second) {
-        BigDecimal left = _NumberUtil.toBigDecimal(first);
-        BigDecimal right = _NumberUtil.toBigDecimal(second);
+        BigDecimal left = _NumberUtils.toBigDecimal(first);
+        BigDecimal right = _NumberUtils.toBigDecimal(second);
         return divide(left, right);
     }
 
@@ -94,7 +94,7 @@ public class BigDecimalArithmeticEngine extends ArithmeticEngine {
 
     @Override
     public Number toNumber(String s) {
-        return _NumberUtil.toBigDecimalOrDouble(s);
+        return _NumberUtils.toBigDecimalOrDouble(s);
     }
 
     private BigDecimal divide(BigDecimal left, BigDecimal right) {

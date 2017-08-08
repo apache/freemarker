@@ -34,7 +34,7 @@ import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
-import org.apache.freemarker.test.TestUtil;
+import org.apache.freemarker.test.TestUtils;
 
 import junit.framework.TestCase;
 
@@ -52,7 +52,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
     public void testBuilderEqualsAndHash() throws Exception {
         assertEquals(Configuration.VERSION_3_0_0, new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).getIncompatibleImprovements());
         try {
-            new DefaultObjectWrapper.Builder(TestUtil.getClosestFutureVersion());
+            new DefaultObjectWrapper.Builder(TestUtils.getClosestFutureVersion());
             fail("Maybe you need to update this test for the new FreeMarker version");
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("upgrade"));

@@ -30,14 +30,14 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.apache.freemarker.core.util._DateUtil.CalendarFieldsToDateConverter;
-import org.apache.freemarker.core.util._DateUtil.DateParseException;
-import org.apache.freemarker.core.util._DateUtil.DateToISO8601CalendarFactory;
-import org.apache.freemarker.core.util._DateUtil.TrivialCalendarFieldsToDateConverter;
+import org.apache.freemarker.core.util._DateUtils.CalendarFieldsToDateConverter;
+import org.apache.freemarker.core.util._DateUtils.DateParseException;
+import org.apache.freemarker.core.util._DateUtils.DateToISO8601CalendarFactory;
+import org.apache.freemarker.core.util._DateUtils.TrivialCalendarFieldsToDateConverter;
 
 import junit.framework.TestCase;
 
-public class DateUtilTest extends TestCase {
+public class DateUtilsTest extends TestCase {
     
     private final TimeZone originalDefaultTZ = TimeZone.getDefault();
 
@@ -54,15 +54,15 @@ public class DateUtilTest extends TestCase {
     private final DateFormat df
             = new SimpleDateFormat("G yyyy-MM-dd HH:mm:ss:S Z", Locale.US);
     {
-        df.setTimeZone(_DateUtil.UTC);
+        df.setTimeZone(_DateUtils.UTC);
     }
     
     private CalendarFieldsToDateConverter cf2dc = new TrivialCalendarFieldsToDateConverter();
     
     private DateToISO8601CalendarFactory calendarFactory
-            = new _DateUtil.TrivialDateToISO8601CalendarFactory();
+            = new _DateUtils.TrivialDateToISO8601CalendarFactory();
     
-    public DateUtilTest(String name) {
+    public DateUtilsTest(String name) {
         super(name);
     }
     
@@ -203,18 +203,18 @@ public class DateUtilTest extends TestCase {
     }
 
     public void testGetTimeZone() throws Exception {
-        assertTrue(_DateUtil.getTimeZone("GMT") != _DateUtil.UTC);
-        assertTrue(_DateUtil.getTimeZone("UT1") != _DateUtil.UTC);
-        assertEquals(_DateUtil.getTimeZone("UTC"), _DateUtil.UTC);
+        assertTrue(_DateUtils.getTimeZone("GMT") != _DateUtils.UTC);
+        assertTrue(_DateUtils.getTimeZone("UT1") != _DateUtils.UTC);
+        assertEquals(_DateUtils.getTimeZone("UTC"), _DateUtils.UTC);
         
-        assertEquals(_DateUtil.getTimeZone("Europe/Rome"),
+        assertEquals(_DateUtils.getTimeZone("Europe/Rome"),
                 TimeZone.getTimeZone("Europe/Rome"));
         
-        assertEquals(_DateUtil.getTimeZone("Iceland"), // GMT and no DST
+        assertEquals(_DateUtils.getTimeZone("Iceland"), // GMT and no DST
                 TimeZone.getTimeZone("Iceland"));
         
         try {
-            _DateUtil.getTimeZone("Europe/NoSuch");
+            _DateUtils.getTimeZone("Europe/NoSuch");
             fail();
         } catch (UnrecognizedTimeZoneException e) {
             // good
@@ -225,12 +225,12 @@ public class DateUtilTest extends TestCase {
         Date t = new Date(0L);
         SimpleDateFormat tf = new SimpleDateFormat("HH:mm:ss");
         
-        tf.setTimeZone(_DateUtil.UTC);
+        tf.setTimeZone(_DateUtils.UTC);
         assertEquals("00:00:00", tf.format(t));
         assertEquals("00:00:00",
                 dateToISO8601UTCTimeString(t, false));
         
-        TimeZone gmt1 = _DateUtil.getTimeZone("GMT+01");
+        TimeZone gmt1 = _DateUtils.getTimeZone("GMT+01");
         tf.setTimeZone(gmt1);
         assertEquals("01:00:00", tf.format(t)); 
         assertEquals("01:00:00+01:00",
@@ -243,16 +243,16 @@ public class DateUtilTest extends TestCase {
                 dateToISO8601UTCDateTimeString(d, true));
         assertEquals("2000-02-08T09:05:04.25Z",
                 dateToISO8601String(d, true, true, true,
-                        _DateUtil.ACCURACY_MILLISECONDS, null));
+                        _DateUtils.ACCURACY_MILLISECONDS, null));
         assertEquals("2000-02-08T09:05:04Z",
                 dateToISO8601String(d, true, true, true,
-                        _DateUtil.ACCURACY_SECONDS, null));
+                        _DateUtils.ACCURACY_SECONDS, null));
         assertEquals("2000-02-08T09:05Z",
                 dateToISO8601String(d, true, true, true,
-                        _DateUtil.ACCURACY_MINUTES, null));
+                        _DateUtils.ACCURACY_MINUTES, null));
         assertEquals("2000-02-08T09Z",
                 dateToISO8601String(d, true, true, true,
-                        _DateUtil.ACCURACY_HOURS, null));
+                        _DateUtils.ACCURACY_HOURS, null));
         
         d = df.parse("AD 1998-10-30 19:30:00:000 +0400");
         assertEquals(
@@ -315,95 +315,95 @@ public class DateUtilTest extends TestCase {
         Date dsum = df.parse("AD 2010-05-09 20:00:00:0 UTC");
         Date dwin = df.parse("AD 2010-01-01 20:00:00:0 UTC");
         
-        TimeZone tzRome = _DateUtil.getTimeZone("Europe/Rome");
+        TimeZone tzRome = _DateUtils.getTimeZone("Europe/Rome");
         
         assertEquals(
                 "2010-01-01T21:00:00+01:00",
-                _DateUtil.dateToXSString(dwin, true, true, true, _DateUtil.ACCURACY_SECONDS, tzRome, calendarFactory));
+                _DateUtils.dateToXSString(dwin, true, true, true, _DateUtils.ACCURACY_SECONDS, tzRome, calendarFactory));
         assertEquals(
                 "2010-05-09T22:00:00+02:00",
-                _DateUtil.dateToXSString(dsum, true, true, true, _DateUtil.ACCURACY_SECONDS, tzRome, calendarFactory));
+                _DateUtils.dateToXSString(dsum, true, true, true, _DateUtils.ACCURACY_SECONDS, tzRome, calendarFactory));
         assertEquals(
                 "2010-01-01+01:00",  // ISO doesn't allow date-only with TZ
-                _DateUtil.dateToXSString(dwin, true, false, true, _DateUtil.ACCURACY_SECONDS, tzRome, calendarFactory));
+                _DateUtils.dateToXSString(dwin, true, false, true, _DateUtils.ACCURACY_SECONDS, tzRome, calendarFactory));
         assertEquals(
                 "2010-05-09+02:00",  // ISO doesn't allow date-only with TZ
-                _DateUtil.dateToXSString(dsum, true, false, true, _DateUtil.ACCURACY_SECONDS, tzRome, calendarFactory));
+                _DateUtils.dateToXSString(dsum, true, false, true, _DateUtils.ACCURACY_SECONDS, tzRome, calendarFactory));
         assertEquals(
                 "21:00:00+01:00",
-                _DateUtil.dateToXSString(dwin, false, true, true, _DateUtil.ACCURACY_SECONDS, tzRome, calendarFactory));
+                _DateUtils.dateToXSString(dwin, false, true, true, _DateUtils.ACCURACY_SECONDS, tzRome, calendarFactory));
         assertEquals(
                 "22:00:00+02:00",
-                _DateUtil.dateToXSString(dsum, false, true, true, _DateUtil.ACCURACY_SECONDS, tzRome, calendarFactory));
+                _DateUtils.dateToXSString(dsum, false, true, true, _DateUtils.ACCURACY_SECONDS, tzRome, calendarFactory));
         
         assertEquals(
                 "-1-02-29T06:15:24Z",  // ISO uses 0 for BC 1
-                _DateUtil.dateToXSString(
+                _DateUtils.dateToXSString(
                         df.parse("BC 0001-03-02 09:15:24:0 +0300"),
-                        true, true, true, _DateUtil.ACCURACY_SECONDS, _DateUtil.UTC, calendarFactory));
+                        true, true, true, _DateUtils.ACCURACY_SECONDS, _DateUtils.UTC, calendarFactory));
         assertEquals(
                 "-2-02-28T06:15:24Z",  // ISO uses -1 for BC 2
-                _DateUtil.dateToXSString(
+                _DateUtils.dateToXSString(
                         df.parse("BC 2-03-02 09:15:24:0 +0300"),
-                        true, true, true, _DateUtil.ACCURACY_SECONDS, _DateUtil.UTC, calendarFactory));
+                        true, true, true, _DateUtils.ACCURACY_SECONDS, _DateUtils.UTC, calendarFactory));
     }
     
     private String dateToISO8601DateTimeString(
             Date date, TimeZone tz) {
         return dateToISO8601String(date, true, true, true,
-                _DateUtil.ACCURACY_SECONDS, tz);
+                _DateUtils.ACCURACY_SECONDS, tz);
     }
     
     private String dateToISO8601UTCDateTimeString(
             Date date, boolean offsetPart) {
         return dateToISO8601String(date, true, true, offsetPart,
-                _DateUtil.ACCURACY_SECONDS, _DateUtil.UTC);
+                _DateUtils.ACCURACY_SECONDS, _DateUtils.UTC);
     }
 
     private String dateToISO8601UTCDateTimeMSString(
             Date date, boolean offsetPart) {
         return dateToISO8601String(date, true, true, offsetPart,
-                _DateUtil.ACCURACY_MILLISECONDS, _DateUtil.UTC);
+                _DateUtils.ACCURACY_MILLISECONDS, _DateUtils.UTC);
     }
 
     private String dateToISO8601UTCDateTimeMSFString(
             Date date, boolean offsetPart) {
         return dateToISO8601String(date, true, true, offsetPart,
-                _DateUtil.ACCURACY_MILLISECONDS_FORCED, _DateUtil.UTC);
+                _DateUtils.ACCURACY_MILLISECONDS_FORCED, _DateUtils.UTC);
     }
         
     private String dateToISO8601DateString(Date date, TimeZone tz) {
         return dateToISO8601String(date, true, false, false,
-                _DateUtil.ACCURACY_SECONDS, tz);
+                _DateUtils.ACCURACY_SECONDS, tz);
     }
 
     private String dateToISO8601UTCDateString(Date date) {
         return dateToISO8601String(date, true, false, false,
-                _DateUtil.ACCURACY_SECONDS, _DateUtil.UTC);
+                _DateUtils.ACCURACY_SECONDS, _DateUtils.UTC);
     }
     
     private String dateToISO8601TimeString(
             Date date, TimeZone tz) {
         return dateToISO8601String(date, false, true, true,
-                _DateUtil.ACCURACY_SECONDS, tz);
+                _DateUtils.ACCURACY_SECONDS, tz);
     }
     
     private String dateToISO8601UTCTimeString(
             Date date, boolean offsetPart) {
         return dateToISO8601String(date, false, true, offsetPart,
-                _DateUtil.ACCURACY_SECONDS, _DateUtil.UTC);
+                _DateUtils.ACCURACY_SECONDS, _DateUtils.UTC);
     }
 
     private String dateToISO8601UTCTimeMSString(
             Date date, boolean offsetPart) {
         return dateToISO8601String(date, false, true, offsetPart,
-                _DateUtil.ACCURACY_MILLISECONDS, _DateUtil.UTC);
+                _DateUtils.ACCURACY_MILLISECONDS, _DateUtils.UTC);
     }
 
     private String dateToISO8601UTCTimeMSFString(
             Date date, boolean offsetPart) {
         return dateToISO8601String(date, false, true, offsetPart,
-                _DateUtil.ACCURACY_MILLISECONDS_FORCED, _DateUtil.UTC);
+                _DateUtils.ACCURACY_MILLISECONDS_FORCED, _DateUtils.UTC);
     }
     
     private String dateToISO8601String(
@@ -411,7 +411,7 @@ public class DateUtilTest extends TestCase {
             boolean datePart, boolean timePart, boolean offsetPart,
             int accuracy,
             TimeZone timeZone) {
-        return _DateUtil.dateToISO8601String(
+        return _DateUtils.dateToISO8601String(
                 date,
                 datePart, timePart, offsetPart,
                 accuracy,
@@ -423,49 +423,49 @@ public class DateUtilTest extends TestCase {
         assertDateParsing(
                 "AD 1998-10-29 20:00:00:0 +0000",
                 null,
-                "1998-10-30+04:00", _DateUtil.UTC);
+                "1998-10-30+04:00", _DateUtils.UTC);
         assertDateParsing(
                 "AD 1998-10-30 02:00:00:0 +0000",
                 null,
-                "1998-10-30-02:00", _DateUtil.UTC);
+                "1998-10-30-02:00", _DateUtils.UTC);
         assertDateParsing(
                 "AD 1998-10-30 02:00:00:0 +0000",
-                "1998-10-30", _DateUtil.parseXSTimeZone("-02:00"));
+                "1998-10-30", _DateUtils.parseXSTimeZone("-02:00"));
         assertDateParsing(
                 null,
                 "AD 1998-10-30 02:00:00:0 +0000",
-                "19981030", _DateUtil.parseXSTimeZone("-02:00"));
+                "19981030", _DateUtils.parseXSTimeZone("-02:00"));
         assertDateParsing(
                 "AD 1998-10-30 00:00:00:0 +0000",
                 null,
-                "1998-10-30Z", _DateUtil.UTC);
+                "1998-10-30Z", _DateUtils.UTC);
         assertDateParsing(
                 "AD 1998-10-30 00:00:00:0 +0000",
-                "1998-10-30", _DateUtil.UTC);
+                "1998-10-30", _DateUtils.UTC);
         assertDateParsing(
                 null,
                 "AD 1998-10-30 00:00:00:0 +0000",
-                "19981030", _DateUtil.UTC);
+                "19981030", _DateUtils.UTC);
 
         assertDateParsing(
                 "AD 1998-10-29 20:00:00:0 +0000",
                 null,
-                "1998-10-30+04:00", _DateUtil.UTC);
+                "1998-10-30+04:00", _DateUtils.UTC);
         assertDateParsing(
                 "AD 1998-10-30 04:00:00:0 +0000",
                 null,
-                "1998-10-30-04:00", _DateUtil.UTC);
+                "1998-10-30-04:00", _DateUtils.UTC);
         assertDateParsing(
                 "AD 1998-10-30 00:00:00:0 +0000",
                 null,
-                "1998-10-30Z", _DateUtil.UTC);
+                "1998-10-30Z", _DateUtils.UTC);
         
         try {
             // XS doesn't have year 0
             assertDateParsing(
                     "BC 0000-02-05 00:00:00:0 +0000",
                     null,
-                    "0000-02-03Z", _DateUtil.UTC);
+                    "0000-02-03Z", _DateUtils.UTC);
             fail();
         } catch (DateParseException e) {
             echo(e);
@@ -473,61 +473,61 @@ public class DateUtilTest extends TestCase {
         assertDateParsing(
                 null,
                 "BC 0001-02-05 00:00:00:0 +0000",
-                "0000-02-03", _DateUtil.UTC);
+                "0000-02-03", _DateUtils.UTC);
         assertDateParsing(
                 null,
                 "BC 0001-02-05 00:00:00:0 +0000",
-                "00000203", _DateUtil.UTC);
+                "00000203", _DateUtils.UTC);
         
         assertDateParsing(
                 "BC 0001-02-05 00:00:00:0 +0000",  // Julian
                 "BC 0002-02-05 00:00:00:0 +0000",  // Julian
-                "-0001-02-03", _DateUtil.UTC);  // Proleptic Gregorian
+                "-0001-02-03", _DateUtils.UTC);  // Proleptic Gregorian
         assertDateParsing(
                 null,
                 "BC 0002-02-05 00:00:00:0 +0000",  // Julian
-                "-00010203", _DateUtil.UTC);  // Proleptic Gregorian
+                "-00010203", _DateUtils.UTC);  // Proleptic Gregorian
 
         assertDateParsing(
                 "AD 0001-02-05 00:00:00:0 +0000",  // Julian
                 null,
-                "0001-02-03Z", _DateUtil.UTC);  // Proleptic Gregorian
+                "0001-02-03Z", _DateUtils.UTC);  // Proleptic Gregorian
         assertDateParsing(
                 "AD 0001-02-05 00:00:00:0 +0000",  // Julian
-                "0001-02-03", _DateUtil.UTC);  // Proleptic Gregorian
+                "0001-02-03", _DateUtils.UTC);  // Proleptic Gregorian
         assertDateParsing(
                 null,
                 "AD 0001-02-05 00:00:00:0 +0000",  // Julian
-                "00010203", _DateUtil.UTC);  // Proleptic Gregorian
+                "00010203", _DateUtils.UTC);  // Proleptic Gregorian
         assertDateParsing(
                 "AD 1001-12-07 00:00:00:0 +0000",  // Julian
                 null,
-                "1001-12-13Z", _DateUtil.UTC);  // Proleptic Gregorian
+                "1001-12-13Z", _DateUtils.UTC);  // Proleptic Gregorian
         assertDateParsing(
                 "AD 1001-12-07 00:00:00:0 +0000",  // Julian
-                "1001-12-13", _DateUtil.UTC);  // Proleptic Gregorian
+                "1001-12-13", _DateUtils.UTC);  // Proleptic Gregorian
         
         assertDateParsing(
                 "AD 2006-12-31 00:00:00:0 +0000",
                 null,
-                "2006-12-31Z", _DateUtil.UTC);
+                "2006-12-31Z", _DateUtils.UTC);
         assertDateParsing(
                 "AD 2006-12-31 00:00:00:0 +0000",
-                "2006-12-31", _DateUtil.UTC);
+                "2006-12-31", _DateUtils.UTC);
         assertDateParsing(
                 "AD 2006-01-01 00:00:00:0 +0000",
                 null,
-                "2006-01-01Z", _DateUtil.UTC);
+                "2006-01-01Z", _DateUtils.UTC);
         assertDateParsing(
                 "AD 2006-01-01 00:00:00:0 +0000",
-                "2006-01-01", _DateUtil.UTC);
+                "2006-01-01", _DateUtils.UTC);
         assertDateParsing(
                 "AD 12006-01-01 00:00:00:0 +0000",
-                "12006-01-01", _DateUtil.UTC);
+                "12006-01-01", _DateUtils.UTC);
         assertDateParsing(
                 null,
                 "AD 12006-01-01 00:00:00:0 +0000",
-                "120060101", _DateUtil.UTC);
+                "120060101", _DateUtils.UTC);
     }
 
     public void testParseDateMalformed() {
@@ -552,105 +552,105 @@ public class DateUtilTest extends TestCase {
     public void testParseTime() throws DateParseException {
         assertTimeParsing(
                 "AD 1970-01-01 17:30:05:0 +0000",
-                "17:30:05", _DateUtil.UTC);
+                "17:30:05", _DateUtils.UTC);
         assertTimeParsing(
                 null,
                 "AD 1970-01-01 17:30:05:0 +0000",
-                "173005", _DateUtil.UTC);
+                "173005", _DateUtils.UTC);
         assertTimeParsing(
                 "AD 1970-01-01 07:30:00:100 +0000",
-                "07:30:00.1", _DateUtil.UTC);
+                "07:30:00.1", _DateUtils.UTC);
         assertTimeParsing(
                 "AD 1970-01-01 07:30:00:120 +0000",
-                "07:30:00.12", _DateUtil.UTC);
+                "07:30:00.12", _DateUtils.UTC);
         assertTimeParsing(
                 "AD 1970-01-01 07:30:00:123 +0000",
-                "07:30:00.123", _DateUtil.UTC);
+                "07:30:00.123", _DateUtils.UTC);
         assertTimeParsing(
                 "AD 1970-01-01 07:30:00:123 +0000",
-                "07:30:00.1235", _DateUtil.UTC);
+                "07:30:00.1235", _DateUtils.UTC);
         assertTimeParsing(
                 "AD 1970-01-01 07:30:00:123 +0000",
-                "07:30:00.12346", _DateUtil.UTC);
+                "07:30:00.12346", _DateUtils.UTC);
         assertTimeParsing(
                 null,
                 "AD 1970-01-01 07:30:00:123 +0000",
-                "073000.12346", _DateUtil.UTC);
+                "073000.12346", _DateUtils.UTC);
         assertTimeParsing(
                 null,
                 "AD 1970-01-01 07:30:00:123 +0000",
-                "073000,12346", _DateUtil.UTC);
+                "073000,12346", _DateUtils.UTC);
         assertTimeParsing(
                 "AD 1970-01-01 07:30:00:120 +0000",
-                "07:30:00.12", _DateUtil.UTC);
+                "07:30:00.12", _DateUtils.UTC);
         assertTimeParsing(
                 "AD 1970-01-01 07:30:00:500 +0000",
-                "07:30:00.5", _DateUtil.UTC);
+                "07:30:00.5", _DateUtils.UTC);
 
         assertTimeParsing(
                 "AD 1970-01-01 16:30:05:0 +0000",
-                "17:30:05+01:00", _DateUtil.UTC);
+                "17:30:05+01:00", _DateUtils.UTC);
         assertTimeParsing(
                 null,
                 "AD 1970-01-01 16:30:05:0 +0000",
-                "173005+01", _DateUtil.UTC);
+                "173005+01", _DateUtils.UTC);
         assertTimeParsing(
                 "AD 1970-01-01 19:00:05:0 +0000",
-                "17:30:05-01:30", _DateUtil.UTC);
+                "17:30:05-01:30", _DateUtils.UTC);
         assertTimeParsing(
                 null,
                 "AD 1970-01-01 19:00:05:0 +0000",
-                "173005-0130", _DateUtil.UTC);
+                "173005-0130", _DateUtils.UTC);
         assertTimeParsing(
                 "AD 1970-01-01 16:30:05:500 +0000",
-                "17:30:05.5+01:00", _DateUtil.UTC);
-        assertTimeParsing(
-                null,
-                "AD 1970-01-01 16:30:05:500 +0000",
-                "173005.5+0100", _DateUtil.UTC);
+                "17:30:05.5+01:00", _DateUtils.UTC);
         assertTimeParsing(
                 null,
                 "AD 1970-01-01 16:30:05:500 +0000",
-                "173005.5+01", _DateUtil.UTC);
+                "173005.5+0100", _DateUtils.UTC);
+        assertTimeParsing(
+                null,
+                "AD 1970-01-01 16:30:05:500 +0000",
+                "173005.5+01", _DateUtils.UTC);
         assertTimeParsing(
                 null,
                 "AD 1970-01-01 16:00:00:0 +0000",
-                "170000+01", _DateUtil.UTC);
+                "170000+01", _DateUtils.UTC);
         assertTimeParsing(
                 null,
                 "AD 1970-01-01 16:00:00:0 +0000",
-                "1700+01", _DateUtil.UTC);
+                "1700+01", _DateUtils.UTC);
         assertTimeParsing(
                 null,
                 "AD 1970-01-01 16:00:00:0 +0000",
-                "17+01", _DateUtil.UTC);
+                "17+01", _DateUtils.UTC);
         
         assertTimeParsing(
                 "AD 1970-01-01 00:00:00:0 +0000",
-                "00:00:00", _DateUtil.UTC);
+                "00:00:00", _DateUtils.UTC);
         assertTimeParsing(
                 "AD 1970-01-02 00:00:00:0 +0000",
-                "24:00:00", _DateUtil.UTC);
-        assertTimeParsing(
-                null,
-                "AD 1970-01-02 00:00:00:0 +0000",
-                "240000", _DateUtil.UTC);
+                "24:00:00", _DateUtils.UTC);
         assertTimeParsing(
                 null,
                 "AD 1970-01-02 00:00:00:0 +0000",
-                "2400", _DateUtil.UTC);
+                "240000", _DateUtils.UTC);
         assertTimeParsing(
                 null,
                 "AD 1970-01-02 00:00:00:0 +0000",
-                "24:00", _DateUtil.UTC);
+                "2400", _DateUtils.UTC);
         assertTimeParsing(
                 null,
                 "AD 1970-01-02 00:00:00:0 +0000",
-                "24", _DateUtil.UTC);
+                "24:00", _DateUtils.UTC);
+        assertTimeParsing(
+                null,
+                "AD 1970-01-02 00:00:00:0 +0000",
+                "24", _DateUtils.UTC);
         
         assertTimeParsing(
                 "AD 1970-01-01 23:59:59:999 +0000",
-                "23:59:59.999", _DateUtil.UTC);
+                "23:59:59.999", _DateUtils.UTC);
     }
 
     public void testParseTimeMalformed() {
@@ -679,73 +679,73 @@ public class DateUtilTest extends TestCase {
     public void testParseDateTime() throws DateParseException {
         assertDateTimeParsing( 
                 "AD 1998-10-30 11:30:00:0 +0000",
-                "1998-10-30T15:30:00+04:00", _DateUtil.UTC);
+                "1998-10-30T15:30:00+04:00", _DateUtils.UTC);
         assertDateTimeParsing(
                 null,
                 "AD 1998-10-30 11:30:00:0 +0000",
-                "19981030T153000+0400", _DateUtil.UTC);
+                "19981030T153000+0400", _DateUtils.UTC);
         assertDateTimeParsing(
                 "AD 1998-10-30 11:30:00:500 +0000",
-                "1998-10-30T15:30:00.5+04:00", _DateUtil.UTC);
+                "1998-10-30T15:30:00.5+04:00", _DateUtils.UTC);
         assertDateTimeParsing(
                 "AD 1998-10-30 15:30:00:0 +0000",
-                "1998-10-30T15:30:00Z", _DateUtil.UTC);
+                "1998-10-30T15:30:00Z", _DateUtils.UTC);
         assertDateTimeParsing(
                 null,
                 "AD 1998-10-30 15:30:00:0 +0000",
-                "19981030T1530Z", _DateUtil.UTC);
+                "19981030T1530Z", _DateUtils.UTC);
         assertDateTimeParsing(
                 "AD 1998-10-30 15:30:00:500 +0000",
-                "1998-10-30T15:30:00.5Z", _DateUtil.UTC);
+                "1998-10-30T15:30:00.5Z", _DateUtils.UTC);
         assertDateTimeParsing(
                 "AD 1998-10-30 11:30:00:0 +0000",
-                "1998-10-30T15:30:00+04:00", _DateUtil.UTC);
+                "1998-10-30T15:30:00+04:00", _DateUtils.UTC);
         assertDateTimeParsing(
                 "AD 1998-10-30 15:30:00:0 +0000",
-                "1998-10-30T15:30:00Z", _DateUtil.UTC);
+                "1998-10-30T15:30:00Z", _DateUtils.UTC);
         assertDateTimeParsing(
                 "AD 1998-10-30 15:30:00:0 +0000",
-                "1998-10-30T15:30:00", _DateUtil.UTC);
+                "1998-10-30T15:30:00", _DateUtils.UTC);
         assertDateTimeParsing(
                 null,
                 "AD 1998-10-30 15:30:00:0 +0000",
-                "1998-10-30T15:30", _DateUtil.UTC);
+                "1998-10-30T15:30", _DateUtils.UTC);
         
         assertDateTimeParsing(
                 "AD 1998-10-29 20:00:00:0 +0000",
-                "1998-10-30T00:00:00+04:00", _DateUtil.UTC);
+                "1998-10-30T00:00:00+04:00", _DateUtils.UTC);
         assertDateTimeParsing(
                 "AD 1998-10-30 02:00:00:0 +0000",
-                "1998-10-30T00:00:00-02:00", _DateUtil.UTC);
+                "1998-10-30T00:00:00-02:00", _DateUtils.UTC);
         assertDateTimeParsing(
                 "AD 1998-10-30 00:00:00:0 +0000",
-                "1998-10-30T00:00:00Z", _DateUtil.UTC);
+                "1998-10-30T00:00:00Z", _DateUtils.UTC);
 
         assertDateTimeParsing(
                 "AD 1998-10-29 20:00:00:0 +0000",
-                "1998-10-30T00:00:00+04:00", _DateUtil.UTC);
+                "1998-10-30T00:00:00+04:00", _DateUtils.UTC);
         assertDateTimeParsing(
                 "AD 1998-10-30 00:00:00:0 +0000",
-                "1998-10-30T00:00:00Z", _DateUtil.UTC);
-        assertDateTimeParsing(
-                null,
-                "AD 1998-10-30 00:00:00:0 +0000",
-                "1998-10-30T00:00Z", _DateUtil.UTC);
+                "1998-10-30T00:00:00Z", _DateUtils.UTC);
         assertDateTimeParsing(
                 null,
                 "AD 1998-10-30 00:00:00:0 +0000",
-                "1998-10-30T00:00", _DateUtil.UTC);
+                "1998-10-30T00:00Z", _DateUtils.UTC);
         assertDateTimeParsing(
                 null,
                 "AD 1998-10-30 00:00:00:0 +0000",
-                "19981030T00Z", _DateUtil.UTC);
+                "1998-10-30T00:00", _DateUtils.UTC);
+        assertDateTimeParsing(
+                null,
+                "AD 1998-10-30 00:00:00:0 +0000",
+                "19981030T00Z", _DateUtils.UTC);
         
         // BC years
         try {
             assertDateTimeParsing(
                         "",
                         null,
-                        "0000-02-03T00:00:00Z", _DateUtil.UTC);
+                        "0000-02-03T00:00:00Z", _DateUtils.UTC);
             fail();
         } catch (DateParseException e) {
             echo(e);
@@ -753,67 +753,67 @@ public class DateUtilTest extends TestCase {
         assertDateTimeParsing(
                 null,
                 "BC 0001-02-05 00:00:00:0 +0000",
-                "0000-02-03T00:00:00Z", _DateUtil.UTC);
+                "0000-02-03T00:00:00Z", _DateUtils.UTC);
         
         assertDateTimeParsing(
                 "BC 0001-02-05 00:00:00:0 +0000",  // Julian
                 "BC 0002-02-05 00:00:00:0 +0000",  // Julian
-                "-0001-02-03T00:00:00Z", _DateUtil.UTC);  // Proleptic Gregorian
+                "-0001-02-03T00:00:00Z", _DateUtils.UTC);  // Proleptic Gregorian
 
         assertDateTimeParsing(
                 "AD 0001-02-05 00:00:00:0 +0000",  // Julian
-                "0001-02-03T00:00:00Z", _DateUtil.UTC);  // Proleptic Gregorian
+                "0001-02-03T00:00:00Z", _DateUtils.UTC);  // Proleptic Gregorian
         assertDateTimeParsing(
                 "AD 1001-12-07 00:00:00:0 +0000",  // Julian
-                "1001-12-13T00:00:00Z", _DateUtil.UTC);  // Proleptic Gregorian
+                "1001-12-13T00:00:00Z", _DateUtils.UTC);  // Proleptic Gregorian
         assertDateTimeParsing(
                 "AD 11001-12-13 00:00:00:0 +0000",
-                "11001-12-13T00:00:00Z", _DateUtil.UTC);
+                "11001-12-13T00:00:00Z", _DateUtils.UTC);
         assertDateTimeParsing(
                 null,
                 "AD 11001-12-13 00:00:00:0 +0000",
-                "110011213T00Z", _DateUtil.UTC);
+                "110011213T00Z", _DateUtils.UTC);
         
         assertDateTimeParsing(
                 "AD 2006-12-31 00:00:00:0 +0000",
-                "2006-12-31T00:00:00Z", _DateUtil.UTC);
+                "2006-12-31T00:00:00Z", _DateUtils.UTC);
         assertDateTimeParsing(
                 "AD 2006-01-01 00:00:00:0 +0000",
-                "2006-01-01T00:00:00Z", _DateUtil.UTC);
+                "2006-01-01T00:00:00Z", _DateUtils.UTC);
         
         assertDateTimeParsing(
                 "AD 1970-01-01 07:30:00:123 +0000",
-                "1970-01-01T07:30:00.123", _DateUtil.UTC);
+                "1970-01-01T07:30:00.123", _DateUtils.UTC);
         assertDateTimeParsing(
                 "AD 1970-01-01 07:30:00:123 +0000",
-                "1970-01-01T07:30:00.1235", _DateUtil.UTC);
+                "1970-01-01T07:30:00.1235", _DateUtils.UTC);
         assertDateTimeParsing(
                 "AD 1970-01-01 07:30:00:123 +0000",
-                "1970-01-01T07:30:00.12346", _DateUtil.UTC);
+                "1970-01-01T07:30:00.12346", _DateUtils.UTC);
         assertDateTimeParsing(
                 "AD 1970-01-01 07:30:00:120 +0000",
-                "1970-01-01T07:30:00.12", _DateUtil.UTC);
+                "1970-01-01T07:30:00.12", _DateUtils.UTC);
         assertDateTimeParsing(
                 "AD 1970-01-01 07:30:00:500 +0000",
-                "1970-01-01T07:30:00.5", _DateUtil.UTC);
+                "1970-01-01T07:30:00.5", _DateUtils.UTC);
 
         assertDateTimeParsing(
                 "AD 1970-01-01 16:30:05:0 +0000",
-                "1970-01-01T17:30:05+01:00", _DateUtil.UTC);
+                "1970-01-01T17:30:05+01:00", _DateUtils.UTC);
         assertDateTimeParsing(
                 "AD 1970-01-01 16:30:05:500 +0000",
-                "1970-01-01T17:30:05.5+01:00", _DateUtil.UTC);
+                "1970-01-01T17:30:05.5+01:00", _DateUtils.UTC);
         
         assertDateTimeParsing(
                 "AD 1970-01-01 00:00:00:0 +0000",
-                "1970-01-01T00:00:00", _DateUtil.UTC);
+                "1970-01-01T00:00:00", _DateUtils.UTC);
         assertDateTimeParsing(
                 "AD 1970-01-02 00:00:00:0 +0000",
-                "1970-01-01T24:00:00", _DateUtil.UTC);
+                "1970-01-01T24:00:00", _DateUtils.UTC);
         
         assertDateTimeParsing(
                 "AD 1970-01-01 23:59:59:999 +0000",
-                "1970-01-01T23:59:59.999", _DateUtil.UTC);
+                "1970-01-01T23:59:59.999", _DateUtils.UTC);
     }
 
     public void testParseDateTimeMalformed() throws DateParseException {
@@ -832,54 +832,54 @@ public class DateUtilTest extends TestCase {
     
     public void testParseXSTimeZone() throws DateParseException {
         assertEquals(0,
-                _DateUtil.parseXSTimeZone("Z").getOffset(0));
+                _DateUtils.parseXSTimeZone("Z").getOffset(0));
         assertEquals(0,
-                _DateUtil.parseXSTimeZone("-00:00").getOffset(0));
+                _DateUtils.parseXSTimeZone("-00:00").getOffset(0));
         assertEquals(0,
-                _DateUtil.parseXSTimeZone("+00:00").getOffset(0));
+                _DateUtils.parseXSTimeZone("+00:00").getOffset(0));
         assertEquals(90 * 60 * 1000,
-                _DateUtil.parseXSTimeZone("+01:30").getOffset(0));
+                _DateUtils.parseXSTimeZone("+01:30").getOffset(0));
         assertEquals(-4 * 60 * 60 * 1000,
-                _DateUtil.parseXSTimeZone("-04:00").getOffset(0));
+                _DateUtils.parseXSTimeZone("-04:00").getOffset(0));
         assertEquals(((-23 * 60) - 59) * 60 * 1000,
-                _DateUtil.parseXSTimeZone("-23:59").getOffset(0));
+                _DateUtils.parseXSTimeZone("-23:59").getOffset(0));
         assertEquals(((23 * 60) + 59) * 60 * 1000,
-                _DateUtil.parseXSTimeZone("+23:59").getOffset(0));
+                _DateUtils.parseXSTimeZone("+23:59").getOffset(0));
     }
 
     public void testParseXSTimeZoneWrong() {
         try {
-            _DateUtil.parseXSTimeZone("04:00").getOffset(0);
+            _DateUtils.parseXSTimeZone("04:00").getOffset(0);
             fail();
         } catch (DateParseException e) {
             echo(e);
         }
         try {
-            _DateUtil.parseXSTimeZone("-04:00x").getOffset(0);
+            _DateUtils.parseXSTimeZone("-04:00x").getOffset(0);
             fail();
         } catch (DateParseException e) {
             echo(e);
         }
         try {
-            _DateUtil.parseXSTimeZone("-04").getOffset(0);
+            _DateUtils.parseXSTimeZone("-04").getOffset(0);
             fail();
         } catch (DateParseException e) {
             echo(e);
         }
         try {
-            _DateUtil.parseXSTimeZone("+24:00").getOffset(0);
+            _DateUtils.parseXSTimeZone("+24:00").getOffset(0);
             fail();
         } catch (DateParseException e) {
             echo(e);
         }
         try {
-            _DateUtil.parseXSTimeZone("-24:00").getOffset(0);
+            _DateUtils.parseXSTimeZone("-24:00").getOffset(0);
             fail();
         } catch (DateParseException e) {
             echo(e);
         }
         try {
-            _DateUtil.parseXSTimeZone("-01:60").getOffset(0);
+            _DateUtils.parseXSTimeZone("-01:60").getOffset(0);
             fail();
         } catch (DateParseException e) {
             echo(e);
@@ -939,7 +939,7 @@ public class DateUtilTest extends TestCase {
     private void assertJavaxAndFTLXSDateTimesSame(String s) throws DateParseException {
         XMLGregorianCalendar xgc = datetypeFactory.newXMLGregorianCalendar(s);
         Date javaxDate = xgc.toGregorianCalendar().getTime();
-        Date ftlDate = _DateUtil.parseXSDateTime(s, TimeZone.getDefault(), cf2dc);
+        Date ftlDate = _DateUtils.parseXSDateTime(s, TimeZone.getDefault(), cf2dc);
         assertEquals(javaxDate, ftlDate);
     }
 
@@ -952,12 +952,12 @@ public class DateUtilTest extends TestCase {
         if (expectedXS != null) {
             assertEquals(
                     expectedXS,
-                    df.format(_DateUtil.parseXSDate(parsed, tz, cf2dc)));
+                    df.format(_DateUtils.parseXSDate(parsed, tz, cf2dc)));
         }
         if (expectedISO8601 != null) {
             assertEquals(
                     expectedISO8601,
-                    df.format(_DateUtil.parseISO8601Date(parsed, tz, cf2dc)));
+                    df.format(_DateUtils.parseISO8601Date(parsed, tz, cf2dc)));
         }
     }
 
@@ -970,12 +970,12 @@ public class DateUtilTest extends TestCase {
         if (expectedXS != null) {
             assertEquals(
                     expectedXS,
-                    df.format(_DateUtil.parseXSDateTime(parsed, tz, cf2dc)));
+                    df.format(_DateUtils.parseXSDateTime(parsed, tz, cf2dc)));
         }
         if (expectedISO8601 != null) {
             assertEquals(
                     expectedISO8601,
-                    df.format(_DateUtil.parseISO8601DateTime(parsed, tz, cf2dc)));
+                    df.format(_DateUtils.parseISO8601DateTime(parsed, tz, cf2dc)));
         }
     }
 
@@ -988,25 +988,25 @@ public class DateUtilTest extends TestCase {
         if (expectedXS != null) {
             assertEquals(
                     expectedXS,
-                    df.format(_DateUtil.parseXSTime(parsed, tz, cf2dc)));
+                    df.format(_DateUtils.parseXSTime(parsed, tz, cf2dc)));
         }
         if (expectedISO8601 != null) {
             assertEquals(
                     expectedISO8601,
-                    df.format(_DateUtil.parseISO8601Time(parsed, tz, cf2dc)));
+                    df.format(_DateUtils.parseISO8601Time(parsed, tz, cf2dc)));
         }
     }
     
     private void assertDateMalformed(String parsed) {
         try {
-            _DateUtil.parseXSDate(parsed, _DateUtil.UTC, cf2dc);
+            _DateUtils.parseXSDate(parsed, _DateUtils.UTC, cf2dc);
             fail();
         } catch (DateParseException e) {
             // Expected
             echo(e);
         }
         try {
-            _DateUtil.parseISO8601Date(parsed, _DateUtil.UTC, cf2dc);
+            _DateUtils.parseISO8601Date(parsed, _DateUtils.UTC, cf2dc);
             fail();
         } catch (DateParseException e) {
             // Expected
@@ -1016,14 +1016,14 @@ public class DateUtilTest extends TestCase {
 
     private void assertTimeMalformed(String parsed) {
         try {
-            _DateUtil.parseXSTime(parsed, _DateUtil.UTC, cf2dc);
+            _DateUtils.parseXSTime(parsed, _DateUtils.UTC, cf2dc);
             fail();
         } catch (DateParseException e) {
             // Expected
             echo(e);
         }
         try {
-            _DateUtil.parseISO8601Time(parsed, _DateUtil.UTC, cf2dc);
+            _DateUtils.parseISO8601Time(parsed, _DateUtils.UTC, cf2dc);
             fail();
         } catch (DateParseException e) {
             // Expected
@@ -1033,14 +1033,14 @@ public class DateUtilTest extends TestCase {
 
     private void assertDateTimeMalformed(String parsed) {
         try {
-            _DateUtil.parseXSDateTime(parsed, _DateUtil.UTC, cf2dc);
+            _DateUtils.parseXSDateTime(parsed, _DateUtils.UTC, cf2dc);
             fail();
         } catch (DateParseException e) {
             // Expected
             echo(e);
         }
         try {
-            _DateUtil.parseISO8601DateTime(parsed, _DateUtil.UTC, cf2dc);
+            _DateUtils.parseISO8601DateTime(parsed, _DateUtils.UTC, cf2dc);
             fail();
         } catch (DateParseException e) {
             // Expected
@@ -1050,7 +1050,7 @@ public class DateUtilTest extends TestCase {
 
     private void assertISO8601DateMalformed(String parsed) {
         try {
-            _DateUtil.parseISO8601Date(parsed, _DateUtil.UTC, cf2dc);
+            _DateUtils.parseISO8601Date(parsed, _DateUtils.UTC, cf2dc);
             fail();
         } catch (DateParseException e) {
             // Expected
@@ -1060,7 +1060,7 @@ public class DateUtilTest extends TestCase {
     
     private void assertISO8601TimeMalformed(String parsed) {
         try {
-            _DateUtil.parseISO8601Time(parsed, _DateUtil.UTC, cf2dc);
+            _DateUtils.parseISO8601Time(parsed, _DateUtils.UTC, cf2dc);
             fail();
         } catch (DateParseException e) {
             // Expected
@@ -1070,7 +1070,7 @@ public class DateUtilTest extends TestCase {
     
     private void assertISO8601DateTimeMalformed(String parsed) {
         try {
-            _DateUtil.parseISO8601DateTime(parsed, _DateUtil.UTC, cf2dc);
+            _DateUtils.parseISO8601DateTime(parsed, _DateUtils.UTC, cf2dc);
             fail();
         } catch (DateParseException e) {
             // Expected

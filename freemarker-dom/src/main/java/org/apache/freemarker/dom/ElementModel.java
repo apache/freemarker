@@ -28,7 +28,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -104,7 +104,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
                     return super.get(key);
                 }
             } else { // Starts with "@", but not with "@@"
-                if (DomStringUtil.isXMLNameLike(key, 1)) {
+                if (DomStringUtils.isXMLNameLike(key, 1)) {
                     Attr att = getAttribute(key.substring(1));
                     if (att == null) { 
                         return new NodeListModel(this);
@@ -117,7 +117,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
                     return super.get(key);
                 }
             }
-        } else if (DomStringUtil.isXMLNameLike(key)) {
+        } else if (DomStringUtils.isXMLNameLike(key)) {
             // We interpret key as an element name
             NodeListModel result = ((NodeListModel) getChildNodes()).filterByName(key);
             return result.size() != 1 ? result : result.get(0);
@@ -229,6 +229,6 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
     }
 
     boolean matchesName(String name, Environment env) {
-        return _StringUtil.matchesQName(name, getNodeName(), getNodeNamespace(), env);
+        return _StringUtils.matchesQName(name, getNodeName(), getNodeNamespace(), env);
     }
 }

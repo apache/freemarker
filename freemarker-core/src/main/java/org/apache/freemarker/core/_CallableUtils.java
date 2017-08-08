@@ -36,7 +36,7 @@ import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.util.FTLUtil;
 import org.apache.freemarker.core.util.StringToIndexMap;
-import org.apache.freemarker.core.util._CollectionUtil;
+import org.apache.freemarker.core.util._CollectionUtils;
 
 /**
  * For internal use only; don't depend on this, there's no backward compatibility guarantee at all!
@@ -161,7 +161,7 @@ public final class _CallableUtils {
             TemplateModel argValue, String argName, int argIndex,
             boolean optional) throws TemplateException {
         if (argValue instanceof TemplateScalarModel) {
-            return _EvalUtil.modelToString((TemplateScalarModel) argValue, null, null);
+            return _EvalUtils.modelToString((TemplateScalarModel) argValue, null, null);
         }
         if (argValue == null) {
             if (optional) {
@@ -255,7 +255,7 @@ public final class _CallableUtils {
                                     (!validPredefNames.isEmpty()
                                             ? new Object[] { " The supported parameter names are:\n",
                                             new _DelayedJQuotedListing(validPredefNames)}
-                                            : _CollectionUtil.EMPTY_OBJECT_ARRAY)}
+                                            : _CollectionUtils.EMPTY_OBJECT_ARRAY)}
                             : "")
             );
             if (callableValue instanceof Environment.TemplateLanguageDirective

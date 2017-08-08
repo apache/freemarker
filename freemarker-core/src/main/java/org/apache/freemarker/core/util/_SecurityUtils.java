@@ -28,11 +28,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  */
-public class _SecurityUtil {
+public class _SecurityUtils {
 
-    private static final Logger LOG = LoggerFactory.getLogger(_SecurityUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(_SecurityUtils.class);
     
-    private _SecurityUtil() {
+    private _SecurityUtils() {
     }
     
     public static String getSystemProperty(final String key) {
@@ -59,8 +59,8 @@ public class _SecurityUtil {
         } catch (AccessControlException e) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn("Insufficient permissions to read system property " + 
-                        _StringUtil.jQuoteNoXSS(key) + ", using default value " +
-                        _StringUtil.jQuoteNoXSS(defValue));
+                        _StringUtils.jQuoteNoXSS(key) + ", using default value " +
+                        _StringUtils.jQuoteNoXSS(defValue));
             }
             return defValue;
         }
@@ -79,7 +79,7 @@ public class _SecurityUtil {
         } catch (AccessControlException e) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn("Insufficient permissions to read system property " + 
-                        _StringUtil.jQuote(key) + ", using default value " + defValue);
+                        _StringUtils.jQuote(key) + ", using default value " + defValue);
             }
             return Integer.valueOf(defValue);
         }

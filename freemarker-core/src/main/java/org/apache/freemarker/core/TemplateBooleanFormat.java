@@ -19,13 +19,15 @@
 
 package org.apache.freemarker.core;
 
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.core.valueformat.TemplateValueFormat;
 
 // TODO Should be public and moved over to core.valueformat?
 final class TemplateBooleanFormat extends TemplateValueFormat {
 
-    static final String C_TRUE_FALSE = "true,false";
+    static final String C_FALSE = "false";
+    static final String C_TRUE = "true";
+    static final String C_TRUE_FALSE = C_TRUE + "," + C_FALSE;
     static final TemplateBooleanFormat C_TRUE_FALSE_FORMAT = new TemplateBooleanFormat();
 
     static TemplateBooleanFormat getInstance(String format) {
@@ -85,7 +87,7 @@ final class TemplateBooleanFormat extends TemplateValueFormat {
 
     @Override
     public String getDescription() {
-        return _StringUtil.jQuote(formatString);
+        return _StringUtils.jQuote(formatString);
     }
 
 }

@@ -30,7 +30,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.apache.freemarker.core.util._DateUtil;
+import org.apache.freemarker.core.util._DateUtils;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
 
@@ -42,7 +42,7 @@ public class SQLTimeZoneTest extends TemplateTest {
 
     private final DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US);
     {
-        df.setTimeZone(_DateUtil.UTC);
+        df.setTimeZone(_DateUtils.UTC);
     }
     
     // Values that JDBC in GMT+02 would produce
@@ -266,7 +266,7 @@ public class SQLTimeZoneTest extends TemplateTest {
 
     private Configuration.ExtendableBuilder<?> testCacheFlushing_createBuilder() {
         return createConfigurationBuilder()
-                .timeZone(_DateUtil.UTC)
+                .timeZone(_DateUtils.UTC)
                 .sqlDateAndTimeTimeZone(null) // Default from FM2...
                 .dateFormat("yyyy-MM-dd E")
                 .timeFormat("HH:mm:ss E")
@@ -276,7 +276,7 @@ public class SQLTimeZoneTest extends TemplateTest {
     @Test
     public void testDateAndTimeBuiltInsHasNoEffect() throws Exception {
         setConfiguration(createConfigurationBuilder()
-                .timeZone(_DateUtil.UTC)
+                .timeZone(_DateUtils.UTC)
                 .sqlDateAndTimeTimeZone(GMT_P02)
                 .build());
 
@@ -297,7 +297,7 @@ public class SQLTimeZoneTest extends TemplateTest {
     @Test
     public void testChangeSettingInTemplate() throws Exception {
         setConfiguration(createConfigurationBuilder()
-                .timeZone(_DateUtil.UTC)
+                .timeZone(_DateUtils.UTC)
                 .sqlDateAndTimeTimeZone(null)
                 .build());
 

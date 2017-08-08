@@ -28,7 +28,7 @@ public class DuplicateStringKeyException extends IllegalArgumentException {
     private final String key;
 
     public DuplicateStringKeyException(String key) {
-        super("Duplicate key: " + _StringUtil.jQuote(key));
+        super("Duplicate key: " + _StringUtils.jQuote(key));
         this.key = key;
     }
 

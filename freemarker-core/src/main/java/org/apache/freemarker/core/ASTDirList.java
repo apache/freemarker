@@ -35,7 +35,7 @@ import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * AST directive node: {@code #list} element, or pre-{@code #else} section of it inside a
@@ -130,10 +130,10 @@ final class ASTDirList extends ASTDirective {
         buf.append(listedExp.getCanonicalForm());
         if (nestedContentParamName != null) {
             buf.append(" as ");
-            buf.append(_StringUtil.toFTLTopLevelIdentifierReference(nestedContentParamName));
+            buf.append(_StringUtils.toFTLTopLevelIdentifierReference(nestedContentParamName));
             if (nestedContentParam2Name != null) {
                 buf.append(", ");
-                buf.append(_StringUtil.toFTLTopLevelIdentifierReference(nestedContentParam2Name));
+                buf.append(_StringUtils.toFTLTopLevelIdentifierReference(nestedContentParam2Name));
             }
         }
         if (canonical) {

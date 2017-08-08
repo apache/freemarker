@@ -61,7 +61,7 @@ public class MiscNumericalOperationsTest extends TestCase {
         BigInteger bi = new BigInteger("123");
         assertEquals(DefaultObjectWrapper.forceUnwrappedNumberToType(new BigDecimal("123.6"), BigInteger.class), bi);
         assertEquals(DefaultObjectWrapper.forceUnwrappedNumberToType(
-                new OverloadedNumberUtil.IntegerBigDecimal(new BigDecimal("123")), BigInteger.class), bi);
+                new OverloadedNumberUtils.IntegerBigDecimal(new BigDecimal("123")), BigInteger.class), bi);
         assertTrue(DefaultObjectWrapper.forceUnwrappedNumberToType(bi, BigInteger.class) == bi);
         assertEquals(DefaultObjectWrapper.forceUnwrappedNumberToType(Long.valueOf(123), BigInteger.class), bi);
         assertEquals(DefaultObjectWrapper.forceUnwrappedNumberToType(Double.valueOf(123.6), BigInteger.class), bi);

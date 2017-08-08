@@ -34,7 +34,7 @@ import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.Version;
 
 /** Don't use this; used internally by FreeMarker, might changes without notice. */
-public class _StringUtil {
+public class _StringUtils {
 
     private static final char[] LT = new char[] { '&', 'l', 't', ';' };
     private static final char[] GT = new char[] { '&', 'g', 't', ';' };
@@ -1308,9 +1308,9 @@ public class _StringUtil {
         try {
             eStr = e.toString();
         } catch (Throwable e2) {
-            eStr = _ClassUtil.getShortClassNameOfObject(e);
+            eStr = _ClassUtils.getShortClassNameOfObject(e);
         }
-        return "[" + _ClassUtil.getShortClassNameOfObject(object) + ".toString() failed: " + eStr + "]";
+        return "[" + _ClassUtils.getShortClassNameOfObject(object) + ".toString() failed: " + eStr + "]";
     }
     
     /**
@@ -1378,7 +1378,7 @@ public class _StringUtil {
     /**
      * Behaves exactly like {@link String#trim()}, but works on arrays. If the resulting array would have the same
      * content after trimming, it returns the original array instance. Otherwise it returns a new array instance (or
-     * {@link _CollectionUtil#EMPTY_CHAR_ARRAY}).
+     * {@link _CollectionUtils#EMPTY_CHAR_ARRAY}).
      */
     public static char[] trim(final char[] cs) {
         if (cs.length == 0) {
@@ -1398,7 +1398,7 @@ public class _StringUtil {
             return cs;
         }
         if (start == end) {
-            return _CollectionUtil.EMPTY_CHAR_ARRAY;
+            return _CollectionUtils.EMPTY_CHAR_ARRAY;
         }
         
         char[] newCs = new char[end - start];

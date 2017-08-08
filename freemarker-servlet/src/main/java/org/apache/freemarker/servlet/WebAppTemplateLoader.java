@@ -38,9 +38,9 @@ import org.apache.freemarker.core.templateresolver.TemplateLoadingResult;
 import org.apache.freemarker.core.templateresolver.TemplateLoadingSource;
 import org.apache.freemarker.core.templateresolver.impl.URLTemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl._TemplateLoaderUtils;
-import org.apache.freemarker.core.util._CollectionUtil;
+import org.apache.freemarker.core.util._CollectionUtils;
 import org.apache.freemarker.core.util._NullArgumentException;
-import org.apache.freemarker.core.util._StringUtil;
+import org.apache.freemarker.core.util._StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,16 +119,16 @@ public class WebAppTemplateLoader implements TemplateLoader {
     @Override
     public String toString() {
         return _TemplateLoaderUtils.getClassNameForToString(this)
-                + "(subdirPath=" + _StringUtil.jQuote(subdirPath)
-                + ", servletContext={contextPath=" + _StringUtil.jQuote(getContextPath())
-                + ", displayName=" + _StringUtil.jQuote(servletContext.getServletContextName()) + "})";
+                + "(subdirPath=" + _StringUtils.jQuote(subdirPath)
+                + ", servletContext={contextPath=" + _StringUtils.jQuote(getContextPath())
+                + ", displayName=" + _StringUtils.jQuote(servletContext.getServletContextName()) + "})";
     }
 
     /** Gets the context path if we are on Servlet 2.5+, or else returns failure description string. */
     private String getContextPath() {
         try {
-            Method m = servletContext.getClass().getMethod("getContextPath", _CollectionUtil.EMPTY_CLASS_ARRAY);
-            return (String) m.invoke(servletContext, _CollectionUtil.EMPTY_OBJECT_ARRAY);
+            Method m = servletContext.getClass().getMethod("getContextPath", _CollectionUtils.EMPTY_CLASS_ARRAY);
+            return (String) m.invoke(servletContext, _CollectionUtils.EMPTY_OBJECT_ARRAY);
         } catch (Throwable e) {
             return "[can't query before Serlvet 2.5]";
         }
@@ -221,7 +221,7 @@ public class WebAppTemplateLoader implements TemplateLoader {
             url = servletContext.getResource(fullPath);
         } catch (MalformedURLException e) {
             if (LOG.isWarnEnabled()) {
-                LOG.warn("Could not retrieve resource " + _StringUtil.jQuoteNoXSS(fullPath), e);
+                LOG.warn("Could not retrieve resource " + _StringUtils.jQuoteNoXSS(fullPath), e);
             }
             return null;
         }

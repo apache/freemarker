@@ -21,7 +21,7 @@ package org.apache.freemarker.core.util;
 
 import org.apache.freemarker.core.model.impl.BeanModel;
 
-public class _ClassUtil {
+public class _ClassUtils {
     
     private static final String ORG_APACHE_FREEMARKER = "org.apache.freemarker.";
     private static final String ORG_APACHE_FREEMARKER_CORE = "org.apache.freemarker.core.";
@@ -29,7 +29,7 @@ public class _ClassUtil {
             = "org.apache.freemarker.core.templateresolver.";
     private static final String ORG_APACHE_FREEMARKER_CORE_MODEL = "org.apache.freemarker.core.model.";
 
-    private _ClassUtil() {
+    private _ClassUtils() {
     }
     
     /**
@@ -112,7 +112,7 @@ public class _ClassUtil {
         if (obj == null) {
             return "Null";
         } else {
-            return _ClassUtil.getShortClassName(obj.getClass(), shortenFreeMarkerClasses);
+            return _ClassUtils.getShortClassName(obj.getClass(), shortenFreeMarkerClasses);
         }
     }
 

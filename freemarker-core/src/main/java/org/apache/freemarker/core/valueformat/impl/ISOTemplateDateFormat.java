@@ -23,10 +23,10 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.util._DateUtil;
-import org.apache.freemarker.core.util._DateUtil.CalendarFieldsToDateConverter;
-import org.apache.freemarker.core.util._DateUtil.DateParseException;
-import org.apache.freemarker.core.util._DateUtil.DateToISO8601CalendarFactory;
+import org.apache.freemarker.core.util._DateUtils;
+import org.apache.freemarker.core.util._DateUtils.CalendarFieldsToDateConverter;
+import org.apache.freemarker.core.util._DateUtils.DateParseException;
+import org.apache.freemarker.core.util._DateUtils.DateToISO8601CalendarFactory;
 import org.apache.freemarker.core.valueformat.InvalidFormatParametersException;
 import org.apache.freemarker.core.valueformat.UnknownDateTypeFormattingUnsupportedException;
 
@@ -45,26 +45,26 @@ class ISOTemplateDateFormat extends ISOLikeTemplateDateFormat {
     @Override
     protected String format(Date date, boolean datePart, boolean timePart, boolean offsetPart, int accuracy,
             TimeZone timeZone, DateToISO8601CalendarFactory calendarFactory) {
-        return _DateUtil.dateToISO8601String(
+        return _DateUtils.dateToISO8601String(
                 date, datePart, timePart, timePart && offsetPart, accuracy, timeZone, calendarFactory);
     }
 
     @Override
     protected Date parseDate(String s, TimeZone tz, CalendarFieldsToDateConverter calToDateConverter)
             throws DateParseException {
-        return _DateUtil.parseISO8601Date(s, tz, calToDateConverter);
+        return _DateUtils.parseISO8601Date(s, tz, calToDateConverter);
     }
 
     @Override
     protected Date parseTime(String s, TimeZone tz, CalendarFieldsToDateConverter calToDateConverter)
             throws DateParseException {
-        return _DateUtil.parseISO8601Time(s, tz, calToDateConverter);
+        return _DateUtils.parseISO8601Time(s, tz, calToDateConverter);
     }
 
     @Override
     protected Date parseDateTime(String s, TimeZone tz,
             CalendarFieldsToDateConverter calToDateConverter) throws DateParseException {
-        return _DateUtil.parseISO8601DateTime(s, tz, calToDateConverter);
+        return _DateUtils.parseISO8601DateTime(s, tz, calToDateConverter);
     }
     
     @Override

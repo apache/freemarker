@@ -132,9 +132,9 @@ final class BuiltInsWithParseTimeParameters {
             for (int i = 0; i + 1 < paramCnt; i += 2) {
                 ASTExpression caseExp = (ASTExpression) parameters.get(i);
                 TemplateModel caseValue = caseExp.evalToNonMissing(env);
-                if (_EvalUtil.compare(
+                if (_EvalUtils.compare(
                         targetValue, target,
-                        _EvalUtil.CMP_OP_EQUALS, "==",
+                        _EvalUtils.CMP_OP_EQUALS, "==",
                         caseValue, caseExp,
                         this, true,
                         false, false, false,

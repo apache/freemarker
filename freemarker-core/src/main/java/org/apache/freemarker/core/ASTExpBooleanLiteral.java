@@ -44,7 +44,7 @@ final class ASTExpBooleanLiteral extends ASTExpression {
 
     @Override
     public String getCanonicalForm() {
-        return val ? MiscUtil.C_TRUE : MiscUtil.C_FALSE;
+        return val ? TemplateBooleanFormat.C_TRUE : TemplateBooleanFormat.C_FALSE;
     }
 
     @Override
@@ -54,7 +54,7 @@ final class ASTExpBooleanLiteral extends ASTExpression {
     
     @Override
     public String toString() {
-        return val ? MiscUtil.C_TRUE : MiscUtil.C_FALSE;
+        return val ? TemplateBooleanFormat.C_TRUE : TemplateBooleanFormat.C_FALSE;
     }
 
     @Override

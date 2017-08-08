@@ -366,7 +366,7 @@ public class FMParser {
         }
         if (legacyCompat && tm instanceof TemplateScalarModel) {
             try {
-                return _StringUtil.getYesNo(((TemplateScalarModel) tm).getAsString());
+                return _StringUtils.getYesNo(((TemplateScalarModel) tm).getAsString());
             } catch (Exception e) {
                 throw new ParseException(e.getMessage()
                         + "\nExpecting boolean (true/false), found: " + exp.getCanonicalForm(),
@@ -3040,7 +3040,7 @@ ASTDirMacroOrFunction Macro() :
                             break;
                         default:
                             throw new ParseException(
-                                    "Unsupported parameter option " + _StringUtil.jQuote(tk.image) + ". "
+                                    "Unsupported parameter option " + _StringUtils.jQuote(tk.image) + ". "
                                     + "The supported options are: \""
                                     + ASTDirMacroOrFunction.NAMED_PARAMETER_OPTION_NAME + "\", \""
                                     + ASTDirMacroOrFunction.POSITIONAL_PARAMETER_OPTION_NAME + "\".",
@@ -3207,7 +3207,7 @@ ASTDirMacroOrFunction Macro() :
                     children);
         } catch (DuplicateStringKeyException e) {
             throw new ParseException("The parameter list contains the parameter name "
-                    + _StringUtil.jQuote(e.getKey()) + " for multiple times.", template, start);
+                    + _StringUtils.jQuote(e.getKey()) + " for multiple times.", template, start);
         }
         result.setLocation(template, start, end);
         template.addMacro(result);
@@ -4013,7 +4013,7 @@ ASTElement OptionalBlock() :
         tp = ASTImplicitParent()
     ]
     {
-        return tp != null ? tp : new ASTStaticText(_CollectionUtil.EMPTY_CHAR_ARRAY, false);
+        return tp != null ? tp : new ASTStaticText(_CollectionUtils.EMPTY_CHAR_ARRAY, false);
     }
 }
 
@@ -4204,7 +4204,7 @@ void HeaderElement() :
                                         Object attValue = DeepUnwrap.unwrap(attributeMap.get(attName));
                                         if (attValue != null && !(attValue instanceof Serializable)) {
                                             throw new ParseException(
-                                                    "Value of custom setting " + _StringUtil.jQuote(attName)
+                                                    "Value of custom setting " + _StringUtils.jQuote(attName)
                                                     + " should implement java.io.Serializable.",
                                                     exp);
                                         }
@@ -4217,7 +4217,7 @@ void HeaderElement() :
                             sb.append("Unknown header parameter: ").append(ks);
 
                             if (ks.indexOf('_') != -1) {
-                                sb.append(MessageUtil.FM3_SNAKE_CASE);
+                                sb.append(MessageUtils.FM3_SNAKE_CASE);
                             }
 
                             String correctName;
