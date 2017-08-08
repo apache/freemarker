@@ -30,7 +30,7 @@ import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
-import org.apache.freemarker.core.util.FTLUtil;
+import org.apache.freemarker.core.util.TemplateLanguageUtils;
 import org.apache.freemarker.core.util._ClassUtils;
 
 /**
@@ -216,7 +216,7 @@ final class OverloadedMethods {
     private _DelayedConversionToString getTMActualParameterTypes(TemplateModel[] args) {
         final String[] argumentTypeDescs = new String[args.length];
         for (int i = 0; i < args.length; i++) {
-            argumentTypeDescs[i] = FTLUtil.getTypeDescription(args[i]);
+            argumentTypeDescs[i] = TemplateLanguageUtils.getTypeDescription(args[i]);
         }
         
         return new DelayedCallSignatureToString(argumentTypeDescs) {

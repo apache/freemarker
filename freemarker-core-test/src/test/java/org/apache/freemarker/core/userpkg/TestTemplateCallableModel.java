@@ -28,7 +28,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.util.FTLUtil;
+import org.apache.freemarker.core.util.TemplateLanguageUtils;
 import org.apache.freemarker.core.util._StringUtils;
 
 public abstract class TestTemplateCallableModel implements TemplateCallableModel {
@@ -64,7 +64,7 @@ public abstract class TestTemplateCallableModel implements TemplateCallableModel
         } else if (value instanceof TemplateNumberModel) {
             sb.append(((TemplateNumberModel) value).getAsNumber().toString());
         } else if (value instanceof TemplateScalarModel) {
-            sb.append(FTLUtil.toStringLiteral(((TemplateScalarModel) value).getAsString()));
+            sb.append(TemplateLanguageUtils.toStringLiteral(((TemplateScalarModel) value).getAsString()));
         } else if (value instanceof TemplateSequenceModel) {
             int len = ((TemplateSequenceModel) value).size();
             sb.append('[');

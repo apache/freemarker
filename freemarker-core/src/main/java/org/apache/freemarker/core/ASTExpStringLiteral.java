@@ -27,7 +27,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.outputformat.OutputFormat;
-import org.apache.freemarker.core.util.FTLUtil;
+import org.apache.freemarker.core.util.TemplateLanguageUtils;
 
 /**
  * AST expression node: string literal
@@ -149,7 +149,7 @@ final class ASTExpStringLiteral extends ASTExpression implements TemplateScalarM
     @Override
     public String getCanonicalForm() {
         if (dynamicValue == null) {
-            return FTLUtil.toStringLiteral(value);
+            return TemplateLanguageUtils.toStringLiteral(value);
         } else {
             StringBuilder sb = new StringBuilder();
             sb.append('"');
@@ -157,7 +157,7 @@ final class ASTExpStringLiteral extends ASTExpression implements TemplateScalarM
                 if (child instanceof ASTInterpolation) {
                     sb.append(((ASTInterpolation) child).getCanonicalFormInStringLiteral());
                 } else {
-                    sb.append(FTLUtil.escapeStringLiteralPart((String) child, '"'));
+                    sb.append(TemplateLanguageUtils.escapeStringLiteralPart((String) child, '"'));
                 }
             }
             sb.append('"');

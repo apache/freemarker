@@ -1541,18 +1541,18 @@ public class _StringUtils {
     }
 
     public static String toFTLIdentifierReferenceAfterDot(String name) {
-        return FTLUtil.escapeIdentifier(name);
+        return TemplateLanguageUtils.escapeIdentifier(name);
     }
 
     public static String toFTLTopLevelIdentifierReference(String name) {
-        return FTLUtil.escapeIdentifier(name);
+        return TemplateLanguageUtils.escapeIdentifier(name);
     }
 
     public static String toFTLTopLevelTragetIdentifier(final String name) {
         char quotationType = 0;
         scanForQuotationType: for (int i = 0; i < name.length(); i++) {
             final char c = name.charAt(i);
-            if (!(i == 0 ? FTLUtil.isNonEscapedIdentifierStart(c) : FTLUtil.isNonEscapedIdentifierPart(c)) && c != '@') {
+            if (!(i == 0 ? TemplateLanguageUtils.isNonEscapedIdentifierStart(c) : TemplateLanguageUtils.isNonEscapedIdentifierPart(c)) && c != '@') {
                 if ((quotationType == 0 || quotationType == '\\') && (c == '-' || c == '.' || c == ':')) {
                     quotationType = '\\';
                 } else {
@@ -1565,9 +1565,9 @@ public class _StringUtils {
         case 0:
             return name;
         case '"':
-            return FTLUtil.toStringLiteral(name);
+            return TemplateLanguageUtils.toStringLiteral(name);
         case '\\':
-            return FTLUtil.escapeIdentifier(name);
+            return TemplateLanguageUtils.escapeIdentifier(name);
         default:
             throw new BugException();
         }

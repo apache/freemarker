@@ -51,11 +51,11 @@ import org.apache.freemarker.core.model.impl.JavaMethodModel;
  * This is meant to be used from outside FreeMarker (i.e., it's an official, published API), not just from inside it.
  */
 // TODO [FM3] This name won't be good if the template language isn't called "FTL"...
-public final class FTLUtil {
+public final class TemplateLanguageUtils {
 
     private static final char[] ESCAPES = createEscapes();
 
-    private FTLUtil() {
+    private TemplateLanguageUtils() {
         // Not meant to be instantiated
     }
 

@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.freemarker.core.util.FTLUtil;
+import org.apache.freemarker.core.util.TemplateLanguageUtils;
 
 /**
  * For testing overloaded method selection.
@@ -149,9 +149,9 @@ public class OverloadedMethods {
 		if (value == null) {
 		    return "null";
 		} else if (value instanceof Character) {
-			return "'" + FTLUtil.escapeStringLiteralPart(value.toString()) + "'";
+			return "'" + TemplateLanguageUtils.escapeStringLiteralPart(value.toString()) + "'";
 		} else if (value instanceof String) {
-			return "\"" + FTLUtil.escapeStringLiteralPart((String) value) + "\"";
+			return "\"" + TemplateLanguageUtils.escapeStringLiteralPart((String) value) + "\"";
 		} else if (value instanceof Map) {
 			StringBuilder sb = new StringBuilder(); 
 			sb.append("{");

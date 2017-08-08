@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util.FTLUtil;
+import org.apache.freemarker.core.util.TemplateLanguageUtils;
 import org.apache.freemarker.core.util._ClassUtils;
 import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.test.TestConfigurationBuilder;
@@ -330,7 +330,7 @@ public class ASTPrinter {
                     out.write(INDENTATION);
                     out.write(ind);
                     out.write("= const ");
-                    out.write(FTLUtil.getTypeDescription(tm));
+                    out.write(TemplateLanguageUtils.getTypeDescription(tm));
                     out.write(' ');
                     out.write(tm.toString());
                     out.write('\n');

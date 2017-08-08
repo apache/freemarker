@@ -2165,7 +2165,7 @@ ASTExpStringLiteral ASTExpStringLiteral(boolean interpolate) :
             s = t.image.substring(2, t.image.length() -1);
         } else {
 	        try {
-	            s = FTLUtil.unescapeStringLiteralPart(t.image.substring(1, t.image.length() -1));
+	            s = TemplateLanguageUtils.unescapeStringLiteralPart(t.image.substring(1, t.image.length() -1));
             } catch (GenericParseException e) {
                 throw new ParseException(e.getMessage(), template, t);
             }
@@ -3633,7 +3633,7 @@ ASTDirOutputFormat OutputFormat() :
             }
         } else {
             throw new ParseException(
-                    "Parameter must be a string, but was: " + FTLUtil.getTypeDescription(paramTM),
+                    "Parameter must be a string, but was: " + TemplateLanguageUtils.getTypeDescription(paramTM),
                     paramExp);
         }
         

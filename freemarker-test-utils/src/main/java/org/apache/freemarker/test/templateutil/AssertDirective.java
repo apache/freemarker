@@ -29,7 +29,7 @@ import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util.FTLUtil;
+import org.apache.freemarker.core.util.TemplateLanguageUtils;
 
 public class AssertDirective implements TemplateDirectiveModel {
     public static AssertDirective INSTANCE = new AssertDirective();
@@ -45,7 +45,7 @@ public class AssertDirective implements TemplateDirectiveModel {
         }
         if (!(test instanceof TemplateBooleanModel)) {
             throw new AssertationFailedInTemplateException("Assertion failed:\n"
-                    + "The value had to be boolean, but it was of type" + FTLUtil.getTypeDescription(test),
+                    + "The value had to be boolean, but it was of type" + TemplateLanguageUtils.getTypeDescription(test),
                     env);
         }
         if (!((TemplateBooleanModel) test).getAsBoolean()) {

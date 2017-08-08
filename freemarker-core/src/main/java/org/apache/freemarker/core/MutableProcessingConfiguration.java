@@ -58,7 +58,7 @@ import org.apache.freemarker.core.templateresolver.OrMatcher;
 import org.apache.freemarker.core.templateresolver.PathGlobMatcher;
 import org.apache.freemarker.core.templateresolver.PathRegexMatcher;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
-import org.apache.freemarker.core.util.FTLUtil;
+import org.apache.freemarker.core.util.TemplateLanguageUtils;
 import org.apache.freemarker.core.util.GenericParseException;
 import org.apache.freemarker.core.util.OptInTemplateClassResolver;
 import org.apache.freemarker.core.util._ClassUtils;
@@ -2209,7 +2209,7 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
             if (w.startsWith("'") || w.startsWith("\"")) {
                 w = w.substring(1, w.length() - 1);
             }
-            return FTLUtil.unescapeStringLiteralPart(w);
+            return TemplateLanguageUtils.unescapeStringLiteralPart(w);
         }
 
         String fetchKeyword() throws GenericParseException {

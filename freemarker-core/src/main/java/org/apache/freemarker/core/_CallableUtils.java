@@ -34,7 +34,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.util.FTLUtil;
+import org.apache.freemarker.core.util.TemplateLanguageUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util._CollectionUtils;
 
@@ -238,7 +238,7 @@ public final class _CallableUtils {
             checkSupportsAnyParameters(callableValue, argsLayout, env);
             List<String> validPredefNames = argsLayout.getPredefinedNamedArgumentsMap().getKeys();
             _ErrorDescriptionBuilder errorDesc = new _ErrorDescriptionBuilder(
-                    "The called ", FTLUtil.getCallableTypeName(callableValue), " ",
+                    "The called ", TemplateLanguageUtils.getCallableTypeName(callableValue), " ",
                     (predefPosArgCnt != 0
                             ? new Object[]{ "can only have ", predefPosArgCnt }
                             : "can't have"
@@ -286,7 +286,7 @@ public final class _CallableUtils {
                                     validNames == null || validNames.isEmpty()
                                             ? getNamedArgumentsNotSupportedMessage(callableValue, namedArg)
                                             : new Object[] {
-                                                    "The called ", FTLUtil.getCallableTypeName(callableValue),
+                                                    "The called ", TemplateLanguageUtils.getCallableTypeName(callableValue),
                                                     " has no parameter that's passed by name and is called ",
                                                     new _DelayedJQuote(namedArg.name),
                                                     ". The supported parameter names are:\n",
@@ -309,7 +309,7 @@ public final class _CallableUtils {
     private static Object[] getNamedArgumentsNotSupportedMessage(TemplateCallableModel callableValue,
             NamedArgument namedArg) {
         return new Object[] {
-                "The called ", FTLUtil.getCallableTypeName(callableValue),
+                "The called ", TemplateLanguageUtils.getCallableTypeName(callableValue),
                 " can't have arguments that are passed by name (like ",
                 new _DelayedJQuote(namedArg.name), "). Try to pass arguments by position "
                 + "(i.e, without name, as in ",
@@ -325,7 +325,7 @@ public final class _CallableUtils {
             throws TemplateException {
         if (argsLayout.getTotalLength() == 0) {
             throw new _MiscTemplateException(env,
-                    "The called ", FTLUtil.getCallableTypeName(callableValue), " doesn't support any parameters.");
+                    "The called ", TemplateLanguageUtils.getCallableTypeName(callableValue), " doesn't support any parameters.");
         }
     }
 

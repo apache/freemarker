@@ -469,6 +469,8 @@ Core / Miscellaneous
 - Removed `NestedContentNotSupportedException`, as `TemplateDirectiveModel.isNestedContentSupported()` now takes care
   of that problem.
 - CallPlaceCustomDataInitializationException is not a checked exception anymore (now it extends RuntimeException)
+- Renamed `FTLUtil` to `TemplateLanguageUtils` (as the FTL name will be abandoned in FM3, and supporting multiple
+  languages are planned in the future)
 
 
 Build / development process changes
