@@ -35,7 +35,7 @@ import org.apache.freemarker.core.outputformat.impl.*;
 import org.apache.freemarker.core.model.*;
 import org.apache.freemarker.core.model.impl.*;
 import org.apache.freemarker.core.util.*;
-import org.apache.freemarker.core.ASTDynamicTopLevelCall.NamedArgument;
+import org.apache.freemarker.core._CallableUtils.NamedArgument;
 import java.io.*;
 import java.util.*;
 import java.nio.charset.Charset;
@@ -1838,7 +1838,7 @@ ASTExpression AddSubExpression(ASTExpression exp) :
         |
         result = DynamicKey(exp)
         |
-        result = MethodArgs(exp)
+        result = FunctionCall(exp)
         |
         result = ASTExpBuiltIn(exp)
         |
@@ -2038,24 +2038,114 @@ ASTExpression DynamicKey(ASTExpression exp) :
 }
 
 /**
- * production for an arglist part of a method invocation.
+ * This is the argument list part of a function/method invocation.
  */
-ASTExpFunctionCall MethodArgs(ASTExpression exp) :
+ASTExpFunctionCall FunctionCall(ASTExpression functionExp) :
 {
-        ArrayList args = new ArrayList();
-        Token end;
+    Token t;
+    ASTExpression exp;
+
+    Token start = null, end;
+    Token prevChoiceComma = null;
+    List<ASTExpression> positionalArgs = null;
+    List<NamedArgument> namedArgs = null;
 }
 {
-        <OPEN_PAREN>
-        args = PositionalArgs()
-        end = <CLOSE_PAREN>
-        {
-            args.trimToSize();
-            ASTExpFunctionCall result = new ASTExpFunctionCall(exp, args);
-            result.setLocation(template, exp, end);
-            return result;
+    start = <OPEN_PAREN>
+
+    (
+        LOOKAHEAD(<ID><ASSIGNMENT_EQUALS>)
+        (
+            t = <ID>
+            <ASSIGNMENT_EQUALS>
+            exp = ASTExpression()
+            {
+                if (prevChoiceComma == null && (positionalArgs != null || namedArgs != null)) {
+                        throw new ParseException("Missing comma (\",\") before expression. "
+                                + "Function call arguments must be separated by comma (even named arguments).", exp);
+                }
+                prevChoiceComma = null;
+
+                if (namedArgs == null) {
+                    namedArgs = new ArrayList<NamedArgument>(8);
+                }
+                namedArgs.add(new NamedArgument(t.image, exp));
+            }
+        )
+        |
+        (
+            // This was made to be choice its own, as we can give better error messages this way.
+            t = <COMMA>
+            {
+                if (prevChoiceComma != null) {
+                    throw new ParseException("Two commas (\",\") without argument between.",
+                            template, t);
+                }
+                prevChoiceComma = t;
+
+                if (namedArgs == null && positionalArgs == null) {
+                    throw new ParseException(
+                            "Remove comma (\",\"); it can only be used between arguments.",
+                            template, t);
+                }
+            }
+        )
+        |
+        (
+            exp = ASTExpression()
+            {
+                if (namedArgs != null) {
+                    throw new ParseException(
+                            "Expression looks like an argument passed by position (no preceding \"<argName>=\"), "
+                            + " but those must be earlier than arguments passed by name.",
+                            exp);
+                }
+
+                if (prevChoiceComma == null && (positionalArgs != null || namedArgs != null)) {
+                        throw new ParseException("Missing comma (\",\") before expression. "
+                                + "Function call arguments must be separated by comma.", exp);
+                }
+                prevChoiceComma = null;
+
+                if (positionalArgs == null) {
+                    positionalArgs = new ArrayList<ASTExpression>(8);
+                }
+                positionalArgs.add(exp);
+            }
+        )
+    )*
+
+    end = <CLOSE_PAREN>
+
+    {
+        ASTExpression[] trimmedPositionalArgs;
+        if (positionalArgs == null) {
+            trimmedPositionalArgs = null;
+        } else {
+            int len = positionalArgs.size();
+            trimmedPositionalArgs = new ASTExpression[len];
+            for (int i = 0; i < len; i++) {
+                trimmedPositionalArgs[i] = positionalArgs.get(i);
+            }
         }
+
+        NamedArgument[] trimmedNamedArgs;
+        if (namedArgs == null) {
+            trimmedNamedArgs = null;
+        } else {
+            int len = namedArgs.size();
+            trimmedNamedArgs = new NamedArgument[len];
+            for (int i = 0; i < len; i++) {
+                trimmedNamedArgs[i] = namedArgs.get(i);
+            }
+        }
+
+        ASTExpFunctionCall result = new ASTExpFunctionCall(functionExp, trimmedPositionalArgs, trimmedNamedArgs);
+        result.setLocation(template, start, end);
+        return result;
+    }
 }
+
 
 ASTExpStringLiteral ASTExpStringLiteral(boolean interpolate) :
 {

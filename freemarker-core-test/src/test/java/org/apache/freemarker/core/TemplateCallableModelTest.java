@@ -24,9 +24,11 @@ import java.io.IOException;
 import org.apache.freemarker.core.userpkg.AllFeaturesDirective;
 import org.apache.freemarker.core.userpkg.AllFeaturesFunction;
 import org.apache.freemarker.core.userpkg.NamedVarargsOnlyDirective;
+import org.apache.freemarker.core.userpkg.NamedVarargsOnlyFunction;
 import org.apache.freemarker.core.userpkg.PositionalVarargsOnlyDirective;
 import org.apache.freemarker.core.userpkg.PositionalVarargsOnlyFunction;
 import org.apache.freemarker.core.userpkg.TwoNamedParamsDirective;
+import org.apache.freemarker.core.userpkg.TwoNamedParamsFunction;
 import org.apache.freemarker.core.userpkg.TwoNestedContentParamsDirective;
 import org.apache.freemarker.core.userpkg.TwoPositionalParamsDirective;
 import org.apache.freemarker.core.userpkg.TwoPositionalParamsFunction;
@@ -48,7 +50,9 @@ public class TemplateCallableModelTest extends TemplateTest {
 
         addToDataModel("fa", AllFeaturesFunction.INSTANCE);
         addToDataModel("fp", TwoPositionalParamsFunction.INSTANCE);
+        addToDataModel("fn", TwoNamedParamsFunction.INSTANCE);
         addToDataModel("fpvo", PositionalVarargsOnlyFunction.INSTANCE);
+        addToDataModel("fnvo", NamedVarargsOnlyFunction.INSTANCE);
     }
 
     @Test
@@ -121,6 +125,13 @@ public class TemplateCallableModelTest extends TemplateTest {
         assertOutput("${fp(1, 2)}",
                 "fp(p1=1, p2=2)");
 
+        assertOutput("${fn()}",
+                "fn(n1=null, n2=null)");
+        assertOutput("${fn(n1=11)}",
+                "fn(n1=11, n2=null)");
+        assertOutput("${fn(n1=11, n2=22)}",
+                "fn(n1=11, n2=22)");
+
         assertOutput("${fpvo()}",
                 "fpvo(pVarargs=[])");
         assertOutput("${fpvo(1)}",
@@ -132,10 +143,27 @@ public class TemplateCallableModelTest extends TemplateTest {
                 "fa(p1=null, p2=null, pVarargs=[], n1=null, n2=null, nVarargs={})");
         assertOutput("${fa(1, 2)}",
                 "fa(p1=1, p2=2, pVarargs=[], n1=null, n2=null, nVarargs={})");
-        assertOutput("${fa(1, 2, 3)}",
-                "fa(p1=1, p2=2, pVarargs=[3], n1=null, n2=null, nVarargs={})");
-        assertOutput("${fa(1, 2, 3, 4)}",
-                "fa(p1=1, p2=2, pVarargs=[3, 4], n1=null, n2=null, nVarargs={})");
+        assertOutput("${fa(n1=11, n2=22)}",
+                "fa(p1=null, p2=null, pVarargs=[], n1=11, n2=22, nVarargs={})");
+
+        assertOutput("${fa(1, 2, n1=11, n2=22)}",
+                "fa(p1=1, p2=2, pVarargs=[], n1=11, n2=22, nVarargs={})");
+        assertOutput("${fa(1, n1=11)}",
+                "fa(p1=1, p2=null, pVarargs=[], n1=11, n2=null, nVarargs={})");
+        assertOutput("${fa(1, 2, 3, n1=11, n2=22, n3=33)}",
+                "fa(p1=1, p2=2, pVarargs=[3], n1=11, n2=22, nVarargs={\"n3\": 33})");
+        assertOutput("${fa(1, n1=11, n3=33)}",
+                "fa(p1=1, p2=null, pVarargs=[], n1=11, n2=null, nVarargs={\"n3\": 33})");
+        assertOutput("${fa(1, n1=11, a=1, b=2, c=3, d=4, e=5, f=6, g=7)}",
+                "fa(p1=1, p2=null, pVarargs=[], n1=11, n2=null, nVarargs={"
+                        + "\"a\": 1, \"b\": 2, \"c\": 3, \"d\": 4, \"e\": 5, \"f\": 6, \"g\": 7})");
+
+        assertOutput("${fnvo()}",
+                "fnvo(nVarargs={})");
+        assertOutput("${fnvo(n1=11)}",
+                "fnvo(nVarargs={\"n1\": 11})");
+        assertOutput("${fnvo(n1=11, n2=22)}",
+                "fnvo(nVarargs={\"n1\": 11, \"n2\": 22})");
     }
 
     @Test

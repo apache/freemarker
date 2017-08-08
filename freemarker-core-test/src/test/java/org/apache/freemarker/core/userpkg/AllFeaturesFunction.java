@@ -21,9 +21,6 @@ package org.apache.freemarker.core.userpkg;
 
 import static org.apache.freemarker.core._CallableUtils.*;
 
-import java.io.IOException;
-import java.io.StringWriter;
-
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
@@ -88,20 +85,18 @@ public class AllFeaturesFunction extends TestTemplateCallableModel implements Te
 
     private TemplateModel execute(Number p1, Number p2, TemplateSequenceModel pOthers,
             Number n1, Number n2, TemplateHashModelEx2 nOthers) throws TemplateException {
-        StringWriter out = new StringWriter();
-        try {
-            out.write("fa(");
-            printParam("p1", p1, out, true);
-            printParam("p2", p2, out);
-            printParam("pVarargs", pOthers, out);
-            printParam(N1_ARG_NAME, n1, out);
-            printParam(N2_ARG_NAME, n2, out);
-            printParam("nVarargs", nOthers, out);
-            out.write(")");
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-        return new SimpleScalar(out.toString());
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("fa(");
+        printParam("p1", p1, sb, true);
+        printParam("p2", p2, sb);
+        printParam("pVarargs", pOthers, sb);
+        printParam(N1_ARG_NAME, n1, sb);
+        printParam(N2_ARG_NAME, n2, sb);
+        printParam("nVarargs", nOthers, sb);
+        sb.append(")");
+
+        return new SimpleScalar(sb.toString());
     }
 
     @Override

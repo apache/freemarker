@@ -35,7 +35,7 @@
 <@assertFails message='"m" flag'>
     ${'x'?keepBefore('x', 'm')}
 </@assertFails>
-<@assertFails message='Too many arguments'>
+<@assertFails message='can only have'>
     ${'x'?keepBefore('x', 'i', 'x')}
 </@assertFails>
 <@assertFails message='argument'>
@@ -61,7 +61,7 @@
 <@assertFails message='"m" flag'>
     ${'x'?keepBeforeLast('x', 'm')}
 </@assertFails>
-<@assertFails message='Too many arguments'>
+<@assertFails message='can only have'>
     ${'x'?keepBeforeLast('x', 'i', 'x')}
 </@assertFails>
 <@assertFails message='argument'>
@@ -87,7 +87,7 @@
 <@assertFails message='"m" flag'>
     ${'x'?keepAfter('x', 'm')}
 </@assertFails>
-<@assertFails message='Too many arguments'>
+<@assertFails message='can only have'>
     ${'x'?keepAfter('x', 'i', 'x')}
 </@assertFails>
 <@assertFails message='argument'>
@@ -115,7 +115,7 @@
 <@assertFails message='"m" flag'>
     ${'x'?keepAfterLast('x', 'm')}
 </@assertFails>
-<@assertFails message='Too many arguments'>
+<@assertFails message='can only have'>
     ${'x'?keepAfterLast('x', 'i', 'x')}
 </@assertFails>
 <@assertFails message='argument'>
@@ -129,7 +129,7 @@
 <@assertEquals expected='o' actual='foo'?removeBeginning('fo') />
 <@assertEquals expected='' actual='foo'?removeBeginning('foo') />
 <@assertEquals expected='foo' actual='foo'?removeBeginning('') />
-<@assertFails message='Too many arguments'>
+<@assertFails message='can only have'>
     ${'x'?removeBeginning('x', 'x')}
 </@assertFails>
 <@assertFails message='argument'>
@@ -143,7 +143,7 @@
 <@assertEquals expected='b' actual='bar'?removeEnding('ar') />
 <@assertEquals expected='' actual='bar'?removeEnding('bar') />
 <@assertEquals expected='bar' actual='bar'?removeEnding('') />
-<@assertFails message='Too many arguments'>
+<@assertFails message='can only have'>
     ${'x'?removeEnding('x', 'x')}
 </@assertFails>
 <@assertFails message='argument'>
@@ -171,7 +171,7 @@
 <@assertEquals expected='https://example.com' actual="https://example.com"?ensureStartsWith("[a-z]+://", "http://") />
 <@assertEquals expected='http://HTTP://example.com' actual="HTTP://example.com"?ensureStartsWith("[a-z]+://", "http://") />
 <@assertEquals expected='HTTP://example.com' actual="HTTP://example.com"?ensureStartsWith("[a-z]+://", "http://", "ir") />
-<@assertFails message='Too many arguments'>
+<@assertFails message='can only have'>
     ${'x'?ensureStartsWith('x', 'x', 'x', 'x')}
 </@assertFails>
 <@assertFails message='argument'>
@@ -185,7 +185,7 @@
 <@assertEquals expected='foo' actual='foo'?ensureEndsWith('') />
 <@assertEquals expected='x' actual=''?ensureEndsWith('x') />
 <@assertEquals expected='' actual=''?ensureEndsWith('') />
-<@assertFails message='Too many arguments'>
+<@assertFails message='can only have'>
     ${'x'?ensureEndsWith('x', 'x')}
 </@assertFails>
 <@assertFails message='argument'>

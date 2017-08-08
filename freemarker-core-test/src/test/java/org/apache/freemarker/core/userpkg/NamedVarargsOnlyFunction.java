@@ -27,24 +27,27 @@ import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 
-public class PositionalVarargsOnlyFunction extends TestTemplateCallableModel implements TemplateFunctionModel {
+public class NamedVarargsOnlyFunction extends TestTemplateCallableModel implements TemplateFunctionModel {
 
-    public static final PositionalVarargsOnlyFunction INSTANCE = new PositionalVarargsOnlyFunction();
+    public static final NamedVarargsOnlyFunction INSTANCE = new NamedVarargsOnlyFunction();
 
     private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
-            0, true,
-            null, false);
+            0, false,
+            null, true);
 
-    private PositionalVarargsOnlyFunction() {
+    private static final int NAMED_VARARGS_ARG_IDX = ARGS_LAYOUT.getNamedVarargsArgumentIndex();
+
+    private NamedVarargsOnlyFunction() {
         //
     }
 
     @Override
-    public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env) throws TemplateException {
+    public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+            throws TemplateException {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("fpvo(");
-        printParam("pVarargs", args[ARGS_LAYOUT.getPositionalVarargsArgumentIndex()], sb, true);
+        sb.append("fnvo(");
+        printParam("nVarargs", args[NAMED_VARARGS_ARG_IDX], sb, true);
         sb.append(")");
 
         return new SimpleScalar(sb.toString());
@@ -54,4 +57,5 @@ public class PositionalVarargsOnlyFunction extends TestTemplateCallableModel imp
     public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
         return ARGS_LAYOUT;
     }
+
 }
