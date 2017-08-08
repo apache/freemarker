@@ -92,10 +92,10 @@ final class ASTExpDynamicKeyName extends ASTExpression {
                 return new SimpleScalar(s.substring(index, index + 1));
             } catch (IndexOutOfBoundsException e) {
                 if (index < 0) {
-                    throw new _MiscTemplateException("Negative index not allowed: ", Integer.valueOf(index));
+                    throw new TemplateException("Negative index not allowed: ", Integer.valueOf(index));
                 }
                 if (index >= s.length()) {
-                    throw new _MiscTemplateException(
+                    throw new TemplateException(
                             "String index out of range: The index was ", Integer.valueOf(index),
                             " (0-based), but the length of the string is only ", Integer.valueOf(s.length()) , ".");
                 }
@@ -154,7 +154,7 @@ final class ASTExpDynamicKeyName extends ASTExpression {
 
         final int firstIdx = range.getBegining();
         if (firstIdx < 0) {
-            throw new _MiscTemplateException(keyExpression,
+            throw new TemplateException(keyExpression,
                     "Negative range start index (", Integer.valueOf(firstIdx),
                     ") isn't allowed for a range used for slicing.");
         }
@@ -168,7 +168,7 @@ final class ASTExpDynamicKeyName extends ASTExpression {
         // Right-adaptive decreasing ranges has exclusive end -1, so it can't help on a  to high firstIndex. 
         // Right-bounded ranges at this point aren't empty, so the right index surely can't reach targetSize. 
         if (rightAdaptive && step == 1 ? firstIdx > targetSize : firstIdx >= targetSize) {
-            throw new _MiscTemplateException(keyExpression,
+            throw new TemplateException(keyExpression,
                     "Range start index ", Integer.valueOf(firstIdx), " is out of bounds, because the sliced ",
                     (targetStr != null ? "string" : "sequence"),
                     " has only ", Integer.valueOf(targetSize), " ", (targetStr != null ? "character(s)" : "element(s)"),
@@ -180,7 +180,7 @@ final class ASTExpDynamicKeyName extends ASTExpression {
             final int lastIdx = firstIdx + (size - 1) * step;
             if (lastIdx < 0) {
                 if (!rightAdaptive) {
-                    throw new _MiscTemplateException(keyExpression,
+                    throw new TemplateException(keyExpression,
                             "Negative range end index (", Integer.valueOf(lastIdx),
                             ") isn't allowed for a range used for slicing.");
                 } else {
@@ -188,7 +188,7 @@ final class ASTExpDynamicKeyName extends ASTExpression {
                 }
             } else if (lastIdx >= targetSize) {
                 if (!rightAdaptive) {
-                    throw new _MiscTemplateException(keyExpression,
+                    throw new TemplateException(keyExpression,
                             "Range end index ", Integer.valueOf(lastIdx), " is out of bounds, because the sliced ",
                             (targetStr != null ? "string" : "sequence"),
                             " has only ", Integer.valueOf(targetSize), " ", (targetStr != null ? "character(s)" : "element(s)"),
@@ -219,7 +219,7 @@ final class ASTExpDynamicKeyName extends ASTExpression {
             final int exclEndIdx;
             if (step < 0 && resultSize > 1) {
                 if (!(range.isAffactedByStringSlicingBug() && resultSize == 2)) {
-                    throw new _MiscTemplateException(keyExpression,
+                    throw new TemplateException(keyExpression,
                             "Decreasing ranges aren't allowed for slicing strings (as it would give reversed text). "
                             + "The index range was: first = ", Integer.valueOf(firstIdx),
                             ", last = ", Integer.valueOf(firstIdx + (resultSize - 1) * step));

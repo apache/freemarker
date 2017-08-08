@@ -26,12 +26,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.freemarker.core.MutableProcessingConfiguration;
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.MutableProcessingConfiguration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateClassResolver;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core._MiscTemplateException;
 
 /**
  * A {@link TemplateClassResolver} that resolves only the classes whose name
@@ -101,7 +100,7 @@ public class OptInTemplateClassResolver implements TemplateClassResolver {
             return TemplateClassResolver.UNRESTRICTED.resolve(className, env, template);
         } else {
             if (!allowedClasses.contains(className)) {
-                throw new _MiscTemplateException(env,
+                throw new TemplateException(env,
                         "Instantiating ", className, " is not allowed in the template for security reasons. (If you "
                         + "run into this problem when using ?new in a template, you may want to check the \"",
                         MutableProcessingConfiguration.NEW_BUILTIN_CLASS_RESOLVER_KEY,
@@ -110,7 +109,7 @@ public class OptInTemplateClassResolver implements TemplateClassResolver {
                 try {
                     return _ClassUtils.forName(className);
                 } catch (ClassNotFoundException e) {
-                    throw new _MiscTemplateException(e, env);
+                    throw new TemplateException(e, env);
                 }
             }
         }

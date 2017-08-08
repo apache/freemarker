@@ -191,7 +191,7 @@ class BuiltInsForStringsBasic {
                     }
                 } else {
                     if (flagsArg != null) {
-                        throw new _MiscTemplateException(
+                        throw new TemplateException(
                                 "The 2nd parameter must be non-null when the 3rd parameter is non-null");
                     }
                     startsWithPrefix = s.startsWith(checkedPrefix);

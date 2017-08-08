@@ -102,27 +102,20 @@ public class TemplateException extends Exception {
     }
     
     /**
-     * The same as {@link #TemplateException(String, Throwable, Environment)}; it's exists only for binary
-     * backward-compatibility.
-     */
-    public TemplateException(String description, Exception cause, Environment env) {
-        this(description, cause, env, null, null);
-    }
-
-    /**
      * Constructs a TemplateException with both a description of the error
      * that occurred and the underlying Exception that caused this exception
      * to be raised.
      *
      * @param description the description of the error that occurred
      * @param cause the underlying {@link Exception} that caused this exception to be raised
+     * @param env Can be null{@code null}, in which case {@link Environment#getCurrentEnvironment()} is used.
      */
     public TemplateException(String description, Throwable cause, Environment env) {
         this(description, cause, env, null, null);
     }
-    
+
     /**
-     * Don't use this; this is to be used internally by FreeMarker. No backward compatibility guarantees.
+     * Do not use; To be used internally by FreeMarker. No backward compatibility guarantees.
      * 
      * @param blamedExpr Maybe {@code null}. The FTL stack in the {@link Environment} only specifies the error location
      *          with "template element" granularity, and this can be used to point to the expression inside the
@@ -132,7 +125,111 @@ public class TemplateException extends Exception {
             _ErrorDescriptionBuilder descriptionBuilder) {
         this(null, cause, env, blamedExpr, descriptionBuilder);
     }
-    
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // BEGIN FM2 TemplateException constructors
+    // -----------------------------------------------------------------------------------------------------------------
+    // TODO [FM3] This was mindlessly copy-pasted. Make order here...
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Permutation group:
+
+    public TemplateException(String description) {
+        this(description, null);
+    }
+
+    TemplateException(Environment env, String description) {
+        this(description, env);
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Permutation group:
+
+    TemplateException(Throwable cause, String description) {
+        this(cause, null, description);
+    }
+
+    TemplateException(Throwable cause) {
+        this(cause, null, (String) null);
+    }
+
+    TemplateException(Throwable cause, Environment env, String description) {
+        this(description, cause, env);
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Permutation group:
+
+    TemplateException(_ErrorDescriptionBuilder description) {
+        this(null, description);
+    }
+
+    TemplateException(Environment env, _ErrorDescriptionBuilder description) {
+        this(null, env, description);
+    }
+
+    TemplateException(Throwable cause, Environment env, _ErrorDescriptionBuilder description) {
+        this(cause, env, null, description);
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Permutation group:
+
+    /**
+     * @param descriptionParts
+     *         Array of objects that will be rendered into {@link String} on demand (if and when the exception message
+     *         is ever needed).
+     */
+    public TemplateException(Object... descriptionParts) {
+        this((Environment) null, descriptionParts);
+    }
+
+    public TemplateException(Environment env, Object... descriptionParts) {
+        this((Throwable) null, env, descriptionParts);
+    }
+
+    public TemplateException(Throwable cause, Object... descriptionParts) {
+        this(cause, null, descriptionParts);
+    }
+
+    public TemplateException(Throwable cause, Environment env, Object... descriptionParts) {
+        this(cause, env, null, new _ErrorDescriptionBuilder(descriptionParts));
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Permutation group:
+
+    TemplateException(ASTExpression blamed, Object... descriptionParts) {
+        this(blamed, null, descriptionParts);
+    }
+
+    TemplateException(ASTExpression blamed, Environment env, Object... descriptionParts) {
+        this(blamed, null, env, descriptionParts);
+    }
+
+    TemplateException(ASTExpression blamed, Throwable cause, Environment env, Object... descriptionParts) {
+        this(cause, env, blamed, new _ErrorDescriptionBuilder(descriptionParts).blame(blamed));
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // Permutation group:
+
+    TemplateException(ASTExpression blamed, String description) {
+        this(blamed, null, description);
+    }
+
+    TemplateException(ASTExpression blamed, Environment env, String description) {
+        this(blamed, null, env, description);
+    }
+
+    TemplateException(ASTExpression blamed, Throwable cause, Environment env, String description) {
+        this(cause, env, blamed, new _ErrorDescriptionBuilder(description).blame(blamed));
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+    // END FM2 TemplateException constructors
+    // -----------------------------------------------------------------------------------------------------------------
+
     private TemplateException(
             String renderedDescription,
             Throwable cause,            

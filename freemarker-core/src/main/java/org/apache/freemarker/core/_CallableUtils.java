@@ -119,7 +119,7 @@ public final class _CallableUtils {
             if (optional) {
                 return null;
             }
-            throw new _MiscTemplateException(
+            throw new TemplateException(
                     "The ", argName != null ? new _DelayedJQuote(argName) : new _DelayedOrdinal(argIndex + 1),
                     " argument can't be null.");
         }
@@ -167,7 +167,7 @@ public final class _CallableUtils {
             if (optional) {
                 return null;
             }
-            throw new _MiscTemplateException(
+            throw new TemplateException(
                     "The ", argName != null ? new _DelayedJQuote(argName) : new _DelayedOrdinal(argIndex + 1),
                     " argument can't be null.");
         }
@@ -188,7 +188,7 @@ public final class _CallableUtils {
             NamedArgument[] namedArgs, TemplateCallableModel callableValue, Environment env)
             throws TemplateException {
         if (namedArgs != null) {
-            throw new _MiscTemplateException(env, getNamedArgumentsNotSupportedMessage(callableValue, namedArgs[0]));
+            throw new TemplateException(env, getNamedArgumentsNotSupportedMessage(callableValue, namedArgs[0]));
         }
 
         TemplateModel[] execArgs;
@@ -264,7 +264,7 @@ public final class _CallableUtils {
                         + " have tried now) when the macro has defined that parameter to be a positional parameter. "
                         + "See in the documentation how, and when that's a good practice.");
             }
-            throw new _MiscTemplateException(env,
+            throw new TemplateException(env,
                     errorDesc
             );
         }
@@ -282,7 +282,7 @@ public final class _CallableUtils {
                         if (namedVarargsArgumentIndex == -1) {
                             checkSupportsAnyParameters(callableValue, argsLayout, env);
                             Collection<String> validNames = predefNamedArgsMap.getKeys();
-                            throw new _MiscTemplateException(env,
+                            throw new TemplateException(env,
                                     validNames == null || validNames.isEmpty()
                                             ? getNamedArgumentsNotSupportedMessage(callableValue, namedArg)
                                             : new Object[] {
@@ -324,7 +324,7 @@ public final class _CallableUtils {
             TemplateCallableModel callableValue, ArgumentArrayLayout argsLayout, Environment env)
             throws TemplateException {
         if (argsLayout.getTotalLength() == 0) {
-            throw new _MiscTemplateException(env,
+            throw new TemplateException(env,
                     "The called ", TemplateLanguageUtils.getCallableTypeName(callableValue), " doesn't support any parameters.");
         }
     }

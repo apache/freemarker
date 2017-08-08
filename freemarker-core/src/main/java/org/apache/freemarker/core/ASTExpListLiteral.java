@@ -127,7 +127,7 @@ final class ASTExpListLiteral extends ASTExpression {
                     Environment.Namespace ns = env.importLib(s, null);
                     result.add(ns);
                 } catch (IOException ioe) {
-                    throw new _MiscTemplateException(((ASTExpStringLiteral) itemExpr),
+                    throw new TemplateException(((ASTExpStringLiteral) itemExpr),
                             "Couldn't import library ", new _DelayedJQuote(s), ": ",
                             new _DelayedGetMessage(ioe));
                 }

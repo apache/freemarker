@@ -38,7 +38,6 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._DelayedJQuote;
 import org.apache.freemarker.core._DelayedShortClassName;
 import org.apache.freemarker.core._ErrorDescriptionBuilder;
-import org.apache.freemarker.core._MiscTemplateException;
 import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
@@ -87,7 +86,7 @@ class JspTagModelBase {
                         try {
                             ((DynamicAttributes) tag).setDynamicAttribute(null, paramName, argArray[0]);
                         } catch (JspException e) {
-                            throw new _MiscTemplateException(
+                            throw new TemplateException(
                                     "Failed to set JSP tag dynamic attribute ", new _DelayedJQuote(paramName), ".",
                                     e);
                         }

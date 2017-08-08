@@ -47,7 +47,7 @@ class ASTDirItems extends ASTDirective {
         final IterationContext iterCtx = ASTDirList.findEnclosingIterationContext(env, null);
         if (iterCtx == null) {
             // The parser should prevent this situation
-            throw new _MiscTemplateException(env,
+            throw new TemplateException(env,
                     getASTNodeDescriptor(), " without iteration in context");
         }
         

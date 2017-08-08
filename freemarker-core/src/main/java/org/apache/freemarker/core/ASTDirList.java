@@ -104,7 +104,7 @@ final class ASTDirList extends ASTDirective {
      * @return The matching context or {@code null} if no such context exists.
      */
     static IterationContext findEnclosingIterationContext(Environment env, String nestedContentParamName)
-            throws _MiscTemplateException {
+            throws TemplateException {
         LocalContextStack ctxStack = env.getLocalContextStack();
         if (ctxStack != null) {
             for (int i = ctxStack.size() - 1; i >= 0; i--) {
@@ -232,7 +232,7 @@ final class ASTDirList extends ASTDirective {
                 throws TemplateException, IOException {
             try {
                 if (alreadyEntered) {
-                    throw new _MiscTemplateException(env,
+                    throw new TemplateException(env,
                             "The #items directive was already entered earlier for this listing.");
                 }
                 alreadyEntered = true;

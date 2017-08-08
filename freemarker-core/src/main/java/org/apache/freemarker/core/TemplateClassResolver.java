@@ -44,7 +44,7 @@ public interface TemplateClassResolver {
             try {
                 return _ClassUtils.forName(className);
             } catch (ClassNotFoundException e) {
-                throw new _MiscTemplateException(e, env);
+                throw new TemplateException(e, env);
             }
         }
         

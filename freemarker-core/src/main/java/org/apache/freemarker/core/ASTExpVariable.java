@@ -39,7 +39,7 @@ final class ASTExpVariable extends ASTExpression {
             return env.getVariable(name);
         } catch (NullPointerException e) {
             if (env == null) {
-                throw new _MiscTemplateException(
+                throw new TemplateException(
                         "Variables are not available (certainly you are in a parse-time executed directive). "
                         + "The name of the variable you tried to read: ", name);
             } else {

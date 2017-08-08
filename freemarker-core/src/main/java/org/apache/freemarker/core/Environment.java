@@ -504,7 +504,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     String getCurrentRecoveredErrorMessage() throws TemplateException {
         if (recoveredErrorStack.isEmpty()) {
-            throw new _MiscTemplateException(this, ".error is not available outside of a #recover block");
+            throw new TemplateException(this, ".error is not available outside of a #recover block");
         }
         return ((Throwable) recoveredErrorStack.get(recoveredErrorStack.size() - 1)).getMessage();
     }
@@ -601,11 +601,11 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                     else if (!nodeType.equals("pi")
                             && !nodeType.equals("comment")
                             && !nodeType.equals("document_type")) {
-                        throw new _MiscTemplateException(
+                        throw new TemplateException(
                                 this, noNodeHandlerDefinedDescription(node, node.getNodeNamespace(), nodeType));
                     }
                 } else {
-                    throw new _MiscTemplateException(
+                    throw new TemplateException(
                             this, noNodeHandlerDefinedDescription(node, node.getNodeNamespace(), "default"));
                 }
             }
@@ -1028,7 +1028,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                 if (fallbackToTrueFalse) {
                     return TemplateBooleanFormat.C_TRUE;
                 } else {
-                    throw new _MiscTemplateException(getNullBooleanFormatErrorDescription());
+                    throw new TemplateException(getNullBooleanFormatErrorDescription());
                 }
             } else {
                 return s;
@@ -1039,7 +1039,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                 if (fallbackToTrueFalse) {
                     return TemplateBooleanFormat.C_FALSE;
                 } else {
-                    throw new _MiscTemplateException(getNullBooleanFormatErrorDescription());
+                    throw new TemplateException(getNullBooleanFormatErrorDescription());
                 }
             } else {
                 return s;
@@ -1180,7 +1180,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                     new _DelayedJQuote(getNumberFormat()), ": ", e.getMessage())
                     .blame(exp); 
             throw useTempModelExc
-                    ? new _TemplateModelException(e, this, desc) : new _MiscTemplateException(e, this, desc);
+                    ? new _TemplateModelException(e, this, desc) : new TemplateException(e, this, desc);
         }
         return format;
     }
@@ -1202,7 +1202,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                     " number format string: ", e.getMessage())
                     .blame(exp);
             throw useTempModelExc
-                    ? new _TemplateModelException(e, this, desc) : new _MiscTemplateException(e, this, desc);
+                    ? new _TemplateModelException(e, this, desc) : new TemplateException(e, this, desc);
         }
         return format;
     }
@@ -1610,7 +1610,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                     "\" FreeMarker configuration setting is a malformed date/time/dateTime format string: ",
                     new _DelayedJQuote(settingValue), ". Reason given: ",
                     e.getMessage());                    
-            throw useTempModelExc ? new _TemplateModelException(e, desc) : new _MiscTemplateException(e, desc);
+            throw useTempModelExc ? new _TemplateModelException(e, desc) : new TemplateException(e, desc);
         }
     }
 
@@ -1633,7 +1633,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                     new _DelayedJQuote(formatString), ". Reason given: ",
                     e.getMessage())
                     .blame(blamedFormatterExp);
-            throw useTempModelExc ? new _TemplateModelException(e, desc) : new _MiscTemplateException(e, desc);
+            throw useTempModelExc ? new _TemplateModelException(e, desc) : new TemplateException(e, desc);
         }
     }
 
@@ -2313,7 +2313,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     TemplateDirectiveModel getNodeProcessor(TemplateNodeModel node) throws TemplateException {
         String nodeName = node.getNodeName();
         if (nodeName == null) {
-            throw new _MiscTemplateException(this, "Node name was null.");
+            throw new TemplateException(this, "Node name was null.");
         }
         TemplateDirectiveModel result = getNodeProcessor(nodeName, node.getNodeNamespace(), 0);
 
@@ -2344,7 +2344,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             try {
                 ns = (Namespace) nodeNamespaces.get(i);
             } catch (ClassCastException cce) {
-                throw new _MiscTemplateException(this,
+                throw new TemplateException(this,
                         "A \"using\" clause should contain a sequence of namespaces or strings that indicate the "
                                 + "location of importable macro libraries.");
             }
@@ -2989,7 +2989,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                     } else {
                         // TODO [FM3] Had to give different messages depending on if the argument was omitted, or if
                         // it was null, but this will be fixed with the null related refactoring.
-                        throw new _MiscTemplateException(Environment.this,
+                        throw new TemplateException(Environment.this,
                                 new _ErrorDescriptionBuilder(
                                         "When calling macro ", new _DelayedJQuote(callableDefinition.getName()),
                                         ", required parameter ", new _DelayedJQuote(paramDef.getName()),

@@ -51,7 +51,7 @@ final class ASTDirImport extends ASTDirective {
         try {
             fullImportedTemplateName = env.toFullTemplateName(getTemplate().getLookupName(), importedTemplateName);
         } catch (MalformedTemplateNameException e) {
-            throw new _MiscTemplateException(e, env,
+            throw new TemplateException(e, env,
                     "Malformed template name ", new _DelayedJQuote(e.getTemplateName()), ":\n",
                     e.getMalformednessDescription());
         }
@@ -59,7 +59,7 @@ final class ASTDirImport extends ASTDirective {
         try {
             env.importLib(fullImportedTemplateName, targetNsVarName);
         } catch (IOException e) {
-            throw new _MiscTemplateException(e, env,
+            throw new TemplateException(e, env,
                     "Template importing failed (for parameter value ",
                     new _DelayedJQuote(importedTemplateName),
                     "):\n", new _DelayedGetMessage(e));

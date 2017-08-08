@@ -68,7 +68,7 @@ final class ASTDirInclude extends ASTDirective {
         try {
             fullIncludedTemplateName = env.toFullTemplateName(getTemplate().getLookupName(), includedTemplateName);
         } catch (MalformedTemplateNameException e) {
-            throw new _MiscTemplateException(e, env,
+            throw new TemplateException(e, env,
                     "Malformed template name ", new _DelayedJQuote(e.getTemplateName()), ":\n",
                     e.getMalformednessDescription());
         }
@@ -86,7 +86,7 @@ final class ASTDirInclude extends ASTDirective {
         try {
             includedTemplate = env.getTemplateForInclusion(fullIncludedTemplateName, ignoreMissing);
         } catch (IOException e) {
-            throw new _MiscTemplateException(e, env,
+            throw new TemplateException(e, env,
                     "Template inclusion failed (for parameter value ",
                     new _DelayedJQuote(includedTemplateName),
                     "):\n", new _DelayedGetMessage(e));
@@ -149,7 +149,7 @@ final class ASTDirInclude extends ASTDirective {
         try {
            return _StringUtils.getYesNo(s);
         } catch (IllegalArgumentException iae) {
-            throw new _MiscTemplateException(exp,
+            throw new TemplateException(exp,
                      "Value must be boolean (or one of these strings: "
                      + "\"n\", \"no\", \"f\", \"false\", \"y\", \"yes\", \"t\", \"true\"), but it was ",
                      new _DelayedJQuote(s), ".");

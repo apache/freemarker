@@ -35,7 +35,7 @@ abstract class BuiltInForNestedContentParameter extends SpecialBuiltIn {
         IterationContext iterCtx = ASTDirList.findEnclosingIterationContext(env, nestedContentParamName);
         if (iterCtx == null) {
             // The parser should prevent this situation
-            throw new _MiscTemplateException(
+            throw new TemplateException(
                     this, env,
                     "There's no iteration in context that uses the nested content parameter ",
                     new _DelayedJQuote( nestedContentParamName), ".");

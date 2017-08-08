@@ -214,7 +214,7 @@ class BuiltInsForMultipleTypes {
                 if (dtype == TemplateDateModel.UNKNOWN || dtype == TemplateDateModel.DATE_TIME) {
                     return new SimpleDate(dmodel.getAsDate(), dateType);
                 }
-                throw new _MiscTemplateException(this,
+                throw new TemplateException(this,
                             "Cannot convert ", TemplateDateModel.TYPE_NAMES.get(dtype),
                             " to ", TemplateDateModel.TYPE_NAMES.get(dateType));
             }
@@ -230,7 +230,7 @@ class BuiltInsForMultipleTypes {
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             if (!env.getAPIBuiltinEnabled()) {
-                throw new _MiscTemplateException(this,
+                throw new TemplateException(this,
                         "Can't use ?api, because the \"", MutableProcessingConfiguration.API_BUILTIN_ENABLED_KEY,
                         "\" configuration setting is false. Think twice before you set it to true though. Especially, "
                         + "it shouldn't abused for modifying Map-s and Collection-s.");

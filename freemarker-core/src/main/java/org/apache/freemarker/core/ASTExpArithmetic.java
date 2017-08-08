@@ -65,10 +65,10 @@ final class ASTExpArithmetic extends ASTExpression {
                 return new SimpleNumber(ae.modulus(lhoNumber, rhoNumber));
             default:
                 if (parent instanceof ASTExpression) {
-                    throw new _MiscTemplateException((ASTExpression) parent,
+                    throw new TemplateException((ASTExpression) parent,
                             "Unknown operation: ", Integer.valueOf(operator));
                 } else {
-                    throw new _MiscTemplateException("Unknown operation: ", Integer.valueOf(operator));
+                    throw new TemplateException("Unknown operation: ", Integer.valueOf(operator));
                 }
         }
     }

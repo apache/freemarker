@@ -276,7 +276,7 @@ class MessageUtils {
     }
     
     static TemplateException newInstantiatingClassNotAllowedException(String className, Environment env) {
-        return new _MiscTemplateException(env,
+        return new TemplateException(env,
                 "Instantiating ", className, " is not allowed in the template for security reasons.");
     }
     
@@ -296,7 +296,7 @@ class MessageUtils {
                 .blame(dataSrcExp); 
         return useTempModelExc
                 ? new _TemplateModelException(e, null, desc)
-                : new _MiscTemplateException(e, null, desc);
+                : new TemplateException(e, null, desc);
     }
     
     static TemplateException newCantFormatNumberException(TemplateNumberFormat format, ASTExpression dataSrcExp,
@@ -307,7 +307,7 @@ class MessageUtils {
                 .blame(dataSrcExp); 
         return useTempModelExc
                 ? new _TemplateModelException(e, null, desc)
-                : new _MiscTemplateException(e, null, desc);
+                : new TemplateException(e, null, desc);
     }
     
     /**

@@ -196,7 +196,7 @@ final class ASTExpBuiltInVariable extends ASTExpression {
             return new SimpleScalar(env.getConfiguration().getIncompatibleImprovements().toString());
         }
         
-        throw new _MiscTemplateException(this,
+        throw new TemplateException(this,
                 "Invalid special variable: ", name);
     }
 

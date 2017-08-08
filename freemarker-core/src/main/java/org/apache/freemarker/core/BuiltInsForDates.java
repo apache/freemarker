@@ -188,7 +188,7 @@ class BuiltInsForDates {
         void checkDateTypeNotUnknown(int dateType)
         throws TemplateException {
             if (dateType == TemplateDateModel.UNKNOWN) {
-                throw new _MiscTemplateException(new _ErrorDescriptionBuilder(
+                throw new TemplateException(new _ErrorDescriptionBuilder(
                             "The value of the following has unknown date type, but ?", key,
                             " needs a value where it's known if it's a date (no time part), time, or date-time value:"                        
                         ).blame(target).tip(MessageUtils.UNKNOWN_DATE_TYPE_ERROR_TIP));

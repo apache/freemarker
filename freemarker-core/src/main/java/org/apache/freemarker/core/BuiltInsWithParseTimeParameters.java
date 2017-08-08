@@ -144,7 +144,7 @@ final class BuiltInsWithParseTimeParameters {
             }
             
             if (paramCnt % 2 == 0) {
-                throw new _MiscTemplateException(target,
+                throw new TemplateException(target,
                         "The value before ?", key, "(case1, value1, case2, value2, ...) didn't match any of the "
                         + "case parameters, and there was no default value parameter (an additional last parameter) "
                         + "eithter. ");

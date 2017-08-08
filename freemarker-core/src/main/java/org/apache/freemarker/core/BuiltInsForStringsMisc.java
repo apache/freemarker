@@ -54,7 +54,7 @@ class BuiltInsForStringsMisc {
             } else if (s.equals(env.getTemplateBooleanFormat().getFalseStringValue())) {
                 b = false;
             } else {
-                throw new _MiscTemplateException(this, env,
+                throw new TemplateException(this, env,
                         "Can't convert this string to boolean: ", new _DelayedJQuote(s));
             }
             return b ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
@@ -96,7 +96,7 @@ class BuiltInsForStringsMisc {
                     throw e.toParseException(parentTemplate);
                 }
             } catch (ParseException e) {
-                throw new _MiscTemplateException(this, env,
+                throw new TemplateException(this, env,
                         "Failed to \"?", key, "\" string with this error:\n\n",
                         MessageUtils.EMBEDDED_MESSAGE_BEGIN,
                         new _DelayedGetMessage(e),
@@ -106,7 +106,7 @@ class BuiltInsForStringsMisc {
             try {
                 return exp.eval(env);
             } catch (TemplateException e) {
-                throw new _MiscTemplateException(this, env,
+                throw new TemplateException(this, env,
                         "Failed to \"?", key, "\" string with this error:\n\n",
                         MessageUtils.EMBEDDED_MESSAGE_BEGIN,
                         new _DelayedGetMessageWithoutStackTop(e),
@@ -179,7 +179,7 @@ class BuiltInsForStringsMisc {
                         outputFormat, autoEscapingPolicy,
                         null, null);
             } catch (IOException e) {
-                throw new _MiscTemplateException(this, e, env,
+                throw new TemplateException(this, e, env,
                         "Template parsing with \"?", key, "\" has failed with this error:\n\n",
                         MessageUtils.EMBEDDED_MESSAGE_BEGIN,
                         new _DelayedGetMessage(e),
@@ -262,11 +262,11 @@ class BuiltInsForStringsMisc {
                 this.env = env;
                 cl = env.getNewBuiltinClassResolver().resolve(classname, env, template);
                 if (!TemplateModel.class.isAssignableFrom(cl)) {
-                    throw new _MiscTemplateException(newBI.this, env,
+                    throw new TemplateException(newBI.this, env,
                             "Class ", cl.getName(), " does not implement org.apache.freemarker.core.TemplateModel");
                 }
                 if (BeanModel.class.isAssignableFrom(cl)) {
-                    throw new _MiscTemplateException(newBI.this, env,
+                    throw new TemplateException(newBI.this, env,
                             "Bean Models cannot be instantiated using the ?", key, " built-in");
                 }
             }

@@ -62,7 +62,7 @@ final class ASTDirVisit extends ASTDirective {
                     throw new NonSequenceException(namespaces, nss, env);
                 } else {
                     // Should not occur
-                    throw new _MiscTemplateException(env, "Expecting a sequence of namespaces after \"using\"");
+                    throw new TemplateException(env, "Expecting a sequence of namespaces after \"using\"");
                 }
             }
         }

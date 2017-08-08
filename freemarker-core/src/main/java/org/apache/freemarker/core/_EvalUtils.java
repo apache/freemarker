@@ -193,7 +193,7 @@ public class _EvalUtils {
                 if (leftExp != null) {
                     throw InvalidReferenceException.getInstance(leftExp, env);
                 } else {
-                    throw new _MiscTemplateException(defaultBlamed, env, 
+                    throw new TemplateException(defaultBlamed, env,
                                 "The left operand of the comparison was undefined or null.");
                 }
             }
@@ -206,7 +206,7 @@ public class _EvalUtils {
                 if (rightExp != null) {
                     throw InvalidReferenceException.getInstance(rightExp, env);
                 } else {
-                    throw new _MiscTemplateException(defaultBlamed, env,
+                    throw new TemplateException(defaultBlamed, env,
                                 "The right operand of the comparison was undefined or null.");
                 }
             }
@@ -225,7 +225,7 @@ public class _EvalUtils {
             try {
                 cmpResult = ae.compareNumbers(leftNum, rightNum);
             } catch (RuntimeException e) {
-                throw new _MiscTemplateException(defaultBlamed, e, env,
+                throw new TemplateException(defaultBlamed, e, env,
                         "Unexpected error while comparing two numbers: ", e);
             }
         } else if (leftValue instanceof TemplateDateModel && rightValue instanceof TemplateDateModel) {
@@ -246,12 +246,12 @@ public class _EvalUtils {
                     sideExp = rightExp;
                 }
                 
-                throw new _MiscTemplateException(sideExp != null ? sideExp : defaultBlamed, env,
+                throw new TemplateException(sideExp != null ? sideExp : defaultBlamed, env,
                         "The ", sideName, " ", VALUE_OF_THE_COMPARISON_IS_UNKNOWN_DATE_LIKE);
             }
             
             if (leftDateType != rightDateType) {
-                throw new _MiscTemplateException(defaultBlamed, env,
+                throw new TemplateException(defaultBlamed, env,
                         "Can't compare dates of different types. Left date type is ",
                         TemplateDateModel.TYPE_NAMES.get(leftDateType), ", right date type is ",
                         TemplateDateModel.TYPE_NAMES.get(rightDateType), ".");
@@ -262,7 +262,7 @@ public class _EvalUtils {
             cmpResult = leftDate.compareTo(rightDate);
         } else if (leftValue instanceof TemplateScalarModel && rightValue instanceof TemplateScalarModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
-                throw new _MiscTemplateException(defaultBlamed, env,
+                throw new TemplateException(defaultBlamed, env,
                         "Can't use operator \"", cmpOpToString(operator, operatorString), "\" on string values.");
             }
             String leftString = _EvalUtils.modelToString((TemplateScalarModel) leftValue, leftExp, env);
@@ -271,7 +271,7 @@ public class _EvalUtils {
             cmpResult = env.getCollator().compare(leftString, rightString);
         } else if (leftValue instanceof TemplateBooleanModel && rightValue instanceof TemplateBooleanModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
-                throw new _MiscTemplateException(defaultBlamed, env,
+                throw new TemplateException(defaultBlamed, env,
                         "Can't use operator \"", cmpOpToString(operator, operatorString), "\" on boolean values.");
             }
             boolean leftBool = ((TemplateBooleanModel) leftValue).getAsBoolean();
@@ -286,7 +286,7 @@ public class _EvalUtils {
                 }
                 // Falls through
             }
-            throw new _MiscTemplateException(defaultBlamed, env,
+            throw new TemplateException(defaultBlamed, env,
                     "Can't compare values of these types. ",
                     "Allowed comparisons are between two numbers, two strings, two dates, or two booleans.\n",
                     "Left hand operand ",
@@ -523,9 +523,9 @@ public class _EvalUtils {
                         " format, while the right hand operand is in ", new _DelayedToString(rightOF),
                         ". Conversion to common format wasn't possible." };
                 if (parent instanceof ASTExpression) {
-                    throw new _MiscTemplateException((ASTExpression) parent, message);
+                    throw new TemplateException((ASTExpression) parent, message);
                 } else {
-                    throw new _MiscTemplateException(message);
+                    throw new TemplateException(message);
                 }
             }
         } else {

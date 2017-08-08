@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core._MiscTemplateException;
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._NumberUtils;
@@ -309,7 +308,7 @@ public class ConservativeArithmeticEngine extends ArithmeticEngine {
                 return n1.mod(n2);
             }
             case BIG_DECIMAL: {
-                throw new _MiscTemplateException("Can't calculate remainder on BigDecimals");
+                throw new TemplateException("Can't calculate remainder on BigDecimals");
             }
         }
         // Make the compiler happy. getCommonClassCode() is guaranteed to
@@ -342,9 +341,9 @@ public class ConservativeArithmeticEngine extends ArithmeticEngine {
             return ((Integer) classCodes.get(num.getClass())).intValue();
         } catch (NullPointerException e) {
             if (num == null) {
-                throw new _MiscTemplateException("The Number object was null.");
+                throw new TemplateException("The Number object was null.");
             } else {
-                throw new _MiscTemplateException("Unknown number type ", num.getClass().getName());
+                throw new TemplateException("Unknown number type ", num.getClass().getName());
             }
         }
     }

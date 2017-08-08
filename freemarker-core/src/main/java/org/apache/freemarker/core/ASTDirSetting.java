@@ -119,7 +119,7 @@ final class ASTDirSetting extends ASTDirective {
         try {
             env.setSetting(key, strval);
         } catch (ConfigurationException e) {
-            throw new _MiscTemplateException(env, e.getMessage(), e.getCause());
+            throw new TemplateException(env, e.getMessage(), e.getCause());
         }
         return null;
     }

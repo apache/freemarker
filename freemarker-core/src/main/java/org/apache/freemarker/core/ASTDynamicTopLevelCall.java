@@ -114,7 +114,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
         }
 
         if (!nestedContentSupported && hasNestedContent()) {
-            throw new _MiscTemplateException(env, "Nested content is not supported by this directive.");
+            throw new TemplateException(env, "Nested content is not supported by this directive.");
         }
 
         TemplateModel[] execArgs = _CallableUtils.getExecuteArgs(
@@ -125,7 +125,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
         } else {
             TemplateModel result = function.execute(execArgs, this, env);
             if (result == null) {
-                throw new _MiscTemplateException(env, "Function has returned no value (or null)");
+                throw new TemplateException(env, "Function has returned no value (or null)");
             }
             // TODO [FM3] Implement it when we have a such language... it should work like `${f()}`.
             throw new BugException("Top-level function call not yet implemented");
@@ -288,7 +288,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
         int nestedContentParamNamesSize = nestedContentParamNames != null ? nestedContentParamNames.size() : 0;
         int nestedContentParamValuesSize = nestedContentArgs != null ? nestedContentArgs.length : 0;
         if (nestedContentParamValuesSize != nestedContentParamNamesSize) {
-            throw new _MiscTemplateException(env,
+            throw new TemplateException(env,
                     "The invocation declares ", (nestedContentParamNamesSize != 0 ? nestedContentParamNamesSize : "no"),
                     " nested content parameter(s)",
                     (nestedContentParamNamesSize != 0
