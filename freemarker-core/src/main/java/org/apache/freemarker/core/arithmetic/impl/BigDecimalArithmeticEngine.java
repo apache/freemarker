@@ -24,8 +24,8 @@ import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.util._NumberUtil;
 
 /**
- * Arithmetic engine that converts all numbers to {@link BigDecimal} and
- * then operates on them. This is FreeMarker's default arithmetic engine.
+ * Arithmetic engine that converts all numbers to {@link BigDecimal} and then operates on them, and also keeps the
+ * result as a {@link BigDecimal}. This is FreeMarker's default arithmetic engine.
  */
 public class BigDecimalArithmeticEngine extends ArithmeticEngine {
 
