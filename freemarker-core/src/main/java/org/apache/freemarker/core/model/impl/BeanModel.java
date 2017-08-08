@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.freemarker.core._DelayedFTLTypeDescription;
+import org.apache.freemarker.core._DelayedTemplateLanguageTypeDescription;
 import org.apache.freemarker.core._DelayedJQuote;
 import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
@@ -154,7 +154,7 @@ public class BeanModel
             throw new _TemplateModelException(e,
                     "An error has occurred when reading existing sub-variable ", new _DelayedJQuote(key),
                     "; see cause exception! The type of the containing value was: ",
-                    new _DelayedFTLTypeDescription(this)
+                    new _DelayedTemplateLanguageTypeDescription(this)
             );
         }
     }

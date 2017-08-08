@@ -63,7 +63,6 @@ import org.apache.freemarker.core.BuiltInsForSequences.sort_byBI;
 import org.apache.freemarker.core.BuiltInsForStringsMisc.evalBI;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.util._DateUtils;
@@ -387,36 +386,36 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         return false; // be on the safe side.
     }
     
-    protected final void checkMethodArgCount(List args, int expectedCnt) throws TemplateModelException {
+    protected final void checkMethodArgCount(List args, int expectedCnt) throws TemplateException {
         checkMethodArgCount(args.size(), expectedCnt);
     }
 
-    protected final void checkMethodArgCount(TemplateModel[] args, int expectedCnt) throws TemplateModelException {
+    protected final void checkMethodArgCount(TemplateModel[] args, int expectedCnt) throws TemplateException {
         checkMethodArgCount(args.length, expectedCnt);
     }
 
-    protected final void checkMethodArgCount(int argCnt, int expectedCnt) throws TemplateModelException {
+    protected final void checkMethodArgCount(int argCnt, int expectedCnt) throws TemplateException {
         if (argCnt != expectedCnt) {
             throw MessageUtils.newArgCntError("?" + key, argCnt, expectedCnt);
         }
     }
 
-    protected final void checkMethodArgCount(List args, int minCnt, int maxCnt) throws TemplateModelException {
+    protected final void checkMethodArgCount(List args, int minCnt, int maxCnt) throws TemplateException {
         checkMethodArgCount(args.size(), minCnt, maxCnt);
     }
 
     protected final void checkMethodArgCount(TemplateModel[] args, int minCnt, int maxCnt) throws
-            TemplateModelException {
+            TemplateException {
         checkMethodArgCount(args.length, minCnt, maxCnt);
     }
 
-    protected final void checkMethodArgCount(int argCnt, int minCnt, int maxCnt) throws TemplateModelException {
+    protected final void checkMethodArgCount(int argCnt, int minCnt, int maxCnt) throws TemplateException {
         if (argCnt < minCnt || argCnt > maxCnt) {
             throw MessageUtils.newArgCntError("?" + key, argCnt, minCnt, maxCnt);
         }
     }
 
-    protected final String getStringMethodArg(TemplateModel[] args, int argIdx) throws TemplateModelException {
+    protected final String getStringMethodArg(TemplateModel[] args, int argIdx) throws TemplateException {
         return getStringMethodArg(args, argIdx, false);
     }
 
@@ -424,18 +423,18 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
      * Gets a method argument and checks if it's a string; it does NOT check if {@code args} is big enough.
      */
     protected final String getStringMethodArg(TemplateModel[] args, int argIdx, boolean optional)
-            throws TemplateModelException {
+            throws TemplateException {
         TemplateModel arg = args[argIdx];
         return getStringMethodArg(arg, argIdx, optional);
     }
 
     protected String getStringMethodArg(TemplateModel arg, int argIdx)
-            throws TemplateModelException {
+            throws TemplateException {
         return getStringMethodArg(arg, argIdx, false);
     }
 
     protected String getStringMethodArg(TemplateModel arg, int argIdx, boolean optional)
-            throws TemplateModelException {
+            throws TemplateException {
         if (!(arg instanceof TemplateScalarModel)) {
             if (optional && arg == null) {
                 return null;
@@ -447,7 +446,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
     }
 
     protected final Number getNumberMethodArg(TemplateModel[] args, int argIdx)
-            throws TemplateModelException {
+            throws TemplateException {
         return getNumberMethodArg(args, argIdx, false);
     }
 
@@ -455,18 +454,18 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
      * Gets a method argument and checks if it's a number; it does NOT check if {@code args} is big enough.
      */
     protected final Number getNumberMethodArg(TemplateModel[] args, int argIdx, boolean optional)
-            throws TemplateModelException {
+            throws TemplateException {
         TemplateModel arg = args[argIdx];
         return getNumberMethodArg(arg, argIdx, optional);
     }
 
     protected Number getNumberMethodArg(TemplateModel arg, int argIdx)
-            throws TemplateModelException {
+            throws TemplateException {
         return getNumberMethodArg(arg, argIdx, false);
     }
 
     protected Number getNumberMethodArg(TemplateModel arg, int argIdx, boolean optional)
-            throws TemplateModelException {
+            throws TemplateException {
         if (!(arg instanceof TemplateNumberModel)) {
             if (optional && arg == null) {
                 return null;
@@ -477,11 +476,11 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         }
     }
 
-    protected final TemplateModelException newMethodArgInvalidValueException(int argIdx, Object[] details) {
+    protected final TemplateException newMethodArgInvalidValueException(int argIdx, Object[] details) {
         return MessageUtils.newMethodArgInvalidValueException("?" + key, argIdx, details);
     }
 
-    protected final TemplateModelException newMethodArgsInvalidValueException(Object[] details) {
+    protected final TemplateException newMethodArgsInvalidValueException(Object[] details) {
         return MessageUtils.newMethodArgsInvalidValueException("?" + key, details);
     }
     

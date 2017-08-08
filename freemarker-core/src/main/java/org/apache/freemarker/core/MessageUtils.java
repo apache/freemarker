@@ -177,11 +177,11 @@ class MessageUtils {
         return sb;
     }
 
-    static TemplateModelException newArgCntError(String methodName, int argCnt, int expectedCnt) {
+    static TemplateException newArgCntError(String methodName, int argCnt, int expectedCnt) {
         return newArgCntError(methodName, argCnt, expectedCnt, expectedCnt);
     }
     
-    static TemplateModelException newArgCntError(String methodName, int argCnt, int minCnt, int maxCnt) {
+    static TemplateException newArgCntError(String methodName, int argCnt, int minCnt, int maxCnt) {
         ArrayList/*<Object>*/ desc = new ArrayList(20);
         
         desc.add(methodName);
@@ -220,47 +220,47 @@ class MessageUtils {
         }
         desc.add(".");
         
-        return new _TemplateModelException(desc.toArray());
+        return new TemplateException(desc.toArray());
     }
 
-    static TemplateModelException newMethodArgMustBeStringException(String methodName, int argIdx, TemplateModel arg) {
+    static TemplateException newMethodArgMustBeStringException(String methodName, int argIdx, TemplateModel arg) {
         return newMethodArgUnexpectedTypeException(methodName, argIdx, "string", arg);
     }
 
-    static TemplateModelException newMethodArgMustBeNumberException(String methodName, int argIdx, TemplateModel arg) {
+    static TemplateException newMethodArgMustBeNumberException(String methodName, int argIdx, TemplateModel arg) {
         return newMethodArgUnexpectedTypeException(methodName, argIdx, "number", arg);
     }
     
-    static TemplateModelException newMethodArgMustBeBooleanException(String methodName, int argIdx, TemplateModel arg) {
+    static TemplateException newMethodArgMustBeBooleanException(String methodName, int argIdx, TemplateModel arg) {
         return newMethodArgUnexpectedTypeException(methodName, argIdx, "boolean", arg);
     }
     
-    static TemplateModelException newMethodArgMustBeExtendedHashException(
+    static TemplateException newMethodArgMustBeExtendedHashException(
             String methodName, int argIdx, TemplateModel arg) {
         return newMethodArgUnexpectedTypeException(methodName, argIdx, "extended hash", arg);
     }
     
-    static TemplateModelException newMethodArgMustBeSequenceException(
+    static TemplateException newMethodArgMustBeSequenceException(
             String methodName, int argIdx, TemplateModel arg) {
         return newMethodArgUnexpectedTypeException(methodName, argIdx, "sequence", arg);
     }
     
-    static TemplateModelException newMethodArgMustBeSequenceOrCollectionException(
+    static TemplateException newMethodArgMustBeSequenceOrCollectionException(
             String methodName, int argIdx, TemplateModel arg) {
         return newMethodArgUnexpectedTypeException(methodName, argIdx, "sequence or collection", arg);
     }
     
-    static TemplateModelException newMethodArgUnexpectedTypeException(
+    static TemplateException newMethodArgUnexpectedTypeException(
             String methodName, int argIdx, String expectedType, TemplateModel arg) {
         return new _TemplateModelException(
                 methodName, "(...) expects ", new _DelayedAOrAn(expectedType), " as argument #", Integer.valueOf(argIdx + 1),
-                ", but received ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(arg)), ".");
+                ", but received ", new _DelayedAOrAn(new _DelayedTemplateLanguageTypeDescription(arg)), ".");
     }
     
     /**
      * The type of the argument was good, but it's value wasn't.
      */
-    static TemplateModelException newMethodArgInvalidValueException(
+    static TemplateException newMethodArgInvalidValueException(
             String methodName, int argIdx, Object... details) {
         return new _TemplateModelException(
                 methodName, "(...) argument #", Integer.valueOf(argIdx + 1),
@@ -270,7 +270,7 @@ class MessageUtils {
     /**
      * The type of the argument was good, but the values of two or more arguments are inconsistent with each other.
      */
-    static TemplateModelException newMethodArgsInvalidValueException(
+    static TemplateException newMethodArgsInvalidValueException(
             String methodName, Object... details) {
         return new _TemplateModelException(methodName, "(...) arguments have invalid value: ", details);
     }

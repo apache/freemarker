@@ -22,7 +22,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Member;
 
 import org.apache.freemarker.core._CallableUtils;
-import org.apache.freemarker.core._DelayedFTLTypeDescription;
+import org.apache.freemarker.core._DelayedTemplateLanguageTypeDescription;
 import org.apache.freemarker.core._DelayedOrdinal;
 import org.apache.freemarker.core._ErrorDescriptionBuilder;
 import org.apache.freemarker.core._TemplateModelException;
@@ -151,7 +151,7 @@ class SimpleMethod {
                 _MethodUtils.invocationErrorMessageStart(member), " couldn't be called: Can't convert the ",
                 new _DelayedOrdinal(argIdx + 1),
                 " argument's value to the target Java type, ", _ClassUtils.getShortClassName(targetType),
-                ". The type of the actual value was: ", new _DelayedFTLTypeDescription(argVal));
+                ". The type of the actual value was: ", new _DelayedTemplateLanguageTypeDescription(argVal));
         if (argVal instanceof TemplateMarkupOutputModel && (targetType.isAssignableFrom(String.class))) {
             desc.tip(MARKUP_OUTPUT_TO_STRING_TIP);
         }

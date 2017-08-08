@@ -47,7 +47,7 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.NonTemplateCallPlace;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core._CoreAPI;
-import org.apache.freemarker.core._DelayedFTLTypeDescription;
+import org.apache.freemarker.core._DelayedTemplateLanguageTypeDescription;
 import org.apache.freemarker.core._DelayedShortClassName;
 import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
@@ -817,10 +817,10 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
                         return ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
                     } else {
                         throw new _TemplateModelException(
-                                "Failed to convert ",  new _DelayedFTLTypeDescription(seq),
+                                "Failed to convert ",  new _DelayedTemplateLanguageTypeDescription(seq),
                                 " object to ", new _DelayedShortClassName(array.getClass()),
                                 ": Problematic sequence item at index ", Integer.valueOf(i) ," with value type: ",
-                                new _DelayedFTLTypeDescription(seqItem));
+                                new _DelayedTemplateLanguageTypeDescription(seqItem));
                     }
 
                 }

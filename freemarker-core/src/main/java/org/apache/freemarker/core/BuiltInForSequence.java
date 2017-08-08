@@ -34,5 +34,5 @@ abstract class BuiltInForSequence extends ASTExpBuiltIn {
         return calculateResult((TemplateSequenceModel) model);
     }
     abstract TemplateModel calculateResult(TemplateSequenceModel tsm)
-    throws TemplateModelException;
+            throws TemplateException;
 }

@@ -156,12 +156,12 @@ class BuiltInsForStringsEncoding {
                 try {
                     charset = Charset.forName(charsetName);
                 } catch (UnsupportedCharsetException e) {
-                    throw new _TemplateModelException(e, "Wrong charset name, or charset is unsupported by the runtime "
+                    throw new TemplateException(e, "Wrong charset name, or charset is unsupported by the runtime "
                             + "environment: " + _StringUtils.jQuote(charsetName));
                 }
                 return new SimpleScalar(encodeWithCharset(charset));
             } catch (Exception e) {
-                throw new _TemplateModelException(e, "Failed to execute URL encoding.");
+                throw new TemplateException(e, "Failed to execute URL encoding.");
             }
         }
 
@@ -175,7 +175,7 @@ class BuiltInsForStringsEncoding {
             if (cachedResult == null) {
                 Charset charset = env.getEffectiveURLEscapingCharset();
                 if (charset == null) {
-                    throw new _TemplateModelException(
+                    throw new TemplateModelException(
                             "To do URL encoding, the framework that encloses "
                             + "FreeMarker must specify the output encoding "
                             + "or the URL encoding charset, so ask the "

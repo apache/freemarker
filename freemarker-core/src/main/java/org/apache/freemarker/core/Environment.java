@@ -662,7 +662,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         if (node == null) {
             node = getCurrentVisitorNode();
             if (node == null) {
-                throw new _TemplateModelException(
+                throw new TemplateModelException(
                         "The target node of recursion is missing or null.");
             }
         }

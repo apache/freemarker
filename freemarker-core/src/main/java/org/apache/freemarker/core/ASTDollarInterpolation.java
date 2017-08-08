@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
+import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.util.TemplateLanguageUtils;
@@ -76,7 +77,7 @@ final class ASTDollarInterpolation extends ASTInterpolation {
                 // ATTENTION: Keep this logic in sync. ?esc/?noEsc's logic!
                 srcPlainText = moOF.getSourcePlainText(mo);
                 if (srcPlainText == null) {
-                    throw new _TemplateModelException(escapedExpression,
+                    throw new TemplateException(escapedExpression,
                             "The value to print is in ", new _DelayedToString(moOF),
                             " format, which differs from the current output format, ",
                             new _DelayedToString(outputFormat), ". Format conversion wasn't possible.");

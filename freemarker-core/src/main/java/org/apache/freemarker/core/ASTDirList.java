@@ -308,7 +308,7 @@ final class ASTDirList extends ASTDirective {
                     && !NonSequenceOrCollectionException.isWrappedIterable(listedValue)) {
                 throw new NonSequenceOrCollectionException(env,
                         new _ErrorDescriptionBuilder("The value you try to list is ",
-                                new _DelayedAOrAn(new _DelayedFTLTypeDescription(listedValue)),
+                                new _DelayedAOrAn(new _DelayedTemplateLanguageTypeDescription(listedValue)),
                                 ", thus you must declare two nested content parameters after the \"as\"; one for the "
                                 + "key, and another for the value, like ", "<#... as k, v>", ")."
                                 ));
@@ -365,7 +365,7 @@ final class ASTDirList extends ASTDirective {
                                                         + "implementations, all keys must be strings, but one of them "
                                                         + "was ",
                                                         new _DelayedAOrAn(
-                                                                new _DelayedFTLTypeDescription(nestedContentParam)),
+                                                                new _DelayedTemplateLanguageTypeDescription(nestedContentParam)),
                                                         "."
                                                         ).tip("The listed value's TemplateModel class was ",
                                                                 new _DelayedShortClassName(listedValue.getClass()),
@@ -391,7 +391,7 @@ final class ASTDirList extends ASTDirective {
                     || listedValue instanceof TemplateSequenceModel) {
                 throw new NonSequenceOrCollectionException(env,
                         new _ErrorDescriptionBuilder("The value you try to list is ",
-                                new _DelayedAOrAn(new _DelayedFTLTypeDescription(listedValue)),
+                                new _DelayedAOrAn(new _DelayedTemplateLanguageTypeDescription(listedValue)),
                                 ", thus you must declare only one nested content parameter after the \"as\" (there's "
                                 + "no separate key and value)."
                                 ));

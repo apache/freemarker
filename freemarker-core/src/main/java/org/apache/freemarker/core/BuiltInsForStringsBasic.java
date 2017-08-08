@@ -508,10 +508,10 @@ class BuiltInsForStringsBasic {
                                         : _StringUtils.rightPad(s, width, filling));
                     } catch (IllegalArgumentException e) {
                         if (filling.length() == 0) {
-                            throw new _TemplateModelException(
+                            throw new TemplateException(
                                     "?", key, "(...) argument #2 can't be a 0-length string.");
                         } else {
-                            throw new _TemplateModelException(e,
+                            throw new TemplateException(e,
                                     "?", key, "(...) failed: ", e);
                         }
                     }
@@ -708,7 +708,7 @@ class BuiltInsForStringsBasic {
                     return ArgumentArrayLayout.TWO_POSITIONAL_PARAMETERS;
                 }
 
-                private TemplateModelException newIndexGreaterThanLengthException(
+                private TemplateException newIndexGreaterThanLengthException(
                         int argIdx, int idx, final int len) throws TemplateModelException {
                     return MessageUtils.newMethodArgInvalidValueException(
                             "?" + key, argIdx,
@@ -716,7 +716,7 @@ class BuiltInsForStringsBasic {
                             len, ", but it was ", idx, ".");
                 }
     
-                private TemplateModelException newIndexLessThan0Exception(
+                private TemplateException newIndexLessThan0Exception(
                         int argIdx, int idx) throws TemplateModelException {
                     return MessageUtils.newMethodArgInvalidValueException(
                             "?" + key, argIdx,

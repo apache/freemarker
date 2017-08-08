@@ -34,7 +34,7 @@ class APINotSupportedTemplateException extends TemplateException {
             TemplateModel tm) {
         final _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                 "The value doesn't support ?api. See requirements in the FreeMarker Manual. ("
-                + "FTL type: ", new _DelayedFTLTypeDescription(tm),
+                + "FTL type: ", new _DelayedTemplateLanguageTypeDescription(tm),
                 ", TemplateModel class: ", new _DelayedShortClassName(tm.getClass()),
                 ", ObjectWapper: ", new _DelayedToString(env.getObjectWrapper()), ")"
         ).blame(blamedExpr);

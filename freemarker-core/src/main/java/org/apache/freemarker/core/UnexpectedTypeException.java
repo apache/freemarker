@@ -129,7 +129,7 @@ public class UnexpectedTypeException extends TemplateException {
                         : "the expression"
                 ),
                 " has evaluated to ",
-                new _DelayedAOrAn(new _DelayedFTLTypeDescription(model)),
+                new _DelayedAOrAn(new _DelayedTemplateLanguageTypeDescription(model)),
                 (blamedAssignmentTargetVarName == null ? ":" : ".")};
     }
     

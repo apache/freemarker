@@ -38,8 +38,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core._DelayedFTLTypeDescription;
-import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core._DelayedTemplateLanguageTypeDescription;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
@@ -100,7 +99,7 @@ public class IncludePage implements TemplateDirectiveModel {
         if (!(path instanceof TemplateScalarModel)) {
             throw new TemplateException(env,
                     "Expected a scalar model. \"", PATH_PARAM_NAME, "\" is instead ",
-                    new _DelayedFTLTypeDescription(path));
+                    new _DelayedTemplateLanguageTypeDescription(path));
         }
         final String strPath = ((TemplateScalarModel) path).getAsString();
         if (strPath == null) {

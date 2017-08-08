@@ -293,12 +293,12 @@ public class _EvalUtils {
                     (quoteOperandsInErrors && leftExp != null
                             ? new Object[] { "(", new _DelayedGetCanonicalForm(leftExp), ") value " }
                             : ""),
-                    "is ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(leftValue)), ".\n",
+                    "is ", new _DelayedAOrAn(new _DelayedTemplateLanguageTypeDescription(leftValue)), ".\n",
                     "Right hand operand ",
                     (quoteOperandsInErrors && rightExp != null
                             ? new Object[] { "(", new _DelayedGetCanonicalForm(rightExp), ") value " }
                             : ""),
-                    "is ", new _DelayedAOrAn(new _DelayedFTLTypeDescription(rightValue)),
+                    "is ", new _DelayedAOrAn(new _DelayedTemplateLanguageTypeDescription(rightValue)),
                     ".");
         }
 

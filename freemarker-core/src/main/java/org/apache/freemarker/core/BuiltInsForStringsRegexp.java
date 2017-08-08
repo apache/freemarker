@@ -221,7 +221,7 @@ class BuiltInsForStringsRegexp {
 
                             return new SimpleScalar(firedEntireInputMatcher.group(i));
                         } catch (Exception e) {
-                            throw new _TemplateModelException(e, "Failed to read match group");
+                            throw new TemplateModelException("Failed to read match group", e);
                         }
                     }
                     
@@ -230,7 +230,7 @@ class BuiltInsForStringsRegexp {
                         try {
                             return firedEntireInputMatcher.groupCount() + 1;
                         } catch (Exception e) {
-                            throw new _TemplateModelException(e, "Failed to get match group count");
+                            throw new TemplateModelException("Failed to get match group count", e);
                         }
                     }
                     
@@ -284,7 +284,7 @@ class BuiltInsForStringsRegexp {
                     public TemplateModel next() throws TemplateModelException {
                         final ArrayList matchingInputParts = RegexMatchModel.this.matchingInputParts;
                         if (matchingInputParts == null) {
-                            if (!hasFindInfo) throw new _TemplateModelException("There were no more matches");
+                            if (!hasFindInfo) throw new TemplateModelException("There were no more matches");
                             MatchWithGroups result = new MatchWithGroups(input, matcher);
                             nextIdx++;
                             hasFindInfo = matcher.find();
@@ -293,7 +293,7 @@ class BuiltInsForStringsRegexp {
                             try {
                                 return (TemplateModel) matchingInputParts.get(nextIdx++);
                             } catch (IndexOutOfBoundsException e) {
-                                throw new _TemplateModelException(e, "There were no more matches");
+                                throw new TemplateModelException("There were no more matches", e);
                             }
                         }
                     }
@@ -314,7 +314,7 @@ class BuiltInsForStringsRegexp {
                         try {
                             return (TemplateModel) matchingInputParts.get(nextIdx++);
                         } catch (IndexOutOfBoundsException e) {
-                            throw new _TemplateModelException(e, "There were no more matches");
+                            throw new TemplateModelException("There were no more matches", e);
                         }
                     }
                 };

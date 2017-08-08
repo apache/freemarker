@@ -27,6 +27,7 @@ import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
@@ -98,7 +99,7 @@ class BuiltInsForDates {
                     try {
                         tzArg = _DateUtils.getTimeZone(tzName);
                     } catch (UnrecognizedTimeZoneException e) {
-                        throw new _TemplateModelException(
+                        throw new TemplateException(
                                 "The time zone string specified for ?", key,
                                 "(...) is not recognized as a valid time zone name: ",
                                 new _DelayedJQuote(tzName));

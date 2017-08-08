@@ -23,9 +23,9 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util.TemplateLanguageUtils;
 
 /** Don't use this; used internally by FreeMarker, might changes without notice. */
-public class _DelayedFTLTypeDescription extends _DelayedConversionToString {
+public class _DelayedTemplateLanguageTypeDescription extends _DelayedConversionToString {
     
-    public _DelayedFTLTypeDescription(TemplateModel tm) {
+    public _DelayedTemplateLanguageTypeDescription(TemplateModel tm) {
         super(tm);
     }
 
