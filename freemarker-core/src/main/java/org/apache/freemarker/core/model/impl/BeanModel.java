@@ -45,7 +45,6 @@ import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
-import org.apache.freemarker.core.util._StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,8 +144,6 @@ public class BeanModel
             if (retval == UNKNOWN) {
                 if (wrapper.isStrict()) {
                     throw new InvalidPropertyException("No such bean property: " + key);
-                } else {
-                    logNoSuchKey(key, classInfo);
                 }
                 retval = wrapper.wrap(null);
             }
@@ -162,14 +159,6 @@ public class BeanModel
         }
     }
 
-    private void logNoSuchKey(String key, Map<?, ?> keyMap) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Key " + _StringUtils.jQuoteNoXSS(key) + " was not found on instance of " +
-                object.getClass().getName() + ". Introspection information for " +
-                "the class is: " + keyMap);
-        }
-    }
-    
     /**
      * Whether the model has a plain get(String) or get(Object) method
      */
