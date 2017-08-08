@@ -19,7 +19,6 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
@@ -46,7 +45,7 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
  * these collections (though of course, Java methods called from the template can violate this rule).
  */
 public class DefaultNonListCollectionAdapter extends WrappingTemplateModel implements TemplateCollectionModelEx,
-        AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport, Serializable {
+        AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport {
 
     private final Collection collection;
 

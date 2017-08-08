@@ -19,7 +19,6 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Iterator;
 
@@ -43,7 +42,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  */
 @SuppressWarnings("serial")
 public class DefaultEnumerationAdapter extends WrappingTemplateModel implements TemplateCollectionModel,
-        AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport, Serializable {
+        AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport {
 
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="We hope it's Seralizable")
     private final Enumeration<?> enumeration;

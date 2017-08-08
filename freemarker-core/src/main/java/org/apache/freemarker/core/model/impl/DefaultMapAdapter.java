@@ -19,7 +19,6 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.io.Serializable;
 import java.util.Map;
 import java.util.SortedMap;
 
@@ -52,8 +51,7 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
  * {@code true}, which is the default when its {@code incompatibleImprovements} property is 2.3.22 or higher.
  */
 public class DefaultMapAdapter extends WrappingTemplateModel
-        implements TemplateHashModelEx2, AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport,
-        Serializable {
+        implements TemplateHashModelEx2, AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport {
 
     private final Map map;
 

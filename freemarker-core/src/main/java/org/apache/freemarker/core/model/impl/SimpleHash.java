@@ -19,7 +19,6 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.io.Serializable;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -76,7 +75,7 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
  * @see DefaultMapAdapter
  * @see TemplateHashModelEx
  */
-public class SimpleHash extends WrappingTemplateModel implements TemplateHashModelEx2, Serializable {
+public class SimpleHash extends WrappingTemplateModel implements TemplateHashModelEx2 {
 
     private final Map map;
     private boolean putFailed;

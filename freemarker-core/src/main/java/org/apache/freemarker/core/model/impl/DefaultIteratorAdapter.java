@@ -19,7 +19,6 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.io.Serializable;
 import java.util.Iterator;
 
 import org.apache.freemarker.core.model.AdapterTemplateModel;
@@ -51,7 +50,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * {@code true}, which is the default when its {@code incompatibleImprovements} property is 2.3.22 or higher.
  */
 public class DefaultIteratorAdapter extends WrappingTemplateModel implements TemplateCollectionModel,
-        AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport, Serializable {
+        AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport {
 
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="We hope it's Seralizable")
     private final Iterator iterator;

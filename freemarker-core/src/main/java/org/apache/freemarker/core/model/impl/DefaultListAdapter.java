@@ -19,7 +19,6 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.io.Serializable;
 import java.util.AbstractSequentialList;
 import java.util.List;
 
@@ -55,7 +54,7 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
  * @see TemplateSequenceModel
  */
 public class DefaultListAdapter extends WrappingTemplateModel implements TemplateSequenceModel,
-        AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport, Serializable {
+        AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport {
 
     protected final List list;
 

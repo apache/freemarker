@@ -19,7 +19,6 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.io.Serializable;
 import java.lang.reflect.Array;
 
 import org.apache.freemarker.core.model.AdapterTemplateModel;
@@ -51,7 +50,7 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
  * @see TemplateSequenceModel
  */
 public abstract class DefaultArrayAdapter extends WrappingTemplateModel implements TemplateSequenceModel,
-        AdapterTemplateModel, WrapperTemplateModel, Serializable {
+        AdapterTemplateModel, WrapperTemplateModel {
 
     /**
      * Factory method for creating new adapter instances.

@@ -19,7 +19,6 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -47,7 +46,7 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
  */
 @SuppressWarnings("serial")
 public class DefaultIterableAdapter extends WrappingTemplateModel implements TemplateCollectionModel,
-        AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport, Serializable {
+        AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport {
     
     private final Iterable<?> iterable;
 
