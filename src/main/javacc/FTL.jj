@@ -78,7 +78,7 @@ public class FMParser {
     private ParserConfiguration pCfg;
 
     /** Keeps track of #list and #foreach nesting. */
-    private List/*<ParserIteratorBlockContext>*/ iteratorBlockContexts;
+    private List<ParserIteratorBlockContext> iteratorBlockContexts;
     
     /**
      * Keeps track of the nesting depth of directives that support #break.
@@ -273,7 +273,9 @@ public class FMParser {
         }
     }
     
-    void setupStringLiteralMode(FMParserTokenManager parentTokenSource, OutputFormat outputFormat) {
+    void setupStringLiteralMode(FMParser parentParser, OutputFormat outputFormat) {
+        FMParserTokenManager parentTokenSource = parentParser.token_source;
+         
         token_source.initialNamingConvention = parentTokenSource.initialNamingConvention;
         token_source.namingConvention = parentTokenSource.namingConvention;
         token_source.namingConventionEstabilisher = parentTokenSource.namingConventionEstabilisher;
@@ -285,9 +287,14 @@ public class FMParser {
             // Emulate bug, where the string literal parser haven't inherited the IcI:
             incompatibleImprovements = _TemplateAPI.VERSION_INT_2_3_0;
         }
+        
+        // So that loop variable built-ins, like ?index, works inside the interpolations in the string literal:
+        iteratorBlockContexts = parentParser.iteratorBlockContexts;
     }
 
-    void tearDownStringLiteralMode(FMParserTokenManager parentTokenSource) {
+    void tearDownStringLiteralMode(FMParser parentParser) {
+        // If the naming convention was established inside the string literal, it's inherited by the parent:
+        FMParserTokenManager parentTokenSource = parentParser.token_source; 
         parentTokenSource.namingConvention = token_source.namingConvention;
         parentTokenSource.namingConventionEstabilisher = token_source.namingConventionEstabilisher;
     }
@@ -507,7 +514,7 @@ public class FMParser {
     
     private ParserIteratorBlockContext pushIteratorBlockContext() {
         if (iteratorBlockContexts == null) {
-            iteratorBlockContexts = new ArrayList(4);
+            iteratorBlockContexts = new ArrayList<ParserIteratorBlockContext>(4);
         }
         ParserIteratorBlockContext newCtx = new ParserIteratorBlockContext();
         iteratorBlockContexts.add(newCtx);
@@ -527,7 +534,7 @@ public class FMParser {
             throws ParseException {
         int size = iteratorBlockContexts != null ? iteratorBlockContexts.size() : 0;
         for (int i = size - 1; i >= 0; i--) {
-            ParserIteratorBlockContext ctx = (ParserIteratorBlockContext) iteratorBlockContexts.get(i);
+            ParserIteratorBlockContext ctx = iteratorBlockContexts.get(i);
             if (loopVarName.equals(ctx.loopVarName) || loopVarName.equals(ctx.loopVar2Name)) {
                 if (ctx.kind == ITERATOR_BLOCK_KIND_USER_DIRECTIVE) {
 			        throw new ParseException(
@@ -2297,7 +2304,7 @@ StringLiteral StringLiteral(boolean interpolate) :
         result.setLocation(template, t, t);
         if (interpolate && !raw) {
             // TODO: This logic is broken. It can't handle literals that contains both ${...} and $\{...}. 
-            if (t.image.indexOf("${") >= 0 || t.image.indexOf("#{") >= 0) result.parseValue(token_source, outputFormat);
+            if (t.image.indexOf("${") >= 0 || t.image.indexOf("#{") >= 0) result.parseValue(this, outputFormat);
         }
         return result;
     }
