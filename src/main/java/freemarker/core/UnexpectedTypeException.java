@@ -104,7 +104,7 @@ public class UnexpectedTypeException extends TemplateException {
                                 new _DelayedJQuote(blamedAssignmentTargetVarName) }), 
                 " has evaluated to ",
                 new _DelayedAOrAn(new _DelayedFTLTypeDescription(model)),
-                (blamedAssignmentTargetVarName == null ? ":" : ".")};
+                (blamed != null ? ":" : ".")};
     }
     
 }
