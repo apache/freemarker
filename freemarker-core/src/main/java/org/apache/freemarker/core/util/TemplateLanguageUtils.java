@@ -743,34 +743,78 @@ public final class TemplateLanguageUtils {
     }
 
     /**
-     * Return the template language type name of callable class, as it should be shown in error messages.
+     * Return the template language type name of the given class, as it should be shown in error messages. This show
+     * less information that {@link #getTypeDescription(TemplateModel)}, but needs no instance, just a class.
+     *
+     * @param cl
+     *         The {@link TemplateModel} subclass; not {@code null}
+     */
+    public static String getTypeName(Class<? extends TemplateModel> cl) {
+        StringBuilder sb = new StringBuilder();
+        appendTemplateModelTypeName(sb, new HashSet<String>(4), cl);
+        return sb.toString();
+    }
+
+    /**
+     * Return the template language type name of the value as it should be shown in error messages, considering {@link
+     * TemplateCollectionModel} subinterfaces only.
      *
      * @param callable
      *         Can't be {@code null}.
      */
     public static String getCallableTypeName(TemplateCallableModel callable) {
-        _NullArgumentException.check("callable", callable);
-
         String result = "callable-of-unknown-kind";
 
         String d = null;
         if (callable instanceof TemplateDirectiveModel) {
-            d = _CoreAPI.isMacro(callable.getClass()) ? "macro" : "directive";
+            d = getDirectiveTypeName((TemplateDirectiveModel) callable);
             result = d;
         }
 
         if (callable instanceof TemplateFunctionModel) {
-            String f = callable instanceof JavaMethodModel ? "method" : "function";
+            String f = getFunctionTypeName((TemplateFunctionModel) callable);
             result = d == null ? f : d + "+" + f;
         }
 
         return result;
     }
 
+    public static String getCallableTypeName(TemplateCallableModel callable, boolean calledAsFunction) {
+        return calledAsFunction
+                ? getFunctionTypeName((TemplateFunctionModel) callable)
+                : !calledAsFunction ? getDirectiveTypeName(
+                        (TemplateDirectiveModel) callable)
+                        : getCallableTypeName(callable);
+    }
+
+    /**
+     * Return the template language type name of the value as it should be shown in error messages, considering
+     * the {@link TemplateFunctionModel} implementing part only.
+     *
+     * @param callable
+     *         Can't be {@code null}.
+     */
+    public static String getFunctionTypeName(TemplateFunctionModel callable) {
+        _NullArgumentException.check("callable", callable);
+        return callable instanceof JavaMethodModel ? "method" : "function";
+    }
+
+    /**
+     * Return the template language type name of the value as it should be shown in error messages, considering
+     * the {@link TemplateDirectiveModel} implementing part only.
+     *
+     * @param callable
+     *         Can't be {@code null}.
+     */
+    public static String getDirectiveTypeName(TemplateDirectiveModel callable) {
+        _NullArgumentException.check("callable", callable);
+        return _CoreAPI.isMacro(callable.getClass()) ? "macro" : "directive";
+    }
+
     /**
      * Returns the {@link TemplateModel} interface that is the most characteristic of the object, or {@code null}.
      */
-    private static Class getPrimaryTemplateModelInterface(TemplateModel tm) {
+    private static Class<? extends TemplateModel> getPrimaryTemplateModelInterface(TemplateModel tm) {
         if (tm instanceof BeanModel) {
             if (tm instanceof BeanAndStringModel) {
                 Object wrapped = ((BeanModel) tm).getWrappedObject();
@@ -785,8 +829,9 @@ public final class TemplateLanguageUtils {
         }
     }
 
-    private static void appendTemplateModelTypeName(StringBuilder sb, Set typeNamesAppended, Class cl) {
-        int initalLength = sb.length();
+    private static void appendTemplateModelTypeName(
+            StringBuilder sb, Set<String> typeNamesAppended, Class<? extends TemplateModel> cl) {
+        int initialLength = sb.length();
 
         if (TemplateNodeModelEx.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "extended node");
@@ -841,7 +886,7 @@ public final class TemplateLanguageUtils {
             appendTypeName(sb, typeNamesAppended, "markupOutput");
         }
 
-        if (sb.length() == initalLength) {
+        if (sb.length() == initialLength) {
             appendTypeName(sb, typeNamesAppended, "miscTemplateModel");
         }
     }
@@ -869,4 +914,5 @@ public final class TemplateLanguageUtils {
             typeNamesAppended.add(name);
         }
     }
+
 }

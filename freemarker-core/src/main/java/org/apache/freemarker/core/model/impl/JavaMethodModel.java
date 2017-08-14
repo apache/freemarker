@@ -25,12 +25,13 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelWithOriginName;
 
 /**
  * Common super interface (marker interface) for {@link TemplateFunctionModel}-s that stand for Java methods; do not
  * implement it yourself! It meant to be implemented inside FreeMarker only.
  */
-public interface JavaMethodModel extends TemplateFunctionModel {
+public interface JavaMethodModel extends TemplateFunctionModel, TemplateModelWithOriginName {
 
     /**
      * Calls {@link #execute(TemplateModel[], CallPlace, Environment)}, but it emphasizes that the
@@ -49,4 +50,21 @@ public interface JavaMethodModel extends TemplateFunctionModel {
      */
     @Override
     ArgumentArrayLayout getFunctionArgumentArrayLayout();
+
+    /**
+     * The class where the method was declared. For overloaded methods, this should the most specific class where some
+     * of the overloads are declared.
+     */
+    Class<?> getMethodDeclaringClass();
+
+    /**
+     * The name of the method.
+     */
+    String getMethodName();
+
+    /**
+     * Returns package name + {@code "."} + method name.
+     */
+    @Override
+    String getOriginName();
 }

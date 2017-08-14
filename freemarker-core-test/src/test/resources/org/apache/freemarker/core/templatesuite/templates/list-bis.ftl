@@ -45,4 +45,4 @@
 <#list ['a', 'b', 'c', 'd', 'e', 'f', 'g'] as x>
     <td class="${x?itemCycle('R', 'G', 'B')}">${x}</td>
 </#list>
-<@assertFails message="expects 1"><#list 1..1 as x>${x?itemCycle()}</#list></@>
+<@assertFails message="1 or more"><#list 1..1 as x>${x?itemCycle()}</#list></@>

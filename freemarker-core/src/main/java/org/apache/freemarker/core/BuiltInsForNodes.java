@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core;
 
+import static org.apache.freemarker.core._CallableUtils.getStringArgument;
+
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -44,6 +46,66 @@ class BuiltInsForNodes {
            }
            return result;
        }
+
+        class AncestorSequence extends NativeSequence implements TemplateFunctionModel,
+                BuiltInCallable {
+
+            private static final int INITIAL_CAPACITY = 12;
+
+            private Environment env;
+
+            AncestorSequence(Environment env) {
+                super(INITIAL_CAPACITY);
+                this.env = env;
+            }
+
+            @Override
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateException {
+                if (args.length == 0) {
+                    return this;
+                }
+                AncestorSequence result = new AncestorSequence(env);
+                for (int seqIdx = 0; seqIdx < size(); seqIdx++) {
+                    TemplateNodeModel tnm = (TemplateNodeModel) get(seqIdx);
+                    String nodeName = tnm.getNodeName();
+                    String nsURI = tnm.getNodeNamespace();
+                    if (nsURI == null) {
+                        for (int argIdx = 0; argIdx < args.length; argIdx++) {
+                            String name = getStringArgument(args, argIdx, this);
+                            if (name.equals(nodeName)) {
+                                result.add(tnm);
+                                break;
+                            }
+                        }
+                    } else {
+                        for (int argIdx = 0; argIdx < args.length; argIdx++) {
+                            if (_StringUtils.matchesQName(
+                                    getStringArgument(args, argIdx, this), nodeName, nsURI, env)) {
+                                result.add(tnm);
+                                break;
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return null;
+            }
+
+            @Override
+            public String getBuiltInName() {
+                return key;
+            }
+
+            @Override
+            public String getOriginName() {
+                return ASTExpBuiltIn.getOriginName(this);
+            }
+        }
     }
     
     static class childrenBI extends BuiltInForNode {
@@ -113,52 +175,4 @@ class BuiltInsForNodes {
     // Can't be instantiated
     private BuiltInsForNodes() { }
 
-    static class AncestorSequence extends NativeSequence implements TemplateFunctionModel {
-
-        private static final int INITIAL_CAPACITY = 12;
-
-        private Environment env;
-        
-        AncestorSequence(Environment env) {
-            super(INITIAL_CAPACITY);
-            this.env = env;
-        }
-
-        @Override
-        public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
-                throws TemplateException {
-            if (args.length == 0) {
-                return this;
-            }
-            AncestorSequence result = new AncestorSequence(env);
-            for (int seqIdx = 0; seqIdx < size(); seqIdx++) {
-                TemplateNodeModel tnm = (TemplateNodeModel) get(seqIdx);
-                String nodeName = tnm.getNodeName();
-                String nsURI = tnm.getNodeNamespace();
-                if (nsURI == null) {
-                    for (int argIdx = 0; argIdx < args.length; argIdx++) {
-                        String name = _CallableUtils.castArgToString(args, argIdx);
-                        if (name.equals(nodeName)) {
-                            result.add(tnm);
-                            break;
-                        }
-                    }
-                } else {
-                    for (int argIdx = 0; argIdx < args.length; argIdx++) {
-                        if (_StringUtils.matchesQName(
-                                _CallableUtils.castArgToString(args, argIdx), nodeName, nsURI, env)) {
-                            result.add(tnm);
-                            break;
-                        }
-                    }
-                }
-            }
-            return result;
-        }
-
-        @Override
-        public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
-            return null;
-        }
-    }
 }

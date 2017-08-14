@@ -19,8 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import java.io.Serializable;
-
+import org.apache.freemarker.core.model.TemplateCallableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 
@@ -69,9 +68,10 @@ public class NonNumericalException extends UnexpectedTypeException {
 
 
     NonNumericalException(
-            Serializable argumentNameOrIndex, TemplateModel model, String[] tips, Environment env)
+            TemplateCallableModel callableModel, int argArrayIndex,
+            TemplateModel model, String[] tips, Environment env)
             throws InvalidReferenceException {
-        super(argumentNameOrIndex, model, "number", EXPECTED_TYPES, tips, env);
+        super(callableModel, argArrayIndex, model, "number", EXPECTED_TYPES, tips, env);
     }
 
     static NonNumericalException newMalformedNumberException(ASTExpression blamed, String text, Environment env) {

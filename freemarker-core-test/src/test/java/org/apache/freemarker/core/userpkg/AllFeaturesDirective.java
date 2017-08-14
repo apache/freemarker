@@ -59,30 +59,14 @@ public class AllFeaturesDirective extends TestTemplateCallableModel implements T
     private static final int P_VARARGS_ARG_IDX = ARGS_LAYOUT.getPositionalVarargsArgumentIndex();
     private static final int N_VARARGS_ARG_IDX = ARGS_LAYOUT.getNamedVarargsArgumentIndex();
 
-    private final boolean p1AllowNull;
-    private final boolean p2AllowNull;
-    private final boolean n1AllowNull;
-    private final boolean n2AllowNull;
-
-    public AllFeaturesDirective() {
-        this(true, true, true, true);
-    }
-
-    public AllFeaturesDirective(boolean p1AllowNull, boolean p2AllowNull, boolean n1AllowNull, boolean n2AllowNull) {
-        this.p1AllowNull = p1AllowNull;
-        this.p2AllowNull = p2AllowNull;
-        this.n1AllowNull = n1AllowNull;
-        this.n2AllowNull = n2AllowNull;
-    }
-
     @Override
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
-        execute(castArgToNumber(args, P1_ARG_IDX, p1AllowNull),
-                castArgToNumber(args, P2_ARG_IDX, p2AllowNull),
+        execute(getOptionalNumberArgument(args, P1_ARG_IDX, this),
+                getOptionalNumberArgument(args, P2_ARG_IDX, this),
                 (TemplateSequenceModel) args[P_VARARGS_ARG_IDX],
-                castArgToNumber(args[N1_ARG_IDX], N1_ARG_NAME, n1AllowNull),
-                castArgToNumber(args[N2_ARG_IDX], N2_ARG_NAME, n2AllowNull),
+                getOptionalNumberArgument(args, N1_ARG_IDX, this),
+                getOptionalNumberArgument(args, N2_ARG_IDX, this),
                 (TemplateHashModelEx2) args[N_VARARGS_ARG_IDX],
                 out, env, callPlace);
     }

@@ -119,5 +119,19 @@ public final class SimpleJavaMethodModel extends SimpleMethod implements JavaMet
                     ") instead of obj.something will yield the desired value" };
         }
     }
-    
+
+    @Override
+    public String getMethodName() {
+        return getMember().getName();
+    }
+
+    @Override
+    public Class<?> getMethodDeclaringClass() {
+        return getMember().getDeclaringClass();
+    }
+
+    @Override
+    public String getOriginName() {
+        return getMethodDeclaringClass().getName() + "." + getMethodName();
+    }
 }

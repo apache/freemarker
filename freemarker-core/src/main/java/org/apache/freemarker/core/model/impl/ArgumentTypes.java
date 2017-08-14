@@ -357,7 +357,7 @@ final class ArgumentTypes {
                         return 0;
                     }
                 } else {
-                    // The method with more oms parameters wins:
+                    // The method with more fixed parameters wins:
                     return paramTypes1Len - paramTypes2Len;
                 }
             } else {

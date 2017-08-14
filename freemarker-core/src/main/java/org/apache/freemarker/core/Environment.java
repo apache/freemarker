@@ -55,6 +55,7 @@ import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
+import org.apache.freemarker.core.model.TemplateModelWithOriginName;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
@@ -2559,7 +2560,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             lazyImport = false;
             // As we have an already normalized name, we use it. 2.3.x note: We should use the template.sourceName as
             // namespace key, but historically we use the looked up name (template.name); check what lazy import does if
-            // that will be oms, as that can't do the template lookup, yet the keys must be the same.
+            // that will be fixed, as that can't do the template lookup, yet the keys must be the same.
             templateName = loadedTemplate.getLookupName();
         } else {
             lazyImport = true;
@@ -2928,13 +2929,20 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     /**
      * Superclass of {@link TemplateCallableModel}-s implemented in the template language.
      */
-    abstract class TemplateLanguageCallable implements TemplateCallableModel {
+    abstract class TemplateLanguageCallable implements TemplateCallableModel, TemplateModelWithOriginName {
         final ASTDirMacroOrFunction callableDefinition;
         private final Namespace namespace;
 
         public TemplateLanguageCallable(ASTDirMacroOrFunction callableDefinition, Namespace namespace) {
             this.callableDefinition = callableDefinition;
             this.namespace = namespace;
+        }
+
+        @Override
+        public String getOriginName() {
+            String sourceName = callableDefinition.getTemplate().getSourceName();
+            return sourceName != null ? sourceName + ":" + callableDefinition.getName()
+                    : callableDefinition.getName();
         }
 
         protected void genericExecute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
@@ -2972,6 +2980,8 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             }
         }
 
+        abstract boolean isFunction();
+
         private void setLocalsFromArguments(ASTDirMacroOrFunction.Context macroCtx, TemplateModel[] args)
                 throws TemplateException {
             ASTDirMacroOrFunction.ParameterDefinition[] paramDefsByArgIdx =
@@ -2991,22 +3001,20 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                         // it was null, but this will be fixed with the null related refactoring.
                         throw new TemplateException(Environment.this,
                                 new _ErrorDescriptionBuilder(
-                                        "When calling macro ", new _DelayedJQuote(callableDefinition.getName()),
-                                        ", required parameter ", new _DelayedJQuote(paramDef.getName()),
-                                        (argIdx < callableDefinition.getArgumentArrayLayout()
-                                                        .getPredefinedPositionalArgumentCount()
-                                                ? new Object[] { " (parameter #", (argIdx + 1), ")" }
-                                                : ""),
-                                        " was either not specified, or had null/missing value.")
-                                        .tip("If the parameter value expression on the caller side is known to "
-                                                + "be legally null/missing, you may want to specify a default "
-                                                + "value for it on the caller side with the \"!\" operator, like "
-                                                + "paramValue!defaultValue.")
-                                        .tip("If the parameter was omitted on the caller side, and the omission was "
-                                                + "deliberate, you may consider making the parameter optional in the macro "
-                                                + "by specifying a default value for it, like <#macro macroName "
-                                                + "paramName=defaultExpr>."
-                                        )
+                                        _CallableUtils.getMessageArgumentProblem(
+                                                this, argIdx,
+                                                " can't be null or omitted.",
+                                                isFunction())
+                                )
+                                .tip("If the parameter value expression on the caller side is known to "
+                                        + "be legally null/missing, you may want to specify a default "
+                                        + "value for it on the caller side with the \"!\" operator, like "
+                                        + "paramValue!defaultValue.")
+                                .tip("If the parameter was omitted on the caller side, and the omission was "
+                                        + "deliberate, you may consider making the parameter optional in the macro "
+                                        + "by specifying a default value for it, like <#macro macroName "
+                                        + "paramName=defaultExpr>."
+                                )
                         );
                     }
                 }
@@ -3029,7 +3037,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      */
     final class TemplateLanguageDirective extends TemplateLanguageCallable implements TemplateDirectiveModel {
 
-        public TemplateLanguageDirective(ASTDirMacroOrFunction macroDef, Namespace namespace) {
+        TemplateLanguageDirective(ASTDirMacroOrFunction macroDef, Namespace namespace) {
             super(macroDef, namespace);
         }
 
@@ -3052,6 +3060,10 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         @Override
         public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
             return callableDefinition.getArgumentArrayLayout();
+        }
+
+        boolean isFunction() {
+            return false;
         }
 
     }
@@ -3082,6 +3094,10 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         @Override
         public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
             return callableDefinition.getArgumentArrayLayout();
+        }
+
+        boolean isFunction() {
+            return true;
         }
 
     }

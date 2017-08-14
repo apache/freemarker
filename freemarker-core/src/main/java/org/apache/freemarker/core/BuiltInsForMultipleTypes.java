@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core;
 
+import static org.apache.freemarker.core._CallableUtils.getOptionalStringArgument;
+
 import java.util.Date;
 
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
@@ -107,7 +109,8 @@ class BuiltInsForMultipleTypes {
     }
 
     static class dateBI extends ASTExpBuiltIn {
-        private class DateParser implements TemplateDateModel, TemplateFunctionModel, TemplateHashModel {
+        private class DateParser extends BuiltInCallableImpl
+                implements TemplateDateModel, TemplateFunctionModel, TemplateHashModel {
             private final String text;
             private final Environment env;
             private final TemplateDateFormat defaultFormat;
@@ -122,8 +125,8 @@ class BuiltInsForMultipleTypes {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                TemplateModel arg1 = args[0];
-                return arg1 == null ? getAsDateModel() : get(_CallableUtils.castArgToString(arg1, 0));
+                String pattern = getOptionalStringArgument(args, 0, this);
+                return pattern == null ? getAsDateModel() : get(pattern);
             }
 
             @Override
@@ -459,7 +462,8 @@ class BuiltInsForMultipleTypes {
     
     static class stringBI extends ASTExpBuiltIn {
         
-        private class BooleanFormatter implements TemplateScalarModel, TemplateFunctionModel {
+        private class BooleanFormatter extends BuiltInCallableImpl
+                implements TemplateScalarModel, TemplateFunctionModel {
             private final TemplateBooleanModel bool;
             private final Environment env;
             
@@ -474,7 +478,8 @@ class BuiltInsForMultipleTypes {
                 int argIdx = bool.getAsBoolean() ? 0 : 1;
                 TemplateModel result = args[argIdx];
                 if (!(result instanceof TemplateScalarModel)) {
-                    throw new NonStringException(argIdx, result, null, null);
+                    // Cause usual type exception
+                    _CallableUtils.castArgumentValueToString(result, argIdx, this, true, false);
                 }
                 return result;
             }
@@ -499,7 +504,8 @@ class BuiltInsForMultipleTypes {
             }
         }
     
-        private class DateFormatter implements TemplateScalarModel, TemplateHashModel, TemplateFunctionModel {
+        private class DateFormatter extends BuiltInCallableImpl
+                implements TemplateScalarModel, TemplateHashModel, TemplateFunctionModel {
             private final TemplateDateModel dateModel;
             private final Environment env;
             private final TemplateDateFormat defaultFormat;
@@ -520,7 +526,7 @@ class BuiltInsForMultipleTypes {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                return formatWith(_CallableUtils.castArgToString(args, 0));
+                return formatWith(_CallableUtils.getStringArgument(args, 0, this));
             }
 
             @Override
@@ -575,7 +581,8 @@ class BuiltInsForMultipleTypes {
             }
         }
         
-        private class NumberFormatter implements TemplateScalarModel, TemplateHashModel, TemplateFunctionModel {
+        private class NumberFormatter extends BuiltInCallableImpl
+                implements TemplateScalarModel, TemplateHashModel, TemplateFunctionModel {
             private final TemplateNumberModel numberModel;
             private final Number number;
             private final Environment env;
@@ -599,7 +606,7 @@ class BuiltInsForMultipleTypes {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                return get(_CallableUtils.castArgToString(args, 0));
+                return get(_CallableUtils.getStringArgument(args, 0, this));
             }
 
             @Override

@@ -83,4 +83,19 @@ class OverloadedJavaMethodModel implements JavaMethodModel {
         return null;
     }
 
+    @Override
+    public Class<?> getMethodDeclaringClass() {
+        return overloadedMethods.getMethodDeclaringClass();
+    }
+
+    @Override
+    public String getMethodName() {
+        return overloadedMethods.getMethodName();
+    }
+
+    @Override
+    public String getOriginName() {
+        return getMethodDeclaringClass().getName() + "." + getMethodName();
+    }
+
 }

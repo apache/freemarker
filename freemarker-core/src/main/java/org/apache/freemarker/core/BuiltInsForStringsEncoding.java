@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core;
 
+import static org.apache.freemarker.core._CallableUtils.getStringArgument;
+
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
@@ -82,7 +84,7 @@ class BuiltInsForStringsEncoding {
             protected String encodeWithCharset(Charset charset) throws UnsupportedEncodingException {
                 return _StringUtils.URLEnc(targetAsString, charset);
             }
-            
+
         }
         
         @Override
@@ -131,8 +133,8 @@ class BuiltInsForStringsEncoding {
     // Can't be instantiated
     private BuiltInsForStringsEncoding() { }
 
-    static abstract class AbstractUrlBIResult implements
-    TemplateScalarModel, TemplateFunctionModel {
+    static abstract class AbstractUrlBIResult implements TemplateScalarModel, TemplateFunctionModel,
+            ASTExpBuiltIn.BuiltInCallable {
         
         protected final ASTExpBuiltIn parent;
         protected final String targetAsString;
@@ -151,7 +153,7 @@ class BuiltInsForStringsEncoding {
         public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                 throws TemplateException {
             try {
-                String charsetName = _CallableUtils.castArgToString(args,0);
+                String charsetName = getStringArgument(args,0, this);
                 Charset charset;
                 try {
                     charset = Charset.forName(charsetName);
@@ -194,7 +196,16 @@ class BuiltInsForStringsEncoding {
             }
             return cachedResult;
         }
-        
+
+        @Override
+        public String getBuiltInName() {
+            return parent.key;
+        }
+
+        @Override
+        public String getOriginName() {
+            return ASTExpBuiltIn.getOriginName(this);
+        }
     }
 
 }

@@ -118,7 +118,8 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
         }
 
         TemplateModel[] execArgs = _CallableUtils.getExecuteArgs(
-                positionalArgs, namedArgs, argsLayout, callableValue, env);
+                positionalArgs, namedArgs, argsLayout, callableValue,
+                false, env);
 
         if (directive != null) {
             directive.execute(execArgs, this, env.getOut(), env);

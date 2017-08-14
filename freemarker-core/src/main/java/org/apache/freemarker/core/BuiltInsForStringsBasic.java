@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core;
 
+import static org.apache.freemarker.core._CallableUtils.*;
+
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
@@ -80,7 +82,7 @@ class BuiltInsForStringsBasic {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                return s.contains(_CallableUtils.castArgToString(args, 0))
+                return s.contains(_CallableUtils.getStringArgument(args, 0, this))
                         ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
             }
 
@@ -99,7 +101,7 @@ class BuiltInsForStringsBasic {
 
     static class ends_withBI extends BuiltInForString {
     
-        private class BIMethod implements TemplateFunctionModel {
+        private class BIMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             private String s;
     
             private BIMethod(String s) {
@@ -109,7 +111,7 @@ class BuiltInsForStringsBasic {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                return s.endsWith(getStringMethodArg(args, 0)) ?
+                return s.endsWith(getStringArgument(args, 0, this)) ?
                         TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
             }
 
@@ -127,7 +129,7 @@ class BuiltInsForStringsBasic {
 
     static class ensure_ends_withBI extends BuiltInForString {
         
-        private class BIMethod implements TemplateFunctionModel {
+        private class BIMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             private String s;
     
             private BIMethod(String s) {
@@ -137,7 +139,7 @@ class BuiltInsForStringsBasic {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                String suffix = getStringMethodArg(args, 0);
+                String suffix = getStringArgument(args, 0, this);
                 return new SimpleScalar(s.endsWith(suffix) ? s : s + suffix);
             }
 
@@ -155,7 +157,7 @@ class BuiltInsForStringsBasic {
 
     static class ensure_starts_withBI extends BuiltInForString {
         
-        private class BIMethod implements TemplateFunctionModel {
+        private class BIMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             private String s;
     
             private BIMethod(String s) {
@@ -165,12 +167,12 @@ class BuiltInsForStringsBasic {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                final String checkedPrefix = getStringMethodArg(args, 0);
+                final String checkedPrefix = getStringArgument(args, 0, this);
 
                 final boolean startsWithPrefix;
                 final String addedPrefix;
-                String addedPrefixArg = getStringMethodArg(args, 1, true);
-                String flagsArg = getStringMethodArg(args, 2, true);
+                String addedPrefixArg = getOptionalStringArgument(args, 1, this);
+                String flagsArg = getOptionalStringArgument(args, 2, this);
                 if (addedPrefixArg != null) {
                     addedPrefix = addedPrefixArg;
                     long flags = flagsArg != null
@@ -214,7 +216,7 @@ class BuiltInsForStringsBasic {
 
     static class index_ofBI extends ASTExpBuiltIn {
         
-        private class BIMethod implements TemplateFunctionModel {
+        private class BIMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             
             private final String s;
             
@@ -225,8 +227,8 @@ class BuiltInsForStringsBasic {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                String subStr = getStringMethodArg(args, 0);
-                Number indexModel = getNumberMethodArg(args, 1, true);
+                String subStr = getStringArgument(args, 0, this);
+                Number indexModel = getOptionalNumberArgument(args, 1, this);
                 if (indexModel != null) {
                     int startIdx = indexModel.intValue();
                     return new SimpleNumber(findLast ? s.lastIndexOf(subStr, startIdx) : s.indexOf(subStr, startIdx));
@@ -255,7 +257,7 @@ class BuiltInsForStringsBasic {
     }
     
     static class keep_afterBI extends BuiltInForString {
-        class KeepAfterMethod implements TemplateFunctionModel {
+        class KeepAfterMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             private String s;
 
             KeepAfterMethod(String s) {
@@ -265,9 +267,9 @@ class BuiltInsForStringsBasic {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                String separatorString = getStringMethodArg(args, 0);
+                String separatorString = getStringArgument(args, 0, this);
 
-                String flagsStr = getStringMethodArg(args, 1, true);
+                String flagsStr = getOptionalStringArgument(args, 1, this);
                 long flags = flagsStr != null ? RegexpHelper.parseFlagString(flagsStr) : 0;
 
                 int startIndex;
@@ -307,7 +309,7 @@ class BuiltInsForStringsBasic {
     }
     
     static class keep_after_lastBI extends BuiltInForString {
-        class KeepAfterMethod implements TemplateFunctionModel {
+        class KeepAfterMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             private String s;
 
             KeepAfterMethod(String s) {
@@ -317,8 +319,8 @@ class BuiltInsForStringsBasic {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                String separatorString = getStringMethodArg(args, 0);
-                String flagString = getStringMethodArg(args, 1, true);
+                String separatorString = getStringArgument(args, 0, this);
+                String flagString = getOptionalStringArgument(args, 1, this);
                 long flags = flagString != null ? RegexpHelper.parseFlagString(flagString) : 0;
 
                 int startIndex;
@@ -365,7 +367,7 @@ class BuiltInsForStringsBasic {
     }
     
     static class keep_beforeBI extends BuiltInForString {
-        class KeepUntilMethod implements TemplateFunctionModel {
+        class KeepUntilMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             private String s;
 
             KeepUntilMethod(String s) {
@@ -375,8 +377,8 @@ class BuiltInsForStringsBasic {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                String separatorString = getStringMethodArg(args, 0);
-                String flagString = getStringMethodArg(args, 1, true);
+                String separatorString = getStringArgument(args, 0, this);
+                String flagString = getOptionalStringArgument(args, 1, this);
                 long flags = flagString != null ? RegexpHelper.parseFlagString(flagString) : 0;
 
                 int stopIndex;
@@ -414,7 +416,7 @@ class BuiltInsForStringsBasic {
     
     // TODO
     static class keep_before_lastBI extends BuiltInForString {
-        class KeepUntilMethod implements TemplateFunctionModel {
+        class KeepUntilMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             private String s;
 
             KeepUntilMethod(String s) {
@@ -424,8 +426,8 @@ class BuiltInsForStringsBasic {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                String separatorString = getStringMethodArg(args, 0);
-                String flagString = getStringMethodArg(args, 1, true);
+                String separatorString = getStringArgument(args, 0, this);
+                String flagString = getOptionalStringArgument(args, 1, this);
                 long flags = flagString != null ? RegexpHelper.parseFlagString(flagString) : 0;
 
                 int stopIndex;
@@ -486,7 +488,7 @@ class BuiltInsForStringsBasic {
 
     static class padBI extends BuiltInForString {
         
-        private class BIMethod implements TemplateFunctionModel {
+        private class BIMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             
             private final String s;
     
@@ -497,9 +499,9 @@ class BuiltInsForStringsBasic {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                int width = getNumberMethodArg(args, 0).intValue();
+                int width = getNumberArgument(args, 0, this).intValue();
 
-                String filling = getStringMethodArg(args, 1, true);
+                String filling = getOptionalStringArgument(args, 1, this);
                 if (filling != null) {
                     try {
                         return new SimpleScalar(
@@ -540,7 +542,7 @@ class BuiltInsForStringsBasic {
     
     static class remove_beginningBI extends BuiltInForString {
         
-        private class BIMethod implements TemplateFunctionModel {
+        private class BIMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             private String s;
     
             private BIMethod(String s) {
@@ -550,7 +552,7 @@ class BuiltInsForStringsBasic {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                String prefix = getStringMethodArg(args, 0);
+                String prefix = getStringArgument(args, 0, this);
                 return new SimpleScalar(s.startsWith(prefix) ? s.substring(prefix.length()) : s);
             }
 
@@ -568,7 +570,7 @@ class BuiltInsForStringsBasic {
 
     static class remove_endingBI extends BuiltInForString {
     
-        private class BIMethod implements TemplateFunctionModel {
+        private class BIMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             private String s;
     
             private BIMethod(String s) {
@@ -578,7 +580,7 @@ class BuiltInsForStringsBasic {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                String suffix = getStringMethodArg(args, 0);
+                String suffix = getStringArgument(args, 0, this);
                 return new SimpleScalar(s.endsWith(suffix) ? s.substring(0, s.length() - suffix.length()) : s);
             }
 
@@ -595,7 +597,7 @@ class BuiltInsForStringsBasic {
     }
     
     static class split_BI extends BuiltInForString {
-        class SplitMethod implements TemplateFunctionModel {
+        class SplitMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             private String s;
 
             SplitMethod(String s) {
@@ -605,11 +607,10 @@ class BuiltInsForStringsBasic {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                int argCnt = args.length;
-                String splitString = getStringMethodArg(args, 0);
+                String splitString = getStringArgument(args, 0, this);
                 TemplateModel arg2 = args[1];
                 long flags = arg2 != null
-                        ? RegexpHelper.parseFlagString(getStringMethodArg(args, 1))
+                        ? RegexpHelper.parseFlagString(getStringArgument(args, 1, this))
                         : 0;
                 String[] result;
                 if ((flags & RegexpHelper.RE_FLAG_REGEXP) == 0) {
@@ -648,7 +649,7 @@ class BuiltInsForStringsBasic {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                return s.startsWith(getStringMethodArg(args, 0)) ?
+                return s.startsWith(getStringArgument(args, 0, this)) ?
                         TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
             }
 
@@ -668,62 +669,68 @@ class BuiltInsForStringsBasic {
         
         @Override
         TemplateModel calculateResult(final String s, final Environment env) throws TemplateException {
-            return new TemplateFunctionModel() {
+            return new MyTemplateFunctionModel(s);
+        }
 
-                @Override
-                public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
-                        throws TemplateException {
-                    int beginIdx = getNumberMethodArg(args, 0).intValue();
+        private class MyTemplateFunctionModel extends BuiltInCallableImpl implements TemplateFunctionModel {
 
-                    final int len = s.length();
+            private final String s;
 
-                    if (beginIdx < 0) {
-                        throw newIndexLessThan0Exception(0, beginIdx);
-                    } else if (beginIdx > len) {
-                        throw newIndexGreaterThanLengthException(0, beginIdx, len);
+            public MyTemplateFunctionModel(String s) {
+                this.s = s;
+            }
+
+            @Override
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateException {
+                int beginIdx = getNumberArgument(args, 0, this).intValue();
+
+                final int len = s.length();
+
+                if (beginIdx < 0) {
+                    throw newIndexLessThan0Exception(0, beginIdx);
+                } else if (beginIdx > len) {
+                    throw newIndexGreaterThanLengthException(0, beginIdx, len);
+                }
+
+                Number endIdxNumber = getOptionalNumberArgument(args, 1, this);
+                if (endIdxNumber != null) {
+                    int endIdx = endIdxNumber.intValue();
+                    if (endIdx < 0) {
+                        throw newIndexLessThan0Exception(1, endIdx);
+                    } else if (endIdx > len) {
+                        throw newIndexGreaterThanLengthException(1, endIdx, len);
                     }
-
-                    Number endIdxNumber = getNumberMethodArg(args, 1, true);
-                    if (endIdxNumber != null) {
-                        int endIdx = endIdxNumber.intValue();
-                        if (endIdx < 0) {
-                            throw newIndexLessThan0Exception(1, endIdx);
-                        } else if (endIdx > len) {
-                            throw newIndexGreaterThanLengthException(1, endIdx, len);
-                        }
-                        if (beginIdx > endIdx) {
-                            throw MessageUtils.newMethodArgsInvalidValueException("?" + key,
-                                    "The begin index argument, ", beginIdx,
-                                    ", shouldn't be greater than the end index argument, ",
-                                    endIdx, ".");
-                        }
-                        return new SimpleScalar(s.substring(beginIdx, endIdx));
-                    } else {
-                        return new SimpleScalar(s.substring(beginIdx));
+                    if (beginIdx > endIdx) {
+                        throw newGenericExecuteException(this,
+                                "The begin index argument, " + beginIdx
+                                + ", shouldn't be greater than the end index argument, " + endIdx + ".");
                     }
+                    return new SimpleScalar(s.substring(beginIdx, endIdx));
+                } else {
+                    return new SimpleScalar(s.substring(beginIdx));
                 }
+            }
 
-                @Override
-                public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
-                    return ArgumentArrayLayout.TWO_POSITIONAL_PARAMETERS;
-                }
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return ArgumentArrayLayout.TWO_POSITIONAL_PARAMETERS;
+            }
 
-                private TemplateException newIndexGreaterThanLengthException(
-                        int argIdx, int idx, final int len) throws TemplateModelException {
-                    return MessageUtils.newMethodArgInvalidValueException(
-                            "?" + key, argIdx,
-                            "The index mustn't be greater than the length of the string, ",
-                            len, ", but it was ", idx, ".");
-                }
-    
-                private TemplateException newIndexLessThan0Exception(
-                        int argIdx, int idx) throws TemplateModelException {
-                    return MessageUtils.newMethodArgInvalidValueException(
-                            "?" + key, argIdx,
-                            "The index must be at least 0, but was ", idx, ".");
-                }
-                
-            };
+            private TemplateException newIndexGreaterThanLengthException(
+                    int argIdx, int idx, final int len) throws TemplateModelException {
+                return newArgumentValueException(
+                        argIdx,
+                        "mustn't be greater than the length of the string, " + len + ", but it was " + idx + ".",
+                        this);
+            }
+
+            private TemplateException newIndexLessThan0Exception(
+                    int argIdx, int idx) throws TemplateModelException {
+                return newArgumentValueException(
+                        argIdx, "must be at least 0, but was " + idx + ".", this);
+            }
+
         }
     }
 

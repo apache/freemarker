@@ -395,7 +395,7 @@ public class ParameterListPreferabilityTest extends TestCase {
                 true);
         
         
-        // Different oms prefix length; in the case of ambiguity, the one with higher oms param count wins.
+        // Different fixed prefix length; in the case of ambiguity, the one with higher oms param count wins.
         testAllCmpPermutationsInc(
                 new Class[][] {
                     new Class[] { String.class, int.class, int.class, int[].class },

@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core;
 
+import static org.apache.freemarker.core._CallableUtils.*;
+
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,7 +63,7 @@ class BuiltInsForStringsRegexp {
     }
     
     static class matchesBI extends BuiltInForString {
-        class MatcherBuilder implements TemplateFunctionModel {
+        class MatcherBuilder extends BuiltInCallableImpl implements TemplateFunctionModel {
             
             String matchString;
             
@@ -73,8 +75,8 @@ class BuiltInsForStringsRegexp {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                String patternString = getStringMethodArg(args, 0);
-                String flagString = getStringMethodArg(args, 1, true);
+                String patternString = getStringArgument(args, 0, this);
+                String flagString = getOptionalStringArgument(args, 1, this);
                 long flags = flagString != null
                         ? RegexpHelper.parseFlagString(flagString)
                         : 0;
@@ -101,7 +103,7 @@ class BuiltInsForStringsRegexp {
     
     static class replace_reBI extends BuiltInForString {
         
-        class ReplaceMethod implements TemplateFunctionModel {
+        class ReplaceMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             private String s;
 
             ReplaceMethod(String s) {
@@ -111,9 +113,9 @@ class BuiltInsForStringsRegexp {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                String arg1 = getStringMethodArg(args, 0);
-                String arg2 = getStringMethodArg(args, 1);
-                String flagString = getStringMethodArg(args, 2, true);
+                String arg1 = getStringArgument(args, 0, this);
+                String arg2 = getStringArgument(args, 1, this);
+                String flagString = getOptionalStringArgument(args, 2, this);
                 long flags = flagString != null
                         ? RegexpHelper.parseFlagString(flagString)
                         : 0;

@@ -42,12 +42,13 @@ import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.model.TemplateModelWithOriginName;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.servlet.jsp.SimpleTagDirectiveModel.TemplateExceptionWrapperJspException;
 
-class JspTagModelBase {
+abstract class JspTagModelBase implements TemplateModelWithOriginName {
     protected final String tagName;
     private final Class tagClass;
     private final Map propertySetters = new HashMap();
@@ -159,5 +160,10 @@ class JspTagModelBase {
                 || eClass == ClassCastException.class
                 || eClass == IndexOutOfBoundsException.class;
     }
-    
+
+    @Override
+    public String getOriginName() {
+        // TODO Can't we know the namespace URI from somewhere?
+        return "jspCustomTag:" + tagName;
+    }
 }

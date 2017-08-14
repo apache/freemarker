@@ -52,7 +52,7 @@ public class CommonSupertypeForUnwrappingHintTest extends TestCase {
         testArrayAndOther(oms);
     }
     
-    /** These will be the same with oms and buggy: */
+    /** These will be the same with fixed and buggy: */
     private void testArrayAndOther(OverloadedMethodsSubset oms) {
         assertEquals(Serializable.class, oms.getCommonSupertypeForUnwrappingHint(int[].class, String.class));
         assertEquals(Serializable.class, oms.getCommonSupertypeForUnwrappingHint(Object[].class, String.class));

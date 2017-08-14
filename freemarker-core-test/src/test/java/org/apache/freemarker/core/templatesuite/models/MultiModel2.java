@@ -43,7 +43,7 @@ public class MultiModel2 implements TemplateScalarModel, TemplateFunctionModel {
     public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env) throws TemplateException {
         StringBuilder  aResults = new StringBuilder( "Arguments are:<br />" );
         for (int i = 0; i < args.length; i++) {
-            aResults.append(_CallableUtils.castArgToString(args, i));
+            aResults.append(_CallableUtils.getStringArgument(args, i, this));
             aResults.append("<br />");
         }
 

@@ -19,8 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import java.io.Serializable;
-
+import org.apache.freemarker.core.model.TemplateCallableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 
 /**
@@ -39,7 +38,11 @@ public class UnexpectedTypeException extends TemplateException {
     UnexpectedTypeException(
             ASTExpression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, Environment env)
             throws InvalidReferenceException {
-        super(null, env, blamed, newDescriptionBuilder(blamed, null, null, model, expectedTypesDesc, expectedTypes,
+        super(null, env, blamed, newDescriptionBuilder(
+                blamed,
+                null,
+                null, -1,
+                model, expectedTypesDesc, expectedTypes,
                 env));
     }
 
@@ -47,7 +50,11 @@ public class UnexpectedTypeException extends TemplateException {
             ASTExpression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, String tip,
             Environment env)
             throws InvalidReferenceException {
-        super(null, env, blamed, newDescriptionBuilder(blamed, null, null, model, expectedTypesDesc, expectedTypes,
+        super(null, env, blamed, newDescriptionBuilder(
+                blamed,
+                null,
+                null, -1,
+                model, expectedTypesDesc, expectedTypes,
                 env)
                 .tip(tip));
     }
@@ -56,7 +63,11 @@ public class UnexpectedTypeException extends TemplateException {
             ASTExpression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, Object[] tips,
             Environment env)
             throws InvalidReferenceException {
-        super(null, env, blamed, newDescriptionBuilder(blamed, null, null, model, expectedTypesDesc, expectedTypes, env)
+        super(null, env, blamed, newDescriptionBuilder(
+                blamed,
+                null,
+                null, -1,
+                model, expectedTypesDesc, expectedTypes, env)
                 .tips(tips));
     }
 
@@ -69,7 +80,10 @@ public class UnexpectedTypeException extends TemplateException {
             Environment env)
             throws InvalidReferenceException {
         super(null, env, null, newDescriptionBuilder(
-                null, blamedAssignmentTargetVarName, null, model, expectedTypesDesc, expectedTypes, env).tips(tips));
+                null,
+                blamedAssignmentTargetVarName,
+                null, -1,
+                model, expectedTypesDesc, expectedTypes, env).tips(tips));
     }
 
     /**
@@ -77,26 +91,40 @@ public class UnexpectedTypeException extends TemplateException {
      * expects.
      */
     UnexpectedTypeException(
-            Serializable blamedArgumentNameOrIndex, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes,
+            TemplateCallableModel callableModel, int argArrayIndex,
+            TemplateModel model, String expectedTypesDesc, Class[] expectedTypes,
             Object[] tips,
             Environment env)
             throws InvalidReferenceException {
         super(null, env, null, newDescriptionBuilder(
-                null, null, blamedArgumentNameOrIndex, model, expectedTypesDesc, expectedTypes, env).tips(tips));
+                null,
+                null,
+                callableModel, argArrayIndex,
+                model,
+                expectedTypesDesc, expectedTypes, env).tips(tips));
     }
 
     private static _ErrorDescriptionBuilder newDescriptionBuilder(
-            ASTExpression blamed, String blamedAssignmentTargetVarName, Serializable blamedArgumentNameOrIndex,
-            TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, Environment env)
+            ASTExpression blamed, String blamedAssignmentTargetVarName,
+            TemplateCallableModel callableModel, int argArrayIndex,
+            TemplateModel model, String expectedTypesDesc, Class<? extends TemplateModel>[] expectedTypes, Environment env)
             throws InvalidReferenceException {
         if (model == null) {
             throw InvalidReferenceException.getInstance(blamed, env);
         }
 
         _ErrorDescriptionBuilder errorDescBuilder = new _ErrorDescriptionBuilder(
-                unexpectedTypeErrorDescription(expectedTypesDesc,
-                        blamed, blamedAssignmentTargetVarName, blamedArgumentNameOrIndex,
-                        model))
+                callableModel == null
+                        ? unexpectedTypeErrorDescription(
+                            expectedTypesDesc,
+                            blamed,
+                            blamedAssignmentTargetVarName,
+                            model)
+                        : unexpectedTypeErrorDescription(
+                                expectedTypesDesc,
+                                blamed,
+                                callableModel, argArrayIndex,
+                                model))
                 .blame(blamed).showBlamer(true);
         if (model instanceof _UnexpectedTypeErrorExplainerTemplateModel) {
             Object[] tip = ((_UnexpectedTypeErrorExplainerTemplateModel) model).explainTypeError(expectedTypes);
@@ -109,7 +137,8 @@ public class UnexpectedTypeException extends TemplateException {
 
     private static Object[] unexpectedTypeErrorDescription(
             String expectedTypesDesc,
-            ASTExpression blamed, String blamedAssignmentTargetVarName, Serializable blamedArgumentNameOrIndex,
+            ASTExpression blamed,
+            String blamedAssignmentTargetVarName,
             TemplateModel model) {
         return new Object[] {
                 "Expected ", new _DelayedAOrAn(expectedTypesDesc), ", but ", (
@@ -117,20 +146,26 @@ public class UnexpectedTypeException extends TemplateException {
                                 ? new Object[] {
                                         "assignment target variable ",
                                         new _DelayedJQuote(blamedAssignmentTargetVarName) }
-                        : blamedArgumentNameOrIndex != null
-                                ? new Object[] {
-                                        "the ",
-                                        (blamedArgumentNameOrIndex instanceof Integer
-                                                ? new _DelayedOrdinal(((Integer) blamedArgumentNameOrIndex) + 1)
-                                                : new _DelayedJQuote(blamedArgumentNameOrIndex)),
-                                        " argument"}
                         : blamed != null
                                 ? "this"
                         : "the expression"
                 ),
                 " has evaluated to ",
                 new _DelayedAOrAn(new _DelayedTemplateLanguageTypeDescription(model)),
-                (blamedAssignmentTargetVarName == null ? ":" : ".")};
+                (blamed != null ? ":" : ".")};
     }
-    
+
+    private static Object[] unexpectedTypeErrorDescription(
+            String expectedTypesDesc,
+            ASTExpression blamed,
+            TemplateCallableModel callableModel, int argArrayIndex,
+            TemplateModel actualValue) {
+        // TODO
+        return new Object[]{
+                blamed, " expects ", new _DelayedAOrAn(expectedTypesDesc), " as its ", argArrayIndex, " arg, but it "
+                + "was " + new _DelayedAOrAn(new _DelayedTemplateLanguageTypeDescription(actualValue)),
+                (blamed != null ? ":" : ".")
+        };
+    }
+
 }

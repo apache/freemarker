@@ -18,6 +18,8 @@
  */
 package org.apache.freemarker.core;
 
+import static org.apache.freemarker.core._CallableUtils.checkArgumentCount;
+
 import org.apache.freemarker.core.ASTDirList.IterationContext;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
@@ -129,7 +131,7 @@ class BuiltInsForNestedContentParameters {
 
     static class item_cycleBI extends BuiltInForNestedContentParameter {
 
-        private class BIMethod implements TemplateFunctionModel {
+        private class BIMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             
             private final IterationContext iterCtx;
     
@@ -140,7 +142,7 @@ class BuiltInsForNestedContentParameters {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                checkMethodArgCount(args, 1, Integer.MAX_VALUE);
+                _CallableUtils.checkArgumentCount(args.length, 1, Integer.MAX_VALUE, this);
                 return args[iterCtx.getIndex() % args.length];
             }
 

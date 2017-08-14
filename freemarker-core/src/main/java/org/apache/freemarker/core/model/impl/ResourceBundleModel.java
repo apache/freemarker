@@ -112,7 +112,7 @@ public class ResourceBundleModel extends BeanModel implements TemplateFunctionMo
         if (args.length < 1)
             throw new TemplateException("No message key was specified", env);
         // Read it
-        String key = _CallableUtils.castArgToString(args, 0);
+        String key = _CallableUtils.getStringArgument(args, 0, this);
         try {
             if (args.length == 1) {
                 return wrap(((ResourceBundle) object).getObject(key));

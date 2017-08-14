@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core;
 
+import static org.apache.freemarker.core._CallableUtils.*;
+
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -27,7 +29,6 @@ import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
@@ -70,7 +71,7 @@ class BuiltInsForDates {
      */
     static class iso_BI extends AbstractISOBI {
         
-        class Result implements TemplateFunctionModel {
+        class Result extends BuiltInCallableImpl implements TemplateFunctionModel {
             private final Date date;
             private final int dateType;
             private final Environment env;
@@ -80,7 +81,6 @@ class BuiltInsForDates {
                 this.dateType = dateType;
                 this.env = env;
             }
-
 
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
@@ -95,18 +95,19 @@ class BuiltInsForDates {
                             instanceof TimeZone) {
                     tzArg = (TimeZone) adaptedObj;
                 } else if (tzArgTM instanceof TemplateScalarModel) {
-                    String tzName = _EvalUtils.modelToString((TemplateScalarModel) tzArgTM, null, null);
+                    String tzName = _EvalUtils.modelToString((TemplateScalarModel) tzArgTM, null);
                     try {
                         tzArg = _DateUtils.getTimeZone(tzName);
                     } catch (UnrecognizedTimeZoneException e) {
-                        throw new TemplateException(
-                                "The time zone string specified for ?", key,
-                                "(...) is not recognized as a valid time zone name: ",
-                                new _DelayedJQuote(tzName));
+                        throw newArgumentValueException(0,
+                                "not recognized as a valid time zone name: " + new _DelayedJQuote(tzName),
+                                this, true);
                     }
                 } else {
-                    throw MessageUtils.newMethodArgUnexpectedTypeException(
-                            "?" + key, 0, "string or java.util.TimeZone", tzArgTM);
+                    throw newArgumentValueTypeException(
+                            tzArgTM, 0,
+                            new Class[] { TemplateScalarModel.class }, "string or java.util.TimeZone",
+                            this, true);
                 }
 
                 return new SimpleScalar(_DateUtils.dateToISO8601String(

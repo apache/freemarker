@@ -19,9 +19,6 @@
 
 package org.apache.freemarker.core;
 
-import java.util.ArrayList;
-
-import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.core.valueformat.TemplateDateFormat;
@@ -58,10 +55,6 @@ class MessageUtils {
 
     // Can't be instantiated
     private MessageUtils() { }
-
-    static String formatLocationForSimpleParsingError(Template template, int line, int column) {
-        return formatLocation("in", template, line, column);
-    }
 
     static String formatLocationForSimpleParsingError(String templateSourceOrLookupName, int line, int column) {
         return formatLocation("in", templateSourceOrLookupName, line, column);
@@ -177,104 +170,6 @@ class MessageUtils {
         return sb;
     }
 
-    static TemplateException newArgCntError(String methodName, int argCnt, int expectedCnt) {
-        return newArgCntError(methodName, argCnt, expectedCnt, expectedCnt);
-    }
-    
-    static TemplateException newArgCntError(String methodName, int argCnt, int minCnt, int maxCnt) {
-        ArrayList/*<Object>*/ desc = new ArrayList(20);
-        
-        desc.add(methodName);
-        
-        desc.add("(");
-        if (maxCnt != 0) desc.add("...");
-        desc.add(") expects ");
-        
-        if (minCnt == maxCnt) {
-            if (maxCnt == 0) {
-                desc.add("no");
-            } else {
-                desc.add(Integer.valueOf(maxCnt));
-            }
-        } else if (maxCnt - minCnt == 1) {
-            desc.add(Integer.valueOf(minCnt));
-            desc.add(" or ");
-            desc.add(Integer.valueOf(maxCnt));
-        } else {
-            desc.add(Integer.valueOf(minCnt));
-            if (maxCnt != Integer.MAX_VALUE) {
-                desc.add(" to ");
-                desc.add(Integer.valueOf(maxCnt));
-            } else {
-                desc.add(" or more (unlimited)");
-            }
-        }
-        desc.add(" argument");
-        if (maxCnt > 1) desc.add("s");
-        
-        desc.add(" but has received ");
-        if (argCnt == 0) {
-            desc.add("none");
-        } else {
-            desc.add(Integer.valueOf(argCnt));
-        }
-        desc.add(".");
-        
-        return new TemplateException(desc.toArray());
-    }
-
-    static TemplateException newMethodArgMustBeStringException(String methodName, int argIdx, TemplateModel arg) {
-        return newMethodArgUnexpectedTypeException(methodName, argIdx, "string", arg);
-    }
-
-    static TemplateException newMethodArgMustBeNumberException(String methodName, int argIdx, TemplateModel arg) {
-        return newMethodArgUnexpectedTypeException(methodName, argIdx, "number", arg);
-    }
-    
-    static TemplateException newMethodArgMustBeBooleanException(String methodName, int argIdx, TemplateModel arg) {
-        return newMethodArgUnexpectedTypeException(methodName, argIdx, "boolean", arg);
-    }
-    
-    static TemplateException newMethodArgMustBeExtendedHashException(
-            String methodName, int argIdx, TemplateModel arg) {
-        return newMethodArgUnexpectedTypeException(methodName, argIdx, "extended hash", arg);
-    }
-    
-    static TemplateException newMethodArgMustBeSequenceException(
-            String methodName, int argIdx, TemplateModel arg) {
-        return newMethodArgUnexpectedTypeException(methodName, argIdx, "sequence", arg);
-    }
-    
-    static TemplateException newMethodArgMustBeSequenceOrCollectionException(
-            String methodName, int argIdx, TemplateModel arg) {
-        return newMethodArgUnexpectedTypeException(methodName, argIdx, "sequence or collection", arg);
-    }
-    
-    static TemplateException newMethodArgUnexpectedTypeException(
-            String methodName, int argIdx, String expectedType, TemplateModel arg) {
-        return new _TemplateModelException(
-                methodName, "(...) expects ", new _DelayedAOrAn(expectedType), " as argument #", Integer.valueOf(argIdx + 1),
-                ", but received ", new _DelayedAOrAn(new _DelayedTemplateLanguageTypeDescription(arg)), ".");
-    }
-    
-    /**
-     * The type of the argument was good, but it's value wasn't.
-     */
-    static TemplateException newMethodArgInvalidValueException(
-            String methodName, int argIdx, Object... details) {
-        return new _TemplateModelException(
-                methodName, "(...) argument #", Integer.valueOf(argIdx + 1),
-                " had invalid value: ", details);
-    }
-
-    /**
-     * The type of the argument was good, but the values of two or more arguments are inconsistent with each other.
-     */
-    static TemplateException newMethodArgsInvalidValueException(
-            String methodName, Object... details) {
-        return new _TemplateModelException(methodName, "(...) arguments have invalid value: ", details);
-    }
-    
     static TemplateException newInstantiatingClassNotAllowedException(String className, Environment env) {
         return new TemplateException(env,
                 "Instantiating ", className, " is not allowed in the template for security reasons.");

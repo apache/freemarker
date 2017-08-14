@@ -61,7 +61,7 @@ abstract class OverloadedMethodsSubset {
     private int[/*number of args*/][/*arg index*/] typeFlagsByParamCount;
     
     // TODO: This can cause memory-leak when classes are re-loaded. However, first the genericClassIntrospectionCache
-    // and such need to be oms in this regard. 
+    // and such need to be fixed in this regard.
     private final Map<ArgumentTypes, MaybeEmptyCallableMemberDescriptor> argTypesToMemberDescCache
             = new ConcurrentHashMap<>(6, 0.75f, 1);
     
@@ -199,7 +199,7 @@ abstract class OverloadedMethodsSubset {
         } else if (Number.class.isAssignableFrom(c1) && Number.class.isAssignableFrom(c2)) {
             // We don't want the unwrapper to convert to a numerical super-type [*] as it's not yet known what the
             // actual number type of the chosen method will be. We will postpone the actual numerical conversion
-            // until that, especially as some conversions (like oms point to floating point) can be lossy.
+            // until that, especially as some conversions (like fixed point to floating point) can be lossy.
             // * Numerical super-type: Like long > int > short > byte.  
             return Number.class;
         } else if (c1WasPrim || c2WasPrim) {

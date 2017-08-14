@@ -68,7 +68,8 @@ final class ASTExpFunctionCall extends ASTExpression implements CallPlace {
 
         return function.execute(
                 _CallableUtils.getExecuteArgs(
-                        positionalArgs, namedArgs, function.getFunctionArgumentArrayLayout(), function, env),
+                        positionalArgs, namedArgs, function.getFunctionArgumentArrayLayout(),
+                        function, true,env),
                 this,
                 env);
     }

@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core;
 
+import static org.apache.freemarker.core._CallableUtils.*;
+
 import java.io.Serializable;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -64,7 +66,7 @@ class BuiltInsForSequences {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                int chunkSize = getNumberMethodArg(args, 0).intValue();
+                int chunkSize = getNumberArgument(args, 0, this).intValue();
 
                 return new ChunkedSequence(tsm, chunkSize, args[1]);
             }
@@ -183,7 +185,7 @@ class BuiltInsForSequences {
 
     static class joinBI extends ASTExpBuiltIn {
         
-        private class BIMethodForCollection implements TemplateFunctionModel {
+        private class BIMethodForCollection extends BuiltInCallableImpl implements TemplateFunctionModel {
             
             private final Environment env;
             private final TemplateCollectionModel coll;
@@ -196,9 +198,9 @@ class BuiltInsForSequences {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                final String separator = getStringMethodArg(args, 0);
-                final String whenEmpty = getStringMethodArg(args, 1, true);
-                final String afterLast = getStringMethodArg(args, 2, true);
+                final String separator = getStringArgument(args, 0, this);
+                final String whenEmpty = getOptionalStringArgument(args, 1, this);
+                final String afterLast = getOptionalStringArgument(args, 2, this);
 
                 StringBuilder sb = new StringBuilder();
 
@@ -411,7 +413,7 @@ class BuiltInsForSequences {
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
                 TemplateModel target = args[0];
-                Number startIndex = getNumberMethodArg(args, 1, true);
+                Number startIndex = getOptionalNumberArgument(args, 1, this);
                 int foundAtIdx;
                 if (startIndex != null) {
                     // TODO [FM3] Prefer Col?

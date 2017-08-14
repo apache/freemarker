@@ -45,7 +45,9 @@ final class OverloadedMethods {
 
     private final OverloadedMethodsSubset fixArgMethods;
     private OverloadedMethodsSubset varargMethods;
-    
+    private String methodName;
+    private Class methodDeclaringClass;
+
     OverloadedMethods() {
         fixArgMethods = new OverloadedFixArgsMethods();
     }
@@ -53,15 +55,28 @@ final class OverloadedMethods {
     void addMethod(Method method) {
         final Class<?>[] paramTypes = method.getParameterTypes();
         addCallableMemberDescriptor(new ReflectionCallableMemberDescriptor(method, paramTypes));
+        if (methodName == null) {
+            methodName = method.getName();
+        }
+        Class<?> newMethodDeclaringClass = method.getDeclaringClass();
+        if (methodDeclaringClass == null
+                || newMethodDeclaringClass != methodDeclaringClass
+                        && methodDeclaringClass.isAssignableFrom(newMethodDeclaringClass)) {
+            methodDeclaringClass = newMethodDeclaringClass;
+        }
     }
 
     void addConstructor(Constructor<?> constr) {
         final Class<?>[] paramTypes = constr.getParameterTypes();
         addCallableMemberDescriptor(new ReflectionCallableMemberDescriptor(constr, paramTypes));
+        if (methodName == null) {
+            methodName = constr.getName();
+            methodDeclaringClass = constr.getDeclaringClass();
+        }
     }
     
     private void addCallableMemberDescriptor(ReflectionCallableMemberDescriptor memberDesc) {
-        // Note: "varargs" methods are always callable as oms args, with a sequence (array) as the last parameter.
+        // Note: "varargs" methods are always callable as fixed args, with a sequence (array) as the last parameter.
         fixArgMethods.addCallableMemberDescriptor(memberDesc);
         if (memberDesc.isVarargs()) {
             if (varargMethods == null) {
@@ -73,7 +88,7 @@ final class OverloadedMethods {
     
     MemberAndArguments getMemberAndArguments(TemplateModel[] tmArgs, DefaultObjectWrapper unwrapper)
     throws TemplateModelException {
-        // Try to find a oms args match:
+        // Try to find a fixed args match:
         MaybeEmptyMemberAndArguments fixArgsRes = fixArgMethods.getMemberAndArguments(tmArgs, unwrapper);
         if (fixArgsRes instanceof MemberAndArguments) {
             return (MemberAndArguments) fixArgsRes;
@@ -99,6 +114,14 @@ final class OverloadedMethods {
                 memberListToString());
         addMarkupBITipAfterNoNoMarchIfApplicable(edb, tmArgs);
         throw new _TemplateModelException(edb);
+    }
+
+    String getMethodName() {
+        return methodName;
+    }
+
+    Class getMethodDeclaringClass() {
+        return methodDeclaringClass;
     }
 
     private Object[] toCompositeErrorMessage(

@@ -56,9 +56,8 @@ public class _EvalUtils {
     
     /**
      * @param expr {@code null} is allowed, but may results in less helpful error messages
-     * @param env {@code null} is allowed
      */
-    static String modelToString(TemplateScalarModel model, ASTExpression expr, Environment env)
+    static String modelToString(TemplateScalarModel model, ASTExpression expr)
     throws TemplateModelException {
         String value = model.getAsString();
         if (value == null) {
@@ -265,8 +264,8 @@ public class _EvalUtils {
                 throw new TemplateException(defaultBlamed, env,
                         "Can't use operator \"", cmpOpToString(operator, operatorString), "\" on string values.");
             }
-            String leftString = _EvalUtils.modelToString((TemplateScalarModel) leftValue, leftExp, env);
-            String rightString = _EvalUtils.modelToString((TemplateScalarModel) rightValue, rightExp, env);
+            String leftString = _EvalUtils.modelToString((TemplateScalarModel) leftValue, leftExp);
+            String rightString = _EvalUtils.modelToString((TemplateScalarModel) rightValue, rightExp);
             // FIXME NBC: Don't use the Collator here. That's locale-specific, but ==/!= should not be.
             cmpResult = env.getCollator().compare(leftString, rightString);
         } else if (leftValue instanceof TemplateBooleanModel && rightValue instanceof TemplateBooleanModel) {
@@ -442,7 +441,7 @@ public class _EvalUtils {
             Environment env)
             throws TemplateException {
         if (tm instanceof TemplateScalarModel) {
-            return modelToString((TemplateScalarModel) tm, exp, env);
+            return modelToString((TemplateScalarModel) tm, exp);
         } else if (tm == null) {
             if (exp != null) {
                 throw InvalidReferenceException.getInstance(exp, env);

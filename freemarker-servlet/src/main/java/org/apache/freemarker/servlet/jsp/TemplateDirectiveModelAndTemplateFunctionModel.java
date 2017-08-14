@@ -29,6 +29,7 @@ import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelWithOriginName;
 
 /**
  * Used when a custom JSP tag and an EL function uses the same name in a tag library, to invoke a single FTL value from
@@ -36,42 +37,51 @@ import org.apache.freemarker.core.model.TemplateModel;
  * value.
  */
 class TemplateDirectiveModelAndTemplateFunctionModel
-        implements TemplateDirectiveModel, TemplateFunctionModel {
+        implements TemplateDirectiveModel, TemplateFunctionModel, TemplateModelWithOriginName {
 
-    private final TemplateDirectiveModel templateDirectiveModel;
-    private final TemplateFunctionModel templateFunctionModel;
+    private final TemplateDirectiveModel directive;
+    private final TemplateFunctionModel function;
 
     TemplateDirectiveModelAndTemplateFunctionModel( //
-            TemplateDirectiveModel templateDirectiveModel, TemplateFunctionModel templateMethodModelEx) {
-        this.templateDirectiveModel = templateDirectiveModel;
-        this.templateFunctionModel = templateMethodModelEx;
+            TemplateDirectiveModel directive, TemplateFunctionModel function) {
+        this.directive = directive;
+        this.function = function;
     }
 
     @Override
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
-        templateDirectiveModel.execute(args, callPlace, out, env);
+        directive.execute(args, callPlace, out, env);
     }
 
     @Override
     public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
-        return templateDirectiveModel.getDirectiveArgumentArrayLayout();
+        return directive.getDirectiveArgumentArrayLayout();
     }
 
     @Override
     public boolean isNestedContentSupported() {
-        return templateDirectiveModel.isNestedContentSupported();
+        return directive.isNestedContentSupported();
     }
 
     @Override
     public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
-        return templateFunctionModel.getFunctionArgumentArrayLayout();
+        return function.getFunctionArgumentArrayLayout();
     }
 
     @Override
     public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
             throws TemplateException {
-        return templateFunctionModel.execute(args, callPlace, env);
+        return function.execute(args, callPlace, env);
+    }
+
+    @Override
+    public String getOriginName() {
+        return (directive instanceof  TemplateModelWithOriginName
+                        ? ((TemplateModelWithOriginName) directive).getOriginName() : "unknownCustomJspTag")
+                + "+"
+                + (function instanceof  TemplateModelWithOriginName
+                        ? ((TemplateModelWithOriginName) function).getOriginName() : "unknownCustomJspFunction");
     }
 
 }

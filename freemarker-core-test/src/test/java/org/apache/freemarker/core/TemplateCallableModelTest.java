@@ -222,7 +222,10 @@ public class TemplateCallableModelTest extends TemplateTest {
         assertErrorContains("<@p 9, 9, 9 />", "can only have 2", "3", "by position");
         assertErrorContains("<@n 9 />", "can't have arguments passed by position");
         assertErrorContains("<@n n3=9 />", "has no", "\"n3\"", "supported", "\"n1\", \"n2\"");
-        assertErrorContains("<@p n1=9 />", "directive", "can't have arguments that are passed by name", "\"n1\"");
+        assertErrorContains("<@p n1=9 />", "directive", "can't have arguments that are passed by name", "\"n1\"",
+                "<@example");
+        assertErrorContains("${fp(n1=9)}", "function", "can't have arguments that are passed by name", "\"n1\"",
+                "example(");
         assertErrorContains("<@uc n1=9 />", "directive", "doesn't support any parameters");
         assertErrorContains("<@uc 9 />", "directive", "doesn't support any parameters");
 
@@ -235,6 +238,19 @@ public class TemplateCallableModelTest extends TemplateTest {
         assertOutput("<@p></@p>",
                 "#p(p1=null, p2=null)");
         assertErrorContains("<@p> </@p>", "Nested content", "not supported");
+
+        assertErrorContains("<@a n1='str' />", "directive", ".AllFeaturesDirective", "\"n1\"", "number", "string");
+        assertErrorContains("<#macro myM n1></#macro><@myM/>", "macro", "\"myM\"", "\"n1\"", "null");
+        assertErrorContains("${fa(n1='str')}", "function", ".AllFeaturesFunction", "\"n1\"", "number", "string");
+        assertErrorContains("<@a 1, 'str' />", "directive", ".AllFeaturesDirective", "2nd", "number", "string");
+        assertErrorContains("${fa(1, 'str')}", "function", ".AllFeaturesFunction", "2nd", "number", "string");
+        assertErrorContains("<#function myF(p1)></#function>${myF()}", "function", "\"myF\"", "1st", "null");
+        assertErrorContains("${'x'?leftPad(1, 2)}", "?leftPad", "2nd", "string", "number");
+        assertErrorContains("${'x'?leftPad(null)}", "?leftPad", "1st", "null");
+        addTemplate("foo.ftl", "<#macro m n1></#macro>");
+        assertErrorContains("<#import 'foo.ftl' as f><@f.m/>", "macro", "\"foo.ftl:m\"");
+        addToDataModel("bean", new TestBean());
+        assertErrorContains("${bean.intMP()}", "method", "org.apache.freemarker.test.TemplateTest$TestBean.intMP");
     }
 
     @Test

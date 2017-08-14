@@ -19,9 +19,8 @@
 
 package org.apache.freemarker.core;
 
-import java.io.Serializable;
-
 import org.apache.freemarker.core.model.TemplateBooleanModel;
+import org.apache.freemarker.core.model.TemplateCallableModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
@@ -76,9 +75,10 @@ public class NonStringException extends UnexpectedTypeException {
     }
 
     NonStringException(
-            Serializable argumentNameOrIndex, TemplateModel model, String[] tips, Environment env)
+            TemplateCallableModel callableModel, int argArrayIndex,
+            TemplateModel model, String[] tips, Environment env)
             throws InvalidReferenceException {
-        super(argumentNameOrIndex, model, "string", EXPECTED_TYPES, tips, env);
+        super(callableModel, argArrayIndex, model, "string", EXPECTED_TYPES, tips, env);
     }
 
 }
