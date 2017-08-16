@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core._CallableUtils.getOptionalStringArgument;
+import static org.apache.freemarker.core.util.CallableUtils.getOptionalStringArgument;
 
 import java.util.Date;
 
@@ -44,6 +44,7 @@ import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.util.BugException;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.valueformat.TemplateDateFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateValueFormatException;
@@ -64,10 +65,10 @@ class BuiltInsForMultipleTypes {
                 return new SimpleScalar(((TemplateBooleanModel) model).getAsBoolean()
                         ? TemplateBooleanFormat.C_TRUE : TemplateBooleanFormat.C_FALSE);
             } else {
-                throw new UnexpectedTypeException(
+                throw MessageUtils.newUnexpectedOperandTypeException(
                         target, model,
                         "number or boolean", new Class[] { TemplateNumberModel.class, TemplateBooleanModel.class },
-                        env);
+                        null, env);
             }
         }
 
@@ -424,9 +425,9 @@ class BuiltInsForMultipleTypes {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             if (!(tm instanceof Environment.TemplateLanguageCallable)) {
-                throw new UnexpectedTypeException(
+                throw MessageUtils.newUnexpectedOperandTypeException(
                         target, tm,
-                        "macro or function", new Class[] { Environment.TemplateLanguageCallable.class },
+                        Environment.TemplateLanguageCallable.class,
                         env);
             }
             return ((Environment.TemplateLanguageCallable) tm).getNamespace();
@@ -446,7 +447,7 @@ class BuiltInsForMultipleTypes {
             } else if (model instanceof TemplateHashModelEx) {
                 size = ((TemplateHashModelEx) model).size();
             } else {
-                throw new UnexpectedTypeException(
+                throw MessageUtils.newUnexpectedOperandTypeException(
                         target, model,
                         "extended-hash or sequence or extended collection",
                         new Class[] {
@@ -454,6 +455,7 @@ class BuiltInsForMultipleTypes {
                                 TemplateSequenceModel.class,
                                 TemplateCollectionModelEx.class
                         },
+                        null,
                         env);
             }
             return new SimpleNumber(size);
@@ -479,7 +481,7 @@ class BuiltInsForMultipleTypes {
                 TemplateModel result = args[argIdx];
                 if (!(result instanceof TemplateScalarModel)) {
                     // Cause usual type exception
-                    _CallableUtils.castArgumentValueToString(result, argIdx, this, true, false);
+                    CallableUtils.castArgumentValueToString(result, argIdx, this, true, false);
                 }
                 return result;
             }
@@ -526,7 +528,7 @@ class BuiltInsForMultipleTypes {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                return formatWith(_CallableUtils.getStringArgument(args, 0, this));
+                return formatWith(CallableUtils.getStringArgument(args, 0, this));
             }
 
             @Override
@@ -606,7 +608,7 @@ class BuiltInsForMultipleTypes {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                return get(_CallableUtils.getStringArgument(args, 0, this));
+                return get(CallableUtils.getStringArgument(args, 0, this));
             }
 
             @Override
@@ -670,15 +672,15 @@ class BuiltInsForMultipleTypes {
                 return new BooleanFormatter((TemplateBooleanModel) model, env);
             } else if (model instanceof TemplateScalarModel) {
                 return new SimpleScalar(((TemplateScalarModel) model).getAsString());
-            } else {            
-                throw new UnexpectedTypeException(
+            } else {
+                throw MessageUtils.newUnexpectedOperandTypeException(
                         target, model,
                         "number, date, boolean or string",
                         new Class[] {
                             TemplateNumberModel.class, TemplateDateModel.class, TemplateBooleanModel.class,
                             TemplateScalarModel.class
                         },
-                        env);
+                        null, env);
             }
         }
     }
@@ -697,10 +699,10 @@ class BuiltInsForMultipleTypes {
                 return new SimpleScalar(((TemplateBooleanModel) model).getAsBoolean()
                         ? TemplateBooleanFormat.C_TRUE : TemplateBooleanFormat.C_FALSE);
             } else {
-                throw new UnexpectedTypeException(
+                throw MessageUtils.newUnexpectedOperandTypeException(
                         target, model,
                         "number or boolean", new Class[] { TemplateNumberModel.class, TemplateBooleanModel.class },
-                        env);
+                        null, env);
             }
         }
     

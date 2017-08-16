@@ -304,17 +304,19 @@ final class ASTDirList extends ASTDirective {
                         env.visit(childBuffer);
                     }
                 }
-            } else if (listedValue instanceof TemplateHashModelEx
-                    && !NonSequenceOrCollectionException.isWrappedIterable(listedValue)) {
-                throw new NonSequenceOrCollectionException(env,
+            } else if (listedValue instanceof TemplateHashModelEx) {
+                throw new TemplateException(env,
                         new _ErrorDescriptionBuilder("The value you try to list is ",
                                 new _DelayedAOrAn(new _DelayedTemplateLanguageTypeDescription(listedValue)),
                                 ", thus you must declare two nested content parameters after the \"as\"; one for the "
                                 + "key, and another for the value, like ", "<#... as k, v>", ")."
                                 ));
             } else {
-                throw new NonSequenceOrCollectionException(
-                        listedExp, listedValue, env);
+                throw MessageUtils.newUnexpectedOperandTypeException(
+                        listedExp, listedValue,
+                        MessageUtils.SEQUENCE_OR_COLLECTION,
+                        MessageUtils.EXPECTED_TYPES_SEQUENCE_OR_COLLECTION,
+                        null, env);
             }
             return listNotEmpty;
         }
@@ -359,13 +361,14 @@ final class ASTDirList extends ASTDirective {
                                 do {
                                     nestedContentParam = keysIter.next();
                                     if (!(nestedContentParam instanceof TemplateScalarModel)) {
-                                        throw new NonStringException(env,
+                                        throw new TemplateException(env,
                                                 new _ErrorDescriptionBuilder(
                                                         "When listing key-value pairs of traditional hash "
                                                         + "implementations, all keys must be strings, but one of them "
                                                         + "was ",
                                                         new _DelayedAOrAn(
-                                                                new _DelayedTemplateLanguageTypeDescription(nestedContentParam)),
+                                                                new _DelayedTemplateLanguageTypeDescription(
+                                                                        nestedContentParam)),
                                                         "."
                                                         ).tip("The listed value's TemplateModel class was ",
                                                                 new _DelayedShortClassName(listedValue.getClass()),
@@ -389,15 +392,15 @@ final class ASTDirList extends ASTDirective {
                 }
             } else if (listedValue instanceof TemplateCollectionModel
                     || listedValue instanceof TemplateSequenceModel) {
-                throw new NonSequenceOrCollectionException(env,
+                throw new TemplateException(env,
                         new _ErrorDescriptionBuilder("The value you try to list is ",
                                 new _DelayedAOrAn(new _DelayedTemplateLanguageTypeDescription(listedValue)),
                                 ", thus you must declare only one nested content parameter after the \"as\" (there's "
                                 + "no separate key and value)."
                                 ));
             } else {
-                throw new NonExtendedHashException(
-                        listedExp, listedValue, env);
+                throw MessageUtils.newUnexpectedOperandTypeException(
+                        listedExp, listedValue, TemplateHashModelEx.class, env);
             }
             return hashNotEmpty;
         }

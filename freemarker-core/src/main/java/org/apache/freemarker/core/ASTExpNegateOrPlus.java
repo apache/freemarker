@@ -48,7 +48,7 @@ final class ASTExpNegateOrPlus extends ASTExpression {
         try {
             targetModel = (TemplateNumberModel) tm;
         } catch (ClassCastException cce) {
-            throw new NonNumericalException(target, tm, env);
+            throw MessageUtils.newUnexpectedOperandTypeException(target, tm, TemplateNumberModel.class, env);
         }
         if (!isMinus) {
             return targetModel;

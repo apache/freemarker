@@ -43,7 +43,7 @@ final class ASTDirVisit extends ASTDirective {
     ASTElement[] accept(Environment env) throws IOException, TemplateException {
         TemplateModel node = targetNode.eval(env);
         if (!(node instanceof TemplateNodeModel)) {
-            throw new NonNodeException(targetNode, node, env);
+            throw MessageUtils.newUnexpectedOperandTypeException(targetNode, node, TemplateNodeModel.class, env);
         }
         
         TemplateModel nss = namespaces == null ? null : namespaces.eval(env);
@@ -59,7 +59,8 @@ final class ASTDirVisit extends ASTDirective {
                 nss = ss;
             } else if (!(nss instanceof TemplateSequenceModel)) {
                 if (namespaces != null) {
-                    throw new NonSequenceException(namespaces, nss, env);
+                    throw MessageUtils.newUnexpectedOperandTypeException(
+                            namespaces, nss, TemplateSequenceModel.class, env);
                 } else {
                     // Should not occur
                     throw new TemplateException(env, "Expecting a sequence of namespaces after \"using\"");

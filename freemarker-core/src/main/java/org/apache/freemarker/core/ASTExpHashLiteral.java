@@ -49,7 +49,7 @@ final class ASTExpHashLiteral extends ASTExpression {
 
     @Override
     TemplateModel _eval(Environment env) throws TemplateException {
-        return new SequenceHash(env);
+        return new LinkedHash(env);
     }
 
     @Override
@@ -106,12 +106,12 @@ final class ASTExpHashLiteral extends ASTExpression {
     	return new ASTExpHashLiteral(clonedKeys, clonedValues);
     }
 
-    private class SequenceHash implements TemplateHashModelEx2 {
+    private class LinkedHash implements TemplateHashModelEx2 {
 
         private HashMap<String, TemplateModel> map;
         private TemplateCollectionModel keyCollection, valueCollection; // ordered lists of keys and values
 
-        SequenceHash(Environment env) throws TemplateException {
+        LinkedHash(Environment env) throws TemplateException {
             map = new LinkedHashMap<>();
             for (int i = 0; i < size; i++) {
                 ASTExpression keyExp = (ASTExpression) keys.get(i);

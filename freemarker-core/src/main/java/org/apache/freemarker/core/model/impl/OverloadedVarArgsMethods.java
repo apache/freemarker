@@ -20,7 +20,7 @@ package org.apache.freemarker.core.model.impl;
 
 import java.lang.reflect.Array;
 
-import org.apache.freemarker.core._CallableUtils;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
@@ -139,7 +139,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset {
     throws TemplateModelException {
         if (tmArgs == null) {
             // null is treated as empty args
-            tmArgs = _CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY;
+            tmArgs = CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY;
         }
         final int argsLen = tmArgs.length;
         final Class<?>[][] unwrappingHintsByParamCount = getUnwrappingHintsByParamCount();

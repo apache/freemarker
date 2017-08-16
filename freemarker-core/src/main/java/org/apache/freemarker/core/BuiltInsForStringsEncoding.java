@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core._CallableUtils.getStringArgument;
+import static org.apache.freemarker.core.util.CallableUtils.getStringArgument;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;

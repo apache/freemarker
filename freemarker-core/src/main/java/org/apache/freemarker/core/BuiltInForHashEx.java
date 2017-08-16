@@ -31,7 +31,7 @@ abstract class BuiltInForHashEx extends ASTExpBuiltIn {
         if (model instanceof TemplateHashModelEx) {
             return calculateResult((TemplateHashModelEx) model, env);
         }
-        throw new NonExtendedHashException(target, model, env);
+        throw MessageUtils.newUnexpectedOperandTypeException(target, model, TemplateHashModelEx.class, env);
     }
     
     abstract TemplateModel calculateResult(TemplateHashModelEx hashExModel, Environment env)

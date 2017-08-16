@@ -249,6 +249,7 @@ public class TemplateCallableModelTest extends TemplateTest {
         assertErrorContains("${'x'?leftPad(null)}", "?leftPad", "1st", "null");
         addTemplate("foo.ftl", "<#macro m n1></#macro>");
         assertErrorContains("<#import 'foo.ftl' as f><@f.m/>", "macro", "\"foo.ftl:m\"");
+        assertErrorContains("<#function myF(p1)></#function><#assign f2 = myF>${f2()}", "\"myF\"");
         addToDataModel("bean", new TestBean());
         assertErrorContains("${bean.intMP()}", "method", "org.apache.freemarker.test.TemplateTest$TestBean.intMP");
     }

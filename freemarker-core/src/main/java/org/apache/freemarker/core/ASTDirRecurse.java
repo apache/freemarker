@@ -44,7 +44,8 @@ final class ASTDirRecurse extends ASTDirective {
     ASTElement[] accept(Environment env) throws IOException, TemplateException {
         TemplateModel node = targetNode == null ? null : targetNode.eval(env);
         if (node != null && !(node instanceof TemplateNodeModel)) {
-            throw new NonNodeException(targetNode, node, "node", env);
+            throw MessageUtils.newUnexpectedOperandTypeException(
+                    targetNode, node, TemplateNodeModel.class, env);
         }
         
         TemplateModel nss = namespaces == null ? null : namespaces.eval(env);
@@ -60,7 +61,8 @@ final class ASTDirRecurse extends ASTDirective {
                 nss = ss;
             } else if (!(nss instanceof TemplateSequenceModel)) {
                 if (namespaces != null) {
-                    throw new NonSequenceException(namespaces, nss, env);
+                    throw MessageUtils.newUnexpectedOperandTypeException(
+                            namespaces, nss, TemplateSequenceModel.class, env);
                 } else {
                     // Should not occur
                     throw new TemplateException(env, "Expecting a sequence of namespaces after \"using\"");

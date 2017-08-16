@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core._CallableUtils.*;
+import static org.apache.freemarker.core.util.CallableUtils.*;
 
 import java.util.Date;
 import java.util.TimeZone;
@@ -60,7 +60,7 @@ class BuiltInsForDates {
                 }
                 return new SimpleDate(_EvalUtils.modelToDate(tdm, target), dateType);
             } else {
-                throw BuiltInForDate.newNonDateException(env, model, target);
+                throw MessageUtils.newUnexpectedOperandTypeException(target, model, TemplateDateModel.class, env);
             }
         }
 

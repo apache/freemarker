@@ -33,24 +33,11 @@ abstract class BuiltInForDate extends ASTExpBuiltIn {
             TemplateDateModel tdm = (TemplateDateModel) model;
             return calculateResult(_EvalUtils.modelToDate(tdm, target), tdm.getDateType(), env);
         } else {
-            throw newNonDateException(env, model, target);
+            throw MessageUtils.newUnexpectedOperandTypeException(target, model, TemplateDateModel.class, env);
         }
     }
 
     /** Override this to implement the built-in. */
-    protected abstract TemplateModel calculateResult(
-            Date date, int dateType, Environment env)
-    throws TemplateException;
-    
-    static TemplateException newNonDateException(Environment env, TemplateModel model, ASTExpression target)
-            throws InvalidReferenceException {
-        TemplateException e;
-        if (model == null) {
-            e = InvalidReferenceException.getInstance(target, env);
-        } else {
-            e = new NonDateException(target, model, "date", env);
-        }
-        return e;
-    }
+    protected abstract TemplateModel calculateResult(Date date, int dateType, Environment env) throws TemplateException;
     
 }

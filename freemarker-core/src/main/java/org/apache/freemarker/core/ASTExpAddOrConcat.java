@@ -76,53 +76,43 @@ final class ASTExpAddOrConcat extends ASTExpression {
         } else {
             boolean hashConcatPossible
                     = leftModel instanceof TemplateHashModel && rightModel instanceof TemplateHashModel;
-            try {
-                // We try string addition first. If hash addition is possible, then instead of throwing exception
-                // we return null and do hash addition instead. (We can't simply give hash addition a priority, like
-                // with sequence addition above, as FTL strings are often also FTL hashes.)
-                Object leftOMOrStr = _EvalUtils.coerceModelToStringOrMarkup(
-                        leftModel, leftExp, /* returnNullOnNonCoercableType = */ hashConcatPossible, null,
-                        env);
-                if (leftOMOrStr == null) {
-                    return _eval_concatenateHashes(leftModel, rightModel);
-                }
+            // We try string addition first. If hash addition is possible, then instead of throwing exception
+            // we return null and do hash addition instead. (We can't simply give hash addition a priority, like
+            // with sequence addition above, as FTL strings are often also FTL hashes.)
+            Object leftOMOrStr = _EvalUtils.coerceModelToStringOrMarkup(
+                    leftModel, leftExp, /* returnNullOnNonCoercableType = */ hashConcatPossible, null,
+                    env);
+            if (leftOMOrStr == null) {
+                return _eval_concatenateHashes(leftModel, rightModel);
+            }
 
-                // Same trick with null return as above.
-                Object rightOMOrStr = _EvalUtils.coerceModelToStringOrMarkup(
-                        rightModel, rightExp, /* returnNullOnNonCoercableType = */ hashConcatPossible, null,
-                        env);
-                if (rightOMOrStr == null) {
-                    return _eval_concatenateHashes(leftModel, rightModel);
-                }
+            // Same trick with null return as above.
+            Object rightOMOrStr = _EvalUtils.coerceModelToStringOrMarkup(
+                    rightModel, rightExp, /* returnNullOnNonCoercableType = */ hashConcatPossible, null,
+                    env);
+            if (rightOMOrStr == null) {
+                return _eval_concatenateHashes(leftModel, rightModel);
+            }
 
-                if (leftOMOrStr instanceof String) {
-                    if (rightOMOrStr instanceof String) {
-                        return new SimpleScalar(((String) leftOMOrStr).concat((String) rightOMOrStr));
-                    } else { // rightOMOrStr instanceof TemplateMarkupOutputModel
-                        TemplateMarkupOutputModel<?> rightMO = (TemplateMarkupOutputModel<?>) rightOMOrStr; 
-                        return _EvalUtils.concatMarkupOutputs(parent,
-                                rightMO.getOutputFormat().fromPlainTextByEscaping((String) leftOMOrStr),
-                                rightMO);
-                    }                    
-                } else { // leftOMOrStr instanceof TemplateMarkupOutputModel 
-                    TemplateMarkupOutputModel<?> leftMO = (TemplateMarkupOutputModel<?>) leftOMOrStr; 
-                    if (rightOMOrStr instanceof String) {  // markup output
-                        return _EvalUtils.concatMarkupOutputs(parent,
-                                leftMO,
-                                leftMO.getOutputFormat().fromPlainTextByEscaping((String) rightOMOrStr));
-                    } else { // rightOMOrStr instanceof TemplateMarkupOutputModel
-                        return _EvalUtils.concatMarkupOutputs(parent,
-                                leftMO,
-                                (TemplateMarkupOutputModel<?>) rightOMOrStr);
-                    }
+            if (leftOMOrStr instanceof String) {
+                if (rightOMOrStr instanceof String) {
+                    return new SimpleScalar(((String) leftOMOrStr).concat((String) rightOMOrStr));
+                } else { // rightOMOrStr instanceof TemplateMarkupOutputModel
+                    TemplateMarkupOutputModel<?> rightMO = (TemplateMarkupOutputModel<?>) rightOMOrStr;
+                    return _EvalUtils.concatMarkupOutputs(parent,
+                            rightMO.getOutputFormat().fromPlainTextByEscaping((String) leftOMOrStr),
+                            rightMO);
                 }
-            } catch (NonStringOrTemplateOutputException e) {
-                // 2.4: Remove this catch; it's for BC, after reworking hash addition so it doesn't rely on this. But
-                // user code might throws this (very unlikely), and then in 2.3.x we did catch that too, incorrectly.
-                if (hashConcatPossible) {
-                    return _eval_concatenateHashes(leftModel, rightModel);
-                } else {
-                    throw e;
+            } else { // leftOMOrStr instanceof TemplateMarkupOutputModel
+                TemplateMarkupOutputModel<?> leftMO = (TemplateMarkupOutputModel<?>) leftOMOrStr;
+                if (rightOMOrStr instanceof String) {  // markup output
+                    return _EvalUtils.concatMarkupOutputs(parent,
+                            leftMO,
+                            leftMO.getOutputFormat().fromPlainTextByEscaping((String) rightOMOrStr));
+                } else { // rightOMOrStr instanceof TemplateMarkupOutputModel
+                    return _EvalUtils.concatMarkupOutputs(parent,
+                            leftMO,
+                            (TemplateMarkupOutputModel<?>) rightOMOrStr);
                 }
             }
         }

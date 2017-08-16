@@ -58,16 +58,18 @@ final class ASTExpDynamicKeyName extends ASTExpression {
         if (keyModel instanceof RangeModel) {
             return dealWithRangeKey(targetModel, (RangeModel) keyModel, env);
         }
-        throw new UnexpectedTypeException(keyExpression, keyModel, "number, range, or string",
-                new Class[] { TemplateNumberModel.class, TemplateScalarModel.class, ASTExpRange.class }, env);
+        throw MessageUtils.newUnexpectedOperandTypeException(keyExpression, keyModel,
+                "number, range, or string",
+                new Class[] { TemplateNumberModel.class, TemplateScalarModel.class, ASTExpRange.class },
+                null, env);
     }
 
     static private Class[] NUMERICAL_KEY_LHO_EXPECTED_TYPES;
     static {
-        NUMERICAL_KEY_LHO_EXPECTED_TYPES = new Class[1 + NonStringException.STRING_COERCABLE_TYPES.length];
+        NUMERICAL_KEY_LHO_EXPECTED_TYPES = new Class[1 + MessageUtils.EXPECTED_TYPES_STRING_COERCABLE.length];
         NUMERICAL_KEY_LHO_EXPECTED_TYPES[0] = TemplateSequenceModel.class;
-        for (int i = 0; i < NonStringException.STRING_COERCABLE_TYPES.length; i++) {
-            NUMERICAL_KEY_LHO_EXPECTED_TYPES[i + 1] = NonStringException.STRING_COERCABLE_TYPES[i];
+        for (int i = 0; i < MessageUtils.EXPECTED_TYPES_STRING_COERCABLE.length; i++) {
+            NUMERICAL_KEY_LHO_EXPECTED_TYPES[i + 1] = MessageUtils.EXPECTED_TYPES_STRING_COERCABLE[i];
         }
     }
     
@@ -84,34 +86,36 @@ final class ASTExpDynamicKeyName extends ASTExpression {
                 size = Integer.MAX_VALUE;
             }
             return index < size ? tsm.get(index) : null;
-        } 
-        
+        }
+
+        String s;
         try {
-            String s = target.evalAndCoerceToPlainText(env);
-            try {
-                return new SimpleScalar(s.substring(index, index + 1));
-            } catch (IndexOutOfBoundsException e) {
-                if (index < 0) {
-                    throw new TemplateException("Negative index not allowed: ", Integer.valueOf(index));
-                }
-                if (index >= s.length()) {
-                    throw new TemplateException(
-                            "String index out of range: The index was ", Integer.valueOf(index),
-                            " (0-based), but the length of the string is only ", Integer.valueOf(s.length()) , ".");
-                }
-                throw new RuntimeException("Can't explain exception", e);
-            }
-        } catch (NonStringException e) {
-            throw new UnexpectedTypeException(
+            s = target.evalAndCoerceToPlainText(env);
+        } catch (TemplateException e) {
+            // TODO [FM3] Wrong, as we don't know why this was thrown. I think we just shouldn't coerce.
+            throw MessageUtils.newUnexpectedOperandTypeException(
                     target, targetModel,
-                    "sequence or " + NonStringException.STRING_COERCABLE_TYPES_DESC,
+                    "sequence or " + MessageUtils.STRING_COERCABLE_TYPES_DESC,
                     NUMERICAL_KEY_LHO_EXPECTED_TYPES,
                     (targetModel instanceof TemplateHashModel
-                            ? "You had a numberical value inside the []. Currently that's only supported for "
-                                    + "sequences (lists) and strings. To get a Map item with a non-string key, "
-                                    + "use myMap?api.get(myKey)."
+                            ? new Object[] { "You had a numberical value inside the []. Currently that's only "
+                                    + "supported for sequences (lists) and strings. To get a Map item with a "
+                                    + "non-string key, use myMap?api.get(myKey)." }
                             : null),
                     env);
+        }
+        try {
+            return new SimpleScalar(s.substring(index, index + 1));
+        } catch (IndexOutOfBoundsException e) {
+            if (index < 0) {
+                throw new TemplateException("Negative index not allowed: ", Integer.valueOf(index));
+            }
+            if (index >= s.length()) {
+                throw new TemplateException(
+                        "String index out of range: The index was ", Integer.valueOf(index),
+                        " (0-based), but the length of the string is only ", Integer.valueOf(s.length()) , ".");
+            }
+            throw new RuntimeException("Can't explain exception", e);
         }
     }
 
@@ -120,7 +124,7 @@ final class ASTExpDynamicKeyName extends ASTExpression {
         if (targetModel instanceof TemplateHashModel) {
             return((TemplateHashModel) targetModel).get(key);
         }
-        throw new NonHashException(target, targetModel, env);
+        throw MessageUtils.newUnexpectedOperandTypeException(target, targetModel, TemplateHashModel.class, env);
     }
 
     private TemplateModel dealWithRangeKey(TemplateModel targetModel, RangeModel range, Environment env)
@@ -134,11 +138,12 @@ final class ASTExpDynamicKeyName extends ASTExpression {
             targetSeq = null;
             try {
                 targetStr = target.evalAndCoerceToPlainText(env);
-            } catch (NonStringException e) {
-                throw new UnexpectedTypeException(
+            } catch (TemplateException e) {
+                // TODO [FM3] Wrong, as we don't know why this was thrown. I think we just shouldn't coerce.
+                throw MessageUtils.newUnexpectedOperandTypeException(
                         target, target.eval(env),
-                        "sequence or " + NonStringException.STRING_COERCABLE_TYPES_DESC,
-                        NUMERICAL_KEY_LHO_EXPECTED_TYPES, env);
+                        "sequence or " + MessageUtils.STRING_COERCABLE_TYPES_DESC,
+                        NUMERICAL_KEY_LHO_EXPECTED_TYPES, null, env);
             }
         }
         

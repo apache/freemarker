@@ -19,7 +19,17 @@
 
 package org.apache.freemarker.core;
 
+import org.apache.freemarker.core.model.TemplateBooleanModel;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateDateModel;
+import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
+import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.model.TemplateNumberModel;
+import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.util.BugException;
+import org.apache.freemarker.core.util.TemplateLanguageUtils;
 import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.core.valueformat.TemplateDateFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
@@ -52,6 +62,29 @@ class MessageUtils {
     static final String EMBEDDED_MESSAGE_END = "\n---end-message---";
 
     static final String ERROR_MESSAGE_HR = "----";
+    
+    static final String STRING_COERCABLE_TYPES_DESC
+            = "string or something automatically convertible to string (number, date or boolean)";
+    static final Class[] EXPECTED_TYPES_STRING_COERCABLE = new Class[] {
+        TemplateScalarModel.class, TemplateNumberModel.class, TemplateDateModel.class, TemplateBooleanModel.class
+    };
+
+    static final String STRING_COERCABLE_TYPES_OR_TOM_DESC
+            = STRING_COERCABLE_TYPES_DESC + ", or \"template output\"";
+    static final Class[] EXPECTED_TYPES_STRING_COERCABLE_TYPES_AND_TOM;
+    static {
+        EXPECTED_TYPES_STRING_COERCABLE_TYPES_AND_TOM = new Class[EXPECTED_TYPES_STRING_COERCABLE.length + 1];
+        int i;
+        for (i = 0; i < EXPECTED_TYPES_STRING_COERCABLE.length; i++) {
+            EXPECTED_TYPES_STRING_COERCABLE_TYPES_AND_TOM[i] = EXPECTED_TYPES_STRING_COERCABLE[i];
+        }
+        EXPECTED_TYPES_STRING_COERCABLE_TYPES_AND_TOM[i] = TemplateMarkupOutputModel.class;
+    }
+
+    static final String SEQUENCE_OR_COLLECTION = "sequence or collection";
+    static final Class[] EXPECTED_TYPES_SEQUENCE_OR_COLLECTION = new Class[] {
+            TemplateSequenceModel.class, TemplateCollectionModel.class
+    };
 
     // Can't be instantiated
     private MessageUtils() { }
@@ -178,9 +211,9 @@ class MessageUtils {
     static TemplateModelException newCantFormatUnknownTypeDateException(
             ASTExpression dateSourceExpr, UnknownDateTypeFormattingUnsupportedException cause) {
         return new _TemplateModelException(cause, null, new _ErrorDescriptionBuilder(
-                MessageUtils.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE)
+                UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE)
                 .blame(dateSourceExpr)
-                .tips(MessageUtils.UNKNOWN_DATE_TO_STRING_TIPS));
+                .tips(UNKNOWN_DATE_TO_STRING_TIPS));
     }
 
     static TemplateException newCantFormatDateException(TemplateDateFormat format, ASTExpression dataSrcExp,
@@ -235,5 +268,83 @@ class MessageUtils {
             }
         }
     }
-    
+
+    static TemplateException newUnexpectedOperandTypeException(
+            ASTExpression blamed, TemplateModel model, Class<? extends TemplateModel> expectedType, Environment env)
+            throws InvalidReferenceException {
+        return newUnexpectedOperandTypeException(blamed, model, null, new Class[] { expectedType }, null, env);
+    }
+
+    static TemplateException newUnexpectedOperandTypeException(
+            ASTExpression blamed, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes, Object[] tips,
+            Environment env)
+            throws InvalidReferenceException {
+        return new TemplateException(null, env, blamed, newUnexpectedOperandTypeDescriptionBuilder(
+                blamed,
+                null,
+                model, expectedTypesDesc, expectedTypes, env)
+                .tips(tips));
+    }
+
+    static TemplateException newUnexpectedAssignmentTargetTypeException(
+            String blamedAssignmentTargetVarName, TemplateModel model, Class<? extends TemplateModel> expectedType,
+            Environment env)
+            throws InvalidReferenceException {
+        return newUnexpectedAssignmentTargetTypeException(
+                blamedAssignmentTargetVarName, model, null, new Class[] { expectedType }, null, env);
+    }
+
+    /**
+     * Used for assignments that use {@code +=} and such.
+     */
+    static TemplateException newUnexpectedAssignmentTargetTypeException(
+            String blamedAssignmentTargetVarName, TemplateModel model, String expectedTypesDesc, Class[] expectedTypes,
+            Object[] tips,
+            Environment env)
+            throws InvalidReferenceException {
+        return new TemplateException(null, env, null, newUnexpectedOperandTypeDescriptionBuilder(
+                null,
+                blamedAssignmentTargetVarName,
+                model, expectedTypesDesc, expectedTypes, env).tips(tips));
+    }
+
+    private static _ErrorDescriptionBuilder newUnexpectedOperandTypeDescriptionBuilder(
+            ASTExpression blamed, String blamedAssignmentTargetVarName,
+            TemplateModel model, String expectedTypesDesc, Class<? extends TemplateModel>[] expectedTypes, Environment env)
+            throws InvalidReferenceException {
+        if (model == null) {
+            throw InvalidReferenceException.getInstance(blamed, env);
+        }
+
+        if (expectedTypesDesc == null) {
+            if (expectedTypes.length != 1) {
+                throw new BugException("Can't generate expectedTypesDesc");
+            }
+            expectedTypesDesc = TemplateLanguageUtils.getTypeName(expectedTypes[0]);
+        }
+        _ErrorDescriptionBuilder errorDescBuilder = new _ErrorDescriptionBuilder(
+                "Expected ", new _DelayedAOrAn(expectedTypesDesc), ", but ",
+                (
+                        blamedAssignmentTargetVarName != null
+                                ? new Object[] {
+                                "assignment target variable ",
+                                new _DelayedJQuote(blamedAssignmentTargetVarName) }
+                                : blamed != null
+                                        ? "this"
+                                        : "the expression"
+                ),
+                " has evaluated to ",
+                new _DelayedAOrAn(new _DelayedTemplateLanguageTypeDescription(model)),
+                (blamed != null ? ":" : ".")
+        )
+        .blame(blamed).showBlamer(true);
+        if (model instanceof _UnexpectedTypeErrorExplainerTemplateModel) {
+            Object[] tip = ((_UnexpectedTypeErrorExplainerTemplateModel) model).explainTypeError(expectedTypes);
+            if (tip != null) {
+                errorDescBuilder.tip(tip);
+            }
+        }
+        return errorDescBuilder;
+    }
+
 }

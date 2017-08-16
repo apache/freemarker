@@ -18,8 +18,6 @@
  */
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core._CallableUtils.checkArgumentCount;
-
 import org.apache.freemarker.core.ASTDirList.IterationContext;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
@@ -27,6 +25,7 @@ import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.util.CallableUtils;
 
 
 class BuiltInsForNestedContentParameters {
@@ -142,7 +141,7 @@ class BuiltInsForNestedContentParameters {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                _CallableUtils.checkArgumentCount(args.length, 1, Integer.MAX_VALUE, this);
+                CallableUtils.checkArgumentCount(args.length, 1, Integer.MAX_VALUE, this);
                 return args[iterCtx.getIndex() % args.length];
             }
 

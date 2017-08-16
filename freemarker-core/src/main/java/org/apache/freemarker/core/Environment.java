@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core;
 
+import static org.apache.freemarker.core.util.CallableUtils.*;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -64,6 +66,7 @@ import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util._DateUtils;
 import org.apache.freemarker.core.util._DateUtils.DateToISO8601CalendarFactory;
@@ -582,7 +585,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         try {
             TemplateDirectiveModel nodeProcessor = getNodeProcessor(node);
             if (nodeProcessor != null) {
-                _CallableUtils.executeWith0Arguments(
+                CallableUtils.executeWith0Arguments(
                         nodeProcessor, NonTemplateCallPlace.INSTANCE, out, this);
             } else if (nodeProcessor == null) {
                 String nodeType = node.getNodeType();
@@ -641,7 +644,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     void fallback() throws TemplateException, IOException {
         TemplateDirectiveModel nodeProcessor = getNodeProcessor(currentNodeName, currentNodeNS, nodeNamespaceIndex);
         if (nodeProcessor != null) {
-            _CallableUtils.executeWith0Arguments(
+            CallableUtils.executeWith0Arguments(
                     nodeProcessor, NonTemplateCallPlace.INSTANCE, out, this);
         }
     }
@@ -2999,22 +3002,23 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                     } else {
                         // TODO [FM3] Had to give different messages depending on if the argument was omitted, or if
                         // it was null, but this will be fixed with the null related refactoring.
-                        throw new TemplateException(Environment.this,
-                                new _ErrorDescriptionBuilder(
-                                        _CallableUtils.getMessageArgumentProblem(
-                                                this, argIdx,
-                                                " can't be null or omitted.",
-                                                isFunction())
-                                )
-                                .tip("If the parameter value expression on the caller side is known to "
+                        throw _newNullOrOmittedArgumentException(
+                                argIdx, this, isFunction(),
+                                new Object[] {
+                                        "If the parameter value expression on the caller side is known to "
                                         + "be legally null/missing, you may want to specify a default "
                                         + "value for it on the caller side with the \"!\" operator, like "
-                                        + "paramValue!defaultValue.")
-                                .tip("If the parameter was omitted on the caller side, and the omission was "
-                                        + "deliberate, you may consider making the parameter optional in the macro "
-                                        + "by specifying a default value for it, like <#macro macroName "
-                                        + "paramName=defaultExpr>."
-                                )
+                                        + "paramValue!defaultValue.",
+                                        new Object[]{
+                                                "If the parameter was omitted on the caller side, and the omission "
+                                                + "was deliberate, you may consider making the parameter optional in "
+                                                + "the macro by specifying a default value for it, like ",
+                                                (isFunction()
+                                                        ? "<#function functionName(paramName=defaultExpr)>"
+                                                        : "<#macro macroName paramName=defaultExpr>"),
+                                                "."
+                                        }
+                                }
                         );
                     }
                 }

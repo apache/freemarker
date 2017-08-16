@@ -23,7 +23,7 @@ import static org.junit.Assert.*;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.NonTemplateCallPlace;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core._CallableUtils;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.junit.Test;
 
@@ -56,10 +56,10 @@ public class Java8DefaultObjectWrapperBridgeMethodsTest {
         JavaMethodModel m1 = (JavaMethodModel) wrapped.get("m1");
         assertEquals(
                 BridgeMethodsBean.M1_RETURN_VALUE,
-                "" + m1.execute(_CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE));
+                "" + m1.execute(CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE));
 
         JavaMethodModel m2 = (JavaMethodModel) wrapped.get("m2");
-        assertNull(m2.execute(_CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE));
+        assertNull(m2.execute(CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE));
     }
     
 }

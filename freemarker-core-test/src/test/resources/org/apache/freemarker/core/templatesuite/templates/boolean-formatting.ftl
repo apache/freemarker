@@ -47,7 +47,7 @@
 <#setting booleanFormat = 'y,n'>
 <#assign x = false>
 <#assign n = 123><#assign m = { x: 'foo', n: 'bar' }><@assertEquals actual=m['n'] + m['123'] expected='foobar' />
-<@assertFails exception="UnexpectedTypeException">${m[false]}</@>
+<@assertFails message="boolean">${m[false]}</@>
 <@assertFails message="can't compare">${x == 'false'}</@>
 <@assertFails message="can't compare">${x != 'false'}</@>
 <@assertFails message="can't convert">${booleanVsStringMethods.expectsString(x)}</@>

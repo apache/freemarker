@@ -98,7 +98,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
                 nestedContentSupported = directive.isNestedContentSupported();
             } else if (callableValueTM instanceof TemplateFunctionModel) {
                 if (!allowCallingFunctions) {
-                    throw new NonDirectiveException(
+                    throw new TemplateException(
                             "Calling functions is not allowed. You can only call directives (like macros) here.", env);
                 }
                 callableValue = (TemplateCallableModel) callableValueTM;
@@ -109,7 +109,8 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
             } else if (callableValueTM == null) {
                 throw InvalidReferenceException.getInstance(callableValueExp, env);
             } else {
-                throw new NonDirectiveException(callableValueExp, callableValueTM, env);
+                throw MessageUtils.newUnexpectedOperandTypeException(
+                        callableValueExp, callableValueTM, TemplateDirectiveModel.class, env);
             }
         }
 

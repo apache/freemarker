@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core._CallableUtils.*;
+import static org.apache.freemarker.core.util.CallableUtils.*;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -54,9 +54,11 @@ class BuiltInsForStringsRegexp {
                 return new NativeStringArraySequence(((RegexMatchModel.MatchWithGroups) targetModel).groups);
 
             } else {
-                throw new UnexpectedTypeException(target, targetModel,
+                throw MessageUtils.newUnexpectedOperandTypeException(
+                        target, targetModel,
                         "regular expression matcher",
                         new Class[] { RegexMatchModel.class, RegexMatchModel.MatchWithGroups.class },
+                        null,
                         env);
             }
         }

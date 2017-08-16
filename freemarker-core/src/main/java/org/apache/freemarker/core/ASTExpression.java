@@ -113,7 +113,7 @@ abstract class ASTExpression extends ASTNode {
         if (model instanceof TemplateNumberModel) {
             return _EvalUtils.modelToNumber((TemplateNumberModel) model, this);
         } else {
-            throw new NonNumericalException(this, model, env);
+            throw MessageUtils.newUnexpectedOperandTypeException(this, model, TemplateNumberModel.class, env);
         }
     }
     
@@ -148,7 +148,7 @@ abstract class ASTExpression extends ASTNode {
         if (model instanceof TemplateBooleanModel) {
             return ((TemplateBooleanModel) model).getAsBoolean();
         } else {
-            throw new NonBooleanException(this, model, env);
+            throw MessageUtils.newUnexpectedOperandTypeException(this, model, TemplateBooleanModel.class, env);
         }
     }
     

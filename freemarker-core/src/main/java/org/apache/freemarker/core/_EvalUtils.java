@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core;
 
+import static org.apache.freemarker.core.MessageUtils.*;
+
 import java.util.Date;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
@@ -57,7 +59,7 @@ public class _EvalUtils {
     /**
      * @param expr {@code null} is allowed, but may results in less helpful error messages
      */
-    static String modelToString(TemplateScalarModel model, ASTExpression expr)
+    public static String modelToString(TemplateScalarModel model, ASTExpression expr)
     throws TemplateModelException {
         String value = model.getAsString();
         if (value == null) {
@@ -69,7 +71,7 @@ public class _EvalUtils {
     /**
      * @param expr {@code null} is allowed, but may results in less helpful error messages
      */
-    static Number modelToNumber(TemplateNumberModel model, ASTExpression expr)
+    public static Number modelToNumber(TemplateNumberModel model, ASTExpression expr)
         throws TemplateModelException {
         Number value = model.getAsNumber();
         if (value == null) throw newModelHasStoredNullException(Number.class, model, expr);
@@ -79,7 +81,7 @@ public class _EvalUtils {
     /**
      * @param expr {@code null} is allowed, but may results in less helpful error messages
      */
-    static Date modelToDate(TemplateDateModel model, ASTExpression expr)
+    public static Date modelToDate(TemplateDateModel model, ASTExpression expr)
         throws TemplateModelException {
         Date value = model.getAsDate();
         if (value == null) throw newModelHasStoredNullException(Date.class, model, expr);
@@ -447,7 +449,7 @@ public class _EvalUtils {
                 throw InvalidReferenceException.getInstance(exp, env);
             } else {
                 throw new InvalidReferenceException(
-                        "Null/missing value (no more informatoin avilable)",
+                        "Null/missing value (no more information available)",
                         env);
             }
         } else if (tm instanceof TemplateBooleanModel) {
@@ -459,37 +461,31 @@ public class _EvalUtils {
             if (returnNullOnNonCoercableType) {
                 return null;
             }
-            if (seqHint != null && (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)) {
-                if (supportsTOM) {
-                    throw new NonStringOrTemplateOutputException(exp, tm, seqHint, env);
-                } else {
-                    throw new NonStringException(exp, tm, seqHint, env);
-                }
-            } else {
-                if (supportsTOM) {
-                    throw new NonStringOrTemplateOutputException(exp, tm, env);
-                } else {
-                    throw new NonStringException(exp, tm, env);
-                }
-            }
+
+            throw newUnexpectedOperandTypeException(
+                    exp, tm,
+                    supportsTOM ? STRING_COERCABLE_TYPES_OR_TOM_DESC : STRING_COERCABLE_TYPES_DESC,
+                    supportsTOM ? EXPECTED_TYPES_STRING_COERCABLE_TYPES_AND_TOM : EXPECTED_TYPES_STRING_COERCABLE,
+                    seqHint != null && (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)
+                            ? new Object[] { seqHint }
+                            : null,
+                    env);
         }
     }
 
     private static String ensureFormatResultString(Object formatResult, ASTExpression exp, Environment env)
-            throws NonStringException {
+            throws TemplateException {
         if (formatResult instanceof String) { 
             return (String) formatResult;
         }
         
         assertFormatResultNotNull(formatResult);
         
-        TemplateMarkupOutputModel mo = (TemplateMarkupOutputModel) formatResult;
-        _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
+        throw new TemplateException(env, new _ErrorDescriptionBuilder(
                 "Value was formatted to convert it to string, but the result was markup of ouput format ",
-                new _DelayedJQuote(mo.getOutputFormat()), ".")
+                new _DelayedJQuote(((TemplateMarkupOutputModel) formatResult).getOutputFormat()), ".")
                 .tip("Use value?string to force formatting to plain text.")
-                .blame(exp);
-        throw new NonStringException(null, desc);
+                .blame(exp));
     }
 
     static String assertFormatResultNotNull(String r) {

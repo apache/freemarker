@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.userpkg;
 
-import static org.apache.freemarker.core._CallableUtils.*;
+import static org.apache.freemarker.core.util.CallableUtils.*;
 
 import java.io.IOException;
 import java.io.Writer;

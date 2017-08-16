@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core._CallableUtils.*;
+import static org.apache.freemarker.core.util.CallableUtils.*;
 
 import java.util.ArrayList;
 import java.util.StringTokenizer;
@@ -34,6 +34,7 @@ import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util._StringUtils;
 
 class BuiltInsForStringsBasic {
@@ -71,7 +72,7 @@ class BuiltInsForStringsBasic {
 
     static class containsBI extends ASTExpBuiltIn {
         
-        private class BIMethod implements TemplateFunctionModel {
+        private class BIMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             
             private final String s;
     
@@ -82,7 +83,7 @@ class BuiltInsForStringsBasic {
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                return s.contains(_CallableUtils.getStringArgument(args, 0, this))
+                return s.contains(CallableUtils.getStringArgument(args, 0, this))
                         ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
             }
 
@@ -257,6 +258,7 @@ class BuiltInsForStringsBasic {
     }
     
     static class keep_afterBI extends BuiltInForString {
+
         class KeepAfterMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             private String s;
 
@@ -367,6 +369,7 @@ class BuiltInsForStringsBasic {
     }
     
     static class keep_beforeBI extends BuiltInForString {
+
         class KeepUntilMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             private String s;
 
@@ -414,8 +417,8 @@ class BuiltInsForStringsBasic {
         
     }
     
-    // TODO
     static class keep_before_lastBI extends BuiltInForString {
+
         class KeepUntilMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             private String s;
 
@@ -597,6 +600,7 @@ class BuiltInsForStringsBasic {
     }
     
     static class split_BI extends BuiltInForString {
+
         class SplitMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             private String s;
 
@@ -639,7 +643,7 @@ class BuiltInsForStringsBasic {
     
     static class starts_withBI extends BuiltInForString {
     
-        private class BIMethod implements TemplateFunctionModel {
+        private class BIMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             private String s;
     
             private BIMethod(String s) {

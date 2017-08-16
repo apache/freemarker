@@ -21,7 +21,7 @@ package org.apache.freemarker.core.model.impl;
 import java.lang.reflect.Array;
 import java.lang.reflect.Member;
 
-import org.apache.freemarker.core._CallableUtils;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core._DelayedTemplateLanguageTypeDescription;
 import org.apache.freemarker.core._DelayedOrdinal;
 import org.apache.freemarker.core._ErrorDescriptionBuilder;
@@ -52,7 +52,7 @@ class SimpleMethod {
     
     Object[] unwrapArguments(TemplateModel[] args, DefaultObjectWrapper wrapper) throws TemplateModelException {
         if (args == null) {
-            args = _CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY;
+            args = CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY;
         }
         boolean isVarArg = _MethodUtils.isVarargs(member);
         int typesLen = argTypes.length;

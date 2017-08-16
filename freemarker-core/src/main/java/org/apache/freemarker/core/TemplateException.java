@@ -39,6 +39,7 @@ public class TemplateException extends Exception {
             = "FTL stack trace (\"~\" means nesting-related):";
 
     // Set in constructor:
+    // TODO [FM3] These all must be final, or else tha class is not thread safe
     private transient _ErrorDescriptionBuilder descriptionBuilder;
     private final transient Environment env;
     private final transient ASTExpression blamedExpression;

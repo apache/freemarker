@@ -598,7 +598,7 @@ public class OutputFormatTest extends TemplateTest {
                 "noSuchVar", "null or missing");
         assertErrorContains(
                 "${'x'?markupString}",
-                "xpected", "markup output", "string");
+                "xpected", "markupOutput", "string");
     }
 
     @Test

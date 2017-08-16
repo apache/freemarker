@@ -123,7 +123,11 @@ final class ASTDirAssignment extends ASTDirective {
             try {
                 namespace = (Environment.Namespace) namespaceTM;
             } catch (ClassCastException e) {
-                throw new NonNamespaceException(namespaceExp, namespaceTM, env);
+                throw MessageUtils.newUnexpectedOperandTypeException(
+                        namespaceExp, namespaceTM,
+                        "namespace",
+                        new Class[] { Environment.Namespace.class },
+                        null, env);
             }
             if (namespace == null) {
                 throw InvalidReferenceException.getInstance(namespaceExp, env);
@@ -158,7 +162,8 @@ final class ASTDirAssignment extends ASTDirective {
                 } else if (lhoValue == null) {
                     throw InvalidReferenceException.getInstance(variableName, getOperatorTypeAsString(), env);
                 } else {
-                    throw new NonNumericalException(variableName, lhoValue, null, env);
+                    throw MessageUtils.newUnexpectedAssignmentTargetTypeException(
+                            variableName, lhoValue, TemplateNumberModel.class, env);
                 }
 
                 if (operatorType == OPERATOR_TYPE_PLUS_PLUS) {

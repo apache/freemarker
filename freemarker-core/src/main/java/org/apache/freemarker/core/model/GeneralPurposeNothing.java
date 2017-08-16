@@ -34,7 +34,11 @@ implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, Tem
         TemplateFunctionModel {
 
     public static final TemplateModel INSTANCE = new GeneralPurposeNothing();
-      
+
+    private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
+            0, true,
+            null, true);
+
     private GeneralPurposeNothing() {
     }
 
@@ -75,9 +79,7 @@ implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, Tem
 
     @Override
     public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
-        return ArgumentArrayLayout.create(
-                0, true,
-                null, true);
+        return ARGS_LAYOUT;
     }
 
     @Override

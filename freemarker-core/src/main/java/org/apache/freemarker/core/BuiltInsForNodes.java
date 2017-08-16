@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core._CallableUtils.getStringArgument;
+import static org.apache.freemarker.core.util.CallableUtils.getStringArgument;
 
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
@@ -47,8 +47,7 @@ class BuiltInsForNodes {
            return result;
        }
 
-        class AncestorSequence extends NativeSequence implements TemplateFunctionModel,
-                BuiltInCallable {
+        class AncestorSequence extends NativeSequence implements TemplateFunctionModel, BuiltInCallable {
 
             private static final int INITIAL_CAPACITY = 12;
 

@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core._CallableUtils.*;
+import static org.apache.freemarker.core.util.CallableUtils.*;
 
 import java.io.Serializable;
 import java.text.Collator;
@@ -55,7 +55,7 @@ class BuiltInsForSequences {
     
     static class chunkBI extends BuiltInForSequence {
 
-        private class BIMethod implements TemplateFunctionModel {
+        private class BIMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             
             private final TemplateSequenceModel tsm;
 
@@ -160,7 +160,11 @@ class BuiltInsForSequences {
             } else if (model instanceof TemplateCollectionModel) {
                 return calculateResultForColletion((TemplateCollectionModel) model);
             } else {
-                throw new NonSequenceOrCollectionException(target, model, env);
+                throw MessageUtils.newUnexpectedOperandTypeException(
+                        target, model,
+                        MessageUtils.SEQUENCE_OR_COLLECTION,
+                        MessageUtils.EXPECTED_TYPES_SEQUENCE_OR_COLLECTION,
+                        null, env);
             }
         }        
         
@@ -255,7 +259,11 @@ class BuiltInsForSequences {
             } else if (model instanceof TemplateSequenceModel) {
                 return new BIMethodForCollection(env, new CollectionAndSequence((TemplateSequenceModel) model));
             } else {
-                throw new NonSequenceOrCollectionException(target, model, env);
+                throw MessageUtils.newUnexpectedOperandTypeException(
+                        target, model,
+                        MessageUtils.SEQUENCE_OR_COLLECTION,
+                        MessageUtils.EXPECTED_TYPES_SEQUENCE_OR_COLLECTION,
+                        null, env);
             }
         }
    
@@ -302,7 +310,7 @@ class BuiltInsForSequences {
     }
 
     static class seq_containsBI extends ASTExpBuiltIn {
-        private class BIMethodForCollection implements TemplateFunctionModel {
+        private class BIMethodForCollection extends BuiltInCallableImpl implements TemplateFunctionModel {
             private TemplateCollectionModel m_coll;
             private Environment m_env;
 
@@ -332,7 +340,7 @@ class BuiltInsForSequences {
 
         }
 
-        private class BIMethodForSequence implements TemplateFunctionModel {
+        private class BIMethodForSequence extends BuiltInCallableImpl implements TemplateFunctionModel {
             private TemplateSequenceModel m_seq;
             private Environment m_env;
 
@@ -371,7 +379,11 @@ class BuiltInsForSequences {
             } else if (model instanceof TemplateCollectionModel) {
                 return new BIMethodForCollection((TemplateCollectionModel) model, env);
             } else {
-                throw new NonSequenceOrCollectionException(target, model, env);
+                throw MessageUtils.newUnexpectedOperandTypeException(
+                        target, model,
+                        MessageUtils.SEQUENCE_OR_COLLECTION,
+                        MessageUtils.EXPECTED_TYPES_SEQUENCE_OR_COLLECTION,
+                        null, env);
             }
         }
     
@@ -379,7 +391,7 @@ class BuiltInsForSequences {
     
     static class seq_index_ofBI extends ASTExpBuiltIn {
         
-        private class BIMethod implements TemplateFunctionModel {
+        private class BIMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             
             final TemplateSequenceModel m_seq;
             final TemplateCollectionModel m_col;
@@ -403,7 +415,11 @@ class BuiltInsForSequences {
                         ? (TemplateCollectionModel) model
                         : null;
                 if (m_seq == null && m_col == null) {
-                    throw new NonSequenceOrCollectionException(target, model, env);
+                    throw MessageUtils.newUnexpectedOperandTypeException(
+                            target, model,
+                            MessageUtils.SEQUENCE_OR_COLLECTION,
+                            MessageUtils.EXPECTED_TYPES_SEQUENCE_OR_COLLECTION,
+                            null, env);
                 }
                 
                 m_env = env;
@@ -544,7 +560,7 @@ class BuiltInsForSequences {
     }
 
     static class sort_byBI extends sortBI {
-        class BIMethod implements TemplateFunctionModel {
+        class BIMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             TemplateSequenceModel seq;
             
             BIMethod(TemplateSequenceModel seq) {

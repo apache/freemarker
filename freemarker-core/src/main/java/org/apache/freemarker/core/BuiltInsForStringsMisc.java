@@ -159,10 +159,10 @@ class BuiltInsForStringsMisc {
             } else if (model instanceof TemplateScalarModel) {
                 sourceExpr = target;
             } else {
-                throw new UnexpectedTypeException(
+                throw MessageUtils.newUnexpectedOperandTypeException(
                         target, model,
                         "sequence or string", new Class[] { TemplateSequenceModel.class, TemplateScalarModel.class },
-                        env);
+                        null, env);
             }
             String templateSource = sourceExpr.evalAndCoerceToPlainText(env);
             Template parentTemplate = env.getCurrentTemplate();
@@ -236,7 +236,10 @@ class BuiltInsForStringsMisc {
             try {
                 return new SimpleNumber(env.getArithmeticEngine().toNumber(s));
             } catch (NumberFormatException nfe) {
-                throw NonNumericalException.newMalformedNumberException(this, s, env);
+                throw new TemplateException(
+                        new _ErrorDescriptionBuilder(
+                                "Can't convert this string to number: ", new _DelayedJQuote(s))
+                        .blame(this));
             }
         }
     }
@@ -253,7 +256,7 @@ class BuiltInsForStringsMisc {
             return new ConstructorFunction(target.evalAndCoerceToPlainText(env), env, target.getTemplate());
         }
 
-        class ConstructorFunction implements TemplateFunctionModel {
+        class ConstructorFunction extends BuiltInCallableImpl implements TemplateFunctionModel {
 
             private final Class<?> cl;
             private final Environment env;

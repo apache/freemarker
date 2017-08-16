@@ -840,12 +840,18 @@ public final class TemplateLanguageUtils {
         }
 
         if (TemplateCallableModel.class.isAssignableFrom(cl)) {
+            boolean recognized = false;
             if (TemplateDirectiveModel.class.isAssignableFrom(cl)) {
                 appendTypeName(sb, typeNamesAppended, _CoreAPI.isMacro(cl) ? "macro" : "directive");
+                recognized = true;
             }
             if (TemplateFunctionModel.class.isAssignableFrom(cl)) {
                 appendTypeName(sb, typeNamesAppended,
                         JavaMethodModel.class.isAssignableFrom(cl) ? "method" : "function");
+                recognized = true;
+            }
+            if (!recognized && _CoreAPI.isTemplateLanguageCallable(cl)) {
+                appendTypeName(sb, typeNamesAppended, "macro or function defined with template language");
             }
         }
 

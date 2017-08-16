@@ -22,7 +22,6 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
-import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._StringUtils;
 
 /**
@@ -45,16 +44,11 @@ final class ASTDirInclude extends ASTDirective {
         this.ignoreMissingExp = ignoreMissingExp;
         if (ignoreMissingExp != null && ignoreMissingExp.isLiteral()) {
             try {
-                try {
-                    ignoreMissingExpPrecalcedValue = Boolean.valueOf(
-                            ignoreMissingExp.evalToBoolean(template.getConfiguration()));
-                } catch (NonBooleanException e) {
-                    throw new ParseException("Expected a boolean as the value of the \"ignore_missing\" attribute",
-                            ignoreMissingExp, e);
-                }
+                ignoreMissingExpPrecalcedValue = Boolean.valueOf(
+                        ignoreMissingExp.evalToBoolean(template.getConfiguration()));
             } catch (TemplateException e) {
-                // evaluation of literals must not throw a TemplateException
-                throw new BugException(e);
+                throw new ParseException("Expected a boolean as the value of the \"ignore_missing\" attribute",
+                        ignoreMissingExp, e);
             }
         } else {
             ignoreMissingExpPrecalcedValue = null;

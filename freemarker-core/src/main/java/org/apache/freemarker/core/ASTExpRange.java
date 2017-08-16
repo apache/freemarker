@@ -58,12 +58,6 @@ final class ASTExpRange extends ASTExpression {
             return new ListableRightUnboundedRangeModel(begin);
         }
     }
-    
-    // Surely this way we can tell that it won't be a boolean without evaluating the range, but why was this important?
-    @Override
-    boolean evalToBoolean(Environment env) throws TemplateException {
-        throw new NonBooleanException(this, new BoundedRangeModel(0, 0, false, false), env);
-    }
 
     @Override
     public String getCanonicalForm() {

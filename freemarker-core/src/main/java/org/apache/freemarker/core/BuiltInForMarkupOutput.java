@@ -30,7 +30,7 @@ abstract class BuiltInForMarkupOutput extends ASTExpBuiltIn {
             throws TemplateException {
         TemplateModel model = target.eval(env);
         if (!(model instanceof TemplateMarkupOutputModel)) {
-            throw new NonMarkupOutputException(target, model, env);
+            throw MessageUtils.newUnexpectedOperandTypeException(target, model, TemplateMarkupOutputModel.class, env);
         }
         return calculateResult((TemplateMarkupOutputModel) model);
     }

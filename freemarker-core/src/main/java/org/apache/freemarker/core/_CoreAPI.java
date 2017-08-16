@@ -69,6 +69,10 @@ public final class _CoreAPI {
         return Environment.TemplateLanguageFunction.class.isAssignableFrom(cl);
     }
 
+    public static boolean isTemplateLanguageCallable(Class<? extends TemplateModel> cl) {
+        return Environment.TemplateLanguageCallable.class.isAssignableFrom(cl);
+    }
+
     public static void checkVersionNotNullAndSupported(Version incompatibleImprovements) {
         _NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
         int iciV = incompatibleImprovements.intValue();

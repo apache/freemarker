@@ -69,8 +69,7 @@ class BuiltInsForExistenceHandling {
             }
 
             @Override
-            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
-                    throws TemplateException {
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env) {
                 return constant;
             }
 

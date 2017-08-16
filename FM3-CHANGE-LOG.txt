@@ -471,7 +471,10 @@ Core / Miscellaneous
 - CallPlaceCustomDataInitializationException is not a checked exception anymore (now it extends RuntimeException)
 - Renamed `FTLUtil` to `TemplateLanguageUtils` (as the FTL name will be abandoned in FM3, and supporting multiple
   languages are planned in the future)
-
+- Removed `UnexpectedTypeException` (a `TemplateException` subclass) and its subclasses (`NonStringException`, etc.),
+  using simple `TemplateException` instead. Catching these exceptions specifically wasn't very useful, while they
+  have bloated the public API (and the code).
+- Added `org.apache.freemarker.core.util.CallableUtils`, to help in implementing (and invoking) `TemplateCallableModel`-s.
 
 Build / development process changes
 -----------------------------------

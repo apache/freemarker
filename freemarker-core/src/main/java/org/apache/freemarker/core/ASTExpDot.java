@@ -41,7 +41,7 @@ final class ASTExpDot extends ASTExpression {
         if (leftModel instanceof TemplateHashModel) {
             return ((TemplateHashModel) leftModel).get(key);
         }
-        throw new NonHashException(target, leftModel, env);
+        throw MessageUtils.newUnexpectedOperandTypeException(target, leftModel, TemplateHashModel.class, env);
     }
 
     @Override

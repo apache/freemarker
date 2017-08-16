@@ -2248,8 +2248,8 @@ ASTDollarInterpolation ASTDollarInterpolation() :
     begin = <DOLLAR_INTERPOLATION_OPENING>
     exp = ASTExpression()
     {
-        notHashLiteral(exp, NonStringException.STRING_COERCABLE_TYPES_DESC);
-        notListLiteral(exp, NonStringException.STRING_COERCABLE_TYPES_DESC);
+        notHashLiteral(exp, MessageUtils.STRING_COERCABLE_TYPES_DESC);
+        notListLiteral(exp, MessageUtils.STRING_COERCABLE_TYPES_DESC);
     }
     end = <CLOSING_CURLY_BRACKET>
     {

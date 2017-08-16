@@ -61,7 +61,8 @@ final class ASTExpFunctionCall extends ASTExpression implements CallPlace {
         {
             TemplateModel functionUncasted = functionExp.eval(env);
             if (!(functionUncasted instanceof TemplateFunctionModel)) {
-                throw new NonFunctionException(functionExp, functionUncasted, env);
+                throw MessageUtils.newUnexpectedOperandTypeException(
+                        functionExp, functionUncasted, TemplateFunctionModel.class, env);
             }
             function = (TemplateFunctionModel) functionUncasted;
         }

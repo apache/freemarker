@@ -30,7 +30,7 @@ import java.util.Set;
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core._CallableUtils;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core._DelayedJQuote;
 import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
@@ -112,7 +112,7 @@ public class ResourceBundleModel extends BeanModel implements TemplateFunctionMo
         if (args.length < 1)
             throw new TemplateException("No message key was specified", env);
         // Read it
-        String key = _CallableUtils.getStringArgument(args, 0, this);
+        String key = CallableUtils.getStringArgument(args, 0, this);
         try {
             if (args.length == 1) {
                 return wrap(((ResourceBundle) object).getObject(key));
