@@ -210,7 +210,8 @@ public final class Macro extends TemplateElement implements TemplateModel {
                             boolean argWasSpecified = localVars.containsKey(argName);
                             throw new _MiscTemplateException(env,
                                     new _ErrorDescriptionBuilder(
-                                            "When calling macro ", new _DelayedJQuote(name), 
+                                            "When calling ", (isFunction() ? "function" : "macro"), " ",
+                                            new _DelayedJQuote(name), 
                                             ", required parameter ", new _DelayedJQuote(argName),
                                             " (parameter #", Integer.valueOf(i + 1), ") was ", 
                                             (argWasSpecified
