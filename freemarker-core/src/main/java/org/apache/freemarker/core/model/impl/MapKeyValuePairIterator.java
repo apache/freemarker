@@ -22,12 +22,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateHashModelEx2.KeyValuePair;
 import org.apache.freemarker.core.model.TemplateHashModelEx2.KeyValuePairIterator;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
  *  Implementation of {@link KeyValuePairIterator} for a {@link TemplateHashModelEx2} that wraps or otherwise uses a
@@ -56,19 +57,19 @@ public class MapKeyValuePairIterator implements KeyValuePairIterator {
         return new KeyValuePair() {
 
             @Override
-            public TemplateModel getKey() throws TemplateModelException {
+            public TemplateModel getKey() throws TemplateException {
                 return wrap(entry.getKey());
             }
 
             @Override
-            public TemplateModel getValue() throws TemplateModelException {
+            public TemplateModel getValue() throws TemplateException {
                 return wrap(entry.getValue());
             }
             
         };
     }
     
-    private TemplateModel wrap(Object obj) throws TemplateModelException {
+    private TemplateModel wrap(Object obj) throws ObjectWrappingException {
         return (obj instanceof TemplateModel) ? (TemplateModel) obj : objectWrapper.wrap(obj);
     }
 

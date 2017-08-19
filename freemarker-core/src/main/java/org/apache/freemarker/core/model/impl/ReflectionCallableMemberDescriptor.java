@@ -25,8 +25,8 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
  * The most commonly used {@link CallableMemberDescriptor} implementation. 
@@ -52,7 +52,7 @@ final class ReflectionCallableMemberDescriptor extends CallableMemberDescriptor 
 
     @Override
     TemplateModel invokeMethod(DefaultObjectWrapper ow, Object obj, Object[] args)
-            throws TemplateModelException, InvocationTargetException, IllegalAccessException {
+            throws TemplateException, InvocationTargetException, IllegalAccessException {
         return ow.invokeMethod(obj, (Method) member, args);
     }
 

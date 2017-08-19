@@ -41,7 +41,7 @@ final class ASTExpNumberLiteral extends ASTExpression implements TemplateNumberM
 
     @Override
     public String evalAndCoerceToPlainText(Environment env) throws TemplateException {
-        return env.formatNumberToPlainText(this, this, false);
+        return env.formatNumberToPlainText(this, this);
     }
 
     @Override

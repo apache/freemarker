@@ -31,7 +31,7 @@ import javax.servlet.jsp.el.ELException;
 import javax.servlet.jsp.el.ExpressionEvaluator;
 import javax.servlet.jsp.el.VariableResolver;
 
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.util._ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +54,7 @@ public class _FreeMarkerPageContext21 extends FreeMarkerPageContext {
                 JspFactory.getDefaultFactory().getClass().getName());
     }
 
-    public _FreeMarkerPageContext21() throws TemplateModelException {
+    public _FreeMarkerPageContext21() throws TemplateException {
         super();
     }
 

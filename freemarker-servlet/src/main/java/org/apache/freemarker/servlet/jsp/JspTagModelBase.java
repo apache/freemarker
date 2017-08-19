@@ -38,10 +38,8 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._DelayedJQuote;
 import org.apache.freemarker.core._DelayedShortClassName;
 import org.apache.freemarker.core._ErrorDescriptionBuilder;
-import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelWithOriginName;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
@@ -92,7 +90,7 @@ abstract class JspTagModelBase implements TemplateModelWithOriginName {
                                     e);
                         }
                     } else {
-                        throw new TemplateModelException("Unknown property "
+                        throw new TemplateException("Unknown property "
                                 + _StringUtils.jQuote(paramName.toString())
                                 + " on instance of " + tagClass.getName());
                     }
@@ -124,25 +122,25 @@ abstract class JspTagModelBase implements TemplateModelWithOriginName {
                                     "<@my.box style=\"info\" message=\"Hello ${name}!\" width=200 />",
                                     ".");
                         }
-                        throw new _TemplateModelException(e, null, desc);
+                        throw new TemplateException(e, null, desc);
                     }
                 }
             }
         }
     }
 
-    protected final TemplateModelException toTemplateModelExceptionOrRethrow(Throwable e)
-            throws TemplateModelException {
+    protected final TemplateException toTemplateExceptionOrRethrow(Throwable e)
+            throws TemplateException {
         if (e instanceof RuntimeException && !isCommonRuntimeException((RuntimeException) e)) {
             throw (RuntimeException) e;
         }
-        if (e instanceof TemplateModelException) {
-            throw (TemplateModelException) e;
+        if (e instanceof TemplateException) {
+            throw (TemplateException) e;
         }
         if (e instanceof TemplateExceptionWrapperJspException) {
-            return (TemplateModelException) e.getCause();
+            return (TemplateException) e.getCause();
         }
-        return new _TemplateModelException(e,
+        return new TemplateException(e,
                 "Error while invoking the ", new _DelayedJQuote(tagName), " JSP custom tag; see cause exception");
     }
 

@@ -21,7 +21,6 @@ package org.apache.freemarker.core.userpkg;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.outputformat.CommonMarkupOutputFormat;
 import org.apache.freemarker.core.util._StringUtils;
 
@@ -47,7 +46,7 @@ public final class CustomHTMLOutputFormat extends CommonMarkupOutputFormat<Custo
     }
 
     @Override
-    public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
+    public void output(String textToEsc, Writer out) throws IOException {
         // This is lazy - don't do it in reality.
         out.write(escapePlainText(textToEsc));
     }

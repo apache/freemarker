@@ -36,7 +36,6 @@ import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
@@ -101,7 +100,7 @@ class BuiltInsForSequences {
 
             @Override
             public TemplateModel get(final int chunkIndex)
-                    throws TemplateModelException {
+                    throws TemplateException {
                 if (chunkIndex >= numberOfChunks) {
                     return null;
                 }
@@ -112,7 +111,7 @@ class BuiltInsForSequences {
 
                     @Override
                     public TemplateModel get(int relIndex)
-                            throws TemplateModelException {
+                            throws TemplateException {
                         int absIndex = baseIndex + relIndex;
                         if (absIndex < wrappedTsm.size()) {
                             return wrappedTsm.get(absIndex);
@@ -124,7 +123,7 @@ class BuiltInsForSequences {
                     }
 
                     @Override
-                    public int size() throws TemplateModelException {
+                    public int size() throws TemplateException {
                         return fillerItem != null || chunkIndex + 1 < numberOfChunks
                                 ? chunkSize
                                 : wrappedTsm.size() - baseIndex;
@@ -134,14 +133,14 @@ class BuiltInsForSequences {
             }
 
             @Override
-            public int size() throws TemplateModelException {
+            public int size() throws TemplateException {
                 return numberOfChunks;
             }
             
         }
         
         @Override
-        TemplateModel calculateResult(TemplateSequenceModel tsm) throws TemplateModelException {
+        TemplateModel calculateResult(TemplateSequenceModel tsm) throws TemplateException {
             return new BIMethod(tsm);
         }
         
@@ -169,7 +168,7 @@ class BuiltInsForSequences {
         }        
         
         private TemplateModel calculateResultForSequence(TemplateSequenceModel seq)
-        throws TemplateModelException {
+        throws TemplateException {
             if (seq.size() == 0) {
                 return null;
             }
@@ -177,7 +176,7 @@ class BuiltInsForSequences {
         }
         
         private TemplateModel calculateResultForColletion(TemplateCollectionModel coll)
-        throws TemplateModelException {
+        throws TemplateException {
             TemplateModelIterator iter = coll.iterator();
             if (!iter.hasNext()) {
                 return null;
@@ -272,7 +271,7 @@ class BuiltInsForSequences {
     static class lastBI extends BuiltInForSequence {
         @Override
         TemplateModel calculateResult(TemplateSequenceModel tsm)
-        throws TemplateModelException {
+        throws TemplateException {
             if (tsm.size() == 0) {
                 return null;
             }
@@ -289,12 +288,12 @@ class BuiltInsForSequences {
             }
 
             @Override
-            public TemplateModel get(int index) throws TemplateModelException {
+            public TemplateModel get(int index) throws TemplateException {
                 return seq.get(seq.size() - 1 - index);
             }
 
             @Override
-            public int size() throws TemplateModelException {
+            public int size() throws TemplateException {
                 return seq.size();
             }
         }

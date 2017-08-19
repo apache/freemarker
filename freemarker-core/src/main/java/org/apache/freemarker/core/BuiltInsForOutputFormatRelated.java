@@ -64,7 +64,7 @@ class BuiltInsForOutputFormatRelated {
                     // ATTENTION: Keep this logic in sync. with ${...}'s logic!
                     String lhoPlainTtext = lhoOF.getSourcePlainText(lhoMO);
                     if (lhoPlainTtext == null) {
-                        throw new _TemplateModelException(target,
+                        throw new TemplateException(target,
                                 "The left side operand of ?", key, " is in ", new _DelayedToString(lhoOF),
                                 " format, which differs from the current output format, ",
                                 new _DelayedToString(contextOF), ". Conversion wasn't possible.");

@@ -24,20 +24,19 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import org.apache.freemarker.core.model.TemplateModelException;
-import org.junit.Test; 
+import org.junit.Test;
 
 public class XHTMLOutputFormatTest {
     
     @Test
-    public void testOutputMO() throws TemplateModelException, IOException {
+    public void testOutputMO() throws TemplateException, IOException {
        StringWriter out = new StringWriter();
        INSTANCE.output(INSTANCE.fromPlainTextByEscaping("a'b"), out);
        assertEquals("a&#39;b", out.toString());
     }
     
     @Test
-    public void testOutputString() throws TemplateModelException, IOException {
+    public void testOutputString() throws TemplateException, IOException {
         StringWriter out = new StringWriter();
         INSTANCE.output("a'b", out);
         assertEquals("a&#39;b", out.toString());

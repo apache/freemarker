@@ -21,7 +21,7 @@ package org.apache.freemarker.manual.examples;
 import java.util.Locale;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
@@ -58,7 +58,7 @@ public class UnitAwareTemplateNumberFormatFactory extends TemplateNumberFormatFa
 
         @Override
         public String formatToPlainText(TemplateNumberModel numberModel)
-                throws TemplateModelException, TemplateValueFormatException {
+                throws TemplateException, TemplateValueFormatException {
             String innerResult = innerFormat.formatToPlainText(numberModel);
             return numberModel instanceof UnitAwareTemplateNumberModel
                     ? innerResult + " " + ((UnitAwareTemplateNumberModel) numberModel).getUnit()

@@ -26,9 +26,9 @@ import java.util.Date;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.NonTemplateCallPlace;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.TemplateHTMLOutputModel;
@@ -37,13 +37,13 @@ import org.junit.Test;
 public class ErrorMessagesTest {
 
     @Test
-    public void getterMessage() throws TemplateModelException {
+    public void getterMessage() throws TemplateException {
         DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         TemplateHashModel thm= (TemplateHashModel) ow.wrap(new TestBean());
         
         try {
             thm.get("foo");
-        } catch (TemplateModelException e) {
+        } catch (TemplateException e) {
             e.printStackTrace();
             final String msg = e.getMessage();
             assertThat(msg, containsString("\"foo\""));
@@ -64,7 +64,7 @@ public class ErrorMessagesTest {
             try {
                 m.execute(new TemplateModel[] { html }, NonTemplateCallPlace.INSTANCE);
                 fail();
-            } catch (TemplateModelException e) {
+            } catch (TemplateException e) {
                 assertThat(e.getMessage(), allOf(
                         containsString("String"), containsString("convert"), containsString("markupOutput"),
                         containsString("Tip:"), containsString("?markupString")));
@@ -76,7 +76,7 @@ public class ErrorMessagesTest {
             try {
                 m.execute(new TemplateModel[] { html }, NonTemplateCallPlace.INSTANCE);
                 fail();
-            } catch (TemplateModelException e) {
+            } catch (TemplateException e) {
                 assertThat(e.getMessage(), allOf(
                         containsString("Date"), containsString("convert"), containsString("markupOutput"),
                         not(containsString("?markupString"))));
@@ -88,7 +88,7 @@ public class ErrorMessagesTest {
             try {
                 m.execute(new TemplateModel[] { html }, NonTemplateCallPlace.INSTANCE);
                 fail();
-            } catch (TemplateModelException e) {
+            } catch (TemplateException e) {
                 assertThat(e.getMessage(), allOf(
                         containsString("No compatible overloaded"),
                         containsString("String"), containsString("markupOutput"),
@@ -101,7 +101,7 @@ public class ErrorMessagesTest {
             try {
                 m.execute(new TemplateModel[] { html }, NonTemplateCallPlace.INSTANCE);
                 fail();
-            } catch (TemplateModelException e) {
+            } catch (TemplateException e) {
                 assertThat(e.getMessage(), allOf(
                         containsString("No compatible overloaded"),
                         containsString("Integer"), containsString("markupOutput"),
@@ -161,7 +161,7 @@ public class ErrorMessagesTest {
             return s;
         }
 
-        public String mOverloaded4(TemplateHTMLOutputModel s) throws TemplateModelException {
+        public String mOverloaded4(TemplateHTMLOutputModel s) throws TemplateException {
             return s.getOutputFormat().getMarkupString(s);
         }
         

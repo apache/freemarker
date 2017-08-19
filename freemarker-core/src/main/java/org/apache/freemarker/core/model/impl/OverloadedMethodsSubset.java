@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.util._ClassUtils;
 import org.apache.freemarker.core.util._NullArgumentException;
 
@@ -154,7 +154,7 @@ abstract class OverloadedMethodsSubset {
     abstract void afterWideningUnwrappingHints(Class<?>[] paramTypes, int[] paramNumericalTypes);
     
     abstract MaybeEmptyMemberAndArguments getMemberAndArguments(TemplateModel[] tmArgs,
-            DefaultObjectWrapper unwrapper) throws TemplateModelException;
+            DefaultObjectWrapper unwrapper) throws TemplateException;
 
     /**
      * Returns the most specific common class (or interface) of two parameter types for the purpose of unwrapping.

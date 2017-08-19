@@ -30,7 +30,6 @@ import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
@@ -69,7 +68,7 @@ class BuiltInsForStringsRegexp {
             
             String matchString;
             
-            MatcherBuilder(String matchString) throws TemplateModelException {
+            MatcherBuilder(String matchString) throws TemplateException {
                 this.matchString = matchString;
             }
 
@@ -97,7 +96,7 @@ class BuiltInsForStringsRegexp {
         }
         
         @Override
-        TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             return new MatcherBuilder(s);
         }
         
@@ -145,7 +144,7 @@ class BuiltInsForStringsRegexp {
         }
         
         @Override
-        TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             return new ReplaceMethod(s);
         }
         
@@ -189,7 +188,7 @@ class BuiltInsForStringsRegexp {
         }
         
         @Override
-        public TemplateModel get(int i) throws TemplateModelException {
+        public TemplateModel get(int i) throws TemplateException {
             ArrayList matchingInputParts = this.matchingInputParts;
             if (matchingInputParts == null) {
                 matchingInputParts = getMatchingInputPartsAndStoreResults();
@@ -216,7 +215,7 @@ class BuiltInsForStringsRegexp {
                 entireInputMatchGroups = new TemplateSequenceModel() {
                     
                     @Override
-                    public TemplateModel get(int i) throws TemplateModelException {
+                    public TemplateModel get(int i) throws TemplateException {
                         try {
                             // Avoid IndexOutOfBoundsException:
                             if (i > firedEntireInputMatcher.groupCount()) {
@@ -225,16 +224,16 @@ class BuiltInsForStringsRegexp {
 
                             return new SimpleScalar(firedEntireInputMatcher.group(i));
                         } catch (Exception e) {
-                            throw new TemplateModelException("Failed to read match group", e);
+                            throw new TemplateException("Failed to read regular expression match group", e);
                         }
                     }
                     
                     @Override
-                    public int size() throws TemplateModelException {
+                    public int size() throws TemplateException {
                         try {
                             return firedEntireInputMatcher.groupCount() + 1;
                         } catch (Exception e) {
-                            throw new TemplateModelException("Failed to get match group count", e);
+                            throw new TemplateException("Failed to get regular expression match group count", e);
                         }
                     }
                     
@@ -244,7 +243,7 @@ class BuiltInsForStringsRegexp {
             return entireInputMatchGroups;
         }
         
-        private ArrayList getMatchingInputPartsAndStoreResults() throws TemplateModelException {
+        private ArrayList getMatchingInputPartsAndStoreResults() throws TemplateException {
             ArrayList matchingInputParts = new ArrayList();
             
             Matcher matcher = pattern.matcher(input);
@@ -285,10 +284,12 @@ class BuiltInsForStringsRegexp {
                     }
                     
                     @Override
-                    public TemplateModel next() throws TemplateModelException {
+                    public TemplateModel next() throws TemplateException {
                         final ArrayList matchingInputParts = RegexMatchModel.this.matchingInputParts;
                         if (matchingInputParts == null) {
-                            if (!hasFindInfo) throw new TemplateModelException("There were no more matches");
+                            if (!hasFindInfo) {
+                                throw new TemplateException("There were no more regular expression matches");
+                            }
                             MatchWithGroups result = new MatchWithGroups(input, matcher);
                             nextIdx++;
                             hasFindInfo = matcher.find();
@@ -297,7 +298,7 @@ class BuiltInsForStringsRegexp {
                             try {
                                 return (TemplateModel) matchingInputParts.get(nextIdx++);
                             } catch (IndexOutOfBoundsException e) {
-                                throw new TemplateModelException("There were no more matches", e);
+                                throw new TemplateException("There were no more regular expression matches", e);
                             }
                         }
                     }
@@ -314,11 +315,11 @@ class BuiltInsForStringsRegexp {
                     }
                     
                     @Override
-                    public TemplateModel next() throws TemplateModelException {
+                    public TemplateModel next() throws TemplateException {
                         try {
                             return (TemplateModel) matchingInputParts.get(nextIdx++);
                         } catch (IndexOutOfBoundsException e) {
-                            throw new TemplateModelException("There were no more matches", e);
+                            throw new TemplateException("There were no more regular expression matches", e);
                         }
                     }
                 };
@@ -326,7 +327,7 @@ class BuiltInsForStringsRegexp {
         }
         
         @Override
-        public int size() throws TemplateModelException {
+        public int size() throws TemplateException {
             ArrayList matchingInputParts = this.matchingInputParts;
             if (matchingInputParts == null) {
                 matchingInputParts = getMatchingInputPartsAndStoreResults();

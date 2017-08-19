@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core.model;
 
+import org.apache.freemarker.core.TemplateException;
+
 /**
  * "hash" template language data type: an object that contains other objects accessible through string keys
  * (sub-variable names).
@@ -37,7 +39,7 @@ public interface TemplateHashModel extends TemplateModel {
      * @return the <tt>TemplateModel</tt> referred to by the key,
      * or null if not found.
      */
-    TemplateModel get(String key) throws TemplateModelException;
+    TemplateModel get(String key) throws TemplateException;
 
-    boolean isEmpty() throws TemplateModelException;
+    boolean isEmpty() throws TemplateException;
 }

@@ -20,7 +20,6 @@
 package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 
@@ -37,9 +36,9 @@ abstract class RangeModel implements TemplateSequenceModel, java.io.Serializable
     }
     
     @Override
-    final public TemplateModel get(int index) throws TemplateModelException {
+    final public TemplateModel get(int index) throws TemplateException {
         if (index < 0 || index >= size()) {
-            throw new _TemplateModelException("Range item index ", Integer.valueOf(index), " is out of bounds.");
+            throw new TemplateException("Range item index ", Integer.valueOf(index), " is out of bounds.");
         }
         long value = begin + getStep() * (long) index;
         return value <= Integer.MAX_VALUE ? new SimpleNumber((int) value) : new SimpleNumber(value);

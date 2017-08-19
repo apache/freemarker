@@ -24,14 +24,14 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.outputformat._OutputFormatTestAPI;
 import org.junit.Test; 
 
 public class RTFOutputFormatTest {
     
     @Test
-    public void testOutputMO() throws TemplateModelException, IOException {
+    public void testOutputMO() throws TemplateException, IOException {
        StringWriter out = new StringWriter();
        
        INSTANCE.output(INSTANCE.fromMarkup("\\par Test "), out);
@@ -50,7 +50,7 @@ public class RTFOutputFormatTest {
     }
     
     @Test
-    public void testOutputString() throws TemplateModelException, IOException {
+    public void testOutputString() throws TemplateException, IOException {
         StringWriter out = new StringWriter();
         
         INSTANCE.output("a", out);
@@ -61,7 +61,7 @@ public class RTFOutputFormatTest {
     }
     
     @Test
-    public void testFromPlainTextByEscaping() throws TemplateModelException {
+    public void testFromPlainTextByEscaping() throws TemplateException {
         String plainText = "a\\b";
         TemplateRTFOutputModel mo = INSTANCE.fromPlainTextByEscaping(plainText);
         assertSame(plainText, _OutputFormatTestAPI.getPlainTextContent(mo));
@@ -69,7 +69,7 @@ public class RTFOutputFormatTest {
     }
 
     @Test
-    public void testFromMarkup() throws TemplateModelException {
+    public void testFromMarkup() throws TemplateException {
         String markup = "a \\par b";
         TemplateRTFOutputModel mo = INSTANCE.fromMarkup(markup);
         assertSame(markup, _OutputFormatTestAPI.getMarkupContent(mo));
@@ -77,7 +77,7 @@ public class RTFOutputFormatTest {
     }
     
     @Test
-    public void testGetMarkup() throws TemplateModelException {
+    public void testGetMarkup() throws TemplateException {
         {
             String markup = "a \\par b";
             TemplateRTFOutputModel mo = INSTANCE.fromMarkup(markup);

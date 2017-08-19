@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core.util.CallableUtils.getStringArgument;
+import static org.apache.freemarker.core.util.CallableUtils.*;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
@@ -28,7 +28,6 @@ import java.nio.charset.UnsupportedCharsetException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.util._StringUtils;
@@ -173,25 +172,24 @@ class BuiltInsForStringsEncoding {
         }
 
         @Override
-        public String getAsString() throws TemplateModelException {
+        public String getAsString() throws TemplateException {
             if (cachedResult == null) {
                 Charset charset = env.getEffectiveURLEscapingCharset();
                 if (charset == null) {
-                    throw new TemplateModelException(
-                            "To do URL encoding, the framework that encloses "
-                            + "FreeMarker must specify the output encoding "
-                            + "or the URL encoding charset, so ask the "
-                            + "programmers to fix it. Or, as a last chance, "
-                            + "you can set the url_encoding_charset setting in "
-                            + "the template, e.g. "
-                            + "<#setting urlEscapingCharset='ISO-8859-1'>, or "
-                            + "give the charset explicitly to the buit-in, e.g. "
+                    throw new TemplateException(
+                            "To do URL encoding, the framework that encloses FreeMarker must specify the \"",
+                            Configuration.Builder.OUTPUT_ENCODING_KEY, "\" setting or the \"",
+                            Configuration.Builder.URL_ESCAPING_CHARSET_KEY,
+                            "\" setting, so ask the programmers to set them. Or, as a last chance, you can set the "
+                            + "url_encoding_charset setting in the template, e.g. <#setting ",
+                            Configuration.Builder.URL_ESCAPING_CHARSET_KEY,
+                            "='ISO-8859-1'>, or give the charset explicitly to the built-in, e.g. "
                             + "foo?url('ISO-8859-1').");
                 }
                 try {
                     cachedResult = encodeWithCharset(charset);
                 } catch (UnsupportedEncodingException e) {
-                    throw new _TemplateModelException(e, "Failed to execute URL encoding.");
+                    throw new TemplateException(e, "Failed to execute URL encoding.");
                 }
             }
             return cachedResult;

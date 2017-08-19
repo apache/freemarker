@@ -17,24 +17,21 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.templatesuite.models;
+package org.apache.freemarker.core.model;
 
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
 
-public class BooleanAndScalarModel implements TemplateBooleanModel, TemplateScalarModel {
+/**
+ * Thrown by {@link ObjectWrapper#wrap(Object)}.
+ */
+public class ObjectWrappingException extends TemplateException {
 
-    public static final BooleanAndScalarModel INSTANCE = new BooleanAndScalarModel();
-
-    @Override
-    public String getAsString() throws TemplateException {
-        return "s";
+    public ObjectWrappingException(String description, Throwable cause) {
+        super(description, cause);
     }
 
-    @Override
-    public boolean getAsBoolean() throws TemplateException {
-        return true;
+    public ObjectWrappingException(String description) {
+        super(description);
     }
 
 }

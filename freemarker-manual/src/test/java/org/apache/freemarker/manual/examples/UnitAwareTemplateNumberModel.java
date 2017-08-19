@@ -18,7 +18,7 @@
  */
 package org.apache.freemarker.manual.examples;
 
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 
 public class UnitAwareTemplateNumberModel implements TemplateNumberModel {
@@ -32,7 +32,7 @@ public class UnitAwareTemplateNumberModel implements TemplateNumberModel {
     }
 
     @Override
-    public Number getAsNumber() throws TemplateModelException {
+    public Number getAsNumber() throws TemplateException {
         return value;
     }
 

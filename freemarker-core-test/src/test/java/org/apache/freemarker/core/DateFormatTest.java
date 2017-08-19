@@ -30,7 +30,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.templateresolver.ConditionalTemplateConfigurationFactory;
 import org.apache.freemarker.core.templateresolver.FileNameGlobMatcher;
@@ -450,7 +449,7 @@ public class DateFormatTest extends TemplateTest {
         }
 
         @Override
-        public Date getAsDate() throws TemplateModelException {
+        public Date getAsDate() throws TemplateException {
             return date;
         }
 

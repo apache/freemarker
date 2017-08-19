@@ -23,13 +23,12 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.regex.Pattern;
 
+import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.util.StringToIndexMap;
@@ -146,7 +145,7 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
     }
 
     private String getAsString(TemplateModel value, String paramName, Environment env)
-            throws BadParameterTypeException, TemplateModelException {
+            throws TemplateException {
         if (value == null) {
             return null;
         }
@@ -158,14 +157,13 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
     }
 
     private Pattern getAsPattern(TemplateModel value, String paramName, Environment env)
-            throws TemplateModelException, BadParameterTypeException {
+            throws TemplateException {
         String s = getAsString(value, paramName, env);
         return s != null ? Pattern.compile(s, Pattern.CASE_INSENSITIVE) : null;
     }
 
-    private int getAsInt(TemplateModel value, int defaultValue, String paramName, Environment env) throws
-            BadParameterTypeException,
-            TemplateModelException {
+    private int getAsInt(TemplateModel value, int defaultValue, String paramName, Environment env)
+            throws TemplateException {
         if (value == null) {
             return defaultValue;
         }

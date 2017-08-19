@@ -19,8 +19,8 @@
 
 package org.apache.freemarker.core.model.impl;
 
+import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 public class PrallelObjectIntrospectionTest extends AbstractParallelIntrospectionTest {
 
@@ -34,8 +34,7 @@ public class PrallelObjectIntrospectionTest extends AbstractParallelIntrospectio
     }
     
     @Override
-    protected TemplateHashModel getWrappedEntity(int objIdx)
-    throws TemplateModelException {
+    protected TemplateHashModel getWrappedEntity(int objIdx) throws ObjectWrappingException {
         return (TemplateHashModel) getObjectWrapper().wrap(
                 ManyObjectsOfDifferentClasses.OBJECTS[objIdx]);
     }

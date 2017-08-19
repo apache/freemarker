@@ -19,8 +19,8 @@
  
 package org.apache.freemarker.dom;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.w3c.dom.DocumentType;
 import org.w3c.dom.ProcessingInstruction;
@@ -35,13 +35,13 @@ class DocumentTypeModel extends NodeModel {
         return ((ProcessingInstruction) node).getData();
     }
     
-    public TemplateSequenceModel getChildren() throws TemplateModelException {
-        throw new TemplateModelException("entering the child nodes of a DTD node is not currently supported");
+    public TemplateSequenceModel getChildren() throws TemplateException {
+        throw new TemplateException("Entering the child nodes of a DTD node is not currently supported");
     }
     
     @Override
-    public TemplateModel get(String key) throws TemplateModelException {
-        throw new TemplateModelException("accessing properties of a DTD is not currently supported");
+    public TemplateModel get(String key) throws TemplateException {
+        throw new TemplateException("Accessing properties of a DTD is not currently supported");
     }
     
     @Override

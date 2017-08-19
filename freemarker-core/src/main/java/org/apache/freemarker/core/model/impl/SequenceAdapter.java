@@ -21,9 +21,9 @@ package org.apache.freemarker.core.model.impl;
 
 import java.util.AbstractList;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelAdapter;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 
@@ -47,7 +47,7 @@ class SequenceAdapter extends AbstractList implements TemplateModelAdapter {
     public int size() {
         try {
             return model.size();
-        } catch (TemplateModelException e) {
+        } catch (TemplateException e) {
             throw new UndeclaredThrowableException(e);
         }
     }
@@ -56,7 +56,7 @@ class SequenceAdapter extends AbstractList implements TemplateModelAdapter {
     public Object get(int index) {
         try {
             return wrapper.unwrap(model.get(index));
-        } catch (TemplateModelException e) {
+        } catch (TemplateException e) {
             throw new UndeclaredThrowableException(e);
         }
     }

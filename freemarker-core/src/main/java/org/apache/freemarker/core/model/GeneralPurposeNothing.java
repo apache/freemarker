@@ -63,8 +63,8 @@ implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, Tem
     }
 
     @Override
-    public TemplateModel get(int i) throws TemplateModelException {
-        throw new TemplateModelException("Empty list");
+    public TemplateModel get(int i) throws TemplateException {
+        throw new TemplateException("Can't get item from an empty sequence.");
     }
 
     @Override
@@ -93,7 +93,7 @@ implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, Tem
     }
 
     @Override
-    public KeyValuePairIterator keyValuePairIterator() throws TemplateModelException {
+    public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
         return EmptyKeyValuePairIterator.EMPTY_KEY_VALUE_PAIR_ITERATOR;
     }
 

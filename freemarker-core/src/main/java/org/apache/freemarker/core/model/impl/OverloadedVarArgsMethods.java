@@ -20,11 +20,11 @@ package org.apache.freemarker.core.model.impl;
 
 import java.lang.reflect.Array;
 
-import org.apache.freemarker.core.util.CallableUtils;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.util.BugException;
+import org.apache.freemarker.core.util.CallableUtils;
 
 /**
  * Stores the varargs methods for a {@link OverloadedMethods} object.
@@ -136,7 +136,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset {
     
     @Override
     MaybeEmptyMemberAndArguments getMemberAndArguments(TemplateModel[] tmArgs, DefaultObjectWrapper unwrapper)
-    throws TemplateModelException {
+    throws TemplateException {
         if (tmArgs == null) {
             // null is treated as empty args
             tmArgs = CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY;
@@ -208,7 +208,7 @@ class OverloadedVarArgsMethods extends OverloadedMethodsSubset {
      */
     private Object replaceVarargsSectionWithArray(
             Object[] args, TemplateModel[] tmArgs, CallableMemberDescriptor memberDesc, DefaultObjectWrapper unwrapper)
-            throws TemplateModelException {
+            throws TemplateException {
         final Class<?>[] paramTypes = memberDesc.getParamTypes();
         final int paramCount = paramTypes.length;
         final Class<?> varArgsCompType = paramTypes[paramCount - 1].getComponentType();

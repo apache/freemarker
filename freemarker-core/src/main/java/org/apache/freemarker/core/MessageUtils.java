@@ -24,7 +24,6 @@ import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
@@ -208,34 +207,30 @@ class MessageUtils {
                 "Instantiating ", className, " is not allowed in the template for security reasons.");
     }
     
-    static TemplateModelException newCantFormatUnknownTypeDateException(
+    static TemplateException newCantFormatUnknownTypeDateException(
             ASTExpression dateSourceExpr, UnknownDateTypeFormattingUnsupportedException cause) {
-        return new _TemplateModelException(cause, null, new _ErrorDescriptionBuilder(
+        return new TemplateException(cause, null, new _ErrorDescriptionBuilder(
                 UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE)
                 .blame(dateSourceExpr)
                 .tips(UNKNOWN_DATE_TO_STRING_TIPS));
     }
 
     static TemplateException newCantFormatDateException(TemplateDateFormat format, ASTExpression dataSrcExp,
-                                                        TemplateValueFormatException e, boolean useTempModelExc) {
+                                                        TemplateValueFormatException e) {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                 "Failed to format date/time/dateTime with format ", new _DelayedJQuote(format.getDescription()), ": ",
                 e.getMessage())
                 .blame(dataSrcExp); 
-        return useTempModelExc
-                ? new _TemplateModelException(e, null, desc)
-                : new TemplateException(e, null, desc);
+        return new TemplateException(e, null, desc);
     }
     
     static TemplateException newCantFormatNumberException(TemplateNumberFormat format, ASTExpression dataSrcExp,
-                                                          TemplateValueFormatException e, boolean useTempModelExc) {
+                                                          TemplateValueFormatException e) {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                 "Failed to format number with format ", new _DelayedJQuote(format.getDescription()), ": ",
                 e.getMessage())
                 .blame(dataSrcExp); 
-        return useTempModelExc
-                ? new _TemplateModelException(e, null, desc)
-                : new TemplateException(e, null, desc);
+        return new TemplateException(e, null, desc);
     }
     
     /**

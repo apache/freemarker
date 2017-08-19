@@ -22,9 +22,9 @@ package org.apache.freemarker.core.userpkg;
 import java.io.IOException;
 import java.io.Writer;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateCallableModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
@@ -33,12 +33,12 @@ import org.apache.freemarker.core.util._StringUtils;
 
 public abstract class TestTemplateCallableModel implements TemplateCallableModel {
 
-    protected void printParam(String name, Object value, StringBuilder sb) throws TemplateModelException {
+    protected void printParam(String name, Object value, StringBuilder sb) throws TemplateException {
         printParam(name, value, sb, false);
     }
 
     protected void printParam(String name, Object value, StringBuilder sb, boolean first)
-            throws TemplateModelException {
+            throws TemplateException {
         if (!first) {
             sb.append(", ");
         }
@@ -47,18 +47,18 @@ public abstract class TestTemplateCallableModel implements TemplateCallableModel
         printValue(value, sb);
     }
 
-    protected void printParam(String name, Object value, Writer out) throws IOException, TemplateModelException {
+    protected void printParam(String name, Object value, Writer out) throws IOException, TemplateException {
         printParam(name, value, out, false);
     }
 
     protected void printParam(String name, Object value, Writer out, boolean first)
-            throws IOException, TemplateModelException {
+            throws IOException, TemplateException {
         StringBuilder sb = new StringBuilder();
         printParam(name, value, sb, first);
         out.write(sb.toString());
     }
 
-    private void printValue(Object value, StringBuilder sb) throws TemplateModelException {
+    private void printValue(Object value, StringBuilder sb) throws TemplateException {
         if (value == null) {
             sb.append("null");
         } else if (value instanceof TemplateNumberModel) {

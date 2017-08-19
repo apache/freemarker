@@ -102,7 +102,7 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
                 pageContext.popWriter();
             }
         } catch (Exception e) {
-            throw toTemplateModelExceptionOrRethrow(e);
+            throw toTemplateExceptionOrRethrow(e);
         }
     }
 

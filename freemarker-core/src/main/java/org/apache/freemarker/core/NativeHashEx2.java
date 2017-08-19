@@ -28,7 +28,6 @@ import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 
 /**
@@ -46,42 +45,42 @@ class NativeHashEx2 implements TemplateHashModelEx2, Serializable {
     }
 
     @Override
-    public int size() throws TemplateModelException {
+    public int size() throws TemplateException {
         return map.size();
     }
 
     @Override
-    public TemplateModel get(String key) throws TemplateModelException {
+    public TemplateModel get(String key) throws TemplateException {
         return map.get(key);
     }
 
     @Override
-    public boolean isEmpty() throws TemplateModelException {
+    public boolean isEmpty() throws TemplateException {
         return map.isEmpty();
     }
 
     @Override
-    public KeyValuePairIterator keyValuePairIterator() throws TemplateModelException {
+    public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
         return new KeyValuePairIterator() {
             private final Iterator<Map.Entry<String, TemplateModel>> entrySetIterator = map.entrySet().iterator();
 
             @Override
-            public boolean hasNext() throws TemplateModelException {
+            public boolean hasNext() throws TemplateException {
                 return entrySetIterator.hasNext();
             }
 
             @Override
-            public KeyValuePair next() throws TemplateModelException {
+            public KeyValuePair next() throws TemplateException {
                 return new KeyValuePair() {
                     private final Map.Entry<String, TemplateModel> entry = entrySetIterator.next();
 
                     @Override
-                    public TemplateModel getKey() throws TemplateModelException {
+                    public TemplateModel getKey() throws TemplateException {
                         return new SimpleScalar(entry.getKey());
                     }
 
                     @Override
-                    public TemplateModel getValue() throws TemplateModelException {
+                    public TemplateModel getValue() throws TemplateException {
                         return entry.getValue();
                     }
                 };
@@ -90,12 +89,12 @@ class NativeHashEx2 implements TemplateHashModelEx2, Serializable {
     }
 
     @Override
-    public TemplateCollectionModel keys() throws TemplateModelException {
+    public TemplateCollectionModel keys() throws TemplateException {
         return new NativeStringCollectionCollectionEx(map.keySet());
     }
 
     @Override
-    public TemplateCollectionModel values() throws TemplateModelException {
+    public TemplateCollectionModel values() throws TemplateException {
         return new NativeCollectionEx(map.values());
     }
 

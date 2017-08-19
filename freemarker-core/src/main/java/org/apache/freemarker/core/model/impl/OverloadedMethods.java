@@ -24,12 +24,11 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._DelayedConversionToString;
 import org.apache.freemarker.core._ErrorDescriptionBuilder;
-import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.util.TemplateLanguageUtils;
 import org.apache.freemarker.core.util._ClassUtils;
 
@@ -87,7 +86,7 @@ final class OverloadedMethods {
     }
     
     MemberAndArguments getMemberAndArguments(TemplateModel[] tmArgs, DefaultObjectWrapper unwrapper)
-    throws TemplateModelException {
+    throws TemplateException {
         // Try to find a fixed args match:
         MaybeEmptyMemberAndArguments fixArgsRes = fixArgMethods.getMemberAndArguments(tmArgs, unwrapper);
         if (fixArgsRes instanceof MemberAndArguments) {
@@ -113,7 +112,7 @@ final class OverloadedMethods {
                 "\nThe matching overload was searched among these members:\n",
                 memberListToString());
         addMarkupBITipAfterNoNoMarchIfApplicable(edb, tmArgs);
-        throw new _TemplateModelException(edb);
+        throw new TemplateException(edb);
     }
 
     String getMethodName() {

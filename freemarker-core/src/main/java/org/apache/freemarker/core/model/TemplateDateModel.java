@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.freemarker.core.TemplateException;
+
 /**
  * "date", "time" and "date-time" template language data types: corresponds to {@link java.util.Date}. Contrary to Java,
  * FreeMarker distinguishes date (no time part), time and date-time values.
@@ -62,7 +64,7 @@ public interface TemplateDateModel extends TemplateModel {
     /**
      * Returns the date value. The return value must not be {@code null}.
      */
-    Date getAsDate() throws TemplateModelException;
+    Date getAsDate() throws TemplateException;
 
     /**
      * Returns the type of the date. It can be any of {@link #TIME}, 

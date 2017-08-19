@@ -66,13 +66,31 @@ public final class CallableUtils {
         return newGenericExecuteException(callable, false, errorDescription);
     }
 
+    public static TemplateException newGenericExecuteException(
+            TemplateCallableModel callable, boolean calledAsFunction, String errorDescription) {
+        return newGenericExecuteException(callable, calledAsFunction, errorDescription, null);
+    }
+
+    /** Convenience method for calling {@link #newGenericExecuteException(TemplateCallableModel, boolean, String)}. */
+    public static TemplateException newGenericExecuteException(
+            TemplateFunctionModel callable, String errorDescription, Throwable cause) {
+        return newGenericExecuteException(callable, true, errorDescription, cause);
+    }
+
+    /** Convenience method for calling {@link #newGenericExecuteException(TemplateCallableModel, boolean, String)}. */
+    public static TemplateException newGenericExecuteException(
+            TemplateDirectiveModel callable, String errorDescription, Throwable cause) {
+        return newGenericExecuteException(callable, false, errorDescription, cause);
+    }
+
     /**
      * @param errorDescription Complete sentence describing the problem. This will be after
      *      {@code "When calling xxx: "}.
      */
     public static TemplateException newGenericExecuteException(
-            TemplateCallableModel callable, boolean calledAsFunction, String errorDescription) {
-        return new TemplateException(
+            TemplateCallableModel callable, boolean calledAsFunction, String errorDescription,
+            Throwable cause) {
+        return new TemplateException(cause,
                 _CallableUtils.getMessagePartWhenCallingSomethingColon(callable, calledAsFunction),
                 errorDescription);
     }

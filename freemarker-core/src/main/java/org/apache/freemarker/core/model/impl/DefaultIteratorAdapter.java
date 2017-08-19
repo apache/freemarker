@@ -21,12 +21,12 @@ package org.apache.freemarker.core.model.impl;
 
 import java.util.Iterator;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
@@ -82,12 +82,12 @@ public class DefaultIteratorAdapter extends WrappingTemplateModel implements Tem
     }
 
     @Override
-    public TemplateModelIterator iterator() throws TemplateModelException {
+    public TemplateModelIterator iterator() throws TemplateException {
         return new SimpleTemplateModelIterator();
     }
 
     @Override
-    public TemplateModel getAPI() throws TemplateModelException {
+    public TemplateModel getAPI() throws TemplateException {
         return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(iterator);
     }
 
@@ -99,7 +99,7 @@ public class DefaultIteratorAdapter extends WrappingTemplateModel implements Tem
         private boolean iteratorOwnedByMe;
 
         @Override
-        public TemplateModel next() throws TemplateModelException {
+        public TemplateModel next() throws TemplateException {
             if (!iteratorOwnedByMe) {
                 checkNotOwner();
                 iteratorOwnedBySomeone = true;
@@ -107,7 +107,7 @@ public class DefaultIteratorAdapter extends WrappingTemplateModel implements Tem
             }
 
             if (!iterator.hasNext()) {
-                throw new TemplateModelException("The collection has no more items.");
+                throw new TemplateException("The collection has no more items.");
             }
 
             Object value = iterator.next();
@@ -115,7 +115,7 @@ public class DefaultIteratorAdapter extends WrappingTemplateModel implements Tem
         }
 
         @Override
-        public boolean hasNext() throws TemplateModelException {
+        public boolean hasNext() throws TemplateException {
             // Calling hasNext may looks safe, but I have met sync. problems.
             if (!iteratorOwnedByMe) {
                 checkNotOwner();
@@ -124,9 +124,9 @@ public class DefaultIteratorAdapter extends WrappingTemplateModel implements Tem
             return iterator.hasNext();
         }
 
-        private void checkNotOwner() throws TemplateModelException {
+        private void checkNotOwner() throws TemplateException {
             if (iteratorOwnedBySomeone) {
-                throw new TemplateModelException(
+                throw new TemplateException(
                         "This collection value wraps a java.util.Iterator, thus it can be listed only once.");
             }
         }

@@ -32,15 +32,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.freemarker.core._DelayedTemplateLanguageTypeDescription;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._DelayedJQuote;
-import org.apache.freemarker.core._TemplateModelException;
+import org.apache.freemarker.core._DelayedTemplateLanguageTypeDescription;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
+import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.TemplateScalarModel;
@@ -124,12 +124,12 @@ public class BeanModel
      * then <tt>non-void-return-type get(java.lang.Object)</tt>, or 
      * alternatively (if the wrapped object is a resource bundle) 
      * <tt>Object get(java.lang.String)</tt>.
-     * @throws TemplateModelException if there was no property nor method nor
+     * @throws TemplateException if there was no property nor method nor
      * a generic <tt>get</tt> method to invoke.
      */
     @Override
     public TemplateModel get(String key)
-        throws TemplateModelException {
+        throws TemplateException {
         Class<?> clazz = object.getClass();
         Map<Object, Object> classInfo = wrapper.getClassIntrospector().get(clazz);
         TemplateModel retval = null;
@@ -148,10 +148,10 @@ public class BeanModel
                 retval = wrapper.wrap(null);
             }
             return retval;
-        } catch (TemplateModelException e) {
+        } catch (TemplateException e) {
             throw e;
         } catch (Exception e) {
-            throw new _TemplateModelException(e,
+            throw new TemplateException(e,
                     "An error has occurred when reading existing sub-variable ", new _DelayedJQuote(key),
                     "; see cause exception! The type of the containing value was: ",
                     new _DelayedTemplateLanguageTypeDescription(this)
@@ -168,7 +168,7 @@ public class BeanModel
     }
     
     private TemplateModel invokeThroughDescriptor(Object desc, Map<Object, Object> classInfo)
-            throws IllegalAccessException, InvocationTargetException, TemplateModelException {
+            throws IllegalAccessException, InvocationTargetException, TemplateException {
         // See if this particular instance has a cached implementation for the requested feature descriptor
         TemplateModel cachedModel;
         synchronized (this) {
@@ -227,7 +227,7 @@ public class BeanModel
 
     protected TemplateModel invokeGenericGet(Map/*<Object, Object>*/ classInfo, Class<?> clazz, String key)
             throws IllegalAccessException, InvocationTargetException,
-        TemplateModelException {
+        TemplateException {
         Method genericGet = (Method) classInfo.get(ClassIntrospector.GENERIC_GET_KEY);
         if (genericGet == null) {
             return UNKNOWN;
@@ -236,13 +236,12 @@ public class BeanModel
         return wrapper.invokeMethod(object, genericGet, new Object[] { key });
     }
 
-    protected TemplateModel wrap(Object obj)
-    throws TemplateModelException {
+    protected TemplateModel wrap(Object obj) throws ObjectWrappingException {
         return wrapper.getOuterIdentity().wrap(obj);
     }
     
     protected Object unwrap(TemplateModel model)
-    throws TemplateModelException {
+    throws TemplateException {
         return wrapper.unwrap(model);
     }
 
@@ -294,7 +293,7 @@ public class BeanModel
     }
 
     @Override
-    public TemplateCollectionModel values() throws TemplateModelException {
+    public TemplateCollectionModel values() throws TemplateException {
         List<Object> values = new ArrayList<>(size());
         TemplateModelIterator it = keys().iterator();
         while (it.hasNext()) {
@@ -320,7 +319,7 @@ public class BeanModel
     }
 
     @Override
-    public TemplateModel getAPI() throws TemplateModelException {
+    public TemplateModel getAPI() throws TemplateException {
         return wrapper.wrapAsAPI(object);
     }
     

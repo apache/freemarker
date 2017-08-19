@@ -45,7 +45,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
 
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
@@ -938,7 +937,7 @@ public class ConfigurationTest {
     private static class MyScalarModel implements TemplateScalarModel {
 
         @Override
-        public String getAsString() throws TemplateModelException {
+        public String getAsString() throws TemplateException {
             return "my";
         }
         

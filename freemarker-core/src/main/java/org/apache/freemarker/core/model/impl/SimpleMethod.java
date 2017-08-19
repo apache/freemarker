@@ -21,15 +21,14 @@ package org.apache.freemarker.core.model.impl;
 import java.lang.reflect.Array;
 import java.lang.reflect.Member;
 
-import org.apache.freemarker.core.util.CallableUtils;
-import org.apache.freemarker.core._DelayedTemplateLanguageTypeDescription;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._DelayedOrdinal;
+import org.apache.freemarker.core._DelayedTemplateLanguageTypeDescription;
 import org.apache.freemarker.core._ErrorDescriptionBuilder;
-import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util._ClassUtils;
 
 /**
@@ -50,7 +49,7 @@ class SimpleMethod {
         this.argTypes = argTypes;
     }
     
-    Object[] unwrapArguments(TemplateModel[] args, DefaultObjectWrapper wrapper) throws TemplateModelException {
+    Object[] unwrapArguments(TemplateModel[] args, DefaultObjectWrapper wrapper) throws TemplateException {
         if (args == null) {
             args = CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY;
         }
@@ -58,14 +57,14 @@ class SimpleMethod {
         int typesLen = argTypes.length;
         if (isVarArg) {
             if (typesLen - 1 > args.length) {
-                throw new _TemplateModelException(
+                throw new TemplateException(
                         _MethodUtils.invocationErrorMessageStart(member),
                         " takes at least ", typesLen - 1,
                         typesLen - 1 == 1 ? " argument" : " arguments", ", but ",
                         args.length, " was given.");
             }
         } else if (typesLen != args.length) {
-            throw new _TemplateModelException(
+            throw new TemplateException(
                     _MethodUtils.invocationErrorMessageStart(member),
                     " takes ", typesLen, typesLen == 1 ? " argument" : " arguments", ", but ",
                     args.length, " was given.");
@@ -76,7 +75,7 @@ class SimpleMethod {
 
     private Object[] unwrapArguments(TemplateModel[] args, Class<?>[] argTypes, boolean isVarargs,
             DefaultObjectWrapper w)
-    throws TemplateModelException {
+    throws TemplateException {
         if (args == null) return null;
         
         int typesLen = argTypes.length;
@@ -145,7 +144,7 @@ class SimpleMethod {
         return unwrappedArgs;
     }
 
-    private TemplateModelException createArgumentTypeMismatchException(
+    private TemplateException createArgumentTypeMismatchException(
             int argIdx, TemplateModel argVal, Class<?> targetType) {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                 _MethodUtils.invocationErrorMessageStart(member), " couldn't be called: Can't convert the ",
@@ -155,11 +154,11 @@ class SimpleMethod {
         if (argVal instanceof TemplateMarkupOutputModel && (targetType.isAssignableFrom(String.class))) {
             desc.tip(MARKUP_OUTPUT_TO_STRING_TIP);
         }
-        return new _TemplateModelException(desc);
+        return new TemplateException(desc);
     }
 
-    private TemplateModelException createNullToPrimitiveArgumentException(int argIdx, Class<?> targetType) {
-        return new _TemplateModelException(
+    private TemplateException createNullToPrimitiveArgumentException(int argIdx, Class<?> targetType) {
+        return new TemplateException(
                 _MethodUtils.invocationErrorMessageStart(member), " couldn't be called: The value of the ",
                 new _DelayedOrdinal(argIdx + 1),
                 " argument was null, but the target Java parameter type (", _ClassUtils.getShortClassName(targetType),

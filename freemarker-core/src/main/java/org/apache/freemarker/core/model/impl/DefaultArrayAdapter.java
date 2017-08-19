@@ -21,12 +21,12 @@ package org.apache.freemarker.core.model.impl;
 
 import java.lang.reflect.Array;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
@@ -117,12 +117,12 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
         }
 
         @Override
-        public TemplateModel get(int index) throws TemplateModelException {
+        public TemplateModel get(int index) throws TemplateException {
             return index >= 0 && index < array.length ? wrap(array[index]) : null;
         }
 
         @Override
-        public int size() throws TemplateModelException {
+        public int size() throws TemplateException {
             return array.length;
         }
 
@@ -143,12 +143,12 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
         }
 
         @Override
-        public TemplateModel get(int index) throws TemplateModelException {
+        public TemplateModel get(int index) throws TemplateException {
             return index >= 0 && index < array.length ? wrap(Byte.valueOf(array[index])) : null;
         }
 
         @Override
-        public int size() throws TemplateModelException {
+        public int size() throws TemplateException {
             return array.length;
         }
 
@@ -169,12 +169,12 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
         }
 
         @Override
-        public TemplateModel get(int index) throws TemplateModelException {
+        public TemplateModel get(int index) throws TemplateException {
             return index >= 0 && index < array.length ? wrap(Short.valueOf(array[index])) : null;
         }
 
         @Override
-        public int size() throws TemplateModelException {
+        public int size() throws TemplateException {
             return array.length;
         }
 
@@ -195,12 +195,12 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
         }
 
         @Override
-        public TemplateModel get(int index) throws TemplateModelException {
+        public TemplateModel get(int index) throws TemplateException {
             return index >= 0 && index < array.length ? wrap(Integer.valueOf(array[index])) : null;
         }
 
         @Override
-        public int size() throws TemplateModelException {
+        public int size() throws TemplateException {
             return array.length;
         }
 
@@ -221,12 +221,12 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
         }
 
         @Override
-        public TemplateModel get(int index) throws TemplateModelException {
+        public TemplateModel get(int index) throws TemplateException {
             return index >= 0 && index < array.length ? wrap(Long.valueOf(array[index])) : null;
         }
 
         @Override
-        public int size() throws TemplateModelException {
+        public int size() throws TemplateException {
             return array.length;
         }
 
@@ -247,12 +247,12 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
         }
 
         @Override
-        public TemplateModel get(int index) throws TemplateModelException {
+        public TemplateModel get(int index) throws TemplateException {
             return index >= 0 && index < array.length ? wrap(Float.valueOf(array[index])) : null;
         }
 
         @Override
-        public int size() throws TemplateModelException {
+        public int size() throws TemplateException {
             return array.length;
         }
 
@@ -273,12 +273,12 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
         }
 
         @Override
-        public TemplateModel get(int index) throws TemplateModelException {
+        public TemplateModel get(int index) throws TemplateException {
             return index >= 0 && index < array.length ? wrap(Double.valueOf(array[index])) : null;
         }
 
         @Override
-        public int size() throws TemplateModelException {
+        public int size() throws TemplateException {
             return array.length;
         }
 
@@ -299,12 +299,12 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
         }
 
         @Override
-        public TemplateModel get(int index) throws TemplateModelException {
+        public TemplateModel get(int index) throws TemplateException {
             return index >= 0 && index < array.length ? wrap(Character.valueOf(array[index])) : null;
         }
 
         @Override
-        public int size() throws TemplateModelException {
+        public int size() throws TemplateException {
             return array.length;
         }
 
@@ -325,12 +325,12 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
         }
 
         @Override
-        public TemplateModel get(int index) throws TemplateModelException {
+        public TemplateModel get(int index) throws TemplateException {
             return index >= 0 && index < array.length ? wrap(Boolean.valueOf(array[index])) : null;
         }
 
         @Override
-        public int size() throws TemplateModelException {
+        public int size() throws TemplateException {
             return array.length;
         }
 
@@ -356,12 +356,12 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
         }
 
         @Override
-        public TemplateModel get(int index) throws TemplateModelException {
+        public TemplateModel get(int index) throws TemplateException {
             return index >= 0 && index < length ? wrap(Array.get(array, index)) : null;
         }
 
         @Override
-        public int size() throws TemplateModelException {
+        public int size() throws TemplateException {
             return length;
         }
 

@@ -21,7 +21,7 @@ package org.apache.freemarker.core.userpkg;
 import java.util.Locale;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.util._NumberUtils;
 import org.apache.freemarker.core.util._StringUtils;
@@ -98,7 +98,7 @@ public class BaseNTemplateNumberFormatFactory extends TemplateNumberFormatFactor
         
         @Override
         public String formatToPlainText(TemplateNumberModel numberModel)
-                throws TemplateModelException, TemplateValueFormatException {
+                throws TemplateException, TemplateValueFormatException {
             Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
             try {
                 return Integer.toString(_NumberUtils.toIntExact(n), base);

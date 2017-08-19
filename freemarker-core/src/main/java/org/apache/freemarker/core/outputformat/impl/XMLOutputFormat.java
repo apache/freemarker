@@ -21,7 +21,7 @@ package org.apache.freemarker.core.outputformat.impl;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.outputformat.CommonMarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.util._StringUtils;
@@ -53,7 +53,7 @@ public final class XMLOutputFormat extends CommonMarkupOutputFormat<TemplateXMLO
     }
 
     @Override
-    public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
+    public void output(String textToEsc, Writer out) throws IOException, TemplateException {
         _StringUtils.XMLEnc(textToEsc, out);
     }
 

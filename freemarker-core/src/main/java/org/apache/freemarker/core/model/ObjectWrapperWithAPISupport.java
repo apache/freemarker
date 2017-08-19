@@ -37,6 +37,6 @@ public interface ObjectWrapperWithAPISupport extends ObjectWrapper {
      * 
      * @return The {@link TemplateModel} through which the API of the object can be accessed. Can't be {@code null}.
      */
-    TemplateHashModel wrapAsAPI(Object obj) throws TemplateModelException;
+    TemplateHashModel wrapAsAPI(Object obj) throws ObjectWrappingException;
 
 }

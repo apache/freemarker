@@ -52,10 +52,10 @@ abstract public class WrappingTemplateModel {
      * wrapper.
      * @param obj the object to wrap
      * @return the template model that wraps the object
-     * @throws TemplateModelException if the wrapper does not know how to
+     * @throws ObjectWrappingException if the wrapper does not know how to
      * wrap the passed object.
      */
-    protected final TemplateModel wrap(Object obj) throws TemplateModelException {
+    protected final TemplateModel wrap(Object obj) throws ObjectWrappingException {
             return objectWrapper.wrap(obj);
     }
     

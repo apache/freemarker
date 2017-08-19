@@ -22,12 +22,12 @@ package org.apache.freemarker.core.model.impl;
 import java.util.Enumeration;
 import java.util.Iterator;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
@@ -74,12 +74,12 @@ public class DefaultEnumerationAdapter extends WrappingTemplateModel implements 
     }
 
     @Override
-    public TemplateModelIterator iterator() throws TemplateModelException {
+    public TemplateModelIterator iterator() throws TemplateException {
         return new SimpleTemplateModelIterator();
     }
 
     @Override
-    public TemplateModel getAPI() throws TemplateModelException {
+    public TemplateModel getAPI() throws TemplateException {
         return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(enumeration);
     }
 
@@ -91,7 +91,7 @@ public class DefaultEnumerationAdapter extends WrappingTemplateModel implements 
         private boolean enumerationOwnedByMe;
 
         @Override
-        public TemplateModel next() throws TemplateModelException {
+        public TemplateModel next() throws TemplateException {
             if (!enumerationOwnedByMe) {
                 checkNotOwner();
                 enumerationOwnedBySomeone = true;
@@ -99,7 +99,7 @@ public class DefaultEnumerationAdapter extends WrappingTemplateModel implements 
             }
 
             if (!enumeration.hasMoreElements()) {
-                throw new TemplateModelException("The collection has no more items.");
+                throw new TemplateException("The collection has no more items.");
             }
 
             Object value = enumeration.nextElement();
@@ -107,7 +107,7 @@ public class DefaultEnumerationAdapter extends WrappingTemplateModel implements 
         }
 
         @Override
-        public boolean hasNext() throws TemplateModelException {
+        public boolean hasNext() throws TemplateException {
             // Calling hasNext may looks safe, but I have met sync. problems.
             if (!enumerationOwnedByMe) {
                 checkNotOwner();
@@ -116,9 +116,9 @@ public class DefaultEnumerationAdapter extends WrappingTemplateModel implements 
             return enumeration.hasMoreElements();
         }
 
-        private void checkNotOwner() throws TemplateModelException {
+        private void checkNotOwner() throws TemplateException {
             if (enumerationOwnedBySomeone) {
-                throw new TemplateModelException(
+                throw new TemplateException(
                         "This collection value wraps a java.util.Enumeration, thus it can be listed only once.");
             }
         }

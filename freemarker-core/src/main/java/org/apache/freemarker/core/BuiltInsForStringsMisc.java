@@ -29,7 +29,6 @@ import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.BeanModel;
@@ -208,7 +207,7 @@ class BuiltInsForStringsMisc {
                         env.setFastInvalidReferenceExceptions(lastFIRE);
                     }
                 } catch (Exception e) {
-                    throw new _TemplateModelException(e,
+                    throw new TemplateException(e,
                             "Template created with \"?", key, "\" has stopped with this error:\n\n",
                             MessageUtils.EMBEDDED_MESSAGE_BEGIN,
                             new _DelayedGetMessage(e),
@@ -276,14 +275,14 @@ class BuiltInsForStringsMisc {
 
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
-                    throws TemplateModelException {
+                    throws TemplateException {
                 ObjectWrapper ow = env.getObjectWrapper();
                 if (ow instanceof DefaultObjectWrapper) {
                     return ow.wrap(((DefaultObjectWrapper) ow).newInstance(cl, args, callPlace));
                 }
 
                 if (args.length != 0) {
-                    throw new TemplateModelException(
+                    throw new TemplateException(
                             "className?new(args) only supports 0 arguments in the current configuration, because "
                             + " the objectWrapper setting value is not a "
                             + DefaultObjectWrapper.class.getName() +
@@ -292,7 +291,7 @@ class BuiltInsForStringsMisc {
                 try {
                     return ow.wrap(cl.newInstance());
                 } catch (Exception e) {
-                    throw new TemplateModelException("Failed to instantiate "
+                    throw new TemplateException("Failed to instantiate "
                             + cl.getName() + " with its parameterless constructor; see cause exception", e);
                 }
             }

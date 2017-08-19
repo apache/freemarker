@@ -22,7 +22,6 @@ package org.apache.freemarker.core;
 import java.util.Collection;
 
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
   * An interface that represents a local context. This is used as the abstraction for  
@@ -30,6 +29,6 @@ import org.apache.freemarker.core.model.TemplateModelException;
   * a macro.
   */
 public interface LocalContext {
-    TemplateModel getLocalVariable(String name) throws TemplateModelException;
-    Collection<String> getLocalVariableNames() throws TemplateModelException;
+    TemplateModel getLocalVariable(String name) throws TemplateException;
+    Collection<String> getLocalVariableNames() throws TemplateException;
 }

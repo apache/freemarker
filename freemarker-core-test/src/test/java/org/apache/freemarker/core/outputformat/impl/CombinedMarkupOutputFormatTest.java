@@ -23,7 +23,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat._OutputFormatTestAPI;
 import org.junit.Test; 
@@ -42,7 +42,7 @@ public class CombinedMarkupOutputFormatTest {
     }
     
     @Test
-    public void testOutputMO() throws TemplateModelException, IOException {
+    public void testOutputMO() throws TemplateException, IOException {
        StringWriter out = new StringWriter();
        
        HTML_RTF.output(HTML_RTF.fromMarkup("<pre>\\par Test "), out);
@@ -61,7 +61,7 @@ public class CombinedMarkupOutputFormatTest {
     }
 
     @Test
-    public void testOutputMO2() throws TemplateModelException, IOException {
+    public void testOutputMO2() throws TemplateException, IOException {
        StringWriter out = new StringWriter();
        
        XML_XML.output(XML_XML.fromMarkup("<pre>&lt;p&gt; Test "), out);
@@ -76,7 +76,7 @@ public class CombinedMarkupOutputFormatTest {
     }
 
     @Test
-    public void testOutputMO3() throws TemplateModelException, IOException {
+    public void testOutputMO3() throws TemplateException, IOException {
         MarkupOutputFormat outputFormat = new CombinedMarkupOutputFormat(
                 RTFOutputFormat.INSTANCE,
                 new CombinedMarkupOutputFormat(RTFOutputFormat.INSTANCE, RTFOutputFormat.INSTANCE));
@@ -92,7 +92,7 @@ public class CombinedMarkupOutputFormatTest {
     }
     
     @Test
-    public void testOutputString() throws TemplateModelException, IOException {
+    public void testOutputString() throws TemplateException, IOException {
         StringWriter out = new StringWriter();
         
         HTML_RTF.output("a", out);
@@ -103,7 +103,7 @@ public class CombinedMarkupOutputFormatTest {
     }
     
     @Test
-    public void testOutputString2() throws TemplateModelException, IOException {
+    public void testOutputString2() throws TemplateException, IOException {
         StringWriter out = new StringWriter();
         
         XML_XML.output("a", out);
@@ -114,7 +114,7 @@ public class CombinedMarkupOutputFormatTest {
     }
     
     @Test
-    public void testFromPlainTextByEscaping() throws TemplateModelException {
+    public void testFromPlainTextByEscaping() throws TemplateException {
         String plainText = "a\\b&c";
         TemplateCombinedMarkupOutputModel mo = HTML_RTF.fromPlainTextByEscaping(plainText);
         assertSame(plainText, _OutputFormatTestAPI.getPlainTextContent(mo));
@@ -122,7 +122,7 @@ public class CombinedMarkupOutputFormatTest {
     }
 
     @Test
-    public void testFromMarkup() throws TemplateModelException {
+    public void testFromMarkup() throws TemplateException {
         String markup = "a \\par <b>";
         TemplateCombinedMarkupOutputModel mo = HTML_RTF.fromMarkup(markup);
         assertSame(markup, _OutputFormatTestAPI.getMarkupContent(mo));
@@ -130,7 +130,7 @@ public class CombinedMarkupOutputFormatTest {
     }
     
     @Test
-    public void testGetMarkup() throws TemplateModelException {
+    public void testGetMarkup() throws TemplateException {
         {
             String markup = "a \\par <b>";
             TemplateCombinedMarkupOutputModel mo = HTML_RTF.fromMarkup(markup);
@@ -169,7 +169,7 @@ public class CombinedMarkupOutputFormatTest {
     }
     
     @Test
-    public void testEscaplePlainText() throws TemplateModelException {
+    public void testEscaplePlainText() throws TemplateException {
         assertEquals("", HTML_RTF.escapePlainText(""));
         assertEquals("a", HTML_RTF.escapePlainText("a"));
         assertEquals("\\{a\\\\b&amp;\\}", HTML_RTF.escapePlainText("{a\\b&}"));

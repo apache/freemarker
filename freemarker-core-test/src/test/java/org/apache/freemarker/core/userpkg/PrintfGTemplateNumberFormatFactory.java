@@ -23,7 +23,7 @@ import java.math.BigInteger;
 import java.util.Locale;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.util._StringUtils;
@@ -76,7 +76,7 @@ public class PrintfGTemplateNumberFormatFactory extends TemplateNumberFormatFact
         
         @Override
         public String formatToPlainText(TemplateNumberModel numberModel)
-                throws UnformattableValueException, TemplateModelException {
+                throws UnformattableValueException, TemplateException {
             final Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
             
             // printf %G only accepts Double, BigDecimal and Float 
@@ -98,7 +98,7 @@ public class PrintfGTemplateNumberFormatFactory extends TemplateNumberFormatFact
 
         @Override
         public Object format(TemplateNumberModel numberModel)
-                throws UnformattableValueException, TemplateModelException {
+                throws UnformattableValueException, TemplateException {
             String strResult = formatToPlainText(numberModel);
             
             int expIdx = strResult.indexOf('E');

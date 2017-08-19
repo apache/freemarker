@@ -20,10 +20,10 @@ package org.apache.freemarker.core.valueformat;
 
 import java.util.Date;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._EvalUtils;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 
 /**
@@ -45,12 +45,12 @@ public final class TemplateFormatUtil {
 
     /**
      * Utility method to extract the {@link Number} from an {@link TemplateNumberModel}, and throws
-     * {@link TemplateModelException} with a standard error message if that's {@code null}. {@link TemplateNumberModel}
+     * {@link TemplateException} with a standard error message if that's {@code null}. {@link TemplateNumberModel}
      * that store {@code null} are in principle not allowed, and so are considered to be bugs in the
      * {@link ObjectWrapper} or {@link TemplateNumberModel} implementation.
      */
     public static Number getNonNullNumber(TemplateNumberModel numberModel)
-            throws TemplateModelException, UnformattableValueException {
+            throws TemplateException, UnformattableValueException {
         Number number = numberModel.getAsNumber();
         if (number == null) {
             throw _EvalUtils.newModelHasStoredNullException(Number.class, numberModel, null);
@@ -60,11 +60,11 @@ public final class TemplateFormatUtil {
 
     /**
      * Utility method to extract the {@link Date} from an {@link TemplateDateModel}, and throw
-     * {@link TemplateModelException} with a standard error message if that's {@code null}. {@link TemplateDateModel}
+     * {@link TemplateException} with a standard error message if that's {@code null}. {@link TemplateDateModel}
      * that store {@code null} are in principle not allowed, and so are considered to be bugs in the
      * {@link ObjectWrapper} or {@link TemplateNumberModel} implementation.
      */
-    public static Date getNonNullDate(TemplateDateModel dateModel) throws TemplateModelException {
+    public static Date getNonNullDate(TemplateDateModel dateModel) throws TemplateException {
         Date date = dateModel.getAsDate();
         if (date == null) {
             throw _EvalUtils.newModelHasStoredNullException(Date.class, dateModel, null);

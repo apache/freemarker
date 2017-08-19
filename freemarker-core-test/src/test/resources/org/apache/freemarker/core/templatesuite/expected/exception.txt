@@ -25,7 +25,7 @@
 <p>A simple test follows:</p>
 
 <p>Hello, world! <br />
-freemarker.template.TemplateModelException: Throwing from ExceptionModel!
+freemarker.template.TemplateException: Throwing from ExceptionModel!
 	at freemarker.test.templatesuite.models.ExceptionModel.getAsString(ExceptionModel.java:57)
 	at freemarker.template.compiler.Expression.getStringValue(Expression.java:65)
 	at freemarker.template.compiler.DollarVariable.process(DollarVariable.java:62)

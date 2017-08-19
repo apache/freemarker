@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core.model;
 
+import org.apache.freemarker.core.TemplateException;
+
 /**
  * "sequence" template language data type; an object that contains other objects accessible through an integer 0-based
  * index.
@@ -41,10 +43,10 @@ public interface TemplateSequenceModel extends TemplateModel {
      *         a bad index will not remain hidden, unless the default value for that case was also specified in the
      *         template.
      */
-    TemplateModel get(int index) throws TemplateModelException;
+    TemplateModel get(int index) throws TemplateException;
 
     /**
      * @return the number of items in the list.
      */
-    int size() throws TemplateModelException;
+    int size() throws TemplateException;
 }

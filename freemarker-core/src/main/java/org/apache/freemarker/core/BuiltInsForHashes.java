@@ -22,7 +22,6 @@ package org.apache.freemarker.core;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.CollectionAndSequence;
 
@@ -35,7 +34,7 @@ class BuiltInsForHashes {
 
         @Override
         TemplateModel calculateResult(TemplateHashModelEx hashExModel, Environment env)
-                throws TemplateModelException, InvalidReferenceException {
+                throws TemplateException, InvalidReferenceException {
             TemplateCollectionModel keys = hashExModel.keys();
             if (keys == null) throw newNullPropertyException("keys", hashExModel, env);
             return keys instanceof TemplateSequenceModel ? keys : new CollectionAndSequence(keys);
@@ -46,7 +45,7 @@ class BuiltInsForHashes {
     static class valuesBI extends BuiltInForHashEx {
         @Override
         TemplateModel calculateResult(TemplateHashModelEx hashExModel, Environment env)
-                throws TemplateModelException, InvalidReferenceException {
+                throws TemplateException, InvalidReferenceException {
             TemplateCollectionModel values = hashExModel.values();
             if (values == null) throw newNullPropertyException("values", hashExModel, env);
             return values instanceof TemplateSequenceModel ? values : new CollectionAndSequence(values);

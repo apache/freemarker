@@ -19,10 +19,10 @@
 
 package org.apache.freemarker.core.templatesuite.models;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
@@ -34,16 +34,16 @@ public class HashAndScalarModel implements TemplateHashModelEx, TemplateScalarMo
     private final TemplateCollectionModel EMPTY_COLLECTION = new TemplateCollectionModel() {
 
         @Override
-        public TemplateModelIterator iterator() throws TemplateModelException {
+        public TemplateModelIterator iterator() throws TemplateException {
             return new TemplateModelIterator() {
 
                 @Override
-                public TemplateModel next() throws TemplateModelException {
+                public TemplateModel next() throws TemplateException {
                     return null;
                 }
 
                 @Override
-                public boolean hasNext() throws TemplateModelException {
+                public boolean hasNext() throws TemplateException {
                     return false;
                 }
                 
@@ -52,32 +52,32 @@ public class HashAndScalarModel implements TemplateHashModelEx, TemplateScalarMo
     };
 
     @Override
-    public String getAsString() throws TemplateModelException {
+    public String getAsString() throws TemplateException {
         return "scalarValue";
     }
 
     @Override
-    public TemplateModel get(String key) throws TemplateModelException {
+    public TemplateModel get(String key) throws TemplateException {
         return new SimpleScalar("mapValue for " + key);
     }
 
     @Override
-    public boolean isEmpty() throws TemplateModelException {
+    public boolean isEmpty() throws TemplateException {
         return true;
     }
 
     @Override
-    public int size() throws TemplateModelException {
+    public int size() throws TemplateException {
         return 0;
     }
 
     @Override
-    public TemplateCollectionModel keys() throws TemplateModelException {
+    public TemplateCollectionModel keys() throws TemplateException {
         return EMPTY_COLLECTION;
     }
 
     @Override
-    public TemplateCollectionModel values() throws TemplateModelException {
+    public TemplateCollectionModel values() throws TemplateException {
         return EMPTY_COLLECTION;
     }
 

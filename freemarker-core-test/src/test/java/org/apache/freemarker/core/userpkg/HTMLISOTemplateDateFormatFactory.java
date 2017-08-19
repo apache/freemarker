@@ -23,8 +23,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.util._DateUtils;
 import org.apache.freemarker.core.util._DateUtils.CalendarFieldsToDateConverter;
@@ -65,7 +65,7 @@ public class HTMLISOTemplateDateFormatFactory extends TemplateDateFormatFactory 
         
         @Override
         public String formatToPlainText(TemplateDateModel dateModel)
-                throws UnformattableValueException, TemplateModelException {
+                throws UnformattableValueException, TemplateException {
             if (calendarFactory == null) {
                 calendarFactory = new _DateUtils.TrivialDateToISO8601CalendarFactory();
             }
@@ -98,7 +98,7 @@ public class HTMLISOTemplateDateFormatFactory extends TemplateDateFormatFactory 
         }
 
         @Override
-        public Object format(TemplateDateModel dateModel) throws TemplateValueFormatException, TemplateModelException {
+        public Object format(TemplateDateModel dateModel) throws TemplateValueFormatException, TemplateException {
             return HTMLOutputFormat.INSTANCE.fromMarkup(
                     formatToPlainText(dateModel).replace("T", "<span class='T'>T</span>"));
         }

@@ -26,10 +26,9 @@ import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._DelayedConversionToString;
 import org.apache.freemarker.core._DelayedJQuote;
-import org.apache.freemarker.core._TemplateModelException;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._ClassUtils;
 
@@ -247,8 +246,8 @@ public final class _MethodUtils {
         return new Object[] { "Java ", isConstructor ? "constructor " : "method ", new _DelayedJQuote(member) };
     }
 
-    static TemplateModelException newInvocationTemplateModelException(Object object, Member member, Throwable e) {
-        return newInvocationTemplateModelException(
+    static TemplateException newInvocationTemplateException(Object object, Member member, Throwable e) {
+        return newInvocationTemplateException(
                 object,
                 member,
                 (member.getModifiers() & Modifier.STATIC) != 0,
@@ -256,8 +255,8 @@ public final class _MethodUtils {
                 e);
     }
 
-    static TemplateModelException newInvocationTemplateModelException(Object object, CallableMemberDescriptor callableMemberDescriptor, Throwable e) {
-        return newInvocationTemplateModelException(
+    static TemplateException newInvocationTemplateException(Object object, CallableMemberDescriptor callableMemberDescriptor, Throwable e) {
+        return newInvocationTemplateException(
                 object,
                 new _DelayedConversionToString(callableMemberDescriptor) {
                     @Override
@@ -270,7 +269,7 @@ public final class _MethodUtils {
                 e);
     }
     
-    private static TemplateModelException newInvocationTemplateModelException(
+    private static TemplateException newInvocationTemplateException(
             Object parentObject, Object member, boolean isStatic, boolean isConstructor, Throwable e) {
         while (e instanceof InvocationTargetException) {
             Throwable cause = ((InvocationTargetException) e).getTargetException();
@@ -281,7 +280,7 @@ public final class _MethodUtils {
             }
         }
 
-        return new _TemplateModelException(e,
+        return new TemplateException(e,
                 invocationErrorMessageStart(member, isConstructor),
                 " threw an exception",
                 isStatic || isConstructor ? "" : new Object[] {

@@ -22,10 +22,9 @@ package org.apache.freemarker.core.model.impl;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.NonTemplateCallPlace;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
+import org.apache.freemarker.core.util.CallableUtils;
 
 import junit.framework.TestCase;
 
@@ -67,7 +66,7 @@ public abstract class AbstractParallelIntrospectionTest extends TestCase {
         }
     }
 
-    protected abstract TemplateHashModel getWrappedEntity(int objIdx) throws TemplateModelException;
+    protected abstract TemplateHashModel getWrappedEntity(int objIdx) throws TemplateException;
     
     protected final DefaultObjectWrapper getObjectWrapper() {
         return ow;
@@ -102,7 +101,7 @@ public abstract class AbstractParallelIntrospectionTest extends TestCase {
         }
 
         private void testProperty(TemplateHashModel h, int objIdx, int mIdx)
-                throws TemplateModelException, AssertionError {
+                throws TemplateException, AssertionError {
             TemplateNumberModel pv = (TemplateNumberModel) h.get("p" + mIdx);
             final int expected = objIdx * 1000 + mIdx;
             final int got = pv.getAsNumber().intValue();

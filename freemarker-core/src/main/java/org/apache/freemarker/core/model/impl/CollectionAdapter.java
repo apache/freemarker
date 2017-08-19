@@ -23,10 +23,10 @@ import java.util.AbstractCollection;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelAdapter;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 
@@ -62,7 +62,7 @@ class CollectionAdapter extends AbstractCollection implements TemplateModelAdapt
                 public boolean hasNext() {
                     try {
                         return i.hasNext();
-                    } catch (TemplateModelException e) {
+                    } catch (TemplateException e) {
                         throw new UndeclaredThrowableException(e);
                     }
                 }
@@ -71,7 +71,7 @@ class CollectionAdapter extends AbstractCollection implements TemplateModelAdapt
                 public Object next() {
                     try {
                         return wrapper.unwrap(i.next());
-                    } catch (TemplateModelException e) {
+                    } catch (TemplateException e) {
                         throw new UndeclaredThrowableException(e);
                     }
                 }
@@ -81,7 +81,7 @@ class CollectionAdapter extends AbstractCollection implements TemplateModelAdapt
                     throw new UnsupportedOperationException();
                 }
             };
-        } catch (TemplateModelException e) {
+        } catch (TemplateException e) {
             throw new UndeclaredThrowableException(e);
         }
     }

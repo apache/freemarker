@@ -25,7 +25,7 @@
 <p>A simple test follows:</p>
 
 <p>Hello, world! <br />
-<!-- Template Error: Couldn't get value of variable test: Couldn't read string value of test: freemarker.template.TemplateModelException: Throwing from ExceptionModel!
+<!-- Template Error: Couldn't get value of variable test: Couldn't read string value of test: freemarker.template.TemplateException: Throwing from ExceptionModel!
 	at freemarker.test.templatesuite.models.ExceptionModel.getAsString(ExceptionModel.java:42)
 	at freemarker.template.expression.Variable.getValue(Variable.java:69)
 	at freemarker.template.instruction.VariableInstruction.process(VariableInstruction.java:55)

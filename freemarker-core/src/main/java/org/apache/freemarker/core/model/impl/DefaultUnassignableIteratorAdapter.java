@@ -21,9 +21,9 @@ package org.apache.freemarker.core.model.impl;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 
 /**
@@ -43,16 +43,16 @@ class DefaultUnassignableIteratorAdapter implements TemplateModelIterator {
     }
 
     @Override
-    public TemplateModel next() throws TemplateModelException {
+    public TemplateModel next() throws TemplateException {
         try {
             return wrapper.wrap(it.next());
         } catch (NoSuchElementException e) {
-            throw new TemplateModelException("The collection has no more items.", e);
+            throw new TemplateException("The collection has no more items.", e);
         }
     }
 
     @Override
-    public boolean hasNext() throws TemplateModelException {
+    public boolean hasNext() throws TemplateException {
         return it.hasNext();
     }
 

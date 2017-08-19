@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core.model;
 
+import org.apache.freemarker.core.TemplateException;
+
 /**
  * <b>Experimental - subject to change:</b> A {@link TemplateModel} on which the {@code ?api} operation can be applied.
  * 
@@ -32,6 +34,6 @@ public interface TemplateModelWithAPISupport extends TemplateModel {
      * Returns the model that exposes the (Java) API of the value. This is usually implemented by delegating to
      * {@link ObjectWrapperWithAPISupport#wrapAsAPI(Object)}.
      */
-    TemplateModel getAPI() throws TemplateModelException;
+    TemplateModel getAPI() throws TemplateException;
 
 }

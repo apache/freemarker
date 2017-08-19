@@ -21,7 +21,6 @@ package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 
 /**
@@ -32,7 +31,7 @@ class BuiltInsForMarkupOutputs {
     static class markup_stringBI extends BuiltInForMarkupOutput {
 
         @Override
-        protected TemplateModel calculateResult(TemplateMarkupOutputModel model) throws TemplateModelException {
+        protected TemplateModel calculateResult(TemplateMarkupOutputModel model) throws TemplateException {
             return new SimpleScalar(model.getOutputFormat().getMarkupString(model));
         }
         

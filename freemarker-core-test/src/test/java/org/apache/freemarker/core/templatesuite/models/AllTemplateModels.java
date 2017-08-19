@@ -21,12 +21,12 @@ package org.apache.freemarker.core.templatesuite.models;
 
 import java.util.Date;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
@@ -45,12 +45,12 @@ public class AllTemplateModels implements
     private final TemplateModelIterator EMPTY_ITERATOR = new TemplateModelIterator() {
 
         @Override
-        public TemplateModel next() throws TemplateModelException {
+        public TemplateModel next() throws TemplateException {
             return null;
         }
 
         @Override
-        public boolean hasNext() throws TemplateModelException {
+        public boolean hasNext() throws TemplateException {
             return false;
         }
         
@@ -59,53 +59,53 @@ public class AllTemplateModels implements
     private final TemplateCollectionModel EMPTY_COLLECTION = new TemplateCollectionModel() {
 
         @Override
-        public TemplateModelIterator iterator() throws TemplateModelException {
+        public TemplateModelIterator iterator() throws TemplateException {
             return EMPTY_ITERATOR;
         }
     };
     
     @Override
-    public TemplateModel get(String key) throws TemplateModelException {
+    public TemplateModel get(String key) throws TemplateException {
         return new SimpleScalar("value for key " + key);
     }
 
     @Override
-    public boolean isEmpty() throws TemplateModelException {
+    public boolean isEmpty() throws TemplateException {
         return true;
     }
 
     @Override
-    public TemplateModelIterator iterator() throws TemplateModelException {
+    public TemplateModelIterator iterator() throws TemplateException {
         return EMPTY_ITERATOR;
     }
 
     @Override
-    public TemplateModel get(int index) throws TemplateModelException {
+    public TemplateModel get(int index) throws TemplateException {
         return null;
     }
 
     @Override
-    public int size() throws TemplateModelException {
+    public int size() throws TemplateException {
         return 0;
     }
 
     @Override
-    public TemplateCollectionModel keys() throws TemplateModelException {
+    public TemplateCollectionModel keys() throws TemplateException {
         return EMPTY_COLLECTION;
     }
 
     @Override
-    public TemplateCollectionModel values() throws TemplateModelException {
+    public TemplateCollectionModel values() throws TemplateException {
         return EMPTY_COLLECTION;
     }
 
     @Override
-    public boolean getAsBoolean() throws TemplateModelException {
+    public boolean getAsBoolean() throws TemplateException {
         return true;
     }
 
     @Override
-    public Date getAsDate() throws TemplateModelException {
+    public Date getAsDate() throws TemplateException {
         return new Date(0);
     }
 
@@ -116,12 +116,12 @@ public class AllTemplateModels implements
 
     @Override
     @SuppressWarnings("boxing")
-    public Number getAsNumber() throws TemplateModelException {
+    public Number getAsNumber() throws TemplateException {
         return 1;
     }
 
     @Override
-    public String getAsString() throws TemplateModelException {
+    public String getAsString() throws TemplateException {
         return "s";
     }
 

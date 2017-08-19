@@ -19,10 +19,10 @@
 
 package org.apache.freemarker.core.templatesuite.models;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
 
@@ -50,7 +50,7 @@ public class BooleanList1 implements TemplateSequenceModel {
      * @return the specified index in the list
      */
     @Override
-    public TemplateModel get(int i) throws TemplateModelException {
+    public TemplateModel get(int i) throws TemplateException {
         return cList.get(i);
     }
 

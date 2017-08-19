@@ -26,7 +26,6 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
  * Wraps a set of same-name overloaded methods behind {@link TemplateFunctionModel} interface,
@@ -57,20 +56,20 @@ class OverloadedJavaMethodModel implements JavaMethodModel {
      * implementation. The actual method to call from several overloaded methods will be chosen based on the classes of
      * the arguments.
      *
-     * @throws TemplateModelException
+     * @throws TemplateException
      *         if the method cannot be chosen unambiguously.
      */
     @Override
     public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment envUnused)
-            throws TemplateModelException {
+            throws TemplateException {
         // TODO [FM3] Utilize optional java type info in callPlace for overloaded method selection
         MemberAndArguments maa = overloadedMethods.getMemberAndArguments(args, wrapper);
         try {
             return maa.invokeMethod(wrapper, object);
         } catch (Exception e) {
-            if (e instanceof TemplateModelException) throw (TemplateModelException) e;
+            if (e instanceof TemplateException) throw (TemplateException) e;
             
-            throw _MethodUtils.newInvocationTemplateModelException(
+            throw _MethodUtils.newInvocationTemplateException(
                     object,
                     maa.getCallableMemberDescriptor(),
                     e);

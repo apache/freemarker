@@ -19,12 +19,12 @@
  
 package org.apache.freemarker.dom;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 public interface XPathSupport {
     
     // [2.4] Add argument to pass down the ObjectWrapper to use 
-    TemplateModel executeQuery(Object context, String xpathQuery) throws TemplateModelException;
+    TemplateModel executeQuery(Object context, String xpathQuery) throws TemplateException;
     
 }

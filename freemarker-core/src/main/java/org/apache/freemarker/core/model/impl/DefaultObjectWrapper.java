@@ -45,14 +45,15 @@ import java.util.WeakHashMap;
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.NonTemplateCallPlace;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core._CoreAPI;
-import org.apache.freemarker.core._DelayedTemplateLanguageTypeDescription;
 import org.apache.freemarker.core._DelayedShortClassName;
-import org.apache.freemarker.core._TemplateModelException;
+import org.apache.freemarker.core._DelayedTemplateLanguageTypeDescription;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
+import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.RichObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
@@ -61,7 +62,6 @@ import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelAdapter;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
@@ -374,7 +374,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * </ol>
      */
     @Override
-    public TemplateModel wrap(Object obj) throws TemplateModelException {
+    public TemplateModel wrap(Object obj) throws ObjectWrappingException {
         if (obj == null) {
             return null;
         }
@@ -475,7 +475,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * override {@link #wrapSpecialObject(Object)}}, or don't subclass the {@link ObjectWrapper} at all, and
      * just set the {@link ExtendableBuilder#getExtensions() extensions} configuration setting of it.
      */
-    protected TemplateModel wrapGenericObject(Object obj) throws TemplateModelException {
+    protected TemplateModel wrapGenericObject(Object obj) throws ObjectWrappingException {
         return new BeanAndStringModel(obj, this);
     }
 
@@ -498,7 +498,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
     /**
      */
     @Override
-    public TemplateHashModel wrapAsAPI(Object obj) throws TemplateModelException {
+    public TemplateHashModel wrapAsAPI(Object obj) throws ObjectWrappingException {
         return new APIModel(obj, this);
     }
 
@@ -513,10 +513,10 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * {@link TemplateSequenceModel} into a List, and arbitrary
      * {@link TemplateCollectionModel} into a Set. All other objects are
      * returned unchanged.
-     * @throws TemplateModelException if an attempted unwrapping fails.
+     * @throws TemplateException if an attempted unwrapping fails.
      */
     @Override
-    public Object unwrap(TemplateModel model) throws TemplateModelException {
+    public Object unwrap(TemplateModel model) throws TemplateException {
         return unwrap(model, Object.class);
     }
 
@@ -529,15 +529,15 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * @param model the model to unwrap
      * @param targetClass the class of the unwrapped result; {@code Object.class} of we don't know what the expected type is.
      * @return the unwrapped result of the desired class
-     * @throws TemplateModelException if an attempted unwrapping fails.
+     * @throws TemplateException if an attempted unwrapping fails.
      *
      * @see #tryUnwrapTo(TemplateModel, Class)
      */
     public Object unwrap(TemplateModel model, Class<?> targetClass)
-            throws TemplateModelException {
+            throws TemplateException {
         final Object obj = tryUnwrapTo(model, targetClass);
         if (obj == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
-            throw new TemplateModelException("Can not unwrap model of type " +
+            throw new TemplateException("Can not unwrap model of type " +
                     model.getClass().getName() + " to type " + targetClass.getName());
         }
         return obj;
@@ -546,7 +546,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
     /**
      */
     @Override
-    public Object tryUnwrapTo(TemplateModel model, Class<?> targetClass) throws TemplateModelException {
+    public Object tryUnwrapTo(TemplateModel model, Class<?> targetClass) throws TemplateException {
         return tryUnwrapTo(model, targetClass, 0);
     }
 
@@ -557,7 +557,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      *            non-overloaded methods.
      * @return {@link ObjectWrapperAndUnwrapper#CANT_UNWRAP_TO_TARGET_CLASS} or the unwrapped object.
      */
-    Object tryUnwrapTo(TemplateModel model, Class<?> targetClass, int typeFlags) throws TemplateModelException {
+    Object tryUnwrapTo(TemplateModel model, Class<?> targetClass, int typeFlags) throws TemplateException {
         Object res = tryUnwrapTo(model, targetClass, typeFlags, null);
         if ((typeFlags & TypeFlags.WIDENED_NUMERICAL_UNWRAPPING_HINT) != 0
                 && res instanceof Number) {
@@ -572,7 +572,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      */
     private Object tryUnwrapTo(final TemplateModel model, Class<?> targetClass, final int typeFlags,
                                final Map<Object, Object> recursionStops)
-            throws TemplateModelException {
+            throws TemplateException {
         if (model == null) {
             return null;
         }
@@ -791,11 +791,11 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * @param tryOnly
      *            If {@code true}, if the conversion of an item to the component type isn't possible, the method returns
      *            {@link ObjectWrapperAndUnwrapper#CANT_UNWRAP_TO_TARGET_CLASS} instead of throwing a
-     *            {@link TemplateModelException}.
+     *            {@link TemplateException}.
      */
     Object unwrapSequenceToArray(
             TemplateSequenceModel seq, Class<?> arrayClass, boolean tryOnly, Map<Object, Object> recursionStops)
-            throws TemplateModelException {
+            throws TemplateException {
         if (recursionStops != null) {
             Object retval = recursionStops.get(seq);
             if (retval != null) {
@@ -816,7 +816,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
                     if (tryOnly) {
                         return ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
                     } else {
-                        throw new _TemplateModelException(
+                        throw new TemplateException(
                                 "Failed to convert ",  new _DelayedTemplateLanguageTypeDescription(seq),
                                 " object to ", new _DelayedShortClassName(array.getClass()),
                                 ": Problematic sequence item at index ", Integer.valueOf(i) ," with value type: ",
@@ -833,7 +833,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
     }
 
     Object listToArray(List<?> list, Class<?> arrayClass, Map<Object, Object> recursionStops)
-            throws TemplateModelException {
+            throws TemplateException {
         if (list instanceof SequenceAdapter) {
             return unwrapSequenceToArray(
                     ((SequenceAdapter) list).getTemplateSequenceModel(),
@@ -888,7 +888,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
                 try {
                     Array.set(array, i, listItem);
                 } catch (IllegalArgumentException e) {
-                    throw new TemplateModelException(
+                    throw new TemplateException(
                             "Failed to convert " + _ClassUtils.getShortClassNameOfObject(list)
                                     + " object to " + _ClassUtils.getShortClassNameOfObject(array)
                                     + ": Problematic List item at index " + i + " with value type: "
@@ -905,7 +905,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
     /**
      * @param array Must be an array (of either a reference or primitive type)
      */
-    List<?> arrayToList(Object array) throws TemplateModelException {
+    List<?> arrayToList(Object array) throws TemplateException {
         if (array instanceof Object[]) {
             // Array of any non-primitive type.
             // Note that an array of non-primitive type is always instanceof Object[].
@@ -985,15 +985,13 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * @throws InvocationTargetException if the invoked method threw an exception
      * @throws IllegalAccessException if the method can't be invoked due to an
      * access restriction.
-     * @throws TemplateModelException if the return value couldn't be wrapped
+     * @throws TemplateException if the return value couldn't be wrapped
      * (this can happen if the wrapper has an outer identity or is subclassed,
      * and the outer identity or the subclass throws an exception. Plain
-     * DefaultObjectWrapper never throws TemplateModelException).
+     * DefaultObjectWrapper never throws TemplateException).
      */
     TemplateModel invokeMethod(Object object, Method method, Object[] args)
-            throws InvocationTargetException,
-            IllegalAccessException,
-            TemplateModelException {
+            throws InvocationTargetException, IllegalAccessException, TemplateException {
         // [2.4]: Java's Method.invoke truncates numbers if the target type has not enough bits to hold the value.
         // There should at least be an option to check this.
         Object retval = method.invoke(object, args);
@@ -1049,12 +1047,11 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * @return The instance created; it's not wrapped into {@link TemplateModel}.
      */
     public Object newInstance(Class<?> clazz, TemplateModel[] args, CallPlace callPlace)
-            throws TemplateModelException {
+            throws TemplateException {
         try {
             Object ctors = classIntrospector.get(clazz).get(ClassIntrospector.CONSTRUCTORS_KEY);
             if (ctors == null) {
-                throw new TemplateModelException("Class " + clazz.getName() +
-                        " has no public constructors.");
+                throw new TemplateException("Class " + clazz.getName() + " has no public constructors.");
             }
             Constructor<?> ctor = null;
             Object[] pojoArgs;
@@ -1065,7 +1062,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
                 try {
                     return ctor.newInstance(pojoArgs);
                 } catch (Exception e) {
-                    throw _MethodUtils.newInvocationTemplateModelException(null, ctor, e);
+                    throw _MethodUtils.newInvocationTemplateException(null, ctor, e);
                 }
             } else if (ctors instanceof OverloadedMethods) {
                 // TODO [FM3] Utilize optional java type info in callPlace for overloaded method selection
@@ -1073,18 +1070,18 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
                 try {
                     return mma.invokeConstructor(this);
                 } catch (Exception e) {
-                    if (e instanceof TemplateModelException) throw (TemplateModelException) e;
+                    if (e instanceof TemplateException) throw (TemplateException) e;
 
-                    throw _MethodUtils.newInvocationTemplateModelException(null, mma.getCallableMemberDescriptor(), e);
+                    throw _MethodUtils.newInvocationTemplateException(null, mma.getCallableMemberDescriptor(), e);
                 }
             } else {
                 // Cannot happen
                 throw new BugException();
             }
-        } catch (TemplateModelException e) {
+        } catch (TemplateException e) {
             throw e;
         } catch (Exception e) {
-            throw new TemplateModelException(
+            throw new TemplateException(
                     "Error while creating new instance of class " + clazz.getName() + "; see cause exception", e);
         }
     }

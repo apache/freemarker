@@ -25,11 +25,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelAdapter;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 
@@ -55,7 +55,7 @@ class HashAdapter extends AbstractMap implements TemplateModelAdapter {
     public boolean isEmpty() {
         try {
             return model.isEmpty();
-        } catch (TemplateModelException e) {
+        } catch (TemplateException e) {
             throw new UndeclaredThrowableException(e);
         }
     }
@@ -64,7 +64,7 @@ class HashAdapter extends AbstractMap implements TemplateModelAdapter {
     public Object get(Object key) {
         try {
             return wrapper.unwrap(model.get(String.valueOf(key)));
-        } catch (TemplateModelException e) {
+        } catch (TemplateException e) {
             throw new UndeclaredThrowableException(e);
         }
     }
@@ -89,7 +89,7 @@ class HashAdapter extends AbstractMap implements TemplateModelAdapter {
                 final TemplateModelIterator i;
                 try {
                      i = getModelEx().keys().iterator();
-                } catch (TemplateModelException e) {
+                } catch (TemplateException e) {
                     throw new UndeclaredThrowableException(e);
                 }
                 return new Iterator() {
@@ -97,7 +97,7 @@ class HashAdapter extends AbstractMap implements TemplateModelAdapter {
                     public boolean hasNext() {
                         try {
                             return i.hasNext();
-                        } catch (TemplateModelException e) {
+                        } catch (TemplateException e) {
                             throw new UndeclaredThrowableException(e);
                         }
                     }
@@ -107,7 +107,7 @@ class HashAdapter extends AbstractMap implements TemplateModelAdapter {
                         final Object key;
                         try {
                             key = wrapper.unwrap(i.next());
-                        } catch (TemplateModelException e) {
+                        } catch (TemplateException e) {
                             throw new UndeclaredThrowableException(e);
                         }
                         return new Map.Entry() {
@@ -162,7 +162,7 @@ class HashAdapter extends AbstractMap implements TemplateModelAdapter {
             public int size() {
                 try {
                     return getModelEx().size();
-                } catch (TemplateModelException e) {
+                } catch (TemplateException e) {
                     throw new UndeclaredThrowableException(e);
                 }
             }

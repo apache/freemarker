@@ -29,12 +29,13 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultMapAdapter;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
@@ -107,7 +108,7 @@ public class Listables {
         return Collections.<Integer>emptySet().iterator();
     }
     
-    public List<TemplateHashModelEx2> getHashEx2s() throws TemplateModelException {
+    public List<TemplateHashModelEx2> getHashEx2s() throws TemplateException {
         Map<Object, Object> map;
         map = new LinkedHashMap<>();
         map.put("k1", "v1");
@@ -120,7 +121,7 @@ public class Listables {
         return getMapsWrappedAsEx2(map);
     }
 
-    public List<? extends TemplateHashModelEx> getEmptyHashes() throws TemplateModelException {
+    public List<? extends TemplateHashModelEx> getEmptyHashes() throws ObjectWrappingException {
         List<TemplateHashModelEx> emptyMaps = new ArrayList<>();
         emptyMaps.addAll(getMapsWrappedAsEx2(Collections.emptyMap()));
         emptyMaps.add((TemplateHashModelEx) new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build()
@@ -131,7 +132,7 @@ public class Listables {
     /**
      * Returns the map wrapped on various ways.
      */
-    private List<TemplateHashModelEx2> getMapsWrappedAsEx2(Map<?, ?> map) throws TemplateModelException {
+    private List<TemplateHashModelEx2> getMapsWrappedAsEx2(Map<?, ?> map) throws ObjectWrappingException {
         List<TemplateHashModelEx2> maps = new ArrayList<>();
         
         DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
@@ -156,7 +157,7 @@ public class Listables {
         }
         
         @Override
-        public TemplateModel get(String key) throws TemplateModelException {
+        public TemplateModel get(String key) throws TemplateException {
             return wrap(map.get(key));
         }
         

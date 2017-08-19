@@ -22,13 +22,13 @@ package org.apache.freemarker.core.model.impl;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
@@ -69,7 +69,7 @@ public class DefaultIterableAdapter extends WrappingTemplateModel implements Tem
     }
 
     @Override
-    public TemplateModelIterator iterator() throws TemplateModelException {
+    public TemplateModelIterator iterator() throws TemplateException {
         return new DefaultUnassignableIteratorAdapter(iterable.iterator(), getObjectWrapper());
     }
 
@@ -84,7 +84,7 @@ public class DefaultIterableAdapter extends WrappingTemplateModel implements Tem
     }
 
     @Override
-    public TemplateModel getAPI() throws TemplateModelException {
+    public TemplateModel getAPI() throws TemplateException {
         return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(iterable);
     }
 

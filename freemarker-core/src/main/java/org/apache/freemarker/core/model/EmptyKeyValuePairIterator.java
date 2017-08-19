@@ -21,15 +21,17 @@ package org.apache.freemarker.core.model;
 
 import java.util.NoSuchElementException;
 
+import org.apache.freemarker.core.TemplateException;
+
 class EmptyKeyValuePairIterator implements TemplateHashModelEx2.KeyValuePairIterator {
 
     @Override
-    public boolean hasNext() throws TemplateModelException {
+    public boolean hasNext() throws TemplateException {
         return false;
     }
 
     @Override
-    public TemplateHashModelEx2.KeyValuePair next() throws TemplateModelException {
+    public TemplateHashModelEx2.KeyValuePair next() throws TemplateException {
         throw new NoSuchElementException("Can't retrieve element from empty key-value pair iterator.");
     }
 

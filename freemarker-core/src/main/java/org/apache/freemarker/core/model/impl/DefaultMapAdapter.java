@@ -22,8 +22,8 @@ package org.apache.freemarker.core.model.impl;
 import java.util.Map;
 import java.util.SortedMap;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._DelayedJQuote;
-import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
@@ -31,7 +31,6 @@ import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
@@ -73,16 +72,16 @@ public class DefaultMapAdapter extends WrappingTemplateModel
     }
 
     @Override
-    public TemplateModel get(String key) throws TemplateModelException {
+    public TemplateModel get(String key) throws TemplateException {
         Object val;
         try {
             val = map.get(key);
         } catch (ClassCastException e) {
-            throw new _TemplateModelException(e,
+            throw new TemplateException(e,
                     "ClassCastException while getting Map entry with String key ",
                     new _DelayedJQuote(key));
         } catch (NullPointerException e) {
-            throw new _TemplateModelException(e,
+            throw new TemplateException(e,
                     "NullPointerException while getting Map entry with String key ",
                     new _DelayedJQuote(key));
         }
@@ -103,11 +102,11 @@ public class DefaultMapAdapter extends WrappingTemplateModel
                         }
                     } 
                 } catch (ClassCastException e) {
-                    throw new _TemplateModelException(e,
+                    throw new TemplateException(e,
                                     "Class casting exception while getting Map entry with Character key ",
                                     new _DelayedJQuote(charKey));
                 } catch (NullPointerException e) {
-                    throw new _TemplateModelException(e,
+                    throw new TemplateException(e,
                                     "NullPointerException while getting Map entry with Character key ",
                                     new _DelayedJQuote(charKey));
                 }
@@ -160,7 +159,7 @@ public class DefaultMapAdapter extends WrappingTemplateModel
     }
 
     @Override
-    public TemplateModel getAPI() throws TemplateModelException {
+    public TemplateModel getAPI() throws TemplateException {
         return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(map);
     }
 

@@ -101,7 +101,11 @@ public class TemplateException extends Exception {
     public TemplateException(Throwable cause, Environment env) {
         this(null, cause, env);
     }
-    
+
+    public TemplateException(String description, Throwable cause) {
+        this(description, cause, null);
+    }
+
     /**
      * Constructs a TemplateException with both a description of the error
      * that occurred and the underlying Exception that caused this exception
@@ -136,7 +140,7 @@ public class TemplateException extends Exception {
     // Permutation group:
 
     public TemplateException(String description) {
-        this(description, null);
+        this(description, (Throwable) null);
     }
 
     TemplateException(Environment env, String description) {

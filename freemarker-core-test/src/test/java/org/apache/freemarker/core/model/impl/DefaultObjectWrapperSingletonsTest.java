@@ -29,10 +29,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.test.TestUtils;
 
@@ -308,7 +308,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         assertTrue(hardReferences.size() != 0);  // just to save it from GC until this line        
     }
     
-    public void testClassInrospectorCache() throws TemplateModelException {
+    public void testClassInrospectorCache() throws TemplateException {
         assertFalse(new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
                 .usePrivateCaches(true).build().isClassIntrospectionCacheRestricted());
         assertTrue(new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
@@ -599,7 +599,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         
     }
 
-    private boolean exposesFields(DefaultObjectWrapper ow) throws TemplateModelException {
+    private boolean exposesFields(DefaultObjectWrapper ow) throws TemplateException {
         TemplateHashModel thm = (TemplateHashModel) ow.wrap(new C());
         TemplateScalarModel r = (TemplateScalarModel) thm.get("foo");
         if (r == null) return false;
@@ -607,7 +607,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         return true;
     }
 
-    private boolean exposesProperties(DefaultObjectWrapper ow) throws TemplateModelException {
+    private boolean exposesProperties(DefaultObjectWrapper ow) throws TemplateException {
         TemplateHashModel thm = (TemplateHashModel) ow.wrap(new C());
         TemplateScalarModel r = (TemplateScalarModel) thm.get("bar");
         if (r == null) return false;
@@ -615,12 +615,12 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
         return true;
     }
 
-    private boolean exposesMethods(DefaultObjectWrapper ow) throws TemplateModelException {
+    private boolean exposesMethods(DefaultObjectWrapper ow) throws TemplateException {
         TemplateHashModel thm = (TemplateHashModel) ow.wrap(new C());
         return thm.get("getBar") != null;
     }
 
-    private boolean exposesUnsafe(DefaultObjectWrapper ow) throws TemplateModelException {
+    private boolean exposesUnsafe(DefaultObjectWrapper ow) throws TemplateException {
         TemplateHashModel thm = (TemplateHashModel) ow.wrap(new C());
         return thm.get("wait") != null;
     }

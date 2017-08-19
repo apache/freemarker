@@ -23,8 +23,8 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._DateUtils;
 import org.apache.freemarker.core.util._DateUtils.CalendarFieldsToDateConverter;
@@ -185,7 +185,7 @@ abstract class ISOLikeTemplateDateFormat  extends TemplateDateFormat {
     }
     
     @Override
-    public final String formatToPlainText(TemplateDateModel dateModel) throws TemplateModelException {
+    public final String formatToPlainText(TemplateDateModel dateModel) throws TemplateException {
         final Date date = TemplateFormatUtil.getNonNullDate(dateModel);
         return format(
                 date,

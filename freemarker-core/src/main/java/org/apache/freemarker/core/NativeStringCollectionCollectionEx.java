@@ -25,7 +25,6 @@ import java.util.Iterator;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateCollectionModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.impl.DefaultNonListCollectionAdapter;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
@@ -56,15 +55,15 @@ class NativeStringCollectionCollectionEx implements TemplateCollectionModelEx {
     }
 
     @Override
-    public TemplateModelIterator iterator() throws TemplateModelException {
+    public TemplateModelIterator iterator() throws TemplateException {
         return new TemplateModelIterator() {
 
             private final Iterator<String> iterator = collection.iterator();
 
             @Override
-            public TemplateModel next() throws TemplateModelException {
+            public TemplateModel next() throws TemplateException {
                 if (!iterator.hasNext()) {
-                    throw new TemplateModelException("The collection has no more items.");
+                    throw new TemplateException("The collection has no more items.");
                 }
 
                 return new SimpleScalar(iterator.next());

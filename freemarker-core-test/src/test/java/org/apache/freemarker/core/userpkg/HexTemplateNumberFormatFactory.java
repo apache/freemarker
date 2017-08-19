@@ -21,7 +21,7 @@ package org.apache.freemarker.core.userpkg;
 import java.util.Locale;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.util._NumberUtils;
 import org.apache.freemarker.core.valueformat.InvalidFormatParametersException;
@@ -53,7 +53,7 @@ public class HexTemplateNumberFormatFactory extends TemplateNumberFormatFactory 
         
         @Override
         public String formatToPlainText(TemplateNumberModel numberModel)
-                throws UnformattableValueException, TemplateModelException {
+                throws UnformattableValueException, TemplateException {
             Number n = TemplateFormatUtil.getNonNullNumber(numberModel);
             try {
                 return Integer.toHexString(_NumberUtils.toIntExact(n));

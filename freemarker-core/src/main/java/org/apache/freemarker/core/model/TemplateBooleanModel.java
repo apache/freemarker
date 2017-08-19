@@ -21,6 +21,8 @@ package org.apache.freemarker.core.model;
 
 import java.io.Serializable;
 
+import org.apache.freemarker.core.TemplateException;
+
 /**
  * "boolean" template language data type; same as in Java; either {@code true} or {@code false}.
  * 
@@ -33,7 +35,7 @@ public interface TemplateBooleanModel extends TemplateModel, Serializable {
     /**
      * @return whether to interpret this object as true or false in a boolean context
      */
-    boolean getAsBoolean() throws TemplateModelException;
+    boolean getAsBoolean() throws TemplateException;
     
     /**
      * A singleton object to represent boolean false

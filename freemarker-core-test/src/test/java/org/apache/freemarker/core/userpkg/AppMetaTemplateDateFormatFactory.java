@@ -23,8 +23,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.valueformat.InvalidFormatParametersException;
 import org.apache.freemarker.core.valueformat.TemplateDateFormat;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
@@ -56,7 +56,7 @@ public class AppMetaTemplateDateFormatFactory extends TemplateDateFormatFactory 
         
         @Override
         public String formatToPlainText(TemplateDateModel dateModel)
-                throws UnformattableValueException, TemplateModelException {
+                throws UnformattableValueException, TemplateException {
             String result = String.valueOf(TemplateFormatUtil.getNonNullDate(dateModel).getTime());
             if (dateModel instanceof AppMetaTemplateDateModel) {
                 result += "/" + ((AppMetaTemplateDateModel) dateModel).getAppMeta(); 
@@ -111,7 +111,7 @@ public class AppMetaTemplateDateFormatFactory extends TemplateDateFormatFactory 
         }
 
         @Override
-        public Date getAsDate() throws TemplateModelException {
+        public Date getAsDate() throws TemplateException {
             return date;
         }
 

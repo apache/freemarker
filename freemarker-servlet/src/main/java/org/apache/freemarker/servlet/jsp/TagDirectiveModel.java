@@ -31,14 +31,13 @@ import javax.servlet.jsp.tagext.SimpleTag;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TryCatchFinally;
 
+import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +81,7 @@ class TagDirectiveModel extends JspTagModelBase implements TemplateDirectiveMode
                 // This is just a sanity check. If it were JDK 1.4-only,
                 // we'd use an assert.
                 if (out != pageContext.getOut()) {
-                    throw new TemplateModelException(
+                    throw new TemplateException(
                         "out != pageContext.getOut(). Out is " + 
                         out + " pageContext.getOut() is " +
                         pageContext.getOut());
@@ -112,7 +111,7 @@ class TagDirectiveModel extends JspTagModelBase implements TemplateDirectiveMode
                 bodyContent.close(); // Pops `topTag` and `writer`
             }
         } catch (Throwable e) {
-            throw toTemplateModelExceptionOrRethrow(e);
+            throw toTemplateExceptionOrRethrow(e);
         }
     }
 
@@ -159,7 +158,7 @@ class TagDirectiveModel extends JspTagModelBase implements TemplateDirectiveMode
         /**
          * @return Whether to execute the nested content (the body, with JSP terminology)
          */
-        private boolean doStartTag() throws TemplateModelException {
+        private boolean doStartTag() throws TemplateException {
             try {
                 int dst = tag.doStartTag();
                 switch(dst) {
@@ -180,7 +179,9 @@ class TagDirectiveModel extends JspTagModelBase implements TemplateDirectiveMode
                             btag.setBodyContent(this);
                             btag.doInitBody();
                         } else {
-                            throw new TemplateModelException("Can't buffer body since " + tag.getClass().getName() + " does not implement BodyTag.");
+                            throw new TemplateException(
+                                    "Can't buffer body since " + tag.getClass().getName()
+                                    + " does not implement BodyTag.");
                         }
                         // Intentional fall-through
                     }
@@ -188,18 +189,19 @@ class TagDirectiveModel extends JspTagModelBase implements TemplateDirectiveMode
                         return true;
                     }
                     default: {
-                        throw new RuntimeException("Illegal return value " + dst + " from " + tag.getClass().getName() + ".doStartTag()");
+                        throw new RuntimeException(
+                                "Illegal return value " + dst + " from " + tag.getClass().getName() + ".doStartTag()");
                     }
                 }
             } catch (Exception e) {
-                throw toTemplateModelExceptionOrRethrow(e);
+                throw toTemplateExceptionOrRethrow(e);
             }
         }
 
         /**
          * @return Whether to execute the nested content again (the body, with JSP terminology)
          */
-        private boolean doAfterBody() throws TemplateModelException {
+        private boolean doAfterBody() throws TemplateException {
             try {
                 if (isIterationTag) {
                     int dab = ((IterationTag) tag).doAfterBody();
@@ -210,13 +212,15 @@ class TagDirectiveModel extends JspTagModelBase implements TemplateDirectiveMode
                         case IterationTag.EVAL_BODY_AGAIN:
                             return true;
                         default:
-                            throw new TemplateModelException("Unexpected return value " + dab + "from " + tag.getClass().getName() + ".doAfterBody()");
+                            throw new TemplateException(
+                                    "Unexpected return value " + dab + "from " + tag.getClass().getName()
+                                    + ".doAfterBody()");
                     }
                 }
                 endEvaluation();
                 return false;
             } catch (Exception e) {
-                throw toTemplateModelExceptionOrRethrow(e);
+                throw toTemplateExceptionOrRethrow(e);
             }
         }
         

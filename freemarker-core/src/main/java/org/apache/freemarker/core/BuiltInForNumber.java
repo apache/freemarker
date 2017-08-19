@@ -20,7 +20,6 @@
 package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 abstract class BuiltInForNumber extends ASTExpBuiltIn {
     @Override
@@ -31,5 +30,5 @@ abstract class BuiltInForNumber extends ASTExpBuiltIn {
     }
     
     abstract TemplateModel calculateResult(Number num, TemplateModel model)
-    throws TemplateModelException;
+    throws TemplateException;
 }

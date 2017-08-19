@@ -35,7 +35,7 @@ doFinally() called here
 
 <!-- Test abrupt execution -->
 doStartTag() called here
-doCatch() called here with class org.apache.freemarker.core._TemplateModelException: Error while invoking the "testtag" JSP custom tag; see cause exception
+doCatch() called here with class org.apache.freemarker.core.TemplateException: Error while invoking the "testtag" JSP custom tag; see cause exception
 doFinally() called here
 
 <!-- Test nested execution -->

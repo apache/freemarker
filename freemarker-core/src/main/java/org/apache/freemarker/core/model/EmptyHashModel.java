@@ -21,35 +21,37 @@ package org.apache.freemarker.core.model;
 
 import java.io.Serializable;
 
+import org.apache.freemarker.core.TemplateException;
+
 class EmptyHashModel implements TemplateHashModelEx2, Serializable {
 
     @Override
-    public int size() throws TemplateModelException {
+    public int size() throws TemplateException {
         return 0;
     }
 
     @Override
-    public TemplateCollectionModel keys() throws TemplateModelException {
+    public TemplateCollectionModel keys() throws TemplateException {
         return TemplateCollectionModel.EMPTY_COLLECTION;
     }
 
     @Override
-    public TemplateCollectionModel values() throws TemplateModelException {
+    public TemplateCollectionModel values() throws TemplateException {
         return TemplateCollectionModel.EMPTY_COLLECTION;
     }
 
     @Override
-    public TemplateModel get(String key) throws TemplateModelException {
+    public TemplateModel get(String key) throws TemplateException {
         return null;
     }
 
     @Override
-    public boolean isEmpty() throws TemplateModelException {
+    public boolean isEmpty() throws TemplateException {
         return true;
     }
 
     @Override
-    public KeyValuePairIterator keyValuePairIterator() throws TemplateModelException {
+    public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
         return EmptyKeyValuePairIterator.EMPTY_KEY_VALUE_PAIR_ITERATOR;
     }
 }

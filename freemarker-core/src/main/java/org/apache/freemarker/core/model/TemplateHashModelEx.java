@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core.model;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 
 /**
@@ -34,18 +35,18 @@ public interface TemplateHashModelEx extends TemplateHashModel {
     /**
      * @return the number of key/value mappings in the hash.
      */
-    int size() throws TemplateModelException;
+    int size() throws TemplateException;
 
     /**
      * @return a collection containing the keys in the hash. Every element of 
      *      the returned collection must implement the {@link TemplateScalarModel}
      *      (as the keys of hashes are always strings).
      */
-    TemplateCollectionModel keys() throws TemplateModelException;
+    TemplateCollectionModel keys() throws TemplateException;
 
     /**
      * @return a collection containing the values in the hash. The elements of the
      * returned collection can be any kind of {@link TemplateModel}-s.
      */
-    TemplateCollectionModel values() throws TemplateModelException;
+    TemplateCollectionModel values() throws TemplateException;
 }

@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core.model;
 
+import org.apache.freemarker.core.TemplateException;
+
 /**
  * A {@link TemplateNodeModel} that supports navigating to the previous and next sibling nodes.
  */
@@ -27,10 +29,10 @@ public interface TemplateNodeModelEx extends TemplateNodeModel {
     /**
      * @return The immediate previous sibling of this node, or {@code null} if there's no such node.
      */
-    TemplateNodeModelEx getPreviousSibling() throws TemplateModelException;
+    TemplateNodeModelEx getPreviousSibling() throws TemplateException;
 
     /**
      * @return The immediate next sibling of this node, or {@code null} if there's no such node.
      */
-    TemplateNodeModelEx getNextSibling() throws TemplateModelException;
+    TemplateNodeModelEx getNextSibling() throws TemplateException;
 }

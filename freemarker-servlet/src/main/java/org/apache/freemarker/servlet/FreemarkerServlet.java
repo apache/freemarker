@@ -53,7 +53,6 @@ import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
@@ -916,7 +915,7 @@ public class FreemarkerServlet extends HttpServlet {
     protected TemplateModel createModel(ObjectWrapperAndUnwrapper objectWrapper,
                                         ServletContext servletContext,
                                         final HttpServletRequest request,
-                                        final HttpServletResponse response) throws TemplateModelException {
+                                        final HttpServletResponse response) throws TemplateException {
         try {
             AllHttpScopesHashModel params = new AllHttpScopesHashModel(objectWrapper, servletContext, request);
 
@@ -984,9 +983,9 @@ public class FreemarkerServlet extends HttpServlet {
             params.putUnlistedModel(KEY_REQUEST_PARAMETERS, requestParametersModel);
             return params;
         } catch (ServletException e) {
-            throw new TemplateModelException(e);
+            throw new TemplateException(e);
         } catch (IOException e) {
-            throw new TemplateModelException(e);
+            throw new TemplateException(e);
         }
     }
 
@@ -997,7 +996,7 @@ public class FreemarkerServlet extends HttpServlet {
      */
     @SuppressWarnings("unchecked")
     protected TaglibFactory createTaglibFactory(ObjectWrapper objectWrapper, ServletContext servletContext)
-            throws TemplateModelException {
+            throws TemplateException {
 
         List<MetaInfTldSource> metaInfTldSourcesFromSysProp = null;
         try {
@@ -1006,7 +1005,7 @@ public class FreemarkerServlet extends HttpServlet {
                     ? TaglibFactory.parseMetaInfTldLocations(InitParamParser.parseCommaSeparatedList(prop))
                     : Collections.emptyList());
         } catch (ParseException e) {
-            throw new TemplateModelException(
+            throw new TemplateException(
                     "Failed to parse system property \"" + SYSTEM_PROPERTY_META_INF_TLD_SOURCES + "\"", e);
         }
 
@@ -1030,7 +1029,7 @@ public class FreemarkerServlet extends HttpServlet {
             classpathTldsFromSysProp = (prop != null) ? InitParamParser.parseCommaSeparatedList(prop)
                     : Collections.<String>emptyList();
         } catch (ParseException e) {
-            throw new TemplateModelException(
+            throw new TemplateException(
                     "Failed to parse system property \"" + SYSTEM_PROPERTY_CLASSPATH_TLDS + "\"", e);
         }
 

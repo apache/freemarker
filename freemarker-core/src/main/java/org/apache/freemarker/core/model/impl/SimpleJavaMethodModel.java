@@ -29,7 +29,6 @@ import org.apache.freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
  * Wraps a {@link Method} into the {@link TemplateFunctionModel} interface. It is used by {@link BeanModel} to wrap
@@ -69,10 +68,10 @@ public final class SimpleJavaMethodModel extends SimpleMethod implements JavaMet
             TemplateException {
         try {
             return wrapper.invokeMethod(object, (Method) getMember(), unwrapArguments(args, wrapper));
-        } catch (TemplateModelException e) {
+        } catch (TemplateException e) {
             throw e;
         } catch (Exception e) {
-            throw _MethodUtils.newInvocationTemplateModelException(object, getMember(), e);
+            throw _MethodUtils.newInvocationTemplateException(object, getMember(), e);
         }
     }
 

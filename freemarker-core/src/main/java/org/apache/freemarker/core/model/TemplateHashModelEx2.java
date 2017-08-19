@@ -21,6 +21,8 @@ package org.apache.freemarker.core.model;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import org.apache.freemarker.core.TemplateException;
+
 /**
  * Adds key-value pair listing capability to {@link TemplateHashModelEx}. While in many cases that can also be achieved
  * with {@link #keys()} and then {@link #get(String)}, that has some problems. One is that {@link #get(String)} only
@@ -32,7 +34,7 @@ public interface TemplateHashModelEx2 extends TemplateHashModelEx {
     /**
      * @return The iterator that walks through the key-value pairs in the hash. Not {@code null}. 
      */
-    KeyValuePairIterator keyValuePairIterator() throws TemplateModelException;
+    KeyValuePairIterator keyValuePairIterator() throws TemplateException;
     
     /**
      * A key-value pair in a hash; used for {@link KeyValuePairIterator}.
@@ -42,17 +44,17 @@ public interface TemplateHashModelEx2 extends TemplateHashModelEx {
         /**
          * @return Any type of {@link TemplateModel}, maybe {@code null} (if the hash entry key is {@code null}).
          */
-        TemplateModel getKey() throws TemplateModelException;
+        TemplateModel getKey() throws TemplateException;
         
         /**
          * @return Any type of {@link TemplateModel}, maybe {@code null} (if the hash entry value is {@code null}).
          */
-        TemplateModel getValue() throws TemplateModelException;
+        TemplateModel getValue() throws TemplateException;
     }
     
     /**
      * Iterates over the key-value pairs in a hash. This is very similar to an {@link Iterator}, but has a fixed item
-     * type, can throw {@link TemplateModelException}-s, and has no {@code remove()} method. 
+     * type, can throw {@link TemplateException}-s, and has no {@code remove()} method.
      */
     interface KeyValuePairIterator {
 
@@ -61,7 +63,7 @@ public interface TemplateHashModelEx2 extends TemplateHashModelEx {
         /**
          * Similar to {@link Iterator#hasNext()}.
          */
-        boolean hasNext() throws TemplateModelException;
+        boolean hasNext() throws TemplateException;
         
         /**
          * Similar to {@link Iterator#next()}.
@@ -70,7 +72,7 @@ public interface TemplateHashModelEx2 extends TemplateHashModelEx {
          * 
          * @throws NoSuchElementException
          */
-        KeyValuePair next() throws TemplateModelException;
+        KeyValuePair next() throws TemplateException;
     }
     
 }

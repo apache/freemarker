@@ -21,11 +21,11 @@ package org.apache.freemarker.dom;
 
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelAdapter;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
@@ -47,7 +47,7 @@ class NodeQueryResultItemObjectWrapper implements ObjectWrapper {
     }
 
     @Override
-    public TemplateModel wrap(Object obj) throws TemplateModelException {
+    public TemplateModel wrap(Object obj) throws ObjectWrappingException {
         if (obj instanceof NodeModel) {
             return (NodeModel) obj;
         }
@@ -85,7 +85,7 @@ class NodeQueryResultItemObjectWrapper implements ObjectWrapper {
                 }
                 return new SimpleDate((java.util.Date) obj, TemplateDateModel.UNKNOWN);
             }
-            throw new TemplateModelException("Don't know how to wrap a W3C DOM query result item of this type: "
+            throw new ObjectWrappingException("Don't know how to wrap a W3C DOM query result item of this type: "
                     + obj.getClass().getName());
         }
     }

@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.Writer;
 
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.util.TemplateLanguageUtils;

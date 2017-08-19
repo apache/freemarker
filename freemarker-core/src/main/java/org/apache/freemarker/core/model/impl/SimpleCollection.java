@@ -23,10 +23,10 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
 
@@ -70,7 +70,7 @@ implements TemplateCollectionModel, Serializable {
      * <p>When you wrap an <tt>Iterator</tt> and you get <tt>TemplateModelIterator</tt> for multiple times,
      * only one of the returned <tt>TemplateModelIterator</tt> instances can be really used. When you have called a
      * method of a <tt>TemplateModelIterator</tt> instance, all other instance will throw a
-     * <tt>TemplateModelException</tt> when you try to call their methods, since the wrapped <tt>Iterator</tt>
+     * {@link TemplateException} when you try to call their methods, since the wrapped <tt>Iterator</tt>
      * can't return the first element anymore.
      */
     @Override
@@ -97,7 +97,7 @@ implements TemplateCollectionModel, Serializable {
         }
 
         @Override
-        public TemplateModel next() throws TemplateModelException {
+        public TemplateModel next() throws TemplateException {
             if (!iteratorOwnedByMe) { 
                 synchronized (SimpleCollection.this) {
                     checkIteratorNotOwned();
@@ -107,7 +107,7 @@ implements TemplateCollectionModel, Serializable {
             }
             
             if (!iterator.hasNext()) {
-                throw new TemplateModelException("The collection has no more items.");
+                throw new TemplateException("The collection has no more items.");
             }
             
             Object value  = iterator.next();
@@ -115,7 +115,7 @@ implements TemplateCollectionModel, Serializable {
         }
 
         @Override
-        public boolean hasNext() throws TemplateModelException {
+        public boolean hasNext() throws TemplateException {
             // Calling hasNext may looks safe, but I have met sync. problems.
             if (!iteratorOwnedByMe) {
                 synchronized (SimpleCollection.this) {
@@ -126,9 +126,9 @@ implements TemplateCollectionModel, Serializable {
             return iterator.hasNext();
         }
         
-        private void checkIteratorNotOwned() throws TemplateModelException {
+        private void checkIteratorNotOwned() throws TemplateException {
             if (iteratorOwned) {
-                throw new TemplateModelException(
+                throw new TemplateException(
                         "This collection value wraps a java.util.Iterator, thus it can be listed only once.");
             }
         }

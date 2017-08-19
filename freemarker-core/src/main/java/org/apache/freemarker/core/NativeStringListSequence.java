@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.DefaultListAdapter;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
@@ -44,12 +43,12 @@ class NativeStringListSequence implements TemplateSequenceModel {
     }
 
     @Override
-    public TemplateModel get(int index) throws TemplateModelException {
+    public TemplateModel get(int index) throws TemplateException {
         return index < items.size() ? new SimpleScalar(items.get(index)) : null;
     }
 
     @Override
-    public int size() throws TemplateModelException {
+    public int size() throws TemplateException {
         return items.size();
     }
 

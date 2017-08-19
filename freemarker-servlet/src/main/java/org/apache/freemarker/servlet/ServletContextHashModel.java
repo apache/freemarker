@@ -22,10 +22,10 @@ package org.apache.freemarker.servlet;
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletContext;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
  * TemplateHashModel wrapper for a ServletContext attributes.
@@ -43,7 +43,7 @@ public final class ServletContextHashModel implements TemplateHashModel {
     }
 
     @Override
-    public TemplateModel get(String key) throws TemplateModelException {
+    public TemplateModel get(String key) throws TemplateException {
         return wrapper.wrap(servletctx.getAttribute(key));
     }
 

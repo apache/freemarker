@@ -19,14 +19,14 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.TemplateException;
 
 /**
  * An exception thrown when there is an attempt to access
  * an invalid bean property when we are in a "strict bean" mode
  */
 
-public class InvalidPropertyException extends TemplateModelException {
+public class InvalidPropertyException extends TemplateException {
 	
     public InvalidPropertyException(String description) {
         super(description);

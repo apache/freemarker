@@ -23,7 +23,6 @@ import java.math.BigInteger;
 
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 
@@ -37,12 +36,12 @@ final class ListableRightUnboundedRangeModel extends RightUnboundedRangeModel im
     }
 
     @Override
-    public int size() throws TemplateModelException {
+    public int size() throws TemplateException {
         return Integer.MAX_VALUE;
     }
 
     @Override
-    public TemplateModelIterator iterator() throws TemplateModelException {
+    public TemplateModelIterator iterator() throws TemplateException {
         return new TemplateModelIterator() {
             boolean needInc;
             int nextType = 1;
@@ -51,7 +50,7 @@ final class ListableRightUnboundedRangeModel extends RightUnboundedRangeModel im
             BigInteger nextBigInteger;
 
             @Override
-            public TemplateModel next() throws TemplateModelException {
+            public TemplateModel next() throws TemplateException {
                 if (needInc) {
                     switch (nextType) {
                     case 1:
@@ -84,7 +83,7 @@ final class ListableRightUnboundedRangeModel extends RightUnboundedRangeModel im
             }
 
             @Override
-            public boolean hasNext() throws TemplateModelException {
+            public boolean hasNext() throws TemplateException {
                 return true;
             }
             

@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core.model;
 
+import org.apache.freemarker.core.TemplateException;
+
 /**
  * Used to iterate over a set of template models <em>once</em>; usually returned from
  * {@link TemplateCollectionModel#iterator()}. Note that it's not a {@link TemplateModel}.
@@ -29,14 +31,14 @@ public interface TemplateModelIterator {
 
     /**
      * Returns the next model.
-     * @throws TemplateModelException if the next model can not be retrieved
+     * @throws TemplateException if the next model can not be retrieved
      *   (i.e. because the iterator is exhausted).
      */
-    TemplateModel next() throws TemplateModelException;
+    TemplateModel next() throws TemplateException;
 
     /**
      * @return whether there are any more items to iterate over.
      */
-    boolean hasNext() throws TemplateModelException;
+    boolean hasNext() throws TemplateException;
 
 }

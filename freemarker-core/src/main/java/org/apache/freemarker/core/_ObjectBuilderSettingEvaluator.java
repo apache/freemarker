@@ -35,9 +35,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.JavaMethodModel;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
@@ -58,8 +58,8 @@ import org.apache.freemarker.core.templateresolver.OrMatcher;
 import org.apache.freemarker.core.templateresolver.PathGlobMatcher;
 import org.apache.freemarker.core.templateresolver.PathRegexMatcher;
 import org.apache.freemarker.core.util.BugException;
-import org.apache.freemarker.core.util.TemplateLanguageUtils;
 import org.apache.freemarker.core.util.GenericParseException;
+import org.apache.freemarker.core.util.TemplateLanguageUtils;
 import org.apache.freemarker.core.util._ClassUtils;
 import org.apache.freemarker.core.util._StringUtils;
 
@@ -997,7 +997,7 @@ public class _ObjectBuilderSettingEvaluator {
                 for (int i = 0; i < positionalParamValues.size(); i++) {
                     try {
                         tmArgs[i] = ow.wrap(positionalParamValues.get(i));
-                    } catch (TemplateModelException e) {
+                    } catch (ObjectWrappingException e) {
                         throw new _ObjectBuilderSettingEvaluationException("Failed to wrap arg #" + (i + 1), e);
                     }
                 }

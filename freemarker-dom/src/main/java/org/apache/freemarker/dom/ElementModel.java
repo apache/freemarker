@@ -23,8 +23,8 @@ import java.util.Collections;
 
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
@@ -57,7 +57,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
      * The special key "/" returns the root document node associated with this element.
      */
     @Override
-    public TemplateModel get(String key) throws TemplateModelException {
+    public TemplateModel get(String key) throws TemplateException {
         if (key.equals("*")) {
             NodeListModel ns = new NodeListModel(this);
             TemplateSequenceModel children = getChildNodes();
@@ -128,7 +128,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
     }
 
     @Override
-    public String getAsString() throws TemplateModelException {
+    public String getAsString() throws TemplateException {
         NodeList nl = node.getChildNodes();
         String result = "";
         for (int i = 0; i < nl.getLength(); i++) {
@@ -139,7 +139,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
                              + "\nThis element with name \""
                              + node.getNodeName()
                              + "\" has a child element named: " + child.getNodeName();
-                throw new TemplateModelException(msg);
+                throw new TemplateException(msg);
             } else if (nodeType == Node.TEXT_NODE || nodeType == Node.CDATA_SECTION_NODE) {
                 result += child.getNodeValue();
             }
@@ -203,7 +203,7 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
         return result;
     }
     
-    private boolean isSignificantNode(Node node) throws TemplateModelException {
+    private boolean isSignificantNode(Node node) throws TemplateException {
         return (node.getNodeType() == Node.TEXT_NODE || node.getNodeType() == Node.CDATA_SECTION_NODE)
                 ? !isBlankXMLText(node.getTextContent())
                 : node.getNodeType() != Node.PROCESSING_INSTRUCTION_NODE && node.getNodeType() != Node.COMMENT_NODE;

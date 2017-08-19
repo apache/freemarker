@@ -21,10 +21,10 @@ package org.apache.freemarker.core.valueformat;
 import java.text.NumberFormat;
 
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 
 /**
@@ -50,11 +50,11 @@ public abstract class TemplateNumberFormat extends TemplateValueFormat {
      * @throws TemplateValueFormatException
      *             If any problem occurs while parsing/getting the format. Notable subclass:
      *             {@link UnformattableValueException}.
-     * @throws TemplateModelException
+     * @throws TemplateException
      *             Exception thrown by the {@code dateModel} object when calling its methods.
      */
     public abstract String formatToPlainText(TemplateNumberModel numberModel)
-            throws TemplateValueFormatException, TemplateModelException;
+            throws TemplateValueFormatException, TemplateException;
 
     /**
      * Formats the model to markup instead of to plain text if the result markup will be more than just plain text
@@ -68,7 +68,7 @@ public abstract class TemplateNumberFormat extends TemplateValueFormat {
      * @return A {@link String} or a {@link TemplateMarkupOutputModel}; not {@code null}.
      */
     public Object format(TemplateNumberModel numberModel)
-            throws TemplateValueFormatException, TemplateModelException {
+            throws TemplateValueFormatException, TemplateException {
         return formatToPlainText(numberModel);
     }
     

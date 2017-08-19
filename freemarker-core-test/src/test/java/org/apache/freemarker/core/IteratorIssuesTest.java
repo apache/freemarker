@@ -21,6 +21,7 @@ package org.apache.freemarker.core;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
@@ -48,7 +49,7 @@ public class IteratorIssuesTest extends TemplateTest {
     }
 
     @Test
-    public void testListAndHasContent() throws Exception {
+    public void testListAndHasContent() throws ObjectWrappingException {
         addToDataModel("it", OW.wrap(getAbcIt()));
         assertErrorContains(FTL_LIST_AND_HAS_CONTENT, "can be listed only once");
     }

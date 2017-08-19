@@ -26,10 +26,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
  * TemplateHashModel wrapper for a HttpSession attributes.
@@ -78,12 +78,12 @@ public final class HttpSessionHashModel implements TemplateHashModel, Serializab
     }
 
     @Override
-    public TemplateModel get(String key) throws TemplateModelException {
+    public TemplateModel get(String key) throws TemplateException {
         checkSessionExistence();
         return wrapper.wrap(session != null ? session.getAttribute(key) : null);
     }
 
-    private void checkSessionExistence() throws TemplateModelException {
+    private void checkSessionExistence() throws TemplateException {
         if (session == null && request != null) {
             session = request.getSession(false);
             if (session != null && servlet != null) {
@@ -96,7 +96,7 @@ public final class HttpSessionHashModel implements TemplateHashModel, Serializab
                 } catch (RuntimeException e) {
                     throw e;
                 } catch (Exception e) {
-                    throw new TemplateModelException(e);
+                    throw new TemplateException(e);
                 }
             }
         }
@@ -108,7 +108,7 @@ public final class HttpSessionHashModel implements TemplateHashModel, Serializab
     }
 
     @Override
-    public boolean isEmpty() throws TemplateModelException {
+    public boolean isEmpty() throws TemplateException {
         checkSessionExistence();
         return session == null || !session.getAttributeNames().hasMoreElements();
     }

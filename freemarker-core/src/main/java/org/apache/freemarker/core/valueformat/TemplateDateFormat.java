@@ -23,9 +23,9 @@ import java.text.DateFormat;
 import java.util.Date;
 
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
  * Represents a date/time/dateTime format; used in templates for formatting and parsing with that format. This is
@@ -50,11 +50,11 @@ public abstract class TemplateDateFormat extends TemplateValueFormat {
      * @throws TemplateValueFormatException
      *             When a problem occurs during the formatting of the value. Notable subclass:
      *             {@link UnknownDateTypeFormattingUnsupportedException}
-     * @throws TemplateModelException
+     * @throws TemplateException
      *             Exception thrown by the {@code dateModel} object when calling its methods.
      */
     public abstract String formatToPlainText(TemplateDateModel dateModel)
-            throws TemplateValueFormatException, TemplateModelException;
+            throws TemplateValueFormatException, TemplateException;
 
     /**
      * Formats the model to markup instead of to plain text if the result markup will be more than just plain text
@@ -66,7 +66,7 @@ public abstract class TemplateDateFormat extends TemplateValueFormat {
      * 
      * @return A {@link String} or a {@link TemplateMarkupOutputModel}; not {@code null}.
      */
-    public Object format(TemplateDateModel dateModel) throws TemplateValueFormatException, TemplateModelException {
+    public Object format(TemplateDateModel dateModel) throws TemplateValueFormatException, TemplateException {
         return formatToPlainText(dateModel);
     }
 

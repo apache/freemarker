@@ -26,7 +26,6 @@ import java.util.Set;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.util._SortedArraySet;
@@ -235,7 +234,7 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         }
         
         @Override
-        public TemplateModel get(String key) throws TemplateModelException {
+        public TemplateModel get(String key) throws TemplateException {
             return env.getVariable(key);
         }
         

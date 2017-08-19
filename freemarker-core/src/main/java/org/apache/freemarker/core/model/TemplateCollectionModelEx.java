@@ -21,6 +21,8 @@ package org.apache.freemarker.core.model;
 
 import java.util.Collection;
 
+import org.apache.freemarker.core.TemplateException;
+
 /**
  * "extended collection" template language data type: Adds size/emptiness querybility and "contains" test to
  * {@link TemplateCollectionModel}. The added extra operations is provided by all Java {@link Collection}-s, and
@@ -32,12 +34,12 @@ public interface TemplateCollectionModelEx extends TemplateCollectionModel {
      * Returns the number items in this collection, or {@link Integer#MAX_VALUE}, if there are more than
      * {@link Integer#MAX_VALUE} items.
      */
-    int size() throws TemplateModelException;
+    int size() throws TemplateException;
 
     /**
      * Returns if the collection contains any elements. This differs from {@code size() != 0} only in that the exact
      * number of items need not be calculated.
      */
-    boolean isEmpty() throws TemplateModelException;
+    boolean isEmpty() throws TemplateException;
 
 }

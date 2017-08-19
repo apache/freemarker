@@ -54,6 +54,6 @@ public interface ObjectWrapper {
      *     restricts how it can be used, like, then it can't be used to wrap
      *     {@linkplain Configuration#getSharedVariables() shared variables}).
      */
-    TemplateModel wrap(Object obj) throws TemplateModelException;
+    TemplateModel wrap(Object obj) throws ObjectWrappingException;
     
 }

@@ -30,13 +30,11 @@ import java.util.Set;
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core._DelayedJQuote;
-import org.apache.freemarker.core._TemplateModelException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.util.CallableUtils;
 
 /**
  * <p>A hash model that wraps a resource bundle. Makes it convenient to store
@@ -66,11 +64,11 @@ public class ResourceBundleModel extends BeanModel implements TemplateFunctionMo
      */
     @Override
     protected TemplateModel invokeGenericGet(Map keyMap, Class clazz, String key)
-    throws TemplateModelException {
+    throws TemplateException {
         try {
             return wrap(((ResourceBundle) object).getObject(key));
         } catch (MissingResourceException e) {
-            throw new _TemplateModelException(e,
+            throw new TemplateException(e,
                     "No ", new _DelayedJQuote(key), " key in the ResourceBundle. "
                     + "Note that conforming to the ResourceBundle Java API, this is an error and not just "
                     + "a missing sub-variable (a null).");
@@ -127,9 +125,10 @@ public class ResourceBundleModel extends BeanModel implements TemplateFunctionMo
             // Invoke format
             return new BeanAndStringModel(format(key, params), wrapper);
         } catch (MissingResourceException e) {
-            throw new TemplateModelException("No such key: " + key);
+            throw CallableUtils.newGenericExecuteException(this, "No such key: " + key,  e);
         } catch (Exception e) {
-            throw new TemplateModelException(e.getMessage());
+            throw CallableUtils.newGenericExecuteException(this,
+                    "Failed to get or format message; see cause exception",  e);
         }
     }
 

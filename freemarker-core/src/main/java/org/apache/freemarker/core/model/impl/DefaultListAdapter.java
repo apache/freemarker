@@ -22,13 +22,13 @@ package org.apache.freemarker.core.model.impl;
 import java.util.AbstractSequentialList;
 import java.util.List;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
 import org.apache.freemarker.core.model.RichObjectWrapper;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
@@ -79,12 +79,12 @@ public class DefaultListAdapter extends WrappingTemplateModel implements Templat
     }
 
     @Override
-    public TemplateModel get(int index) throws TemplateModelException {
+    public TemplateModel get(int index) throws TemplateException {
         return index >= 0 && index < list.size() ? wrap(list.get(index)) : null;
     }
 
     @Override
-    public int size() throws TemplateModelException {
+    public int size() throws TemplateException {
         return list.size();
     }
 
@@ -106,14 +106,14 @@ public class DefaultListAdapter extends WrappingTemplateModel implements Templat
         }
 
         @Override
-        public TemplateModelIterator iterator() throws TemplateModelException {
+        public TemplateModelIterator iterator() throws TemplateException {
             return new DefaultUnassignableIteratorAdapter(list.iterator(), getObjectWrapper());
         }
 
     }
 
     @Override
-    public TemplateModel getAPI() throws TemplateModelException {
+    public TemplateModel getAPI() throws TemplateException {
         return ((ObjectWrapperWithAPISupport) getObjectWrapper()).wrapAsAPI(list);
     }
     

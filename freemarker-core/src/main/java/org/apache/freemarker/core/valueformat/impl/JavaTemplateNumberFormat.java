@@ -20,7 +20,7 @@ package org.apache.freemarker.core.valueformat.impl;
 
 import java.text.NumberFormat;
 
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.valueformat.TemplateFormatUtil;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
@@ -37,7 +37,8 @@ final class JavaTemplateNumberFormat extends TemplateNumberFormat {
     }
 
     @Override
-    public String formatToPlainText(TemplateNumberModel numberModel) throws UnformattableValueException, TemplateModelException {
+    public String formatToPlainText(TemplateNumberModel numberModel) throws UnformattableValueException,
+            TemplateException {
         Number number = TemplateFormatUtil.getNonNullNumber(numberModel);
         try {
             return javaNumberFormat.format(number);

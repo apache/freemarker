@@ -63,12 +63,12 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.freemarker.core.ConfigurationException;
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.CommonBuilder;
@@ -236,7 +236,7 @@ public class TaglibFactory implements TemplateHashModel {
      *         {@link TemplateFunctionModel}, respectively.
      */
     @Override
-    public TemplateModel get(final String taglibUri) throws TemplateModelException {
+    public TemplateModel get(final String taglibUri) throws TemplateException {
         synchronized (lock) {
             {
                 final Taglib taglib = (Taglib) taglibs.get(taglibUri);
@@ -309,7 +309,7 @@ public class TaglibFactory implements TemplateHashModel {
                 }
             } catch (Exception e) {
                 String failedTLDsList = failedTldListAlreadyIncluded ? null : getFailedTLDsList();
-                throw new TemplateModelException(
+                throw new TemplateException(
                         "Error while looking for TLD file for " + _StringUtils.jQuoteNoXSS(taglibUri)
                         + "; see cause exception."
                         + (failedTLDsList == null
@@ -322,7 +322,7 @@ public class TaglibFactory implements TemplateHashModel {
             try {
                 return loadTaglib(tldLocation, normalizedTaglibUri);
             } catch (Exception e) {
-                throw new TemplateModelException("Error while loading tag library for URI "
+                throw new TemplateException("Error while loading tag library for URI "
                         + _StringUtils.jQuoteNoXSS(normalizedTaglibUri) + " from TLD location "
                         + _StringUtils.jQuoteNoXSS(tldLocation) + "; see cause exception.",
                         e);
@@ -914,7 +914,7 @@ public class TaglibFactory implements TemplateHashModel {
         try {
             reqHash = Environment.getCurrentEnvironment().getVariable(
                     FreemarkerServlet.KEY_REQUEST_PRIVATE);
-        } catch (TemplateModelException e) {
+        } catch (TemplateException e) {
             throw new TaglibGettingException("Failed to get FreemarkerServlet request information", e);
         }
 

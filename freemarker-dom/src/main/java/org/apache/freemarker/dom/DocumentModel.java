@@ -18,11 +18,11 @@
  */
  
 package org.apache.freemarker.dom;
- 
+
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
@@ -45,7 +45,7 @@ class DocumentModel extends NodeModel implements TemplateHashModel {
     }
     
     @Override
-    public TemplateModel get(String key) throws TemplateModelException {
+    public TemplateModel get(String key) throws TemplateException {
         if (key.equals("*")) {
             return getRootElement();
         } else if (key.equals("**")) {

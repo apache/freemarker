@@ -24,12 +24,12 @@ import java.util.List;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
@@ -84,7 +84,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
         this.contextNode = contextNode;
     }
     
-    NodeListModel filterByName(String name) throws TemplateModelException {
+    NodeListModel filterByName(String name) throws TemplateException {
         NodeListModel result = new NodeListModel(contextNode);
         int size = size();
         if (size == 0) {
@@ -108,7 +108,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
     }
     
     @Override
-    public TemplateModel get(String key) throws TemplateModelException {
+    public TemplateModel get(String key) throws TemplateException {
         if (size() == 1) {
             NodeModel nm = (NodeModel) get(0);
             return nm.get(key);
@@ -127,13 +127,13 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
             } else if (key.length() != 2 /* to allow "@@" to fall through */) {
                 // As @@... would cause exception in the XPath engine, we throw a nicer exception now. 
                 if (AtAtKey.containsKey(key)) {
-                    throw new TemplateModelException(
+                    throw new TemplateException(
                             "\"" + key + "\" is only applicable to a single XML node, but it was applied on "
                             + (size() != 0
                                     ? size() + " XML nodes (multiple matches)."
                                     : "an empty list of XML nodes (no matches)."));
                 } else {
-                    throw new TemplateModelException("Unsupported @@ key: " + key);
+                    throw new TemplateException("Unsupported @@ key: " + key);
                 }
             }
         }
@@ -164,13 +164,13 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
             Object context = (size() == 0) ? null : rawNodeList(); 
             return xps.executeQuery(context, key);
         } else {
-            throw new TemplateModelException(
+            throw new TemplateException(
                     "Can't try to resolve the XML query key, because no XPath support is available. "
                     + "This is either malformed or an XPath expression: " + key);
         }
     }
     
-    private List rawNodeList() throws TemplateModelException {
+    private List rawNodeList() throws TemplateException {
         int size = size();
         ArrayList al = new ArrayList(size);
         for (int i = 0; i < size; i++) {
@@ -179,7 +179,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
         return al;
     }
     
-    XPathSupport getXPathSupport() throws TemplateModelException {
+    XPathSupport getXPathSupport() throws TemplateException {
         if (xpathSupport == null) {
             if (contextNode != null) {
                 xpathSupport = contextNode.getXPathSupport();

@@ -21,7 +21,7 @@ package org.apache.freemarker.core.outputformat.impl;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.outputformat.CommonMarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 
@@ -65,17 +65,17 @@ public final class CombinedMarkupOutputFormat extends CommonMarkupOutputFormat<T
     }
 
     @Override
-    public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
+    public void output(String textToEsc, Writer out) throws IOException, TemplateException {
         outer.output(inner.escapePlainText(textToEsc), out);
     }
 
     @Override
-    public String escapePlainText(String plainTextContent) throws TemplateModelException {
+    public String escapePlainText(String plainTextContent) throws TemplateException {
         return outer.escapePlainText(inner.escapePlainText(plainTextContent));
     }
 
     @Override
-    public boolean isLegacyBuiltInBypassed(String builtInName) throws TemplateModelException {
+    public boolean isLegacyBuiltInBypassed(String builtInName) throws TemplateException {
         return outer.isLegacyBuiltInBypassed(builtInName);
     }
 

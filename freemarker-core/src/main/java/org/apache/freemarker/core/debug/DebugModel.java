@@ -23,7 +23,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Date;
 
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.TemplateException;
 
 /**
  * Represents the debugger-side mirror of a TemplateModel object, a Template
@@ -52,51 +52,51 @@ public interface DebugModel extends Remote {
     public static final int TYPE_CONFIGURATION = 8192;
     
     public String getAsString()
-    throws TemplateModelException,
+    throws TemplateException,
         RemoteException;
         
     public Number getAsNumber()
-    throws TemplateModelException,
+    throws TemplateException,
         RemoteException;
     
     public boolean getAsBoolean()
-    throws TemplateModelException,
+    throws TemplateException,
         RemoteException;
     
     public Date getAsDate()
-    throws TemplateModelException,
+    throws TemplateException,
         RemoteException;
     
     public int getDateType()
-    throws TemplateModelException,
+    throws TemplateException,
         RemoteException;
         
     public int size()
-    throws TemplateModelException,
+    throws TemplateException,
         RemoteException;
         
     public DebugModel get(int index)
-    throws TemplateModelException,
+    throws TemplateException,
         RemoteException;
     
     public DebugModel[] get(int fromIndex, int toIndex)
-    throws TemplateModelException,
+    throws TemplateException,
         RemoteException;
         
     public DebugModel get(String key)
-    throws TemplateModelException,
+    throws TemplateException,
         RemoteException;
         
     public DebugModel[] get(String[] keys)
-    throws TemplateModelException,
+    throws TemplateException,
         RemoteException;
     
     public DebugModel[] getCollection()
-    throws TemplateModelException,
+    throws TemplateException,
         RemoteException;
 
     public String[] keys()
-    throws TemplateModelException,
+    throws TemplateException,
         RemoteException;
     
     public int getModelTypes()

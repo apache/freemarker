@@ -26,7 +26,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collections;
 
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
@@ -804,7 +803,7 @@ public class OutputFormatTest extends TemplateTest {
 
     private Configuration testAutoEscPolicy_createCfg(AutoEscapingPolicy autoEscPolicy,
             OutputFormat outpoutFormat)
-            throws TemplateModelException {
+            throws TemplateException {
         return createDefaultConfigurationBuilder()
                 .registeredCustomOutputFormats(ImmutableList.<OutputFormat>of(
                         SeldomEscapedOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE))
@@ -989,7 +988,7 @@ public class OutputFormatTest extends TemplateTest {
         assertOutput("${m1?isMarkupOutput?c} ${m2?isMarkupOutput?c} ${s?isMarkupOutput?c}", "true true false");
     }
 
-    private TestConfigurationBuilder createDefaultConfigurationBuilder() throws TemplateModelException {
+    private TestConfigurationBuilder createDefaultConfigurationBuilder() throws TemplateException {
         return new TestConfigurationBuilder()
                 .templateConfigurations(
                         new ConditionalTemplateConfigurationFactory(
@@ -1001,7 +1000,7 @@ public class OutputFormatTest extends TemplateTest {
     }
 
     @Before
-    public void addCommonDataModelVariables() throws TemplateModelException {
+    public void addCommonDataModelVariables() throws TemplateException {
         addToDataModel("rtfPlain", RTFOutputFormat.INSTANCE.fromPlainTextByEscaping("\\par a & b"));
         addToDataModel("rtfMarkup", RTFOutputFormat.INSTANCE.fromMarkup("\\par c"));
         addToDataModel("htmlPlain", HTMLOutputFormat.INSTANCE.fromPlainTextByEscaping("a < {h'}"));
@@ -1011,7 +1010,7 @@ public class OutputFormatTest extends TemplateTest {
     }
 
     @Override
-    protected Configuration createDefaultConfiguration() throws TemplateModelException {
+    protected Configuration createDefaultConfiguration() throws TemplateException {
         return createDefaultConfigurationBuilder().build();
     }
     

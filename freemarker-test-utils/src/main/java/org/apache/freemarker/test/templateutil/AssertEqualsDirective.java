@@ -22,15 +22,14 @@ package org.apache.freemarker.test.templateutil;
 import java.io.IOException;
 import java.io.Writer;
 
+import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.util.StringToIndexMap;
@@ -87,7 +86,7 @@ public class AssertEqualsDirective implements TemplateDirectiveModel {
         return false;
     }
 
-    private String tryUnwrap(TemplateModel value) throws TemplateModelException {
+    private String tryUnwrap(TemplateModel value) throws TemplateException {
         if (value == null) return "null";
             // This is the same order as comparison goes:
         else if (value instanceof TemplateNumberModel) return ((TemplateNumberModel) value).getAsNumber().toString();

@@ -25,9 +25,9 @@ import javax.xml.transform.TransformerException;
 
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.xml.utils.PrefixResolver;
@@ -60,25 +60,25 @@ class XalanXPathSupport implements XPathSupport {
             = "Cannot perform an XPath query against an empty node set."; /* " + ERRMSG_RECOMMEND_JAXEN;*/
     
     @Override
-    synchronized public TemplateModel executeQuery(Object context, String xpathQuery) throws TemplateModelException {
+    synchronized public TemplateModel executeQuery(Object context, String xpathQuery) throws TemplateException {
         if (!(context instanceof Node)) {
             if (context != null) {
                 if (isNodeList(context)) {
                     int cnt = ((List) context).size();
                     if (cnt != 0) {
-                        throw new TemplateModelException(
+                        throw new TemplateException(
                                 "Cannot perform an XPath query against a node set of " + cnt
                                 + " nodes. Expecting a single node."/* " + ERRMSG_RECOMMEND_JAXEN*/);
                     } else {
-                        throw new TemplateModelException(ERRMSG_EMPTY_NODE_SET);
+                        throw new TemplateException(ERRMSG_EMPTY_NODE_SET);
                     }
                 } else {
-                    throw new TemplateModelException(
+                    throw new TemplateException(
                             "Cannot perform an XPath query against a " + context.getClass().getName()
                             + ". Expecting a single org.w3c.dom.Node.");
                 }
             } else {
-                throw new TemplateModelException(ERRMSG_EMPTY_NODE_SET);
+                throw new TemplateException(ERRMSG_EMPTY_NODE_SET);
             }
         }
         Node node = (Node) context;
@@ -111,9 +111,9 @@ class XalanXPathSupport implements XPathSupport {
             if (xresult instanceof XNumber) {
                 return new SimpleNumber(Double.valueOf(((XNumber) xresult).num()));
             }
-            throw new TemplateModelException("Cannot deal with type: " + xresult.getClass().getName());
+            throw new TemplateException("Cannot deal with type: " + xresult.getClass().getName());
         } catch (TransformerException te) {
-            throw new TemplateModelException(te);
+            throw new TemplateException(te);
         }
     }
     

@@ -25,7 +25,6 @@ import java.util.Collection;
 
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 
 /**
@@ -63,12 +62,12 @@ class NativeSequence implements TemplateSequenceModel, Serializable {
     }
 
     @Override
-    public TemplateModel get(int index) throws TemplateModelException {
+    public TemplateModel get(int index) throws TemplateException {
         return items.get(index);
     }
 
     @Override
-    public int size() throws TemplateModelException {
+    public int size() throws TemplateException {
         return items.size();
     }
 }

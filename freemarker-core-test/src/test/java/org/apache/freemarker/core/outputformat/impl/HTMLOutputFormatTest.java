@@ -24,7 +24,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.outputformat.CommonMarkupOutputFormat;
 import org.apache.freemarker.core.outputformat._OutputFormatTestAPI;
 import org.junit.Test; 
@@ -35,7 +35,7 @@ import org.junit.Test;
 public class HTMLOutputFormatTest {
     
     @Test
-    public void testOutputMO() throws TemplateModelException, IOException {
+    public void testOutputMO() throws TemplateException, IOException {
        StringWriter out = new StringWriter();
        
        INSTANCE.output(INSTANCE.fromMarkup("<p>Test "), out);
@@ -57,7 +57,7 @@ public class HTMLOutputFormatTest {
     }
     
     @Test
-    public void testOutputString() throws TemplateModelException, IOException {
+    public void testOutputString() throws TemplateException, IOException {
         StringWriter out = new StringWriter();
         
         INSTANCE.output("a", out);
@@ -68,7 +68,7 @@ public class HTMLOutputFormatTest {
     }
     
     @Test
-    public void testFromPlainTextByEscaping() throws TemplateModelException {
+    public void testFromPlainTextByEscaping() throws TemplateException {
         String plainText = "a&b";
         TemplateHTMLOutputModel mo = INSTANCE.fromPlainTextByEscaping(plainText);
         assertSame(plainText, _OutputFormatTestAPI.getPlainTextContent(mo));
@@ -76,7 +76,7 @@ public class HTMLOutputFormatTest {
     }
 
     @Test
-    public void testFromMarkup() throws TemplateModelException {
+    public void testFromMarkup() throws TemplateException {
         String markup = "a&amp;b";
         TemplateHTMLOutputModel mo = INSTANCE.fromMarkup(markup);
         assertSame(markup, _OutputFormatTestAPI.getMarkupContent(mo));
@@ -84,7 +84,7 @@ public class HTMLOutputFormatTest {
     }
     
     @Test
-    public void testGetMarkup() throws TemplateModelException {
+    public void testGetMarkup() throws TemplateException {
         {
             String markup = "a&amp;b";
             TemplateHTMLOutputModel mo = INSTANCE.fromMarkup(markup);

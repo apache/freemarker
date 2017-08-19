@@ -21,10 +21,9 @@ package org.apache.freemarker.servlet.jsp;
 
 import javax.servlet.ServletContext;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.servlet.FreemarkerServlet;
-import org.apache.freemarker.servlet.jsp.TaglibFactory;
 
 public class JspTestFreemarkerServlet extends FreemarkerServlet {
 
@@ -40,7 +39,7 @@ public class JspTestFreemarkerServlet extends FreemarkerServlet {
 
     @Override
     protected TaglibFactory createTaglibFactory(ObjectWrapper objectWrapper, ServletContext servletContext)
-            throws TemplateModelException {
+            throws TemplateException {
         final TaglibFactory taglibFactory = super.createTaglibFactory(objectWrapper, servletContext);
         taglibFactory.test_emulateNoUrlToFileConversions = emulateNoUrlToFileConversions;
         taglibFactory.test_emulateNoJarURLConnections = emulateNoJarURLConnections;

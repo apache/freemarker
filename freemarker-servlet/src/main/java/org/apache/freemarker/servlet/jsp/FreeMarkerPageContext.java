@@ -46,10 +46,11 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.BodyContent;
 
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
+import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
@@ -72,7 +73,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
     private final ObjectWrapperAndUnwrapper wrapper;
     private JspWriter jspOut;
     
-    protected FreeMarkerPageContext() throws TemplateModelException {
+    protected FreeMarkerPageContext() throws TemplateException {
         environment = Environment.getCurrentEnvironment();
 
         TemplateModel appModel = environment.getGlobalVariable(
@@ -84,7 +85,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
         if (appModel instanceof ServletContextHashModel) {
             servlet = ((ServletContextHashModel) appModel).getServlet();
         } else {
-            throw new  TemplateModelException("Could not find an instance of " + 
+            throw new  TemplateException("Could not find an instance of " +
                     ServletContextHashModel.class.getName() + 
                     " in the data model under either the name " + 
                     FreemarkerServlet.KEY_APPLICATION_PRIVATE + " or " + 
@@ -105,7 +106,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
             ObjectWrapperAndUnwrapper ow = reqHash.getObjectWrapper();
             wrapper = (ObjectWrapperAndUnwrapper) ow;
         } else {
-            throw new  TemplateModelException("Could not find an instance of " + 
+            throw new  TemplateException("Could not find an instance of " +
                     HttpRequestHashModel.class.getName() + 
                     " in the data model under either the name " + 
                     FreemarkerServlet.KEY_REQUEST_PRIVATE + " or " + 
@@ -151,7 +152,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
                 try {
                     environment.setGlobalVariable(name, wrapper.wrap(value));
                     break;
-                } catch (TemplateModelException e) {
+                } catch (ObjectWrappingException e) {
                     throw new UndeclaredThrowableException(e);
                 }
             }
@@ -184,7 +185,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
             case PAGE_SCOPE: {
                 try {
                     return wrapper.unwrap(environment.getGlobalNamespace().get(name));
-                } catch (TemplateModelException e) {
+                } catch (TemplateException e) {
                     throw new UndeclaredThrowableException("Failed to unwrap FTL global variable", e);
                 }
             }
@@ -270,7 +271,7 @@ abstract class FreeMarkerPageContext extends PageContext implements TemplateMode
                 try {
                     return 
                         new TemplateHashModelExEnumeration(environment.getGlobalNamespace());
-                } catch (TemplateModelException e) {
+                } catch (TemplateException e) {
                     throw new UndeclaredThrowableException(e);
                 }
             }
@@ -434,7 +435,7 @@ public JspWriter pushBody(Writer w) {
     private static class TemplateHashModelExEnumeration implements Enumeration {
         private final TemplateModelIterator it;
             
-        private TemplateHashModelExEnumeration(TemplateHashModelEx hashEx) throws TemplateModelException {
+        private TemplateHashModelExEnumeration(TemplateHashModelEx hashEx) throws TemplateException {
             it = hashEx.keys().iterator();
         }
         
@@ -442,7 +443,7 @@ public JspWriter pushBody(Writer w) {
         public boolean hasMoreElements() {
             try {
                 return it.hasNext();
-            } catch (TemplateModelException tme) {
+            } catch (TemplateException tme) {
                 throw new UndeclaredThrowableException(tme);
             }
         }
@@ -451,7 +452,7 @@ public JspWriter pushBody(Writer w) {
         public Object nextElement() {
             try {
                 return ((TemplateScalarModel) it.next()).getAsString();
-            } catch (TemplateModelException tme) {
+            } catch (TemplateException tme) {
                 throw new UndeclaredThrowableException(tme);
             }
         }

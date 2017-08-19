@@ -19,8 +19,8 @@
 
 package org.apache.freemarker.core.model.impl;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 public class PrallelStaticIntrospectionTest extends AbstractParallelIntrospectionTest {
 
@@ -38,7 +38,7 @@ public class PrallelStaticIntrospectionTest extends AbstractParallelIntrospectio
     
     @Override
     protected TemplateHashModel getWrappedEntity(int clIdx)
-    throws TemplateModelException {
+    throws TemplateException {
         return (TemplateHashModel) getObjectWrapper().getStaticModels().get(
                 STATICS_CLASS_CONTAINER_CLASS_NAME + "$C"
                 + clIdx);

@@ -25,7 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.util._CollectionUtils;
 
 /**
@@ -39,7 +39,7 @@ public class _ModelAPI {
     
     public static Object newInstance(Class<?> pClass, Object[] args, DefaultObjectWrapper ow)
             throws NoSuchMethodException, IllegalArgumentException, InstantiationException,
-            IllegalAccessException, InvocationTargetException, TemplateModelException {
+            IllegalAccessException, InvocationTargetException, TemplateException {
         return newInstance(getConstructorDescriptor(pClass, args), args, ow);
     }
     
@@ -90,7 +90,7 @@ public class _ModelAPI {
     
     private static Object newInstance(CallableMemberDescriptor constrDesc, Object[] args, DefaultObjectWrapper ow)
             throws InstantiationException, IllegalAccessException, InvocationTargetException, IllegalArgumentException,
-            TemplateModelException {
+            TemplateException {
         if (args == null) args = _CollectionUtils.EMPTY_OBJECT_ARRAY;
         
         final Object[] packedArgs;

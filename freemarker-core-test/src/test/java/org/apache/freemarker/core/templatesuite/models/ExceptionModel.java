@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.templatesuite.models;
 
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 
 /**
@@ -33,7 +33,7 @@ public class ExceptionModel implements TemplateScalarModel {
      * @return the String value of this scalar.
      */
     @Override
-    public String getAsString () throws TemplateModelException {
-        throw new TemplateModelException( "Throwing from ExceptionModel!" );
+    public String getAsString () throws TemplateException {
+        throw new TemplateException( "Throwing from ExceptionModel!" );
     }
 }

@@ -30,7 +30,6 @@ import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
@@ -304,7 +303,7 @@ class BuiltInsForStringsBasic {
         }
         
         @Override
-        TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             return new KeepAfterMethod(s);
         }
         
@@ -362,7 +361,7 @@ class BuiltInsForStringsBasic {
         }
         
         @Override
-        TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             return new KeepAfterMethod(s);
         }
         
@@ -411,7 +410,7 @@ class BuiltInsForStringsBasic {
         }
         
         @Override
-        TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             return new KeepUntilMethod(s);
         }
         
@@ -467,7 +466,7 @@ class BuiltInsForStringsBasic {
         }
         
         @Override
-        TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             return new KeepUntilMethod(s);
         }
         
@@ -635,7 +634,7 @@ class BuiltInsForStringsBasic {
         }
         
         @Override
-        TemplateModel calculateResult(String s, Environment env) throws TemplateModelException {
+        TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             return new SplitMethod(s);
         }
         
@@ -722,7 +721,7 @@ class BuiltInsForStringsBasic {
             }
 
             private TemplateException newIndexGreaterThanLengthException(
-                    int argIdx, int idx, final int len) throws TemplateModelException {
+                    int argIdx, int idx, final int len) throws TemplateException {
                 return newArgumentValueException(
                         argIdx,
                         "mustn't be greater than the length of the string, " + len + ", but it was " + idx + ".",
@@ -730,7 +729,7 @@ class BuiltInsForStringsBasic {
             }
 
             private TemplateException newIndexLessThan0Exception(
-                    int argIdx, int idx) throws TemplateModelException {
+                    int argIdx, int idx) throws TemplateException {
                 return newArgumentValueException(
                         argIdx, "must be at least 0, but was " + idx + ".", this);
             }

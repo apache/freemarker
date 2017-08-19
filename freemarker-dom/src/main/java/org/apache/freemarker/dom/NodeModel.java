@@ -27,13 +27,13 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNodeModelEx;
 import org.apache.freemarker.core.model.TemplateNumberModel;
@@ -111,7 +111,7 @@ abstract public class NodeModel implements TemplateNodeModelEx, TemplateHashMode
     }
     
     @Override
-    public TemplateModel get(String key) throws TemplateModelException {
+    public TemplateModel get(String key) throws TemplateException {
         if (key.startsWith("@@")) {
             if (key.equals(AtAtKey.TEXT.getKey())) {
                 return new SimpleScalar(getText(node));
@@ -140,10 +140,10 @@ abstract public class NodeModel implements TemplateNodeModelEx, TemplateHashMode
             } else {
                 // As @@... would cause exception in the XPath engine, we throw a nicer exception now. 
                 if (AtAtKey.containsKey(key)) {
-                    throw new TemplateModelException(
+                    throw new TemplateException(
                             "\"" + key + "\" is not supported for an XML node of type \"" + getNodeType() + "\".");
                 } else {
-                    throw new TemplateModelException("Unsupported @@ key: " + key);
+                    throw new TemplateException("Unsupported @@ key: " + key);
                 }
             }
         } else {
@@ -151,7 +151,7 @@ abstract public class NodeModel implements TemplateNodeModelEx, TemplateHashMode
             if (xps != null) {
                 return xps.executeQuery(node, key);
             } else {
-                throw new TemplateModelException(
+                throw new TemplateException(
                         "Can't try to resolve the XML query key, because no XPath support is available. "
                         + "This is either malformed or an XPath expression: " + key);
             }
@@ -173,12 +173,12 @@ abstract public class NodeModel implements TemplateNodeModelEx, TemplateHashMode
     }
 
     @Override
-    public TemplateNodeModelEx getPreviousSibling() throws TemplateModelException {
+    public TemplateNodeModelEx getPreviousSibling() throws TemplateException {
         return wrap(node.getPreviousSibling());
     }
 
     @Override
-    public TemplateNodeModelEx getNextSibling() throws TemplateModelException {
+    public TemplateNodeModelEx getNextSibling() throws TemplateException {
         return wrap(node.getNextSibling());
     }
 
@@ -191,7 +191,7 @@ abstract public class NodeModel implements TemplateNodeModelEx, TemplateHashMode
     }
     
     @Override
-    public final String getNodeType() throws TemplateModelException {
+    public final String getNodeType() throws TemplateException {
         short nodeType = node.getNodeType();
         switch (nodeType) {
             case Node.ATTRIBUTE_NODE : return "attribute";
@@ -207,20 +207,7 @@ abstract public class NodeModel implements TemplateNodeModelEx, TemplateHashMode
             case Node.PROCESSING_INSTRUCTION_NODE : return "pi";
             case Node.TEXT_NODE : return "text";
         }
-        throw new TemplateModelException("Unknown node type: " + nodeType + ". This should be impossible!");
-    }
-    
-    public TemplateModel exec(List args) throws TemplateModelException {
-        if (args.size() != 1) {
-            throw new TemplateModelException("Expecting exactly one arguments");
-        }
-        String query = (String) args.get(0);
-        // Now, we try to behave as if this is an XPath expression
-        XPathSupport xps = getXPathSupport();
-        if (xps == null) {
-            throw new TemplateModelException("No XPath support available");
-        }
-        return xps.executeQuery(node, query);
+        throw new TemplateException("Unknown node type: " + nodeType + ". This should be impossible!");
     }
     
     /**
@@ -579,7 +566,7 @@ abstract public class NodeModel implements TemplateNodeModelEx, TemplateHashMode
     }
     
     
-    String getQualifiedName() throws TemplateModelException {
+    String getQualifiedName() throws TemplateException {
         return getNodeName();
     }
     

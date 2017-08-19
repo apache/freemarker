@@ -21,20 +21,22 @@ package org.apache.freemarker.core.model;
 
 import java.io.Serializable;
 
+import org.apache.freemarker.core.TemplateException;
+
 class EmptyCollectionExModel implements TemplateCollectionModelEx, Serializable {
 
     @Override
-    public int size() throws TemplateModelException {
+    public int size() throws TemplateException {
         return 0;
     }
 
     @Override
-    public boolean isEmpty() throws TemplateModelException {
+    public boolean isEmpty() throws TemplateException {
         return true;
     }
 
     @Override
-    public TemplateModelIterator iterator() throws TemplateModelException {
+    public TemplateModelIterator iterator() throws TemplateException {
         return TemplateModelIterator.EMPTY_ITERATOR;
     }
 

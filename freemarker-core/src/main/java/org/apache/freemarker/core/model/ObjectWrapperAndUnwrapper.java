@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core.model;
 
+import org.apache.freemarker.core.TemplateException;
+
 /**
  * <b>Experimental - subject to change:</b> Adds functionality to {@link ObjectWrapper} that creates a plain Java object
  * from a {@link TemplateModel}. This is usually implemented by {@link ObjectWrapper}-s and reverses
@@ -49,12 +51,12 @@ public interface ObjectWrapperAndUnwrapper extends ObjectWrapper {
      *         the template model. {@code null} must not be used to indicate an unwrapping failure. It must NOT be
      *         {@link #CANT_UNWRAP_TO_TARGET_CLASS}.
      * 
-     * @throws TemplateModelException
+     * @throws TemplateException
      *             If the unwrapping fails from any reason.
      * 
      * @see #tryUnwrapTo(TemplateModel, Class)
      */
-    Object unwrap(TemplateModel tm) throws TemplateModelException;
+    Object unwrap(TemplateModel tm) throws TemplateException;
 
     /**
      * Attempts to unwrap a {@link TemplateModel} to a plain Java object that's the instance of the given class (or is
@@ -71,12 +73,12 @@ public interface ObjectWrapperAndUnwrapper extends ObjectWrapper {
      *         result can be {@code null}). However, {@link #CANT_UNWRAP_TO_TARGET_CLASS} must not be returned if the
      *         {@code targetClass} parameter was {@code Object.class}.
      * 
-     * @throws TemplateModelException
+     * @throws TemplateException
      *             If the unwrapping fails for a reason than doesn't fit the meaning of the
      *             {@link #CANT_UNWRAP_TO_TARGET_CLASS} return value.
      * 
      * @see #unwrap(TemplateModel)
      */
-    Object tryUnwrapTo(TemplateModel tm, Class<?> targetClass) throws TemplateModelException;
+    Object tryUnwrapTo(TemplateModel tm, Class<?> targetClass) throws TemplateException;
 
 }

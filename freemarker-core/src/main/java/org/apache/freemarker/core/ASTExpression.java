@@ -25,7 +25,6 @@ import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
@@ -175,7 +174,7 @@ abstract class ASTExpression extends ASTNode {
     protected abstract ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState);
 
-    static boolean isEmpty(TemplateModel model) throws TemplateModelException {
+    static boolean isEmpty(TemplateModel model) throws TemplateException {
         if (model instanceof BeanModel) {
             return ((BeanModel) model).isEmpty();
         } else if (model instanceof TemplateSequenceModel) {

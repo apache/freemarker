@@ -25,9 +25,9 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import org.apache.freemarker.core.Version;
+import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
  * A restricted version of {@link DefaultObjectWrapper} that doesn't expose arbitrary object, just those that directly
@@ -45,14 +45,15 @@ public class RestrictedObjectWrapper extends DefaultObjectWrapper {
      * In this implementation, this just throws an exception.
      */
     @Override
-    protected TemplateModel wrapGenericObject(Object obj) throws TemplateModelException {
-        throw new TemplateModelException("RestrictedObjectWrapper deliberately won't wrap this type: "
+    protected TemplateModel wrapGenericObject(Object obj) throws ObjectWrappingException {
+        throw new ObjectWrappingException("RestrictedObjectWrapper deliberately won't wrap this type: "
                 + obj.getClass().getName());
     }
 
     @Override
-    public TemplateHashModel wrapAsAPI(Object obj) throws TemplateModelException {
-        throw new TemplateModelException("RestrictedObjectWrapper deliberately doesn't allow ?api.");
+    public TemplateHashModel wrapAsAPI(Object obj) throws ObjectWrappingException {
+        throw new ObjectWrappingException(
+                RestrictedObjectWrapper.class.getName() + " doesn't allow ?api.");
     }
 
     protected static abstract class ExtendableBuilder<

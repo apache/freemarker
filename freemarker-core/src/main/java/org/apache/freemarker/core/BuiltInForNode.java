@@ -20,7 +20,6 @@
 package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 
 abstract class BuiltInForNode extends ASTExpBuiltIn {
@@ -36,6 +35,6 @@ abstract class BuiltInForNode extends ASTExpBuiltIn {
         }
     }
 
-    abstract TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateModelException;
+    abstract TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateException;
 
 }

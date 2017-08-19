@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core.model;
 
+import org.apache.freemarker.core.TemplateException;
+
 /**
  * "node" template language data type: an object that is a node in a tree.
  * A tree of nodes can be recursively <em>visited</em> using the &lt;#visit...&gt; and &lt;#recurse...&gt;
@@ -37,14 +39,14 @@ public interface TemplateNodeModel extends TemplateModel {
      * @return the parent of this node or null, in which case
      * this node is the root of the tree.
      */
-    TemplateNodeModel getParentNode() throws TemplateModelException;
+    TemplateNodeModel getParentNode() throws TemplateException;
     
     /**
      * @return a sequence containing this node's children.
      * If the returned value is null or empty, this is essentially 
      * a leaf node.
      */
-    TemplateSequenceModel getChildNodes() throws TemplateModelException;
+    TemplateSequenceModel getChildNodes() throws TemplateException;
 
     /**
      * @return a String that is used to determine the processing
@@ -54,7 +56,7 @@ public interface TemplateNodeModel extends TemplateModel {
      * returns "@text" for text nodes, "@pi" for processing instructions,
      * and so on.
      */    
-    String getNodeName() throws TemplateModelException;
+    String getNodeName() throws TemplateException;
     
     /**
      * @return a String describing the <em>type</em> of node this is.
@@ -63,7 +65,7 @@ public interface TemplateNodeModel extends TemplateModel {
      * trees could return whatever it appropriate for that application. It
      * can be null, if you don't want to use node-types.
      */
-    String getNodeType() throws TemplateModelException;
+    String getNodeType() throws TemplateException;
     
     
     /**
@@ -72,5 +74,5 @@ public interface TemplateNodeModel extends TemplateModel {
      * not XML-related, it will almost certainly be null. Even 
      * for XML nodes, this will often be null.
      */
-    String getNodeNamespace() throws TemplateModelException;
+    String getNodeNamespace() throws TemplateException;
 }

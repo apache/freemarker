@@ -19,8 +19,8 @@
 
 package org.apache.freemarker.core.model.impl;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
  * Utility class for instantiating {@link StaticModel} instances from
@@ -37,7 +37,7 @@ class StaticModels extends ClassBasedModelFactory {
 
     @Override
     protected TemplateModel createModel(Class clazz) 
-    throws TemplateModelException {
+    throws TemplateException {
         return new StaticModel(clazz, getWrapper());
     }
 }

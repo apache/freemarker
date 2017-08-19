@@ -39,12 +39,12 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateCollectionModelEx;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
@@ -58,7 +58,7 @@ import org.xml.sax.SAXException;
 public class RestrictedObjectWrapperTest {
 
     @Test
-    public void testBasics() throws TemplateModelException {
+    public void testBasics() throws TemplateException {
         PostConstruct.class.toString();
         RestrictedObjectWrapper ow = new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         testCustomizationCommonPart(ow);
@@ -69,7 +69,7 @@ public class RestrictedObjectWrapperTest {
     }
 
     @SuppressWarnings("boxing")
-    private void testCustomizationCommonPart(RestrictedObjectWrapper ow) throws TemplateModelException {
+    private void testCustomizationCommonPart(RestrictedObjectWrapper ow) throws TemplateException {
         assertTrue(ow.wrap("x") instanceof SimpleScalar);
         assertTrue(ow.wrap(1.5) instanceof SimpleNumber);
         assertTrue(ow.wrap(new Date()) instanceof SimpleDate);
@@ -78,13 +78,13 @@ public class RestrictedObjectWrapperTest {
         try {
             ow.wrap(new TestBean());
             fail();
-        } catch (TemplateModelException e) {
+        } catch (TemplateException e) {
             assertThat(e.getMessage(), containsStringIgnoringCase("type"));
         }
     }
 
     @Test
-    public void testDoesNotAllowAPIBuiltin() throws TemplateModelException {
+    public void testDoesNotAllowAPIBuiltin() throws TemplateException {
         RestrictedObjectWrapper sow = new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
 
         TemplateModelWithAPISupport map = (TemplateModelWithAPISupport) sow.wrap(new HashMap());
@@ -98,7 +98,7 @@ public class RestrictedObjectWrapperTest {
 
     @SuppressWarnings("boxing")
     @Test
-    public void testCanWrapBasicTypes() throws TemplateModelException {
+    public void testCanWrapBasicTypes() throws ObjectWrappingException {
         RestrictedObjectWrapper sow = new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         assertTrue(sow.wrap("s") instanceof TemplateScalarModel);
         assertTrue(sow.wrap(1) instanceof TemplateNumberModel);
@@ -113,8 +113,7 @@ public class RestrictedObjectWrapperTest {
     }
 
     @Test
-    public void testWontWrapDOM() throws SAXException, IOException, ParserConfigurationException,
-            TemplateModelException {
+    public void testWontWrapDOM() throws SAXException, IOException, ParserConfigurationException, TemplateException {
         DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         InputSource is = new InputSource();
         is.setCharacterStream(new StringReader("<doc><sub a='1' /></doc>"));
@@ -124,7 +123,7 @@ public class RestrictedObjectWrapperTest {
         try {
             sow.wrap(doc);
             fail();
-        } catch (TemplateModelException e) {
+        } catch (TemplateException e) {
             assertThat(e.getMessage(), containsString("won't wrap"));
         }
     }
@@ -135,7 +134,7 @@ public class RestrictedObjectWrapperTest {
         try {
             sow.wrap(new File("/x"));
             fail();
-        } catch (TemplateModelException e) {
+        } catch (ObjectWrappingException e) {
             assertThat(e.getMessage(), containsString("won't wrap"));
         }
     }

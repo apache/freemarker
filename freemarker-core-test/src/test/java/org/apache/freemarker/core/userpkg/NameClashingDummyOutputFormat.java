@@ -21,7 +21,7 @@ package org.apache.freemarker.core.userpkg;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.outputformat.CommonMarkupOutputFormat;
 
 public class NameClashingDummyOutputFormat extends CommonMarkupOutputFormat<TemplateDummyOutputModel> {
@@ -43,7 +43,7 @@ public class NameClashingDummyOutputFormat extends CommonMarkupOutputFormat<Temp
     }
 
     @Override
-    public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
+    public void output(String textToEsc, Writer out) throws IOException, TemplateException {
         out.write(escapePlainText(textToEsc));
     }
 

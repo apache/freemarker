@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core.model;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 
@@ -42,6 +43,6 @@ public interface TemplateNumberModel extends TemplateModel {
      *
      * @return the {@link Number} instance associated with this number model.
      */
-    Number getAsNumber() throws TemplateModelException;
+    Number getAsNumber() throws TemplateException;
     
 }

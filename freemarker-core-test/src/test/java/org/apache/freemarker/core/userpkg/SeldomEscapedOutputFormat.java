@@ -21,7 +21,6 @@ package org.apache.freemarker.core.userpkg;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.outputformat.CommonMarkupOutputFormat;
 
 public class SeldomEscapedOutputFormat extends CommonMarkupOutputFormat<TemplateSeldomEscapedOutputModel> {
@@ -43,7 +42,7 @@ public class SeldomEscapedOutputFormat extends CommonMarkupOutputFormat<Template
     }
 
     @Override
-    public void output(String textToEsc, Writer out) throws IOException, TemplateModelException {
+    public void output(String textToEsc, Writer out) throws IOException {
         out.write(escapePlainText(textToEsc));
     }
 

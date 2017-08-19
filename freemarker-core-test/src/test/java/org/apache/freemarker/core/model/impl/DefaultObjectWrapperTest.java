@@ -45,17 +45,16 @@ import org.apache.freemarker.core.NonTemplateCallPlace;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.Version;
-import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core._CoreAPI;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateCollectionModelEx;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.TemplateNumberModel;
@@ -63,6 +62,7 @@ import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
@@ -276,7 +276,7 @@ public class DefaultObjectWrapperTest {
     }
 
     private void assertCollectionTMEquals(TemplateCollectionModel coll, Object... expectedItems)
-            throws TemplateModelException {
+            throws TemplateException {
         for (int i = 0; i < 2; i++) { // Run twice to check if we always get a new iterator
             int idx = 0;
             TemplateModelIterator it2 = null;
@@ -351,14 +351,14 @@ public class DefaultObjectWrapperTest {
             try {
                 it.next();
                 fail();
-            } catch (TemplateModelException e) {
+            } catch (TemplateException e) {
                 assertThat(e.getMessage(), containsString("no more"));
             }
         }
     }
 
     @Test
-    public void testArrayAdapterTypes() throws TemplateModelException {
+    public void testArrayAdapterTypes() throws ObjectWrappingException {
         assertArrayAdapterClass("Object", OW.wrap(new Object[] {}));
         assertArrayAdapterClass("Object", OW.wrap(new String[] {}));
         assertArrayAdapterClass("byte", OW.wrap(new byte[] {}));
@@ -379,7 +379,7 @@ public class DefaultObjectWrapperTest {
 
     @SuppressWarnings("boxing")
     @Test
-    public void testArrayAdapters() throws TemplateModelException {
+    public void testArrayAdapters() throws TemplateException {
         {
             final String[] testArray = new String[] { "a", null, "c" };
 
@@ -504,7 +504,7 @@ public class DefaultObjectWrapperTest {
 
     @SuppressWarnings("boxing")
     @Test
-    public void testCollectionAdapterOutOfBounds() throws TemplateModelException {
+    public void testCollectionAdapterOutOfBounds() throws TemplateException {
         Set set = Collections.singleton(123);
 
         TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW.wrap(set);
@@ -521,14 +521,14 @@ public class DefaultObjectWrapperTest {
             try {
                 it.next();
                 fail();
-            } catch (TemplateModelException e) {
+            } catch (TemplateException e) {
                 assertThat(e.getMessage(), containsStringIgnoringCase("no more"));
             }
         }
     }
 
     @Test
-    public void testCollectionAdapterAndNulls() throws TemplateModelException {
+    public void testCollectionAdapterAndNulls() throws TemplateException {
         Set set = new HashSet();
         set.add(null);
 
@@ -558,14 +558,14 @@ public class DefaultObjectWrapperTest {
         try {
             itIt.next();
             fail();
-        } catch (TemplateModelException e) {
+        } catch (TemplateException e) {
             assertThat(e.getMessage(), containsStringIgnoringCase("no more"));
         }
 
         try {
             itIt2.hasNext();
             fail();
-        } catch (TemplateModelException e) {
+        } catch (TemplateException e) {
             assertThat(e.getMessage(), containsString("can be listed only once"));
         }
 
@@ -573,7 +573,7 @@ public class DefaultObjectWrapperTest {
         try {
             itIt3.hasNext();
             fail();
-        } catch (TemplateModelException e) {
+        } catch (TemplateException e) {
             assertThat(e.getMessage(), containsString("can be listed only once"));
         }
     }
@@ -592,7 +592,7 @@ public class DefaultObjectWrapperTest {
 
     @SuppressWarnings("boxing")
     @Test
-    public void testCharKeyFallback() throws TemplateModelException {
+    public void testCharKeyFallback() throws TemplateException {
         Map hashMapS = new HashMap<>();
         hashMapS.put("a", 1);
         Map sortedMapS = new TreeMap<>();
@@ -607,7 +607,7 @@ public class DefaultObjectWrapperTest {
         assertEquals(1, OW.unwrap(((TemplateHashModel) OW.wrap(sortedMapS)).get("a")));
         try {
             ((TemplateHashModel) OW.wrap(sortedMapC)).get("a");
-        } catch (TemplateModelException e) {
+        } catch (TemplateException e) {
             assertThat(e.getMessage(), containsStringIgnoringCase("String key"));
         }
         
@@ -616,7 +616,7 @@ public class DefaultObjectWrapperTest {
         assertNull(((TemplateHashModel) OW.wrap(sortedMapS)).get("b"));
         try {
             ((TemplateHashModel) OW.wrap(sortedMapC)).get("b");
-        } catch (TemplateModelException e) {
+        } catch (TemplateException e) {
             assertThat(e.getMessage(), containsStringIgnoringCase("String key"));
         }
     }
@@ -644,7 +644,7 @@ public class DefaultObjectWrapperTest {
             try {
                 iteratorTM.next();
                 fail();
-            } catch (TemplateModelException e) {
+            } catch (TemplateException e) {
                 assertThat(e.getMessage(), containsStringIgnoringCase("no more"));
             }
         }
@@ -721,7 +721,7 @@ public class DefaultObjectWrapperTest {
         }
     }
 
-    private TemplateHashModel wrapWithExposureLevel(Object bean, int exposureLevel) throws TemplateModelException {
+    private TemplateHashModel wrapWithExposureLevel(Object bean, int exposureLevel) throws ObjectWrappingException {
         return (TemplateHashModel) new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
                 .exposureLevel(exposureLevel).build()
                 .wrap(bean);
@@ -851,7 +851,7 @@ public class DefaultObjectWrapperTest {
         }
         
         @Override
-        protected TemplateModel wrapGenericObject(final Object obj) throws TemplateModelException {
+        protected TemplateModel wrapGenericObject(final Object obj) throws ObjectWrappingException {
             if (obj instanceof Tupple) {
                 return new TuppleAdapter((Tupple<?, ?>) obj, this);
             }
@@ -872,12 +872,12 @@ public class DefaultObjectWrapperTest {
         }
 
         @Override
-        public int size() throws TemplateModelException {
+        public int size() throws TemplateException {
             return 2;
         }
         
         @Override
-        public TemplateModel get(int index) throws TemplateModelException {
+        public TemplateModel get(int index) throws TemplateException {
             switch (index) {
             case 0: return wrap(tupple.getE1());
             case 1: return wrap(tupple.getE2());

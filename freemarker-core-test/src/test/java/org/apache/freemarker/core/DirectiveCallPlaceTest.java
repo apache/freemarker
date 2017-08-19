@@ -30,7 +30,6 @@ import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.util.CommonSupplier;
 import org.apache.freemarker.test.TemplateTest;
@@ -127,7 +126,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
 
                             });
                 } catch (CallPlaceCustomDataInitializationException e) {
-                    throw new TemplateModelException("Failed to pre-render nested content", e);
+                    throw new TemplateException("Failed to pre-render nested content", e);
                 }
             } else {
                 convertedText = convertBodyText(callPlace, env);

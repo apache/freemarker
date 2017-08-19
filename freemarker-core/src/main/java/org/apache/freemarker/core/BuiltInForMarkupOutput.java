@@ -21,7 +21,6 @@ package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 abstract class BuiltInForMarkupOutput extends ASTExpBuiltIn {
     
@@ -35,6 +34,6 @@ abstract class BuiltInForMarkupOutput extends ASTExpBuiltIn {
         return calculateResult((TemplateMarkupOutputModel) model);
     }
     
-    protected abstract TemplateModel calculateResult(TemplateMarkupOutputModel model) throws TemplateModelException;
+    protected abstract TemplateModel calculateResult(TemplateMarkupOutputModel model) throws TemplateException;
     
 }

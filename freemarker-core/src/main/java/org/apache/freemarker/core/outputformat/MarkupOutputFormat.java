@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.io.Writer;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.TemplateHTMLOutputModel;
 
@@ -59,28 +59,28 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
      * @see #escapePlainText(String)
      * @see #getSourcePlainText(TemplateMarkupOutputModel)
      */
-    public abstract MO fromPlainTextByEscaping(String textToEsc) throws TemplateModelException;
+    public abstract MO fromPlainTextByEscaping(String textToEsc) throws TemplateException;
 
     /**
      * Wraps a {@link String} that's already markup to {@link TemplateMarkupOutputModel} interface, to indicate its
-     * format. This corresponds to {@code ?noEsc}. (This methods is allowed to throw {@link TemplateModelException} if
+     * format. This corresponds to {@code ?noEsc}. (This methods is allowed to throw {@link TemplateException} if
      * the parameter markup text is malformed, but it's unlikely that an implementation chooses to parse the parameter
      * until, and if ever, that becomes necessary.)
      * 
      * @see #getMarkupString(TemplateMarkupOutputModel)
      */
-    public abstract MO fromMarkup(String markupText) throws TemplateModelException;
+    public abstract MO fromMarkup(String markupText) throws TemplateException;
 
     /**
      * Prints the parameter model to the output.
      */
-    public abstract void output(MO mo, Writer out) throws IOException, TemplateModelException;
+    public abstract void output(MO mo, Writer out) throws IOException, TemplateException;
 
     /**
      * Equivalent to calling {@link #fromPlainTextByEscaping(String)} and then
      * {@link #output(TemplateMarkupOutputModel, Writer)}, but the implementation may uses a more efficient solution.
      */
-    public abstract void output(String textToEsc, Writer out) throws IOException, TemplateModelException;
+    public abstract void output(String textToEsc, Writer out) throws IOException, TemplateException;
     
     /**
      * If this {@link TemplateMarkupOutputModel} was created with {@link #fromPlainTextByEscaping(String)}, it returns
@@ -88,7 +88,7 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
      * of markups, as if the source format can be converted to plain text without loss, then that just has to be
      * re-escaped with the target format to do the conversion.
      */
-    public abstract String getSourcePlainText(MO mo) throws TemplateModelException;
+    public abstract String getSourcePlainText(MO mo) throws TemplateException;
 
     /**
      * Returns the content as markup text; never {@code null}. If this {@link TemplateMarkupOutputModel} was created
@@ -96,31 +96,31 @@ public abstract class MarkupOutputFormat<MO extends TemplateMarkupOutputModel> e
      * as far as the returned markup means the same. If this {@link TemplateMarkupOutputModel} wasn't created
      * with {@link #fromMarkup(String)} and it doesn't yet have the markup, it has to generate the markup now.
      */
-    public abstract String getMarkupString(MO mo) throws TemplateModelException;
+    public abstract String getMarkupString(MO mo) throws TemplateException;
     
     /**
      * Returns a {@link TemplateMarkupOutputModel} that contains the content of both {@link TemplateMarkupOutputModel}
      * objects concatenated.
      */
-    public abstract MO concat(MO mo1, MO mo2) throws TemplateModelException;
+    public abstract MO concat(MO mo1, MO mo2) throws TemplateException;
     
     /**
      * Should give the same result as {@link #fromPlainTextByEscaping(String)} and then
      * {@link #getMarkupString(TemplateMarkupOutputModel)}, but the implementation may uses a more efficient solution.
      */
-    public abstract String escapePlainText(String plainTextContent) throws TemplateModelException;
+    public abstract String escapePlainText(String plainTextContent) throws TemplateException;
 
     /**
      * Returns if the markup is empty (0 length). This is used by at least {@code ?hasContent}.
      */
-    public abstract boolean isEmpty(MO mo) throws TemplateModelException;
+    public abstract boolean isEmpty(MO mo) throws TemplateException;
     
     /**
      * Tells if a string built-in that can't handle a {@link TemplateMarkupOutputModel} left hand operand can bypass
      * this object as is. A typical such case would be when a {@link TemplateHTMLOutputModel} of "HTML" format bypasses
      * {@code ?html}.
      */
-    public abstract boolean isLegacyBuiltInBypassed(String builtInName) throws TemplateModelException;
+    public abstract boolean isLegacyBuiltInBypassed(String builtInName) throws TemplateException;
     
     /**
      * Tells if by default auto-escaping should be on for this format. It should be {@code true} if you need to escape

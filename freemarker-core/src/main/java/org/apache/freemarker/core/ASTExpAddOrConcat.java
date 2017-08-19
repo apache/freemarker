@@ -28,7 +28,6 @@ import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
@@ -119,7 +118,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
     }
 
     private static TemplateModel _eval_concatenateHashes(TemplateModel leftModel, TemplateModel rightModel)
-            throws TemplateModelException {
+            throws TemplateException {
         if (leftModel instanceof TemplateHashModelEx && rightModel instanceof TemplateHashModelEx) {
             TemplateHashModelEx leftModelEx = (TemplateHashModelEx) leftModel;
             TemplateHashModelEx rightModelEx = (TemplateHashModelEx) rightModel;
@@ -193,13 +192,13 @@ final class ASTExpAddOrConcat extends ASTExpression {
 
         @Override
         public int size()
-        throws TemplateModelException {
+        throws TemplateException {
             return left.size() + right.size();
         }
 
         @Override
         public TemplateModel get(int i)
-        throws TemplateModelException {
+        throws TemplateException {
             int ls = left.size();
             return i < ls ? left.get(i) : right.get(i - ls);
         }
@@ -217,14 +216,14 @@ final class ASTExpAddOrConcat extends ASTExpression {
         
         @Override
         public TemplateModel get(String key)
-        throws TemplateModelException {
+        throws TemplateException {
             TemplateModel model = right.get(key);
             return (model != null) ? model : left.get(key);
         }
 
         @Override
         public boolean isEmpty()
-        throws TemplateModelException {
+        throws TemplateException {
             return left.isEmpty() && right.isEmpty();
         }
     }
@@ -241,27 +240,27 @@ final class ASTExpAddOrConcat extends ASTExpression {
         }
         
         @Override
-        public int size() throws TemplateModelException {
+        public int size() throws TemplateException {
             initKeys();
             return size;
         }
 
         @Override
         public TemplateCollectionModel keys()
-        throws TemplateModelException {
+        throws TemplateException {
             initKeys();
             return keys;
         }
 
         @Override
         public TemplateCollectionModel values()
-        throws TemplateModelException {
+        throws TemplateException {
             initValues();
             return values;
         }
 
         private void initKeys()
-        throws TemplateModelException {
+        throws TemplateException {
             if (keys == null) {
                 HashSet keySet = new HashSet();
                 NativeSequence keySeq = new NativeSequence(32);
@@ -273,7 +272,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
         }
 
         private static void addKeys(Set set, NativeSequence keySeq, TemplateHashModelEx hash)
-        throws TemplateModelException {
+        throws TemplateException {
             TemplateModelIterator it = hash.keys().iterator();
             while (it.hasNext()) {
                 TemplateScalarModel tsm = (TemplateScalarModel) it.next();
@@ -286,7 +285,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
         }        
 
         private void initValues()
-        throws TemplateModelException {
+        throws TemplateException {
             if (values == null) {
                 NativeSequence seq = new NativeSequence(size());
                 // Note: size() invokes initKeys() if needed.

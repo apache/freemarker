@@ -21,7 +21,6 @@ package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.DefaultArrayAdapter;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
@@ -41,12 +40,12 @@ class NativeStringArraySequence implements TemplateSequenceModel {
     }
 
     @Override
-    public TemplateModel get(int index) throws TemplateModelException {
+    public TemplateModel get(int index) throws TemplateException {
         return index < items.length ? new SimpleScalar(items[index]) : null;
     }
 
     @Override
-    public int size() throws TemplateModelException {
+    public int size() throws TemplateException {
         return items.length;
     }
 

@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core.model;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 
 /**
@@ -40,6 +41,6 @@ public interface TemplateScalarModel extends TemplateModel {
      * Objects of this type should be immutable, that is, calling {@link #getAsString()} should always return the same
      * value as for the first time.
      */
-    String getAsString() throws TemplateModelException;
+    String getAsString() throws TemplateException;
 
 }

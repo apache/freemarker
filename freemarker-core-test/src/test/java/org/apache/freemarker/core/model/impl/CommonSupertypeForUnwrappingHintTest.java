@@ -23,7 +23,6 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 import junit.framework.TestCase;
 
@@ -121,8 +120,7 @@ public class CommonSupertypeForUnwrappingHintTest extends TestCase {
         }
 
         @Override
-        MaybeEmptyMemberAndArguments getMemberAndArguments(TemplateModel[] tmArgs, DefaultObjectWrapper w) throws
-                TemplateModelException {
+        MaybeEmptyMemberAndArguments getMemberAndArguments(TemplateModel[] tmArgs, DefaultObjectWrapper w) {
             throw new RuntimeException("Not implemented in this dummy.");
         }
         

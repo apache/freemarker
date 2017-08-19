@@ -26,11 +26,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ final class StaticModel implements TemplateHashModelEx {
     private final DefaultObjectWrapper wrapper;
     private final Map map = new HashMap();
 
-    StaticModel(Class clazz, DefaultObjectWrapper wrapper) throws TemplateModelException {
+    StaticModel(Class clazz, DefaultObjectWrapper wrapper) throws TemplateException {
         this.clazz = clazz;
         this.wrapper = wrapper;
         populate();
@@ -59,7 +59,7 @@ final class StaticModel implements TemplateHashModelEx {
      * parameter.
      */
     @Override
-    public TemplateModel get(String key) throws TemplateModelException {
+    public TemplateModel get(String key) throws TemplateException {
         Object model = map.get(key);
         // Simple method, overloaded method or final field -- these have cached 
         // template models
@@ -70,12 +70,12 @@ final class StaticModel implements TemplateHashModelEx {
             try {
                 return wrapper.getOuterIdentity().wrap(((Field) model).get(null));
             } catch (IllegalAccessException e) {
-                throw new TemplateModelException(
+                throw new TemplateException(
                     "Illegal access for field " + key + " of class " + clazz.getName());
             }
         }
 
-        throw new TemplateModelException(
+        throw new TemplateException(
             "No such key: " + key + " in class " + clazz.getName());
     }
 
@@ -94,18 +94,18 @@ final class StaticModel implements TemplateHashModelEx {
     }
     
     @Override
-    public TemplateCollectionModel keys() throws TemplateModelException {
+    public TemplateCollectionModel keys() throws TemplateException {
         return (TemplateCollectionModel) wrapper.getOuterIdentity().wrap(map.keySet());
     }
     
     @Override
-    public TemplateCollectionModel values() throws TemplateModelException {
+    public TemplateCollectionModel values() throws TemplateException {
         return (TemplateCollectionModel) wrapper.getOuterIdentity().wrap(map.values());
     }
 
-    private void populate() throws TemplateModelException {
+    private void populate() throws TemplateException {
         if (!Modifier.isPublic(clazz.getModifiers())) {
-            throw new TemplateModelException(
+            throw new TemplateException(
                 "Can't wrap the non-public class " + clazz.getName());
         }
         

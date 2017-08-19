@@ -26,7 +26,6 @@ import java.util.Date;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
@@ -42,17 +41,17 @@ class BuiltInsForNumbers {
     private static abstract class abcBI extends BuiltInForNumber {
 
         @Override
-        TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
+        TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateException {
             final int n;
             try {
                 n = _NumberUtils.toIntExact(num);
             } catch (ArithmeticException e) {
-                throw new _TemplateModelException(target,
+                throw new TemplateException(target,
                         "The left side operand value isn't compatible with ?", key, ": ", e.getMessage());
          
             }
             if (n <= 0) {
-                throw new _TemplateModelException(target,
+                throw new TemplateException(target,
                         "The left side operand of to ?", key, " must be at least 1, but was ", Integer.valueOf(n), ".");
             }
             return new SimpleScalar(toABC(n));
@@ -82,7 +81,7 @@ class BuiltInsForNumbers {
     
     static class absBI extends BuiltInForNumber {
         @Override
-        TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
+        TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateException {
             if (num instanceof Integer) {
                 int n = num.intValue();
                 if (n < 0) {
@@ -140,7 +139,7 @@ class BuiltInsForNumbers {
                     return model;
                 }
             } else {
-                throw new _TemplateModelException("Unsupported number class: ", num.getClass());
+                throw new TemplateException("Unsupported number class: ", num.getClass());
             }            
         }
     }
@@ -201,7 +200,7 @@ class BuiltInsForNumbers {
 
     static class is_infiniteBI extends BuiltInForNumber {
         @Override
-        TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
+        TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateException {
             return _NumberUtils.isInfinite(num) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
@@ -209,7 +208,7 @@ class BuiltInsForNumbers {
 
     static class is_nanBI extends BuiltInForNumber {
         @Override
-        TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateModelException {
+        TemplateModel calculateResult(Number num, TemplateModel model) throws TemplateException {
             return _NumberUtils.isNaN(num) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
@@ -244,7 +243,7 @@ class BuiltInsForNumbers {
         
         @Override
         TemplateModel calculateResult(Number num, TemplateModel model)
-        throws TemplateModelException {
+        throws TemplateException {
             return new SimpleDate(new Date(safeToLong(num)), dateType);
         }
     }
@@ -267,11 +266,11 @@ class BuiltInsForNumbers {
         }
     }
 
-    private static long safeToLong(Number num) throws TemplateModelException {
+    private static long safeToLong(Number num) throws TemplateException {
         if (num instanceof Double) {
             double d = Math.round(num.doubleValue());
             if (d > Long.MAX_VALUE || d < Long.MIN_VALUE) {
-                throw new _TemplateModelException(
+                throw new TemplateException(
                         "Number doesn't fit into a 64 bit signed integer (long): ", Double.valueOf(d));
             } else {
                 return (long) d;
@@ -279,7 +278,7 @@ class BuiltInsForNumbers {
         } else if (num instanceof Float) {
             float f = Math.round(num.floatValue());
             if (f > Long.MAX_VALUE || f < Long.MIN_VALUE) {
-                throw new _TemplateModelException(
+                throw new TemplateException(
                         "Number doesn't fit into a 64 bit signed integer (long): ", Float.valueOf(f));
             } else {
                 return (long) f;
@@ -287,22 +286,22 @@ class BuiltInsForNumbers {
         } else if (num instanceof BigDecimal) {
             BigDecimal bd = ((BigDecimal) num).setScale(0, BigDecimal.ROUND_HALF_UP);
             if (bd.compareTo(BIG_DECIMAL_LONG_MAX) > 0 || bd.compareTo(BIG_DECIMAL_LONG_MIN) < 0) {
-                throw new _TemplateModelException("Number doesn't fit into a 64 bit signed integer (long): ", bd);
+                throw new TemplateException("Number doesn't fit into a 64 bit signed integer (long): ", bd);
             } else {
                 return bd.longValue();
             }
         } else if (num instanceof BigInteger) {
             BigInteger bi = (BigInteger) num;
             if (bi.compareTo(BIG_INTEGER_LONG_MAX) > 0 || bi.compareTo(BIG_INTEGER_LONG_MIN) < 0) {
-                throw new _TemplateModelException("Number doesn't fit into a 64 bit signed integer (long): ", bi);
+                throw new TemplateException("Number doesn't fit into a 64 bit signed integer (long): ", bi);
             } else {
                 return bi.longValue();
             }
         } else if (num instanceof Long || num instanceof Integer || num instanceof Byte || num instanceof Short) {
             return num.longValue();
         } else {
-            // Should add Atomic* types in 2.4...
-            throw new _TemplateModelException("Unsupported number type: ", num.getClass());
+            // TODO [FM3] Should add Atomic* types in 2.4...
+            throw new TemplateException("Unsupported number type: ", num.getClass());
         }
     }
     

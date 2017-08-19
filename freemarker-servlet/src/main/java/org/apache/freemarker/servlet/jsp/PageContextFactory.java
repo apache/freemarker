@@ -22,8 +22,8 @@ package org.apache.freemarker.servlet.jsp;
 import javax.servlet.jsp.PageContext;
 
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 
 /**
@@ -45,7 +45,7 @@ class PageContextFactory {
         }
     }
 
-    static FreeMarkerPageContext getCurrentPageContext() throws TemplateModelException {
+    static FreeMarkerPageContext getCurrentPageContext() throws TemplateException {
         Environment env = Environment.getCurrentEnvironment();
         TemplateModel pageContextModel = env.getGlobalVariable(PageContext.PAGECONTEXT);
         if (pageContextModel instanceof FreeMarkerPageContext) {

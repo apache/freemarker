@@ -23,8 +23,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
  * Packs a {@link Method} or {@link Constructor} together with its parameter types. The actual
@@ -35,11 +35,11 @@ import org.apache.freemarker.core.model.TemplateModelException;
 abstract class CallableMemberDescriptor extends MaybeEmptyCallableMemberDescriptor {
 
     abstract TemplateModel invokeMethod(DefaultObjectWrapper ow, Object obj, Object[] args)
-            throws TemplateModelException, InvocationTargetException, IllegalAccessException;
+            throws TemplateException, InvocationTargetException, IllegalAccessException;
 
     abstract Object invokeConstructor(DefaultObjectWrapper ow, Object[] args)
             throws IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException,
-            TemplateModelException;
+            TemplateException;
     
     abstract String getDeclaration();
     

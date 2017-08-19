@@ -21,15 +21,17 @@ package org.apache.freemarker.core.model;
 
 import java.io.Serializable;
 
+import org.apache.freemarker.core.TemplateException;
+
 class EmptySequenceModel implements TemplateSequenceModel, Serializable {
 
     @Override
-    public TemplateModel get(int index) throws TemplateModelException {
+    public TemplateModel get(int index) throws TemplateException {
         return null;
     }
 
     @Override
-    public int size() throws TemplateModelException {
+    public int size() throws TemplateException {
         return 0;
     }
 

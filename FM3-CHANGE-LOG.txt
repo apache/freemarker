@@ -198,7 +198,7 @@ Major changes / features
     `TemplateDirectiveModel`, `TemplateTransformModel`). FM3 replaces them with only two new interfaces,
     `TemplateDirectiveModel` (differs from the interface with identical name in FM2) and `TemplateFunctionModel`.
     (These are both the subinterfaces of another new interface `TemplateCallableModel`.)
-  - All callable TempalteModel-s support passing parameters by position and by name, even in the same call
+  - All callable TemplateModel-s support passing parameters by position and by name, even in the same call
     (e.g., `<@heading "Some title" icon="foo.jpg" />`, `sum(1, 2, 3, abs=true)`)
   - `#macro` now produces a `TemplateDirectiveModel` and `#function` produces a `TemplateFunctionModel`. (Earlier, the
     product was just a generic `TemplateModel` that could only be invoked using internal API-s, and had capabilities
@@ -377,6 +377,14 @@ Core / Models and Object wrapping
   the common interface bith for wrapped Java methods and functions defined in the templates, or on any other ways.
   `OverloadedMethodsModel` and `SimpleMethodModel` were renamed to `OverloadJavaMethodModel` and  `SimpleJavaMethodModel`,
   which of course extend `TemplateFunctionModel`, but allow inocations without `Environment` parameter.
+- `TemplateModelException` was removed, replaced with `TemplateException` on all places, except for
+  `ObjectWrapper.wrap(Object)` and `wrapAsAPI(Object)`, which now throws `ObjectWrappingException` instead (that extends
+  `TemplateException`).
+  In FM2 it `TemplateModelException` has extended `TemplateException` and was thrown by `TemplateModel` methods. As it
+  has turned out over time, some models call into FreeMarker functionality that can throw `TemplateException`, but the
+  method of the model couldn't throw that as `TemplateModelException` is more specific. Now it can. Also it's not very
+  useful in practice to catch `TemplateModelException` and the more generic `TemplateException` separately, so this
+  simplification was made.
 
 Core / Template loading and caching
 ...................................

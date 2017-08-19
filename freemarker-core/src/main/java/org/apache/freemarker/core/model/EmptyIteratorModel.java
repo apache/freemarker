@@ -21,15 +21,17 @@ package org.apache.freemarker.core.model;
 
 import java.io.Serializable;
 
+import org.apache.freemarker.core.TemplateException;
+
 class EmptyIteratorModel implements TemplateModelIterator, Serializable {
 
     @Override
-    public TemplateModel next() throws TemplateModelException {
-        throw new TemplateModelException("The collection has no more elements.");
+    public TemplateModel next() throws TemplateException {
+        throw new TemplateException("The collection has no more elements.");
     }
 
     @Override
-    public boolean hasNext() throws TemplateModelException {
+    public boolean hasNext() {
         return false;
     }
 

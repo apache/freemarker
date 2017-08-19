@@ -55,7 +55,6 @@ import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithOriginName;
 import org.apache.freemarker.core.model.TemplateNodeModel;
@@ -443,13 +442,13 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         } else {
             pushLocalContext(new LocalContext() {
                 @Override
-                public TemplateModel getLocalVariable(String name) throws TemplateModelException {
+                public TemplateModel getLocalVariable(String name) throws TemplateException {
                     int index = nestedContentParamNames.get(name);
                     return index != -1 ? nestedContentParamValues[index] : null;
                 }
 
                 @Override
-                public Collection<String> getLocalVariableNames() throws TemplateModelException {
+                public Collection<String> getLocalVariableNames() throws TemplateException {
                     return nestedContentParamNames.getKeys();
                 }
             });
@@ -624,7 +623,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     private Object[] noNodeHandlerDefinedDescription(
             TemplateNodeModel node, String ns, String nodeType)
-                    throws TemplateModelException {
+                    throws TemplateException {
         String nsPrefix;
         if (ns != null) {
             if (ns.length() > 0) {
@@ -666,8 +665,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         if (node == null) {
             node = getCurrentVisitorNode();
             if (node == null) {
-                throw new TemplateModelException(
-                        "The target node of recursion is missing or null.");
+                throw new TemplateException("The target node of recursion is missing or null.");
             }
         }
         TemplateSequenceModel children = node.getChildNodes();
@@ -1092,9 +1090,9 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * @param exp
      *            The blamed expression if an error occurs; it's only needed for better error messages
      */
-    String formatNumberToPlainText(TemplateNumberModel number, ASTExpression exp, boolean useTempModelExc)
+    String formatNumberToPlainText(TemplateNumberModel number, ASTExpression exp)
             throws TemplateException {
-        return formatNumberToPlainText(number, getTemplateNumberFormat(exp, useTempModelExc), exp, useTempModelExc);
+        return formatNumberToPlainText(number, getTemplateNumberFormat(exp), exp);
     }
 
     /**
@@ -1104,13 +1102,12 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      *            The blamed expression if an error occurs; it's only needed for better error messages
      */
     String formatNumberToPlainText(
-            TemplateNumberModel number, TemplateNumberFormat format, ASTExpression exp,
-            boolean useTempModelExc)
+            TemplateNumberModel number, TemplateNumberFormat format, ASTExpression exp)
             throws TemplateException {
         try {
             return _EvalUtils.assertFormatResultNotNull(format.formatToPlainText(number));
         } catch (TemplateValueFormatException e) {
-            throw MessageUtils.newCantFormatNumberException(format, exp, e, useTempModelExc);
+            throw MessageUtils.newCantFormatNumberException(format, exp, e);
         }
     }
 
@@ -1174,7 +1171,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     /**
      * Convenience wrapper around {@link #getTemplateNumberFormat()} to be called during expression evaluation.
      */
-    TemplateNumberFormat getTemplateNumberFormat(ASTExpression exp, boolean useTempModelExc) throws TemplateException {
+    TemplateNumberFormat getTemplateNumberFormat(ASTExpression exp) throws TemplateException {
         TemplateNumberFormat format;
         try {
             format = getTemplateNumberFormat();
@@ -1183,8 +1180,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                     "Failed to get number format object for the current number format string, ",
                     new _DelayedJQuote(getNumberFormat()), ": ", e.getMessage())
                     .blame(exp); 
-            throw useTempModelExc
-                    ? new _TemplateModelException(e, this, desc) : new TemplateException(e, this, desc);
+            throw new TemplateException(e, this, desc);
         }
         return format;
     }
@@ -1195,7 +1191,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * @param exp
      *            The blamed expression if an error occurs; it's only needed for better error messages
      */
-    TemplateNumberFormat getTemplateNumberFormat(String formatString, ASTExpression exp, boolean useTempModelExc)
+    TemplateNumberFormat getTemplateNumberFormat(String formatString, ASTExpression exp)
             throws TemplateException {
         TemplateNumberFormat format;
         try {
@@ -1205,8 +1201,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                     "Failed to get number format object for the ", new _DelayedJQuote(formatString),
                     " number format string: ", e.getMessage())
                     .blame(exp);
-            throw useTempModelExc
-                    ? new _TemplateModelException(e, this, desc) : new TemplateException(e, this, desc);
+            throw new TemplateException(e, this, desc);
         }
         return format;
     }
@@ -1379,14 +1374,13 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * @param tdmSourceExpr
      *            The blamed expression if an error occurs; only used for error messages.
      */
-    String formatDateToPlainText(TemplateDateModel tdm, ASTExpression tdmSourceExpr,
-            boolean useTempModelExc) throws TemplateException {
-        TemplateDateFormat format = getTemplateDateFormat(tdm, tdmSourceExpr, useTempModelExc);
+    String formatDateToPlainText(TemplateDateModel tdm, ASTExpression tdmSourceExpr) throws TemplateException {
+        TemplateDateFormat format = getTemplateDateFormat(tdm, tdmSourceExpr);
         
         try {
             return _EvalUtils.assertFormatResultNotNull(format.formatToPlainText(tdm));
         } catch (TemplateValueFormatException e) {
-            throw MessageUtils.newCantFormatDateException(format, tdmSourceExpr, e, useTempModelExc);
+            throw MessageUtils.newCantFormatDateException(format, tdmSourceExpr, e);
         }
     }
 
@@ -1397,19 +1391,17 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      *            The blamed expression if an error occurs; only used for error messages.
      */
     String formatDateToPlainText(TemplateDateModel tdm, String formatString,
-            ASTExpression blamedDateSourceExp, ASTExpression blamedFormatterExp,
-            boolean useTempModelExc) throws TemplateException {
+            ASTExpression blamedDateSourceExp, ASTExpression blamedFormatterExp) throws TemplateException {
         Date date = _EvalUtils.modelToDate(tdm, blamedDateSourceExp);
         
         TemplateDateFormat format = getTemplateDateFormat(
                 formatString, tdm.getDateType(), date.getClass(),
-                blamedDateSourceExp, blamedFormatterExp,
-                useTempModelExc);
+                blamedDateSourceExp, blamedFormatterExp);
         
         try {
             return _EvalUtils.assertFormatResultNotNull(format.formatToPlainText(tdm));
         } catch (TemplateValueFormatException e) {
-            throw MessageUtils.newCantFormatDateException(format, blamedDateSourceExp, e, useTempModelExc);
+            throw MessageUtils.newCantFormatDateException(format, blamedDateSourceExp, e);
         }
     }
 
@@ -1569,20 +1561,19 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         return getTemplateDateFormatWithoutCache(formatString, dateType, locale, timeZone, zonelessInput);
     }
     
-    TemplateDateFormat getTemplateDateFormat(TemplateDateModel tdm, ASTExpression tdmSourceExpr, boolean useTempModelExc)
+    TemplateDateFormat getTemplateDateFormat(TemplateDateModel tdm, ASTExpression tdmSourceExpr)
             throws TemplateException {
         Date date = _EvalUtils.modelToDate(tdm, tdmSourceExpr);
         
         return getTemplateDateFormat(
-                tdm.getDateType(), date.getClass(), tdmSourceExpr,
-                useTempModelExc);
+                tdm.getDateType(), date.getClass(), tdmSourceExpr);
     }
 
     /**
      * Same as {@link #getTemplateDateFormat(int, Class)}, but translates the exceptions to {@link TemplateException}-s.
      */
     TemplateDateFormat getTemplateDateFormat(
-            int dateType, Class<? extends Date> dateClass, ASTExpression blamedDateSourceExp, boolean useTempModelExc)
+            int dateType, Class<? extends Date> dateClass, ASTExpression blamedDateSourceExp)
                     throws TemplateException {
         try {
             return getTemplateDateFormat(dateType, dateClass);
@@ -1614,7 +1605,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                     "\" FreeMarker configuration setting is a malformed date/time/dateTime format string: ",
                     new _DelayedJQuote(settingValue), ". Reason given: ",
                     e.getMessage());                    
-            throw useTempModelExc ? new _TemplateModelException(e, desc) : new TemplateException(e, desc);
+            throw new TemplateException(e, desc);
         }
     }
 
@@ -1624,8 +1615,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      */
     TemplateDateFormat getTemplateDateFormat(
             String formatString, int dateType, Class<? extends Date> dateClass,
-            ASTExpression blamedDateSourceExp, ASTExpression blamedFormatterExp,
-            boolean useTempModelExc)
+            ASTExpression blamedDateSourceExp, ASTExpression blamedFormatterExp)
                     throws TemplateException {
         try {
             return getTemplateDateFormat(formatString, dateType, dateClass);
@@ -1637,7 +1627,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                     new _DelayedJQuote(formatString), ". Reason given: ",
                     e.getMessage())
                     .blame(blamedFormatterExp);
-            throw useTempModelExc ? new _TemplateModelException(e, desc) : new TemplateException(e, desc);
+            throw new TemplateException(e, desc);
         }
     }
 
@@ -1854,7 +1844,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * according to our terminology.)
      */
     // TODO [FM3] Don't return nested content params anymore (see JavaDoc)
-    public TemplateModel getLocalVariable(String name) throws TemplateModelException {
+    public TemplateModel getLocalVariable(String name) throws TemplateException {
         if (localContextStack != null) {
             for (int i = localContextStack.size() - 1; i >= 0; i--) {
                 LocalContext lc = localContextStack.get(i);
@@ -1884,7 +1874,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * </li>
      * </ol>
      */
-    public TemplateModel getVariable(String name) throws TemplateModelException {
+    public TemplateModel getVariable(String name) throws TemplateException {
         TemplateModel result = getLocalVariable(name);
         if (result == null) {
             result = currentNamespace.get(name);
@@ -1900,7 +1890,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * <code>.globals.<i>name</i></code>. This will first look at variables that were assigned globally via: &lt;#global
      * ...&gt; and then at the data model exposed to the template.
      */
-    public TemplateModel getGlobalVariable(String name) throws TemplateModelException {
+    public TemplateModel getGlobalVariable(String name) throws TemplateException {
         TemplateModel result = globalNamespace.get(name);
         if (result == null) {
             result = rootDataModel.get(name);
@@ -1956,7 +1946,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * object on each call that is completely disconnected from the Environment. That is, modifying the set will have no
      * effect on the Environment object.
      */
-    public Set getKnownVariableNames() throws TemplateModelException {
+    public Set getKnownVariableNames() throws TemplateException {
         // shared vars.
         Set set = configuration.getSharedVariables().keySet();
 
@@ -2210,7 +2200,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             }
 
             @Override
-            public TemplateModel get(String key) throws TemplateModelException {
+            public TemplateModel get(String key) throws TemplateException {
                 TemplateModel value = rootDataModel.get(key);
                 if (value == null) {
                     value = configuration.getWrappedSharedVariable(key);
@@ -2223,12 +2213,12 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             return new TemplateHashModelEx() {
 
                 @Override
-                public boolean isEmpty() throws TemplateModelException {
+                public boolean isEmpty() throws TemplateException {
                     return result.isEmpty();
                 }
 
                 @Override
-                public TemplateModel get(String key) throws TemplateModelException {
+                public TemplateModel get(String key) throws TemplateException {
                     return result.get(key);
                 }
 
@@ -2236,17 +2226,17 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                 // configuration shared variables even though
                 // the hash will return them, if only for BWC reasons
                 @Override
-                public TemplateCollectionModel values() throws TemplateModelException {
+                public TemplateCollectionModel values() throws TemplateException {
                     return ((TemplateHashModelEx) rootDataModel).values();
                 }
 
                 @Override
-                public TemplateCollectionModel keys() throws TemplateModelException {
+                public TemplateCollectionModel keys() throws TemplateException {
                     return ((TemplateHashModelEx) rootDataModel).keys();
                 }
 
                 @Override
-                public int size() throws TemplateModelException {
+                public int size() throws TemplateException {
                     return ((TemplateHashModelEx) rootDataModel).size();
                 }
             };
@@ -2268,7 +2258,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             }
 
             @Override
-            public TemplateModel get(String key) throws TemplateModelException {
+            public TemplateModel get(String key) throws TemplateException {
                 TemplateModel result = globalNamespace.get(key);
                 if (result == null) {
                     result = rootDataModel.get(key);
@@ -2760,10 +2750,10 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             customLookupCondition = getIncludedTemplateCustomLookupCondition();
         }
 
-        private void ensureInitializedTME() throws TemplateModelException {
+        private void ensureInitializedTME() throws TemplateException {
             if (status != InitializationStatus.INITIALIZED && status != InitializationStatus.INITIALIZING) {
                 if (status == InitializationStatus.FAILED) {
-                    throw new TemplateModelException(
+                    throw new TemplateException(
                             "Lazy initialization of the imported namespace for "
                             + _StringUtils.jQuote(templateName)
                             + " has already failed earlier; won't retry it.");
@@ -2774,7 +2764,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                     status = InitializationStatus.INITIALIZED;
                 } catch (Exception e) {
                     // [FM3] Rethrow TemplateException-s as is
-                    throw new TemplateModelException(
+                    throw new TemplateException(
                             "Lazy initialization of the imported namespace for "
                             + _StringUtils.jQuote(templateName)
                             + " has failed; see cause exception", e);
@@ -2789,7 +2779,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         private void ensureInitializedRTE() {
             try {
                 ensureInitializedTME();
-            } catch (TemplateModelException e) {
+            } catch (TemplateException e) {
                 throw new RuntimeException(e.getMessage(), e.getCause());
             }
         }
@@ -2830,7 +2820,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         }
 
         @Override
-        public TemplateModel get(String key) throws TemplateModelException {
+        public TemplateModel get(String key) throws TemplateException {
             ensureInitializedTME();
             return super.get(key);
         }

@@ -18,10 +18,10 @@
  */
 package org.apache.freemarker.core.model.impl;
 
-import org.apache.freemarker.core.util.CallableUtils;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
+import org.apache.freemarker.core.util.CallableUtils;
 
 /**
  * Stores the non-varargs methods for a {@link OverloadedMethods} object.
@@ -44,7 +44,7 @@ class OverloadedFixArgsMethods extends OverloadedMethodsSubset {
 
     @Override
     MaybeEmptyMemberAndArguments getMemberAndArguments(TemplateModel[] tmArgs, DefaultObjectWrapper unwrapper)
-    throws TemplateModelException {
+    throws TemplateException {
         if (tmArgs == null) {
             // null is treated as empty args
             tmArgs = CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY;

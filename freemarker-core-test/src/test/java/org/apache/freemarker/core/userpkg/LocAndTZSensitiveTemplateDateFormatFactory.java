@@ -23,8 +23,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.valueformat.InvalidFormatParametersException;
 import org.apache.freemarker.core.valueformat.TemplateDateFormat;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
@@ -60,8 +60,9 @@ public class LocAndTZSensitiveTemplateDateFormatFactory extends TemplateDateForm
 
         @Override
         public String formatToPlainText(TemplateDateModel dateModel)
-                throws UnformattableValueException, TemplateModelException {
-            return String.valueOf(TemplateFormatUtil.getNonNullDate(dateModel).getTime() + "@" + locale + ":" + timeZone.getID());
+                throws UnformattableValueException, TemplateException {
+            return String.valueOf(
+                    TemplateFormatUtil.getNonNullDate(dateModel).getTime() + "@" + locale + ":" + timeZone.getID());
         }
 
         @Override

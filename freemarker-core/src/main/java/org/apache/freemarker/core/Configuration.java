@@ -47,9 +47,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine;
 import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
@@ -348,7 +348,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             for (Entry<String, Object> ent : sharedVariables.entrySet()) {
                 try {
                     wrappedSharedVariables.put(ent.getKey(), objectWrapper.wrap(ent.getValue()));
-                } catch (TemplateModelException e) {
+                } catch (ObjectWrappingException e) {
                     throw new InvalidSettingValueException(
                             ExtendableBuilder.SHARED_VARIABLES_KEY, null, false,
                             "Failed to wrap shared variable " + _StringUtils.jQuote(ent.getKey()),

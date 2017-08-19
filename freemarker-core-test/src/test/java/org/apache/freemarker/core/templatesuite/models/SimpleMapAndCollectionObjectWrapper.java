@@ -23,8 +23,8 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.apache.freemarker.core.Version;
+import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
@@ -40,7 +40,7 @@ public class SimpleMapAndCollectionObjectWrapper extends DefaultObjectWrapper {
     }
 
     @Override
-    public TemplateModel wrap(Object obj) throws TemplateModelException {
+    public TemplateModel wrap(Object obj) throws ObjectWrappingException {
         if (obj == null) {
             return super.wrap(null);
         }        

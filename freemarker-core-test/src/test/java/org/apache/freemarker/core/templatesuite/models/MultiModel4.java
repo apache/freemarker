@@ -19,10 +19,10 @@
 
 package org.apache.freemarker.core.templatesuite.models;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleScalar;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
@@ -42,7 +42,7 @@ public class MultiModel4 implements TemplateSequenceModel, TemplateHashModel {
      * @return the specified index in the list
      */
     @Override
-    public TemplateModel get(int i) throws TemplateModelException {
+    public TemplateModel get(int i) throws TemplateException {
         return m_cList.get( i );
     }
 

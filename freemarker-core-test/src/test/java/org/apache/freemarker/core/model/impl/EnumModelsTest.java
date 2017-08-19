@@ -23,11 +23,11 @@ import static org.junit.Assert.*;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.NonTemplateCallPlace;
-import org.apache.freemarker.core.util.CallableUtils;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -49,7 +49,7 @@ public class EnumModelsTest {
         try {
             enums.get("no.such.ClassExists");
             fail();
-        } catch (TemplateModelException ex) {
+        } catch (TemplateException ex) {
             assertTrue(ex.getCause() instanceof ClassNotFoundException);
         }
         

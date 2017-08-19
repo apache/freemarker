@@ -21,10 +21,10 @@ package org.apache.freemarker.core.model.impl;
 
 import java.util.ArrayList;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateCollectionModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 
@@ -47,7 +47,7 @@ final public class CollectionAndSequence implements TemplateCollectionModel, Tem
     }
 
     @Override
-    public TemplateModelIterator iterator() throws TemplateModelException {
+    public TemplateModelIterator iterator() throws TemplateException {
         if (collection != null) {
             return collection.iterator();
         } else {
@@ -56,7 +56,7 @@ final public class CollectionAndSequence implements TemplateCollectionModel, Tem
     }
 
     @Override
-    public TemplateModel get(int i) throws TemplateModelException {
+    public TemplateModel get(int i) throws TemplateException {
         if (sequence != null) {
             return sequence.get(i);
         } else {
@@ -66,7 +66,7 @@ final public class CollectionAndSequence implements TemplateCollectionModel, Tem
     }
 
     @Override
-    public int size() throws TemplateModelException {
+    public int size() throws TemplateException {
         if (sequence != null) {
             return sequence.size();
         } else if (collection instanceof TemplateCollectionModelEx) {
@@ -77,7 +77,7 @@ final public class CollectionAndSequence implements TemplateCollectionModel, Tem
         }
     }
 
-    private void initSequence() throws TemplateModelException {
+    private void initSequence() throws TemplateException {
         if (data == null) {
             data = new ArrayList();
             TemplateModelIterator it = collection.iterator();
@@ -93,13 +93,13 @@ final public class CollectionAndSequence implements TemplateCollectionModel, Tem
         private final int size;
         private int index = 0;
 
-        SequenceIterator(TemplateSequenceModel sequence) throws TemplateModelException {
+        SequenceIterator(TemplateSequenceModel sequence) throws TemplateException {
             this.sequence = sequence;
             size = sequence.size();
             
         }
         @Override
-        public TemplateModel next() throws TemplateModelException {
+        public TemplateModel next() throws TemplateException {
             return sequence.get(index++);
         }
 

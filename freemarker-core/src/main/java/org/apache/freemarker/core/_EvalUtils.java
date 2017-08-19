@@ -30,12 +30,12 @@ import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.util.BugException;
+import org.apache.freemarker.core.util._ClassUtils;
 import org.apache.freemarker.core.valueformat.TemplateDateFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateValueFormat;
@@ -60,7 +60,7 @@ public class _EvalUtils {
      * @param expr {@code null} is allowed, but may results in less helpful error messages
      */
     public static String modelToString(TemplateScalarModel model, ASTExpression expr)
-    throws TemplateModelException {
+    throws TemplateException {
         String value = model.getAsString();
         if (value == null) {
             throw newModelHasStoredNullException(String.class, model, expr);
@@ -72,7 +72,7 @@ public class _EvalUtils {
      * @param expr {@code null} is allowed, but may results in less helpful error messages
      */
     public static Number modelToNumber(TemplateNumberModel model, ASTExpression expr)
-        throws TemplateModelException {
+        throws TemplateException {
         Number value = model.getAsNumber();
         if (value == null) throw newModelHasStoredNullException(Number.class, model, expr);
         return value;
@@ -82,17 +82,20 @@ public class _EvalUtils {
      * @param expr {@code null} is allowed, but may results in less helpful error messages
      */
     public static Date modelToDate(TemplateDateModel model, ASTExpression expr)
-        throws TemplateModelException {
+        throws TemplateException {
         Date value = model.getAsDate();
         if (value == null) throw newModelHasStoredNullException(Date.class, model, expr);
         return value;
     }
     
     /** Signals the buggy case where we have a non-null model, but it wraps a null. */
-    public static TemplateModelException newModelHasStoredNullException(
-            Class expected, TemplateModel model, ASTExpression expr) {
-        return new _TemplateModelException(expr,
-                _TemplateModelException.modelHasStoredNullDescription(expected, model));
+    public static TemplateException newModelHasStoredNullException(
+            Class<?> expected, TemplateModel model, ASTExpression expr) {
+        return new TemplateException(expr,
+                "The FreeMarker value exists, but has nothing inside it; the TemplateModel object (class: ",
+                model.getClass().getName(), ") has returned a null",
+                (expected != null ? new Object[] { " instead of a ", _ClassUtils.getShortClassName(expected) } : ""),
+                ". This is possibly a bug in the non-FreeMarker code that builds the data-model.");
     }
 
     /**
@@ -355,19 +358,19 @@ public class _EvalUtils {
             throws TemplateException {
         if (tm instanceof TemplateNumberModel) {
             TemplateNumberModel tnm = (TemplateNumberModel) tm; 
-            TemplateNumberFormat format = env.getTemplateNumberFormat(exp, false);
+            TemplateNumberFormat format = env.getTemplateNumberFormat(exp);
             try {
                 return assertFormatResultNotNull(format.format(tnm));
             } catch (TemplateValueFormatException e) {
-                throw MessageUtils.newCantFormatNumberException(format, exp, e, false);
+                throw MessageUtils.newCantFormatNumberException(format, exp, e);
             }
         } else if (tm instanceof TemplateDateModel) {
             TemplateDateModel tdm = (TemplateDateModel) tm;
-            TemplateDateFormat format = env.getTemplateDateFormat(tdm, exp, false);
+            TemplateDateFormat format = env.getTemplateDateFormat(tdm, exp);
             try {
                 return assertFormatResultNotNull(format.format(tdm));
             } catch (TemplateValueFormatException e) {
-                throw MessageUtils.newCantFormatDateException(format, exp, e, false);
+                throw MessageUtils.newCantFormatDateException(format, exp, e);
             }
         } else if (tm instanceof TemplateMarkupOutputModel) {
             return tm;
@@ -390,19 +393,19 @@ public class _EvalUtils {
             throws TemplateException {
         if (tm instanceof TemplateNumberModel) {
             TemplateNumberModel tnm = (TemplateNumberModel) tm; 
-            TemplateNumberFormat format = env.getTemplateNumberFormat(exp, false);
+            TemplateNumberFormat format = env.getTemplateNumberFormat(exp);
             try {
                 return ensureFormatResultString(format.format(tnm), exp, env);
             } catch (TemplateValueFormatException e) {
-                throw MessageUtils.newCantFormatNumberException(format, exp, e, false);
+                throw MessageUtils.newCantFormatNumberException(format, exp, e);
             }
         } else if (tm instanceof TemplateDateModel) {
             TemplateDateModel tdm = (TemplateDateModel) tm;
-            TemplateDateFormat format = env.getTemplateDateFormat(tdm, exp, false);
+            TemplateDateFormat format = env.getTemplateDateFormat(tdm, exp);
             try {
                 return ensureFormatResultString(format.format(tdm), exp, env);
             } catch (TemplateValueFormatException e) {
-                throw MessageUtils.newCantFormatDateException(format, exp, e, false);
+                throw MessageUtils.newCantFormatDateException(format, exp, e);
             }
         } else { 
             return coerceModelToTextualCommon(tm, exp, seqTip, false, false, env);
@@ -421,9 +424,9 @@ public class _EvalUtils {
     static String coerceModelToPlainText(TemplateModel tm, ASTExpression exp, String seqTip,
             Environment env) throws TemplateException {
         if (tm instanceof TemplateNumberModel) {
-            return assertFormatResultNotNull(env.formatNumberToPlainText((TemplateNumberModel) tm, exp, false));
+            return assertFormatResultNotNull(env.formatNumberToPlainText((TemplateNumberModel) tm, exp));
         } else if (tm instanceof TemplateDateModel) {
-            return assertFormatResultNotNull(env.formatDateToPlainText((TemplateDateModel) tm, exp, false));
+            return assertFormatResultNotNull(env.formatDateToPlainText((TemplateDateModel) tm, exp));
         } else {
             return coerceModelToTextualCommon(tm, exp, seqTip, false, false, env);
         }

@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.Date;
 
 import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.userpkg.HTMLISOTemplateDateFormatFactory;
@@ -138,7 +137,7 @@ public class CoercionToTextualTest extends TemplateTest {
     }
 
     @Before
-    public void setup() throws TemplateModelException {
+    public void setup() throws TemplateException {
         addToDataModel("s", "abc");
         addToDataModel("n", 1500);
         addToDataModel("dt", TM);

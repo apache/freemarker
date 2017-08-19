@@ -23,8 +23,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateDateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.core.valueformat.InvalidFormatParametersException;
 import org.apache.freemarker.core.valueformat.TemplateDateFormat;
@@ -69,7 +69,7 @@ public class EpochMillisDivTemplateDateFormatFactory extends TemplateDateFormatF
         
         @Override
         public String formatToPlainText(TemplateDateModel dateModel)
-                throws UnformattableValueException, TemplateModelException {
+                throws UnformattableValueException, TemplateException {
             return String.valueOf(TemplateFormatUtil.getNonNullDate(dateModel).getTime() / divisor);
         }
 

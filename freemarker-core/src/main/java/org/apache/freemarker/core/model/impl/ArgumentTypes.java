@@ -24,8 +24,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._ClassUtils;
 
@@ -561,7 +561,7 @@ final class ArgumentTypes {
         }
 
         @Override
-        TemplateModel invokeMethod(DefaultObjectWrapper ow, Object obj, Object[] args) throws TemplateModelException,
+        TemplateModel invokeMethod(DefaultObjectWrapper ow, Object obj, Object[] args) throws TemplateException,
                 InvocationTargetException, IllegalAccessException {
             convertArgsToReflectionCompatible(ow, args);
             return callableMemberDesc.invokeMethod(ow, obj, args);
@@ -569,7 +569,7 @@ final class ArgumentTypes {
 
         @Override
         Object invokeConstructor(DefaultObjectWrapper ow, Object[] args) throws IllegalArgumentException,
-                InstantiationException, IllegalAccessException, InvocationTargetException, TemplateModelException {
+                InstantiationException, IllegalAccessException, InvocationTargetException, TemplateException {
             convertArgsToReflectionCompatible(ow, args);
             return callableMemberDesc.invokeConstructor(ow, args);
         }
@@ -604,7 +604,7 @@ final class ArgumentTypes {
             return callableMemberDesc.getName();
         }
 
-        private void convertArgsToReflectionCompatible(DefaultObjectWrapper ow, Object[] args) throws TemplateModelException {
+        private void convertArgsToReflectionCompatible(DefaultObjectWrapper ow, Object[] args) throws TemplateException {
             Class<?>[] paramTypes = callableMemberDesc.getParamTypes();
             int ln = paramTypes.length;
             for (int i = 0; i < ln; i++) {

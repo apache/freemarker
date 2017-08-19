@@ -21,8 +21,8 @@ package org.apache.freemarker.core.model.impl;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 /**
  */
@@ -47,13 +47,13 @@ class MemberAndArguments extends MaybeEmptyMemberAndArguments {
     }
     
     TemplateModel invokeMethod(DefaultObjectWrapper ow, Object obj)
-            throws TemplateModelException, InvocationTargetException, IllegalAccessException {
+            throws TemplateException, InvocationTargetException, IllegalAccessException {
         return callableMemberDesc.invokeMethod(ow, obj, args);
     }
 
     Object invokeConstructor(DefaultObjectWrapper ow)
             throws IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException,
-            TemplateModelException {
+            TemplateException {
         return callableMemberDesc.invokeConstructor(ow, args);
     }
     

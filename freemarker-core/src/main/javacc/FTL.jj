@@ -361,7 +361,7 @@ public class FMParser {
         if (tm instanceof TemplateBooleanModel) {
             try {
                 return ((TemplateBooleanModel) tm).getAsBoolean();
-            } catch (TemplateModelException tme) {
+            } catch (TemplateException tme) {
             }
         }
         if (legacyCompat && tm instanceof TemplateScalarModel) {
@@ -3625,7 +3625,7 @@ ASTDirOutputFormat OutputFormat() :
         if (paramTM instanceof TemplateScalarModel) {
             try {
                 paramStr = ((TemplateScalarModel) paramTM).getAsString();
-            } catch (TemplateModelException e) {
+            } catch (TemplateException e) {
 	            throw new ParseException(
 	                    "Could not evaluate expression (on parse-time): " + paramExp.getCanonicalForm()
 	                    + "\nUnderlying cause: " +  e,
@@ -4115,7 +4115,7 @@ void HeaderElement() :
                     if (value instanceof TemplateScalarModel) {
                         try {
                             vs = ((TemplateScalarModel) exp).getAsString();
-                        } catch (TemplateModelException tme) {}
+                        } catch (TemplateException tme) {}
                     }
                     if (template != null) {
                         if (ks.equalsIgnoreCase("encoding")) {
@@ -4190,7 +4190,7 @@ void HeaderElement() :
                                         throw new ParseException(iae.getMessage(), exp);
                                     }
                                 }
-                            } catch (TemplateModelException tme) {
+                            } catch (TemplateException tme) {
                             }
                         } else if (ks.equals("customSettings")) {
                             if (!(value instanceof TemplateHashModelEx)) {
@@ -4210,7 +4210,7 @@ void HeaderElement() :
                                         }
                                         template.setHeaderCustomSetting(attName, (Serializable) attValue);
                                 }
-                            } catch (TemplateModelException tme) {
+                            } catch (TemplateException tme) {
                             }
                         } else {
                             StringBuilder sb = new StringBuilder();

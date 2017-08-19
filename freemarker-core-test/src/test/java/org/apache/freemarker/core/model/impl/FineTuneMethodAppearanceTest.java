@@ -22,9 +22,9 @@ package org.apache.freemarker.core.model.impl;
 import static org.junit.Assert.*;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +34,7 @@ import org.junit.runners.JUnit4;
 public class FineTuneMethodAppearanceTest {
 
     @Test
-    public void newWayOfConfiguring() throws TemplateModelException {
+    public void newWayOfConfiguring() throws TemplateException {
         DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
                 .methodAppearanceFineTuner(GetlessMethodsAsPropertyGettersRule.INSTANCE)
                 .exposeFields(true)
@@ -42,7 +42,7 @@ public class FineTuneMethodAppearanceTest {
         checkIfProperlyWrapped(ow.wrap(new C()));
     }
     
-    private void checkIfProperlyWrapped(TemplateModel tm) throws TemplateModelException {
+    private void checkIfProperlyWrapped(TemplateModel tm) throws TemplateException {
         TemplateHashModel thm = (TemplateHashModel) tm;
         assertEquals("v1", ((TemplateScalarModel) thm.get("v1")).getAsString());
         assertEquals("v2()", ((TemplateScalarModel) thm.get("v2")).getAsString());

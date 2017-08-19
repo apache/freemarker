@@ -20,7 +20,6 @@
 package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.util._NullArgumentException;
 
 /**
@@ -44,20 +43,6 @@ public final class _CoreAPI {
             new ThreadInterruptionSupportTemplatePostProcessor().postProcess(template);
         } catch (TemplatePostProcessorException e) {
             throw new RuntimeException("Template post-processing failed", e);
-        }
-    }
-
-    /**
-     * The work around the problematic cases where we should throw a {@link TemplateException}, but we are inside
-     * a {@link TemplateModel} method and so we can only throw {@link TemplateModelException}-s.  
-     */
-    // [FM3] Get rid of this problem, then delete this method
-    public static TemplateModelException ensureIsTemplateModelException(String modelOpMsg, TemplateException e) {
-        if (e instanceof TemplateModelException) {
-            return (TemplateModelException) e;
-        } else {
-            return new _TemplateModelException(
-                    e.getBlamedExpression(), e.getCause(), e.getEnvironment(), modelOpMsg);
         }
     }
 

@@ -20,10 +20,10 @@
 package org.apache.freemarker.core.templatesuite.models;
 
 import org.apache.freemarker.core.Configuration;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
@@ -95,7 +95,7 @@ public class MultiModel1 implements TemplateHashModel,
      * @return the specified index in the list
      */
     @Override
-    public TemplateModel get(int i) throws TemplateModelException {
+    public TemplateModel get(int i) throws TemplateException {
         return m_cListModel.get( i );
     }
 
@@ -110,7 +110,7 @@ public class MultiModel1 implements TemplateHashModel,
     }
 
     @Override
-    public int size() throws TemplateModelException {
+    public int size() throws TemplateException {
         return m_cListModel.size();
     }
 }

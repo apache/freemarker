@@ -30,11 +30,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.impl.RationalNumber;
@@ -873,7 +874,7 @@ public class OverloadedMethods2 {
         return listList;
     }
 
-    public List getJavaStringSequenceList() throws TemplateModelException {
+    public List getJavaStringSequenceList() throws ObjectWrappingException {
         ObjectWrapper ow = Environment.getCurrentEnvironment().getObjectWrapper();
         
         List listList = new ArrayList();
@@ -1027,7 +1028,7 @@ public class OverloadedMethods2 {
         }
 
         @Override
-        public Number getAsNumber() throws TemplateModelException {
+        public Number getAsNumber() throws TemplateException {
             return Integer.valueOf(122);
         }
         
@@ -1036,7 +1037,7 @@ public class OverloadedMethods2 {
     private static class MyWrapperNumberModel implements TemplateNumberModel, WrapperTemplateModel {
 
         @Override
-        public Number getAsNumber() throws TemplateModelException {
+        public Number getAsNumber() throws TemplateException {
             return Integer.valueOf(122);
         }
 
@@ -1055,7 +1056,7 @@ public class OverloadedMethods2 {
         }
 
         @Override
-        public boolean getAsBoolean() throws TemplateModelException {
+        public boolean getAsBoolean() throws TemplateException {
             return true;
         }
         
@@ -1069,7 +1070,7 @@ public class OverloadedMethods2 {
         }
 
         @Override
-        public boolean getAsBoolean() throws TemplateModelException {
+        public boolean getAsBoolean() throws TemplateException {
             return false;
         }
         
@@ -1087,7 +1088,7 @@ public class OverloadedMethods2 {
         }
 
         @Override
-        public boolean getAsBoolean() throws TemplateModelException {
+        public boolean getAsBoolean() throws TemplateException {
             return false;
         }
         
@@ -1101,7 +1102,7 @@ public class OverloadedMethods2 {
         }
 
         @Override
-        public boolean getAsBoolean() throws TemplateModelException {
+        public boolean getAsBoolean() throws TemplateException {
             return true;
         }
         

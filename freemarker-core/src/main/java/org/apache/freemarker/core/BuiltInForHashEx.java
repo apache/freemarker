@@ -21,7 +21,6 @@ package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelException;
 
 abstract class BuiltInForHashEx extends ASTExpBuiltIn {
 
@@ -35,7 +34,7 @@ abstract class BuiltInForHashEx extends ASTExpBuiltIn {
     }
     
     abstract TemplateModel calculateResult(TemplateHashModelEx hashExModel, Environment env)
-            throws TemplateModelException, InvalidReferenceException;
+            throws TemplateException, InvalidReferenceException;
     
     protected InvalidReferenceException newNullPropertyException(
             String propertyName, TemplateModel tm, Environment env) {
