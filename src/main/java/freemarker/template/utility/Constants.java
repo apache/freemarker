@@ -39,8 +39,8 @@ import freemarker.template.TemplateSequenceModel;
  * Frequently used constant {@link TemplateModel} values.
  * 
  * <p>These constants should be stored in the {@link TemplateModel}
- * sub-interfaces, but for bacward compatibility they are stored here instead.
- * Starting from FreeMarker 2.4 they should be copyed (not moved!) into the
+ * sub-interfaces, but for backward compatibility they are stored here instead.
+ * Starting from FreeMarker 2.4 they should be copied (not moved!) into the
  * {@link TemplateModel} sub-interfaces, and this class should be marked as
  * deprecated.</p>
  */
