@@ -19,9 +19,13 @@
 
 package org.apache.freemarker.core.model;
 
+import org.apache.freemarker.core.util.CallableUtils;
+
 /**
  * Super interface (marker interface) of {@link TemplateFunctionModel} and {@link TemplateDirectiveModel}; don' extended
  * (or implement) it yourself!
+ * <p>
+ * You can find utilities for implementing {@link TemplateCallableModel}-s in {@link CallableUtils}.
  */
 public interface TemplateCallableModel extends TemplateModel {
     //

@@ -705,9 +705,10 @@ class BuiltInsForStringsBasic {
                         throw newIndexGreaterThanLengthException(1, endIdx, len);
                     }
                     if (beginIdx > endIdx) {
-                        throw newGenericExecuteException(this,
+                        throw newGenericExecuteException(
                                 "The begin index argument, " + beginIdx
-                                + ", shouldn't be greater than the end index argument, " + endIdx + ".");
+                                + ", shouldn't be greater than the end index argument, " + endIdx + ".",
+                                this);
                     }
                     return new SimpleScalar(s.substring(beginIdx, endIdx));
                 } else {

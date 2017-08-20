@@ -8,6 +8,7 @@ import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.NonTemplateCallPlace;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.impl.JavaMethodModel;
+import org.apache.freemarker.core.util.CallableUtils;
 
 /**
  * A {@link TemplateCallableModel} that progressively writes it result into the {@code out} object, instead of
@@ -21,6 +22,8 @@ import org.apache.freemarker.core.model.impl.JavaMethodModel;
  * <p>
  * Example usage in a template: {@code <@my.menu style="foo" expand=true>...</@my.menu>},
  * {@code <@my.menuItem "Some title" icon="some.jpg" />}.
+ * <p>
+ * You can find utilities for implementing {@link TemplateDirectiveModel}-s in {@link CallableUtils}.
  */
 public interface TemplateDirectiveModel extends TemplateCallableModel {
 

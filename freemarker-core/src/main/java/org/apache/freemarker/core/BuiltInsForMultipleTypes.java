@@ -475,7 +475,8 @@ class BuiltInsForMultipleTypes {
                 TemplateModel result = args[argIdx];
                 if (!(result instanceof TemplateScalarModel)) {
                     // Cause usual type exception
-                    CallableUtils.castArgumentValueToString(result, argIdx, this, true, false);
+                    CallableUtils.castArgumentValueToString(
+                            result, argIdx, false, null, this, true);
                 }
                 return result;
             }

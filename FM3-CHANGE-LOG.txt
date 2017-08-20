@@ -377,6 +377,7 @@ Core / Models and Object wrapping
   the common interface bith for wrapped Java methods and functions defined in the templates, or on any other ways.
   `OverloadedMethodsModel` and `SimpleMethodModel` were renamed to `OverloadJavaMethodModel` and  `SimpleJavaMethodModel`,
   which of course extend `TemplateFunctionModel`, but allow inocations without `Environment` parameter.
+- `org.apache.freemarker.core.util.CallableUtils` was added to help implementing function and directives in Java.
 - `TemplateModelException` was removed, replaced with `TemplateException` on all places, except for
   `ObjectWrapper.wrap(Object)` and `wrapAsAPI(Object)`, which now throws `ObjectWrappingException` instead (that extends
   `TemplateException`).

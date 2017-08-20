@@ -26,10 +26,9 @@ import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util.TemplateLanguageUtils;
+import org.apache.freemarker.core.util.CallableUtils;
 
 public class AssertDirective implements TemplateDirectiveModel {
     public static AssertDirective INSTANCE = new AssertDirective();
@@ -39,16 +38,7 @@ public class AssertDirective implements TemplateDirectiveModel {
     @Override
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
-        TemplateModel test = args[0];
-        if (test == null) {
-            throw new MissingRequiredParameterException("test", env);
-        }
-        if (!(test instanceof TemplateBooleanModel)) {
-            throw new AssertationFailedInTemplateException("Assertion failed:\n"
-                    + "The value had to be boolean, but it was of type" + TemplateLanguageUtils.getTypeDescription(test),
-                    env);
-        }
-        if (!((TemplateBooleanModel) test).getAsBoolean()) {
+        if (!CallableUtils.getBooleanArgument(args, 0, this)) {
             throw new AssertationFailedInTemplateException("Assertion failed:\n"
                     + "the value was false.",
                     env);

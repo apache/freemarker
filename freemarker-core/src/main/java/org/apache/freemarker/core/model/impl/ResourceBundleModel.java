@@ -125,10 +125,10 @@ public class ResourceBundleModel extends BeanModel implements TemplateFunctionMo
             // Invoke format
             return new BeanAndStringModel(format(key, params), wrapper);
         } catch (MissingResourceException e) {
-            throw CallableUtils.newGenericExecuteException(this, "No such key: " + key,  e);
+            throw CallableUtils.newGenericExecuteException("No such key: " + key, this, e);
         } catch (Exception e) {
-            throw CallableUtils.newGenericExecuteException(this,
-                    "Failed to get or format message; see cause exception",  e);
+            throw CallableUtils.newGenericExecuteException("Failed to get or format message; see cause exception", this,
+                    e);
         }
     }
 

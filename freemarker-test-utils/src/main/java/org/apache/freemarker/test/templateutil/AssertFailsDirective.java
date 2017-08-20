@@ -29,8 +29,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util._NullWriter;
 import org.apache.freemarker.core.util._StringUtils;
@@ -44,16 +43,11 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
     private static final int EXCEPTION_ARG_IDX = 2;
     private static final int CAUSE_NESTING_LEVEL_ARG_IDX = 3;
 
-    private static final String MESSAGE_ARG_NAME = "message";
-    private static final String MESSAGE_REGEXP_ARG_NAME = "messageRegexp";
-    private static final String EXCEPTION_ARG_NAME = "exception";
-    private static final String CAUSE_NESTING_LEVEL_ARG_NAME = "causeNestingLevel";
-
     private static final StringToIndexMap ARG_NAME_TO_IDX = StringToIndexMap.of(
-            MESSAGE_ARG_NAME, MESSAGE_ARG_IDX,
-            MESSAGE_REGEXP_ARG_NAME, MESSAGE_REGEXP_ARG_IDX,
-            EXCEPTION_ARG_NAME, EXCEPTION_ARG_IDX,
-            CAUSE_NESTING_LEVEL_ARG_NAME, CAUSE_NESTING_LEVEL_ARG_IDX);
+            "message", MESSAGE_ARG_IDX,
+            "messageRegexp", MESSAGE_REGEXP_ARG_IDX,
+            "exception", EXCEPTION_ARG_IDX,
+            "causeNestingLevel", CAUSE_NESTING_LEVEL_ARG_IDX);
 
     private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
             0, false,
@@ -64,10 +58,15 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
 
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
-        String message = getAsString(args[MESSAGE_ARG_IDX], MESSAGE_ARG_NAME, env);
-        Pattern messageRegexp = getAsPattern(args[MESSAGE_REGEXP_ARG_IDX], MESSAGE_REGEXP_ARG_NAME, env);
-        String exception = getAsString(args[EXCEPTION_ARG_IDX], EXCEPTION_ARG_NAME, env);
-        int causeNestingLevel = getAsInt(args[CAUSE_NESTING_LEVEL_ARG_IDX], 0, CAUSE_NESTING_LEVEL_ARG_NAME, env);
+        String message = CallableUtils.getOptionalStringArgument(args, MESSAGE_ARG_IDX, this);
+        Pattern messageRegexp;
+        {
+            String s = CallableUtils.getOptionalStringArgument(args, MESSAGE_REGEXP_ARG_IDX, this);
+            messageRegexp = s != null ? Pattern.compile(s, Pattern.CASE_INSENSITIVE) : null;
+        }
+        String exception = CallableUtils.getOptionalStringArgument(args, EXCEPTION_ARG_IDX, this);
+        int causeNestingLevel = CallableUtils.getOptionalIntArgument(
+                args, CAUSE_NESTING_LEVEL_ARG_IDX, 0, this);
         if (callPlace.hasNestedContent()) {
             boolean blockFailed;
             try {
@@ -142,36 +141,6 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
     @Override
     public boolean isNestedContentSupported() {
         return true;
-    }
-
-    private String getAsString(TemplateModel value, String paramName, Environment env)
-            throws TemplateException {
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof TemplateScalarModel) {
-            return ((TemplateScalarModel) value).getAsString();
-        } else {
-            throw new BadParameterTypeException(paramName, "string", value, env);
-        }
-    }
-
-    private Pattern getAsPattern(TemplateModel value, String paramName, Environment env)
-            throws TemplateException {
-        String s = getAsString(value, paramName, env);
-        return s != null ? Pattern.compile(s, Pattern.CASE_INSENSITIVE) : null;
-    }
-
-    private int getAsInt(TemplateModel value, int defaultValue, String paramName, Environment env)
-            throws TemplateException {
-        if (value == null) {
-            return defaultValue;
-        }
-        if (value instanceof TemplateNumberModel) {
-            return ((TemplateNumberModel) value).getAsNumber().intValue(); 
-        } else {
-            throw new BadParameterTypeException(paramName, "number", value, env);
-        }
     }
 
 }

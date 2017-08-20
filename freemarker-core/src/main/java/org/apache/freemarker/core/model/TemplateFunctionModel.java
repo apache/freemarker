@@ -6,6 +6,7 @@ import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.impl.JavaMethodModel;
+import org.apache.freemarker.core.util.CallableUtils;
 
 /**
  * A {@link TemplateCallableModel}, which returns its result as a {@link TemplateModel} at the end of its execution.
@@ -16,6 +17,8 @@ import org.apache.freemarker.core.model.impl.JavaMethodModel;
  * <p>
  * Example usage in templates: {@code < a href="${my.toProductURL(product.id)}">},
  * {@code <#list my.groupByFirstLetter(products, property="name") as productGroup>}
+ * <p>
+ * You can find utilities for implementing {@link TemplateFunctionModel}-s in {@link CallableUtils}.
  */
 public interface TemplateFunctionModel extends TemplateCallableModel {
 

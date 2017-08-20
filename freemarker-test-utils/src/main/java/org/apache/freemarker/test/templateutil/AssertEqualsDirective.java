@@ -32,6 +32,7 @@ import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util._StringUtils;
 
@@ -42,12 +43,9 @@ public class AssertEqualsDirective implements TemplateDirectiveModel {
     private static final int ACTUAL_ARG_IDX = 0;
     private static final int EXPECTED_ARG_IDX = 1;
 
-    private static final String ACTUAL_ARG_NAME = "actual";
-    private static final String EXPECTED_ARG_NAME = "expected";
-
     private static final StringToIndexMap ARG_NAME_TO_IDX = StringToIndexMap.of(
-            ACTUAL_ARG_NAME, ACTUAL_ARG_IDX,
-            EXPECTED_ARG_NAME, EXPECTED_ARG_IDX);
+            "actual", ACTUAL_ARG_IDX,
+            "expected", EXPECTED_ARG_IDX);
 
     private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
             0, false,
@@ -58,16 +56,8 @@ public class AssertEqualsDirective implements TemplateDirectiveModel {
     @Override
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
-        TemplateModel actual = args[ACTUAL_ARG_IDX];
-        if (actual == null) {
-            throw new MissingRequiredParameterException(ACTUAL_ARG_NAME, env);
-        }
-
-        TemplateModel expected = args[EXPECTED_ARG_IDX];
-        if (expected == null) {
-            throw new MissingRequiredParameterException(EXPECTED_ARG_NAME, env);
-        }
-
+        TemplateModel actual = CallableUtils.getArgument(args, ACTUAL_ARG_IDX, null, this);
+        TemplateModel expected = CallableUtils.getArgument(args, ACTUAL_ARG_IDX, null, this);
         if (!env.applyEqualsOperatorLenient(actual, expected)) {
             throw new AssertationFailedInTemplateException("Assertion failed:\n"
                     + "Expected: " + tryUnwrap(expected) + "\n"
