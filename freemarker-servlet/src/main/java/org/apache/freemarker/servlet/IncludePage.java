@@ -72,14 +72,14 @@ public class IncludePage implements TemplateDirectiveModel {
     private static final String INHERIT_PARAMS_PARAM_NAME = "inherit_params";
     private static final String PARAMS_PARAM_NAME = "params";
 
-    private static final StringToIndexMap NAME_TO_IDX_MAP = StringToIndexMap.of(
-            PATH_PARAM_NAME, PATH_PARAM_IDX,
-            INHERIT_PARAMS_PARAM_NAME, INHERIT_PARAMS_PARAM_IDX
-    );
-
     private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
-            0, false,
-            NAME_TO_IDX_MAP, false
+            0,
+            false,
+            StringToIndexMap.of(
+                    PATH_PARAM_NAME, PATH_PARAM_IDX,
+                    INHERIT_PARAMS_PARAM_NAME, INHERIT_PARAMS_PARAM_IDX
+            ),
+            false
     );
     
     public IncludePage(HttpServletRequest request, HttpServletResponse response) {

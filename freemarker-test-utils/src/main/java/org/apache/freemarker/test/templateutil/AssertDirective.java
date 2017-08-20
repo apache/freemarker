@@ -39,9 +39,7 @@ public class AssertDirective implements TemplateDirectiveModel {
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
         if (!CallableUtils.getBooleanArgument(args, 0, this)) {
-            throw new AssertationFailedInTemplateException("Assertion failed:\n"
-                    + "the value was false.",
-                    env);
+            throw new AssertionFailedInTemplateException("Assertion failed:\n" + "the value was false.", env);
         }
     }
 

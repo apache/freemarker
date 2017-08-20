@@ -43,15 +43,15 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
     private static final int EXCEPTION_ARG_IDX = 2;
     private static final int CAUSE_NESTING_LEVEL_ARG_IDX = 3;
 
-    private static final StringToIndexMap ARG_NAME_TO_IDX = StringToIndexMap.of(
-            "message", MESSAGE_ARG_IDX,
-            "messageRegexp", MESSAGE_REGEXP_ARG_IDX,
-            "exception", EXCEPTION_ARG_IDX,
-            "causeNestingLevel", CAUSE_NESTING_LEVEL_ARG_IDX);
-
     private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
-            0, false,
-            ARG_NAME_TO_IDX, false);
+            0,
+            false,
+            StringToIndexMap.of(
+                    "message", MESSAGE_ARG_IDX,
+                    "messageRegexp", MESSAGE_REGEXP_ARG_IDX,
+                    "exception", EXCEPTION_ARG_IDX,
+                    "causeNestingLevel", CAUSE_NESTING_LEVEL_ARG_IDX),
+            false);
 
     private AssertFailsDirective() {
     }
@@ -84,7 +84,7 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
             while (causeNestingLevelCountDown != 0) {
                 e = e.getCause();
                 if (e == null) {
-                    throw new AssertationFailedInTemplateException(
+                    throw new AssertionFailedInTemplateException(
                             "Failure is not like expected: The cause exception nesting dept was lower than "
                                     + causeNestingLevel + ".",
                             env);
@@ -94,7 +94,7 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
 
             if (message != null || messageRegexp != null) {
                 if (e.getMessage() == null) {
-                    throw new AssertationFailedInTemplateException(
+                    throw new AssertionFailedInTemplateException(
                             "Failure is not like expected. The exception message was null, "
                                     + "and thus it doesn't contain:\n" + _StringUtils.jQuote(message) + ".",
                             env);
@@ -103,37 +103,35 @@ public class AssertFailsDirective implements TemplateDirectiveModel {
                     String actualMessage = e instanceof TemplateException
                             ? ((TemplateException) e).getMessageWithoutStackTop() : e.getMessage();
                     if (!actualMessage.toLowerCase().contains(message.toLowerCase())) {
-                        throw new AssertationFailedInTemplateException(
-                                "Failure is not like expected. The exception message:\n" + _StringUtils
-                                        .jQuote(actualMessage)
+                        throw new AssertionFailedInTemplateException(
+                                "Failure is not like expected. The exception message:\n"
+                                        + _StringUtils.jQuote(actualMessage)
                                         + "\ndoesn't contain:\n" + _StringUtils.jQuote(message) + ".",
                                 env);
                     }
                 }
                 if (messageRegexp != null) {
                     if (!messageRegexp.matcher(e.getMessage()).find()) {
-                        throw new AssertationFailedInTemplateException(
-                                "Failure is not like expected. The exception message:\n" + _StringUtils
-                                        .jQuote(e.getMessage())
-                                        + "\ndoesn't match this regexp:\n" + _StringUtils
-                                        .jQuote(messageRegexp.toString())
+                        throw new AssertionFailedInTemplateException(
+                                "Failure is not like expected. The exception message:\n"
+                                        + _StringUtils.jQuote(e.getMessage())
+                                        + "\ndoesn't match this regexp:\n"
+                                        + _StringUtils.jQuote(messageRegexp.toString())
                                         + ".",
                                 env);
                     }
                 }
             }
             if (exception != null && !e.getClass().getName().contains(exception)) {
-                throw new AssertationFailedInTemplateException(
-                        "Failure is not like expected. The exception class name " + _StringUtils
-                                .jQuote(e.getClass().getName())
+                throw new AssertionFailedInTemplateException(
+                        "Failure is not like expected. The exception class name "
+                                + _StringUtils.jQuote(e.getClass().getName())
                                 + " doesn't contain " + _StringUtils.jQuote(message) + ".",
                         env);
             }
         }
         if (!blockFailed) {
-            throw new AssertationFailedInTemplateException(
-                    "Block was expected to fail, but it didn't.",
-                    env);
+            throw new AssertionFailedInTemplateException("Block was expected to fail, but it didn't.", env);
         }
     }
 

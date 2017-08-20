@@ -43,13 +43,13 @@ public class AssertEqualsDirective implements TemplateDirectiveModel {
     private static final int ACTUAL_ARG_IDX = 0;
     private static final int EXPECTED_ARG_IDX = 1;
 
-    private static final StringToIndexMap ARG_NAME_TO_IDX = StringToIndexMap.of(
-            "actual", ACTUAL_ARG_IDX,
-            "expected", EXPECTED_ARG_IDX);
-
     private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
-            0, false,
-            ARG_NAME_TO_IDX, false);
+            0,
+            false,
+            StringToIndexMap.of(
+                    "actual", ACTUAL_ARG_IDX,
+                    "expected", EXPECTED_ARG_IDX),
+            false);
 
     private AssertEqualsDirective() { }
     
@@ -59,7 +59,7 @@ public class AssertEqualsDirective implements TemplateDirectiveModel {
         TemplateModel actual = CallableUtils.getArgument(args, ACTUAL_ARG_IDX, null, this);
         TemplateModel expected = CallableUtils.getArgument(args, ACTUAL_ARG_IDX, null, this);
         if (!env.applyEqualsOperatorLenient(actual, expected)) {
-            throw new AssertationFailedInTemplateException("Assertion failed:\n"
+            throw new AssertionFailedInTemplateException("Assertion failed:\n"
                     + "Expected: " + tryUnwrap(expected) + "\n"
                     + "Actual: " + tryUnwrap(actual),
                     env);

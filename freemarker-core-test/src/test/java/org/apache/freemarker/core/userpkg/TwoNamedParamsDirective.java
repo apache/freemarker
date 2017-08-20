@@ -40,13 +40,13 @@ public class TwoNamedParamsDirective extends TestTemplateCallableModel implement
     private static final String N1_ARG_NAME = "n1";
     private static final String N2_ARG_NAME = "n2";
 
-    private static final StringToIndexMap ARG_NAME_TO_IDX = StringToIndexMap.of(
-            N1_ARG_NAME, N1_ARG_IDX,
-            N2_ARG_NAME, N2_ARG_IDX);
-
     private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
-            0, false,
-            ARG_NAME_TO_IDX, false);
+            0,
+            false,
+            StringToIndexMap.of(
+                    N1_ARG_NAME, N1_ARG_IDX,
+                    N2_ARG_NAME, N2_ARG_IDX),
+            false);
 
     private TwoNamedParamsDirective() {
         //
