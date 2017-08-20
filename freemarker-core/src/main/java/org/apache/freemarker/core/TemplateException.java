@@ -263,7 +263,8 @@ public class TemplateException extends Exception {
         if (description != null && description.length() != 0) {
             messageWithoutStackTop = description;
         } else if (getCause() != null) {
-            messageWithoutStackTop = "No error description was specified for this error; low-level message: "
+            messageWithoutStackTop = "No high-level description was specified for this error; "
+                    + "low-level message (from cause exception): "
                     + getCause().getClass().getName() + ": " + getCause().getMessage();
         } else {
             messageWithoutStackTop = "[No error description was available.]";
