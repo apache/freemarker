@@ -27,7 +27,7 @@ import org.apache.freemarker.core.NonTemplateCallPlace;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,12 +60,12 @@ public class StaticModelsTest {
         }
         
         TemplateModel f = s.get("F");
-        assertTrue(f instanceof TemplateScalarModel);
-        assertEquals(((TemplateScalarModel) f).getAsString(), "F OK");
+        assertTrue(f instanceof TemplateStringModel);
+        assertEquals(((TemplateStringModel) f).getAsString(), "F OK");
         
         TemplateModel m = s.get("m");
         assertTrue(m instanceof JavaMethodModel);
-        assertEquals(((TemplateScalarModel) ((JavaMethodModel) m).execute(
+        assertEquals(((TemplateStringModel) ((JavaMethodModel) m).execute(
                 CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE)).getAsString(),
                 "m OK");
         

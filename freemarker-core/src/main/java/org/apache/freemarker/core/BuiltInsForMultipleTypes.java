@@ -37,11 +37,11 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.valueformat.TemplateDateFormat;
@@ -61,7 +61,7 @@ class BuiltInsForMultipleTypes {
             if (model instanceof TemplateNumberModel) {
                 return formatNumber(env, model);
             } else if (model instanceof TemplateBooleanModel) {
-                return new SimpleScalar(((TemplateBooleanModel) model).getAsBoolean()
+                return new SimpleString(((TemplateBooleanModel) model).getAsBoolean()
                         ? TemplateBooleanFormat.C_TRUE : TemplateBooleanFormat.C_FALSE);
             } else {
                 throw MessageUtils.newUnexpectedOperandTypeException(
@@ -76,34 +76,34 @@ class BuiltInsForMultipleTypes {
             Number num = _EvalUtils.modelToNumber((TemplateNumberModel) model, target);
             if (num instanceof Integer || num instanceof Long) {
                 // Accelerate these fairly common cases
-                return new SimpleScalar(num.toString());
+                return new SimpleString(num.toString());
             } else if (num instanceof Double) {
                 double n = num.doubleValue();
                 if (n == Double.POSITIVE_INFINITY) {
-                    return new SimpleScalar("INF");
+                    return new SimpleString("INF");
                 }
                 if (n == Double.NEGATIVE_INFINITY) {
-                    return new SimpleScalar("-INF");
+                    return new SimpleString("-INF");
                 }
                 if (Double.isNaN(n)) {
-                    return new SimpleScalar("NaN");
+                    return new SimpleString("NaN");
                 }
                 // Deliberately falls through
             } else if (num instanceof Float) {
                 float n = num.floatValue();
                 if (n == Float.POSITIVE_INFINITY) {
-                    return new SimpleScalar("INF");
+                    return new SimpleString("INF");
                 }
                 if (n == Float.NEGATIVE_INFINITY) {
-                    return new SimpleScalar("-INF");
+                    return new SimpleString("-INF");
                 }
                 if (Float.isNaN(n)) {
-                    return new SimpleScalar("NaN");
+                    return new SimpleString("NaN");
                 }
                 // Deliberately falls through
             }
         
-            return new SimpleScalar(env.getCNumberFormat().format(num));
+            return new SimpleString(env.getCNumberFormat().format(num));
         }
         
     }
@@ -409,7 +409,7 @@ class BuiltInsForMultipleTypes {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
-            return (tm instanceof TemplateScalarModel) ?
+            return (tm instanceof TemplateStringModel) ?
                 TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
@@ -459,7 +459,7 @@ class BuiltInsForMultipleTypes {
     static class stringBI extends ASTExpBuiltIn {
         
         private class BooleanFormatter extends BuiltInCallableImpl
-                implements TemplateScalarModel, TemplateFunctionModel {
+                implements TemplateStringModel, TemplateFunctionModel {
             private final TemplateBooleanModel bool;
             private final Environment env;
             
@@ -473,7 +473,7 @@ class BuiltInsForMultipleTypes {
                     throws TemplateException {
                 int argIdx = bool.getAsBoolean() ? 0 : 1;
                 TemplateModel result = args[argIdx];
-                if (!(result instanceof TemplateScalarModel)) {
+                if (!(result instanceof TemplateStringModel)) {
                     // Cause usual type exception
                     CallableUtils.castArgumentValueToString(
                             result, argIdx, false, null, this, true);
@@ -489,8 +489,8 @@ class BuiltInsForMultipleTypes {
             @Override
             public String getAsString() throws TemplateException {
                 // Boolean should have come first... but that change would be non-BC. 
-                if (bool instanceof TemplateScalarModel) {
-                    return ((TemplateScalarModel) bool).getAsString();
+                if (bool instanceof TemplateStringModel) {
+                    return ((TemplateStringModel) bool).getAsString();
                 } else {
                     return env.formatBoolean(bool.getAsBoolean(), true);
                 }
@@ -498,7 +498,7 @@ class BuiltInsForMultipleTypes {
         }
     
         private class DateFormatter extends BuiltInCallableImpl
-                implements TemplateScalarModel, TemplateHashModel, TemplateFunctionModel {
+                implements TemplateStringModel, TemplateHashModel, TemplateFunctionModel {
             private final TemplateDateModel dateModel;
             private final Environment env;
             private final TemplateDateFormat defaultFormat;
@@ -533,7 +533,7 @@ class BuiltInsForMultipleTypes {
             }
 
             private TemplateModel formatWith(String key) throws TemplateException {
-                return new SimpleScalar(env.formatDateToPlainText(dateModel, key, target, stringBI.this));
+                return new SimpleString(env.formatDateToPlainText(dateModel, key, target, stringBI.this));
             }
             
             @Override
@@ -563,7 +563,7 @@ class BuiltInsForMultipleTypes {
         }
         
         private class NumberFormatter extends BuiltInCallableImpl
-                implements TemplateScalarModel, TemplateHashModel, TemplateFunctionModel {
+                implements TemplateStringModel, TemplateHashModel, TemplateFunctionModel {
             private final TemplateNumberModel numberModel;
             private final Number number;
             private final Environment env;
@@ -596,7 +596,7 @@ class BuiltInsForMultipleTypes {
 
                 String result = env.formatNumberToPlainText(numberModel, format, target);
 
-                return new SimpleScalar(result);
+                return new SimpleString(result);
             }
             
             @Override
@@ -621,19 +621,19 @@ class BuiltInsForMultipleTypes {
             } else if (model instanceof TemplateDateModel) {
                 TemplateDateModel dm = (TemplateDateModel) model;
                 return new DateFormatter(dm, env);
-            } else if (model instanceof SimpleScalar) {
+            } else if (model instanceof SimpleString) {
                 return model;
             } else if (model instanceof TemplateBooleanModel) {
                 return new BooleanFormatter((TemplateBooleanModel) model, env);
-            } else if (model instanceof TemplateScalarModel) {
-                return new SimpleScalar(((TemplateScalarModel) model).getAsString());
+            } else if (model instanceof TemplateStringModel) {
+                return new SimpleString(((TemplateStringModel) model).getAsString());
             } else {
                 throw MessageUtils.newUnexpectedOperandTypeException(
                         target, model,
                         "number, date, boolean or string",
                         new Class[] {
                             TemplateNumberModel.class, TemplateDateModel.class, TemplateBooleanModel.class,
-                            TemplateScalarModel.class
+                            TemplateStringModel.class
                         },
                         null, env);
             }
@@ -651,7 +651,7 @@ class BuiltInsForMultipleTypes {
             if (model instanceof TemplateNumberModel) {
                 return formatNumber(env, model);
             } else if (model instanceof TemplateBooleanModel) {
-                return new SimpleScalar(((TemplateBooleanModel) model).getAsBoolean()
+                return new SimpleString(((TemplateBooleanModel) model).getAsBoolean()
                         ? TemplateBooleanFormat.C_TRUE : TemplateBooleanFormat.C_FALSE);
             } else {
                 throw MessageUtils.newUnexpectedOperandTypeException(

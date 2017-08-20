@@ -106,7 +106,7 @@ public class CoreTemplateTestSuite extends TemplateTestSuite {
             dataModel.put("unknownDate", new SimpleDate(cal.getTime(), TemplateDateModel.UNKNOWN));
             dataModel.put("javaGMT02", TimeZone.getTimeZone("GMT+02"));
             dataModel.put("javaUTC", TimeZone.getTimeZone("UTC"));
-            dataModel.put("adaptedToStringScalar", new Object() {
+            dataModel.put("adaptedToString", new Object() {
                 @Override
                 public String toString() {
                     return "GMT+02";

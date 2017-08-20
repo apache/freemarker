@@ -33,7 +33,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.test.TestUtils;
 
 import junit.framework.TestCase;
@@ -601,7 +601,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
 
     private boolean exposesFields(DefaultObjectWrapper ow) throws TemplateException {
         TemplateHashModel thm = (TemplateHashModel) ow.wrap(new C());
-        TemplateScalarModel r = (TemplateScalarModel) thm.get("foo");
+        TemplateStringModel r = (TemplateStringModel) thm.get("foo");
         if (r == null) return false;
         assertEquals("FOO", r.getAsString());
         return true;
@@ -609,7 +609,7 @@ public class DefaultObjectWrapperSingletonsTest extends TestCase {
 
     private boolean exposesProperties(DefaultObjectWrapper ow) throws TemplateException {
         TemplateHashModel thm = (TemplateHashModel) ow.wrap(new C());
-        TemplateScalarModel r = (TemplateScalarModel) thm.get("bar");
+        TemplateStringModel r = (TemplateStringModel) thm.get("bar");
         if (r == null) return false;
         assertEquals("BAR", r.getAsString());
         return true;

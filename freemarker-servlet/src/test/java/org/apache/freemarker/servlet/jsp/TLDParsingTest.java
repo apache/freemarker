@@ -34,10 +34,10 @@ import javax.xml.parsers.SAXParserFactory;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.NonTemplateCallPlace;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.JavaMethodModel;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -85,13 +85,13 @@ public class TLDParsingTest {
 
         JavaMethodModel function = (JavaMethodModel) tagsAndFunctions.get("toUpperCase");
         assertNotNull(function);
-        TemplateScalarModel result = (TemplateScalarModel) function.execute(
-                new TemplateModel[] { new SimpleScalar("abc") }, NonTemplateCallPlace.INSTANCE);
+        TemplateStringModel result = (TemplateStringModel) function.execute(
+                new TemplateModel[] { new SimpleString("abc") }, NonTemplateCallPlace.INSTANCE);
         assertEquals("ABC", result.getAsString());
         function = (JavaMethodModel) tagsAndFunctions.get("toUpperCase2");
         assertNotNull(function);
-        result = (TemplateScalarModel) function.execute(
-                new TemplateModel[] { new SimpleScalar("abc") }, NonTemplateCallPlace.INSTANCE);
+        result = (TemplateStringModel) function.execute(
+                new TemplateModel[] { new SimpleString("abc") }, NonTemplateCallPlace.INSTANCE);
         assertEquals("ABC", result.getAsString());
     }
 

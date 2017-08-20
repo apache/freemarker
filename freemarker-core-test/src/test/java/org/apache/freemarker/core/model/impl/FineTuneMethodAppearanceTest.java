@@ -25,7 +25,7 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -44,9 +44,9 @@ public class FineTuneMethodAppearanceTest {
     
     private void checkIfProperlyWrapped(TemplateModel tm) throws TemplateException {
         TemplateHashModel thm = (TemplateHashModel) tm;
-        assertEquals("v1", ((TemplateScalarModel) thm.get("v1")).getAsString());
-        assertEquals("v2()", ((TemplateScalarModel) thm.get("v2")).getAsString());
-        assertEquals("getV3()", ((TemplateScalarModel) thm.get("v3")).getAsString());
+        assertEquals("v1", ((TemplateStringModel) thm.get("v1")).getAsString());
+        assertEquals("v2()", ((TemplateStringModel) thm.get("v2")).getAsString());
+        assertEquals("getV3()", ((TemplateStringModel) thm.get("v3")).getAsString());
         assertTrue(thm.get("getV3") instanceof JavaMethodModel);
     }
     

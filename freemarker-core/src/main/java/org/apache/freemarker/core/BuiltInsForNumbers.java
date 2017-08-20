@@ -29,7 +29,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util._NumberUtils;
 import org.apache.freemarker.core.util._StringUtils;
 
@@ -54,7 +54,7 @@ class BuiltInsForNumbers {
                 throw new TemplateException(target,
                         "The left side operand of to ?", key, " must be at least 1, but was ", Integer.valueOf(n), ".");
             }
-            return new SimpleScalar(toABC(n));
+            return new SimpleString(toABC(n));
         }
 
         protected abstract String toABC(int n);

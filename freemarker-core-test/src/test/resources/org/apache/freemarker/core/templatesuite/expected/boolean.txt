@@ -27,7 +27,7 @@
 <p>Hello, world!</p>
 
 
-<p>Now perform scalar boolean tests:</p>
+<p>Now perform boolean tests:</p>
 
 <p>
     b is true.<br />

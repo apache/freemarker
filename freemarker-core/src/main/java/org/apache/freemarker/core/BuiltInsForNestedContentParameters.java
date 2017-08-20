@@ -24,7 +24,7 @@ import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util.CallableUtils;
 
 
@@ -106,8 +106,8 @@ class BuiltInsForNestedContentParameters {
     
     static class item_parityBI extends BuiltInForNestedContentParameter {
         
-        private static final SimpleScalar ODD = new SimpleScalar("odd");
-        private static final SimpleScalar EVEN = new SimpleScalar("even");
+        private static final SimpleString ODD = new SimpleString("odd");
+        private static final SimpleString EVEN = new SimpleString("even");
 
         @Override
         TemplateModel calculateResult(IterationContext iterCtx, Environment env) throws TemplateException {
@@ -118,8 +118,8 @@ class BuiltInsForNestedContentParameters {
 
     static class item_parity_capBI extends BuiltInForNestedContentParameter {
         
-        private static final SimpleScalar ODD = new SimpleScalar("Odd");
-        private static final SimpleScalar EVEN = new SimpleScalar("Even");
+        private static final SimpleString ODD = new SimpleString("Odd");
+        private static final SimpleString EVEN = new SimpleString("Even");
 
         @Override
         TemplateModel calculateResult(IterationContext iterCtx, Environment env) throws TemplateException {

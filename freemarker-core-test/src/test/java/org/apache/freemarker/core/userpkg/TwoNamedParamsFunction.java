@@ -25,7 +25,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util.StringToIndexMap;
 
 public class TwoNamedParamsFunction extends TestTemplateCallableModel implements TemplateFunctionModel {
@@ -60,7 +60,7 @@ public class TwoNamedParamsFunction extends TestTemplateCallableModel implements
         printParam(N2_ARG_NAME, args[N2_ARG_IDX], sb);
         sb.append(")");
 
-        return new SimpleScalar(sb.toString());
+        return new SimpleString(sb.toString());
     }
 
     @Override

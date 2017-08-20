@@ -29,7 +29,7 @@ import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.BeanModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
@@ -117,8 +117,8 @@ class BuiltInsForStringsMisc {
     }
     
     /**
-     * A method that takes a parameter and evaluates it as a scalar,
-     * then treats that scalar as template source code and returns a
+     * A method that takes a parameter and evaluates it as a string,
+     * then treats that string as template source code and returns a
      * transform model that evaluates the template in place.
      * The template inherits the configuration and environment of the executing
      * template. By default, its name will be equal to 
@@ -134,8 +134,8 @@ class BuiltInsForStringsMisc {
          * 
          * <p>The built-in has two arguments:
          * the arguments passed to the method. It can receive at
-         * least one and at most two arguments, both must evaluate to a scalar. 
-         * The first scalar is interpreted as a template source code and a template
+         * least one and at most two arguments, both must evaluate to a string.
+         * The first string is interpreted as a template source code and a template
          * is built from it. The second (optional) is used to give the generated
          * template a name.
          * 
@@ -155,12 +155,12 @@ class BuiltInsForStringsMisc {
                     id = ((ASTExpression) new ASTExpDynamicKeyName(target, new ASTExpNumberLiteral(1))
                             .copyLocationFrom(target)).evalAndCoerceToPlainText(env);
                 }
-            } else if (model instanceof TemplateScalarModel) {
+            } else if (model instanceof TemplateStringModel) {
                 sourceExpr = target;
             } else {
                 throw MessageUtils.newUnexpectedOperandTypeException(
                         target, model,
-                        "sequence or string", new Class[] { TemplateSequenceModel.class, TemplateScalarModel.class },
+                        "sequence or string", new Class[] { TemplateSequenceModel.class, TemplateStringModel.class },
                         null, env);
             }
             String templateSource = sourceExpr.evalAndCoerceToPlainText(env);

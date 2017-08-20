@@ -43,7 +43,7 @@ import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleCollection;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -229,11 +229,11 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
         private static final List KEYS = composeList(DebugConfigurableModel.KEYS, 
             Arrays.asList("configuration", "name"));
     
-        private final SimpleScalar name;
+        private final SimpleString name;
 
         DebugTemplateModel(Template template) {
             super(template);
-            name = new SimpleScalar(template.getLookupName());
+            name = new SimpleString(template.getLookupName());
         }
 
         @Override

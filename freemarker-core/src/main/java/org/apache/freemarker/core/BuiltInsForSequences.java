@@ -38,11 +38,11 @@ import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.CollectionAndSequence;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.model.impl.TemplateModelListSequence;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._StringUtils;
@@ -236,7 +236,7 @@ class BuiltInsForSequences {
                 } else {
                     if (whenEmpty != null) sb.append(whenEmpty);
                 }
-                return new SimpleScalar(sb.toString());
+                return new SimpleString(sb.toString());
             }
 
             @Override
@@ -571,21 +571,21 @@ class BuiltInsForSequences {
                     throws TemplateException {
                 String[] subvars;
                 TemplateModel obj = args[0];
-                if (obj instanceof TemplateScalarModel) {
-                    subvars = new String[] { ((TemplateScalarModel) obj).getAsString() };
+                if (obj instanceof TemplateStringModel) {
+                    subvars = new String[] { ((TemplateStringModel) obj).getAsString() };
                 } else if (obj instanceof TemplateSequenceModel) {
                     TemplateSequenceModel seq = (TemplateSequenceModel) obj;
                     int ln = seq.size();
                     subvars = new String[ln];
                     for (int i = 0; i < ln; i++) {
                         TemplateModel item = seq.get(i);
-                        if (!(item instanceof  TemplateScalarModel)) {
+                        if (!(item instanceof TemplateStringModel)) {
                             throw new TemplateException(
                                     "The argument to ?", key, "(key), when it's a sequence, must be a "
                                     + "sequence of strings, but the item at index ", i,
                                     " is not a string.");
                         }
-                        subvars[i] = ((TemplateScalarModel) item).getAsString();
+                        subvars[i] = ((TemplateStringModel) item).getAsString();
                     }
                 } else {
                     throw new TemplateException(
@@ -750,7 +750,7 @@ class BuiltInsForSequences {
                 } // for each key
                 
                 if (keyType == KEY_TYPE_NOT_YET_DETECTED) {
-                    if (key instanceof TemplateScalarModel) {
+                    if (key instanceof TemplateStringModel) {
                         keyType = KEY_TYPE_STRING;
                         keyComparator = new LexicalKVPComparator(
                                 Environment.getCurrentEnvironment().getCollator());
@@ -775,10 +775,10 @@ class BuiltInsForSequences {
                     case KEY_TYPE_STRING:
                         try {
                             res.add(new KVP(
-                                    ((TemplateScalarModel) key).getAsString(),
+                                    ((TemplateStringModel) key).getAsString(),
                                     item));
                         } catch (ClassCastException e) {
-                            if (!(key instanceof TemplateScalarModel)) {
+                            if (!(key instanceof TemplateStringModel)) {
                                 throw newInconsistentSortKeyTypeException(
                                         keyNamesLn, "string", "strings", i, key);
                             } else {

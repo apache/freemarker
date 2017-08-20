@@ -17,24 +17,28 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.templatesuite.models;
+package org.apache.freemarker.core.model;
 
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.impl.SimpleString;
 
-public class BooleanAndScalarModel implements TemplateBooleanModel, TemplateScalarModel {
+/**
+ * "string" template language data-type; like in Java, an unmodifiable UNICODE character sequence.
+ * When a template has to print a value of this class, it will assume that it stores plain text (not HTML, XML, etc.),
+ * and thus it will be possibly auto-escaped. To avoid that, use the appropriate {@link TemplateMarkupOutputModel}
+ * instead.
+ */
+public interface TemplateStringModel extends TemplateModel {
 
-    public static final BooleanAndScalarModel INSTANCE = new BooleanAndScalarModel();
+    /**
+     * A constant value to use as the empty string.
+     */
+    TemplateModel EMPTY_STRING = new SimpleString("");
 
-    @Override
-    public String getAsString() throws TemplateException {
-        return "s";
-    }
-
-    @Override
-    public boolean getAsBoolean() throws TemplateException {
-        return true;
-    }
+    /**
+     * Returns the {@link String} representation of this model. Returning {@code null} is illegal, and may cause
+     * exception in the calling code.
+     */
+    String getAsString() throws TemplateException;
 
 }

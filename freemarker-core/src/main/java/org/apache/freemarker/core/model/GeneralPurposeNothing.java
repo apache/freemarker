@@ -30,7 +30,7 @@ import org.apache.freemarker.core.TemplateException;
  */
 
 final class GeneralPurposeNothing
-implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, TemplateHashModelEx2,
+implements TemplateBooleanModel, TemplateStringModel, TemplateSequenceModel, TemplateHashModelEx2,
         TemplateFunctionModel {
 
     public static final TemplateModel INSTANCE = new GeneralPurposeNothing();

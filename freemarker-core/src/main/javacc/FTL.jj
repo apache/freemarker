@@ -364,9 +364,9 @@ public class FMParser {
             } catch (TemplateException tme) {
             }
         }
-        if (legacyCompat && tm instanceof TemplateScalarModel) {
+        if (legacyCompat && tm instanceof TemplateStringModel) {
             try {
-                return _StringUtils.getYesNo(((TemplateScalarModel) tm).getAsString());
+                return _StringUtils.getYesNo(((TemplateStringModel) tm).getAsString());
             } catch (Exception e) {
                 throw new ParseException(e.getMessage()
                         + "\nExpecting boolean (true/false), found: " + exp.getCanonicalForm(),
@@ -1581,10 +1581,10 @@ ASTExpression EqualityExpression() :
         )
         rhs = RelationalExpression()
         {
-	        notHashLiteral(lhs, "scalar");
-	        notHashLiteral(rhs, "scalar");
-	        notListLiteral(lhs, "scalar");
-	        notListLiteral(rhs, "scalar");
+	        notHashLiteral(lhs, "string");
+	        notHashLiteral(rhs, "string");
+	        notListLiteral(lhs, "string");
+	        notListLiteral(rhs, "string");
 	        result = new ASTExpComparison(lhs, rhs, t.image);
 	        result.setLocation(template, lhs, rhs);
         }
@@ -1618,10 +1618,10 @@ ASTExpression RelationalExpression() :
         )
         rhs = RangeExpression()
         {
-            notHashLiteral(lhs, "scalar");
-            notHashLiteral(rhs, "scalar");
-            notListLiteral(lhs, "scalar");
-            notListLiteral(rhs, "scalar");
+            notHashLiteral(lhs, "number");
+            notHashLiteral(rhs, "number");
+            notListLiteral(lhs, "number");
+            notListLiteral(rhs, "number");
             notStringLiteral(lhs, "number");
             notStringLiteral(rhs, "number");
             result = new ASTExpComparison(lhs, rhs, t.image);
@@ -1809,7 +1809,7 @@ ASTExpBuiltInVariable ASTExpBuiltInVariable() :
         TemplateModel parseTimeValue;
         String nameStr = name.image;
         if (nameStr.equals(ASTExpBuiltInVariable.OUTPUT_FORMAT)) {
-            parseTimeValue = new SimpleScalar(outputFormat.getName());
+            parseTimeValue = new SimpleString(outputFormat.getName());
         } else if (nameStr.equals(ASTExpBuiltInVariable.AUTO_ESC)) {
             parseTimeValue = autoEscaping ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         } else {
@@ -3622,9 +3622,9 @@ ASTDirOutputFormat OutputFormat() :
                     paramExp, e);
         }
         String paramStr;
-        if (paramTM instanceof TemplateScalarModel) {
+        if (paramTM instanceof TemplateStringModel) {
             try {
-                paramStr = ((TemplateScalarModel) paramTM).getAsString();
+                paramStr = ((TemplateStringModel) paramTM).getAsString();
             } catch (TemplateException e) {
 	            throw new ParseException(
 	                    "Could not evaluate expression (on parse-time): " + paramExp.getCanonicalForm()
@@ -4112,9 +4112,9 @@ void HeaderElement() :
                                 exp, e);
                     }
                     String vs = null;
-                    if (value instanceof TemplateScalarModel) {
+                    if (value instanceof TemplateStringModel) {
                         try {
-                            vs = ((TemplateScalarModel) exp).getAsString();
+                            vs = ((TemplateStringModel) exp).getAsString();
                         } catch (TemplateException tme) {}
                     }
                     if (template != null) {
@@ -4178,12 +4178,12 @@ void HeaderElement() :
                             try {
                                 TemplateCollectionModel keys = prefixMap.keys();
                                 for (TemplateModelIterator it = keys.iterator(); it.hasNext();) {
-                                    String prefix = ((TemplateScalarModel) it.next()).getAsString();
+                                    String prefix = ((TemplateStringModel) it.next()).getAsString();
                                     TemplateModel valueModel = prefixMap.get(prefix);
-                                    if (!(valueModel instanceof TemplateScalarModel)) {
+                                    if (!(valueModel instanceof TemplateStringModel)) {
                                         throw new ParseException("Non-string value in prefix to namespace hash.", exp);
                                     }
-                                    String nsURI = ((TemplateScalarModel) valueModel).getAsString();
+                                    String nsURI = ((TemplateStringModel) valueModel).getAsString();
                                     try {
                                         template.addPrefixNSMapping(prefix, nsURI);
                                     } catch (IllegalArgumentException iae) {
@@ -4200,7 +4200,7 @@ void HeaderElement() :
                             try {
                                 TemplateCollectionModel keys = attributeMap.keys();
                                 for (TemplateModelIterator it = keys.iterator(); it.hasNext();) {
-                                        String attName = ((TemplateScalarModel) it.next()).getAsString();
+                                        String attName = ((TemplateStringModel) it.next()).getAsString();
                                         Object attValue = DeepUnwrap.unwrap(attributeMap.get(attName));
                                         if (attValue != null && !(attValue instanceof Serializable)) {
                                             throw new ParseException(

@@ -21,32 +21,31 @@ package org.apache.freemarker.core.model.impl;
 
 import java.io.Serializable;
 
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 
 /**
- * A simple implementation of the <tt>TemplateScalarModel</tt>
+ * A simple implementation of the <tt>TemplateStringModel</tt>
  * interface, using a <tt>String</tt>.
- * As of version 2.0 this object is immutable.
  *
  * <p>This class is thread-safe.
  *
  * @see SimpleSequence
  * @see SimpleHash
  */
-public final class SimpleScalar 
-implements TemplateScalarModel, Serializable {
+public final class SimpleString
+implements TemplateStringModel, Serializable {
     
     /**
-     * @serial the value of this <tt>SimpleScalar</tt> if it wraps a
+     * @serial the value of this <tt>SimpleString</tt> if it wraps a
      * <tt>String</tt>.
      */
     private final String value;
 
     /**
-     * Constructs a <tt>SimpleScalar</tt> containing a string value.
+     * Constructs a <tt>SimpleString</tt> containing a string value.
      * @param value the string value. If this is {@code null}, its value in FTL will be {@code ""}.
      */
-    public SimpleScalar(String value) {
+    public SimpleString(String value) {
         this.value = value;
     }
 
@@ -64,8 +63,8 @@ implements TemplateScalarModel, Serializable {
     /**
      * Same as calling the constructor, except that for a {@code null} parameter it returns null. 
      */
-    public static SimpleScalar newInstanceOrNull(String s) {
-        return s != null ? new SimpleScalar(s) : null;
+    public static SimpleString newInstanceOrNull(String s) {
+        return s != null ? new SimpleString(s) : null;
     }
     
 }

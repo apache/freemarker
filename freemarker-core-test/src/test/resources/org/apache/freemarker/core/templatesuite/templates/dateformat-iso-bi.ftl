@@ -132,7 +132,7 @@
 
 <@assertEquals actual=d?iso(javaUTC) expected="2010-05-15T20:38:05Z" />
 <@assertEquals actual=d?iso(javaGMT02) expected="2010-05-15T22:38:05+02:00" />
-<@assertEquals actual=d?iso(adaptedToStringScalar) expected="2010-05-15T22:38:05+02:00" />
+<@assertEquals actual=d?iso(adaptedToString) expected="2010-05-15T22:38:05+02:00" />
 
 <#assign d = "12:00:00:1 +0000"?time("HH:mm:ss:S Z")>
 <@assertEquals actual=d?isoUtcMs expected="12:00:00.001Z" />

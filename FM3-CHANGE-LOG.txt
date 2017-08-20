@@ -203,6 +203,8 @@ Major changes / features
   - `#macro` now produces a `TemplateDirectiveModel` and `#function` produces a `TemplateFunctionModel`. (Earlier, the
     product was just a generic `TemplateModel` that could only be invoked using internal API-s, and had capabilities
     that the callable TemplateModel-s coulnd't have.)
+- Renamed `TemplateScalarModel` to `TemplateStringModel`. (The `TemplateScalarModel` name come from the early FM,
+  where there where strings, numbers, booleans, etc. weren't separated.)
 - Removed freemarker.ext.log, our log abstraction layer from the times when there was no clear winner on this field.
   Added org.slf4j:slf4j-api as required dependency instead.
 - Added Spring support to the FreeMarker project (freemarker-spring module), instead of relying Spring developers

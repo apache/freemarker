@@ -19,10 +19,10 @@
  
 package org.apache.freemarker.dom;
 
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.w3c.dom.ProcessingInstruction;
 
-class PINodeModel extends NodeModel implements TemplateScalarModel {
+class PINodeModel extends NodeModel implements TemplateStringModel {
     
     public PINodeModel(ProcessingInstruction pi) {
         super(pi);

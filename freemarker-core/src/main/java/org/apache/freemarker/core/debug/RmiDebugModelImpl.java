@@ -36,7 +36,7 @@ import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 
 /**
@@ -58,7 +58,7 @@ class RmiDebugModelImpl extends UnicastRemoteObject implements DebugModel {
     }
     @Override
     public String getAsString() throws TemplateException {
-        return ((TemplateScalarModel) model).getAsString();
+        return ((TemplateStringModel) model).getAsString();
     }
 
     @Override
@@ -135,7 +135,7 @@ class RmiDebugModelImpl extends UnicastRemoteObject implements DebugModel {
         List list = new ArrayList();
         TemplateModelIterator i = h.keys().iterator();
         while (i.hasNext()) {
-            list.add(((TemplateScalarModel) i.next()).getAsString());
+            list.add(((TemplateStringModel) i.next()).getAsString());
         }
         return (String[]) list.toArray(new String[list.size()]);
     }
@@ -147,7 +147,7 @@ class RmiDebugModelImpl extends UnicastRemoteObject implements DebugModel {
     
     private static int calculateType(TemplateModel model) {
         int type = 0;
-        if (model instanceof TemplateScalarModel) type += TYPE_SCALAR;
+        if (model instanceof TemplateStringModel) type += TYPE_STRING;
         if (model instanceof TemplateNumberModel) type += TYPE_NUMBER;
         if (model instanceof TemplateDateModel) type += TYPE_DATE;
         if (model instanceof TemplateBooleanModel) type += TYPE_BOOLEAN;

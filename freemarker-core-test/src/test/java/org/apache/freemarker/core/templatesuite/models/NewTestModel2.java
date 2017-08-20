@@ -19,14 +19,14 @@
 
 package org.apache.freemarker.core.templatesuite.models;
 
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 
 /**
  * Testcase to see how FreeMarker's ?new built-in deals with constructors.
  */
 public class NewTestModel2
 implements
-    TemplateScalarModel {
+        TemplateStringModel {
     private final String string;
     
     public NewTestModel2() {

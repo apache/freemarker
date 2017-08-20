@@ -37,7 +37,7 @@ import org.apache.freemarker.core.TemplateException;
  * template models are implemented by the mirrored object.
  */
 public interface DebugModel extends Remote {
-    public static final int TYPE_SCALAR        =    1;
+    public static final int TYPE_STRING        =    1;
     public static final int TYPE_NUMBER        =    2;
     public static final int TYPE_DATE          =    4;
     public static final int TYPE_BOOLEAN       =    8;

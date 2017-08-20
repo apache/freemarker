@@ -29,7 +29,7 @@ import org.apache.freemarker.core.NonTemplateCallPlace;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.TemplateHTMLOutputModel;
 import org.junit.Test;
@@ -112,8 +112,8 @@ public class ErrorMessagesTest {
         {
             JavaMethodModel m = (JavaMethodModel)thm.get("mOverloaded4");
             Object r = m.execute(new TemplateModel[] { html }, NonTemplateCallPlace.INSTANCE);
-            if (r instanceof TemplateScalarModel) {
-                r = ((TemplateScalarModel) r).getAsString();
+            if (r instanceof TemplateStringModel) {
+                r = ((TemplateStringModel) r).getAsString();
             }
             assertEquals("<p>a", r);
         }

@@ -63,7 +63,7 @@ import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelAdapter;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.util.BugException;
@@ -420,7 +420,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      */
     protected TemplateModel wrapSpecialObject(Object obj) {
         if (obj instanceof String) {
-            return new SimpleScalar((String) obj);
+            return new SimpleString((String) obj);
         }
         if (obj instanceof Number) {
             return new SimpleNumber((Number) obj);
@@ -507,7 +507,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * method is the inverse of the {@link #wrap(Object)} method. In addition
      * it will unwrap arbitrary {@link TemplateNumberModel} instances into
      * a number, arbitrary {@link TemplateDateModel} instances into a date,
-     * {@link TemplateScalarModel} instances into a String, arbitrary
+     * {@link TemplateStringModel} instances into a String, arbitrary
      * {@link TemplateBooleanModel} instances into a Boolean, arbitrary
      * {@link TemplateHashModel} instances into a Map, arbitrary
      * {@link TemplateSequenceModel} into a List, and arbitrary
@@ -621,8 +621,8 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
 
             // [2.4][IcI]: Should also check for CharSequence at the end
             if (String.class == targetClass) {
-                if (model instanceof TemplateScalarModel) {
-                    return ((TemplateScalarModel) model).getAsString();
+                if (model instanceof TemplateStringModel) {
+                    return ((TemplateStringModel) model).getAsString();
                 }
                 // String is final, so no other conversion will work
                 return ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS;
@@ -686,8 +686,8 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
 
             // Allow one-char strings to be coerced to characters
             if (char.class == targetClass || targetClass == Character.class) {
-                if (model instanceof TemplateScalarModel) {
-                    String s = ((TemplateScalarModel) model).getAsString();
+                if (model instanceof TemplateStringModel) {
+                    String s = ((TemplateStringModel) model).getAsString();
                     if (s.length() == 1) {
                         return Character.valueOf(s.charAt(0));
                     }
@@ -727,9 +727,9 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
                 }
             }
             if ((itf == 0 || (itf & (TypeFlags.ACCEPTS_STRING | TypeFlags.CHARACTER)) != 0)
-                    && model instanceof TemplateScalarModel
+                    && model instanceof TemplateStringModel
                     && (itf != 0 || targetClass.isAssignableFrom(String.class))) {
-                String strVal = ((TemplateScalarModel) model).getAsString();
+                String strVal = ((TemplateStringModel) model).getAsString();
                 if (itf == 0 || (itf & TypeFlags.CHARACTER) == 0) {
                     return strVal;
                 } else { // TypeFlags.CHAR == 1
@@ -745,7 +745,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
                     // It had to be unwrapped to Character, but the string length wasn't 1 => Fall through
                 }
             }
-            // Should be earlier than TemplateScalarModel, but we keep it here until FM 2.4 or such
+            // Should be earlier than TemplateStringModel, but we keep it here until FM 2.4 or such
             if ((itf == 0 || (itf & TypeFlags.ACCEPTS_BOOLEAN) != 0)
                     && model instanceof TemplateBooleanModel
                     && (itf != 0 || targetClass.isAssignableFrom(Boolean.class))) {

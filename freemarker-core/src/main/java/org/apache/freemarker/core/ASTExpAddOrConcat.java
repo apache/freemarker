@@ -30,11 +30,11 @@ import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.CollectionAndSequence;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 
 /**
  * AST expression node: binary {@code +} operator. Note that this is treated separately from the other 4 arithmetic
@@ -95,7 +95,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
 
             if (leftOMOrStr instanceof String) {
                 if (rightOMOrStr instanceof String) {
-                    return new SimpleScalar(((String) leftOMOrStr).concat((String) rightOMOrStr));
+                    return new SimpleString(((String) leftOMOrStr).concat((String) rightOMOrStr));
                 } else { // rightOMOrStr instanceof TemplateMarkupOutputModel
                     TemplateMarkupOutputModel<?> rightMO = (TemplateMarkupOutputModel<?>) rightOMOrStr;
                     return _EvalUtils.concatMarkupOutputs(parent,
@@ -275,7 +275,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
         throws TemplateException {
             TemplateModelIterator it = hash.keys().iterator();
             while (it.hasNext()) {
-                TemplateScalarModel tsm = (TemplateScalarModel) it.next();
+                TemplateStringModel tsm = (TemplateStringModel) it.next();
                 if (set.add(tsm.getAsString())) {
                     // The first occurence of the key decides the index;
                     // this is consisten with stuff like java.util.LinkedHashSet.
@@ -292,7 +292,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
             
                 int ln = keys.size();
                 for (int i  = 0; i < ln; i++) {
-                    seq.add(get(((TemplateScalarModel) keys.get(i)).getAsString()));
+                    seq.add(get(((TemplateStringModel) keys.get(i)).getAsString()));
                 }
                 values = new CollectionAndSequence(seq);
             }

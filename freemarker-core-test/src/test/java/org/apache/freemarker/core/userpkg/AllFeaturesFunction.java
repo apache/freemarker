@@ -29,7 +29,7 @@ import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util.StringToIndexMap;
 
 public class AllFeaturesFunction extends TestTemplateCallableModel implements TemplateFunctionModel {
@@ -84,7 +84,7 @@ public class AllFeaturesFunction extends TestTemplateCallableModel implements Te
         printParam("nVarargs", nOthers, sb);
         sb.append(")");
 
-        return new SimpleScalar(sb.toString());
+        return new SimpleString(sb.toString());
     }
 
     @Override

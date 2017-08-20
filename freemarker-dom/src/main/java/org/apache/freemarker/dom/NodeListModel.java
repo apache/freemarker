@@ -32,9 +32,9 @@ import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -120,10 +120,10 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
                 StringBuilder result = new StringBuilder();
                 for (int i = 0; i < size(); i++) {
                     NodeModel nm = (NodeModel) get(i);
-                    TemplateScalarModel textModel = (TemplateScalarModel) nm.get(key);
+                    TemplateStringModel textModel = (TemplateStringModel) nm.get(key);
                     result.append(textModel.getAsString());
                 }
-                return new SimpleScalar(result.toString());
+                return new SimpleString(result.toString());
             } else if (key.length() != 2 /* to allow "@@" to fall through */) {
                 // As @@... would cause exception in the XPath engine, we throw a nicer exception now. 
                 if (AtAtKey.containsKey(key)) {
@@ -193,7 +193,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
     @Override
     public Object[] explainTypeError(Class[] expectedClasses) {
         for (Class expectedClass : expectedClasses) {
-            if (TemplateScalarModel.class.isAssignableFrom(expectedClass)
+            if (TemplateStringModel.class.isAssignableFrom(expectedClass)
                     || TemplateDateModel.class.isAssignableFrom(expectedClass)
                     || TemplateNumberModel.class.isAssignableFrom(expectedClass)
                     || TemplateBooleanModel.class.isAssignableFrom(expectedClass)) {

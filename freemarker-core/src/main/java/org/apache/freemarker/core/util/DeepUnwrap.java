@@ -33,7 +33,7 @@ import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 
@@ -52,8 +52,8 @@ public class DeepUnwrap {
      *       of {@link WrapperTemplateModel#getWrappedObject()} is returned.
      *   <li>If the object is identical to the null model of the current object 
      *       wrapper, null is returned. 
-     *   <li>If the object implements {@link TemplateScalarModel}, then the result
-     *       of {@link TemplateScalarModel#getAsString()} is returned.
+     *   <li>If the object implements {@link TemplateStringModel}, then the result
+     *       of {@link TemplateStringModel#getAsString()} is returned.
      *   <li>If the object implements {@link TemplateNumberModel}, then the result
      *       of {@link TemplateNumberModel#getAsNumber()} is returned.
      *   <li>If the object implements {@link TemplateDateModel}, then the result
@@ -105,8 +105,8 @@ public class DeepUnwrap {
         if (model == nullModel) {
             return null;
         }
-        if (model instanceof TemplateScalarModel) {
-            return ((TemplateScalarModel) model).getAsString();
+        if (model instanceof TemplateStringModel) {
+            return ((TemplateStringModel) model).getAsString();
         }
         if (model instanceof TemplateNumberModel) {
             return ((TemplateNumberModel) model).getAsNumber();

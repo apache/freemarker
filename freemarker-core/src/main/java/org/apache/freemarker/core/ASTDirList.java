@@ -32,7 +32,7 @@ import org.apache.freemarker.core.model.TemplateHashModelEx2.KeyValuePair;
 import org.apache.freemarker.core.model.TemplateHashModelEx2.KeyValuePairIterator;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.util._StringUtils;
@@ -360,7 +360,7 @@ final class ASTDirList extends ASTDirective {
                             try {
                                 do {
                                     nestedContentParam = keysIter.next();
-                                    if (!(nestedContentParam instanceof TemplateScalarModel)) {
+                                    if (!(nestedContentParam instanceof TemplateStringModel)) {
                                         throw new TemplateException(env,
                                                 new _ErrorDescriptionBuilder(
                                                         "When listing key-value pairs of traditional hash "
@@ -376,7 +376,7 @@ final class ASTDirList extends ASTDirective {
                                                                 new _DelayedShortClassName(TemplateHashModelEx2.class),
                                                                 ", which leads to this restriction."));
                                     }
-                                    nestedContentParam2 = listedHash.get(((TemplateScalarModel) nestedContentParam)
+                                    nestedContentParam2 = listedHash.get(((TemplateStringModel) nestedContentParam)
                                             .getAsString());
                                     hasNext = keysIter.hasNext();
                                     env.visit(childBuffer);

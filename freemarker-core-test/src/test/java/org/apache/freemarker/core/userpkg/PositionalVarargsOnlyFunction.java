@@ -25,7 +25,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 
 public class PositionalVarargsOnlyFunction extends TestTemplateCallableModel implements TemplateFunctionModel {
 
@@ -47,7 +47,7 @@ public class PositionalVarargsOnlyFunction extends TestTemplateCallableModel imp
         printParam("pVarargs", args[ARGS_LAYOUT.getPositionalVarargsArgumentIndex()], sb, true);
         sb.append(")");
 
-        return new SimpleScalar(sb.toString());
+        return new SimpleString(sb.toString());
     }
 
     @Override

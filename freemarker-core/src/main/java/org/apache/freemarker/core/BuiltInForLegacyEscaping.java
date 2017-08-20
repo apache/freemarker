@@ -20,7 +20,7 @@ package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 
 /**
  * A string built-in whose usage is banned when auto-escaping with a markup-output format is active.
@@ -40,7 +40,7 @@ abstract class BuiltInForLegacyEscaping extends BuiltInBannedWhenAutoEscaping {
             if (mo.getOutputFormat().isLegacyBuiltInBypassed(key)) {
                 return mo;
             }
-            throw MessageUtils.newUnexpectedOperandTypeException(target, tm, TemplateScalarModel.class, env);
+            throw MessageUtils.newUnexpectedOperandTypeException(target, tm, TemplateStringModel.class, env);
         }
     }
     

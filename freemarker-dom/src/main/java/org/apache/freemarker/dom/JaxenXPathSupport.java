@@ -39,7 +39,7 @@ import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.apache.freemarker.core.util._ObjectHolder;
 import org.jaxen.BaseXPath;
@@ -128,8 +128,8 @@ class JaxenXPathSupport implements XPathSupport {
                 if (model == null) {
                     throw new UnresolvableException("Variable \"" + localName + "\" not found.");
                 }
-                if (model instanceof TemplateScalarModel) {
-                    return ((TemplateScalarModel) model).getAsString();
+                if (model instanceof TemplateStringModel) {
+                    return ((TemplateStringModel) model).getAsString();
                 }
                 if (model instanceof TemplateNumberModel) {
                     return ((TemplateNumberModel) model).getAsNumber();

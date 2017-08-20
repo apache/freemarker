@@ -23,10 +23,10 @@ import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.DefaultArrayAdapter;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 
 /**
- * Adapts (not copies) a {@link String} array with on-the-fly wrapping of the items to {@link SimpleScalar}-s. The
+ * Adapts (not copies) a {@link String} array with on-the-fly wrapping of the items to {@link SimpleString}-s. The
  * important difference to {@link DefaultArrayAdapter} is that it doesn't depend on an {@link ObjectWrapper}, which is
  * needed to guarantee the behavior of some template language constructs. The important difference to
  * {@link NativeSequence} is that it doesn't need upfront conversion to {@link TemplateModel}-s (performance).
@@ -41,7 +41,7 @@ class NativeStringArraySequence implements TemplateSequenceModel {
 
     @Override
     public TemplateModel get(int index) throws TemplateException {
-        return index < items.length ? new SimpleScalar(items[index]) : null;
+        return index < items.length ? new SimpleString(items[index]) : null;
     }
 
     @Override

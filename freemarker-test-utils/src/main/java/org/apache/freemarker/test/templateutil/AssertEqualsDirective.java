@@ -31,7 +31,7 @@ import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util._StringUtils;
@@ -81,7 +81,7 @@ public class AssertEqualsDirective implements TemplateDirectiveModel {
             // This is the same order as comparison goes:
         else if (value instanceof TemplateNumberModel) return ((TemplateNumberModel) value).getAsNumber().toString();
         else if (value instanceof TemplateDateModel) return ((TemplateDateModel) value).getAsDate().toString();
-        else if (value instanceof TemplateScalarModel) return _StringUtils.jQuote(((TemplateScalarModel) value).getAsString());
+        else if (value instanceof TemplateStringModel) return _StringUtils.jQuote(((TemplateStringModel) value).getAsString());
         else if (value instanceof TemplateBooleanModel) return String.valueOf(((TemplateBooleanModel) value).getAsBoolean());
             // This shouldn't be reached, as the comparison should have failed earlier:
         else return value.toString();

@@ -36,15 +36,14 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core._DelayedTemplateLanguageTypeDescription;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.DeepUnwrap;
 import org.apache.freemarker.core.util.StringToIndexMap;
 
@@ -91,21 +90,8 @@ public class IncludePage implements TemplateDirectiveModel {
     @Override
     public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
-        // Determine the path
-        final TemplateModel path = args[PATH_PARAM_IDX];
-        if (path == null) {
-            throw new TemplateException(env, "Missing required parameter \"path\"");
-        }
-        if (!(path instanceof TemplateScalarModel)) {
-            throw new TemplateException(env,
-                    "Expected a scalar model. \"", PATH_PARAM_NAME, "\" is instead ",
-                    new _DelayedTemplateLanguageTypeDescription(path));
-        }
-        final String strPath = ((TemplateScalarModel) path).getAsString();
-        if (strPath == null) {
-            throw new TemplateException(env, "String value of \"path\" parameter is null");
-        }
-        
+        final String strPath = CallableUtils.getStringArgument(args, PARAMS_PARAM_IDX, this);
+
         // See whether we need to use a custom response (if we're inside a TTM
         // or TDM or macro nested body, we'll need to as then the current 
         // FM environment writer is not identical to HTTP servlet response 

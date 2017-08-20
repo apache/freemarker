@@ -26,7 +26,7 @@ import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.BeanModel;
 
@@ -179,8 +179,8 @@ abstract class ASTExpression extends ASTNode {
             return ((BeanModel) model).isEmpty();
         } else if (model instanceof TemplateSequenceModel) {
             return ((TemplateSequenceModel) model).size() == 0;
-        } else if (model instanceof TemplateScalarModel) {
-            String s = ((TemplateScalarModel) model).getAsString();
+        } else if (model instanceof TemplateStringModel) {
+            String s = ((TemplateStringModel) model).getAsString();
             return (s == null || s.length() == 0);
         } else if (model == null) {
             return true;

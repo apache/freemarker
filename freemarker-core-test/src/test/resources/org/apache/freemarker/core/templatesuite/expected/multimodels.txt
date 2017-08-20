@@ -25,7 +25,7 @@
 <p>Let's begin with a simple model:</p>
 <p>Hello, world!</p>
 
-<p>Cool, now get into the first model. This implements a scalar, list, and
+<p>Cool, now get into the first model. This implements a string, list, and
 hash as a single class. Let's try some tests...</p>
 
 <p>MultiModel1 as a string!</p>

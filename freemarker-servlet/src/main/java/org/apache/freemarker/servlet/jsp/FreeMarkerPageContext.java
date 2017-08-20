@@ -52,7 +52,7 @@ import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 import org.apache.freemarker.servlet.FreemarkerServlet;
 import org.apache.freemarker.servlet.HttpRequestHashModel;
@@ -451,7 +451,7 @@ public JspWriter pushBody(Writer w) {
         @Override
         public Object nextElement() {
             try {
-                return ((TemplateScalarModel) it.next()).getAsString();
+                return ((TemplateStringModel) it.next()).getAsString();
             } catch (TemplateException tme) {
                 throw new UndeclaredThrowableException(tme);
             }

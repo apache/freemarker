@@ -47,7 +47,7 @@ import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapperTest.TestBean;
 import org.junit.Test;
@@ -70,7 +70,7 @@ public class RestrictedObjectWrapperTest {
 
     @SuppressWarnings("boxing")
     private void testCustomizationCommonPart(RestrictedObjectWrapper ow) throws TemplateException {
-        assertTrue(ow.wrap("x") instanceof SimpleScalar);
+        assertTrue(ow.wrap("x") instanceof SimpleString);
         assertTrue(ow.wrap(1.5) instanceof SimpleNumber);
         assertTrue(ow.wrap(new Date()) instanceof SimpleDate);
         assertEquals(TemplateBooleanModel.TRUE, ow.wrap(true));
@@ -100,7 +100,7 @@ public class RestrictedObjectWrapperTest {
     @Test
     public void testCanWrapBasicTypes() throws ObjectWrappingException {
         RestrictedObjectWrapper sow = new RestrictedObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
-        assertTrue(sow.wrap("s") instanceof TemplateScalarModel);
+        assertTrue(sow.wrap("s") instanceof TemplateStringModel);
         assertTrue(sow.wrap(1) instanceof TemplateNumberModel);
         assertTrue(sow.wrap(true) instanceof TemplateBooleanModel);
         assertTrue(sow.wrap(new Date()) instanceof TemplateDateModel);

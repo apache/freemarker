@@ -29,7 +29,7 @@ import org.apache.freemarker.core.model.TemplateModelAdapter;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.w3c.dom.Node;
 
 /**
@@ -65,7 +65,7 @@ class NodeQueryResultItemObjectWrapper implements ObjectWrapper {
             }
 
             if (obj instanceof String) {
-                return new SimpleScalar((String) obj);
+                return new SimpleString((String) obj);
             }
             if (obj instanceof Number) {
                 return new SimpleNumber((Number) obj);

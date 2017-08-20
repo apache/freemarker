@@ -23,11 +23,11 @@ import static org.junit.Assert.*;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.NonTemplateCallPlace;
 import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.junit.Test;
 
@@ -40,19 +40,19 @@ public class Java8DefaultObjectWrapperTest {
         TemplateHashModel wrappedBean = (TemplateHashModel) ow.wrap(new Java8DefaultMethodsBean());
         
         {
-            TemplateScalarModel prop = (TemplateScalarModel) wrappedBean.get(Java8DefaultMethodsBean.NORMAL_PROP);
+            TemplateStringModel prop = (TemplateStringModel) wrappedBean.get(Java8DefaultMethodsBean.NORMAL_PROP);
             assertNotNull(prop);
             assertEquals(Java8DefaultMethodsBean.NORMAL_PROP_VALUE, prop.getAsString());
         }
         {
             // This is overridden in the subclass, so it's visible even without default method support: 
-            TemplateScalarModel prop = (TemplateScalarModel) wrappedBean.get(
+            TemplateStringModel prop = (TemplateStringModel) wrappedBean.get(
                     Java8DefaultMethodsBean.DEFAULT_METHOD_PROP_2);
             assertNotNull(prop);
             assertEquals(Java8DefaultMethodsBean.PROP_2_OVERRIDE_VALUE, prop.getAsString());
         }
         {
-            TemplateScalarModel prop = (TemplateScalarModel) wrappedBean.get(
+            TemplateStringModel prop = (TemplateStringModel) wrappedBean.get(
                     Java8DefaultMethodsBeanBase.DEFAULT_METHOD_PROP);
             assertNotNull(prop);
             assertEquals(Java8DefaultMethodsBeanBase.DEFAULT_METHOD_PROP_VALUE, prop.getAsString());
@@ -65,7 +65,7 @@ public class Java8DefaultObjectWrapperTest {
                     Java8DefaultMethodsBeanBase.DEFAULT_METHOD_INDEXED_PROP_GETTER);
             assertNotNull(indexedReadMethod);
             assertEquals(Java8DefaultMethodsBeanBase.DEFAULT_METHOD_INDEXED_PROP_VALUE,
-                    ((TemplateScalarModel) indexedReadMethod.execute(
+                    ((TemplateStringModel) indexedReadMethod.execute(
                             new TemplateModel[] { new SimpleNumber(0) }, NonTemplateCallPlace.INSTANCE))
                             .getAsString());
         }
@@ -78,7 +78,7 @@ public class Java8DefaultObjectWrapperTest {
         }
         {
             // The default method read method invalidates the indexed read method in the subclass
-            TemplateScalarModel prop = (TemplateScalarModel) wrappedBean.get(
+            TemplateStringModel prop = (TemplateStringModel) wrappedBean.get(
                     Java8DefaultMethodsBean.DEFAULT_METHOD_NOT_AN_INDEXED_PROP_2);
             assertNotNull(prop);
             assertEquals(Java8DefaultMethodsBean.DEFAULT_METHOD_NOT_AN_INDEXED_PROP_2_VALUE, prop.getAsString());
@@ -89,7 +89,7 @@ public class Java8DefaultObjectWrapperTest {
                     Java8DefaultMethodsBean.DEFAULT_METHOD_NOT_AN_INDEXED_PROP_3);
             assertNotNull(prop);
             assertEquals(Java8DefaultMethodsBean.DEFAULT_METHOD_NOT_AN_INDEXED_PROP_3_VALUE_0,
-                    ((TemplateScalarModel) prop.get(0)).getAsString());
+                    ((TemplateStringModel) prop.get(0)).getAsString());
         }
         {
             // We see the default method indexed reader, which overrides the plain array reader in the subclass.
@@ -97,7 +97,7 @@ public class Java8DefaultObjectWrapperTest {
                     Java8DefaultMethodsBean.DEFAULT_METHOD_INDEXED_PROP_2);
             assertNotNull(prop);
             assertEquals(Java8DefaultMethodsBean.ARRAY_PROP_2_VALUE_0,
-                    ((TemplateScalarModel) prop.get(0)).getAsString());
+                    ((TemplateStringModel) prop.get(0)).getAsString());
         }
         {
             // We do see the default method non-indexed reader, but the subclass has a matching indexed reader, so that
@@ -106,7 +106,7 @@ public class Java8DefaultObjectWrapperTest {
                     Java8DefaultMethodsBean.DEFAULT_METHOD_INDEXED_PROP_3);
             assertNotNull(prop);
             assertEquals(Java8DefaultMethodsBeanBase.DEFAULT_METHOD_INDEXED_PROP_3_VALUE_0,
-                    ((TemplateScalarModel) prop.get(0)).getAsString());
+                    ((TemplateStringModel) prop.get(0)).getAsString());
         }        
         {
             // Only present in the subclass.
@@ -118,7 +118,7 @@ public class Java8DefaultObjectWrapperTest {
                     Java8DefaultMethodsBean.INDEXED_PROP_GETTER_4);
             assertNotNull(indexedReadMethod);
             assertEquals(Java8DefaultMethodsBean.INDEXED_PROP_4_VALUE,
-                    ((TemplateScalarModel) indexedReadMethod.execute(
+                    ((TemplateStringModel) indexedReadMethod.execute(
                             new TemplateModel[] { new SimpleNumber(0) }, NonTemplateCallPlace.INSTANCE))
                             .getAsString());
         }        
@@ -128,7 +128,7 @@ public class Java8DefaultObjectWrapperTest {
             assertNotNull(action);
             assertEquals(
                     Java8DefaultMethodsBean.NORMAL_ACTION_RETURN_VALUE,
-                    ((TemplateScalarModel) action.execute(
+                    ((TemplateStringModel) action.execute(
                             CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE))
                             .getAsString());
         }
@@ -139,7 +139,7 @@ public class Java8DefaultObjectWrapperTest {
             assertNotNull(action);
             assertEquals(
                     Java8DefaultMethodsBean.NORMAL_ACTION_RETURN_VALUE,
-                    ((TemplateScalarModel) action.execute(
+                    ((TemplateStringModel) action.execute(
                             CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE))
                             .getAsString());
         }
@@ -149,7 +149,7 @@ public class Java8DefaultObjectWrapperTest {
             assertNotNull(action);
             assertEquals(
                     Java8DefaultMethodsBean.DEFAULT_METHOD_ACTION_RETURN_VALUE,
-                    ((TemplateScalarModel) action.execute(
+                    ((TemplateStringModel) action.execute(
                             CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE))
                             .getAsString());
         }
@@ -159,7 +159,7 @@ public class Java8DefaultObjectWrapperTest {
             assertNotNull(action);
             assertEquals(
                     Java8DefaultMethodsBean.OVERRIDDEN_DEFAULT_METHOD_ACTION_RETURN_VALUE,
-                    ((TemplateScalarModel) action.execute(
+                    ((TemplateStringModel) action.execute(
                             CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE))
                             .getAsString());
         }

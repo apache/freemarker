@@ -24,12 +24,12 @@ import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.TemplateScalarModel;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.model.impl.SimpleString;
 
-public class HashAndScalarModel implements TemplateHashModelEx, TemplateScalarModel {
+public class HashAndStringModel implements TemplateHashModelEx, TemplateStringModel {
     
-    public static final HashAndScalarModel INSTANCE = new HashAndScalarModel();
+    public static final HashAndStringModel INSTANCE = new HashAndStringModel();
     
     private final TemplateCollectionModel EMPTY_COLLECTION = new TemplateCollectionModel() {
 
@@ -53,12 +53,12 @@ public class HashAndScalarModel implements TemplateHashModelEx, TemplateScalarMo
 
     @Override
     public String getAsString() throws TemplateException {
-        return "scalarValue";
+        return "stringValue";
     }
 
     @Override
     public TemplateModel get(String key) throws TemplateException {
-        return new SimpleScalar("mapValue for " + key);
+        return new SimpleString("mapValue for " + key);
     }
 
     @Override

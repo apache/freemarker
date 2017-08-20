@@ -29,7 +29,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.xml.utils.PrefixResolver;
 import org.apache.xpath.XPath;
 import org.apache.xpath.XPathContext;
@@ -106,7 +106,7 @@ class XalanXPathSupport implements XPathSupport {
                 return null;
             }
             if (xresult instanceof XString) {
-                return new SimpleScalar(xresult.toString());
+                return new SimpleString(xresult.toString());
             }
             if (xresult instanceof XNumber) {
                 return new SimpleNumber(Double.valueOf(((XNumber) xresult).num()));

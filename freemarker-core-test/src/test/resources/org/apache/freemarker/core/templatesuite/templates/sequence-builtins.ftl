@@ -27,7 +27,7 @@
 <@assertEquals expected=0 actual=ls?size />
 <@assertEquals expected=3 actual=set?size />
 </@noOutput>
-Sorting scalars:
+Sorting strings:
 ----------------
 
 String order:

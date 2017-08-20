@@ -20,18 +20,13 @@
 package org.apache.freemarker.core.templatesuite.models;
 
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 
 /**
  * A template that always throws an exception whenever we call getAsString()
  */
-public class ExceptionModel implements TemplateScalarModel {
+public class ExceptionModel implements TemplateStringModel {
 
-    /**
-     * Returns the scalar's value as a String.
-     *
-     * @return the String value of this scalar.
-     */
     @Override
     public String getAsString () throws TemplateException {
         throw new TemplateException( "Throwing from ExceptionModel!" );

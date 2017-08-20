@@ -19,12 +19,12 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 
 /**
  * Represents value unwrapped both to {@link Character} and {@link String}. This is needed for unwrapped overloaded
  * method parameters where both {@link Character} and {@link String} occurs on the same parameter position when the
- * {@link TemplateScalarModel} to unwrapp contains a {@link String} of length 1.
+ * {@link TemplateStringModel} to unwrapp contains a {@link String} of length 1.
  */
 final class CharacterOrString {
 

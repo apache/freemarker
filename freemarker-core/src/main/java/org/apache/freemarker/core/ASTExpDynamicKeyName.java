@@ -22,9 +22,9 @@ package org.apache.freemarker.core;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 
 /**
  * AST expression node: {@code target[keyExpression]}, where, in FM 2.3, {@code keyExpression} can be string, a number
@@ -51,8 +51,8 @@ final class ASTExpDynamicKeyName extends ASTExpression {
             int index = keyExpression.modelToNumber(keyModel, env).intValue();
             return dealWithNumericalKey(targetModel, index, env);
         }
-        if (keyModel instanceof TemplateScalarModel) {
-            String key = _EvalUtils.modelToString((TemplateScalarModel) keyModel, keyExpression);
+        if (keyModel instanceof TemplateStringModel) {
+            String key = _EvalUtils.modelToString((TemplateStringModel) keyModel, keyExpression);
             return dealWithStringKey(targetModel, key, env);
         }
         if (keyModel instanceof RangeModel) {
@@ -60,7 +60,7 @@ final class ASTExpDynamicKeyName extends ASTExpression {
         }
         throw MessageUtils.newUnexpectedOperandTypeException(keyExpression, keyModel,
                 "number, range, or string",
-                new Class[] { TemplateNumberModel.class, TemplateScalarModel.class, ASTExpRange.class },
+                new Class[] { TemplateNumberModel.class, TemplateStringModel.class, ASTExpRange.class },
                 null, env);
     }
 
@@ -105,7 +105,7 @@ final class ASTExpDynamicKeyName extends ASTExpression {
                     env);
         }
         try {
-            return new SimpleScalar(s.substring(index, index + 1));
+            return new SimpleString(s.substring(index, index + 1));
         } catch (IndexOutOfBoundsException e) {
             if (index < 0) {
                 throw new TemplateException("Negative index not allowed: ", Integer.valueOf(index));
@@ -237,12 +237,12 @@ final class ASTExpDynamicKeyName extends ASTExpression {
                 exclEndIdx = firstIdx + resultSize;
             }
             
-            return new SimpleScalar(targetStr.substring(firstIdx, exclEndIdx));
+            return new SimpleString(targetStr.substring(firstIdx, exclEndIdx));
         }
     }
 
     private TemplateModel emptyResult(boolean seq) {
-        return seq ? TemplateSequenceModel.EMPTY_SEQUENCE : TemplateScalarModel.EMPTY_STRING;
+        return seq ? TemplateSequenceModel.EMPTY_SEQUENCE : TemplateStringModel.EMPTY_STRING;
     }
 
     @Override

@@ -20,10 +20,10 @@
 package org.apache.freemarker.dom;
 
 import org.apache.freemarker.core.Environment;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.w3c.dom.Attr;
 
-class AttributeNodeModel extends NodeModel implements TemplateScalarModel {
+class AttributeNodeModel extends NodeModel implements TemplateStringModel {
     
     public AttributeNodeModel(Attr att) {
         super(att);

@@ -24,15 +24,15 @@ import java.util.List;
 
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.util.TemplateLanguageUtils;
 
 /**
  * AST expression node: string literal
  */
-final class ASTExpStringLiteral extends ASTExpression implements TemplateScalarModel {
+final class ASTExpStringLiteral extends ASTExpression implements TemplateStringModel {
     
     private final String value;
     
@@ -87,7 +87,7 @@ final class ASTExpStringLiteral extends ASTExpression implements TemplateScalarM
     @Override
     TemplateModel _eval(Environment env) throws TemplateException {
         if (dynamicValue == null) {
-            return new SimpleScalar(value);
+            return new SimpleString(value);
         } else {
             // This should behave like concatenating the values with `+`. Thus, an interpolated expression that
             // returns markup promotes the result of the whole expression to markup.
@@ -128,8 +128,8 @@ final class ASTExpStringLiteral extends ASTExpression implements TemplateScalarM
                 }
             } // for each part
             return markupResult != null ? markupResult
-                    : plainTextResult != null ? new SimpleScalar(plainTextResult.toString())
-                    : SimpleScalar.EMPTY_STRING;
+                    : plainTextResult != null ? new SimpleString(plainTextResult.toString())
+                    : SimpleString.EMPTY_STRING;
         }
     }
 

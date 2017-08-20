@@ -29,15 +29,15 @@ import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 
 /**
  * Implements all template models that are interesting when calling overloaded Java methods.
  */
 public class AllTemplateModels implements
-        TemplateScalarModel, TemplateNumberModel, TemplateDateModel, TemplateBooleanModel,
+        TemplateStringModel, TemplateNumberModel, TemplateDateModel, TemplateBooleanModel,
         TemplateHashModelEx, TemplateSequenceModel, TemplateCollectionModel {
 
     public static final AllTemplateModels INSTANCE = new AllTemplateModels();
@@ -66,7 +66,7 @@ public class AllTemplateModels implements
     
     @Override
     public TemplateModel get(String key) throws TemplateException {
-        return new SimpleScalar("value for key " + key);
+        return new SimpleString("value for key " + key);
     }
 
     @Override

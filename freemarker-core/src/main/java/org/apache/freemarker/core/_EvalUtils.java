@@ -31,7 +31,7 @@ import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.util.BugException;
@@ -59,7 +59,7 @@ public class _EvalUtils {
     /**
      * @param expr {@code null} is allowed, but may results in less helpful error messages
      */
-    public static String modelToString(TemplateScalarModel model, ASTExpression expr)
+    public static String modelToString(TemplateStringModel model, ASTExpression expr)
     throws TemplateException {
         String value = model.getAsString();
         if (value == null) {
@@ -264,13 +264,13 @@ public class _EvalUtils {
             Date leftDate = _EvalUtils.modelToDate(leftDateModel, leftExp);
             Date rightDate = _EvalUtils.modelToDate(rightDateModel, rightExp);
             cmpResult = leftDate.compareTo(rightDate);
-        } else if (leftValue instanceof TemplateScalarModel && rightValue instanceof TemplateScalarModel) {
+        } else if (leftValue instanceof TemplateStringModel && rightValue instanceof TemplateStringModel) {
             if (operator != CMP_OP_EQUALS && operator != CMP_OP_NOT_EQUALS) {
                 throw new TemplateException(defaultBlamed, env,
                         "Can't use operator \"", cmpOpToString(operator, operatorString), "\" on string values.");
             }
-            String leftString = _EvalUtils.modelToString((TemplateScalarModel) leftValue, leftExp);
-            String rightString = _EvalUtils.modelToString((TemplateScalarModel) rightValue, rightExp);
+            String leftString = _EvalUtils.modelToString((TemplateStringModel) leftValue, leftExp);
+            String rightString = _EvalUtils.modelToString((TemplateStringModel) rightValue, rightExp);
             // FIXME NBC: Don't use the Collator here. That's locale-specific, but ==/!= should not be.
             cmpResult = env.getCollator().compare(leftString, rightString);
         } else if (leftValue instanceof TemplateBooleanModel && rightValue instanceof TemplateBooleanModel) {
@@ -445,8 +445,8 @@ public class _EvalUtils {
             TemplateModel tm, ASTExpression exp, String seqHint, boolean supportsTOM, boolean returnNullOnNonCoercableType,
             Environment env)
             throws TemplateException {
-        if (tm instanceof TemplateScalarModel) {
-            return modelToString((TemplateScalarModel) tm, exp);
+        if (tm instanceof TemplateStringModel) {
+            return modelToString((TemplateStringModel) tm, exp);
         } else if (tm == null) {
             if (exp != null) {
                 throw InvalidReferenceException.getInstance(exp, env);
@@ -456,8 +456,8 @@ public class _EvalUtils {
                         env);
             }
         } else if (tm instanceof TemplateBooleanModel) {
-            // [FM3] This should be before TemplateScalarModel, but automatic boolean-to-string is only non-error since
-            // 2.3.20, so to keep backward compatibility we couldn't insert this before TemplateScalarModel.
+            // [FM3] This should be before TemplateStringModel, but automatic boolean-to-string is only non-error since
+            // 2.3.20, so to keep backward compatibility we couldn't insert this before TemplateStringModel.
             boolean booleanValue = ((TemplateBooleanModel) tm).getAsBoolean();
             return env.formatBoolean(booleanValue, false);
         } else {

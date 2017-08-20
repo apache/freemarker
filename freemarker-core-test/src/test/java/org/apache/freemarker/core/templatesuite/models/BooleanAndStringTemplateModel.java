@@ -21,9 +21,9 @@ package org.apache.freemarker.core.templatesuite.models;
 
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 
-public class BooleanAndStringTemplateModel implements TemplateBooleanModel, TemplateScalarModel {
+public class BooleanAndStringTemplateModel implements TemplateBooleanModel, TemplateStringModel {
 
     @Override
     public String getAsString() throws TemplateException {

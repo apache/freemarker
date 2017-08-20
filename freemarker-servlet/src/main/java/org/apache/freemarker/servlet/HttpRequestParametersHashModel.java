@@ -31,7 +31,7 @@ import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleCollection;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 
 /**
  * TemplateHashModel wrapper for a HttpServletRequest parameters.
@@ -50,7 +50,7 @@ public class HttpRequestParametersHashModel implements TemplateHashModelEx {
     @Override
     public TemplateModel get(String key) {
         String value = request.getParameter(key);
-        return value == null ? null : new SimpleScalar(value);
+        return value == null ? null : new SimpleString(value);
     }
 
     @Override

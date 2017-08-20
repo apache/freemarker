@@ -39,7 +39,7 @@ public interface TemplateHashModelEx extends TemplateHashModel {
 
     /**
      * @return a collection containing the keys in the hash. Every element of 
-     *      the returned collection must implement the {@link TemplateScalarModel}
+     *      the returned collection must implement the {@link TemplateStringModel}
      *      (as the keys of hashes are always strings).
      */
     TemplateCollectionModel keys() throws TemplateException;

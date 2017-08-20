@@ -19,11 +19,11 @@
  
 package org.apache.freemarker.dom;
 
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Comment;
 
-class CharacterDataNodeModel extends NodeModel implements TemplateScalarModel {
+class CharacterDataNodeModel extends NodeModel implements TemplateStringModel {
     
     public CharacterDataNodeModel(CharacterData text) {
         super(text);

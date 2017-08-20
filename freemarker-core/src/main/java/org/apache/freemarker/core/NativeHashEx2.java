@@ -28,7 +28,7 @@ import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 
 /**
  * A hash where each value is already a {@link TemplateModel}, so no {@link ObjectWrapper} need to be specified.
@@ -76,7 +76,7 @@ class NativeHashEx2 implements TemplateHashModelEx2, Serializable {
 
                     @Override
                     public TemplateModel getKey() throws TemplateException {
-                        return new SimpleScalar(entry.getKey());
+                        return new SimpleString(entry.getKey());
                     }
 
                     @Override

@@ -24,4 +24,5 @@
 
 A simple test follows:
 
-ERROR [org.apache.freemarker.core.Template]: message is not a TemplateHashModel, it's a freemarker.template.SimpleScalar.
+ERROR [org.apache.freemarker.core.Template]: message is not a TemplateHashModel, it's a freemarker.template.SimpleString
+.

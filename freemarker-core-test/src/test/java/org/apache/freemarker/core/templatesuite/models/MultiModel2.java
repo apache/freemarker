@@ -26,13 +26,13 @@ import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.model.impl.SimpleString;
 
 /**
  * Testcase to see how FreeMarker deals with multiple Template models.
  */
-public class MultiModel2 implements TemplateScalarModel, TemplateFunctionModel {
+public class MultiModel2 implements TemplateStringModel, TemplateFunctionModel {
 
     @Override
     public String getAsString() {
@@ -47,7 +47,7 @@ public class MultiModel2 implements TemplateScalarModel, TemplateFunctionModel {
             aResults.append("<br />");
         }
 
-        return new SimpleScalar( aResults.toString() );
+        return new SimpleString( aResults.toString() );
     }
 
     @Override

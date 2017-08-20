@@ -26,7 +26,7 @@ import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNodeModelEx;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util._StringUtils;
 
 /**
@@ -116,7 +116,7 @@ class BuiltInsForNodes {
     static class node_nameBI extends BuiltInForNode {
        @Override
     TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateException {
-            return new SimpleScalar(nodeModel.getNodeName());
+            return new SimpleString(nodeModel.getNodeName());
        }
     }
     
@@ -125,14 +125,14 @@ class BuiltInsForNodes {
         @Override
         TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateException {
             String nsURI = nodeModel.getNodeNamespace();
-            return nsURI == null ? null : new SimpleScalar(nsURI);
+            return nsURI == null ? null : new SimpleString(nsURI);
         }
     }
     
     static class node_typeBI extends BuiltInForNode {
        @Override
     TemplateModel calculateResult(TemplateNodeModel nodeModel, Environment env) throws TemplateException {
-            return new SimpleScalar(nodeModel.getNodeType());
+            return new SimpleString(nodeModel.getNodeType());
         }
     }
 

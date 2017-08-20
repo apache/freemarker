@@ -21,46 +21,30 @@ package org.apache.freemarker.core.templatesuite.models;
 
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.model.impl.SimpleString;
 
 /**
  * Testcase to see how FreeMarker deals with multiple Template models.
  */
-public class MultiModel3 implements TemplateScalarModel, TemplateHashModel {
+public class MultiModel3 implements TemplateStringModel, TemplateHashModel {
 
-    /**
-     * Returns the scalar's value as a String.
-     *
-     * @return the String value of this scalar.
-     */
     @Override
     public String getAsString() {
         return "Model3 is alive!";
     }
 
-    /**
-     * @return true if this object is empty.
-     */
     @Override
     public boolean isEmpty() {
         return false;
     }
 
-    /**
-     * Gets a <tt>TemplateModel</tt> from the hash.
-     *
-     * @param key the name by which the <tt>TemplateModel</tt>
-     * is identified in the template.
-     * @return the <tt>TemplateModel</tt> referred to by the key,
-     * or null if not found.
-     */
     @Override
     public TemplateModel get(String key) {
         if ( key.equals( "selftest" )) {
-            return new SimpleScalar( "Selftest from MultiModel3!" );
+            return new SimpleString( "Selftest from MultiModel3!" );
         } else if ( key.equals( "message" )) {
-            return new SimpleScalar( "Hello world from MultiModel3!" );
+            return new SimpleString( "Hello world from MultiModel3!" );
         } else {
             return null;
         }

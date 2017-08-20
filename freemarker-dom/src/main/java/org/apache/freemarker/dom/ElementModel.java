@@ -25,16 +25,16 @@ import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util._StringUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-class ElementModel extends NodeModel implements TemplateScalarModel {
+class ElementModel extends NodeModel implements TemplateStringModel {
 
     public ElementModel(Element element) {
         super(element);
@@ -76,15 +76,15 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
                     return new NodeListModel(node.getAttributes(), this);
                 } else if (key.equals(AtAtKey.START_TAG.getKey())) {
                     NodeOutputter nodeOutputter = new NodeOutputter(node);
-                    return new SimpleScalar(nodeOutputter.getOpeningTag((Element) node));
+                    return new SimpleString(nodeOutputter.getOpeningTag((Element) node));
                 } else if (key.equals(AtAtKey.END_TAG.getKey())) {
                     NodeOutputter nodeOutputter = new NodeOutputter(node);
-                    return new SimpleScalar(nodeOutputter.getClosingTag((Element) node));
+                    return new SimpleString(nodeOutputter.getClosingTag((Element) node));
                 } else if (key.equals(AtAtKey.ATTRIBUTES_MARKUP.getKey())) {
                     StringBuilder buf = new StringBuilder();
                     NodeOutputter nu = new NodeOutputter(node);
                     nu.outputContent(node.getAttributes(), buf);
-                    return new SimpleScalar(buf.toString().trim());
+                    return new SimpleString(buf.toString().trim());
                 } else if (key.equals(AtAtKey.PREVIOUS_SIBLING_ELEMENT.getKey())) {
                     Node previousSibling = node.getPreviousSibling();
                     while (previousSibling != null && !isSignificantNode(previousSibling)) {

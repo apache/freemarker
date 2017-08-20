@@ -34,7 +34,7 @@ import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
 import org.apache.freemarker.test.TemplateTest;
 import org.apache.freemarker.test.TestConfigurationBuilder;
@@ -80,7 +80,7 @@ public class NewBiObjectWrapperRestrictionTest extends TemplateTest {
             }
 
             if (obj instanceof String) {
-                return new SimpleScalar((String) obj);
+                return new SimpleString((String) obj);
             }
             if (obj instanceof Number) {
                 return new SimpleNumber((Number) obj);

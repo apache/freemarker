@@ -25,7 +25,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 
 /**
  * A simple method model used as a test bed.
@@ -34,7 +34,7 @@ public class SimpleTestFunction implements TemplateFunctionModel {
 
     @Override
     public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env) throws TemplateException {
-        return new SimpleScalar("Argument value is: " + args[0]);
+        return new SimpleString("Argument value is: " + args[0]);
     }
 
     @Override

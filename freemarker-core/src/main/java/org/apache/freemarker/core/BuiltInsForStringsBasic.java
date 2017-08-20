@@ -30,9 +30,9 @@ import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util._StringUtils;
 
@@ -51,21 +51,21 @@ class BuiltInsForStringsBasic {
                 b.setCharAt(i, Character.toUpperCase(s.charAt(i)));
                 s = b.toString();
             }
-            return new SimpleScalar(s);
+            return new SimpleString(s);
         }
     }
 
     static class capitalizeBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(_StringUtils.capitalize(s));
+            return new SimpleString(_StringUtils.capitalize(s));
         }
     }
 
     static class chop_linebreakBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(_StringUtils.chomp(s));
+            return new SimpleString(_StringUtils.chomp(s));
         }
     }
 
@@ -140,7 +140,7 @@ class BuiltInsForStringsBasic {
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
                 String suffix = getStringArgument(args, 0, this);
-                return new SimpleScalar(s.endsWith(suffix) ? s : s + suffix);
+                return new SimpleString(s.endsWith(suffix) ? s : s + suffix);
             }
 
             @Override
@@ -199,7 +199,7 @@ class BuiltInsForStringsBasic {
                     startsWithPrefix = s.startsWith(checkedPrefix);
                     addedPrefix = checkedPrefix;
                 }
-                return new SimpleScalar(startsWithPrefix ? s : addedPrefix + s);
+                return new SimpleString(startsWithPrefix ? s : addedPrefix + s);
             }
 
             @Override
@@ -293,7 +293,7 @@ class BuiltInsForStringsBasic {
                         startIndex = -1;
                     }
                 }
-                return startIndex == -1 ? TemplateScalarModel.EMPTY_STRING : new SimpleScalar(s.substring(startIndex));
+                return startIndex == -1 ? TemplateStringModel.EMPTY_STRING : new SimpleString(s.substring(startIndex));
             }
 
             @Override
@@ -351,7 +351,7 @@ class BuiltInsForStringsBasic {
                         }
                     }
                 }
-                return startIndex == -1 ? TemplateScalarModel.EMPTY_STRING : new SimpleScalar(s.substring(startIndex));
+                return startIndex == -1 ? TemplateStringModel.EMPTY_STRING : new SimpleString(s.substring(startIndex));
             }
 
             @Override
@@ -400,7 +400,7 @@ class BuiltInsForStringsBasic {
                         stopIndex = -1;
                     }
                 }
-                return stopIndex == -1 ? new SimpleScalar(s) : new SimpleScalar(s.substring(0, stopIndex));
+                return stopIndex == -1 ? new SimpleString(s) : new SimpleString(s.substring(0, stopIndex));
             }
 
             @Override
@@ -456,7 +456,7 @@ class BuiltInsForStringsBasic {
                         }
                     }
                 }
-                return stopIndex == -1 ? new SimpleScalar(s) : new SimpleScalar(s.substring(0, stopIndex));
+                return stopIndex == -1 ? new SimpleString(s) : new SimpleString(s.substring(0, stopIndex));
             }
 
             @Override
@@ -484,7 +484,7 @@ class BuiltInsForStringsBasic {
     static class lower_caseBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(s.toLowerCase(env.getLocale()));
+            return new SimpleString(s.toLowerCase(env.getLocale()));
         }
     }    
 
@@ -506,7 +506,7 @@ class BuiltInsForStringsBasic {
                 String filling = getOptionalStringArgument(args, 1, this);
                 if (filling != null) {
                     try {
-                        return new SimpleScalar(
+                        return new SimpleString(
                                 leftPadder
                                         ? _StringUtils.leftPad(s, width, filling)
                                         : _StringUtils.rightPad(s, width, filling));
@@ -520,7 +520,7 @@ class BuiltInsForStringsBasic {
                         }
                     }
                 } else {
-                    return new SimpleScalar(leftPadder ? _StringUtils.leftPad(s, width) : _StringUtils.rightPad(s, width));
+                    return new SimpleString(leftPadder ? _StringUtils.leftPad(s, width) : _StringUtils.rightPad(s, width));
                 }
             }
 
@@ -555,7 +555,7 @@ class BuiltInsForStringsBasic {
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
                 String prefix = getStringArgument(args, 0, this);
-                return new SimpleScalar(s.startsWith(prefix) ? s.substring(prefix.length()) : s);
+                return new SimpleString(s.startsWith(prefix) ? s.substring(prefix.length()) : s);
             }
 
             @Override
@@ -583,7 +583,7 @@ class BuiltInsForStringsBasic {
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
                 String suffix = getStringArgument(args, 0, this);
-                return new SimpleScalar(s.endsWith(suffix) ? s.substring(0, s.length() - suffix.length()) : s);
+                return new SimpleString(s.endsWith(suffix) ? s.substring(0, s.length() - suffix.length()) : s);
             }
 
             @Override
@@ -710,9 +710,9 @@ class BuiltInsForStringsBasic {
                                 + ", shouldn't be greater than the end index argument, " + endIdx + ".",
                                 this);
                     }
-                    return new SimpleScalar(s.substring(beginIdx, endIdx));
+                    return new SimpleString(s.substring(beginIdx, endIdx));
                 } else {
-                    return new SimpleScalar(s.substring(beginIdx));
+                    return new SimpleString(s.substring(beginIdx));
                 }
             }
 
@@ -741,7 +741,7 @@ class BuiltInsForStringsBasic {
     static class trimBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(s.trim());
+            return new SimpleString(s.trim());
         }
     }
 
@@ -758,14 +758,14 @@ class BuiltInsForStringsBasic {
                 b.setCharAt(i, Character.toLowerCase(s.charAt(i)));
                 s = b.toString();
             }
-            return new SimpleScalar(s);
+            return new SimpleString(s);
         }
     }
 
     static class upper_caseBI extends BuiltInForString {
         @Override
         TemplateModel calculateResult(String s, Environment env) {
-            return new SimpleScalar(s.toUpperCase(env.getLocale()));
+            return new SimpleString(s.toUpperCase(env.getLocale()));
         }
     }
 

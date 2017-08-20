@@ -21,7 +21,7 @@ package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 
 /**
  * A holder for builtins that operate exclusively on markup output left-hand value.
@@ -32,7 +32,7 @@ class BuiltInsForMarkupOutputs {
 
         @Override
         protected TemplateModel calculateResult(TemplateMarkupOutputModel model) throws TemplateException {
-            return new SimpleScalar(model.getOutputFormat().getMarkupString(model));
+            return new SimpleString(model.getOutputFormat().getMarkupString(model));
         }
         
     }

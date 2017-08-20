@@ -26,7 +26,7 @@ import org.apache.freemarker.core.NonTemplateCallPlace;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,11 +54,11 @@ public class EnumModelsTest {
         }
         
         TemplateModel a = e.get("A");
-        assertTrue(a instanceof TemplateScalarModel);
+        assertTrue(a instanceof TemplateStringModel);
         assertTrue(a instanceof TemplateHashModel);
-        assertEquals(((TemplateScalarModel) a).getAsString(), "ts:A");
+        assertEquals(((TemplateStringModel) a).getAsString(), "ts:A");
         JavaMethodModel nameMethod = (JavaMethodModel) ((TemplateHashModel) a).get("name");
-        assertEquals(((TemplateScalarModel) nameMethod.execute(
+        assertEquals(((TemplateStringModel) nameMethod.execute(
                 CallableUtils.EMPTY_TEMPLATE_MODEL_ARRAY, NonTemplateCallPlace.INSTANCE)).getAsString(),
                 "A");
         

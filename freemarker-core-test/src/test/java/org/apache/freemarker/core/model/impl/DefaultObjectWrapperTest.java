@@ -58,7 +58,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
@@ -177,7 +177,7 @@ public class DefaultObjectWrapperTest {
         assertEquals(11, ow.unwrap(seq.get(0)));
         assertEquals(22, ow.unwrap(seq.get(1)));
         
-        assertTrue(ow.wrap("x") instanceof SimpleScalar);
+        assertTrue(ow.wrap("x") instanceof SimpleString);
         assertTrue(ow.wrap(1.5) instanceof SimpleNumber);
         assertTrue(ow.wrap(new Date()) instanceof SimpleDate);
         assertEquals(TemplateBooleanModel.TRUE, ow.wrap(true));
@@ -186,7 +186,7 @@ public class DefaultObjectWrapperTest {
         assertTrue(ow.wrap(Collections.emptyList()) instanceof DefaultListAdapter);
         assertTrue(ow.wrap(new boolean[] { }) instanceof DefaultArrayAdapter);
         assertTrue(ow.wrap(new HashSet()) instanceof DefaultNonListCollectionAdapter);
-        assertTrue(ow.wrap('c') instanceof TemplateScalarModel); // BeanAndStringModel right now, but should change later
+        assertTrue(ow.wrap('c') instanceof TemplateStringModel); // BeanAndStringModel right now, but should change later
         
         TemplateHashModel bean = (TemplateHashModel) ow.wrap(new TestBean());
         assertEquals(1, ow.unwrap(bean.get("x")));
@@ -261,7 +261,7 @@ public class DefaultObjectWrapperTest {
             assertNull(hash.get("e"));
             assertEquals(1, ((TemplateNumberModel) hash.get("a")).getAsNumber());
             assertNull(hash.get("b"));
-            assertEquals("C", ((TemplateScalarModel) hash.get("c")).getAsString());
+            assertEquals("C", ((TemplateStringModel) hash.get("c")).getAsString());
             assertTrue(hash.get("d") instanceof DefaultListAdapter);
 
             assertCollectionTMEquals(hash.keys(), "a", "b", "c", "d");
@@ -319,7 +319,7 @@ public class DefaultObjectWrapperTest {
             assertNull(seq.get(-1));
             assertEquals(1, ((TemplateNumberModel) seq.get(0)).getAsNumber());
             assertNull(seq.get(1));
-            assertEquals("c", ((TemplateScalarModel) seq.get(2)).getAsString());
+            assertEquals("c", ((TemplateStringModel) seq.get(2)).getAsString());
             assertTrue(seq.get(3) instanceof DefaultArrayAdapter);
             assertNull(seq.get(4));
             
@@ -339,7 +339,7 @@ public class DefaultObjectWrapperTest {
             assertNull(seq.get(-1));
             assertEquals(1, ((TemplateNumberModel) seq.get(0)).getAsNumber());
             assertNull(seq.get(1));
-            assertEquals("c", ((TemplateScalarModel) seq.get(2)).getAsString());
+            assertEquals("c", ((TemplateStringModel) seq.get(2)).getAsString());
             assertNull(seq.get(3));
 
             assertCollectionTMEquals((TemplateCollectionModel) seq, 1, null, "c");
@@ -386,9 +386,9 @@ public class DefaultObjectWrapperTest {
             TemplateSequenceModel seq = (TemplateSequenceModel) OW.wrap(testArray);
             assertEquals(3, seq.size());
             assertNull(seq.get(-1));
-            assertEquals("a", ((TemplateScalarModel) seq.get(0)).getAsString());
+            assertEquals("a", ((TemplateStringModel) seq.get(0)).getAsString());
             assertNull(seq.get(1));
-            assertEquals("c", ((TemplateScalarModel) seq.get(2)).getAsString());
+            assertEquals("c", ((TemplateStringModel) seq.get(2)).getAsString());
             assertNull(seq.get(3));
         }
 
@@ -427,8 +427,8 @@ public class DefaultObjectWrapperTest {
             TemplateSequenceModel seq = (TemplateSequenceModel) OW.wrap(testArray);
             assertEquals(2, seq.size());
             assertNull(seq.get(-1));
-            assertEquals("a", ((TemplateScalarModel) seq.get(0)).getAsString());
-            assertEquals("b", ((TemplateScalarModel) seq.get(1)).getAsString());
+            assertEquals("a", ((TemplateStringModel) seq.get(0)).getAsString());
+            assertEquals("b", ((TemplateStringModel) seq.get(1)).getAsString());
             assertNull(seq.get(2));
         }
     }
@@ -459,7 +459,7 @@ public class DefaultObjectWrapperTest {
         if (expectedPojoToString != null) {
             JavaMethodModel getToStringM = (JavaMethodModel) testBeanTM.get("toString");
             TemplateModel r = getToStringM.execute(new TemplateModel[] { objTM }, NonTemplateCallPlace.INSTANCE);
-            assertEquals(expectedPojoToString, ((TemplateScalarModel) r).getAsString());
+            assertEquals(expectedPojoToString, ((TemplateStringModel) r).getAsString());
         }
     }
 
@@ -663,9 +663,9 @@ public class DefaultObjectWrapperTest {
         DefaultEnumerationAdapter enumAdapter = (DefaultEnumerationAdapter) wrappedEnumeration;
         TemplateModelIterator iterator = enumAdapter.iterator();
         assertTrue(iterator.hasNext());
-        assertEquals("a", ((TemplateScalarModel) iterator.next()).getAsString());
+        assertEquals("a", ((TemplateStringModel) iterator.next()).getAsString());
         assertTrue(iterator.hasNext());
-        assertEquals("b", ((TemplateScalarModel) iterator.next()).getAsString());
+        assertEquals("b", ((TemplateStringModel) iterator.next()).getAsString());
         assertFalse(iterator.hasNext());
 
         iterator = enumAdapter.iterator();

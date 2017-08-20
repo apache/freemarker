@@ -24,7 +24,7 @@ import java.util.Set;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util._SortedArraySet;
 import org.apache.freemarker.core.util._StringUtils;
 
@@ -107,8 +107,8 @@ final class ASTDirSetting extends ASTDirective {
     ASTElement[] accept(Environment env) throws TemplateException {
         TemplateModel mval = value.eval(env);
         String strval;
-        if (mval instanceof TemplateScalarModel) {
-            strval = ((TemplateScalarModel) mval).getAsString();
+        if (mval instanceof TemplateStringModel) {
+            strval = ((TemplateStringModel) mval).getAsString();
         } else if (mval instanceof TemplateBooleanModel) {
             strval = ((TemplateBooleanModel) mval).getAsBoolean() ? "true" : "false";
         } else if (mval instanceof TemplateNumberModel) {

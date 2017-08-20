@@ -24,7 +24,7 @@ import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
 
 /**
@@ -34,23 +34,16 @@ public class MultiModel5 implements TemplateSequenceModel, TemplateHashModel {
 
     private final SimpleSequence m_cList;
 
-    /** Creates new MultiModel5 */
     public MultiModel5(ObjectWrapper ow) {
         this.m_cList = new SimpleSequence(ow);
-        m_cList.add( new SimpleScalar( "Dummy to make list non-empty" ));
+        m_cList.add( new SimpleString( "Dummy to make list non-empty" ));
     }
 
-    /**
-     * @return the specified index in the list
-     */
     @Override
     public TemplateModel get(int i) throws TemplateException {
         return m_cList.get( i );
     }
 
-    /**
-     * @return true if this object is empty.
-     */
     @Override
     public boolean isEmpty() {
         return false;
@@ -61,18 +54,10 @@ public class MultiModel5 implements TemplateSequenceModel, TemplateHashModel {
         return m_cList.size();
     }
 
-    /**
-     * Gets a <tt>TemplateModel</tt> from the hash.
-     *
-     * @param key the name by which the <tt>TemplateModel</tt>
-     * is identified in the template.
-     * @return the <tt>TemplateModel</tt> referred to by the key,
-     * or null if not found.
-     */
     @Override
     public TemplateModel get(String key) {
         if ( key.equals( "empty" )) {
-            return new SimpleScalar( "Dummy hash value, for test purposes." );
+            return new SimpleString( "Dummy hash value, for test purposes." );
         } else {
             return null;
         }

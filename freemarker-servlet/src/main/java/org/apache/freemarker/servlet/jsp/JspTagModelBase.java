@@ -41,7 +41,7 @@ import org.apache.freemarker.core._ErrorDescriptionBuilder;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModelWithOriginName;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.util._StringUtils;
 import org.apache.freemarker.servlet.jsp.SimpleTagDirectiveModel.TemplateExceptionWrapperJspException;
@@ -78,7 +78,7 @@ abstract class JspTagModelBase implements TemplateModelWithOriginName {
                 final TemplateHashModelEx2.KeyValuePair entry = iter.next();
                 final Object arg = wrapper.unwrap(entry.getValue());
                 argArray[0] = arg;
-                final String paramName = ((TemplateScalarModel) entry.getKey()).getAsString();
+                final String paramName = ((TemplateStringModel) entry.getKey()).getAsString();
                 Method setterMethod = (Method) propertySetters.get(paramName);
                 if (setterMethod == null) {
                     if (tag instanceof DynamicAttributes) {

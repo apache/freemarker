@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.util.BugException;
 
@@ -75,7 +75,7 @@ final class ASTDirCapturingAssignment extends ASTDirective {
     }
 
     private TemplateModel capturedStringToModel(String s) throws TemplateException {
-        return markupOutputFormat == null ? new SimpleScalar(s) : markupOutputFormat.fromMarkup(s);
+        return markupOutputFormat == null ? new SimpleString(s) : markupOutputFormat.fromMarkup(s);
     }
 
     @Override

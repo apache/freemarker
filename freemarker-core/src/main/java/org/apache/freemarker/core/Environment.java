@@ -59,7 +59,7 @@ import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithOriginName;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
@@ -594,8 +594,8 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                     // // TemplateNodeModel somehow.
 
                     // If the node's type is 'text', we just output it.
-                    if ((nodeType.equals("text") && node instanceof TemplateScalarModel)) {
-                        out.write(((TemplateScalarModel) node).getAsString()); // TODO [FM3] Escaping?
+                    if ((nodeType.equals("text") && node instanceof TemplateStringModel)) {
+                        out.write(((TemplateStringModel) node).getAsString()); // TODO [FM3] Escaping?
                     } else if (nodeType.equals("document")) {
                         recurse(node, namespaces);
                     }
@@ -1954,18 +1954,18 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         if (rootDataModel instanceof TemplateHashModelEx) {
             TemplateModelIterator rootNames = ((TemplateHashModelEx) rootDataModel).keys().iterator();
             while (rootNames.hasNext()) {
-                set.add(((TemplateScalarModel) rootNames.next()).getAsString());
+                set.add(((TemplateStringModel) rootNames.next()).getAsString());
             }
         }
 
         // globals
         for (TemplateModelIterator tmi = globalNamespace.keys().iterator(); tmi.hasNext();) {
-            set.add(((TemplateScalarModel) tmi.next()).getAsString());
+            set.add(((TemplateStringModel) tmi.next()).getAsString());
         }
 
         // current name-space
         for (TemplateModelIterator tmi = currentNamespace.keys().iterator(); tmi.hasNext();) {
-            set.add(((TemplateScalarModel) tmi.next()).getAsString());
+            set.add(((TemplateStringModel) tmi.next()).getAsString());
         }
 
         // locals and loop vars

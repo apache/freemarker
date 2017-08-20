@@ -31,8 +31,8 @@ import org.apache.freemarker.core.outputformat.OutputFormat;
  * {@link #getOutputFormat()}. See more about how markup output values work at {@link OutputFormat}.
  * 
  * <p>
- * Note that {@link TemplateMarkupOutputModel}-s are by design not treated like {@link TemplateScalarModel}-s, and so
- * the implementations of this interface usually shouldn't implement {@link TemplateScalarModel}. (Because, operations
+ * Note that {@link TemplateMarkupOutputModel}-s are by design not treated like {@link TemplateStringModel}-s, and so
+ * the implementations of this interface usually shouldn't implement {@link TemplateStringModel}. (Because, operations
  * applicable on plain strings, like converting to upper case, substringing, etc., can corrupt markup.) If the template
  * author wants to pass in the "source" of the markup as string somewhere, he should use {@code ?markup_string}.
  * 

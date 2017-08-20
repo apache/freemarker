@@ -28,7 +28,7 @@ import java.util.Collections;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.templateresolver.impl.StringTemplateLoader;
 import org.apache.freemarker.test.TemplateTest;
 import org.apache.freemarker.test.TestConfigurationBuilder;
@@ -203,7 +203,7 @@ public class EnvironmentGetTemplateVariantsTest extends TemplateTest {
                 final String r = "<ct=" + env.getCurrentTemplate().getLookupName() + " mt="
                         + env.getMainTemplate().getLookupName() + ">";
                 out.write(r);
-                env.setGlobalVariable("lastTNamesResult", new SimpleScalar(r));
+                env.setGlobalVariable("lastTNamesResult", new SimpleString(r));
             }
 
             @Override

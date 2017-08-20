@@ -30,7 +30,7 @@ import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util.CommonSupplier;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
@@ -233,7 +233,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
             TemplateHashModelEx2 varargs = (TemplateHashModelEx2) args[ARGS_LAYOUT.getNamedVarargsArgumentIndex()];
             if (varargs.size() > 0) {
                 out.write("(p=");
-                out.write(((TemplateScalarModel) varargs.get("p")).getAsString());
+                out.write(((TemplateStringModel) varargs.get("p")).getAsString());
                 out.write(")");
             }
             if (callPlace.hasNestedContent()) {

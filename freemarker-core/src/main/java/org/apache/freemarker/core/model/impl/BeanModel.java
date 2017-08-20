@@ -43,7 +43,7 @@ import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +67,7 @@ public class BeanModel
     protected final DefaultObjectWrapper wrapper;
     
     // We use this to represent an unknown value as opposed to known value of null (JR)
-    static final TemplateModel UNKNOWN = new SimpleScalar("UNKNOWN");
+    static final TemplateModel UNKNOWN = new SimpleString("UNKNOWN");
 
     // I've tried to use a volatile ConcurrentHashMap field instead of HashMap + synchronized(this), but oddly it was
     // a bit slower, at least on Java 8 u66. 
@@ -77,7 +77,7 @@ public class BeanModel
      * Creates a new model that wraps the specified object. Note that there are
      * specialized subclasses of this class for wrapping arrays, collections,
      * enumeration, iterators, and maps. Note also that the superclass can be
-     * used to wrap String objects if only scalar functionality is needed. You
+     * used to wrap String objects if only {@link TemplateStringModel} functionality is needed. You
      * can also choose to delegate the choice over which model class is used for
      * wrapping to {@link DefaultObjectWrapper#wrap(Object)}.
      * @param object the object to wrap into a model.
@@ -297,7 +297,7 @@ public class BeanModel
         List<Object> values = new ArrayList<>(size());
         TemplateModelIterator it = keys().iterator();
         while (it.hasNext()) {
-            String key = ((TemplateScalarModel) it.next()).getAsString();
+            String key = ((TemplateStringModel) it.next()).getAsString();
             values.add(get(key));
         }
         return new CollectionAndSequence(new SimpleSequence(values, wrapper));

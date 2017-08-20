@@ -45,10 +45,10 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
 
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.UnregisteredOutputFormatException;
@@ -651,24 +651,24 @@ public class ConfigurationTest {
                 .sharedVariables(ImmutableMap.of(
                         "a", "aa",
                         "b", "bb",
-                        "c", new MyScalarModel()
+                        "c", new MyStringModel()
                 ))
                 .build();
 
         assertNull(cfg.getSharedVariables().get("noSuchVar"));
         assertNull(cfg.getWrappedSharedVariable("noSuchVar"));
 
-        TemplateScalarModel aVal = (TemplateScalarModel) cfg.getWrappedSharedVariable("a");
+        TemplateStringModel aVal = (TemplateStringModel) cfg.getWrappedSharedVariable("a");
         assertEquals("aa", aVal.getAsString());
-        assertEquals(SimpleScalar.class, aVal.getClass());
+        assertEquals(SimpleString.class, aVal.getClass());
 
-        TemplateScalarModel bVal = (TemplateScalarModel) cfg.getWrappedSharedVariable("b");
+        TemplateStringModel bVal = (TemplateStringModel) cfg.getWrappedSharedVariable("b");
         assertEquals("bb", bVal.getAsString());
-        assertEquals(SimpleScalar.class, bVal.getClass());
+        assertEquals(SimpleString.class, bVal.getClass());
 
-        TemplateScalarModel cVal = (TemplateScalarModel) cfg.getWrappedSharedVariable("c");
+        TemplateStringModel cVal = (TemplateStringModel) cfg.getWrappedSharedVariable("c");
         assertEquals("my", cVal.getAsString());
-        assertEquals(MyScalarModel.class, cfg.getWrappedSharedVariable("c").getClass());
+        assertEquals(MyStringModel.class, cfg.getWrappedSharedVariable("c").getClass());
 
         // See if it actually works in templates:
         StringWriter sw = new StringWriter();
@@ -934,7 +934,7 @@ public class ConfigurationTest {
         }
     }
 
-    private static class MyScalarModel implements TemplateScalarModel {
+    private static class MyStringModel implements TemplateStringModel {
 
         @Override
         public String getAsString() throws TemplateException {

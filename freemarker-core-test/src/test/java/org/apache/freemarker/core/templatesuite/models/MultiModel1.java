@@ -24,18 +24,18 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleHash;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
 
 /**
  * Testcase to see how FreeMarker deals with multiple Template models.
  */
 public class MultiModel1 implements TemplateHashModel,
-        TemplateSequenceModel, TemplateScalarModel {
+        TemplateSequenceModel, TemplateStringModel {
 
     private ObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
 
@@ -45,7 +45,6 @@ public class MultiModel1 implements TemplateHashModel,
     private TemplateSequenceModel m_cListModel = new SimpleSequence(ow);
     private TemplateHashModel m_cHashModel = new SimpleHash(ow);
 
-    /** Creates new MultiModel1 */
     public MultiModel1() {
         for ( int i = 0; i < 10; i++ ) {
             ((SimpleSequence) m_cListModel).add( "Model1 value: " + Integer.toString( i ));
@@ -54,14 +53,6 @@ public class MultiModel1 implements TemplateHashModel,
         ((SimpleHash) m_cHashModel).put( "nested", new MultiModel3() );
     }
 
-    /**
-     * Gets a <tt>TemplateModel</tt> from the hash.
-     *
-     * @param key the name by which the <tt>TemplateModel</tt>
-     * is identified in the template.
-     * @return the <tt>TemplateModel</tt> referred to by the key,
-     * or null if not found.
-     */
     @Override
     public TemplateModel get(String key) {
         if ( key.equals( "model2" )) {
@@ -69,13 +60,13 @@ public class MultiModel1 implements TemplateHashModel,
         } else if ( key.equals( "modellist" )) {
             return m_cListModel;
         } else if ( key.equals( "selftest" )) {
-            return new SimpleScalar( "Selftest of a hash from MultiModel1" );
+            return new SimpleString( "Selftest of a hash from MultiModel1" );
         } else if ( key.equals( "one" )) {
             return m_cListHashModel1;
         } else if ( key.equals( "two" )) {
             return m_cListHashModel2;
         } else if ( key.equals( "size" )) {
-            return new SimpleScalar( "Nasty!" );
+            return new SimpleString( "Nasty!" );
         } else if ( key.equals( "nesting1" )) {
             return m_cHashModel;
         } else {
@@ -83,27 +74,16 @@ public class MultiModel1 implements TemplateHashModel,
         }
     }
 
-    /**
-     * @return true if this object is empty.
-     */
     @Override
     public boolean isEmpty() {
         return false;
     }
 
-    /**
-     * @return the specified index in the list
-     */
     @Override
     public TemplateModel get(int i) throws TemplateException {
         return m_cListModel.get( i );
     }
 
-    /**
-     * Returns the scalar's value as a String.
-     *
-     * @return the String value of this scalar.
-     */
     @Override
     public String getAsString() {
         return "MultiModel1 as a string!";

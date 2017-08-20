@@ -19,40 +19,22 @@
 
 package org.apache.freemarker.core.templatesuite.models;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateHashModel;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.impl.SimpleString;
+import org.apache.freemarker.core.model.TemplateStringModel;
 
-/**
- * Tests the impact that the isEmpty() has on template hash models.
- */
-public class BooleanHash1 implements TemplateHashModel {
+public class BooleanAndStringModel implements TemplateBooleanModel, TemplateStringModel {
 
-    /**
-     * Gets a <tt>TemplateModel</tt> from the hash.
-     *
-     * @param key the name by which the <tt>TemplateModel</tt>
-     * is identified in the template.
-     * @return the <tt>TemplateModel</tt> referred to by the key,
-     * or null if not found.
-     */
+    public static final BooleanAndStringModel INSTANCE = new BooleanAndStringModel();
+
     @Override
-    public TemplateModel get(String key) {
-        if ( key.equals( "temp" )) {
-            return new SimpleString( "Hello, world." );
-        } else if ( key.equals( "boolean" )) {
-            return TemplateBooleanModel.FALSE;
-        } else {
-            return new SimpleString( "Just another key..." );
-        }
+    public String getAsString() throws TemplateException {
+        return "s";
     }
 
-    /**
-     * @return true if this object is empty.
-     */
     @Override
-    public boolean isEmpty() {
+    public boolean getAsBoolean() throws TemplateException {
         return true;
     }
+
 }

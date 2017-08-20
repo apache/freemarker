@@ -25,11 +25,11 @@ import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.DefaultListAdapter;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 
 /**
  * Adapts (not copies) a {@link List} of {@link String}-s with on-the-fly wrapping of the items to {@link
- * SimpleScalar}-s. The important difference to {@link DefaultListAdapter} is that it doesn't depend on an {@link
+ * SimpleString}-s. The important difference to {@link DefaultListAdapter} is that it doesn't depend on an {@link
  * ObjectWrapper}, which is needed to guarantee the behavior of some template language constructs. The important
  * difference to {@link NativeSequence} is that it doesn't need upfront conversion to {@link TemplateModel}-s
  * (performance).
@@ -44,7 +44,7 @@ class NativeStringListSequence implements TemplateSequenceModel {
 
     @Override
     public TemplateModel get(int index) throws TemplateException {
-        return index < items.size() ? new SimpleScalar(items.get(index)) : null;
+        return index < items.size() ? new SimpleString(items.get(index)) : null;
     }
 
     @Override

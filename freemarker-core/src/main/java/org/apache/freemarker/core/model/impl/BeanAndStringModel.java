@@ -19,19 +19,18 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 
 /**
  * Subclass of {@link BeanModel} that exposes the return value of the {@link
- * java.lang.Object#toString()} method through the {@link TemplateScalarModel}
+ * java.lang.Object#toString()} method through the {@link TemplateStringModel}
  * interface.
  */
 // [FM3] Treating all beans as FTL strings was certainly a bad idea in FM2.
-public class BeanAndStringModel extends BeanModel implements TemplateScalarModel {
+public class BeanAndStringModel extends BeanModel implements TemplateStringModel {
 
     /**
-     * Creates a new model that wraps the specified object with BeanModel + scalar
-     * functionality.
+     * Creates a new model that wraps the specified object with BeanModel + string functionality.
      * @param object the object to wrap into a model.
      * @param wrapper the {@link DefaultObjectWrapper} associated with this model.
      * Every model has to have an associated {@link DefaultObjectWrapper} instance. The

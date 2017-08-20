@@ -29,9 +29,9 @@ import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.SimpleDate;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util.UnrecognizedTimeZoneException;
 import org.apache.freemarker.core.util._DateUtils;
 
@@ -94,8 +94,8 @@ class BuiltInsForDates {
                                 .getAdaptedObject(TimeZone.class))
                             instanceof TimeZone) {
                     tzArg = (TimeZone) adaptedObj;
-                } else if (tzArgTM instanceof TemplateScalarModel) {
-                    String tzName = _EvalUtils.modelToString((TemplateScalarModel) tzArgTM, null);
+                } else if (tzArgTM instanceof TemplateStringModel) {
+                    String tzName = _EvalUtils.modelToString((TemplateStringModel) tzArgTM, null);
                     try {
                         tzArg = _DateUtils.getTimeZone(tzName);
                     } catch (UnrecognizedTimeZoneException e) {
@@ -106,11 +106,11 @@ class BuiltInsForDates {
                 } else {
                     throw newArgumentValueTypeException(
                             tzArgTM, 0,
-                            new Class[] { TemplateScalarModel.class }, "string or java.util.TimeZone",
+                            new Class[] { TemplateStringModel.class }, "string or java.util.TimeZone",
                             this, true);
                 }
 
-                return new SimpleScalar(_DateUtils.dateToISO8601String(
+                return new SimpleString(_DateUtils.dateToISO8601String(
                         date,
                         dateType != TemplateDateModel.TIME,
                         dateType != TemplateDateModel.DATE,
@@ -159,7 +159,7 @@ class BuiltInsForDates {
                 Date date, int dateType, Environment env)
         throws TemplateException {
             checkDateTypeNotUnknown(dateType);
-            return new SimpleScalar(_DateUtils.dateToISO8601String(
+            return new SimpleString(_DateUtils.dateToISO8601String(
                     date,
                     dateType != TemplateDateModel.TIME,
                     dateType != TemplateDateModel.DATE,

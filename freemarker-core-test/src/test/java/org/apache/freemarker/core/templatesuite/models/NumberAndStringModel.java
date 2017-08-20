@@ -20,10 +20,10 @@
 package org.apache.freemarker.core.templatesuite.models;
 
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 
 public class NumberAndStringModel implements TemplateNumberModel,
-		TemplateScalarModel {
+        TemplateStringModel {
 	
 	private final String s;
 	

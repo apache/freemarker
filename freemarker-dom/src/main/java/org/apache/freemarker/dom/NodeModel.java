@@ -22,7 +22,6 @@ package org.apache.freemarker.dom;
 
 import java.lang.ref.WeakReference;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -40,7 +39,7 @@ import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.slf4j.Logger;
 import org.w3c.dom.Attr;
 import org.w3c.dom.CDATASection;
@@ -114,29 +113,29 @@ abstract public class NodeModel implements TemplateNodeModelEx, TemplateHashMode
     public TemplateModel get(String key) throws TemplateException {
         if (key.startsWith("@@")) {
             if (key.equals(AtAtKey.TEXT.getKey())) {
-                return new SimpleScalar(getText(node));
+                return new SimpleString(getText(node));
             } else if (key.equals(AtAtKey.NAMESPACE.getKey())) {
                 String nsURI = node.getNamespaceURI();
-                return nsURI == null ? null : new SimpleScalar(nsURI);
+                return nsURI == null ? null : new SimpleString(nsURI);
             } else if (key.equals(AtAtKey.LOCAL_NAME.getKey())) {
                 String localName = node.getLocalName();
                 if (localName == null) {
                     localName = getNodeName();
                 }
-                return new SimpleScalar(localName);
+                return new SimpleString(localName);
             } else if (key.equals(AtAtKey.MARKUP.getKey())) {
                 StringBuilder buf = new StringBuilder();
                 NodeOutputter nu = new NodeOutputter(node);
                 nu.outputContent(node, buf);
-                return new SimpleScalar(buf.toString());
+                return new SimpleString(buf.toString());
             } else if (key.equals(AtAtKey.NESTED_MARKUP.getKey())) {
                 StringBuilder buf = new StringBuilder();
                 NodeOutputter nu = new NodeOutputter(node);
                 nu.outputContent(node.getChildNodes(), buf);
-                return new SimpleScalar(buf.toString());
+                return new SimpleString(buf.toString());
             } else if (key.equals(AtAtKey.QNAME.getKey())) {
                 String qname = getQualifiedName();
-                return qname != null ? new SimpleScalar(qname) : null;
+                return qname != null ? new SimpleString(qname) : null;
             } else {
                 // As @@... would cause exception in the XPath engine, we throw a nicer exception now. 
                 if (AtAtKey.containsKey(key)) {

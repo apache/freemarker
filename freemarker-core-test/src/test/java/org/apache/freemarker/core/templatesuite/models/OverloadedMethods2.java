@@ -969,12 +969,12 @@ public class OverloadedMethods2 {
         return new Object[] { "a", "b" };
     }
     
-    public TemplateModel getHashAndScalarModel() {
-        return HashAndScalarModel.INSTANCE;
+    public TemplateModel getHashAndStringModel() {
+        return HashAndStringModel.INSTANCE;
     }
 
-    public TemplateModel getBooleanAndScalarModel() {
-        return BooleanAndScalarModel.INSTANCE;
+    public TemplateModel getBooleanAndStringModel() {
+        return BooleanAndStringModel.INSTANCE;
     }
     
     public TemplateModel getAllModels() {

@@ -23,7 +23,7 @@ import java.io.IOException;
 
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNodeModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 
 
@@ -48,7 +48,7 @@ final class ASTDirVisit extends ASTDirective {
         
         TemplateModel nss = namespaces == null ? null : namespaces.eval(env);
         if (namespaces instanceof ASTExpStringLiteral) {
-            nss = env.importLib(((TemplateScalarModel) nss).getAsString(), null);
+            nss = env.importLib(((TemplateStringModel) nss).getAsString(), null);
         } else if (namespaces instanceof ASTExpListLiteral) {
             nss = ((ASTExpListLiteral) namespaces).evaluateStringsToNamespaces(env);
         }

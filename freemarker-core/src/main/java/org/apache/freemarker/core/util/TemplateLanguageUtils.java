@@ -39,7 +39,7 @@ import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNodeModelEx;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.impl.BeanAndStringModel;
@@ -697,7 +697,7 @@ public final class TemplateLanguageUtils {
     /**
      * Returns the type description of a value with FTL terms (not plain class name), as it should be used in
      * type-related error messages and for debugging purposes. The exact format is not specified and might change over
-     * time, but currently it's something like {@code "string (wrapper: f.t.SimpleScalar)"} or
+     * time, but currently it's something like {@code "string (wrapper: f.t.SimpleString)"} or
      * {@code "sequence+hash+string (ArrayList wrapped into f.e.b.CollectionModel)"}.
      *
      * @param tm The value whose type we will describe. If {@code null}, then {@code "Null"} is returned (without the
@@ -819,7 +819,7 @@ public final class TemplateLanguageUtils {
             if (tm instanceof BeanAndStringModel) {
                 Object wrapped = ((BeanModel) tm).getWrappedObject();
                 return wrapped instanceof String
-                        ? TemplateScalarModel.class
+                        ? TemplateStringModel.class
                         : (tm instanceof TemplateHashModelEx ? TemplateHashModelEx.class : null);
             } else {
                 return null;
@@ -884,7 +884,7 @@ public final class TemplateLanguageUtils {
             appendTypeName(sb, typeNamesAppended, "boolean");
         }
 
-        if (TemplateScalarModel.class.isAssignableFrom(cl)) {
+        if (TemplateStringModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "string");
         }
 

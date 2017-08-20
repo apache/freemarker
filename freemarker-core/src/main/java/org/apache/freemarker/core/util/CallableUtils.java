@@ -41,7 +41,7 @@ import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 
 /**
@@ -407,15 +407,15 @@ public final class CallableUtils {
 
     /**
      * See {@link #castArgumentValue(TemplateModel, int, Class, boolean, TemplateModel, TemplateCallableModel,
-     * boolean)}; this does the same, but with {@link TemplateScalarModel} as {@code type}, and with {@link String}
+     * boolean)}; this does the same, but with {@link TemplateStringModel} as {@code type}, and with {@link String}
      * return value.
      */
     public static String castArgumentValueToString(
             TemplateModel argValue, int argIdx, boolean optional, String defaultValue,
             TemplateCallableModel callable, boolean calledAsFunction)
             throws TemplateException {
-        if (argValue instanceof TemplateScalarModel) {
-            return _EvalUtils.modelToString((TemplateScalarModel) argValue, null);
+        if (argValue instanceof TemplateStringModel) {
+            return _EvalUtils.modelToString((TemplateStringModel) argValue, null);
         }
         if (argValue == null) {
             if (optional) {
@@ -423,7 +423,7 @@ public final class CallableUtils {
             }
             throw newNullOrOmittedArgumentException(argIdx, callable, calledAsFunction);
         }
-        throw newArgumentValueTypeException(argValue, argIdx, TemplateScalarModel.class, callable, calledAsFunction);
+        throw newArgumentValueTypeException(argValue, argIdx, TemplateStringModel.class, callable, calledAsFunction);
     }
 
     // Number arg:

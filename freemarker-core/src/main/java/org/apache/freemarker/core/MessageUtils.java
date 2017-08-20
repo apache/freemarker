@@ -25,7 +25,7 @@ import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.TemplateLanguageUtils;
@@ -65,7 +65,7 @@ class MessageUtils {
     static final String STRING_COERCABLE_TYPES_DESC
             = "string or something automatically convertible to string (number, date or boolean)";
     static final Class[] EXPECTED_TYPES_STRING_COERCABLE = new Class[] {
-        TemplateScalarModel.class, TemplateNumberModel.class, TemplateDateModel.class, TemplateBooleanModel.class
+        TemplateStringModel.class, TemplateNumberModel.class, TemplateDateModel.class, TemplateBooleanModel.class
     };
 
     static final String STRING_COERCABLE_TYPES_OR_TOM_DESC

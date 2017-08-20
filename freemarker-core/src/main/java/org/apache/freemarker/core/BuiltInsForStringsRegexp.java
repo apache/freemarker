@@ -31,9 +31,9 @@ import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.TemplateScalarModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.SimpleScalar;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util._StringUtils;
 
 
@@ -133,7 +133,7 @@ class BuiltInsForStringsRegexp {
                             ? matcher.replaceFirst(arg2)
                             : matcher.replaceAll(arg2);
                 }
-                return new SimpleScalar(result);
+                return new SimpleString(result);
             }
 
             @Override
@@ -154,7 +154,7 @@ class BuiltInsForStringsRegexp {
   
     static class RegexMatchModel 
     implements TemplateBooleanModel, TemplateCollectionModel, TemplateSequenceModel {
-        static class MatchWithGroups implements TemplateScalarModel {
+        static class MatchWithGroups implements TemplateStringModel {
             final String matchedInputPart;
             final String[] groups;
 
@@ -222,7 +222,7 @@ class BuiltInsForStringsRegexp {
                                 return null;
                             }
 
-                            return new SimpleScalar(firedEntireInputMatcher.group(i));
+                            return new SimpleString(firedEntireInputMatcher.group(i));
                         } catch (Exception e) {
                             throw new TemplateException("Failed to read regular expression match group", e);
                         }

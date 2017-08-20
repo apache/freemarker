@@ -28,7 +28,7 @@
 
 <#assign b=true>
 
-<p>Now perform scalar boolean tests:</p>
+<p>Now perform boolean tests:</p>
 
 <p><#if b>
     b is true.<br />
