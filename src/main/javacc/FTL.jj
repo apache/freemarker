@@ -1795,10 +1795,10 @@ Expression EqualityExpression() :
         )
         rhs = RelationalExpression()
         {
-	        notHashLiteral(lhs, "scalar");
-	        notHashLiteral(rhs, "scalar");
-	        notListLiteral(lhs, "scalar");
-	        notListLiteral(rhs, "scalar");
+	        notHashLiteral(lhs, "string");
+	        notHashLiteral(rhs, "string");
+	        notListLiteral(lhs, "string");
+	        notListLiteral(rhs, "string");
 	        result = new ComparisonExpression(lhs, rhs, t.image);
 	        result.setLocation(template, lhs, rhs);
         }
@@ -1832,10 +1832,10 @@ Expression RelationalExpression() :
         )
         rhs = RangeExpression()
         {
-            notHashLiteral(lhs, "scalar");
-            notHashLiteral(rhs, "scalar");
-            notListLiteral(lhs, "scalar");
-            notListLiteral(rhs, "scalar");
+            notHashLiteral(lhs, "number");
+            notHashLiteral(rhs, "number");
+            notListLiteral(lhs, "number");
+            notListLiteral(rhs, "number");
             notStringLiteral(lhs, "number");
             notStringLiteral(rhs, "number");
             result = new ComparisonExpression(lhs, rhs, t.image);
