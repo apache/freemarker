@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.net.URLConnection;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -436,11 +437,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     static {
         try {
             Properties vp = new Properties();
-            InputStream ins = Configuration.class.getClassLoader()
-                    .getResourceAsStream(VERSION_PROPERTIES_PATH);
-            if (ins == null) {
+            URL versionPropertiesResource = Configuration.class.getClassLoader()
+                    .getResource(VERSION_PROPERTIES_PATH);
+            if (versionPropertiesResource == null) {
                 throw new RuntimeException("Version file is missing.");
             } else {
+                InputStream ins = versionPropertiesResource.openStream();
                 try {
                     vp.load(ins);
                 } finally {
