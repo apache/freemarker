@@ -26917,7 +26917,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>&amp;&amp;</literal> (logical <quote>and</quote>)
               operator: <literal>\and</literal> and
               <literal>&amp;amp;&amp;amp;</literal>. These are to work around
-              issues in applications where the template must be a valid XML
+              issues in applications where the template must be valid XML
               (<literal>&amp;&amp;</literal> is not valid XML/HTML, at most
               places), or where the template entered is stored after XML or
               HTML escaping. Note that lonely <literal>&amp;amp;</literal>,
@@ -26998,9 +26998,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para><literal>Constants.EMPTY_HASH</literal> and
               <literal>GeneralPurposeNothing</literal> (the value of
               <literal>missingVar!</literal>) now implements
-              <literal>TemplateHashModelEx2</literal>, so it can be listed
-              with <literal>&lt;#list ... as k, v&gt;</literal>. Earlier they
-              were only a <literal>TemplateHashModelEx</literal>-s.</para>
+              <literal>TemplateHashModelEx2</literal>. Earlier they were only
+              a <literal>TemplateHashModelEx</literal>-s.</para>
             </listitem>
 
             <listitem>
