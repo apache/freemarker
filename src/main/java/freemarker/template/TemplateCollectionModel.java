@@ -23,10 +23,14 @@ import java.util.Collection;
 
 /**
  * "collection" template language data type: a collection of values that can be enumerated, but can't be or not meant to
- * be accessed by index or key. As such, this is not a super-interface of {@link TemplateSequenceModel}, and
- * implementations of that interface needn't also implement this interface just because they can. They should though, if
- * enumeration with this interface is significantly faster than enumeration by index. The {@code #list} directive will
- * enumerate using this interface if it's available.
+ * be accessed by index or key, nor the number of elements in it is known. As such, this is very similar to Java's
+ * {@link Iterable} interface (but it predates that interface, hence the unfortunate class name).
+ * 
+ * <p>
+ * Note that this is not a super-interface of {@link TemplateSequenceModel}, and implementations of that interface
+ * needn't also implement this interface just because they can. They should though, if enumeration with this interface
+ * is significantly faster than enumeration by index. The {@code #list} directive will enumerate using this interface if
+ * it's available.
  * 
  * <p>
  * The enumeration should be repeatable if that's possible with reasonable effort, otherwise a second enumeration
