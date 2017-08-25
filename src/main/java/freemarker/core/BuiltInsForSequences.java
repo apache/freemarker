@@ -64,6 +64,9 @@ class BuiltInsForSequences {
             public Object exec(List args) throws TemplateModelException {
                 checkMethodArgCount(args, 1, 2);
                 int chunkSize = getNumberMethodArg(args, 0).intValue();
+                if (chunkSize < 1) {
+                    throw new _TemplateModelException("The 1st argument to ?", key, " (...) must be at least 1.");
+                }
                 
                 return new ChunkedSequence(
                         tsm,
@@ -85,9 +88,6 @@ class BuiltInsForSequences {
             private ChunkedSequence(
                     TemplateSequenceModel wrappedTsm, int chunkSize, TemplateModel fillerItem)
                     throws TemplateModelException {
-                if (chunkSize < 1) {
-                    throw new _TemplateModelException("The 1st argument to ?', key, ' (...) must be at least 1.");
-                }
                 this.wrappedTsm = wrappedTsm;
                 this.chunkSize = chunkSize;
                 this.fillerItem = fillerItem;
