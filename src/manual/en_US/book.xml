@@ -26965,6 +26965,33 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fixed: <literal>BeansWrapper</literal> and
+              <literal>DefaultObjectWrapper</literal>, starting from Java 8,
+              when the same JavaBeans property has both non-indexed read
+              method (like <literal>String[] getFoo()</literal>) and indexed
+              read method (like <literal>String getFoo(int index)</literal>),
+              has mistakenly used the indexed read method to access the
+              property. This is a problem because then the array size was
+              unknown, and thus the property has suddenly become unlistable on
+              Java 8. To enable the fix (where it will use the non-indexed
+              read method), you have to increase the value of the
+              <literal>incompatibleImprovements</literal> constructor argument
+              of the used <literal>DefaultObjectWrapper</literal> or
+              <literal>BeansWrapper</literal> to 2.3.27. Note that if you
+              leave the <literal>object_wrapper</literal> setting of the
+              <literal>Configuration</literal> on its default, it's enough to
+              increase the <link
+              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatibleImprovements</literal>
+              setting</link> of the <literal>Configuration</literal> to
+              2.3.27, as that's inherited by the default
+              <literal>object_wrapper</literal>. Note that this bug haven't
+              surfaced before Java 8, as then
+              <literal>java.beans.Inrospector</literal> has only exposed the
+              non-indexed method when both kind of read method was
+              present.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed: When the
               <literal>TemplateExceptionHandler</literal> suppresses (i.e.,
               doesn't re-throw) an exception, the <link

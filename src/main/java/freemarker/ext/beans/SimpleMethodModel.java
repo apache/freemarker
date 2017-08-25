@@ -24,13 +24,16 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 
+import freemarker.core._DelayedFTLTypeDescription;
+import freemarker.core._DelayedToString;
+import freemarker.core._ErrorDescriptionBuilder;
+import freemarker.core._TemplateModelException;
 import freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
 import freemarker.template.SimpleNumber;
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateSequenceModel;
-import freemarker.template.utility.ClassUtil;
 
 /**
  * A class that will wrap a reflected method call into a
@@ -81,13 +84,15 @@ public final class SimpleMethodModel extends SimpleMethod
     }
 
     public int size() throws TemplateModelException {
-        throw new TemplateModelException(
-                "Getting the number of items or enumerating the items is not supported on this "
-                + ClassUtil.getFTLTypeDescription(this) + " value.\n"
-                + "("
-                + "Hint 1: Maybe you wanted to call this method first and then do something with its return value. "
-                + "Hint 2: Getting items by intex possibly works, hence it's a \"+sequence\"."
-                + ")");
+        throw new _TemplateModelException(
+                new _ErrorDescriptionBuilder(
+                "Getting the number of items or listing the items is not supported on this ",
+                new _DelayedFTLTypeDescription(this), " value, because this value wraps the following Java method, "
+                + "not a real listable value: ", new _DelayedToString(getMember()))
+                .tips(
+                        "Maybe you should to call this method first and then do something with its return value.",
+                        "obj.someMethod(i) and obj.someMethod[i] does the same for this method, hence it's a "
+                        + "\"+sequence\"."));
     }
     
     @Override

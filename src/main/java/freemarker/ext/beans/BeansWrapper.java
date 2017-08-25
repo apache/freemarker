@@ -19,6 +19,7 @@
 
 package freemarker.ext.beans;
 
+import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
@@ -246,6 +247,16 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      *       The default of {@link BeansWrapper#getTreatDefaultMethodsAsBeanMembers()} changes from {@code false} to
      *       {@code true}. Thus, Java 8 default methods (and the bean properties they define) are exposed, despite that
      *       {@link java.beans.Introspector} (the official JavaBeans introspector) ignores them, at least as of Java 8. 
+     *     </li>  
+     *     <li>
+     *       <p>2.3.27 (or higher):
+     *       If the same JavaBean property has both an indexed property reader (like {@code String getFoo(int)}) and
+     *       a non-indexed property reader (like {@code String[] getFoo()}), and {@link Introspector} exposes both
+     *       (which apparently only happens since Java 8), we will use the non-indexed property reader method, while
+     *       before this improvement we have used the indexed property method. When using the indexed property reader,
+     *       FreeMarker doesn't know the size of the array, so the value becomes unlistable. Before Java 8 this problem
+     *       haven't surfaced, as {@link Introspector} has only exposed the non-indexed property reader method when both
+     *       kind of read method was present. So this can be seen as a Java 8 compatibility fix.  
      *     </li>  
      *   </ul>
      *   
@@ -844,7 +855,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         if (incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_0) {
             throw new IllegalArgumentException("Version must be at least 2.3.0.");
         }
-        return incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_26 ? Configuration.VERSION_2_3_26
+        return incompatibleImprovements.intValue() >= _TemplateAPI.VERSION_INT_2_3_27 ? Configuration.VERSION_2_3_27
+                : incompatibleImprovements.intValue() == _TemplateAPI.VERSION_INT_2_3_26 ? Configuration.VERSION_2_3_26
                 : is2324Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_24
                 : is2321Bugfixed(incompatibleImprovements) ? Configuration.VERSION_2_3_21
                 : Configuration.VERSION_2_3_0;

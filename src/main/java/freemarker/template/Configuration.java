@@ -414,7 +414,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     /** FreeMarker version 2.3.26 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_26 = new Version(2, 3, 26);
 
-    /** FreeMarker version 2.3.26 (an {@link #Configuration(Version) incompatible improvements break-point}) */
+    /** FreeMarker version 2.3.27 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_27 = new Version(2, 3, 27);
     
     /** The default of {@link #getIncompatibleImprovements()}, currently {@link #VERSION_2_3_0}. */
@@ -831,6 +831,15 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *       <li><p>
      *          {@link BeansWrapper} and {@link DefaultObjectWrapper} now exposes Java 8 default methods (and the bean
      *          properties they define); see {@link BeansWrapper#BeansWrapper(Version)}. 
+     *     </ul>
+     *   </li>
+     *   <li><p>
+     *     2.3.27 (or higher):
+     *     <ul>
+     *       <li><p>
+     *          {@link BeansWrapper} and {@link DefaultObjectWrapper} now prefers the non-indexed JavaBean property
+     *          read method over the indexed read method when Java 8 exposes both;
+     *          see {@link BeansWrapper#BeansWrapper(Version)}. 
      *     </ul>
      *   </li>
      * </ul>
