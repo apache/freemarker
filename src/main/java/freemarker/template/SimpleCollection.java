@@ -43,7 +43,7 @@ implements TemplateCollectionModel, Serializable {
     
     private boolean iteratorOwned;
     private final Iterator iterator;
-    private final Collection collection;
+    private final Iterable iterable;
 
     /**
      * @deprecated Use {@link #SimpleCollection(Iterator, ObjectWrapper)}
@@ -51,27 +51,32 @@ implements TemplateCollectionModel, Serializable {
     @Deprecated
     public SimpleCollection(Iterator iterator) {
         this.iterator = iterator;
-        collection = null;
+        iterable = null;
     }
 
     /**
-     * @deprecated Use {@link #SimpleCollection(Collection, ObjectWrapper)}
+     * @param iterable Note that this was a {@link Collection} before 2.3.27, not an {@link Iterable}
+     *
+     * @deprecated Use {@link #SimpleCollection(Iterable, ObjectWrapper)}
      */
     @Deprecated
-    public SimpleCollection(Collection collection) {
-        this.collection = collection;
+    public SimpleCollection(Iterable iterable) {
+        this.iterable = iterable;
         iterator = null;
     }
 
     public SimpleCollection(Iterator iterator, ObjectWrapper wrapper) {
         super(wrapper);
         this.iterator = iterator;
-        collection = null;
+        iterable = null;
     }
 
-    public SimpleCollection(Collection collection, ObjectWrapper wrapper) {
+    /**
+     * @param iterable Note that this was a {@link Collection} before 2.3.27, not an {@link Iterable}
+     */
+    public SimpleCollection(Iterable iterable, ObjectWrapper wrapper) {
         super(wrapper);
-        this.collection = collection;
+        this.iterable = iterable;
         iterator = null;
     }
 
@@ -87,7 +92,7 @@ implements TemplateCollectionModel, Serializable {
     public TemplateModelIterator iterator() {
         return iterator != null
                 ? new SimpleTemplateModelIterator(iterator, false)
-                : new SimpleTemplateModelIterator(collection.iterator(), true);
+                : new SimpleTemplateModelIterator(iterable.iterator(), true);
     }
     
     /**
