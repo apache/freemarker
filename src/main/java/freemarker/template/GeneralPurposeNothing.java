@@ -58,7 +58,7 @@ implements TemplateBooleanModel, TemplateScalarModel, TemplateSequenceModel, Tem
     }
 
     public TemplateModel get(int i) throws TemplateModelException {
-        throw new TemplateModelException("Empty list");
+        throw new TemplateModelException("Can't get item from an empty sequence.");
     }
 
     public TemplateModel get(String key) {

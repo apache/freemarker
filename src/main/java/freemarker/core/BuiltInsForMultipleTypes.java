@@ -691,9 +691,7 @@ class BuiltInsForMultipleTypes {
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel model = target.eval(env);
             if (model instanceof TemplateNumberModel) {
-                TemplateNumberModel numberModel = (TemplateNumberModel) model;
-                Number num = EvalUtil.modelToNumber(numberModel, target);
-                return new NumberFormatter(numberModel, env);
+                return new NumberFormatter((TemplateNumberModel) model, env);
             } else if (model instanceof TemplateDateModel) {
                 TemplateDateModel dm = (TemplateDateModel) model;
                 return new DateFormatter(dm, env);

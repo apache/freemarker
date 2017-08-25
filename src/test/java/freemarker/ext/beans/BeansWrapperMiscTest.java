@@ -19,20 +19,30 @@
 
 package freemarker.ext.beans;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+
+import java.util.Collections;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import freemarker.template.Configuration;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateHashModel;
+import freemarker.template.TemplateMethodModelEx;
+import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateScalarModel;
+import freemarker.template.TemplateSequenceModel;
+import freemarker.template.utility.Constants;
 
 @RunWith(JUnit4.class)
 public class BeansWrapperMiscTest {
 
     @Test
-    public void booleans() throws Exception {
+    public void booleansTest() throws Exception {
         final BeansWrapper bw = new BeansWrapper();
 
         assertTrue(((TemplateBooleanModel) bw.wrap(Boolean.TRUE)).getAsBoolean());
@@ -52,6 +62,52 @@ public class BeansWrapperMiscTest {
         assertNotNull(tm.get("class"));
         
         assertSame(tm, bw.wrap(Boolean.TRUE));
+    }
+    
+    @Test
+    public void java8IndexedMethodIssueTest() throws TemplateModelException {
+        {
+            BeansWrapper bw = new BeansWrapper(Configuration.VERSION_2_3_26);
+            TemplateHashModel beanTM = (TemplateHashModel) bw.wrap(new BeanWithBothIndexedAndArrayProperty());
+            TemplateModel fooTM = beanTM.get("foo");
+            assertThat(fooTM, instanceOf(TemplateMethodModelEx.class));
+            assertThat(fooTM, instanceOf(TemplateSequenceModel.class));
+            assertEquals("b",
+                    ((TemplateScalarModel) ((TemplateMethodModelEx) fooTM).exec(
+                            Collections.singletonList(Constants.ONE)))
+                    .getAsString());
+            try {
+                ((TemplateSequenceModel) fooTM).size();
+                fail();
+            } catch (TemplateModelException e) {
+                // Expected
+            }
+        }
+        
+        {
+            BeansWrapper bw = new BeansWrapper(Configuration.VERSION_2_3_27);
+            TemplateHashModel beanTM = (TemplateHashModel) bw.wrap(new BeanWithBothIndexedAndArrayProperty());
+            TemplateModel fooTM = beanTM.get("foo");
+            assertThat(fooTM, not(instanceOf(TemplateMethodModelEx.class)));
+            assertThat(fooTM, instanceOf(TemplateSequenceModel.class));
+            assertEquals("b",
+                    ((TemplateScalarModel) ((TemplateSequenceModel) fooTM).get(1)).getAsString());
+            assertEquals(2, ((TemplateSequenceModel) fooTM).size());
+        }
+    }
+    
+    public static class BeanWithBothIndexedAndArrayProperty {
+        
+        private final static String[] FOO = new String[] { "a", "b" };
+        
+        public String[] getFoo() {
+            return FOO;
+        }
+        
+        public String getFoo(int index) {
+            return FOO[index];
+        }
+        
     }
     
 }

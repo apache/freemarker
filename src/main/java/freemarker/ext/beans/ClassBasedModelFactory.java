@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import freemarker.core._DelayedJQuote;
+import freemarker.core._TemplateModelException;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -49,7 +51,8 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
             if (e instanceof TemplateModelException) {
                 throw (TemplateModelException) e;
             } else {
-                throw new TemplateModelException(e);
+                throw new _TemplateModelException(e,
+                        "Failed to get valeu for key ", new _DelayedJQuote(key), "; see cause exception.");
             }
         }
     }

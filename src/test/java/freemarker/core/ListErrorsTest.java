@@ -47,6 +47,11 @@ public class ListErrorsTest extends TemplateTest {
                 + "</#list>",
                 "1@0[3,4@0]1@0; 2@1[3,4@0]2@1; ");
     }
+    
+    @Test
+    public void stringInterpolationBugFixTest() throws IOException, TemplateException {
+        assertOutput("<#list 1..3 as x>${'${x?index}'}</#list>", "012");
+    }
 
     @Test
     public void testInvalidItemsParseTime() throws IOException, TemplateException {

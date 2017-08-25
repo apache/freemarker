@@ -22,6 +22,7 @@ package freemarker.core;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+import freemarker.template.Configuration;
 import freemarker.template.SimpleScalar;
 import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModel;
@@ -177,14 +178,13 @@ class BuiltInsForStringsEncoding {
                 String cs = env.getEffectiveURLEscapingCharset();
                 if (cs == null) {
                     throw new _TemplateModelException(
-                            "To do URL encoding, the framework that encloses "
-                            + "FreeMarker must specify the output encoding "
-                            + "or the URL encoding charset, so ask the "
-                            + "programmers to fix it. Or, as a last chance, "
-                            + "you can set the url_encoding_charset setting in "
-                            + "the template, e.g. "
-                            + "<#setting url_escaping_charset='ISO-8859-1'>, or "
-                            + "give the charset explicitly to the buit-in, e.g. "
+                            "To do URL encoding, the framework that encloses FreeMarker must specify the \"",
+                            Configuration.OUTPUT_ENCODING_KEY, "\" setting or the \"",
+                            Configuration.URL_ESCAPING_CHARSET_KEY,
+                            "\" setting, so ask the programmers to set them. Or, as a last chance, you can set the "
+                            + "url_encoding_charset setting in the template, e.g. <#setting ",
+                            Configuration.URL_ESCAPING_CHARSET_KEY,
+                            "='ISO-8859-1'>, or give the charset explicitly to the built-in, e.g. "
                             + "foo?url('ISO-8859-1').");
                 }
                 try {

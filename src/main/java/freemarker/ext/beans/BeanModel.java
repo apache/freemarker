@@ -50,6 +50,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateModelWithAPISupport;
 import freemarker.template.TemplateScalarModel;
+import freemarker.template._TemplateAPI;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -119,7 +120,7 @@ implements
      * matching the key name. If a method or property is found, it's wrapped
      * into {@link freemarker.template.TemplateMethodModelEx} (for a method or
      * indexed property), or evaluated on-the-fly and the return value wrapped
-     * into appropriate model (for a simple property) Models for various
+     * into appropriate model (for a non-indexed property) Models for various
      * properties and methods are cached on a per-class basis, so the costly
      * introspection is performed only once per property or method of a class.
      * (Side-note: this also implies that any class whose method has been called
@@ -219,10 +220,17 @@ implements
 
         TemplateModel resultModel = UNKNOWN;
         if (desc instanceof IndexedPropertyDescriptor) {
-            Method readMethod = ((IndexedPropertyDescriptor) desc).getIndexedReadMethod(); 
-            resultModel = cachedModel = 
-                new SimpleMethodModel(object, readMethod, 
-                        ClassIntrospector.getArgTypes(classInfo, readMethod), wrapper);
+            IndexedPropertyDescriptor pd = (IndexedPropertyDescriptor) desc;
+            if (wrapper.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_27
+                    && pd.getReadMethod() != null) {
+                resultModel = wrapper.invokeMethod(object, pd.getReadMethod(), null);
+                // cachedModel remains null, as we don't cache these
+            } else {
+                Method readMethod = pd.getIndexedReadMethod(); 
+                resultModel = cachedModel = 
+                    new SimpleMethodModel(object, readMethod, 
+                            ClassIntrospector.getArgTypes(classInfo, readMethod), wrapper);
+            }
         } else if (desc instanceof PropertyDescriptor) {
             PropertyDescriptor pd = (PropertyDescriptor) desc;
             resultModel = wrapper.invokeMethod(object, pd.getReadMethod(), null);

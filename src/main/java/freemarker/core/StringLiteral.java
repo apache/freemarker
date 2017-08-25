@@ -41,15 +41,13 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
     }
     
     /**
-     * @param parentTkMan
-     *            The token source of the template that contains this string literal. As of this writing, we only need
-     *            this to share the {@code namingConvetion} with that.
+     * @param parentParser
+     *            The parser of the template that contains this string literal.
      */
-    void parseValue(FMParserTokenManager parentTkMan, OutputFormat outputFormat) throws ParseException {
+    void parseValue(FMParser parentParser, OutputFormat outputFormat) throws ParseException {
         // The way this works is incorrect (the literal should be parsed without un-escaping),
         // but we can't fix this backward compatibly.
         if (value.length() > 3 && (value.indexOf("${") >= 0 || value.indexOf("#{") >= 0)) {
-            
             Template parentTemplate = getTemplate();
             ParserConfiguration pcfg = parentTemplate.getParserConfiguration();
 
@@ -65,12 +63,12 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
                 
                 FMParser parser = new FMParser(parentTemplate, false, tkMan, pcfg);
                 // We continue from the parent parser's current state:
-                parser.setupStringLiteralMode(parentTkMan, outputFormat);
+                parser.setupStringLiteralMode(parentParser, outputFormat);
                 try {
                     dynamicValue = parser.StaticTextAndInterpolations();
                 } finally {
                     // The parent parser continues from this parser's current state:
-                    parser.tearDownStringLiteralMode(parentTkMan);
+                    parser.tearDownStringLiteralMode(parentParser);
                 }
             } catch (ParseException e) {
                 e.setTemplateName(parentTemplate.getSourceName());

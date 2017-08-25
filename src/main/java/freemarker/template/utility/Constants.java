@@ -39,8 +39,8 @@ import freemarker.template.TemplateSequenceModel;
  * Frequently used constant {@link TemplateModel} values.
  * 
  * <p>These constants should be stored in the {@link TemplateModel}
- * sub-interfaces, but for bacward compatibility they are stored here instead.
- * Starting from FreeMarker 2.4 they should be copyed (not moved!) into the
+ * sub-interfaces, but for backward compatibility they are stored here instead.
+ * Starting from FreeMarker 2.4 they should be copied (not moved!) into the
  * {@link TemplateModel} sub-interfaces, and this class should be marked as
  * deprecated.</p>
  */
@@ -96,7 +96,7 @@ public class Constants {
         
     }
     
-    public static final TemplateHashModelEx EMPTY_HASH = new EmptyHashModel();
+    public static final TemplateHashModelEx2 EMPTY_HASH = new EmptyHashModel();
     
     /**
      * An empty hash. Since 2.3.27, it implements {@link TemplateHashModelEx2}, before that it was only
@@ -133,12 +133,9 @@ public class Constants {
     /**
      * @since 2.3.27
      */
-    public static final KeyValuePairIterator EMPTY_KEY_VALUE_PAIR_ITERATOR = EmptyKeyValuePairIterator.INSTANCE;
+    public static final KeyValuePairIterator EMPTY_KEY_VALUE_PAIR_ITERATOR = new EmptyKeyValuePairIterator();
     
     private static class EmptyKeyValuePairIterator implements TemplateHashModelEx2.KeyValuePairIterator {
-
-        static final EmptyKeyValuePairIterator INSTANCE = new EmptyKeyValuePairIterator();
-
         private EmptyKeyValuePairIterator() {
             //
         }

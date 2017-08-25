@@ -26917,12 +26917,25 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>&amp;&amp;</literal> (logical <quote>and</quote>)
               operator: <literal>\and</literal> and
               <literal>&amp;amp;&amp;amp;</literal>. These are to work around
-              issues in applications where the template must be a valid XML
+              issues in applications where the template must be valid XML
               (<literal>&amp;&amp;</literal> is not valid XML/HTML, at most
               places), or where the template entered is stored after XML or
               HTML escaping. Note that lonely <literal>&amp;amp;</literal>,
               and <literal>and</literal> without <literal>\</literal> is not
               recognized for backward compatibility.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-70">FREEMARKER-70</link>):
+              The usage of loop variable built-ins, like
+              <literal><replaceable>loopVar</replaceable>?index</literal>, was
+              disallowed by the parser inside interpolations that are inside a
+              string literal expression (as in <literal>&lt;#list 1..3 as
+              loopVar&gt;${'${loopVar?index}'}&lt;/#list&gt;</literal>),
+              saying that there's no loop variable in scope with
+              <literal><replaceable>loopVar</replaceable></literal>
+              name.</para>
             </listitem>
 
             <listitem>
@@ -26949,6 +26962,33 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               as an error, just as it was in earlier versions, though now the
               error message will indicate that the exception was thrown inside
               an <literal>attempt</literal> directive block.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: <literal>BeansWrapper</literal> and
+              <literal>DefaultObjectWrapper</literal>, starting from Java 8,
+              when the same JavaBeans property has both non-indexed read
+              method (like <literal>String[] getFoo()</literal>) and indexed
+              read method (like <literal>String getFoo(int index)</literal>),
+              has mistakenly used the indexed read method to access the
+              property. This is a problem because then the array size was
+              unknown, and thus the property has suddenly become unlistable on
+              Java 8. To enable the fix (where it will use the non-indexed
+              read method), you have to increase the value of the
+              <literal>incompatibleImprovements</literal> constructor argument
+              of the used <literal>DefaultObjectWrapper</literal> or
+              <literal>BeansWrapper</literal> to 2.3.27. Note that if you
+              leave the <literal>object_wrapper</literal> setting of the
+              <literal>Configuration</literal> on its default, it's enough to
+              increase the <link
+              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatibleImprovements</literal>
+              setting</link> of the <literal>Configuration</literal> to
+              2.3.27, as that's inherited by the default
+              <literal>object_wrapper</literal>. Note that this bug haven't
+              surfaced before Java 8, as then
+              <literal>java.beans.Inrospector</literal> has only exposed the
+              non-indexed method when both kind of read method was
+              present.</para>
             </listitem>
 
             <listitem>
@@ -26985,9 +27025,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para><literal>Constants.EMPTY_HASH</literal> and
               <literal>GeneralPurposeNothing</literal> (the value of
               <literal>missingVar!</literal>) now implements
-              <literal>TemplateHashModelEx2</literal>, so it can be listed
-              with <literal>&lt;#list ... as k, v&gt;</literal>. Earlier they
-              were only a <literal>TemplateHashModelEx</literal>-s.</para>
+              <literal>TemplateHashModelEx2</literal>. Earlier they were only
+              a <literal>TemplateHashModelEx</literal>-s.</para>
             </listitem>
 
             <listitem>
