@@ -25,15 +25,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
+import org.apache.freemarker.core.model.TemplateHashModelEx2;
+import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.servlet.AllHttpScopesHashModel;
 import org.apache.freemarker.servlet.FreemarkerServlet;
 import org.apache.freemarker.servlet.HttpRequestHashModel;
 import org.apache.freemarker.servlet.HttpRequestParametersHashModel;
 import org.apache.freemarker.servlet.HttpSessionHashModel;
+import org.apache.freemarker.servlet.IncludePage;
 import org.apache.freemarker.servlet.ServletContextHashModel;
 import org.apache.freemarker.servlet.jsp.TaglibFactory;
+import org.apache.freemarker.spring.model.BindDirective;
 
 /**
  * FreeMarker template based view implementation, with being able to provide a {@link ServletContextHashModel}
@@ -134,6 +139,10 @@ public class FreeMarkerView extends AbstractFreeMarkerView {
 
         model.putUnlistedModel(FreemarkerServlet.KEY_JSP_TAGLIBS, getTaglibFactory());
 
+        model.putUnlistedModel(FreemarkerServlet.KEY_INCLUDE, new IncludePage(request, response));
+
+        model.putUnlistedModel("spring", createSpringCallableHashModel(objectWrapper, request, response));
+
         model.putAll(map);
 
         return model;
@@ -165,4 +174,10 @@ public class FreeMarkerView extends AbstractFreeMarkerView {
         return sessionModel;
     }
 
+    private TemplateHashModelEx2 createSpringCallableHashModel(final ObjectWrapper objectWrapper,
+            final HttpServletRequest request, final HttpServletResponse response) {
+        final SimpleHash springCallableHash = new SimpleHash(objectWrapper);
+        springCallableHash.put("bind", new BindDirective(request, response));
+        return springCallableHash;
+    }
 }
