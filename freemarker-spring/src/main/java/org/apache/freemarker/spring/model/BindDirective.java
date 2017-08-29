@@ -91,10 +91,15 @@ public class BindDirective implements TemplateDirectiveModel {
             resolvedPath = resolveNestedPath(resolvedPath);
         }
 
-        BindStatus status = requestContext.getBindStatus(resolvedPath);
-        env.setLocalVariable(STATUS_VARIABLE_NAME, new BeanModel(status, (DefaultObjectWrapper) objectWrapper));
+        final TemplateModel oldStatusModel = env.getVariable(STATUS_VARIABLE_NAME);
 
-        callPlace.executeNestedContent(null, out, env);
+        try {
+            BindStatus status = requestContext.getBindStatus(resolvedPath);
+            env.setVariable(STATUS_VARIABLE_NAME, new BeanModel(status, (DefaultObjectWrapper) objectWrapper));
+            callPlace.executeNestedContent(null, out, env);
+        } finally {
+            env.setVariable(STATUS_VARIABLE_NAME, oldStatusModel);
+        }
     }
 
     @Override
