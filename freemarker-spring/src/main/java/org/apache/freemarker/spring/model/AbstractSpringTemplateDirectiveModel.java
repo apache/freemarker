@@ -29,14 +29,18 @@ import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
+import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
+import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.view.AbstractTemplateView;
 
 public abstract class AbstractSpringTemplateDirectiveModel implements TemplateDirectiveModel {
 
+    // TODO: namespace this into 'spring.nestedPath'??
     /**
      * @see <code>org.springframework.web.servlet.tags.NestedPathTag#NESTED_PATH_VARIABLE_NAME</code>
      */
@@ -55,9 +59,9 @@ public abstract class AbstractSpringTemplateDirectiveModel implements TemplateDi
             throws TemplateException, IOException {
         final ObjectWrapper objectWrapper = env.getObjectWrapper();
 
-        if (!(objectWrapper instanceof DefaultObjectWrapper)) {
+        if (!(objectWrapper instanceof ObjectWrapperAndUnwrapper)) {
             throw new TemplateException(
-                    "The ObjectWrapper of environment wasn't instance of " + DefaultObjectWrapper.class.getName());
+                    "The ObjectWrapper of environment wasn't instance of ObjectWrapperAndUnwrapper.");
         }
 
         TemplateModel rcModel = env.getVariable(AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
@@ -66,13 +70,14 @@ public abstract class AbstractSpringTemplateDirectiveModel implements TemplateDi
             throw new TemplateException(AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE + " not found.");
         }
 
-        RequestContext requestContext = (RequestContext) ((DefaultObjectWrapper) objectWrapper).unwrap(rcModel);
+        RequestContext requestContext = (RequestContext) ((ObjectWrapperAndUnwrapper) objectWrapper).unwrap(rcModel);
 
-        executeInternal(args, callPlace, out, env, (DefaultObjectWrapper) objectWrapper, requestContext);
+        executeInternal(args, callPlace, out, env, (ObjectWrapperAndUnwrapper) objectWrapper, requestContext);
     }
 
     protected abstract void executeInternal(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env,
-            DefaultObjectWrapper objectWrapper, RequestContext requestContext) throws TemplateException, IOException;
+            ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
+                    throws TemplateException, IOException;
 
     protected final HttpServletRequest getRequest() {
         return request;
@@ -82,7 +87,40 @@ public abstract class AbstractSpringTemplateDirectiveModel implements TemplateDi
         return response;
     }
 
-    protected final String resolveNestedPath(final Environment env, final String path) {
+    /**
+     * Find {@link BindStatus} with no {@code htmlEscape} option from {@link RequestContext} by the {@code path}
+     * and wrap it as a {@link TemplateModel}.
+     * <P>
+     * <EM>NOTE:</EM> In FreeMarker, there is no need to depend on <code>BindStatus#htmlEscape</code> option
+     * as FreeMarker template expressions can easily set escape option by themselves.
+     * Therefore, this method always get a {@link BindStatus} with {@code htmlEscape} option set to {@code false}.
+     * @param env Environment
+     * @param objectWrapperAndUnwrapper ObjectWrapperAndUnwrapper
+     * @param requestContext Spring RequestContext
+     * @param path bind path
+     * @param ignoreNestedPath flag whether or not to ignore the nested path
+     * @return {@link TemplateModel} wrapping a {@link BindStatus} with no {@code htmlEscape} option from {@link RequestContext}
+     * by the {@code path}
+     * @throws ObjectWrappingException if fails to wrap the <code>BindStatus</code> object
+     */
+    protected final TemplateModel getBindStatusTemplateModel(Environment env, ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper,
+            RequestContext requestContext, String path, boolean ignoreNestedPath) throws ObjectWrappingException {
+        final String resolvedPath = (ignoreNestedPath) ? path : resolveNestedPath(env, objectWrapperAndUnwrapper, path);
+        BindStatus status = requestContext.getBindStatus(resolvedPath, false);
+
+        if (status != null) {
+            if (!(objectWrapperAndUnwrapper instanceof DefaultObjectWrapper)) {
+                throw new IllegalArgumentException("objectWrapperAndUnwrapper is not a DefaultObjectWrapper.");
+            }
+
+            return ((DefaultObjectWrapper) objectWrapperAndUnwrapper).wrap(status);
+        }
+
+        return null;
+    }
+
+    private String resolveNestedPath(final Environment env, ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper,
+            final String path) {
         // TODO: should read it from request or env??
         //       or read spring.nestedPath first and read request attribute next??
         String nestedPath = (String) request.getAttribute(NESTED_PATH_VARIABLE_NAME);

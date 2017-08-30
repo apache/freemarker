@@ -29,12 +29,10 @@ import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
+import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.impl.BeanModel;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
-import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.support.RequestContext;
 
 public class BindDirective extends AbstractSpringTemplateDirectiveModel {
@@ -58,17 +56,16 @@ public class BindDirective extends AbstractSpringTemplateDirectiveModel {
 
     @Override
     protected void executeInternal(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env,
-            DefaultObjectWrapper objectWrapper, RequestContext requestContext) throws TemplateException, IOException {
-
+            ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
+                    throws TemplateException, IOException {
         final String path = CallableUtils.getStringArgument(args, PATH_PARAM_IDX, this);
         boolean ignoreNestedPath = CallableUtils.getOptionalBooleanArgument(args, IGNORE_NESTED_PATH_PARAM_IDX, this,
                 false);
 
-        final String resolvedPath = (ignoreNestedPath) ? path : resolveNestedPath(env, path);
+        TemplateModel statusModel = getBindStatusTemplateModel(env, objectWrapperAndUnwrapper, requestContext, path,
+                ignoreNestedPath);
+        TemplateModel[] nestedContentArgs = new TemplateModel[] { statusModel };
 
-        //TODO: how to deal with htmlEscape when invoking #getBindStatus()?
-        BindStatus status = requestContext.getBindStatus(resolvedPath);
-        TemplateModel[] nestedContentArgs = new TemplateModel[] { new BeanModel(status, objectWrapper) };
         callPlace.executeNestedContent(nestedContentArgs, out, env);
     }
 
