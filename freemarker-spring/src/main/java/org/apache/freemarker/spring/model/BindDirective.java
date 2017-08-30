@@ -29,8 +29,6 @@ import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.BeanModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
@@ -38,58 +36,35 @@ import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.support.RequestContext;
-import org.springframework.web.servlet.view.AbstractTemplateView;
 
-public class BindDirective implements TemplateDirectiveModel {
-
-    public static final String STATUS_VARIABLE_NAME = "status";
-
-    /**
-     * @see <code>org.springframework.web.servlet.tags.NestedPathTag#NESTED_PATH_VARIABLE_NAME</code>
-     */
-    private static final String NESTED_PATH_VARIABLE_NAME = "nestedPath";
+public class BindDirective extends AbstractSpringTemplateDirectiveModel {
 
     private static final int PATH_PARAM_IDX = 0;
     private static final int IGNORE_NESTED_PATH_PARAM_IDX = 1;
 
     private static final String IGNORE_NESTED_PATH_PARAM_NAME = "ignoreNestedPath";
 
-    private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
-            1,
-            true,
-            StringToIndexMap.of(
-                    IGNORE_NESTED_PATH_PARAM_NAME, IGNORE_NESTED_PATH_PARAM_IDX
-            ),
-            false
-    );
-
-    private final HttpServletRequest request;
-    private final HttpServletResponse response;
+    private static final ArgumentArrayLayout ARGS_LAYOUT =
+            ArgumentArrayLayout.create(
+                    1,
+                    true,
+                    StringToIndexMap.of(IGNORE_NESTED_PATH_PARAM_NAME, IGNORE_NESTED_PATH_PARAM_IDX),
+                    false
+                    );
 
     public BindDirective(HttpServletRequest request, HttpServletResponse response) {
-        this.request = request;
-        this.response = response;
+        super(request, response);
     }
 
     @Override
-    public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
-            throws TemplateException, IOException {
-        final ObjectWrapper objectWrapper = env.getObjectWrapper();
+    protected void executeInternal(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env,
+            DefaultObjectWrapper objectWrapper, RequestContext requestContext) throws TemplateException, IOException {
 
-        if (!(objectWrapper instanceof DefaultObjectWrapper)) {
-            throw new TemplateException("The ObjectWrapper of environment wasn't instance of " + DefaultObjectWrapper.class.getName());
-        }
-
-        TemplateModel model = env.getDataModel().get(AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
-        RequestContext requestContext = (RequestContext) ((DefaultObjectWrapper) objectWrapper).unwrap(model);
-
-        String resolvedPath = CallableUtils.getStringArgument(args, PATH_PARAM_IDX, this);
+        final String path = CallableUtils.getStringArgument(args, PATH_PARAM_IDX, this);
         boolean ignoreNestedPath = CallableUtils.getOptionalBooleanArgument(args, IGNORE_NESTED_PATH_PARAM_IDX, this,
                 false);
 
-        if (!ignoreNestedPath) {
-            resolvedPath = resolveNestedPath(resolvedPath);
-        }
+        final String resolvedPath = (ignoreNestedPath) ? path : resolveNestedPath(env, path);
 
         //TODO: how to deal with htmlEscape when invoking #getBindStatus()?
         BindStatus status = requestContext.getBindStatus(resolvedPath);
@@ -106,16 +81,5 @@ public class BindDirective implements TemplateDirectiveModel {
     @Override
     public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
         return ARGS_LAYOUT;
-    }
-
-    private String resolveNestedPath(final String path) {
-        String nestedPath = (String) request.getAttribute(NESTED_PATH_VARIABLE_NAME);
-
-        if (nestedPath != null && !path.startsWith(nestedPath)
-                && !path.equals(nestedPath.substring(0, nestedPath.length() - 1))) {
-            return nestedPath + path;
-        }
-
-        return path;
     }
 }
