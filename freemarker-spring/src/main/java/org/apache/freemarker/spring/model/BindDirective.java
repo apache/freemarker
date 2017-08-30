@@ -68,8 +68,7 @@ public class BindDirective extends AbstractSpringTemplateDirectiveModel {
 
         //TODO: how to deal with htmlEscape when invoking #getBindStatus()?
         BindStatus status = requestContext.getBindStatus(resolvedPath);
-        TemplateModel[] nestedContentArgs = new TemplateModel[] {
-                new BeanModel(status, (DefaultObjectWrapper) objectWrapper) };
+        TemplateModel[] nestedContentArgs = new TemplateModel[] { new BeanModel(status, objectWrapper) };
         callPlace.executeNestedContent(nestedContentArgs, out, env);
     }
 
