@@ -35,6 +35,22 @@ import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.springframework.web.servlet.support.RequestContext;
 
+/**
+ * Provides <code>TemplateModel</code> wrapping <code>BindStatus</code> for the given bind path, working similarly
+ * to Spring Framework's <code>&lt;spring:bind /&gt;</code> JSP Tag Library.
+ * <P>
+ * This directive supports the following parameters:
+ * <UL>
+ * <LI><code>ignoreNestedPath</code>: Set whether to ignore a nested path, if any. <code>false</code> by default.</LI>
+ * <LI><code>path</code>: The path to the bean or bean property to bind status information for.</LI>
+ * </UL>
+ * </P>
+ * <P>
+ * <EM>Note:</EM> Unlike Spring Framework's <code>&lt;spring:bind /&gt;</code> JSP Tag Library, this directive
+ * does not support <code>htmlEscape</code> parameter. It always has <code>BindStatus</code> not to escape HTML's
+ * because it is much easier to control escaping in FreeMarker Template expressions rather than depending on directives.
+ * </P>
+ */
 public class BindDirective extends AbstractSpringTemplateDirectiveModel {
 
     private static final int PATH_PARAM_IDX = 0;

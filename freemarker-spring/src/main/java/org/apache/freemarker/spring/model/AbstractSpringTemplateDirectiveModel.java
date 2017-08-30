@@ -38,6 +38,9 @@ import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.view.AbstractTemplateView;
 
+/**
+ * Abstract TemplateDirectiveModel for derived classes to support Spring MVC based templating environment.
+ */
 public abstract class AbstractSpringTemplateDirectiveModel implements TemplateDirectiveModel {
 
     // TODO: namespace this into 'spring.nestedPath'??
