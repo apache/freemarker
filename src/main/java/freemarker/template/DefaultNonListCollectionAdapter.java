@@ -70,7 +70,7 @@ public class DefaultNonListCollectionAdapter extends WrappingTemplateModel imple
     }
 
     public TemplateModelIterator iterator() throws TemplateModelException {
-        return new DefaultUnassignableIteratorAdapter(collection.iterator(), getObjectWrapper());
+        return new IteratorToTemplateModelIteratorAdapter(collection.iterator(), getObjectWrapper());
     }
 
     public int size() {

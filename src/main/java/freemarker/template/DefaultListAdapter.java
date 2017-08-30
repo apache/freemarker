@@ -96,7 +96,7 @@ public class DefaultListAdapter extends WrappingTemplateModel implements Templat
         }
 
         public TemplateModelIterator iterator() throws TemplateModelException {
-            return new DefaultUnassignableIteratorAdapter(list.iterator(), getObjectWrapper());
+            return new IteratorToTemplateModelIteratorAdapter(list.iterator(), getObjectWrapper());
         }
 
     }

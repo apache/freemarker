@@ -68,7 +68,7 @@ public class DefaultIterableAdapter extends WrappingTemplateModel implements Tem
     }
 
     public TemplateModelIterator iterator() throws TemplateModelException {
-        return new DefaultUnassignableIteratorAdapter(iterable.iterator(), getObjectWrapper());
+        return new IteratorToTemplateModelIteratorAdapter(iterable.iterator(), getObjectWrapper());
     }
 
     public Object getWrappedObject() {
