@@ -129,8 +129,9 @@ public class DeepUnwrap {
         }
         if (model instanceof TemplateSequenceModel) {
             TemplateSequenceModel seq = (TemplateSequenceModel) model;
-            ArrayList list = new ArrayList(seq.size());
-            for (int i = 0; i < seq.size(); ++i) {
+            int size = seq.size();
+            ArrayList list = new ArrayList(size);
+            for (int i = 0; i < size; ++i) {
                 list.add(unwrap(seq.get(i), nullModel, permissive));
             }
             return list;

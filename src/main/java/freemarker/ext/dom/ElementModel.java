@@ -60,7 +60,8 @@ class ElementModel extends NodeModel implements TemplateScalarModel {
         if (key.equals("*")) {
             NodeListModel ns = new NodeListModel(this);
             TemplateSequenceModel children = getChildNodes();
-            for (int i = 0; i < children.size(); i++) {
+            int size = children.size();
+            for (int i = 0; i < size; i++) {
                 NodeModel child = (NodeModel) children.get(i);
                 if (child.node.getNodeType() == Node.ELEMENT_NODE) {
                     ns.add(child);

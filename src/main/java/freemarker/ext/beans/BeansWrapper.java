@@ -1301,10 +1301,10 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             recursionStops = new IdentityHashMap<Object, Object>();
         }
         Class<?> componentType = arrayClass.getComponentType();
-        Object array = Array.newInstance(componentType, seq.size());
+        final int size = seq.size();
+        Object array = Array.newInstance(componentType, size);
         recursionStops.put(seq, array);
         try {
-            final int size = seq.size();
             for (int i = 0; i < size; i++) {
                 final TemplateModel seqItem = seq.get(i);
                 Object val = tryUnwrapTo(seqItem, componentType, 0, recursionStops);
