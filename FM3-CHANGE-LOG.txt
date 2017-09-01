@@ -129,7 +129,7 @@ Node: Changes already mentioned above aren't repeated here!
 - Changes in #macro/#functions
   - See major changes first, in the earlier chapter
   - It's not tolerated anymore if the caller of a macro has declared more nested content parameters than
-    what `#nested` passes to it (like in `<#macro m><#nested 1, 2></#macro> <@m ; iterator, j, k>...</@>`, where `k` has
+    what `#nested` passes to it (like in `<#macro m><#nested 1, 2></#macro> <@m ; i, j, k>...</@>`, where `k` has
     no corresponding value in `#nested`).
   - In `#macro` (and `function`) named parameters with default values need not be at the end of the parameter list
     anymore. (Positional parameters with default values need to be at the end of the list of positional parameters
