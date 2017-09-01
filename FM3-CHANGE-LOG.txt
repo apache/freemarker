@@ -31,8 +31,8 @@ Note that the template converter tool (freemarker-converter) can automatically a
 templates. But changes that aren't purely syntactical (but behavioral) often can't be treated with 100% safety or at
 all, in which case it's always noted for that change as "Converter note:".
 
-Major changes / features
-------------------------
+Major template language changes / features
+------------------------------------------
 
 - Switched to camel case as the only supported naming convention. This is as if in FM2 you set the "namingConvention"
   configuration setting to "camelCase", however the "namingConvention" setting was removed, as no other convention will
@@ -64,8 +64,8 @@ Major changes / features
   - In FM2, the same macro could be called with specifying all parameters by position, or by specifying all parameters
     by name. In FM3 that won't work anymore, as now a parameter is either strictly positional or strictly named.
 
-Smaller changes
----------------
+Smaller template language changes
+---------------------------------
 
 Node: Changes already mentioned above aren't repeated here!
 
@@ -229,8 +229,8 @@ Major changes / features
   [Note: This is in very early stage, as of 2017-07-06.]
 
 
-Smaller changes (categorized)
------------------------------
+Smaller Java API changes (categorized)
+--------------------------------------
 
 Node: Changes already mentioned above aren't repeated here!
 
