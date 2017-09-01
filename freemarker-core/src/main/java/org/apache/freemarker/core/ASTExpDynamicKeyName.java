@@ -78,14 +78,7 @@ final class ASTExpDynamicKeyName extends ASTExpression {
                                                Environment env)
         throws TemplateException {
         if (targetModel instanceof TemplateSequenceModel) {
-            TemplateSequenceModel tsm = (TemplateSequenceModel) targetModel;
-            int size;
-            try {
-                size = tsm.size();
-            } catch (Exception e) {
-                size = Integer.MAX_VALUE;
-            }
-            return index < size ? tsm.get(index) : null;
+            return ((TemplateSequenceModel) targetModel).get(index);
         }
 
         String s;
@@ -147,7 +140,7 @@ final class ASTExpDynamicKeyName extends ASTExpression {
             }
         }
         
-        final int size = range.size();
+        final int size = range.getCollectionSize();
         final boolean rightUnbounded = range.isRightUnbounded();
         final boolean rightAdaptive = range.isRightAdaptive();
         
@@ -157,14 +150,14 @@ final class ASTExpDynamicKeyName extends ASTExpression {
             return emptyResult(targetSeq != null);
         }
 
-        final int firstIdx = range.getBegining();
+        final int firstIdx = range.getBeginning();
         if (firstIdx < 0) {
             throw new TemplateException(keyExpression,
                     "Negative range start index (", Integer.valueOf(firstIdx),
                     ") isn't allowed for a range used for slicing.");
         }
         
-        final int targetSize = targetStr != null ? targetStr.length() : targetSeq.size();
+        final int targetSize = targetStr != null ? targetStr.length() : targetSeq.getCollectionSize();
         final int step = range.getStep();
         
         // Right-adaptive increasing ranges can start 1 after the last element of the target, because they are like
@@ -221,23 +214,13 @@ final class ASTExpDynamicKeyName extends ASTExpression {
             // List items are already wrapped, so the wrapper will be null:
             return resultSeq;
         } else {
-            final int exclEndIdx;
             if (step < 0 && resultSize > 1) {
-                if (!(range.isAffactedByStringSlicingBug() && resultSize == 2)) {
-                    throw new TemplateException(keyExpression,
-                            "Decreasing ranges aren't allowed for slicing strings (as it would give reversed text). "
-                            + "The index range was: first = ", Integer.valueOf(firstIdx),
-                            ", last = ", Integer.valueOf(firstIdx + (resultSize - 1) * step));
-                } else {
-                    // Emulate the legacy bug, where "foo"[n .. n-1] gives "" instead of an error (if n >= 1).  
-                    // Fix this in FTL [2.4]
-                    exclEndIdx = firstIdx;
-                }
-            } else {
-                exclEndIdx = firstIdx + resultSize;
+                throw new TemplateException(keyExpression,
+                        "Decreasing ranges aren't allowed for slicing strings (as it would give reversed text). "
+                        + "The index range was: first = ", Integer.valueOf(firstIdx),
+                        ", last = ", Integer.valueOf(firstIdx + (resultSize - 1) * step));
             }
-            
-            return new SimpleString(targetStr.substring(firstIdx, exclEndIdx));
+            return new SimpleString(targetStr.substring(firstIdx, firstIdx + resultSize));
         }
     }
 

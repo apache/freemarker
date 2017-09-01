@@ -136,7 +136,7 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyHash() {
         return false;
     }
     

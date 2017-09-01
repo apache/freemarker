@@ -1007,12 +1007,14 @@ class ClassIntrospector {
      * Returns the Set of names of introspected methods/properties that should be available via the TemplateHashModel
      * interface.
      */
-    Set<Object> keySet(Class<?> clazz) {
+    // TODO [FM3] Can't we instead return an Iterable<String> that filters out the non-String keys?
+    @SuppressWarnings("rawtypes")
+    Set<String> keySet(Class<?> clazz) {
         Set<Object> set = new HashSet<>(get(clazz).keySet());
         set.remove(CONSTRUCTORS_KEY);
         set.remove(GENERIC_GET_KEY);
         set.remove(ARG_TYPES_BY_METHOD_KEY);
-        return set;
+        return (Set) set;
     }
 
     // -----------------------------------------------------------------------------------------------------------------

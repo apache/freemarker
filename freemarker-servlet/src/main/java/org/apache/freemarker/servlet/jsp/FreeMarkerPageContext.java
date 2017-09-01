@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.NoSuchElementException;
 
 import javax.servlet.GenericServlet;
 import javax.servlet.Servlet;
@@ -451,6 +452,9 @@ public JspWriter pushBody(Writer w) {
         @Override
         public Object nextElement() {
             try {
+                if (!it.hasNext()) {
+                    throw new NoSuchElementException();
+                }
                 return ((TemplateStringModel) it.next()).getAsString();
             } catch (TemplateException tme) {
                 throw new UndeclaredThrowableException(tme);

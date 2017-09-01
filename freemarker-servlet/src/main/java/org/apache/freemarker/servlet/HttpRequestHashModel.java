@@ -28,10 +28,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.impl.SimpleCollection;
+import org.apache.freemarker.core.model.impl.SimpleIterable;
 
 /**
  * TemplateHashModel wrapper for a HttpServletRequest attributes.
@@ -62,12 +62,12 @@ public final class HttpRequestHashModel implements TemplateHashModelEx {
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyHash() {
         return !request.getAttributeNames().hasMoreElements();
     }
     
     @Override
-    public int size() {
+    public int getHashSize() {
         int result = 0;
         for (Enumeration enumeration = request.getAttributeNames(); enumeration.hasMoreElements(); ) {
             enumeration.nextElement();
@@ -77,21 +77,21 @@ public final class HttpRequestHashModel implements TemplateHashModelEx {
     }
     
     @Override
-    public TemplateCollectionModel keys() {
+    public TemplateIterableModel keys() {
         ArrayList keys = new ArrayList();
         for (Enumeration enumeration = request.getAttributeNames(); enumeration.hasMoreElements(); ) {
             keys.add(enumeration.nextElement());
         }
-        return new SimpleCollection(keys.iterator(), wrapper);
+        return new SimpleIterable(keys.iterator(), wrapper);
     }
     
     @Override
-    public TemplateCollectionModel values() {
+    public TemplateIterableModel values() {
         ArrayList values = new ArrayList();
         for (Enumeration enumeration = request.getAttributeNames(); enumeration.hasMoreElements(); ) {
             values.add(request.getAttribute((String) enumeration.nextElement()));
         }
-        return new SimpleCollection(values.iterator(), wrapper);
+        return new SimpleIterable(values.iterator(), wrapper);
     }
 
     public HttpServletRequest getRequest() {

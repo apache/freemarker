@@ -97,7 +97,7 @@ class XalanXPathSupport implements XPathSupport {
                         result.add(n);
                     }
                 } while (n != null);
-                return result.size() == 1 ? result.get(0) : result;
+                return result.getCollectionSize() == 1 ? result.get(0) : result;
             }
             if (xresult instanceof XBoolean) {
                 return ((XBoolean) xresult).bool() ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;

@@ -26,6 +26,7 @@ import java.util.List;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
 
@@ -133,22 +134,32 @@ public class SimpleSequence extends WrappingTemplateModel implements TemplateSeq
      */
     @Override
     public TemplateModel get(int index) throws TemplateException {
-        try {
-            Object value = list.get(index);
-            if (value instanceof TemplateModel) {
-                return (TemplateModel) value;
-            }
-            TemplateModel tm = wrap(value);
-            list.set(index, tm);
-            return tm;
-        } catch (IndexOutOfBoundsException e) {
+        if (index >= list.size() || index < 0) {
             return null;
         }
+
+        Object value = list.get(index);
+        if (value instanceof TemplateModel) {
+            return (TemplateModel) value;
+        }
+        TemplateModel tm = wrap(value);
+        list.set(index, tm);
+        return tm;
     }
 
     @Override
-    public int size() {
+    public int getCollectionSize() {
         return list.size();
+    }
+
+    @Override
+    public boolean isEmptyCollection() throws TemplateException {
+        return list.isEmpty();
+    }
+
+    @Override
+    public TemplateModelIterator iterator() throws TemplateException {
+        return new SequenceTemplateModelIterator(this);
     }
 
     @Override

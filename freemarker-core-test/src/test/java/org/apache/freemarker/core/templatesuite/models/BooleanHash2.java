@@ -23,7 +23,7 @@ import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 
 /**
- * Tests the impact that the isEmpty() has on template hash models.
+ * Tests the impact that the isEmptyHash() has on template hash models.
  */
 public class BooleanHash2 implements TemplateHashModel {
 
@@ -44,7 +44,7 @@ public class BooleanHash2 implements TemplateHashModel {
      * @return true if this object is empty.
      */
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyHash() {
         return false;
     }
 }

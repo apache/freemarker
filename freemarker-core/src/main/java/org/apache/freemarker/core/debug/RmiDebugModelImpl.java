@@ -27,7 +27,7 @@ import java.util.List;
 
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
@@ -84,9 +84,9 @@ class RmiDebugModelImpl extends UnicastRemoteObject implements DebugModel {
     @Override
     public int size() throws TemplateException {
         if (model instanceof TemplateSequenceModel) {
-            return ((TemplateSequenceModel) model).size();
+            return ((TemplateSequenceModel) model).getCollectionSize();
         }
-        return ((TemplateHashModelEx) model).size();
+        return ((TemplateHashModelEx) model).getHashSize();
     }
 
     @Override
@@ -107,7 +107,7 @@ class RmiDebugModelImpl extends UnicastRemoteObject implements DebugModel {
     @Override
     public DebugModel[] getCollection() throws TemplateException, RemoteException {
         List list = new ArrayList();
-        TemplateModelIterator i = ((TemplateCollectionModel) model).iterator();
+        TemplateModelIterator i = ((TemplateIterableModel) model).iterator();
         while (i.hasNext()) {
             list.add(getDebugModel(i.next()));
         }
@@ -152,7 +152,7 @@ class RmiDebugModelImpl extends UnicastRemoteObject implements DebugModel {
         if (model instanceof TemplateDateModel) type += TYPE_DATE;
         if (model instanceof TemplateBooleanModel) type += TYPE_BOOLEAN;
         if (model instanceof TemplateSequenceModel) type += TYPE_SEQUENCE;
-        if (model instanceof TemplateCollectionModel) type += TYPE_COLLECTION;
+        if (model instanceof TemplateIterableModel) type += TYPE_COLLECTION;
         if (model instanceof TemplateHashModelEx) type += TYPE_HASH_EX;
         if (model instanceof TemplateHashModel) type += TYPE_HASH;
         if (model instanceof TemplateFunctionModel) type += TYPE_FUNCTION;

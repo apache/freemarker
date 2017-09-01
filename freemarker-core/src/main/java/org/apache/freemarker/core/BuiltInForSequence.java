@@ -23,6 +23,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 
 abstract class BuiltInForSequence extends ASTExpBuiltIn {
+
     @Override
     TemplateModel _eval(Environment env)
             throws TemplateException {
@@ -32,6 +33,7 @@ abstract class BuiltInForSequence extends ASTExpBuiltIn {
         }
         return calculateResult((TemplateSequenceModel) model);
     }
-    abstract TemplateModel calculateResult(TemplateSequenceModel tsm)
-            throws TemplateException;
+
+    abstract TemplateModel calculateResult(TemplateSequenceModel tsm) throws TemplateException;
+
 }

@@ -20,18 +20,17 @@
 package org.apache.freemarker.core.model.impl;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Iterator;
 
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
 
 /**
- * A simple implementation of {@link TemplateCollectionModel}.
+ * A simple implementation of {@link TemplateIterableModel}.
  * It's able to wrap <tt>java.util.Iterator</tt>-s and <tt>java.util.Collection</tt>-s.
  * If you wrap an <tt>Iterator</tt>, the variable can be &lt;#list&gt;-ed only once!
  *
@@ -45,27 +44,27 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
  * <p>This class is thread-safe. The returned {@link TemplateModelIterator}-s
  * are <em>not</em> thread-safe.
  */
-public class SimpleCollection extends WrappingTemplateModel
-implements TemplateCollectionModel, Serializable {
+public class SimpleIterable extends WrappingTemplateModel
+implements TemplateIterableModel, Serializable {
     
     private boolean iteratorOwned;
     private final Iterator iterator;
-    private final Collection collection;
+    private final Iterable iterable;
 
-    public SimpleCollection(Iterator iterator, ObjectWrapper wrapper) {
+    public SimpleIterable(Iterator iterator, ObjectWrapper wrapper) {
         super(wrapper);
         this.iterator = iterator;
-        collection = null;
+        iterable = null;
     }
 
-    public SimpleCollection(Collection collection, ObjectWrapper wrapper) {
+    public SimpleIterable(Iterable iterable, ObjectWrapper wrapper) {
         super(wrapper);
-        this.collection = collection;
+        this.iterable = iterable;
         iterator = null;
     }
 
     /**
-     * Retrieves a template model iterator that is used to iterate over the elements in this collection.
+     * Retrieves a template model iterator that is used to iterate over the elements in this iterable.
      *  
      * <p>When you wrap an <tt>Iterator</tt> and you get <tt>TemplateModelIterator</tt> for multiple times,
      * only one of the returned <tt>TemplateModelIterator</tt> instances can be really used. When you have called a
@@ -77,7 +76,7 @@ implements TemplateCollectionModel, Serializable {
     public TemplateModelIterator iterator() {
         return iterator != null
                 ? new SimpleTemplateModelIterator(iterator, false)
-                : new SimpleTemplateModelIterator(collection.iterator(), true);
+                : new SimpleTemplateModelIterator(iterable.iterator(), true);
     }
     
     /**
@@ -99,17 +98,13 @@ implements TemplateCollectionModel, Serializable {
         @Override
         public TemplateModel next() throws TemplateException {
             if (!iteratorOwnedByMe) { 
-                synchronized (SimpleCollection.this) {
+                synchronized (SimpleIterable.this) {
                     checkIteratorNotOwned();
                     iteratorOwned = true;
                     iteratorOwnedByMe = true;
                 }
             }
-            
-            if (!iterator.hasNext()) {
-                throw new TemplateException("The collection has no more items.");
-            }
-            
+
             Object value  = iterator.next();
             return value instanceof TemplateModel ? (TemplateModel) value : wrap(value);
         }
@@ -118,7 +113,7 @@ implements TemplateCollectionModel, Serializable {
         public boolean hasNext() throws TemplateException {
             // Calling hasNext may looks safe, but I have met sync. problems.
             if (!iteratorOwnedByMe) {
-                synchronized (SimpleCollection.this) {
+                synchronized (SimpleIterable.this) {
                     checkIteratorNotOwned();
                 }
             }
@@ -129,7 +124,7 @@ implements TemplateCollectionModel, Serializable {
         private void checkIteratorNotOwned() throws TemplateException {
             if (iteratorOwned) {
                 throw new TemplateException(
-                        "This collection value wraps a java.util.Iterator, thus it can be listed only once.");
+                        "This value wraps a java.util.Iterator, thus it can be listed only once.");
             }
         }
         

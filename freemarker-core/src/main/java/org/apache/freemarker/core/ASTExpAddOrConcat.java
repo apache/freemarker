@@ -23,16 +23,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.CollectionAndSequence;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleString;
 
@@ -122,9 +121,9 @@ final class ASTExpAddOrConcat extends ASTExpression {
         if (leftModel instanceof TemplateHashModelEx && rightModel instanceof TemplateHashModelEx) {
             TemplateHashModelEx leftModelEx = (TemplateHashModelEx) leftModel;
             TemplateHashModelEx rightModelEx = (TemplateHashModelEx) rightModel;
-            if (leftModelEx.size() == 0) {
+            if (leftModelEx.getHashSize() == 0) {
                 return rightModelEx;
-            } else if (rightModelEx.size() == 0) {
+            } else if (rightModelEx.getHashSize() == 0) {
                 return leftModelEx;
             } else {
                 return new ConcatenatedHashEx(leftModelEx, rightModelEx);
@@ -179,9 +178,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
         return ParameterRole.forBinaryOperatorOperand(idx);
     }
 
-    private static final class ConcatenatedSequence
-    implements
-        TemplateSequenceModel {
+    private static final class ConcatenatedSequence implements TemplateSequenceModel {
         private final TemplateSequenceModel left;
         private final TemplateSequenceModel right;
 
@@ -191,21 +188,63 @@ final class ASTExpAddOrConcat extends ASTExpression {
         }
 
         @Override
-        public int size()
+        public int getCollectionSize()
         throws TemplateException {
-            return left.size() + right.size();
+            return left.getCollectionSize() + right.getCollectionSize();
         }
 
         @Override
-        public TemplateModel get(int i)
-        throws TemplateException {
-            int ls = left.size();
-            return i < ls ? left.get(i) : right.get(i - ls);
+        public boolean isEmptyCollection() throws TemplateException {
+            return left.isEmptyCollection() && right.isEmptyCollection();
+        }
+
+        @Override
+        public TemplateModel get(int i) throws TemplateException {
+            int leftSize = left.getCollectionSize();
+            return i < leftSize ? left.get(i) : right.get(i - leftSize);
+        }
+
+        @Override
+        public TemplateModelIterator iterator() throws TemplateException {
+            return new ConcatenatedTemplateModelIterator(left.iterator(), right.iterator());
         }
     }
 
-    private static class ConcatenatedHash
-    implements TemplateHashModel {
+    private static class ConcatenatedTemplateModelIterator implements  TemplateModelIterator {
+        private final TemplateModelIterator left;
+        private final TemplateModelIterator right;
+        private boolean leftExhausted;
+
+        ConcatenatedTemplateModelIterator(TemplateModelIterator left, TemplateModelIterator right) {
+            this.left = left;
+            this.right = right;
+        }
+
+        @Override
+        public TemplateModel next() throws TemplateException {
+            if (!leftExhausted) {
+                if (left.hasNext()) {
+                    return left.next();
+                }
+                leftExhausted = true;
+            }
+            return right.next();
+        }
+
+        @Override
+        public boolean hasNext() throws TemplateException {
+            if (!leftExhausted) {
+                if (left.hasNext()) {
+                    return true;
+                }
+                leftExhausted = true;
+            }
+            // At this point leftExhausted is true.
+            return right.hasNext();
+        }
+    }
+
+    private static class ConcatenatedHash implements TemplateHashModel {
         protected final TemplateHashModel left;
         protected final TemplateHashModel right;
 
@@ -222,17 +261,16 @@ final class ASTExpAddOrConcat extends ASTExpression {
         }
 
         @Override
-        public boolean isEmpty()
+        public boolean isEmptyHash()
         throws TemplateException {
-            return left.isEmpty() && right.isEmpty();
+            return left.isEmptyHash() && right.isEmptyHash();
         }
     }
 
-    private static final class ConcatenatedHashEx
-    extends ConcatenatedHash
+    private static final class ConcatenatedHashEx extends ConcatenatedHash
     implements TemplateHashModelEx {
-        private CollectionAndSequence keys;
-        private CollectionAndSequence values;
+        private TemplateSequenceModel keys;
+        private TemplateSequenceModel values;
         private int size;
 
         ConcatenatedHashEx(TemplateHashModelEx left, TemplateHashModelEx right) {
@@ -240,34 +278,33 @@ final class ASTExpAddOrConcat extends ASTExpression {
         }
         
         @Override
-        public int size() throws TemplateException {
+        public int getHashSize() throws TemplateException {
             initKeys();
             return size;
         }
 
         @Override
-        public TemplateCollectionModel keys()
+        public TemplateIterableModel keys()
         throws TemplateException {
             initKeys();
             return keys;
         }
 
         @Override
-        public TemplateCollectionModel values()
+        public TemplateIterableModel values()
         throws TemplateException {
             initValues();
             return values;
         }
 
-        private void initKeys()
-        throws TemplateException {
+        private void initKeys() throws TemplateException {
             if (keys == null) {
                 HashSet keySet = new HashSet();
                 NativeSequence keySeq = new NativeSequence(32);
                 addKeys(keySet, keySeq, (TemplateHashModelEx) left);
                 addKeys(keySet, keySeq, (TemplateHashModelEx) right);
                 size = keySet.size();
-                keys = new CollectionAndSequence(keySeq);
+                keys = keySeq;
             }
         }
 
@@ -277,24 +314,23 @@ final class ASTExpAddOrConcat extends ASTExpression {
             while (it.hasNext()) {
                 TemplateStringModel tsm = (TemplateStringModel) it.next();
                 if (set.add(tsm.getAsString())) {
-                    // The first occurence of the key decides the index;
-                    // this is consisten with stuff like java.util.LinkedHashSet.
+                    // The first occurrence of the key decides the index;
+                    // this is consistent with stuff like java.util.LinkedHashSet.
                     keySeq.add(tsm);
                 }
             }
         }        
 
-        private void initValues()
-        throws TemplateException {
+        private void initValues() throws TemplateException {
             if (values == null) {
-                NativeSequence seq = new NativeSequence(size());
-                // Note: size() invokes initKeys() if needed.
+                NativeSequence seq = new NativeSequence(getHashSize());
+                // Note: getCollectionSize() invokes initKeys() if needed.
             
-                int ln = keys.size();
+                int ln = keys.getCollectionSize();
                 for (int i  = 0; i < ln; i++) {
                     seq.add(get(((TemplateStringModel) keys.get(i)).getAsString()));
                 }
-                values = new CollectionAndSequence(seq);
+                values = seq;
             }
         }
     }

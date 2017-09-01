@@ -121,12 +121,15 @@ Node: Changes already mentioned above aren't repeated here!
   - `?isMacro` was removed; use `?isDirective` instead, which returns `true` both for macros and directives defined otherwise.
   - `?isMethod` was removed; use `?isFunction` instead, which returns `true` both for Java methods and functions defined
      otherwise (such as with `#function`).
+- The FM2 `?isCollection` and `?isEnumerable` was replaced by `?isIterable`. `?isCollectionEx` was renamed to
+  `?isCollection`. (These follows the similar nomenclature change in the TemplateModel API-s)
+  `?isIndexable` was removed, and can be replaced with `?isSequence`.
 - The directive returned by `?interpret` doesn't allow nested content anymore. (It wasn't useful earlier either;
   the nested content was simply executed after the interpreted string.)
 - Changes in #macro/#functions
   - See major changes first, in the earlier chapter
   - It's not tolerated anymore if the caller of a macro has declared more nested content parameters than
-    what `#nested` passes to it (like in `<#macro m><#nested 1, 2></#macro> <@m ; i, j, k>...</@>`, where `k` has
+    what `#nested` passes to it (like in `<#macro m><#nested 1, 2></#macro> <@m ; iterator, j, k>...</@>`, where `k` has
     no corresponding value in `#nested`).
   - In `#macro` (and `function`) named parameters with default values need not be at the end of the parameter list
     anymore. (Positional parameters with default values need to be at the end of the list of positional parameters
@@ -134,10 +137,12 @@ Node: Changes already mentioned above aren't repeated here!
   - When parameter default expressions are evaluated, only the parameters defined earlier are already set.
     So `<#macro m a b=a>` works, but `<#macro m a=b b>` won't work anymore (unless there's `b` outside the
     parameter list), as `b` is not yet set when the default of `a` is calculated.
-- Built-ins don't convert their parameters to tring anymore; in FM some (not all) of them did, because they
+- Built-ins don't convert their parameters to string anymore; in FM some (not all) of them did, because they
   were based on the TemplateMethod interface (deprecated even in FM2) that required String paramteters and
-  was auto-converted by FM2.
-    
+  was auto-converted by FM2. (The template converter tool can't do this conversion.)
+- The string ranges like `someString[1..0]` (that is, where the end is one less than the beginning) aren't
+  tolerated anymore, and are errors. (The template converter tool can't do this conversion.)
+
   
 Java API changes
 ================
@@ -193,18 +198,31 @@ Major changes / features
 - Configuration is now immutable. You should use Configuration.Builder to set up the setting values, then create
   the Configuration with the builder's build() method.
 - Configuration defaults were changed to follow the current best practices (like default charset is UTF-8 everywhere)
-- Reworked callable `TemplateModel`-s (i.e., models that can be called like `foo(...)` or as `<@foo .../>`)
-  - Earlier there were several callable `TemplateModel` internfaces (`TemplateMethodModel`, `TemplateMethodModelEx`,
-    `TemplateDirectiveModel`, `TemplateTransformModel`). FM3 replaces them with only two new interfaces,
-    `TemplateDirectiveModel` (differs from the interface with identical name in FM2) and `TemplateFunctionModel`.
-    (These are both the subinterfaces of another new interface `TemplateCallableModel`.)
-  - All callable TemplateModel-s support passing parameters by position and by name, even in the same call
-    (e.g., `<@heading "Some title" icon="foo.jpg" />`, `sum(1, 2, 3, abs=true)`)
-  - `#macro` now produces a `TemplateDirectiveModel` and `#function` produces a `TemplateFunctionModel`. (Earlier, the
-    product was just a generic `TemplateModel` that could only be invoked using internal API-s, and had capabilities
-    that the callable TemplateModel-s coulnd't have.)
-- Renamed `TemplateScalarModel` to `TemplateStringModel`. (The `TemplateScalarModel` name come from the early FM,
-  where there where strings, numbers, booleans, etc. weren't separated.)
+- Reworked TemplateModel interfaces:
+  - Reworked callable `TemplateModel`-s (iterator.e., models that can be called like `foo(...)` or as `<@foo .../>`)
+    - Earlier there were several callable `TemplateModel` internfaces (`TemplateMethodModel`, `TemplateMethodModelEx`,
+      `TemplateDirectiveModel`, `TemplateTransformModel`). FM3 replaces them with only two new interfaces,
+      `TemplateDirectiveModel` (differs from the interface with identical name in FM2) and `TemplateFunctionModel`.
+      (These are both the subinterfaces of another new interface `TemplateCallableModel`.)
+    - All callable TemplateModel-s support passing parameters by position and by name, even in the same call
+      (e.g., `<@heading "Some title" icon="foo.jpg" />`, `sum(1, 2, 3, abs=true)`)
+    - `#macro` now produces a `TemplateDirectiveModel` and `#function` produces a `TemplateFunctionModel`. (Earlier, the
+      product was just a generic `TemplateModel` that could only be invoked using internal API-s, and had capabilities
+      that the callable TemplateModel-s coulnd't have.)
+  - Renamed `TemplateScalarModel` to `TemplateStringModel`. (The `TemplateScalarModel` name come from the early FM,
+    where strings, numbers, booleans, etc. weren't separated.)
+  - Renamed `TemplateCollectionModel` to `TemplateIterableModel`, and `TemplateCollectionModelEx` to
+    `TemplateCollectionModel`. (Since java.util.Iterable was added to Java, the TemplateCollectionModel
+    has become an unfortunate name, especailly as later TemplateCollectionModelEx was added, that was closer
+    to java.util.Collection than TemplateCollectionModel.)
+  - `TemplateSequenceModel` now extends `TemplateCollecitonModel`, and `#list` and other built-in mechanims prefer
+     using `iterator()` instead of an index loop.
+  - `TemplateModelIterator.next()` isn't required to handle anymore the case when there's no next item. If someone
+    doesn't check that with `hasNext()` before calling `next()`, anything can happen. This is to allow more efficient
+    implementations, which has become important now that `#list` and such prefers iterators over index loops.
+  - `isEmpty` of FM2 `TemplateCollectionModelEx` (now `TemplateCollectionModel`) and FM2 `TemplateHashModel` was renamed
+    to `isEmptyCollection` and `isEmptyHash`, so that for multi-typed values can give different results depending on the
+    type. Also, for collections `size()` was renamed to `getCollectionSize()`, and for hashes `getHashSize()`.
 - Removed freemarker.ext.log, our log abstraction layer from the times when there was no clear winner on this field.
   Added org.slf4j:slf4j-api as required dependency instead.
 - Added Spring support to the FreeMarker project (freemarker-spring module), instead of relying Spring developers
@@ -388,6 +406,9 @@ Core / Models and Object wrapping
   method of the model couldn't throw that as `TemplateModelException` is more specific. Now it can. Also it's not very
   useful in practice to catch `TemplateModelException` and the more generic `TemplateException` separately, so this
   simplification was made.
+- `TemplateSequenceModel.get(int)` is now expected to actually return `null` for any invalid index. In FM2 this was
+  the documented expectation, but many implementaitons throw exception instead of returning `null`, but FreeMarker
+  has tolerated that.
 
 Core / Template loading and caching
 ...................................

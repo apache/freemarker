@@ -79,13 +79,13 @@ public class ResourceBundleModel extends BeanModel implements TemplateFunctionMo
      * Returns true if this bundle contains no objects.
      */
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyHash() {
         return !((ResourceBundle) object).getKeys().hasMoreElements() &&
-            super.isEmpty();
+            super.isEmptyHash();
     }
 
     @Override
-    public int size() {
+    public int getHashSize() {
         return keySet().size();
     }
 

@@ -16,31 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- 
-package org.apache.freemarker.dom;
 
-import org.apache.freemarker.core.model.TemplateStringModel;
-import org.w3c.dom.CharacterData;
-import org.w3c.dom.Comment;
+package org.apache.freemarker.core;
 
-class CharacterDataNodeModel extends NodeModel implements TemplateStringModel {
-    
-    public CharacterDataNodeModel(CharacterData text) {
-        super(text);
+import java.util.Iterator;
+
+import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelIterator;
+
+class NativeTemplateModelIterator implements TemplateModelIterator {
+
+    private final Iterator<TemplateModel> iterator;
+
+    NativeTemplateModelIterator(Iterator<TemplateModel> iterator) {
+        this.iterator = iterator;
     }
-    
+
     @Override
-    public String getAsString() {
-        return ((org.w3c.dom.CharacterData) node).getData();
+    public TemplateModel next() throws TemplateException {
+        return iterator.next();
     }
-    
+
     @Override
-    public String getNodeName() {
-        return (node instanceof Comment) ? "@comment" : "@text";
-    }
-    
-    @Override
-    public boolean isEmptyHash() {
-        return true;
+    public boolean hasNext() {
+        return iterator.hasNext();
     }
 }

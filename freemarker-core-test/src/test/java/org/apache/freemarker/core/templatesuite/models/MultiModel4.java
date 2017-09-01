@@ -23,6 +23,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
@@ -40,7 +41,7 @@ public class MultiModel4 implements TemplateSequenceModel, TemplateHashModel {
 
     @Override
     public TemplateModel get(int i) throws TemplateException {
-        return m_cList.get( i );
+        return m_cList.get(i);
     }
 
     @Override
@@ -53,13 +54,23 @@ public class MultiModel4 implements TemplateSequenceModel, TemplateHashModel {
     }
 
     @Override
-    public int size() {
-        return m_cList.size();
+    public int getCollectionSize() {
+        return m_cList.getCollectionSize();
     }
 
     @Override
-    public boolean isEmpty() {
-        return size() == 0;
+    public boolean isEmptyCollection() throws TemplateException {
+        return m_cList.isEmptyCollection();
+    }
+
+    @Override
+    public boolean isEmptyHash() throws TemplateException {
+        return false;
+    }
+
+    @Override
+    public TemplateModelIterator iterator() throws TemplateException {
+        return m_cList.iterator();
     }
 
 }

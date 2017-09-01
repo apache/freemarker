@@ -17,37 +17,39 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.templatesuite.models;
+package org.apache.freemarker.core;
 
-import org.apache.freemarker.core.model.TemplateHashModel;
+import java.util.Collection;
+
+import org.apache.freemarker.core.model.ObjectWrapper;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
-import org.apache.freemarker.core.model.impl.SimpleString;
+import org.apache.freemarker.core.model.TemplateModelIterator;
 
 /**
- * Testcase to see how FreeMarker deals with multiple Template models.
+ * A collection where each items is already a {@link TemplateModel}, so no {@link ObjectWrapper} need to be specified.
  */
-public class MultiModel3 implements TemplateStringModel, TemplateHashModel {
+class NativeCollection implements TemplateCollectionModel {
 
-    @Override
-    public String getAsString() {
-        return "Model3 is alive!";
+    private final Collection<TemplateModel> collection;
+
+    public NativeCollection(Collection<TemplateModel> collection) {
+        this.collection = collection;
     }
 
     @Override
-    public boolean isEmptyHash() {
-        return false;
+    public int getCollectionSize() {
+        return collection.size();
     }
 
     @Override
-    public TemplateModel get(String key) {
-        if ( key.equals( "selftest" )) {
-            return new SimpleString( "Selftest from MultiModel3!" );
-        } else if ( key.equals( "message" )) {
-            return new SimpleString( "Hello world from MultiModel3!" );
-        } else {
-            return null;
-        }
+    public boolean isEmptyCollection() {
+        return collection.isEmpty();
+    }
+
+    @Override
+    public TemplateModelIterator iterator() throws TemplateException {
+        return new NativeTemplateModelIterator(collection.iterator());
     }
 
 }

@@ -20,6 +20,9 @@
 package org.apache.freemarker.core;
 
 
+import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelIterator;
+
 /**
  * A range between two integers (maybe 0 long).
  */
@@ -27,8 +30,7 @@ final class BoundedRangeModel extends RangeModel {
 
     private final int step, size;
     private final boolean rightAdaptive;
-    private final boolean affectedByStringSlicingBug;
-    
+
     /**
      * @param inclusiveEnd Tells if the {@code end} index is part of the range. 
      * @param rightAdaptive Tells if the right end of the range adapts to the size of the sliced value, if otherwise
@@ -39,14 +41,35 @@ final class BoundedRangeModel extends RangeModel {
         step = begin <= end ? 1 : -1;
         size = Math.abs(end - begin) + (inclusiveEnd ? 1 : 0);
         this.rightAdaptive = rightAdaptive;
-        affectedByStringSlicingBug = inclusiveEnd;
     }
 
     @Override
-    public int size() {
+    public int getCollectionSize() {
         return size;
     }
-    
+
+    @Override
+    public boolean isEmptyCollection() throws TemplateException {
+        return size == 0;
+    }
+
+    @Override
+    public TemplateModelIterator iterator() throws TemplateException {
+        return new TemplateModelIterator() {
+            private long nextIndex;
+
+            @Override
+            public TemplateModel next() throws TemplateException {
+                return uncheckedGet(nextIndex++);
+            }
+
+            @Override
+            public boolean hasNext() throws TemplateException {
+                return nextIndex < getCollectionSize();
+            }
+        };
+    }
+
     @Override
     int getStep() {
         return step;
@@ -62,9 +85,4 @@ final class BoundedRangeModel extends RangeModel {
         return rightAdaptive;
     }
 
-    @Override
-    boolean isAffactedByStringSlicingBug() {
-        return affectedByStringSlicingBug;
-    }
-    
 }

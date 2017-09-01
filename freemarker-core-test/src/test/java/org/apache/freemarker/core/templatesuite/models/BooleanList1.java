@@ -23,11 +23,12 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
 
 /**
- * Model for testing the impact of isEmpty() on template list models. Every
+ * Model for testing the impact of isEmptyCollection() on template list models. Every
  * other method simply delegates to a SimpleList model.
  */
 public class BooleanList1 implements TemplateSequenceModel {
@@ -55,8 +56,18 @@ public class BooleanList1 implements TemplateSequenceModel {
     }
 
     @Override
-    public int size() {
-        return cList.size();
+    public int getCollectionSize() {
+        return cList.getCollectionSize();
+    }
+
+    @Override
+    public boolean isEmptyCollection() throws TemplateException {
+        return cList.isEmptyCollection();
+    }
+
+    @Override
+    public TemplateModelIterator iterator() throws TemplateException {
+        return cList.iterator();
     }
 
 }

@@ -86,7 +86,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
     
     NodeListModel filterByName(String name) throws TemplateException {
         NodeListModel result = new NodeListModel(contextNode);
-        int size = size();
+        int size = getCollectionSize();
         if (size == 0) {
             return result;
         }
@@ -103,13 +103,14 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
     }
     
     @Override
-    public boolean isEmpty() {
-        return size() == 0;
+    public boolean isEmptyHash() {
+        return false;
     }
     
     @Override
     public TemplateModel get(String key) throws TemplateException {
-        if (size() == 1) {
+        int size = getCollectionSize();
+        if (size == 1) {
             NodeModel nm = (NodeModel) get(0);
             return nm.get(key);
         }
@@ -118,7 +119,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
                     || key.equals(AtAtKey.NESTED_MARKUP.getKey()) 
                     || key.equals(AtAtKey.TEXT.getKey())) {
                 StringBuilder result = new StringBuilder();
-                for (int i = 0; i < size(); i++) {
+                for (int i = 0; i < size; i++) {
                     NodeModel nm = (NodeModel) get(i);
                     TemplateStringModel textModel = (TemplateStringModel) nm.get(key);
                     result.append(textModel.getAsString());
@@ -129,8 +130,8 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
                 if (AtAtKey.containsKey(key)) {
                     throw new TemplateException(
                             "\"" + key + "\" is only applicable to a single XML node, but it was applied on "
-                            + (size() != 0
-                                    ? size() + " XML nodes (multiple matches)."
+                            + (size != 0
+                                    ? size + " XML nodes (multiple matches)."
                                     : "an empty list of XML nodes (no matches)."));
                 } else {
                     throw new TemplateException("Unsupported @@ key: " + key);
@@ -142,26 +143,26 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
                         && (DomStringUtils.isXMLNameLike(key, 1)  || key.equals("@@") || key.equals("@*"))))
                 || key.equals("*") || key.equals("**")) {
             NodeListModel result = new NodeListModel(contextNode);
-            for (int i = 0; i < size(); i++) {
+            for (int i = 0; i < size; i++) {
                 NodeModel nm = (NodeModel) get(i);
                 if (nm instanceof ElementModel) {
                     TemplateSequenceModel tsm = (TemplateSequenceModel) nm.get(key);
                     if (tsm != null) {
-                        int size = tsm.size();
-                        for (int j = 0; j < size; j++) {
+                        int tsmSize = tsm.getCollectionSize();
+                        for (int j = 0; j < tsmSize; j++) {
                             result.add(tsm.get(j));
                         }
                     }
                 }
             }
-            if (result.size() == 1) {
+            if (result.getCollectionSize() == 1) {
                 return result.get(0);
             }
             return result;
         }
         XPathSupport xps = getXPathSupport();
         if (xps != null) {
-            Object context = (size() == 0) ? null : rawNodeList(); 
+            Object context = (size == 0) ? null : rawNodeList();
             return xps.executeQuery(context, key);
         } else {
             throw new TemplateException(
@@ -171,7 +172,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
     }
     
     private List rawNodeList() throws TemplateException {
-        int size = size();
+        int size = getCollectionSize();
         ArrayList al = new ArrayList(size);
         for (int i = 0; i < size; i++) {
             al.add(((NodeModel) get(i)).node);
@@ -183,7 +184,7 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
         if (xpathSupport == null) {
             if (contextNode != null) {
                 xpathSupport = contextNode.getXPathSupport();
-            } else if (size() > 0) {
+            } else if (getCollectionSize() > 0) {
                 xpathSupport = ((NodeModel) get(0)).getXPathSupport();
             }
         }
@@ -206,11 +207,12 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
     }
 
     private Object[] newTypeErrorExplanation(String type) {
+        int size = getCollectionSize();
         return new Object[] {
                 "This XML query result can't be used as ", type, " because for that it had to contain exactly "
-                + "1 XML node, but it contains ", Integer.valueOf(size()), " nodes. "
+                + "1 XML node, but it contains ", Integer.valueOf(size), " nodes. "
                 + "That is, the constructing XML query has found ",
-                isEmpty()
+                size == 0
                     ? "no matches."
                     : "multiple matches."
                 };

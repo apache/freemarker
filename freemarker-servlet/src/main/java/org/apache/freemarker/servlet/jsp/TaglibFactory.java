@@ -356,7 +356,7 @@ public class TaglibFactory implements TemplateHashModel {
      * Returns false.
      */
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyHash() {
         return false;
     }
 
@@ -1513,7 +1513,7 @@ public class TaglibFactory implements TemplateHashModel {
         }
 
         @Override
-        public boolean isEmpty() {
+        public boolean isEmptyHash() {
             return tagsAndFunctions.isEmpty();
         }
 

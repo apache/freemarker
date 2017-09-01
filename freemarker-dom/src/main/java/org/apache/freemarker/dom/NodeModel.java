@@ -33,6 +33,7 @@ import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNodeModelEx;
 import org.apache.freemarker.core.model.TemplateNumberModel;
@@ -40,6 +41,7 @@ import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleString;
+import org.apache.freemarker.core.model.impl.SingleItemTemplateModelIterator;
 import org.slf4j.Logger;
 import org.w3c.dom.Attr;
 import org.w3c.dom.CDATASection;
@@ -208,20 +210,38 @@ abstract public class NodeModel implements TemplateNodeModelEx, TemplateHashMode
         }
         throw new TemplateException("Unknown node type: " + nodeType + ". This should be impossible!");
     }
-    
+
+    /**
+     * Always returns {@code false}.
+     */
+    @Override
+    public boolean isEmptyHash() throws TemplateException {
+        return false;
+    }
+
+    @Override
+    public TemplateModelIterator iterator() throws TemplateException {
+        return new SingleItemTemplateModelIterator(this);
+    }
+
+    @Override
+    public final TemplateModel get(int index) {
+        return index == 0 ? this : null;
+    }
+
     /**
      * Always returns 1.
      */
     @Override
-    public final int size() {
+    public final int getCollectionSize() {
         return 1;
     }
-    
+
     @Override
-    public final TemplateModel get(int i) {
-        return i == 0 ? this : null;
+    public final boolean isEmptyCollection() throws TemplateException {
+        return false;
     }
-    
+
     @Override
     public String getNodeNamespace() {
         int nodeType = node.getNodeType();

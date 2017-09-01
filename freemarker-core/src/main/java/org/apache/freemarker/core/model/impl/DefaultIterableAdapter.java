@@ -27,7 +27,7 @@ import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
@@ -36,7 +36,7 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
 
 /**
  * Adapts an {@link Iterable} to the corresponding {@link TemplateModel} interface(s), most importantly to
- * {@link TemplateCollectionModel}. This should only be used if {@link Collection} is not implemented by the adapted
+ * {@link TemplateIterableModel}. This should only be used if {@link Collection} is not implemented by the adapted
  * object, because then {@link DefaultListAdapter} and {@link DefaultNonListCollectionAdapter} gives more functionality.
  * 
  * <p>
@@ -45,7 +45,7 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
  * {@link Iterator} modifier methods (though of course, Java methods called from the template can violate this rule).
  */
 @SuppressWarnings("serial")
-public class DefaultIterableAdapter extends WrappingTemplateModel implements TemplateCollectionModel,
+public class DefaultIterableAdapter extends WrappingTemplateModel implements TemplateIterableModel,
         AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport {
     
     private final Iterable<?> iterable;
@@ -54,7 +54,7 @@ public class DefaultIterableAdapter extends WrappingTemplateModel implements Tem
      * Factory method for creating new adapter instances.
      * 
      * @param iterable
-     *            The collection to adapt; can't be {@code null}.
+     *            The {@link Iterable} to adapt; can't be {@code null}.
      * @param wrapper
      *            The {@link ObjectWrapper} used to wrap the items in the array. Has to be
      *            {@link ObjectWrapperAndUnwrapper} because of planned future features.
@@ -70,7 +70,7 @@ public class DefaultIterableAdapter extends WrappingTemplateModel implements Tem
 
     @Override
     public TemplateModelIterator iterator() throws TemplateException {
-        return new DefaultUnassignableIteratorAdapter(iterable.iterator(), getObjectWrapper());
+        return new IteratorToTemplateModelIteratorAdapter(iterable.iterator(), getObjectWrapper());
     }
 
     @Override

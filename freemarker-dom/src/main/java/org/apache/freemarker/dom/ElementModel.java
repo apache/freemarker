@@ -41,7 +41,7 @@ class ElementModel extends NodeModel implements TemplateStringModel {
     }
     
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyHash() {
         return false;
     }
     
@@ -61,7 +61,8 @@ class ElementModel extends NodeModel implements TemplateStringModel {
         if (key.equals("*")) {
             NodeListModel ns = new NodeListModel(this);
             TemplateSequenceModel children = getChildNodes();
-            for (int i = 0; i < children.size(); i++) {
+            int size = children.getCollectionSize();
+            for (int i = 0; i < size; i++) {
                 NodeModel child = (NodeModel) children.get(i);
                 if (child.node.getNodeType() == Node.ELEMENT_NODE) {
                     ns.add(child);
@@ -120,7 +121,7 @@ class ElementModel extends NodeModel implements TemplateStringModel {
         } else if (DomStringUtils.isXMLNameLike(key)) {
             // We interpret key as an element name
             NodeListModel result = ((NodeListModel) getChildNodes()).filterByName(key);
-            return result.size() != 1 ? result : result.get(0);
+            return result.getCollectionSize() != 1 ? result : result.get(0);
         } else {
             // We don't anything like this that's element-specific; fall back 
             return super.get(key);

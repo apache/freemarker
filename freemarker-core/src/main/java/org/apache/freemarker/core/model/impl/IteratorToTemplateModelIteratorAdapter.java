@@ -19,7 +19,6 @@
 package org.apache.freemarker.core.model.impl;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
@@ -27,28 +26,22 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 
 /**
- * As opposed to {@link DefaultIteratorAdapter}, this simpler {@link Iterator} adapter is used in situations where the
- * {@link TemplateModelIterator} won't be assigned to FreeMarker template variables, only used internally by
- * {@code #list} or custom Java code. Because of that, it doesn't have to handle the situation where the user tries to
- * iterate over the same value twice.
+ * Unlike {@link DefaultIteratorAdapter}, this doesn't adapt to some {@link TemplateModel}, but to {@link
+ * TemplateModelIterator}.
  */
-class DefaultUnassignableIteratorAdapter implements TemplateModelIterator {
+class IteratorToTemplateModelIteratorAdapter implements TemplateModelIterator {
 
     private final Iterator<?> it;
     private final ObjectWrapper wrapper;
 
-    DefaultUnassignableIteratorAdapter(Iterator<?> it, ObjectWrapper wrapper) {
+    IteratorToTemplateModelIteratorAdapter(Iterator<?> it, ObjectWrapper wrapper) {
         this.it = it;
         this.wrapper = wrapper;
     }
 
     @Override
     public TemplateModel next() throws TemplateException {
-        try {
-            return wrapper.wrap(it.next());
-        } catch (NoSuchElementException e) {
-            throw new TemplateException("The collection has no more items.", e);
-        }
+        return wrapper.wrap(it.next());
     }
 
     @Override

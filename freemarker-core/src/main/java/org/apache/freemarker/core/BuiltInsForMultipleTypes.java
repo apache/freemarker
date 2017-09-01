@@ -25,8 +25,8 @@ import java.util.Date;
 
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateCollectionModelEx;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
@@ -171,7 +171,7 @@ class BuiltInsForMultipleTypes {
             }
     
             @Override
-            public boolean isEmpty() {
+            public boolean isEmptyHash() {
                 return false;
             }
     
@@ -261,21 +261,21 @@ class BuiltInsForMultipleTypes {
         }
     }
 
+    static class is_iterableBI extends ASTExpBuiltIn {
+        @Override
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel tm = target.eval(env);
+            target.assertNonNull(tm, env);
+            return (tm instanceof TemplateIterableModel) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
+        }
+    }
+
     static class is_collectionBI extends ASTExpBuiltIn {
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
             return (tm instanceof TemplateCollectionModel) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
-        }
-    }
-
-    static class is_collection_exBI extends ASTExpBuiltIn {
-        @Override
-        TemplateModel _eval(Environment env) throws TemplateException {
-            TemplateModel tm = target.eval(env);
-            target.assertNonNull(tm, env);
-            return (tm instanceof TemplateCollectionModelEx) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
 
@@ -317,16 +317,6 @@ class BuiltInsForMultipleTypes {
         }
     }
 
-    static class is_enumerableBI extends ASTExpBuiltIn {
-        @Override
-        TemplateModel _eval(Environment env) throws TemplateException {
-            TemplateModel tm = target.eval(env);
-            target.assertNonNull(tm, env);
-            return (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)
-                    ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
-        }
-    }
-
     static class is_hash_exBI extends ASTExpBuiltIn {
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
@@ -342,15 +332,6 @@ class BuiltInsForMultipleTypes {
             TemplateModel tm = target.eval(env);
             target.assertNonNull(tm, env);
             return (tm instanceof TemplateHashModel) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
-        }
-    }
-
-    static class is_indexableBI extends ASTExpBuiltIn {
-        @Override
-        TemplateModel _eval(Environment env) throws TemplateException {
-            TemplateModel tm = target.eval(env);
-            target.assertNonNull(tm, env);
-            return (tm instanceof TemplateSequenceModel) ? TemplateBooleanModel.TRUE : TemplateBooleanModel.FALSE;
         }
     }
 
@@ -434,21 +415,15 @@ class BuiltInsForMultipleTypes {
             TemplateModel model = target.eval(env);
 
             final int size;
-            if (model instanceof TemplateSequenceModel) {
-                size = ((TemplateSequenceModel) model).size();
-            } else if (model instanceof TemplateCollectionModelEx) {
-                size = ((TemplateCollectionModelEx) model).size();
+            if (model instanceof TemplateCollectionModel) {
+                size = ((TemplateCollectionModel) model).getCollectionSize();
             } else if (model instanceof TemplateHashModelEx) {
-                size = ((TemplateHashModelEx) model).size();
+                size = ((TemplateHashModelEx) model).getHashSize();
             } else {
                 throw MessageUtils.newUnexpectedOperandTypeException(
                         target, model,
-                        "extended-hash or sequence or extended collection",
-                        new Class[] {
-                                TemplateHashModelEx.class,
-                                TemplateSequenceModel.class,
-                                TemplateCollectionModelEx.class
-                        },
+                        "collection (like a sequence) or extended-hash",
+                        new Class[] { TemplateCollectionModel.class, TemplateHashModelEx.class },
                         null,
                         env);
             }
@@ -557,7 +532,7 @@ class BuiltInsForMultipleTypes {
             }
     
             @Override
-            public boolean isEmpty() {
+            public boolean isEmptyHash() {
                 return false;
             }
         }
@@ -608,7 +583,7 @@ class BuiltInsForMultipleTypes {
             }
     
             @Override
-            public boolean isEmpty() {
+            public boolean isEmptyHash() {
                 return false;
             }
         }

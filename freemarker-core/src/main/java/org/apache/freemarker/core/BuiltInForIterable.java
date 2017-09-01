@@ -16,31 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- 
-package org.apache.freemarker.dom;
 
-import org.apache.freemarker.core.model.TemplateStringModel;
-import org.w3c.dom.CharacterData;
-import org.w3c.dom.Comment;
+package org.apache.freemarker.core;
 
-class CharacterDataNodeModel extends NodeModel implements TemplateStringModel {
-    
-    public CharacterDataNodeModel(CharacterData text) {
-        super(text);
-    }
-    
+import org.apache.freemarker.core.model.TemplateIterableModel;
+import org.apache.freemarker.core.model.TemplateModel;
+
+abstract class BuiltInForIterable extends ASTExpBuiltIn {
+
     @Override
-    public String getAsString() {
-        return ((org.w3c.dom.CharacterData) node).getData();
+    TemplateModel _eval(Environment env)
+            throws TemplateException {
+        TemplateModel model = target.eval(env);
+        if (!(model instanceof TemplateIterableModel)) {
+            throw MessageUtils.newUnexpectedOperandTypeException(
+                    target, model,
+                    MessageUtils.EXPECTED_TYPE_ITERABLE_DESC,
+                    TemplateIterableModel.class,
+                    null, env);
+        }
+        return calculateResult((TemplateIterableModel) model);
     }
-    
-    @Override
-    public String getNodeName() {
-        return (node instanceof Comment) ? "@comment" : "@text";
-    }
-    
-    @Override
-    public boolean isEmptyHash() {
-        return true;
-    }
+
+    abstract TemplateModel calculateResult(TemplateIterableModel model) throws TemplateException;
+
 }

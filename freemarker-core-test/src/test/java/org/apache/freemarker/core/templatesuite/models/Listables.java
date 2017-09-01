@@ -32,14 +32,14 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrappingException;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultMapAdapter;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.SimpleCollection;
+import org.apache.freemarker.core.model.impl.SimpleIterable;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 
 import com.google.common.collect.ImmutableMap;
@@ -162,23 +162,23 @@ public class Listables {
         }
         
         @Override
-        public boolean isEmpty() {
+        public boolean isEmptyHash() {
             return map.isEmpty();
         }
         
         @Override
-        public int size() {
+        public int getHashSize() {
             return map.size();
         }
         
         @Override
-        public TemplateCollectionModel keys() {
-            return new SimpleCollection(map.keySet(), getObjectWrapper());
+        public TemplateIterableModel keys() {
+            return new SimpleIterable(map.keySet(), getObjectWrapper());
         }
         
         @Override
-        public TemplateCollectionModel values() {
-            return new SimpleCollection(map.values(), getObjectWrapper());
+        public TemplateIterableModel values() {
+            return new SimpleIterable(map.values(), getObjectWrapper());
         }
         
     }

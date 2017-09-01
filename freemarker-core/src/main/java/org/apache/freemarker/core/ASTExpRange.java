@@ -55,7 +55,7 @@ final class ASTExpRange extends ASTExpression {
                     begin, endType != END_SIZE_LIMITED ? lhoValue : begin + lhoValue,
                     endType == END_INCLUSIVE, endType == END_SIZE_LIMITED); 
         } else {
-            return new ListableRightUnboundedRangeModel(begin);
+            return new RightUnboundedRangeModel(begin);
         }
     }
 

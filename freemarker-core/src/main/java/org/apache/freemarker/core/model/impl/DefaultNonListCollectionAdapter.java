@@ -27,7 +27,7 @@ import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
-import org.apache.freemarker.core.model.TemplateCollectionModelEx;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
@@ -36,7 +36,7 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
 
 /**
  * Adapts a non-{@link List} Java {@link Collection} to the corresponding {@link TemplateModel} interface(s), most
- * importantly to {@link TemplateCollectionModelEx}. For {@link List}-s, use {@link DefaultListAdapter}, or else you
+ * importantly to {@link TemplateCollectionModel}. For {@link List}-s, use {@link DefaultListAdapter}, or else you
  * lose indexed element access.
  * 
  * <p>
@@ -44,7 +44,7 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
  * is. Normally you only have to consider read-only access, as the FreeMarker template language doesn't allow writing
  * these collections (though of course, Java methods called from the template can violate this rule).
  */
-public class DefaultNonListCollectionAdapter extends WrappingTemplateModel implements TemplateCollectionModelEx,
+public class DefaultNonListCollectionAdapter extends WrappingTemplateModel implements TemplateCollectionModel,
         AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport {
 
     private final Collection collection;
@@ -69,16 +69,16 @@ public class DefaultNonListCollectionAdapter extends WrappingTemplateModel imple
 
     @Override
     public TemplateModelIterator iterator() throws TemplateException {
-        return new DefaultUnassignableIteratorAdapter(collection.iterator(), getObjectWrapper());
+        return new IteratorToTemplateModelIteratorAdapter(collection.iterator(), getObjectWrapper());
     }
 
     @Override
-    public int size() {
+    public int getCollectionSize() {
         return collection.size();
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyCollection() {
         return collection.isEmpty();
     }
 

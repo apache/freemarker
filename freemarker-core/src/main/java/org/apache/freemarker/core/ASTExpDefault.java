@@ -20,49 +20,75 @@
 package org.apache.freemarker.core;
 
 
-import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateHashModelEx;
+import org.apache.freemarker.core.model.TemplateHashModelEx2;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 
 /** {@code exp!defExp}, {@code (exp)!defExp} and the same two with {@code (exp)!}. */
 class ASTExpDefault extends ASTExpression {
-	
-	static private class EmptyStringAndSequence
-	  implements TemplateStringModel, TemplateSequenceModel, TemplateHashModelEx {
-		@Override
+
+    static private class EmptyStringAndSequenceAndHash implements TemplateStringModel, TemplateSequenceModel,
+            TemplateHashModelEx2 {
+        @Override
         public String getAsString() {
-			return "";
-		}
-		@Override
+            return "";
+        }
+
+        @Override
         public TemplateModel get(int i) {
-			return null;
-		}
-		@Override
+            return null;
+        }
+
+        @Override
+        public TemplateModelIterator iterator() {
+            return TemplateModelIterator.EMPTY_ITERATOR;
+        }
+
+        @Override
         public TemplateModel get(String s) {
-			return null;
-		}
-		@Override
-        public int size() {
-			return 0;
-		}
-		@Override
-        public boolean isEmpty() {
-			return true;
-		}
-		@Override
-        public TemplateCollectionModel keys() {
-			return TemplateCollectionModel.EMPTY_COLLECTION;
-		}
-		@Override
-        public TemplateCollectionModel values() {
-			return TemplateCollectionModel.EMPTY_COLLECTION;
-		}
-		
-	}
-	
-	static final TemplateModel EMPTY_STRING_AND_SEQUENCE = new EmptyStringAndSequence();
+            return null;
+        }
+
+        @Override
+        public int getCollectionSize() {
+            return 0;
+        }
+
+        @Override
+        public boolean isEmptyCollection() throws TemplateException {
+            return true;
+        }
+
+        @Override
+        public int getHashSize() throws TemplateException {
+            return 0;
+        }
+
+        @Override
+        public boolean isEmptyHash() {
+            return true;
+        }
+
+        @Override
+        public TemplateIterableModel keys() {
+            return TemplateIterableModel.EMPTY_ITERABLE;
+        }
+
+        @Override
+        public TemplateIterableModel values() {
+            return TemplateIterableModel.EMPTY_ITERABLE;
+        }
+
+        @Override
+        public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
+            return KeyValuePairIterator.EMPTY_KEY_VALUE_PAIR_ITERATOR;
+        }
+    }
+
+    static final TemplateModel EMPTY_STRING_AND_SEQUENCE_AND_HASH = new EmptyStringAndSequenceAndHash();
 	
 	private final ASTExpression lho, rho;
 	
@@ -88,7 +114,7 @@ class ASTExpDefault extends ASTExpression {
 		}
 		
 		if (left != null) return left;
-		else if (rho == null) return EMPTY_STRING_AND_SEQUENCE;
+		else if (rho == null) return EMPTY_STRING_AND_SEQUENCE_AND_HASH;
 		else return rho.eval(env);
 	}
 

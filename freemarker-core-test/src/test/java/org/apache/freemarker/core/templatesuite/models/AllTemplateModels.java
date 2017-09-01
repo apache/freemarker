@@ -23,7 +23,7 @@ import java.util.Date;
 
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -38,45 +38,28 @@ import org.apache.freemarker.core.model.impl.SimpleString;
  */
 public class AllTemplateModels implements
         TemplateStringModel, TemplateNumberModel, TemplateDateModel, TemplateBooleanModel,
-        TemplateHashModelEx, TemplateSequenceModel, TemplateCollectionModel {
+        TemplateHashModelEx, TemplateSequenceModel, TemplateIterableModel {
 
     public static final AllTemplateModels INSTANCE = new AllTemplateModels();
-    
-    private final TemplateModelIterator EMPTY_ITERATOR = new TemplateModelIterator() {
 
-        @Override
-        public TemplateModel next() throws TemplateException {
-            return null;
-        }
-
-        @Override
-        public boolean hasNext() throws TemplateException {
-            return false;
-        }
-        
-    };
-    
-    private final TemplateCollectionModel EMPTY_COLLECTION = new TemplateCollectionModel() {
-
-        @Override
-        public TemplateModelIterator iterator() throws TemplateException {
-            return EMPTY_ITERATOR;
-        }
-    };
-    
     @Override
     public TemplateModel get(String key) throws TemplateException {
         return new SimpleString("value for key " + key);
     }
 
     @Override
-    public boolean isEmpty() throws TemplateException {
+    public boolean isEmptyHash() throws TemplateException {
         return true;
     }
 
     @Override
+    public int getHashSize() throws TemplateException {
+        return 0;
+    }
+
+    @Override
     public TemplateModelIterator iterator() throws TemplateException {
-        return EMPTY_ITERATOR;
+        return TemplateModelIterator.EMPTY_ITERATOR;
     }
 
     @Override
@@ -85,18 +68,23 @@ public class AllTemplateModels implements
     }
 
     @Override
-    public int size() throws TemplateException {
+    public int getCollectionSize() throws TemplateException {
         return 0;
     }
 
     @Override
-    public TemplateCollectionModel keys() throws TemplateException {
-        return EMPTY_COLLECTION;
+    public boolean isEmptyCollection() throws TemplateException {
+        return true;
     }
 
     @Override
-    public TemplateCollectionModel values() throws TemplateException {
-        return EMPTY_COLLECTION;
+    public TemplateIterableModel keys() throws TemplateException {
+        return EMPTY_ITERABLE;
+    }
+
+    @Override
+    public TemplateIterableModel values() throws TemplateException {
+        return EMPTY_ITERABLE;
     }
 
     @Override

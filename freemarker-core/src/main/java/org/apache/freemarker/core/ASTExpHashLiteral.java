@@ -24,11 +24,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.ListIterator;
 
-import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.impl.CollectionAndSequence;
+import org.apache.freemarker.core.model.impl.IterableAndSequence;
 
 /**
  * AST expression node: <tt>{ keyExp: valueExp, ... }</tt> 
@@ -108,7 +108,7 @@ final class ASTExpHashLiteral extends ASTExpression {
     private class LinkedHash implements TemplateHashModelEx2 {
 
         private HashMap<String, TemplateModel> map;
-        private TemplateCollectionModel keyCollection, valueCollection; // ordered lists of keys and values
+        private TemplateIterableModel keyCollection, valueCollection; // ordered lists of keys and values
 
         LinkedHash(Environment env) throws TemplateException {
             map = new LinkedHashMap<>();
@@ -123,22 +123,22 @@ final class ASTExpHashLiteral extends ASTExpression {
         }
 
         @Override
-        public int size() {
+        public int getHashSize() {
             return size;
         }
 
         @Override
-        public TemplateCollectionModel keys() {
+        public TemplateIterableModel keys() {
             if (keyCollection == null) {
-                keyCollection = new CollectionAndSequence(new NativeStringCollectionCollectionEx(map.keySet()));
+                keyCollection = new IterableAndSequence(new NativeStringCollectionCollection(map.keySet()));
             }
             return keyCollection;
         }
 
         @Override
-        public TemplateCollectionModel values() {
+        public TemplateIterableModel values() {
             if (valueCollection == null) {
-                valueCollection = new CollectionAndSequence(new NativeCollectionEx(map.values()));
+                valueCollection = new IterableAndSequence(new NativeCollection(map.values()));
             }
             return valueCollection;
         }
@@ -149,7 +149,7 @@ final class ASTExpHashLiteral extends ASTExpression {
         }
 
         @Override
-        public boolean isEmpty() {
+        public boolean isEmptyHash() {
             return size == 0;
         }
         

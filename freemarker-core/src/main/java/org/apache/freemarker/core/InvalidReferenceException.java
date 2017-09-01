@@ -65,7 +65,7 @@ public class InvalidReferenceException extends TemplateException {
     private static final String TIP_JSP_TAGLIBS =
             "The \"JspTaglibs\" variable isn't a core FreeMarker feature; "
             + "it's only available when templates are invoked through org.apache.freemarker.servlet.FreemarkerServlet"
-            + " (or other custom FreeMarker-JSP integration solution).";
+            + " (or through some other custom FreeMarker-JSP integration solution).";
     
     /**
      * Creates and invalid reference exception that contains no information about what was missing or null.

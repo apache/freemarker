@@ -16,31 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
- 
-package org.apache.freemarker.dom;
 
-import org.apache.freemarker.core.model.TemplateStringModel;
-import org.w3c.dom.CharacterData;
-import org.w3c.dom.Comment;
+package org.apache.freemarker.core.model.impl;
 
-class CharacterDataNodeModel extends NodeModel implements TemplateStringModel {
-    
-    public CharacterDataNodeModel(CharacterData text) {
-        super(text);
-    }
-    
-    @Override
-    public String getAsString() {
-        return ((org.w3c.dom.CharacterData) node).getData();
-    }
-    
-    @Override
-    public String getNodeName() {
-        return (node instanceof Comment) ? "@comment" : "@text";
-    }
-    
-    @Override
-    public boolean isEmptyHash() {
-        return true;
+import java.util.Set;
+
+import org.apache.freemarker.core.model.TemplateCollectionModel;
+
+// TODO [FM3] There's no TemplateSetModel, but we need to be able to do something like obj.needsASet([1, 2, 3]). But,
+// TemplateCollectionModel doesn't guarantee that the items are unique.
+class TemplateSetModelAdapter<T> extends TemplateCollectionModelAdapter<T> implements Set<T> {
+    TemplateSetModelAdapter(TemplateCollectionModel model, DefaultObjectWrapper wrapper) {
+        super(model, wrapper);
     }
 }

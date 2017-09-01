@@ -19,14 +19,30 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.util.Set;
-
-import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelIterator;
 
 /**
+ * {@link TemplateModelIterator} for the special case when you have exactly one element.
  */
-class SetAdapter extends CollectionAdapter implements Set {
-    SetAdapter(TemplateCollectionModel model, DefaultObjectWrapper wrapper) {
-        super(model, wrapper);
+public class SingleItemTemplateModelIterator implements TemplateModelIterator {
+
+    private final TemplateModel element;
+    private boolean hasNext;
+
+    public SingleItemTemplateModelIterator(TemplateModel element) {
+        this.element = element;
+    }
+
+    @Override
+    public TemplateModel next() throws TemplateException {
+        hasNext = false;
+        return element;
+    }
+
+    @Override
+    public boolean hasNext() throws TemplateException {
+        return hasNext;
     }
 }

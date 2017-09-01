@@ -24,6 +24,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
@@ -75,7 +76,7 @@ public class MultiModel1 implements TemplateHashModel,
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyHash() {
         return false;
     }
 
@@ -90,7 +91,18 @@ public class MultiModel1 implements TemplateHashModel,
     }
 
     @Override
-    public int size() throws TemplateException {
-        return m_cListModel.size();
+    public int getCollectionSize() throws TemplateException {
+        return m_cListModel.getCollectionSize();
     }
+
+    @Override
+    public boolean isEmptyCollection() throws TemplateException {
+        return m_cListModel.isEmptyCollection();
+    }
+
+    @Override
+    public TemplateModelIterator iterator() throws TemplateException {
+        return m_cListModel.iterator();
+    }
+
 }

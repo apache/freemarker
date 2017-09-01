@@ -31,16 +31,16 @@ import java.util.Date;
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.CollectionAndSequence;
+import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.model.impl.SequenceTemplateModelIterator;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.model.impl.TemplateModelListSequence;
@@ -48,7 +48,7 @@ import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._StringUtils;
 
 /**
- * A holder for builtins that operate exclusively on sequence or collection left-hand value.
+ * A holder for builtins that operate on sequence (or some even on iterable) left-hand value.
  */
 class BuiltInsForSequences {
     
@@ -66,7 +66,9 @@ class BuiltInsForSequences {
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
                 int chunkSize = getNumberArgument(args, 0, this).intValue();
-
+                if (chunkSize < 1) {
+                    newArgumentValueException(0, "The value must be at least 1", this);
+                }
                 return new ChunkedSequence(tsm, chunkSize, args[1]);
             }
 
@@ -89,19 +91,16 @@ class BuiltInsForSequences {
             private ChunkedSequence(
                     TemplateSequenceModel wrappedTsm, int chunkSize, TemplateModel fillerItem)
                     throws TemplateException {
-                if (chunkSize < 1) {
-                    throw new TemplateException("The 1st argument to ?', key, ' (...) must be at least 1.");
-                }
                 this.wrappedTsm = wrappedTsm;
                 this.chunkSize = chunkSize;
                 this.fillerItem = fillerItem;
-                numberOfChunks = (wrappedTsm.size() + chunkSize - 1) / chunkSize; 
+                numberOfChunks = (wrappedTsm.getCollectionSize() + chunkSize - 1) / chunkSize;
             }
 
             @Override
             public TemplateModel get(final int chunkIndex)
                     throws TemplateException {
-                if (chunkIndex >= numberOfChunks) {
+                if (chunkIndex >= numberOfChunks || chunkIndex < 0) {
                     return null;
                 }
                 
@@ -110,33 +109,51 @@ class BuiltInsForSequences {
                     private final int baseIndex = chunkIndex * chunkSize;
 
                     @Override
-                    public TemplateModel get(int relIndex)
-                            throws TemplateException {
+                    public TemplateModel get(int relIndex) throws TemplateException {
+                        if (relIndex < 0) {
+                            return null;
+                        }
                         int absIndex = baseIndex + relIndex;
-                        if (absIndex < wrappedTsm.size()) {
+                        if (absIndex < wrappedTsm.getCollectionSize()) {
                             return wrappedTsm.get(absIndex);
                         } else {
-                            return absIndex < numberOfChunks * chunkSize
-                                ? fillerItem
-                                : null;
+                            return absIndex < numberOfChunks * chunkSize ? fillerItem : null;
                         }
                     }
 
                     @Override
-                    public int size() throws TemplateException {
+                    public int getCollectionSize() throws TemplateException {
                         return fillerItem != null || chunkIndex + 1 < numberOfChunks
                                 ? chunkSize
-                                : wrappedTsm.size() - baseIndex;
+                                : wrappedTsm.getCollectionSize() - baseIndex;
                     }
-                    
+
+                    @Override
+                    public boolean isEmptyCollection() throws TemplateException {
+                        return getCollectionSize() == 0;
+                    }
+
+                    @Override
+                    public TemplateModelIterator iterator() throws TemplateException {
+                        return new SequenceTemplateModelIterator(this);
+                    }
                 };
             }
 
             @Override
-            public int size() throws TemplateException {
+            public int getCollectionSize() throws TemplateException {
                 return numberOfChunks;
             }
-            
+
+            @Override
+            public boolean isEmptyCollection() throws TemplateException {
+                return numberOfChunks == 0;
+            }
+
+            @Override
+            public TemplateModelIterator iterator() throws TemplateException {
+                return new SequenceTemplateModelIterator(this);
+            }
         }
         
         @Override
@@ -146,56 +163,27 @@ class BuiltInsForSequences {
         
     }
     
-    static class firstBI extends ASTExpBuiltIn {
+    static class firstBI extends BuiltInForIterable {
         
         @Override
-        TemplateModel _eval(Environment env)
-                throws TemplateException {
-            TemplateModel model = target.eval(env);
-            // In 2.3.x only, we prefer TemplateSequenceModel for
-            // backward compatibility. In 2.4.x, we prefer TemplateCollectionModel. 
-            if (model instanceof TemplateSequenceModel) {
-                return calculateResultForSequence((TemplateSequenceModel) model);
-            } else if (model instanceof TemplateCollectionModel) {
-                return calculateResultForColletion((TemplateCollectionModel) model);
-            } else {
-                throw MessageUtils.newUnexpectedOperandTypeException(
-                        target, model,
-                        MessageUtils.SEQUENCE_OR_COLLECTION,
-                        MessageUtils.EXPECTED_TYPES_SEQUENCE_OR_COLLECTION,
-                        null, env);
-            }
-        }        
-        
-        private TemplateModel calculateResultForSequence(TemplateSequenceModel seq)
-        throws TemplateException {
-            if (seq.size() == 0) {
-                return null;
-            }
-            return seq.get(0);
-        }
-        
-        private TemplateModel calculateResultForColletion(TemplateCollectionModel coll)
-        throws TemplateException {
-            TemplateModelIterator iter = coll.iterator();
+        TemplateModel calculateResult(TemplateIterableModel model) throws TemplateException {
+            TemplateModelIterator iter = model.iterator();
             if (!iter.hasNext()) {
                 return null;
             }
             return iter.next();
         }
-        
+
     }
 
-    static class joinBI extends ASTExpBuiltIn {
+    static class joinBI extends BuiltInForIterable {
         
-        private class BIMethodForCollection extends BuiltInCallableImpl implements TemplateFunctionModel {
+        private class BIMethodForIterable extends BuiltInCallableImpl implements TemplateFunctionModel {
             
-            private final Environment env;
-            private final TemplateCollectionModel coll;
+            private final TemplateIterableModel iterable;
 
-            private BIMethodForCollection(Environment env, TemplateCollectionModel coll) {
-                this.env = env;
-                this.coll = coll;
+            private BIMethodForIterable(TemplateIterableModel iterable) {
+                this.iterable = iterable;
             }
 
             @Override
@@ -207,7 +195,7 @@ class BuiltInsForSequences {
 
                 StringBuilder sb = new StringBuilder();
 
-                TemplateModelIterator it = coll.iterator();
+                TemplateModelIterator it = iterable.iterator();
 
                 int idx = 0;
                 boolean hadItem = false;
@@ -247,23 +235,12 @@ class BuiltInsForSequences {
         }
 
         @Override
-        TemplateModel _eval(Environment env) throws TemplateException {
-            TemplateModel model = target.eval(env);
-            if (model instanceof TemplateCollectionModel) {
-                if (model instanceof RightUnboundedRangeModel) {
-                    throw new TemplateException(
-                            "The sequence to join was right-unbounded numerical range, thus it's infinitely long.");
-                }
-                return new BIMethodForCollection(env, (TemplateCollectionModel) model);
-            } else if (model instanceof TemplateSequenceModel) {
-                return new BIMethodForCollection(env, new CollectionAndSequence((TemplateSequenceModel) model));
-            } else {
-                throw MessageUtils.newUnexpectedOperandTypeException(
-                        target, model,
-                        MessageUtils.SEQUENCE_OR_COLLECTION,
-                        MessageUtils.EXPECTED_TYPES_SEQUENCE_OR_COLLECTION,
-                        null, env);
+        TemplateModel calculateResult(TemplateIterableModel model) throws TemplateException {
+            if (model instanceof RightUnboundedRangeModel) {
+                throw new TemplateException(
+                        "The sequence to join was right-unbounded numerical range, thus it's infinitely long.");
             }
+            return new BIMethodForIterable((TemplateIterableModel) model);
         }
    
     }
@@ -272,10 +249,11 @@ class BuiltInsForSequences {
         @Override
         TemplateModel calculateResult(TemplateSequenceModel tsm)
         throws TemplateException {
-            if (tsm.size() == 0) {
+            int size = tsm.getCollectionSize();
+            if (size == 0) {
                 return null;
             }
-            return tsm.get(tsm.size() - 1);
+            return tsm.get(size - 1);
         }
     }
 
@@ -289,12 +267,22 @@ class BuiltInsForSequences {
 
             @Override
             public TemplateModel get(int index) throws TemplateException {
-                return seq.get(seq.size() - 1 - index);
+                return seq.get(seq.getCollectionSize() - 1 - index);
             }
 
             @Override
-            public int size() throws TemplateException {
-                return seq.size();
+            public int getCollectionSize() throws TemplateException {
+                return seq.getCollectionSize();
+            }
+
+            @Override
+            public boolean isEmptyCollection() throws TemplateException {
+                return seq.isEmptyCollection();
+            }
+
+            @Override
+            public TemplateModelIterator iterator() throws TemplateException {
+                return new SequenceTemplateModelIterator(this);
             }
         }
 
@@ -308,25 +296,24 @@ class BuiltInsForSequences {
         }
     }
 
-    static class seq_containsBI extends ASTExpBuiltIn {
-        private class BIMethodForCollection extends BuiltInCallableImpl implements TemplateFunctionModel {
-            private TemplateCollectionModel m_coll;
-            private Environment m_env;
+    static class seq_containsBI extends BuiltInForIterable {
+        private class BIMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
+            private TemplateIterableModel iterable;
 
-            private BIMethodForCollection(TemplateCollectionModel coll, Environment env) {
-                m_coll = coll;
-                m_env = env;
+            private BIMethod(TemplateIterableModel coll) {
+                iterable = coll;
             }
 
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
                 TemplateModel arg = args[0];
-                TemplateModelIterator it = m_coll.iterator();
+                TemplateModelIterator it = iterable.iterator();
                 int idx = 0;
                 while (it.hasNext()) {
-                    if (modelsEqual(idx, it.next(), arg, m_env))
+                    if (modelsEqual(idx, it.next(), arg, env)) {
                         return TemplateBooleanModel.TRUE;
+                    }
                     idx++;
                 }
                 return TemplateBooleanModel.FALSE;
@@ -339,111 +326,38 @@ class BuiltInsForSequences {
 
         }
 
-        private class BIMethodForSequence extends BuiltInCallableImpl implements TemplateFunctionModel {
-            private TemplateSequenceModel m_seq;
-            private Environment m_env;
-
-            private BIMethodForSequence(TemplateSequenceModel seq, Environment env) {
-                m_seq = seq;
-                m_env = env;
-            }
-
-            @Override
-            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
-                    throws TemplateException {
-                TemplateModel arg = args[0];
-                int size = m_seq.size();
-                for (int i = 0; i < size; i++) {
-                    if (modelsEqual(i, m_seq.get(i), arg, m_env))
-                        return TemplateBooleanModel.TRUE;
-                }
-                return TemplateBooleanModel.FALSE;
-            }
-
-            @Override
-            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
-                return ArgumentArrayLayout.SINGLE_POSITIONAL_PARAMETER;
-            }
-
-        }
-    
         @Override
-        TemplateModel _eval(Environment env)
-                throws TemplateException {
-            TemplateModel model = target.eval(env);
-            // In 2.3.x only, we prefer TemplateSequenceModel for
-            // backward compatibility. In 2.4.x, we prefer TemplateCollectionModel. 
-            if (model instanceof TemplateSequenceModel) {
-                return new BIMethodForSequence((TemplateSequenceModel) model, env);
-            } else if (model instanceof TemplateCollectionModel) {
-                return new BIMethodForCollection((TemplateCollectionModel) model, env);
-            } else {
-                throw MessageUtils.newUnexpectedOperandTypeException(
-                        target, model,
-                        MessageUtils.SEQUENCE_OR_COLLECTION,
-                        MessageUtils.EXPECTED_TYPES_SEQUENCE_OR_COLLECTION,
-                        null, env);
-            }
+        TemplateModel calculateResult(TemplateIterableModel model) throws TemplateException  {
+            return new BIMethod((TemplateIterableModel) model);
         }
     
     }
     
-    static class seq_index_ofBI extends ASTExpBuiltIn {
+    static class seq_index_ofBI extends BuiltInForIterable {
         
         private class BIMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
             
-            final TemplateSequenceModel m_seq;
-            final TemplateCollectionModel m_col;
-            final Environment m_env;
+            final TemplateIterableModel iterable;
 
-            private BIMethod(Environment env)
+            private BIMethod(TemplateIterableModel iterable)
                     throws TemplateException {
-                TemplateModel model = target.eval(env);
-                m_seq = model instanceof TemplateSequenceModel
-                        ? (TemplateSequenceModel) model
-                        : null;
-                // [FM3] Rework the below
-                // In 2.3.x only, we deny the possibility of collection
-                // access if there's sequence access. This is so to minimize
-                // the change of compatibility issues; without this, objects
-                // that implement both the sequence and collection interfaces
-                // would suddenly start using the collection interface, and if
-                // that's buggy that would surface now, breaking the application
-                // that despite its bugs has worked earlier.
-                m_col = m_seq == null && model instanceof TemplateCollectionModel
-                        ? (TemplateCollectionModel) model
-                        : null;
-                if (m_seq == null && m_col == null) {
-                    throw MessageUtils.newUnexpectedOperandTypeException(
-                            target, model,
-                            MessageUtils.SEQUENCE_OR_COLLECTION,
-                            MessageUtils.EXPECTED_TYPES_SEQUENCE_OR_COLLECTION,
-                            null, env);
-                }
-                
-                m_env = env;
+                this.iterable = iterable;
             }
 
             @Override
             public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
-                TemplateModel target = args[0];
-                Number startIndex = getOptionalNumberArgument(args, 1, this);
+                TemplateModel searched = args[0];
+                Integer startIndex = getOptionalIntArgument(args, 1, this);
                 int foundAtIdx;
                 if (startIndex != null) {
-                    // TODO [FM3] Prefer Col?
-                    // In 2.3.x only, we prefer TemplateSequenceModel for
-                    // backward compatibility:
-                    foundAtIdx = m_seq != null
-                            ? findInSeq(target, startIndex.intValue())
-                            : findInCol(target, startIndex.intValue());
+                    foundAtIdx = iterable instanceof TemplateSequenceModel
+                            ? findInSeq(searched, (TemplateSequenceModel) iterable, startIndex, env)
+                            : findInIter(searched, startIndex, env);
                 } else {
-                    // TODO [FM3] Prefer Col?
-                    // In 2.3.x only, we prefer TemplateSequenceModel for
-                    // backward compatibility:
-                    foundAtIdx = m_seq != null
-                            ? findInSeq(target)
-                            : findInCol(target);
+                    foundAtIdx = iterable instanceof TemplateSequenceModel
+                            ? findInSeq(searched, (TemplateSequenceModel) iterable, env)
+                            : findInIter(searched, env);
                 }
                 return foundAtIdx == -1 ? TemplateNumberModel.MINUS_ONE : new SimpleNumber(foundAtIdx);
             }
@@ -453,37 +367,41 @@ class BuiltInsForSequences {
                 return ArgumentArrayLayout.TWO_POSITIONAL_PARAMETERS;
             }
 
-            int findInCol(TemplateModel target) throws TemplateException {
-                return findInCol(target, 0, Integer.MAX_VALUE);
+            int findInIter(TemplateModel searched, Environment env) throws TemplateException {
+                return findInIter(searched, 0, Integer.MAX_VALUE, env);
             }
             
-            int findInCol(TemplateModel target, int startIndex)
+            int findInIter(TemplateModel searched, int startIndex, Environment env)
                     throws TemplateException {
-                if (m_dir == 1) {
-                    return findInCol(target, startIndex, Integer.MAX_VALUE);
+                if (findFirst) {
+                    return findInIter(searched, startIndex, Integer.MAX_VALUE, env);
                 } else {
-                    return findInCol(target, 0, startIndex);
+                    return findInIter(searched, 0, startIndex, env);
                 }
             }
         
-            int findInCol(TemplateModel target,
-                    final int allowedRangeStart, final int allowedRangeEnd)
+            int findInIter(TemplateModel searched,
+                    final int allowedRangeStart, final int allowedRangeEnd, Environment env)
                     throws TemplateException {
                 if (allowedRangeEnd < 0) return -1;
                 
-                TemplateModelIterator it = m_col.iterator();
+                TemplateModelIterator it = iterable.iterator();
                 
                 int foundAtIdx = -1;  // -1 is the return value for "not found"
                 int idx = 0; 
                 searchItem: while (it.hasNext()) {
-                    if (idx > allowedRangeEnd) break searchItem;
+                    if (idx > allowedRangeEnd) {
+                        break searchItem;
+                    }
                     
                     TemplateModel current = it.next();
                     if (idx >= allowedRangeStart) {
-                        if (modelsEqual(idx, current, target, m_env)) {
+                        if (modelsEqual(idx, current, searched, env)) {
                             foundAtIdx = idx;
-                            if (m_dir == 1) break searchItem; // "find first"
-                            // Otherwise it's "find last".
+                            // Don't stop if it's "find last".
+                            if (findFirst) {
+                                break searchItem;
+                            }
                         }
                     }
                     idx++;
@@ -491,25 +409,26 @@ class BuiltInsForSequences {
                 return foundAtIdx;
             }
 
-            int findInSeq(TemplateModel target)
+            int findInSeq(TemplateModel searched, TemplateSequenceModel seq, Environment env)
                     throws TemplateException {
-                final int seqSize = m_seq.size();
+                final int seqSize = seq.getCollectionSize();
                 final int actualStartIndex;
-                
-                if (m_dir == 1) {
+
+                if (findFirst) {
                     actualStartIndex = 0;
                 } else {
                     actualStartIndex = seqSize - 1;
                 }
-            
-                return findInSeq(target, actualStartIndex, seqSize); 
+
+                return findInSeq(searched, seq, actualStartIndex, seqSize, env);
             }
 
-            private int findInSeq(TemplateModel target, int startIndex)
+            private int findInSeq(
+                    TemplateModel searched, TemplateSequenceModel seq, int startIndex, Environment env)
                     throws TemplateException {
-                int seqSize = m_seq.size();
+                int seqSize = seq.getCollectionSize();
                 
-                if (m_dir == 1) {
+                if (findFirst) {
                     if (startIndex >= seqSize) {
                         return -1;
                     }
@@ -525,19 +444,19 @@ class BuiltInsForSequences {
                     }
                 }
                 
-                return findInSeq(target, startIndex, seqSize); 
+                return findInSeq(searched, seq, startIndex, seqSize, env);
             }
             
             private int findInSeq(
-                    TemplateModel target, int scanStartIndex, int seqSize)
+                    TemplateModel searched, TemplateSequenceModel seq, int scanStartIndex, int seqSize, Environment env)
                     throws TemplateException {
-                if (m_dir == 1) {
+                if (findFirst) {
                     for (int i = scanStartIndex; i < seqSize; i++) {
-                        if (modelsEqual(i, m_seq.get(i), target, m_env)) return i;
+                        if (modelsEqual(i, seq.get(i), searched, env)) return i;
                     }
                 } else {
                     for (int i = scanStartIndex; i >= 0; i--) {
-                        if (modelsEqual(i, m_seq.get(i), target, m_env)) return i;
+                        if (modelsEqual(i, seq.get(i), searched, env)) return i;
                     }
                 }
                 return -1;
@@ -545,16 +464,15 @@ class BuiltInsForSequences {
             
         }
 
-        private int m_dir;
+        private boolean findFirst;
 
-        seq_index_ofBI(int dir) {
-            m_dir = dir;
+        seq_index_ofBI(boolean findFirst) {
+            this.findFirst = findFirst;
         }
 
         @Override
-        TemplateModel _eval(Environment env)
-                throws TemplateException {
-            return new BIMethod(env);
+        TemplateModel calculateResult(TemplateIterableModel model) throws TemplateException {
+            return new BIMethod(model);
         }
     }
 
@@ -567,7 +485,8 @@ class BuiltInsForSequences {
             }
 
             @Override
-            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+            public TemplateModel execute(
+                    TemplateModel[] args, CallPlace callPlace, Environment env)
                     throws TemplateException {
                 String[] subvars;
                 TemplateModel obj = args[0];
@@ -575,10 +494,11 @@ class BuiltInsForSequences {
                     subvars = new String[] { ((TemplateStringModel) obj).getAsString() };
                 } else if (obj instanceof TemplateSequenceModel) {
                     TemplateSequenceModel seq = (TemplateSequenceModel) obj;
-                    int ln = seq.size();
+                    int ln = seq.getCollectionSize();
                     subvars = new String[ln];
+                    TemplateModelIterator iter = seq.iterator();
                     for (int i = 0; i < ln; i++) {
-                        TemplateModel item = seq.get(i);
+                        TemplateModel item = iter.next();
                         if (!(item instanceof TemplateStringModel)) {
                             throw new TemplateException(
                                     "The argument to ?", key, "(key), when it's a sequence, must be a "
@@ -711,7 +631,7 @@ class BuiltInsForSequences {
          */
         static TemplateSequenceModel sort(TemplateSequenceModel seq, String[] keyNames)
                 throws TemplateException {
-            int ln = seq.size();
+            int ln = seq.getCollectionSize();
             if (ln == 0) return seq;
             
             ArrayList res = new ArrayList(ln);
@@ -721,8 +641,9 @@ class BuiltInsForSequences {
             // Copy the Seq into a Java List[KVP] (also detects key type at the 1st item):
             int keyType = KEY_TYPE_NOT_YET_DETECTED;
             Comparator keyComparator = null;
+            TemplateModelIterator iter = seq.iterator();
             for (int i = 0; i < ln; i++) {
-                final TemplateModel item = seq.get(i);
+                final TemplateModel item = iter.next();
                 TemplateModel key = item;
                 for (int keyNameI = 0; keyNameI < keyNamesLn; keyNameI++) {
                     try {
@@ -757,8 +678,7 @@ class BuiltInsForSequences {
                     } else if (key instanceof TemplateNumberModel) {
                         keyType = KEY_TYPE_NUMBER;
                         keyComparator = new NumericalKVPComparator(
-                                Environment.getCurrentEnvironment()
-                                        .getArithmeticEngine());
+                                Environment.getCurrentEnvironment().getArithmeticEngine());
                     } else if (key instanceof TemplateDateModel) {
                         keyType = KEY_TYPE_DATE;
                         keyComparator = new DateKVPComparator();
@@ -877,8 +797,7 @@ class BuiltInsForSequences {
     }
 
     private static boolean modelsEqual(
-            int seqItemIndex, TemplateModel seqItem, TemplateModel searchedItem,
-            Environment env)
+            int seqItemIndex, TemplateModel seqItem, TemplateModel searchedItem, Environment env)
             throws TemplateException {
         try {
             return _EvalUtils.compare(
@@ -894,7 +813,7 @@ class BuiltInsForSequences {
                     " to the searched item:\n", new _DelayedGetMessage(ex));
         }
     }
- 
+
     // Can't be instantiated
     private BuiltInsForSequences() { }
     

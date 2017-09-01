@@ -23,7 +23,7 @@ import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.impl.DefaultNonListCollectionAdapter;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.ResourceBundleModel;
-import org.apache.freemarker.core.model.impl.SimpleCollection;
+import org.apache.freemarker.core.model.impl.SimpleIterable;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.templatesuite.models.BooleanAndStringTemplateModel;
@@ -158,10 +158,10 @@ public class CoreTemplateTestSuite extends TemplateTestSuite {
         } else if (simpleTestName.equals("stringbimethods")) {
             dataModel.put("multi", new TestBoolean());
         } else if (simpleTestName.startsWith("type-builtins")) {
-            dataModel.put("testfunction", new SimpleTestFunction());
-            dataModel.put("testnode", new TestNode());
-            dataModel.put("testcollection", new SimpleCollection(new ArrayList<>(), dow));
-            dataModel.put("testcollectionEx", DefaultNonListCollectionAdapter.adapt(new HashSet<>(), dow));
+            dataModel.put("testFunction", new SimpleTestFunction());
+            dataModel.put("testNode", new TestNode());
+            dataModel.put("testIterable", new SimpleIterable(new ArrayList<>(), dow));
+            dataModel.put("testCollection", DefaultNonListCollectionAdapter.adapt(new HashSet<>(), dow));
             dataModel.put("bean", new TestBean());
         } else if (simpleTestName.equals("date-type-builtins")) {
             GregorianCalendar cal = new GregorianCalendar(2003, 4 - 1, 5, 6, 7, 8);
@@ -197,7 +197,7 @@ public class CoreTemplateTestSuite extends TemplateTestSuite {
             listWithNull.add(null);
             dataModel.put("listWithNullsOnly", listWithNullsOnly);
 
-            dataModel.put("abcCollection", new SimpleCollection(abcSet, dow));
+            dataModel.put("abcCollection", new SimpleIterable(abcSet, dow));
 
             Set<String> set = new HashSet<>();
             set.add("a");

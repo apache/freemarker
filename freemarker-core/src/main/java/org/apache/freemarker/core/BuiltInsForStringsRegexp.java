@@ -27,12 +27,12 @@ import java.util.regex.Pattern;
 
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.model.impl.SequenceTemplateModelIterator;
 import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util._StringUtils;
 
@@ -152,8 +152,7 @@ class BuiltInsForStringsRegexp {
     
     // Represents the match
   
-    static class RegexMatchModel 
-    implements TemplateBooleanModel, TemplateCollectionModel, TemplateSequenceModel {
+    static class RegexMatchModel implements TemplateBooleanModel, TemplateSequenceModel {
         static class MatchWithGroups implements TemplateStringModel {
             final String matchedInputPart;
             final String[] groups;
@@ -172,15 +171,14 @@ class BuiltInsForStringsRegexp {
                 return matchedInputPart;
             }
         }
+
         final Pattern pattern;
-        
         final String input;
+
         private Matcher firedEntireInputMatcher;
         private Boolean entireInputMatched;
-        
         private TemplateSequenceModel entireInputMatchGroups;
-        
-        private ArrayList matchingInputParts;
+        private ArrayList<TemplateModel> matchingInputParts;
         
         RegexMatchModel(Pattern pattern, String input) {
             this.pattern = pattern;
@@ -189,17 +187,34 @@ class BuiltInsForStringsRegexp {
         
         @Override
         public TemplateModel get(int i) throws TemplateException {
-            ArrayList matchingInputParts = this.matchingInputParts;
+            if (i < 0) {
+                return  null;
+            }
+            ArrayList<TemplateModel> matchingInputParts = this.matchingInputParts;
             if (matchingInputParts == null) {
                 matchingInputParts = getMatchingInputPartsAndStoreResults();
             }
-            return (TemplateModel) matchingInputParts.get(i);
+            return i < matchingInputParts.size() ? matchingInputParts.get(i) : null;
         }
-        
+
+        @Override
+        public int getCollectionSize() throws TemplateException {
+            ArrayList<TemplateModel> matchingInputParts = this.matchingInputParts;
+            if (matchingInputParts == null) {
+                matchingInputParts = getMatchingInputPartsAndStoreResults();
+            }
+            return matchingInputParts.size();
+        }
+
+        @Override
+        public boolean isEmptyCollection() throws TemplateException {
+            return getCollectionSize() == 0;
+        }
+
         @Override
         public boolean getAsBoolean() {
             Boolean result = entireInputMatched;
-            return result != null ? result.booleanValue() : isEntrieInputMatchesAndStoreResults();
+            return result != null ? result : isEntireInputMatchesAndStoreResults();
         }
         
         TemplateModel getGroups() {
@@ -207,7 +222,7 @@ class BuiltInsForStringsRegexp {
            if (entireInputMatchGroups == null) {
                Matcher t = firedEntireInputMatcher;
                if (t == null) {
-                   isEntrieInputMatchesAndStoreResults();
+                   isEntireInputMatchesAndStoreResults();
                    t = firedEntireInputMatcher;
                }
                final Matcher firedEntireInputMatcher = t;
@@ -217,8 +232,7 @@ class BuiltInsForStringsRegexp {
                     @Override
                     public TemplateModel get(int i) throws TemplateException {
                         try {
-                            // Avoid IndexOutOfBoundsException:
-                            if (i > firedEntireInputMatcher.groupCount()) {
+                            if (i < 0 || i > firedEntireInputMatcher.groupCount()) {
                                 return null;
                             }
 
@@ -229,22 +243,27 @@ class BuiltInsForStringsRegexp {
                     }
                     
                     @Override
-                    public int size() throws TemplateException {
-                        try {
-                            return firedEntireInputMatcher.groupCount() + 1;
-                        } catch (Exception e) {
-                            throw new TemplateException("Failed to get regular expression match group count", e);
-                        }
+                    public int getCollectionSize() throws TemplateException {
+                        return firedEntireInputMatcher.groupCount() + 1;
                     }
-                    
+
+                    @Override
+                    public boolean isEmptyCollection() throws TemplateException {
+                        return getCollectionSize() == 0;
+                    }
+
+                    @Override
+                    public TemplateModelIterator iterator() throws TemplateException {
+                        return new SequenceTemplateModelIterator(this);
+                    }
                 };
                 this.entireInputMatchGroups = entireInputMatchGroups;
             }
             return entireInputMatchGroups;
         }
         
-        private ArrayList getMatchingInputPartsAndStoreResults() throws TemplateException {
-            ArrayList matchingInputParts = new ArrayList();
+        private ArrayList<TemplateModel> getMatchingInputPartsAndStoreResults() throws TemplateException {
+            ArrayList<TemplateModel> matchingInputParts = new ArrayList<>();
             
             Matcher matcher = pattern.matcher(input);
             while (matcher.find()) {
@@ -255,17 +274,17 @@ class BuiltInsForStringsRegexp {
             return matchingInputParts;
         }
         
-        private boolean isEntrieInputMatchesAndStoreResults() {
+        private boolean isEntireInputMatchesAndStoreResults() {
             Matcher matcher = pattern.matcher(input);
             boolean matches = matcher.matches();
             firedEntireInputMatcher = matcher;
-            entireInputMatched = Boolean.valueOf(matches);
+            entireInputMatched = matches;
             return matches;
         }
         
         @Override
         public TemplateModelIterator iterator() {
-            final ArrayList matchingInputParts = this.matchingInputParts;
+            final ArrayList<TemplateModel> matchingInputParts = this.matchingInputParts;
             if (matchingInputParts == null) {
                 final Matcher matcher = pattern.matcher(input);
                 return new TemplateModelIterator() {
@@ -275,7 +294,7 @@ class BuiltInsForStringsRegexp {
                     
                     @Override
                     public boolean hasNext() {
-                        final ArrayList matchingInputParts = RegexMatchModel.this.matchingInputParts;
+                        final ArrayList<TemplateModel> matchingInputParts = RegexMatchModel.this.matchingInputParts;
                         if (matchingInputParts == null) {
                             return hasFindInfo;
                         } else {
@@ -285,7 +304,7 @@ class BuiltInsForStringsRegexp {
                     
                     @Override
                     public TemplateModel next() throws TemplateException {
-                        final ArrayList matchingInputParts = RegexMatchModel.this.matchingInputParts;
+                        final ArrayList<TemplateModel> matchingInputParts = RegexMatchModel.this.matchingInputParts;
                         if (matchingInputParts == null) {
                             if (!hasFindInfo) {
                                 throw new TemplateException("There were no more regular expression matches");
@@ -295,11 +314,7 @@ class BuiltInsForStringsRegexp {
                             hasFindInfo = matcher.find();
                             return result;
                         } else {
-                            try {
-                                return (TemplateModel) matchingInputParts.get(nextIdx++);
-                            } catch (IndexOutOfBoundsException e) {
-                                throw new TemplateException("There were no more regular expression matches", e);
-                            }
+                            return matchingInputParts.get(nextIdx++);
                         }
                     }
                     
@@ -316,24 +331,12 @@ class BuiltInsForStringsRegexp {
                     
                     @Override
                     public TemplateModel next() throws TemplateException {
-                        try {
-                            return (TemplateModel) matchingInputParts.get(nextIdx++);
-                        } catch (IndexOutOfBoundsException e) {
-                            throw new TemplateException("There were no more regular expression matches", e);
-                        }
+                        return matchingInputParts.get(nextIdx++);
                     }
                 };
             }
         }
         
-        @Override
-        public int size() throws TemplateException {
-            ArrayList matchingInputParts = this.matchingInputParts;
-            if (matchingInputParts == null) {
-                matchingInputParts = getMatchingInputPartsAndStoreResults();
-            }
-            return matchingInputParts.size();
-        }
     }
 
     // Can't be instantiated

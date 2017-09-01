@@ -25,6 +25,7 @@ import java.util.Collection;
 
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 
 /**
@@ -49,25 +50,53 @@ class NativeSequence implements TemplateSequenceModel, Serializable {
         this.items.addAll(items);
     }
 
-    public void add(TemplateModel tm) {
+    void add(TemplateModel tm) {
         items.add(tm);
     }
 
-    public void addAll(Collection<TemplateModel> items) {
+    void addAll(Collection<TemplateModel> items) {
         this.items.addAll(items);
     }
 
-    public void clear() {
+    void clear() {
         items.clear();
     }
 
     @Override
     public TemplateModel get(int index) throws TemplateException {
-        return items.get(index);
+        return index < items.size() && index >= 0 ? items.get(index) : null;
     }
 
     @Override
-    public int size() throws TemplateException {
+    public int getCollectionSize() throws TemplateException {
         return items.size();
+    }
+
+    @Override
+    public boolean isEmptyCollection() throws TemplateException {
+        return items.isEmpty();
+    }
+
+    /**
+     * Do not call when you will still add items to the sequence!
+     *
+     * {@inheritDoc}
+     */
+    @Override
+    public TemplateModelIterator iterator() throws TemplateException {
+        return new TemplateModelIterator() {
+            private int nextIndex = 0;
+            private final int size = items.size();
+
+            @Override
+            public TemplateModel next() throws TemplateException {
+                return items.get(nextIndex++);
+            }
+
+            @Override
+            public boolean hasNext() throws TemplateException {
+                return nextIndex < size;
+            }
+        };
     }
 }

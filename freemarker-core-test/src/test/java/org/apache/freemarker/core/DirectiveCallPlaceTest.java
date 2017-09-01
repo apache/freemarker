@@ -231,7 +231,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
         public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
                 throws TemplateException, IOException {
             TemplateHashModelEx2 varargs = (TemplateHashModelEx2) args[ARGS_LAYOUT.getNamedVarargsArgumentIndex()];
-            if (varargs.size() > 0) {
+            if (varargs.getHashSize() > 0) {
                 out.write("(p=");
                 out.write(((TemplateStringModel) varargs.get("p")).getAsString());
                 out.write(")");

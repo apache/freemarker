@@ -48,7 +48,7 @@ public final class ServletContextHashModel implements TemplateHashModel {
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyHash() {
         return !servletctx.getAttributeNames().hasMoreElements();
     }
     

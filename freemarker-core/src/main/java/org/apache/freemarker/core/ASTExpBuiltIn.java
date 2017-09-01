@@ -121,8 +121,8 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("int", new intBI());
         putBI("interpret", new BuiltInsForStringsMisc.interpretBI());
         putBI("isBoolean", new BuiltInsForMultipleTypes.is_booleanBI());
+        putBI("isIterable", new BuiltInsForMultipleTypes.is_iterableBI());
         putBI("isCollection", new BuiltInsForMultipleTypes.is_collectionBI());
-        putBI("isCollectionEx", new BuiltInsForMultipleTypes.is_collection_exBI());
         is_dateLikeBI bi = new BuiltInsForMultipleTypes.is_dateLikeBI();
         putBI("isDate", bi);  // misnomer
         putBI("isDateLike", bi);
@@ -133,11 +133,9 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("isUnknownDateLike", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.UNKNOWN));
         putBI("isDatetime", new BuiltInsForMultipleTypes.is_dateOfTypeBI(TemplateDateModel.DATE_TIME));
         putBI("isDirective", new BuiltInsForMultipleTypes.is_directiveBI());
-        putBI("isEnumerable", new BuiltInsForMultipleTypes.is_enumerableBI());
         putBI("isHashEx", new BuiltInsForMultipleTypes.is_hash_exBI());
         putBI("isHash", new BuiltInsForMultipleTypes.is_hashBI());
         putBI("isInfinite", new is_infiniteBI());
-        putBI("isIndexable", new BuiltInsForMultipleTypes.is_indexableBI());
         putBI("isMarkupOutput", new BuiltInsForMultipleTypes.is_markup_outputBI());
         putBI("isFunction", new BuiltInsForMultipleTypes.is_functionBI());
         putBI("isNan", new is_nanBI());
@@ -250,8 +248,8 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("removeBeginning", new BuiltInsForStringsBasic.remove_beginningBI());
         putBI("rtf", new BuiltInsForStringsEncoding.rtfBI());
         putBI("seqContains", new seq_containsBI());
-        putBI("seqIndexOf", new seq_index_ofBI(1));
-        putBI("seqLastIndexOf", new seq_index_ofBI(-1));
+        putBI("seqIndexOf", new seq_index_ofBI(true));
+        putBI("seqLastIndexOf", new seq_index_ofBI(false));
         putBI("short", new shortBI());
         putBI("size", new BuiltInsForMultipleTypes.sizeBI());
         putBI("sortBy", new sort_byBI());

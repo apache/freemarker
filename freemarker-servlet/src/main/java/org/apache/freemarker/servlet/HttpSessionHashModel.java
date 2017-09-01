@@ -108,7 +108,7 @@ public final class HttpSessionHashModel implements TemplateHashModel, Serializab
     }
 
     @Override
-    public boolean isEmpty() throws TemplateException {
+    public boolean isEmptyHash() throws TemplateException {
         checkSessionExistence();
         return session == null || !session.getAttributeNames().hasMoreElements();
     }

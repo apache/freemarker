@@ -44,7 +44,7 @@ class AttributeNodeModel extends NodeModel implements TemplateStringModel {
     }
     
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyHash() {
         return true;
     }
     

@@ -151,7 +151,7 @@ class BuiltInsForStringsMisc {
             if (model instanceof TemplateSequenceModel) {
                 sourceExpr = ((ASTExpression) new ASTExpDynamicKeyName(target, new ASTExpNumberLiteral(0))
                         .copyLocationFrom(target));
-                if (((TemplateSequenceModel) model).size() > 1) {
+                if (((TemplateSequenceModel) model).getCollectionSize() > 1) {
                     id = ((ASTExpression) new ASTExpDynamicKeyName(target, new ASTExpNumberLiteral(1))
                             .copyLocationFrom(target)).evalAndCoerceToPlainText(env);
                 }
@@ -168,7 +168,6 @@ class BuiltInsForStringsMisc {
             
             final Template interpretedTemplate;
             try {
-                ParsingConfiguration pCfg = parentTemplate.getParsingConfiguration();
                 // pCfg.outputFormat+autoEscapingPolicy is exceptional: it's inherited from the lexical context
                 interpretedTemplate = new Template(
                         (parentTemplate.getLookupName() != null ? parentTemplate.getLookupName() : "nameless_template") + "->" + id,

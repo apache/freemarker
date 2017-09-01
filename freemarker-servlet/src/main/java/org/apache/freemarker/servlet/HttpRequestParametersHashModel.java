@@ -27,10 +27,10 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.impl.SimpleCollection;
+import org.apache.freemarker.core.model.impl.SimpleIterable;
 import org.apache.freemarker.core.model.impl.SimpleString;
 
 /**
@@ -54,24 +54,24 @@ public class HttpRequestParametersHashModel implements TemplateHashModelEx {
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyHash() {
         return !request.getParameterNames().hasMoreElements();
     }
     
     @Override
-    public int size() {
+    public int getHashSize() {
         return getKeys().size();
     }
     
     @Override
-    public TemplateCollectionModel keys() {
-        return new SimpleCollection(getKeys().iterator(), objectWrapper);
+    public TemplateIterableModel keys() {
+        return new SimpleIterable(getKeys().iterator(), objectWrapper);
     }
     
     @Override
-    public TemplateCollectionModel values() {
+    public TemplateIterableModel values() {
         final Iterator iter = getKeys().iterator();
-        return new SimpleCollection(
+        return new SimpleIterable(
             new Iterator() {
                 @Override
                 public boolean hasNext() {
