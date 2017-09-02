@@ -223,6 +223,9 @@ Major changes / features
   - `isEmpty` of FM2 `TemplateCollectionModelEx` (now `TemplateCollectionModel`) and FM2 `TemplateHashModel` was renamed
     to `isEmptyCollection` and `isEmptyHash`, so that for multi-typed values can give different results depending on the
     type. Also, for collections `size()` was renamed to `getCollectionSize()`, and for hashes `getHashSize()`.
+  - `TemplateHashModelEx.keys()` and `values()` returns `TemplateCollectoinModel`, just as in FM2, but in FM3
+    `TemplateCollectoinModel` has `getCollectionSize()` and `isEmptyCollection` method. So this affects
+    `TemplateHashModelEx` implementations as well.
 - Removed freemarker.ext.log, our log abstraction layer from the times when there was no clear winner on this field.
   Added org.slf4j:slf4j-api as required dependency instead.
 - Added Spring support to the FreeMarker project (freemarker-spring module), instead of relying Spring developers

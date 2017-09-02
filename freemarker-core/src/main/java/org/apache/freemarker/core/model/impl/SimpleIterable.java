@@ -21,6 +21,7 @@ package org.apache.freemarker.core.model.impl;
 
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
@@ -31,15 +32,15 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
 
 /**
  * A simple implementation of {@link TemplateIterableModel}.
- * It's able to wrap <tt>java.util.Iterator</tt>-s and <tt>java.util.Collection</tt>-s.
- * If you wrap an <tt>Iterator</tt>, the variable can be &lt;#list&gt;-ed only once!
+ * It's able to wrap {@link Iterable}-s and {@link Iterator}-s.
+ * If you wrap an {@link Iterator}, the variable can be &lt;#list&gt;-ed only once!
  *
- * <p>Consider using {@link SimpleSequence} instead of this class if you want to wrap <tt>Iterator</tt>s.
- * <tt>SimpleSequence</tt> will read all elements of the <tt>Iterator</tt>, and store them in a <tt>List</tt>
+ * <p>Consider using {@link SimpleSequence} instead of this class if you want to wrap {@link Iterator}-s.
+ * {@link SimpleSequence} will read all elements of the {@link Iterator}, and store them in a {@link List}
  * (this may cause too high resource consumption in some applications), so you can list the variable
- * for unlimited times. Also, if you want to wrap <tt>Collection</tt>s, and then list the resulting
- * variable for many times, <tt>SimpleSequence</tt> may gives better performance, as the
- * wrapping of non-<tt>TemplateModel</tt> objects happens only once.
+ * for unlimited times. Also, if you want to wrap {@link Iterable}-s, and then list the resulting
+ * variable for many times, {@link SimpleSequence} may gives better performance, as the
+ * wrapping of non-{@link TemplateModel} objects happens only once.
  *
  * <p>This class is thread-safe. The returned {@link TemplateModelIterator}-s
  * are <em>not</em> thread-safe.

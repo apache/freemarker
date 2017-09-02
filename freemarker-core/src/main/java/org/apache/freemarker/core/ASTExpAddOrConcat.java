@@ -23,9 +23,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
@@ -284,15 +284,13 @@ final class ASTExpAddOrConcat extends ASTExpression {
         }
 
         @Override
-        public TemplateIterableModel keys()
-        throws TemplateException {
+        public TemplateCollectionModel keys() throws TemplateException {
             initKeys();
             return keys;
         }
 
         @Override
-        public TemplateIterableModel values()
-        throws TemplateException {
+        public TemplateCollectionModel values() throws TemplateException {
             initValues();
             return values;
         }

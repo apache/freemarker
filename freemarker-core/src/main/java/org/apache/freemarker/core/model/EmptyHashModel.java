@@ -31,13 +31,13 @@ class EmptyHashModel implements TemplateHashModelEx2, Serializable {
     }
 
     @Override
-    public TemplateIterableModel keys() throws TemplateException {
-        return TemplateIterableModel.EMPTY_ITERABLE;
+    public TemplateCollectionModel keys() throws TemplateException {
+        return TemplateCollectionModel.EMPTY_COLLECTION;
     }
 
     @Override
-    public TemplateIterableModel values() throws TemplateException {
-        return TemplateIterableModel.EMPTY_ITERABLE;
+    public TemplateCollectionModel values() throws TemplateException {
+        return TemplateCollectionModel.EMPTY_COLLECTION;
     }
 
     @Override

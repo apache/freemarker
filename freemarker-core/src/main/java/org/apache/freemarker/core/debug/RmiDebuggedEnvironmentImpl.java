@@ -38,11 +38,11 @@ import org.apache.freemarker.core.MutableProcessingConfiguration;
 import org.apache.freemarker.core.ProcessingConfiguration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.TemplateIterableModel;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.SimpleIterable;
+import org.apache.freemarker.core.model.impl.SimpleCollection;
 import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 
@@ -133,19 +133,19 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
         }
 
         @Override
-        public TemplateIterableModel keys() {
-            return new SimpleIterable(keySet(), OBJECT_WRAPPER);
+        public TemplateCollectionModel keys() {
+            return new SimpleCollection(keySet(), OBJECT_WRAPPER);
         }
 
         @Override
-        public TemplateIterableModel values() throws TemplateException {
+        public TemplateCollectionModel values() throws TemplateException {
             Collection keys = keySet();
             List list = new ArrayList(keys.size());
             
             for (Iterator it = keys.iterator(); it.hasNext(); ) {
                 list.add(get((String) it.next()));
             }
-            return new SimpleIterable(list, OBJECT_WRAPPER);
+            return new SimpleCollection(list, OBJECT_WRAPPER);
         }
 
         @Override

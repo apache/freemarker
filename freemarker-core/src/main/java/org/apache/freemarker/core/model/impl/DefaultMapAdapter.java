@@ -27,7 +27,7 @@ import org.apache.freemarker.core._DelayedJQuote;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
-import org.apache.freemarker.core.model.TemplateIterableModel;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -66,7 +66,7 @@ public class DefaultMapAdapter extends WrappingTemplateModel
         return new DefaultMapAdapter(map, wrapper);
     }
     
-    private DefaultMapAdapter(Map map, ObjectWrapper wrapper) {
+    private DefaultMapAdapter(Map map, ObjectWrapperWithAPISupport wrapper) {
         super(wrapper);
         this.map = map;
     }
@@ -134,13 +134,13 @@ public class DefaultMapAdapter extends WrappingTemplateModel
     }
 
     @Override
-    public TemplateIterableModel keys() {
-        return new SimpleIterable(map.keySet(), getObjectWrapper());
+    public TemplateCollectionModel keys() {
+        return DefaultNonListCollectionAdapter.adapt(map.keySet(), (ObjectWrapperWithAPISupport) getObjectWrapper());
     }
 
     @Override
-    public TemplateIterableModel values() {
-        return new SimpleIterable(map.values(), getObjectWrapper());
+    public TemplateCollectionModel values() {
+        return DefaultNonListCollectionAdapter.adapt(map.values(), (ObjectWrapperWithAPISupport) getObjectWrapper());
     }
 
     @Override

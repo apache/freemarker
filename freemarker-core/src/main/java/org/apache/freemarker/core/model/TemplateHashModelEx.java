@@ -41,11 +41,11 @@ public interface TemplateHashModelEx extends TemplateHashModel {
      * @return a iterable returning the keys in the hash. Every element of the returned by the iterable must implement
      * the {@link TemplateStringModel} (as the keys of hashes are always strings).
      */
-    TemplateIterableModel keys() throws TemplateException;
+    TemplateCollectionModel keys() throws TemplateException;
 
     /**
      * @return An iterable returning the values in the hash. The elements returned by the iterable can be any kind of
      * {@link TemplateModel}-s.
      */
-    TemplateIterableModel values() throws TemplateException;
+    TemplateCollectionModel values() throws TemplateException;
 }

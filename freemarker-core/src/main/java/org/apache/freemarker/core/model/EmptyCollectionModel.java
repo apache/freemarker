@@ -25,6 +25,10 @@ import org.apache.freemarker.core.TemplateException;
 
 class EmptyCollectionModel implements TemplateCollectionModel, Serializable {
 
+    public EmptyCollectionModel() {
+
+    }
+
     @Override
     public int getCollectionSize() throws TemplateException {
         return 0;

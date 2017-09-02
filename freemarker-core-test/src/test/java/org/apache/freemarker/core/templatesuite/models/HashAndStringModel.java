@@ -20,8 +20,8 @@
 package org.apache.freemarker.core.templatesuite.models;
 
 import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.SimpleString;
@@ -51,13 +51,13 @@ public class HashAndStringModel implements TemplateHashModelEx, TemplateStringMo
     }
 
     @Override
-    public TemplateIterableModel keys() throws TemplateException {
-        return TemplateIterableModel.EMPTY_ITERABLE;
+    public TemplateCollectionModel keys() throws TemplateException {
+        return TemplateCollectionModel.EMPTY_COLLECTION;
     }
 
     @Override
-    public TemplateIterableModel values() throws TemplateException {
-        return TemplateIterableModel.EMPTY_ITERABLE;
+    public TemplateCollectionModel values() throws TemplateException {
+        return TemplateCollectionModel.EMPTY_COLLECTION;
     }
 
 }

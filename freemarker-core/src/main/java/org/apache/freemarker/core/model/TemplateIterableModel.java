@@ -39,7 +39,7 @@ import org.apache.freemarker.core.TemplateException;
  */
 public interface TemplateIterableModel extends TemplateModel {
 
-    TemplateCollectionModel EMPTY_ITERABLE = new EmptyCollectionModel();
+    TemplateIterableModel EMPTY_ITERABLE = new EmptyIterableModel();
 
     /**
      * Retrieves an iterator that is used to iterate over the elements of something.

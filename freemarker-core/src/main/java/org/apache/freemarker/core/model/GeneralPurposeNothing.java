@@ -98,13 +98,13 @@ implements TemplateBooleanModel, TemplateStringModel, TemplateSequenceModel, Tem
     }
 
     @Override
-    public TemplateIterableModel keys() {
-        return TemplateIterableModel.EMPTY_ITERABLE;
+    public TemplateCollectionModel keys() {
+        return TemplateCollectionModel.EMPTY_COLLECTION;
     }
 
     @Override
-    public TemplateIterableModel values() {
-        return TemplateIterableModel.EMPTY_ITERABLE;
+    public TemplateCollectionModel values() {
+        return TemplateCollectionModel.EMPTY_COLLECTION;
     }
 
     @Override

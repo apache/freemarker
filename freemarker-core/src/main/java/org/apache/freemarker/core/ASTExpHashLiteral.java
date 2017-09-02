@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.ListIterator;
 
-import org.apache.freemarker.core.model.TemplateIterableModel;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
@@ -108,7 +108,7 @@ final class ASTExpHashLiteral extends ASTExpression {
     private class LinkedHash implements TemplateHashModelEx2 {
 
         private HashMap<String, TemplateModel> map;
-        private TemplateIterableModel keyCollection, valueCollection; // ordered lists of keys and values
+        private TemplateCollectionModel keyCollection, valueCollection; // ordered lists of keys and values
 
         LinkedHash(Environment env) throws TemplateException {
             map = new LinkedHashMap<>();
@@ -128,7 +128,7 @@ final class ASTExpHashLiteral extends ASTExpression {
         }
 
         @Override
-        public TemplateIterableModel keys() {
+        public TemplateCollectionModel keys() {
             if (keyCollection == null) {
                 keyCollection = new IterableAndSequence(new NativeStringCollectionCollection(map.keySet()));
             }
@@ -136,7 +136,7 @@ final class ASTExpHashLiteral extends ASTExpression {
         }
 
         @Override
-        public TemplateIterableModel values() {
+        public TemplateCollectionModel values() {
             if (valueCollection == null) {
                 valueCollection = new IterableAndSequence(new NativeCollection(map.values()));
             }

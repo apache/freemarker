@@ -30,7 +30,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core._DelayedJQuote;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateIterableModel;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -277,17 +277,18 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
     }
 
     @Override
-    public TemplateIterableModel keys() {
-        return new SimpleIterable(map.keySet(), getObjectWrapper());
+    public TemplateCollectionModel keys() {
+        return new SimpleCollection(map.keySet(), getObjectWrapper());
     }
 
     @Override
-    public TemplateIterableModel values() {
-        return new SimpleIterable(map.values(), getObjectWrapper());
+    public TemplateCollectionModel values() {
+        return new SimpleCollection(map.values(), getObjectWrapper());
     }
 
     @Override
     public KeyValuePairIterator keyValuePairIterator() {
         return new MapKeyValuePairIterator(map, getObjectWrapper());
     }
+
 }

@@ -48,7 +48,7 @@ import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateCallableModel;
-import org.apache.freemarker.core.model.TemplateIterableModel;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
@@ -59,8 +59,8 @@ import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithOriginName;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateResolver;
@@ -2229,12 +2229,12 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                 // configuration shared variables even though
                 // the hash will return them, if only for BWC reasons
                 @Override
-                public TemplateIterableModel values() throws TemplateException {
+                public TemplateCollectionModel values() throws TemplateException {
                     return ((TemplateHashModelEx) rootDataModel).values();
                 }
 
                 @Override
-                public TemplateIterableModel keys() throws TemplateException {
+                public TemplateCollectionModel keys() throws TemplateException {
                     return ((TemplateHashModelEx) rootDataModel).keys();
                 }
 
@@ -2866,13 +2866,13 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         }
 
         @Override
-        public TemplateIterableModel keys() {
+        public TemplateCollectionModel keys() {
             ensureInitializedRTE();
             return super.keys();
         }
 
         @Override
-        public TemplateIterableModel values() {
+        public TemplateCollectionModel values() {
             ensureInitializedRTE();
             return super.values();
         }

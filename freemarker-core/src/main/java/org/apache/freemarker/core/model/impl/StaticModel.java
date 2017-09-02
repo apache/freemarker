@@ -27,7 +27,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.TemplateIterableModel;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -94,13 +94,13 @@ final class StaticModel implements TemplateHashModelEx {
     }
     
     @Override
-    public TemplateIterableModel keys() throws TemplateException {
-        return (TemplateIterableModel) wrapper.getOuterIdentity().wrap(map.keySet());
+    public TemplateCollectionModel keys() throws TemplateException {
+        return (TemplateCollectionModel) wrapper.getOuterIdentity().wrap(map.keySet());
     }
     
     @Override
-    public TemplateIterableModel values() throws TemplateException {
-        return (TemplateIterableModel) wrapper.getOuterIdentity().wrap(map.values());
+    public TemplateCollectionModel values() throws TemplateException {
+        return (TemplateCollectionModel) wrapper.getOuterIdentity().wrap(map.values());
     }
 
     private void populate() throws TemplateException {

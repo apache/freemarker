@@ -28,10 +28,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
-import org.apache.freemarker.core.model.TemplateIterableModel;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.impl.SimpleIterable;
+import org.apache.freemarker.core.model.impl.SimpleCollection;
 
 /**
  * TemplateHashModel wrapper for a HttpServletRequest attributes.
@@ -77,21 +77,21 @@ public final class HttpRequestHashModel implements TemplateHashModelEx {
     }
     
     @Override
-    public TemplateIterableModel keys() {
+    public TemplateCollectionModel keys() {
         ArrayList keys = new ArrayList();
         for (Enumeration enumeration = request.getAttributeNames(); enumeration.hasMoreElements(); ) {
             keys.add(enumeration.nextElement());
         }
-        return new SimpleIterable(keys.iterator(), wrapper);
+        return new SimpleCollection(keys, wrapper);
     }
     
     @Override
-    public TemplateIterableModel values() {
+    public TemplateCollectionModel values() {
         ArrayList values = new ArrayList();
         for (Enumeration enumeration = request.getAttributeNames(); enumeration.hasMoreElements(); ) {
             values.add(request.getAttribute((String) enumeration.nextElement()));
         }
-        return new SimpleIterable(values.iterator(), wrapper);
+        return new SimpleCollection(values, wrapper);
     }
 
     public HttpServletRequest getRequest() {

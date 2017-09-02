@@ -20,8 +20,8 @@
 package org.apache.freemarker.core;
 
 
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
-import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
@@ -73,13 +73,13 @@ class ASTExpDefault extends ASTExpression {
         }
 
         @Override
-        public TemplateIterableModel keys() {
-            return TemplateIterableModel.EMPTY_ITERABLE;
+        public TemplateCollectionModel keys() {
+            return TemplateCollectionModel.EMPTY_COLLECTION;
         }
 
         @Override
-        public TemplateIterableModel values() {
-            return TemplateIterableModel.EMPTY_ITERABLE;
+        public TemplateCollectionModel values() {
+            return TemplateCollectionModel.EMPTY_COLLECTION;
         }
 
         @Override
@@ -88,7 +88,7 @@ class ASTExpDefault extends ASTExpression {
         }
     }
 
-    static final TemplateModel EMPTY_STRING_AND_SEQUENCE_AND_HASH = new EmptyStringAndSequenceAndHash();
+    private static final TemplateModel EMPTY_STRING_AND_SEQUENCE_AND_HASH = new EmptyStringAndSequenceAndHash();
 	
 	private final ASTExpression lho, rho;
 	

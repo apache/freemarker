@@ -21,24 +21,11 @@ package org.apache.freemarker.core.model;
 
 import org.apache.freemarker.core.TemplateException;
 
-/**
- * "collection" template language data type: Extends {@link TemplateIterableModel} with the ability to get the
- * whether there's any element, and the ability to get number of elements in the collection.
- */
-public interface TemplateCollectionModel extends TemplateIterableModel {
+class EmptyIterableModel implements TemplateIterableModel {
 
-    TemplateCollectionModel EMPTY_COLLECTION = new EmptyCollectionModel();
-
-    /**
-     * Returns the number items in this collection, or {@link Integer#MAX_VALUE}, if there are more than
-     * {@link Integer#MAX_VALUE} items.
-     */
-    int getCollectionSize() throws TemplateException;
-
-    /**
-     * Returns if the collection contains any elements. This differs from {@code getCollectionSize() != 0} only in that
-     * the exact number of items need not be calculated.
-     */
-    boolean isEmptyCollection() throws TemplateException;
+    @Override
+    public TemplateModelIterator iterator() throws TemplateException {
+        return TemplateModelIterator.EMPTY_ITERATOR;
+    }
 
 }

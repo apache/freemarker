@@ -25,7 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.TemplateIterableModel;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleString;
@@ -89,12 +89,12 @@ class NativeHashEx2 implements TemplateHashModelEx2, Serializable {
     }
 
     @Override
-    public TemplateIterableModel keys() throws TemplateException {
+    public TemplateCollectionModel keys() throws TemplateException {
         return new NativeStringCollectionCollection(map.keySet());
     }
 
     @Override
-    public TemplateIterableModel values() throws TemplateException {
+    public TemplateCollectionModel values() throws TemplateException {
         return new NativeCollection(map.values());
     }
 

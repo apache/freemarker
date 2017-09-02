@@ -23,14 +23,15 @@ import java.util.Date;
 
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateIterableModel;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.SimpleString;
 
 /**
@@ -78,13 +79,13 @@ public class AllTemplateModels implements
     }
 
     @Override
-    public TemplateIterableModel keys() throws TemplateException {
-        return EMPTY_ITERABLE;
+    public TemplateCollectionModel keys() throws TemplateException {
+        return EMPTY_COLLECTION;
     }
 
     @Override
-    public TemplateIterableModel values() throws TemplateException {
-        return EMPTY_ITERABLE;
+    public TemplateCollectionModel values() throws TemplateException {
+        return EMPTY_COLLECTION;
     }
 
     @Override

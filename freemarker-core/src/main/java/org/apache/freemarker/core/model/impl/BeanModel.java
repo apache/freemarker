@@ -37,7 +37,7 @@ import org.apache.freemarker.core._DelayedJQuote;
 import org.apache.freemarker.core._DelayedTemplateLanguageTypeDescription;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrappingException;
-import org.apache.freemarker.core.model.TemplateIterableModel;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -288,12 +288,12 @@ public class BeanModel
     }
 
     @Override
-    public TemplateIterableModel keys() {
+    public TemplateCollectionModel keys() {
         return new IterableAndSequence(DefaultNonListCollectionAdapter.adapt(keySet(), wrapper));
     }
 
     @Override
-    public TemplateIterableModel values() throws TemplateException {
+    public TemplateCollectionModel values() throws TemplateException {
         List<Object> values = new ArrayList<>(getHashSize());
         TemplateModelIterator it = keys().iterator();
         while (it.hasNext()) {
