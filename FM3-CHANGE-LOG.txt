@@ -198,34 +198,14 @@ Major changes / features
 - Configuration is now immutable. You should use Configuration.Builder to set up the setting values, then create
   the Configuration with the builder's build() method.
 - Configuration defaults were changed to follow the current best practices (like default charset is UTF-8 everywhere)
-- Reworked TemplateModel interfaces:
-  - Reworked callable `TemplateModel`-s (iterator.e., models that can be called like `foo(...)` or as `<@foo .../>`)
-    - Earlier there were several callable `TemplateModel` internfaces (`TemplateMethodModel`, `TemplateMethodModelEx`,
-      `TemplateDirectiveModel`, `TemplateTransformModel`). FM3 replaces them with only two new interfaces,
-      `TemplateDirectiveModel` (differs from the interface with identical name in FM2) and `TemplateFunctionModel`.
-      (These are both the subinterfaces of another new interface `TemplateCallableModel`.)
-    - All callable TemplateModel-s support passing parameters by position and by name, even in the same call
-      (e.g., `<@heading "Some title" icon="foo.jpg" />`, `sum(1, 2, 3, abs=true)`)
-    - `#macro` now produces a `TemplateDirectiveModel` and `#function` produces a `TemplateFunctionModel`. (Earlier, the
-      product was just a generic `TemplateModel` that could only be invoked using internal API-s, and had capabilities
-      that the callable TemplateModel-s coulnd't have.)
-  - Renamed `TemplateScalarModel` to `TemplateStringModel`. (The `TemplateScalarModel` name come from the early FM,
-    where strings, numbers, booleans, etc. weren't separated.)
-  - Renamed `TemplateCollectionModel` to `TemplateIterableModel`, and `TemplateCollectionModelEx` to
-    `TemplateCollectionModel`. (Since java.util.Iterable was added to Java, the TemplateCollectionModel
-    has become an unfortunate name, especailly as later TemplateCollectionModelEx was added, that was closer
-    to java.util.Collection than TemplateCollectionModel.)
-  - `TemplateSequenceModel` now extends `TemplateCollecitonModel`, and `#list` and other built-in mechanims prefer
-     using `iterator()` instead of an index loop.
-  - `TemplateModelIterator.next()` isn't required to handle anymore the case when there's no next item. If someone
-    doesn't check that with `hasNext()` before calling `next()`, anything can happen. This is to allow more efficient
-    implementations, which has become important now that `#list` and such prefers iterators over index loops.
-  - `isEmpty` of FM2 `TemplateCollectionModelEx` (now `TemplateCollectionModel`) and FM2 `TemplateHashModel` was renamed
-    to `isEmptyCollection` and `isEmptyHash`, so that for multi-typed values can give different results depending on the
-    type. Also, for collections `size()` was renamed to `getCollectionSize()`, and for hashes `getHashSize()`.
-  - `TemplateHashModelEx.keys()` and `values()` returns `TemplateCollectoinModel`, just as in FM2, but in FM3
-    `TemplateCollectoinModel` has `getCollectionSize()` and `isEmptyCollection` method. So this affects
-    `TemplateHashModelEx` implementations as well.
+- Reworked TemplateModel interfaces (see more details in the later sections):
+  - Callable `TemplateModel`-s (i.e., models that can be called like `foo(...)` or as `<@foo .../>`) were replaced by
+    `TemplateFunctionModel` and the reworked `TemplateDirectiveModel` interface. Both of these support padding arguments
+    by position and by name, even in the same call (e.g., `<@heading "Some title" icon="foo.jpg" />`, `sum(1, 2, 3, abs=true)`).
+    Because of the extended capabiliteis of this interface, callables defined inside templates (via `#function` and `#macro`)
+    are now just create `TemplateFunctionModel` and `TemplateDirectiveModel` objects.
+  - Listable TemplateModel-s and their intheriance hierarchy are now much more similar the Java collection API:
+    TemplateIterableModel > TemplateCollectionModel > TemplateSequenceModel [TODO: This last will be TemplateListModel].
 - Removed freemarker.ext.log, our log abstraction layer from the times when there was no clear winner on this field.
   Added org.slf4j:slf4j-api as required dependency instead.
 - Added Spring support to the FreeMarker project (freemarker-spring module), instead of relying Spring developers
@@ -409,10 +389,39 @@ Core / Models and Object wrapping
   method of the model couldn't throw that as `TemplateModelException` is more specific. Now it can. Also it's not very
   useful in practice to catch `TemplateModelException` and the more generic `TemplateException` separately, so this
   simplification was made.
-- `TemplateSequenceModel.get(int)` is now expected to actually return `null` for any invalid index. In FM2 this was
-  the documented expectation, but many implementaitons throw exception instead of returning `null`, but FreeMarker
-  has tolerated that.
-
+- Reworked TemplateModel interfaces:
+  - Reworked callable `TemplateModel`-s (i.e., models that can be called like `foo(...)` or as `<@foo .../>`)
+    - Earlier there were several callable `TemplateModel` internfaces (`TemplateMethodModel`, `TemplateMethodModelEx`,
+      `TemplateDirectiveModel`, `TemplateTransformModel`). FM3 replaces them with only two new interfaces,
+      `TemplateDirectiveModel` (differs from the interface with identical name in FM2) and `TemplateFunctionModel`.
+      (These are both the subinterfaces of another new interface `TemplateCallableModel`.)
+    - All callable TemplateModel-s support passing parameters by position and by name, even in the same call
+      (e.g., `<@heading "Some title" icon="foo.jpg" />`, `sum(1, 2, 3, abs=true)`)
+    - `#macro` now produces a `TemplateDirectiveModel` and `#function` produces a `TemplateFunctionModel`. (Earlier, the
+      product was just a generic `TemplateModel` that could only be invoked using internal API-s, and had capabilities
+      that the callable TemplateModel-s coulnd't have.)
+  - Renamed `TemplateScalarModel` to `TemplateStringModel`. (The `TemplateScalarModel` name come from the early FM,
+    where strings, numbers, booleans, etc. weren't separated.)
+  - Reworked the list-like TemplateModel interfaces: 
+    - Renamed `TemplateCollectionModel` to `TemplateIterableModel`, and `TemplateCollectionModelEx` to
+      `TemplateCollectionModel`. (Since java.util.Iterable was added to Java, the TemplateCollectionModel
+      has become an unfortunate name, especailly as later TemplateCollectionModelEx was added, that was closer
+      to java.util.Collection than TemplateCollectionModel.)
+    - `TemplateSequenceModel` now extends `TemplateCollecitonModel`, and `#list` and other built-in mechanims prefer
+       using `iterator()` instead of an index loop.
+    - `TemplateModelIterator.next()` isn't required to handle anymore the case when there's no next item. If someone
+      doesn't check that with `hasNext()` before calling `next()`, anything can happen. This is to allow more efficient
+      implementations, which has become important now that `#list` and such prefers iterators over index loops.
+    - `isEmpty` of FM2 `TemplateCollectionModelEx` (now `TemplateCollectionModel`) and FM2 `TemplateHashModel` was renamed
+      to `isEmptyCollection` and `isEmptyHash`, so that for multi-typed values can give different results depending on the
+      type. Also, for collections `size()` was renamed to `getCollectionSize()`, and for hashes `getHashSize()`.
+    - `TemplateSequenceModel.get(int)` is now expected to actually return `null` for any invalid index. In FM2 this was
+      the documented expectation, but many implementaitons throw exception instead of returning `null`, but FreeMarker
+      has tolerated that.
+    - `TemplateHashModelEx.keys()` and `values()` returns `TemplateCollectoinModel`, just as in FM2, but in FM3
+      `TemplateCollectoinModel` has `getCollectionSize()` and `isEmptyCollection` method. So this affects
+      `TemplateHashModelEx` implementations as well.
+      
 Core / Template loading and caching
 ...................................
 
