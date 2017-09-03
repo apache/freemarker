@@ -50,7 +50,7 @@ class DocumentTypeModel extends NodeModel {
     }
     
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyHash() {
         return true;
     }
 }

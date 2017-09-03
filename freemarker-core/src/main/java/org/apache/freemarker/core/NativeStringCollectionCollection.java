@@ -23,28 +23,34 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.apache.freemarker.core.model.ObjectWrapper;
-import org.apache.freemarker.core.model.TemplateCollectionModelEx;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
+import org.apache.freemarker.core.model.impl.DefaultNonListCollectionAdapter;
+import org.apache.freemarker.core.model.impl.SimpleString;
 
 /**
- * A collection where each items is already a {@link TemplateModel}, so no {@link ObjectWrapper} need to be specified.
+ * Adapts (not copies) a {@link Collection} of {@link String}-s with on-the-fly wrapping of the items to {@link
+ * SimpleString}-s. The important difference to {@link DefaultNonListCollectionAdapter} is that it doesn't depend on an
+ * {@link ObjectWrapper}, which is needed to guarantee the behavior of some template language constructs. The important
+ * difference to {@link NativeCollection} is that it doesn't need upfront conversion to {@link TemplateModel}-s
+ * (performance).
  */
-class NativeCollectionEx implements TemplateCollectionModelEx {
+class NativeStringCollectionCollection implements TemplateCollectionModel {
 
-    private final Collection<TemplateModel> collection;
+    private final Collection<String> collection;
 
-    public NativeCollectionEx(Collection<TemplateModel> collection) {
+    public NativeStringCollectionCollection(Collection<String> collection) {
         this.collection = collection;
     }
 
     @Override
-    public int size() {
+    public int getCollectionSize() {
         return collection.size();
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyCollection() {
         return collection.isEmpty();
     }
 
@@ -52,15 +58,11 @@ class NativeCollectionEx implements TemplateCollectionModelEx {
     public TemplateModelIterator iterator() throws TemplateException {
         return new TemplateModelIterator() {
 
-            private final Iterator<TemplateModel> iterator = collection.iterator();
+            private final Iterator<String> iterator = collection.iterator();
 
             @Override
             public TemplateModel next() throws TemplateException {
-                if (!iterator.hasNext()) {
-                    throw new TemplateException("The collection has no more items.");
-                }
-
-                return iterator.next();
+                return new SimpleString(iterator.next());
             }
 
             @Override

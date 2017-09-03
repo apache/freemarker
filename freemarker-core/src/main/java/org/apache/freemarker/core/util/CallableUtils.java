@@ -289,7 +289,7 @@ public final class CallableUtils {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                 getMessageArgumentProblem(
                         callable, argIdx,
-                        new Object[]{ " should be ", new _DelayedAOrAn(expectedTypesDesc), ", but was ",
+                        new Object[]{ "should be ", new _DelayedAOrAn(expectedTypesDesc), ", but was ",
                                 new _DelayedAOrAn(new _DelayedTemplateLanguageTypeDescription(argValue)),
                                 "." },
                         calledAsFunction));
@@ -543,25 +543,33 @@ public final class CallableUtils {
     }
 
     /**
-     * Convenience method to call
+     * Convenience method to return {@code null} if the argument is missing, otherwise call
      * {@link #castArgumentValueToInt(TemplateModel, int, boolean, int, TemplateCallableModel, boolean)
-     * castArgumentValueToInt(args[argIndex], argIndex, true, null, callable, true)}.
+     * castArgumentValueToInt(args[argIndex], argIndex, false, 0, callable, false)}.
      */
-    public static int getOptionalIntArgument(
+    public static Integer getOptionalIntArgument(
             TemplateModel[] args, int argIndex, TemplateFunctionModel callable)
             throws TemplateException {
-        return castArgumentValueToInt(args[argIndex], argIndex, true, 0, callable, true);
+        TemplateModel argValue = args[argIndex];
+        if (argValue == null) {
+            return null;
+        }
+        return castArgumentValueToInt(argValue, argIndex, false, 0, callable, true);
     }
 
     /**
-     * Convenience method to call
+     * Convenience method to return {@code null} if the argument is missing, otherwise call
      * {@link #castArgumentValueToInt(TemplateModel, int, boolean, int, TemplateCallableModel, boolean)
-     * castArgumentValueToInt(args[argIndex], argIndex, true, null, callable, false)}.
+     * castArgumentValueToInt(args[argIndex], argIndex, false, 0, callable, false)}.
      */
-    public static int getOptionalIntArgument(
+    public static Integer getOptionalIntArgument(
             TemplateModel[] args, int argIndex, TemplateDirectiveModel callable)
             throws TemplateException {
-        return castArgumentValueToInt(args[argIndex], argIndex, true, 0, callable, false);
+        TemplateModel argValue = args[argIndex];
+        if (argValue == null) {
+            return null;
+        }
+        return castArgumentValueToInt(argValue, argIndex, false, 0, callable, false);
     }
 
     /**

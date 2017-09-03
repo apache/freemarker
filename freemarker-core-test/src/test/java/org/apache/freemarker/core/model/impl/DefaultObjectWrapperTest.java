@@ -35,6 +35,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -50,8 +51,8 @@ import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateCollectionModelEx;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -172,8 +173,8 @@ public class DefaultObjectWrapperTest {
         CustomizedDefaultObjectWrapper ow = new CustomizedDefaultObjectWrapper(Configuration.VERSION_3_0_0);
         assertEquals(Configuration.VERSION_3_0_0, ow.getIncompatibleImprovements());
 
-        TemplateSequenceModel seq = (TemplateSequenceModel) ow.wrap(new Tupple(11, 22));
-        assertEquals(2, seq.size());
+        TemplateSequenceModel seq = (TemplateSequenceModel) ow.wrap(new Tuple(11, 22));
+        assertEquals(2, seq.getCollectionSize());
         assertEquals(11, ow.unwrap(seq.get(0)));
         assertEquals(22, ow.unwrap(seq.get(1)));
         
@@ -199,11 +200,11 @@ public class DefaultObjectWrapperTest {
         }
         {
             // Check custom TM usage and round trip:
-            final TemplateModel mr = ((JavaMethodModel) bean.get("incTupple"))
-                    .execute(new TemplateModel[] { ow.wrap(new Tupple<>(1, 2)) },
+            final TemplateModel mr = ((JavaMethodModel) bean.get("incTuple"))
+                    .execute(new TemplateModel[] { ow.wrap(new Tuple<>(1, 2)) },
                             NonTemplateCallPlace.INSTANCE);
-            assertEquals(new Tupple<>(2, 3), ow.unwrap(mr));
-            assertTrue(TuppleAdapter.class.isInstance(mr));
+            assertEquals(new Tuple<>(2, 3), ow.unwrap(mr));
+            assertTrue(TupleAdapter.class.isInstance(mr));
         }
     }
 
@@ -256,8 +257,8 @@ public class DefaultObjectWrapperTest {
 
         {
             TemplateHashModelEx hash = (TemplateHashModelEx) OW.wrap(testMap);
-            assertEquals(4, hash.size());
-            assertFalse(hash.isEmpty());
+            assertEquals(4, hash.getHashSize());
+            assertFalse(hash.isEmptyHash());
             assertNull(hash.get("e"));
             assertEquals(1, ((TemplateNumberModel) hash.get("a")).getAsNumber());
             assertNull(hash.get("b"));
@@ -271,11 +272,11 @@ public class DefaultObjectWrapperTest {
         }
 
         {
-            assertTrue(((TemplateHashModel) OW.wrap(Collections.emptyMap())).isEmpty());
+            assertTrue(((TemplateHashModel) OW.wrap(Collections.emptyMap())).isEmptyHash());
         }
     }
 
-    private void assertCollectionTMEquals(TemplateCollectionModel coll, Object... expectedItems)
+    private void assertCollectionTMEquals(TemplateIterableModel coll, Object... expectedItems)
             throws TemplateException {
         for (int i = 0; i < 2; i++) { // Run twice to check if we always get a new iterator
             int idx = 0;
@@ -314,8 +315,7 @@ public class DefaultObjectWrapperTest {
 
             TemplateSequenceModel seq = (TemplateSequenceModel) OW.wrap(testList);
             assertTrue(seq instanceof DefaultListAdapter);
-            assertFalse(seq instanceof TemplateCollectionModel); // Maybe changes at 2.4.0
-            assertEquals(4, seq.size());
+            assertEquals(4, seq.getCollectionSize());
             assertNull(seq.get(-1));
             assertEquals(1, ((TemplateNumberModel) seq.get(0)).getAsNumber());
             assertNull(seq.get(1));
@@ -334,25 +334,24 @@ public class DefaultObjectWrapperTest {
 
             TemplateSequenceModel seq = (TemplateSequenceModel) OW.wrap(testList);
             assertTrue(seq instanceof DefaultListAdapter);
-            assertTrue(seq instanceof TemplateCollectionModel); // Maybe changes at 2.4.0
-            assertEquals(3, seq.size());
+            assertEquals(3, seq.getCollectionSize());
             assertNull(seq.get(-1));
             assertEquals(1, ((TemplateNumberModel) seq.get(0)).getAsNumber());
             assertNull(seq.get(1));
             assertEquals("c", ((TemplateStringModel) seq.get(2)).getAsString());
             assertNull(seq.get(3));
 
-            assertCollectionTMEquals((TemplateCollectionModel) seq, 1, null, "c");
+            assertCollectionTMEquals((TemplateIterableModel) seq, 1, null, "c");
 
-            TemplateModelIterator it = ((TemplateCollectionModel) seq).iterator();
+            TemplateModelIterator it = ((TemplateIterableModel) seq).iterator();
             it.next();
             it.next();
             it.next();
             try {
                 it.next();
                 fail();
-            } catch (TemplateException e) {
-                assertThat(e.getMessage(), containsString("no more"));
+            } catch (NoSuchElementException e) {
+                // Expected, for this implementation
             }
         }
     }
@@ -384,7 +383,7 @@ public class DefaultObjectWrapperTest {
             final String[] testArray = new String[] { "a", null, "c" };
 
             TemplateSequenceModel seq = (TemplateSequenceModel) OW.wrap(testArray);
-            assertEquals(3, seq.size());
+            assertEquals(3, seq.getCollectionSize());
             assertNull(seq.get(-1));
             assertEquals("a", ((TemplateStringModel) seq.get(0)).getAsString());
             assertNull(seq.get(1));
@@ -395,7 +394,7 @@ public class DefaultObjectWrapperTest {
         {
             final int[] testArray = new int[] { 11, 22 };
             TemplateSequenceModel seq = (TemplateSequenceModel) OW.wrap(testArray);
-            assertEquals(2, seq.size());
+            assertEquals(2, seq.getCollectionSize());
             assertNull(seq.get(-1));
             assertEqualsAndSameClass(Integer.valueOf(11), ((TemplateNumberModel) seq.get(0)).getAsNumber());
             assertEqualsAndSameClass(Integer.valueOf(22), ((TemplateNumberModel) seq.get(1)).getAsNumber());
@@ -405,7 +404,7 @@ public class DefaultObjectWrapperTest {
         {
             final double[] testArray = new double[] { 11, 22 };
             TemplateSequenceModel seq = (TemplateSequenceModel) OW.wrap(testArray);
-            assertEquals(2, seq.size());
+            assertEquals(2, seq.getCollectionSize());
             assertNull(seq.get(-1));
             assertEqualsAndSameClass(Double.valueOf(11), ((TemplateNumberModel) seq.get(0)).getAsNumber());
             assertEqualsAndSameClass(Double.valueOf(22), ((TemplateNumberModel) seq.get(1)).getAsNumber());
@@ -415,7 +414,7 @@ public class DefaultObjectWrapperTest {
         {
             final boolean[] testArray = new boolean[] { true, false };
             TemplateSequenceModel seq = (TemplateSequenceModel) OW.wrap(testArray);
-            assertEquals(2, seq.size());
+            assertEquals(2, seq.getCollectionSize());
             assertNull(seq.get(-1));
             assertEqualsAndSameClass(Boolean.valueOf(true), ((TemplateBooleanModel) seq.get(0)).getAsBoolean());
             assertEqualsAndSameClass(Boolean.valueOf(false), ((TemplateBooleanModel) seq.get(1)).getAsBoolean());
@@ -425,7 +424,7 @@ public class DefaultObjectWrapperTest {
         {
             final char[] testArray = new char[] { 'a', 'b' };
             TemplateSequenceModel seq = (TemplateSequenceModel) OW.wrap(testArray);
-            assertEquals(2, seq.size());
+            assertEquals(2, seq.getCollectionSize());
             assertNull(seq.get(-1));
             assertEquals("a", ((TemplateStringModel) seq.get(0)).getAsString());
             assertEquals("b", ((TemplateStringModel) seq.get(1)).getAsString());
@@ -471,10 +470,10 @@ public class DefaultObjectWrapperTest {
             set.add("a");
             set.add("b");
             set.add("c");
-            TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW.wrap(set);
+            TemplateCollectionModel coll = (TemplateCollectionModel) OW.wrap(set);
             assertTrue(coll instanceof DefaultNonListCollectionAdapter);
-            assertEquals(3, coll.size());
-            assertFalse(coll.isEmpty());
+            assertEquals(3, coll.getCollectionSize());
+            assertFalse(coll.isEmptyCollection());
             assertCollectionTMEquals(coll, "a", "b", "c");
 
             assertRoundtrip(OW, set, DefaultNonListCollectionAdapter.class, TreeSet.class, "[a, b, c]");
@@ -487,7 +486,7 @@ public class DefaultObjectWrapperTest {
             final List<String> list = Collections.singletonList("b");
             set.add(list);
             set.add(null);
-            TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW.wrap(set);
+            TemplateCollectionModel coll = (TemplateCollectionModel) OW.wrap(set);
             TemplateModelIterator it = coll.iterator();
             final TemplateModel tm1 = it.next();
             Object obj1 = OW.unwrap(tm1);
@@ -507,7 +506,7 @@ public class DefaultObjectWrapperTest {
     public void testCollectionAdapterOutOfBounds() throws TemplateException {
         Set set = Collections.singleton(123);
 
-        TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW.wrap(set);
+        TemplateCollectionModel coll = (TemplateCollectionModel) OW.wrap(set);
         TemplateModelIterator it = coll.iterator();
 
         for (int i = 0; i < 3; i++) {
@@ -521,8 +520,8 @@ public class DefaultObjectWrapperTest {
             try {
                 it.next();
                 fail();
-            } catch (TemplateException e) {
-                assertThat(e.getMessage(), containsStringIgnoringCase("no more"));
+            } catch (NoSuchElementException e) {
+                // Expected, for this implementation
             }
         }
     }
@@ -532,9 +531,9 @@ public class DefaultObjectWrapperTest {
         Set set = new HashSet();
         set.add(null);
 
-        TemplateCollectionModelEx coll = (TemplateCollectionModelEx) OW.wrap(set);
-        assertEquals(1, coll.size());
-        assertFalse(coll.isEmpty());
+        TemplateCollectionModel coll = (TemplateCollectionModel) OW.wrap(set);
+        assertEquals(1, coll.getCollectionSize());
+        assertFalse(coll.isEmptyCollection());
         assertNull(coll.iterator().next());
     }
 
@@ -542,7 +541,7 @@ public class DefaultObjectWrapperTest {
     public void testIteratorWrapping() throws TemplateException, ClassNotFoundException {
         final List<String> list = ImmutableList.of("a", "b", "c");
         Iterator<String> it = list.iterator();
-        TemplateCollectionModel coll = (TemplateCollectionModel) OW.wrap(it);
+        TemplateIterableModel coll = (TemplateIterableModel) OW.wrap(it);
 
         assertRoundtrip(OW, coll, DefaultIteratorAdapter.class, Iterator.class, null);
 
@@ -558,8 +557,8 @@ public class DefaultObjectWrapperTest {
         try {
             itIt.next();
             fail();
-        } catch (TemplateException e) {
-            assertThat(e.getMessage(), containsStringIgnoringCase("no more"));
+        } catch (NoSuchElementException e) {
+            // Expected, for this implementation
         }
 
         try {
@@ -629,8 +628,8 @@ public class DefaultObjectWrapperTest {
         
         DefaultObjectWrapper ow = OW;
         TemplateModel tm = ow.wrap(iterable);
-        assertThat(tm, instanceOf(TemplateCollectionModel.class));
-        TemplateCollectionModel iterableTM = (TemplateCollectionModel) tm;
+        assertThat(tm, instanceOf(TemplateIterableModel.class));
+        TemplateIterableModel iterableTM = (TemplateIterableModel) tm;
 
         for (int i = 0; i < 2; i++) {
             TemplateModelIterator iteratorTM = iterableTM.iterator();
@@ -644,8 +643,8 @@ public class DefaultObjectWrapperTest {
             try {
                 iteratorTM.next();
                 fail();
-            } catch (TemplateException e) {
-                assertThat(e.getMessage(), containsStringIgnoringCase("no more"));
+            } catch (NoSuchElementException e) {
+                // Expected, for this implementation
             }
         }
 
@@ -782,12 +781,12 @@ public class DefaultObjectWrapperTest {
 
     }
     
-    private static class Tupple<E1, E2> {
+    private static class Tuple<E1, E2> {
         
         private final E1 e1;
         private final E2 e2;
 
-        public Tupple(E1 e1, E2 e2) {
+        public Tuple(E1 e1, E2 e2) {
             if (e1 == null || e2 == null) throw new NullPointerException();
             this.e1 = e1;
             this.e2 = e2;
@@ -815,7 +814,7 @@ public class DefaultObjectWrapperTest {
             if (this == obj) return true;
             if (obj == null) return false;
             if (getClass() != obj.getClass()) return false;
-            Tupple other = (Tupple) obj;
+            Tuple other = (Tuple) obj;
             if (e1 == null) {
                 if (other.e1 != null) return false;
             } else if (!e1.equals(other.e1)) return false;
@@ -838,8 +837,8 @@ public class DefaultObjectWrapperTest {
             return Collections.singletonList(1);
         }
 
-        public Tupple incTupple(Tupple<Integer, Integer> tupple) {
-            return new Tupple(tupple.e1 + 1, tupple.e2 + 1);
+        public Tuple incTuple(Tuple<Integer, Integer> tupple) {
+            return new Tuple(tupple.e1 + 1, tupple.e2 + 1);
         }
         
     }
@@ -852,8 +851,8 @@ public class DefaultObjectWrapperTest {
         
         @Override
         protected TemplateModel wrapGenericObject(final Object obj) throws ObjectWrappingException {
-            if (obj instanceof Tupple) {
-                return new TuppleAdapter((Tupple<?, ?>) obj, this);
+            if (obj instanceof Tuple) {
+                return new TupleAdapter((Tuple<?, ?>) obj, this);
             }
             
             return super.wrapGenericObject(obj);
@@ -861,35 +860,45 @@ public class DefaultObjectWrapperTest {
         
     }
     
-    private static class TuppleAdapter extends WrappingTemplateModel implements TemplateSequenceModel,
+    private static class TupleAdapter extends WrappingTemplateModel implements TemplateSequenceModel,
             AdapterTemplateModel {
         
-        private final Tupple<?, ?> tupple;
+        private final Tuple<?, ?> tuple;
         
-        public TuppleAdapter(Tupple<?, ?> tupple, ObjectWrapper ow) {
+        public TupleAdapter(Tuple<?, ?> tuple, ObjectWrapper ow) {
             super(ow);
-            this.tupple = tupple;
+            this.tuple = tuple;
         }
 
         @Override
-        public int size() throws TemplateException {
+        public int getCollectionSize() throws TemplateException {
             return 2;
         }
         
         @Override
         public TemplateModel get(int index) throws TemplateException {
             switch (index) {
-            case 0: return wrap(tupple.getE1());
-            case 1: return wrap(tupple.getE2());
+            case 0: return wrap(tuple.getE1());
+            case 1: return wrap(tuple.getE2());
             default: return null;
             }
         }
 
         @Override
-        public Object getAdaptedObject(Class hint) {
-            return tupple;
+        public boolean isEmptyCollection() throws TemplateException {
+            return false;
         }
-        
+
+        @Override
+        public TemplateModelIterator iterator() throws TemplateException {
+            return new SequenceTemplateModelIterator(this);
+        }
+
+        @Override
+        public Object getAdaptedObject(Class hint) {
+            return tuple;
+        }
+
     }
 
 }

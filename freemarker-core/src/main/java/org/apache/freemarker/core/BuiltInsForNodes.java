@@ -64,7 +64,8 @@ class BuiltInsForNodes {
                     return this;
                 }
                 AncestorSequence result = new AncestorSequence(env);
-                for (int seqIdx = 0; seqIdx < size(); seqIdx++) {
+                int size = getCollectionSize();
+                for (int seqIdx = 0; seqIdx < size; seqIdx++) {
                     TemplateNodeModel tnm = (TemplateNodeModel) get(seqIdx);
                     String nodeName = tnm.getNodeName();
                     String nsURI = tnm.getNodeNamespace();

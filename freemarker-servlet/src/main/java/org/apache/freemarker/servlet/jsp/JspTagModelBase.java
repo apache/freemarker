@@ -72,7 +72,7 @@ abstract class JspTagModelBase implements TemplateModelWithOriginName {
             throws TemplateException,
         InvocationTargetException, 
         IllegalAccessException {
-        if (args != null && !args.isEmpty()) {
+        if (args != null && !args.isEmptyHash()) {
             final Object[] argArray = new Object[1];
             for (TemplateHashModelEx2.KeyValuePairIterator iter = args.keyValuePairIterator(); iter.hasNext(); ) {
                 final TemplateHashModelEx2.KeyValuePair entry = iter.next();

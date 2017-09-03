@@ -27,7 +27,7 @@ class EmptyIteratorModel implements TemplateModelIterator, Serializable {
 
     @Override
     public TemplateModel next() throws TemplateException {
-        throw new TemplateException("The collection has no more elements.");
+        throw new TemplateException("It's an empty iterator it has no elements.");
     }
 
     @Override

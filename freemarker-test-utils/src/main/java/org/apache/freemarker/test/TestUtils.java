@@ -1,6 +1,5 @@
 package org.apache.freemarker.test;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -128,14 +127,14 @@ public final class TestUtils {
     }
 
     public static String listToString(List<?> list) {
-        return collectionToString("", list);
+        return iterableToString("", list);
     }
 
     public static String setToString(Set<?> list) {
-        return collectionToString("Set", list);
+        return iterableToString("Set", list);
     }
 
-    private static String collectionToString(String prefix, Collection<?> list) {
+    private static String iterableToString(String prefix, Iterable<?> list) {
         if (list == null) return "null";
 
         StringBuilder sb = new StringBuilder();

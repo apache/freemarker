@@ -26,7 +26,7 @@ import org.apache.freemarker.core.TemplateException;
 class EmptyHashModel implements TemplateHashModelEx2, Serializable {
 
     @Override
-    public int size() throws TemplateException {
+    public int getHashSize() throws TemplateException {
         return 0;
     }
 
@@ -46,7 +46,7 @@ class EmptyHashModel implements TemplateHashModelEx2, Serializable {
     }
 
     @Override
-    public boolean isEmpty() throws TemplateException {
+    public boolean isEmptyHash() throws TemplateException {
         return true;
     }
 

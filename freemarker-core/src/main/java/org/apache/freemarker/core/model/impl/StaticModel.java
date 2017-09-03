@@ -84,12 +84,12 @@ final class StaticModel implements TemplateHashModelEx {
      * field or method in the underlying class.
      */
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyHash() {
         return map.isEmpty();
     }
 
     @Override
-    public int size() {
+    public int getHashSize() {
         return map.size();
     }
     

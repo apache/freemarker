@@ -4176,7 +4176,7 @@ void HeaderElement() :
                             }
                             TemplateHashModelEx prefixMap = (TemplateHashModelEx) value;
                             try {
-                                TemplateCollectionModel keys = prefixMap.keys();
+                                TemplateIterableModel keys = prefixMap.keys();
                                 for (TemplateModelIterator it = keys.iterator(); it.hasNext();) {
                                     String prefix = ((TemplateStringModel) it.next()).getAsString();
                                     TemplateModel valueModel = prefixMap.get(prefix);
@@ -4198,7 +4198,7 @@ void HeaderElement() :
                             }
                             TemplateHashModelEx attributeMap = (TemplateHashModelEx) value;
                             try {
-                                TemplateCollectionModel keys = attributeMap.keys();
+                                TemplateIterableModel keys = attributeMap.keys();
                                 for (TemplateModelIterator it = keys.iterator(); it.hasNext();) {
                                         String attName = ((TemplateStringModel) it.next()).getAsString();
                                         Object attValue = DeepUnwrap.unwrap(attributeMap.get(attName));

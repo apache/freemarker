@@ -26,6 +26,7 @@ import java.util.List;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util._StringUtils;
 
@@ -290,7 +291,7 @@ final class ASTDirMacroOrFunction extends ASTDirective implements TemplateModel 
         public Collection<String> getLocalVariableNames() throws TemplateException {
             HashSet<String> result = new HashSet<>();
             for (TemplateModelIterator it = localVars.keys().iterator(); it.hasNext(); ) {
-                result.add(it.next().toString());
+                result.add(((TemplateStringModel) it.next()).getAsString());
             }
             return result;
         }

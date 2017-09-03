@@ -20,13 +20,11 @@
 package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.TemplateLanguageUtils;
 import org.apache.freemarker.core.util._StringUtils;
@@ -80,13 +78,11 @@ class MessageUtils {
         EXPECTED_TYPES_STRING_COERCABLE_TYPES_AND_TOM[i] = TemplateMarkupOutputModel.class;
     }
 
-    static final String SEQUENCE_OR_COLLECTION = "sequence or collection";
-    static final Class[] EXPECTED_TYPES_SEQUENCE_OR_COLLECTION = new Class[] {
-            TemplateSequenceModel.class, TemplateCollectionModel.class
-    };
+    static final String EXPECTED_TYPE_ITERABLE_DESC = "iterable (like a sequence)";
 
-    // Can't be instantiated
-    private MessageUtils() { }
+    private MessageUtils() {
+        // Not meant to be instantiated
+    }
 
     static String formatLocationForSimpleParsingError(String templateSourceOrLookupName, int line, int column) {
         return formatLocation("in", templateSourceOrLookupName, line, column);
@@ -268,6 +264,15 @@ class MessageUtils {
             ASTExpression blamed, TemplateModel model, Class<? extends TemplateModel> expectedType, Environment env)
             throws InvalidReferenceException {
         return newUnexpectedOperandTypeException(blamed, model, null, new Class[] { expectedType }, null, env);
+    }
+
+    static TemplateException newUnexpectedOperandTypeException(
+            ASTExpression blamed, TemplateModel model, String expectedTypesDesc, Class<? extends TemplateModel> expectedType,
+            Object[] tips,
+            Environment env)
+            throws InvalidReferenceException {
+        return newUnexpectedOperandTypeException(
+                blamed, model, expectedTypesDesc, new Class[] { expectedType }, tips, env);
     }
 
     static TemplateException newUnexpectedOperandTypeException(

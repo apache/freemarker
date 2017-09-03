@@ -128,7 +128,7 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
     
     private abstract static class DebugMapModel implements TemplateHashModelEx {
         @Override
-        public int size() {
+        public int getHashSize() {
             return keySet().size();
         }
 
@@ -149,8 +149,8 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
         }
 
         @Override
-        public boolean isEmpty() {
-            return size() == 0;
+        public boolean isEmptyHash() {
+            return getHashSize() == 0;
         }
         
         abstract Collection keySet();

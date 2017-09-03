@@ -247,9 +247,11 @@ public final class StringToIndexMap {
     }
 
     /**
-     * Checks if all entries are in the {@code start} - {@code start}+{@code size()} (exclusive) index range.
+     * Checks if all entries are in the {@code start} - {@code start}+{@code getCollectionSize()} (exclusive) index
+     * range.
      *
-     * @throws IllegalArgumentException If some entry is not in the specified index range.
+     * @throws IllegalArgumentException
+     *         If some entry is not in the specified index range.
      */
     public void checkIndexRange(int start) {
         if (buckets == null) {

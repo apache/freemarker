@@ -19,50 +19,47 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.util.AbstractList;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelAdapter;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 
-/**
- */
-class SequenceAdapter extends AbstractList implements TemplateModelAdapter {
+class TemplateModelIteratorAdapter<T> implements Iterator<T> {
+    private final TemplateModelIterator iterator;
     private final DefaultObjectWrapper wrapper;
-    private final TemplateSequenceModel model;
-    
-    SequenceAdapter(TemplateSequenceModel model, DefaultObjectWrapper wrapper) {
-        this.model = model;
+
+    public TemplateModelIteratorAdapter(TemplateModelIterator iterator,
+            DefaultObjectWrapper wrapper) {
+        this.iterator = iterator;
         this.wrapper = wrapper;
     }
-    
+
     @Override
-    public TemplateModel getTemplateModel() {
-        return model;
-    }
-    
-    @Override
-    public int size() {
+    public boolean hasNext() {
         try {
-            return model.size();
+            return iterator.hasNext();
         } catch (TemplateException e) {
             throw new UndeclaredThrowableException(e);
         }
     }
-    
+
+    @SuppressWarnings("unchecked")
     @Override
-    public Object get(int index) {
+    public T next() {
         try {
-            return wrapper.unwrap(model.get(index));
+            if (!iterator.hasNext()) {
+                throw new NoSuchElementException();
+            }
+            return (T) wrapper.unwrap(iterator.next());
         } catch (TemplateException e) {
             throw new UndeclaredThrowableException(e);
         }
     }
-    
-    public TemplateSequenceModel getTemplateSequenceModel() {
-        return model;
+
+    @Override
+    public void remove() {
+        throw new UnsupportedOperationException();
     }
-    
 }

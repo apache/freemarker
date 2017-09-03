@@ -57,11 +57,13 @@ import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.RichObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelAdapter;
+import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
@@ -511,7 +513,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
      * {@link TemplateBooleanModel} instances into a Boolean, arbitrary
      * {@link TemplateHashModel} instances into a Map, arbitrary
      * {@link TemplateSequenceModel} into a List, and arbitrary
-     * {@link TemplateCollectionModel} into a Set. All other objects are
+     * {@link TemplateIterableModel} into a Set. All other objects are
      * returned unchanged.
      * @throws TemplateException if an attempted unwrapping fails.
      */
@@ -649,29 +651,41 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
 
             if (Map.class == targetClass) {
                 if (model instanceof TemplateHashModel) {
-                    return new HashAdapter((TemplateHashModel) model, this);
+                    return new TemplateHashModelAdapter((TemplateHashModel) model, this);
                 }
             }
 
             if (List.class == targetClass) {
                 if (model instanceof TemplateSequenceModel) {
-                    return new SequenceAdapter((TemplateSequenceModel) model, this);
+                    return new TemplateSequenceModelAdapter((TemplateSequenceModel) model, this);
                 }
             }
 
             if (Set.class == targetClass) {
                 if (model instanceof TemplateCollectionModel) {
-                    return new SetAdapter((TemplateCollectionModel) model, this);
+                    return new TemplateSetModelAdapter((TemplateCollectionModel) model, this);
                 }
             }
 
-            if (Collection.class == targetClass || Iterable.class == targetClass) {
-                if (model instanceof TemplateCollectionModel) {
-                    return new CollectionAdapter((TemplateCollectionModel) model,
-                            this);
-                }
+            if (Collection.class == targetClass) {
                 if (model instanceof TemplateSequenceModel) {
-                    return new SequenceAdapter((TemplateSequenceModel) model, this);
+                    return new TemplateSequenceModelAdapter((TemplateSequenceModel) model, this);
+                }
+                if (model instanceof TemplateCollectionModel) {
+                    return new TemplateCollectionModelAdapter((TemplateCollectionModel) model, this);
+                }
+            }
+
+            if (Iterable.class == targetClass) {
+                if (model instanceof TemplateSequenceModel) {
+                    return new TemplateSequenceModelAdapter((TemplateSequenceModel) model, this);
+                }
+                if (model instanceof TemplateCollectionModel) {
+                    return new TemplateCollectionModelAdapter((TemplateCollectionModel) model, this);
+                }
+                if (model instanceof TemplateIterableModel) {
+                    return new TemplateIterableModelAdapter((TemplateIterableModel) model,
+                            this);
                 }
             }
 
@@ -753,23 +767,23 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
             }
             if ((itf == 0 || (itf & TypeFlags.ACCEPTS_MAP) != 0)
                     && model instanceof TemplateHashModel
-                    && (itf != 0 || targetClass.isAssignableFrom(HashAdapter.class))) {
-                return new HashAdapter((TemplateHashModel) model, this);
+                    && (itf != 0 || targetClass.isAssignableFrom(TemplateHashModelAdapter.class))) {
+                return new TemplateHashModelAdapter((TemplateHashModel) model, this);
             }
             if ((itf == 0 || (itf & TypeFlags.ACCEPTS_LIST) != 0)
                     && model instanceof TemplateSequenceModel
-                    && (itf != 0 || targetClass.isAssignableFrom(SequenceAdapter.class))) {
-                return new SequenceAdapter((TemplateSequenceModel) model, this);
+                    && (itf != 0 || targetClass.isAssignableFrom(TemplateSequenceModelAdapter.class))) {
+                return new TemplateSequenceModelAdapter((TemplateSequenceModel) model, this);
             }
             if ((itf == 0 || (itf & TypeFlags.ACCEPTS_SET) != 0)
                     && model instanceof TemplateCollectionModel
-                    && (itf != 0 || targetClass.isAssignableFrom(SetAdapter.class))) {
-                return new SetAdapter((TemplateCollectionModel) model, this);
+                    && (itf != 0 || targetClass.isAssignableFrom(TemplateSetModelAdapter.class))) {
+                return new TemplateSetModelAdapter((TemplateCollectionModel) model, this);
             }
 
             if ((itf & TypeFlags.ACCEPTS_ARRAY) != 0
                     && model instanceof TemplateSequenceModel) {
-                return new SequenceAdapter((TemplateSequenceModel) model, this);
+                return new TemplateSequenceModelAdapter((TemplateSequenceModel) model, this);
             }
 
             if (itf == 0) {
@@ -805,12 +819,13 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
             recursionStops = new IdentityHashMap<>();
         }
         Class<?> componentType = arrayClass.getComponentType();
-        Object array = Array.newInstance(componentType, seq.size());
+        final int size = seq.getCollectionSize();
+        Object array = Array.newInstance(componentType, size);
         recursionStops.put(seq, array);
         try {
-            final int size = seq.size();
-            for (int i = 0; i < size; i++) {
-                final TemplateModel seqItem = seq.get(i);
+            TemplateModelIterator iter = seq.iterator();
+            for (int idx = 0; idx < size; idx++) {
+                final TemplateModel seqItem = iter.next();
                 Object val = tryUnwrapTo(seqItem, componentType, 0, recursionStops);
                 if (val == ObjectWrapperAndUnwrapper.CANT_UNWRAP_TO_TARGET_CLASS) {
                     if (tryOnly) {
@@ -819,12 +834,12 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
                         throw new TemplateException(
                                 "Failed to convert ",  new _DelayedTemplateLanguageTypeDescription(seq),
                                 " object to ", new _DelayedShortClassName(array.getClass()),
-                                ": Problematic sequence item at index ", Integer.valueOf(i) ," with value type: ",
+                                ": Problematic sequence item at index ", Integer.valueOf(idx) ," with value type: ",
                                 new _DelayedTemplateLanguageTypeDescription(seqItem));
                     }
 
                 }
-                Array.set(array, i, val);
+                Array.set(array, idx, val);
             }
         } finally {
             recursionStops.remove(seq);
@@ -834,9 +849,9 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
 
     Object listToArray(List<?> list, Class<?> arrayClass, Map<Object, Object> recursionStops)
             throws TemplateException {
-        if (list instanceof SequenceAdapter) {
+        if (list instanceof TemplateSequenceModelAdapter) {
             return unwrapSequenceToArray(
-                    ((SequenceAdapter) list).getTemplateSequenceModel(),
+                    ((TemplateSequenceModelAdapter) list).getTemplateSequenceModel(),
                     arrayClass, false,
                     recursionStops);
         }

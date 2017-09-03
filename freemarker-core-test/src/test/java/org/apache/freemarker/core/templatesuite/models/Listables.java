@@ -162,12 +162,12 @@ public class Listables {
         }
         
         @Override
-        public boolean isEmpty() {
+        public boolean isEmptyHash() {
             return map.isEmpty();
         }
         
         @Override
-        public int size() {
+        public int getHashSize() {
             return map.size();
         }
         

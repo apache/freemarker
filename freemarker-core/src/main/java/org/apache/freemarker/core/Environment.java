@@ -59,8 +59,8 @@ import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithOriginName;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.templateresolver.TemplateResolver;
@@ -669,8 +669,11 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             }
         }
         TemplateSequenceModel children = node.getChildNodes();
-        if (children == null) return;
-        for (int i = 0; i < children.size(); i++) {
+        if (children == null) {
+            return;
+        }
+        int size = children.getCollectionSize();
+        for (int i = 0; i < size; i++) {
             TemplateNodeModel child = (TemplateNodeModel) children.get(i);
             if (child != null) {
                 invokeNodeHandlerFor(child, namespaces);
@@ -2195,7 +2198,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         final TemplateHashModel result = new TemplateHashModel() {
 
             @Override
-            public boolean isEmpty() {
+            public boolean isEmptyHash() {
                 return false;
             }
 
@@ -2213,8 +2216,8 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             return new TemplateHashModelEx() {
 
                 @Override
-                public boolean isEmpty() throws TemplateException {
-                    return result.isEmpty();
+                public boolean isEmptyHash() throws TemplateException {
+                    return result.isEmptyHash();
                 }
 
                 @Override
@@ -2236,8 +2239,8 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                 }
 
                 @Override
-                public int size() throws TemplateException {
-                    return ((TemplateHashModelEx) rootDataModel).size();
+                public int getHashSize() throws TemplateException {
+                    return ((TemplateHashModelEx) rootDataModel).getHashSize();
                 }
             };
         }
@@ -2253,7 +2256,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         return new TemplateHashModel() {
 
             @Override
-            public boolean isEmpty() {
+            public boolean isEmptyHash() {
                 return false;
             }
 
@@ -2333,7 +2336,8 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             throws TemplateException {
         TemplateDirectiveModel result = null;
         int i;
-        for (i = startIndex; i < nodeNamespaces.size(); i++) {
+        int size = nodeNamespaces.getCollectionSize();
+        for (i = startIndex; i < size; i++) {
             Namespace ns = null;
             try {
                 ns = (Namespace) nodeNamespaces.get(i);
@@ -2850,15 +2854,15 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         }
 
         @Override
-        public int size() {
+        public int getHashSize() {
             ensureInitializedRTE();
-            return super.size();
+            return super.getHashSize();
         }
 
         @Override
-        public boolean isEmpty() {
+        public boolean isEmptyHash() {
             ensureInitializedRTE();
-            return super.isEmpty();
+            return super.isEmptyHash();
         }
 
         @Override

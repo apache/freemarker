@@ -95,7 +95,7 @@ class BuiltInsForStringsBasic {
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             return new BIMethod(target.evalAndCoerceToStringOrUnsupportedMarkup(env,
-                    "For sequences/collections (lists and such) use \"?seqContains\" instead."));
+                    "For iterables (like sequences) use \"?seqContains\" instead."));
         }
     }
 
@@ -252,7 +252,7 @@ class BuiltInsForStringsBasic {
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {
             return new BIMethod(target.evalAndCoerceToStringOrUnsupportedMarkup(env,
-                    "For sequences/collections (lists and such) use \"?seqIndexOf\" instead."));
+                    "For iterables (like seqiences) use \"?seqIndexOf\" instead."));
         }
     }
     

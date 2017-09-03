@@ -32,107 +32,58 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
 
 /**
  * A simple implementation of {@link TemplateCollectionModel}.
- * It's able to wrap <tt>java.util.Iterator</tt>-s and <tt>java.util.Collection</tt>-s.
- * If you wrap an <tt>Iterator</tt>, the variable can be &lt;#list&gt;-ed only once!
- *
- * <p>Consider using {@link SimpleSequence} instead of this class if you want to wrap <tt>Iterator</tt>s.
- * <tt>SimpleSequence</tt> will read all elements of the <tt>Iterator</tt>, and store them in a <tt>List</tt>
- * (this may cause too high resource consumption in some applications), so you can list the variable
- * for unlimited times. Also, if you want to wrap <tt>Collection</tt>s, and then list the resulting
- * variable for many times, <tt>SimpleSequence</tt> may gives better performance, as the
- * wrapping of non-<tt>TemplateModel</tt> objects happens only once.
- *
- * <p>This class is thread-safe. The returned {@link TemplateModelIterator}-s
- * are <em>not</em> thread-safe.
+ * <p>
+ * This class is thread-safe. The returned {@link TemplateModelIterator}-s are <em>not</em> thread-safe.
  */
-public class SimpleCollection extends WrappingTemplateModel
-implements TemplateCollectionModel, Serializable {
-    
-    private boolean iteratorOwned;
-    private final Iterator iterator;
-    private final Collection collection;
+public class SimpleCollection extends WrappingTemplateModel implements TemplateCollectionModel, Serializable {
 
-    public SimpleCollection(Iterator iterator, ObjectWrapper wrapper) {
-        super(wrapper);
-        this.iterator = iterator;
-        collection = null;
-    }
+    private final Collection<?> collection;
 
-    public SimpleCollection(Collection collection, ObjectWrapper wrapper) {
+    public SimpleCollection(Collection<?> collection, ObjectWrapper wrapper) {
         super(wrapper);
         this.collection = collection;
-        iterator = null;
+    }
+
+    @Override
+    public int getCollectionSize() throws TemplateException {
+        return collection.size();
+    }
+
+    @Override
+    public boolean isEmptyCollection() throws TemplateException {
+        return collection.isEmpty();
     }
 
     /**
-     * Retrieves a template model iterator that is used to iterate over the elements in this collection.
-     *  
-     * <p>When you wrap an <tt>Iterator</tt> and you get <tt>TemplateModelIterator</tt> for multiple times,
-     * only one of the returned <tt>TemplateModelIterator</tt> instances can be really used. When you have called a
-     * method of a <tt>TemplateModelIterator</tt> instance, all other instance will throw a
-     * {@link TemplateException} when you try to call their methods, since the wrapped <tt>Iterator</tt>
-     * can't return the first element anymore.
+     * Retrieves a template model iterator that is used to iterate over the elements in this iterable.
      */
     @Override
     public TemplateModelIterator iterator() {
-        return iterator != null
-                ? new SimpleTemplateModelIterator(iterator, false)
-                : new SimpleTemplateModelIterator(collection.iterator(), true);
+        return new SimpleTemplateModelIterator(collection.iterator());
     }
     
     /**
-     * Wraps an {@link Iterator}; not thread-safe. The encapsulated {@link Iterator} may be accessible from multiple
-     * threads (as multiple {@link SimpleTemplateModelIterator} instance can wrap the same {@link Iterator} instance),
-     * but if the {@link Iterator} was marked in the constructor as shared, the first thread which uses the
-     * {@link Iterator} will monopolize that.
+     * Wraps an {@link Iterator}; not thread-safe.
      */
     private class SimpleTemplateModelIterator implements TemplateModelIterator {
         
-        private final Iterator iterator;
-        private boolean iteratorOwnedByMe;
-            
-        SimpleTemplateModelIterator(Iterator iterator, boolean iteratorOwnedByMe) {
+        private final Iterator<?> iterator;
+
+        SimpleTemplateModelIterator(Iterator<?> iterator) {
             this.iterator = iterator;
-            this.iteratorOwnedByMe = iteratorOwnedByMe;
         }
 
         @Override
         public TemplateModel next() throws TemplateException {
-            if (!iteratorOwnedByMe) { 
-                synchronized (SimpleCollection.this) {
-                    checkIteratorNotOwned();
-                    iteratorOwned = true;
-                    iteratorOwnedByMe = true;
-                }
-            }
-            
-            if (!iterator.hasNext()) {
-                throw new TemplateException("The collection has no more items.");
-            }
-            
             Object value  = iterator.next();
             return value instanceof TemplateModel ? (TemplateModel) value : wrap(value);
         }
 
         @Override
         public boolean hasNext() throws TemplateException {
-            // Calling hasNext may looks safe, but I have met sync. problems.
-            if (!iteratorOwnedByMe) {
-                synchronized (SimpleCollection.this) {
-                    checkIteratorNotOwned();
-                }
-            }
-            
             return iterator.hasNext();
         }
-        
-        private void checkIteratorNotOwned() throws TemplateException {
-            if (iteratorOwned) {
-                throw new TemplateException(
-                        "This collection value wraps a java.util.Iterator, thus it can be listed only once.");
-            }
-        }
-        
+
     }
     
 }

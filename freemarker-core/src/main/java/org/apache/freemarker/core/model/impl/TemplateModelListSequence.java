@@ -19,16 +19,17 @@
 
 package org.apache.freemarker.core.model.impl;
 
+import java.util.Iterator;
 import java.util.List;
 
-import org.apache.freemarker.core.model.TemplateFunctionModel;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 
 /**
  * A sequence that wraps a {@link List} of {@link TemplateModel}-s. It does not copy the original
- * list. It's mostly useful when implementing {@link TemplateFunctionModel}-es that collect items from other
- * {@link TemplateModel}-s.
+ * list. The thread safety (and other behavior in face on concurrency) remains the same as of the wrapped list.
  */
 public class TemplateModelListSequence implements TemplateSequenceModel {
     
@@ -43,12 +44,34 @@ public class TemplateModelListSequence implements TemplateSequenceModel {
 
     @Override
     public TemplateModel get(int index) {
-        return list.get(index);
+        return index < list.size() && index >= 0 ? list.get(index) : null;
     }
 
     @Override
-    public int size() {
+    public int getCollectionSize() {
         return list.size();
+    }
+
+    @Override
+    public boolean isEmptyCollection() throws TemplateException {
+        return list.isEmpty();
+    }
+
+    @Override
+    public TemplateModelIterator iterator() throws TemplateException {
+        return new TemplateModelIterator() {
+            private final Iterator<? extends TemplateModel> iterator = list.iterator();
+
+            @Override
+            public TemplateModel next() throws TemplateException {
+                return iterator.next();
+            }
+
+            @Override
+            public boolean hasNext() throws TemplateException {
+                return iterator.hasNext();
+            }
+        };
     }
 
     /**

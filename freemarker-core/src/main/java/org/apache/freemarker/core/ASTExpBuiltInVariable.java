@@ -239,7 +239,7 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         }
         
         @Override
-        public boolean isEmpty() {
+        public boolean isEmptyHash() {
             return false;
         }
     }

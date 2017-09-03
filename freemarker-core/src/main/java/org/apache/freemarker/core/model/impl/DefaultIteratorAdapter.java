@@ -25,7 +25,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
@@ -36,7 +36,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Adapts an {@link Iterator} to the corresponding {@link TemplateModel} interface(s), most importantly to
- * {@link TemplateCollectionModel}. The resulting {@link TemplateCollectionModel} can only be listed (iterated) once.
+ * {@link TemplateIterableModel}. The resulting {@link TemplateIterableModel} can only be listed (iterated) once.
  * If the user tries list the variable for a second time, an exception will be thrown instead of silently gettig an
  * empty (or partial) listing.
  * 
@@ -49,7 +49,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * This adapter is used by {@link DefaultObjectWrapper} if its {@code useAdaptersForCollections} property is
  * {@code true}, which is the default when its {@code incompatibleImprovements} property is 2.3.22 or higher.
  */
-public class DefaultIteratorAdapter extends WrappingTemplateModel implements TemplateCollectionModel,
+public class DefaultIteratorAdapter extends WrappingTemplateModel implements TemplateIterableModel,
         AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport {
 
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="We hope it's Seralizable")
@@ -106,10 +106,6 @@ public class DefaultIteratorAdapter extends WrappingTemplateModel implements Tem
                 iteratorOwnedByMe = true;
             }
 
-            if (!iterator.hasNext()) {
-                throw new TemplateException("The collection has no more items.");
-            }
-
             Object value = iterator.next();
             return value instanceof TemplateModel ? (TemplateModel) value : wrap(value);
         }
@@ -127,7 +123,7 @@ public class DefaultIteratorAdapter extends WrappingTemplateModel implements Tem
         private void checkNotOwner() throws TemplateException {
             if (iteratorOwnedBySomeone) {
                 throw new TemplateException(
-                        "This collection value wraps a java.util.Iterator, thus it can be listed only once.");
+                        "This value wraps a java.util.Iterator, thus it can be listed only once.");
             }
         }
     }

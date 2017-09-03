@@ -23,33 +23,12 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.SimpleString;
 
 public class HashAndStringModel implements TemplateHashModelEx, TemplateStringModel {
     
     public static final HashAndStringModel INSTANCE = new HashAndStringModel();
-    
-    private final TemplateCollectionModel EMPTY_COLLECTION = new TemplateCollectionModel() {
-
-        @Override
-        public TemplateModelIterator iterator() throws TemplateException {
-            return new TemplateModelIterator() {
-
-                @Override
-                public TemplateModel next() throws TemplateException {
-                    return null;
-                }
-
-                @Override
-                public boolean hasNext() throws TemplateException {
-                    return false;
-                }
-                
-            };
-        }
-    };
 
     @Override
     public String getAsString() throws TemplateException {
@@ -62,23 +41,23 @@ public class HashAndStringModel implements TemplateHashModelEx, TemplateStringMo
     }
 
     @Override
-    public boolean isEmpty() throws TemplateException {
+    public boolean isEmptyHash() throws TemplateException {
         return true;
     }
 
     @Override
-    public int size() throws TemplateException {
+    public int getHashSize() throws TemplateException {
         return 0;
     }
 
     @Override
     public TemplateCollectionModel keys() throws TemplateException {
-        return EMPTY_COLLECTION;
+        return TemplateCollectionModel.EMPTY_COLLECTION;
     }
 
     @Override
     public TemplateCollectionModel values() throws TemplateException {
-        return EMPTY_COLLECTION;
+        return TemplateCollectionModel.EMPTY_COLLECTION;
     }
 
 }

@@ -76,7 +76,7 @@ public class BeanModel
     /**
      * Creates a new model that wraps the specified object. Note that there are
      * specialized subclasses of this class for wrapping arrays, collections,
-     * enumeration, iterators, and maps. Note also that the superclass can be
+     * enumeration, iterators, maps, etc. Note also that the superclass can be
      * used to wrap String objects if only {@link TemplateStringModel} functionality is needed. You
      * can also choose to delegate the choice over which model class is used for
      * wrapping to {@link DefaultObjectWrapper#wrap(Object)}.
@@ -189,8 +189,8 @@ public class BeanModel
                 // cachedModel remains null, as we don't cache these
             } else if (desc instanceof IndexedPropertyDescriptor) {
                 // In FreeMarker 2 we have exposed such indexed properties as sequences, but they can't support
-                // the size() method, so we have discontinued that. People has to call the indexed read method like
-                // any other method.
+                // the getCollectionSize() method, so we have discontinued that. People has to call the indexed read
+                // method like any other method.
                 resultModel = UNKNOWN;
             } else {
                 throw new IllegalStateException("PropertyDescriptor.readMethod shouldn't be null");
@@ -251,7 +251,7 @@ public class BeanModel
      * {@link Map}, or an {@link Iterator} that has no more items, or a {@link Boolean#FALSE}, or {@code null}. 
      */
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyHash() {
         if (object instanceof String) {
             return ((String) object).length() == 0;
         }
@@ -283,24 +283,24 @@ public class BeanModel
     }
     
     @Override
-    public int size() {
+    public int getHashSize() {
         return wrapper.getClassIntrospector().keyCount(object.getClass());
     }
 
     @Override
     public TemplateCollectionModel keys() {
-        return new CollectionAndSequence(new SimpleSequence(keySet(), wrapper));
+        return new IterableAndSequence(DefaultNonListCollectionAdapter.adapt(keySet(), wrapper));
     }
 
     @Override
     public TemplateCollectionModel values() throws TemplateException {
-        List<Object> values = new ArrayList<>(size());
+        List<Object> values = new ArrayList<>(getHashSize());
         TemplateModelIterator it = keys().iterator();
         while (it.hasNext()) {
             String key = ((TemplateStringModel) it.next()).getAsString();
             values.add(get(key));
         }
-        return new CollectionAndSequence(new SimpleSequence(values, wrapper));
+        return new IterableAndSequence(DefaultNonListCollectionAdapter.adapt(values, wrapper));
     }
     
     @Override
@@ -314,7 +314,7 @@ public class BeanModel
      * interface. Subclasses that override <tt>invokeGenericGet</tt> to
      * provide additional hash keys should also override this method.
      */
-    protected Set/*<Object>*/ keySet() {
+    protected Set<String> keySet() {
         return wrapper.getClassIntrospector().keySet(object.getClass());
     }
 

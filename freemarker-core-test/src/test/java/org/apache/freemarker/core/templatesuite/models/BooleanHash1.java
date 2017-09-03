@@ -25,7 +25,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleString;
 
 /**
- * Tests the impact that the isEmpty() has on template hash models.
+ * Tests the impact that the isEmptyHash() has on template hash models.
  */
 public class BooleanHash1 implements TemplateHashModel {
 
@@ -52,7 +52,7 @@ public class BooleanHash1 implements TemplateHashModel {
      * @return true if this object is empty.
      */
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyHash() {
         return true;
     }
 }

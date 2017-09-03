@@ -28,7 +28,7 @@ import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.impl.CollectionAndSequence;
+import org.apache.freemarker.core.model.impl.IterableAndSequence;
 
 /**
  * AST expression node: <tt>{ keyExp: valueExp, ... }</tt> 
@@ -123,14 +123,14 @@ final class ASTExpHashLiteral extends ASTExpression {
         }
 
         @Override
-        public int size() {
+        public int getHashSize() {
             return size;
         }
 
         @Override
         public TemplateCollectionModel keys() {
             if (keyCollection == null) {
-                keyCollection = new CollectionAndSequence(new NativeStringCollectionCollectionEx(map.keySet()));
+                keyCollection = new IterableAndSequence(new NativeStringCollectionCollection(map.keySet()));
             }
             return keyCollection;
         }
@@ -138,7 +138,7 @@ final class ASTExpHashLiteral extends ASTExpression {
         @Override
         public TemplateCollectionModel values() {
             if (valueCollection == null) {
-                valueCollection = new CollectionAndSequence(new NativeCollectionEx(map.values()));
+                valueCollection = new IterableAndSequence(new NativeCollection(map.values()));
             }
             return valueCollection;
         }
@@ -149,7 +149,7 @@ final class ASTExpHashLiteral extends ASTExpression {
         }
 
         @Override
-        public boolean isEmpty() {
+        public boolean isEmptyHash() {
             return size == 0;
         }
         

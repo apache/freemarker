@@ -26,7 +26,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
@@ -37,11 +37,11 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Adapts an {@link Enumeration} to the corresponding {@link TemplateModel} interface(s), most importantly to
- * {@link TemplateCollectionModel}. Putting aside that it wraps an {@link Enumeration} instead of an {@link Iterator},
+ * {@link TemplateIterableModel}. Putting aside that it wraps an {@link Enumeration} instead of an {@link Iterator},
  * this is identical to {@link DefaultIteratorAdapter}, so see further details there.
  */
 @SuppressWarnings("serial")
-public class DefaultEnumerationAdapter extends WrappingTemplateModel implements TemplateCollectionModel,
+public class DefaultEnumerationAdapter extends WrappingTemplateModel implements TemplateIterableModel,
         AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport {
 
     @SuppressFBWarnings(value="SE_BAD_FIELD", justification="We hope it's Seralizable")
@@ -98,10 +98,6 @@ public class DefaultEnumerationAdapter extends WrappingTemplateModel implements 
                 enumerationOwnedByMe = true;
             }
 
-            if (!enumeration.hasMoreElements()) {
-                throw new TemplateException("The collection has no more items.");
-            }
-
             Object value = enumeration.nextElement();
             return value instanceof TemplateModel ? (TemplateModel) value : wrap(value);
         }
@@ -119,7 +115,7 @@ public class DefaultEnumerationAdapter extends WrappingTemplateModel implements 
         private void checkNotOwner() throws TemplateException {
             if (enumerationOwnedBySomeone) {
                 throw new TemplateException(
-                        "This collection value wraps a java.util.Enumeration, thus it can be listed only once.");
+                        "This iterator value wraps a java.util.Enumeration, thus it can be listed only once.");
             }
         }
     }

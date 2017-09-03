@@ -45,7 +45,7 @@ class NativeHashEx2 implements TemplateHashModelEx2, Serializable {
     }
 
     @Override
-    public int size() throws TemplateException {
+    public int getHashSize() throws TemplateException {
         return map.size();
     }
 
@@ -55,7 +55,7 @@ class NativeHashEx2 implements TemplateHashModelEx2, Serializable {
     }
 
     @Override
-    public boolean isEmpty() throws TemplateException {
+    public boolean isEmptyHash() throws TemplateException {
         return map.isEmpty();
     }
 
@@ -90,12 +90,12 @@ class NativeHashEx2 implements TemplateHashModelEx2, Serializable {
 
     @Override
     public TemplateCollectionModel keys() throws TemplateException {
-        return new NativeStringCollectionCollectionEx(map.keySet());
+        return new NativeStringCollectionCollection(map.keySet());
     }
 
     @Override
     public TemplateCollectionModel values() throws TemplateException {
-        return new NativeCollectionEx(map.values());
+        return new NativeCollection(map.values());
     }
 
     public TemplateModel put(String key, TemplateModel value) {

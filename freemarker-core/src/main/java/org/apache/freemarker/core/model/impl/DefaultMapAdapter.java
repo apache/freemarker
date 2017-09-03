@@ -66,7 +66,7 @@ public class DefaultMapAdapter extends WrappingTemplateModel
         return new DefaultMapAdapter(map, wrapper);
     }
     
-    private DefaultMapAdapter(Map map, ObjectWrapper wrapper) {
+    private DefaultMapAdapter(Map map, ObjectWrapperWithAPISupport wrapper) {
         super(wrapper);
         this.map = map;
     }
@@ -124,23 +124,23 @@ public class DefaultMapAdapter extends WrappingTemplateModel
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyHash() {
         return map.isEmpty();
     }
 
     @Override
-    public int size() {
+    public int getHashSize() {
         return map.size();
     }
 
     @Override
     public TemplateCollectionModel keys() {
-        return new SimpleCollection(map.keySet(), getObjectWrapper());
+        return DefaultNonListCollectionAdapter.adapt(map.keySet(), (ObjectWrapperWithAPISupport) getObjectWrapper());
     }
 
     @Override
     public TemplateCollectionModel values() {
-        return new SimpleCollection(map.values(), getObjectWrapper());
+        return DefaultNonListCollectionAdapter.adapt(map.values(), (ObjectWrapperWithAPISupport) getObjectWrapper());
     }
 
     @Override

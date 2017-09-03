@@ -17,16 +17,15 @@
  * under the License.
  */
 
-package org.apache.freemarker.core.model.impl;
+package org.apache.freemarker.core.model;
 
-import java.util.Set;
+import org.apache.freemarker.core.TemplateException;
 
-import org.apache.freemarker.core.model.TemplateCollectionModel;
+class EmptyIterableModel implements TemplateIterableModel {
 
-/**
- */
-class SetAdapter extends CollectionAdapter implements Set {
-    SetAdapter(TemplateCollectionModel model, DefaultObjectWrapper wrapper) {
-        super(model, wrapper);
+    @Override
+    public TemplateModelIterator iterator() throws TemplateException {
+        return TemplateModelIterator.EMPTY_ITERATOR;
     }
+
 }

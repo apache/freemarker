@@ -31,8 +31,18 @@ class EmptySequenceModel implements TemplateSequenceModel, Serializable {
     }
 
     @Override
-    public int size() throws TemplateException {
+    public int getCollectionSize() throws TemplateException {
         return 0;
+    }
+
+    @Override
+    public boolean isEmptyCollection() throws TemplateException {
+        return true;
+    }
+
+    @Override
+    public TemplateModelIterator iterator() throws TemplateException {
+        return TemplateModelIterator.EMPTY_ITERATOR;
     }
 
 }

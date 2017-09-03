@@ -26,8 +26,8 @@ import org.apache.freemarker.core._CoreAPI;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCallableModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateCollectionModelEx;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
@@ -757,7 +757,7 @@ public final class TemplateLanguageUtils {
 
     /**
      * Return the template language type name of the value as it should be shown in error messages, considering {@link
-     * TemplateCollectionModel} subinterfaces only.
+     * TemplateIterableModel} subinterfaces only.
      *
      * @param callable
      *         Can't be {@code null}.
@@ -857,9 +857,9 @@ public final class TemplateLanguageUtils {
 
         if (TemplateSequenceModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "sequence");
-        } else if (TemplateCollectionModel.class.isAssignableFrom(cl)) {
+        } else if (TemplateIterableModel.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended,
-                    TemplateCollectionModelEx.class.isAssignableFrom(cl) ? "extended_collection" : "collection");
+                    TemplateCollectionModel.class.isAssignableFrom(cl) ? "collection" : "iterable");
         } else if (TemplateModelIterator.class.isAssignableFrom(cl)) {
             appendTypeName(sb, typeNamesAppended, "iterator");
         }

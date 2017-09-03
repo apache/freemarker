@@ -21,11 +21,8 @@ package org.apache.freemarker.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.ListIterator;
 
-import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 
@@ -34,9 +31,9 @@ import org.apache.freemarker.core.model.TemplateSequenceModel;
  */
 final class ASTExpListLiteral extends ASTExpression {
 
-    final ArrayList/*<ASTExpression>*/ items;
+    final ArrayList<ASTExpression> items;
 
-    ASTExpListLiteral(ArrayList items) {
+    ASTExpListLiteral(ArrayList<ASTExpression> items) {
         this.items = items;
         items.trimToSize();
     }
@@ -53,30 +50,6 @@ final class ASTExpListLiteral extends ASTExpression {
         return list;
     }
 
-    /**
-     * For {@link TemplateFunctionModel} calls, returns the list of arguments as {@link TemplateModel}-s.
-     */
-    // TODO [FM3][CF] This will be removed
-    List<TemplateModel> getModelList(Environment env) throws TemplateException {
-        int size = items.size();
-        switch(size) {
-            case 0: {
-                return Collections.emptyList();
-            }
-            case 1: {
-                return Collections.singletonList(((ASTExpression) items.get(0)).eval(env));
-            }
-            default: {
-                List result = new ArrayList(items.size());
-                for (ListIterator iterator = items.listIterator(); iterator.hasNext(); ) {
-                    ASTExpression exp = (ASTExpression) iterator.next();
-                    result.add(exp.eval(env));
-                }
-                return result;
-            }
-        }
-    }
-
     public int size() {
         return items.size();
     }
@@ -86,7 +59,7 @@ final class ASTExpListLiteral extends ASTExpression {
         StringBuilder buf = new StringBuilder("[");
         int size = items.size();
         for (int i = 0; i < size; i++) {
-            ASTExpression value = (ASTExpression) items.get(i);
+            ASTExpression value = items.get(i);
             buf.append(value.getCanonicalForm());
             if (i != size - 1) {
                 buf.append(", ");
@@ -107,7 +80,7 @@ final class ASTExpListLiteral extends ASTExpression {
             return true;
         }
         for (int i = 0; i < items.size(); i++) {
-            ASTExpression exp = (ASTExpression) items.get(i);
+            ASTExpression exp = items.get(i);
             if (!exp.isLiteral()) {
                 return false;
             }
@@ -118,7 +91,7 @@ final class ASTExpListLiteral extends ASTExpression {
     // A hacky routine used by ASTDirVisit and ASTDirRecurse
     TemplateSequenceModel evaluateStringsToNamespaces(Environment env) throws TemplateException {
         TemplateSequenceModel val = (TemplateSequenceModel) eval(env);
-        NativeSequence result = new NativeSequence(val.size());
+        NativeSequence result = new NativeSequence(val.getCollectionSize());
         for (int i = 0; i < items.size(); i++) {
             Object itemExpr = items.get(i);
             if (itemExpr instanceof ASTExpStringLiteral) {
@@ -138,12 +111,13 @@ final class ASTExpListLiteral extends ASTExpression {
         return result;
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     protected ASTExpression deepCloneWithIdentifierReplaced_inner(
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
-		ArrayList clonedValues = (ArrayList) items.clone();
-		for (ListIterator iter = clonedValues.listIterator(); iter.hasNext(); ) {
-            iter.set(((ASTExpression) iter.next()).deepCloneWithIdentifierReplaced(
+        ArrayList<ASTExpression> clonedValues = (ArrayList<ASTExpression>) items.clone();
+		for (ListIterator<ASTExpression> iter = clonedValues.listIterator(); iter.hasNext(); ) {
+            iter.set(iter.next().deepCloneWithIdentifierReplaced(
                     replacedIdentifier, replacement, replacementState));
         }
         return new ASTExpListLiteral(clonedValues);

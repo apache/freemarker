@@ -62,12 +62,12 @@ public final class HttpRequestHashModel implements TemplateHashModelEx {
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyHash() {
         return !request.getAttributeNames().hasMoreElements();
     }
     
     @Override
-    public int size() {
+    public int getHashSize() {
         int result = 0;
         for (Enumeration enumeration = request.getAttributeNames(); enumeration.hasMoreElements(); ) {
             enumeration.nextElement();
@@ -82,7 +82,7 @@ public final class HttpRequestHashModel implements TemplateHashModelEx {
         for (Enumeration enumeration = request.getAttributeNames(); enumeration.hasMoreElements(); ) {
             keys.add(enumeration.nextElement());
         }
-        return new SimpleCollection(keys.iterator(), wrapper);
+        return new SimpleCollection(keys, wrapper);
     }
     
     @Override
@@ -91,7 +91,7 @@ public final class HttpRequestHashModel implements TemplateHashModelEx {
         for (Enumeration enumeration = request.getAttributeNames(); enumeration.hasMoreElements(); ) {
             values.add(request.getAttribute((String) enumeration.nextElement()));
         }
-        return new SimpleCollection(values.iterator(), wrapper);
+        return new SimpleCollection(values, wrapper);
     }
 
     public HttpServletRequest getRequest() {

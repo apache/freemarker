@@ -25,15 +25,14 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateHashModelEx2.KeyValuePair;
 import org.apache.freemarker.core.model.TemplateHashModelEx2.KeyValuePairIterator;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateStringModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.util._StringUtils;
 
@@ -50,7 +49,7 @@ final class ASTDirList extends ASTDirective {
 
     /**
      * @param listedExp
-     *            a variable referring to a sequence or collection or extended hash to list
+     *            a variable referring to an iterable or extended hash that we want to list
      * @param nestedContentParamName
      *            The name of the variable that will hold the value of the current item when looping through listed value,
      *            or {@code null} if we have a nested {@code #items}. If this is a hash listing then this variable will holds the value
@@ -252,15 +251,15 @@ final class ASTDirList extends ASTDirective {
         private boolean executeNestedContent(Environment env, ASTElement[] childBuffer)
                 throws TemplateException, IOException {
             return !hashListing
-                    ? executedNestedContentForCollOrSeqListing(env, childBuffer)
+                    ? executedNestedContentForIterableListing(env, childBuffer)
                     : executedNestedContentForHashListing(env, childBuffer);
         }
 
-        private boolean executedNestedContentForCollOrSeqListing(Environment env, ASTElement[] childBuffer)
+        private boolean executedNestedContentForIterableListing(Environment env, ASTElement[] childBuffer)
                 throws IOException, TemplateException {
             final boolean listNotEmpty;
-            if (listedValue instanceof TemplateCollectionModel) {
-                final TemplateCollectionModel collModel = (TemplateCollectionModel) listedValue;
+            if (listedValue instanceof TemplateIterableModel) {
+                final TemplateIterableModel collModel = (TemplateIterableModel) listedValue;
                 final TemplateModelIterator iterModel
                         = openedIterator == null ? collModel.iterator()
                                 : ((TemplateModelIterator) openedIterator);
@@ -279,28 +278,9 @@ final class ASTDirList extends ASTDirective {
                         }
                         openedIterator = null;
                     } else {
-                        // We must reuse this later, because TemplateCollectionModel-s that wrap an Iterator only
+                        // We must reuse this later, because TemplateIterableModel-s that wrap an Iterator only
                         // allow one iterator() call.
                         openedIterator = iterModel;
-                        env.visit(childBuffer);
-                    }
-                }
-            } else if (listedValue instanceof TemplateSequenceModel) {
-                final TemplateSequenceModel seqModel = (TemplateSequenceModel) listedValue;
-                final int size = seqModel.size();
-                listNotEmpty = size != 0;
-                if (listNotEmpty) {
-                    if (nestedContentParam1Name != null) {
-                        try {
-                            for (index = 0; index < size; index++) {
-                                nestedContentParam = seqModel.get(index);
-                                hasNext = (size > index + 1);
-                                env.visit(childBuffer);
-                            }
-                        } catch (ASTDirBreak.Break br) {
-                            // Silently exit loop
-                        }
-                    } else {
                         env.visit(childBuffer);
                     }
                 }
@@ -314,8 +294,8 @@ final class ASTDirList extends ASTDirective {
             } else {
                 throw MessageUtils.newUnexpectedOperandTypeException(
                         listedExp, listedValue,
-                        MessageUtils.SEQUENCE_OR_COLLECTION,
-                        MessageUtils.EXPECTED_TYPES_SEQUENCE_OR_COLLECTION,
+                        MessageUtils.EXPECTED_TYPE_ITERABLE_DESC,
+                        TemplateIterableModel.class,
                         null, env);
             }
             return listNotEmpty;
@@ -390,8 +370,7 @@ final class ASTDirList extends ASTDirective {
                         }
                     }
                 }
-            } else if (listedValue instanceof TemplateCollectionModel
-                    || listedValue instanceof TemplateSequenceModel) {
+            } else if (listedValue instanceof TemplateIterableModel) {
                 throw new TemplateException(env,
                         new _ErrorDescriptionBuilder("The value you try to list is ",
                                 new _DelayedAOrAn(new _DelayedTemplateLanguageTypeDescription(listedValue)),

@@ -28,12 +28,12 @@ import org.apache.freemarker.core.TemplateException;
  * It is meant to be interpreted in the most sensible way possible in various contexts.
  * This can be returned to avoid exceptions.
  */
-
+// TODO [FM3] As `exp!` doesn't use this, are the other use cases necessary and correct?
 final class GeneralPurposeNothing
 implements TemplateBooleanModel, TemplateStringModel, TemplateSequenceModel, TemplateHashModelEx2,
         TemplateFunctionModel {
 
-    public static final TemplateModel INSTANCE = new GeneralPurposeNothing();
+    static final TemplateModel INSTANCE = new GeneralPurposeNothing();
 
     private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(
             0, true,
@@ -53,23 +53,38 @@ implements TemplateBooleanModel, TemplateStringModel, TemplateSequenceModel, Tem
     }
 
     @Override
-    public boolean isEmpty() {
-        return true;
-    }
-
-    @Override
-    public int size() {
+    public int getHashSize() throws TemplateException {
         return 0;
     }
 
     @Override
+    public boolean isEmptyHash() {
+        return true;
+    }
+
+    @Override
+    public int getCollectionSize() {
+        return 0;
+    }
+
+    @Override
+    public boolean isEmptyCollection() throws TemplateException {
+        return true;
+    }
+
+    @Override
     public TemplateModel get(int i) throws TemplateException {
-        throw new TemplateException("Can't get item from an empty sequence.");
+        return null;
     }
 
     @Override
     public TemplateModel get(String key) {
         return null;
+    }
+
+    @Override
+    public TemplateModelIterator iterator() throws TemplateException {
+        return TemplateModelIterator.EMPTY_ITERATOR;
     }
 
     @Override

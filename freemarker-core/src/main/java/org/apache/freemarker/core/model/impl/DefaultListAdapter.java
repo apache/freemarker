@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.util.AbstractSequentialList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.freemarker.core.TemplateException;
@@ -27,7 +27,6 @@ import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperWithAPISupport;
 import org.apache.freemarker.core.model.RichObjectWrapper;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
@@ -41,9 +40,11 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
  * specifically to be used from a template, also consider using {@link SimpleSequence} (see comparison there).
  * 
  * <p>
- * Thread safety: A {@link DefaultListAdapter} is as thread-safe as the {@link List} that it wraps is. Normally you only
- * have to consider read-only access, as the FreeMarker template language doesn't allow writing these sequences (though
- * of course, Java methods called from the template can violate this rule).
+ * Thread safety: A {@link DefaultListAdapter} is as thread-safe as the {@link List} that it wraps is. Also,
+ * {@link #iterator()} will return a {@link TemplateModelIterator} that is as thread-safe as the {@link Iterator}
+ * that the wrapped {@link List} returns.
+ * Note that normally you only have to consider read-only access, as the FreeMarker template language doesn't allow
+ * writing these sequences (though of course, Java methods called from the template can violate this rule).
  * 
  * <p>
  * This adapter is used by {@link DefaultObjectWrapper} if its {@code useAdaptersForCollections} property is
@@ -67,10 +68,7 @@ public class DefaultListAdapter extends WrappingTemplateModel implements Templat
      *            The {@link ObjectWrapper} used to wrap the items in the array.
      */
     public static DefaultListAdapter adapt(List list, RichObjectWrapper wrapper) {
-        // [2.4] DefaultListAdapter should implement TemplateCollectionModelEx, so this choice becomes unnecessary
-        return list instanceof AbstractSequentialList
-                ? new DefaultListAdapterWithCollectionSupport(list, wrapper)
-                : new DefaultListAdapter(list, wrapper);
+        return new DefaultListAdapter(list, wrapper);
     }
 
     private DefaultListAdapter(List list, RichObjectWrapper wrapper) {
@@ -84,8 +82,18 @@ public class DefaultListAdapter extends WrappingTemplateModel implements Templat
     }
 
     @Override
-    public int size() throws TemplateException {
+    public int getCollectionSize() throws TemplateException {
         return list.size();
+    }
+
+    @Override
+    public boolean isEmptyCollection() throws TemplateException {
+        return list.isEmpty();
+    }
+
+    @Override
+    public TemplateModelIterator iterator() throws TemplateException {
+        return new IteratorToTemplateModelIteratorAdapter(list.iterator(), getObjectWrapper());
     }
 
     @Override
@@ -96,20 +104,6 @@ public class DefaultListAdapter extends WrappingTemplateModel implements Templat
     @Override
     public Object getWrappedObject() {
         return list;
-    }
-
-    private static class DefaultListAdapterWithCollectionSupport extends DefaultListAdapter implements
-            TemplateCollectionModel {
-
-        private DefaultListAdapterWithCollectionSupport(List list, RichObjectWrapper wrapper) {
-            super(list, wrapper);
-        }
-
-        @Override
-        public TemplateModelIterator iterator() throws TemplateException {
-            return new DefaultUnassignableIteratorAdapter(list.iterator(), getObjectWrapper());
-        }
-
     }
 
     @Override

@@ -27,6 +27,7 @@ import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
@@ -122,8 +123,30 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
         }
 
         @Override
-        public int size() throws TemplateException {
+        public int getCollectionSize() throws TemplateException {
             return array.length;
+        }
+
+        @Override
+        public boolean isEmptyCollection() throws TemplateException {
+            return array.length == 0;
+        }
+
+        @Override
+        public TemplateModelIterator iterator() throws TemplateException {
+            return new TemplateModelIterator() {
+                private int nextIndex;
+
+                @Override
+                public TemplateModel next() throws TemplateException {
+                    return wrap(array[nextIndex++]);
+                }
+
+                @Override
+                public boolean hasNext() throws TemplateException {
+                    return nextIndex < array.length;
+                }
+            };
         }
 
         @Override
@@ -144,12 +167,35 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
 
         @Override
         public TemplateModel get(int index) throws TemplateException {
-            return index >= 0 && index < array.length ? wrap(Byte.valueOf(array[index])) : null;
+            return index >= 0 && index < array.length ? wrap(array[index]) : null;
         }
 
         @Override
-        public int size() throws TemplateException {
+        public int getCollectionSize() throws TemplateException {
             return array.length;
+        }
+
+
+        @Override
+        public boolean isEmptyCollection() throws TemplateException {
+            return array.length == 0;
+        }
+
+        @Override
+        public TemplateModelIterator iterator() throws TemplateException {
+            return new TemplateModelIterator() {
+                private int nextIndex;
+
+                @Override
+                public TemplateModel next() throws TemplateException {
+                    return wrap(array[nextIndex++]);
+                }
+
+                @Override
+                public boolean hasNext() throws TemplateException {
+                    return nextIndex < array.length;
+                }
+            };
         }
 
         @Override
@@ -170,12 +216,34 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
 
         @Override
         public TemplateModel get(int index) throws TemplateException {
-            return index >= 0 && index < array.length ? wrap(Short.valueOf(array[index])) : null;
+            return index >= 0 && index < array.length ? wrap(array[index]) : null;
         }
 
         @Override
-        public int size() throws TemplateException {
+        public int getCollectionSize() throws TemplateException {
             return array.length;
+        }
+
+        @Override
+        public boolean isEmptyCollection() throws TemplateException {
+            return array.length == 0;
+        }
+
+        @Override
+        public TemplateModelIterator iterator() throws TemplateException {
+            return new TemplateModelIterator() {
+                private int nextIndex;
+
+                @Override
+                public TemplateModel next() throws TemplateException {
+                    return wrap(array[nextIndex++]);
+                }
+
+                @Override
+                public boolean hasNext() throws TemplateException {
+                    return nextIndex < array.length;
+                }
+            };
         }
 
         @Override
@@ -196,12 +264,34 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
 
         @Override
         public TemplateModel get(int index) throws TemplateException {
-            return index >= 0 && index < array.length ? wrap(Integer.valueOf(array[index])) : null;
+            return index >= 0 && index < array.length ? wrap(array[index]) : null;
         }
 
         @Override
-        public int size() throws TemplateException {
+        public int getCollectionSize() throws TemplateException {
             return array.length;
+        }
+
+        @Override
+        public boolean isEmptyCollection() throws TemplateException {
+            return array.length == 0;
+        }
+
+        @Override
+        public TemplateModelIterator iterator() throws TemplateException {
+            return new TemplateModelIterator() {
+                private int nextIndex;
+
+                @Override
+                public TemplateModel next() throws TemplateException {
+                    return wrap(array[nextIndex++]);
+                }
+
+                @Override
+                public boolean hasNext() throws TemplateException {
+                    return nextIndex < array.length;
+                }
+            };
         }
 
         @Override
@@ -222,12 +312,34 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
 
         @Override
         public TemplateModel get(int index) throws TemplateException {
-            return index >= 0 && index < array.length ? wrap(Long.valueOf(array[index])) : null;
+            return index >= 0 && index < array.length ? wrap(array[index]) : null;
         }
 
         @Override
-        public int size() throws TemplateException {
+        public int getCollectionSize() throws TemplateException {
             return array.length;
+        }
+
+        @Override
+        public boolean isEmptyCollection() throws TemplateException {
+            return array.length == 0;
+        }
+
+        @Override
+        public TemplateModelIterator iterator() throws TemplateException {
+            return new TemplateModelIterator() {
+                private int nextIndex;
+
+                @Override
+                public TemplateModel next() throws TemplateException {
+                    return wrap(array[nextIndex++]);
+                }
+
+                @Override
+                public boolean hasNext() throws TemplateException {
+                    return nextIndex < array.length;
+                }
+            };
         }
 
         @Override
@@ -248,12 +360,34 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
 
         @Override
         public TemplateModel get(int index) throws TemplateException {
-            return index >= 0 && index < array.length ? wrap(Float.valueOf(array[index])) : null;
+            return index >= 0 && index < array.length ? wrap(array[index]) : null;
         }
 
         @Override
-        public int size() throws TemplateException {
+        public int getCollectionSize() throws TemplateException {
             return array.length;
+        }
+
+        @Override
+        public boolean isEmptyCollection() throws TemplateException {
+            return array.length == 0;
+        }
+
+        @Override
+        public TemplateModelIterator iterator() throws TemplateException {
+            return new TemplateModelIterator() {
+                private int nextIndex;
+
+                @Override
+                public TemplateModel next() throws TemplateException {
+                    return wrap(array[nextIndex++]);
+                }
+
+                @Override
+                public boolean hasNext() throws TemplateException {
+                    return nextIndex < array.length;
+                }
+            };
         }
 
         @Override
@@ -274,12 +408,34 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
 
         @Override
         public TemplateModel get(int index) throws TemplateException {
-            return index >= 0 && index < array.length ? wrap(Double.valueOf(array[index])) : null;
+            return index >= 0 && index < array.length ? wrap(array[index]) : null;
         }
 
         @Override
-        public int size() throws TemplateException {
+        public int getCollectionSize() throws TemplateException {
             return array.length;
+        }
+
+        @Override
+        public boolean isEmptyCollection() throws TemplateException {
+            return array.length == 0;
+        }
+
+        @Override
+        public TemplateModelIterator iterator() throws TemplateException {
+            return new TemplateModelIterator() {
+                private int nextIndex;
+
+                @Override
+                public TemplateModel next() throws TemplateException {
+                    return wrap(array[nextIndex++]);
+                }
+
+                @Override
+                public boolean hasNext() throws TemplateException {
+                    return nextIndex < array.length;
+                }
+            };
         }
 
         @Override
@@ -300,12 +456,34 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
 
         @Override
         public TemplateModel get(int index) throws TemplateException {
-            return index >= 0 && index < array.length ? wrap(Character.valueOf(array[index])) : null;
+            return index >= 0 && index < array.length ? wrap(array[index]) : null;
         }
 
         @Override
-        public int size() throws TemplateException {
+        public int getCollectionSize() throws TemplateException {
             return array.length;
+        }
+
+        @Override
+        public boolean isEmptyCollection() throws TemplateException {
+            return array.length == 0;
+        }
+
+        @Override
+        public TemplateModelIterator iterator() throws TemplateException {
+            return new TemplateModelIterator() {
+                private int nextIndex;
+
+                @Override
+                public TemplateModel next() throws TemplateException {
+                    return wrap(array[nextIndex++]);
+                }
+
+                @Override
+                public boolean hasNext() throws TemplateException {
+                    return nextIndex < array.length;
+                }
+            };
         }
 
         @Override
@@ -326,12 +504,34 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
 
         @Override
         public TemplateModel get(int index) throws TemplateException {
-            return index >= 0 && index < array.length ? wrap(Boolean.valueOf(array[index])) : null;
+            return index >= 0 && index < array.length ? wrap(array[index]) : null;
         }
 
         @Override
-        public int size() throws TemplateException {
+        public int getCollectionSize() throws TemplateException {
             return array.length;
+        }
+
+        @Override
+        public boolean isEmptyCollection() throws TemplateException {
+            return array.length == 0;
+        }
+
+        @Override
+        public TemplateModelIterator iterator() throws TemplateException {
+            return new TemplateModelIterator() {
+                private int nextIndex;
+
+                @Override
+                public TemplateModel next() throws TemplateException {
+                    return wrap(array[nextIndex++]);
+                }
+
+                @Override
+                public boolean hasNext() throws TemplateException {
+                    return nextIndex < array.length;
+                }
+            };
         }
 
         @Override
@@ -361,8 +561,30 @@ public abstract class DefaultArrayAdapter extends WrappingTemplateModel implemen
         }
 
         @Override
-        public int size() throws TemplateException {
+        public int getCollectionSize() throws TemplateException {
             return length;
+        }
+
+        @Override
+        public boolean isEmptyCollection() throws TemplateException {
+            return length == 0;
+        }
+
+        @Override
+        public TemplateModelIterator iterator() throws TemplateException {
+            return new TemplateModelIterator() {
+                private int nextIndex;
+
+                @Override
+                public TemplateModel next() throws TemplateException {
+                    return wrap(Array.get(array, nextIndex++));
+                }
+
+                @Override
+                public boolean hasNext() throws TemplateException {
+                    return nextIndex < length;
+                }
+            };
         }
 
         @Override

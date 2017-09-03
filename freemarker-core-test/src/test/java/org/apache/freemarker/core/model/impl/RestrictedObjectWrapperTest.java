@@ -41,8 +41,8 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateCollectionModelEx;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
@@ -106,8 +106,8 @@ public class RestrictedObjectWrapperTest {
         assertTrue(sow.wrap(new Date()) instanceof TemplateDateModel);
         assertTrue(sow.wrap(new ArrayList()) instanceof TemplateSequenceModel);
         assertTrue(sow.wrap(new String[0]) instanceof TemplateSequenceModel);
-        assertTrue(sow.wrap(new ArrayList().iterator()) instanceof TemplateCollectionModel);
-        assertTrue(sow.wrap(new HashSet()) instanceof TemplateCollectionModelEx);
+        assertTrue(sow.wrap(new ArrayList().iterator()) instanceof TemplateIterableModel);
+        assertTrue(sow.wrap(new HashSet()) instanceof TemplateCollectionModel);
         assertTrue(sow.wrap(new HashMap()) instanceof TemplateHashModelEx2);
         assertNull(sow.wrap(null));
     }

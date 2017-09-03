@@ -31,19 +31,20 @@ abstract class RangeModel implements TemplateSequenceModel, java.io.Serializable
         this.begin = begin;
     }
 
-    final int getBegining() {
+    final int getBeginning() {
         return begin;
     }
     
     @Override
-    final public TemplateModel get(int index) throws TemplateException {
-        if (index < 0 || index >= size()) {
-            throw new TemplateException("Range item index ", Integer.valueOf(index), " is out of bounds.");
-        }
-        long value = begin + getStep() * (long) index;
+    public final TemplateModel get(int index) throws TemplateException {
+        return index < getCollectionSize() && index >= 0 ? uncheckedGet(index) : null;
+    }
+
+    protected final TemplateModel uncheckedGet(long index) {
+        long value = begin + getStep() * index;
         return value <= Integer.MAX_VALUE ? new SimpleNumber((int) value) : new SimpleNumber(value);
     }
-    
+
     /**
      * @return {@code 1} or {@code -1}; other return values need not be properly handled until FTL supports other steps.
      */
@@ -52,7 +53,5 @@ abstract class RangeModel implements TemplateSequenceModel, java.io.Serializable
     abstract boolean isRightUnbounded();
     
     abstract boolean isRightAdaptive();
-    
-    abstract boolean isAffactedByStringSlicingBug();
 
 }

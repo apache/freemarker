@@ -16,44 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.freemarker.core.model.impl;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 
 /**
- * As opposed to {@link DefaultIteratorAdapter}, this simpler {@link Iterator} adapter is used in situations where the
- * {@link TemplateModelIterator} won't be assigned to FreeMarker template variables, only used internally by
- * {@code #list} or custom Java code. Because of that, it doesn't have to handle the situation where the user tries to
- * iterate over the same value twice.
+ * {@link TemplateModelIterator} for the special case when you have exactly one element.
  */
-class DefaultUnassignableIteratorAdapter implements TemplateModelIterator {
+public class SingleItemTemplateModelIterator implements TemplateModelIterator {
 
-    private final Iterator<?> it;
-    private final ObjectWrapper wrapper;
+    private final TemplateModel element;
+    private boolean hasNext;
 
-    DefaultUnassignableIteratorAdapter(Iterator<?> it, ObjectWrapper wrapper) {
-        this.it = it;
-        this.wrapper = wrapper;
+    public SingleItemTemplateModelIterator(TemplateModel element) {
+        this.element = element;
     }
 
     @Override
     public TemplateModel next() throws TemplateException {
-        try {
-            return wrapper.wrap(it.next());
-        } catch (NoSuchElementException e) {
-            throw new TemplateException("The collection has no more items.", e);
-        }
+        hasNext = false;
+        return element;
     }
 
     @Override
     public boolean hasNext() throws TemplateException {
-        return it.hasNext();
+        return hasNext;
     }
-
 }

@@ -66,7 +66,7 @@ public abstract class TestTemplateCallableModel implements TemplateCallableModel
         } else if (value instanceof TemplateStringModel) {
             sb.append(TemplateLanguageUtils.toStringLiteral(((TemplateStringModel) value).getAsString()));
         } else if (value instanceof TemplateSequenceModel) {
-            int len = ((TemplateSequenceModel) value).size();
+            int len = ((TemplateSequenceModel) value).getCollectionSize();
             sb.append('[');
             for (int i = 0; i < len; i++) {
                 if (i != 0) {

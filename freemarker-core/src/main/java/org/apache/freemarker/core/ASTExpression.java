@@ -23,11 +23,11 @@ import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.BeanModel;
 
 /**
@@ -75,7 +75,7 @@ abstract class ASTExpression extends ASTNode {
     }
 
     /**
-     * @param seqTip Tip to display if the value type is not coercable, but it's sequence or collection.
+     * @param seqTip Tip to display if the value type is not coercable, but it's iterable.
      */
     String evalAndCoerceToPlainText(Environment env, String seqTip) throws TemplateException {
         return _EvalUtils.coerceModelToPlainText(eval(env), this, seqTip, env);
@@ -86,7 +86,7 @@ abstract class ASTExpression extends ASTNode {
     }
 
     /**
-     * @param seqTip Tip to display if the value type is not coercable, but it's sequence or collection.
+     * @param seqTip Tip to display if the value type is not coercable, but it's iterable.
      */
     Object evalAndCoerceToStringOrMarkup(Environment env, String seqTip) throws TemplateException {
         return _EvalUtils.coerceModelToStringOrMarkup(eval(env), this, seqTip, env);
@@ -97,7 +97,7 @@ abstract class ASTExpression extends ASTNode {
     }
 
     /**
-     * @param seqTip Tip to display if the value type is not coercable, but it's sequence or collection.
+     * @param seqTip Tip to display if the value type is not coercable, but it's iterable.
      */
     String evalAndCoerceToStringOrUnsupportedMarkup(Environment env, String seqTip) throws TemplateException {
         return _EvalUtils.coerceModelToStringOrUnsupportedMarkup(eval(env), this, seqTip, env);
@@ -176,9 +176,9 @@ abstract class ASTExpression extends ASTNode {
 
     static boolean isEmpty(TemplateModel model) throws TemplateException {
         if (model instanceof BeanModel) {
-            return ((BeanModel) model).isEmpty();
-        } else if (model instanceof TemplateSequenceModel) {
-            return ((TemplateSequenceModel) model).size() == 0;
+            return ((BeanModel) model).isEmptyHash();
+        } else if (model instanceof TemplateCollectionModel) {
+            return ((TemplateCollectionModel) model).isEmptyCollection();
         } else if (model instanceof TemplateStringModel) {
             String s = ((TemplateStringModel) model).getAsString();
             return (s == null || s.length() == 0);
@@ -187,10 +187,10 @@ abstract class ASTExpression extends ASTNode {
         } else if (model instanceof TemplateMarkupOutputModel) { // Note: happens just after FTL string check
             TemplateMarkupOutputModel mo = (TemplateMarkupOutputModel) model;
             return mo.getOutputFormat().isEmpty(mo);
-        } else if (model instanceof TemplateCollectionModel) {
-            return !((TemplateCollectionModel) model).iterator().hasNext();
+        } else if (model instanceof TemplateIterableModel) {
+            return !((TemplateIterableModel) model).iterator().hasNext();
         } else if (model instanceof TemplateHashModel) {
-            return ((TemplateHashModel) model).isEmpty();
+            return ((TemplateHashModel) model).isEmptyHash();
         } else if (model instanceof TemplateNumberModel
                 || model instanceof TemplateDateModel
                 || model instanceof TemplateBooleanModel) {

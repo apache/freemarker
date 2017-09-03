@@ -21,15 +21,16 @@ package org.apache.freemarker.servlet;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.impl.SimpleCollection;
 import org.apache.freemarker.core.model.impl.SimpleString;
 
@@ -40,7 +41,7 @@ import org.apache.freemarker.core.model.impl.SimpleString;
 public class HttpRequestParametersHashModel implements TemplateHashModelEx {
     private final HttpServletRequest request;
     private final ObjectWrapper objectWrapper;
-    private List keys;
+    private List<String> keys;
         
     public HttpRequestParametersHashModel(HttpServletRequest request, ObjectWrapper objectWrapper) {
         this.request = request;
@@ -54,48 +55,61 @@ public class HttpRequestParametersHashModel implements TemplateHashModelEx {
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyHash() {
         return !request.getParameterNames().hasMoreElements();
     }
     
     @Override
-    public int size() {
+    public int getHashSize() {
         return getKeys().size();
     }
     
     @Override
     public TemplateCollectionModel keys() {
-        return new SimpleCollection(getKeys().iterator(), objectWrapper);
+        return new SimpleCollection(getKeys(), objectWrapper);
     }
     
     @Override
     public TemplateCollectionModel values() {
-        final Iterator iter = getKeys().iterator();
-        return new SimpleCollection(
-            new Iterator() {
-                @Override
-                public boolean hasNext() {
-                    return iter.hasNext();
-                }
-                @Override
-                public Object next() {
-                    return request.getParameter((String) iter.next());
-                }
-                @Override
-                public void remove() {
-                    throw new UnsupportedOperationException();
-                }
-            }, objectWrapper);
+        return new TemplateCollectionModel() {
+            private final List<String> paramNames = getKeys();
+
+            @Override
+            public int getCollectionSize() throws TemplateException {
+                return paramNames.size();
+            }
+
+            @Override
+            public boolean isEmptyCollection() throws TemplateException {
+                return paramNames.isEmpty();
+            }
+
+            @Override
+            public TemplateModelIterator iterator() throws TemplateException {
+                return new TemplateModelIterator() {
+                    int nextIndex;
+
+                    @Override
+                    public TemplateModel next() throws TemplateException {
+                        TemplateModel result = objectWrapper.wrap(
+                                request.getParameter(paramNames.get(nextIndex)));
+                        nextIndex++;
+                        return result;
+                    }
+
+                    @Override
+                    public boolean hasNext() throws TemplateException {
+                        return nextIndex < paramNames.size();
+                    }
+                };
+            }
+        };
     }
 
-    protected String transcode(String string) {
-        return string;
-    }
-
-    private synchronized List getKeys() {
+    private synchronized List<String> getKeys() {
         if (keys == null) {
-            keys = new ArrayList();
-            for (Enumeration enumeration = request.getParameterNames(); enumeration.hasMoreElements(); ) {
+            keys = new ArrayList<>();
+            for (Enumeration<String> enumeration = request.getParameterNames(); enumeration.hasMoreElements(); ) {
                 keys.add(enumeration.nextElement());
             }
         }

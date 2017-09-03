@@ -19,34 +19,26 @@
 
 package org.apache.freemarker.core.model;
 
-import java.util.Collection;
-
 import org.apache.freemarker.core.TemplateException;
 
 /**
- * "collection" template language data type: a collection of values that can be enumerated, but can't be or not meant to
- * be accessed by index or key. As such, this is not a super-interface of {@link TemplateSequenceModel}, and
- * implementations of that interface needn't also implement this interface just because they can. They should though, if
- * enumeration with this interface is significantly faster than enumeration by index. The {@code #list} directive will
- * enumerate using this interface if it's available.
- * 
- * <p>
- * The enumeration should be repeatable if that's possible with reasonable effort, otherwise a second enumeration
- * attempt is allowed to throw an {@link TemplateException}. Generally, the interface user Java code need not
- * handle that kind of exception, as in practice only the template author can handle it, by not listing such collections
- * twice.
- * 
- * <p>
- * Note that to wrap Java's {@link Collection}, you should implement {@link TemplateCollectionModelEx}, not just this
- * interface.
+ * "collection" template language data type: Extends {@link TemplateIterableModel} with the ability to get the
+ * whether there's any element, and the ability to get number of elements in the collection.
  */
-public interface TemplateCollectionModel extends TemplateModel {
+public interface TemplateCollectionModel extends TemplateIterableModel {
 
-    TemplateCollectionModelEx EMPTY_COLLECTION = new EmptyCollectionExModel();
+    TemplateCollectionModel EMPTY_COLLECTION = new EmptyCollectionModel();
 
     /**
-     * Retrieves a template model iterator that is used to iterate over the elements in this collection.
+     * Returns the number items in this collection, or {@link Integer#MAX_VALUE}, if there are more than
+     * {@link Integer#MAX_VALUE} items.
      */
-    TemplateModelIterator iterator() throws TemplateException;
+    int getCollectionSize() throws TemplateException;
+
+    /**
+     * Returns if the collection contains any elements. This differs from {@code getCollectionSize() != 0} only in that
+     * the exact number of items need not be calculated.
+     */
+    boolean isEmptyCollection() throws TemplateException;
 
 }

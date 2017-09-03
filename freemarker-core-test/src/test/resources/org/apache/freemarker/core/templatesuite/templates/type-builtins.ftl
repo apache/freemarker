@@ -17,12 +17,12 @@
   under the License.
 -->
 <#setting booleanFormat="1,0">
-StNuBoHaHxSeCoCxEnInFuDiNo
+StNuBoHaHxItCoSeFuDiNo
 <#list [
   "a", 1, false,
-  testfunction, testmacro,
-  {"a":1}, [1], testcollection, testcollectionEx,
-  testnode,
+  testFunction, testMacro,
+  {"a":1}, [1], testIterable, testCollection,
+  testNode,
   bean, bean.m, bean.mOverloaded
 ] as x>
   ${x?isString} <#t>
@@ -30,13 +30,11 @@ StNuBoHaHxSeCoCxEnInFuDiNo
   ${x?isBoolean} <#t>
   ${x?isHash} <#t>
   ${x?isHashEx} <#t>
-  ${x?isSequence} <#t>
+  ${x?isIterable} <#t>
   ${x?isCollection} <#t>
-  ${x?isCollectionEx} <#t>
-  ${x?isEnumerable} <#t>
-  ${x?isIndexable} <#t>
+  ${x?isSequence} <#t>
   ${x?isFunction} <#t>
   ${x?isDirective} <#t>
   ${x?isNode}<#lt>
 </#list>
-<#macro testmacro></#macro>
+<#macro testMacro></#macro>

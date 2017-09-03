@@ -22,6 +22,7 @@ package org.apache.freemarker.core.templatesuite.models;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
 
@@ -47,7 +48,17 @@ public class BooleanList2 implements TemplateSequenceModel {
     }
 
     @Override
-    public int size() {
-        return cList.size();
+    public int getCollectionSize() {
+        return cList.getCollectionSize();
+    }
+
+    @Override
+    public boolean isEmptyCollection() throws TemplateException {
+        return cList.isEmptyCollection();
+    }
+
+    @Override
+    public TemplateModelIterator iterator() throws TemplateException {
+        return cList.iterator();
     }
 }

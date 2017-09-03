@@ -267,12 +267,12 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
     }
 
     @Override
-    public int size() {
+    public int getHashSize() {
         return map.size();
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyHash() {
         return map == null || map.isEmpty();
     }
 
@@ -290,4 +290,5 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
     public KeyValuePairIterator keyValuePairIterator() {
         return new MapKeyValuePairIterator(map, getObjectWrapper());
     }
+
 }

@@ -45,10 +45,10 @@ final class ASTDirNested extends ASTDirective {
     ASTElement[] accept(Environment env) throws IOException, TemplateException {
         CallPlace macroCallPlace = env.getCurrentMacroContext().callPlace;
 
-        // When nestedContParamCnt < nestedContentParameters.size(), then we just skip calculating the extra parameters,
-        // and CallPlace.executeNestedContent will be successful. Note sure if this lenient behavior is a good idea,
-        // but for now it's inherited from FM2, so TODO [FM3].
-        // When nestedContParamCnt > nestedContentParameters.size(), then later
+        // When nestedContParamCnt < nestedContentParameters.getCollectionSize(), then we just skip calculating the
+        // extra parameters, and CallPlace.executeNestedContent will be successful. Note sure if this lenient
+        // behavior is a good idea, but for now it's inherited from FM2, so TODO [FM3].
+        // When nestedContParamCnt > nestedContentParameters.getCollectionSize(), then later
         // CallPlace.executeNestedContent will throw exception, but we let that happen so that the error message
         // generation remains centralized. (In FM2 not even this was an error.)
         TemplateModel[] nestedContParamValues;

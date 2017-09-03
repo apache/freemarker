@@ -60,8 +60,8 @@ String: s [java.lang.String]
 Number: 1 [java.math.BigDecimal]
 Boolean: true [java.lang.Boolean]
 Date-time: 2014-12-20T16:19:00Z [java.util.Date]
-Sequence: [1, 2, 3] [org.apache.freemarker.core.model.impl.SequenceAdapter]
-Hash: {a=1, b=2, c=3} [org.apache.freemarker.core.model.impl.HashAdapter]
+Sequence: [1, 2, 3] [org.apache.freemarker.core.model.impl.TemplateSequenceModelAdapter]
+Hash: {a=1, b=2, c=3} [org.apache.freemarker.core.model.impl.TemplateHashModelAdapter]
 
 Values created in Java:
 LinkedList: [1, 2, 3] [java.util.LinkedList]

@@ -27,14 +27,14 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 
 /**
@@ -61,7 +61,7 @@ public class DeepUnwrap {
      *   <li>If the object implements {@link TemplateBooleanModel}, then the result
      *       of {@link TemplateBooleanModel#getAsBoolean()} is returned.
      *   <li>If the object implements {@link TemplateSequenceModel} or
-     *       {@link TemplateCollectionModel}, then a <code>java.util.ArrayList</code> is
+     *       {@link TemplateIterableModel}, then a <code>java.util.ArrayList</code> is
      *       constructed from the subvariables, and each subvariable is unwrapped with
      *       the rules described here (recursive unwrapping).
      *   <li>If the object implements {@link TemplateHashModelEx}, then a
@@ -119,14 +119,16 @@ public class DeepUnwrap {
         }
         if (model instanceof TemplateSequenceModel) {
             TemplateSequenceModel seq = (TemplateSequenceModel) model;
-            ArrayList list = new ArrayList(seq.size());
-            for (int i = 0; i < seq.size(); ++i) {
-                list.add(unwrap(seq.get(i), nullModel, permissive));
+            int size = seq.getCollectionSize();
+            ArrayList list = new ArrayList(size);
+            TemplateModelIterator iter = seq.iterator();
+            for (int i = 0; i < size; ++i) {
+                list.add(unwrap(iter.next(), nullModel, permissive));
             }
             return list;
         }
-        if (model instanceof TemplateCollectionModel) {
-            TemplateCollectionModel coll = (TemplateCollectionModel) model;
+        if (model instanceof TemplateIterableModel) {
+            TemplateIterableModel coll = (TemplateIterableModel) model;
             ArrayList list = new ArrayList();
             TemplateModelIterator it = coll.iterator();            
             while (it.hasNext()) {

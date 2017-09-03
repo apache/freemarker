@@ -26,13 +26,12 @@ import java.util.Date;
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._ClassUtils;
@@ -338,7 +337,7 @@ public class _EvalUtils {
      * {@link TemplateValueFormat} involved produces.
      * 
      * @param seqTip
-     *            Tip to display if the value type is not coercable, but it's sequence or collection.
+     *            Tip to display if the value type is not coercable, but it's iterable.
      * 
      * @return Never {@code null}
      */
@@ -384,7 +383,7 @@ public class _EvalUtils {
      * if the result is markup. This is what you normally use where markup results can't be used.
      *
      * @param seqTip
-     *            Tip to display if the value type is not coercable, but it's sequence or collection.
+     *            Tip to display if the value type is not coercable, but it's iterable.
      * 
      * @return Never {@code null}
      */
@@ -417,7 +416,7 @@ public class _EvalUtils {
      * markup. This should be used rarely, where the user clearly intend to use the plain text variant of the format.
      * 
      * @param seqTip
-     *            Tip to display if the value type is not coercable, but it's sequence or collection.
+     *            Tip to display if the value type is not coercable, but it's iterable.
      * 
      * @return Never {@code null}
      */
@@ -469,7 +468,7 @@ public class _EvalUtils {
                     exp, tm,
                     supportsTOM ? STRING_COERCABLE_TYPES_OR_TOM_DESC : STRING_COERCABLE_TYPES_DESC,
                     supportsTOM ? EXPECTED_TYPES_STRING_COERCABLE_TYPES_AND_TOM : EXPECTED_TYPES_STRING_COERCABLE,
-                    seqHint != null && (tm instanceof TemplateSequenceModel || tm instanceof TemplateCollectionModel)
+                    seqHint != null && tm instanceof TemplateIterableModel
                             ? new Object[] { seqHint }
                             : null,
                     env);

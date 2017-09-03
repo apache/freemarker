@@ -19,20 +19,33 @@
 
 package org.apache.freemarker.core.model;
 
+import java.util.List;
+import java.util.NoSuchElementException;
+
 import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.impl.DefaultListAdapter;
 
 /**
- * Used to iterate over a set of template models <em>once</em>; usually returned from
- * {@link TemplateCollectionModel#iterator()}. Note that it's not a {@link TemplateModel}.
+ * Used to iterate over a set of template models <em>once</em>; usually returned from {@link
+ * TemplateIterableModel#iterator()}. Note that it's not a {@link TemplateModel}. Note that the implementation of this
+ * interface may assume that the collection of elements that we iterate through is not changing after the {@link
+ * TemplateModelIterator} was created, as far as the {@link TemplateModelIterator} is still in use. If they still
+ * change, the methods of this interface might throw any kind of exception or gives and inconsistent view of the
+ * elements (like partially old element, partially new elements). Of course, implementations of this interface may
+ * specify a more specific behavior. Notably, the {@link TemplateModelIterator} return by {@link
+ * DefaultListAdapter#iterator()} gives the same concurrency guarantees as the wrapped {@link List} object.
  */
 public interface TemplateModelIterator {
 
     TemplateModelIterator EMPTY_ITERATOR = new EmptyIteratorModel();
 
     /**
-     * Returns the next model.
-     * @throws TemplateException if the next model can not be retrieved
-     *   (i.e. because the iterator is exhausted).
+     * Returns the next item. It must not be called if there are no more items, as the behavior is undefined then
+     * (typically, {@link NoSuchElementException} or {@link IndexOutOfBoundsException} will be thrown, or {@code null}
+     * will be returned). Hence, you should almost always call {@link #hasNext()} before this method, and only call this
+     * method if that has returned {@code true}. (Note that the implementation still can't assume that {@link
+     * #hasNext()} is always called before {@link #next()}; the caller might knows that there's a next item for a
+     * different reason, like already knows the size of the collection.)
      */
     TemplateModel next() throws TemplateException;
 

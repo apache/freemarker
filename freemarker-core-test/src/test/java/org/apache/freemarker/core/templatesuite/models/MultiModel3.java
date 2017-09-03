@@ -35,7 +35,7 @@ public class MultiModel3 implements TemplateStringModel, TemplateHashModel {
     }
 
     @Override
-    public boolean isEmpty() {
+    public boolean isEmptyHash() {
         return false;
     }
 

@@ -47,7 +47,7 @@ public interface TemplateDirectiveModel extends TemplateCallableModel {
      *         call is not from a template, you can use {@link NonTemplateCallPlace#INSTANCE} (or another {@link
      *         NonTemplateCallPlace} instance). Note that {@link CallPlace#executeNestedContent(TemplateModel[], Writer,
      *         Environment)} can be used to execute the nested content (even if there's no nested content; then simply
-     *         nothing happens).
+     *         nothing happens), and to pass nested content parameters to it.
      * @param out
      *         Print the output here (if there's any)
      * @param env

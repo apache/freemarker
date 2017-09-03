@@ -1992,6 +1992,14 @@ public class FM2ASTToFM3SourceConverter {
             .put("datetime", "dateTime")
             .put("datetime_if_unknown", "dateTimeIfUnknown")
             .put("datetimeIfUnknown", "dateTimeIfUnknown")
+            .put("isCollection", "isIterable")
+            .put("is_collection", "isIterable")
+            .put("isEnumerable", "isIterable")
+            .put("is_enumerable", "isIterable")
+            .put("isCollectionEx", "isCollection")
+            .put("is_collection_ex", "isCollection")
+            .put("isIndexable", "isSequence")
+            .put("is_indexable", "isSequence")
             .build();
 
     private void printParameterSeparatorSource(Expression lho, Expression rho) {

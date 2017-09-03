@@ -41,5 +41,5 @@ public interface TemplateHashModel extends TemplateModel {
      */
     TemplateModel get(String key) throws TemplateException;
 
-    boolean isEmpty() throws TemplateException;
+    boolean isEmptyHash() throws TemplateException;
 }

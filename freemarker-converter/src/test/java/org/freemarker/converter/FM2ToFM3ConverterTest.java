@@ -479,6 +479,10 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConverted("${s?isDirective}", "${s?isMacro}");
         assertConverted("${s?isFunction}", "${s?is_method}");
         assertConverted("${s?isFunction}", "${s?isMethod}");
+        assertConverted("${s?isIterable}", "${s?isCollection}");
+        assertConverted("${s?isIterable}", "${s?is_collection}");
+        assertConverted("${s?isCollection}", "${s?isCollectionEx}");
+        assertConverted("${s?isCollection}", "${s?is_collection_ex}");
         assertConvertedSame("${s  ?   upperCase\t?\t\tleftPad(5)}");
         assertConvertedSame("${s <#--1--> ? <#--2--> upperCase}");
         // Runtime params:

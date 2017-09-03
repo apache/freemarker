@@ -19,25 +19,22 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.util.AbstractCollection;
-import java.util.Collection;
+import java.util.AbstractList;
 import java.util.Iterator;
 
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelAdapter;
-import org.apache.freemarker.core.model.TemplateModelIterator;
+import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 
 /**
- * Adapts a {@link TemplateCollectionModel} to  {@link Collection}.
  */
-class CollectionAdapter extends AbstractCollection implements TemplateModelAdapter {
+class TemplateSequenceModelAdapter<T> extends AbstractList<T> implements TemplateModelAdapter {
     private final DefaultObjectWrapper wrapper;
-    private final TemplateCollectionModel model;
+    private final TemplateSequenceModel model;
     
-    CollectionAdapter(TemplateCollectionModel model, DefaultObjectWrapper wrapper) {
+    TemplateSequenceModelAdapter(TemplateSequenceModel model, DefaultObjectWrapper wrapper) {
         this.model = model;
         this.wrapper = wrapper;
     }
@@ -49,40 +46,43 @@ class CollectionAdapter extends AbstractCollection implements TemplateModelAdapt
     
     @Override
     public int size() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Iterator iterator() {
         try {
-            return new Iterator() {
-                final TemplateModelIterator i = model.iterator();
-    
-                @Override
-                public boolean hasNext() {
-                    try {
-                        return i.hasNext();
-                    } catch (TemplateException e) {
-                        throw new UndeclaredThrowableException(e);
-                    }
-                }
-                
-                @Override
-                public Object next() {
-                    try {
-                        return wrapper.unwrap(i.next());
-                    } catch (TemplateException e) {
-                        throw new UndeclaredThrowableException(e);
-                    }
-                }
-                
-                @Override
-                public void remove() {
-                    throw new UnsupportedOperationException();
-                }
-            };
+            return model.getCollectionSize();
         } catch (TemplateException e) {
             throw new UndeclaredThrowableException(e);
         }
     }
+
+    @Override
+    public boolean isEmpty() {
+        try {
+            return model.isEmptyCollection();
+        } catch (TemplateException e) {
+            throw new UndeclaredThrowableException(e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public T get(int index) {
+        try {
+            return (T) wrapper.unwrap(model.get(index));
+        } catch (TemplateException e) {
+            throw new UndeclaredThrowableException(e);
+        }
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        try {
+            return new TemplateModelIteratorAdapter<T>(model.iterator(), wrapper);
+        } catch (TemplateException e) {
+            throw new UndeclaredThrowableException(e);
+        }
+    }
+
+    public TemplateSequenceModel getTemplateSequenceModel() {
+        return model;
+    }
+    
 }
