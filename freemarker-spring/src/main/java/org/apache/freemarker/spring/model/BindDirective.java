@@ -75,12 +75,12 @@ public class BindDirective extends AbstractSpringTemplateDirectiveModel {
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
                     throws TemplateException, IOException {
         final String path = CallableUtils.getStringArgument(args, PATH_PARAM_IDX, this);
-        boolean ignoreNestedPath = CallableUtils.getOptionalBooleanArgument(args, IGNORE_NESTED_PATH_PARAM_IDX, this,
-                false);
+        final boolean ignoreNestedPath = CallableUtils.getOptionalBooleanArgument(args, IGNORE_NESTED_PATH_PARAM_IDX,
+                this, false);
 
-        TemplateModel statusModel = getBindStatusTemplateModel(env, objectWrapperAndUnwrapper, requestContext, path,
-                ignoreNestedPath);
-        TemplateModel[] nestedContentArgs = new TemplateModel[] { statusModel };
+        final TemplateModel statusModel = getBindStatusTemplateModel(env, objectWrapperAndUnwrapper, requestContext,
+                path, ignoreNestedPath);
+        final TemplateModel[] nestedContentArgs = new TemplateModel[] { statusModel };
 
         callPlace.executeNestedContent(nestedContentArgs, out, env);
     }

@@ -19,9 +19,6 @@
 
 package org.apache.freemarker.spring.model;
 
-import java.io.IOException;
-import java.io.Writer;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -30,23 +27,23 @@ import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
-import org.apache.freemarker.core.model.TemplateDirectiveModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.view.AbstractTemplateView;
 
 /**
- * Abstract TemplateDirectiveModel for derived classes to support Spring MVC based templating environment.
+ * Abstract TemplateFunctionModel for derived classes to support Spring MVC based templating environment.
  */
-public abstract class AbstractSpringTemplateDirectiveModel extends AbstractSpringTemplateCallableModel implements TemplateDirectiveModel {
+public abstract class AbstractSpringTemplateFunctionModel extends AbstractSpringTemplateCallableModel
+        implements TemplateFunctionModel {
 
-    public AbstractSpringTemplateDirectiveModel(HttpServletRequest request, HttpServletResponse response) {
+    public AbstractSpringTemplateFunctionModel(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
     }
 
     @Override
-    public final void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
-            throws TemplateException, IOException {
+    public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env) throws TemplateException {
         final ObjectWrapper objectWrapper = env.getObjectWrapper();
 
         if (!(objectWrapper instanceof ObjectWrapperAndUnwrapper)) {
@@ -62,11 +59,11 @@ public abstract class AbstractSpringTemplateDirectiveModel extends AbstractSprin
 
         RequestContext requestContext = (RequestContext) ((ObjectWrapperAndUnwrapper) objectWrapper).unwrap(rcModel);
 
-        executeInternal(args, callPlace, out, env, (ObjectWrapperAndUnwrapper) objectWrapper, requestContext);
+        return executeInternal(args, callPlace, env, (ObjectWrapperAndUnwrapper) objectWrapper, requestContext);
     }
 
-    protected abstract void executeInternal(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env,
+    protected abstract TemplateModel executeInternal(TemplateModel[] args, CallPlace callPlace, Environment env,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
-                    throws TemplateException, IOException;
+                    throws TemplateException;
 
 }
