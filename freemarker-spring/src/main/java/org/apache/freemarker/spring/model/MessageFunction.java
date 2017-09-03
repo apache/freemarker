@@ -42,15 +42,14 @@ import org.springframework.web.servlet.support.RequestContext;
 
 public class MessageFunction extends AbstractSpringTemplateFunctionModel {
 
-    private static final int CODE_PARAM_IDX = 0;
-    private static final int MESSAGE_PARAM_IDX = 1;
-    private static final int MESSAGE_ARGS_PARAM_IDX = 2;
+    private static final int MESSAGE_PARAM_IDX = 0;
+    private static final int MESSAGE_ARGS_PARAM_IDX = 1;
 
     private static final String MESSAGE_PARAM_NAME = "message";
 
     private static final ArgumentArrayLayout ARGS_LAYOUT =
             ArgumentArrayLayout.create(
-                    1,
+                    0,
                     true,
                     StringToIndexMap.of(
                             MESSAGE_PARAM_NAME, MESSAGE_PARAM_IDX),
@@ -72,23 +71,24 @@ public class MessageFunction extends AbstractSpringTemplateFunctionModel {
 
         String message = null;
 
-        final String code = CallableUtils.getStringArgument(args, CODE_PARAM_IDX, this);
+        final TemplateCollectionModel messageArgsModel = (TemplateCollectionModel) args[MESSAGE_ARGS_PARAM_IDX];
 
-        if (code != null && !code.isEmpty()) {
-            final TemplateCollectionModel messageArgsModel = (TemplateCollectionModel) args[MESSAGE_ARGS_PARAM_IDX];
-            List<Object> msgArgumentList = null;
-
-            if (!messageArgsModel.isEmptyCollection()) {
-                msgArgumentList = new ArrayList<>();
-                TemplateModel msgArgModel;
-                for (TemplateModelIterator tit = messageArgsModel.iterator(); tit.hasNext(); ) {
-                    msgArgModel = tit.next();
+        if (!messageArgsModel.isEmptyCollection()) {
+            String code = null;
+            List<Object> msgArgumentList = new ArrayList<>();
+            TemplateModel msgArgModel;
+            int i = 0;
+            for (TemplateModelIterator tit = messageArgsModel.iterator(); tit.hasNext(); i++) {
+                msgArgModel = tit.next();
+                if (i == 0) {
+                    code = objectWrapperAndUnwrapper.unwrap(msgArgModel).toString();
+                } else {
                     msgArgumentList.add(objectWrapperAndUnwrapper.unwrap(msgArgModel));
                 }
             }
 
             // TODO: Is it okay to set the default value to null to avoid NoSuchMessageException from Spring MessageSource?
-            message = messageSource.getMessage(code, (msgArgumentList == null) ? null : msgArgumentList.toArray(),
+            message = messageSource.getMessage(code, (msgArgumentList.isEmpty()) ? null : msgArgumentList.toArray(),
                     null, requestContext.getLocale());
         } else {
             final TemplateModel messageModel = CallableUtils.getOptionalArgument(args, MESSAGE_PARAM_IDX,
@@ -97,6 +97,8 @@ public class MessageFunction extends AbstractSpringTemplateFunctionModel {
                 MessageSourceResolvable messageResolvable = (MessageSourceResolvable) objectWrapperAndUnwrapper
                         .unwrap(messageModel);
                 message = messageSource.getMessage(messageResolvable, requestContext.getLocale());
+            } else {
+                throw new TemplateException("Neither message code nor message resolvable was set.");
             }
         }
 
