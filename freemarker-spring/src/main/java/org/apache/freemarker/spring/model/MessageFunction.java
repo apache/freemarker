@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.spring.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +30,9 @@ import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
@@ -41,6 +44,7 @@ public class MessageFunction extends AbstractSpringTemplateFunctionModel {
 
     private static final int CODE_PARAM_IDX = 0;
     private static final int MESSAGE_PARAM_IDX = 1;
+    private static final int MESSAGE_ARGS_PARAM_IDX = 2;
 
     private static final String MESSAGE_PARAM_NAME = "message";
 
@@ -71,8 +75,17 @@ public class MessageFunction extends AbstractSpringTemplateFunctionModel {
         final String code = CallableUtils.getStringArgument(args, CODE_PARAM_IDX, this);
 
         if (code != null && !code.isEmpty()) {
+            final TemplateCollectionModel messageArgsModel = (TemplateCollectionModel) args[MESSAGE_ARGS_PARAM_IDX];
             List<Object> msgArgumentList = null;
-            // TODO: How to read message arguments from the varags?
+
+            if (!messageArgsModel.isEmptyCollection()) {
+                msgArgumentList = new ArrayList<>();
+                TemplateModel msgArgModel;
+                for (TemplateModelIterator tit = messageArgsModel.iterator(); tit.hasNext(); ) {
+                    msgArgModel = tit.next();
+                    msgArgumentList.add(objectWrapperAndUnwrapper.unwrap(msgArgModel));
+                }
+            }
 
             // TODO: Is it okay to set the default value to null to avoid NoSuchMessageException from Spring MessageSource?
             message = messageSource.getMessage(code, (msgArgumentList == null) ? null : msgArgumentList.toArray(),
