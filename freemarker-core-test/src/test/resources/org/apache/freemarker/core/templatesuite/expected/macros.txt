@@ -56,9 +56,9 @@
 <p>Test "catch-all" macro parameter:</p>
 
 
-foo=a baz=[]
-foo=a baz=[bar=b]
-foo=a baz=[bar=b, baz=c]
+foo=a bar=[]
+foo=a bar=[bar=b]
+foo=a bar=[bar=b, baz=c]
 
 
 Hello World! Today is Monday.

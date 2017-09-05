@@ -38,6 +38,10 @@ class NativeSequence implements TemplateSequenceModel, Serializable {
 
     private final ArrayList<TemplateModel> items;
 
+    public NativeSequence() {
+        items = new ArrayList<>();
+    }
+
     public NativeSequence(int capacity) {
         items = new ArrayList<>(capacity);
     }

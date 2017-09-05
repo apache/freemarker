@@ -80,8 +80,8 @@ ${test["1"]}
 
 <p>Hash concatenation:</p>
 <#assign cc = { "a" : 1, "b" : 2 } + { "b" : 3, "c" : 4 }>
-<#list cc?keys?sort as key>
-${key} => ${cc[key]}
+<#list cc as key, value>
+${key} => ${value}
 </#list>
 
 <p>Empty hash concatenation:</p>

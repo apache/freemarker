@@ -69,7 +69,7 @@ ${.vars['as"d']}
 <#global g\-a=1 g\-b=2 "g-c"=3>
 
 <#macro dumpNS>
-    <#list .namespace?keys?sort as k>
+    <#list .namespace?keys?sequence?sort as k>
         ${k} = <#local v = .namespace[k]><#if v?isString>${v}<#else>...</#if><#lt>
     </#list>
 </#macro>

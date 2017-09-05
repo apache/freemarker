@@ -22,6 +22,9 @@ package org.apache.freemarker.core;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 
+/**
+ * Built-in that meant to acts on {@link TemplateSequenceModel}-s only.
+ */
 abstract class BuiltInForSequence extends ASTExpBuiltIn {
 
     @Override
