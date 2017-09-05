@@ -36,24 +36,26 @@ import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
+import org.apache.freemarker.core.util._StringUtils;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.web.servlet.support.RequestContext;
 
 public class MessageFunction extends AbstractSpringTemplateFunctionModel {
 
-    private static final int MESSAGE_PARAM_IDX = 0;
-    private static final int MESSAGE_ARGS_PARAM_IDX = 1;
+    private static final int CODE_PARAM_IDX = 0;
+    private static final int MESSAGE_RESOLVABLE_PARAM_IDX = 1;
+    private static final int MESSAGE_ARGS_PARAM_IDX = 2;
 
-    private static final String MESSAGE_PARAM_NAME = "message";
+    private static final String MESSAGE_RESOLVABLE_PARAM_NAME = "message";
 
     private static final ArgumentArrayLayout ARGS_LAYOUT =
             ArgumentArrayLayout.create(
-                    0,
+                    1,
                     true,
-                    StringToIndexMap.of(
-                            MESSAGE_PARAM_NAME, MESSAGE_PARAM_IDX),
-                    false);
+                    StringToIndexMap.of(MESSAGE_RESOLVABLE_PARAM_NAME, MESSAGE_RESOLVABLE_PARAM_IDX),
+                    false
+                    );
 
     public MessageFunction(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
@@ -63,42 +65,45 @@ public class MessageFunction extends AbstractSpringTemplateFunctionModel {
     public TemplateModel executeInternal(TemplateModel[] args, CallPlace callPlace, Environment env,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
                     throws TemplateException {
-        final MessageSource messageSource = requestContext.getMessageSource();
+        final MessageSource messageSource = getMessageSource(requestContext);
 
         if (messageSource == null) {
-            throw new TemplateException("MessageSource not found.");
+            CallableUtils.newGenericExecuteException("MessageSource not found.", this);
         }
 
         String message = null;
 
-        final TemplateCollectionModel messageArgsModel = (TemplateCollectionModel) args[MESSAGE_ARGS_PARAM_IDX];
+        final TemplateModel messageResolvableModel = CallableUtils.getOptionalArgument(args, MESSAGE_RESOLVABLE_PARAM_IDX,
+                TemplateModel.class, this);
 
-        if (!messageArgsModel.isEmptyCollection()) {
-            String code = null;
-            List<Object> msgArgumentList = new ArrayList<>();
-            TemplateModel msgArgModel;
-            int i = 0;
-            for (TemplateModelIterator tit = messageArgsModel.iterator(); tit.hasNext(); i++) {
-                msgArgModel = tit.next();
-                if (i == 0) {
-                    code = objectWrapperAndUnwrapper.unwrap(msgArgModel).toString();
-                } else {
-                    msgArgumentList.add(objectWrapperAndUnwrapper.unwrap(msgArgModel));
-                }
-            }
-
-            // TODO: Is it okay to set the default value to null to avoid NoSuchMessageException from Spring MessageSource?
-            message = messageSource.getMessage(code, (msgArgumentList.isEmpty()) ? null : msgArgumentList.toArray(),
-                    null, requestContext.getLocale());
+        if (messageResolvableModel != null) {
+            MessageSourceResolvable messageResolvable = (MessageSourceResolvable) objectWrapperAndUnwrapper
+                    .unwrap(messageResolvableModel);
+            message = messageSource.getMessage(messageResolvable, requestContext.getLocale());
         } else {
-            final TemplateModel messageModel = CallableUtils.getOptionalArgument(args, MESSAGE_PARAM_IDX,
-                    TemplateModel.class, this);
-            if (messageModel != null) {
-                MessageSourceResolvable messageResolvable = (MessageSourceResolvable) objectWrapperAndUnwrapper
-                        .unwrap(messageModel);
-                message = messageSource.getMessage(messageResolvable, requestContext.getLocale());
+            final String code = _StringUtils
+                    .emptyToNull(CallableUtils.getOptionalStringArgument(args, CODE_PARAM_IDX, this));
+
+            if (code != null) {
+                List<Object> msgArgumentList = null;
+                final TemplateCollectionModel messageArgsModel = (TemplateCollectionModel) args[MESSAGE_ARGS_PARAM_IDX];
+
+                if (!messageArgsModel.isEmptyCollection()) {
+                    msgArgumentList = new ArrayList<>();
+                    TemplateModel msgArgModel;
+                    int i = 0;
+                    for (TemplateModelIterator tit = messageArgsModel.iterator(); tit.hasNext(); i++) {
+                        msgArgModel = tit.next();
+                        msgArgumentList.add(objectWrapperAndUnwrapper.unwrap(msgArgModel));
+                    }
+                }
+
+                // Note: Pass null as default value to avoid NoSuchMessageException from Spring MessageSource
+                //       since we want to take advantage of FreeMarker's default value expressions.
+                message = messageSource.getMessage(code, (msgArgumentList == null) ? null : msgArgumentList.toArray(),
+                        null, requestContext.getLocale());
             } else {
-                throw new TemplateException("Neither message code nor message resolvable was set.");
+                CallableUtils.newNullOrOmittedArgumentException(CODE_PARAM_IDX, this);
             }
         }
 
@@ -108,6 +113,10 @@ public class MessageFunction extends AbstractSpringTemplateFunctionModel {
     @Override
     public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
         return ARGS_LAYOUT;
+    }
+
+    protected MessageSource getMessageSource(final RequestContext requestContext) {
+        return requestContext.getMessageSource();
     }
 
 }

@@ -29,6 +29,7 @@ import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.view.AbstractTemplateView;
 
@@ -47,19 +48,26 @@ public abstract class AbstractSpringTemplateFunctionModel extends AbstractSpring
         final ObjectWrapper objectWrapper = env.getObjectWrapper();
 
         if (!(objectWrapper instanceof ObjectWrapperAndUnwrapper)) {
-            throw new TemplateException(
-                    "The ObjectWrapper of environment wasn't instance of ObjectWrapperAndUnwrapper.");
+            CallableUtils.newGenericExecuteException(
+                    "The ObjectWrapper of environment isn't an instance of ObjectWrapperAndUnwrapper.", this,
+                    isFunction());
         }
 
         TemplateModel rcModel = env.getVariable(AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
 
         if (rcModel == null) {
-            throw new TemplateException(AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE + " not found.");
+            CallableUtils.newGenericExecuteException(
+                    AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE + " not found.", this, isFunction());
         }
 
         RequestContext requestContext = (RequestContext) ((ObjectWrapperAndUnwrapper) objectWrapper).unwrap(rcModel);
 
         return executeInternal(args, callPlace, env, (ObjectWrapperAndUnwrapper) objectWrapper, requestContext);
+    }
+
+    @Override
+    protected final boolean isFunction() {
+        return true;
     }
 
     protected abstract TemplateModel executeInternal(TemplateModel[] args, CallPlace callPlace, Environment env,

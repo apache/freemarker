@@ -40,6 +40,7 @@ import org.apache.freemarker.servlet.ServletContextHashModel;
 import org.apache.freemarker.servlet.jsp.TaglibFactory;
 import org.apache.freemarker.spring.model.BindDirective;
 import org.apache.freemarker.spring.model.MessageFunction;
+import org.apache.freemarker.spring.model.ThemeFunction;
 
 /**
  * FreeMarker template based view implementation, with being able to provide a {@link ServletContextHashModel}
@@ -180,6 +181,7 @@ public class FreeMarkerView extends AbstractFreeMarkerView {
         final SimpleHash springCallableHash = new SimpleHash(objectWrapper);
         springCallableHash.put("bind", new BindDirective(request, response));
         springCallableHash.put("message", new MessageFunction(request, response));
+        springCallableHash.put("theme", new ThemeFunction(request, response));
         return springCallableHash;
     }
 }

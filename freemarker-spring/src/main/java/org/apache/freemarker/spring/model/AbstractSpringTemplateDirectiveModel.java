@@ -32,13 +32,15 @@ import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.view.AbstractTemplateView;
 
 /**
  * Abstract TemplateDirectiveModel for derived classes to support Spring MVC based templating environment.
  */
-public abstract class AbstractSpringTemplateDirectiveModel extends AbstractSpringTemplateCallableModel implements TemplateDirectiveModel {
+public abstract class AbstractSpringTemplateDirectiveModel extends AbstractSpringTemplateCallableModel
+        implements TemplateDirectiveModel {
 
     public AbstractSpringTemplateDirectiveModel(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
@@ -50,19 +52,26 @@ public abstract class AbstractSpringTemplateDirectiveModel extends AbstractSprin
         final ObjectWrapper objectWrapper = env.getObjectWrapper();
 
         if (!(objectWrapper instanceof ObjectWrapperAndUnwrapper)) {
-            throw new TemplateException(
-                    "The ObjectWrapper of environment wasn't instance of ObjectWrapperAndUnwrapper.");
+            CallableUtils.newGenericExecuteException(
+                    "The ObjectWrapper of environment isn't an instance of ObjectWrapperAndUnwrapper.", this,
+                    isFunction());
         }
 
         TemplateModel rcModel = env.getVariable(AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
 
         if (rcModel == null) {
-            throw new TemplateException(AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE + " not found.");
+            CallableUtils.newGenericExecuteException(
+                    AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE + " not found.", this, isFunction());
         }
 
         RequestContext requestContext = (RequestContext) ((ObjectWrapperAndUnwrapper) objectWrapper).unwrap(rcModel);
 
         executeInternal(args, callPlace, out, env, (ObjectWrapperAndUnwrapper) objectWrapper, requestContext);
+    }
+
+    @Override
+    protected final boolean isFunction() {
+        return false;
     }
 
     protected abstract void executeInternal(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env,

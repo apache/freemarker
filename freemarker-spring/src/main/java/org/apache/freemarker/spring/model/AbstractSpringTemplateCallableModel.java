@@ -28,6 +28,7 @@ import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateCallableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.support.RequestContext;
 
@@ -81,7 +82,8 @@ public abstract class AbstractSpringTemplateCallableModel implements TemplateCal
 
         if (status != null) {
             if (!(objectWrapperAndUnwrapper instanceof DefaultObjectWrapper)) {
-                throw new IllegalArgumentException("objectWrapperAndUnwrapper is not a DefaultObjectWrapper.");
+                CallableUtils.newGenericExecuteException("objectWrapperAndUnwrapper is not a DefaultObjectWrapper.",
+                        this, isFunction());
             }
 
             return ((DefaultObjectWrapper) objectWrapperAndUnwrapper).wrap(status);
@@ -89,6 +91,8 @@ public abstract class AbstractSpringTemplateCallableModel implements TemplateCal
 
         return null;
     }
+
+    protected abstract boolean isFunction();
 
     private String resolveNestedPath(final Environment env, ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper,
             final String path) {
