@@ -38,7 +38,7 @@ as3
 as4
 as5
 
-<catchAll x=1 y=2 a:b.c=5 data-foo=4 z=3 />
+<catchAll x=1 y=2 z=3 data-foo=4 a:b.c=5 />
 
 ---.: = dash-dash-dash etc.
 @as@_a = as1

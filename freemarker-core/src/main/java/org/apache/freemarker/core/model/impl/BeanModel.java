@@ -289,7 +289,7 @@ public class BeanModel
 
     @Override
     public TemplateCollectionModel keys() {
-        return new IterableAndSequence(DefaultNonListCollectionAdapter.adapt(keySet(), wrapper));
+        return DefaultNonListCollectionAdapter.adapt(keySet(), wrapper);
     }
 
     @Override
@@ -300,7 +300,7 @@ public class BeanModel
             String key = ((TemplateStringModel) it.next()).getAsString();
             values.add(get(key));
         }
-        return new IterableAndSequence(DefaultNonListCollectionAdapter.adapt(values, wrapper));
+        return DefaultNonListCollectionAdapter.adapt(values, wrapper);
     }
     
     @Override

@@ -19,11 +19,15 @@
 
 package org.apache.freemarker.core;
 
+import java.util.Arrays;
+
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
+import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.TemplateLanguageUtils;
@@ -343,6 +347,12 @@ class MessageUtils {
             if (tip != null) {
                 errorDescBuilder.tip(tip);
             }
+        }
+        if (model instanceof TemplateIterableModel && Arrays.asList(expectedTypes).contains(TemplateSequenceModel
+                .class)) {
+            errorDescBuilder.tip("As the problematic value contains a collection of items, so you could covert it "
+                    + "to a sequence like someValue?sequence. Be sure that you won't have a large number of items "
+                    + "though, as all will be held in memory at once.");
         }
         return errorDescBuilder;
     }

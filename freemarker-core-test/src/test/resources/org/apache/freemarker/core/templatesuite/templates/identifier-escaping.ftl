@@ -69,12 +69,12 @@ ${.vars['as"d']}
 <#global g\-a=1 g\-b=2 "g-c"=3>
 
 <#macro catchAll x y attrs...>
-<catchAll x=${x} y=${y}<#list attrs?keys?sort as k> ${k}=${attrs[k]}</#list> />
+<catchAll x=${x} y=${y}<#list attrs as k, v> ${k}=${v}</#list> />
 </#macro>
 <@catchAll x=1 y=2 z=3 data\-foo=4 a\:b\.c=5 />
 
 <#macro dumpNS>
-    <#list .namespace?keys?sort as k>
+    <#list .namespace?keys?sequence?sort as k>
         ${k} = <#local v = .namespace[k]><#if v?isString>${v}<#else>...</#if><#lt>
     </#list>
 </#macro>

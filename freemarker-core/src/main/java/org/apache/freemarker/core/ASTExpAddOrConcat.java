@@ -19,7 +19,9 @@
 
 package org.apache.freemarker.core;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
@@ -267,11 +269,9 @@ final class ASTExpAddOrConcat extends ASTExpression {
         }
     }
 
-    private static final class ConcatenatedHashEx extends ConcatenatedHash
-    implements TemplateHashModelEx {
-        private TemplateSequenceModel keys;
-        private TemplateSequenceModel values;
-        private int size;
+    private static final class ConcatenatedHashEx extends ConcatenatedHash implements TemplateHashModelEx {
+        private TemplateCollectionModel keys;
+        private TemplateCollectionModel values;
 
         ConcatenatedHashEx(TemplateHashModelEx left, TemplateHashModelEx right) {
             super(left, right);
@@ -280,7 +280,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
         @Override
         public int getHashSize() throws TemplateException {
             initKeys();
-            return size;
+            return keys.getCollectionSize();
         }
 
         @Override
@@ -298,37 +298,34 @@ final class ASTExpAddOrConcat extends ASTExpression {
         private void initKeys() throws TemplateException {
             if (keys == null) {
                 HashSet keySet = new HashSet();
-                NativeSequence keySeq = new NativeSequence(32);
-                addKeys(keySet, keySeq, (TemplateHashModelEx) left);
-                addKeys(keySet, keySeq, (TemplateHashModelEx) right);
-                size = keySet.size();
-                keys = keySeq;
+                ArrayList<TemplateModel> keyList = new ArrayList<>();
+                addKeys(keySet, keyList, (TemplateHashModelEx) left);
+                addKeys(keySet, keyList, (TemplateHashModelEx) right);
+                keys = new NativeCollection(keyList);
             }
         }
 
-        private static void addKeys(Set set, NativeSequence keySeq, TemplateHashModelEx hash)
+        private static void addKeys(Set keySet, List<TemplateModel> keyList, TemplateHashModelEx hash)
         throws TemplateException {
-            TemplateModelIterator it = hash.keys().iterator();
-            while (it.hasNext()) {
+            for (TemplateModelIterator it = hash.keys().iterator(); it.hasNext(); ) {
                 TemplateStringModel tsm = (TemplateStringModel) it.next();
-                if (set.add(tsm.getAsString())) {
+                if (keySet.add(tsm.getAsString())) {
                     // The first occurrence of the key decides the index;
                     // this is consistent with stuff like java.util.LinkedHashSet.
-                    keySeq.add(tsm);
+                    keyList.add(tsm);
                 }
             }
         }        
 
         private void initValues() throws TemplateException {
             if (values == null) {
-                NativeSequence seq = new NativeSequence(getHashSize());
-                // Note: getCollectionSize() invokes initKeys() if needed.
+                ArrayList<TemplateModel> valueList = new ArrayList<>(getHashSize());
+                // Note: getHashSize() invokes initKeys()
             
-                int ln = keys.getCollectionSize();
-                for (int i  = 0; i < ln; i++) {
-                    seq.add(get(((TemplateStringModel) keys.get(i)).getAsString()));
+                for (TemplateModelIterator iter = keys.iterator(); iter.hasNext(); ) {
+                    valueList.add(get(((TemplateStringModel) iter.next()).getAsString()));
                 }
-                values = seq;
+                values = new NativeCollection(valueList);
             }
         }
     }

@@ -19,11 +19,9 @@
 
 package org.apache.freemarker.core;
 
-import org.apache.freemarker.core.model.TemplateIterableModel;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.IterableAndSequence;
 
 /**
  * A holder for builtins that operate exclusively on hash left-hand value.
@@ -35,9 +33,9 @@ class BuiltInsForHashes {
         @Override
         TemplateModel calculateResult(TemplateHashModelEx hashExModel, Environment env)
                 throws TemplateException, InvalidReferenceException {
-            TemplateIterableModel keys = hashExModel.keys();
+            TemplateCollectionModel keys = hashExModel.keys();
             if (keys == null) throw newNullPropertyException("keys", hashExModel, env);
-            return keys instanceof TemplateSequenceModel ? keys : new IterableAndSequence(keys);
+            return keys;
         }
         
     }
@@ -46,9 +44,9 @@ class BuiltInsForHashes {
         @Override
         TemplateModel calculateResult(TemplateHashModelEx hashExModel, Environment env)
                 throws TemplateException, InvalidReferenceException {
-            TemplateIterableModel values = hashExModel.values();
+            TemplateCollectionModel values = hashExModel.values();
             if (values == null) throw newNullPropertyException("values", hashExModel, env);
-            return values instanceof TemplateSequenceModel ? values : new IterableAndSequence(values);
+            return values;
         }
     }
 

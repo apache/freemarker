@@ -31,6 +31,7 @@ import java.util.Date;
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
@@ -51,11 +52,12 @@ import org.apache.freemarker.core.util._StringUtils;
  * A holder for builtins that operate on sequence (or some even on iterable) left-hand value.
  */
 class BuiltInsForSequences {
-    
+
+    // TODO [FM3] Should work on TemplateIterableModel as well
     static class chunkBI extends BuiltInForSequence {
 
         private class BIMethod extends BuiltInCallableImpl implements TemplateFunctionModel {
-            
+
             private final TemplateSequenceModel tsm;
 
             private BIMethod(TemplateSequenceModel tsm) {
@@ -79,15 +81,15 @@ class BuiltInsForSequences {
         }
 
         private static class ChunkedSequence implements TemplateSequenceModel {
-            
+
             private final TemplateSequenceModel wrappedTsm;
-            
+
             private final int chunkSize;
-            
+
             private final TemplateModel fillerItem;
-            
+
             private final int numberOfChunks;
-            
+
             private ChunkedSequence(
                     TemplateSequenceModel wrappedTsm, int chunkSize, TemplateModel fillerItem)
                     throws TemplateException {
@@ -103,9 +105,9 @@ class BuiltInsForSequences {
                 if (chunkIndex >= numberOfChunks || chunkIndex < 0) {
                     return null;
                 }
-                
+
                 return new TemplateSequenceModel() {
-                    
+
                     private final int baseIndex = chunkIndex * chunkSize;
 
                     @Override
@@ -155,16 +157,16 @@ class BuiltInsForSequences {
                 return new SequenceTemplateModelIterator(this);
             }
         }
-        
+
         @Override
         TemplateModel calculateResult(TemplateSequenceModel tsm) throws TemplateException {
             return new BIMethod(tsm);
         }
-        
+
     }
-    
+
     static class firstBI extends BuiltInForIterable {
-        
+
         @Override
         TemplateModel calculateResult(TemplateIterableModel model) throws TemplateException {
             TemplateModelIterator iter = model.iterator();
@@ -812,6 +814,25 @@ class BuiltInsForSequences {
                     "This error has occurred when comparing sequence item at 0-based index ", Integer.valueOf(seqItemIndex),
                     " to the searched item:\n", new _DelayedGetMessage(ex));
         }
+    }
+
+    static class sequenceBI extends BuiltInForIterable {
+
+        @Override
+        TemplateModel calculateResult(TemplateIterableModel model) throws TemplateException {
+            if (model instanceof TemplateSequenceModel) {
+                return model;
+            }
+            NativeSequence seq =
+                    model instanceof TemplateCollectionModel
+                            ? new NativeSequence(((TemplateCollectionModel) model).getCollectionSize())
+                            : new NativeSequence();
+            for (TemplateModelIterator iter = model.iterator(); iter.hasNext(); ) {
+                seq.add(iter.next());
+            }
+            return seq;
+        }
+
     }
 
     // Can't be instantiated

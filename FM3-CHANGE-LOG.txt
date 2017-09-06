@@ -131,17 +131,29 @@ Node: Changes already mentioned above aren't repeated here!
   - It's not tolerated anymore if the caller of a macro has declared more nested content parameters than
     what `#nested` passes to it (like in `<#macro m><#nested 1, 2></#macro> <@m ; i, j, k>...</@>`, where `k` has
     no corresponding value in `#nested`).
+    (The template converter tool can't do this conversion.)
   - In `#macro` (and `function`) named parameters with default values need not be at the end of the parameter list
     anymore. (Positional parameters with default values need to be at the end of the list of positional parameters
     only.)
   - When parameter default expressions are evaluated, only the parameters defined earlier are already set.
     So `<#macro m a b=a>` works, but `<#macro m a=b b>` won't work anymore (unless there's `b` outside the
     parameter list), as `b` is not yet set when the default of `a` is calculated.
+    (The template converter tool can't do this conversion.)
 - Built-ins don't convert their parameters to string anymore; in FM some (not all) of them did, because they
   were based on the TemplateMethod interface (deprecated even in FM2) that required String paramteters and
   was auto-converted by FM2. (The template converter tool can't do this conversion.)
 - The string ranges like `someString[1..0]` (that is, where the end is one less than the beginning) aren't
   tolerated anymore, and are errors. (The template converter tool can't do this conversion.)
+- Added `?sequence`, which converts an iterable value into a sequence. This is to be used with care, as iterables
+  that are not also sequences sometimes contain a large number of items, and the resulting sequence will have to
+  store all of them.
+- `?keys` and `?values` (used to return the keys and values in a hash) now returns a collection, not a sequence.
+  Note that for FM3 collections ?size works, but not accessing by index. This is to be more aligned with the
+  capabilities of java.util.Map. In case you know that you won't have a too large number of entries, and you need
+  a sequence of the keys or values, use `myMap?keys?sequence` or `myMap?values?sequence`.
+  (The template converter tool can't do this conversion. Because `?sequence` is a relatively expensive operation,
+  it shouldn't be invoked for multiple times on the same value, instead the result should be extracted into a
+  variable, like: `<#assign keySeq = keys?sequence>[... Do multiple things with keySeq here ...]`.
 
   
 Java API changes
