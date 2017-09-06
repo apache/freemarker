@@ -23,8 +23,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.freemarker.core.Environment;
+import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
-import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateCallableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
@@ -36,12 +36,6 @@ import org.springframework.web.servlet.support.RequestContext;
  * Abstract TemplateCallableModel for derived classes to support Spring MVC based templating environment.
  */
 public abstract class AbstractSpringTemplateCallableModel implements TemplateCallableModel {
-
-    // TODO: namespace this into 'spring.nestedPath'??
-    /**
-     * @see <code>org.springframework.web.servlet.tags.NestedPathTag#NESTED_PATH_VARIABLE_NAME</code>
-     */
-    private static final String NESTED_PATH_VARIABLE_NAME = "nestedPath";
 
     private final HttpServletRequest request;
     private final HttpServletResponse response;
@@ -73,10 +67,10 @@ public abstract class AbstractSpringTemplateCallableModel implements TemplateCal
      * @param ignoreNestedPath flag whether or not to ignore the nested path
      * @return {@link TemplateModel} wrapping a {@link BindStatus} with no {@code htmlEscape} option from {@link RequestContext}
      * by the {@code path}
-     * @throws ObjectWrappingException if fails to wrap the <code>BindStatus</code> object
+     * @throws TemplateException 
      */
     protected final TemplateModel getBindStatusTemplateModel(Environment env, ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper,
-            RequestContext requestContext, String path, boolean ignoreNestedPath) throws ObjectWrappingException {
+            RequestContext requestContext, String path, boolean ignoreNestedPath) throws TemplateException {
         final String resolvedPath = (ignoreNestedPath) ? path : resolveNestedPath(env, objectWrapperAndUnwrapper, path);
         BindStatus status = requestContext.getBindStatus(resolvedPath, false);
 
@@ -94,15 +88,25 @@ public abstract class AbstractSpringTemplateCallableModel implements TemplateCal
 
     protected abstract boolean isFunction();
 
-    private String resolveNestedPath(final Environment env, ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper,
-            final String path) {
-        // TODO: should read it from request or env??
-        //       or read spring.nestedPath first and read request attribute next??
-        String nestedPath = (String) request.getAttribute(NESTED_PATH_VARIABLE_NAME);
+    protected String getCurrentNestedPath(final Environment env) throws TemplateException {
+        SpringTemplateCallableHashModel springHash = (SpringTemplateCallableHashModel) env
+                .getVariable(SpringTemplateCallableHashModel.NAME);
+        return springHash.getNestedPath();
+    }
 
-        if (nestedPath != null && !path.startsWith(nestedPath)
-                && !path.equals(nestedPath.substring(0, nestedPath.length() - 1))) {
-            return nestedPath + path;
+    protected void setCurrentNestedPath(final Environment env, final String nestedPath) throws TemplateException {
+        SpringTemplateCallableHashModel springHash = (SpringTemplateCallableHashModel) env
+                .getVariable(SpringTemplateCallableHashModel.NAME);
+        springHash.setNestedPath(nestedPath);
+    }
+
+    private String resolveNestedPath(final Environment env, ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper,
+            final String path) throws TemplateException {
+        String curNestedPath = getCurrentNestedPath(env);
+
+        if (curNestedPath != null && !path.startsWith(curNestedPath)
+                && !path.equals(curNestedPath.substring(0, curNestedPath.length() - 1))) {
+            return curNestedPath + path;
         }
 
         return path;

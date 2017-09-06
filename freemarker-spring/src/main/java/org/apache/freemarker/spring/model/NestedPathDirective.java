@@ -32,54 +32,42 @@ import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util.CallableUtils;
-import org.apache.freemarker.core.util.StringToIndexMap;
+import org.springframework.beans.PropertyAccessor;
 import org.springframework.web.servlet.support.RequestContext;
 
 /**
- * Provides <code>TemplateModel</code> wrapping <code>BindStatus</code> for the given bind path, working similarly
- * to Spring Framework's <code>&lt;spring:bind /&gt;</code> JSP Tag Library.
+ * Provides <code>TemplateModel</code> setting <code>spring.nestedPath</code> by the given bind path, working similarly
+ * to Spring Framework's <code>&lt;spring:nestedPath /&gt;</code> JSP Tag Library.
  * <P>
  * This directive supports the following parameters:
  * <UL>
- * <LI><code>path</code>: The first positional parameter pointing to the bean or bean property to bind status information for.</LI>
- * <LI>
- *   <code>ignoreNestedPath</code>: A named parameter to set whether to ignore a nested path, if any.
- *   <code>false</code> by default.
- * </LI>
+ * <LI><code>path</code>: The first positional parameter to set a new nested path by appending it to the existing nested path if any existing.</LI>
  * </UL>
  * </P>
  * <P>
  * Some valid example(s):
  * </P>
  * <PRE>
- *   &lt;@spring.bind "user.email"; status&gt;
- *     &lt;input type="text" name="email" value="${status.value!}" /&gt;
- *   &lt;/@spring.bind&gt;
+ *   &lt;@spring.nestedPath "user"&gt;
+ *     &lt;#-- nested content --/&gt;
+ *   &lt;/@spring.nestedPath&gt;
  * </PRE>
- * <P>
- * <EM>Note:</EM> Unlike Spring Framework's <code>&lt;spring:bind /&gt;</code> JSP Tag Library, this directive
- * does not support <code>htmlEscape</code> parameter. It always has <code>BindStatus</code> not to escape HTML's
- * because it is much easier to control escaping in FreeMarker Template expressions.
- * </P>
  */
-public class BindDirective extends AbstractSpringTemplateDirectiveModel {
+public class NestedPathDirective extends AbstractSpringTemplateDirectiveModel {
 
-    public static final String NAME = "bind";
+    public static final String NAME = "nestedPath";
 
     private static final int PATH_PARAM_IDX = 0;
-    private static final int IGNORE_NESTED_PATH_PARAM_IDX = 1;
-
-    private static final String IGNORE_NESTED_PATH_PARAM_NAME = "ignoreNestedPath";
 
     private static final ArgumentArrayLayout ARGS_LAYOUT =
             ArgumentArrayLayout.create(
                     1,
-                    true,
-                    StringToIndexMap.of(IGNORE_NESTED_PATH_PARAM_NAME, IGNORE_NESTED_PATH_PARAM_IDX),
+                    false,
+                    null,
                     false
                     );
 
-    public BindDirective(HttpServletRequest request, HttpServletResponse response) {
+    public NestedPathDirective(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
     }
 
@@ -87,15 +75,25 @@ public class BindDirective extends AbstractSpringTemplateDirectiveModel {
     protected void executeInternal(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
                     throws TemplateException, IOException {
-        final String path = CallableUtils.getStringArgument(args, PATH_PARAM_IDX, this);
-        final boolean ignoreNestedPath = CallableUtils.getOptionalBooleanArgument(args, IGNORE_NESTED_PATH_PARAM_IDX,
-                this, false);
+        String path = CallableUtils.getStringArgument(args, PATH_PARAM_IDX, this);
 
-        final TemplateModel statusModel = getBindStatusTemplateModel(env, objectWrapperAndUnwrapper, requestContext,
-                path, ignoreNestedPath);
-        final TemplateModel[] nestedContentArgs = new TemplateModel[] { statusModel };
+        if (path == null) {
+            path = "";
+        }
 
-        callPlace.executeNestedContent(nestedContentArgs, out, env);
+        if (!path.isEmpty() && !path.endsWith(PropertyAccessor.NESTED_PROPERTY_SEPARATOR)) {
+            path += PropertyAccessor.NESTED_PROPERTY_SEPARATOR;
+        }
+
+        String prevNestedPath = getCurrentNestedPath(env);
+        String newNestedPath = (prevNestedPath != null) ? prevNestedPath + path : path;
+
+        try {
+            setCurrentNestedPath(env, newNestedPath);
+            callPlace.executeNestedContent(null, out, env);
+        } finally {
+            setCurrentNestedPath(env, prevNestedPath);
+        }
     }
 
     @Override
@@ -107,4 +105,5 @@ public class BindDirective extends AbstractSpringTemplateDirectiveModel {
     public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
         return ARGS_LAYOUT;
     }
+
 }

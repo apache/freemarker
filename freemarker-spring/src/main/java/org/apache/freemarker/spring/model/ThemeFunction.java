@@ -25,7 +25,43 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.context.MessageSource;
 import org.springframework.web.servlet.support.RequestContext;
 
+/**
+ * A <code>TemplateFunctionModel</code> providing functionality equivalent to the Spring Framework's
+ * <code>&lt;spring:theme /&gt;</code> JSP Tag Library.
+ * It retrieves the theme message with the given code or the resolved text by the given <code>message</code> parameter.
+ * <P>
+ * This function supports the following parameters:
+ * <UL>
+ * <LI><code>code</code>: The first optional positional parameter. The key to use when looking up the message.
+ * <LI><code>message arguments</code>: Positional varargs after <code>code</code> parameter, as message arguments.</LI>
+ * <LI><code>message</code>: Named parameters as <code>MessageResolvable</code> object.</LI>
+ * </UL>
+ * </P>
+ * <P>
+ * This function requires either <code>code</code> parameter or <code>message</code> parameter at least.
+ * </P>
+ * <P>
+ * Some valid example(s):
+ * </P>
+ * <PRE>
+ * &lt;#-- With 'code' positional parameter only --&gt;
+ * ${spring.theme("label.user.firstName")!}
+ *
+ * &lt;#-- With 'code' positional parameter and message arguments (varargs) --&gt;
+ * ${spring.theme("message.user.form", user.firstName, user.lastName, user.email)}
+ *
+ * &lt;#-- With 'message' named parameter (<code>MessageResolvable</code> object) --&gt;
+ * ${spring.theme(message=myMessageResolvable)}
+ * </PRE>
+ * <P>
+ * <EM>Note:</EM> Unlike Spring Framework's <code>&lt;spring:theme /&gt;</code> JSP Tag Library, this function
+ * does not support <code>htmlEscape</code> parameter. It always returns the message not to escape HTML's
+ * because it is much easier to control escaping in FreeMarker Template expressions.
+ * </P>
+ */
 public class ThemeFunction extends MessageFunction {
+
+    public static final String NAME = "theme";
 
     public ThemeFunction(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
