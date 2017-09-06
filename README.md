@@ -142,24 +142,25 @@ IDE setup
 
 ### Eclipse
 
-Last tested Eclipse Neon.1.
+Last tested Eclipse Oxygen (4.7.0)
 
+- First, build the project with Gradle if you haven't yet (see earlier how).
 - Start Eclipse
-- You may prefer to start a new workspace (File -> "Switch workspace"), but
-  it's optional.
+- Start a new workspace (File -> "Switch workspace")
 - Window -> Preferences
   - General -> Workspace, set the text file encoding
     to "UTF-8". (Or, you can set the same later on project level instead.)
-  - General -> Editors, set:
+  - General -> Editors -> Text Editors, set:
     - Insert space for tabs
     - Show print margin, 120 columns
   - Java -> Code Style -> Formatter -> Import...
-    Select src\ide-settings\Eclipse\Formatter-profile-FreeMarker.xml
-    inside the FreeMarker project directory.
-    This profile uses space-only indentation policy and 120 character line
-    width, and formatting rules that are pretty much standard in modern Java.
+    Select `src\ide-settings\Eclipse\Formatter-profile-FreeMarker.xml`
+    inside the FreeMarker project directory. That select "FreeMarker" as the
+    "Active profile".
+    (This profile uses space-only indentation policy and 120 character line
+    width, and formatting rules that are pretty much standard in modern Java.)
   - Java -> Code Style -> Organize imports
-    The order is this (the Eclipse default): java, javax, org, com.
+    Order: java, javax, org, com.
     Number of imports required for .*: 99
     Number of static imports needed for .*: 1
   - Java -> Installed JRE-s:
@@ -168,29 +169,37 @@ Last tested Eclipse Neon.1.
   - Java -> Compiler -> Javadoc:
     "Malformed Javadoc comments": Error
     "Only consider members as visible": Private
-    "Validate tag argunebts": true
+    "Validate tag arguments": true
     "Missing tag descriptions": Validate @return tags
     "Missing Javadoc tags": Ignore
     "Missing Javadoc comments": Ignore
-- Project -> Properties -> Java Compiler -> Errors/Warnings:
-  Check in "Enable project specific settings", then set "Forbidden reference
-  (access rules)" from "Error" to "Warning".
-- At Project -> Properties -> Java Code Style -> Formatter, check in "Enable
-  project specific settings", and then select "FreeMarker" as active profile.
-- At Project -> Properties -> Java Editor -> Save Actions, check "Enable project
-  specific settings", then "Perform the selected actions on save", and have
-  only "Organize imports" and "Additional actions" checked (the list for the
-  last should contain "Add missing @Override annotations",
-  "Add missing @Override annotations to implementations of interface methods",
-  "Add missing @Deprecated annotations", and "Remove unnecessary cast").
-- Right click on the root project -> Run As -> JUnit Test [TODO: Try this]
-  It should run without problems (all green).
+  - Java -> Compiler -> Errors/Warnings:
+    Set "Forbidden reference (access rules)" from "Error" to "Warning".
+  - Java -> Editor -> Save Actions:
+    Check "Perform the selected actions on save", and under that have only
+    "Organize imports" and "Additional actions" checked. The list for the
+    last should contain
+    "Add missing @Override annotations",
+    "Add missing @Override annotations to implementations of interface methods",
+    "Add missing @Deprecated annotations", and
+    "Remove unnecessary cast".
+- File -> Import... -> Gradle / Existing Gradle Project
+  Import the FreeMarker project directory. Everything can remain at its default.
+- Now Eclipse will automatically build the broject in the backround. There shouldn't
+  be any errors.
+- You may right-click on a all the project in the project tree, and chose
+  "Run as..." -> "JUnit test". Not all projects contains tests though (notably,
+  freemarker-core tests are in separate projects).
+- To run all the tests at once, you must use Gradle. To do that from under Eclipse,
+  go to "Run" -> "Run Configurations...", then right click on "Gradle Project" in the
+  tree, then "New". The "Gradle task" (and the "Name") should be `test`, and the
+  "Working directory" `${workspace_loc:/freemarker}`.
 - It's highly recommened to use the Eclipse FindBugs plugin.
-  - Install it from Eclipse Marketplace (3.0.1 as of this writing)
+  - Install it from Eclipse Marketplace (3.0.2 as of this writing)
   - Window -> Preferences -> Java -> FindBugs:
     Set all bug marker ranks from Warning to Error. (For false alarms we add
     @SuppressFBWarnings(value = "...", justification = "...") annotations.)
-  - Project -> Properties -> FindBugs -> [x] Run Automatically
+  - Fro each project: Project -> Properties -> FindBugs -> [x] Run Automatically
   - There should 0 errors. But sometimes the plugin fails to take the
     @SuppressFBWarnings annotations into account; then use Project -> Clean. 
 
@@ -198,7 +207,7 @@ Last tested Eclipse Neon.1.
 
 Last tested on IntelliJ IDEA Community 2017.1.5.
     
-- First build the project with Gradle if you haven't yet (see earlier how)
+- First, build the project with Gradle if you haven't yet (see earlier how).
 - "New..." -> "Project from existing source"
   - Point to the root project `incubator-freemarker`) directory
   - On the next screen, select "Import project from external model" and "Gradle"
@@ -224,7 +233,7 @@ Last tested on IntelliJ IDEA Community 2017.1.5.
     go back to "Copyrigth" in the tree, and set "Default project copyright" to "ASL2".
 - Testing your setup:
   - You may do "Bulild"/"Build project" (Ctrl+F9) to see if everyting compiles now.
-  - You may ran the `test` task of the root project with Gradle to see that everything works as
+  - You may run the `test` task of the root project with Gradle to see that everything works as
     expected. To do that from IntelliJ, create a run configuration:
     "Run" \ "Run Configurations..." \ "+" \ "Gradle" then:
     - Set "Name" to `All tests` for example
