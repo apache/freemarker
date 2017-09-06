@@ -41,8 +41,8 @@ import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 
 /**
  * Utilities for implementing and calling {@link TemplateCallableModel}-s (such as {@link TemplateDirectiveModel}-s
@@ -597,7 +597,7 @@ public final class CallableUtils {
     /**
      * See {@link #castArgumentValue(TemplateModel, int, Class, boolean, TemplateModel, TemplateCallableModel,
      * boolean)}; this does the same, but with {@link TemplateNumberModel} as {@code type} and with the restriction that
-     * the number must be convertable to {@code int} losselessly, and with {@link int} return value.
+     * the number must be convertable to {@code int} losselessly, and with {@code int} return value.
      */
     public static int castArgumentValueToInt(
             TemplateModel argValue, int argIdx, boolean optional, int defaultValue, TemplateCallableModel callable,
