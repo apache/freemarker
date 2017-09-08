@@ -30,7 +30,6 @@ import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
-import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.util.CallableUtils;
@@ -104,7 +103,7 @@ public class BindErrorsDirective extends AbstractSpringTemplateDirectiveModel {
     }
 
     private final TemplateModel getBindErrorsTemplateModel(Environment env, ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper,
-            RequestContext requestContext, String name) throws ObjectWrappingException {
+            RequestContext requestContext, String name) throws TemplateException {
         final Errors errors = requestContext.getErrors(name, false);
 
         if (errors != null && errors.hasErrors()) {
@@ -113,7 +112,7 @@ public class BindErrorsDirective extends AbstractSpringTemplateDirectiveModel {
                         this, isFunction());
             }
 
-            return ((DefaultObjectWrapper) objectWrapperAndUnwrapper).wrap(errors);
+            return wrapObject(objectWrapperAndUnwrapper, errors);
         }
 
         return null;

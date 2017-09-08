@@ -73,14 +73,21 @@ public abstract class AbstractSpringTemplateCallableModel implements TemplateCal
             RequestContext requestContext, String path, boolean ignoreNestedPath) throws TemplateException {
         final String resolvedPath = (ignoreNestedPath) ? path : resolveNestedPath(env, objectWrapperAndUnwrapper, path);
         BindStatus status = requestContext.getBindStatus(resolvedPath, false);
+        return wrapObject(objectWrapperAndUnwrapper, status);
+    }
 
-        if (status != null) {
+    protected final Object unwrapObject(ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, TemplateModel model) throws TemplateException {
+        return (model != null) ? objectWrapperAndUnwrapper.unwrap(model) : null;
+    }
+
+    protected final TemplateModel wrapObject(ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, Object object) throws TemplateException {
+        if (object != null) {
             if (!(objectWrapperAndUnwrapper instanceof DefaultObjectWrapper)) {
                 CallableUtils.newGenericExecuteException("objectWrapperAndUnwrapper is not a DefaultObjectWrapper.",
                         this, isFunction());
             }
 
-            return ((DefaultObjectWrapper) objectWrapperAndUnwrapper).wrap(status);
+            return ((DefaultObjectWrapper) objectWrapperAndUnwrapper).wrap(object);
         }
 
         return null;

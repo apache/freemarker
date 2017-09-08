@@ -33,7 +33,6 @@ import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util._StringUtils;
@@ -111,10 +110,10 @@ public class MessageFunction extends AbstractSpringTemplateFunctionModel {
 
         final TemplateModel messageResolvableModel = CallableUtils.getOptionalArgument(args, MESSAGE_RESOLVABLE_PARAM_IDX,
                 TemplateModel.class, this);
+        final MessageSourceResolvable messageResolvable = (MessageSourceResolvable) unwrapObject(
+                objectWrapperAndUnwrapper, messageResolvableModel);
 
-        if (messageResolvableModel != null) {
-            MessageSourceResolvable messageResolvable = (MessageSourceResolvable) objectWrapperAndUnwrapper
-                    .unwrap(messageResolvableModel);
+        if (messageResolvable != null) {
             message = messageSource.getMessage(messageResolvable, requestContext.getLocale());
         } else {
             final String code = _StringUtils
@@ -127,10 +126,9 @@ public class MessageFunction extends AbstractSpringTemplateFunctionModel {
                 if (!messageArgsModel.isEmptyCollection()) {
                     msgArgumentList = new ArrayList<>();
                     TemplateModel msgArgModel;
-                    int i = 0;
-                    for (TemplateModelIterator tit = messageArgsModel.iterator(); tit.hasNext(); i++) {
+                    for (TemplateModelIterator tit = messageArgsModel.iterator(); tit.hasNext(); ) {
                         msgArgModel = tit.next();
-                        msgArgumentList.add(objectWrapperAndUnwrapper.unwrap(msgArgModel));
+                        msgArgumentList.add(unwrapObject(objectWrapperAndUnwrapper, msgArgModel));
                     }
                 }
 
@@ -143,7 +141,7 @@ public class MessageFunction extends AbstractSpringTemplateFunctionModel {
             }
         }
 
-        return (message != null) ? new SimpleString(message) : null;
+        return wrapObject(objectWrapperAndUnwrapper, message);
     }
 
     @Override

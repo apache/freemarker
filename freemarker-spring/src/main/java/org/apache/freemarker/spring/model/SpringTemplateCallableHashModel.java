@@ -47,11 +47,16 @@ public final class SpringTemplateCallableHashModel implements TemplateHashModel,
     private String nestedPath;
 
     public SpringTemplateCallableHashModel(final HttpServletRequest request, final HttpServletResponse response) {
-        callablesMap.put(BindDirective.NAME, new BindDirective(request, response));
         callablesMap.put(MessageFunction.NAME, new MessageFunction(request, response));
         callablesMap.put(ThemeFunction.NAME, new ThemeFunction(request, response));
         callablesMap.put(BindErrorsDirective.NAME, new BindErrorsDirective(request, response));
         callablesMap.put(NestedPathDirective.NAME, new NestedPathDirective(request, response));
+        callablesMap.put(BindDirective.NAME, new BindDirective(request, response));
+
+        callablesMap.put(TransformFunction.NAME, new TransformFunction(request, response));
+        callablesMap.put(UrlFunction.NAME, new UrlFunction(request, response));
+        callablesMap.put(EvalFunction.NAME, new EvalFunction(request, response));
+        callablesMap.put(MvcUrlFunction.NAME, new MvcUrlFunction(request, response));
     }
 
     public TemplateModel get(String key) throws TemplateException {
