@@ -55,7 +55,6 @@ public final class SpringTemplateCallableHashModel implements TemplateHashModel,
         modelsMap.put(TransformFunction.NAME, new TransformFunction(request, response));
         modelsMap.put(UrlFunction.NAME, new UrlFunction(request, response));
         modelsMap.put(EvalFunction.NAME, new EvalFunction(request, response));
-        modelsMap.put(MvcUrlFunction.NAME, new MvcUrlFunction(request, response));
     }
 
     public TemplateModel get(String key) throws TemplateException {
