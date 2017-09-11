@@ -66,6 +66,8 @@ public class EvalFunction extends AbstractSpringTemplateFunctionModel {
 
     private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(1, false, null, false);
 
+    private static final String EVALUATION_CONTEXT_VAR_NAME = "org.apache.freemarker.spring.model.EVALUATION_CONTEXT";
+
     private final ExpressionParser expressionParser = new SpelExpressionParser();
 
     public EvalFunction(HttpServletRequest request, HttpServletResponse response) {
@@ -79,8 +81,17 @@ public class EvalFunction extends AbstractSpringTemplateFunctionModel {
         final String expressionString = CallableUtils.getStringArgument(args, EXPRESSION_PARAM_IDX, this);
         final Expression expression = expressionParser.parseExpression(expressionString);
 
-        // TODO: cache evaluationContext somewhere in request level....
-        EvaluationContext evaluationContext = createEvaluationContext(env, objectWrapperAndUnwrapper, requestContext);
+        EvaluationContext evaluationContext = null;
+        final SpringTemplateCallableHashModel springTemplateModel = getSpringTemplateCallableHashModel(env);
+        TemplateModel evaluationContextModel = springTemplateModel.get(EVALUATION_CONTEXT_VAR_NAME);
+
+        if (evaluationContextModel != null) {
+            evaluationContext = (EvaluationContext) unwrapObject(objectWrapperAndUnwrapper, evaluationContextModel);
+        } else {
+            evaluationContext = createEvaluationContext(env, objectWrapperAndUnwrapper, requestContext);
+            evaluationContextModel = wrapObject(objectWrapperAndUnwrapper, evaluationContext);
+            springTemplateModel.setEvaluationContextModel(evaluationContextModel);
+        }
 
         final Object result = expression.getValue(evaluationContext);
         return wrapObject(objectWrapperAndUnwrapper, result);

@@ -27,6 +27,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateCallableModel;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.springframework.web.servlet.support.BindStatus;
@@ -95,21 +96,15 @@ public abstract class AbstractSpringTemplateCallableModel implements TemplateCal
 
     protected abstract boolean isFunction();
 
-    protected String getCurrentNestedPath(final Environment env) throws TemplateException {
-        SpringTemplateCallableHashModel springHash = (SpringTemplateCallableHashModel) env
-                .getVariable(SpringTemplateCallableHashModel.NAME);
-        return springHash.getNestedPath();
-    }
-
-    protected void setCurrentNestedPath(final Environment env, final String nestedPath) throws TemplateException {
-        SpringTemplateCallableHashModel springHash = (SpringTemplateCallableHashModel) env
-                .getVariable(SpringTemplateCallableHashModel.NAME);
-        springHash.setNestedPath(nestedPath);
+    protected SpringTemplateCallableHashModel getSpringTemplateCallableHashModel(final Environment env)
+            throws TemplateException {
+        return (SpringTemplateCallableHashModel) env.getVariable(SpringTemplateCallableHashModel.NAME);
     }
 
     private String resolveNestedPath(final Environment env, ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper,
             final String path) throws TemplateException {
-        String curNestedPath = getCurrentNestedPath(env);
+        final TemplateStringModel curNestedPathModel = getSpringTemplateCallableHashModel(env).getNestedPathModel();
+        final String curNestedPath = (curNestedPathModel != null) ? curNestedPathModel.getAsString() : null;
 
         if (curNestedPath != null && !path.startsWith(curNestedPath)
                 && !path.equals(curNestedPath.substring(0, curNestedPath.length() - 1))) {

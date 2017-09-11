@@ -31,6 +31,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.web.servlet.support.RequestContext;
@@ -59,13 +60,7 @@ public class NestedPathDirective extends AbstractSpringTemplateDirectiveModel {
 
     private static final int PATH_PARAM_IDX = 0;
 
-    private static final ArgumentArrayLayout ARGS_LAYOUT =
-            ArgumentArrayLayout.create(
-                    1,
-                    false,
-                    null,
-                    false
-                    );
+    private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(1, false, null, false);
 
     public NestedPathDirective(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
@@ -85,14 +80,18 @@ public class NestedPathDirective extends AbstractSpringTemplateDirectiveModel {
             path += PropertyAccessor.NESTED_PROPERTY_SEPARATOR;
         }
 
-        String prevNestedPath = getCurrentNestedPath(env);
-        String newNestedPath = (prevNestedPath != null) ? prevNestedPath + path : path;
+        final SpringTemplateCallableHashModel springTemplateModel = getSpringTemplateCallableHashModel(env);
+        final TemplateStringModel prevNestedPathModel = springTemplateModel.getNestedPathModel();
+        final String prevNestedPath = (prevNestedPathModel != null) ? prevNestedPathModel.getAsString() : null;
+        final String newNestedPath = (prevNestedPath != null) ? prevNestedPath + path : path;
+        final TemplateStringModel newNestedPathModel = (TemplateStringModel) wrapObject(objectWrapperAndUnwrapper,
+                newNestedPath);
 
         try {
-            setCurrentNestedPath(env, newNestedPath);
+            springTemplateModel.setNestedPathModel(newNestedPathModel);
             callPlace.executeNestedContent(null, out, env);
         } finally {
-            setCurrentNestedPath(env, prevNestedPath);
+            springTemplateModel.setNestedPathModel(prevNestedPathModel);
         }
     }
 

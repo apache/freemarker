@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.impl.SimpleString;
+import org.apache.freemarker.core.model.TemplateStringModel;
 
 /**
  * TemplateHashModel wrapper for templates using Spring directives and functions.
@@ -40,31 +40,26 @@ public final class SpringTemplateCallableHashModel implements TemplateHashModel,
 
     public static final String NAME = "spring";
 
-    public static final String NESTED_PATH = "nestedPath";
+    public static final String NESTED_PATH_MODEL = "nestedPathModel";
 
-    private Map<String, AbstractSpringTemplateCallableModel> callablesMap = new HashMap<>();
+    public static final String EVALUATION_CONTEXT_MODEL = "evaluationContextModel";
 
-    private String nestedPath;
+    private Map<String, TemplateModel> modelsMap = new HashMap<>();
 
     public SpringTemplateCallableHashModel(final HttpServletRequest request, final HttpServletResponse response) {
-        callablesMap.put(MessageFunction.NAME, new MessageFunction(request, response));
-        callablesMap.put(ThemeFunction.NAME, new ThemeFunction(request, response));
-        callablesMap.put(BindErrorsDirective.NAME, new BindErrorsDirective(request, response));
-        callablesMap.put(NestedPathDirective.NAME, new NestedPathDirective(request, response));
-        callablesMap.put(BindDirective.NAME, new BindDirective(request, response));
-
-        callablesMap.put(TransformFunction.NAME, new TransformFunction(request, response));
-        callablesMap.put(UrlFunction.NAME, new UrlFunction(request, response));
-        callablesMap.put(EvalFunction.NAME, new EvalFunction(request, response));
-        callablesMap.put(MvcUrlFunction.NAME, new MvcUrlFunction(request, response));
+        modelsMap.put(MessageFunction.NAME, new MessageFunction(request, response));
+        modelsMap.put(ThemeFunction.NAME, new ThemeFunction(request, response));
+        modelsMap.put(BindErrorsDirective.NAME, new BindErrorsDirective(request, response));
+        modelsMap.put(NestedPathDirective.NAME, new NestedPathDirective(request, response));
+        modelsMap.put(BindDirective.NAME, new BindDirective(request, response));
+        modelsMap.put(TransformFunction.NAME, new TransformFunction(request, response));
+        modelsMap.put(UrlFunction.NAME, new UrlFunction(request, response));
+        modelsMap.put(EvalFunction.NAME, new EvalFunction(request, response));
+        modelsMap.put(MvcUrlFunction.NAME, new MvcUrlFunction(request, response));
     }
 
     public TemplateModel get(String key) throws TemplateException {
-        if (NESTED_PATH.equals(key)) {
-            return (nestedPath != null) ? new SimpleString(nestedPath) : null;
-        }
-
-        return callablesMap.get(key);
+        return modelsMap.get(key);
     }
 
     @Override
@@ -72,12 +67,20 @@ public final class SpringTemplateCallableHashModel implements TemplateHashModel,
         return false;
     }
 
-    public String getNestedPath() {
-        return nestedPath;
+    public TemplateStringModel getNestedPathModel() throws TemplateException {
+        return (TemplateStringModel) get(NESTED_PATH_MODEL);
     }
 
-    public void setNestedPath(String nestedPath) {
-        this.nestedPath = nestedPath;
+    public void setNestedPathModel(TemplateStringModel nestedPathModel) {
+        modelsMap.put(NESTED_PATH_MODEL, nestedPathModel);
+    }
+
+    public TemplateModel getEvaluationContextModel() throws TemplateException {
+        return (TemplateModel) get(EVALUATION_CONTEXT_MODEL);
+    }
+
+    public void setEvaluationContextModel(TemplateModel evaluationContextModel) {
+        modelsMap.put(EVALUATION_CONTEXT_MODEL, evaluationContextModel);
     }
 
 }
