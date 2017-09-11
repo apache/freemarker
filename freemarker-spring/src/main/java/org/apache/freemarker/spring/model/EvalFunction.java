@@ -80,7 +80,7 @@ public class EvalFunction extends AbstractSpringTemplateFunctionModel {
         final Expression expression = expressionParser.parseExpression(expressionString);
 
         // TODO: cache evaluationContext somewhere in request level....
-        EvaluationContext evaluationContext = createEvaluationContext(env, requestContext);
+        EvaluationContext evaluationContext = createEvaluationContext(env, objectWrapperAndUnwrapper, requestContext);
 
         final Object result = expression.getValue(evaluationContext);
         return wrapObject(objectWrapperAndUnwrapper, result);
@@ -91,10 +91,11 @@ public class EvalFunction extends AbstractSpringTemplateFunctionModel {
         return ARGS_LAYOUT;
     }
 
-    private EvaluationContext createEvaluationContext(final Environment env, final RequestContext requestContext) {
+    private EvaluationContext createEvaluationContext(final Environment env,
+            final ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, final RequestContext requestContext) {
         StandardEvaluationContext context = new StandardEvaluationContext();
 
-        context.addPropertyAccessor(new EnvironmentVariablesPropertyAccessor(env));
+        context.addPropertyAccessor(new EnvironmentVariablesPropertyAccessor(env, objectWrapperAndUnwrapper));
         context.addPropertyAccessor(new MapAccessor());
         context.addPropertyAccessor(new EnvironmentAccessor());
         context.setBeanResolver(new BeanFactoryResolver(requestContext.getWebApplicationContext()));
@@ -112,42 +113,51 @@ public class EvalFunction extends AbstractSpringTemplateFunctionModel {
         return (ConversionService) getRequest().getAttribute(ConversionService.class.getName());
     }
 
-    private static class EnvironmentVariablesPropertyAccessor implements PropertyAccessor {
+    private class EnvironmentVariablesPropertyAccessor implements PropertyAccessor {
 
         private final Environment env;
+        private final ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper;
 
-        public EnvironmentVariablesPropertyAccessor(final Environment env) {
+        public EnvironmentVariablesPropertyAccessor(final Environment env,
+                final ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper) {
             this.env = env;
+            this.objectWrapperAndUnwrapper = objectWrapperAndUnwrapper;
         }
 
         @Override
         public Class<?>[] getSpecificTargetClasses() {
-            // TODO Auto-generated method stub
             return null;
         }
 
         @Override
         public boolean canRead(EvaluationContext context, Object target, String name) throws AccessException {
-            // TODO Auto-generated method stub
-            return false;
+            try {
+                return (target == null && env.getVariable(name) != null);
+            } catch (TemplateException e) {
+                throw new AccessException("Can't get environment variable by name, '" + name + "'.", e);
+            }
         }
 
         @Override
         public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
-            // TODO Auto-generated method stub
-            return null;
+            try {
+                TemplateModel model = env.getVariable(name);
+                Object value = unwrapObject(objectWrapperAndUnwrapper, model);
+                return new TypedValue(value);
+            } catch (TemplateException e) {
+                throw new AccessException("Can't get environment variable by name, '" + name + "'.", e);
+            }
         }
 
         @Override
         public boolean canWrite(EvaluationContext context, Object target, String name) throws AccessException {
-            // TODO Auto-generated method stub
             return false;
         }
 
         @Override
         public void write(EvaluationContext context, Object target, String name, Object newValue)
                 throws AccessException {
-            // TODO Auto-generated method stub
+            throw new UnsupportedOperationException();
         }
     }
 }
