@@ -55,7 +55,6 @@ public class SpringResourceTemplateLoader implements TemplateLoader, ResourceLoa
 
     /**
      * Base resource location which can be prepended to the template name internally when resolving a resource.
-     * @return
      */
     public String getBaseLocation() {
         return baseLocation;

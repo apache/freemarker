@@ -28,18 +28,20 @@ inAggregateJavadoc = true
 dependencies {
     compile project(":freemarker-core")
 
-    def geronimoServletSpec3Version = "1.0"
-    def geronimoJspSpec22Version = "1.2"
-    def geronimoELSpec22Version = "1.0.4"
-
-    compileOnly "org.apache.geronimo.specs:geronimo-servlet_3.0_spec:${geronimoServletSpec3Version}"
-    compileOnly "org.apache.geronimo.specs:geronimo-jsp_2.2_spec:${geronimoJspSpec22Version}"
-    compileOnly "org.apache.geronimo.specs:geronimo-el_2.2_spec:${geronimoELSpec22Version}"
+    // Because of the limitations of Eclipse dependency handling, we have to use the dependency artifacts from
+    // Jetty ${jettyVersion} here, which is the Jetty version used for the tests. When the jettyVersion changes, run
+    // `gradlew freemarker-servlet:dependencies` and copy-paste the exact versions to here:
+    compileOnly "org.eclipse.jetty.orbit:javax.servlet:3.0.0.v201112011016"
+    compileOnly "org.eclipse.jetty.orbit:javax.servlet.jsp:2.2.0.v201112011158"
+    compileOnly "org.eclipse.jetty.orbit:javax.el:2.2.0.v201108011116"
 
     // ------------------------------------------------------------------------
     // For tests
 
-    def jettyVersion = "7.6.16.v20140903"
+    // When changing this, the non-test org.eclipse.jetty.orbit dependencies must be updated as well! Thus, it must use
+    // exactly the same Servlet/JSP-related specification versions as the minimal requirements of FreeMarker.
+    def jettyVersion = "8.1.22.v20160922" 
+     
     testCompile "org.eclipse.jetty:jetty-server:$jettyVersion"
     testCompile "org.eclipse.jetty:jetty-webapp:$jettyVersion"
     testCompile "org.eclipse.jetty:jetty-jsp:$jettyVersion"

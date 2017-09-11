@@ -215,9 +215,11 @@ subprojects {
         compile "org.slf4j:slf4j-api:$slf4jVersion"
         // All subprojects might use Findbugs annotations:
         compileOnly libraries.findbugs
-    
-        // Test libraries and utilities might come handy during testing:
-        testCompile project(":freemarker-test-utils")
+        // We don't add test dependencies to freemarker-core, as Eclipse sees that as circular dependency:
+        if (path != ':freemarker-core') {   
+            // Test libraries and utilities might come handy during testing:
+            testCompile project(":freemarker-test-utils")
+        }
     }
 
     // Like Maven's Enforcer plugin, make the build fail if certain libraries get in. (The problem with the

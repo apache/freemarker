@@ -56,7 +56,7 @@ public class FreeMarkerViewResolver extends AbstractTemplateViewResolver impleme
 
     /**
      * Internal servlet instance to provide a page object in JSP tag library usages.
-     * @see {@link javax.servlet.jsp.PageContext#getPage()}
+     * @see javax.servlet.jsp.PageContext#getPage()
      */
     private GenericServlet pageContextServlet;
 

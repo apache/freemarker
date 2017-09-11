@@ -27,11 +27,8 @@ import org.apache.freemarker.core.util._ArrayEnumeration;
 
 /**
  * AST non-expression node superclass: Superclass of directive calls, interpolations, static text, top-level comments,
- * or other such non-expression node in the parsed template. Some information that can be found here can be accessed
- * through the {@link Environment#getCurrentDirectiveCallPlace()}, which is a published API, and thus promises backward
- * compatibility.
+ * or other such non-expression node in the parsed template.
  */
-// TODO [FM3] Get rid of "public" and thus the "_" prefix
 abstract class ASTElement extends ASTNode {
 
     private static final int INITIAL_CHILD_BUFFER_CAPACITY = 6;

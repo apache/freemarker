@@ -1,8 +1,8 @@
-**/build/
-/.out/
-/bin/
-/.bin/
-/target/
+build/
+.out/
+bin/
+.bin/
+target/
 
 /gradle.properties
 /archive/

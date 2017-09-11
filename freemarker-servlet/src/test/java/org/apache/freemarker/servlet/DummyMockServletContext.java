@@ -22,12 +22,21 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.EventListener;
+import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.Filter;
+import javax.servlet.FilterRegistration;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
+import javax.servlet.ServletRegistration.Dynamic;
+import javax.servlet.SessionCookieConfig;
+import javax.servlet.SessionTrackingMode;
+import javax.servlet.descriptor.JspConfigDescriptor;
 
 public class DummyMockServletContext implements ServletContext {
 
@@ -153,5 +162,136 @@ public class DummyMockServletContext implements ServletContext {
     @Override
     public void setAttribute(String arg0, Object arg1) {
     }
-    
+
+    @Override
+    public boolean setInitParameter(String name, String value) {
+        return false;
+    }
+
+    @Override
+    public Dynamic addServlet(String servletName, String className)
+            throws IllegalArgumentException, IllegalStateException {
+        return null;
+    }
+
+    @Override
+    public Dynamic addServlet(String servletName, Servlet servlet)
+            throws IllegalArgumentException, IllegalStateException {
+        return null;
+    }
+
+    @Override
+    public Dynamic addServlet(String servletName, Class<? extends Servlet> clazz)
+            throws IllegalArgumentException, IllegalStateException {
+        return null;
+    }
+
+    @Override
+    public <T extends Servlet> T createServlet(Class<T> clazz) throws ServletException {
+        return null;
+    }
+
+    @Override
+    public ServletRegistration getServletRegistration(String servletName) {
+        return null;
+    }
+
+    @Override
+    public Map<String, ? extends ServletRegistration> getServletRegistrations() {
+        return null;
+    }
+
+    @Override
+    public javax.servlet.FilterRegistration.Dynamic addFilter(String filterName, String className)
+            throws IllegalArgumentException, IllegalStateException {
+        return null;
+    }
+
+    @Override
+    public javax.servlet.FilterRegistration.Dynamic addFilter(String filterName, Filter filter)
+            throws IllegalArgumentException, IllegalStateException {
+        return null;
+    }
+
+    @Override
+    public javax.servlet.FilterRegistration.Dynamic addFilter(String filterName, Class<? extends Filter> filterClass)
+            throws IllegalArgumentException, IllegalStateException {
+        return null;
+    }
+
+    @Override
+    public <T extends Filter> T createFilter(Class<T> clazz) throws ServletException {
+        return null;
+    }
+
+    @Override
+    public FilterRegistration getFilterRegistration(String filterName) {
+        return null;
+    }
+
+    @Override
+    public Map<String, ? extends FilterRegistration> getFilterRegistrations() {
+        return null;
+    }
+
+    @Override
+    public void addListener(Class<? extends EventListener> listenerClass) {
+    }
+
+    @Override
+    public void addListener(String className) {
+    }
+
+    @Override
+    public <T extends EventListener> void addListener(T t) {
+    }
+
+    @Override
+    public <T extends EventListener> T createListener(Class<T> clazz) throws ServletException {
+        return null;
+    }
+
+    @Override
+    public void declareRoles(String... roleNames) {
+    }
+
+    @Override
+    public SessionCookieConfig getSessionCookieConfig() {
+        return null;
+    }
+
+    @Override
+    public void setSessionTrackingModes(Set<SessionTrackingMode> sessionTrackingModes) {
+    }
+
+    @Override
+    public Set<SessionTrackingMode> getDefaultSessionTrackingModes() {
+        return null;
+    }
+
+    @Override
+    public int getEffectiveMajorVersion() throws UnsupportedOperationException {
+        return 3;
+    }
+
+    @Override
+    public int getEffectiveMinorVersion() throws UnsupportedOperationException {
+        return 0;
+    }
+
+    @Override
+    public Set<SessionTrackingMode> getEffectiveSessionTrackingModes() {
+        return null;
+    }
+
+    @Override
+    public ClassLoader getClassLoader() {
+        return null;
+    }
+
+    @Override
+    public JspConfigDescriptor getJspConfigDescriptor() {
+        return null;
+    }
+
 }
