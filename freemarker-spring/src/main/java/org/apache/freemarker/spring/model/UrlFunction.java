@@ -21,6 +21,7 @@ package org.apache.freemarker.spring.model;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -53,6 +54,9 @@ import org.springframework.web.util.UriUtils;
  * Some valid example(s):
  * </P>
  * <PRE>
+ * ${spring.url('/usereditaction.do')}
+ * ${spring.url('/usereditaction.do', param1='value1', param2='value2')}
+ * ${spring.url('/usereditaction.do', context='/othercontext', param1='value1', param2='value2')}
  * </PRE>
  * <P>
  * <EM>Note:</EM> Unlike Spring Framework's <code>&lt;spring:message /&gt;</code> JSP Tag Library, this function
@@ -93,7 +97,7 @@ public class UrlFunction extends AbstractSpringTemplateFunctionModel {
         final String value = CallableUtils.getStringArgument(args, VALUE_PARAM_IDX, this);
         final String context = CallableUtils.getOptionalStringArgument(args, CONTEXT_PARAM_IDX, this);
 
-        List<_KeyValuePair<String, String>> params = null;
+        List<_KeyValuePair<String, String>> params = Collections.emptyList();
         final TemplateHashModelEx2 paramsHashModel = (TemplateHashModelEx2) args[PARAMS_PARAM_IDX];
 
         if (!paramsHashModel.isEmptyHash()) {
