@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -62,11 +63,15 @@ public class ThemeFunctionTest {
 
     @Test
     public void testThemeFunctionBasicUsages() throws Exception {
+        final MessageSource defaultThemeMessageSource = themeSource.getTheme("default").getMessageSource();
+
         final Integer userId = userRepository.getUserIds().iterator().next();
         mockMvc.perform(get("/users/{userId}/", userId).param("viewName", "test/model/theme-function-basic-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
-                .andExpect(xpath("//link[@rel='stylesheet']/@href").string(
-                        themeSource.getTheme("default").getMessageSource().getMessage("styleSheet", null, null)));
+                .andExpect(xpath("//link[@rel='stylesheet']/@href")
+                        .string(defaultThemeMessageSource.getMessage("styleSheet", null, null)))
+                .andExpect(xpath("//div[@id='user']/@class")
+                        .string(defaultThemeMessageSource.getMessage("userClass", new Object[] { "selected" }, null)));
     }
 }

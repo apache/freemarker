@@ -48,6 +48,8 @@ import org.springframework.web.servlet.support.RequestContext;
  * ${spring.theme("styleSheet")!}
  *
  * &lt;link rel="stylesheet" href="${spring.theme('styleSheet')}" type="text/css" /&gt;
+ * 
+ * &lt;div id="user" class="${spring.theme('userClass', 'selected')}"&gt;...&lt;/div&gt;
  * </PRE>
  * <P>
  * <EM>Note:</EM> Unlike Spring Framework's <code>&lt;spring:theme /&gt;</code> JSP Tag Library, this function

@@ -22,5 +22,10 @@
 <link rel="stylesheet" href="${spring.theme('styleSheet')}" type="text/css" />
 </head>
 <body>
+
+  <div id="user" class="${spring.theme('userClass', 'selected')}">
+    ${user.firstName!} ${user.lastName!}
+  </div>
+
 </body>
 </html>
