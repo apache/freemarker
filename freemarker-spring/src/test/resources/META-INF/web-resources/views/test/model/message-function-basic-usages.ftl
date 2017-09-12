@@ -18,29 +18,15 @@
   under the License.
 -->
 <html>
-<head>
-<title>Spring MVC Form Example - Users</title>
-</head>
 <body>
 
-<h1>Users</h1>
-
-<table border="2">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>E-Mail</th>
-    </tr>
-  </thead>
-  <tbody>
-    <#list users as user>
-    <tr>
-      <td><a href="users/${user.id}">${user.firstName} ${user.lastName}</a></td>
-      <td><a href="mailto:${user.email}">${user.email}</a></td>
-    </tr>
-    </#list>
-  </tbody>
-</table>
+<#if user??>
+  <div id="userId">${spring.message("user.id")!}</div>
+  <div id="userEmail">${spring.message("user.email")!}</div>
+  <div id="userInfoWithArgs">${spring.message("user.form.message", user.firstName, user.lastName, user.email)!}</div>
+<#else>
+  <div id="errorMessage">${spring.message(message=errorMessage)!}</div>
+</#if>
 
 </body>
 </html>

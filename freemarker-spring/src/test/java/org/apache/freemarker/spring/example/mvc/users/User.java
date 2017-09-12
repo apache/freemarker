@@ -23,18 +23,18 @@ import java.util.Date;
 
 public class User {
 
-    private final String id;
+    private final Integer id;
     private String password;
     private String email;
     private String firstName;
     private String lastName;
     private Date birthDate;
 
-    public User(final String id) {
+    public User(final Integer id) {
         this.id = id;
     }
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 

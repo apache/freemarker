@@ -65,7 +65,7 @@ import org.springframework.web.servlet.support.RequestContext;
  * &lt;#-- With 'code' positional parameter and message arguments (varargs) --&gt;
  * ${spring.message("message.user.form", user.firstName, user.lastName, user.email)}
  *
- * &lt;#-- With 'message' named parameter (<code>MessageResolvable</code> object) --&gt;
+ * &lt;#-- With 'message' named parameter (assuming a <code>MessageResolvable</code> object is set to a model attribute) --&gt;
  * ${spring.message(message=myMessageResolvable)}
  * </PRE>
  * <P>

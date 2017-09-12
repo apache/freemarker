@@ -26,7 +26,7 @@
   <context:component-scan base-package="org.apache.freemarker.spring.example.mvc.users" />
 
   <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
-    <property name="basename" value="classpath:org.apache.freemarker.spring.example.mvc.users.UserMessages" />
+    <property name="basename" value="classpath:org/apache/freemarker/spring/example/mvc/users/UsersMessages" />
   </bean>
 
   <bean id="configuration" class="org.apache.freemarker.spring.ConfigurationFactoryBean">

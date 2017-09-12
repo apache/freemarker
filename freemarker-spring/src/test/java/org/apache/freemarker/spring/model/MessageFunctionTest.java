@@ -20,10 +20,13 @@
 package org.apache.freemarker.spring.model;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
+import org.apache.freemarker.spring.example.mvc.users.User;
+import org.apache.freemarker.spring.example.mvc.users.UserRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,11 +41,14 @@ import org.springframework.web.context.WebApplicationContext;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration("classpath:META-INF/web-resources")
-@ContextConfiguration("MessageFunctionTest-context.xml")
+@ContextConfiguration(locations = { "classpath:org/apache/freemarker/spring/example/mvc/users/users-mvc-context.xml" })
 public class MessageFunctionTest {
 
     @Autowired
     private WebApplicationContext wac;
+
+    @Autowired
+    private UserRepository userRepository;
 
     private MockMvc mockMvc;
 
@@ -52,10 +58,26 @@ public class MessageFunctionTest {
     }
 
     @Test
-    public void getUsers() throws Exception {
-        mockMvc.perform(get("/users").accept(MediaType.parseMediaType("text/html")))
-            .andExpect(status().isOk())
-            .andExpect(content().contentTypeCompatibleWith("text/html"))
-            .andExpect(xpath("/html/head/title").string("Spring MVC Form Example - Users"));
+    public void getMessageFunctionBasicUsages() throws Exception {
+        final Integer userId = userRepository.getUserIds().iterator().next();
+        final User user = userRepository.getUser(userId);
+        mockMvc.perform(get("/users/{userId}/", userId).param("viewName", "test/model/message-function-basic-usages")
+                .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
+                .andExpect(xpath("//div[@id='userId']/text()").string(wac.getMessage("user.id", null, null)))
+                .andExpect(xpath("//div[@id='userEmail']/text()").string(wac.getMessage("user.email", null, null)))
+                .andExpect(xpath("//div[@id='userInfoWithArgs']/text()").string(wac.getMessage("user.form.message",
+                        new Object[] { user.getFirstName(), user.getLastName(), user.getEmail() }, null)));
+    }
+
+    @Test
+    public void getMessageFunctionWithMessageSourceResolvable() throws Exception {
+        final Integer nonExistingUserId = 0;
+        mockMvc.perform(
+                get("/users/{userId}/", nonExistingUserId).param("viewName", "test/model/message-function-basic-usages")
+                        .accept(MediaType.parseMediaType("text/html")))
+                .andExpect(status().isOk()).andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
+                .andExpect(xpath("//div[@id='errorMessage']/text()")
+                        .string(wac.getMessage("user.error.notfound", new Object[] { nonExistingUserId }, null)));
     }
 }

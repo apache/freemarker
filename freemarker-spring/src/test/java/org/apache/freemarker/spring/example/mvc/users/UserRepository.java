@@ -30,9 +30,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class UserRepository {
 
-    private Map<String, User> usersMap = new ConcurrentHashMap<>();
+    private Map<Integer, User> usersMap = new ConcurrentHashMap<>();
     {
-        String id = "13c2ec8c-102c-4883-a282-3fe983e61515";
+        Integer id = 101;
         User user = new User(id);
         user.setEmail("john@example.com");
         user.setFirstName("John");
@@ -44,7 +44,7 @@ public class UserRepository {
         user.setBirthDate(birthDate.getTime());
         usersMap.put(id, user);
 
-        id = "04d6080b-2098-4eaf-90ee-7331caab5e91";
+        id = 102;
         user = new User(id);
         user.setEmail("jane@example.com");
         user.setFirstName("Jane");
@@ -57,11 +57,11 @@ public class UserRepository {
         usersMap.put(id, user);
     }
 
-    public synchronized Set<String> getUserIds() {
+    public synchronized Set<Integer> getUserIds() {
         return new TreeSet<>(usersMap.keySet());
     }
 
-    public synchronized User getUser(final String id) {
+    public synchronized User getUser(final Integer id) {
         if (id == null) {
             throw new IllegalArgumentException("ID must be non-null.");
         }
@@ -76,7 +76,7 @@ public class UserRepository {
     }
 
     public synchronized User addOrUpdateUser(final User user) {
-        final String id = user.getId();
+        final Integer id = user.getId();
         User newUser = cloneUser(user, id);
         usersMap.put(id, newUser);
         return cloneUser(newUser, id);
@@ -91,7 +91,7 @@ public class UserRepository {
         return user != null;
     }
 
-    private User cloneUser(final User source, final String id) {
+    private User cloneUser(final User source, final Integer id) {
         User clone = new User(id);
         clone.setPassword(source.getPassword());
         clone.setEmail(source.getEmail());

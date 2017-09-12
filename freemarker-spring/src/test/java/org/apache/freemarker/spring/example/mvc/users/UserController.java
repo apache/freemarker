@@ -23,36 +23,51 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class UserController {
 
+    private static final String DEFAULT_USER_LIST_VIEW_NAME = "example/users/userlist";
+
+    private static final String DEFAULT_USER_EDIT_VIEW_NAME = "example/users/useredit";
+
     @Autowired
     private UserRepository userRepository;
 
-    @RequestMapping(value = "/users", method = RequestMethod.GET)
-    public String listUsers(Model model) {
+    @RequestMapping(value = "/users/", method = RequestMethod.GET)
+    public String listUsers(@RequestParam(value = "viewName", required = false) String viewName, Model model) {
         List<User> users = new LinkedList<>();
 
-        for (String id : userRepository.getUserIds()) {
+        for (Integer id : userRepository.getUserIds()) {
             users.add(userRepository.getUser(id));
         }
 
         model.addAttribute("users", users);
 
-        return "example/users/userlist";
+        return (StringUtils.hasText(viewName)) ? viewName : DEFAULT_USER_LIST_VIEW_NAME;
     }
 
-    @RequestMapping(value = "/users/{id}", method = RequestMethod.GET)
-    public String editUser(@PathVariable("id") String id, Model model) {
+    @RequestMapping(value = "/users/{id:\\d+}", method = RequestMethod.GET)
+    public String getUser(@PathVariable("id") Integer id,
+            @RequestParam(value = "viewName", required = false) String viewName, Model model) {
         User user = userRepository.getUser(id);
-        model.addAttribute("user", user);
-        return "example/users/useredit";
+
+        if (user != null) {
+            model.addAttribute("user", user);
+        } else {
+            model.addAttribute("errorMessage",
+                    new DefaultMessageSourceResolvable(new String[] { "user.error.notfound" }, new Object[] { id }));
+        }
+
+        return (StringUtils.hasText(viewName)) ? viewName : DEFAULT_USER_EDIT_VIEW_NAME;
     }
 
     public UserRepository getUserRepository() {
