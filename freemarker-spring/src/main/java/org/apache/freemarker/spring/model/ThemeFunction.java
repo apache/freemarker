@@ -45,13 +45,9 @@ import org.springframework.web.servlet.support.RequestContext;
  * </P>
  * <PRE>
  * &lt;#-- With 'code' positional parameter only --&gt;
- * ${spring.theme("label.user.firstName")!}
+ * ${spring.theme("styleSheet")!}
  *
- * &lt;#-- With 'code' positional parameter and message arguments (varargs) --&gt;
- * ${spring.theme("message.user.form", user.firstName, user.lastName, user.email)}
- *
- * &lt;#-- With 'message' named parameter (<code>MessageResolvable</code> object) --&gt;
- * ${spring.theme(message=myMessageResolvable)}
+ * &lt;link rel="stylesheet" href="${spring.theme('styleSheet')}" type="text/css" /&gt;
  * </PRE>
  * <P>
  * <EM>Note:</EM> Unlike Spring Framework's <code>&lt;spring:theme /&gt;</code> JSP Tag Library, this function

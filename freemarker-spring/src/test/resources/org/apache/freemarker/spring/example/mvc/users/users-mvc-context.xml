@@ -43,4 +43,12 @@
     <property name="suffix" value=".ftl" />
   </bean>
 
+  <bean id="themeSource" class="org.springframework.ui.context.support.ResourceBundleThemeSource">
+    <property name="basenamePrefix" value="org/apache/freemarker/spring/example/mvc/users/UsersTheme-" />
+  </bean>
+
+  <bean id="themeResolver" class="org.springframework.web.servlet.theme.CookieThemeResolver">
+    <property name="defaultThemeName" value="default" />
+  </bean>
+
 </beans>
