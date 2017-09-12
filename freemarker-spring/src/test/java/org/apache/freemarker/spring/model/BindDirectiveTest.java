@@ -58,7 +58,7 @@ public class BindDirectiveTest {
     }
 
     @Test
-    public void testMessageFunctionBasicUsages() throws Exception {
+    public void testBasicUsages() throws Exception {
         final Integer userId = userRepository.getUserIds().iterator().next();
         final User user = userRepository.getUser(userId);
         mockMvc.perform(get("/users/{userId}.", userId).param("viewName", "test/model/bind-directive-basic-usages")

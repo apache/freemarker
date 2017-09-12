@@ -49,8 +49,14 @@ import org.springframework.web.servlet.support.RequestContext;
  * Some valid example(s):
  * </P>
  * <PRE>
- * &lt;@spring.hasBindErrors "email"; errors&gt;
- *   &lt;#-- nested content with using errors --&gt;
+ * &lt;@spring.hasBindErrors "user"; errors&gt;
+ *   &lt;div class="errors"&gt;
+ *     &lt;#list errors.allErrors as error&gt;
+ *       &lt;div class="error"&gt;
+ *         ${spring.message(message=error)!}
+ *       &lt;/div&gt;
+ *     &lt;/#list&gt;
+ *   &lt;/div&gt;
  * &lt;/@spring.hasBindErrors&gt;
  * </PRE>
  * <P>

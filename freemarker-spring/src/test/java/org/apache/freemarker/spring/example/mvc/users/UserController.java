@@ -27,6 +27,8 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -65,6 +67,19 @@ public class UserController {
         } else {
             model.addAttribute("errorMessage",
                     new DefaultMessageSourceResolvable(new String[] { "user.error.notfound" }, new Object[] { id }));
+        }
+
+        return (StringUtils.hasText(viewName)) ? viewName : DEFAULT_USER_EDIT_VIEW_NAME;
+    }
+
+    @RequestMapping(value = "/users/", method = RequestMethod.POST)
+    public String createUser(@RequestParam(value = "viewName", required = false) String viewName, User user,
+            BindingResult bindingResult, Model model) {
+        model.addAttribute("user", user);
+
+        if (!StringUtils.hasText(user.getEmail())) {
+            bindingResult.addError(new FieldError("user", "email", user.getEmail(), true,
+                    new String[] { "user.error.invalid.email" }, new Object[] { user.getEmail() }, "E-Mail is blank."));
         }
 
         return (StringUtils.hasText(viewName)) ? viewName : DEFAULT_USER_EDIT_VIEW_NAME;

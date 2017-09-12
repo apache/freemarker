@@ -57,7 +57,7 @@ public class UrlFunctionTest {
     }
 
     @Test
-    public void testThemeFunctionBasicUsages() throws Exception {
+    public void testBasicUsages() throws Exception {
         final Integer userId = userRepository.getUserIds().iterator().next();
         mockMvc.perform(get("/users/").param("viewName", "test/model/url-function-basic-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())

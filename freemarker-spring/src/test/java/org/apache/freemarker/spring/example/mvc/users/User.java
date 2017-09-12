@@ -23,12 +23,15 @@ import java.util.Date;
 
 public class User {
 
-    private final Integer id;
+    private Integer id;
     private String password;
     private String email;
     private String firstName;
     private String lastName;
     private Date birthDate;
+
+    public User() {
+    }
 
     public User(final Integer id) {
         this.id = id;

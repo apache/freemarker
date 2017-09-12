@@ -20,7 +20,7 @@
 package org.apache.freemarker.spring.model;
 
 import static org.hamcrest.Matchers.equalToIgnoringWhiteSpace;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -43,13 +44,16 @@ import org.springframework.web.context.WebApplicationContext;
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration("classpath:META-INF/web-resources")
 @ContextConfiguration(locations = { "classpath:org/apache/freemarker/spring/example/mvc/users/users-mvc-context.xml" })
-public class EvalFunctionTest {
+public class BindErrorsDirectiveTest {
 
     @Autowired
     private WebApplicationContext wac;
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private MessageSource messageSource;
 
     private MockMvc mockMvc;
 
@@ -60,16 +64,20 @@ public class EvalFunctionTest {
 
     @Test
     public void testBasicUsages() throws Exception {
-        final Integer userId = userRepository.getUserIds().iterator().next();
-        final User user = userRepository.getUser(userId);
-        mockMvc.perform(get("/users/").param("viewName", "test/model/eval-function-basic-usages")
-                .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
-                .andExpect(xpath("//div[@id='maxNumber']/text()").number(56.78))
-                .andExpect(xpath("//div[@id='user-%s']/text()", userId)
-                        .string(equalToIgnoringWhiteSpace(user.getFirstName() + " " + user.getLastName())))
-                .andExpect(xpath("//div[@id='firstUserId']/text()").string(userId.toString()))
-                .andExpect(xpath("//div[@id='fibonacci']/text()").string("0, 1, 1, 2, 3, 5, 8, 13"));
+        final User user = new User();
+        user.setFirstName("Paul");
+        user.setLastName("Temple");
+        // set invalid email intentionally to test BindErrorsDirective...
+        user.setEmail("");
+
+        mockMvc.perform(post("/users/").param("viewName", "test/model/binderrors-directive-basic-usages")
+                .param("firstName", user.getFirstName()).param("lastName", user.getLastName())
+                .param("email", user.getEmail()).accept(MediaType.parseMediaType("text/html")))
+                .andExpect(status().isOk()).andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
+                .andExpect(xpath("//div[@class='error']").string(equalToIgnoringWhiteSpace(
+                        messageSource.getMessage("user.error.invalid.email", new Object[] { user.getEmail() }, null))))
+                .andExpect(xpath("//input[@name='firstName']/@value").string(user.getFirstName()))
+                .andExpect(xpath("//input[@name='lastName']/@value").string(user.getLastName()));
     }
 
 }

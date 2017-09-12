@@ -62,7 +62,7 @@ public class ThemeFunctionTest {
     }
 
     @Test
-    public void testThemeFunctionBasicUsages() throws Exception {
+    public void testBasicUsages() throws Exception {
         final MessageSource defaultThemeMessageSource = themeSource.getTheme("default").getMessageSource();
 
         final Integer userId = userRepository.getUserIds().iterator().next();

@@ -58,7 +58,7 @@ public class MessageFunctionTest {
     }
 
     @Test
-    public void testMessageFunctionBasicUsages() throws Exception {
+    public void testBasicUsages() throws Exception {
         final Integer userId = userRepository.getUserIds().iterator().next();
         final User user = userRepository.getUser(userId);
         mockMvc.perform(get("/users/{userId}/", userId).param("viewName", "test/model/message-function-basic-usages")
@@ -71,7 +71,7 @@ public class MessageFunctionTest {
     }
 
     @Test
-    public void testMessageFunctionWithMessageSourceResolvable() throws Exception {
+    public void testWithMessageSourceResolvable() throws Exception {
         final Integer nonExistingUserId = 0;
         mockMvc.perform(
                 get("/users/{userId}/", nonExistingUserId).param("viewName", "test/model/message-function-basic-usages")
