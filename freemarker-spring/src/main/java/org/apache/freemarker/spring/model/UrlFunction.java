@@ -55,7 +55,11 @@ import org.springframework.web.util.UriUtils;
  * </P>
  * <PRE>
  * ${spring.url('/usereditaction.do')}
+ * 
  * ${spring.url('/usereditaction.do', param1='value1', param2='value2')}
+ * 
+ * ${spring.url('/users/{userId}/edit.do', userId='123')}
+ * 
  * ${spring.url('/usereditaction.do', context='/othercontext', param1='value1', param2='value2')}
  * </PRE>
  * <P>
