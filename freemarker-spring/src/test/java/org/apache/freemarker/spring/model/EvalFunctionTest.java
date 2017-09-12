@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.spring.model;
 
+import static org.hamcrest.Matchers.equalToIgnoringWhiteSpace;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -42,7 +43,7 @@ import org.springframework.web.context.WebApplicationContext;
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration("classpath:META-INF/web-resources")
 @ContextConfiguration(locations = { "classpath:org/apache/freemarker/spring/example/mvc/users/users-mvc-context.xml" })
-public class MessageFunctionTest {
+public class EvalFunctionTest {
 
     @Autowired
     private WebApplicationContext wac;
@@ -52,32 +53,28 @@ public class MessageFunctionTest {
 
     private MockMvc mockMvc;
 
+    private long startTimeMillis;
+
     @Before
     public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+
+        startTimeMillis = System.currentTimeMillis();
+        System.setProperty("EvalFunctionTest.startTimeMillis", Long.toString(startTimeMillis));
     }
 
     @Test
     public void testMessageFunctionBasicUsages() throws Exception {
         final Integer userId = userRepository.getUserIds().iterator().next();
         final User user = userRepository.getUser(userId);
-        mockMvc.perform(get("/users/{userId}/", userId).param("viewName", "test/model/message-function-basic-usages")
+        mockMvc.perform(get("/users/").param("viewName", "test/model/eval-function-basic-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
-                .andExpect(xpath("//div[@id='userId']/text()").string(wac.getMessage("user.id", null, null)))
-                .andExpect(xpath("//div[@id='userEmail']/text()").string(wac.getMessage("user.email", null, null)))
-                .andExpect(xpath("//div[@id='userInfoWithArgs']/text()").string(wac.getMessage("user.form.message",
-                        new Object[] { user.getFirstName(), user.getLastName(), user.getEmail() }, null)));
+                .andExpect(xpath("//div[@id='maxNumber']/text()").number(56.78))
+                .andExpect(xpath("//div[@id='user-%s']/text()", userId)
+                        .string(equalToIgnoringWhiteSpace(user.getFirstName() + " " + user.getLastName())))
+                .andExpect(xpath("//div[@id='firstUserId']/text()").string(userId.toString()))
+                .andExpect(xpath("//div[@id='fibonacci']/text()").string("0, 1, 1, 2, 3, 5, 8, 13"));
     }
 
-    @Test
-    public void testMessageFunctionWithMessageSourceResolvable() throws Exception {
-        final Integer nonExistingUserId = 0;
-        mockMvc.perform(
-                get("/users/{userId}/", nonExistingUserId).param("viewName", "test/model/message-function-basic-usages")
-                        .accept(MediaType.parseMediaType("text/html")))
-                .andExpect(status().isOk()).andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
-                .andExpect(xpath("//div[@id='errorMessage']/text()")
-                        .string(wac.getMessage("user.error.notfound", new Object[] { nonExistingUserId }, null)));
-    }
 }

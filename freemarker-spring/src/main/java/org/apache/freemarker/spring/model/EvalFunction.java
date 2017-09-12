@@ -51,9 +51,26 @@ import org.springframework.web.servlet.support.RequestContext;
  * Some valid example(s):
  * </P>
  * <PRE>
+ * &lt;#assign expression="T(java.lang.Math).max(12.34, 56.78)" /&gt;
+ * Max number: ${spring.eval(expression)}
+ * 
+ * &lt;#assign expression="user.id" /&gt;
+ * User ID: ${spring.eval(expression)!}
+ * 
+ * User ID: ${spring.eval('user.id')!}
+ * 
+ * &lt;#assign expression="user.firstName + ' ' + user.lastName" /&gt;
+ * User Name: ${spring.eval(expression)!}
+ * 
+ * &lt;#assign expression="users[0].id" /&gt;
+ * First User's ID: ${spring.eval(expression)!}
+ *
+ * &lt;#assign expression="{0,1,1,2,3,5,8,13}" /&gt;
+ * &lt;#assign numbers=spring.eval(expression) /&gt;
+ * Numbers: &lt;#list numbers as number&gt;${number}&lt;#sep&gt;, &lt;/#list&gt;
  * </PRE>
  * <P>
- * <EM>Note:</EM> Unlike Spring Framework's <code>&lt;spring:message /&gt;</code> JSP Tag Library, this function
+ * <EM>Note:</EM> Unlike Spring Framework's <code>&lt;spring:eval /&gt;</code> JSP Tag Library, this function
  * does not support <code>htmlEscape</code> parameter. It always returns the message not to escape HTML's
  * because it is much easier to control escaping in FreeMarker Template expressions.
  * </P>
