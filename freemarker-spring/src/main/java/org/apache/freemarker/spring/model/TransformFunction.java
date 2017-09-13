@@ -46,7 +46,7 @@ import org.springframework.web.servlet.support.RequestContext;
  * </P>
  * <PRE>
  *   &lt;@spring.bind "user"; status&gt;
- *     ${spring.transform(status, user.birthDate)}
+ *     ${spring.transform(status.editor, user.birthDate)}
  *   &lt;/@spring.bind&gt;
  * </PRE>
  * <P>

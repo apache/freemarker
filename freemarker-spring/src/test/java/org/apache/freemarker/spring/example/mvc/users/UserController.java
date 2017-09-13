@@ -19,16 +19,22 @@
 
 package org.apache.freemarker.spring.example.mvc.users;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -43,6 +49,12 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @InitBinder("user")
+    public void customizeBinding(WebDataBinder binder) {
+        binder.registerCustomEditor(Date.class, "birthDate",
+                new CustomDateEditor(new SimpleDateFormat("yyyy-MM-dd"), true));
+    }
 
     @RequestMapping(value = "/users/", method = RequestMethod.GET)
     public String listUsers(@RequestParam(value = "viewName", required = false) String viewName, Model model) {
@@ -73,14 +85,16 @@ public class UserController {
     }
 
     @RequestMapping(value = "/users/", method = RequestMethod.POST)
-    public String createUser(@RequestParam(value = "viewName", required = false) String viewName, User user,
-            BindingResult bindingResult, Model model) {
+    public String createUser(@RequestParam(value = "viewName", required = false) String viewName,
+            @ModelAttribute("user") User user, BindingResult bindingResult, Model model) {
         model.addAttribute("user", user);
 
         if (!StringUtils.hasText(user.getEmail())) {
             bindingResult.addError(new FieldError("user", "email", user.getEmail(), true,
                     new String[] { "user.error.invalid.email" }, new Object[] { user.getEmail() }, "E-Mail is blank."));
         }
+
+        // No saving for now...
 
         return (StringUtils.hasText(viewName)) ? viewName : DEFAULT_USER_EDIT_VIEW_NAME;
     }
