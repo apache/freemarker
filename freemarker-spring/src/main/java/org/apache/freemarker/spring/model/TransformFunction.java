@@ -57,7 +57,13 @@ public class TransformFunction extends AbstractSpringTemplateFunctionModel {
     private static final int PROPERTY_EDITOR_PARAM_IDX = 0;
     private static final int VALUE_PARAM_IDX = 1;
 
-    private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(2, false, null, false);
+    private static final ArgumentArrayLayout ARGS_LAYOUT =
+            ArgumentArrayLayout.create(
+                    2,
+                    false,
+                    null,
+                    false
+                    );
 
     public TransformFunction(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);

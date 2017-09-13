@@ -60,7 +60,13 @@ public class NestedPathDirective extends AbstractSpringTemplateDirectiveModel {
 
     private static final int PATH_PARAM_IDX = 0;
 
-    private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(1, false, null, false);
+    private static final ArgumentArrayLayout ARGS_LAYOUT =
+            ArgumentArrayLayout.create(
+                    1,
+                    false,
+                    null,
+                    false
+                    );
 
     public NestedPathDirective(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);

@@ -476,6 +476,20 @@ This is about the Spring Framework Support (freemarker-spring): FREEMARKER-54, F
 - SpringResourceTemplateLoader, a new TemplateLoader to load templates from Spring Framework's Resources.
 - New FreeMarkerView and FreeMarkerViewResolver for MVC support. FreeMarkerView supports TaglibFactory and other
 models by default like FreemarkerServlet does.
+- Directives and Functions Support to replace Spring JSP Tag Libraries in spring.tld:
+  - <spring:htmlEscape ... /> : No need since FreeMarker Built-In's and escaping directives are better.
+  - <spring:escapeBody ... /> : No need since FreeMarker Built-In's and escaping directives are better.
+  - <spring:message ... /> : Replaced by spring.message function. e.g, ${spring.message(...)}
+  - <spring:theme ... /> : Replaced by spring.theme function. e.g, ${spring.theme(...)}
+  - <spring:argument ... /> : No need since spring.message(...) and spring.theme(...) functions support
+    positional varargs for variable length arguments.
+  - <spring:hasBindErrors ... /> : Replaced by <@spring.hasBindErrors ... /> directive.
+  - <spring:nestedPath ... /> : Replaced by <@spring.nestedPath ... /> directive.
+  - <spring:bind ... /> : Replaced by <@spring.bind ... /> directive.
+  - <spring:transform ... /> : Replaced by spring.transform(...) function.
+  - <spring:url ... /> : Replaced by spring.url(...) function.
+  - <spring:param ... /> : No need since spring.url(...) function supports named vargs for variable length parameters.
+  - <spring:eval /> : Replaced by spring.eval(...) function.
 
 Core / Miscellaneous
 ....................

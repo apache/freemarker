@@ -87,8 +87,13 @@ public class UrlFunction extends AbstractSpringTemplateFunctionModel {
 
     private static final String URL_TEMPLATE_DELIMITER_SUFFIX = "}";
 
-    private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(1, false,
-            StringToIndexMap.of(CONTEXT_PARAM_NAME, CONTEXT_PARAM_IDX), true);
+    private static final ArgumentArrayLayout ARGS_LAYOUT =
+            ArgumentArrayLayout.create(
+                    1,
+                    false,
+                    StringToIndexMap.of(CONTEXT_PARAM_NAME, CONTEXT_PARAM_IDX),
+                    true
+                    );
 
     public UrlFunction(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);

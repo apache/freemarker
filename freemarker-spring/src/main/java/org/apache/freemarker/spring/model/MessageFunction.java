@@ -84,8 +84,13 @@ public class MessageFunction extends AbstractSpringTemplateFunctionModel {
 
     private static final String MESSAGE_RESOLVABLE_PARAM_NAME = "message";
 
-    private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(1, true,
-            StringToIndexMap.of(MESSAGE_RESOLVABLE_PARAM_NAME, MESSAGE_RESOLVABLE_PARAM_IDX), false);
+    private static final ArgumentArrayLayout ARGS_LAYOUT =
+            ArgumentArrayLayout.create(
+                    1,
+                    true,
+                    StringToIndexMap.of(MESSAGE_RESOLVABLE_PARAM_NAME, MESSAGE_RESOLVABLE_PARAM_IDX),
+                    false
+                    );
 
     public MessageFunction(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);

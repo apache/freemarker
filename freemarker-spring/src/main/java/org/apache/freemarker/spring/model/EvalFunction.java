@@ -81,7 +81,13 @@ public class EvalFunction extends AbstractSpringTemplateFunctionModel {
 
     private static final int EXPRESSION_PARAM_IDX = 0;
 
-    private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(1, false, null, false);
+    private static final ArgumentArrayLayout ARGS_LAYOUT =
+            ArgumentArrayLayout.create(
+                    1,
+                    false,
+                    null,
+                    false
+                    );
 
     private static final String EVALUATION_CONTEXT_VAR_NAME = "org.apache.freemarker.spring.model.EVALUATION_CONTEXT";
 

@@ -71,7 +71,13 @@ public class BindErrorsDirective extends AbstractSpringTemplateDirectiveModel {
 
     private static final int NAME_PARAM_IDX = 0;
 
-    private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(1, false, null, false);
+    private static final ArgumentArrayLayout ARGS_LAYOUT =
+            ArgumentArrayLayout.create(
+                    1,
+                    false,
+                    null,
+                    false
+                    );
 
     public BindErrorsDirective(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
