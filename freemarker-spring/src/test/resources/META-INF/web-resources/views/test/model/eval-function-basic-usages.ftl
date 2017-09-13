@@ -20,26 +20,21 @@
 <html>
 <body>
 
-<#assign expression="T(java.lang.Math).max(12.34, 56.78)" />
-<div id="maxNumber">${spring.eval(expression)}</div>
+<div id="maxNumber">${spring.eval("T(java.lang.Math).max(12.34, 56.78)")}</div>
 
 <ul>
   <#list users as user>
     <li>
-      <#assign expression="user.id" />
-      <div id="user-${spring.eval(expression)!}">
-        <#assign expression="user.firstName + ' ' + user.lastName" />
-        ${spring.eval(expression)!}
+      <div id="user-${spring.eval('user.id')!}">
+        ${spring.eval("user.firstName + ' ' + user.lastName")!}
       </div>
     </li>
   </#list>
 </ul>
 
-<#assign expression="users[0].id" />
-<div id="firstUserId">${spring.eval(expression)!}</div>
+<div id="firstUserId">${spring.eval("users[0].id")!}</div>
 
-<#assign expression="{0,1,1,2,3,5,8,13}" />
-<#assign numbers=spring.eval(expression) />
+<#assign numbers=spring.eval("{0,1,1,2,3,5,8,13}") />
 <div id="fibonacci"><#list numbers as number>${number}<#sep>, </#list></div>
 
 </body>
