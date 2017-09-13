@@ -32,8 +32,10 @@ import org.apache.freemarker.servlet.FreemarkerServlet;
 import org.apache.freemarker.servlet.HttpRequestHashModel;
 import org.apache.freemarker.servlet.HttpRequestParametersHashModel;
 import org.apache.freemarker.servlet.HttpSessionHashModel;
+import org.apache.freemarker.servlet.IncludePage;
 import org.apache.freemarker.servlet.ServletContextHashModel;
 import org.apache.freemarker.servlet.jsp.TaglibFactory;
+import org.apache.freemarker.spring.model.SpringTemplateCallableHashModel;
 
 /**
  * FreeMarker template based view implementation, with being able to provide a {@link ServletContextHashModel}
@@ -133,6 +135,11 @@ public class FreeMarkerView extends AbstractFreeMarkerView {
         model.putUnlistedModel(FreemarkerServlet.KEY_REQUEST_PARAMETERS, requestParametersModel);
 
         model.putUnlistedModel(FreemarkerServlet.KEY_JSP_TAGLIBS, getTaglibFactory());
+
+        model.putUnlistedModel(FreemarkerServlet.KEY_INCLUDE, new IncludePage(request, response));
+
+        model.putUnlistedModel(SpringTemplateCallableHashModel.NAME,
+                new SpringTemplateCallableHashModel(request, response));
 
         model.putAll(map);
 
