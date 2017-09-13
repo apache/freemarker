@@ -40,14 +40,9 @@ import org.springframework.web.servlet.support.RequestContext;
  * Some valid example(s):
  * </P>
  * <PRE>
- * </PRE>
- * <P>
- * Some valid example(s):
- * </P>
- * <PRE>
- *   &lt;@spring.bind "user"; status&gt;
- *     ${spring.transform(status.editor, user.birthDate)}
- *   &lt;/@spring.bind&gt;
+ * &lt;@spring.bind "user.birthDate"; status&gt;
+ *   &lt;div id="userBirthDate"&gt;${spring.transform(status.editor, status.actualValue)}&lt;/div&gt;
+ * &lt;/@spring.bind&gt;
  * </PRE>
  * <P>
  * <EM>Note:</EM> Unlike Spring Framework's <code>&lt;spring:bind /&gt;</code> JSP Tag Library, this directive
@@ -74,10 +69,12 @@ public class TransformFunction extends AbstractSpringTemplateFunctionModel {
                     throws TemplateException {
         final TemplateModel editorModel = CallableUtils.getOptionalArgument(args, PROPERTY_EDITOR_PARAM_IDX,
                 TemplateModel.class, this);
-        final PropertyEditor editor = (PropertyEditor) unwrapObject(objectWrapperAndUnwrapper, editorModel);
+        final PropertyEditor editor = (editorModel != null)
+                ? (PropertyEditor) objectWrapperAndUnwrapper.unwrap(editorModel) : null;
 
-        final TemplateModel valueModel = CallableUtils.getOptionalArgument(args, VALUE_PARAM_IDX, TemplateModel.class, this);
-        final Object value = unwrapObject(objectWrapperAndUnwrapper, valueModel);
+        final TemplateModel valueModel = CallableUtils.getOptionalArgument(args, VALUE_PARAM_IDX, TemplateModel.class,
+                this);
+        final Object value = (valueModel != null) ? objectWrapperAndUnwrapper.unwrap(valueModel) : null;
 
         String valueAsString = null;
 
@@ -90,7 +87,7 @@ public class TransformFunction extends AbstractSpringTemplateFunctionModel {
             }
         }
 
-        return wrapObject(objectWrapperAndUnwrapper, valueAsString);
+        return (valueAsString != null) ? objectWrapperAndUnwrapper.wrap(valueAsString) : null;
     }
 
     @Override

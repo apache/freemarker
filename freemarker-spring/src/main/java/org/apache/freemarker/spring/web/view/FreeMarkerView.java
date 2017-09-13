@@ -35,7 +35,6 @@ import org.apache.freemarker.servlet.HttpSessionHashModel;
 import org.apache.freemarker.servlet.IncludePage;
 import org.apache.freemarker.servlet.ServletContextHashModel;
 import org.apache.freemarker.servlet.jsp.TaglibFactory;
-import org.apache.freemarker.spring.model.SpringFormTemplateCallableHashModel;
 import org.apache.freemarker.spring.model.SpringTemplateCallableHashModel;
 
 /**
@@ -141,8 +140,6 @@ public class FreeMarkerView extends AbstractFreeMarkerView {
 
         model.putUnlistedModel(SpringTemplateCallableHashModel.NAME,
                 new SpringTemplateCallableHashModel(request, response));
-        model.putUnlistedModel(SpringFormTemplateCallableHashModel.NAME,
-                new SpringFormTemplateCallableHashModel(request, response));
 
         model.putAll(map);
 

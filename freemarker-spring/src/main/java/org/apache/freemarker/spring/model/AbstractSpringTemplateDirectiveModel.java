@@ -42,10 +42,22 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
 public abstract class AbstractSpringTemplateDirectiveModel extends AbstractSpringTemplateCallableModel
         implements TemplateDirectiveModel {
 
+    /**
+     * Construct directive with servlet request and response.
+     * @param request servlet request
+     * @param response servlet response
+     */
     public AbstractSpringTemplateDirectiveModel(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
     }
 
+    /**
+     * Execute this directive.
+     * <P>
+     * This method establishes Spring's <code>RequestContext</code> and invokes {@link #executeInternal(TemplateModel[], CallPlace, Writer, Environment, ObjectWrapperAndUnwrapper, RequestContext)}
+     * which must be implemented by derived directive classes.
+     * </P>
+     */
     @Override
     public final void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
@@ -53,15 +65,14 @@ public abstract class AbstractSpringTemplateDirectiveModel extends AbstractSprin
 
         if (!(objectWrapper instanceof ObjectWrapperAndUnwrapper)) {
             CallableUtils.newGenericExecuteException(
-                    "The ObjectWrapper of environment isn't an instance of ObjectWrapperAndUnwrapper.", this,
-                    isFunction());
+                    "The ObjectWrapper of environment isn't an instance of ObjectWrapperAndUnwrapper.", this, false);
         }
 
         TemplateModel rcModel = env.getVariable(AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
 
         if (rcModel == null) {
             CallableUtils.newGenericExecuteException(
-                    AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE + " not found.", this, isFunction());
+                    AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE + " not found.", this, false);
         }
 
         RequestContext requestContext = (RequestContext) ((ObjectWrapperAndUnwrapper) objectWrapper).unwrap(rcModel);
@@ -69,11 +80,17 @@ public abstract class AbstractSpringTemplateDirectiveModel extends AbstractSprin
         executeInternal(args, callPlace, out, env, (ObjectWrapperAndUnwrapper) objectWrapper, requestContext);
     }
 
-    @Override
-    protected final boolean isFunction() {
-        return false;
-    }
-
+    /**
+     * Interal execution method that is supposed to be implemented by derived directive classes.
+     * @param args argument models
+     * @param callPlace the place where this is being called
+     * @param out output writer
+     * @param env template execution environment
+     * @param objectWrapperAndUnwrapper ObjectWrapperAndUnwrapper
+     * @param requestContext Spring RequestContext
+     * @throws TemplateException if template exception occurs
+     * @throws IOException if IO exception occurs
+     */
     protected abstract void executeInternal(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
                     throws TemplateException, IOException;

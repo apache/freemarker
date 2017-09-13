@@ -84,13 +84,8 @@ public class MessageFunction extends AbstractSpringTemplateFunctionModel {
 
     private static final String MESSAGE_RESOLVABLE_PARAM_NAME = "message";
 
-    private static final ArgumentArrayLayout ARGS_LAYOUT =
-            ArgumentArrayLayout.create(
-                    1,
-                    true,
-                    StringToIndexMap.of(MESSAGE_RESOLVABLE_PARAM_NAME, MESSAGE_RESOLVABLE_PARAM_IDX),
-                    false
-                    );
+    private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(1, true,
+            StringToIndexMap.of(MESSAGE_RESOLVABLE_PARAM_NAME, MESSAGE_RESOLVABLE_PARAM_IDX), false);
 
     public MessageFunction(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
@@ -108,10 +103,10 @@ public class MessageFunction extends AbstractSpringTemplateFunctionModel {
 
         String message = null;
 
-        final TemplateModel messageResolvableModel = CallableUtils.getOptionalArgument(args, MESSAGE_RESOLVABLE_PARAM_IDX,
-                TemplateModel.class, this);
-        final MessageSourceResolvable messageResolvable = (MessageSourceResolvable) unwrapObject(
-                objectWrapperAndUnwrapper, messageResolvableModel);
+        final TemplateModel messageResolvableModel = CallableUtils.getOptionalArgument(args,
+                MESSAGE_RESOLVABLE_PARAM_IDX, TemplateModel.class, this);
+        final MessageSourceResolvable messageResolvable = (messageResolvableModel != null)
+                ? (MessageSourceResolvable) objectWrapperAndUnwrapper.unwrap(messageResolvableModel) : null;
 
         if (messageResolvable != null) {
             message = messageSource.getMessage(messageResolvable, requestContext.getLocale());
@@ -126,9 +121,9 @@ public class MessageFunction extends AbstractSpringTemplateFunctionModel {
                 if (!messageArgsModel.isEmptyCollection()) {
                     msgArgumentList = new ArrayList<>();
                     TemplateModel msgArgModel;
-                    for (TemplateModelIterator tit = messageArgsModel.iterator(); tit.hasNext(); ) {
+                    for (TemplateModelIterator tit = messageArgsModel.iterator(); tit.hasNext();) {
                         msgArgModel = tit.next();
-                        msgArgumentList.add(unwrapObject(objectWrapperAndUnwrapper, msgArgModel));
+                        msgArgumentList.add(objectWrapperAndUnwrapper.unwrap(msgArgModel));
                     }
                 }
 
@@ -141,7 +136,7 @@ public class MessageFunction extends AbstractSpringTemplateFunctionModel {
             }
         }
 
-        return wrapObject(objectWrapperAndUnwrapper, message);
+        return (message != null) ? objectWrapperAndUnwrapper.wrap(message) : null;
     }
 
     @Override

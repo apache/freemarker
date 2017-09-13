@@ -103,15 +103,16 @@ public class EvalFunction extends AbstractSpringTemplateFunctionModel {
         TemplateModel evaluationContextModel = springTemplateModel.get(EVALUATION_CONTEXT_VAR_NAME);
 
         if (evaluationContextModel != null) {
-            evaluationContext = (EvaluationContext) unwrapObject(objectWrapperAndUnwrapper, evaluationContextModel);
+            evaluationContext = (EvaluationContext) objectWrapperAndUnwrapper.unwrap(evaluationContextModel);
         } else {
             evaluationContext = createEvaluationContext(env, objectWrapperAndUnwrapper, requestContext);
-            evaluationContextModel = wrapObject(objectWrapperAndUnwrapper, evaluationContext);
+            evaluationContextModel = objectWrapperAndUnwrapper.wrap(evaluationContext);
             springTemplateModel.setEvaluationContextModel(evaluationContextModel);
         }
 
         final Object result = expression.getValue(evaluationContext);
-        return wrapObject(objectWrapperAndUnwrapper, result);
+
+        return (result != null) ? objectWrapperAndUnwrapper.wrap(result) : null;
     }
 
     @Override
@@ -170,8 +171,13 @@ public class EvalFunction extends AbstractSpringTemplateFunctionModel {
         public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
             try {
                 TemplateModel model = env.getVariable(name);
-                Object value = unwrapObject(objectWrapperAndUnwrapper, model);
-                return new TypedValue(value);
+
+                if (model != null) {
+                    Object value = objectWrapperAndUnwrapper.unwrap(model);
+                    return new TypedValue(value);
+                } else {
+                    return null;
+                }
             } catch (TemplateException e) {
                 throw new AccessException("Can't get environment variable by name, '" + name + "'.", e);
             }

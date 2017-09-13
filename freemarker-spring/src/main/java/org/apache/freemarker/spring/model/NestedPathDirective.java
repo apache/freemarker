@@ -84,8 +84,8 @@ public class NestedPathDirective extends AbstractSpringTemplateDirectiveModel {
         final TemplateStringModel prevNestedPathModel = springTemplateModel.getNestedPathModel();
         final String prevNestedPath = (prevNestedPathModel != null) ? prevNestedPathModel.getAsString() : null;
         final String newNestedPath = (prevNestedPath != null) ? prevNestedPath + path : path;
-        final TemplateStringModel newNestedPathModel = (TemplateStringModel) wrapObject(objectWrapperAndUnwrapper,
-                newNestedPath);
+        final TemplateStringModel newNestedPathModel = (TemplateStringModel) objectWrapperAndUnwrapper
+                .wrap(newNestedPath);
 
         try {
             springTemplateModel.setNestedPathModel(newNestedPathModel);

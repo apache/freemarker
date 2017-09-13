@@ -32,16 +32,27 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 
 /**
- * TemplateHashModel wrapper for templates using Spring directives and functions.
+ * TemplateHashModel wrapper for templates using Spring directives, functions and internal models.
  */
 public final class SpringTemplateCallableHashModel implements TemplateHashModel, Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Spring namespace model name.
+     */
     public static final String NAME = "spring";
 
+    /**
+     * Name of the internal nested path template model, which is equivalent to the <code>nestedPath</code> pageContext attribute
+     * in Spring Framework JSP tag libraries.
+     */
+    // NOTE: The model name, "nestedPathModel", must be different from the "nestedPath" directive model's name.
     public static final String NESTED_PATH_MODEL = "nestedPathModel";
 
+    /**
+     * Name of the internal evaluation context template model used by <code>EvalFunction</code> to cache <code>EvaluationContext</code>.
+     */
     public static final String EVALUATION_CONTEXT_MODEL = "evaluationContextModel";
 
     private Map<String, TemplateModel> modelsMap = new HashMap<>();

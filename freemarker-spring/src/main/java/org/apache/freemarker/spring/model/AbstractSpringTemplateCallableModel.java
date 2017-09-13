@@ -28,8 +28,6 @@ import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateCallableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.util.CallableUtils;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.support.RequestContext;
 
@@ -41,15 +39,28 @@ public abstract class AbstractSpringTemplateCallableModel implements TemplateCal
     private final HttpServletRequest request;
     private final HttpServletResponse response;
 
+    /**
+     * Constructs with servlet request and response.
+     * @param request servlet request
+     * @param response servlet response
+     */
     public AbstractSpringTemplateCallableModel(HttpServletRequest request, HttpServletResponse response) {
         this.request = request;
         this.response = response;
     }
 
+    /**
+     * Return servlet request.
+     * @return servlet request
+     */
     protected final HttpServletRequest getRequest() {
         return request;
     }
 
+    /**
+     * Return servlet response.
+     * @return servlet response
+     */
     protected final HttpServletResponse getResponse() {
         return response;
     }
@@ -68,34 +79,22 @@ public abstract class AbstractSpringTemplateCallableModel implements TemplateCal
      * @param ignoreNestedPath flag whether or not to ignore the nested path
      * @return {@link TemplateModel} wrapping a {@link BindStatus} with no {@code htmlEscape} option from {@link RequestContext}
      * by the {@code path}
-     * @throws TemplateException 
+     * @throws TemplateException if template exception occurs
      */
-    protected final TemplateModel getBindStatusTemplateModel(Environment env, ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper,
-            RequestContext requestContext, String path, boolean ignoreNestedPath) throws TemplateException {
+    protected final TemplateModel getBindStatusTemplateModel(Environment env,
+            ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext, String path,
+            boolean ignoreNestedPath) throws TemplateException {
         final String resolvedPath = (ignoreNestedPath) ? path : resolveNestedPath(env, objectWrapperAndUnwrapper, path);
         BindStatus status = requestContext.getBindStatus(resolvedPath, false);
-        return wrapObject(objectWrapperAndUnwrapper, status);
+        return (status != null) ? objectWrapperAndUnwrapper.wrap(status) : null;
     }
 
-    protected final Object unwrapObject(ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, TemplateModel model) throws TemplateException {
-        return (model != null) ? objectWrapperAndUnwrapper.unwrap(model) : null;
-    }
-
-    protected final TemplateModel wrapObject(ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, Object object) throws TemplateException {
-        if (object != null) {
-            if (!(objectWrapperAndUnwrapper instanceof DefaultObjectWrapper)) {
-                CallableUtils.newGenericExecuteException("objectWrapperAndUnwrapper is not a DefaultObjectWrapper.",
-                        this, isFunction());
-            }
-
-            return ((DefaultObjectWrapper) objectWrapperAndUnwrapper).wrap(object);
-        }
-
-        return null;
-    }
-
-    protected abstract boolean isFunction();
-
+    /**
+     * Return the internal TemplateHashModel wrapper for templating in Spring Framework applications.
+     * @param env environment
+     * @return the internal TemplateHashModel wrapper for templating in Spring Framework applications
+     * @throws TemplateException if template exception occurs
+     */
     protected SpringTemplateCallableHashModel getSpringTemplateCallableHashModel(final Environment env)
             throws TemplateException {
         return (SpringTemplateCallableHashModel) env.getVariable(SpringTemplateCallableHashModel.NAME);

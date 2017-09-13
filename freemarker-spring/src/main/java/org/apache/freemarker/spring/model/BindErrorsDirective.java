@@ -31,7 +31,6 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.support.RequestContext;
@@ -72,13 +71,7 @@ public class BindErrorsDirective extends AbstractSpringTemplateDirectiveModel {
 
     private static final int NAME_PARAM_IDX = 0;
 
-    private static final ArgumentArrayLayout ARGS_LAYOUT =
-            ArgumentArrayLayout.create(
-                    1,
-                    false,
-                    null,
-                    false
-                    );
+    private static final ArgumentArrayLayout ARGS_LAYOUT = ArgumentArrayLayout.create(1, false, null, false);
 
     public BindErrorsDirective(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
@@ -90,7 +83,8 @@ public class BindErrorsDirective extends AbstractSpringTemplateDirectiveModel {
                     throws TemplateException, IOException {
         final String name = CallableUtils.getStringArgument(args, NAME_PARAM_IDX, this);
 
-        final TemplateModel bindErrorsModel = getBindErrorsTemplateModel(env, objectWrapperAndUnwrapper, requestContext, name);
+        final TemplateModel bindErrorsModel = getBindErrorsTemplateModel(env, objectWrapperAndUnwrapper, requestContext,
+                name);
 
         if (bindErrorsModel != null) {
             final TemplateModel[] nestedContentArgs = new TemplateModel[] { bindErrorsModel };
@@ -108,17 +102,13 @@ public class BindErrorsDirective extends AbstractSpringTemplateDirectiveModel {
         return ARGS_LAYOUT;
     }
 
-    private final TemplateModel getBindErrorsTemplateModel(Environment env, ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper,
-            RequestContext requestContext, String name) throws TemplateException {
+    private final TemplateModel getBindErrorsTemplateModel(Environment env,
+            ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext, String name)
+                    throws TemplateException {
         final Errors errors = requestContext.getErrors(name, false);
 
         if (errors != null && errors.hasErrors()) {
-            if (!(objectWrapperAndUnwrapper instanceof DefaultObjectWrapper)) {
-                CallableUtils.newGenericExecuteException("objectWrapperAndUnwrapper is not a DefaultObjectWrapper.",
-                        this, isFunction());
-            }
-
-            return wrapObject(objectWrapperAndUnwrapper, errors);
+            return objectWrapperAndUnwrapper.wrap(errors);
         }
 
         return null;

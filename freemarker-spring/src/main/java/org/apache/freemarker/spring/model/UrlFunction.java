@@ -166,7 +166,7 @@ public class UrlFunction extends AbstractSpringTemplateFunctionModel {
             urlString = processor.processUrl(getRequest(), urlString);
         }
 
-        return wrapObject(objectWrapperAndUnwrapper, urlString);
+        return objectWrapperAndUnwrapper.wrap(urlString);
     }
 
     @Override
