@@ -74,7 +74,7 @@ import org.springframework.web.servlet.support.RequestContext;
  * because it is much easier to control escaping in FreeMarker Template expressions.
  * </P>
  */
-public class MessageFunction extends AbstractSpringTemplateFunctionModel {
+class MessageFunction extends AbstractSpringTemplateFunctionModel {
 
     public static final String NAME = "message";
 
@@ -92,12 +92,12 @@ public class MessageFunction extends AbstractSpringTemplateFunctionModel {
                     false
                     );
 
-    public MessageFunction(HttpServletRequest request, HttpServletResponse response) {
+    protected MessageFunction(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
     }
 
     @Override
-    public TemplateModel executeInternal(TemplateModel[] args, CallPlace callPlace, Environment env,
+    protected TemplateModel executeInternal(TemplateModel[] args, CallPlace callPlace, Environment env,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
                     throws TemplateException {
         final MessageSource messageSource = getMessageSource(requestContext);
@@ -149,6 +149,11 @@ public class MessageFunction extends AbstractSpringTemplateFunctionModel {
         return ARGS_LAYOUT;
     }
 
+    /**
+     * Get the {@link MessageSource} bean from the current application context.
+     * @param requestContext Spring Framework RequestContext
+     * @return the {@link MessageSource} bean from the current application context
+     */
     protected MessageSource getMessageSource(final RequestContext requestContext) {
         return requestContext.getMessageSource();
     }

@@ -39,7 +39,7 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
 /**
  * Abstract TemplateDirectiveModel for derived classes to support Spring MVC based templating environment.
  */
-public abstract class AbstractSpringTemplateDirectiveModel extends AbstractSpringTemplateCallableModel
+abstract class AbstractSpringTemplateDirectiveModel extends AbstractSpringTemplateCallableModel
         implements TemplateDirectiveModel {
 
     /**
@@ -47,7 +47,7 @@ public abstract class AbstractSpringTemplateDirectiveModel extends AbstractSprin
      * @param request servlet request
      * @param response servlet response
      */
-    public AbstractSpringTemplateDirectiveModel(HttpServletRequest request, HttpServletResponse response) {
+    protected AbstractSpringTemplateDirectiveModel(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
     }
 

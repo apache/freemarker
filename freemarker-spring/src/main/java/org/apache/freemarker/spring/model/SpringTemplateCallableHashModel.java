@@ -68,6 +68,7 @@ public final class SpringTemplateCallableHashModel implements TemplateHashModel,
         modelsMap.put(EvalFunction.NAME, new EvalFunction(request, response));
     }
 
+    @Override
     public TemplateModel get(String key) throws TemplateException {
         return modelsMap.get(key);
     }
@@ -77,19 +78,19 @@ public final class SpringTemplateCallableHashModel implements TemplateHashModel,
         return false;
     }
 
-    public TemplateStringModel getNestedPathModel() throws TemplateException {
+    TemplateStringModel getNestedPathModel() throws TemplateException {
         return (TemplateStringModel) get(NESTED_PATH_MODEL);
     }
 
-    public void setNestedPathModel(TemplateStringModel nestedPathModel) {
+    void setNestedPathModel(TemplateStringModel nestedPathModel) {
         modelsMap.put(NESTED_PATH_MODEL, nestedPathModel);
     }
 
-    public TemplateModel getEvaluationContextModel() throws TemplateException {
+    TemplateModel getEvaluationContextModel() throws TemplateException {
         return (TemplateModel) get(EVALUATION_CONTEXT_MODEL);
     }
 
-    public void setEvaluationContextModel(TemplateModel evaluationContextModel) {
+    void setEvaluationContextModel(TemplateModel evaluationContextModel) {
         modelsMap.put(EVALUATION_CONTEXT_MODEL, evaluationContextModel);
     }
 

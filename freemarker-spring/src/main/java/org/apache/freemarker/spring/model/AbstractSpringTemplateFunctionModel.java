@@ -36,7 +36,7 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
 /**
  * Abstract TemplateFunctionModel for derived classes to support Spring MVC based templating environment.
  */
-public abstract class AbstractSpringTemplateFunctionModel extends AbstractSpringTemplateCallableModel
+abstract class AbstractSpringTemplateFunctionModel extends AbstractSpringTemplateCallableModel
         implements TemplateFunctionModel {
 
     /**
@@ -44,7 +44,7 @@ public abstract class AbstractSpringTemplateFunctionModel extends AbstractSpring
      * @param request servlet request
      * @param response servlet response
      */
-    public AbstractSpringTemplateFunctionModel(HttpServletRequest request, HttpServletResponse response) {
+    protected AbstractSpringTemplateFunctionModel(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
     }
 

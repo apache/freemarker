@@ -50,7 +50,7 @@ import org.springframework.web.servlet.support.RequestContext;
  * because it is much easier to control escaping in FreeMarker Template expressions.
  * </P>
  */
-public class TransformFunction extends AbstractSpringTemplateFunctionModel {
+class TransformFunction extends AbstractSpringTemplateFunctionModel {
 
     public static final String NAME = "transform";
 
@@ -65,12 +65,12 @@ public class TransformFunction extends AbstractSpringTemplateFunctionModel {
                     false
                     );
 
-    public TransformFunction(HttpServletRequest request, HttpServletResponse response) {
+    protected TransformFunction(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
     }
 
     @Override
-    public TemplateModel executeInternal(TemplateModel[] args, CallPlace callPlace, Environment env,
+    protected TemplateModel executeInternal(TemplateModel[] args, CallPlace callPlace, Environment env,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
                     throws TemplateException {
         final TemplateModel editorModel = CallableUtils.getOptionalArgument(args, PROPERTY_EDITOR_PARAM_IDX,

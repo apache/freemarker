@@ -68,7 +68,7 @@ import org.springframework.web.util.UriUtils;
  * because it is much easier to control escaping in FreeMarker Template expressions.
  * </P>
  */
-public class UrlFunction extends AbstractSpringTemplateFunctionModel {
+class UrlFunction extends AbstractSpringTemplateFunctionModel {
 
     public static final String NAME = "url";
 
@@ -95,12 +95,12 @@ public class UrlFunction extends AbstractSpringTemplateFunctionModel {
                     true
                     );
 
-    public UrlFunction(HttpServletRequest request, HttpServletResponse response) {
+    protected UrlFunction(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
     }
 
     @Override
-    public TemplateModel executeInternal(TemplateModel[] args, CallPlace callPlace, Environment env,
+    protected TemplateModel executeInternal(TemplateModel[] args, CallPlace callPlace, Environment env,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
                     throws TemplateException {
         final String value = CallableUtils.getStringArgument(args, VALUE_PARAM_IDX, this);

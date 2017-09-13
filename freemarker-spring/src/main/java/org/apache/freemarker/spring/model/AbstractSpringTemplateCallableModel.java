@@ -34,7 +34,7 @@ import org.springframework.web.servlet.support.RequestContext;
 /**
  * Abstract TemplateCallableModel for derived classes to support Spring MVC based templating environment.
  */
-public abstract class AbstractSpringTemplateCallableModel implements TemplateCallableModel {
+abstract class AbstractSpringTemplateCallableModel implements TemplateCallableModel {
 
     private final HttpServletRequest request;
     private final HttpServletResponse response;
@@ -44,7 +44,7 @@ public abstract class AbstractSpringTemplateCallableModel implements TemplateCal
      * @param request servlet request
      * @param response servlet response
      */
-    public AbstractSpringTemplateCallableModel(HttpServletRequest request, HttpServletResponse response) {
+    protected AbstractSpringTemplateCallableModel(HttpServletRequest request, HttpServletResponse response) {
         this.request = request;
         this.response = response;
     }
