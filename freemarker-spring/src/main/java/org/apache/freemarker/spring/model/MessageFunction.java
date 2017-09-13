@@ -108,10 +108,8 @@ class MessageFunction extends AbstractSpringTemplateFunctionModel {
 
         String message = null;
 
-        final TemplateModel messageResolvableModel = CallableUtils.getOptionalArgument(args,
-                MESSAGE_RESOLVABLE_PARAM_IDX, TemplateModel.class, this);
-        final MessageSourceResolvable messageResolvable = (messageResolvableModel != null)
-                ? (MessageSourceResolvable) objectWrapperAndUnwrapper.unwrap(messageResolvableModel) : null;
+        final MessageSourceResolvable messageResolvable = CallableUtils.getOptionalAndUnwrapArgument(args,
+                MESSAGE_RESOLVABLE_PARAM_IDX, MessageSourceResolvable.class, this, objectWrapperAndUnwrapper);
 
         if (messageResolvable != null) {
             message = messageSource.getMessage(messageResolvable, requestContext.getLocale());

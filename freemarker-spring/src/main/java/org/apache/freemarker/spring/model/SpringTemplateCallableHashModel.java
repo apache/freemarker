@@ -48,12 +48,12 @@ public final class SpringTemplateCallableHashModel implements TemplateHashModel,
      * in Spring Framework JSP tag libraries.
      */
     // NOTE: The model name, "nestedPathModel", must be different from the "nestedPath" directive model's name.
-    public static final String NESTED_PATH_MODEL = "nestedPathModel";
+    private static final String NESTED_PATH_MODEL = "nestedPathModel";
 
     /**
      * Name of the internal evaluation context template model used by <code>EvalFunction</code> to cache <code>EvaluationContext</code>.
      */
-    public static final String EVALUATION_CONTEXT_MODEL = "evaluationContextModel";
+    private static final String EVALUATION_CONTEXT_MODEL = "evaluationContextModel";
 
     private Map<String, TemplateModel> modelsMap = new HashMap<>();
 

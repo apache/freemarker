@@ -25,13 +25,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util.CallableUtils;
 import org.springframework.web.servlet.support.RequestContext;
-import org.springframework.web.servlet.view.AbstractTemplateView;
 
 /**
  * Abstract TemplateFunctionModel for derived classes to support Spring MVC based templating environment.
@@ -57,23 +54,9 @@ abstract class AbstractSpringTemplateFunctionModel extends AbstractSpringTemplat
      */
     @Override
     public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env) throws TemplateException {
-        final ObjectWrapper objectWrapper = env.getObjectWrapper();
-
-        if (!(objectWrapper instanceof ObjectWrapperAndUnwrapper)) {
-            CallableUtils.newGenericExecuteException(
-                    "The ObjectWrapper of environment isn't an instance of ObjectWrapperAndUnwrapper.", this, true);
-        }
-
-        TemplateModel rcModel = env.getVariable(AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
-
-        if (rcModel == null) {
-            CallableUtils.newGenericExecuteException(
-                    AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE + " not found.", this, true);
-        }
-
-        RequestContext requestContext = (RequestContext) ((ObjectWrapperAndUnwrapper) objectWrapper).unwrap(rcModel);
-
-        return executeInternal(args, callPlace, env, (ObjectWrapperAndUnwrapper) objectWrapper, requestContext);
+        final ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper = getObjectWrapperAndUnwrapper(env, true);
+        final RequestContext requestContext = getRequestContext(env, true);
+        return executeInternal(args, callPlace, env, objectWrapperAndUnwrapper, requestContext);
     }
 
     /**

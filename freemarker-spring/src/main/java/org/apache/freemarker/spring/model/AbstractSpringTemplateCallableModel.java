@@ -24,12 +24,16 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateCallableModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.support.RequestContext;
+import org.springframework.web.servlet.view.AbstractTemplateView;
 
 /**
  * Abstract TemplateCallableModel for derived classes to support Spring MVC based templating environment.
@@ -63,6 +67,48 @@ abstract class AbstractSpringTemplateCallableModel implements TemplateCallableMo
      */
     protected final HttpServletResponse getResponse() {
         return response;
+    }
+
+    /**
+     * Find {@link ObjectWrapperAndUnwrapper} from the environment.
+     * @param env environment
+     * @param calledAsFunction whether or not this is called from a {@link TemplateFunctionModel}.
+     * @return {@link ObjectWrapperAndUnwrapper} from the environment
+     * @throws TemplateException if the ObjectWrapper in the environment is not an ObjectWrapperAndUnwrapper
+     */
+    protected ObjectWrapperAndUnwrapper getObjectWrapperAndUnwrapper(Environment env, boolean calledAsFunction)
+            throws TemplateException {
+        final ObjectWrapper objectWrapper = env.getObjectWrapper();
+
+        if (!(objectWrapper instanceof ObjectWrapperAndUnwrapper)) {
+            CallableUtils.newGenericExecuteException(
+                    "The ObjectWrapper of environment isn't an instance of ObjectWrapperAndUnwrapper.", this,
+                    calledAsFunction);
+        }
+
+        return (ObjectWrapperAndUnwrapper) objectWrapper;
+    }
+
+    /**
+     * Find Spring {@link RequestContext} from the environment.
+     * @param env environment
+     * @param calledAsFunction whether or not this is called from a {@link TemplateFunctionModel}.
+     * @return Spring {@link RequestContext} from the environment
+     * @throws TemplateException if Spring {@link RequestContext} from the environment is not found
+     */
+    protected RequestContext getRequestContext(final Environment env, boolean calledAsFunction)
+            throws TemplateException {
+        TemplateModel rcModel = env.getVariable(AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
+
+        if (rcModel == null) {
+            CallableUtils.newGenericExecuteException(
+                    AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE + " not found.", this, false);
+        }
+
+        RequestContext requestContext = (RequestContext) getObjectWrapperAndUnwrapper(env, calledAsFunction)
+                .unwrap(rcModel);
+
+        return requestContext;
     }
 
     /**

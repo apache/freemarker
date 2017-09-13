@@ -106,7 +106,7 @@ class EvalFunction extends AbstractSpringTemplateFunctionModel {
 
         EvaluationContext evaluationContext = null;
         final SpringTemplateCallableHashModel springTemplateModel = getSpringTemplateCallableHashModel(env);
-        TemplateModel evaluationContextModel = springTemplateModel.get(EVALUATION_CONTEXT_VAR_NAME);
+        TemplateModel evaluationContextModel = springTemplateModel.getEvaluationContextModel();
 
         if (evaluationContextModel != null) {
             evaluationContext = (EvaluationContext) objectWrapperAndUnwrapper.unwrap(evaluationContextModel);
