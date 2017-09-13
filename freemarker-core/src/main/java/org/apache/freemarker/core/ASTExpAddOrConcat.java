@@ -79,7 +79,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
             // We try string addition first. If hash addition is possible, then instead of throwing exception
             // we return null and do hash addition instead. (We can't simply give hash addition a priority, like
             // with sequence addition above, as FTL strings are often also FTL hashes.)
-            Object leftOMOrStr = _EvalUtils.coerceModelToStringOrMarkup(
+            Object leftOMOrStr = _EvalUtils.coerceModelToPlainTextOrMarkup(
                     leftModel, leftExp, /* returnNullOnNonCoercableType = */ hashConcatPossible, null,
                     env);
             if (leftOMOrStr == null) {
@@ -87,7 +87,7 @@ final class ASTExpAddOrConcat extends ASTExpression {
             }
 
             // Same trick with null return as above.
-            Object rightOMOrStr = _EvalUtils.coerceModelToStringOrMarkup(
+            Object rightOMOrStr = _EvalUtils.coerceModelToPlainTextOrMarkup(
                     rightModel, rightExp, /* returnNullOnNonCoercableType = */ hashConcatPossible, null,
                     env);
             if (rightOMOrStr == null) {
