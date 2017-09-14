@@ -1029,10 +1029,13 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
 
     /**
      * Converts a value to plain text {@link String}, or to {@link TemplateMarkupOutputModel} if that's what the
-     * {@link TemplateValueFormat} involved prefer to produce. (Most {@link TemplateValueFormat} produce plain text,
-     * markup producting formatters are very rare.) This will only convert values that <code>${value}</code> would too,
-     * for example, it will throw {@link TemplateException} if you try to convert a sequence or a date whose type is not
-     * known. 
+     * {@link TemplateValueFormat} involved prefer to produce, similarly as <code>${value}</code> would do it. (Most
+     * {@link TemplateValueFormat} produce plain text, markup producing formatters are very rare.) This will only
+     * convert values that <code>${value}</code> would too, for example, it will throw {@link TemplateException} if you
+     * try to convert a sequence or a date whose type is not known.
+     * 
+     * <p>Note that just like the output <code>${value}</code>, the results is intended for human audience, as
+     * opposed to computer audience. For example, the number 1234567 will be possibly formatted as {@code "1,234,567"}. 
      * 
      * @return Never {@code null}
      * 
