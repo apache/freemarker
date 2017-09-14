@@ -123,20 +123,24 @@ class UrlFunction extends AbstractSpringTemplateFunctionModel {
                 paramNameModel = pair.getKey();
                 paramValueModel = pair.getValue();
 
-                if ((paramNameModel instanceof TemplateStringModel)
-                        && (paramValueModel instanceof TemplateStringModel)) {
+                if (paramNameModel instanceof TemplateStringModel) {
                     paramName = ((TemplateStringModel) paramNameModel).getAsString();
-                    paramValue = ((TemplateStringModel) paramValueModel).getAsString();
 
                     if (paramName.isEmpty()) {
                         CallableUtils.newArgumentValueException(PARAMS_PARAM_IDX,
                                 "Parameter name must be a non-blank string.", this);
                     }
 
+                    if (paramValueModel instanceof TemplateStringModel) {
+                        paramValue = ((TemplateStringModel) paramValueModel).getAsString();
+                    } else {
+                        paramValue = env.formatToPlainText(paramValueModel);
+                    }
+
                     params.add(new _KeyValuePair<String, String>(paramName, paramValue));
                 } else {
                     CallableUtils.newArgumentValueException(PARAMS_PARAM_IDX,
-                            "Parameter name and value must be string.", this);
+                            "Parameter name must be string.", this);
                 }
             }
         }

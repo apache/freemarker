@@ -40,7 +40,7 @@
   <#list users as user>
     <li>
       <div id="user-${user.id!}">
-        <a class="userIdLink" href="${spring.url('/users/{userId}/', userId=user.id?string)}">${user.id!}</a>
+        <a class="userIdLink" href="${spring.url('/users/{userId}/', userId=user.id)}">${user.id!}</a>
         <a class="userNameLink" href="${spring.url('/users/${user.id}/')}">${user.firstName!} ${user.lastName!}</a>
       </div>
     </li>
