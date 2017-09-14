@@ -54,7 +54,8 @@ public class SpringResourceTemplateLoader implements TemplateLoader, ResourceLoa
     private ResourceLoader resourceLoader;
 
     /**
-     * Base resource location which can be prepended to the template name internally when resolving a resource.
+     * Return base resource location which can be prepended to the template name internally when resolving a resource.
+     * @return base resource location which can be prepended to the template name internally when resolving a resource
      */
     public String getBaseLocation() {
         return baseLocation;
@@ -62,31 +63,22 @@ public class SpringResourceTemplateLoader implements TemplateLoader, ResourceLoa
 
     /**
      * Set base resource location which can be prepended to the template name internally when resolving a resource.
-     * @param baseLocation
+     * @param baseLocation base resource location which can be prepended to the template name internally when resolving a resource
      */
     public void setBaseLocation(String baseLocation) {
         this.baseLocation = baseLocation;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setResourceLoader(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public TemplateLoaderSession createSession() {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public TemplateLoadingResult load(String name, TemplateLoadingSource ifSourceDiffersFrom,
             Serializable ifVersionDiffersFrom, TemplateLoaderSession session) throws IOException {
@@ -129,12 +121,9 @@ public class SpringResourceTemplateLoader implements TemplateLoader, ResourceLoa
         return new TemplateLoadingResult(source, version, resource.getInputStream(), null);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void resetState() {
-        // Does nothing
+        // Do nothing
     }
 
     @SuppressWarnings("serial")

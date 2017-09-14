@@ -28,18 +28,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util.CallableUtils;
 import org.springframework.web.servlet.support.RequestContext;
-import org.springframework.web.servlet.view.AbstractTemplateView;
 
 /**
  * Abstract TemplateDirectiveModel for derived classes to support Spring MVC based templating environment.
  */
-public abstract class AbstractSpringTemplateDirectiveModel extends AbstractSpringTemplateCallableModel
+abstract class AbstractSpringTemplateDirectiveModel extends AbstractSpringTemplateCallableModel
         implements TemplateDirectiveModel {
 
     /**
@@ -47,7 +44,7 @@ public abstract class AbstractSpringTemplateDirectiveModel extends AbstractSprin
      * @param request servlet request
      * @param response servlet response
      */
-    public AbstractSpringTemplateDirectiveModel(HttpServletRequest request, HttpServletResponse response) {
+    protected AbstractSpringTemplateDirectiveModel(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
     }
 
@@ -61,23 +58,9 @@ public abstract class AbstractSpringTemplateDirectiveModel extends AbstractSprin
     @Override
     public final void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException {
-        final ObjectWrapper objectWrapper = env.getObjectWrapper();
-
-        if (!(objectWrapper instanceof ObjectWrapperAndUnwrapper)) {
-            CallableUtils.newGenericExecuteException(
-                    "The ObjectWrapper of environment isn't an instance of ObjectWrapperAndUnwrapper.", this, false);
-        }
-
-        TemplateModel rcModel = env.getVariable(AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
-
-        if (rcModel == null) {
-            CallableUtils.newGenericExecuteException(
-                    AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE + " not found.", this, false);
-        }
-
-        RequestContext requestContext = (RequestContext) ((ObjectWrapperAndUnwrapper) objectWrapper).unwrap(rcModel);
-
-        executeInternal(args, callPlace, out, env, (ObjectWrapperAndUnwrapper) objectWrapper, requestContext);
+        final ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper = getObjectWrapperAndUnwrapper(env, false);
+        final RequestContext requestContext = getRequestContext(env, false);
+        executeInternal(args, callPlace, out, env, objectWrapperAndUnwrapper, requestContext);
     }
 
     /**

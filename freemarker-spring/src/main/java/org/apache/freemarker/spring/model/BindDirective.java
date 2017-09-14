@@ -62,7 +62,7 @@ import org.springframework.web.servlet.support.RequestContext;
  * because it is much easier to control escaping in FreeMarker Template expressions.
  * </P>
  */
-public class BindDirective extends AbstractSpringTemplateDirectiveModel {
+class BindDirective extends AbstractSpringTemplateDirectiveModel {
 
     public static final String NAME = "bind";
 
@@ -79,7 +79,7 @@ public class BindDirective extends AbstractSpringTemplateDirectiveModel {
                     false
                     );
 
-    public BindDirective(HttpServletRequest request, HttpServletResponse response) {
+    protected BindDirective(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
     }
 

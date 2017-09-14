@@ -48,12 +48,12 @@ public final class SpringTemplateCallableHashModel implements TemplateHashModel,
      * in Spring Framework JSP tag libraries.
      */
     // NOTE: The model name, "nestedPathModel", must be different from the "nestedPath" directive model's name.
-    public static final String NESTED_PATH_MODEL = "nestedPathModel";
+    private static final String NESTED_PATH_MODEL = "nestedPathModel";
 
     /**
      * Name of the internal evaluation context template model used by <code>EvalFunction</code> to cache <code>EvaluationContext</code>.
      */
-    public static final String EVALUATION_CONTEXT_MODEL = "evaluationContextModel";
+    private static final String EVALUATION_CONTEXT_MODEL = "evaluationContextModel";
 
     private Map<String, TemplateModel> modelsMap = new HashMap<>();
 
@@ -68,6 +68,7 @@ public final class SpringTemplateCallableHashModel implements TemplateHashModel,
         modelsMap.put(EvalFunction.NAME, new EvalFunction(request, response));
     }
 
+    @Override
     public TemplateModel get(String key) throws TemplateException {
         return modelsMap.get(key);
     }
@@ -77,19 +78,19 @@ public final class SpringTemplateCallableHashModel implements TemplateHashModel,
         return false;
     }
 
-    public TemplateStringModel getNestedPathModel() throws TemplateException {
+    TemplateStringModel getNestedPathModel() throws TemplateException {
         return (TemplateStringModel) get(NESTED_PATH_MODEL);
     }
 
-    public void setNestedPathModel(TemplateStringModel nestedPathModel) {
+    void setNestedPathModel(TemplateStringModel nestedPathModel) {
         modelsMap.put(NESTED_PATH_MODEL, nestedPathModel);
     }
 
-    public TemplateModel getEvaluationContextModel() throws TemplateException {
+    TemplateModel getEvaluationContextModel() throws TemplateException {
         return (TemplateModel) get(EVALUATION_CONTEXT_MODEL);
     }
 
-    public void setEvaluationContextModel(TemplateModel evaluationContextModel) {
+    void setEvaluationContextModel(TemplateModel evaluationContextModel) {
         modelsMap.put(EVALUATION_CONTEXT_MODEL, evaluationContextModel);
     }
 

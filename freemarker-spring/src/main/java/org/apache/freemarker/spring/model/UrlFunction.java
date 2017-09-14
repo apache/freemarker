@@ -68,7 +68,7 @@ import org.springframework.web.util.UriUtils;
  * because it is much easier to control escaping in FreeMarker Template expressions.
  * </P>
  */
-public class UrlFunction extends AbstractSpringTemplateFunctionModel {
+class UrlFunction extends AbstractSpringTemplateFunctionModel {
 
     public static final String NAME = "url";
 
@@ -95,12 +95,12 @@ public class UrlFunction extends AbstractSpringTemplateFunctionModel {
                     true
                     );
 
-    public UrlFunction(HttpServletRequest request, HttpServletResponse response) {
+    protected UrlFunction(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
     }
 
     @Override
-    public TemplateModel executeInternal(TemplateModel[] args, CallPlace callPlace, Environment env,
+    protected TemplateModel executeInternal(TemplateModel[] args, CallPlace callPlace, Environment env,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
                     throws TemplateException {
         final String value = CallableUtils.getStringArgument(args, VALUE_PARAM_IDX, this);
@@ -123,20 +123,24 @@ public class UrlFunction extends AbstractSpringTemplateFunctionModel {
                 paramNameModel = pair.getKey();
                 paramValueModel = pair.getValue();
 
-                if ((paramNameModel instanceof TemplateStringModel)
-                        && (paramValueModel instanceof TemplateStringModel)) {
+                if (paramNameModel instanceof TemplateStringModel) {
                     paramName = ((TemplateStringModel) paramNameModel).getAsString();
-                    paramValue = ((TemplateStringModel) paramValueModel).getAsString();
 
                     if (paramName.isEmpty()) {
                         CallableUtils.newArgumentValueException(PARAMS_PARAM_IDX,
                                 "Parameter name must be a non-blank string.", this);
                     }
 
+                    if (paramValueModel instanceof TemplateStringModel) {
+                        paramValue = ((TemplateStringModel) paramValueModel).getAsString();
+                    } else {
+                        paramValue = env.formatToPlainText(paramValueModel);
+                    }
+
                     params.add(new _KeyValuePair<String, String>(paramName, paramValue));
                 } else {
                     CallableUtils.newArgumentValueException(PARAMS_PARAM_IDX,
-                            "Parameter name and value must be string.", this);
+                            "Parameter name must be string.", this);
                 }
             }
         }

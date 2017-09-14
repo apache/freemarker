@@ -27,8 +27,8 @@ import javax.servlet.ServletResponse;
 
 /**
  * A built-in internal servlet class to be used as page object in JSP tag libraries used in FreeMarker templates.
- *
- * @see javax.servlet.jsp.PageContext#getPage()
+ * JSP Tag Library implementations may invoke <code>javax.servlet.jsp.PageContext#getPage()</code> to get the
+ * reference of the servlet. So, this internal servlet implementation is provided for that.
  */
 @SuppressWarnings("serial")
 final class PageContextServlet extends GenericServlet {

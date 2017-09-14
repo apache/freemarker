@@ -57,14 +57,15 @@ import org.springframework.web.servlet.support.RequestContext;
  * because it is much easier to control escaping in FreeMarker Template expressions.
  * </P>
  */
-public class ThemeFunction extends MessageFunction {
+class ThemeFunction extends MessageFunction {
 
     public static final String NAME = "theme";
 
-    public ThemeFunction(HttpServletRequest request, HttpServletResponse response) {
+    protected ThemeFunction(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
     }
 
+    @Override
     protected MessageSource getMessageSource(final RequestContext requestContext) {
         return requestContext.getTheme().getMessageSource();
     }

@@ -50,7 +50,7 @@ import org.springframework.web.servlet.support.RequestContext;
  * because it is much easier to control escaping in FreeMarker Template expressions.
  * </P>
  */
-public class TransformFunction extends AbstractSpringTemplateFunctionModel {
+class TransformFunction extends AbstractSpringTemplateFunctionModel {
 
     public static final String NAME = "transform";
 
@@ -65,22 +65,18 @@ public class TransformFunction extends AbstractSpringTemplateFunctionModel {
                     false
                     );
 
-    public TransformFunction(HttpServletRequest request, HttpServletResponse response) {
+    protected TransformFunction(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
     }
 
     @Override
-    public TemplateModel executeInternal(TemplateModel[] args, CallPlace callPlace, Environment env,
+    protected TemplateModel executeInternal(TemplateModel[] args, CallPlace callPlace, Environment env,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
                     throws TemplateException {
-        final TemplateModel editorModel = CallableUtils.getOptionalArgument(args, PROPERTY_EDITOR_PARAM_IDX,
-                TemplateModel.class, this);
-        final PropertyEditor editor = (editorModel != null)
-                ? (PropertyEditor) objectWrapperAndUnwrapper.unwrap(editorModel) : null;
-
-        final TemplateModel valueModel = CallableUtils.getOptionalArgument(args, VALUE_PARAM_IDX, TemplateModel.class,
-                this);
-        final Object value = (valueModel != null) ? objectWrapperAndUnwrapper.unwrap(valueModel) : null;
+        final PropertyEditor editor = CallableUtils.getOptionalArgumentAndUnwrap(args, PROPERTY_EDITOR_PARAM_IDX,
+                PropertyEditor.class, this, objectWrapperAndUnwrapper);
+        final Object value = CallableUtils.getOptionalArgumentAndUnwrap(args, VALUE_PARAM_IDX,
+                null, this, objectWrapperAndUnwrapper);
 
         String valueAsString = null;
 

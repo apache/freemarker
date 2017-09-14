@@ -65,7 +65,7 @@ import org.springframework.web.servlet.support.RequestContext;
  * rather than depending on directives.
  * </P>
  */
-public class BindErrorsDirective extends AbstractSpringTemplateDirectiveModel {
+class BindErrorsDirective extends AbstractSpringTemplateDirectiveModel {
 
     public static final String NAME = "hasBindErrors";
 
@@ -79,7 +79,7 @@ public class BindErrorsDirective extends AbstractSpringTemplateDirectiveModel {
                     false
                     );
 
-    public BindErrorsDirective(HttpServletRequest request, HttpServletResponse response) {
+    protected BindErrorsDirective(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
     }
 

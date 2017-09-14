@@ -75,7 +75,7 @@ import org.springframework.web.servlet.support.RequestContext;
  * because it is much easier to control escaping in FreeMarker Template expressions.
  * </P>
  */
-public class EvalFunction extends AbstractSpringTemplateFunctionModel {
+class EvalFunction extends AbstractSpringTemplateFunctionModel {
 
     public static final String NAME = "eval";
 
@@ -93,12 +93,12 @@ public class EvalFunction extends AbstractSpringTemplateFunctionModel {
 
     private final ExpressionParser expressionParser = new SpelExpressionParser();
 
-    public EvalFunction(HttpServletRequest request, HttpServletResponse response) {
+    protected EvalFunction(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
     }
 
     @Override
-    public TemplateModel executeInternal(TemplateModel[] args, CallPlace callPlace, Environment env,
+    protected TemplateModel executeInternal(TemplateModel[] args, CallPlace callPlace, Environment env,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
                     throws TemplateException {
         final String expressionString = CallableUtils.getStringArgument(args, EXPRESSION_PARAM_IDX, this);
@@ -106,7 +106,7 @@ public class EvalFunction extends AbstractSpringTemplateFunctionModel {
 
         EvaluationContext evaluationContext = null;
         final SpringTemplateCallableHashModel springTemplateModel = getSpringTemplateCallableHashModel(env);
-        TemplateModel evaluationContextModel = springTemplateModel.get(EVALUATION_CONTEXT_VAR_NAME);
+        TemplateModel evaluationContextModel = springTemplateModel.getEvaluationContextModel();
 
         if (evaluationContextModel != null) {
             evaluationContext = (EvaluationContext) objectWrapperAndUnwrapper.unwrap(evaluationContextModel);

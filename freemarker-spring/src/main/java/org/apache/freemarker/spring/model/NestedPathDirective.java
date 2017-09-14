@@ -54,7 +54,7 @@ import org.springframework.web.servlet.support.RequestContext;
  *   &lt;/@spring.nestedPath&gt;
  * </PRE>
  */
-public class NestedPathDirective extends AbstractSpringTemplateDirectiveModel {
+class NestedPathDirective extends AbstractSpringTemplateDirectiveModel {
 
     public static final String NAME = "nestedPath";
 
@@ -68,7 +68,7 @@ public class NestedPathDirective extends AbstractSpringTemplateDirectiveModel {
                     false
                     );
 
-    public NestedPathDirective(HttpServletRequest request, HttpServletResponse response) {
+    protected NestedPathDirective(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
     }
 

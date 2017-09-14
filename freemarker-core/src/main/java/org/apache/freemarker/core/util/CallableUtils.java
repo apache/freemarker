@@ -35,6 +35,7 @@ import org.apache.freemarker.core._ErrorDescriptionBuilder;
 import org.apache.freemarker.core._EvalUtils;
 import org.apache.freemarker.core._UnexpectedTypeErrorExplainerTemplateModel;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
+import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCallableModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
@@ -299,6 +300,20 @@ public final class CallableUtils {
                 desc.tip(tip);
             }
         }
+        return desc;
+    }
+
+    private static _ErrorDescriptionBuilder getMessageBadGenericArgumentType(
+            Object argValue, int argIdx, Class<? extends TemplateModel>[] expectedTypes,
+            String expectedTypesDesc, TemplateCallableModel callable,
+            boolean calledAsFunction) {
+        _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
+                getMessageArgumentProblem(
+                        callable, argIdx,
+                        new Object[]{ "should be ", new _DelayedAOrAn(expectedTypesDesc), ", but was ",
+                                new _DelayedAOrAn(argValue.getClass()),
+                                "." },
+                        calledAsFunction));
         return desc;
     }
 
@@ -715,6 +730,150 @@ public final class CallableUtils {
         throw newArgumentValueTypeException(
                 argValue, argIdx, TemplateBooleanModel.class, callable,
                 calledAsFunction);
+    }
+
+    // getAndUnwrapArgument(...)'s and getOptionalAndUnwrapArgument(...)'s
+
+    /**
+     * Convenience method to call
+     * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, Object, TemplateCallableModel, boolean, ObjectWrapperAndUnwrapper)
+     * unwrapAndCastArgumentValue(args[argIndex], argIndex, type, false, null, callable, true, objectWrapperAndUnwrapper)}.
+     */
+    public static <T> T getAndUnwrapArgument(
+            TemplateModel[] args, int argIndex, Class<T> type, TemplateFunctionModel callable,
+            ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper)
+            throws TemplateException {
+        return unwrapAndCastArgumentValue(args[argIndex], argIndex, type, false, null, callable, true,
+                objectWrapperAndUnwrapper);
+    }
+
+    /**
+     * Convenience method to call
+     * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, Object, TemplateCallableModel, boolean, ObjectWrapperAndUnwrapper)
+     * unwrapAndCastArgumentValue(args[argIndex], argIndex, type, false, null, callable, false, objectWrapperAndUnwrapper)}.
+     */
+    public static <T> T getArgumentAndUnwrap(
+            TemplateModel[] args, int argIndex, Class<T> type, TemplateDirectiveModel callable,
+            ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper)
+            throws TemplateException {
+        return unwrapAndCastArgumentValue(args[argIndex], argIndex, type, false, null, callable, false,
+                objectWrapperAndUnwrapper);
+    }
+
+    /**
+     * Convenience method to call
+     * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, Object, TemplateCallableModel, boolean, ObjectWrapperAndUnwrapper)
+     * unwrapAndCastArgumentValue(args[argIndex], argIndex, type, true, null, callable, true, objectWrapperAndUnwrapper)}.
+     */
+    public static <T> T getOptionalArgumentAndUnwrap(
+            TemplateModel[] args, int argIndex, Class<T> type, TemplateFunctionModel callable,
+            ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper)
+            throws TemplateException {
+        return unwrapAndCastArgumentValue(args[argIndex], argIndex, type, true, null, callable, true,
+                objectWrapperAndUnwrapper);
+    }
+
+    /**
+     * Convenience method to call
+     * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, Object, TemplateCallableModel, boolean, ObjectWrapperAndUnwrapper)
+     * unwrapAndCastArgumentValue(args[argIndex], argIndex, type, true, null, callable, false, objectWrapperAndUnwrapper)}.
+     */
+    public static <T> T getOptionalArgumentAndUnwrap(
+            TemplateModel[] args, int argIndex, Class<T> type, TemplateDirectiveModel callable,
+            ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper)
+            throws TemplateException {
+        return unwrapAndCastArgumentValue(args[argIndex], argIndex, type, true, null, callable, false,
+                objectWrapperAndUnwrapper);
+    }
+
+    /**
+     * Convenience method to call
+     * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, Object, TemplateCallableModel, boolean, ObjectWrapperAndUnwrapper)
+     * unwrapAndCastArgumentValue(args[argIndex], argIndex, type, true, defaultValue, callable, true, objectWrapperAndUnwrapper)}.
+     */
+    public static <T> T getOptionalArgumentAndUnwrap(
+            TemplateModel[] args, int argIndex, Class<T> type, T defaultValue, TemplateFunctionModel callable,
+            ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper)
+            throws TemplateException {
+        return unwrapAndCastArgumentValue(args[argIndex], argIndex, type, true, defaultValue, callable, true,
+                objectWrapperAndUnwrapper);
+    }
+
+    /**
+     * Convenience method to call
+     * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, Object, TemplateCallableModel, boolean, ObjectWrapperAndUnwrapper)
+     * unwrapAndCastArgumentValue(args[argIndex], argIndex, type, true, defaultValue, callable, false, objectWrapperAndUnwrapper)}.
+     */
+    public static <T> T getOptionalArgumentAndUnwrap(
+            TemplateModel[] args, int argIndex, Class<T> type, T defaultValue, TemplateDirectiveModel callable,
+            ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper)
+            throws TemplateException {
+        return unwrapAndCastArgumentValue(args[argIndex], argIndex, type, true, defaultValue, callable, false,
+                objectWrapperAndUnwrapper);
+    }
+
+    /**
+     * Unwrap the argument to a plain Java object first and checks if the argument value is of the proper type,
+     * also, if it's {@code null}/omitted, in which case it can throw an exception or return a default value.
+     * <p>
+     * The point of this method is not only to decrease the boiler plate needed for these common checks, but also to
+     * standardize the error message content. If the checks themselves don't fit your needs, you should still use {@link
+     * #newArgumentValueTypeException(TemplateModel, int, Class, TemplateCallableModel, boolean)} and its overloads,
+     * also {@link #newNullOrOmittedArgumentException(int, TemplateCallableModel, boolean)} and its overloads to
+     * generate similar error messages.
+     *
+     * @param argValue
+     *         The argument value at the position of {@code argIdx}.
+     * @param argIdx
+     *         The index in the {@code args} array (assumed to be a valid index. This is information is needed for
+     *         proper error messages.
+     * @param type
+     *         The expected class of the unwrapped argument as plain Java object (not a {@link TemplateModel} subinterface).
+     *         {@code null} if there are no type restrictions.
+     * @param optional
+     *         If we allow the parameter to be {@code null} or omitted.
+     * @param defaultValue
+     *         The value to return if the parameter was {@code null} or omitted.
+     * @param callable
+     *         The {@link TemplateCallableModel} whose argument we cast; required for printing proper error message.
+     * @param calledAsFunction
+     *         Tells if the {@code callable} was called as function (as opposed to called as a directive). This
+     *         information is needed because a {@link TemplateCallableModel} might implements both {@link
+     *         TemplateFunctionModel} and {@link TemplateDirectiveModel}, in which case this method couldn't tell if the
+     *         argument of which we are casting.
+     * @param objectWrapperAndUnwrapper
+     *         The ObjectWrapperAndUnwrapper instance to use when unwrapping the argument to a plain Java object.
+     *
+     * @return The argument value of the proper type.
+     *
+     * @throws TemplateException
+     *         If the argument is not of the proper type or is non-optional yet {@code null}/omitted. The error message
+     *         describes the problem in detail, and is meant to be shown for the template author.
+     */
+    public static <T> T unwrapAndCastArgumentValue(
+            TemplateModel argValue, int argIdx, Class<T> type,
+            boolean optional, T defaultValue, TemplateCallableModel callable,
+            boolean calledAsFunction, ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper)
+            throws TemplateException {
+        if (objectWrapperAndUnwrapper == null) {
+            throw newGenericExecuteException("ObjectWrapperAndUnwrapper shouldn't be null.", callable,
+                    calledAsFunction);
+        }
+        final Object argValueObject = (argValue != null) ? objectWrapperAndUnwrapper.unwrap(argValue) : null;
+        if (argValueObject == null) {
+            if (optional) {
+                return defaultValue;
+            }
+            throw newNullOrOmittedArgumentException(argIdx, callable, calledAsFunction);
+        }
+        if (type == null || type.isInstance(argValueObject)) {
+            return (T) argValueObject;
+        }
+        throw new TemplateException(
+                getMessageBadGenericArgumentType(argValue, argIdx,
+                        new Class[] { type },
+                        type.getName(),
+                        callable, calledAsFunction));
     }
 
     // Other type of arg:

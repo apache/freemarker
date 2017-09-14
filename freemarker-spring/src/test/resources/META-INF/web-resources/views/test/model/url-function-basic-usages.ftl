@@ -21,41 +21,34 @@
 <body>
 
 <h2 id="usersListHeader">
-  <#assign pathInfo="/users/" />
-  <a href="${spring.url(pathInfo)}">Users List</a>
+  <a href="${spring.url('/users/')}">Users List</a>
 </h2>
 
 <h3 id="usersListHeaderWithSortParams">
-  <#assign pathInfo="/users/" />
-  <a href="${spring.url(pathInfo, sortField='birthDate', sortDirection='descending')}">Users List</a>
+  <a href="${spring.url('/users/', sortField='birthDate', sortDirection='descending')}">Users List</a>
 </h3>
 
 <h2 id="otherAppsUsersListHeader">
-  <#assign pathInfo="/users/" />
-  <a href="${spring.url(pathInfo, context='/otherapp')}">Users List</a>
+  <a href="${spring.url('/users/', context='/otherapp')}">Users List</a>
 </h2>
 
 <h3 id="otherAppsUsersListHeaderWithSortParams">
-  <#assign pathInfo="/users/" />
-  <a href="${spring.url(pathInfo, context='/otherapp', sortField='birthDate', sortDirection='descending')}">Users List</a>
+  <a href="${spring.url('/users/', context='/otherapp', sortField='birthDate', sortDirection='descending')}">Users List</a>
 </h3>
 
 <ul>
   <#list users as user>
     <li>
       <div id="user-${user.id!}">
-        <#assign pathInfo="/users/{userId}/" />
-        <a class="userIdLink" href="${spring.url(pathInfo, userId=user.id?string)}">${user.id!}</a>
-        <#assign pathInfo="/users/${user.id}/" />
-        <a class="userNameLink" href="${spring.url(pathInfo)}">${user.firstName!} ${user.lastName!}</a>
+        <a class="userIdLink" href="${spring.url('/users/{userId}/', userId=user.id)}">${user.id!}</a>
+        <a class="userNameLink" href="${spring.url('/users/${user.id}/')}">${user.firstName!} ${user.lastName!}</a>
       </div>
     </li>
   </#list>
 </ul>
 
 <div id="freeMarkerManualUrl">
-  <#assign pathInfo="http://freemarker.org/docs/index.html" />
-  <a href="${spring.url(pathInfo)}">Apache FreeMarker Manual</a>
+  <a href="${spring.url('http://freemarker.org/docs/index.html')}">Apache FreeMarker Manual</a>
 </div>
 
 </body>
