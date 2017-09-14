@@ -750,7 +750,7 @@ public final class CallableUtils {
      * Convenience method to call
      * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, TemplateModel, TemplateCallableModel, boolean)}.
      */
-    public static <T> T getAndUnwrapArgument(
+    public static <T> T getArgumentAndUnwrap(
             TemplateModel[] args, int argIndex, Class<T> type, TemplateDirectiveModel callable,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper)
             throws TemplateException {
@@ -762,7 +762,7 @@ public final class CallableUtils {
      * Convenience method to call
      * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, TemplateModel, TemplateCallableModel, boolean)}.
      */
-    public static <T> T getOptionalAndUnwrapArgument(
+    public static <T> T getOptionalArgumentAndUnwrap(
             TemplateModel[] args, int argIndex, Class<T> type, TemplateFunctionModel callable,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper)
             throws TemplateException {
@@ -774,7 +774,7 @@ public final class CallableUtils {
      * Convenience method to call
      * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, TemplateModel, TemplateCallableModel, boolean)}.
      */
-    public static <T> T getOptionalAndUnwrapArgument(
+    public static <T> T getOptionalArgumentAndUnwrap(
             TemplateModel[] args, int argIndex, Class<T> type, TemplateDirectiveModel callable,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper)
             throws TemplateException {
@@ -786,7 +786,7 @@ public final class CallableUtils {
      * Convenience method to call
      * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, TemplateModel, TemplateCallableModel, boolean)}.
      */
-    public static <T> T getOptionalAndUnwrapArgument(
+    public static <T> T getOptionalArgumentAndUnwrap(
             TemplateModel[] args, int argIndex, Class<T> type, T defaultValue, TemplateFunctionModel callable,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper)
             throws TemplateException {
@@ -798,7 +798,7 @@ public final class CallableUtils {
      * Convenience method to call
      * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, TemplateModel, TemplateCallableModel, boolean)}.
      */
-    public static <T> T getOptionalAndUnwrapArgument(
+    public static <T> T getOptionalArgumentAndUnwrap(
             TemplateModel[] args, int argIndex, Class<T> type, T defaultValue, TemplateDirectiveModel callable,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper)
             throws TemplateException {

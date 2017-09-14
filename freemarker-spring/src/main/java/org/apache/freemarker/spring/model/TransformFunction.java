@@ -73,9 +73,9 @@ class TransformFunction extends AbstractSpringTemplateFunctionModel {
     protected TemplateModel executeInternal(TemplateModel[] args, CallPlace callPlace, Environment env,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
                     throws TemplateException {
-        final PropertyEditor editor = CallableUtils.getOptionalAndUnwrapArgument(args, PROPERTY_EDITOR_PARAM_IDX,
+        final PropertyEditor editor = CallableUtils.getOptionalArgumentAndUnwrap(args, PROPERTY_EDITOR_PARAM_IDX,
                 PropertyEditor.class, this, objectWrapperAndUnwrapper);
-        final Object value = CallableUtils.getOptionalAndUnwrapArgument(args, VALUE_PARAM_IDX,
+        final Object value = CallableUtils.getOptionalArgumentAndUnwrap(args, VALUE_PARAM_IDX,
                 null, this, objectWrapperAndUnwrapper);
 
         String valueAsString = null;
