@@ -736,7 +736,8 @@ public final class CallableUtils {
 
     /**
      * Convenience method to call
-     * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, TemplateModel, TemplateCallableModel, boolean)}.
+     * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, Object, TemplateCallableModel, boolean, ObjectWrapperAndUnwrapper)
+     * unwrapAndCastArgumentValue(args[argIndex], argIndex, type, false, null, callable, true, objectWrapperAndUnwrapper)}.
      */
     public static <T> T getAndUnwrapArgument(
             TemplateModel[] args, int argIndex, Class<T> type, TemplateFunctionModel callable,
@@ -748,7 +749,8 @@ public final class CallableUtils {
 
     /**
      * Convenience method to call
-     * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, TemplateModel, TemplateCallableModel, boolean)}.
+     * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, Object, TemplateCallableModel, boolean, ObjectWrapperAndUnwrapper)
+     * unwrapAndCastArgumentValue(args[argIndex], argIndex, type, false, null, callable, false, objectWrapperAndUnwrapper)}.
      */
     public static <T> T getArgumentAndUnwrap(
             TemplateModel[] args, int argIndex, Class<T> type, TemplateDirectiveModel callable,
@@ -760,7 +762,8 @@ public final class CallableUtils {
 
     /**
      * Convenience method to call
-     * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, TemplateModel, TemplateCallableModel, boolean)}.
+     * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, Object, TemplateCallableModel, boolean, ObjectWrapperAndUnwrapper)
+     * unwrapAndCastArgumentValue(args[argIndex], argIndex, type, true, null, callable, true, objectWrapperAndUnwrapper)}.
      */
     public static <T> T getOptionalArgumentAndUnwrap(
             TemplateModel[] args, int argIndex, Class<T> type, TemplateFunctionModel callable,
@@ -772,7 +775,8 @@ public final class CallableUtils {
 
     /**
      * Convenience method to call
-     * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, TemplateModel, TemplateCallableModel, boolean)}.
+     * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, Object, TemplateCallableModel, boolean, ObjectWrapperAndUnwrapper)
+     * unwrapAndCastArgumentValue(args[argIndex], argIndex, type, true, null, callable, false, objectWrapperAndUnwrapper)}.
      */
     public static <T> T getOptionalArgumentAndUnwrap(
             TemplateModel[] args, int argIndex, Class<T> type, TemplateDirectiveModel callable,
@@ -784,7 +788,8 @@ public final class CallableUtils {
 
     /**
      * Convenience method to call
-     * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, TemplateModel, TemplateCallableModel, boolean)}.
+     * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, Object, TemplateCallableModel, boolean, ObjectWrapperAndUnwrapper)
+     * unwrapAndCastArgumentValue(args[argIndex], argIndex, type, true, defaultValue, callable, true, objectWrapperAndUnwrapper)}.
      */
     public static <T> T getOptionalArgumentAndUnwrap(
             TemplateModel[] args, int argIndex, Class<T> type, T defaultValue, TemplateFunctionModel callable,
@@ -796,7 +801,8 @@ public final class CallableUtils {
 
     /**
      * Convenience method to call
-     * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, TemplateModel, TemplateCallableModel, boolean)}.
+     * {@link #unwrapAndCastArgumentValue(TemplateModel, int, Class, boolean, Object, TemplateCallableModel, boolean, ObjectWrapperAndUnwrapper)
+     * unwrapAndCastArgumentValue(args[argIndex], argIndex, type, true, defaultValue, callable, false, objectWrapperAndUnwrapper)}.
      */
     public static <T> T getOptionalArgumentAndUnwrap(
             TemplateModel[] args, int argIndex, Class<T> type, T defaultValue, TemplateDirectiveModel callable,
