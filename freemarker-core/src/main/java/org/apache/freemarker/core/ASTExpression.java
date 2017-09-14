@@ -82,25 +82,25 @@ abstract class ASTExpression extends ASTNode {
     }
 
     Object evalAndCoerceToStringOrMarkup(Environment env) throws TemplateException {
-        return _EvalUtils.coerceModelToStringOrMarkup(eval(env), this, null, env);
+        return _EvalUtils.coerceModelToPlainTextOrMarkup(eval(env), this, null, env);
     }
 
     /**
      * @param seqTip Tip to display if the value type is not coercable, but it's iterable.
      */
     Object evalAndCoerceToStringOrMarkup(Environment env, String seqTip) throws TemplateException {
-        return _EvalUtils.coerceModelToStringOrMarkup(eval(env), this, seqTip, env);
+        return _EvalUtils.coerceModelToPlainTextOrMarkup(eval(env), this, seqTip, env);
     }
     
     String evalAndCoerceToStringOrUnsupportedMarkup(Environment env) throws TemplateException {
-        return _EvalUtils.coerceModelToStringOrUnsupportedMarkup(eval(env), this, null, env);
+        return _EvalUtils.coerceModelToPlainTextOrUnsupportedMarkup(eval(env), this, null, env);
     }
 
     /**
      * @param seqTip Tip to display if the value type is not coercable, but it's iterable.
      */
     String evalAndCoerceToStringOrUnsupportedMarkup(Environment env, String seqTip) throws TemplateException {
-        return _EvalUtils.coerceModelToStringOrUnsupportedMarkup(eval(env), this, seqTip, env);
+        return _EvalUtils.coerceModelToPlainTextOrUnsupportedMarkup(eval(env), this, seqTip, env);
     }
     
     Number evalToNumber(Environment env) throws TemplateException {

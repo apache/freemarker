@@ -210,7 +210,7 @@ class BuiltInsForSequences {
                             hadItem = true;
                         }
                         try {
-                            sb.append(_EvalUtils.coerceModelToStringOrUnsupportedMarkup(item, null, null, env));
+                            sb.append(_EvalUtils.coerceModelToPlainTextOrUnsupportedMarkup(item, null, null, env));
                         } catch (TemplateException e) {
                             throw new TemplateException(e,
                                     "\"?", key, "\" failed at index ", idx, " with this error:\n\n",

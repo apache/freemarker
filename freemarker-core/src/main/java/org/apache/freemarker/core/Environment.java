@@ -54,6 +54,7 @@ import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
+import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithOriginName;
@@ -75,6 +76,7 @@ import org.apache.freemarker.core.valueformat.TemplateDateFormat;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormat;
 import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
+import org.apache.freemarker.core.valueformat.TemplateValueFormat;
 import org.apache.freemarker.core.valueformat.TemplateValueFormatException;
 import org.apache.freemarker.core.valueformat.UndefinedCustomFormatException;
 import org.apache.freemarker.core.valueformat.UnknownDateTypeFormattingUnsupportedException;
@@ -1025,6 +1027,30 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         return getMainTemplate().getBooleanFormat();
     }
 
+    /**
+     * Converts a value to plain text {@link String}, or to {@link TemplateMarkupOutputModel} if that's what the
+     * {@link TemplateValueFormat} involved prefer to produce. (Most {@link TemplateValueFormat} produce plain text,
+     * markup producting formatters are very rare.) This will only convert values that <code>${value}</code> would too,
+     * for example, it will throw {@link TemplateException} if you try to convert a sequence or a date whose type is not
+     * known. 
+     * 
+     * @return Never {@code null}
+     * 
+     * @see #formatToPlainText(TemplateModel)
+     */
+    public Object formatToPlainTextOrMarkup(TemplateModel tm)
+            throws TemplateException {
+        return _EvalUtils.coerceModelToPlainTextOrMarkup(tm, null, null, this);
+    }
+    
+    /**
+     * Same as {@link #formatToPlainTextOrMarkup(TemplateModel)}, but always formats to plain text, even if the
+     * {@link TemplateValueFormat} involved by normally produces markup.
+     */
+    public String formatToPlainText(TemplateModel tm) throws TemplateException {
+        return _EvalUtils.coerceModelToPlainText(tm, null, null, this);
+    }
+    
     String formatBoolean(boolean value, boolean fallbackToTrueFalse) throws TemplateException {
         TemplateBooleanFormat templateBooleanFormat = getTemplateBooleanFormat();
         if (value) {
@@ -3060,6 +3086,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             return callableDefinition.getArgumentArrayLayout();
         }
 
+        @Override
         boolean isFunction() {
             return false;
         }
@@ -3094,6 +3121,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
             return callableDefinition.getArgumentArrayLayout();
         }
 
+        @Override
         boolean isFunction() {
             return true;
         }

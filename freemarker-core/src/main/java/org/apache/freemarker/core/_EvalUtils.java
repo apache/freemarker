@@ -341,18 +341,18 @@ public class _EvalUtils {
      * 
      * @return Never {@code null}
      */
-    static Object coerceModelToStringOrMarkup(TemplateModel tm, ASTExpression exp, String seqTip, Environment env)
+    static Object coerceModelToPlainTextOrMarkup(TemplateModel tm, ASTExpression exp, String seqTip, Environment env)
             throws TemplateException {
-        return coerceModelToStringOrMarkup(tm, exp, false, seqTip, env);
+        return coerceModelToPlainTextOrMarkup(tm, exp, false, seqTip, env);
     }
     
     /**
      * @return {@code null} if the {@code returnNullOnNonCoercableType} parameter is {@code true}, and the coercion is
      *         not possible, because of the type is not right for it.
      * 
-     * @see #coerceModelToStringOrMarkup(TemplateModel, ASTExpression, String, Environment)
+     * @see #coerceModelToPlainTextOrMarkup(TemplateModel, ASTExpression, String, Environment)
      */
-    static Object coerceModelToStringOrMarkup(
+    static Object coerceModelToPlainTextOrMarkup(
             TemplateModel tm, ASTExpression exp, boolean returnNullOnNonCoercableType, String seqTip, Environment env)
             throws TemplateException {
         if (tm instanceof TemplateNumberModel) {
@@ -379,7 +379,7 @@ public class _EvalUtils {
     }
 
     /**
-     * Like {@link #coerceModelToStringOrMarkup(TemplateModel, ASTExpression, String, Environment)}, but gives error
+     * Like {@link #coerceModelToPlainTextOrMarkup(TemplateModel, ASTExpression, String, Environment)}, but gives error
      * if the result is markup. This is what you normally use where markup results can't be used.
      *
      * @param seqTip
@@ -387,7 +387,7 @@ public class _EvalUtils {
      * 
      * @return Never {@code null}
      */
-    static String coerceModelToStringOrUnsupportedMarkup(
+    static String coerceModelToPlainTextOrUnsupportedMarkup(
             TemplateModel tm, ASTExpression exp, String seqTip, Environment env)
             throws TemplateException {
         if (tm instanceof TemplateNumberModel) {
