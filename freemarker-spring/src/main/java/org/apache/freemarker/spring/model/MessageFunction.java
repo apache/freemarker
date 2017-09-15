@@ -103,7 +103,7 @@ class MessageFunction extends AbstractSpringTemplateFunctionModel {
         final MessageSource messageSource = getMessageSource(requestContext);
 
         if (messageSource == null) {
-            CallableUtils.newGenericExecuteException("MessageSource not found.", this);
+            throw CallableUtils.newGenericExecuteException("MessageSource not found.", this);
         }
 
         String message = null;
@@ -135,7 +135,7 @@ class MessageFunction extends AbstractSpringTemplateFunctionModel {
                 message = messageSource.getMessage(code, (msgArgumentList == null) ? null : msgArgumentList.toArray(),
                         null, requestContext.getLocale());
             } else {
-                CallableUtils.newNullOrOmittedArgumentException(CODE_PARAM_IDX, this);
+                throw CallableUtils.newNullOrOmittedArgumentException(CODE_PARAM_IDX, this);
             }
         }
 

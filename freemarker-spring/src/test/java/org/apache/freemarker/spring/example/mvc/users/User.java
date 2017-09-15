@@ -23,7 +23,7 @@ import java.util.Date;
 
 public class User {
 
-    private Integer id;
+    private Long id;
     private String password;
     private String email;
     private String firstName;
@@ -33,11 +33,11 @@ public class User {
     public User() {
     }
 
-    public User(final Integer id) {
+    public User(final Long id) {
         this.id = id;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 

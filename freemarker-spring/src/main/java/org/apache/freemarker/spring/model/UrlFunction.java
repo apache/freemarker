@@ -36,9 +36,11 @@ import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
+import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateHashModelEx2.KeyValuePairIterator;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
@@ -127,20 +129,27 @@ class UrlFunction extends AbstractSpringTemplateFunctionModel {
                     paramName = ((TemplateStringModel) paramNameModel).getAsString();
 
                     if (paramName.isEmpty()) {
-                        CallableUtils.newArgumentValueException(PARAMS_PARAM_IDX,
+                        throw CallableUtils.newArgumentValueException(PARAMS_PARAM_IDX,
                                 "Parameter name must be a non-blank string.", this);
                     }
 
                     if (paramValueModel instanceof TemplateStringModel) {
                         paramValue = ((TemplateStringModel) paramValueModel).getAsString();
+                    } else if (paramValueModel instanceof TemplateNumberModel) {
+                        paramValue = ((TemplateNumberModel) paramValueModel).getAsNumber().toString();
+                    } else if (paramValueModel instanceof TemplateBooleanModel) {
+                        paramValue = Boolean.toString(((TemplateBooleanModel) paramValueModel).getAsBoolean());
                     } else {
-                        paramValue = env.formatToPlainText(paramValueModel);
+                        throw CallableUtils.newArgumentValueException(PARAMS_PARAM_IDX,
+                                "Format the parameter manually to properly coerce it to a URL parameter value string. "
+                                        + "e.g, date?string.iso, date?long, list?join('_'), etc.",
+                                this);
                     }
 
                     params.add(new _KeyValuePair<String, String>(paramName, paramValue));
                 } else {
-                    CallableUtils.newArgumentValueException(PARAMS_PARAM_IDX,
-                            "Parameter name must be string.", this);
+                    throw CallableUtils.newArgumentValueException(PARAMS_PARAM_IDX,
+                            "Parameter name must be a string.", this);
                 }
             }
         }
@@ -214,7 +223,7 @@ class UrlFunction extends AbstractSpringTemplateFunctionModel {
                 try {
                     uri = uri.replace(template, UriUtils.encodePath(paramValue, encoding));
                 } catch (UnsupportedEncodingException e) {
-                    CallableUtils.newGenericExecuteException("Cannot encode URI. " + e, this);
+                    throw CallableUtils.newGenericExecuteException("Cannot encode URI. " + e, this);
                 }
             } else {
                 template = URL_TEMPLATE_DELIMITER_PREFIX + '/' + paramName + URL_TEMPLATE_DELIMITER_SUFFIX;
@@ -225,7 +234,7 @@ class UrlFunction extends AbstractSpringTemplateFunctionModel {
                     try {
                         uri = uri.replace(template, UriUtils.encodePathSegment(paramValue, encoding));
                     } catch (UnsupportedEncodingException e) {
-                        CallableUtils.newGenericExecuteException("Cannot encode URI. " + e, this);
+                        throw CallableUtils.newGenericExecuteException("Cannot encode URI. " + e, this);
                     }
                 }
             }
@@ -258,7 +267,7 @@ class UrlFunction extends AbstractSpringTemplateFunctionModel {
                         queryStringBuilder.append(UriUtils.encodeQueryParam(paramValue, encoding));
                     }
                 } catch (UnsupportedEncodingException e) {
-                    CallableUtils.newGenericExecuteException("Cannot encode query parameter. " + e, this);
+                    throw CallableUtils.newGenericExecuteException("Cannot encode query parameter. " + e, this);
                 }
             }
         }

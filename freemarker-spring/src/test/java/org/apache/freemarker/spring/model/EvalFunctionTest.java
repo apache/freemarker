@@ -60,7 +60,7 @@ public class EvalFunctionTest {
 
     @Test
     public void testBasicUsages() throws Exception {
-        final Integer userId = userRepository.getUserIds().iterator().next();
+        final Long userId = userRepository.getUserIds().iterator().next();
         final User user = userRepository.getUser(userId);
         mockMvc.perform(get("/users/").param("viewName", "test/model/eval-function-basic-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())

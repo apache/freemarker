@@ -30,21 +30,21 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class UserRepository {
 
-    private Map<Integer, User> usersMap = new ConcurrentHashMap<>();
+    private Map<Long, User> usersMap = new ConcurrentHashMap<>();
     {
-        Integer id = 101;
+        Long id = 101L;
         User user = new User(id);
         user.setEmail("john@example.com");
         user.setFirstName("John");
         user.setLastName("Doe");
         Calendar birthDate = Calendar.getInstance();
-        birthDate.set(Calendar.YEAR, 1971);
+        birthDate.set(Calendar.YEAR, 1973);
         birthDate.set(Calendar.MONTH, Calendar.JANUARY);
         birthDate.set(Calendar.DATE, 5);
         user.setBirthDate(birthDate.getTime());
         usersMap.put(id, user);
 
-        id = 102;
+        id = 102L;
         user = new User(id);
         user.setEmail("jane@example.com");
         user.setFirstName("Jane");
@@ -57,11 +57,11 @@ public class UserRepository {
         usersMap.put(id, user);
     }
 
-    public synchronized Set<Integer> getUserIds() {
+    public synchronized Set<Long> getUserIds() {
         return new TreeSet<>(usersMap.keySet());
     }
 
-    public synchronized User getUser(final Integer id) {
+    public synchronized User getUser(final Long id) {
         if (id == null) {
             throw new IllegalArgumentException("ID must be non-null.");
         }
@@ -76,7 +76,7 @@ public class UserRepository {
     }
 
     public synchronized User addOrUpdateUser(final User user) {
-        final Integer id = user.getId();
+        final Long id = user.getId();
         User newUser = cloneUser(user, id);
         usersMap.put(id, newUser);
         return cloneUser(newUser, id);
@@ -91,7 +91,7 @@ public class UserRepository {
         return user != null;
     }
 
-    private User cloneUser(final User source, final Integer id) {
+    private User cloneUser(final User source, final Long id) {
         User clone = new User(id);
         clone.setPassword(source.getPassword());
         clone.setEmail(source.getEmail());

@@ -65,7 +65,7 @@ public class ThemeFunctionTest {
     public void testBasicUsages() throws Exception {
         final MessageSource defaultThemeMessageSource = themeSource.getTheme("default").getMessageSource();
 
-        final Integer userId = userRepository.getUserIds().iterator().next();
+        final Long userId = userRepository.getUserIds().iterator().next();
         mockMvc.perform(get("/users/{userId}/", userId).param("viewName", "test/model/theme-function-basic-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
