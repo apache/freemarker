@@ -139,7 +139,7 @@ apply it to your development environment:
 - Window -> Preferences
   - General -> Workspace, set the text file encoding
     to "UTF-8". (Or, you can set the same later on project level instead.)
-  - General -> Editors, set:
+  - General -> Editors -> Text Editors, set:
     - Insert space for tabs
     - Show print margin, 120 columns
   - Java -> Code Style -> Formatter -> Import...
