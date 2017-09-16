@@ -1001,13 +1001,22 @@ public class DefaultObjectWrapperTest {
     }
     
     @Test
-    public void assertCanWrapDOM() throws SAXException, IOException, ParserConfigurationException,
+    public void testCanWrapDOM() throws SAXException, IOException, ParserConfigurationException,
             TemplateModelException {
         DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         InputSource is = new InputSource();
         is.setCharacterStream(new StringReader("<doc><sub a='1' /></doc>"));
         Document doc = db.parse(is);        
         assertTrue(OW22.wrap(doc) instanceof TemplateNodeModel);
+    }
+
+    @Test
+    public void testPreferIndexedReadMethodAndIcI() {
+        assertTrue(new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_26).build().getPreferIndexedReadMethod());
+        assertTrue(new DefaultObjectWrapper(Configuration.VERSION_2_3_26).getPreferIndexedReadMethod());
+        
+        assertFalse(new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_27).build().getPreferIndexedReadMethod());
+        assertFalse(new DefaultObjectWrapper(Configuration.VERSION_2_3_27).getPreferIndexedReadMethod());
     }
     
     private void assertSizeThroughAPIModel(int expectedSize, TemplateModel normalModel) throws TemplateModelException {

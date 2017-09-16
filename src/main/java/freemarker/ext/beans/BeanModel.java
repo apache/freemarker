@@ -50,7 +50,6 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
 import freemarker.template.TemplateModelWithAPISupport;
 import freemarker.template.TemplateScalarModel;
-import freemarker.template._TemplateAPI;
 import freemarker.template.utility.StringUtil;
 
 /**
@@ -221,8 +220,7 @@ implements
         TemplateModel resultModel = UNKNOWN;
         if (desc instanceof IndexedPropertyDescriptor) {
             IndexedPropertyDescriptor pd = (IndexedPropertyDescriptor) desc;
-            if (wrapper.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_27
-                    && pd.getReadMethod() != null) {
+            if (!wrapper.getPreferIndexedReadMethod() && pd.getReadMethod() != null) {
                 resultModel = wrapper.invokeMethod(object, pd.getReadMethod(), null);
                 // cachedModel remains null, as we don't cache these
             } else {

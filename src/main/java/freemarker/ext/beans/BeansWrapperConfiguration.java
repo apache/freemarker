@@ -46,6 +46,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
     
     // Properties and their *defaults*:
     private boolean simpleMapWrapper = false;
+    private boolean preferIndexedReadMethod;
     private int defaultDateType = TemplateDateModel.UNKNOWN;
     private ObjectWrapper outerIdentity = null;
     private boolean strict = false;
@@ -81,6 +82,8 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
                 : BeansWrapper.normalizeIncompatibleImprovementsVersion(incompatibleImprovements);
         this.incompatibleImprovements = incompatibleImprovements;
         
+        preferIndexedReadMethod = incompatibleImprovements.intValue() < _TemplateAPI.VERSION_INT_2_3_27;
+        
         classIntrospectorBuilder = new ClassIntrospectorBuilder(incompatibleImprovements);
     }
     
@@ -97,6 +100,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
         int result = 1;
         result = prime * result + incompatibleImprovements.hashCode();
         result = prime * result + (simpleMapWrapper ? 1231 : 1237);
+        result = prime * result + (preferIndexedReadMethod ? 1231 : 1237);
         result = prime * result + defaultDateType;
         result = prime * result + (outerIdentity != null ? outerIdentity.hashCode() : 0);
         result = prime * result + (strict ? 1231 : 1237);
@@ -118,6 +122,7 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
         
         if (!incompatibleImprovements.equals(other.incompatibleImprovements)) return false;
         if (simpleMapWrapper != other.simpleMapWrapper) return false;
+        if (preferIndexedReadMethod != other.preferIndexedReadMethod) return false;
         if (defaultDateType != other.defaultDateType) return false;
         if (outerIdentity != other.outerIdentity) return false;
         if (strict != other.strict) return false;
@@ -147,6 +152,16 @@ public abstract class BeansWrapperConfiguration implements Cloneable {
     /** See {@link BeansWrapper#setSimpleMapWrapper(boolean)}. */
     public void setSimpleMapWrapper(boolean simpleMapWrapper) {
         this.simpleMapWrapper = simpleMapWrapper;
+    }
+    
+    /** @since 2.3.27 */
+    public boolean getPreferIndexedReadMethod() {
+        return preferIndexedReadMethod;
+    }
+
+    /** See {@link BeansWrapper#setPreferIndexedReadMethod(boolean)}. @since 2.3.27 */
+    public void setPreferIndexedReadMethod(boolean preferIndexedReadMethod) {
+        this.preferIndexedReadMethod = preferIndexedReadMethod;
     }
 
     public int getDefaultDateType() {
