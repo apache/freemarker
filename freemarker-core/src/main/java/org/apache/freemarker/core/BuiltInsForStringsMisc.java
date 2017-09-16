@@ -29,8 +29,8 @@ import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.BeanModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
@@ -105,7 +105,7 @@ class BuiltInsForStringsMisc {
             try {
                 return exp.eval(env);
             } catch (TemplateException e) {
-                throw new TemplateException(this, env,
+                throw new TemplateException(e, this, env,
                         "Failed to \"?", key, "\" string with this error:\n\n",
                         MessageUtils.EMBEDDED_MESSAGE_BEGIN,
                         new _DelayedGetMessageWithoutStackTop(e),
