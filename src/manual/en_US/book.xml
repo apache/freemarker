@@ -26943,6 +26943,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               the <literal>switch</literal> tag and the first
               <literal>case</literal> tag.</para>
             </listitem>
+
+            <listitem>
+              <para>Bug fixed (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-71">FREEMARKER-71</link>):
+              When using
+              <literal><replaceable>exp</replaceable>?eval</literal>, if the
+              expression inside evaluated string throws an exception, the
+              cause exception of that exception was lost.</para>
+            </listitem>
           </itemizedlist>
         </section>
 

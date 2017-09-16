@@ -97,7 +97,7 @@ class BuiltInsForStringsMisc {
             try {
                 return exp.eval(env);
             } catch (TemplateException e) {
-                throw new _MiscTemplateException(this, env,
+                throw new _MiscTemplateException(e, this, env,
                         "Failed to \"?", key, "\" string with this error:\n\n",
                         MessageUtil.EMBEDDED_MESSAGE_BEGIN,
                         new _DelayedGetMessageWithoutStackTop(e),
