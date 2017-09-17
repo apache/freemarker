@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateCollectionModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
@@ -30,13 +31,13 @@ import freemarker.template.TemplateSequenceModel;
 
 /**
  * Add sequence capabilities to an existing collection, or
- * vice versa. Used by ?keys and ?values built-ins.
+ * vice versa. Used by the ?keys and ?values built-ins.
  */
 final public class CollectionAndSequence
 implements TemplateCollectionModel, TemplateSequenceModel, Serializable {
     private TemplateCollectionModel collection;
     private TemplateSequenceModel sequence;
-    private ArrayList data;
+    private ArrayList<TemplateModel> data;
 
     public CollectionAndSequence(TemplateCollectionModel collection) {
         this.collection = collection;
@@ -59,13 +60,15 @@ implements TemplateCollectionModel, TemplateSequenceModel, Serializable {
             return sequence.get(i);
         } else {
             initSequence();
-            return (TemplateModel) data.get(i);
+            return data.get(i);
         }
     }
 
     public int size() throws TemplateModelException {
         if (sequence != null) {
             return sequence.size();
+        } if (collection instanceof TemplateCollectionModelEx) {
+            return ((TemplateCollectionModelEx) collection).size();
         } else {
             initSequence();
             return data.size();
@@ -74,7 +77,7 @@ implements TemplateCollectionModel, TemplateSequenceModel, Serializable {
 
     private void initSequence() throws TemplateModelException {
         if (data == null) {
-            data = new ArrayList();
+            data = new ArrayList<TemplateModel>();
             TemplateModelIterator it = collection.iterator();
             while (it.hasNext()) {
                 data.add(it.next());

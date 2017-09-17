@@ -30,8 +30,10 @@ import java.util.List;
 import freemarker.ext.beans.CollectionModel;
 import freemarker.template.SimpleNumber;
 import freemarker.template.SimpleScalar;
+import freemarker.template.SimpleSequence;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateCollectionModelEx;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateHashModel;
@@ -829,6 +831,33 @@ class BuiltInsForSequences {
         
     }
 
+    static class sequenceBI extends BuiltIn {
+
+        @Override
+        TemplateModel _eval(Environment env) throws TemplateException {
+            TemplateModel model = target.eval(env);
+            
+            if (model instanceof TemplateSequenceModel && !isBuggySeqButGoodCollection(model)) {
+                return model;
+            }
+            
+            if (!(model instanceof TemplateCollectionModel)) {
+                throw new NonSequenceOrCollectionException(target, model, env);
+            }
+            TemplateCollectionModel coll = (TemplateCollectionModel) model;
+            
+            SimpleSequence seq =
+                    coll instanceof TemplateCollectionModelEx
+                            ? new SimpleSequence(((TemplateCollectionModelEx) coll).size())
+                            : new SimpleSequence();
+            for (TemplateModelIterator iter = coll.iterator(); iter.hasNext(); ) {
+                seq.add(iter.next());
+            }
+            return seq;
+        }
+        
+    }
+    
     private static boolean isBuggySeqButGoodCollection(
             TemplateModel model) {
         return model instanceof CollectionModel

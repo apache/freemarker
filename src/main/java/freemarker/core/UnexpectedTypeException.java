@@ -19,8 +19,13 @@
 
 package freemarker.core;
 
+import java.util.Arrays;
+
+import freemarker.template.TemplateCollectionModel;
+import freemarker.template.TemplateCollectionModelEx;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
+import freemarker.template.TemplateSequenceModel;
 
 /**
  * The type of a value differs from what was expected.
@@ -87,6 +92,13 @@ public class UnexpectedTypeException extends TemplateException {
             if (tip != null) {
                 errorDescBuilder.tip(tip);
             }
+        }
+        if (model instanceof TemplateCollectionModel
+                && (Arrays.asList(expectedTypes).contains(TemplateSequenceModel.class)
+                        || Arrays.asList(expectedTypes).contains(TemplateCollectionModelEx.class))) {
+            errorDescBuilder.tip("As the problematic value contains a collection of items, you could convert it "
+                    + "to a sequence like someValue?sequence. Be sure though that you won't have a large number of "
+                    + "items, as all will be held in memory one the same time.");
         }
         return errorDescBuilder;
     }

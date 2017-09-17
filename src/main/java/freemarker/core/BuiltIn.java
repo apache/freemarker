@@ -61,6 +61,7 @@ import freemarker.core.BuiltInsForSequences.lastBI;
 import freemarker.core.BuiltInsForSequences.reverseBI;
 import freemarker.core.BuiltInsForSequences.seq_containsBI;
 import freemarker.core.BuiltInsForSequences.seq_index_ofBI;
+import freemarker.core.BuiltInsForSequences.sequenceBI;
 import freemarker.core.BuiltInsForSequences.sortBI;
 import freemarker.core.BuiltInsForSequences.sort_byBI;
 import freemarker.core.BuiltInsForStringsMisc.evalBI;
@@ -83,7 +84,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
 
     static final Set<String> CAMEL_CASE_NAMES = new TreeSet<String>();
     static final Set<String> SNAKE_CASE_NAMES = new TreeSet<String>();
-    static final int NUMBER_OF_BIS = 263;
+    static final int NUMBER_OF_BIS = 264;
     static final HashMap<String, BuiltIn> BUILT_INS_BY_NAME = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
 
     static {
@@ -262,6 +263,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("seq_contains", "seqContains", new seq_containsBI());
         putBI("seq_index_of", "seqIndexOf", new seq_index_ofBI(true));
         putBI("seq_last_index_of", "seqLastIndexOf", new seq_index_ofBI(false));
+        putBI("sequence", new sequenceBI());
         putBI("short", new shortBI());
         putBI("size", new BuiltInsForMultipleTypes.sizeBI());
         putBI("sort_by", "sortBy", new sort_byBI());

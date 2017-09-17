@@ -12812,6 +12812,10 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_sequence">sequence</link></para>
+          </listitem>
+
+          <listitem>
             <para><link linkend="ref_builtin_sort_by">sort_by</link></para>
           </listitem>
 
@@ -18439,6 +18443,61 @@ ${1305575275540?number_to_time}</programlisting>
 May 16, 2011
 3:47:55 PM</programlisting>
         </section>
+
+        <section xml:id="ref_builtin_sequence">
+          <title>sequence</title>
+
+          <indexterm>
+            <primary>seq_sequence built-in</primary>
+          </indexterm>
+
+          <para>This built-in is used to convert a listable value (one that
+          you can iterate through with the <link
+          linkend="ref.directive.list"><literal>list</literal>
+          directive</link>) to a more capable <link
+          linkend="dgui_datamodel_container">sequence</link> value. Sequences
+          support operations like <literal>xs[index]</literal> and
+          <literal>xs?size</literal>. Also, the resulting value is listable
+          for multiple times, even if the original value was backed by a
+          <literal>java.util.Iterator</literal>. This built-in is typically
+          used to work around data-model problems, in case you can't fix the
+          data-model itself. If you can, always fix the data-model instead
+          (give a <literal>java.util.List</literal> or array to the template
+          instead of a more restricted object, like a
+          non-<literal>List</literal> <literal>java.util.Collection</literal>,
+          or a <literal>java.util.Iterator</literal>).</para>
+
+          <para>If the value is already a sequence, then this built-in just
+          returns that as is. If the value is not something that the <link
+          linkend="ref.directive.list"><literal>list</literal>
+          directive</link> could list, then template processing will be
+          aborted with error. Otherwise, it fetches all the values, and stores
+          them into a sequence. Be careful if you can have a huge number of
+          items, as all of them will be held in memory on the same
+          time.</para>
+
+          <para>You should convert a value with <literal>sequence</literal>
+          only once. If you need the resulting sequence at multiple places,
+          always assign the result to a variable, because if the value you
+          convert is only listable once, converting it for the second time
+          will result in error or an empty sequence. Also the conversion is
+          somewhat costly for big collections, so it's better to do it only
+          once.</para>
+
+          <para>Example: Let's say you find that <literal>users</literal> is
+          only listable once (because it's a
+          <literal>java.util.Iterator</literal>), but you need to list it for
+          multiple times in the template, and you can't fix the data-model.
+          Then you could do this:</para>
+
+          <programlisting role="template">&lt;#-- Collect all the users into a sequence: --&gt;
+&lt;#assign usersSeq = users?sequence&gt;
+
+&lt;#list usersSeq as user&gt;...&lt;/#list&gt;
+Again:
+&lt;#list usersSeq as user&gt;...&lt;/#list&gt;
+</programlisting>
+        </section>
       </section>
     </chapter>
 
@@ -18491,6 +18550,11 @@ May 16, 2011
           <listitem>
             <para><link
             linkend="ref.directive.compress">compress</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
+            linkend="ref.directive.list.continue">continue</link></para>
           </listitem>
 
           <listitem>
@@ -26989,11 +27053,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>Added the <link
-              linkend="ref.directive.list.continue"><literal>continue</literal>
-              directive</link>, which can be used inside a
-              <literal>list</literal> to skip to the next iteration (similarly
-              as in Java).</para>
+              <para>New directive: <literal>continue</literal>. This can be
+              used inside the <literal>list</literal> directive to skip to the
+              next iteration (similarly as in Java). <link
+              linkend="ref.directive.list.continue">See more...</link></para>
             </listitem>
 
             <listitem>
@@ -27007,6 +27070,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               HTML escaping. Note that lonely <literal>&amp;amp;</literal>,
               and <literal>and</literal> without <literal>\</literal> is not
               recognized for backward compatibility.</para>
+            </listitem>
+
+            <listitem>
+              <para>New built-in, <literal>sequence</literal>. This can be
+              used to work around situations where a listable value lacks some
+              features that you need in the template (like it can't be listed
+              twice, it can't tell its size, etc.), and you can't modify the
+              data-model to fix the problem. <link
+              linkend="ref_builtin_sequence">See more...</link></para>
             </listitem>
 
             <listitem>
@@ -27033,7 +27105,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-71">FREEMARKER-71</link>):
               When using
               <literal><replaceable>exp</replaceable>?eval</literal>, if the
-              expression inside evaluated string throws an exception, the
+              expression inside the evaluated string throws an exception, the
               cause exception of that exception was lost.</para>
             </listitem>
           </itemizedlist>
