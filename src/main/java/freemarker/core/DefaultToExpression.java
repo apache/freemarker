@@ -23,18 +23,20 @@ package freemarker.core;
 import freemarker.template.SimpleCollection;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateException;
-import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateHashModelEx2;
 import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.utility.Constants;
 
 /** {@code exp!defExp}, {@code (exp)!defExp} and the same two with {@code (exp)!}. */
 class DefaultToExpression extends Expression {
 	
     private static final TemplateCollectionModel EMPTY_COLLECTION = new SimpleCollection(new java.util.ArrayList(0));
     
-	static private class EmptyStringAndSequence 
-	  implements TemplateScalarModel, TemplateSequenceModel, TemplateHashModelEx {
+	static private class EmptyStringAndSequenceAndHash implements TemplateScalarModel, TemplateSequenceModel,
+	        TemplateHashModelEx2 {
 		public String getAsString() {
 			return "";
 		}
@@ -56,10 +58,12 @@ class DefaultToExpression extends Expression {
 		public TemplateCollectionModel values() {
 			return EMPTY_COLLECTION;
 		}
-		
+        public KeyValuePairIterator keyValuePairIterator() throws TemplateModelException {
+            return Constants.EMPTY_KEY_VALUE_PAIR_ITERATOR;
+        }
 	}
 	
-	static final TemplateModel EMPTY_STRING_AND_SEQUENCE = new EmptyStringAndSequence();
+	static final TemplateModel EMPTY_STRING_AND_SEQUENCE_AND_HASH = new EmptyStringAndSequenceAndHash();
 	
 	private final Expression lho, rho;
 	
@@ -85,7 +89,7 @@ class DefaultToExpression extends Expression {
 		}
 		
 		if (left != null) return left;
-		else if (rho == null) return EMPTY_STRING_AND_SEQUENCE;
+		else if (rho == null) return EMPTY_STRING_AND_SEQUENCE_AND_HASH;
 		else return rho.eval(env);
 	}
 

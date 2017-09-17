@@ -22,11 +22,11 @@ package freemarker.core;
 /**
  * Represents a &lt;break&gt; instruction to break out of a loop.
  */
-final class BreakInstruction extends TemplateElement {
+final class ContinueInstruction extends TemplateElement {
 
     @Override
     TemplateElement[] accept(Environment env) {
-        throw BreakOrContinueException.BREAK_INSTANCE;
+        throw BreakOrContinueException.CONTINUE_INSTANCE;
     }
 
     @Override
@@ -36,7 +36,7 @@ final class BreakInstruction extends TemplateElement {
     
     @Override
     String getNodeTypeSymbol() {
-        return "#break";
+        return "#continue";
     }
 
     @Override

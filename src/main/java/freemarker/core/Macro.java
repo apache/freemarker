@@ -29,6 +29,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
+import freemarker.template.TemplateScalarModel;
 
 /**
  * An element representing a macro declaration.
@@ -263,7 +264,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
         public Collection getLocalVariableNames() throws TemplateModelException {
             HashSet result = new HashSet();
             for (TemplateModelIterator it = localVars.keys().iterator(); it.hasNext(); ) {
-                result.add(it.next().toString());
+                result.add(((TemplateScalarModel) it.next()).getAsString());
             }
             return result;
         }

@@ -260,8 +260,8 @@ abstract class BuiltIn extends Expression implements Cloneable {
         putBI("remove_beginning", "removeBeginning", new BuiltInsForStringsBasic.remove_beginningBI());
         putBI("rtf", new BuiltInsForStringsEncoding.rtfBI());
         putBI("seq_contains", "seqContains", new seq_containsBI());
-        putBI("seq_index_of", "seqIndexOf", new seq_index_ofBI(1));
-        putBI("seq_last_index_of", "seqLastIndexOf", new seq_index_ofBI(-1));
+        putBI("seq_index_of", "seqIndexOf", new seq_index_ofBI(true));
+        putBI("seq_last_index_of", "seqLastIndexOf", new seq_index_ofBI(false));
         putBI("short", new shortBI());
         putBI("size", new BuiltInsForMultipleTypes.sizeBI());
         putBI("sort_by", "sortBy", new sort_byBI());

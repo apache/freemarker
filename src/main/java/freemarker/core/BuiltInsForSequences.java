@@ -251,10 +251,11 @@ class BuiltInsForSequences {
         @Override
         TemplateModel calculateResult(TemplateSequenceModel tsm)
         throws TemplateModelException {
-            if (tsm.size() == 0) {
+            int size = tsm.size();
+            if (size == 0) {
                 return null;
             }
-            return tsm.get(tsm.size() - 1);
+            return tsm.get(size - 1);
         }
     }
 
@@ -388,39 +389,36 @@ class BuiltInsForSequences {
                 int argCnt = args.size();
                 checkMethodArgCount(argCnt, 1, 2);
                 
-                TemplateModel target = (TemplateModel) args.get(0);
+                TemplateModel searched = (TemplateModel) args.get(0);
                 int foundAtIdx;
                 if (argCnt > 1) {
                     int startIndex = getNumberMethodArg(args, 1).intValue();
-                    // In 2.3.x only, we prefer TemplateSequenceModel for
-                    // backward compatibility:
+                    // In 2.3, we prefer TemplateSequenceModel for backward compatibility, even if startIndex is 0:
                     foundAtIdx = m_seq != null
-                            ? findInSeq(target, startIndex)
-                            : findInCol(target, startIndex);
+                            ? findInSeq(searched, startIndex)
+                            : findInCol(searched, startIndex);
                 } else {
-                    // In 2.3.x only, we prefer TemplateSequenceModel for
-                    // backward compatibility:
                     foundAtIdx = m_seq != null
-                            ? findInSeq(target)
-                            : findInCol(target);
+                            ? findInSeq(searched)
+                            : findInCol(searched);
                 }
                 return foundAtIdx == -1 ? Constants.MINUS_ONE : new SimpleNumber(foundAtIdx);
             }
             
-            int findInCol(TemplateModel target) throws TemplateModelException {
-                return findInCol(target, 0, Integer.MAX_VALUE);
+            int findInCol(TemplateModel searched) throws TemplateModelException {
+                return findInCol(searched, 0, Integer.MAX_VALUE);
             }
             
-            protected int findInCol(TemplateModel target, int startIndex)
+            protected int findInCol(TemplateModel searched, int startIndex)
                     throws TemplateModelException {
-                if (m_dir == 1) {
-                    return findInCol(target, startIndex, Integer.MAX_VALUE);
+                if (findFirst) {
+                    return findInCol(searched, startIndex, Integer.MAX_VALUE);
                 } else {
-                    return findInCol(target, 0, startIndex);
+                    return findInCol(searched, 0, startIndex);
                 }
             }
         
-            protected int findInCol(TemplateModel target,
+            protected int findInCol(TemplateModel searched,
                     final int allowedRangeStart, final int allowedRangeEnd)
                     throws TemplateModelException {
                 if (allowedRangeEnd < 0) return -1;
@@ -434,10 +432,12 @@ class BuiltInsForSequences {
                     
                     TemplateModel current = it.next();
                     if (idx >= allowedRangeStart) {
-                        if (modelsEqual(idx, current, target, m_env)) {
+                        if (modelsEqual(idx, current, searched, m_env)) {
                             foundAtIdx = idx;
-                            if (m_dir == 1) break searchItem; // "find first"
-                            // Otherwise it's "find last".
+                            // Don't stop if it's "find last".
+                            if (findFirst) {
+                                break searchItem;
+                            }
                         }
                     }
                     idx++;
@@ -445,25 +445,25 @@ class BuiltInsForSequences {
                 return foundAtIdx;
             }
 
-            int findInSeq(TemplateModel target)
+            int findInSeq(TemplateModel searched)
             throws TemplateModelException {
                 final int seqSize = m_seq.size();
                 final int actualStartIndex;
                 
-                if (m_dir == 1) {
+                if (findFirst) {
                     actualStartIndex = 0;
                 } else {
                     actualStartIndex = seqSize - 1;
                 }
             
-                return findInSeq(target, actualStartIndex, seqSize); 
+                return findInSeq(searched, actualStartIndex, seqSize); 
             }
 
-            private int findInSeq(TemplateModel target, int startIndex)
+            private int findInSeq(TemplateModel searched, int startIndex)
                     throws TemplateModelException {
                 int seqSize = m_seq.size();
                 
-                if (m_dir == 1) {
+                if (findFirst) {
                     if (startIndex >= seqSize) {
                         return -1;
                     }
@@ -479,13 +479,13 @@ class BuiltInsForSequences {
                     }
                 }
                 
-                return findInSeq(target, startIndex, seqSize); 
+                return findInSeq(searched, startIndex, seqSize); 
             }
             
             private int findInSeq(
                     TemplateModel target, int scanStartIndex, int seqSize)
                     throws TemplateModelException {
-                if (m_dir == 1) {
+                if (findFirst) {
                     for (int i = scanStartIndex; i < seqSize; i++) {
                         if (modelsEqual(i, m_seq.get(i), target, m_env)) return i;
                     }
@@ -499,10 +499,10 @@ class BuiltInsForSequences {
             
         }
 
-        private int m_dir;
+        private boolean findFirst;
 
-        seq_index_ofBI(int dir) {
-            m_dir = dir;
+        seq_index_ofBI(boolean findFirst) {
+            this.findFirst = findFirst;
         }
 
         @Override

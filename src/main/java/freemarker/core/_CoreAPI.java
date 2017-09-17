@@ -78,6 +78,7 @@ public class _CoreAPI {
         addName(allNames, lcNames, ccNames, "case");
         addName(allNames, lcNames, ccNames, "comment");
         addName(allNames, lcNames, ccNames, "compress");
+        addName(allNames, lcNames, ccNames, "continue");
         addName(allNames, lcNames, ccNames, "default");
         addName(allNames, lcNames, ccNames, "else");
         addName(allNames, lcNames, ccNames, "elseif", "elseIf");

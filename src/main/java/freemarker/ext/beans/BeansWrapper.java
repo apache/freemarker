@@ -179,11 +179,12 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
     private volatile boolean writeProtected;
     
     private TemplateModel nullModel = null;
-    private int defaultDateType; // initialized by PropertyAssignments.apply
+    private int defaultDateType; // initialized from the BeansWrapperConfiguration
     private ObjectWrapper outerIdentity = this;
     private boolean methodsShadowItems = true;
-    private boolean simpleMapWrapper;  // initialized by PropertyAssignments.apply
-    private boolean strict;  // initialized by PropertyAssignments.apply
+    private boolean simpleMapWrapper;  // initialized from the BeansWrapperConfiguration
+    private boolean strict;  // initialized from the BeansWrapperConfiguration
+    private boolean preferIndexedReadMethod; // initialized from the BeansWrapperConfiguration
     
     private final Version incompatibleImprovements;
     
@@ -250,13 +251,8 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      *     </li>  
      *     <li>
      *       <p>2.3.27 (or higher):
-     *       If the same JavaBean property has both an indexed property reader (like {@code String getFoo(int)}) and
-     *       a non-indexed property reader (like {@code String[] getFoo()}), and {@link Introspector} exposes both
-     *       (which apparently only happens since Java 8), we will use the non-indexed property reader method, while
-     *       before this improvement we have used the indexed property method. When using the indexed property reader,
-     *       FreeMarker doesn't know the size of the array, so the value becomes unlistable. Before Java 8 this problem
-     *       haven't surfaced, as {@link Introspector} has only exposed the non-indexed property reader method when both
-     *       kind of read method was present. So this can be seen as a Java 8 compatibility fix.  
+     *       The default of the {@link #setPreferIndexedReadMethod(boolean) preferIndexedReadMethod} setting changes
+     *       from {@code true} to {@code false}.
      *     </li>  
      *   </ul>
      *   
@@ -344,6 +340,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         this.incompatibleImprovements = bwConf.getIncompatibleImprovements();  // normalized
         
         simpleMapWrapper = bwConf.isSimpleMapWrapper();
+        preferIndexedReadMethod =  bwConf.getPreferIndexedReadMethod();
         defaultDateType = bwConf.getDefaultDateType();
         outerIdentity = bwConf.getOuterIdentity() != null ? bwConf.getOuterIdentity() : this;
         strict = bwConf.isStrict();
@@ -523,31 +520,40 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         return simpleMapWrapper;
     }
 
-    // I have commented this out, as it won't be in 2.3.20 yet.
-    /*
     /**
-     * Tells which non-backward-compatible overloaded method selection fixes to apply;
-     * see {@link #setOverloadedMethodSelection(Version)}.
-     * /
-    public Version getOverloadedMethodSelection() {
-        return overloadedMethodSelection;
+     * Getter pair of {@link #setPreferIndexedReadMethod(boolean)} 
+     * 
+     * @since 2.3.27
+     */
+    public boolean getPreferIndexedReadMethod() {
+        return preferIndexedReadMethod;
     }
 
     /**
-     * Sets which non-backward-compatible overloaded method selection fixes to apply.
-     * This has similar logic as {@link Configuration#setIncompatibleImprovements(Version)},
-     * but only applies to this aspect.
+     * Sets if when a JavaBean property has both a normal read method (like {@code String[] getFoos()}) and an indexed
+     * read method (like {@code String getFoos(int index)}), and the Java {@link Introspector} exposes both (which only
+     * happens since Java 8, apparently), which read method will be used when the property is accessed with the
+     * shorthand syntax (like {@code myObj.foos}). Before {@link #getIncompatibleImprovements() incompatibleImprovements}
+     * 2.3.27 it defaults to {@code true} for backward compatibility (although it's actually less backward compatible if
+     * you are just switching to Java 8; see later), but the recommended value and the default starting with
+     * {@link #getIncompatibleImprovements() incompatibleImprovements} 2.3.27 is {@code false}. This setting has no
+     * effect on properties that only has normal read method, or only has indexed read method. In case a property has
+     * both, using the indexed reader method is disadvantageous, as then FreeMarker can't tell what the highest allowed
+     * index is, and so the property will be unlistable ({@code <#list foo as myObj.foos>} will fail).
      * 
-     * Currently significant values:
-     * <ul>
-     *   <li>2.3.21: Completetlly rewritten overloaded method selection, fixes several issues with the old one.</li>
-     * </ul>
-     * /
-    public void setOverloadedMethodSelection(Version version) {
-        overloadedMethodSelection = version;
+     * <p>
+     * Apparently, this setting only matters since Java 8, as before that {@link Introspector} did not expose the
+     * indexed reader method if there was also a normal reader method. As with Java 8 the behavior of
+     * {@link Introspector} has changed, some old templates started to break, as the property has suddenly become
+     * unlistable (see earlier why). So setting this to {@code false} can be seen as a Java 8 compatibility fix.
+     * 
+     * @since 2.3.27
+     */
+    public void setPreferIndexedReadMethod(boolean preferIndexedReadMethod) {
+        checkModifiable();
+        this.preferIndexedReadMethod = preferIndexedReadMethod;
     }
-    */
-    
+
     /**
      * Sets the method exposure level. By default, set to <code>EXPOSE_SAFE</code>.
      * @param exposureLevel can be any of the <code>EXPOSE_xxx</code>
@@ -1301,10 +1307,10 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
             recursionStops = new IdentityHashMap<Object, Object>();
         }
         Class<?> componentType = arrayClass.getComponentType();
-        Object array = Array.newInstance(componentType, seq.size());
+        final int size = seq.size();
+        Object array = Array.newInstance(componentType, size);
         recursionStops.put(seq, array);
         try {
-            final int size = seq.size();
             for (int i = 0; i < size; i++) {
                 final TemplateModel seqItem = seq.get(i);
                 Object val = tryUnwrapTo(seqItem, componentType, 0, recursionStops);
@@ -1746,6 +1752,7 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
         return "simpleMapWrapper=" + simpleMapWrapper + ", "
                + "exposureLevel=" + classIntrospector.getExposureLevel() + ", "
                + "exposeFields=" + classIntrospector.getExposeFields() + ", "
+               + "preferIndexedReadMethod=" + preferIndexedReadMethod + ", "
                + "treatDefaultMethodsAsBeanMembers="
                + classIntrospector.getTreatDefaultMethodsAsBeanMembers() + ", "
                + "sharedClassIntrospCache="

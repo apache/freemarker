@@ -284,16 +284,18 @@ final class IteratorBlock extends TemplateElement {
                 listNotEmpty = iterModel.hasNext();
                 if (listNotEmpty) {
                     if (loopVarName != null) {
-                        try {
-                            do {
+                            listLoop: do {
                                 loopVar = iterModel.next();
                                 hasNext = iterModel.hasNext();
-                                env.visit(childBuffer);
+                                try {
+                                    env.visit(childBuffer);
+                                } catch (BreakOrContinueException br) {
+                                    if (br == BreakOrContinueException.BREAK_INSTANCE) {
+                                        break listLoop;
+                                    }
+                                }
                                 index++;
                             } while (hasNext);
-                        } catch (BreakInstruction.Break br) {
-                            // Silently exit loop
-                        }
                         openedIterator = null;
                     } else {
                         // We must reuse this later, because TemplateCollectionModel-s that wrap an Iterator only
@@ -308,15 +310,17 @@ final class IteratorBlock extends TemplateElement {
                 listNotEmpty = size != 0;
                 if (listNotEmpty) {
                     if (loopVarName != null) {
-                        try {
-                            for (index = 0; index < size; index++) {
+                            listLoop: for (index = 0; index < size; index++) {
                                 loopVar = seqModel.get(index);
                                 hasNext = (size > index + 1);
-                                env.visit(childBuffer);
+                                try {
+                                    env.visit(childBuffer);
+                                } catch (BreakOrContinueException br) {
+                                    if (br == BreakOrContinueException.BREAK_INSTANCE) {
+                                        break listLoop;
+                                    }
+                                }
                             }
-                        } catch (BreakInstruction.Break br) {
-                            // Silently exit loop
-                        }
                     } else {
                         env.visit(childBuffer);
                     }
@@ -329,7 +333,7 @@ final class IteratorBlock extends TemplateElement {
                 }
                 try {
                     env.visit(childBuffer);
-                } catch (BreakInstruction.Break br) {
+                } catch (BreakOrContinueException br) {
                     // Silently exit "loop"
                 }
             } else if (listedValue instanceof TemplateHashModelEx
@@ -359,18 +363,20 @@ final class IteratorBlock extends TemplateElement {
                     hashNotEmpty = kvpIter.hasNext();
                     if (hashNotEmpty) {
                         if (loopVarName != null) {
-                            try {
-                                do {
-                                    KeyValuePair kvp = kvpIter.next();
-                                    loopVar = kvp.getKey();
-                                    loopVar2 = kvp.getValue();
-                                    hasNext = kvpIter.hasNext();
+                            listLoop: do {
+                                KeyValuePair kvp = kvpIter.next();
+                                loopVar = kvp.getKey();
+                                loopVar2 = kvp.getValue();
+                                hasNext = kvpIter.hasNext();
+                                try {
                                     env.visit(childBuffer);
-                                    index++;
-                                } while (hasNext);
-                            } catch (BreakInstruction.Break br) {
-                                // Silently exit loop
-                            }
+                                } catch (BreakOrContinueException br) {
+                                    if (br == BreakOrContinueException.BREAK_INSTANCE) {
+                                        break listLoop;
+                                    }
+                                }
+                                index++;
+                            } while (hasNext);
                             openedIterator = null;
                         } else {
                             // We will reuse this at the #iterms
@@ -383,30 +389,32 @@ final class IteratorBlock extends TemplateElement {
                     hashNotEmpty = keysIter.hasNext();
                     if (hashNotEmpty) {
                         if (loopVarName != null) {
-                            try {
-                                do {
-                                    loopVar = keysIter.next();
-                                    if (!(loopVar instanceof TemplateScalarModel)) {
-                                        throw new NonStringException(env,
-                                                new _ErrorDescriptionBuilder(
-                                                        "When listing key-value pairs of traditional hash "
-                                                        + "implementations, all keys must be strings, but one of them "
-                                                        + "was ",
-                                                        new _DelayedAOrAn(new _DelayedFTLTypeDescription(loopVar)), "."
-                                                        ).tip("The listed value's TemplateModel class was ",
-                                                                new _DelayedShortClassName(listedValue.getClass()),
-                                                                ", which doesn't implement ",
-                                                                new _DelayedShortClassName(TemplateHashModelEx2.class),
-                                                                ", which leads to this restriction."));
-                                    }
-                                    loopVar2 = listedHash.get(((TemplateScalarModel) loopVar).getAsString());
-                                    hasNext = keysIter.hasNext();
+                            listLoop: do {
+                                loopVar = keysIter.next();
+                                if (!(loopVar instanceof TemplateScalarModel)) {
+                                    throw new NonStringException(env,
+                                            new _ErrorDescriptionBuilder(
+                                                    "When listing key-value pairs of traditional hash "
+                                                    + "implementations, all keys must be strings, but one of them "
+                                                    + "was ",
+                                                    new _DelayedAOrAn(new _DelayedFTLTypeDescription(loopVar)), "."
+                                                    ).tip("The listed value's TemplateModel class was ",
+                                                            new _DelayedShortClassName(listedValue.getClass()),
+                                                            ", which doesn't implement ",
+                                                            new _DelayedShortClassName(TemplateHashModelEx2.class),
+                                                            ", which leads to this restriction."));
+                                }
+                                loopVar2 = listedHash.get(((TemplateScalarModel) loopVar).getAsString());
+                                hasNext = keysIter.hasNext();
+                                try {
                                     env.visit(childBuffer);
-                                    index++;
-                                } while (hasNext);
-                            } catch (BreakInstruction.Break br) {
-                                // Silently exit loop
-                            }
+                                } catch (BreakOrContinueException br) {
+                                    if (br == BreakOrContinueException.BREAK_INSTANCE) {
+                                        break listLoop;
+                                    }
+                                }
+                                index++;
+                            } while (hasNext);
                         } else {
                             env.visit(childBuffer);
                         }

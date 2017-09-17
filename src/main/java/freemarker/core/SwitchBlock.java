@@ -86,7 +86,7 @@ final class SwitchBlock extends TemplateElement {
             if (!processedCase && defaultCase != null) {
                 env.visit(defaultCase);
             }
-        } catch (BreakInstruction.Break br) {}
+        } catch (BreakOrContinueException br) {}
         return null;
     }
 

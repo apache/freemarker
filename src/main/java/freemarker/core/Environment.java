@@ -831,8 +831,11 @@ public final class Environment extends Configurable {
             }
         }
         TemplateSequenceModel children = node.getChildNodes();
-        if (children == null) return;
-        for (int i = 0; i < children.size(); i++) {
+        if (children == null) {
+            return;
+        }
+        int size = children.size();
+        for (int i = 0; i < size; i++) {
             TemplateNodeModel child = (TemplateNodeModel) children.get(i);
             if (child != null) {
                 invokeNodeHandlerFor(child, namespaces);
@@ -2359,7 +2362,8 @@ public final class Environment extends Configurable {
             throws TemplateException {
         TemplateModel result = null;
         int i;
-        for (i = startIndex; i < nodeNamespaces.size(); i++) {
+        int size = nodeNamespaces.size();
+        for (i = startIndex; i < size; i++) {
             Namespace ns = null;
             try {
                 ns = (Namespace) nodeNamespaces.get(i);

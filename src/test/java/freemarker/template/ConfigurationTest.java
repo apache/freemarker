@@ -167,6 +167,10 @@ public class ConfigurationTest extends TestCase {
         assertFalse(((DefaultObjectWrapper) cfg.getObjectWrapper()).getTreatDefaultMethodsAsBeanMembers());
         cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_26);
         assertTrue(((DefaultObjectWrapper) cfg.getObjectWrapper()).getTreatDefaultMethodsAsBeanMembers());
+        assertTrue(((DefaultObjectWrapper) cfg.getObjectWrapper()).getPreferIndexedReadMethod());
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_27);
+        assertTrue(((DefaultObjectWrapper) cfg.getObjectWrapper()).getTreatDefaultMethodsAsBeanMembers());
+        assertFalse(((DefaultObjectWrapper) cfg.getObjectWrapper()).getPreferIndexedReadMethod());
     }
 
     private void assertUses2322ObjectWrapper(Configuration cfg) {
