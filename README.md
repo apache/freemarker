@@ -161,7 +161,7 @@ apply it to your development environment:
   - Java -> Compiler -> Javadoc:
     "Malformed Javadoc comments": Error
     "Only consider members as visible": Private
-    "Validate tag argunebts": true
+    "Validate tag arguments": true
     "Missing tag descriptions": Validate @return tags
     "Missing Javadoc tags": Ignore
     "Missing Javadoc comments": Ignore
