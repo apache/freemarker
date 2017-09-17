@@ -85,6 +85,11 @@ public class FMParser {
      */
     private int breakableDirectiveNesting;
     
+    /**
+     * Keeps track of the nesting depth of directives that support #continue.
+     */
+    private int continuableDirectiveNesting;
+    
     private boolean inMacro, inFunction;
     private LinkedList escapes = new LinkedList();
     private int mixedContentNesting; // for stripText
@@ -1018,6 +1023,8 @@ TOKEN:
     <ELSE : <START_TAG> "else" <CLOSE_TAG2>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
     <BREAK : <START_TAG> "break" <CLOSE_TAG2>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    |
+    <CONTINUE : <START_TAG> "continue" <CLOSE_TAG2>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
     <SIMPLE_RETURN : <START_TAG> "return" <CLOSE_TAG2>> { strictSyntaxCheck(matchedToken, DEFAULT); }
     |
@@ -2580,6 +2587,7 @@ TemplateElement List() :
         if (loopVar != null) {
             iterCtx.loopVarName = loopVar.image;
             breakableDirectiveNesting++;
+            continuableDirectiveNesting++;
             if (loopVar2 != null) {
                 iterCtx.loopVar2Name = loopVar2.image;
                 iterCtx.hashListing = true;
@@ -2596,6 +2604,7 @@ TemplateElement List() :
     {
         if (loopVar != null) {
             breakableDirectiveNesting--;
+            continuableDirectiveNesting--;
         } else if (iterCtx.kind != ITERATOR_BLOCK_KIND_ITEMS) {
             throw new ParseException(
                     "#list must have either \"as loopVar\" parameter or nested #items that belongs to it.",
@@ -2660,6 +2669,7 @@ IteratorBlock ForEach() :
         iterCtx.loopVarName = loopVar.image;
         iterCtx.kind = ITERATOR_BLOCK_KIND_FOREACH;
         breakableDirectiveNesting++;
+        continuableDirectiveNesting++;
     }
     
     children = MixedContentElements()
@@ -2667,6 +2677,7 @@ IteratorBlock ForEach() :
     end = <END_FOREACH>
     {
         breakableDirectiveNesting--;
+        continuableDirectiveNesting--;
         popIteratorBlockContext();
                 
         IteratorBlock result = new IteratorBlock(exp, loopVar.image, null, children, false, true);
@@ -2718,6 +2729,7 @@ Items Items() :
         }
     
         breakableDirectiveNesting++;
+        continuableDirectiveNesting++;
     }
     
     children = MixedContentElements()
@@ -2725,6 +2737,7 @@ Items Items() :
     end = <END_ITEMS>
     {
         breakableDirectiveNesting--;
+        continuableDirectiveNesting--;
         iterCtx.loopVarName = null;
         iterCtx.loopVar2Name = null;
         
@@ -2845,6 +2858,27 @@ BreakInstruction Break() :
                     template, start);
         }
         BreakInstruction result = new BreakInstruction();
+        result.setLocation(template, start, start);
+        return result;
+    }
+}
+
+/**
+ * Production used to skip an iteration in a loop.
+ */
+ContinueInstruction Continue() :
+{
+    Token start;
+}
+{
+    start = <CONTINUE>
+    {
+        if (continuableDirectiveNesting < 1) {
+            throw new ParseException(start.image + " must be nested inside a directive that supports it: " 
+                    + " #list with \"as\", #items (or the deprecated " + forEachDirectiveSymbol() + ")",
+                    template, start);
+        }
+        ContinueInstruction result = new ContinueInstruction();
         result.setLocation(template, start, start);
         return result;
     }
@@ -3221,6 +3255,7 @@ Macro Macro() :
     Expression defValue = null;
     List lastIteratorBlockContexts;
     int lastBreakableDirectiveNesting;
+    int lastContiunableDirectiveNesting;
     TemplateElements children;
     boolean isFunction = false, hasDefaults = false;
     boolean isCatchAll = false;
@@ -3292,9 +3327,12 @@ Macro Macro() :
         iteratorBlockContexts = null;
         if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_23) {
 	        lastBreakableDirectiveNesting = breakableDirectiveNesting;
+	        lastContiunableDirectiveNesting = continuableDirectiveNesting;
 	        breakableDirectiveNesting = 0; 
+	        continuableDirectiveNesting = 0;
         } else {
             lastBreakableDirectiveNesting = 0; // Just to prevent uninitialized local variable error later
+            lastContiunableDirectiveNesting = 0;
         }
     }
     children = MixedContentElements()
@@ -3313,6 +3351,7 @@ Macro Macro() :
         iteratorBlockContexts = lastIteratorBlockContexts;
         if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_23) {
             breakableDirectiveNesting = lastBreakableDirectiveNesting;
+            continuableDirectiveNesting = lastContiunableDirectiveNesting;
         }
         
         inMacro = inFunction = false;
@@ -3936,6 +3975,8 @@ TemplateElement FreemarkerDirective() :
         tp = Setting()
         |
         tp = Break()
+        |
+        tp = Continue()
         |
         tp = Return()
         |

@@ -20428,7 +20428,7 @@ All rights reserved.</emphasis></programlisting>
       </section>
 
       <section xml:id="ref_directive_list">
-        <title>list, else, items, sep, break</title>
+        <title>list, else, items, sep, break, continue</title>
 
         <anchor xml:id="ref.directive.list"/>
 
@@ -20522,7 +20522,7 @@ All rights reserved.</emphasis></programlisting>
         <section>
           <title>Description</title>
 
-          <section>
+          <section xml:id="ref_list_simple">
             <title>Simplest form</title>
 
             <para>Assuming <literal>users</literal> contains the
@@ -20569,7 +20569,7 @@ All rights reserved.</emphasis></programlisting>
             <literal>Map</literal> objects can be listed.</para>
           </section>
 
-          <section>
+          <section xml:id="ref_list_else">
             <title>else directive</title>
 
             <anchor xml:id="ref.directive.list.else"/>
@@ -20609,7 +20609,7 @@ All rights reserved.</emphasis></programlisting>
             included template.</para>
           </section>
 
-          <section>
+          <section xml:id="ref_list_items">
             <title>items directive</title>
 
             <anchor xml:id="ref.directive.items"/>
@@ -20712,7 +20712,7 @@ All rights reserved.</emphasis></programlisting>
             </itemizedlist>
           </section>
 
-          <section>
+          <section xml:id="ref_list_sep">
             <title>sep directive</title>
 
             <anchor xml:id="ref.directive.sep"/>
@@ -20765,7 +20765,7 @@ All rights reserved.</emphasis></programlisting>
             will be called from).</para>
           </section>
 
-          <section>
+          <section xml:id="ref_list_break">
             <title>break directive</title>
 
             <anchor xml:id="ref.directive.list.break"/>
@@ -20792,16 +20792,32 @@ All rights reserved.</emphasis></programlisting>
             anywhere inside <literal>list</literal> as far as it has
             <literal>as <replaceable>item</replaceable></literal> parameter,
             otherwise it can be placed anywhere inside the
-            <literal>items</literal> directive. If the
-            <literal>break</literal> is inside <literal>items</literal>, it
-            will only exit from <literal>items</literal>, not from
-            <literal>list</literal>. In general, <literal>break</literal> will
-            only exit from the directive whose body is called for each item,
-            and can only be placed inside such directive. So for example can't
-            use <literal>break</literal> inside <literal>list</literal>'s
+            <literal>items</literal> directive. However, it's strongly
+            recommended to place it either before or after all the other
+            things that you do inside the iteration. Otherwise it's easy to
+            end up with unclosed elements in the output, or otherwise make the
+            template harder to understand. Especially, avoid breaking out from
+            the nested content of custom directives (like <literal>&lt;#list
+            ...&gt;...&lt;@foo&gt;...&lt;#break&gt;...&lt;/@foo&gt;...&lt;/#list&gt;</literal>),
+            as the author of the directive may not expect that the closing tag
+            (<literal>&lt;/@foo&gt;</literal>) is never executed.</para>
+
+            <para>If the <literal>break</literal> is inside
+            <literal>items</literal>, it will only exit from
+            <literal>items</literal>, not from <literal>list</literal>. In
+            general, <literal>break</literal> will only exit from the
+            directive whose body is called for each item, and can only be
+            placed inside such directive. So for example can't use
+            <literal>break</literal> inside <literal>list</literal>'s
             <literal>else</literal> section, unless there's the
             <literal>list</literal> is nested into another
             <literal>break</literal>-able directive.</para>
+
+            <para>Using <literal>break</literal> together with
+            <literal>sep</literal> is generally a bad idea, as
+            <literal>sep</literal> can't know if you will skip the rest of
+            items with <literal>break</literal>, and then you end up with a
+            separator after the item printed last.</para>
 
             <para>Just like <literal>else</literal> and
             <literal>items</literal>, <literal>break</literal> must be
@@ -20809,7 +20825,67 @@ All rights reserved.</emphasis></programlisting>
             can't be moved out into a macro or included template.</para>
           </section>
 
-          <section>
+          <section xml:id="ref_list_continue">
+            <title>continue directive</title>
+
+            <anchor xml:id="ref.directive.list.continue"/>
+
+            <indexterm>
+              <primary>continue directive</primary>
+            </indexterm>
+
+            <note>
+              <para>The <literal>continue</literal> directive exists since
+              FreeMarker 2.3.27</para>
+            </note>
+
+            <para>You can skip the rest of the iteration body (the section
+            until the <literal>&lt;/#list&gt;</literal> or
+            <literal>&lt;/#items&gt;</literal> tag) with the
+            <literal>continue</literal> directive, then FreeMarker will
+            continue with the next item. For example:</para>
+
+            <programlisting role="template">&lt;#list 1..5 as x&gt;
+  &lt;#if x == 3&gt;
+    &lt;#continue&gt;
+  &lt;/#if&gt;
+  ${x}
+&lt;/#list&gt;</programlisting>
+
+            <programlisting role="output">  1
+  2
+  4
+  5</programlisting>
+
+            <para>The <literal>continue</literal> directives can be placed
+            anywhere inside <literal>list</literal> as far as it has
+            <literal>as <replaceable>item</replaceable></literal> parameter,
+            otherwise it can be placed anywhere inside the
+            <literal>items</literal> directive. However, it's strongly
+            recommended to place it before all the other things you do inside
+            the iteration. Otherwise it's easy to end up with unclosed
+            elements in the output, or otherwise make the template harder to
+            understand. Especially, avoid breaking out from the nested content
+            of custom directives (like <literal>&lt;#list
+            ...&gt;...&lt;@foo&gt;...&lt;#continue&gt;...&lt;/@foo&gt;...&lt;/#list&gt;</literal>),
+            as the author of the directive may not expect that the closing tag
+            (<literal>&lt;/@foo&gt;</literal>) is never executed.</para>
+
+            <para>When you call <literal>continue</literal>, the
+            <literal>sep</literal> directive will not be executed for that
+            iteration. Using <literal>continue</literal> together with
+            <literal>sep</literal> is generally a bad idea, as
+            <literal>sep</literal> can't know if you will skip the rest of the
+            items, and then you end up with a separator after the item printed
+            last.</para>
+
+            <para>Just like <literal>break</literal>,
+            <literal>continue</literal> must be literally inside body of the
+            directive whose iteration need to be <quote>continued</quote>, and
+            can't be moved out into a macro or included template.</para>
+          </section>
+
+          <section xml:id="ref_list_accessing_state">
             <title>Accessing iteration state</title>
 
             <indexterm>
@@ -20876,7 +20952,7 @@ All rights reserved.</emphasis></programlisting>
             1}</literal>.</para>
           </section>
 
-          <section>
+          <section xml:id="ref_list_nesting">
             <title>Nesting loops into each other</title>
 
             <para>Naturally, <literal>list</literal> or
@@ -20919,7 +20995,7 @@ All rights reserved.</emphasis></programlisting>
   Outer again: 2</programlisting>
           </section>
 
-          <section>
+          <section xml:id="ref_list_java_notes">
             <title>Notes for Java programmers</title>
 
             <para><phrase role="forProgrammers">If classic compatible mode
@@ -26912,6 +26988,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the FTL side</title>
 
           <itemizedlist>
+            <listitem>
+              <para>Added the <link
+              linkend="ref.directive.list.continue"><literal>continue</literal>
+              directive</link>, which can be used inside a
+              <literal>list</literal> to skip to the next iteration (similarly
+              as in Java).</para>
+            </listitem>
+
             <listitem>
               <para>Added alternative syntaxes for the
               <literal>&amp;&amp;</literal> (logical <quote>and</quote>)
