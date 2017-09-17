@@ -22,11 +22,11 @@ package org.apache.freemarker.core;
 /**
  * AST directive node: {@code #break}
  */
-final class ASTDirBreak extends ASTDirective {
+final class ASTDirContinue extends ASTDirective {
 
     @Override
     ASTElement[] accept(Environment env) {
-        throw BreakOrContinueException.BREAK_INSTANCE;
+        throw BreakOrContinueException.CONTINUE_INSTANCE;
     }
 
     @Override
@@ -36,7 +36,7 @@ final class ASTDirBreak extends ASTDirective {
     
     @Override
     String getASTNodeDescriptor() {
-        return "#break";
+        return "#continue";
     }
 
     @Override

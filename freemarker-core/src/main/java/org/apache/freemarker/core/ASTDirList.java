@@ -266,16 +266,18 @@ final class ASTDirList extends ASTDirective {
                 listNotEmpty = iterModel.hasNext();
                 if (listNotEmpty) {
                     if (nestedContentParam1Name != null) {
-                        try {
-                            do {
+                        listLoop: do {
                                 nestedContentParam = iterModel.next();
                                 hasNext = iterModel.hasNext();
-                                env.visit(childBuffer);
+                                try {
+                                    env.visit(childBuffer);
+                                } catch (BreakOrContinueException br) {
+                                    if (br == BreakOrContinueException.BREAK_INSTANCE) {
+                                        break listLoop;
+                                    }
+                                }
                                 index++;
                             } while (hasNext);
-                        } catch (ASTDirBreak.Break br) {
-                            // Silently exit loop
-                        }
                         openedIterator = null;
                     } else {
                         // We must reuse this later, because TemplateIterableModel-s that wrap an Iterator only
@@ -313,18 +315,20 @@ final class ASTDirList extends ASTDirective {
                     hashNotEmpty = kvpIter.hasNext();
                     if (hashNotEmpty) {
                         if (nestedContentParam1Name != null) {
-                            try {
-                                do {
+                            listLoop: do {
                                     KeyValuePair kvp = kvpIter.next();
                                     nestedContentParam = kvp.getKey();
                                     nestedContentParam2 = kvp.getValue();
                                     hasNext = kvpIter.hasNext();
-                                    env.visit(childBuffer);
+                                    try {
+                                        env.visit(childBuffer);
+                                    } catch (BreakOrContinueException br) {
+                                        if (br == BreakOrContinueException.BREAK_INSTANCE) {
+                                            break listLoop;
+                                        }
+                                    }
                                     index++;
                                 } while (hasNext);
-                            } catch (ASTDirBreak.Break br) {
-                                // Silently exit loop
-                            }
                             openedIterator = null;
                         } else {
                             // We will reuse this at the #iterms
@@ -337,34 +341,36 @@ final class ASTDirList extends ASTDirective {
                     hashNotEmpty = keysIter.hasNext();
                     if (hashNotEmpty) {
                         if (nestedContentParam1Name != null) {
-                            try {
-                                do {
-                                    nestedContentParam = keysIter.next();
-                                    if (!(nestedContentParam instanceof TemplateStringModel)) {
-                                        throw new TemplateException(env,
-                                                new _ErrorDescriptionBuilder(
-                                                        "When listing key-value pairs of traditional hash "
-                                                        + "implementations, all keys must be strings, but one of them "
-                                                        + "was ",
-                                                        new _DelayedAOrAn(
-                                                                new _DelayedTemplateLanguageTypeDescription(
-                                                                        nestedContentParam)),
-                                                        "."
-                                                        ).tip("The listed value's TemplateModel class was ",
-                                                                new _DelayedShortClassName(listedValue.getClass()),
-                                                                ", which doesn't implement ",
-                                                                new _DelayedShortClassName(TemplateHashModelEx2.class),
-                                                                ", which leads to this restriction."));
-                                    }
-                                    nestedContentParam2 = listedHash.get(((TemplateStringModel) nestedContentParam)
-                                            .getAsString());
-                                    hasNext = keysIter.hasNext();
+                            listLoop: do {
+                                nestedContentParam = keysIter.next();
+                                if (!(nestedContentParam instanceof TemplateStringModel)) {
+                                    throw new TemplateException(env,
+                                            new _ErrorDescriptionBuilder(
+                                                    "When listing key-value pairs of traditional hash "
+                                                    + "implementations, all keys must be strings, but one of them "
+                                                    + "was ",
+                                                    new _DelayedAOrAn(
+                                                            new _DelayedTemplateLanguageTypeDescription(
+                                                                    nestedContentParam)),
+                                                    "."
+                                                    ).tip("The listed value's TemplateModel class was ",
+                                                            new _DelayedShortClassName(listedValue.getClass()),
+                                                            ", which doesn't implement ",
+                                                            new _DelayedShortClassName(TemplateHashModelEx2.class),
+                                                            ", which leads to this restriction."));
+                                }
+                                nestedContentParam2 = listedHash.get(((TemplateStringModel) nestedContentParam)
+                                        .getAsString());
+                                hasNext = keysIter.hasNext();
+                                try {
                                     env.visit(childBuffer);
-                                    index++;
-                                } while (hasNext);
-                            } catch (ASTDirBreak.Break br) {
-                                // Silently exit loop
-                            }
+                                } catch (BreakOrContinueException br) {
+                                    if (br == BreakOrContinueException.BREAK_INSTANCE) {
+                                        break listLoop;
+                                    }
+                                }
+                                index++;
+                            } while (hasNext);
                         } else {
                             env.visit(childBuffer);
                         }

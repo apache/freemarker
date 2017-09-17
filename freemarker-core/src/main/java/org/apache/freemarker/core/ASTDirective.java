@@ -37,6 +37,7 @@ abstract class ASTDirective extends ASTElement {
         names.add("break");
         names.add("case");
         names.add("compress");
+        names.add("continue");
         names.add("default");
         names.add("else");
         names.add("elseIf");

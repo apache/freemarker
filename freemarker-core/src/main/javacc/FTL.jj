@@ -93,6 +93,11 @@ public class FMParser {
      */
     private int breakableDirectiveNesting;
 
+    /**
+     * Keeps track of the nesting depth of directives that support #continue.
+     */
+    private int continuableDirectiveNesting;
+
     private boolean inMacro, inFunction;
     private LinkedList escapes = new LinkedList();
     private int mixedContentNesting; // for stripText
@@ -809,6 +814,8 @@ TOKEN:
     <ELSE : <START_TAG> "else" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
     <BREAK : <START_TAG> "break" <CLOSE_TAG2>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
+    |
+    <CONTINUE : <START_TAG> "continue" <CLOSE_TAG2>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
     <SIMPLE_RETURN : <START_TAG> "return" <CLOSE_TAG2>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
@@ -2365,6 +2372,7 @@ ASTElement List() :
         if (nestedContentParam != null) {
             iterCtx.nestedContentParamName = nestedContentParam.image;
             breakableDirectiveNesting++;
+            continuableDirectiveNesting++;
             if (nestedContentParam2 != null) {
                 iterCtx.nestedContentParam2Name = nestedContentParam2.image;
                 iterCtx.hashListing = true;
@@ -2382,6 +2390,7 @@ ASTElement List() :
     {
         if (nestedContentParam != null) {
             breakableDirectiveNesting--;
+            continuableDirectiveNesting--;
         } else if (iterCtx.kind != ITERATOR_BLOCK_KIND_ITEMS) {
             throw new ParseException(
                     "#list must have either \"as someItem\" parameter or nested #items that belongs to it.",
@@ -2471,6 +2480,7 @@ ASTDirItems Items() :
         }
     
         breakableDirectiveNesting++;
+        continuableDirectiveNesting++;
     }
     
     children = MixedContentElements()
@@ -2478,6 +2488,7 @@ ASTDirItems Items() :
     end = <END_ITEMS>
     {
         breakableDirectiveNesting--;
+        continuableDirectiveNesting--;
         iterCtx.nestedContentParamName = null;
         iterCtx.nestedContentParam2Name = null;
         
@@ -2598,6 +2609,28 @@ ASTDirBreak Break() :
                     template, start);
         }
         ASTDirBreak result = new ASTDirBreak();
+        result.setLocation(template, start, start);
+        return result;
+    }
+}
+
+
+/**
+ * Production used to skip an iteration in a loop.
+ */
+ASTDirContinue Continue() :
+{
+    Token start;
+}
+{
+    start = <CONTINUE>
+    {
+        if (continuableDirectiveNesting < 1) {
+            throw new ParseException(start.image + " must be nested inside a directive that supports it: " 
+                    + " #list with \"as\", #items",
+                    template, start);
+        }
+        ASTDirContinue result = new ASTDirContinue();
         result.setLocation(template, start, start);
         return result;
     }
@@ -2984,6 +3017,7 @@ ASTDirMacroOrFunction Macro() :
 
     List lastIteratorBlockContexts;
     int lastBreakableDirectiveNesting;
+    int lastContinuableDirectiveNesting;
 }
 {
     (
@@ -3177,7 +3211,9 @@ ASTDirMacroOrFunction Macro() :
         lastIteratorBlockContexts = iteratorBlockContexts;
         iteratorBlockContexts = null;
         lastBreakableDirectiveNesting = breakableDirectiveNesting;
+        lastContinuableDirectiveNesting = continuableDirectiveNesting;
         breakableDirectiveNesting = 0; 
+        continuableDirectiveNesting = 0; 
     }
     children = MixedContentElements()
     (
@@ -3194,6 +3230,7 @@ ASTDirMacroOrFunction Macro() :
     {
         iteratorBlockContexts = lastIteratorBlockContexts;
         breakableDirectiveNesting = lastBreakableDirectiveNesting;
+        continuableDirectiveNesting = lastContinuableDirectiveNesting;
         
         inMacro = inFunction = false;
 
@@ -3809,6 +3846,8 @@ ASTElement FreemarkerDirective() :
         tp = Setting()
         |
         tp = Break()
+        |
+        tp = Continue()
         |
         tp = Return()
         |

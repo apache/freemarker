@@ -81,7 +81,7 @@ final class ASTDirSwitch extends ASTDirective {
             if (!processedCase && defaultCase != null) {
                 env.visit(defaultCase);
             }
-        } catch (ASTDirBreak.Break br) {
+        } catch (BreakOrContinueException br) {
             // #break was called
         }
         return null;

@@ -24,14 +24,16 @@ import java.io.IOException;
 import org.apache.freemarker.test.TemplateTest;
 import org.junit.Test;
 
-public class BreakPlacementTest extends TemplateTest {
+public class BreakAndContinuePlacementTest extends TemplateTest {
     
     private static final String BREAK_NESTING_ERROR_MESSAGE_PART = "<#break> must be nested";
+    private static final String CONTINUE_NESTING_ERROR_MESSAGE_PART = "<#continue> must be nested";
 
     @Test
     public void testValidPlacements() throws IOException, TemplateException {
         assertOutput("<#assign x = 1><#switch x><#case 1>one<#break><#case 2>two</#switch>", "one");
         assertOutput("<#list 1..2 as x>${x}<#break></#list>", "1");
+        assertOutput("<#list 1..2 as x>${x}<#continue></#list>", "12");
         assertOutput("<#list 1..2>[<#items as x>${x}<#break></#items>]</#list>", "[1]");
         assertOutput("<#list 1..2 as x>${x}<#list 1..3>B<#break>E<#items as y></#items></#list>E</#list>.", "1B.");
         assertOutput("<#list 1..2 as x>${x}<#list 3..4 as x>${x}<#break></#list>;</#list>", "13;23;");
@@ -41,11 +43,14 @@ public class BreakPlacementTest extends TemplateTest {
                 + "<#list xs>[<#items as x>${x}</#items>]<#else><#break></#list>"
                 + "</#list>.",
                 "[12][34].");
+        assertOutput("<#switch 1><#case 1>1<#break></#switch>", "1");
     }
 
     @Test
     public void testInvalidPlacements() throws IOException, TemplateException {
         assertErrorContains("<#break>", BREAK_NESTING_ERROR_MESSAGE_PART);
+        assertErrorContains("<#continue>", CONTINUE_NESTING_ERROR_MESSAGE_PART);
+        assertErrorContains("<#switch 1><#case 1>1<#continue></#switch>", CONTINUE_NESTING_ERROR_MESSAGE_PART);
         assertErrorContains("<#list 1..2 as x>${x}</#list><#break>", BREAK_NESTING_ERROR_MESSAGE_PART);
         assertErrorContains("<#if false><#break></#if>", BREAK_NESTING_ERROR_MESSAGE_PART);
         assertErrorContains("<#list xs><#break></#list>", BREAK_NESTING_ERROR_MESSAGE_PART);
