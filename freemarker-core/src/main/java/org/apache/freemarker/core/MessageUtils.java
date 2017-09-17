@@ -22,6 +22,7 @@ package org.apache.freemarker.core;
 import java.util.Arrays;
 
 import org.apache.freemarker.core.model.TemplateBooleanModel;
+import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
@@ -348,11 +349,12 @@ class MessageUtils {
                 errorDescBuilder.tip(tip);
             }
         }
-        if (model instanceof TemplateIterableModel && Arrays.asList(expectedTypes).contains(TemplateSequenceModel
-                .class)) {
-            errorDescBuilder.tip("As the problematic value contains a collection of items, so you could covert it "
-                    + "to a sequence like someValue?sequence. Be sure that you won't have a large number of items "
-                    + "though, as all will be held in memory at once.");
+        if (model instanceof TemplateIterableModel && (
+                Arrays.asList(expectedTypes).contains(TemplateSequenceModel.class)
+                || Arrays.asList(expectedTypes).contains(TemplateCollectionModel.class))) {
+            errorDescBuilder.tip("As the problematic value contains a collection of items, you could convert it "
+                    + "to a sequence like someValue?sequence. Be sure though that you won't have a large number of "
+                    + "items, as all will be held in memory on the same time.");
         }
         return errorDescBuilder;
     }

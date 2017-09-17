@@ -49,6 +49,14 @@ public class SequenceBuiltInTest extends TemplateTest {
             assertThat(e.getMessage(), containsString("?sequence")); // Contains tip to use ?sequence
         }
         assertOutput("${xs?sequence[1]}", "b");
+
+        try {
+            assertOutput("${xs?size}", "2");
+            fail();
+        } catch (TemplateException e) {
+            assertThat(e.getMessage(), containsString("?sequence")); // Contains tip to use ?sequence
+        }
+        assertOutput("${xs?sequence?size}", "2");
     }
 
     @Test
@@ -64,6 +72,8 @@ public class SequenceBuiltInTest extends TemplateTest {
             assertThat(e.getMessage(), containsString("?sequence")); // Contains tip to use ?sequence
         }
         assertOutput("${xs?sequence[1]}", "b");
+
+        assertOutput("${xs?size}", "2"); // No need for ?sequence
     }
 
     @Test
