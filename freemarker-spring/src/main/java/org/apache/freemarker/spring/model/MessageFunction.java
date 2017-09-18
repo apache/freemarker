@@ -80,7 +80,6 @@ class MessageFunction extends AbstractSpringTemplateFunctionModel {
 
     private static final int CODE_PARAM_IDX = 0;
     private static final int MESSAGE_RESOLVABLE_PARAM_IDX = 1;
-    private static final int MESSAGE_ARGS_PARAM_IDX = 2;
 
     private static final String MESSAGE_RESOLVABLE_PARAM_NAME = "message";
 
@@ -119,7 +118,8 @@ class MessageFunction extends AbstractSpringTemplateFunctionModel {
 
             if (code != null) {
                 List<Object> msgArgumentList = null;
-                final TemplateCollectionModel messageArgsModel = (TemplateCollectionModel) args[MESSAGE_ARGS_PARAM_IDX];
+                final TemplateCollectionModel messageArgsModel = (TemplateCollectionModel) args[ARGS_LAYOUT
+                        .getPositionalVarargsArgumentIndex()];
 
                 if (!messageArgsModel.isEmptyCollection()) {
                     msgArgumentList = new ArrayList<>();

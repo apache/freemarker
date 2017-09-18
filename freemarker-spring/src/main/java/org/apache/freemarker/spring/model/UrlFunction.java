@@ -76,7 +76,6 @@ class UrlFunction extends AbstractSpringTemplateFunctionModel {
 
     private static final int VALUE_PARAM_IDX = 0;
     private static final int CONTEXT_PARAM_IDX = 1;
-    private static final int PARAMS_PARAM_IDX = 2;
 
     private static final String CONTEXT_PARAM_NAME = "context";
 
@@ -109,7 +108,8 @@ class UrlFunction extends AbstractSpringTemplateFunctionModel {
         final String context = CallableUtils.getOptionalStringArgument(args, CONTEXT_PARAM_IDX, this);
 
         List<_KeyValuePair<String, String>> params = Collections.emptyList();
-        final TemplateHashModelEx2 paramsHashModel = (TemplateHashModelEx2) args[PARAMS_PARAM_IDX];
+        final int paramsVarargsIndex = ARGS_LAYOUT.getNamedVarargsArgumentIndex();
+        final TemplateHashModelEx2 paramsHashModel = (TemplateHashModelEx2) args[paramsVarargsIndex];
 
         if (!paramsHashModel.isEmptyHash()) {
             params = new ArrayList<>();
@@ -120,14 +120,14 @@ class UrlFunction extends AbstractSpringTemplateFunctionModel {
                 TemplateModel paramValueModel = pair.getValue();
 
                 if (!(paramNameModel instanceof TemplateStringModel)) {
-                    throw CallableUtils.newArgumentValueException(PARAMS_PARAM_IDX,
+                    throw CallableUtils.newArgumentValueException(paramsVarargsIndex,
                             "Parameter name must be a string.", this);
                 }
 
                 String paramName = ((TemplateStringModel) paramNameModel).getAsString();
 
                 if (paramName.isEmpty()) {
-                    throw CallableUtils.newArgumentValueException(PARAMS_PARAM_IDX,
+                    throw CallableUtils.newArgumentValueException(paramsVarargsIndex,
                             "Parameter name must be a non-blank string.", this);
                 }
 
@@ -140,7 +140,7 @@ class UrlFunction extends AbstractSpringTemplateFunctionModel {
                 } else if (paramValueModel instanceof TemplateBooleanModel) {
                     paramValue = Boolean.toString(((TemplateBooleanModel) paramValueModel).getAsBoolean());
                 } else {
-                    throw CallableUtils.newArgumentValueException(PARAMS_PARAM_IDX,
+                    throw CallableUtils.newArgumentValueException(paramsVarargsIndex,
                             "Format the parameter manually to properly coerce it to a URL parameter value string. "
                                     + "e.g, date?string.iso, date?long, list?join('_'), etc.",
                             this);
