@@ -219,7 +219,8 @@ class UrlFunction extends AbstractSpringTemplateFunctionModel {
                 try {
                     uri = uri.replace(template, UriUtils.encodePath(paramValue, encoding));
                 } catch (UnsupportedEncodingException e) {
-                    throw CallableUtils.newGenericExecuteException("Cannot encode URI. " + e, this);
+                    throw CallableUtils.newGenericExecuteException("Unsupported servlet response encoding: " + encoding,
+                            this);
                 }
             } else {
                 template = URL_TEMPLATE_DELIMITER_PREFIX + '/' + paramName + URL_TEMPLATE_DELIMITER_SUFFIX;
@@ -230,7 +231,8 @@ class UrlFunction extends AbstractSpringTemplateFunctionModel {
                     try {
                         uri = uri.replace(template, UriUtils.encodePathSegment(paramValue, encoding));
                     } catch (UnsupportedEncodingException e) {
-                        throw CallableUtils.newGenericExecuteException("Cannot encode URI. " + e, this);
+                        throw CallableUtils
+                                .newGenericExecuteException("Unsupported servlet response encoding: " + encoding, this);
                     }
                 }
             }
@@ -263,7 +265,8 @@ class UrlFunction extends AbstractSpringTemplateFunctionModel {
                         queryStringBuilder.append(UriUtils.encodeQueryParam(paramValue, encoding));
                     }
                 } catch (UnsupportedEncodingException e) {
-                    throw CallableUtils.newGenericExecuteException("Cannot encode query parameter. " + e, this);
+                    throw CallableUtils.newGenericExecuteException("Unsupported servlet response encoding: " + encoding,
+                            this);
                 }
             }
         }

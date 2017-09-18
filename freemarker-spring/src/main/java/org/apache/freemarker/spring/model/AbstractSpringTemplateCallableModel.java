@@ -102,7 +102,7 @@ abstract class AbstractSpringTemplateCallableModel implements TemplateCallableMo
 
         if (rcModel == null) {
             throw CallableUtils.newGenericExecuteException(
-                    AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE + " not found.", this, false);
+                    AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE + " is not found.", this, false);
         }
 
         RequestContext requestContext = (RequestContext) getObjectWrapperAndUnwrapper(env, calledAsFunction)
