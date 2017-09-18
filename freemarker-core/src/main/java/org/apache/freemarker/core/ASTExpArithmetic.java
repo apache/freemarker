@@ -54,22 +54,28 @@ final class ASTExpArithmetic extends ASTExpression {
     static TemplateModel _eval(Environment env, ASTNode parent, Number lhoNumber, int operator, Number rhoNumber)
             throws TemplateException {
         ArithmeticEngine ae = _EvalUtils.getArithmeticEngine(env, parent);
-        switch (operator) {
-            case TYPE_SUBSTRACTION : 
-                return new SimpleNumber(ae.subtract(lhoNumber, rhoNumber));
-            case TYPE_MULTIPLICATION :
-                return new SimpleNumber(ae.multiply(lhoNumber, rhoNumber));
-            case TYPE_DIVISION :
-                return new SimpleNumber(ae.divide(lhoNumber, rhoNumber));
-            case TYPE_MODULO :
-                return new SimpleNumber(ae.modulus(lhoNumber, rhoNumber));
-            default:
-                if (parent instanceof ASTExpression) {
-                    throw new TemplateException((ASTExpression) parent,
-                            "Unknown operation: ", Integer.valueOf(operator));
-                } else {
-                    throw new TemplateException("Unknown operation: ", Integer.valueOf(operator));
-                }
+        try {
+            switch (operator) {
+                case TYPE_SUBSTRACTION : 
+                    return new SimpleNumber(ae.subtract(lhoNumber, rhoNumber));
+                case TYPE_MULTIPLICATION :
+                    return new SimpleNumber(ae.multiply(lhoNumber, rhoNumber));
+                case TYPE_DIVISION :
+                    return new SimpleNumber(ae.divide(lhoNumber, rhoNumber));
+                case TYPE_MODULO :
+                    return new SimpleNumber(ae.modulus(lhoNumber, rhoNumber));
+                default:
+                    if (parent instanceof ASTExpression) {
+                        throw new TemplateException((ASTExpression) parent,
+                                "Unknown operation: ", Integer.valueOf(operator));
+                    } else {
+                        throw new TemplateException("Unknown operation: ", Integer.valueOf(operator));
+                    }
+            }
+        } catch (ArithmeticException e) {
+            throw new TemplateException(e, env,
+                    "Arithmetic operation failed",
+                    (e.getMessage() != null ? new String[] { ": ", e.getMessage() } : " (see cause exception)"));
         }
     }
 

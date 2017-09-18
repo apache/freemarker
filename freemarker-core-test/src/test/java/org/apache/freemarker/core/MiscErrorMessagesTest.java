@@ -19,6 +19,9 @@
 
 package org.apache.freemarker.core;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
 import org.apache.freemarker.test.TemplateTest;
 import org.apache.freemarker.test.TestConfigurationBuilder;
@@ -43,6 +46,13 @@ public class MiscErrorMessagesTest extends TemplateTest {
     @Test
     public void numericalKeyHint() {
         assertErrorContains("${{}[10]}", "[]", "?api");
+    }
+    
+    @Test
+    public void aritheticException() {
+        Throwable e = assertErrorContains("<#assign x = 0>\n${1 / x}", "Arithmetic");
+        assertThat(e, instanceOf(TemplateException.class));
+        assertEquals((Integer) 2, ((TemplateException) e).getLineNumber());
     }
     
 }
