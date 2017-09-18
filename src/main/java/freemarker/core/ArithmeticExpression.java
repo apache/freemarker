@@ -54,22 +54,28 @@ final class ArithmeticExpression extends Expression {
     static TemplateModel _eval(Environment env, TemplateObject parent, Number lhoNumber, int operator, Number rhoNumber)
             throws TemplateException, _MiscTemplateException {
         ArithmeticEngine ae = EvalUtil.getArithmeticEngine(env, parent); 
-        switch (operator) {
-            case TYPE_SUBSTRACTION : 
-                return new SimpleNumber(ae.subtract(lhoNumber, rhoNumber));
-            case TYPE_MULTIPLICATION :
-                return new SimpleNumber(ae.multiply(lhoNumber, rhoNumber));
-            case TYPE_DIVISION :
-                return new SimpleNumber(ae.divide(lhoNumber, rhoNumber));
-            case TYPE_MODULO :
-                return new SimpleNumber(ae.modulus(lhoNumber, rhoNumber));
-            default:
-                if (parent instanceof Expression) {
-                    throw new _MiscTemplateException((Expression) parent,
-                            "Unknown operation: ", Integer.valueOf(operator));
-                } else {
-                    throw new _MiscTemplateException("Unknown operation: ", Integer.valueOf(operator));
-                }
+        try {
+            switch (operator) {
+                case TYPE_SUBSTRACTION : 
+                    return new SimpleNumber(ae.subtract(lhoNumber, rhoNumber));
+                case TYPE_MULTIPLICATION :
+                    return new SimpleNumber(ae.multiply(lhoNumber, rhoNumber));
+                case TYPE_DIVISION :
+                    return new SimpleNumber(ae.divide(lhoNumber, rhoNumber));
+                case TYPE_MODULO :
+                    return new SimpleNumber(ae.modulus(lhoNumber, rhoNumber));
+                default:
+                    if (parent instanceof Expression) {
+                        throw new _MiscTemplateException((Expression) parent,
+                                "Unknown operation: ", Integer.valueOf(operator));
+                    } else {
+                        throw new _MiscTemplateException("Unknown operation: ", Integer.valueOf(operator));
+                    }
+            }
+        } catch (ArithmeticException e) {
+            throw new _MiscTemplateException(e, env,
+                    "Arithmetic operation failed",
+                    (e.getMessage() != null ? new String[] { ": ", e.getMessage() } : " (see cause exception)"));
         }
     }
 

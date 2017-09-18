@@ -27179,6 +27179,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fixed (part of <link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-48">FREEMARKER-48</link>):
+              When an arithmetic exception has occurred in an expression
+              (typically division by zero), the template processing has thrown
+              the <literal>ArithmeticException</literal> as is, without
+              packaging it into a <literal>TemplateException</literal>. Thus,
+              the error location in the template wasn't visible in the
+              exception.</para>
+            </listitem>
+
+            <listitem>
               <para>When logging error due to an error in an <link
               linkend="ref.directive.attempt"><literal>attempt</literal>
               directive</link> block, the log message now indicates that the
