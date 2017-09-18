@@ -66,9 +66,11 @@ import freemarker.core.EpochMillisTemplateDateFormatFactory;
 import freemarker.core.HTMLOutputFormat;
 import freemarker.core.HexTemplateNumberFormatFactory;
 import freemarker.core.MarkupOutputFormat;
+import freemarker.core.OptInTemplateClassResolver;
 import freemarker.core.OutputFormat;
 import freemarker.core.ParseException;
 import freemarker.core.RTFOutputFormat;
+import freemarker.core.TemplateClassResolver;
 import freemarker.core.TemplateDateFormatFactory;
 import freemarker.core.TemplateNumberFormatFactory;
 import freemarker.core.UndefinedOutputFormat;
@@ -1692,6 +1694,28 @@ public class ConfigurationTest extends TestCase {
         cfg.setSetting(Configuration.TIME_ZONE_KEY, "JVM default");
         assertEquals(TimeZone.getDefault(), cfg.getTimeZone());
         assertTrue(cfg.isTimeZoneExplicitlySet());
+    }
+    
+    public void testNewBuiltinClassResolverSetting() throws TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
+        assertSame(TemplateClassResolver.UNRESTRICTED_RESOLVER, cfg.getNewBuiltinClassResolver());
+        
+        cfg.setSetting(Configuration.NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE,
+                "allowed_classes: com.example.C1, com.example.C2, trusted_templates: lib/*, safe.ftl");
+        assertThat(cfg.getNewBuiltinClassResolver(), instanceOf(OptInTemplateClassResolver.class));
+        
+        cfg.setSetting(Configuration.NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE, "safer");
+        assertSame(TemplateClassResolver.SAFER_RESOLVER, cfg.getNewBuiltinClassResolver());
+        
+        cfg.setSetting(Configuration.NEW_BUILTIN_CLASS_RESOLVER_KEY_CAMEL_CASE,
+                "allowedClasses: com.example.C1, com.example.C2, trustedTemplates: lib/*, safe.ftl");
+        assertThat(cfg.getNewBuiltinClassResolver(), instanceOf(OptInTemplateClassResolver.class));
+        
+        cfg.setSetting(Configuration.NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE, "allowsNothing");
+        assertSame(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER, cfg.getNewBuiltinClassResolver());
+        
+        cfg.setSetting(Configuration.NEW_BUILTIN_CLASS_RESOLVER_KEY_SNAKE_CASE, "allows_nothing");
+        assertSame(TemplateClassResolver.ALLOWS_NOTHING_RESOLVER, cfg.getNewBuiltinClassResolver());
     }
     
     @Test

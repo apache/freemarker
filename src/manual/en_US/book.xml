@@ -27181,21 +27181,33 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>When logging error due to an error in an <link
               linkend="ref.directive.attempt"><literal>attempt</literal>
-              directive</link> block, the log message now indicates that error
-              was inside an <literal>attempt</literal> block.</para>
+              directive</link> block, the log message now indicates that the
+              error was inside an <literal>attempt</literal> block.</para>
             </listitem>
 
             <listitem>
               <para>Bug fixed (<link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-52">FREEMARKER-52</link>):
-              When setting the <literal>output_format</literal> with
-              <literal>Properties</literal>, the
-              <literal>XHTMLOutputFormat</literal> abbreviation wasn't
-              recognized (for example in a <literal>.properties</literal>
-              file, <literal>output_format=XHTMLOutputFormat</literal> didn't
-              work, only
+              When setting the <literal>output_format</literal> from
+              <literal>Properties</literal> or the <literal>setSetting(String,
+              String)</literal> API, the <literal>XHTMLOutputFormat</literal>
+              abbreviation wasn't recognized (for example in a
+              <literal>.properties</literal> file,
+              <literal>output_format=XHTMLOutputFormat</literal> didn't work,
+              only
               <literal>output_format=freemarker.core.XHTMLOutputFormat()</literal>
               did).</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: When setting the
+              <literal>new_builtin_resolver</literal> from
+              <literal>Properties</literal> or the <literal>setSetting(String,
+              String)</literal> API, it didn't recognize the camel case form
+              of the <literal>allowed_classes</literal> and
+              <literal>trusted_templates</literal> keywords, and throw
+              exception for them. Now <literal>allowedClasses</literal> and
+              <literal>trustedTemplates</literal> can be used as well.</para>
             </listitem>
 
             <listitem>

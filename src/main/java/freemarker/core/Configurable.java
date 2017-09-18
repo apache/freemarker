@@ -2033,8 +2033,10 @@ public class Configurable {
         }
     }
     
-    private static final String ALLOWED_CLASSES = "allowed_classes";
-    private static final String TRUSTED_TEMPLATES = "trusted_templates";
+    private static final String ALLOWED_CLASSES_SNAKE_CASE = "allowed_classes";
+    private static final String TRUSTED_TEMPLATES_SNAKE_CASE = "trusted_templates";
+    private static final String ALLOWED_CLASSES_CAMEL_CASE = "allowedClasses";
+    private static final String TRUSTED_TEMPLATES_CAMEL_CASE = "trustedTemplates";
     
     /**
      * Sets a FreeMarker setting by a name and string value. If you can configure FreeMarker directly with Java (or
@@ -2179,13 +2181,13 @@ public class Configurable {
      *             Use {@link TemplateClassResolver#UNRESTRICTED_RESOLVER}
      *         <li><p>{@code "safer"}:
      *             Use {@link TemplateClassResolver#SAFER_RESOLVER}
-     *         <li><p>{@code "allows_nothing"}:
+     *         <li><p>{@code "allows_nothing"} (or {@code "allowsNothing"}):
      *             Use {@link TemplateClassResolver#ALLOWS_NOTHING_RESOLVER}
      *         <li><p>Something that contains colon will use
      *             {@link OptInTemplateClassResolver} and is expected to
      *             store comma separated values (possibly quoted) segmented
-     *             with {@code "allowed_classes:"} and/or
-     *             {@code "trusted_templates:"}. Examples of valid values:
+     *             with {@code "allowed_classes:"} (or {@code "allowedClasses:"}) and/or
+     *             {@code "trusted_templates:"} (or {@code "trustedTemplates:"}). Examples of valid values:
      *             
      *             <table style="width: auto; border-collapse: collapse" border="1"
      *                  summary="trusted_template value examples">
@@ -2610,15 +2612,21 @@ public class Configurable {
                         KeyValuePair kv = (KeyValuePair) segments.get(i);
                         String segmentKey = (String) kv.getKey();
                         List segmentValue = (List) kv.getValue();
-                        if (segmentKey.equals(ALLOWED_CLASSES)) {
+                        if (segmentKey.equals(ALLOWED_CLASSES_SNAKE_CASE)
+                                || segmentKey.equals(ALLOWED_CLASSES_CAMEL_CASE)) {
                             allowedClasses = new HashSet(segmentValue); 
-                        } else if (segmentKey.equals(TRUSTED_TEMPLATES)) {
+                        } else if (segmentKey.equals(TRUSTED_TEMPLATES_SNAKE_CASE)
+                                || segmentKey.equals(TRUSTED_TEMPLATES_CAMEL_CASE)) {
                             trustedTemplates = segmentValue;
                         } else {
                             throw new ParseException(
                                     "Unrecognized list segment key: " + StringUtil.jQuote(segmentKey) +
-                                    ". Supported keys are: \"" + ALLOWED_CLASSES + "\", \"" +
-                                    TRUSTED_TEMPLATES + "\"", 0, 0);
+                                    ". Supported keys are: " +
+                                    "\"" + ALLOWED_CLASSES_SNAKE_CASE + "\", " +
+                                    "\"" + ALLOWED_CLASSES_CAMEL_CASE + "\", " +
+                                    "\"" + TRUSTED_TEMPLATES_SNAKE_CASE + "\", " +
+                                    "\"" + TRUSTED_TEMPLATES_CAMEL_CASE + "\". ",
+                                    0, 0);
                         }
                     }
                     setNewBuiltinClassResolver(
