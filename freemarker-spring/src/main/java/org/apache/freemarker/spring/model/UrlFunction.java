@@ -114,43 +114,39 @@ class UrlFunction extends AbstractSpringTemplateFunctionModel {
         if (!paramsHashModel.isEmptyHash()) {
             params = new ArrayList<>();
 
-            TemplateHashModelEx2.KeyValuePair pair;
-            TemplateModel paramNameModel;
-            TemplateModel paramValueModel;
-            String paramName;
-            String paramValue;
-
             for (KeyValuePairIterator pairIt = paramsHashModel.keyValuePairIterator(); pairIt.hasNext();) {
-                pair = pairIt.next();
-                paramNameModel = pair.getKey();
-                paramValueModel = pair.getValue();
+                TemplateHashModelEx2.KeyValuePair pair = pairIt.next();
+                TemplateModel paramNameModel = pair.getKey();
+                TemplateModel paramValueModel = pair.getValue();
 
-                if (paramNameModel instanceof TemplateStringModel) {
-                    paramName = ((TemplateStringModel) paramNameModel).getAsString();
-
-                    if (paramName.isEmpty()) {
-                        throw CallableUtils.newArgumentValueException(PARAMS_PARAM_IDX,
-                                "Parameter name must be a non-blank string.", this);
-                    }
-
-                    if (paramValueModel instanceof TemplateStringModel) {
-                        paramValue = ((TemplateStringModel) paramValueModel).getAsString();
-                    } else if (paramValueModel instanceof TemplateNumberModel) {
-                        paramValue = ((TemplateNumberModel) paramValueModel).getAsNumber().toString();
-                    } else if (paramValueModel instanceof TemplateBooleanModel) {
-                        paramValue = Boolean.toString(((TemplateBooleanModel) paramValueModel).getAsBoolean());
-                    } else {
-                        throw CallableUtils.newArgumentValueException(PARAMS_PARAM_IDX,
-                                "Format the parameter manually to properly coerce it to a URL parameter value string. "
-                                        + "e.g, date?string.iso, date?long, list?join('_'), etc.",
-                                this);
-                    }
-
-                    params.add(new _KeyValuePair<String, String>(paramName, paramValue));
-                } else {
+                if (!(paramNameModel instanceof TemplateStringModel)) {
                     throw CallableUtils.newArgumentValueException(PARAMS_PARAM_IDX,
                             "Parameter name must be a string.", this);
                 }
+
+                String paramName = ((TemplateStringModel) paramNameModel).getAsString();
+
+                if (paramName.isEmpty()) {
+                    throw CallableUtils.newArgumentValueException(PARAMS_PARAM_IDX,
+                            "Parameter name must be a non-blank string.", this);
+                }
+
+                String paramValue;
+
+                if (paramValueModel instanceof TemplateStringModel) {
+                    paramValue = ((TemplateStringModel) paramValueModel).getAsString();
+                } else if (paramValueModel instanceof TemplateNumberModel) {
+                    paramValue = ((TemplateNumberModel) paramValueModel).getAsNumber().toString();
+                } else if (paramValueModel instanceof TemplateBooleanModel) {
+                    paramValue = Boolean.toString(((TemplateBooleanModel) paramValueModel).getAsBoolean());
+                } else {
+                    throw CallableUtils.newArgumentValueException(PARAMS_PARAM_IDX,
+                            "Format the parameter manually to properly coerce it to a URL parameter value string. "
+                                    + "e.g, date?string.iso, date?long, list?join('_'), etc.",
+                            this);
+                }
+
+                params.add(new _KeyValuePair<String, String>(paramName, paramValue));
             }
         }
 
