@@ -81,7 +81,7 @@ abstract class AbstractSpringTemplateCallableModel implements TemplateCallableMo
         final ObjectWrapper objectWrapper = env.getObjectWrapper();
 
         if (!(objectWrapper instanceof ObjectWrapperAndUnwrapper)) {
-            CallableUtils.newGenericExecuteException(
+            throw CallableUtils.newGenericExecuteException(
                     "The ObjectWrapper of environment isn't an instance of ObjectWrapperAndUnwrapper.", this,
                     calledAsFunction);
         }
@@ -101,8 +101,8 @@ abstract class AbstractSpringTemplateCallableModel implements TemplateCallableMo
         TemplateModel rcModel = env.getVariable(AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE);
 
         if (rcModel == null) {
-            CallableUtils.newGenericExecuteException(
-                    AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE + " not found.", this, false);
+            throw CallableUtils.newGenericExecuteException(
+                    AbstractTemplateView.SPRING_MACRO_REQUEST_CONTEXT_ATTRIBUTE + " is not found.", this, false);
         }
 
         RequestContext requestContext = (RequestContext) getObjectWrapperAndUnwrapper(env, calledAsFunction)

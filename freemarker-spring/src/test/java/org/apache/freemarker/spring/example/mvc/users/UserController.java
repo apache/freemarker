@@ -60,7 +60,7 @@ public class UserController {
     public String listUsers(@RequestParam(value = "viewName", required = false) String viewName, Model model) {
         List<User> users = new LinkedList<>();
 
-        for (Integer id : userRepository.getUserIds()) {
+        for (Long id : userRepository.getUserIds()) {
             users.add(userRepository.getUser(id));
         }
 
@@ -70,7 +70,7 @@ public class UserController {
     }
 
     @RequestMapping(value = "/users/{id:\\d+}", method = RequestMethod.GET)
-    public String getUser(@PathVariable("id") Integer id,
+    public String getUser(@PathVariable("id") Long id,
             @RequestParam(value = "viewName", required = false) String viewName, Model model) {
         User user = userRepository.getUser(id);
 

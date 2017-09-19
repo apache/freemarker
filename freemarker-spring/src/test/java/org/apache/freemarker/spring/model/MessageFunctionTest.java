@@ -59,7 +59,7 @@ public class MessageFunctionTest {
 
     @Test
     public void testBasicUsages() throws Exception {
-        final Integer userId = userRepository.getUserIds().iterator().next();
+        final Long userId = userRepository.getUserIds().iterator().next();
         final User user = userRepository.getUser(userId);
         mockMvc.perform(get("/users/{userId}/", userId).param("viewName", "test/model/message-function-basic-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
@@ -72,7 +72,7 @@ public class MessageFunctionTest {
 
     @Test
     public void testWithMessageSourceResolvable() throws Exception {
-        final Integer nonExistingUserId = 0;
+        final Long nonExistingUserId = 0L;
         mockMvc.perform(
                 get("/users/{userId}/", nonExistingUserId).param("viewName", "test/model/message-function-basic-usages")
                         .accept(MediaType.parseMediaType("text/html")))

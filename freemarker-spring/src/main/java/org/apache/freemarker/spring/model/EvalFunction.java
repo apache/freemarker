@@ -89,8 +89,6 @@ class EvalFunction extends AbstractSpringTemplateFunctionModel {
                     false
                     );
 
-    private static final String EVALUATION_CONTEXT_VAR_NAME = "org.apache.freemarker.spring.model.EVALUATION_CONTEXT";
-
     private final ExpressionParser expressionParser = new SpelExpressionParser();
 
     protected EvalFunction(HttpServletRequest request, HttpServletResponse response) {
