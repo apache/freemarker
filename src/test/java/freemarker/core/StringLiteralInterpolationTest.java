@@ -80,7 +80,7 @@ public class StringLiteralInterpolationTest extends TemplateTest {
     public void testErrors() {
         addToDataModel("x", 1);
         assertErrorContains("${'${noSuchVar}'}", InvalidReferenceException.class, "missing", "noSuchVar");
-        assertErrorContains("${'${x/0}'}", ArithmeticException.class, "zero");
+        assertErrorContains("${'${x/0}'}", "zero");
     }
 
     @Test
