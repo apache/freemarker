@@ -32,6 +32,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.utility.UndeclaredThrowableException;
 
 /**
  * <b>Internal API - subject to change:</b> Represent expression nodes in the parsed template.
@@ -78,7 +79,22 @@ abstract public class Expression extends TemplateObject {
     }
     
     final TemplateModel eval(Environment env) throws TemplateException {
-        return constantValue != null ? constantValue : _eval(env);
+        try {
+            return constantValue != null ? constantValue : _eval(env);
+        } catch (FlowControlException e) {
+            throw e;
+        } catch (TemplateException e) {
+            throw e;
+        } catch (Exception e) {
+            if (env != null && EvalUtil.shouldWrapUncheckedException(e, env)) {
+                throw new _MiscTemplateException(
+                        this, e, env, "Expression has thrown an unchecked exception; see the cause exception.");
+            } else if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            } else {
+                throw new UndeclaredThrowableException(e);
+            }
+        }
     }
     
     String evalAndCoerceToPlainText(Environment env) throws TemplateException {

@@ -60,6 +60,7 @@ import freemarker.template.SimpleObjectWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
+import freemarker.template.TemplateMethodModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.Version;
 import freemarker.template._TemplateAPI;
@@ -247,6 +248,13 @@ public class Configurable {
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. @since 2.3.22 */
     public static final String LOG_TEMPLATE_EXCEPTIONS_KEY = LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE;
 
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.27 */
+    public static final String WRAP_UNCHECKED_EXCEPTIONS_KEY_SNAKE_CASE = "wrap_unchecked_exceptions";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.27 */
+    public static final String WRAP_UNCHECKED_EXCEPTIONS_KEY_CAMEL_CASE = "wrapUncheckedExceptions";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. @since 2.3.27 */
+    public static final String WRAP_UNCHECKED_EXCEPTIONS_KEY = WRAP_UNCHECKED_EXCEPTIONS_KEY_SNAKE_CASE;
+    
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.25 */
     public static final String LAZY_IMPORTS_KEY_SNAKE_CASE = "lazy_imports";
     /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.25 */
@@ -307,7 +315,8 @@ public class Configurable {
         TEMPLATE_EXCEPTION_HANDLER_KEY_SNAKE_CASE,
         TIME_FORMAT_KEY_SNAKE_CASE,
         TIME_ZONE_KEY_SNAKE_CASE,
-        URL_ESCAPING_CHARSET_KEY_SNAKE_CASE
+        URL_ESCAPING_CHARSET_KEY_SNAKE_CASE,
+        WRAP_UNCHECKED_EXCEPTIONS_KEY_SNAKE_CASE
     };
     
     private static final String[] SETTING_NAMES_CAMEL_CASE = new String[] {
@@ -338,7 +347,8 @@ public class Configurable {
         TEMPLATE_EXCEPTION_HANDLER_KEY_CAMEL_CASE,
         TIME_FORMAT_KEY_CAMEL_CASE,
         TIME_ZONE_KEY_CAMEL_CASE,
-        URL_ESCAPING_CHARSET_KEY_CAMEL_CASE
+        URL_ESCAPING_CHARSET_KEY_CAMEL_CASE,
+        WRAP_UNCHECKED_EXCEPTIONS_KEY_CAMEL_CASE
     };
 
     private Configurable parent;
@@ -370,6 +380,7 @@ public class Configurable {
     private Boolean showErrorTips;
     private Boolean apiBuiltinEnabled;
     private Boolean logTemplateExceptions;
+    private Boolean wrapUncheckedExceptions;
     private Map<String, ? extends TemplateDateFormatFactory> customDateFormats;
     private Map<String, ? extends TemplateNumberFormatFactory> customNumberFormats;
     private LinkedHashMap<String, String> autoImports;
@@ -425,6 +436,8 @@ public class Configurable {
         
         templateExceptionHandler = _TemplateAPI.getDefaultTemplateExceptionHandler(incompatibleImprovements);
         properties.setProperty(TEMPLATE_EXCEPTION_HANDLER_KEY, templateExceptionHandler.getClass().getName());
+        
+        wrapUncheckedExceptions = _TemplateAPI.getDefaultWrapUncheckedExceptions(incompatibleImprovements);
 
         attemptExceptionReporter = _TemplateAPI.getDefaultAttemptExceptionReporter(incompatibleImprovements);
         
@@ -1690,6 +1703,44 @@ public class Configurable {
     public boolean isLogTemplateExceptionsSet() {
         return logTemplateExceptions != null;
     }
+
+    /**
+     * Specifies if unchecked exceptions thrown during expression evaluation or during executing custom directives (and
+     * transform) will be wrapped into {@link TemplateException}-s, or will bubble up to the caller of
+     * {@link Template#process(Object, Writer, ObjectWrapper)} as is. The default is {@code false} for backward
+     * compatibility (as some applications catch certain unchecked exceptions thrown by the template processing to do
+     * something special), but the recommended value is {@code true}.    
+     * When this is {@code true}, the unchecked exceptions will be wrapped into a {@link TemplateException}-s, thus the
+     * exception will include the location in the template (not
+     * just the Java stack trace). Another consequence of the wrapping is that the {@link TemplateExceptionHandler} will
+     * be invoked for the exception (as that only handles {@link TemplateException}-s, it wasn't invoked for unchecked
+     * exceptions). When this setting is {@code false}, unchecked exception will be thrown by
+     * {@link Template#process(Object, Writer, ObjectWrapper)}.
+     * Note that plain Java methods called from templates aren't user defined {@link TemplateMethodModel}-s, and have
+     * always wrapped the thrown exception into {@link TemplateException}, regardless of this setting.  
+     * 
+     * @since 2.3.27
+     */
+    public void setWrapUncheckedExceptions(boolean wrapUncheckedExceptions) {
+        this.wrapUncheckedExceptions = wrapUncheckedExceptions;
+    }
+    
+    /**
+     * The getter pair of {@link #setWrapUncheckedExceptions(boolean)}.
+     * 
+     * @since 2.3.27
+     */
+    public boolean getWrapUncheckedExceptions() {
+        return wrapUncheckedExceptions != null ? wrapUncheckedExceptions
+                : (parent != null ? parent.getWrapUncheckedExceptions() : false /* [2.4] true */);
+    }
+
+    /**
+     * @since 2.3.27
+     */
+    public boolean isWrapUncheckedExceptionsSet() {
+        return wrapUncheckedExceptions != null;
+    }
     
     /**
      * The getter pair of {@link #setLazyImports(boolean)}.
@@ -2647,6 +2698,9 @@ public class Configurable {
             } else if (LOG_TEMPLATE_EXCEPTIONS_KEY_SNAKE_CASE.equals(name)
                     || LOG_TEMPLATE_EXCEPTIONS_KEY_CAMEL_CASE.equals(name)) {
                 setLogTemplateExceptions(StringUtil.getYesNo(value));
+            } else if (WRAP_UNCHECKED_EXCEPTIONS_KEY_SNAKE_CASE.equals(name)
+                    || WRAP_UNCHECKED_EXCEPTIONS_KEY_CAMEL_CASE.equals(name)) {
+                setWrapUncheckedExceptions(StringUtil.getYesNo(value));
             } else if (LAZY_AUTO_IMPORTS_KEY_SNAKE_CASE.equals(name) || LAZY_AUTO_IMPORTS_KEY_CAMEL_CASE.equals(name)) {
                 setLazyAutoImports(value.equals(NULL) ? null : Boolean.valueOf(StringUtil.getYesNo(value)));
             } else if (LAZY_IMPORTS_KEY_SNAKE_CASE.equals(name) || LAZY_IMPORTS_KEY_CAMEL_CASE.equals(name)) {

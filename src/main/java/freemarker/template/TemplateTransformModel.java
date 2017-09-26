@@ -37,18 +37,30 @@ public interface TemplateTransformModel extends TemplateModel {
       * transformation input to the transform. Each call to this method
       * must return a new instance of the writer so that the transformation
       * is thread-safe.
+      * 
       * @param out the character stream to which to write the transformed output
       * @param args the arguments (if any) passed to the transformation as a 
       * map of key/value pairs where the keys are strings and the arguments are
       * TemplateModel instances. This is never null. If you need to convert the
       * template models to POJOs, you can use the utility methods in the 
       * {@link DeepUnwrap} class.
+      * 
       * @return a writer to which the engine will feed the transformation 
       * input, or null if the transform does not support nested content (body).
       * The returned writer can implement the {@link TransformControl}
       * interface if it needs advanced control over the evaluation of the 
       * transformation body.
+      * 
+      * <p>This method should not throw {@link RuntimeException}, nor {@link IOException} that wasn't caused by writing
+      * to the output. Such exceptions should be catched inside the method and wrapped inside a
+      * {@link TemplateModelException}. (Note that setting {@link Configuration#setWrapUncheckedExceptions(boolean)} to
+      * {@code true} can mitigate the negative effects of implementations that throw {@link RuntimeException}-s.)
+      * 
+      * @throws TemplateModelException If any problem occurs that's not an {@link IOException} during writing the
+      *          template output.
+      * @throws IOException When writing the template output fails. Other {@link IOException}-s should be catched in
+      *          this method and wrapped into {@link TemplateModelException}.   
+      *  
       */
-     Writer getWriter(Writer out, Map args) 
-         throws TemplateModelException, IOException;
+     Writer getWriter(Writer out, Map args) throws TemplateModelException, IOException;
 }

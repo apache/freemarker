@@ -81,7 +81,7 @@ public class _TemplateAPI {
             Version incompatibleImprovements) {
         return Configuration.getDefaultTemplateExceptionHandler(incompatibleImprovements);
     }
-
+    
     public static AttemptExceptionReporter getDefaultAttemptExceptionReporter(
             Version incompatibleImprovements) {
         return Configuration.getDefaultAttemptExceptionReporter(incompatibleImprovements);
@@ -91,6 +91,10 @@ public class _TemplateAPI {
         return Configuration.getDefaultLogTemplateExceptions(incompatibleImprovements);
     }
 
+    public static boolean getDefaultWrapUncheckedExceptions(Version incompatibleImprovements) {
+        return Configuration.getDefaultWrapUncheckedExceptions(incompatibleImprovements);
+    }
+    
     public static TemplateLoader createDefaultTemplateLoader(Version incompatibleImprovements) {
         return Configuration.createDefaultTemplateLoader(incompatibleImprovements);
     }

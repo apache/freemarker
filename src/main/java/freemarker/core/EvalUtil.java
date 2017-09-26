@@ -19,6 +19,7 @@
 
 package freemarker.core;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 
 import freemarker.ext.beans.BeanModel;
@@ -32,6 +33,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template._TemplateAPI;
 
 /**
  * Internally used static utilities for evaluation expressions.
@@ -578,6 +580,27 @@ class EvalUtil {
         return env != null
                 ? env.getArithmeticEngine()
                 : tObj.getTemplate().getParserConfiguration().getArithmeticEngine();
+    }
+
+    static boolean shouldWrapUncheckedException(Throwable e, Environment env) {
+        if (FlowControlException.class.isInstance(e)) {
+            return false;
+        }
+        if (env.getWrapUncheckedExceptions()) {
+            return true;
+        } else if (env.getConfiguration().getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_27) {
+            // We have to judge if we dare to wrap this exception, or it's too likely that some applications try to
+            // catch it around the template processing to do something special. For the same reason, we only wrap very
+            // frequent exceptions.
+            // We use "==" instead of "instanceof" deliberately; user defined subclasses must not match.
+            Class<? extends Throwable> c = e.getClass();
+            return c == NullPointerException.class
+                    || c == ClassCastException.class
+                    || c == IndexOutOfBoundsException.class
+                    || c == InvocationTargetException.class;
+        } else {
+            return false;
+        }
     }
     
 }
