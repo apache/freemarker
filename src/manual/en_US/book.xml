@@ -27123,7 +27123,8 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>Added new configuration setting,
+              <para>Added new configuration setting (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-48">FREEMARKER-48</link>),
               <literal>wrap_unchecked_exceptions</literal>
               (<literal>Configurable.setWrapUncheckedExceptions(boolean)</literal>).
               When this is <literal>true</literal>, unchecked exceptions
@@ -27180,7 +27181,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>true</literal> (see that earlier), but this is more
               backward compatible, as it avoids wrapping unchecked exceptions
               that some application is likely to catch specifically (like
-              application-specific unchecked exceptions).</para>
+              application-specific unchecked exceptions). (This is related to
+              <link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-48">FREEMARKER-48</link>.)</para>
             </listitem>
 
             <listitem>
