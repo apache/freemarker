@@ -27283,6 +27283,39 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>Added
               <literal>Constants.EMPTY_KEY_VALUE_PAIR_ITERATOR</literal></para>
             </listitem>
+
+            <listitem>
+              <para>Improved/fixed <literal>TemplateTransformModel</literal>
+              behavior (this is a legacy interface that's not used much in
+              user code):</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>Writer
+                  TemplateTransformModel.getWriter(Writer out, Map
+                  args)</literal> can now return the <literal>out</literal>
+                  parameter as is, as FreeMarker now recognizes that it's the
+                  same object and so won't call <literal>close()</literal> on
+                  it after the end tag.</para>
+                </listitem>
+
+                <listitem>
+                  <para>When <link
+                  linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incomplatible_improvements</literal></link>
+                  is set to 2.3.27 (or higher), and the returned
+                  <literal>Writer</literal> implements
+                  <literal>TransformControl</literal>, exceptions that are
+                  used internally for flow control (for
+                  <literal>&lt;#return&gt;</literal>,
+                  <literal>&lt;#break&gt;</literal>, etc.) won't be passed to
+                  <literal>TransformControl.onError(Throwable)</literal>
+                  anymore. Earlier, if <literal>onError</literal> didn't
+                  rethrow the exception (though almost all implementation
+                  does), you couldn't use said directives inside the
+                  transformed block.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
           </itemizedlist>
         </section>
       </section>

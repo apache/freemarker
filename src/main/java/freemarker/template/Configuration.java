@@ -22,6 +22,7 @@ package freemarker.template;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLConnection;
 import java.text.DecimalFormat;
@@ -850,6 +851,15 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *          {@link #setWrapUncheckedExceptions(boolean) wrap_unchecked_exceptions} to {@code true} (see more there),
      *          but this is more backward compatible, as it avoids wrapping unchecked exceptions that the calling
      *          application is likely to catch specifically (like application-specific unchecked exceptions).
+     *       <li><p>
+     *          When the {@link Writer} returned by {@link TemplateTransformModel#getWriter(Writer, Map)} implements
+     *          {@link TransformControl}, exceptions that are used internally by FreeMarker for flow control (for
+     *          {@code <#return>}, {@code <#break>}, etc.) won't be passed to
+     *          {@link TransformControl#onError(Throwable)} anymore. Earlier, if {@code onError} didn't rethrow the
+     *          exception (though almost all implementation does), you couldn't use said directives inside the
+     *          transformed block. It's very unlikely that user code is affected by this, partially because these aren't
+     *          commonly implemented interfaces (especially not {@link TransformControl}), and because it's unlikely
+     *          that templates utilize the the bug that's not fixed.
      *     </ul>
      *   </li>
      * </ul>

@@ -492,7 +492,10 @@ public final class Environment extends Configurable {
                 }
             } catch (Throwable t) {
                 try {
-                    if (tc != null) {
+                    if (tc != null
+                            && !(t instanceof FlowControlException
+                                    && getConfiguration().getIncompatibleImprovements().intValue()
+                                    >= _TemplateAPI.VERSION_INT_2_3_27)) {
                         tc.onError(t);
                     } else {
                         throw t;
@@ -515,7 +518,9 @@ public final class Environment extends Configurable {
                 }
             } finally {
                 out = prevOut;
-                tw.close();
+                if (prevOut != tw) {
+                    tw.close();
+                }
             }
         } catch (TemplateException te) {
             handleTemplateException(te);
