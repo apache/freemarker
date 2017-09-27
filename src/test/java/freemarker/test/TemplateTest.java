@@ -22,6 +22,7 @@ package freemarker.test;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.io.FilterWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -145,9 +146,40 @@ public abstract class TemplateTest {
     
     protected String getOutput(Template t) throws TemplateException, IOException {
         StringWriter out = new StringWriter();
-        t.process(getDataModel(), out);
-        String actualOut = out.toString();
-        return actualOut;
+        t.process(getDataModel(), new FilterWriter(out) {
+            private boolean closed;
+
+            @Override
+            public void write(int c) throws IOException {
+                checkNotClosed();
+                super.write(c);
+            }
+
+            @Override
+            public void write(char[] cbuf, int off, int len) throws IOException {
+                checkNotClosed();
+                super.write(cbuf, off, len);
+            }
+
+            @Override
+            public void write(String str, int off, int len) throws IOException {
+                checkNotClosed();
+                super.write(str, off, len);
+            }
+
+            @Override
+            public void close() throws IOException {
+                super.close();
+                closed = true;
+            }
+            
+            private void checkNotClosed() throws IOException {
+                if (closed) {
+                    throw new IOException("Writer is already closed");
+                }
+            }
+        });
+        return out.toString();
     }
     
     protected Configuration createConfiguration() throws Exception {
