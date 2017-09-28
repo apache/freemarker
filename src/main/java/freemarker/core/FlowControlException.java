@@ -5,5 +5,13 @@ package freemarker.core;
  */
 @SuppressWarnings("serial")
 class FlowControlException extends RuntimeException {
-    //
+
+    FlowControlException() {
+        super();
+    }
+
+    FlowControlException(String message) {
+        super(message);
+    }
+    
 }
