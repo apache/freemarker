@@ -28,7 +28,11 @@ import org.apache.freemarker.core.util.CallableUtils;
 public interface TemplateDirectiveModel extends TemplateCallableModel {
 
     /**
-     * Invokes the directive.
+     * Invokes the callable object.
+     * <p>
+     * This method shouldn't deliberately throw {@link RuntimeException}, nor {@link IOException} that wasn't caused by
+     * writing to the output. Such exceptions should be catched inside the method and wrapped inside a
+     * {@link TemplateException}. 
      *
      * @param args
      *         The array of argument values. Not {@code null}. If a parameter was omitted on the caller side, the
@@ -55,10 +59,10 @@ public interface TemplateDirectiveModel extends TemplateCallableModel {
      *         specifically allow that, typically, implementations that are just adapters towards FreeMarker-unaware
      *         callables (for example, {@link JavaMethodModel} is like that).
      *
-     * @throws TemplateException
-     *         If any problem occurs that's not an {@link IOException} during writing the template output.
-     * @throws IOException
-     *         When writing the template output fails.
+     * @throws TemplateException If any problem occurs that's not an {@link IOException} during writing the template
+     *          output.
+     * @throws IOException When writing the template output fails. Other {@link IOException}-s should be catched in this
+     *          method and wrapped into {@link TemplateException}.
      */
     void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
             throws TemplateException, IOException;

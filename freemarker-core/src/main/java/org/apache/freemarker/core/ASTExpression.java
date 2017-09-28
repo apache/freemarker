@@ -67,7 +67,14 @@ abstract class ASTExpression extends ASTNode {
     }
     
     final TemplateModel eval(Environment env) throws TemplateException {
-        return constantValue != null ? constantValue : _eval(env);
+        try {
+            return constantValue != null ? constantValue : _eval(env);
+        } catch (FlowControlException | TemplateException e) {
+            throw e;
+        } catch (Exception e) {
+                throw new TemplateException(
+                        this, e, env, "Expression has thrown an unchecked exception; see the cause exception.");
+        }
     }
     
     String evalAndCoerceToPlainText(Environment env) throws TemplateException {

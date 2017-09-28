@@ -57,8 +57,9 @@ public interface CallPlace {
      * Executes the nested content; it there's none, it just does nothing.
      *
      * @param nestedContentArgs
-     *         The nested content parameter values to pass to the nested content (as in {@code <@foo bar; i, j>${i},
-     *         ${j}</@foo>} there are 2 such parameters, whose value you set here), or {@code null} if there's none.
+     *         The nested content parameter values to pass to the nested content (as in <code>&lt;@foo bar; i, jgt;${i},
+     *         ${j}&lt;/@foo&gt;</code> there are 2 such parameters, whose value you set here), or {@code null} if
+     *         there's none.
      *         This array must be {@link #getNestedContentParameterCount()} long, or else FreeMarker will throw an
      *         {@link TemplateException} with a descriptive error message that tells to user that they need to declare
      *         that many nested content parameters as the length of this array. If you want to allow the  caller to not

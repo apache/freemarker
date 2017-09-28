@@ -20,13 +20,18 @@
 package org.apache.freemarker.core;
 
 /**
- * Used for implementing #break and #continue. 
+ * Exception that's not really an exception, just used for flow control.
  */
-// TODO [FM3] This is not a good mechanism (like what if we have <#list ...><@m><#break><@></#list>, and inside `m`
-// there's <#list ...><#nested></#list>)
-class BreakOrContinueException extends FlowControlException {
-    static final BreakOrContinueException BREAK_INSTANCE = new BreakOrContinueException();
-    static final BreakOrContinueException CONTINUE_INSTANCE = new BreakOrContinueException();
-    
-    private BreakOrContinueException() { }
+// TODO [FM3] Can we solve controlling program flow without exceptions?
+@SuppressWarnings("serial")
+class FlowControlException extends RuntimeException {
+
+    FlowControlException() {
+        super();
+    }
+
+    FlowControlException(String message) {
+        super(message);
+    }
+
 }

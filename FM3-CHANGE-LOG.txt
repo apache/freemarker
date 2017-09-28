@@ -268,7 +268,8 @@ Core / Configuration
     DefaultTemplateNameFormat24 was renamed to DefaultTemplateNameFormat.
 - Removed the logTemplateExceptions (log_template_exceptions) setting. FreeMarker now behaves as if it was false.
   When a FreeMarker method throws an exception, the caller is responsible for either logging it or letting it bubble up.
-- Removed the strict_syntax setting, and so also the support for FTL tags without #. This was a FreeMarker 1.x
+- Removed the wrapUncheckedExceptions setting. FreeMarker now behaves as if it was true.
+- Removed the strictSyntax setting, and so also the support for FTL tags without #. This was a FreeMarker 1.x
   compatibility option.
 - Renamed the `cacheStorage` Configuration setting to `templateCacheStorage`.
 - Renamed the `localizedLookup` Configuration setting to `localizedTemplateLookup`.

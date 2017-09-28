@@ -30,6 +30,7 @@ import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util.BugException;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.CommonSupplier;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util._StringUtils;
@@ -122,15 +123,24 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
                 positionalArgs, namedArgs, argsLayout, callableValue,
                 false, env);
 
-        if (directive != null) {
-            directive.execute(execArgs, this, env.getOut(), env);
-        } else {
-            TemplateModel result = function.execute(execArgs, this, env);
-            if (result == null) {
-                throw new TemplateException(env, "Function has returned no value (or null)");
+        try {
+            if (directive != null) {
+                directive.execute(execArgs, this, env.getOut(), env);
+            } else {
+                TemplateModel result = function.execute(execArgs, this, env);
+                if (result == null) {
+                    throw new TemplateException(env, "Function has returned no value (or null)");
+                }
+                // TODO [FM3] Implement it when we have a such language... it should work like `${f()}`.
+                throw new BugException("Top-level function call not yet implemented");
             }
-            // TODO [FM3] Implement it when we have a such language... it should work like `${f()}`.
-            throw new BugException("Top-level function call not yet implemented");
+        } catch (TemplateException | FlowControlException | IOException e) {
+            throw e;
+        } catch (Exception e) {
+            throw CallableUtils.newGenericExecuteException(
+                    "An unchecked exception was thrown; see the cause exception",
+                    directive != null ? directive : function, directive == null,
+                    e);
         }
 
         return null;
@@ -315,6 +325,7 @@ class ASTDynamicTopLevelCall extends ASTDirective implements CallPlace  {
         return null;
     }
 
+    @Override
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     @SuppressFBWarnings(value={ "IS2_INCONSISTENT_SYNC", "DC_DOUBLECHECK" }, justification="Performance tricks")
     public Object getOrCreateCustomData(Object providerIdentity, CommonSupplier<?> supplier)

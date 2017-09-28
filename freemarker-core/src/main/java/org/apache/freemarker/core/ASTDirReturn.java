@@ -60,7 +60,7 @@ final class ASTDirReturn extends ASTDirective {
         return "#return";
     }
     
-    public static class Return extends RuntimeException {
+    public static class Return extends FlowControlException {
         static final Return INSTANCE = new Return();
         private Return() {
         }
