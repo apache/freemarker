@@ -6300,9 +6300,9 @@ That's all.</programlisting>
         beginning of the application (possibly servlet) life-cycle:</para>
 
         <programlisting role="unspecified">// Create your Configuration instance, and specify if up to what FreeMarker
-// version (here 2.3.25) do you want to apply the fixes that are not 100%
+// version (here 2.3.27) do you want to apply the fixes that are not 100%
 // backward-compatible. See the Configuration JavaDoc for details.
-Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
+Configuration cfg = new Configuration(Configuration.VERSION_2_3_27);
 
 // Specify the source where the template files come from. Here I set a
 // plain directory for it, but non-file-system sources are possible too:
@@ -6317,7 +6317,10 @@ cfg.setDefaultEncoding("UTF-8");
 cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 
 // Don't log exceptions inside FreeMarker that it will thrown at you anyway:
-cfg.setLogTemplateExceptions(false);</programlisting>
+cfg.setLogTemplateExceptions(false);
+
+// Wrap unchecked exceptions thrown during template processing into TemplateException-s.
+cfg.setWrapUncheckedExceptions(true);</programlisting>
 
         <para>From now you should use this <emphasis>single</emphasis>
         configuration instance (i.e., its a singleton). Note however that if a
@@ -6589,11 +6592,12 @@ public class Test {
         /* You should do this ONLY ONCE in the whole application life-cycle:        */
 
         /* Create and adjust the configuration singleton */
-        Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_27);
         cfg.setDirectoryForTemplateLoading(new File("<replaceable>/where/you/store/templates</replaceable>"));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
         cfg.setLogTemplateExceptions(false);
+        cfg.setWrapUncheckedExceptions(true);
 
         /* ------------------------------------------------------------------------ */
         /* You usually do these for MULTIPLE TIMES in the application life-cycle:   */
@@ -27053,10 +27057,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>New directive: <literal>continue</literal>. This can be
-              used inside the <literal>list</literal> directive to skip to the
-              next iteration (similarly as in Java). <link
-              linkend="ref.directive.list.continue">See more...</link></para>
+              <para>New directive: <literal>continue</literal> (<link
+              xlink:href="https://sourceforge.net/p/freemarker/feature-requests/79/">sf.net
+              #79</link>). This can be used inside the <literal>list</literal>
+              directive to skip to the next iteration (similarly as in Java).
+              <link linkend="ref.directive.list.continue">See
+              more...</link></para>
             </listitem>
 
             <listitem>
@@ -27073,11 +27079,12 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>New built-in, <literal>sequence</literal>. This can be
-              used to work around situations where a listable value lacks some
-              features that you need in the template (like it can't be listed
-              twice, it can't tell its size, etc.), and you can't modify the
-              data-model to fix the problem. <link
+              <para>New built-in, <literal>sequence</literal> (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-73">FREEMARKER-73</link>).
+              This can be used to work around situations where a listable
+              value lacks some features that you need in the template (like it
+              can't be listed twice, it can't tell its size, etc.), and you
+              can't modify the data-model to fix the problem. <link
               linkend="ref_builtin_sequence">See more...</link></para>
             </listitem>
 
@@ -27116,6 +27123,28 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para>Added new configuration setting (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-48">FREEMARKER-48</link>),
+              <literal>wrap_unchecked_exceptions</literal>
+              (<literal>Configurable.setWrapUncheckedExceptions(boolean)</literal>).
+              When this is <literal>true</literal>, unchecked exceptions
+              thrown during evaluating an expression or during executing a
+              custom directive will be wrapped into a
+              <literal>TemplateException</literal>-s. The advantage of that is
+              that thus the exception will include the location in the
+              template (not just the Java stack trace), and the
+              <literal>TemplateExceptionHandler</literal> will be invoked for
+              it as well. When this setting is <literal>false</literal> (which
+              is the default for backward compatibility), the the unchecked
+              exception will bubble up and thrown by
+              <literal>Template.process</literal>, just as in earlier
+              versions. (Note that plain Java methods called from templates
+              have always wrapped the thrown exception into
+              <literal>TemplateException</literal>, regardless of this
+              setting.)</para>
+            </listitem>
+
+            <listitem>
               <para>Added new configuration setting,
               <literal>attempt_exception_reporter</literal>
               (<literal>Configurable.setAttemptExceptionReporter(AttemptExceptionReporter)</literal>),
@@ -27134,6 +27163,27 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>preferIndexedReadMethod</literal>. This was added to
               address a Java 8 compatibility problem; see the bug fix entry
               below for more information.</para>
+            </listitem>
+
+            <listitem>
+              <para>When <link
+              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incomplatible_improvements</literal></link>
+              is set to 2.3.27 (or higher), the following unchecked exceptions
+              (but not their subclasses) will be wrapped into
+              <literal>TemplateException</literal>-s when thrown during
+              evaluating expressions or calling directives:
+              <literal>NullPointerException</literal>,
+              <literal>ClassCastException</literal>,
+              <literal>IndexOutOfBoundsException</literal>, and
+              <literal>InvocationTargetException</literal>. The goal of this
+              is the same as of setting the
+              <literal>wrap_unchecked_exceptions</literal> setting to
+              <literal>true</literal> (see that earlier), but this is more
+              backward compatible, as it avoids wrapping unchecked exceptions
+              that some application is likely to catch specifically (like
+              application-specific unchecked exceptions). (This is related to
+              <link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-48">FREEMARKER-48</link>.)</para>
             </listitem>
 
             <listitem>
@@ -27232,6 +27282,39 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>Added
               <literal>Constants.EMPTY_KEY_VALUE_PAIR_ITERATOR</literal></para>
+            </listitem>
+
+            <listitem>
+              <para>Improved/fixed <literal>TemplateTransformModel</literal>
+              behavior (this is a legacy interface that's not used much in
+              user code):</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>Writer
+                  TemplateTransformModel.getWriter(Writer out, Map
+                  args)</literal> can now return the <literal>out</literal>
+                  parameter as is, as FreeMarker now recognizes that it's the
+                  same object and so won't call <literal>close()</literal> on
+                  it after the end tag.</para>
+                </listitem>
+
+                <listitem>
+                  <para>When <link
+                  linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incomplatible_improvements</literal></link>
+                  is set to 2.3.27 (or higher), and the returned
+                  <literal>Writer</literal> implements
+                  <literal>TransformControl</literal>, exceptions that are
+                  used internally for flow control (for
+                  <literal>&lt;#return&gt;</literal>,
+                  <literal>&lt;#break&gt;</literal>, etc.) won't be passed to
+                  <literal>TransformControl.onError(Throwable)</literal>
+                  anymore. Earlier, if <literal>onError</literal> didn't
+                  rethrow the exception (though almost all implementation
+                  does), you couldn't use said directives inside the
+                  transformed block.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>

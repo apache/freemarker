@@ -438,6 +438,22 @@ public final class Environment extends Configurable {
         }
         try {
             directiveModel.execute(this, args, outArgs, nested);
+        } catch (FlowControlException e) {
+            throw e;
+        } catch (TemplateException e) {
+            throw e;
+        } catch (IOException e) {
+            // For backward compatibility, we assume that this is because the output Writer has thrown it.
+            throw e;
+        } catch (Exception e) {
+            if (EvalUtil.shouldWrapUncheckedException(e, this)) {
+                throw new _MiscTemplateException(
+                        e, this, "Directive has thrown an unchecked exception; see the cause exception.");
+            } else if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            } else {
+                throw new UndeclaredThrowableException(e);
+            }
         } finally {
             if (outArgs.length > 0) {
                 localContextStack.pop();
@@ -476,7 +492,10 @@ public final class Environment extends Configurable {
                 }
             } catch (Throwable t) {
                 try {
-                    if (tc != null) {
+                    if (tc != null
+                            && !(t instanceof FlowControlException
+                                    && getConfiguration().getIncompatibleImprovements().intValue()
+                                    >= _TemplateAPI.VERSION_INT_2_3_27)) {
                         tc.onError(t);
                     } else {
                         throw t;
@@ -485,16 +504,23 @@ public final class Environment extends Configurable {
                     throw e;
                 } catch (IOException e) {
                     throw e;
-                } catch (RuntimeException e) {
-                    throw e;
                 } catch (Error e) {
                     throw e;
                 } catch (Throwable e) {
-                    throw new UndeclaredThrowableException(e);
+                    if (EvalUtil.shouldWrapUncheckedException(e, this)) {
+                        throw new _MiscTemplateException(
+                                e, this, "Transform has thrown an unchecked exception; see the cause exception.");
+                    } else if (e instanceof RuntimeException) {
+                        throw (RuntimeException) e;
+                    } else {
+                        throw new UndeclaredThrowableException(e);
+                    }
                 }
             } finally {
                 out = prevOut;
-                tw.close();
+                if (prevOut != tw) {
+                    tw.close();
+                }
             }
         } catch (TemplateException te) {
             handleTemplateException(te);

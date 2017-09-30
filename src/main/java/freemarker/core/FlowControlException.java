@@ -19,12 +19,17 @@
 package freemarker.core;
 
 /**
- * Used for implementing #break and #continue. 
+ * Exception that's not really an exception, just used for flow control.
  */
-class BreakOrContinueException extends FlowControlException {
+@SuppressWarnings("serial")
+class FlowControlException extends RuntimeException {
+
+    FlowControlException() {
+        super();
+    }
+
+    FlowControlException(String message) {
+        super(message);
+    }
     
-    static final BreakOrContinueException BREAK_INSTANCE = new BreakOrContinueException();
-    static final BreakOrContinueException CONTINUE_INSTANCE = new BreakOrContinueException();
-    
-    private BreakOrContinueException() { }
 }

@@ -1213,6 +1213,15 @@ public class ConfigurationTest extends TestCase {
         assertEquals(false, cfg.getLogTemplateExceptions());
     }
 
+    public void testSetWrapUncheckedExceptionsViaSetSettingAPI() throws TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_27);
+        assertEquals(false, cfg.getWrapUncheckedExceptions());
+        cfg.setSetting(Configurable.WRAP_UNCHECKED_EXCEPTIONS_KEY_CAMEL_CASE, "true");
+        assertEquals(true, cfg.getWrapUncheckedExceptions());
+        cfg.setSetting(Configurable.WRAP_UNCHECKED_EXCEPTIONS_KEY_SNAKE_CASE, "false");
+        assertEquals(false, cfg.getWrapUncheckedExceptions());
+    }
+    
     public void testSetAttemptExceptionReporter() throws TemplateException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
         assertEquals(AttemptExceptionReporter.LOG_ERROR_REPORTER, cfg.getAttemptExceptionReporter());

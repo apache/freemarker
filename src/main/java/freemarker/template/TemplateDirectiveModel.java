@@ -40,6 +40,11 @@ public interface TemplateDirectiveModel extends TemplateModel {
     /**
      * Executes this user-defined directive; called by FreeMarker when the user-defined
      * directive is called in the template.
+     * 
+     * <p>This method should not throw {@link RuntimeException}, nor {@link IOException} that wasn't caused by writing
+     * to the output. Such exceptions should be catched inside the method and wrapped inside a
+     * {@link TemplateException}. (Note that setting {@link Configuration#setWrapUncheckedExceptions(boolean)} to
+     * {@code true} can mitigate the negative effects of implementations that throw {@link RuntimeException}-s.) 
      *
      * @param env the current processing environment. Note that you can access
      * the output {@link java.io.Writer Writer} by {@link Environment#getOut()}.
@@ -61,7 +66,8 @@ public interface TemplateDirectiveModel extends TemplateModel {
      *
      * @throws TemplateException If any problem occurs that's not an {@link IOException} during writing the template
      *          output.
-     * @throws IOException When writing the template output fails.
+     * @throws IOException When writing the template output fails. Other {@link IOException}-s should be catched in this
+     *          method and wrapped into {@link TemplateException}.   
      */
    public void execute(Environment env, Map params, TemplateModel[] loopVars, 
             TemplateDirectiveBody body) throws TemplateException, IOException;

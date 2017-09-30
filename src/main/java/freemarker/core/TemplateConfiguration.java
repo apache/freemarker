@@ -198,6 +198,9 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         if (tc.isLogTemplateExceptionsSet()) {
             setLogTemplateExceptions(tc.getLogTemplateExceptions());
         }
+        if (tc.isWrapUncheckedExceptionsSet()) {
+            setWrapUncheckedExceptions(tc.getWrapUncheckedExceptions());
+        }
         if (tc.isNamingConventionSet()) {
             setNamingConvention(tc.getNamingConvention());
         }
@@ -330,6 +333,9 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         }
         if (isLogTemplateExceptionsSet() && !template.isLogTemplateExceptionsSet()) {
             template.setLogTemplateExceptions(getLogTemplateExceptions());
+        }
+        if (isWrapUncheckedExceptionsSet() && !template.isWrapUncheckedExceptionsSet()) {
+            template.setWrapUncheckedExceptions(getWrapUncheckedExceptions());
         }
         if (isNewBuiltinClassResolverSet() && !template.isNewBuiltinClassResolverSet()) {
             template.setNewBuiltinClassResolver(getNewBuiltinClassResolver());
@@ -634,6 +640,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
                 || isLazyAutoImportsSet()
                 || isLocaleSet()
                 || isLogTemplateExceptionsSet()
+                || isWrapUncheckedExceptionsSet()
                 || isNewBuiltinClassResolverSet()
                 || isNumberFormatSet()
                 || isObjectWrapperSet()

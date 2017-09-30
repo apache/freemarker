@@ -62,7 +62,7 @@ public final class ReturnInstruction extends TemplateElement {
         return "#return";
     }
     
-    public static class Return extends RuntimeException {
+    public static class Return extends FlowControlException {
         static final Return INSTANCE = new Return();
         private Return() {
         }

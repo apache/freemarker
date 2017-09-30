@@ -130,7 +130,7 @@ class ThreadInterruptionSupportTemplatePostProcessor extends TemplatePostProcess
      * <p>ATTENTION: This is used by https://github.com/kenshoo/freemarker-online. Don't break backward
      * compatibility without updating that project too! 
      */
-    static class TemplateProcessingThreadInterruptedException extends RuntimeException {
+    static class TemplateProcessingThreadInterruptedException extends FlowControlException {
         
         TemplateProcessingThreadInterruptedException() {
             super("Template processing thread \"interrupted\" flag was set.");

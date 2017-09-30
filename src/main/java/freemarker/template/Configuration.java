@@ -22,6 +22,8 @@ package freemarker.template;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URLConnection;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -516,6 +518,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private boolean templateExceptionHandlerExplicitlySet;
     private boolean attemptExceptionReporterExplicitlySet;
     private boolean logTemplateExceptionsExplicitlySet;
+    private boolean wrapUncheckedExceptionsExplicitlySet;
     private boolean localeExplicitlySet;
     private boolean defaultEncodingExplicitlySet;
     private boolean timeZoneExplicitlySet;
@@ -839,7 +842,24 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *       <li><p>
      *          {@link BeansWrapper} and {@link DefaultObjectWrapper} now prefers the non-indexed JavaBean property
      *          read method over the indexed read method when Java 8 exposes both;
-     *          see {@link BeansWrapper#BeansWrapper(Version)}. 
+     *          see {@link BeansWrapper#BeansWrapper(Version)}.
+     *       <li><p>
+     *          The following unchecked exceptions (but not their subclasses) will be wrapped into
+     *          {@link TemplateException}-s when thrown during evaluating expressions or calling directives:
+     *          {@link NullPointerException}, {@link ClassCastException}, {@link IndexOutOfBoundsException}, and
+     *          {@link InvocationTargetException}. The goal of this is the same as of setting
+     *          {@link #setWrapUncheckedExceptions(boolean) wrap_unchecked_exceptions} to {@code true} (see more there),
+     *          but this is more backward compatible, as it avoids wrapping unchecked exceptions that the calling
+     *          application is likely to catch specifically (like application-specific unchecked exceptions).
+     *       <li><p>
+     *          When the {@link Writer} returned by {@link TemplateTransformModel#getWriter(Writer, Map)} implements
+     *          {@link TransformControl}, exceptions that are used internally by FreeMarker for flow control (for
+     *          {@code <#return>}, {@code <#break>}, etc.) won't be passed to
+     *          {@link TransformControl#onError(Throwable)} anymore. Earlier, if {@code onError} didn't rethrow the
+     *          exception (though almost all implementation does), you couldn't use said directives inside the
+     *          transformed block. It's very unlikely that user code is affected by this, partially because these aren't
+     *          commonly implemented interfaces (especially not {@link TransformControl}), and because it's unlikely
+     *          that templates utilize the the bug that's not fixed.
      *     </ul>
      *   </li>
      * </ul>
@@ -983,24 +1003,33 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private boolean getDefaultLogTemplateExceptions() {
         return getDefaultLogTemplateExceptions(getIncompatibleImprovements());
     }
+
+    private boolean getDefaultWrapUncheckedExceptions() {
+        return getDefaultWrapUncheckedExceptions(getIncompatibleImprovements());
+    }
     
     private ObjectWrapper getDefaultObjectWrapper() {
         return getDefaultObjectWrapper(getIncompatibleImprovements());
     }
     
     // Package visible as Configurable needs this to initialize the field defaults.
-    final static TemplateExceptionHandler getDefaultTemplateExceptionHandler(Version incompatibleImprovements) {
+    static TemplateExceptionHandler getDefaultTemplateExceptionHandler(Version incompatibleImprovements) {
         return TemplateExceptionHandler.DEBUG_HANDLER;
     }
 
     // Package visible as Configurable needs this to initialize the field defaults.
-    final static AttemptExceptionReporter getDefaultAttemptExceptionReporter(Version incompatibleImprovements) {
+    static AttemptExceptionReporter getDefaultAttemptExceptionReporter(Version incompatibleImprovements) {
         return AttemptExceptionReporter.LOG_ERROR_REPORTER;
     }
     
     // Package visible as Configurable needs this to initialize the field defaults.
-    final static boolean getDefaultLogTemplateExceptions(Version incompatibleImprovements) {
+    static boolean getDefaultLogTemplateExceptions(Version incompatibleImprovements) {
         return true;
+    }
+
+    // Package visible as Configurable needs this to initialize the field defaults.
+    static boolean getDefaultWrapUncheckedExceptions(Version incompatibleImprovements) {
+        return false;
     }
     
     @Override
@@ -1759,6 +1788,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }    
     
     /**
+     * {@inheritDoc}
+     * 
      * @since 2.3.22
      */
     @Override
@@ -1790,6 +1821,36 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         return logTemplateExceptionsExplicitlySet;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * @since 2.3.27
+     */
+    @Override
+    public void setWrapUncheckedExceptions(boolean value) {
+        super.setWrapUncheckedExceptions(value);
+        wrapUncheckedExceptionsExplicitlySet = true;
+    }
+    
+    /**
+     * @since 2.3.27
+     */
+    public void unsetWrapUncheckedExceptions() {
+        if (wrapUncheckedExceptionsExplicitlySet) {
+            setWrapUncheckedExceptions(getDefaultWrapUncheckedExceptions());
+            wrapUncheckedExceptionsExplicitlySet = false;
+        }
+    }
+    
+    /**
+     * Tells if {@link #setWrapUncheckedExceptions} (or equivalent) was already called on this instance.
+     * 
+     * @since 2.3.27
+     */
+    public boolean isWrapUncheckedExceptionsExplicitlySet() {
+        return wrapUncheckedExceptionsExplicitlySet;
+    }
+    
     /**
      * The getter pair of {@link #setStrictSyntaxMode}.
      */
@@ -1851,6 +1912,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
             if (!logTemplateExceptionsExplicitlySet) {
                 logTemplateExceptionsExplicitlySet = true;
                 unsetLogTemplateExceptions();
+            }
+            
+            if (!wrapUncheckedExceptionsExplicitlySet) {
+                wrapUncheckedExceptionsExplicitlySet = true;
+                unsetWrapUncheckedExceptions();
             }
             
             if (!objectWrapperExplicitlySet) {
