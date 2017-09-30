@@ -55,9 +55,7 @@ implements TemplateCollectionModel, Serializable {
     }
 
     /**
-     * @param iterable Note that this was a {@link Collection} before 2.3.27, not an {@link Iterable}
-     *
-     * @deprecated Use {@link #SimpleCollection(Iterable, ObjectWrapper)}
+     * @deprecated Use {@link #SimpleCollection(Iterable, ObjectWrapper)} instead.
      */
     @Deprecated
     public SimpleCollection(Iterable iterable) {
@@ -65,6 +63,23 @@ implements TemplateCollectionModel, Serializable {
         iterator = null;
     }
 
+    /**
+     * Same as {@link SimpleCollection#SimpleCollection(Iterable)}; kept for binary compatibility.
+     * 
+     * @deprecated Use {@link #SimpleCollection(Iterable, ObjectWrapper)} instead.
+     */
+    @Deprecated
+    public SimpleCollection(Collection collection) {
+        this((Iterable) collection);
+    }
+    
+    /**
+     * Same as {@link SimpleCollection#SimpleCollection(Iterable, ObjectWrapper)}; kept for binary compatibility.
+     */
+    public SimpleCollection(Collection collection, ObjectWrapper wrapper) {
+        this((Iterable) collection, wrapper);
+    }
+    
     public SimpleCollection(Iterator iterator, ObjectWrapper wrapper) {
         super(wrapper);
         this.iterator = iterator;
