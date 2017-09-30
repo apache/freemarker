@@ -7672,7 +7672,7 @@ public class RepeatDirective implements TemplateDirectiveModel {
             <listitem xml:id="topic.defaultObjectWrapperIcI">
               <para><literal>DefaultObjectWrapper</literal> has an
               <literal>incompatibleImprovements</literal> property, that's
-              highly recommended to set to 2.3.22 or higher (see the <link
+              highly recommended to set it to a high value (see the <link
               xlink:href="http://freemarker.org/docs/api/freemarker/template/DefaultObjectWrapper.html#DefaultObjectWrapper-freemarker.template.Version-">API
               documentation</link> for the effects). How to set it:</para>
 
@@ -7701,13 +7701,13 @@ public class RepeatDirective implements TemplateDirectiveModel {
                     <listitem>
                       <para>If you are using the builder API:</para>
 
-                      <programlisting role="unspecified">... = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_25).build()</programlisting>
+                      <programlisting role="unspecified">... = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_27).build()</programlisting>
                     </listitem>
 
                     <listitem>
                       <para>Or, if you are using the constructor:</para>
 
-                      <programlisting role="unspecified">... = new DefaultObjectWrapper(Configuration.VERSION_2_3_25)</programlisting>
+                      <programlisting role="unspecified">... = new DefaultObjectWrapper(Configuration.VERSION_2_3_27)</programlisting>
                     </listitem>
 
                     <listitem>
@@ -7716,7 +7716,7 @@ public class RepeatDirective implements TemplateDirectiveModel {
                       (<literal>*.properties</literal> file or
                       <literal>java.util.Properties</literal> object):</para>
 
-                      <programlisting role="unspecified">object_wrapper=DefaultObjectWrapper(2.3.25)</programlisting>
+                      <programlisting role="unspecified">object_wrapper=DefaultObjectWrapper(2.3.27)</programlisting>
                     </listitem>
 
                     <listitem>
@@ -7728,7 +7728,7 @@ public class RepeatDirective implements TemplateDirectiveModel {
 
                       <programlisting role="unspecified">&lt;init-param&gt;
     &lt;param-name&gt;object_wrapper&lt;/param-name&gt;
-    &lt;param-value&gt;DefaultObjectWrapper(2.3.25)&lt;/param-value&gt;
+    &lt;param-value&gt;DefaultObjectWrapper(2.3.27)&lt;/param-value&gt;
 &lt;/init-param&gt;</programlisting>
                     </listitem>
                   </itemizedlist>
@@ -7889,7 +7889,7 @@ public class MyAppObjectWrapper extends DefaultObjectWrapper {
           our object wrapper in:</para>
 
           <programlisting role="unspecified">// Where you initialize the cfg *singleton* (happens just once in the application life-cycle):
-cfg = new Configuration(Configuration.VERSION_2_3_25);
+cfg = new Configuration(Configuration.VERSION_2_3_27);
 ...
 cfg.setObjectWrapper(new MyAppObjectWrapper(cfg.getIncompatibleImprovements()));</programlisting>
 
@@ -7897,7 +7897,7 @@ cfg.setObjectWrapper(new MyAppObjectWrapper(cfg.getIncompatibleImprovements()));
           <literal>java.util.Properties</literal> instead (and let's say it's
           also a <literal>.properties</literal> file):</para>
 
-          <programlisting role="unspecified">object_wrapper=com.example.myapp.freemarker.MyAppObjectWrapper(2.3.25)</programlisting>
+          <programlisting role="unspecified">object_wrapper=com.example.myapp.freemarker.MyAppObjectWrapper(2.3.27)</programlisting>
         </section>
       </section>
     </chapter>
@@ -7961,7 +7961,7 @@ cfg.setObjectWrapper(new MyAppObjectWrapper(cfg.getIncompatibleImprovements()));
         the configuration with the <literal>setSharedVariable</literal>
         methods:</para>
 
-        <programlisting role="unspecified">Configuration cfg = new Configuration(Configuration.VERSION_2_3_25);
+        <programlisting role="unspecified">Configuration cfg = new Configuration(Configuration.VERSION_2_3_27);
 <replaceable>..</replaceable>.
 cfg.setSharedVariable("warp", new WarpDirective());
 cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
@@ -8162,10 +8162,10 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
             the settings with the setter methods of the
             <literal>Configuration</literal> object, fore example:</para>
 
-            <programlisting role="unspecified">Configuration myCfg = new Configuration(Configuration.VERSION_2_3_25);
+            <programlisting role="unspecified">Configuration myCfg = new Configuration(Configuration.VERSION_2_3_27);
 myCfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 myCfg.setDefaultEncoding("UTF-8");
-DefaultObjectWrapperBuilder owb = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_25);
+DefaultObjectWrapperBuilder owb = new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_27);
 owb.setForceLegacyNonListCollections(false);
 owb.setDefaultDateType(TemplateDateModel.DATETIME);
 myCfg.setObjectWrapper(owb.build());</programlisting>
@@ -8191,12 +8191,12 @@ myCfg.setObjectWrapper(owb.build());</programlisting>
     class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"&gt;
   &lt;property name="freemarkerSettings"&gt;
     &lt;props&gt;
-      &lt;prop key="incompatible_improvements"&gt;2.3.25&lt;/prop&gt;
+      &lt;prop key="incompatible_improvements"&gt;2.3.27&lt;/prop&gt;
       &lt;prop key="template_exception_handler"&gt;rethrow&lt;/prop&gt;
       &lt;prop key="default_encoding"&gt;UTF-8&lt;/prop&gt;
       &lt;prop key="object_wrapper"&gt;
         DefaultObjectWrapper(
-                2.3.25,
+                2.3.27,
                 forceLegacyNonListCollections = false,
                 defaultDateType = freemarker.template.TemplateDateModel.DATETIME)
       &lt;/prop&gt;
@@ -8208,11 +8208,11 @@ myCfg.setObjectWrapper(owb.build());</programlisting>
             which looks for a <literal>freemarker.properties</literal> in the
             classpath:</para>
 
-            <programlisting role="unspecified">incompatible_improvements=2.3.25
+            <programlisting role="unspecified">incompatible_improvements=2.3.27
 template_exception_handler=rethrow
 default_encoding=UTF-8
 object_wrapper=DefaultObjectWrapper( \
-        2.3.25, \
+        2.3.27, \
         forceLegacyNonListCollections = false, \
         defaultDateType = freemarker.template.TemplateDateModel.DATETIME)</programlisting>
 
@@ -10049,14 +10049,14 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
               <literal>freemarker.template.Configuration</literal> object
               like:</para>
 
-              <programlisting role="unspecified">... = new Configuration(Configuration.VERSION_2_3_25)</programlisting>
+              <programlisting role="unspecified">... = new Configuration(Configuration.VERSION_2_3_27)</programlisting>
             </listitem>
 
             <listitem>
               <para>Or, alter the <literal>Configuration</literal> singleton
               where you initialize its other settings like:</para>
 
-              <programlisting role="unspecified">cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_25)</programlisting>
+              <programlisting role="unspecified">cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_27)</programlisting>
             </listitem>
 
             <listitem>
@@ -10064,7 +10064,7 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
               (<literal>*.properties</literal> file or
               <literal>java.util.Properties</literal> object), add:</para>
 
-              <programlisting role="unspecified">incompatible_improvements=2.3.25</programlisting>
+              <programlisting role="unspecified">incompatible_improvements=2.3.27</programlisting>
             </listitem>
 
             <listitem>
@@ -10075,7 +10075,7 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
 
               <programlisting role="unspecified">&lt;init-param&gt;
     &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
-    &lt;param-value&gt;2.3.25&lt;/param-value&gt;
+    &lt;param-value&gt;2.3.27&lt;/param-value&gt;
 &lt;/init-param&gt;</programlisting>
             </listitem>
           </itemizedlist>
@@ -11281,7 +11281,7 @@ TemplateHashModel roundingModeEnums =
   &lt;!-- FreeMarker engine settings: --&gt;
   &lt;init-param&gt;
     &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
-    &lt;param-value&gt;2.3.25&lt;/param-value&gt;
+    &lt;param-value&gt;2.3.27&lt;/param-value&gt;
     &lt;!--
       Recommended to set to a high value.
       See: http://freemarker.org/docs/pgui_config_incompatible_improvements.html
