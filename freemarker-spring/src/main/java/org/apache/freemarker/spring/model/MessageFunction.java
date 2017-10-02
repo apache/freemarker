@@ -102,7 +102,7 @@ class MessageFunction extends AbstractSpringTemplateFunctionModel {
         final MessageSource messageSource = getMessageSource(requestContext);
 
         if (messageSource == null) {
-            throw CallableUtils.newGenericExecuteException("MessageSource not found from the request context.", this);
+            throw CallableUtils.newGenericExecuteException("MessageSource not found in the request context.", this);
         }
 
         String message = null;
