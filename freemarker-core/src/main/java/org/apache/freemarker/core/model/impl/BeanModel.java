@@ -19,8 +19,6 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.beans.IndexedPropertyDescriptor;
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -180,21 +178,9 @@ public class BeanModel
         }
 
         TemplateModel resultModel = UNKNOWN;
-        if (desc instanceof PropertyDescriptor) {
-            PropertyDescriptor pd = (PropertyDescriptor) desc;
-            Method readMethod = pd.getReadMethod();
-            if (readMethod != null) {
-                // Unlike in FreeMarker 2, we prefer the normal read method even if there's an indexed read method.
-                resultModel = wrapper.invokeMethod(object, readMethod, null);
-                // cachedModel remains null, as we don't cache these
-            } else if (desc instanceof IndexedPropertyDescriptor) {
-                // In FreeMarker 2 we have exposed such indexed properties as sequences, but they can't support
-                // the getCollectionSize() method, so we have discontinued that. People has to call the indexed read
-                // method like any other method.
-                resultModel = UNKNOWN;
-            } else {
-                throw new IllegalStateException("PropertyDescriptor.readMethod shouldn't be null");
-            }
+        if (desc instanceof FastPropertyDescriptor) {
+            // Unlike in FreeMarker 2, we always use the normal read method, and ignore the indexed read method.
+            resultModel = wrapper.invokeMethod(object, ((FastPropertyDescriptor) desc).getReadMethod(), null);
         } else if (desc instanceof Field) {
             resultModel = wrapper.wrap(((Field) desc).get(object));
             // cachedModel remains null, as we don't cache these
