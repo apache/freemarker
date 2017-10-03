@@ -27045,7 +27045,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <section xml:id="versions_2_3_27">
         <title>2.3.27 (incubating at Apache)</title>
 
-        <para>Release date: 2017-10-02 + release process</para>
+        <para>Release date: 2017-10-03 + release process</para>
 
         <para><emphasis role="bold">This is a stable, final
         release.</emphasis> The <quote>incubating</quote> suffix is required
