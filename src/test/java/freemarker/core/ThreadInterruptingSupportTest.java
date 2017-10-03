@@ -37,15 +37,15 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.utility.NullWriter;
 
-public class TheadInterruptingSupportTest {
+public class ThreadInterruptingSupportTest {
     
-    private static final Logger LOG = LoggerFactory.getLogger(TheadInterruptingSupportTest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ThreadInterruptingSupportTest.class);
 
     private static final int TEMPLATE_INTERRUPTION_TIMEOUT = 5000;
     private final Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
 
     @Test
-    public void test() throws IOException, InterruptedException {
+    public void test() throws IOException, InterruptedException, TemplateException {
         assertCanBeInterrupted("<#list 1.. as x></#list>");
         assertCanBeInterrupted("<#list 1.. as x>${x}</#list>");
         assertCanBeInterrupted("<#list 1.. as x>t${x}</#list>");
@@ -61,12 +61,22 @@ public class TheadInterruptingSupportTest {
         assertCanBeInterrupted("<#attempt><#list 1.. as _></#list><#recover>suppress</#attempt>");
     }
 
-    private void assertCanBeInterrupted(final String templateSourceCode) throws IOException, InterruptedException {
+    private void assertCanBeInterrupted(final String templateSourceCode)
+            throws IOException, InterruptedException, TemplateException {
         TemplateRunnerThread trt = new TemplateRunnerThread(templateSourceCode);
         trt.start();
         synchronized (trt) {
-            while (!trt.isStarted()) {
+            while (!trt.isStartedOrFailed()) {
                 trt.wait();
+            }
+        }
+        if (trt.failedWith != null) {
+            if (trt.failedWith instanceof TemplateException) {
+                throw (TemplateException) trt.failedWith;
+            } else if (trt.failedWith instanceof IOException) {
+                throw (IOException) trt.failedWith;
+            } else {
+                throw new RuntimeException("Template processing has failed", trt.failedWith);
             }
         }
         Thread.sleep(50); // Just to ensure (hope...) that the template execution reaches "deep" enough
@@ -79,6 +89,7 @@ public class TheadInterruptingSupportTest {
 
         private final Template template;
         private boolean started;
+        private Throwable failedWith;
         private boolean templateProcessingInterrupted;
 
         public TemplateRunnerThread(String templateSourceCode) throws IOException {
@@ -97,6 +108,17 @@ public class TheadInterruptingSupportTest {
                 }
             } catch (Throwable e) {
                 LOG.error("Template processing failed", e);
+                synchronized (TemplateRunnerThread.this) {
+                    failedWith = e;
+                    TemplateRunnerThread.this.notifyAll();
+                }
+            } finally {
+                synchronized (TemplateRunnerThread.this) {
+                    if (!started && failedWith == null) {
+                        failedWith = new IllegalStateException("Start directive was never called");
+                        TemplateRunnerThread.this.notifyAll();
+                    }
+                }
             }
         }
 
@@ -104,8 +126,8 @@ public class TheadInterruptingSupportTest {
             return templateProcessingInterrupted;
         }
         
-        public synchronized boolean isStarted() {
-            return started;
+        public synchronized boolean isStartedOrFailed() {
+            return started || failedWith != null;
         }
         
         public TemplateDirectiveModel getStartedDirective() {

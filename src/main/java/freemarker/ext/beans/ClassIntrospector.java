@@ -218,7 +218,7 @@ class ClassIntrospector {
      * Gets the class introspection data from {@link #cache}, automatically creating the cache entry if it's missing.
      * 
      * @return A {@link Map} where each key is a property/method/field name (or a special {@link Object} key like
-     *         {@link #CONSTRUCTORS_KEY}), each value is a {@link PropertyDescriptor} or {@link Method} or
+     *         {@link #CONSTRUCTORS_KEY}), each value is a {@link FastPropertyDescriptor} or {@link Method} or
      *         {@link OverloadedMethods} or {@link Field} (but better check the source code...).
      */
     Map<Object, Object> get(Class<?> clazz) {
@@ -335,8 +335,7 @@ class ClassIntrospector {
             int mdsSize = mds.size();
             IdentityHashMap<Method, Void> argTypesUsedByIndexerPropReaders = null;
             for (int i = mdsSize - 1; i >= 0; --i) {
-                final MethodDescriptor md = mds.get(i);
-                final Method method = getMatchingAccessibleMethod(md.getMethod(), accessibleMethods);
+                final Method method = getMatchingAccessibleMethod(mds.get(i).getMethod(), accessibleMethods);
                 if (method != null && isAllowedToExpose(method)) {
                     decision.setDefaults(method);
                     if (methodAppearanceFineTuner != null) {
@@ -350,7 +349,7 @@ class ClassIntrospector {
                     }
 
                     PropertyDescriptor propDesc = decision.getExposeAsProperty();
-                    if (propDesc != null && !(introspData.get(propDesc.getName()) instanceof PropertyDescriptor)) {
+                    if (propDesc != null && !(introspData.get(propDesc.getName()) instanceof FastPropertyDescriptor)) {
                         addPropertyDescriptorToClassIntrospectionData(
                                 introspData, propDesc, clazz, accessibleMethods);
                     }
@@ -373,7 +372,7 @@ class ClassIntrospector {
                             // Already overloaded method - add new overload
                             ((OverloadedMethods) previous).addMethod(method);
                         } else if (decision.getMethodShadowsProperty()
-                                || !(previous instanceof PropertyDescriptor)) {
+                                || !(previous instanceof FastPropertyDescriptor)) {
                             // Simple method (this far)
                             introspData.put(methodKey, method);
                             Class<?>[] replaced = getArgTypesByMethod(introspData).put(method,
@@ -661,45 +660,28 @@ class ClassIntrospector {
 
     private void addPropertyDescriptorToClassIntrospectionData(Map<Object, Object> introspData,
             PropertyDescriptor pd, Class<?> clazz, Map<MethodSignature, List<Method>> accessibleMethods) {
+        Method readMethod = getMatchingAccessibleMethod(pd.getReadMethod(), accessibleMethods);
+        if (readMethod != null && !isAllowedToExpose(readMethod)) {
+            readMethod = null;
+        }
+        
+        Method indexedReadMethod;
         if (pd instanceof IndexedPropertyDescriptor) {
-            IndexedPropertyDescriptor ipd =
-                    (IndexedPropertyDescriptor) pd;
-            Method readMethod = ipd.getIndexedReadMethod();
-            Method publicReadMethod = getMatchingAccessibleMethod(readMethod, accessibleMethods);
-            if (publicReadMethod != null && isAllowedToExpose(publicReadMethod)) {
-                try {
-                    if (readMethod != publicReadMethod) {
-                        ipd = new IndexedPropertyDescriptor(
-                                ipd.getName(), ipd.getReadMethod(),
-                                null, publicReadMethod,
-                                null);
-                    }
-                    introspData.put(ipd.getName(), ipd);
-                    getArgTypesByMethod(introspData).put(publicReadMethod, publicReadMethod.getParameterTypes());
-                } catch (IntrospectionException e) {
-                    LOG.warn("Failed creating a publicly-accessible " +
-                            "property descriptor for " + clazz.getName() +
-                            " indexed property " + pd.getName() +
-                            ", read method " + publicReadMethod,
-                            e);
-                }
+            indexedReadMethod = getMatchingAccessibleMethod(
+                    ((IndexedPropertyDescriptor) pd).getIndexedReadMethod(), accessibleMethods);
+            if (indexedReadMethod != null && !isAllowedToExpose(indexedReadMethod)) {
+                indexedReadMethod = null;
+            }
+            if (indexedReadMethod != null) {
+                getArgTypesByMethod(introspData).put(
+                        indexedReadMethod, indexedReadMethod.getParameterTypes());
             }
         } else {
-            Method readMethod = pd.getReadMethod();
-            Method publicReadMethod = getMatchingAccessibleMethod(readMethod, accessibleMethods);
-            if (publicReadMethod != null && isAllowedToExpose(publicReadMethod)) {
-                try {
-                    if (readMethod != publicReadMethod) {
-                        pd = new PropertyDescriptor(pd.getName(), publicReadMethod, null);
-                    }
-                    introspData.put(pd.getName(), pd);
-                } catch (IntrospectionException e) {
-                    LOG.warn("Failed creating a publicly-accessible " +
-                            "property descriptor for " + clazz.getName() +
-                            " property " + pd.getName() + ", read method " +
-                            publicReadMethod, e);
-                }
-            }
+            indexedReadMethod = null;
+        }
+        
+        if (readMethod != null || indexedReadMethod != null) {
+            introspData.put(pd.getName(), new FastPropertyDescriptor(readMethod, indexedReadMethod));
         }
     }
 

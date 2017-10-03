@@ -19,8 +19,6 @@
 
 package freemarker.ext.beans;
 
-import java.beans.IndexedPropertyDescriptor;
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -63,8 +61,7 @@ import freemarker.template.utility.StringUtil;
  */
 
 public class BeanModel
-implements
-    TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport {
+implements TemplateHashModelEx, AdapterTemplateModel, WrapperTemplateModel, TemplateModelWithAPISupport {
     private static final Logger LOG = Logger.getLogger("freemarker.beans");
     protected final Object object;
     protected final BeansWrapper wrapper;
@@ -218,21 +215,22 @@ implements
         }
 
         TemplateModel resultModel = UNKNOWN;
-        if (desc instanceof IndexedPropertyDescriptor) {
-            IndexedPropertyDescriptor pd = (IndexedPropertyDescriptor) desc;
-            if (!wrapper.getPreferIndexedReadMethod() && pd.getReadMethod() != null) {
+        if (desc instanceof FastPropertyDescriptor) {
+            FastPropertyDescriptor pd = (FastPropertyDescriptor) desc;
+            Method indexedReadMethod = pd.getIndexedReadMethod(); 
+            if (indexedReadMethod != null) {
+                if (!wrapper.getPreferIndexedReadMethod() && (pd.getReadMethod()) != null) {
+                    resultModel = wrapper.invokeMethod(object, pd.getReadMethod(), null);
+                    // cachedModel remains null, as we don't cache these
+                } else {
+                    resultModel = cachedModel = 
+                        new SimpleMethodModel(object, indexedReadMethod, 
+                                ClassIntrospector.getArgTypes(classInfo, indexedReadMethod), wrapper);
+                }
+            } else {
                 resultModel = wrapper.invokeMethod(object, pd.getReadMethod(), null);
                 // cachedModel remains null, as we don't cache these
-            } else {
-                Method readMethod = pd.getIndexedReadMethod(); 
-                resultModel = cachedModel = 
-                    new SimpleMethodModel(object, readMethod, 
-                            ClassIntrospector.getArgTypes(classInfo, readMethod), wrapper);
             }
-        } else if (desc instanceof PropertyDescriptor) {
-            PropertyDescriptor pd = (PropertyDescriptor) desc;
-            resultModel = wrapper.invokeMethod(object, pd.getReadMethod(), null);
-            // cachedModel remains null, as we don't cache these
         } else if (desc instanceof Field) {
             resultModel = wrapper.wrap(((Field) desc).get(object));
             // cachedModel remains null, as we don't cache these
