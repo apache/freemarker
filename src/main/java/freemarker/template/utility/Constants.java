@@ -96,7 +96,7 @@ public class Constants {
         
     }
     
-    public static final TemplateHashModelEx2 EMPTY_HASH = new EmptyHashModel();
+    public static final TemplateHashModelEx EMPTY_HASH = new EmptyHashModel();
     
     /**
      * An empty hash. Since 2.3.27, it implements {@link TemplateHashModelEx2}, before that it was only
