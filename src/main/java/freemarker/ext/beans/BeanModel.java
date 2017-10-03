@@ -220,14 +220,15 @@ implements
         TemplateModel resultModel = UNKNOWN;
         if (desc instanceof IndexedPropertyDescriptor) {
             IndexedPropertyDescriptor pd = (IndexedPropertyDescriptor) desc;
-            if (!wrapper.getPreferIndexedReadMethod() && pd.getReadMethod() != null) {
-                resultModel = wrapper.invokeMethod(object, pd.getReadMethod(), null);
+            Method readMethod;
+            if (!wrapper.getPreferIndexedReadMethod() && (readMethod = pd.getReadMethod()) != null) {
+                resultModel = wrapper.invokeMethod(object, readMethod, null);
                 // cachedModel remains null, as we don't cache these
             } else {
-                Method readMethod = pd.getIndexedReadMethod(); 
+                Method indexedReadMethod = pd.getIndexedReadMethod(); 
                 resultModel = cachedModel = 
-                    new SimpleMethodModel(object, readMethod, 
-                            ClassIntrospector.getArgTypes(classInfo, readMethod), wrapper);
+                    new SimpleMethodModel(object, indexedReadMethod, 
+                            ClassIntrospector.getArgTypes(classInfo, indexedReadMethod), wrapper);
             }
         } else if (desc instanceof PropertyDescriptor) {
             PropertyDescriptor pd = (PropertyDescriptor) desc;
