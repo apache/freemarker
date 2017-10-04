@@ -24619,14 +24619,17 @@ Test Book</programlisting>
         <section>
           <title>Using XPath expressions</title>
 
-          <note>
+          <note xml:id="topic.xpathSupportDependencies">
             <para>XPath expressions work only if <link
-            xlink:href="http://jaxen.org/">Jaxen</link> (recommended, but use
-            at least Jaxen 1.1-beta-8, not older) or <link
-            xlink:href="http://xml.apache.org/xalan/">Apache Xalan</link>
-            classes are available. (Apache Xalan classes are included in Sun
-            J2SE 1.4, 1.5 and 1.6 (and maybe later too); no separate Xalan jar
-            is needed.)</para>
+            xlink:href="http://xml.apache.org/xalan/">Apache Xalan</link> or
+            <link xlink:href="http://jaxen.org/">Jaxen</link> (at least 1.1)
+            classes are available. However, up to Java 1.8 you don't need any
+            additional dependencies, as Apache Xalan is included in Java with
+            changed package names, which FreeMarker will automatically use
+            (unless plain Apache Xalan is also present). This internal Xalan
+            isn't available anymore on OpenJDK 9, but is still available on
+            Oracle JDK/JRE 9 (at least on official stable release <quote>build
+            9+181</quote>).</para>
           </note>
 
           <note>
@@ -27217,6 +27220,23 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>java.beans.Inrospector</literal> has only exposed the
               non-indexed method when both kind of read method was
               present.</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: On OpenJDK 9 (but not on earlier versions, nor
+              on Oracle Java 9 (tested with <quote>build 9+181</quote>)), when
+              you try to use the DOM-based XML support
+              (<literal>freemarker.ext.dom.NodeModel</literal>), unless you
+              happen to have Apache Xalan in the class path, the
+              <literal>NodeModel</literal> constructor will fail with
+              <literal>IllegalAccessError</literal> because <quote>java.xml
+              does not export com.sun.org.apache.xml.internal.utils</quote>.
+              Note that while the exception is not thrown anymore in 2.3.27,
+              FreeMarker can't use the XPath support included in Open JDK 9,
+              and so templates that try to use XPath expressions (like
+              <literal>doc['//foo']</literal>) will still fail, <link
+              linkend="topic.xpathSupportDependencies">unless 3rd party XPath
+              support is present</link>.</para>
             </listitem>
 
             <listitem>

@@ -619,20 +619,35 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
         synchronized (STATIC_LOCK) {
             xpathSupportClass = null;
             jaxenXPathSupport = null;
+            
             try {
                 useXalanXPathSupport();
+            } catch (ClassNotFoundException e) {
+                // Expected
             } catch (Exception e) {
-                ; // ignore
+                LOG.debug("Failed to use Xalan XPath support.", e);
+            } catch (IllegalAccessError e) {
+                LOG.debug("Failed to use Xalan internal XPath support.", e);
             }
+            
             if (xpathSupportClass == null) try {
             	useSunInternalXPathSupport();
             } catch (Exception e) {
-            	; // ignore
+                LOG.debug("Failed to use Sun internal XPath support.", e);
+            } catch (IllegalAccessError e) {
+                // Happens on OpenJDK 9 (but not on Oracle Java 9)
+                LOG.debug("Failed to use Sun internal XPath support. "
+                        + "Tip: On Java 9+, you may need Xalan or Jaxen+Saxpath.", e);
             }
+            
             if (xpathSupportClass == null) try {
                 useJaxenXPathSupport();
+            } catch (ClassNotFoundException e) {
+                // Expected
             } catch (Exception e) {
-                ; // ignore
+                LOG.debug("Failed to use Jaxen XPath support.", e);
+            } catch (IllegalAccessError e) {
+                LOG.debug("Failed to use Jaxen XPath support.", e);
             }
         }
     }
@@ -648,9 +663,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
         synchronized (STATIC_LOCK) {
             xpathSupportClass = c;
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Using Jaxen classes for XPath support");
-        }
+        LOG.debug("Using Jaxen classes for XPath support");
     }
     
     /**
@@ -663,9 +676,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
         synchronized (STATIC_LOCK) {
             xpathSupportClass = c;
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Using Xalan classes for XPath support");
-        }
+        LOG.debug("Using Xalan classes for XPath support");
     }
     
     static public void useSunInternalXPathSupport() throws Exception {
@@ -674,9 +685,7 @@ implements TemplateNodeModelEx, TemplateHashModel, TemplateSequenceModel,
         synchronized (STATIC_LOCK) {
             xpathSupportClass = c;
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Using Sun's internal Xalan classes for XPath support");
-        }
+        LOG.debug("Using Sun's internal Xalan classes for XPath support");
     }
     
     /**
