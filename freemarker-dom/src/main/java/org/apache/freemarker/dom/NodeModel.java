@@ -458,20 +458,35 @@ abstract public class NodeModel implements TemplateNodeModelEx, TemplateHashMode
         synchronized (STATIC_LOCK) {
             xpathSupportClass = null;
             jaxenXPathSupport = null;
+            
             try {
                 useXalanXPathSupport();
+            } catch (ClassNotFoundException e) {
+                // Expected
             } catch (Exception e) {
-                // ignore
+                LOG.debug("Failed to use Xalan XPath support.", e);
+            } catch (IllegalAccessError e) {
+                LOG.debug("Failed to use Xalan internal XPath support.", e);
             }
+            
             if (xpathSupportClass == null) try {
-            	useSunInternalXPathSupport();
+                useSunInternalXPathSupport();
             } catch (Exception e) {
-                // ignore
+                LOG.debug("Failed to use Sun internal XPath support.", e);
+            } catch (IllegalAccessError e) {
+                // Happens on OpenJDK 9 (but not on Oracle Java 9)
+                LOG.debug("Failed to use Sun internal XPath support. "
+                        + "Tip: On Java 9+, you may need Xalan or Jaxen+Saxpath.", e);
             }
+            
             if (xpathSupportClass == null) try {
                 useJaxenXPathSupport();
+            } catch (ClassNotFoundException e) {
+                // Expected
             } catch (Exception e) {
-                // ignore
+                LOG.debug("Failed to use Jaxen XPath support.", e);
+            } catch (IllegalAccessError e) {
+                LOG.debug("Failed to use Jaxen XPath support.", e);
             }
         }
     }
