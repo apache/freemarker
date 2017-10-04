@@ -206,10 +206,10 @@ public class SQLTimeZoneTest extends TemplateTest {
         
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
-                + "<#setting locale='de'>\n"
+                + "<#setting locale='hu'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n",
                 "2014-07-11 Fri, 10:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
-                + "2014-07-11 Fr, 10:30:05 Do, 2014-07-12T10:30:05 Sa, 2014-07-12T10:30:05 Sa, 2014-07-12 Sa, 10:30:05 Sa\n");
+                + "2014-07-11 P, 10:30:05 Cs, 2014-07-12T10:30:05 Szo, 2014-07-12T10:30:05 Szo, 2014-07-12 Szo, 10:30:05 Szo\n");
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
                 + "<#setting date_format='yyyy-MM-dd'>\n"
@@ -232,10 +232,10 @@ public class SQLTimeZoneTest extends TemplateTest {
         cfg.setSQLDateAndTimeTimeZone(GMT_P02);
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
-                + "<#setting locale='de'>\n"
+                + "<#setting locale='hu'>\n"
                 + "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n",
                 "2014-07-12 Sat, 12:30:05 Thu, 2014-07-12T10:30:05 Sat, 2014-07-12T10:30:05 Sat, 2014-07-12 Sat, 10:30:05 Sat\n"
-                + "2014-07-12 Sa, 12:30:05 Do, 2014-07-12T10:30:05 Sa, 2014-07-12T10:30:05 Sa, 2014-07-12 Sa, 10:30:05 Sa\n");
+                + "2014-07-12 Szo, 12:30:05 Cs, 2014-07-12T10:30:05 Szo, 2014-07-12T10:30:05 Szo, 2014-07-12 Szo, 10:30:05 Szo\n");
         assertOutput(
                 "${sqlDate}, ${sqlTime}, ${sqlTimestamp}, ${javaDate?datetime}, ${javaDate?date}, ${javaDate?time}\n"
                 + "<#setting date_format='yyyy-MM-dd'>\n"

@@ -16,35 +16,39 @@
   specific language governing permissions and limitations
   under the License.
 -->
+<#-- Removes US format differences introduced in Java 9: -->
+<#function n(s)>
+  <#return s?replace('2002,', '2002')?replace('/02,', '/02')?replace(' at', '')>
+</#function>
 <#setting locale="en_US">
 <#setting time_zone="GMT">
 <#setting datetime_format="">
-${date}
-${unknownDate?datetime}
-${date?string}
-${date?string[""]}
-${date?string.short}
-${date?string.medium}
-${date?string.long}
-${date?string.short_short}
-${date?string.short_medium}
-${date?string.short_long}
-${date?string.medium_short}
-${date?string.medium_medium}
-${date?string.medium_long}
-${date?string.long_short}
-${date?string.long_medium}
-${date?string.long_long}
-${unknownDate?date}
-${date?date?string[""]}
-${date?date?string.short}
-${date?date?string.medium}
-${date?date?string.long}
-${unknownDate?time}
-${date?time?string[""]}
-${date?time?string.short}
-${date?time?string.medium}
-${date?time?string.long}
+${n(date)}
+${n(unknownDate?datetime)}
+${n(date?string)}
+${n(date?string[""])}
+${n(date?string.short)}
+${n(date?string.medium)}
+${n(date?string.long)}
+${n(date?string.short_short)}
+${n(date?string.short_medium)}
+${n(date?string.short_long)}
+${n(date?string.medium_short)}
+${n(date?string.medium_medium)}
+${n(date?string.medium_long)}
+${n(date?string.long_short)}
+${n(date?string.long_medium)}
+${n(date?string.long_long)}
+${n(unknownDate?date)}
+${n(date?date?string[""])}
+${n(date?date?string.short)}
+${n(date?date?string.medium)}
+${n(date?date?string.long)}
+${n(unknownDate?time)}
+${n(date?time?string[""])}
+${n(date?time?string.short)}
+${n(date?time?string.medium)}
+${n(date?time?string.long)}
 <#setting locale="hu_hu">
 <#setting datetime_format="long_long">
 ${date}
