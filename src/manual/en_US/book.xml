@@ -24616,10 +24616,10 @@ Test Book</programlisting>
           of node built-ins</link>.</para>
         </section>
 
-        <section>
+        <section xml:id="xgui_imperative_learn_xpath">
           <title>Using XPath expressions</title>
 
-          <note xml:id="topic.xpathSupportDependencies">
+          <note>
             <para>XPath expressions work only if <link
             xlink:href="http://xml.apache.org/xalan/">Apache Xalan</link> or
             <link xlink:href="http://jaxen.org/">Jaxen</link> (at least 1.1)
@@ -27235,7 +27235,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               FreeMarker can't use the XPath support included in Open JDK 9,
               and so templates that try to use XPath expressions (like
               <literal>doc['//foo']</literal>) will still fail, <link
-              linkend="topic.xpathSupportDependencies">unless 3rd party XPath
+              linkend="xgui_imperative_learn_xpath">unless 3rd party XPath
               support is present</link>.</para>
             </listitem>
 
