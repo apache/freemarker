@@ -21,7 +21,7 @@
   AFTER CHANGING THIS FILE don't forget to issue: ant update-deps
 -->
 <!DOCTYPE ivy-module [
-    <!ENTITY jetty.version "7.6.16.v20140903">
+    <!ENTITY jetty.version "7.6.21.v20160908">
     <!ENTITY slf4j.version "1.6.1">
     <!ENTITY spring.version "2.5.6.SEC03">
 ]>
@@ -152,6 +152,8 @@
       <exclude org="org.slf4j" name="jcl104-over-slf4j" />
       <exclude org="log4j" name="log4j" />
     </dependency>
+    <!-- Override Java 9 incompatible version (coming from displaytag): -->
+    <dependency org="commons-lang" name="commons-lang" rev="2.6" conf="test->default" />
 
     <dependency org="org.springframework" name="spring-core" rev="&spring.version;" conf="test->default">
       <exclude org="commons-logging" name="commons-logging" />
