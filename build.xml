@@ -101,7 +101,7 @@
   <filter token="version" value="${version}" />
   
   <property name="dist.dir" value="build/dist" />
-  <property name="dist.archiveBaseName" value="apache-${mavenArtifactId}-${version}" />
+  <property name="dist.archiveBaseName" value="apache-${mavenArtifactId}-${mavenVersion}" />
   <property name="dist.bin.dir" value="${dist.dir}/bin/${dist.archiveBaseName}-bin" />
   <property name="dist.src.dir" value="${dist.dir}/src/${dist.archiveBaseName}-src" />
   
