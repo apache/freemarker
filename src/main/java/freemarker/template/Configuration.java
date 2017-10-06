@@ -151,7 +151,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     
     private static final Logger CACHE_LOG = Logger.getLogger("freemarker.cache");
     
-    private static final String VERSION_PROPERTIES_PATH = "freemarker/version.properties";
+    private static final String VERSION_PROPERTIES_PATH = "/freemarker/version.properties";
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String DEFAULT_ENCODING_KEY_SNAKE_CASE = "default_encoding"; 
@@ -436,36 +436,31 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     static {
         try {
             Properties vp = new Properties();
-            InputStream ins = Configuration.class.getClassLoader()
-                    .getResourceAsStream(VERSION_PROPERTIES_PATH);
-            if (ins == null) {
-                throw new RuntimeException("Version file is missing.");
-            } else {
-                try {
-                    vp.load(ins);
-                } finally {
-                    ins.close();
-                }
-                
-                String versionString  = getRequiredVersionProperty(vp, "version");
-                
-                Date buildDate;
-                {
-                    String buildDateStr = getRequiredVersionProperty(vp, "buildTimestamp");
-                    if (buildDateStr.endsWith("Z")) {
-                        buildDateStr = buildDateStr.substring(0, buildDateStr.length() - 1) + "+0000";
-                    }
-                    try {
-                        buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US).parse(buildDateStr);
-                    } catch (java.text.ParseException e) {
-                        buildDate = null;
-                    }
-                }
-                
-                final Boolean gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(vp, "isGAECompliant"));
-                
-                VERSION = new Version(versionString, gaeCompliant, buildDate);
+            InputStream ins = ClassUtil.getReasourceAsStream(Configuration.class, VERSION_PROPERTIES_PATH);
+            try {
+                vp.load(ins);
+            } finally {
+                ins.close();
             }
+            
+            String versionString  = getRequiredVersionProperty(vp, "version");
+            
+            Date buildDate;
+            {
+                String buildDateStr = getRequiredVersionProperty(vp, "buildTimestamp");
+                if (buildDateStr.endsWith("Z")) {
+                    buildDateStr = buildDateStr.substring(0, buildDateStr.length() - 1) + "+0000";
+                }
+                try {
+                    buildDate = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US).parse(buildDateStr);
+                } catch (java.text.ParseException e) {
+                    buildDate = null;
+                }
+            }
+            
+            final Boolean gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(vp, "isGAECompliant"));
+            
+            VERSION = new Version(versionString, gaeCompliant, buildDate);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load and parse " + VERSION_PROPERTIES_PATH, e);
         }
@@ -537,6 +532,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private ConcurrentMap localeToCharsetMap = new ConcurrentHashMap();
     
     /**
+     * Same as {@link #Configuration(Version) Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS)}.
+     * 
      * @deprecated Use {@link #Configuration(Version)} instead. Note that the version can be still modified later with
      *     {@link Configuration#setIncompatibleImprovements(Version)} (or
      *     {@link Configuration#setSettings(Properties)}).  
@@ -555,11 +552,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *
      * <p>This setting value is the FreeMarker version number where the not 100% backward compatible bug fixes and
      * improvements that you want to enable were already implemented. In new projects you should set this to the
-     * FreeMarker version that you are actually using. In older projects it's also usually better to keep this high,
-     * however you better check the changes activated (find them below), at least if not only the 3rd version number
-     * (the micro version) of {@code incompatibleImprovements} is increased. Generally, as far as you only increase the
-     * last version number of this setting, the changes are always low risk. The default value is 2.3.0 to maximize
-     * backward compatibility, but that value isn't recommended.
+     * version of FreeMarker that you start the development with. In older projects it's also usually better to keep
+     * this high, however you should check the changes activated (find them below), especially if not only the 3rd
+     * version number (the micro version) of {@code incompatibleImprovements} is increased. Generally, as far as you
+     * only increase the last version number of this setting, the changes are low risk. The default value is 2.3.0 to
+     * maximize backward compatibility, but that value isn't recommended.
      * 
      * <p>Bugfixes and improvements that are fully backward compatible, also those that are important security fixes,
      * are enabled regardless of the incompatible improvements setting.
@@ -576,8 +573,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * <p>Currently the effects of this setting are:
      * <ul>
      *   <li><p>
-     *     2.3.0: This is the lowest supported value, the version used in older projects. This is the default in the
-     *     FreeMarker 2.3.x series.
+     *     2.3.0: This is the lowest supported value, the version used in very old projects. This is the default in the
+     *     FreeMarker 2.3.x series (the one used by the deprecated {@link #Configuration()} constructor) for maximum
+     *     backward compatibility.
      *   </li>
      *   <li><p>
      *     2.3.19 (or higher): Bug fix: Wrong {@code #} tags were printed as static text instead of

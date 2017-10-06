@@ -19,6 +19,9 @@
 
 package freemarker.template.utility;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -377,6 +380,51 @@ public class ClassUtil {
     public static boolean isNumerical(Class type) {
         return Number.class.isAssignableFrom(type)
                 || type.isPrimitive() && type != Boolean.TYPE && type != Character.TYPE && type != Void.TYPE;
+    }
+    
+    /**
+     * Very similar to {@link Class#getResourceAsStream(String)}, but throws {@link IOException} instead of returning
+     * {@code null}, and attempts to work around "IllegalStateException: zip file closed" issues (caused by bugs
+     * outside of FreeMarker).
+     *   
+     * @return Never {@code null} 
+     * @throws IOException If the resource wasn't found, or other {@link IOException} occurs. 
+     */
+    public static InputStream getReasourceAsStream(Class<?> baseClass, String resource) throws IOException {
+        InputStream ins;
+        try {
+            ins = baseClass.getResourceAsStream(resource);
+        } catch (IllegalStateException e) {
+            // Workaround for "IllegalStateException: zip file closed". This happens due to bugs outside of FreeMarker
+            // (sometimes caused by the caching of jar URL connection streams), but we try to work it around anyway.
+            URL url = baseClass.getResource(resource);
+            ins = url != null ? url.openStream() : null;
+        }
+        if (ins == null) {
+            throw new IOException("Class-loader resource not found (shown quoted): \""
+                    + StringUtil.jQuote(resource) + "\". The base class was " + baseClass.getName() + ".");
+        }
+        return ins;
+    }
+
+    /**
+     * Same as {@link #getReasourceAsStream(Class, String)}, but uses a {@link ClassLoader} directly instead of a
+     * {@link Class}.
+     */
+    public static InputStream getReasourceAsStream(ClassLoader classLoader, String resource)
+            throws IOException {
+        InputStream ins;
+        try {
+            ins = classLoader.getResourceAsStream(resource);
+        } catch (IllegalStateException e) {
+            URL url = classLoader.getResource(resource);
+            ins = url != null ? url.openStream() : null;
+        }
+        if (ins == null) {
+            throw new IOException("Class-loader resource not found (shown quoted): \""
+                    + StringUtil.jQuote(resource) + "\". The base ClassLoader was: " + classLoader);
+        }
+        return ins;
     }
     
 }

@@ -27349,6 +27349,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                 </listitem>
               </itemizedlist>
             </listitem>
+
+            <listitem>
+              <para>Added workaround against <quote>IllegalStateException: zip
+              file closed</quote> issues (caused by bugs outside of
+              FreeMarker) when loading resources included in the FreeMarker
+              jar (see
+              <literal>freemarker.template.utility.ClassUtil.getReasourceAsStream</literal>).</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>
