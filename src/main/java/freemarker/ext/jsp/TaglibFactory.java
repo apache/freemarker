@@ -1257,17 +1257,10 @@ public class TaglibFactory implements TemplateHashModel {
         public InputStream getInputStream() throws IOException {
             ClassLoader tccl = tryGetThreadContextClassLoader();
             if (tccl != null) {
-                final InputStream in = getClass().getResourceAsStream(resourcePath);
-                if (in != null) { 
-                    return in;
-                }
+                return ClassUtil.getReasourceAsStream(getClass(), resourcePath);
             }
             
-            final InputStream in = getClass().getResourceAsStream(resourcePath);
-            if (in == null) {
-                throw newResourceNotFoundException();
-            }
-            return in;
+            return ClassUtil.getReasourceAsStream(getClass(), resourcePath);
         }
 
         public String getXmlSystemId() throws IOException {
@@ -1281,10 +1274,6 @@ public class TaglibFactory implements TemplateHashModel {
             
             final URL url = getClass().getResource(resourcePath);
             return url == null ? null : url.toExternalForm();
-        }
-        
-        private IOException newResourceNotFoundException() {
-            return new IOException("Resource not found: classpath:" + resourcePath);
         }
     
     }

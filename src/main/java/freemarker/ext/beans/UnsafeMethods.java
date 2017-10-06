@@ -44,13 +44,9 @@ class UnsafeMethods {
     
     private static final Set createUnsafeMethodsSet() {
         Properties props = new Properties();
-        InputStream in = BeansWrapper.class.getResourceAsStream("unsafeMethods.properties");
-        if (in == null) {
-            throw new IllegalStateException("Class loader resource not found: "
-                        + BeansWrapper.class.getPackage().getName() + UNSAFE_METHODS_PROPERTIES);
-        }
         String methodSpec = null;
         try {
+            InputStream in = ClassUtil.getReasourceAsStream(BeansWrapper.class, UNSAFE_METHODS_PROPERTIES);
             try {
                 props.load(in);
             } finally {

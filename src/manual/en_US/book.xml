@@ -27306,6 +27306,18 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Somewhat less synchronization when accessing JavaBean
+              properties (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-80">FREEMARKER-80</link>).
+              The problem was that the
+              <literal>java.beans.PropertyDescriptor.getReadMethod</literal>
+              method is synchronized, and
+              <literal>freemarer.ext.beans.BeanModel</literal> has called it
+              each time a property was read. Now that method is only called
+              when the class is first introspected.</para>
+            </listitem>
+
+            <listitem>
               <para>Improved/fixed <literal>TemplateTransformModel</literal>
               behavior (this is a legacy interface that's not used much in
               user code):</para>
@@ -27336,6 +27348,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   transformed block.</para>
                 </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Added workaround against <quote>IllegalStateException: zip
+              file closed</quote> issues (caused by bugs outside of
+              FreeMarker) when loading resources included in the FreeMarker
+              jar (see
+              <literal>freemarker.template.utility.ClassUtil.getReasourceAsStream</literal>).</para>
             </listitem>
           </itemizedlist>
         </section>
