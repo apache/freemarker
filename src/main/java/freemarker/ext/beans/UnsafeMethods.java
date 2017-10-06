@@ -21,6 +21,7 @@ package freemarker.ext.beans;
 
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -44,13 +45,15 @@ class UnsafeMethods {
     
     private static final Set createUnsafeMethodsSet() {
         Properties props = new Properties();
-        InputStream in = BeansWrapper.class.getResourceAsStream("unsafeMethods.properties");
-        if (in == null) {
+
+        URL unsafeMethodsResource = BeansWrapper.class.getResource("unsafeMethods.properties");
+        if (unsafeMethodsResource == null) {
             throw new IllegalStateException("Class loader resource not found: "
                         + BeansWrapper.class.getPackage().getName() + UNSAFE_METHODS_PROPERTIES);
         }
         String methodSpec = null;
         try {
+            InputStream in = unsafeMethodsResource.openStream();
             try {
                 props.load(in);
             } finally {
