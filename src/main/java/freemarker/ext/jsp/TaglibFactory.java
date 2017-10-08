@@ -1257,9 +1257,9 @@ public class TaglibFactory implements TemplateHashModel {
         public InputStream getInputStream() throws IOException {
             ClassLoader tccl = tryGetThreadContextClassLoader();
             if (tccl != null) {
-                InputStream r = ClassUtil.getReasourceAsStream(tccl, resourcePath, true);
-                if (r != null) {
-                    return r;
+                InputStream ins = ClassUtil.getReasourceAsStream(tccl, resourcePath, true);
+                if (ins != null) {
+                    return ins;
                 }
             }
             

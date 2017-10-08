@@ -387,7 +387,7 @@ public class ClassUtil {
     /**
      * Very similar to {@link Class#getResourceAsStream(String)}, but throws {@link IOException} instead of returning
      * {@code null} if {@code optional} is {@code false}, and attempts to work around "IllegalStateException: zip file
-     * closed" issues (caused by bugs outside of FreeMarker).
+     * closed" and related issues (caused by bugs outside of FreeMarker).
      * 
      * @return If {@code optional} is {@code false}, it's never {@code null}, otherwise {@code null} indicates that the
      *         resource doesn't exist.
@@ -401,9 +401,9 @@ public class ClassUtil {
         InputStream ins;
         try {
             ins = baseClass.getResourceAsStream(resource);
-        } catch (IllegalStateException e) {
-            // Workaround for "IllegalStateException: zip file closed". This happens due to bugs outside of FreeMarker,
-            // but we try to work it around anyway.
+        } catch (Exception e) {
+            // Workaround for "IllegalStateException: zip file closed", and other related exceptions. This happens due
+            // to bugs outside of FreeMarker, but we try to work it around anyway.
             URL url = baseClass.getResource(resource);
             ins = url != null ? url.openStream() : null;
         }
@@ -424,7 +424,7 @@ public class ClassUtil {
         InputStream ins;
         try {
             ins = classLoader.getResourceAsStream(resource);
-        } catch (IllegalStateException e) {
+        } catch (Exception e) {
             URL url = classLoader.getResource(resource);
             ins = url != null ? url.openStream() : null;
         }
@@ -436,7 +436,8 @@ public class ClassUtil {
     }
 
     /**
-     * Loads a class loader resource into a {@link Properties}; tries to work around "zip file closed" errors.
+     * Loads a class loader resource into a {@link Properties}; tries to work around "zip file closed" and related
+     * errors.
      * 
      * @since 2.3.27
      */
@@ -447,18 +448,18 @@ public class ClassUtil {
         try {
             try {
                 ins = baseClass.getResourceAsStream(resource);
-            } catch (IllegalStateException e) {
+            } catch (Exception e) {
                 throw new MaybeZipFileClosedException();
             }
             checkInputStreamNotNull(ins, baseClass, resource);
             try {
                 props.load(ins);
-            } catch (ZipException e) {
+            } catch (Exception e) {
                 throw new MaybeZipFileClosedException();                
             }
         } catch (MaybeZipFileClosedException e) {
-            // Workaround for "zip file closed" exception. This happens due to bugs outside of FreeMarker, but we try
-            // to work it around anyway.
+            // Workaround for "zip file closed" exception, and other related exceptions. This happens due to bugs
+            // outside of FreeMarker, but we try to work it around anyway.
             URL url = baseClass.getResource(resource);
             ins = url != null ? url.openStream() : null;
             checkInputStreamNotNull(ins, baseClass, resource);
