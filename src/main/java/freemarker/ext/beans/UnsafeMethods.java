@@ -22,7 +22,6 @@ package freemarker.ext.beans;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -46,9 +45,9 @@ class UnsafeMethods {
             Properties props = ClassUtil.loadProperties(BeansWrapper.class, UNSAFE_METHODS_PROPERTIES);
             Set set = new HashSet(props.size() * 4 / 3, 1f);
             Map primClasses = createPrimitiveClassesMap();
-            for (Iterator iterator = props.keySet().iterator(); iterator.hasNext(); ) {
+            for (Object key : props.keySet()) {
                 try {
-                    set.add(parseMethodSpec((String) iterator.next(), primClasses));
+                    set.add(parseMethodSpec((String) key, primClasses));
                 } catch (ClassNotFoundException e) {
                     if (ClassIntrospector.DEVELOPMENT_MODE) {
                         throw e;

@@ -435,6 +435,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     static {
         try {
             Properties props = ClassUtil.loadProperties(Configuration.class, VERSION_PROPERTIES_PATH);
+            
             String versionString  = getRequiredVersionProperty(props, "version");
             
             Date buildDate;
