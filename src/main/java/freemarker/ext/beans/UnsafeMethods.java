@@ -19,7 +19,6 @@
 
 package freemarker.ext.beans;
 
-import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,21 +42,13 @@ class UnsafeMethods {
     }
     
     private static final Set createUnsafeMethodsSet() {
-        Properties props = new Properties();
-        String methodSpec = null;
         try {
-            InputStream in = ClassUtil.getReasourceAsStream(BeansWrapper.class, UNSAFE_METHODS_PROPERTIES);
-            try {
-                props.load(in);
-            } finally {
-                in.close();
-            }
+            Properties props = ClassUtil.loadProperties(BeansWrapper.class, UNSAFE_METHODS_PROPERTIES);
             Set set = new HashSet(props.size() * 4 / 3, 1f);
             Map primClasses = createPrimitiveClassesMap();
             for (Iterator iterator = props.keySet().iterator(); iterator.hasNext(); ) {
-                methodSpec = (String) iterator.next();
                 try {
-                    set.add(parseMethodSpec(methodSpec, primClasses));
+                    set.add(parseMethodSpec((String) iterator.next(), primClasses));
                 } catch (ClassNotFoundException e) {
                     if (ClassIntrospector.DEVELOPMENT_MODE) {
                         throw e;
@@ -70,7 +61,7 @@ class UnsafeMethods {
             }
             return set;
         } catch (Exception e) {
-            throw new RuntimeException("Could not load unsafe method " + methodSpec + " " + e.getClass().getName() + " " + e.getMessage());
+            throw new RuntimeException("Could not load unsafe method set", e);
         }
     }
 

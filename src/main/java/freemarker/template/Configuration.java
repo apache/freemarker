@@ -21,7 +21,6 @@ package freemarker.template;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URLConnection;
@@ -435,19 +434,12 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private static final Version VERSION;
     static {
         try {
-            Properties vp = new Properties();
-            InputStream ins = ClassUtil.getReasourceAsStream(Configuration.class, VERSION_PROPERTIES_PATH);
-            try {
-                vp.load(ins);
-            } finally {
-                ins.close();
-            }
-            
-            String versionString  = getRequiredVersionProperty(vp, "version");
+            Properties props = ClassUtil.loadProperties(Configuration.class, VERSION_PROPERTIES_PATH);
+            String versionString  = getRequiredVersionProperty(props, "version");
             
             Date buildDate;
             {
-                String buildDateStr = getRequiredVersionProperty(vp, "buildTimestamp");
+                String buildDateStr = getRequiredVersionProperty(props, "buildTimestamp");
                 if (buildDateStr.endsWith("Z")) {
                     buildDateStr = buildDateStr.substring(0, buildDateStr.length() - 1) + "+0000";
                 }
@@ -458,7 +450,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 }
             }
             
-            final Boolean gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(vp, "isGAECompliant"));
+            final Boolean gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(props, "isGAECompliant"));
             
             VERSION = new Version(versionString, gaeCompliant, buildDate);
         } catch (IOException e) {

@@ -27293,6 +27293,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fixed: JSP support haven't tried using the thread
+              context class-loader to load the TLD, instead, it has only used
+              the defining class loader of the FreeMarker classes. This can
+              cause problem in the rare case where
+              <literal>freemarker.jar</literal> is installed on higher scope
+              than the web application (like on the Servlet container level),
+              but the web application contains the TLD.</para>
+            </listitem>
+
+            <listitem>
               <para><literal>Constants.EMPTY_HASH</literal> and
               <literal>GeneralPurposeNothing</literal> (the value of
               <literal>missingVar!</literal>) now implements
@@ -27352,10 +27362,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Added workaround against <quote>IllegalStateException: zip
-              file closed</quote> issues (caused by bugs outside of
-              FreeMarker) when loading resources included in the FreeMarker
-              jar (see
-              <literal>freemarker.template.utility.ClassUtil.getReasourceAsStream</literal>).</para>
+              file closed</quote> and <quote>ZipException: ZipFile
+              closed</quote> issues (caused by bugs outside of FreeMarker)
+              when loading resources included in the FreeMarker jar (see
+              <literal>freemarker.template.utility.ClassUtil.loadProperties</literal>).</para>
             </listitem>
           </itemizedlist>
         </section>

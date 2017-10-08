@@ -1257,16 +1257,19 @@ public class TaglibFactory implements TemplateHashModel {
         public InputStream getInputStream() throws IOException {
             ClassLoader tccl = tryGetThreadContextClassLoader();
             if (tccl != null) {
-                return ClassUtil.getReasourceAsStream(getClass(), resourcePath);
+                InputStream r = ClassUtil.getReasourceAsStream(tccl, resourcePath, true);
+                if (r != null) {
+                    return r;
+                }
             }
             
-            return ClassUtil.getReasourceAsStream(getClass(), resourcePath);
+            return ClassUtil.getReasourceAsStream(getClass(), resourcePath, false);
         }
 
         public String getXmlSystemId() throws IOException {
             ClassLoader tccl = tryGetThreadContextClassLoader();
             if (tccl != null) {
-                final URL url = getClass().getResource(resourcePath);
+                final URL url = tccl.getResource(resourcePath);
                 if (url != null) { 
                     return url.toExternalForm();
                 }
