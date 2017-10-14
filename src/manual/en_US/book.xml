@@ -4038,6 +4038,10 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
         <section xml:id="dgui_template_exp_comment">
           <title>Comments in expressions</title>
 
+          <indexterm>
+            <primary>comment</primary>
+          </indexterm>
+
           <para>Expression may contain comments anywhere where they can
           contain ignored white-space (<link
           linkend="dgui_template_exp_whitespace">see above</link>). Comments
