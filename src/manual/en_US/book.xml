@@ -4035,6 +4035,27 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
       }</programlisting>
         </section>
 
+        <section xml:id="dgui_template_exp_comment">
+          <title>Comments in expressions</title>
+
+          <para>Expression may contain comments anywhere where they can
+          contain ignored white-space (<link
+          linkend="dgui_template_exp_whitespace">see above</link>). Comments
+          look like <literal>&lt;#-- ... --&gt;</literal> or as <literal>[#--
+          ... --]</literal>. Example:</para>
+
+          <programlisting role="template">&lt;#assign x &lt;#-- A comment --&gt; = 123 &lt;#-- A comment --&gt;&gt;
+&lt;#function f(x &lt;#-- A comment --&gt;, y &lt;#-- A comment --&gt;)&gt;
+  &lt;#return &lt;#-- A comment --&gt; 1 &lt;#-- A comment --&gt;&gt;
+&lt;/#function&gt;
+&lt;#assign someHash = {
+    "foo": 123, &lt;#-- A comment --&gt;
+    "bar": x &lt;#-- A comment --&gt; + 1,
+    &lt;#-- A comment --&gt;
+    "baaz": f(1 &lt;#-- A comment --&gt;, 2 &lt;#-- A comment --&gt;)
+} &lt;#-- A comment --&gt;&gt;</programlisting>
+        </section>
+
         <section xml:id="dgui_template_exp_precedence">
           <title>Operator precedence</title>
 
