@@ -239,7 +239,7 @@ public class TaglibFactory implements TemplateHashModel {
     public TemplateModel get(final String taglibUri) throws TemplateException {
         synchronized (lock) {
             {
-                final Taglib taglib = (Taglib) taglibs.get(taglibUri);
+                final Taglib taglib = taglibs.get(taglibUri);
                 if (taglib != null) {
                     return taglib;
                 }
@@ -296,7 +296,7 @@ public class TaglibFactory implements TemplateHashModel {
                     }
 
                     if (!normalizedTaglibUri.equals(taglibUri)) {
-                        final Taglib taglib = (Taglib) taglibs.get(normalizedTaglibUri);
+                        final Taglib taglib = taglibs.get(normalizedTaglibUri);
                         if (taglib != null) {
                             return taglib;
                         }
@@ -484,7 +484,7 @@ public class TaglibFactory implements TemplateHashModel {
         }
 
         for (int srcIdx = srcIdxStart; srcIdx < metaInfTldSources.size(); srcIdx++) {
-            MetaInfTldSource miTldSource = (MetaInfTldSource) metaInfTldSources.get(srcIdx);
+            MetaInfTldSource miTldSource = metaInfTldSources.get(srcIdx);
 
             if (miTldSource == WebInfPerLibJarMetaInfTldSource.INSTANCE) {
                 addTldLocationsFromWebInfPerLibJarMetaInfTlds();
@@ -609,7 +609,7 @@ public class TaglibFactory implements TemplateHashModel {
             }
 
             for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements(); ) {
-                final JarEntry curEntry = (JarEntry) entries.nextElement();
+                final JarEntry curEntry = entries.nextElement();
                 final String curEntryPath = normalizeJarEntryPath(curEntry.getName(), false);
                 if (curEntryPath.startsWith(metaInfEntryPath) && curEntryPath.endsWith(".tld")) {
                     addTldLocationFromTld(new ServletContextJarEntryTldLocation(jarResourcePath, curEntryPath));
@@ -700,7 +700,7 @@ public class TaglibFactory implements TemplateHashModel {
             }
 
             for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements(); ) {
-                final JarEntry curEntry = (JarEntry) entries.nextElement();
+                final JarEntry curEntry = entries.nextElement();
                 final String curEntryPath = normalizeJarEntryPath(curEntry.getName(), false);
 
                 if (curEntryPath.startsWith(baseEntryPath) && curEntryPath.endsWith(".tld")) {
@@ -1286,25 +1286,20 @@ public class TaglibFactory implements TemplateHashModel {
         public InputStream getInputStream() throws IOException {
             ClassLoader tccl = tryGetThreadContextClassLoader();
             if (tccl != null) {
-                final InputStream in = getClass().getResourceAsStream(resourcePath);
-                if (in != null) { 
-                    return in;
+                InputStream ins = _ClassUtils.getReasourceAsStream(tccl, resourcePath, true);
+                if (ins != null) {
+                    return ins;
                 }
             }
 
-            final InputStream in = getClass().getResourceAsStream(resourcePath);
-            if (in == null) {
-                throw newResourceNotFoundException();
-            }
-
-            return in;
+            return _ClassUtils.getReasourceAsStream(getClass(), resourcePath, false);
         }
 
         @Override
         public String getXmlSystemId() throws IOException {
             ClassLoader tccl = tryGetThreadContextClassLoader();
             if (tccl != null) {
-                final URL url = getClass().getResource(resourcePath);
+                final URL url = tccl.getResource(resourcePath);
                 if (url != null) { 
                     return url.toExternalForm();
                 }
@@ -1312,10 +1307,6 @@ public class TaglibFactory implements TemplateHashModel {
 
             final URL url = getClass().getResource(resourcePath);
             return url == null ? null : url.toExternalForm();
-        }
-
-        private IOException newResourceNotFoundException() {
-            return new IOException("Resource not found: classpath:" + resourcePath);
         }
 
     }
@@ -1509,7 +1500,7 @@ public class TaglibFactory implements TemplateHashModel {
 
         @Override
         public TemplateModel get(String key) {
-            return (TemplateModel) tagsAndFunctions.get(key);
+            return tagsAndFunctions.get(key);
         }
 
         @Override

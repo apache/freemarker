@@ -19,6 +19,11 @@
 
 package org.apache.freemarker.core.util;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Properties;
+
 import org.apache.freemarker.core.model.impl.BeanModel;
 
 public class _ClassUtils {
@@ -163,6 +168,118 @@ public class _ClassUtils {
     public static boolean isNumerical(Class type) {
         return Number.class.isAssignableFrom(type)
                 || type.isPrimitive() && type != Boolean.TYPE && type != Character.TYPE && type != Void.TYPE;
+    }
+
+    /**
+     * Very similar to {@link Class#getResourceAsStream(String)}, but throws {@link IOException} instead of returning
+     * {@code null} if {@code optional} is {@code false}, and attempts to work around "IllegalStateException: zip file
+     * closed" and similar {@code sun.net.www.protocol.jar.JarURLConnection}-related glitches. These are caused by bugs
+     * outside of FreeMarker. Note that in cases where the JAR resource becomes broken concurrently, similar errors can
+     * still occur later when the {@link InputStream} is read ({@link #loadProperties(Class, String)} works that
+     * around as well).
+     * 
+     * @return If {@code optional} is {@code false}, it's never {@code null}, otherwise {@code null} indicates that the
+     *         resource doesn't exist.
+     * @throws IOException
+     *             If the resource wasn't found, or other {@link IOException} occurs.
+     */
+    public static InputStream getReasourceAsStream(Class<?> baseClass, String resource, boolean optional)
+            throws IOException {
+        InputStream ins;
+        try {
+            // This is how we did this earlier. May uses some JarURLConnection caches, which leads to the problems.
+            ins = baseClass.getResourceAsStream(resource);
+        } catch (Exception e) {
+            // Workaround for "IllegalStateException: zip file closed", and other related exceptions. This happens due
+            // to bugs outside of FreeMarker, but we try to work it around anyway.
+            URL url = baseClass.getResource(resource);
+            ins = url != null ? url.openStream() : null;
+        }
+        if (!optional) {
+            checkInputStreamNotNull(ins, baseClass, resource);
+        }
+        return ins;
+    }
+
+    /**
+     * Same as {@link #getReasourceAsStream(Class, String, boolean)}, but uses a {@link ClassLoader} directly
+     * instead of a {@link Class}.
+     */
+    public static InputStream getReasourceAsStream(ClassLoader classLoader, String resource, boolean optional)
+            throws IOException {
+        // See source commends in the other overload of this method.
+        InputStream ins;
+        try {
+            ins = classLoader.getResourceAsStream(resource);
+        } catch (Exception e) {
+            URL url = classLoader.getResource(resource);
+            ins = url != null ? url.openStream() : null;
+        }
+        if (ins == null && !optional) {
+            throw new IOException("Class-loader resource not found (shown quoted): "
+                    + _StringUtils.jQuote(resource) + ". The base ClassLoader was: " + classLoader);
+        }
+        return ins;
+    }
+
+    /**
+     * Loads a class loader resource into a {@link Properties}; tries to work around "zip file closed" and related
+     * {@code sun.net.www.protocol.jar.JarURLConnection} glitches.
+     */
+    public static Properties loadProperties(Class<?> baseClass, String resource) throws IOException {
+        Properties props = new Properties();
+        
+        InputStream ins  = null;
+        try {
+            try {
+                // This is how we did this earlier. May uses some JarURLConnection caches, which leads to the problems.
+                ins = baseClass.getResourceAsStream(resource);
+            } catch (Exception e) {
+                throw new MaybeZipFileClosedException();
+            }
+            checkInputStreamNotNull(ins, baseClass, resource);
+            try {
+                props.load(ins);
+            } catch (Exception e) {
+                throw new MaybeZipFileClosedException();                
+            } finally {
+                try {
+                    ins.close();
+                } catch (Exception e) {
+                    // Do nothing to suppress "ZipFile closed" and related exceptions.
+                }
+                ins = null;
+            }
+        } catch (MaybeZipFileClosedException e) {
+            // Workaround for "zip file closed" exception, and other related exceptions. This happens due to bugs
+            // outside of FreeMarker, but we try to work it around anyway.
+            URL url = baseClass.getResource(resource);
+            ins = url != null ? url.openStream() : null;
+            checkInputStreamNotNull(ins, baseClass, resource);
+            props.load(ins);
+        } finally {
+            if (ins != null) {
+                try {
+                    ins.close();
+                } catch (Exception e) {
+                    // Do nothing to suppress "ZipFile closed" and related exceptions.
+                }
+            }
+        }
+        return props;
+    }
+
+    private static void checkInputStreamNotNull(InputStream ins, Class<?> baseClass, String resource)
+            throws IOException {
+        if (ins == null) {
+            throw new IOException("Class-loader resource not found (shown quoted): "
+                    + _StringUtils.jQuote(resource) + ". The base class was " + baseClass.getName() + ".");
+        }
+    }
+    
+    /** Used internally to work around some JarURLConnection glitches */
+    private static class MaybeZipFileClosedException extends Exception {
+        //
     }
     
 }

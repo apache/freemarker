@@ -19,11 +19,9 @@
 
 package org.apache.freemarker.core.model.impl;
 
-import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -37,7 +35,7 @@ class UnsafeMethods {
 
     private static final Logger LOG = LoggerFactory.getLogger(UnsafeMethods.class);
     private static final String UNSAFE_METHODS_PROPERTIES = "unsafeMethods.properties";
-    private static final Set UNSAFE_METHODS = createUnsafeMethodsSet();
+    private static final Set<Method> UNSAFE_METHODS = createUnsafeMethodsSet();
     
     private UnsafeMethods() { }
     
@@ -45,37 +43,25 @@ class UnsafeMethods {
         return UNSAFE_METHODS.contains(method);        
     }
     
-    private static Set createUnsafeMethodsSet() {
-        Properties props = new Properties();
-        InputStream in = DefaultObjectWrapper.class.getResourceAsStream(UNSAFE_METHODS_PROPERTIES);
-        if (in == null) {
-            throw new IllegalStateException("Class loader resource not found: "
-                        + DefaultObjectWrapper.class.getPackage().getName() + UNSAFE_METHODS_PROPERTIES);
-        }
-        String methodSpec = null;
+    private static Set<Method> createUnsafeMethodsSet() {
         try {
-            try {
-                props.load(in);
-            } finally {
-                in.close();
-            }
-            Set set = new HashSet(props.size() * 4 / 3, 1f);
-            Map primClasses = createPrimitiveClassesMap();
-            for (Iterator iterator = props.keySet().iterator(); iterator.hasNext(); ) {
-                methodSpec = (String) iterator.next();
+            Properties props = _ClassUtils.loadProperties(DefaultObjectWrapper.class, UNSAFE_METHODS_PROPERTIES);
+            Set<Method> set = new HashSet<>(props.size() * 4 / 3, 1f);
+            Map<String, Class<?>> primClasses = createPrimitiveClassesMap();
+            for (Object key : props.keySet()) {
                 try {
-                    set.add(parseMethodSpec(methodSpec, primClasses));
+                    set.add(parseMethodSpec((String) key, primClasses));
                 } catch (ClassNotFoundException | NoSuchMethodException e) {
                     LOG.debug("Failed to get unsafe method", e);
                 }
             }
             return set;
         } catch (Exception e) {
-            throw new RuntimeException("Could not load unsafe method " + methodSpec + " " + e.getClass().getName() + " " + e.getMessage());
+            throw new RuntimeException("Could not load unsafe method set", e);
         }
     }
 
-    private static Method parseMethodSpec(String methodSpec, Map primClasses)
+    private static Method parseMethodSpec(String methodSpec, Map<String, Class<?>> primClasses)
     throws ClassNotFoundException,
         NoSuchMethodException {
         int brace = methodSpec.indexOf('(');
@@ -88,7 +74,7 @@ class UnsafeMethods {
         Class[] argTypes = new Class[argcount];
         for (int i = 0; i < argcount; i++) {
             String argClassName = tok.nextToken();
-            argTypes[i] = (Class) primClasses.get(argClassName);
+            argTypes[i] = primClasses.get(argClassName);
             if (argTypes[i] == null) {
                 argTypes[i] = _ClassUtils.forName(argClassName);
             }
@@ -96,8 +82,8 @@ class UnsafeMethods {
         return clazz.getMethod(methodName, argTypes);
     }
 
-    private static Map createPrimitiveClassesMap() {
-        Map map = new HashMap();
+    private static Map<String, Class<?>> createPrimitiveClassesMap() {
+        Map<String, Class<?>> map = new HashMap<>();
         map.put("boolean", Boolean.TYPE);
         map.put("byte", Byte.TYPE);
         map.put("char", Character.TYPE);

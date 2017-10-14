@@ -53,6 +53,7 @@ public final class Version implements Serializable {
         this(stringValue, null, null);
     }
     
+    // TODO [FM3] gaeCompliant should be removed
     /**
      * @throws IllegalArgumentException if the version string is malformed
      */

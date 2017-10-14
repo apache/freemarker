@@ -22,7 +22,6 @@ package org.apache.freemarker.core;
 import static org.apache.freemarker.core.Configuration.ExtendableBuilder.*;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -131,7 +130,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  */
 public final class Configuration implements TopLevelConfiguration, CustomStateScope {
     
-    private static final String VERSION_PROPERTIES_PATH = "org/apache/freemarker/core/version.properties";
+    private static final String VERSION_PROPERTIES_PATH = "/org/apache/freemarker/core/version.properties";
 
     private static final Map<String, OutputFormat> STANDARD_OUTPUT_FORMATS;
     static {
@@ -156,24 +155,10 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     private static final Version VERSION;
     static {
         try {
-            Properties vp = new Properties();
-            InputStream ins = Configuration.class.getClassLoader()
-                    .getResourceAsStream(VERSION_PROPERTIES_PATH);
-            if (ins == null) {
-                throw new RuntimeException("Version file is missing.");
-            } else {
-                try {
-                    vp.load(ins);
-                } finally {
-                    ins.close();
-                }
-                
-                String versionString  = getRequiredVersionProperty(vp, "version");
-                
-                final Boolean gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(vp, "isGAECompliant"));
-                
-                VERSION = new Version(versionString, gaeCompliant, null);
-            }
+            Properties props = _ClassUtils.loadProperties(Configuration.class, VERSION_PROPERTIES_PATH);
+            String versionString  = getRequiredVersionProperty(props, "version");
+            final Boolean gaeCompliant = Boolean.valueOf(getRequiredVersionProperty(props, "isGAECompliant"));
+            VERSION = new Version(versionString, gaeCompliant, null);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load and parse " + VERSION_PROPERTIES_PATH, e);
         }
@@ -777,6 +762,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         return (MarkupOutputFormat) of;
     }
     
+    @Override
     public Collection<OutputFormat> getRegisteredCustomOutputFormats() {
         return registeredCustomOutputFormats;
     }
@@ -2215,11 +2201,13 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             localizedTemplateLookupSet = false;
         }
 
+        @Override
         public Collection<OutputFormat> getRegisteredCustomOutputFormats() {
             return isRegisteredCustomOutputFormatsSet() ? registeredCustomOutputFormats
                     : getDefaultRegisteredCustomOutputFormats();
         }
 
+        @Override
         public boolean isRegisteredCustomOutputFormatsSet() {
             return registeredCustomOutputFormats != null;
         }
