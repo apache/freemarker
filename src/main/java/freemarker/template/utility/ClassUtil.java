@@ -25,7 +25,6 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
-import java.util.zip.ZipException;
 
 import freemarker.core.Environment;
 import freemarker.core.Macro;
@@ -387,7 +386,10 @@ public class ClassUtil {
     /**
      * Very similar to {@link Class#getResourceAsStream(String)}, but throws {@link IOException} instead of returning
      * {@code null} if {@code optional} is {@code false}, and attempts to work around "IllegalStateException: zip file
-     * closed" and related issues (caused by bugs outside of FreeMarker).
+     * closed" and similar {@code sun.net.www.protocol.jar.JarURLConnection}-related glitches. These are caused by bugs
+     * outside of FreeMarker. Note that in cases where the JAR resource becomes broken concurrently, similar errors can
+     * still occur later when the {@link InputStream} is read ({@link #loadProperties(Class, String)} works that
+     * around as well).
      * 
      * @return If {@code optional} is {@code false}, it's never {@code null}, otherwise {@code null} indicates that the
      *         resource doesn't exist.
@@ -400,6 +402,7 @@ public class ClassUtil {
             throws IOException {
         InputStream ins;
         try {
+            // This is how we did this earlier. May uses some JarURLConnection caches, which leads to the problems.
             ins = baseClass.getResourceAsStream(resource);
         } catch (Exception e) {
             // Workaround for "IllegalStateException: zip file closed", and other related exceptions. This happens due
@@ -421,6 +424,7 @@ public class ClassUtil {
      */
     public static InputStream getReasourceAsStream(ClassLoader classLoader, String resource, boolean optional)
             throws IOException {
+        // See source commends in the other overload of this method.
         InputStream ins;
         try {
             ins = classLoader.getResourceAsStream(resource);
@@ -437,7 +441,7 @@ public class ClassUtil {
 
     /**
      * Loads a class loader resource into a {@link Properties}; tries to work around "zip file closed" and related
-     * errors.
+     * {@code sun.net.www.protocol.jar.JarURLConnection} glitches.
      * 
      * @since 2.3.27
      */
@@ -447,6 +451,7 @@ public class ClassUtil {
         InputStream ins  = null;
         try {
             try {
+                // This is how we did this earlier. May uses some JarURLConnection caches, which leads to the problems.
                 ins = baseClass.getResourceAsStream(resource);
             } catch (Exception e) {
                 throw new MaybeZipFileClosedException();
@@ -456,6 +461,13 @@ public class ClassUtil {
                 props.load(ins);
             } catch (Exception e) {
                 throw new MaybeZipFileClosedException();                
+            } finally {
+                try {
+                    ins.close();
+                } catch (Exception e) {
+                    // Do nothing to suppress "ZipFile closed" and related exceptions.
+                }
+                ins = null;
             }
         } catch (MaybeZipFileClosedException e) {
             // Workaround for "zip file closed" exception, and other related exceptions. This happens due to bugs
@@ -468,8 +480,8 @@ public class ClassUtil {
             if (ins != null) {
                 try {
                     ins.close();
-                } catch (ZipException e) {
-                    // Do nothing to suppress "ZipFile closed" exceptions.
+                } catch (Exception e) {
+                    // Do nothing to suppress "ZipFile closed" and related exceptions.
                 }
             }
         }
@@ -484,6 +496,7 @@ public class ClassUtil {
         }
     }
     
+    /** Used internally to work around some JarURLConnection glitches */
     private static class MaybeZipFileClosedException extends Exception {
         //
     }
