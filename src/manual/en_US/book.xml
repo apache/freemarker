@@ -27216,19 +27216,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Bug fixed: <literal>BeansWrapper</literal> and
-              <literal>DefaultObjectWrapper</literal>, starting from Java 8,
-              when the same JavaBeans property has both non-indexed read
-              method (like <literal>String[] getFoos()</literal>) and indexed
-              read method (like <literal>String getFoos(int index)</literal>),
-              has mistakenly used the indexed read method to access the
-              property. This is a problem because then the array size was
-              unknown, and thus the property has suddenly become unlistable on
-              Java 8 (that is, <literal>&lt;#list myObject.foos as
-              foo&gt;</literal> fails). To enable the fix (where it will use
-              the non-indexed read method), you should to increase the value
-              of the <literal>incompatibleImprovements</literal> constructor
-              argument of the used <literal>DefaultObjectWrapper</literal> or
+              <para>Bug fixed: Starting from Java 8, when the same JavaBeans
+              property has both non-indexed read method (like
+              <literal>String[] getFoos()</literal>) and indexed read method
+              (like <literal>String getFoos(int index)</literal>),
+              <literal>BeansWrapper</literal> and
+              <literal>DefaultObjectWrapper</literal> have mistakenly used the
+              indexed read method to access the property. This is a problem
+              because then the array size was unknown, and thus the property
+              has suddenly become unlistable on Java 8 (that is,
+              <literal>&lt;#list myObject.foos as foo&gt;</literal> fails). To
+              enable the fix (where it will use the non-indexed read method),
+              you should increase the value of the
+              <literal>incompatibleImprovements</literal> constructor argument
+              of the used <literal>DefaultObjectWrapper</literal> or
               <literal>BeansWrapper</literal> to 2.3.27. Note that if you
               leave the <literal>object_wrapper</literal> setting of the
               <literal>Configuration</literal> on its default, it's enough to
@@ -27257,7 +27258,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>IllegalAccessError</literal> because <quote>java.xml
               does not export com.sun.org.apache.xml.internal.utils</quote>.
               Note that while the exception is not thrown anymore in 2.3.27,
-              FreeMarker can't use the XPath support included in Open JDK 9,
+              FreeMarker can't use the XPath support included in OpenJDK 9,
               and so templates that try to use XPath expressions (like
               <literal>doc['//foo']</literal>) will still fail, <link
               linkend="xgui_imperative_learn_xpath">unless 3rd party XPath
