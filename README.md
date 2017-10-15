@@ -78,6 +78,12 @@ dependencies, but usually you don't have to deal with them, because if
 you are using an optional feature that's certainly because your
 application already uses the related library.
 
+Attention: If you upgrade to OpenJDK 9 or later, and you are using
+XPath queries in templates, you will need to add Apache Xalan as a
+dependency, as freemarker.ext.dom can't use the XPath support
+included in OpenJDK anymore. It's not needed on Oracle Java 9,
+or if FreeMarker is configured to use Jaxen for XPath.
+
 The minimum required Java version is currently Java SE 5. (The presence
 of a later version may be detected on runtime and utilized by
 FreeMarker.)
