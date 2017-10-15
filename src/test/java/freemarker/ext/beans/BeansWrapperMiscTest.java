@@ -22,12 +22,14 @@ package freemarker.ext.beans;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import freemarker.core._JavaVersions;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateHashModel;
@@ -36,6 +38,7 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.TemplateSequenceModel;
+import freemarker.template.Version;
 import freemarker.template.utility.Constants;
 
 @RunWith(JUnit4.class)
@@ -95,6 +98,27 @@ public class BeansWrapperMiscTest {
             assertEquals(2, ((TemplateSequenceModel) fooTM).size());
         }
     }
+
+    @Test
+    public void java8InaccessibleIndexedAccessibleNonIndexedReadMethodTest() throws TemplateModelException {
+        assertTrue("This test case must be ran on Java 8 or later", _JavaVersions.JAVA_8 != null);
+        assertFalse(Modifier.isPublic(BeanWithInaccessibleIndexedProperty.class.getModifiers()));
+        
+        for (Version ici : new Version[] { Configuration.VERSION_2_3_26, Configuration.VERSION_2_3_27 }) {
+            BeansWrapper bw = new BeansWrapper(ici);
+            TemplateHashModel beanTM = (TemplateHashModel) bw.wrap(new BeanWithInaccessibleIndexedProperty());
+            TemplateModel fooTM = beanTM.get("foo");
+            
+            assertThat(fooTM, instanceOf(TemplateSequenceModel.class));
+            assertEquals("b",
+                    ((TemplateScalarModel) ((TemplateSequenceModel) fooTM).get(1)).getAsString());
+            // Even with 2.3.26, where the indexed reader was preferred, as it's inaccessible, we use the normal reader:
+            assertEquals(2, ((TemplateSequenceModel) fooTM).size());
+            
+            TemplateModel barTM = beanTM.get("bar");
+            assertNull(barTM); // all read methods inaccessible
+        }
+    }
     
     public static class BeanWithBothIndexedAndArrayProperty {
         
@@ -105,6 +129,30 @@ public class BeansWrapperMiscTest {
         }
         
         public String getFoo(int index) {
+            return FOO[index];
+        }
+        
+    }
+    
+    public interface HasFoo {
+        String[] getFoo();
+    }
+
+    // Note: This class is deliberately not public
+    static class BeanWithInaccessibleIndexedProperty implements HasFoo {
+        
+        private final static String[] FOO = new String[] { "a", "b" };
+        
+        public String getFoo(int index) {
+            return FOO[index];
+        }
+
+        // This will be accessible
+        public String[] getFoo() {
+            return FOO;
+        }
+        
+        public String getBar(int index) {
             return FOO[index];
         }
         

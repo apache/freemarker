@@ -27249,6 +27249,22 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Bug fixed (affects Java 8 and later): Regardless of the
+              value of the <literal>preferIndexedReadMethod</literal> setting
+              (see previous point), if one of the indexed read method and the
+              non-indexed read method is inaccessible (i.e., it's declared in
+              a non-public type, and wasn't inherited by a public type), while
+              the other read method is accessible, we will use the accessible
+              one. Earlier, if there was an indexed read method but it was
+              inaccessible, we have given up, and that bean property wasn't
+              visible. Such properties will now be visible again, just as
+              before Java 8. (Before Java 8
+              <literal>java.beans.Inrospector</literal> has only exposed the
+              non-indexed read method in this case, so we didn't have this
+              problem.)</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed: On OpenJDK 9 (but not on earlier versions, nor
               on Oracle Java 9 (tested with <quote>build 9+181</quote>)), when
               you try to use the DOM-based XML support
