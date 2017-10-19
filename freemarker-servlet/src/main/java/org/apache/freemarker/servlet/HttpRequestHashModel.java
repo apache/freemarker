@@ -32,6 +32,7 @@ import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleCollection;
+import org.apache.freemarker.core.model.impl.SimpleString;
 
 /**
  * TemplateHashModel wrapper for a HttpServletRequest attributes.
@@ -92,6 +93,33 @@ public final class HttpRequestHashModel implements TemplateHashModelEx {
             values.add(request.getAttribute((String) enumeration.nextElement()));
         }
         return new SimpleCollection(values, wrapper);
+    }
+    
+    @Override
+    public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
+        final Enumeration<String> namesEnum = request.getAttributeNames();
+        return new KeyValuePairIterator() {
+            @Override
+            public boolean hasNext() throws TemplateException {
+                return namesEnum.hasMoreElements();
+            }
+
+            @Override
+            public KeyValuePair next() throws TemplateException {
+                final String name = namesEnum.nextElement();
+                return new KeyValuePair() {
+                    @Override
+                    public TemplateModel getValue() throws TemplateException {
+                        return wrapper.wrap(request.getAttribute(name));
+                    }
+                    
+                    @Override
+                    public TemplateModel getKey() throws TemplateException {
+                        return new SimpleString(name);
+                    }
+                };
+            }
+        };
     }
 
     public HttpServletRequest getRequest() {

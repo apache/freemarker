@@ -26,9 +26,9 @@ import java.util.Collections;
 
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
+import org.apache.freemarker.core.model.TemplateHashModelEx.KeyValuePair;
+import org.apache.freemarker.core.model.TemplateHashModelEx.KeyValuePairIterator;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
-import org.apache.freemarker.core.model.TemplateHashModelEx2.KeyValuePair;
-import org.apache.freemarker.core.model.TemplateHashModelEx2.KeyValuePairIterator;
 import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
@@ -309,14 +309,14 @@ final class ASTDirList extends ASTDirective {
             if (listedValue instanceof TemplateHashModelEx) {
                 TemplateHashModelEx listedHash = (TemplateHashModelEx) listedValue; 
                 if (listedHash instanceof TemplateHashModelEx2) {
-                    KeyValuePairIterator kvpIter
+                    TemplateHashModelEx.KeyValuePairIterator kvpIter
                             = openedIterator == null ? ((TemplateHashModelEx2) listedHash).keyValuePairIterator()
-                                    : (KeyValuePairIterator) openedIterator;
+                                    : (TemplateHashModelEx.KeyValuePairIterator) openedIterator;
                     hashNotEmpty = kvpIter.hasNext();
                     if (hashNotEmpty) {
                         if (nestedContentParam1Name != null) {
                             listLoop: do {
-                                    KeyValuePair kvp = kvpIter.next();
+                                    TemplateHashModelEx.KeyValuePair kvp = kvpIter.next();
                                     nestedContentParam = kvp.getKey();
                                     nestedContentParam2 = kvp.getValue();
                                     hasNext = kvpIter.hasNext();

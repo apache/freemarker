@@ -89,6 +89,11 @@ public class AllTemplateModels implements
     }
 
     @Override
+    public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
+        return KeyValuePairIterator.EMPTY_KEY_VALUE_PAIR_ITERATOR;
+    }
+
+    @Override
     public boolean getAsBoolean() throws TemplateException {
         return true;
     }

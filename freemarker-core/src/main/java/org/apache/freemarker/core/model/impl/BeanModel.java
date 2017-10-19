@@ -39,7 +39,6 @@ import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
@@ -274,21 +273,47 @@ public class BeanModel
     }
 
     @Override
-    public TemplateCollectionModel keys() {
+    public final TemplateCollectionModel keys() {
         return DefaultNonListCollectionAdapter.adapt(keySet(), wrapper);
     }
 
     @Override
-    public TemplateCollectionModel values() throws TemplateException {
-        List<Object> values = new ArrayList<>(getHashSize());
-        TemplateModelIterator it = keys().iterator();
-        while (it.hasNext()) {
-            String key = ((TemplateStringModel) it.next()).getAsString();
+    public final TemplateCollectionModel values() throws TemplateException {
+        Set<String> keySet = keySet();
+        List<Object> values = new ArrayList<>(keySet().size());
+        for (String key : keySet) {
             values.add(get(key));
         }
         return DefaultNonListCollectionAdapter.adapt(values, wrapper);
     }
     
+    @Override
+    public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
+        final Iterator<String> keyIter = keySet().iterator();
+        return new KeyValuePairIterator() {
+            @Override
+            public boolean hasNext() throws TemplateException {
+                return keyIter.hasNext();
+            }
+
+            @Override
+            public KeyValuePair next() throws TemplateException {
+                final String key = keyIter.next();
+                return new KeyValuePair() {
+                    @Override
+                    public TemplateModel getValue() throws TemplateException {
+                        return get(key);
+                    }
+                    
+                    @Override
+                    public TemplateModel getKey() throws TemplateException {
+                        return new SimpleString(key);
+                    }
+                };
+            };
+        };
+    }
+
     @Override
     public String toString() {
         return object.toString();
@@ -299,6 +324,7 @@ public class BeanModel
      * Strings which are available via the TemplateHashModel
      * interface. Subclasses that override <tt>invokeGenericGet</tt> to
      * provide additional hash keys should also override this method.
+     * Also, if this is overwritten, {@link #getHashSize()} should be too.
      */
     protected Set<String> keySet() {
         return wrapper.getClassIntrospector().keySet(object.getClass());

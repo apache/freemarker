@@ -287,7 +287,7 @@ public class SimpleHash extends WrappingTemplateModel implements TemplateHashMod
     }
 
     @Override
-    public KeyValuePairIterator keyValuePairIterator() {
+    public TemplateHashModelEx.KeyValuePairIterator keyValuePairIterator() {
         return new MapKeyValuePairIterator(map, getObjectWrapper());
     }
 

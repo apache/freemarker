@@ -23,20 +23,20 @@ import static org.junit.Assert.*;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.NonTemplateCallPlace;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.TemplateStringModel;
-import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.util.CallableUtils;
 import org.junit.Test;
 
 public class Java8DefaultObjectWrapperTest {
+    
+    private static final DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();    
 
     @Test
     public void testDefaultMethodRecognized() throws TemplateException {
-        DefaultObjectWrapper.Builder owb = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0);
-        DefaultObjectWrapper ow = owb.build();
         TemplateHashModel wrappedBean = (TemplateHashModel) ow.wrap(new Java8DefaultMethodsBean());
         
         {

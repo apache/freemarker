@@ -60,4 +60,9 @@ public class HashAndStringModel implements TemplateHashModelEx, TemplateStringMo
         return TemplateCollectionModel.EMPTY_COLLECTION;
     }
 
+    @Override
+    public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
+        return KeyValuePairIterator.EMPTY_KEY_VALUE_PAIR_ITERATOR;
+    }
+
 }

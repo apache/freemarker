@@ -21,6 +21,7 @@ package org.apache.freemarker.core;
 
 
 import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
@@ -83,8 +84,8 @@ class ASTExpDefault extends ASTExpression {
         }
 
         @Override
-        public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
-            return KeyValuePairIterator.EMPTY_KEY_VALUE_PAIR_ITERATOR;
+        public TemplateHashModelEx.KeyValuePairIterator keyValuePairIterator() throws TemplateException {
+            return TemplateHashModelEx.KeyValuePairIterator.EMPTY_KEY_VALUE_PAIR_ITERATOR;
         }
     }
 

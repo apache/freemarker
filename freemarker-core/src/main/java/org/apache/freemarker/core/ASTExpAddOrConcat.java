@@ -19,13 +19,16 @@
 
 package org.apache.freemarker.core;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
+import org.apache.freemarker.core.model.AdapterTemplateModel;
+import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
@@ -34,6 +37,7 @@ import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleString;
 
@@ -123,9 +127,9 @@ final class ASTExpAddOrConcat extends ASTExpression {
         if (leftModel instanceof TemplateHashModelEx && rightModel instanceof TemplateHashModelEx) {
             TemplateHashModelEx leftModelEx = (TemplateHashModelEx) leftModel;
             TemplateHashModelEx rightModelEx = (TemplateHashModelEx) rightModel;
-            if (leftModelEx.getHashSize() == 0) {
+            if (leftModelEx.isEmptyHash()) {
                 return rightModelEx;
-            } else if (rightModelEx.getHashSize() == 0) {
+            } else if (rightModelEx.isEmptyHash()) {
                 return leftModelEx;
             } else {
                 return new ConcatenatedHashEx(leftModelEx, rightModelEx);
@@ -270,8 +274,8 @@ final class ASTExpAddOrConcat extends ASTExpression {
     }
 
     private static final class ConcatenatedHashEx extends ConcatenatedHash implements TemplateHashModelEx {
-        private TemplateCollectionModel keys;
-        private TemplateCollectionModel values;
+        /** Lazily calculated list of key-value pairs; there's only one item per duplicate key. */
+        private Collection<KeyValuePair> kvps;
 
         ConcatenatedHashEx(TemplateHashModelEx left, TemplateHashModelEx right) {
             super(left, right);
@@ -279,55 +283,140 @@ final class ASTExpAddOrConcat extends ASTExpression {
         
         @Override
         public int getHashSize() throws TemplateException {
-            initKeys();
-            return keys.getCollectionSize();
+            initKvps();
+            return kvps.size();
         }
 
         @Override
         public TemplateCollectionModel keys() throws TemplateException {
-            initKeys();
-            return keys;
+            initKvps();
+            return new TemplateCollectionModel() {
+                @Override
+                public TemplateModelIterator iterator() throws TemplateException {
+                    return new TemplateModelIterator() {
+                        private Iterator<KeyValuePair> iter = kvps.iterator();
+
+                        @Override
+                        public boolean hasNext() throws TemplateException {
+                            return iter.hasNext();
+                        }
+
+                        @Override
+                        public TemplateModel next() throws TemplateException {
+                            return iter.next().getKey();
+                        }
+                    };
+                }
+
+                @Override
+                public int getCollectionSize() throws TemplateException {
+                    return kvps.size();
+                }
+
+                @Override
+                public boolean isEmptyCollection() throws TemplateException {
+                    return kvps.isEmpty();
+                }
+            };
         }
 
         @Override
         public TemplateCollectionModel values() throws TemplateException {
-            initValues();
-            return values;
-        }
+            initKvps();
+            return new TemplateCollectionModel() {
+                @Override
+                public TemplateModelIterator iterator() throws TemplateException {
+                    return new TemplateModelIterator() {
+                        private Iterator<KeyValuePair> iter = kvps.iterator();
 
-        private void initKeys() throws TemplateException {
-            if (keys == null) {
-                HashSet keySet = new HashSet();
-                ArrayList<TemplateModel> keyList = new ArrayList<>();
-                addKeys(keySet, keyList, (TemplateHashModelEx) left);
-                addKeys(keySet, keyList, (TemplateHashModelEx) right);
-                keys = new NativeCollection(keyList);
-            }
-        }
+                        @Override
+                        public boolean hasNext() throws TemplateException {
+                            return iter.hasNext();
+                        }
 
-        private static void addKeys(Set keySet, List<TemplateModel> keyList, TemplateHashModelEx hash)
-        throws TemplateException {
-            for (TemplateModelIterator it = hash.keys().iterator(); it.hasNext(); ) {
-                TemplateStringModel tsm = (TemplateStringModel) it.next();
-                if (keySet.add(tsm.getAsString())) {
-                    // The first occurrence of the key decides the index;
-                    // this is consistent with stuff like java.util.LinkedHashSet.
-                    keyList.add(tsm);
+                        @Override
+                        public TemplateModel next() throws TemplateException {
+                            return iter.next().getValue();
+                        }
+                    };
                 }
-            }
-        }        
+                
+                @Override
+                public boolean isEmptyCollection() throws TemplateException {
+                    return kvps.isEmpty();
+                }
+                
+                @Override
+                public int getCollectionSize() throws TemplateException {
+                    return kvps.size();
+                }
+            };
+        }
+        
+        @Override
+        public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
+            initKvps();
+            return new KeyValuePairIterator() {
+                private Iterator<KeyValuePair> iter = kvps.iterator();
 
-        private void initValues() throws TemplateException {
-            if (values == null) {
-                ArrayList<TemplateModel> valueList = new ArrayList<>(getHashSize());
-                // Note: getHashSize() invokes initKeys()
+                @Override
+                public boolean hasNext() throws TemplateException {
+                    return iter.hasNext();
+                }
+
+                @Override
+                public KeyValuePair next() throws TemplateException {
+                    return iter.next();
+                }
+            };
+        }
+
+        /**
+         * We must precreate the whole key-value pair list, as we have to deal with duplicate keys. 
+         */
+        private void initKvps() throws TemplateException {
+            if (kvps != null) {
+                return;
+            }
             
-                for (TemplateModelIterator iter = keys.iterator(); iter.hasNext(); ) {
-                    valueList.add(get(((TemplateStringModel) iter.next()).getAsString()));
-                }
-                values = new NativeCollection(valueList);
+            Map<Object, KeyValuePair> kvpsMap = new LinkedHashMap<>();
+            putKVPs(kvpsMap, (TemplateHashModelEx) left);
+            putKVPs(kvpsMap, (TemplateHashModelEx) right);
+            this.kvps = kvpsMap.values();
+        }
+
+        private static void putKVPs(Map<Object, KeyValuePair> kvps, TemplateHashModelEx hash) throws TemplateException {
+            for (KeyValuePairIterator iter = hash.keyValuePairIterator(); iter.hasNext(); ) {
+                KeyValuePair kvp = iter.next();
+                kvps.put(unwrapKey(kvp.getKey()), kvp);
             }
         }
+
+        private static Object unwrapKey(TemplateModel model) throws TemplateException {
+            if (model instanceof AdapterTemplateModel) {
+                return ((AdapterTemplateModel) model).getAdaptedObject(Object.class);
+            }
+            if (model instanceof WrapperTemplateModel) {
+                return ((WrapperTemplateModel) model).getWrappedObject();
+            }
+            if (model instanceof TemplateStringModel) {
+                return ((TemplateStringModel) model).getAsString();
+            }
+            if (model instanceof TemplateNumberModel) {
+                return ((TemplateNumberModel) model).getAsNumber();
+            }
+            if (model instanceof TemplateDateModel) {
+                return ((TemplateDateModel) model).getAsDate();
+            }
+            if (model instanceof TemplateBooleanModel) {
+                return Boolean.valueOf(((TemplateBooleanModel) model).getAsBoolean());
+            }
+            // TODO [FM3] Handle List-s, etc.? But wait until FM3 TM-s settle; we might will have TM.getWrappedObject().
+            return new TemplateException(
+                    "Can't unwrapp hash key of this type, yet (TODO): ",
+                    new _DelayedTemplateLanguageTypeDescription(model));
+        }
+        
     }
     
 }

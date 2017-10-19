@@ -105,6 +105,38 @@ public class HttpRequestParametersHashModel implements TemplateHashModelEx {
             }
         };
     }
+    
+    
+
+    @Override
+    public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
+        return new KeyValuePairIterator() {
+            private final List<String> keys = getKeys();
+            private int nextIndex = 0;  
+            
+            @Override
+            public KeyValuePair next() throws TemplateException {
+                return new KeyValuePair() {
+                    private final String key = keys.get(nextIndex++);
+                    
+                    @Override
+                    public TemplateModel getValue() throws TemplateException {
+                        return objectWrapper.wrap(request.getParameter(key));
+                    }
+                    
+                    @Override
+                    public TemplateModel getKey() throws TemplateException {
+                        return new SimpleString(key);
+                    }
+                };
+            }
+            
+            @Override
+            public boolean hasNext() throws TemplateException {
+                return nextIndex < keys.size();
+            }
+        };
+    }
 
     private synchronized List<String> getKeys() {
         if (keys == null) {

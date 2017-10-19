@@ -51,7 +51,7 @@ class EmptyHashModel implements TemplateHashModelEx2, Serializable {
     }
 
     @Override
-    public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
+    public TemplateHashModelEx.KeyValuePairIterator keyValuePairIterator() throws TemplateException {
         return EmptyKeyValuePairIterator.EMPTY_KEY_VALUE_PAIR_ITERATOR;
     }
 }

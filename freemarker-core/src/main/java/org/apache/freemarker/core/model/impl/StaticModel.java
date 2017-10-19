@@ -102,6 +102,11 @@ final class StaticModel implements TemplateHashModelEx {
     public TemplateCollectionModel values() throws TemplateException {
         return (TemplateCollectionModel) wrapper.getOuterIdentity().wrap(map.values());
     }
+    
+    @Override
+    public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
+        return new MapKeyValuePairIterator(map, wrapper.getOuterIdentity());
+    }
 
     private void populate() throws TemplateException {
         if (!Modifier.isPublic(clazz.getModifiers())) {

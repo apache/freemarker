@@ -39,6 +39,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultMapAdapter;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
+import org.apache.freemarker.core.model.impl.MapKeyValuePairIterator;
 import org.apache.freemarker.core.model.impl.SimpleCollection;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 
@@ -147,6 +148,7 @@ public class Listables {
                 new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
     }
     
+    // TODO [FM3][CF] Remove
     public static class NonEx2MapAdapter extends WrappingTemplateModel implements TemplateHashModelEx {
 
         private final Map<?, ?> map;
@@ -179,6 +181,11 @@ public class Listables {
         @Override
         public TemplateCollectionModel values() {
             return new SimpleCollection(map.values(), getObjectWrapper());
+        }
+
+        @Override
+        public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
+            return new MapKeyValuePairIterator(map, getObjectWrapper());
         }
         
     }

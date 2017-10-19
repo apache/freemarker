@@ -25,16 +25,16 @@ import java.util.Map.Entry;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrappingException;
+import org.apache.freemarker.core.model.TemplateHashModelEx;
+import org.apache.freemarker.core.model.TemplateHashModelEx.KeyValuePairIterator;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
-import org.apache.freemarker.core.model.TemplateHashModelEx2.KeyValuePair;
-import org.apache.freemarker.core.model.TemplateHashModelEx2.KeyValuePairIterator;
 import org.apache.freemarker.core.model.TemplateModel;
 
 /**
  *  Implementation of {@link KeyValuePairIterator} for a {@link TemplateHashModelEx2} that wraps or otherwise uses a
  *  {@link Map} internally.
  */
-public class MapKeyValuePairIterator implements KeyValuePairIterator {
+public class MapKeyValuePairIterator implements TemplateHashModelEx.KeyValuePairIterator {
 
     private final Iterator<Entry<?, ?>> entrySetIterator;
     
@@ -52,9 +52,9 @@ public class MapKeyValuePairIterator implements KeyValuePairIterator {
     }
 
     @Override
-    public KeyValuePair next() {
+    public TemplateHashModelEx.KeyValuePair next() {
         final Entry<?, ?> entry = entrySetIterator.next();
-        return new KeyValuePair() {
+        return new TemplateHashModelEx.KeyValuePair() {
 
             @Override
             public TemplateModel getKey() throws TemplateException {

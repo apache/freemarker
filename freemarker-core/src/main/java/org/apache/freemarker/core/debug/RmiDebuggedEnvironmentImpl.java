@@ -153,6 +153,35 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
             return getHashSize() == 0;
         }
         
+        @Override
+        public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
+            return new KeyValuePairIterator() {
+                private final Iterator<String> keyIter = keySet().iterator();
+                
+                @Override
+                public KeyValuePair next() throws TemplateException {
+                    return new KeyValuePair() {
+                        private final String key = keyIter.next();
+                        
+                        @Override
+                        public TemplateModel getValue() throws TemplateException {
+                            return get(key);
+                        }
+                        
+                        @Override
+                        public TemplateModel getKey() throws TemplateException {
+                            return new SimpleString(key);
+                        }
+                    };
+                }
+                
+                @Override
+                public boolean hasNext() throws TemplateException {
+                    return keyIter.hasNext();
+                }
+            };
+        }
+
         abstract Collection keySet();
 
         static List composeList(Collection c1, Collection c2) {

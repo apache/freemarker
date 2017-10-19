@@ -23,7 +23,7 @@ import java.util.NoSuchElementException;
 
 import org.apache.freemarker.core.TemplateException;
 
-class EmptyKeyValuePairIterator implements TemplateHashModelEx2.KeyValuePairIterator {
+class EmptyKeyValuePairIterator implements TemplateHashModelEx.KeyValuePairIterator {
 
     @Override
     public boolean hasNext() throws TemplateException {
@@ -31,7 +31,7 @@ class EmptyKeyValuePairIterator implements TemplateHashModelEx2.KeyValuePairIter
     }
 
     @Override
-    public TemplateHashModelEx2.KeyValuePair next() throws TemplateException {
+    public TemplateHashModelEx.KeyValuePair next() throws TemplateException {
         throw new NoSuchElementException("Can't retrieve element from empty key-value pair iterator.");
     }
 

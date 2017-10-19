@@ -42,6 +42,7 @@ public class ListBreakContinueTest extends TemplateTest {
     }
     
     /** Hides the Ex2 features of another hash */
+    // TODO [FM3][CF] Remove
     static class NonEx2Hash implements TemplateHashModelEx {
         private final TemplateHashModelEx delegate;
 
@@ -72,6 +73,11 @@ public class ListBreakContinueTest extends TemplateTest {
         @Override
         public TemplateCollectionModel values() throws TemplateException {
             return delegate.values();
+        }
+
+        @Override
+        public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
+            return delegate.keyValuePairIterator();
         }
     }
     

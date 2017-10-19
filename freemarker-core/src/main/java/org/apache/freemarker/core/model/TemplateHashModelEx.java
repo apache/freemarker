@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core.model;
 
+import java.util.Iterator;
+
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 
@@ -31,6 +33,45 @@ import org.apache.freemarker.core.model.impl.SimpleHash;
  * @see SimpleHash
  */
 public interface TemplateHashModelEx extends TemplateHashModel {
+
+    /**
+     * A key-value pair in a hash; used for {@link TemplateHashModelEx.KeyValuePairIterator}.
+     */
+    interface KeyValuePair {
+        
+        /**
+         * @return Any type of {@link TemplateModel}, maybe {@code null} (if the hash entry key is {@code null}).
+         */
+        TemplateModel getKey() throws TemplateException;
+        
+        /**
+         * @return Any type of {@link TemplateModel}, maybe {@code null} (if the hash entry value is {@code null}).
+         */
+        TemplateModel getValue() throws TemplateException;
+    }
+
+    /**
+     * Iterates over the key-value pairs in a hash. This is very similar to an {@link Iterator}, but has a fixed item
+     * type, can throw {@link TemplateException}-s, and has no {@code remove()} method.
+     */
+    interface KeyValuePairIterator {
+    
+        TemplateHashModelEx.KeyValuePairIterator EMPTY_KEY_VALUE_PAIR_ITERATOR = new EmptyKeyValuePairIterator();
+    
+        /**
+         * Similar to {@link Iterator#hasNext()}.
+         */
+        boolean hasNext() throws TemplateException;
+        
+        /**
+         * Similar to {@link TemplateModelIterator#next()}, but returns a {@link KeyValuePair}-s instead of
+         * {@link TemplateModel}-s. As such, its behavior is undefined too, if it's called when there's no more
+         * items (so you must use {@link #hasNext()}, unless you know how many key-value pairs there are).
+         * 
+         * @return Not {@code null}
+         */
+        KeyValuePair next() throws TemplateException;
+    }
 
     /**
      * @return the number of key/value mappings in the hash.
@@ -48,4 +89,11 @@ public interface TemplateHashModelEx extends TemplateHashModel {
      * {@link TemplateModel}-s.
      */
     TemplateCollectionModel values() throws TemplateException;
+    
+
+    /**
+     * @return The iterator that walks through the key-value pairs in the hash. Not {@code null}. 
+     */
+    TemplateHashModelEx.KeyValuePairIterator keyValuePairIterator() throws TemplateException;
+    
 }

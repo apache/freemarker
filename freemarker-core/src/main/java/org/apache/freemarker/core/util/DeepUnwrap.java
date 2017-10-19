@@ -40,8 +40,8 @@ import org.apache.freemarker.core.model.WrapperTemplateModel;
 /**
  * Utility methods for unwrapping {@link TemplateModel}-s.
  */
+// TODO [FM3] Has to be changed or removed. For starters, for Collection-s and Map-s we should use adapters.
 public class DeepUnwrap {
-    private static final Class OBJECT_CLASS = Object.class;
     /**
      * Unwraps {@link TemplateModel}-s recursively.
      * The converting of the {@link TemplateModel} object happens with the following rules:
@@ -97,7 +97,7 @@ public class DeepUnwrap {
 
     private static Object unwrap(TemplateModel model, TemplateModel nullModel, boolean permissive) throws TemplateException {
         if (model instanceof AdapterTemplateModel) {
-            return ((AdapterTemplateModel) model).getAdaptedObject(OBJECT_CLASS);
+            return ((AdapterTemplateModel) model).getAdaptedObject(Object.class);
         }
         if (model instanceof WrapperTemplateModel) {
             return ((WrapperTemplateModel) model).getWrappedObject();

@@ -51,16 +51,16 @@ import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateModelWithAPISupport;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
 import org.apache.freemarker.core.util.CallableUtils;
@@ -341,7 +341,7 @@ public class DefaultObjectWrapperTest {
             assertEquals("c", ((TemplateStringModel) seq.get(2)).getAsString());
             assertNull(seq.get(3));
 
-            assertCollectionTMEquals((TemplateIterableModel) seq, 1, null, "c");
+            assertCollectionTMEquals(seq, 1, null, "c");
 
             TemplateModelIterator it = ((TemplateIterableModel) seq).iterator();
             it.next();
@@ -900,5 +900,5 @@ public class DefaultObjectWrapperTest {
         }
 
     }
-
+    
 }

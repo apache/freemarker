@@ -2266,6 +2266,11 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
                 public TemplateCollectionModel keys() throws TemplateException {
                     return ((TemplateHashModelEx) rootDataModel).keys();
                 }
+                
+                @Override
+                public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
+                    return ((TemplateHashModelEx) rootDataModel).keyValuePairIterator();
+                }
 
                 @Override
                 public int getHashSize() throws TemplateException {
@@ -2907,7 +2912,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         }
 
         @Override
-        public KeyValuePairIterator keyValuePairIterator() {
+        public TemplateHashModelEx.KeyValuePairIterator keyValuePairIterator() {
             ensureInitializedRTE();
             return super.keyValuePairIterator();
         }

@@ -959,6 +959,7 @@ class ClassIntrospector {
      * Returns the number of introspected methods/properties that should be available via the TemplateHashModel
      * interface.
      */
+    // TODO [FM3] Too slow. See also keySet().
     int keyCount(Class<?> clazz) {
         Map<Object, Object> map = get(clazz);
         int count = map.size();
@@ -972,7 +973,7 @@ class ClassIntrospector {
      * Returns the Set of names of introspected methods/properties that should be available via the TemplateHashModel
      * interface.
      */
-    // TODO [FM3] Can't we instead return an Iterable<String> that filters out the non-String keys?
+    // TODO [FM3] Far too slow. 
     @SuppressWarnings("rawtypes")
     Set<String> keySet(Class<?> clazz) {
         Set<Object> set = new HashSet<>(get(clazz).keySet());

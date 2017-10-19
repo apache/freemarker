@@ -108,7 +108,7 @@ implements TemplateBooleanModel, TemplateStringModel, TemplateSequenceModel, Tem
     }
 
     @Override
-    public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
+    public TemplateHashModelEx.KeyValuePairIterator keyValuePairIterator() throws TemplateException {
         return EmptyKeyValuePairIterator.EMPTY_KEY_VALUE_PAIR_ITERATOR;
     }
 

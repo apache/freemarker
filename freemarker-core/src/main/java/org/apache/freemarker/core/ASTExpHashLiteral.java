@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.ListIterator;
 
 import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
@@ -158,8 +159,8 @@ final class ASTExpHashLiteral extends ASTExpression {
         }
 
         @Override
-        public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
-            return new KeyValuePairIterator() {
+        public TemplateHashModelEx.KeyValuePairIterator keyValuePairIterator() throws TemplateException {
+            return new TemplateHashModelEx.KeyValuePairIterator() {
                 private final TemplateModelIterator keyIterator = keys().iterator();
                 private final TemplateModelIterator valueIterator = values().iterator();
 
@@ -169,8 +170,8 @@ final class ASTExpHashLiteral extends ASTExpression {
                 }
 
                 @Override
-                public KeyValuePair next() throws TemplateException {
-                    return new KeyValuePair() {
+                public TemplateHashModelEx.KeyValuePair next() throws TemplateException {
+                    return new TemplateHashModelEx.KeyValuePair() {
                         private final TemplateModel key = keyIterator.next();
                         private final TemplateModel value = valueIterator.next();
 

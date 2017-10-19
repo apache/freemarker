@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleString;
@@ -60,8 +61,8 @@ class NativeHashEx2 implements TemplateHashModelEx2, Serializable {
     }
 
     @Override
-    public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
-        return new KeyValuePairIterator() {
+    public TemplateHashModelEx.KeyValuePairIterator keyValuePairIterator() throws TemplateException {
+        return new TemplateHashModelEx.KeyValuePairIterator() {
             private final Iterator<Map.Entry<String, TemplateModel>> entrySetIterator = map.entrySet().iterator();
 
             @Override
@@ -70,8 +71,8 @@ class NativeHashEx2 implements TemplateHashModelEx2, Serializable {
             }
 
             @Override
-            public KeyValuePair next() throws TemplateException {
-                return new KeyValuePair() {
+            public TemplateHashModelEx.KeyValuePair next() throws TemplateException {
+                return new TemplateHashModelEx.KeyValuePair() {
                     private final Map.Entry<String, TemplateModel> entry = entrySetIterator.next();
 
                     @Override

@@ -144,7 +144,7 @@ public class DefaultMapAdapter extends WrappingTemplateModel
     }
 
     @Override
-    public KeyValuePairIterator keyValuePairIterator() {
+    public TemplateHashModelEx.KeyValuePairIterator keyValuePairIterator() {
         return new MapKeyValuePairIterator(map, getObjectWrapper());
     }
 
