@@ -25,10 +25,9 @@ import java.io.Writer;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateCallableModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util.TemplateLanguageUtils;
 import org.apache.freemarker.core.util._StringUtils;
 
@@ -76,8 +75,8 @@ public abstract class TestTemplateCallableModel implements TemplateCallableModel
                 printValue(((TemplateSequenceModel) value).get(i), sb);
             }
             sb.append(']');
-        } else if (value instanceof TemplateHashModelEx2) {
-            TemplateHashModelEx.KeyValuePairIterator it = ((TemplateHashModelEx2) value).keyValuePairIterator();
+        } else if (value instanceof TemplateHashModelEx) {
+            TemplateHashModelEx.KeyValuePairIterator it = ((TemplateHashModelEx) value).keyValuePairIterator();
             sb.append('{');
             while (it.hasNext()) {
                 TemplateHashModelEx.KeyValuePair kvp = it.next();

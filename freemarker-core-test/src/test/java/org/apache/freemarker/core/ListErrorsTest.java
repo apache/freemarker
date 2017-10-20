@@ -21,12 +21,8 @@ package org.apache.freemarker.core;
 
 import java.io.IOException;
 
-import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.test.TemplateTest;
-import org.apache.freemarker.core.templatesuite.models.Listables;
 import org.junit.Test;
-
-import com.google.common.collect.ImmutableMap;
 
 public class ListErrorsTest extends TemplateTest {
     
@@ -116,15 +112,6 @@ public class ListErrorsTest extends TemplateTest {
                 "as k, v");
         assertErrorContains("<#list [] as k, v></#list>",
                 "only one nested content parameter");
-    }
-
-    @Test
-    public void testNonEx2NonStringKey() throws IOException, TemplateException {
-        addToDataModel("m", new Listables.NonEx2MapAdapter(ImmutableMap.of("k1", "v1", 2, "v2"),
-                new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build()));
-        assertOutput("<#list m?keys as k>${k};</#list>", "k1;2;");
-        assertErrorContains("<#list m as k, v></#list>",
-                "string", "number", ".TemplateHashModelEx2");
     }
     
 }

@@ -27,7 +27,6 @@ import java.util.Map;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.SimpleString;
 
@@ -37,11 +36,11 @@ import org.apache.freemarker.core.model.impl.SimpleString;
  * <p>While this class allows adding items, doing so is not thread-safe, and thus only meant to be done during the
  * initialization of the sequence.
  */
-class NativeHashEx2 implements TemplateHashModelEx2, Serializable {
+class NativeHashEx implements TemplateHashModelEx, Serializable {
 
     private final LinkedHashMap<String, TemplateModel> map;
 
-    public NativeHashEx2() {
+    public NativeHashEx() {
         this.map = new LinkedHashMap<>();
     }
 

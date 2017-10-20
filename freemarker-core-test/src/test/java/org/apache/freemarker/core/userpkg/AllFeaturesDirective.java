@@ -29,7 +29,7 @@ import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
-import org.apache.freemarker.core.model.TemplateHashModelEx2;
+import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
@@ -67,12 +67,12 @@ public class AllFeaturesDirective extends TestTemplateCallableModel implements T
                 (TemplateSequenceModel) args[P_VARARGS_ARG_IDX],
                 getOptionalNumberArgument(args, N1_ARG_IDX, this),
                 getOptionalNumberArgument(args, N2_ARG_IDX, this),
-                (TemplateHashModelEx2) args[N_VARARGS_ARG_IDX],
+                (TemplateHashModelEx) args[N_VARARGS_ARG_IDX],
                 out, env, callPlace);
     }
 
     private void execute(Number p1, Number p2, TemplateSequenceModel pOthers,
-            Number n1, Number n2, TemplateHashModelEx2 nOthers,
+            Number n1, Number n2, TemplateHashModelEx nOthers,
             Writer out, Environment env, CallPlace callPlace) throws IOException, TemplateException {
         out.write("#a(");
         printParam("p1", p1, out, true);

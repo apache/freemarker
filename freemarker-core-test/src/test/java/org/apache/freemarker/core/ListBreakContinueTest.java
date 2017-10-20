@@ -26,9 +26,7 @@ public class ListBreakContinueTest extends TemplateTest {
 
     @Test
     public void testHash() throws IOException, TemplateException {
-        testHash(ImmutableMap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5)); // Listing a TemplateHashModelEx2
-        testHash(new NonEx2Hash((TemplateHashModelEx) getConfiguration().getObjectWrapper().wrap(
-                ImmutableMap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5)))); // Listing a TemplateHashModelEx (non-Ex2)
+        testHash(ImmutableMap.of("a", 1, "b", 2, "c", 3, "d", 4, "e", 5)); // Listing a TemplateHashModelEx
     }
 
     private void testHash(Object listed) throws IOException, TemplateException {
@@ -39,46 +37,6 @@ public class ListBreakContinueTest extends TemplateTest {
         assertOutput(
                 "<#list listed as k, v>B(${k}=${v}) <#if k == 'c'>Continue! <#continue></#if>A(${k}=${v})<#sep>, </#list>",
                 "B(a=1) A(a=1), B(b=2) A(b=2), B(c=3) Continue! B(d=4) A(d=4), B(e=5) A(e=5)");
-    }
-    
-    /** Hides the Ex2 features of another hash */
-    // TODO [FM3][CF] Remove
-    static class NonEx2Hash implements TemplateHashModelEx {
-        private final TemplateHashModelEx delegate;
-
-        public NonEx2Hash(TemplateHashModelEx delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public TemplateModel get(String key) throws TemplateException {
-            return delegate.get(key);
-        }
-
-        @Override
-        public int getHashSize() throws TemplateException {
-            return delegate.getHashSize();
-        }
-
-        @Override
-        public TemplateCollectionModel keys() throws TemplateException {
-            return delegate.keys();
-        }
-
-        @Override
-        public boolean isEmptyHash() throws TemplateException {
-            return delegate.isEmptyHash();
-        }
-
-        @Override
-        public TemplateCollectionModel values() throws TemplateException {
-            return delegate.values();
-        }
-
-        @Override
-        public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
-            return delegate.keyValuePairIterator();
-        }
     }
     
 }

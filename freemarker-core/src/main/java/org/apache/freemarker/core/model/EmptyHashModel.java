@@ -23,7 +23,8 @@ import java.io.Serializable;
 
 import org.apache.freemarker.core.TemplateException;
 
-class EmptyHashModel implements TemplateHashModelEx2, Serializable {
+@SuppressWarnings("serial")
+class EmptyHashModel implements TemplateHashModelEx, Serializable {
 
     @Override
     public int getHashSize() throws TemplateException {

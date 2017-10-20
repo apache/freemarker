@@ -30,7 +30,7 @@ import org.apache.freemarker.core.TemplateException;
  */
 // TODO [FM3] As `exp!` doesn't use this, are the other use cases necessary and correct?
 final class GeneralPurposeNothing
-implements TemplateBooleanModel, TemplateStringModel, TemplateSequenceModel, TemplateHashModelEx2,
+implements TemplateBooleanModel, TemplateStringModel, TemplateSequenceModel, TemplateHashModelEx,
         TemplateFunctionModel {
 
     static final TemplateModel INSTANCE = new GeneralPurposeNothing();

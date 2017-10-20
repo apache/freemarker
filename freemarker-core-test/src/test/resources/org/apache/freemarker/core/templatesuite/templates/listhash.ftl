@@ -53,8 +53,7 @@
 
 Non-empty maps:
 
-<@listings listables.hashEx2s />
-<@listings [ listables.hashNonEx2 ] />
+<@listings listables.hashExs />
 
 Empty maps:
 

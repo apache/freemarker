@@ -435,7 +435,7 @@ Core / Models and Object wrapping
       `TemplateCollectoinModel` has `getCollectionSize()` and `isEmptyCollection` method. So this affects
       `TemplateHashModelEx` implementations as well.
   - Map-like interfaces:
-    - [TODO: in progress] `TemplateHashModelEx2` was removed, as the `keyValuePairIterator()` method was moved to `TemplateHashModelEx`,
+    - `TemplateHashModelEx2` was removed, as the `keyValuePairIterator()` method was moved to `TemplateHashModelEx`,
        so now the two interfaces would be the same.
 - BeanModel.keys() and values() are now final methods. Override BeanModel.keySet() and/or get(String) instead.
       

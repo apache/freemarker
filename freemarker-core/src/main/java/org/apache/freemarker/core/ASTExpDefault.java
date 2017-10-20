@@ -22,7 +22,6 @@ package org.apache.freemarker.core;
 
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
@@ -31,8 +30,8 @@ import org.apache.freemarker.core.model.TemplateStringModel;
 /** {@code exp!defExp}, {@code (exp)!defExp} and the same two with {@code (exp)!}. */
 class ASTExpDefault extends ASTExpression {
 
-    static private class EmptyStringAndSequenceAndHash implements TemplateStringModel, TemplateSequenceModel,
-            TemplateHashModelEx2 {
+    static private class EmptyStringAndSequenceAndHash
+            implements TemplateStringModel, TemplateSequenceModel, TemplateHashModelEx {
         @Override
         public String getAsString() {
             return "";

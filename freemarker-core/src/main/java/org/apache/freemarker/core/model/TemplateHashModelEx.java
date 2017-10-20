@@ -22,14 +22,17 @@ package org.apache.freemarker.core.model;
 import java.util.Iterator;
 
 import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.impl.DefaultMapAdapter;
 import org.apache.freemarker.core.model.impl.SimpleHash;
 
 /**
  * "extended hash" template language data type; extends {@link TemplateHashModel} by allowing
- * iterating through its keys and values.
+ * iterating through its key-value pairs, or just the keys, or just the values.
  * 
  * <p>In templates they are used like hashes, but these will also work (among others):
- * {@code myExtHash?size}, {@code myExtHash?keys}, {@code myExtHash?values}.
+ * {@code myExtHash?size}, {@code myExtHash?keys}, {@code myExtHash?values}, {@code <#list myMap as k, v>}.
+ * 
+ * @see DefaultMapAdapter
  * @see SimpleHash
  */
 public interface TemplateHashModelEx extends TemplateHashModel {

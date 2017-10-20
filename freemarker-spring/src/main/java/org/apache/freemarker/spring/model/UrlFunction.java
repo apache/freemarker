@@ -38,8 +38,6 @@ import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateHashModelEx.KeyValuePairIterator;
-import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
@@ -110,7 +108,7 @@ class UrlFunction extends AbstractSpringTemplateFunctionModel {
 
         List<_KeyValuePair<String, String>> params = Collections.emptyList();
         final int paramsVarargsIndex = ARGS_LAYOUT.getNamedVarargsArgumentIndex();
-        final TemplateHashModelEx2 paramsHashModel = (TemplateHashModelEx2) args[paramsVarargsIndex];
+        final TemplateHashModelEx paramsHashModel = (TemplateHashModelEx) args[paramsVarargsIndex];
 
         if (!paramsHashModel.isEmptyHash()) {
             params = new ArrayList<>();

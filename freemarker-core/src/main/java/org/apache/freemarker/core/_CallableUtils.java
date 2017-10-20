@@ -139,7 +139,7 @@ public class _CallableUtils {
         }
 
         int namedVarargsArgumentIndex = argsLayout.getNamedVarargsArgumentIndex();
-        NativeHashEx2 namedVarargsHash = null;
+        NativeHashEx namedVarargsHash = null;
         if (namedArgs != null) {
             StringToIndexMap predefNamedArgsMap = argsLayout.getPredefinedNamedArgumentsMap();
             for (NamedArgument namedArg : namedArgs) {
@@ -165,7 +165,7 @@ public class _CallableUtils {
                                             });
                         }
 
-                        namedVarargsHash = new NativeHashEx2();
+                        namedVarargsHash = new NativeHashEx();
                     }
                     namedVarargsHash.put(namedArg.name, namedArg.value.eval(env));
                 }

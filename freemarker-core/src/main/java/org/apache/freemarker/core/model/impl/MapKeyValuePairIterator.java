@@ -27,11 +27,10 @@ import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateHashModelEx.KeyValuePairIterator;
-import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 
 /**
- *  Implementation of {@link KeyValuePairIterator} for a {@link TemplateHashModelEx2} that wraps or otherwise uses a
+ *  Implementation of {@link KeyValuePairIterator} for a {@link TemplateHashModelEx} that wraps or otherwise uses a
  *  {@link Map} internally.
  */
 public class MapKeyValuePairIterator implements TemplateHashModelEx.KeyValuePairIterator {

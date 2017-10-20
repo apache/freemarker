@@ -36,7 +36,7 @@ import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
-import org.apache.freemarker.core.model.TemplateHashModelEx2;
+import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +72,7 @@ class TagDirectiveModel extends JspTagModelBase implements TemplateDirectiveMode
             Tag parentTag = (Tag) pageContext.peekTopTag(Tag.class);
             tag.setParent(parentTag);
             tag.setPageContext(pageContext);
-            setupTag(tag, (TemplateHashModelEx2) args[ARGS_LAYOUT.getNamedVarargsArgumentIndex()],
+            setupTag(tag, (TemplateHashModelEx) args[ARGS_LAYOUT.getNamedVarargsArgumentIndex()],
                     pageContext.getObjectWrapper());
             // If the parent of this writer is not a JspWriter itself, use
             // a little Writer-to-JspWriter adapter...

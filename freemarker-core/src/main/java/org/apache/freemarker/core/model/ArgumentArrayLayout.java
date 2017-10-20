@@ -57,9 +57,9 @@ import org.apache.freemarker.core.util.StringToIndexMap;
  *     an empty {@link TemplateSequenceModel} (like {@link TemplateSequenceModel#EMPTY_SEQUENCE}).
  * <li>
  *     If there's a named varargs argument, then 1 element for the positional varargs parameter (whose value will be
- *     a {@link TemplateHashModelEx2}), at index {@link #getNamedVarargsArgumentIndex()}. This must not be left
+ *     a {@link TemplateHashModelEx}), at index {@link #getNamedVarargsArgumentIndex()}. This must not be left
  *     {@code null} in the argument array. In case there are 0 named varargs, the caller must set it to an empty
- *     {@link TemplateHashModelEx2} (like {@link TemplateHashModel#EMPTY_HASH}).
+ *     {@link TemplateHashModelEx} (like {@link TemplateHashModel#EMPTY_HASH}).
  * </ol>
  * <p>
  * The length of the argument array (allocated by the caller of {@code execute}) is {@link #getTotalLength()}}, or
@@ -221,7 +221,7 @@ public final class ArgumentArrayLayout {
     /**
      * Returns the index of the varargs argument into which named arguments that aren't predefined (via {@link
      * #getPredefinedNamedArgumentsMap()}) are collected, or -1 if there's no such varargs argument. The value of the
-     * named varargs argument is a {@link TemplateHashModelEx2} with string keys that collects all the named arguments
+     * named varargs argument is a {@link TemplateHashModelEx} with string keys that collects all the named arguments
      * that aren't present in the {@link #getPredefinedNamedArgumentsMap()}. The iteration order of this hash
      * corresponds to the order in which the arguments were specified on the call site (in a template, typically).
      * The value of this argument can't be {@code null}.

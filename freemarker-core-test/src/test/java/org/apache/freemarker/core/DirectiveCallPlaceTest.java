@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
-import org.apache.freemarker.core.model.TemplateHashModelEx2;
+import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util.CommonSupplier;
@@ -230,7 +230,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
         @Override
         public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
                 throws TemplateException, IOException {
-            TemplateHashModelEx2 varargs = (TemplateHashModelEx2) args[ARGS_LAYOUT.getNamedVarargsArgumentIndex()];
+            TemplateHashModelEx varargs = (TemplateHashModelEx) args[ARGS_LAYOUT.getNamedVarargsArgumentIndex()];
             if (varargs.getHashSize() > 0) {
                 out.write("(p=");
                 out.write(((TemplateStringModel) varargs.get("p")).getAsString());

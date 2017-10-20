@@ -30,20 +30,11 @@ import java.util.TreeSet;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrappingException;
-import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateHashModelEx2;
-import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.WrappingTemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultMapAdapter;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
-import org.apache.freemarker.core.model.impl.MapKeyValuePairIterator;
-import org.apache.freemarker.core.model.impl.SimpleCollection;
 import org.apache.freemarker.core.model.impl.SimpleHash;
-
-import com.google.common.collect.ImmutableMap;
 
 @SuppressWarnings("boxing")
 public class Listables {
@@ -65,8 +56,6 @@ public class Listables {
         list.add(33);
         LINKED_LIST = list;
     }
-
-    private static final List<Integer> EMPTY_LINKED_LIST = new LinkedList<>();
 
     private static final Set<Integer> SET;
     static {
@@ -109,7 +98,7 @@ public class Listables {
         return Collections.<Integer>emptySet().iterator();
     }
     
-    public List<TemplateHashModelEx2> getHashEx2s() throws TemplateException {
+    public List<TemplateHashModelEx> getHashExs() throws TemplateException {
         Map<Object, Object> map;
         map = new LinkedHashMap<>();
         map.put("k1", "v1");
@@ -119,12 +108,12 @@ public class Listables {
         map.put(true, "v5");
         map.put(false, null);
         
-        return getMapsWrappedAsEx2(map);
+        return getMapsWrappedAsEx(map);
     }
 
     public List<? extends TemplateHashModelEx> getEmptyHashes() throws ObjectWrappingException {
         List<TemplateHashModelEx> emptyMaps = new ArrayList<>();
-        emptyMaps.addAll(getMapsWrappedAsEx2(Collections.emptyMap()));
+        emptyMaps.addAll(getMapsWrappedAsEx(Collections.emptyMap()));
         emptyMaps.add((TemplateHashModelEx) new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build()
                 .wrap(Collections.emptyMap()));
         return emptyMaps;
@@ -133,61 +122,14 @@ public class Listables {
     /**
      * Returns the map wrapped on various ways.
      */
-    private List<TemplateHashModelEx2> getMapsWrappedAsEx2(Map<?, ?> map) throws ObjectWrappingException {
-        List<TemplateHashModelEx2> maps = new ArrayList<>();
+    private List<TemplateHashModelEx> getMapsWrappedAsEx(Map<?, ?> map) throws ObjectWrappingException {
+        List<TemplateHashModelEx> maps = new ArrayList<>();
         
         DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build();
         maps.add(new SimpleHash(map, ow));
         maps.add((DefaultMapAdapter) ow.wrap(map));
 
         return maps;
-    }
-    
-    public TemplateHashModelEx getHashNonEx2() {
-        return new NonEx2MapAdapter(ImmutableMap.of("k1", 11, "k2", 22),
-                new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0).build());
-    }
-    
-    // TODO [FM3][CF] Remove
-    public static class NonEx2MapAdapter extends WrappingTemplateModel implements TemplateHashModelEx {
-
-        private final Map<?, ?> map;
-        
-        public NonEx2MapAdapter(Map<?, ?> map, ObjectWrapper wrapper) {
-            super(wrapper);
-            this.map = map;
-        }
-        
-        @Override
-        public TemplateModel get(String key) throws TemplateException {
-            return wrap(map.get(key));
-        }
-        
-        @Override
-        public boolean isEmptyHash() {
-            return map.isEmpty();
-        }
-        
-        @Override
-        public int getHashSize() {
-            return map.size();
-        }
-        
-        @Override
-        public TemplateCollectionModel keys() {
-            return new SimpleCollection(map.keySet(), getObjectWrapper());
-        }
-        
-        @Override
-        public TemplateCollectionModel values() {
-            return new SimpleCollection(map.values(), getObjectWrapper());
-        }
-
-        @Override
-        public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
-            return new MapKeyValuePairIterator(map, getObjectWrapper());
-        }
-        
     }
     
 }

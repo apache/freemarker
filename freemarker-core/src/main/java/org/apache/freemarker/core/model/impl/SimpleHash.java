@@ -32,7 +32,6 @@ import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.WrappingTemplateModel;
 
@@ -74,7 +73,7 @@ import org.apache.freemarker.core.model.WrappingTemplateModel;
  * @see DefaultMapAdapter
  * @see TemplateHashModelEx
  */
-public class SimpleHash extends WrappingTemplateModel implements TemplateHashModelEx2 {
+public class SimpleHash extends WrappingTemplateModel implements TemplateHashModelEx {
 
     private final Map map;
     private boolean putFailed;

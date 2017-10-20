@@ -40,7 +40,6 @@ import org.apache.freemarker.core._DelayedShortClassName;
 import org.apache.freemarker.core._ErrorDescriptionBuilder;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModelWithOriginName;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
@@ -69,7 +68,7 @@ abstract class JspTagModelBase implements TemplateModelWithOriginName {
         return tagClass.newInstance();
     }
     
-    void setupTag(JspTag tag, TemplateHashModelEx2 args, ObjectWrapperAndUnwrapper wrapper)
+    void setupTag(JspTag tag, TemplateHashModelEx args, ObjectWrapperAndUnwrapper wrapper)
             throws TemplateException,
         InvocationTargetException, 
         IllegalAccessException {

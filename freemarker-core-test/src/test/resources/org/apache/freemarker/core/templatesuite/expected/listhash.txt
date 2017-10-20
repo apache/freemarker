@@ -81,25 +81,6 @@ Non-empty maps:
       ]
     }
 
-    Map:
-    
-    [
-      k1 = 11
-      k2 = 22
-    ]
-  
-    [
-      k1 = 11; // @0=@0; odd=odd; Y=Y
-      k2 = 22 // @1=@1; even=even; N=N
-    ]
-  
-    {
-      [
-        k1 = 11; // @0=@0; odd=odd; Y=Y
-        k2 = 22 // @1=@1; even=even; N=N
-      ]
-    }
-
 
 Empty maps:
 

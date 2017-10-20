@@ -30,12 +30,12 @@ import javax.servlet.jsp.tagext.JspTag;
 import javax.servlet.jsp.tagext.SimpleTag;
 import javax.servlet.jsp.tagext.Tag;
 
+import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
-import org.apache.freemarker.core.model.TemplateHashModelEx2;
+import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 
 /**
@@ -71,7 +71,7 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
                 if (parentTag != null) {
                     tag.setParent(parentTag);
                 }
-                setupTag(tag, (TemplateHashModelEx2) args[ARGS_LAYOUT.getNamedVarargsArgumentIndex()],
+                setupTag(tag, (TemplateHashModelEx) args[ARGS_LAYOUT.getNamedVarargsArgumentIndex()],
                         pageContext.getObjectWrapper());
                 if (callPlace.hasNestedContent()) {
                     tag.setJspBody(new JspFragment() {

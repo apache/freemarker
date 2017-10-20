@@ -26,13 +26,9 @@ import java.util.Collections;
 
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateHashModelEx.KeyValuePair;
-import org.apache.freemarker.core.model.TemplateHashModelEx.KeyValuePairIterator;
-import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.util._StringUtils;
 
@@ -308,60 +304,17 @@ final class ASTDirList extends ASTDirective {
             final boolean hashNotEmpty;
             if (listedValue instanceof TemplateHashModelEx) {
                 TemplateHashModelEx listedHash = (TemplateHashModelEx) listedValue; 
-                if (listedHash instanceof TemplateHashModelEx2) {
-                    TemplateHashModelEx.KeyValuePairIterator kvpIter
-                            = openedIterator == null ? ((TemplateHashModelEx2) listedHash).keyValuePairIterator()
-                                    : (TemplateHashModelEx.KeyValuePairIterator) openedIterator;
-                    hashNotEmpty = kvpIter.hasNext();
-                    if (hashNotEmpty) {
-                        if (nestedContentParam1Name != null) {
-                            listLoop: do {
-                                    TemplateHashModelEx.KeyValuePair kvp = kvpIter.next();
-                                    nestedContentParam = kvp.getKey();
-                                    nestedContentParam2 = kvp.getValue();
-                                    hasNext = kvpIter.hasNext();
-                                    try {
-                                        env.visit(childBuffer);
-                                    } catch (BreakOrContinueException br) {
-                                        if (br == BreakOrContinueException.BREAK_INSTANCE) {
-                                            break listLoop;
-                                        }
-                                    }
-                                    index++;
-                                } while (hasNext);
-                            openedIterator = null;
-                        } else {
-                            // We will reuse this at the #iterms
-                            openedIterator = kvpIter;
-                            env.visit(childBuffer);
-                        }
-                    }
-                } else { //  not a TemplateHashModelEx2, but still a TemplateHashModelEx
-                    TemplateModelIterator keysIter = listedHash.keys().iterator();
-                    hashNotEmpty = keysIter.hasNext();
-                    if (hashNotEmpty) {
-                        if (nestedContentParam1Name != null) {
-                            listLoop: do {
-                                nestedContentParam = keysIter.next();
-                                if (!(nestedContentParam instanceof TemplateStringModel)) {
-                                    throw new TemplateException(env,
-                                            new _ErrorDescriptionBuilder(
-                                                    "When listing key-value pairs of traditional hash "
-                                                    + "implementations, all keys must be strings, but one of them "
-                                                    + "was ",
-                                                    new _DelayedAOrAn(
-                                                            new _DelayedTemplateLanguageTypeDescription(
-                                                                    nestedContentParam)),
-                                                    "."
-                                                    ).tip("The listed value's TemplateModel class was ",
-                                                            new _DelayedShortClassName(listedValue.getClass()),
-                                                            ", which doesn't implement ",
-                                                            new _DelayedShortClassName(TemplateHashModelEx2.class),
-                                                            ", which leads to this restriction."));
-                                }
-                                nestedContentParam2 = listedHash.get(((TemplateStringModel) nestedContentParam)
-                                        .getAsString());
-                                hasNext = keysIter.hasNext();
+                TemplateHashModelEx.KeyValuePairIterator kvpIter
+                        = openedIterator == null ? listedHash.keyValuePairIterator()
+                                : (TemplateHashModelEx.KeyValuePairIterator) openedIterator;
+                hashNotEmpty = kvpIter.hasNext();
+                if (hashNotEmpty) {
+                    if (nestedContentParam1Name != null) {
+                        listLoop: do {
+                                TemplateHashModelEx.KeyValuePair kvp = kvpIter.next();
+                                nestedContentParam = kvp.getKey();
+                                nestedContentParam2 = kvp.getValue();
+                                hasNext = kvpIter.hasNext();
                                 try {
                                     env.visit(childBuffer);
                                 } catch (BreakOrContinueException br) {
@@ -371,9 +324,11 @@ final class ASTDirList extends ASTDirective {
                                 }
                                 index++;
                             } while (hasNext);
-                        } else {
-                            env.visit(childBuffer);
-                        }
+                        openedIterator = null;
+                    } else {
+                        // We will reuse this at the #iterms
+                        openedIterator = kvpIter;
+                        env.visit(childBuffer);
                     }
                 }
             } else if (listedValue instanceof TemplateIterableModel) {

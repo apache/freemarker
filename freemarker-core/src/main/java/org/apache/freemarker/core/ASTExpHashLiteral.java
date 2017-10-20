@@ -26,7 +26,6 @@ import java.util.ListIterator;
 
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
-import org.apache.freemarker.core.model.TemplateHashModelEx2;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 
@@ -105,7 +104,7 @@ final class ASTExpHashLiteral extends ASTExpression {
     	return new ASTExpHashLiteral(clonedKeys, clonedValues);
     }
 
-    private class LinkedHash implements TemplateHashModelEx2 {
+    private class LinkedHash implements TemplateHashModelEx {
 
         private HashMap<String, TemplateModel> map;
         private TemplateCollectionModel keyCollection, valueCollection; // ordered lists of keys and values
