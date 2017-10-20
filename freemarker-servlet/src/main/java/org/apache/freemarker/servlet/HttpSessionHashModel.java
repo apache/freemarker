@@ -34,7 +34,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 /**
  * TemplateHashModel wrapper for a HttpSession attributes.
  */
-
+// TODO [FM3] Shouldn't this be a TemplateHashModelEx? The attribute names are known after all.
 public final class HttpSessionHashModel implements TemplateHashModel, Serializable {
     private static final long serialVersionUID = 1L;
     private transient HttpSession session;
@@ -106,10 +106,5 @@ public final class HttpSessionHashModel implements TemplateHashModel, Serializab
         return (session != null && session != currentSession) || 
             (session == null && request == null);
     }
-
-    @Override
-    public boolean isEmptyHash() throws TemplateException {
-        checkSessionExistence();
-        return session == null || !session.getAttributeNames().hasMoreElements();
-    }
+    
 }

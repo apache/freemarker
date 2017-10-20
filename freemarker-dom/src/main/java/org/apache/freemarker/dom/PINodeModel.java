@@ -38,8 +38,4 @@ class PINodeModel extends NodeModel implements TemplateStringModel {
         return "@pi$" + ((ProcessingInstruction) node).getTarget();
     }
     
-    @Override
-    public boolean isEmptyHash() {
-        return true;
-    }
 }

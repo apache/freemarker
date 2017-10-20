@@ -141,14 +141,14 @@ final class ASTExpBuiltInVariable extends ASTExpression {
             return env.getMainNamespace();
         }
         if (name == GLOBALS) {
-            return env.getGlobalVariables();
+            return env.getGloballyVisibleVariables();
         }
         if (name == LOCALS) {
             ASTDirMacroOrFunction.Context ctx = env.getCurrentMacroContext();
             return ctx == null ? null : ctx.getLocals();
         }
         if (name == DATA_MODEL) {
-            return env.getDataModel();
+            return env.getDataModelWithSharedVariableFallback();
         }
         if (name == VARS) {
             return new VarsHash(env);
@@ -226,7 +226,6 @@ final class ASTExpBuiltInVariable extends ASTExpression {
     }
 
     static class VarsHash implements TemplateHashModel {
-        
         Environment env;
         
         VarsHash(Environment env) {
@@ -236,11 +235,6 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         @Override
         public TemplateModel get(String key) throws TemplateException {
             return env.getVariable(key);
-        }
-        
-        @Override
-        public boolean isEmptyHash() {
-            return false;
         }
     }
     

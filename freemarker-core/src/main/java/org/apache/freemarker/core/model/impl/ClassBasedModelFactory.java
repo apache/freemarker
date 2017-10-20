@@ -134,11 +134,6 @@ abstract class ClassBasedModelFactory implements TemplateHashModel {
             cache.remove(clazz.getName());
         }
     }
-
-    @Override
-    public boolean isEmptyHash() {
-        return false;
-    }
     
     protected abstract TemplateModel createModel(Class clazz) 
     throws TemplateException;

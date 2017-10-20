@@ -25,8 +25,8 @@ import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util._StringUtils;
 import org.w3c.dom.Attr;
@@ -38,11 +38,6 @@ class ElementModel extends NodeModel implements TemplateStringModel {
 
     public ElementModel(Element element) {
         super(element);
-    }
-    
-    @Override
-    public boolean isEmptyHash() {
-        return false;
     }
     
     /**

@@ -49,8 +49,4 @@ class DocumentTypeModel extends NodeModel {
         return "@document_type$" + node.getNodeName();
     }
     
-    @Override
-    public boolean isEmptyHash() {
-        return true;
-    }
 }

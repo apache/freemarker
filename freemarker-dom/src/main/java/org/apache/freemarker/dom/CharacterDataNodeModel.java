@@ -38,9 +38,4 @@ class CharacterDataNodeModel extends NodeModel implements TemplateStringModel {
     public String getNodeName() {
         return (node instanceof Comment) ? "@comment" : "@text";
     }
-    
-    @Override
-    public boolean isEmptyHash() {
-        return true;
-    }
 }

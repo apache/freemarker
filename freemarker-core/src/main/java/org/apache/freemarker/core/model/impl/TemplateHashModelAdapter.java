@@ -55,7 +55,7 @@ class TemplateHashModelAdapter extends AbstractMap implements TemplateModelAdapt
     @Override
     public boolean isEmpty() {
         try {
-            return model.isEmptyHash();
+            return getModelEx().isEmptyHash();
         } catch (TemplateException e) {
             throw new UndeclaredThrowableException(e);
         }
@@ -65,6 +65,15 @@ class TemplateHashModelAdapter extends AbstractMap implements TemplateModelAdapt
     public Object get(Object key) {
         try {
             return wrapper.unwrap(model.get(String.valueOf(key)));
+        } catch (TemplateException e) {
+            throw new UndeclaredThrowableException(e);
+        }
+    }
+    
+    @Override
+    public int size() {
+        try {
+            return getModelEx().getHashSize();
         } catch (TemplateException e) {
             throw new UndeclaredThrowableException(e);
         }

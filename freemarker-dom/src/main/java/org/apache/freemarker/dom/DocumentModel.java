@@ -68,9 +68,4 @@ class DocumentModel extends NodeModel implements TemplateHashModel {
         }
         return rootElement;
     }
-    
-    @Override
-    public boolean isEmptyHash() {
-        return false;
-    }
 } 

@@ -23,6 +23,7 @@ import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
+import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -197,7 +198,7 @@ abstract class ASTExpression extends ASTNode {
         } else if (model instanceof TemplateIterableModel) {
             return !((TemplateIterableModel) model).iterator().hasNext();
         } else if (model instanceof TemplateHashModel) {
-            return ((TemplateHashModel) model).isEmptyHash();
+            return (model instanceof TemplateHashModelEx) ? ((TemplateHashModelEx) model).isEmptyHash() : false;
         } else if (model instanceof TemplateNumberModel
                 || model instanceof TemplateDateModel
                 || model instanceof TemplateBooleanModel) {

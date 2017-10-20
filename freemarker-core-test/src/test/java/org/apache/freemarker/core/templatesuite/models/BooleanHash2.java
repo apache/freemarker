@@ -39,12 +39,4 @@ public class BooleanHash2 implements TemplateHashModel {
     public TemplateModel get(String key) {
         return null;
     }
-
-    /**
-     * @return true if this object is empty.
-     */
-    @Override
-    public boolean isEmptyHash() {
-        return false;
-    }
 }

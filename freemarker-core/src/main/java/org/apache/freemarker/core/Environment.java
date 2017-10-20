@@ -2221,64 +2221,53 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
     }
 
     /**
-     * Returns the data-model (also known as the template context in some other template engines).
+     * Returns a view of the data-model (also known as the template context in some other template engines) 
+     * that falls back to {@linkplain Configuration#getSharedVariables() shared variables}.
      */
-    public TemplateHashModel getDataModel() {
-        final TemplateHashModel result = new TemplateHashModel() {
-
-            @Override
-            public boolean isEmptyHash() {
-                return false;
-            }
-
-            @Override
-            public TemplateModel get(String key) throws TemplateException {
-                TemplateModel value = rootDataModel.get(key);
-                if (value == null) {
-                    value = configuration.getWrappedSharedVariable(key);
+    public TemplateHashModel getDataModelWithSharedVariableFallback() {
+        return rootDataModel instanceof TemplateHashModelEx
+                ? new TemplateHashModelEx() {
+                    @Override
+                    public boolean isEmptyHash() throws TemplateException {
+                        return ((TemplateHashModelEx) rootDataModel).isEmptyHash();
+                    }
+    
+                    @Override
+                    public TemplateModel get(String key) throws TemplateException {
+                        TemplateModel value = rootDataModel.get(key);
+                        return value != null ? value : configuration.getWrappedSharedVariable(key);
+                    }
+    
+                    // NB: The methods below do not take into account
+                    // configuration shared variables even though
+                    // the hash will return them, if only for BWC reasons
+                    @Override
+                    public TemplateCollectionModel values() throws TemplateException {
+                        return ((TemplateHashModelEx) rootDataModel).values();
+                    }
+    
+                    @Override
+                    public TemplateCollectionModel keys() throws TemplateException {
+                        return ((TemplateHashModelEx) rootDataModel).keys();
+                    }
+                    
+                    @Override
+                    public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
+                        return ((TemplateHashModelEx) rootDataModel).keyValuePairIterator();
+                    }
+    
+                    @Override
+                    public int getHashSize() throws TemplateException {
+                        return ((TemplateHashModelEx) rootDataModel).getHashSize();
+                    }
                 }
-                return value;
-            }
-        };
-
-        if (rootDataModel instanceof TemplateHashModelEx) {
-            return new TemplateHashModelEx() {
-
-                @Override
-                public boolean isEmptyHash() throws TemplateException {
-                    return result.isEmptyHash();
-                }
-
+            : new TemplateHashModel() {
                 @Override
                 public TemplateModel get(String key) throws TemplateException {
-                    return result.get(key);
-                }
-
-                // NB: The methods below do not take into account
-                // configuration shared variables even though
-                // the hash will return them, if only for BWC reasons
-                @Override
-                public TemplateCollectionModel values() throws TemplateException {
-                    return ((TemplateHashModelEx) rootDataModel).values();
-                }
-
-                @Override
-                public TemplateCollectionModel keys() throws TemplateException {
-                    return ((TemplateHashModelEx) rootDataModel).keys();
-                }
-                
-                @Override
-                public KeyValuePairIterator keyValuePairIterator() throws TemplateException {
-                    return ((TemplateHashModelEx) rootDataModel).keyValuePairIterator();
-                }
-
-                @Override
-                public int getHashSize() throws TemplateException {
-                    return ((TemplateHashModelEx) rootDataModel).getHashSize();
+                    TemplateModel value = rootDataModel.get(key);
+                    return value != null ? value : configuration.getWrappedSharedVariable(key);
                 }
             };
-        }
-        return result;
     }
 
     /**
@@ -2286,14 +2275,8 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * hash. That is, you see the variables created with <code>&lt;#global ...&gt;</code>, and the variables of the
      * data-model. To invoke new global variables, use {@link #setGlobalVariable setGlobalVariable}.
      */
-    public TemplateHashModel getGlobalVariables() {
+    public TemplateHashModel getGloballyVisibleVariables() {
         return new TemplateHashModel() {
-
-            @Override
-            public boolean isEmptyHash() {
-                return false;
-            }
-
             @Override
             public TemplateModel get(String key) throws TemplateException {
                 TemplateModel result = globalNamespace.get(key);

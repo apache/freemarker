@@ -272,7 +272,7 @@ public class DefaultObjectWrapperTest {
         }
 
         {
-            assertTrue(((TemplateHashModel) OW.wrap(Collections.emptyMap())).isEmptyHash());
+            assertTrue(((TemplateHashModelEx) OW.wrap(Collections.emptyMap())).isEmptyHash());
         }
     }
 

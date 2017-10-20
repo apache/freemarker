@@ -211,14 +211,6 @@ abstract public class NodeModel implements TemplateNodeModelEx, TemplateHashMode
         throw new TemplateException("Unknown node type: " + nodeType + ". This should be impossible!");
     }
 
-    /**
-     * Always returns {@code false}.
-     */
-    @Override
-    public boolean isEmptyHash() throws TemplateException {
-        return false;
-    }
-
     @Override
     public TemplateModelIterator iterator() throws TemplateException {
         return new SingleItemTemplateModelIterator(this);

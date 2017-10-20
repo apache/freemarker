@@ -47,12 +47,4 @@ public class BooleanHash1 implements TemplateHashModel {
             return new SimpleString( "Just another key..." );
         }
     }
-
-    /**
-     * @return true if this object is empty.
-     */
-    @Override
-    public boolean isEmptyHash() {
-        return true;
-    }
 }

@@ -44,11 +44,6 @@ class AttributeNodeModel extends NodeModel implements TemplateStringModel {
     }
     
     @Override
-    public boolean isEmptyHash() {
-        return true;
-    }
-    
-    @Override
     String getQualifiedName() {
         String nsURI = node.getNamespaceURI();
         if (nsURI == null || nsURI.equals(""))

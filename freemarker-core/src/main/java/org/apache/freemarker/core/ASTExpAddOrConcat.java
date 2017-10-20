@@ -266,11 +266,6 @@ final class ASTExpAddOrConcat extends ASTExpression {
             return (model != null) ? model : left.get(key);
         }
 
-        @Override
-        public boolean isEmptyHash()
-        throws TemplateException {
-            return left.isEmptyHash() && right.isEmptyHash();
-        }
     }
 
     private static final class ConcatenatedHashEx extends ConcatenatedHash implements TemplateHashModelEx {
@@ -287,6 +282,12 @@ final class ASTExpAddOrConcat extends ASTExpression {
             return kvps.size();
         }
 
+        @Override
+        public boolean isEmptyHash()
+        throws TemplateException {
+            return ((TemplateHashModelEx) left).isEmptyHash() && ((TemplateHashModelEx) right).isEmptyHash();
+        }
+        
         @Override
         public TemplateCollectionModel keys() throws TemplateException {
             initKvps();

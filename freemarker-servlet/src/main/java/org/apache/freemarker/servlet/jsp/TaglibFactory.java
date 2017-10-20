@@ -353,14 +353,6 @@ public class TaglibFactory implements TemplateHashModel {
     }
 
     /**
-     * Returns false.
-     */
-    @Override
-    public boolean isEmptyHash() {
-        return false;
-    }
-
-    /**
      * See {@link Builder#getMetaInfTldSources()}
      */
     public ServletContext getServletContext() {
@@ -1490,6 +1482,7 @@ public class TaglibFactory implements TemplateHashModel {
 
     }
 
+    // TODO [FM3] Shouldn't this be a TemplateHashModelEx? The names are known after all.
     private static final class Taglib implements TemplateHashModel {
 
         private final Map<String, TemplateModel> tagsAndFunctions;
@@ -1501,11 +1494,6 @@ public class TaglibFactory implements TemplateHashModel {
         @Override
         public TemplateModel get(String key) {
             return tagsAndFunctions.get(key);
-        }
-
-        @Override
-        public boolean isEmptyHash() {
-            return tagsAndFunctions.isEmpty();
         }
 
         private static Map<String, TemplateModel> parseToTagsAndFunctions(

@@ -25,8 +25,8 @@ import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
+import org.apache.freemarker.core.model.impl.SimpleString;
 
 /**
  * Testcase to see how FreeMarker deals with multiple Template models.
@@ -61,11 +61,6 @@ public class MultiModel4 implements TemplateSequenceModel, TemplateHashModel {
     @Override
     public boolean isEmptyCollection() throws TemplateException {
         return m_cList.isEmptyCollection();
-    }
-
-    @Override
-    public boolean isEmptyHash() throws TemplateException {
-        return false;
     }
 
     @Override

@@ -328,7 +328,7 @@ class RmiDebuggedEnvironmentImpl extends RmiDebugModelImpl implements DebuggedEn
                 return ((Environment) ProcessingConfiguration).getCurrentNamespace();
             }
             if ("dataModel".equals(key)) {
-                return ((Environment) ProcessingConfiguration).getDataModel();
+                return ((Environment) ProcessingConfiguration).getDataModelWithSharedVariableFallback();
             }
             if ("globalNamespace".equals(key)) {
                 return ((Environment) ProcessingConfiguration).getGlobalNamespace();

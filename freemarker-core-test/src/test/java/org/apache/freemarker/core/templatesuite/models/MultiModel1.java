@@ -25,12 +25,12 @@ import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
-import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleHash;
-import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
+import org.apache.freemarker.core.model.impl.SimpleString;
 
 /**
  * Testcase to see how FreeMarker deals with multiple Template models.
@@ -73,11 +73,6 @@ public class MultiModel1 implements TemplateHashModel,
         } else {
             return null;
         }
-    }
-
-    @Override
-    public boolean isEmptyHash() {
-        return false;
     }
 
     @Override

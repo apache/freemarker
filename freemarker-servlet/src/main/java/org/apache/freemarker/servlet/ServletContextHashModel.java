@@ -30,6 +30,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 /**
  * TemplateHashModel wrapper for a ServletContext attributes.
  */
+//TODO [FM3] Shouldn't this be a TemplateHashModelEx? The attribute names are known after all.
 public final class ServletContextHashModel implements TemplateHashModel {
     private final GenericServlet servlet;
     private final ServletContext servletctx;
@@ -47,11 +48,6 @@ public final class ServletContextHashModel implements TemplateHashModel {
         return wrapper.wrap(servletctx.getAttribute(key));
     }
 
-    @Override
-    public boolean isEmptyHash() {
-        return !servletctx.getAttributeNames().hasMoreElements();
-    }
-    
     /**
      * Returns the underlying servlet. Can return null if this object was
      * created using the deprecated constructor.

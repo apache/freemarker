@@ -107,12 +107,6 @@ public class ConcatenatedHashTest {
     private TemplateHashModel toHashModelNonEx(Map<String, ?> map) throws ObjectWrappingException {
         final TemplateHashModelEx tm = toHashModelEx(map);
         return new TemplateHashModel() {
-
-            @Override
-            public boolean isEmptyHash() throws TemplateException {
-                return tm.isEmptyHash();
-            }
-
             @Override
             public TemplateModel get(String key) throws TemplateException {
                 return tm.get(key);
@@ -127,12 +121,12 @@ public class ConcatenatedHashTest {
             assertEquals(ent.getValue(), ow.unwrap(value));
         }
 
-        assertEquals(expected.isEmpty(), actual.isEmptyHash());
-
         if (actual instanceof TemplateHashModelEx) {
             TemplateHashModelEx actualEx = (TemplateHashModelEx) actual;
 
             assertEquals(expected.size(), actualEx.getHashSize());
+            
+            assertEquals(expected.isEmpty(), actualEx.isEmptyHash());
 
             // Keys:
             {

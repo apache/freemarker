@@ -34,6 +34,7 @@ import org.apache.freemarker.core.model.TemplateStringModel;
 /**
  * TemplateHashModel wrapper for templates using Spring directives, functions and internal models.
  */
+//TODO [FM3] Shouldn't this be a TemplateHashModelEx?
 public final class SpringTemplateCallableHashModel implements TemplateHashModel, Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -55,7 +56,7 @@ public final class SpringTemplateCallableHashModel implements TemplateHashModel,
      */
     private static final String EVALUATION_CONTEXT_MODEL = "evaluationContextModel";
 
-    private Map<String, TemplateModel> modelsMap = new HashMap<>();
+    private final Map<String, TemplateModel> modelsMap = new HashMap<>();
 
     public SpringTemplateCallableHashModel(final HttpServletRequest request, final HttpServletResponse response) {
         modelsMap.put(MessageFunction.NAME, new MessageFunction(request, response));
@@ -73,11 +74,6 @@ public final class SpringTemplateCallableHashModel implements TemplateHashModel,
         return modelsMap.get(key);
     }
 
-    @Override
-    public boolean isEmptyHash() throws TemplateException {
-        return false;
-    }
-
     TemplateStringModel getNestedPathModel() throws TemplateException {
         return (TemplateStringModel) get(NESTED_PATH_MODEL);
     }
@@ -87,7 +83,7 @@ public final class SpringTemplateCallableHashModel implements TemplateHashModel,
     }
 
     TemplateModel getEvaluationContextModel() throws TemplateException {
-        return (TemplateModel) get(EVALUATION_CONTEXT_MODEL);
+        return get(EVALUATION_CONTEXT_MODEL);
     }
 
     void setEvaluationContextModel(TemplateModel evaluationContextModel) {

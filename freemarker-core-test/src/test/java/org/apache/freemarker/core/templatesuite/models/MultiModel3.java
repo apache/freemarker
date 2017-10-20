@@ -35,11 +35,6 @@ public class MultiModel3 implements TemplateStringModel, TemplateHashModel {
     }
 
     @Override
-    public boolean isEmptyHash() {
-        return false;
-    }
-
-    @Override
     public TemplateModel get(String key) {
         if ( key.equals( "selftest" )) {
             return new SimpleString( "Selftest from MultiModel3!" );

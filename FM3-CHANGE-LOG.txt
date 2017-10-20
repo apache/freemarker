@@ -437,6 +437,10 @@ Core / Models and Object wrapping
   - Map-like interfaces:
     - `TemplateHashModelEx2` was removed, as the `keyValuePairIterator()` method was moved to `TemplateHashModelEx`,
        so now the two interfaces would be the same.
+    - `TemplateHashModel` doesn't have `isEmpty()` method anymore. (As the point of a pure `TemplateHashModel` is that
+      it's not able to list its keys, almost all `isEmpty()` implementations in FM2 were just dummies returning `false`.)
+      Note that `?hashContent` now returns `true` for `TemplateHashModel` that aren't also `TemplateHashModelEx2`-s,
+      based on the idea that for some `key` (which you may don't know) `get(key)` might returns something.
 - BeanModel.keys() and values() are now final methods. Override BeanModel.keySet() and/or get(String) instead.
       
 Core / Template loading and caching
@@ -550,6 +554,8 @@ Core / Miscellaneous
   using simple `TemplateException` instead. Catching these exceptions specifically wasn't very useful, while they
   have bloated the public API (and the code).
 - Added `org.apache.freemarker.core.util.CallableUtils`, to help in implementing (and invoking) `TemplateCallableModel`-s.
+- Renamed `Environment.getDataModel()` to `getDataModelWithSharedVariableFallback()`
+  Renamed `Environment.getGlobalVariables()` to `getGloballyVisibleVariables()()`
 
 Build / development process changes
 -----------------------------------

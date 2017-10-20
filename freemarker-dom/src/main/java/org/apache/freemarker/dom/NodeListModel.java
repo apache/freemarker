@@ -32,10 +32,10 @@ import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
-import org.apache.freemarker.core.model.impl.SimpleString;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.SimpleSequence;
+import org.apache.freemarker.core.model.impl.SimpleString;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -100,11 +100,6 @@ class NodeListModel extends SimpleSequence implements TemplateHashModel, _Unexpe
             }
         }
         return result;
-    }
-    
-    @Override
-    public boolean isEmptyHash() {
-        return false;
     }
     
     @Override

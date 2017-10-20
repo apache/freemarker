@@ -82,6 +82,11 @@ public interface TemplateHashModelEx extends TemplateHashModel {
     int getHashSize() throws TemplateException;
 
     /**
+     * Returns if the hash size is 0. In some implementations this can be faster than {@link #getHashSize()}.
+     */
+    boolean isEmptyHash() throws TemplateException;
+    
+    /**
      * @return a iterable returning the keys in the hash. Every element of the returned by the iterable must implement
      * the {@link TemplateStringModel} (as the keys of hashes are always strings).
      */

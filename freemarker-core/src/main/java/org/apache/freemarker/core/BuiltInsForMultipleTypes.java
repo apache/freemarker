@@ -170,11 +170,6 @@ class BuiltInsForMultipleTypes {
                 return dateType;
             }
     
-            @Override
-            public boolean isEmptyHash() {
-                return false;
-            }
-    
             private Object parse(TemplateDateFormat df)
             throws TemplateException {
                 try {
@@ -530,17 +525,11 @@ class BuiltInsForMultipleTypes {
                 }
                 return cachedValue;
             }
-    
-            @Override
-            public boolean isEmptyHash() {
-                return false;
-            }
         }
         
         private class NumberFormatter extends BuiltInCallableImpl
                 implements TemplateStringModel, TemplateHashModel, TemplateFunctionModel {
             private final TemplateNumberModel numberModel;
-            private final Number number;
             private final Environment env;
             private final TemplateNumberFormat defaultFormat;
             private String cachedValue;
@@ -550,7 +539,6 @@ class BuiltInsForMultipleTypes {
                 
                 // As we format lazily, we need a snapshot of the format inputs:
                 this.numberModel = numberModel;
-                number = _EvalUtils.modelToNumber(numberModel, target);  // for BackwardCompatibleTemplateNumberFormat-s
                 defaultFormat = env.getTemplateNumberFormat(stringBI.this);
             }
 
@@ -580,11 +568,6 @@ class BuiltInsForMultipleTypes {
                     cachedValue = env.formatNumberToPlainText(numberModel, defaultFormat, target);
                 }
                 return cachedValue;
-            }
-    
-            @Override
-            public boolean isEmptyHash() {
-                return false;
             }
         }
     
