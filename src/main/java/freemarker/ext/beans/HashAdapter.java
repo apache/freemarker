@@ -59,6 +59,15 @@ public class HashAdapter extends AbstractMap implements TemplateModelAdapter {
     }
     
     @Override
+    public int size() {
+        try {
+            return getModelEx().size();
+        } catch (TemplateModelException e) {
+            throw new UndeclaredThrowableException(e);
+        }
+    }
+    
+    @Override
     public Object get(Object key) {
         try {
             return wrapper.unwrap(model.get(String.valueOf(key)));

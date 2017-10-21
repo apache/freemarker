@@ -2253,52 +2253,46 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Returns the data-model (also known as the template context in some other template engines).
+     * Returns a view of the data-model (also known as the template context in some other template engines) 
+     * that falls back to {@linkplain Configuration#setSharedVariable(String, TemplateModel) shared variables}.
      */
     public TemplateHashModel getDataModel() {
-        final TemplateHashModel result = new TemplateHashModel() {
+        return rootDataModel instanceof TemplateHashModelEx
+                ? new TemplateHashModelEx() {
+                    public boolean isEmpty() throws TemplateModelException {
+                        return false;
+                    }
 
-            public boolean isEmpty() {
-                return false;
-            }
+                    public TemplateModel get(String key) throws TemplateModelException {
+                        TemplateModel value = rootDataModel.get(key);
+                        return value != null ? value : configuration.getSharedVariable(key);
+                    }
 
-            public TemplateModel get(String key) throws TemplateModelException {
-                TemplateModel value = rootDataModel.get(key);
-                if (value == null) {
-                    value = configuration.getSharedVariable(key);
+                    // NB: The methods below do not take into account
+                    // configuration shared variables even though
+                    // the hash will return them, if only for BWC reasons
+                    public TemplateCollectionModel values() throws TemplateModelException {
+                        return ((TemplateHashModelEx) rootDataModel).values();
+                    }
+
+                    public TemplateCollectionModel keys() throws TemplateModelException {
+                        return ((TemplateHashModelEx) rootDataModel).keys();
+                    }
+
+                    public int size() throws TemplateModelException {
+                        return ((TemplateHashModelEx) rootDataModel).size();
+                    }
                 }
-                return value;
-            }
-        };
-
-        if (rootDataModel instanceof TemplateHashModelEx) {
-            return new TemplateHashModelEx() {
-
-                public boolean isEmpty() throws TemplateModelException {
-                    return result.isEmpty();
+            : new TemplateHashModel() {
+                public boolean isEmpty() {
+                    return false;
                 }
 
                 public TemplateModel get(String key) throws TemplateModelException {
-                    return result.get(key);
-                }
-
-                // NB: The methods below do not take into account
-                // configuration shared variables even though
-                // the hash will return them, if only for BWC reasons
-                public TemplateCollectionModel values() throws TemplateModelException {
-                    return ((TemplateHashModelEx) rootDataModel).values();
-                }
-
-                public TemplateCollectionModel keys() throws TemplateModelException {
-                    return ((TemplateHashModelEx) rootDataModel).keys();
-                }
-
-                public int size() throws TemplateModelException {
-                    return ((TemplateHashModelEx) rootDataModel).size();
+                    TemplateModel value = rootDataModel.get(key);
+                    return value != null ? value : configuration.getSharedVariable(key);
                 }
             };
-        }
-        return result;
     }
 
     /**
