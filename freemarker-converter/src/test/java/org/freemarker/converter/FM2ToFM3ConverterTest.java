@@ -44,6 +44,7 @@ import freemarker.template.Configuration;
 
 public class FM2ToFM3ConverterTest extends ConverterTest {
 
+    @Override
     protected void createSourceFiles() throws IOException {
         //
     }
@@ -493,6 +494,15 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("${s?then <#--1--> ( <#--2--> 1 <#--3-->, <#--5--> 2 <#--6--> )}");
     }
 
+    @Test
+    public void testRemovedExistenceBuiltIns() throws IOException, ConverterException {
+        assertConverted("${s??}", "${s?exists}");
+        assertConverted("${s??}", "${s\n\t\t?exists}");
+        assertConverted("${s <#-- c --> ??}", "${s <#-- c --> ?exists}");
+        assertConverted("${s?? <#-- c --> }", "${s? <#-- c --> exists}");
+        assertConverted("${s?? <#-- c --> }", "${s?exists <#-- c --> }");
+    }
+    
     @Test
     public void testTagEndCharGlitch() throws IOException, ConverterException {
         assertConverted("<#assign x = 1>x", "<#assign x = 1]x");

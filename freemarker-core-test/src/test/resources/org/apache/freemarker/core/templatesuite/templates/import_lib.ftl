@@ -19,7 +19,7 @@
 <#macro test foo>
   Test ${foo}.
   Email: ${mail}
-  <#if .main.mail?exists>
+  <#if .main.mail??>
     Email in the root: ${.main.mail}
   </#if>
 </#macro>

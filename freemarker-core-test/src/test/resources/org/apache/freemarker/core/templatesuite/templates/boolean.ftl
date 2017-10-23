@@ -78,13 +78,13 @@
  
 <p>Now test list models:</p>
 
-<p><#if list1?exists>
+<p><#if list1??>
     list1 succeeded.<br />
 <#else>
     list1 failed.<br />
 </#if></p>
 
-<p><#if list2?exists>
+<p><#if list2??>
     list2 succeeded.<br />
 <#else>
     list2 failed.<br />
@@ -92,13 +92,13 @@
 
 <p>Test hash models:</p>
 
-<p><#if hash1?exists>
+<p><#if hash1??>
     hash1 succeeded: ${hash1.temp}<br />
 <#else>
     hash1 failed: ${hash1.temp}<br />
 </#if></p>
 
-<p><#if hash2?exists>
+<p><#if hash2??>
     hash2 succeeded.<br />
 <#else>
     hash2 failed.<br />

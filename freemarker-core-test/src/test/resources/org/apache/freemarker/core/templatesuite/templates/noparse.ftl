@@ -32,7 +32,7 @@ A more rigorous test, showing that we're not faking it:
 ${message@#$%&}
 
 </#noParse>
-<#if message?exists>
+<#if message??>
 	<p>Message exists!
 	<#noParse>
 		...and even generates output!

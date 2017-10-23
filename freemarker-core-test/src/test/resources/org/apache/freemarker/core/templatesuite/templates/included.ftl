@@ -18,7 +18,7 @@
 -->
 <p>A test of included files:</p>
 
-<#if .globals.message?exists>
+<#if .globals.message??>
 	<p>Message exists!:<br />
         ${.globals.message}</p>
 <#else>

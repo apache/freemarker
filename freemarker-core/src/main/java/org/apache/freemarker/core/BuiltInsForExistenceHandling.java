@@ -107,18 +107,6 @@ class BuiltInsForExistenceHandling {
         };
     }
     
-    static class existsBI extends BuiltInsForExistenceHandling.ExistenceBuiltIn {
-        @Override
-        TemplateModel _eval(Environment env) throws TemplateException {
-            return evalMaybeNonexistentTarget(env) == null ? TemplateBooleanModel.FALSE : TemplateBooleanModel.TRUE;
-        }
-    
-        @Override
-        boolean evalToBoolean(Environment env) throws TemplateException {
-            return _eval(env) == TemplateBooleanModel.TRUE;
-        }
-    }
-
     static class has_contentBI extends BuiltInsForExistenceHandling.ExistenceBuiltIn {
         @Override
         TemplateModel _eval(Environment env) throws TemplateException {

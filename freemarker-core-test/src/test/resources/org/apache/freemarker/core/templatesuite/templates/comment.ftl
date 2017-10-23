@@ -32,7 +32,7 @@ A more rigorous test, showing that we're not faking it:
 ${message@#$%&}
 
 --><#-- > --><#-- -> --><#-- -- --><#-- -- > -->
-<#if message?exists>
+<#if message??>
 	<p>Message exists!
 	<#--
 		...and even generates output!

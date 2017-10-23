@@ -24,9 +24,9 @@ ${x} = ${.main.x} = ${.namespace.x}
 <#global x = 6>
 ${.globals.x} but ${.dataModel.x} = 4
 ${y} = ${.globals.y} = ${.dataModel.y?default("ERROR")}
-Invisiblity test 1.: <#if .main.y?exists || .namespace.y?exists>failed<#else>passed</#if>
-Invisiblity test 2.: <#if .main.z?exists || .namespace.z?exists>failed<#else>passed</#if>
-Invisiblity test 3.: <#global q = 1><#if .main.q?exists || .namespace.q?exists || .dataModel.q?exists>failed<#else>passed</#if>
+Invisiblity test 1.: <#if .main.y?? || .namespace.y??>failed<#else>passed</#if>
+Invisiblity test 2.: <#if .main.z?? || .namespace.z??>failed<#else>passed</#if>
+Invisiblity test 3.: <#global q = 1><#if .main.q?? || .namespace.q?? || .dataModel.q??>failed<#else>passed</#if>
 --
 <@lib.foo/>
 --

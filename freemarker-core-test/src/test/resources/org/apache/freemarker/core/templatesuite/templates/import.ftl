@@ -20,7 +20,7 @@
 <#-- import "/import_lib.ftl" as my -->
 --
 
-<#if mail?exists || test?exists>
+<#if mail?? || test??>
   <#stop "mail or test should not exist">
 </#if>
 

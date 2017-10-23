@@ -31,8 +31,8 @@ ${list[0]}
 ${map.key}
 ${map?api.get(objKey)}
 ${obj.foo}
-<#if obj.foo?exists>hasfoo<#else>nofoo</#if>
-<#if obj.baz?exists>hasbaz<#else>nobaz</#if>
+<#if obj.foo??>hasfoo<#else>nofoo</#if>
+<#if obj.baz??>hasbaz<#else>nobaz</#if>
 ${obj.bar[0]}
 ${obj.getFoo()}
 ${obj.overloaded(1?int)}
@@ -51,7 +51,7 @@ ${enum.TWO}
 ${enum.THREE}
 ${(enum.ONE == enum.ONE)?string("true", "false")}
 ${(enum.ONE == enum.TWO)?string("true", "false")}
-${enums["org.apache.freemarker.core.templatesuite.models.BeanTestClass"]?exists?string("true", "false")}
+${enums["org.apache.freemarker.core.templatesuite.models.BeanTestClass"]???string("true", "false")}
 ${obj.something}
 ${obj.publicInner.x}
 ${obj.publicInner.m()}

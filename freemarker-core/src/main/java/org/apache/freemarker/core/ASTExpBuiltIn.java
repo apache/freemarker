@@ -104,7 +104,6 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("ensureStartsWith", new BuiltInsForStringsBasic.ensure_starts_withBI());
         putBI("esc", new escBI());
         putBI("eval", new evalBI());
-        putBI("exists", new BuiltInsForExistenceHandling.existsBI());
         putBI("first", new firstBI());
         putBI("float", new floatBI());
         putBI("floor", new floorBI());
@@ -329,6 +328,8 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
 
             if (correctedKey != null) {
                 sb.append("\nThe correct name is: ").append(correctedKey);
+            } else if (key.equals("exists")) {
+                sb.append("\nUse someExpression?? instead of someExpression?exists.");
             } else {
                 sb.append(
                         "\nHelp (latest version): http://freemarker.org/docs/ref_builtins.html; "

@@ -32,7 +32,7 @@
 <br />
 <br />
 
-<#if patate1?exists && patate2 == patate3>
+<#if patate1?? && patate2 == patate3>
 ##########
 </#if>
 

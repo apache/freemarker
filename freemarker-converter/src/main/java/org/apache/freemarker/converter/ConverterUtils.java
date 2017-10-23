@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.converter;
 
+/** Don't use this; used internally by FreeMarker, might changes without notice. */
 public final class ConverterUtils {
 
     private ConverterUtils() {
@@ -43,5 +44,14 @@ public final class ConverterUtils {
 
     public static boolean isQuotationChar(char q) {
         return q == '\'' || q == '\"';
+    }
+    
+    public static boolean isWhitespaceOnly(String s) {
+        for (int i = 0; i < s.length(); i++) {
+            if (!Character.isWhitespace(s.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 }

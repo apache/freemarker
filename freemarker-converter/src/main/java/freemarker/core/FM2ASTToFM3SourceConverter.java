@@ -33,8 +33,8 @@ import java.util.Set;
 import org.apache.commons.io.IOUtils;
 import org.apache.freemarker.converter.ConversionMarkers;
 import org.apache.freemarker.converter.ConverterException;
-import org.apache.freemarker.converter.ConverterUtils;
 import org.apache.freemarker.converter.UnconvertableLegacyFeatureException;
+import org.apache.freemarker.converter.ConverterUtils;
 import org.apache.freemarker.core.util.TemplateLanguageUtils;
 import org.apache.freemarker.core.util._ClassUtils;
 import org.apache.freemarker.core.util._NullArgumentException;
@@ -1819,36 +1819,47 @@ public class FM2ASTToFM3SourceConverter {
         // <lho>?biName
         printExp(lho);
         int pos = getEndPositionExclusive(lho);
+        
+        if (rho.equals("exists")) {
+            // lho?exists -> lho??
 
-        // lho<?>biName
-        pos = printSeparatorAndWSAndExpComments(pos, "?");
-
-        // lho?<biName>
-        print(convertBuiltInName(rho));
-
-        if (node instanceof BuiltInWithParseTimeParameters) {
-            // lho?biName<(>
-            pos = getPositionAfterIdentifier(pos);
-            pos = printSeparatorAndWSAndExpComments(pos, "(");
-            int paramCnt = node.getParameterCount();
-            for (int paramIdx = 2; paramIdx < paramCnt; paramIdx++) {
-                Expression argValue = getParam(node, paramIdx, ParameterRole.ARGUMENT_VALUE, Expression.class);
-                printExp(argValue);
-                pos = getEndPositionExclusive(argValue);
-
-                if (paramIdx + 1 < paramCnt) {
-                    printSeparatorAndWSAndExpComments(pos, ",");
-                }
-            }
-            pos = printWSAndExpComments(pos);
-            boolean endChar = src.charAt(pos) == ')';
-            assertNodeContent(pos == getEndPositionInclusive(node), node,
-                    "Actual end position doesn't match node end position.");
-            assertNodeContent(endChar, node,
-                    "Expected ')' but found {}.");
-            print(')');
-        } else {
+            pos = printWSAndExpCommentsIfContainsComment(pos); // lho< >?exists
+            pos = skipRequiredString(pos, "?"); // lho<?>exists
+            print("??");
+            pos = printWSAndExpCommentsIfContainsComment(pos); // lho?< >exists
+            pos = getPositionAfterIdentifier(pos); // lho?<exists>
             assertParamCount(node, 2);
+        } else {
+            // lho<?>biName
+            pos = printSeparatorAndWSAndExpComments(pos, "?");
+    
+            // lho?<biName>
+            print(convertBuiltInName(rho));
+    
+            if (node instanceof BuiltInWithParseTimeParameters) {
+                // lho?biName<(>
+                pos = getPositionAfterIdentifier(pos);
+                pos = printSeparatorAndWSAndExpComments(pos, "(");
+                int paramCnt = node.getParameterCount();
+                for (int paramIdx = 2; paramIdx < paramCnt; paramIdx++) {
+                    Expression argValue = getParam(node, paramIdx, ParameterRole.ARGUMENT_VALUE, Expression.class);
+                    printExp(argValue);
+                    pos = getEndPositionExclusive(argValue);
+    
+                    if (paramIdx + 1 < paramCnt) {
+                        printSeparatorAndWSAndExpComments(pos, ",");
+                    }
+                }
+                pos = printWSAndExpComments(pos);
+                boolean endChar = src.charAt(pos) == ')';
+                assertNodeContent(pos == getEndPositionInclusive(node), node,
+                        "Actual end position doesn't match node end position.");
+                assertNodeContent(endChar, node,
+                        "Expected ')' but found {}.");
+                print(')');
+            } else {
+                assertParamCount(node, 2);
+            }
         }
     }
 
@@ -2248,7 +2259,7 @@ public class FM2ASTToFM3SourceConverter {
         int parameterCount = node.getParameterCount();
         assertNodeContent(parameterCount == 1, node,
                 "Node expected to have exactly 1 parameter, but had {}.", parameterCount);
-        return (T) getParam(node, 0, role, valueClass);
+        return getParam(node, 0, role, valueClass);
     }
 
     @SuppressWarnings("unchecked")
@@ -2397,6 +2408,15 @@ public class FM2ASTToFM3SourceConverter {
         return pos;
     }
 
+    private int printWSAndExpCommentsIfContainsComment(int pos) throws ConverterException {
+        String sep = readWSAndExpComments(pos);
+        if (!ConverterUtils.isWhitespaceOnly(sep)) {
+            printWithConvertedExpComments(sep);
+        }
+        pos += sep.length();
+        return pos;
+    }
+    
     private int printSeparatorAndWSAndExpComments(int pos, String separator) throws ConverterException {
         return printSeparatorAndWSAndExpComments(pos, separator, false, null);
     }
@@ -2412,7 +2432,7 @@ public class FM2ASTToFM3SourceConverter {
             throws ConverterException {
         return printSeparatorAndWSAndExpComments(pos, separator, true, separatorPosInOutput);
     }
-
+    
     private int printSeparatorAndWSAndExpComments(int startPos, String separatorSymbol, boolean separatorOptional,
             _ObjectHolder<Integer> separatorPosInOutput)
             throws ConverterException {
@@ -2441,6 +2461,13 @@ public class FM2ASTToFM3SourceConverter {
             printWithConvertedExpComments(src.substring(sepPos, pos));
             return pos;
         }
+    }
+    
+    private int skipRequiredString(int pos, String s) throws ConverterException {
+        if (!src.startsWith(s, pos)) {
+            throw new ConverterException("Expected " + _StringUtils.jQuote(s) + " at position " + pos + ".");
+        }
+        return pos + s.length();
     }
 
     private int getPositionAfterIdentifier(int startPos) throws ConverterException {

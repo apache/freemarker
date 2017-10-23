@@ -26,7 +26,7 @@
 
 ${message}
 
-<#if message?exists>
+<#if message??>
 	<p>Message exists!
 </#if>
 

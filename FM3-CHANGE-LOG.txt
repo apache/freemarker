@@ -92,7 +92,7 @@ Node: Changes already mentioned above aren't repeated here!
   invocation of the function or macro.
 - Removed some long deprecated built-ins:
   - `webSafe` (converted to `html`)
-  - TODO Add the further ones here as they are removed
+  - `exists` (converted to the `??` operator)
 - Comma is now required between sequence literal items (such as `[a, b, c]`). It's not well known, but in FM2 the comma
   could be omitted.
 - #include has no "encoding" parameter anymore (as now only the Configuration is responsible ofr deciding the encoding)

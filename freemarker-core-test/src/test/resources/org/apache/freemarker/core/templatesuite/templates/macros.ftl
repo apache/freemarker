@@ -55,7 +55,7 @@
    alt="About Us"
 />
 
-<#if var?exists>
+<#if var??>
    Something is wrong here.
 <#else>
    Good.
