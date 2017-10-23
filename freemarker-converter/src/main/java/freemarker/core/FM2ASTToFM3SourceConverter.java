@@ -34,7 +34,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.freemarker.converter.ConversionMarkers;
 import org.apache.freemarker.converter.ConverterException;
 import org.apache.freemarker.converter.UnconvertableLegacyFeatureException;
-import org.apache.freemarker.converter.ConverterUtils;
+import org.apache.freemarker.converter._ConverterUtils;
 import org.apache.freemarker.core.util.TemplateLanguageUtils;
 import org.apache.freemarker.core.util._ClassUtils;
 import org.apache.freemarker.core.util._NullArgumentException;
@@ -778,11 +778,11 @@ public class FM2ASTToFM3SourceConverter {
             String postVar2WSAndComment = readWSAndExpComments(getEndPositionExclusive(listSource));
 
             printExp(listSource);
-            printWithConvertedExpComments(ConverterUtils.rightTrim(postVar2WSAndComment));
+            printWithConvertedExpComments(_ConverterUtils.rightTrim(postVar2WSAndComment));
             print(" as ");
             print(TemplateLanguageUtils.escapeIdentifier(loopVal1));
-            printWithConvertedExpComments(ConverterUtils.rightTrim(postVar1WSAndComment));
-            printWithConvertedExpComments(ConverterUtils.rightTrim(postInWSAndComment));
+            printWithConvertedExpComments(_ConverterUtils.rightTrim(postVar1WSAndComment));
+            printWithConvertedExpComments(_ConverterUtils.rightTrim(postInWSAndComment));
         } else {
             throw new UnexpectedNodeContentException(node, "Expected #list or #foreach as node symbol", null);
         }
@@ -837,7 +837,7 @@ public class FM2ASTToFM3SourceConverter {
             // We only have removed thing after in the src => no need for spacing after us
             int commentPos = postNameWSOrComment.indexOf("--") - 1;
             if (commentPos >= 0) {
-                printWithConvertedExpComments(ConverterUtils.rightTrim(postNameWSOrComment));
+                printWithConvertedExpComments(_ConverterUtils.rightTrim(postNameWSOrComment));
             }
         }
 
@@ -857,7 +857,7 @@ public class FM2ASTToFM3SourceConverter {
                 } else {
                     int commentPos = postParamWSOrComment.indexOf("--") - 1;
                     if (commentPos >= 0) {
-                        printWithConvertedExpComments(ConverterUtils.rightTrim(postParamWSOrComment));
+                        printWithConvertedExpComments(_ConverterUtils.rightTrim(postParamWSOrComment));
                     }
                 }
             }
@@ -2410,7 +2410,7 @@ public class FM2ASTToFM3SourceConverter {
 
     private int printWSAndExpCommentsIfContainsComment(int pos) throws ConverterException {
         String sep = readWSAndExpComments(pos);
-        if (!ConverterUtils.isWhitespaceOnly(sep)) {
+        if (!_ConverterUtils.isWhitespaceOnly(sep)) {
             printWithConvertedExpComments(sep);
         }
         pos += sep.length();
@@ -2515,7 +2515,7 @@ public class FM2ASTToFM3SourceConverter {
             raw = false;
         }
         char quotationC = c;
-        if (!ConverterUtils.isQuotationChar(quotationC)) {
+        if (!_ConverterUtils.isQuotationChar(quotationC)) {
             throw new IllegalArgumentException("The specifies position is not the beginning of a string literal");
         }
 
@@ -2539,7 +2539,7 @@ public class FM2ASTToFM3SourceConverter {
             return false;
         }
         char c = src.charAt(pos);
-        return (ConverterUtils.isQuotationChar(c) || c == 'r' && pos < src.length() + 1 && ConverterUtils
+        return (_ConverterUtils.isQuotationChar(c) || c == 'r' && pos < src.length() + 1 && _ConverterUtils
                 .isQuotationChar(src.charAt(pos + 1)));
     }
 
@@ -2580,7 +2580,7 @@ public class FM2ASTToFM3SourceConverter {
         }
 
         int i = 0;
-        while (i < s.length() && !ConverterUtils.isUpperCaseLetter(s.charAt(i))) {
+        while (i < s.length() && !_ConverterUtils.isUpperCaseLetter(s.charAt(i))) {
             i++;
         }
         result = i < s.length();
