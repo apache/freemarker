@@ -63,6 +63,11 @@ Major template language changes / features
     - Positional and named varargs: `<#function f(xs..., props{named}...)>...</#function>` `${f(1, 2, 3, x=1, y=2)}`
   - In FM2, the same macro could be called with specifying all parameters by position, or by specifying all parameters
     by name. In FM3 that won't work anymore, as now a parameter is either strictly positional or strictly named.
+- Operator for handing null/missing values were reworked:
+  - The right-side operator precedence of the `exp!defaultExp` (and `exp!`) operator is now the same precedence on
+    both sides, which is lower as of `.`, but higher as of `+`. The converter takes care of cases where this would
+    change the meaning of the expression (like `x!y+1` is converted to `x!(x+1)`.)
+  - [TODO] Much more will happen here
 
 Smaller template language changes
 ---------------------------------
