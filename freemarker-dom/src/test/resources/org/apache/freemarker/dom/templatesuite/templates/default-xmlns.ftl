@@ -18,10 +18,10 @@
   under the License.
 -->
 <#assign r = doc.*[0]>
-${r["N:t1"]?default('-')} = No NS
-${r["t2"]?default('-')} = x NS
-${r["y:t3"]?default('-')} = y NS
-${r["./D:t4"]?default('-')} = x NS
+${r["N:t1"]!'-'} = No NS
+${r["t2"]!'-'} = x NS
+${r["y:t3"]!'-'} = y NS
+${r["./D:t4"]!'-'} = x NS
 
 <#assign bool = doc["true()"]>
 ${bool?string}

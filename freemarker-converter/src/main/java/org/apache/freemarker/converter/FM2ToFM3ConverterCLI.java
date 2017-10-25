@@ -49,6 +49,7 @@ public class FM2ToFM3ConverterCLI {
     private static final String EXCLUDE_OPTION = "exclude";
     private static final String FILE_EXTENSION_SUBSTITUTION = "file-ext-subst";
     private static final String NO_PREDEFINED_FILE_EXTENSION_SUBSTITUTIONS = "no-predef-file-ext-substs";
+    private static final String SKIP_UNPARSEABLE_FILES = "skip-unparsable-files";
     private static final String FREEMARKER_2_SETTING_OPTION = "fm2-setting";
     private static final String HELP_OPTION = "help";
     private static final String HELP_OPTION_SHORT = "h";
@@ -93,6 +94,10 @@ public class FM2ToFM3ConverterCLI {
             .addOption(Option.builder(null).longOpt(NO_PREDEFINED_FILE_EXTENSION_SUBSTITUTIONS)
                     .desc("Disables the predefined file extension substitutions (i.e, \"ftl\", \"ftlh\", "
                             + "\"ftlx\" and \"fm\" are replaced with the corresponding FreeMarker 3 file extensions).")
+                    .build())
+            .addOption(Option.builder(null).longOpt(SKIP_UNPARSEABLE_FILES)
+                    .desc("Ignore source files that aren't syntactically vaild FreeMarker 2.x templates. The problem "
+                            + "will be logged as a warning into to the conversion markers file.")
                     .build())
             .addOption(Option.builder(HELP_OPTION_SHORT).longOpt(HELP_OPTION)
                     .desc("Prints command-line help.")
@@ -160,6 +165,10 @@ public class FM2ToFM3ConverterCLI {
 
                 converter.setFileExtensionSubstitutions((Map) Collections.unmodifiableMap(
                         cl.getOptionProperties(FILE_EXTENSION_SUBSTITUTION)));
+                
+                if (cl.hasOption(SKIP_UNPARSEABLE_FILES)) {
+                    converter.setSkipUnparsableFiles(true);
+                }
 
                 converter.setFreeMarker2Settings(cl.getOptionProperties(FREEMARKER_2_SETTING_OPTION));
                 try {

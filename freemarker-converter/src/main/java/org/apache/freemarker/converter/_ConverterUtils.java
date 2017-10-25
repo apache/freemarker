@@ -54,4 +54,14 @@ public final class _ConverterUtils {
         }
         return true;
     }
+
+    public static boolean containsLineBreak(String s) {
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '\n' || c == '\r') {
+                return true;
+            }
+        }
+        return false;
+    }
 }

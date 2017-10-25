@@ -75,7 +75,7 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
     protected ASTExpression target;
     protected String key;
 
-    static final int NUMBER_OF_BIS = 263;
+    static final int NUMBER_OF_BIS = 262;
     static final HashMap<String, ASTExpBuiltIn> BUILT_INS_BY_NAME = new HashMap(NUMBER_OF_BIS * 3 / 2 + 1, 1f);
 
     static {
@@ -97,7 +97,6 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("dateIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATE));
         putBI("dateTime", new BuiltInsForMultipleTypes.dateBI(TemplateDateModel.DATE_TIME));
         putBI("dateTimeIfUnknown", new BuiltInsForDates.dateType_if_unknownBI(TemplateDateModel.DATE_TIME));
-        putBI("default", new BuiltInsForExistenceHandling.defaultBI());
         putBI("double", new doubleBI());
         putBI("endsWith", new BuiltInsForStringsBasic.ends_withBI());
         putBI("ensureEndsWith", new BuiltInsForStringsBasic.ensure_ends_withBI());

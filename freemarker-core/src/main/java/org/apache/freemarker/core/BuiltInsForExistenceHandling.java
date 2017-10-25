@@ -19,9 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
-import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateModel;
 
 /**
@@ -51,60 +49,6 @@ class BuiltInsForExistenceHandling {
             return tm;
         }
         
-    }
-    
-    static class defaultBI extends BuiltInsForExistenceHandling.ExistenceBuiltIn {
-
-        @Override
-        TemplateModel _eval(final Environment env) throws TemplateException {
-            TemplateModel model = evalMaybeNonexistentTarget(env);
-            return model == null ? FIRST_NON_NULL_METHOD : new ConstantMethod(model);
-        }
-
-        private static class ConstantMethod implements TemplateFunctionModel {
-            private final TemplateModel constant;
-
-            ConstantMethod(TemplateModel constant) {
-                this.constant = constant;
-            }
-
-            @Override
-            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env) {
-                return constant;
-            }
-
-            @Override
-            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
-                return null;
-            }
-
-        }
-
-        /**
-         * A method that goes through the arguments one by one and returns
-         * the first one that is non-null. If all args are null, returns null.
-         */
-        private static final TemplateFunctionModel FIRST_NON_NULL_METHOD = new TemplateFunctionModel() {
-
-            @Override
-            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
-                    throws TemplateException {
-                int argsLen = args.length;
-                for (int i = 0; i < argsLen; i++ ) {
-                    TemplateModel result = args[i];
-                    if (result != null) {
-                        return result;
-                    }
-                }
-                return null;
-            }
-
-            @Override
-            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
-                return null;
-            }
-
-        };
     }
     
     static class has_contentBI extends BuiltInsForExistenceHandling.ExistenceBuiltIn {

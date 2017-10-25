@@ -24,5 +24,5 @@
   ${z} = ${z2} = ${x1} = ${.dataModel.x}
   5
   ${x} == ${.globals.x}
-  ${y} == ${.globals.y} == ${.dataModel.y?default("ERROR")}
+  ${y} == ${.globals.y} == ${.dataModel.y!"ERROR"}
 </#macro>

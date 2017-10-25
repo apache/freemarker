@@ -1617,15 +1617,15 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          * <p>If this property is <tt>false</tt> (the default) then an attempt to read
          * a missing bean property is the same as reading an existing bean property whose
          * value is <tt>null</tt>. The template can't tell the difference, and thus always
-         * can use <tt>?default('something')</tt> and <tt>??</tt> and similar expressions
+         * can use <tt>!'something'</tt> and <tt>??</tt> and similar expressions
          * to handle the situation.
          *
          * <p>If this property is <tt>true</tt> then an attempt to read a bean propertly in
          * the template (like <tt>myBean.aProperty</tt>) that doesn't exist in the bean
          * object (as opposed to just holding <tt>null</tt> value) will cause
          * {@link InvalidPropertyException}, which can't be suppressed in the template
-         * (not even with <tt>myBean.noSuchProperty?default('something')</tt>). This way
-         * <tt>?default('something')</tt> and <tt>??</tt> and similar expressions can be used to
+         * (not even with <tt>myBean.noSuchProperty!'something'</tt>). This way
+         * <tt>!'something'</tt> and <tt>??</tt> and similar expressions can be used to
          * handle existing properties whose value is <tt>null</tt>, without the risk of
          * hiding typos in the property names. Typos will always cause error. But mind you, it
          * goes against the basic approach of FreeMarker, so use this feature only if you really

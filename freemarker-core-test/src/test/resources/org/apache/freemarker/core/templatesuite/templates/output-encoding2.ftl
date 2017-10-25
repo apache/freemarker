@@ -16,8 +16,8 @@
   specific language governing permissions and limitations
   under the License.
 -->
-Output charset: ${.outputEncoding?default("undefined")}
-URL escaping charset: ${.urlEscapingCharset?default("undefined")}
+Output charset: ${.outputEncoding!"undefined"}
+URL escaping charset: ${.urlEscapingCharset!"undefined"}
 
 <#assign s="a/%b">
 UTF-16: ${s?url}

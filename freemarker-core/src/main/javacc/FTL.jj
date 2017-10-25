@@ -1382,6 +1382,45 @@ ASTExpression ASTExpression() :
 }
 
 /**
+ * PrimaryExpression followed by optional `!defaultExp` or `!`.
+ * Note: Because x!y!z means x!(y!z), this consumes a whole chain of !defaultExp-s. 
+ */
+ASTExpression PrimaryWithDefaultExpression() :
+{
+    Token exclamTk;
+    ASTExpression priExp, defaultExp;
+}
+{
+    priExp = PrimaryExpression()
+    [
+      exclamTk = <EXCLAM>
+      (
+          LOOKAHEAD(<ID><ASSIGNMENT_EQUALS>) { /* Do not consume */ }
+          |
+          [
+              LOOKAHEAD(PrimaryWithDefaultExpression())
+              defaultExp = PrimaryWithDefaultExpression()
+            {
+                ASTExpDefault result = new ASTExpDefault(priExp, defaultExp);
+                result.setLocation(template, priExp, defaultExp);
+                return result;
+            }
+          ]
+      )
+      // If we reach this, we had no defaultExp.
+      {
+          ASTExpDefault result = new ASTExpDefault(priExp, null);
+          result.setLocation(template, priExp, exclamTk);
+          return result;
+      }
+    ]
+    // If we reach this, we had no <EXCALM>.
+    {
+        return priExp;
+    }
+}
+
+/**
  * Lowest level expression, a literal, a variable,
  * or a possibly more complex expression bounded
  * by parentheses.
@@ -1409,7 +1448,7 @@ ASTExpression PrimaryExpression() :
         exp = ASTExpBuiltInVariable()
     )
     (
-        LOOKAHEAD(<DOT> | <OPEN_BRACKET> |<OPEN_PAREN> | <BUILT_IN> | <EXCLAM> | <EXISTS>)
+        LOOKAHEAD(<DOT> | <OPEN_BRACKET> |<OPEN_PAREN> | <BUILT_IN> | <EXISTS>)
         exp = AddSubExpression(exp)
     )*
     {
@@ -1434,11 +1473,9 @@ ASTExpression Parenthesis() :
 }
 
 /**
- * A primary expression preceded by zero or
- * more unary operators. (The only unary operator we
- * currently have is the NOT.)
+ * A primary expression preceded by zero or more unary prefix operators.
  */
-ASTExpression UnaryExpression() :
+ASTExpression UnaryPrefixExpression() :
 {
     ASTExpression exp, result;
     boolean haveNot = false;
@@ -1450,7 +1487,7 @@ ASTExpression UnaryExpression() :
         |
         result = ASTExpNot()
         |
-        result = PrimaryExpression()
+        result = PrimaryWithDefaultExpression()
     )
     {
         return result;
@@ -1467,7 +1504,7 @@ ASTExpression ASTExpNot() :
     (
         t = <EXCLAM> { nots.add(t); }
     )+
-    exp = PrimaryExpression()
+    exp = PrimaryWithDefaultExpression()
     {
         for (int i = 0; i < nots.size(); i++) {
             result = new ASTExpNot(exp);
@@ -1491,7 +1528,7 @@ ASTExpression ASTExpNegateOrPlus() :
         |
         t = <MINUS> { isMinus = true; }
     )
-    exp = PrimaryExpression()
+    exp = PrimaryWithDefaultExpression()
     {
         result = new ASTExpNegateOrPlus(exp, isMinus);  
         result.setLocation(template, t, exp);
@@ -1545,7 +1582,7 @@ ASTExpression MultiplicativeExpression() :
     int operation = ASTExpArithmetic.TYPE_MULTIPLICATION;
 }
 {
-    lhs = UnaryExpression() { result = lhs; }
+    lhs = UnaryPrefixExpression() { result = lhs; }
     (
         LOOKAHEAD(<TIMES>|<DIVIDE>|<PERCENT>)
         (
@@ -1557,7 +1594,7 @@ ASTExpression MultiplicativeExpression() :
                 <PERCENT> {operation = ASTExpArithmetic.TYPE_MODULO; }
             )
         )
-        rhs = UnaryExpression()
+        rhs = UnaryPrefixExpression()
         {
             numberLiteralOnly(lhs);
             numberLiteralOnly(rhs);
@@ -1570,7 +1607,6 @@ ASTExpression MultiplicativeExpression() :
         return result;
     }
 }
-
 
 ASTExpression EqualityExpression() :
 {
@@ -1849,37 +1885,9 @@ ASTExpression AddSubExpression(ASTExpression exp) :
         |
         result = ASTExpBuiltIn(exp)
         |
-        result = DefaultTo(exp)
-        |
         result = Exists(exp)
     )
     {
-        return result;
-    }
-}
-
-ASTExpression DefaultTo(ASTExpression exp) :
-{
-    ASTExpression rhs = null;
-    Token t;
-}
-{
-    t = <EXCLAM>
-    (
-        LOOKAHEAD(<ID><ASSIGNMENT_EQUALS>) { /* Do not consume */ }
-        |
-        [
-            LOOKAHEAD(ASTExpression())
-            rhs = ASTExpression()
-        ]
-    )
-    {
-        ASTExpDefault result = new ASTExpDefault(exp, rhs);
-        if (rhs == null) {
-            result.setLocation(template, exp, t);
-        } else {
-            result.setLocation(template, exp, rhs);
-        }
         return result;
     }
 }

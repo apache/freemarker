@@ -23,7 +23,7 @@ ${x} = ${.dataModel.x} = ${.globals.x}
 ${x} = ${.main.x} = ${.namespace.x}
 <#global x = 6>
 ${.globals.x} but ${.dataModel.x} = 4
-${y} = ${.globals.y} = ${.dataModel.y?default("ERROR")}
+${y} = ${.globals.y} = ${.dataModel.y!"ERROR"}
 Invisiblity test 1.: <#if .main.y?? || .namespace.y??>failed<#else>passed</#if>
 Invisiblity test 2.: <#if .main.z?? || .namespace.z??>failed<#else>passed</#if>
 Invisiblity test 3.: <#global q = 1><#if .main.q?? || .namespace.q?? || .dataModel.q??>failed<#else>passed</#if>

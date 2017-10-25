@@ -22,8 +22,8 @@
     ${y} ${count}/${x}: <#nested x, "asdf"> <#-- the second body parameter is not used below -->
   </#list>
 </#macro>
-<@repeat count=3>${y?default("undefined")} ${x?default("undefined")} ${count?default("undefined")}</@repeat>
+<@repeat count=3>${y!"undefined"} ${x!"undefined"} ${count!"undefined"}</@repeat>
 <#global x = "X">
 <#global y = "Y">
 <#global count = "Count">
-<@repeat count=3 ; param1>${y?default("undefined")} ${x?default("undefined")} ${count?default("undefined")} ${param1}</@repeat>
+<@repeat count=3 ; param1>${y!"undefined"} ${x!"undefined"} ${count!"undefined"} ${param1}</@repeat>

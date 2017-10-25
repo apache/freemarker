@@ -36,7 +36,7 @@ class EnumModels extends ClassBasedModelFactory {
         if (obj == null) {
             // Return null - it'll manifest itself as undefined in the template.
             // We're doing this rather than throw an exception as this way 
-            // people can use someEnumModel?default({}) to gracefully fall back 
+            // people can use someEnumModel!{} to gracefully fall back 
             // to an empty hash if they want to.
             return null;
         }

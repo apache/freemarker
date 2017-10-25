@@ -27,8 +27,8 @@
 <@isNonFastIRE>${v}</@> <#-- To check that it isn't an IRE.FAST_INSTANCE -->
 <@assertEquals actual=v?? expected=false />
 <@assertEquals actual=(v)?? expected=false />
-<@assertEquals actual=v?default('-') expected='-' />
-<@assertEquals actual=(v)?default('-') expected='-' />
+<@assertEquals actual=v!'-' expected='-' />
+<@assertEquals actual=(v)!'-' expected='-' />
 <@isNonFastIRE>${v}</@> <#-- To check that it isn't an IRE.FAST_INSTANCE -->
 <@assertEquals actual=v?? expected=false />
 <@assertEquals actual=(v)?? expected=false />
@@ -37,10 +37,10 @@
 <@assertEquals actual=v?hasContent expected=false />
 <@assertEquals actual=(v)?hasContent expected=false />
 
-<@assertEquals actual=v?default(w, '-') expected='-' />
+<@assertEquals actual=v!w!'-' expected='-' />
 <@assertEquals actual=v!w!'-' expected='-' />
 <#assign w = 'W'>
-<@assertEquals actual=v?default(w, '-') expected='W' />
+<@assertEquals actual=v!w!'-' expected='W' />
 <@assertEquals actual=v!w!'-' expected='W' />
 
 <#list ['V', 1.5] as v>
@@ -48,8 +48,8 @@
 	<@assertEquals actual=(v)!'-' expected=v />
 	<@assert v?? />
 	<@assert (v)?? />
-	<@assertEquals actual=v?default('-') expected=v />
-	<@assertEquals actual=(v)?default('-') expected=v />
+	<@assertEquals actual=v!'-' expected=v />
+	<@assertEquals actual=(v)!'-' expected=v />
 	<@assert v?? />
 	<@assert (v)?? />
 	<@assertEquals actual=v?ifExists expected=v />
@@ -65,8 +65,8 @@
 <@assertEquals actual=(u.v)!'-' expected='-' />
 <@isIRE>${u.v??}</@>
 <@assertEquals actual=(u.v)?? expected=false />
-<@isIRE>${u.v?default('-')}</@>
-<@assertEquals actual=(u.v)?default('-') expected='-' />
+<@isIRE>${u.v!'-'}</@>
+<@assertEquals actual=(u.v)!'-' expected='-' />
 <@isIRE>${u.v??}</@>
 <@assertEquals actual=(u.v)?? expected=false />
 <@isIRE>${u.v?ifExists}</@>
@@ -79,8 +79,8 @@
 <@assertEquals actual=(u.v)!'-' expected='-' />
 <@assertEquals actual=u.v?? expected=false />
 <@assertEquals actual=(u.v)?? expected=false />
-<@assertEquals actual=u.v?default('-') expected='-' />
-<@assertEquals actual=(u.v)?default('-') expected='-' />
+<@assertEquals actual=u.v!'-' expected='-' />
+<@assertEquals actual=(u.v)!'-' expected='-' />
 <@assertEquals actual=u.v?? expected=false />
 <@assertEquals actual=(u.v)?? expected=false />
 <@assertEquals actual=u.v?ifExists expected='' />
@@ -93,8 +93,8 @@
 <@assertEquals actual=(u.v)!'-' expected='V' />
 <@assert u.v?? />
 <@assert (u.v)?? />
-<@assertEquals actual=u.v?default('-') expected='V' />
-<@assertEquals actual=(u.v)?default('-') expected='V' />
+<@assertEquals actual=u.v!'-' expected='V' />
+<@assertEquals actual=(u.v)!'-' expected='V' />
 <@assert u.v?? />
 <@assert (u.v)?? />
 <@assertEquals actual=u.v?ifExists expected='V' />

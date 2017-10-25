@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1501,10 +1502,36 @@ public class FM2ASTToFM3SourceConverter {
             Expression lho = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, Expression.class);
             printExp(lho);
             printParameterSeparatorSource(lho, rho);
+            boolean needParentheses = needsParenthesisAsDefaultValue(rho);
+            if (needParentheses) {
+                print('(');
+            }
             printNode(rho);
+            if (needParentheses) {
+                print(')');
+            }
         } else {
             printPostfixOperator(node, "!");
         }
+    }
+
+    /**
+     * Tells if in `exp!defaultExp` we need parentheses around `defultExp`.
+     */
+    private boolean needsParenthesisAsDefaultValue(Expression rho) {
+        return !(rho instanceof NumberLiteral)
+        && !(rho instanceof StringLiteral)
+        && !(rho instanceof BooleanLiteral)
+        && !(rho instanceof ListLiteral)
+        && !(rho instanceof HashLiteral)
+        && !(rho instanceof Identifier)
+        && !(rho instanceof Dot)
+        && !(rho instanceof DynamicKeyName)
+        && !(rho instanceof MethodCall)
+        && !(rho instanceof BuiltIn)
+        && !(rho instanceof DefaultToExpression)
+        && !(rho instanceof ExistsExpression)
+        && !(rho instanceof ParentheticalExpression);
     }
 
     private void printExpNot(NotExpression node) throws ConverterException {
@@ -1800,11 +1827,17 @@ public class FM2ASTToFM3SourceConverter {
     private void printExpMethodCall(MethodCall node) throws ConverterException {
         Expression callee = getParam(node, 0, ParameterRole.CALLEE, Expression.class);
         printExp(callee);
-
+        
+        if (callee instanceof BuiltIn
+                && getParam(callee, 1, ParameterRole.RIGHT_HAND_OPERAND, String.class).equals("default")) {
+            // ?default(defExp) handles printing its own parameter lists, as it will be converted to exp!defExp.
+            return;
+        }
+        
         Expression prevParam = callee;
         int argCnt = node.getParameterCount() - 1;
         for (int argIdx = 0; argIdx < argCnt; argIdx++) {
-            Expression argExp = getParam(node, argIdx + 1, ParameterRole.ARGUMENT_VALUE, Expression.class);
+            Expression argExp = getParam(node, 1 + argIdx, ParameterRole.ARGUMENT_VALUE, Expression.class);
             printParameterSeparatorSource(prevParam, argExp);
             printExp(argExp);
             prevParam = argExp;
@@ -1816,20 +1849,112 @@ public class FM2ASTToFM3SourceConverter {
         Expression lho = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, Expression.class);
         String rho = getParam(node, 1, ParameterRole.RIGHT_HAND_OPERAND, String.class);
 
-        // <lho>?biName
-        printExp(lho);
-        int pos = getEndPositionExclusive(lho);
-        
         if (rho.equals("exists")) {
             // lho?exists -> lho??
 
+            // <lho>?exists
+            printExp(lho);
+            int pos = getEndPositionExclusive(lho);
+            
             pos = printWSAndExpCommentsIfContainsComment(pos); // lho< >?exists
             pos = skipRequiredString(pos, "?"); // lho<?>exists
             print("??");
             pos = printWSAndExpCommentsIfContainsComment(pos); // lho?< >exists
             pos = getPositionAfterIdentifier(pos); // lho?<exists>
             assertParamCount(node, 2);
+        } else if (rho.equals("default")) {
+            // lho?default(exp) -> lho!exp
+            
+            TemplateObject parentNode = getParentNode(node);
+            if (!(parentNode instanceof MethodCall)) {
+                throw new UnconvertableLegacyFeatureException(
+                        "?default must be followed by a paramter list, like in ?default(1), "
+                        + "otherwise it has no equivalent in FreeMarker 3.",
+                        node.getBeginLine(), node.getBeginColumn());
+            }
+            MethodCall parentCall = (MethodCall) parentNode;
+
+            // Sometimes parentheses must be added, e.g.:
+            // - Needed: `a?default(b).x` -> `(a!b).x`
+            // - Not needed: `a?default(b) + x` -> `a!b + x` 
+            TemplateObject grandParentNode = getParentNode(parentCall);
+            boolean wholeExpNeedsParenthesis = grandParentNode instanceof Expression
+                    && !needsParenthesisAsDefaultValue((Expression) grandParentNode)
+                    && !(grandParentNode instanceof ParentheticalExpression);
+            if (wholeExpNeedsParenthesis) {
+                print("(");
+            }
+            
+            // <lho>?default(exp)
+            printExp(lho);
+            int pos = getEndPositionExclusive(lho);
+            
+            pos = printWSAndExpCommentsIfContainsComment(pos); // lho< >?default(exp)
+            pos = skipRequiredString(pos, "?"); // lho<?>default(exp)
+            pos = printWSAndExpCommentsIfContainsComment(pos); // lho?< >default(exp)
+            pos = getPositionAfterIdentifier(pos); // lho?<default>(exp)
+            // The parameter list is handled elsewhere, as that call is the parent expression.
+            assertParamCount(node, 2);
+            
+            pos = printWSAndExpCommentsIfContainsComment(pos); // lho?default< >(exp1, expN)
+            pos = skipRequiredString(pos, "("); // lho?default<(>exp1, exp2, expN)
+            
+            int argCnt = parentCall.getParameterCount() - 1;
+            String sepBeforeLastComma = "";
+            for (int argIdx = 0; argIdx < argCnt; argIdx++) {
+                String sep = readWSAndExpComments(pos); // lho?default(< >exp1,< >expN)
+                if (!_ConverterUtils.isWhitespaceOnly(sep)) {
+                    // exp?def(<#-- c -->d) -> exp!<#-- c -->d
+                    print('!');
+                    printWithConvertedExpComments(sep);
+                } else if (_ConverterUtils.containsLineBreak(sep)) {
+                    // exp?def(\n\td) -> exp\n\t!d
+                    print(sep);
+                    print('!');
+                } else {
+                    if (!sep.isEmpty() && sepBeforeLastComma.length() > 0
+                            && !Character.isWhitespace(sepBeforeLastComma.charAt(sepBeforeLastComma.length() - 1))) {
+                        // exp?def(d1 <#-- c -->, d2) -> exp!d1 <#-- c --> !d2                    
+                        print(' ');
+                    }
+                    print('!');
+                }
+                
+                // lho?default(<exp1>, <expN>)
+                Expression argExp = getParam(parentCall, 1 + argIdx, ParameterRole.ARGUMENT_VALUE, Expression.class);
+                boolean argValueNeedsParenthesis = needsParenthesisAsDefaultValue(argExp);
+                if (argValueNeedsParenthesis) {
+                    print('(');
+                }
+                printExp(argExp);
+                if (argValueNeedsParenthesis) {
+                    print(')');
+                }
+                
+                // lho?default(exp1< >, expN< >)
+                pos = getEndPositionExclusive(argExp);
+                sep = readWSAndExpComments(pos);
+                pos += sep.length();
+                sepBeforeLastComma = sep;
+                if (!_ConverterUtils.isWhitespaceOnly(sep) || _ConverterUtils.containsLineBreak(sep)) {
+                    printWithConvertedExpComments(sep);
+                }
+                
+                // lho?default(exp1<,> expN< >)
+                if (argIdx != argCnt - 1) {
+                    pos = skipRequiredString(pos, ",");
+                } else {
+                    printWSAndExpCommentsIfContainsComment(pos);
+                }
+            }
+            if (wholeExpNeedsParenthesis) {
+                print(")");
+            }
         } else {
+            // <lho>?biName
+            printExp(lho);
+            int pos = getEndPositionExclusive(lho);
+            
             // lho<?>biName
             pos = printSeparatorAndWSAndExpComments(pos, "?");
     
@@ -2470,6 +2595,10 @@ public class FM2ASTToFM3SourceConverter {
         return pos + s.length();
     }
 
+    private int skipOptionalString(int pos, String s) throws ConverterException {
+        return src.startsWith(s, pos) ? pos + s.length() : pos;
+    }
+    
     private int getPositionAfterIdentifier(int startPos) throws ConverterException {
         return getPositionAfterIdentifier(startPos, false);
     }
@@ -2553,6 +2682,50 @@ public class FM2ASTToFM3SourceConverter {
             pos++;
         }
         return src.substring(startPos, pos);
+    }
+    
+    private IdentityHashMap<TemplateObject, TemplateObject> parentsByChildrenNode = null;
+    private IdentityHashMap<TemplateObject, Object> parentsProcessed = null;
+    
+    private TemplateObject getParentNode(TemplateObject node) throws ConverterException {
+        if (parentsByChildrenNode == null) {
+            parentsByChildrenNode = new IdentityHashMap<>();
+            parentsProcessed = new IdentityHashMap<>();
+            collectParentNodesOfChildren(template.getRootTreeNode());
+        }
+        TemplateObject parent = parentsByChildrenNode.get(node);
+        if (parent == null) {
+            throw new ConverterException("Can't find the parent node of a(n) " + node.getClass().getName() + " node.");
+        }
+        return parent;
+    }
+
+    private void collectParentNodesOfChildren(TemplateObject parentNode) {
+        // I don't think there can be dependency loops, but to be sure we handle them:
+        if (parentsProcessed.containsKey(parentNode)) {
+            return;
+        }
+        parentsProcessed.put(parentNode, null);
+        
+        if (parentNode instanceof TemplateElement) {
+            TemplateElement parentElement = (TemplateElement) parentNode; 
+            int childCnt = parentElement.getChildCount();
+            for (int i = 0; i < childCnt; i++) {
+                TemplateElement child = parentElement.getChild(i);
+                parentsByChildrenNode.put(child, parentNode);
+                collectParentNodesOfChildren(child);
+            }
+        }
+        
+        int paramCnt = parentNode.getParameterCount();
+        for (int i = 0; i < paramCnt; i++) {
+            Object paramValue = parentNode.getParameterValue(i);
+            if (paramValue instanceof TemplateObject) {
+                TemplateObject paramValueNode = (TemplateObject) paramValue;
+                parentsByChildrenNode.put(paramValueNode, parentNode);
+                collectParentNodesOfChildren(paramValueNode);
+            }
+        }
     }
 
     /**

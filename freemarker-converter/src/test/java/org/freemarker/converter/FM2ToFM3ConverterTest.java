@@ -150,8 +150,7 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("${a <#--1--> !} ${a <#--2--> ! <#--3--> 0}");
         assertConvertedSame("${a!b.c(x!0, y!0)}");
         assertConvertedSame("${(a.b)!x}");
-        // [FM3] Will be: a!(x+1)
-        assertConvertedSame("${a!x+1}");
+        assertConverted("${a!(x+1)}", "${a!x+1}");
 
         assertConvertedSame("${a??} ${a <#--1--> ??}");
     }
@@ -501,6 +500,50 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConverted("${s <#-- c --> ??}", "${s <#-- c --> ?exists}");
         assertConverted("${s?? <#-- c --> }", "${s? <#-- c --> exists}");
         assertConverted("${s?? <#-- c --> }", "${s?exists <#-- c --> }");
+        
+        assertConverted("${s!1}", "${s?default(1)}");
+        assertConverted("${s!(1 + x)}", "${s?default(1 + x)}");
+        assertConverted("${s!(-x)}", "${s?default(-x)}");
+        assertConverted("${s!a.b}", "${s?default(a.b)}");
+        assertConverted("${s!a!b}", "${s?default(a!b)}");
+        assertConverted("${s\n\t!1}", "${s?default(\n\t1)}");
+        assertConverted("${s!1}", "${s?default( 1)}");
+        assertConverted("${s! <#-- c1 --> d1}", "${s?default( <#-- c1 --> d1)}");
+        assertConverted("${s!d1!d2!d3}", "${s?default(d1, d2, d3)}");
+        assertConverted("${s!d1!d2!d3}", "${s?default( d1,d2,d3 )}");
+        assertConverted("${s!a!b!c!d}", "${s?default(a!b, c!d)}");
+        assertConverted("${s!d1 <#-- c1 --> !d2 <#-- c2 -->}", "${s?default(d1 <#-- c1 -->, d2 <#-- c2 -->)}");
+        try {
+            convert("<#assign d = x?default>");
+            fail();
+        } catch (UnconvertableLegacyFeatureException e) {
+            assertEquals(1, (Object) e.getRow());
+            assertEquals(14, (Object) e.getColumn());
+        }
+        assertConverted("${(s!d).a}", "${s?default(d).a}");
+        assertConverted("${(s!d1!d2)!a}", "${s?default(d1, d2)!a}");
+        assertConverted("${s!d + a}", "${s?default(d) + a}");
+    }
+
+    @Test
+    public void testDefaultValueExpressionPrecedenceChange() throws IOException, ConverterException {
+        assertConvertedSame("${v!d}");
+        assertConvertedSame("${v!}");
+        assertConvertedSame("${v!d.e}");
+        assertConvertedSame("${v!d[e]}");
+        assertConvertedSame("${v!d(e)}");
+        assertConvertedSame("${v!d??}");
+        assertConvertedSame("${v!d?upperCase}");
+        assertConvertedSame("${v!}");
+        assertConvertedSame("${v!(d + 1)}");
+        assertConvertedSame("${(v!) + 'x'}");
+        assertConverted("${v!(+1)}", "${v!+1}"); 
+        assertConverted("${v!(-1)}", "${v!-1}"); 
+        assertConverted("${v!(d+1)}", "${v!d+1}");
+        assertConverted("${v!(d-1)}", "${v!d-1}");
+        assertConverted("${v!(d * e)}", "${v!d * e}");
+        assertConverted("${v ! (d * e)}", "${v ! d * e}");
+        assertConverted("${v ! <#-- c1 --> (d * e) <#-- c2 -->}", "${v ! <#-- c1 --> d * e <#-- c2 -->}");
     }
     
     @Test

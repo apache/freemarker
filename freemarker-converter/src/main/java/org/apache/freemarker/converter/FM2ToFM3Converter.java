@@ -24,7 +24,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+import org.apache.freemarker.converter.ConversionMarkers.Type;
 import org.apache.freemarker.core.util._NullArgumentException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -41,6 +44,7 @@ import freemarker.core.JSONOutputFormat;
 import freemarker.core.JavaScriptOutputFormat;
 import freemarker.core.MarkupOutputFormat;
 import freemarker.core.OutputFormat;
+import freemarker.core.ParseException;
 import freemarker.core.PlainTextOutputFormat;
 import freemarker.core.RTFOutputFormat;
 import freemarker.core.UndefinedOutputFormat;
@@ -80,12 +84,15 @@ public class FM2ToFM3Converter extends Converter {
                     .put("fm", "fm3")
                     .build();
 
+    private static final Logger LOG = LoggerFactory.getLogger(Converter.class);
+    
     private boolean predefinedFileExtensionSubstitutionsEnabled;
     private Map<String, String> fileExtensionSubstitutions = PREDEFINED_FILE_EXTENSION_SUBSTITUTIONS;
     private Properties freeMarker2Settings;
     private Configuration fm2Cfg;
     private StringTemplateLoader stringTemplateLoader;
     private boolean validateOutput = true;
+    private boolean skipUnparsableFiles;
 
     @Override
     protected Pattern getDefaultInclude() {
@@ -162,10 +169,19 @@ public class FM2ToFM3Converter extends Converter {
         Template template = null;
         try {
             template = fm2Cfg.getTemplate(fileTransCtx.getRelativeSourcePathWithSlashes());
+            fm2Cfg.clearTemplateCache();
         } catch (Exception e) {
-            throw new ConverterException("Failed to load FreeMarker 2.3.x template", e);
+            if (getSkipUnparsableFiles() && e instanceof ParseException) {
+                ParseException pe = (ParseException) e;
+                fileTransCtx.getConversionMarkers().markInSource(
+                        pe.getLineNumber(), pe.getColumnNumber(), Type.WARN, "Skipped file due to parse error: "
+                        + pe.getEditorMessage());
+                LOG.debug("Skipped file due to parsing error: {}", fileTransCtx.getRelativeSourcePathWithSlashes());
+                return; //!
+            } else {
+                throw new ConverterException("Failed to load FreeMarker 2.3.x template", e);
+            }
         }
-        fm2Cfg.clearTemplateCache();
 
         FM2ASTToFM3SourceConverter.Result result = FM2ASTToFM3SourceConverter.convert(
                 template, fm2Cfg, stringTemplateLoader, fileTransCtx.getConversionMarkers()
@@ -274,6 +290,22 @@ public class FM2ToFM3Converter extends Converter {
 
     public void setValidateOutput(boolean validateOutput) {
         this.validateOutput = validateOutput;
+    }
+    
+    /**
+     * Getter pair of {@link #setSkipUnparsableFiles(boolean)}.
+     */
+    public boolean getSkipUnparsableFiles() {
+        return skipUnparsableFiles;
+    }
+
+    /**
+     * Sets whether source files that syntactically aren't valid FreeMarker 2 templates should be ignored.
+     * The problem will be logged as a warning into to the conversion markers file.
+     * Defaults to {@code false}. 
+     */
+    public void setSkipUnparsableFiles(boolean skipUnparsableFiles) {
+        this.skipUnparsableFiles = skipUnparsableFiles;
     }
 
 }
