@@ -19,11 +19,28 @@
 
 package org.apache.freemarker.converter;
 
+import freemarker.core.TemplateObject;
+
 /**
  * The legacy feature has no equivalent in the target format.
  */
+@SuppressWarnings({ "deprecation", "serial" })
 public class UnconvertableLegacyFeatureException extends ConverterException {
 
+    /**
+     * @param astNode The position of the error is extracted from this.
+     */
+    public UnconvertableLegacyFeatureException(String message, TemplateObject astNode) {
+        this(message, astNode.getBeginLine(), astNode.getBeginColumn(), null);
+    }
+
+    /**
+     * @param astNode The position of the error is extracted from this.
+     */
+    public UnconvertableLegacyFeatureException(String message, TemplateObject astNode, Throwable cause) {
+        this(message, astNode.getBeginLine(), astNode.getBeginColumn(), cause);
+    }
+    
     /**
      * @param row 1-based
      * @param column 1-based

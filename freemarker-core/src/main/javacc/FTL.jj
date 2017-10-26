@@ -1045,13 +1045,13 @@ TOKEN:
     |
     <MINUS_MINUS : "--">
     |
-    <LESS_THAN : "lt" | "\\lt" | "<" | "&lt;">
+    <LESS_THAN : "lt" | "<">
     |
-    <LESS_THAN_EQUALS : "lte" | "\\lte" | "<=" | "&lt;=">
+    <LESS_THAN_EQUALS : "le" | "<=">
     |
-    <ESCAPED_GT: "gt" | "\\gt" |  "&gt;">
+    <ESCAPED_GT: "gt">
     |
-    <ESCAPED_GTE : "gte" | "\\gte" | "&gt;=">
+    <ESCAPED_GTE : "ge">
     |
     <PLUS : "+">
     |
@@ -1067,9 +1067,9 @@ TOKEN:
     |
     <PERCENT : "%">
     |
-    <AND : "&&" | "&amp;&amp;" | "\\and">
+    <AND : "&&" | "and">
     |
-    <OR : "||">
+    <OR : "||" | "or">
     |
     <EXCLAM : "!">
     |
@@ -1718,17 +1718,18 @@ ASTExpression RangeExpression() :
 ASTExpression ASTExpAnd() :
 {
     ASTExpression lhs, rhs, result;
+    Token tk;
 }
 {
     lhs = EqualityExpression() { result = lhs; }
     (
         LOOKAHEAD(<AND>)
-        <AND>
+        tk = <AND>
         rhs = EqualityExpression()
         {
             booleanLiteralOnly(lhs);
             booleanLiteralOnly(rhs);
-            result = new ASTExpAnd(lhs, rhs);
+            result = new ASTExpAnd(lhs, rhs, tk.image);
             result.setLocation(template, lhs, rhs);
             lhs = result;
         }
@@ -1741,17 +1742,18 @@ ASTExpression ASTExpAnd() :
 ASTExpression ASTExpOr() :
 {
     ASTExpression lhs, rhs, result;
+    Token tk;
 }
 {
     lhs = ASTExpAnd() { result = lhs; }
     (
         LOOKAHEAD(<OR>)
-        <OR>
+        tk = <OR>
         rhs = ASTExpAnd()
         {
             booleanLiteralOnly(lhs);
             booleanLiteralOnly(rhs);
-            result = new ASTExpOr(lhs, rhs);
+            result = new ASTExpOr(lhs, rhs, tk.image);
             result.setLocation(template, lhs, rhs);
             lhs = result;
         }

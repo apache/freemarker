@@ -83,7 +83,13 @@ Node: Changes already mentioned above aren't repeated here!
 - Removed the following operator aliases:
   - `=` for comparison (it can only be used for assignment now). Use `==` instead.
   - `&` for logical "and". Use `&&` instead.
+  - `\and`, `&amp;&amp;`. Use `and` instead. (HTML entity support will be re-added, but "globally")
   - `|` for logical "or". Use `||` instead.
+  - `\lt`, `&lt;`. Use "lt" instead.
+  - `lte`, `\lte`, `&lt;=`. Use "le" instead (syntax from XSTL).
+  - `\gt`, `&gt;`. Use "gt" instead.
+  - `gte`, `\gte`, `&gt;=`. Use "ge" instead (syntax from XSTL).
+- New keywords (can't be used as identifier): `and`, `or`, `le`, `ge`
 - Removed some long deprecated template language directives:
   - <#call ...> (deprecated by <@... />)
   - <#comment>...</#comment> (deprecated by <#-- ... -->)

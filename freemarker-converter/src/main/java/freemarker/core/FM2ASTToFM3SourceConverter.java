@@ -291,8 +291,7 @@ public class FM2ASTToFM3SourceConverter {
         print("#--");
         String content = getOnlyParam(node, ParameterRole.CONTENT, String.class);
         if (content.indexOf("-->") != -1) {
-            throw new UnconvertableLegacyFeatureException("You can't have a \"-->\" inside a comment.",
-                    node.getBeginLine(), node.getBeginColumn());
+            throw new UnconvertableLegacyFeatureException("You can't have a \"-->\" inside a comment.", node);
         }
         print(content);
         print("--");
@@ -566,7 +565,7 @@ public class FM2ASTToFM3SourceConverter {
                 } else if (pastDefault) {
                     throw new UnconvertableLegacyFeatureException("The \"case\" directive can't be after "
                             + "the \"default\" directive since FreeMarker 3. You need to rearrange this \"switch\".",
-                            child.getBeginLine(), child.getBeginColumn());
+                            child);
                 }
             }
         }
@@ -612,7 +611,7 @@ public class FM2ASTToFM3SourceConverter {
         if (converted.equals("classicCompatible")) {
             throw new UnconvertableLegacyFeatureException("There \"classicCompatible\" setting doesn't exist in "
                     + "FreeMarker 3. You have to remove it manually before conversion.",
-                    node.getBeginLine(), node.getBeginColumn());
+                    node);
         }
         if (converted.equals("datetimeFormat")) {
             converted = "dateTimeFormat";
@@ -1549,20 +1548,20 @@ public class FM2ASTToFM3SourceConverter {
         COMPARATOR_OP_MAP.put("!=", "!=");
         COMPARATOR_OP_MAP.put("<", "<");
         COMPARATOR_OP_MAP.put("lt", "lt");
-        COMPARATOR_OP_MAP.put("\\lt", "\\lt");
-        COMPARATOR_OP_MAP.put("&lt;", "&lt;");
+        COMPARATOR_OP_MAP.put("\\lt", "lt");
+        COMPARATOR_OP_MAP.put("&lt;", "lt");
         COMPARATOR_OP_MAP.put("<=", "<=");
-        COMPARATOR_OP_MAP.put("lte", "lte");
-        COMPARATOR_OP_MAP.put("\\lte", "\\lte");
-        COMPARATOR_OP_MAP.put("&lt;=", "&lt;=");
+        COMPARATOR_OP_MAP.put("lte", "le");
+        COMPARATOR_OP_MAP.put("\\lte", "le");
+        COMPARATOR_OP_MAP.put("&lt;=", "le");
         COMPARATOR_OP_MAP.put(">", ">");
         COMPARATOR_OP_MAP.put("gt", "gt");
-        COMPARATOR_OP_MAP.put("\\gt", "\\gt");
-        COMPARATOR_OP_MAP.put("&gt;", "&gt;");
+        COMPARATOR_OP_MAP.put("\\gt", "gt");
+        COMPARATOR_OP_MAP.put("&gt;", "gt");
         COMPARATOR_OP_MAP.put(">=", ">=");
-        COMPARATOR_OP_MAP.put("gte", "gte");
-        COMPARATOR_OP_MAP.put("\\gte", "\\gte");
-        COMPARATOR_OP_MAP.put("&gt;=", "&gt;=");
+        COMPARATOR_OP_MAP.put("gte", "ge");
+        COMPARATOR_OP_MAP.put("\\gte", "ge");
+        COMPARATOR_OP_MAP.put("&gt;=", "ge");
     }
 
     private void printExpComparison(ComparisonExpression node) throws ConverterException {
@@ -1575,8 +1574,8 @@ public class FM2ASTToFM3SourceConverter {
         AND_OP_MAP = new HashMap<String, String>();
         AND_OP_MAP.put("&&", "&&");
         AND_OP_MAP.put("&", "&&");
-        AND_OP_MAP.put("\\and", "\\and");
-        AND_OP_MAP.put("&amp;&amp;", "&amp;&amp;");
+        AND_OP_MAP.put("\\and", "and");
+        AND_OP_MAP.put("&amp;&amp;", "and");
     }
 
     private void printExpAnd(AndExpression node) throws ConverterException {
@@ -1820,8 +1819,16 @@ public class FM2ASTToFM3SourceConverter {
                 node.getEndColumn(), node.getEndLine()));
     }
 
-    private void printExpIdentifier(Identifier node) {
-        print(TemplateLanguageUtils.escapeIdentifier(node.getName()));
+    private void printExpIdentifier(Identifier node) throws UnconvertableLegacyFeatureException {
+        Identifier name = node;
+        if (name.equals("ge") || name.equals("le") || name.equals("or") || name.equals("and")) {
+            // TODO [FM3] The plan is to extend the identifier syntax so that any variable name can be specified.
+            // (Although with FM2 syntax we could convert to `.var.ge`, it's not supported on all places where an
+            // identifier can occur, so we can't convert to that in some cases, so we wait for the real solution.)
+            throw new UnconvertableLegacyFeatureException(
+                    _StringUtils.jQuote(name) + " is a keyword now, so you must rename this variable.", node);
+        }
+        print(TemplateLanguageUtils.escapeIdentifier(name.getName()));
     }
 
     private void printExpMethodCall(MethodCall node) throws ConverterException {
@@ -1902,7 +1909,7 @@ public class FM2ASTToFM3SourceConverter {
                 throw new UnconvertableLegacyFeatureException(
                         "?default must be followed by a paramter list, like in ?default(1), "
                         + "otherwise it has no equivalent in FreeMarker 3.",
-                        node.getBeginLine(), node.getBeginColumn());
+                        node);
             }
             MethodCall parentCall = (MethodCall) parentNodeRel.parentNode;
 

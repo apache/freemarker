@@ -71,10 +71,10 @@
 <#else>
     boolean4 && boolean5 failed.<br />
 </#if></p>
-<@assert true &amp;&amp; true />
-<@assert !(false &amp;&amp; true) />
-<@assert true \and true />
-<@assert !(false \and true) />
+<@assert true && true />
+<@assert !(false && true) />
+<@assert true and true />
+<@assert !(false and true) />
  
 <p>Now test list models:</p>
 

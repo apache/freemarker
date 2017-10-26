@@ -26,10 +26,12 @@ final class ASTExpOr extends ASTExpBoolean {
 
     private final ASTExpression lho;
     private final ASTExpression rho;
+    private final String opString;
 
-    ASTExpOr(ASTExpression lho, ASTExpression rho) {
+    ASTExpOr(ASTExpression lho, ASTExpression rho, String opString) {
         this.lho = lho;
         this.rho = rho;
+        this.opString = opString.intern();
     }
 
     @Override
@@ -39,7 +41,7 @@ final class ASTExpOr extends ASTExpBoolean {
 
     @Override
     public String getCanonicalForm() {
-        return lho.getCanonicalForm() + " || " + rho.getCanonicalForm();
+        return lho.getCanonicalForm() + " " + opString + " " + rho.getCanonicalForm();
     }
     
     @Override
@@ -57,7 +59,8 @@ final class ASTExpOr extends ASTExpBoolean {
             String replacedIdentifier, ASTExpression replacement, ReplacemenetState replacementState) {
     	return new ASTExpOr(
     	        lho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
-    	        rho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState));
+    	        rho.deepCloneWithIdentifierReplaced(replacedIdentifier, replacement, replacementState),
+    	        opString);
     }
 
     @Override

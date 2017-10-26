@@ -133,16 +133,23 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
                 + "${(a<#--7-->><#--8-->b)}${(a<#--9-->>=<#--A-->b)}"
                 + "${a<#--B-->==<#--C-->b}${a<#--D-->!=<#--E-->b}");
         assertConverted("${a == b}${a == b}", "${a = b}${a == b}");
-        assertConvertedSame("${a &lt; b}${a lt b}${a \\lt b}");
-        assertConvertedSame("${a &lt;= b}${a lte b}${a \\lte b}");
-        assertConvertedSame("${a &gt; b}${a gt b}${a \\gt b}");
-        assertConvertedSame("${a &gt;= b}${a gte b}${a \\gte b}");
+        assertConverted("${a lt b}${a lt b}${a lt b}${a lt b}", "${a &lt; b}${a lt b}${a \\lt b}${a &lt; b}");
+        assertConverted("${a le b}${a le b}${a le b}${a le b}", "${a &lt;= b}${a lte b}${a \\lte b}${a &lt;= b}");
+        assertConverted("${a gt b}${a gt b}${a gt b}${a gt b}", "${a &gt; b}${a gt b}${a \\gt b}${a &gt; b}");
+        assertConverted("${a ge b}${a ge b}${a ge b}${a ge b}", "${a &gt;= b}${a gte b}${a \\gte b}${a &gt;= b}");
 
-        assertConverted("${a && b}${a && b}${a || b}${a || b}", "${a && b}${a & b}${a || b}${a | b}");
+        assertConverted("${a && b}${a && b}${a and b}${a and b}", "${a && b}${a & b}${a &amp;&amp; b}${a \\and b}");
+        assertConverted("${a || b}${a || b}", "${a || b}${a | b}");
         assertConverted(
                 "${a<#--1-->&&<#--2-->b}${a<#--3-->&&<#--4-->b}${a<#--5-->||<#--6-->b}${a<#--7-->||<#--8-->b}",
                 "${a<#--1-->&&<#--2-->b}${a<#--3-->&<#--4-->b}${a<#--5-->||<#--6-->b}${a<#--7-->|<#--8-->b}");
-        assertConvertedSame("${a &amp;&amp; b}${a \\and b}");
+        for (String newKeyword : new String[] { "and", "or", "le", "ge" }) {
+            try {
+                convert("${" + newKeyword + "}");
+            } catch (UnconvertableLegacyFeatureException e) {
+                assertThat(e.getMessage(), containsString("keyword"));
+            }
+        }
 
         assertConvertedSame("${!a}${! foo}${! <#--1--> bar}${!!c}");
 
@@ -552,6 +559,7 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("${v!(d + 1)}");
         assertConvertedSame("${v!?upperCase}");
         assertConvertedSame("${(v!) + 'x'}");
+        assertConvertedSame("<@foo x=v! y=2 />");
         assertConverted("${v!(+1)}", "${v!+1}"); 
         assertConverted("${v!(-1)}", "${v!-1}"); 
         assertConverted("${v!(d+1)}", "${v!d+1}");

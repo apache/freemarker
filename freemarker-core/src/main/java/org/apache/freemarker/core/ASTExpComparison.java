@@ -40,16 +40,16 @@ final class ASTExpComparison extends ASTExpBoolean {
             operation = _EvalUtils.CMP_OP_EQUALS;
         } else if (opString == "!=") {
             operation = _EvalUtils.CMP_OP_NOT_EQUALS;
-        } else if (opString == "gt" || opString == "\\gt" || opString == ">" || opString == "&gt;") {
+        } else if (opString == ">" || opString == "gt") {
             operation = _EvalUtils.CMP_OP_GREATER_THAN;
-        } else if (opString == "gte" || opString == "\\gte" || opString == ">=" || opString == "&gt;=") {
+        } else if (opString == ">=" || opString == "ge") {
             operation = _EvalUtils.CMP_OP_GREATER_THAN_EQUALS;
-        } else if (opString == "lt" || opString == "\\lt" || opString == "<" || opString == "&lt;") {
+        } else if (opString == "<" || opString == "lt") {
             operation = _EvalUtils.CMP_OP_LESS_THAN;
-        } else if (opString == "lte" || opString == "\\lte" || opString == "<=" || opString == "&lt;=") {
+        } else if (opString == "<=" || opString == "le") {
             operation = _EvalUtils.CMP_OP_LESS_THAN_EQUALS;
         } else {
-            throw new BugException("Unknown comparison operator " + opString);
+            throw new BugException("Unknown comparison operator: " + opString);
         }
     }
 
