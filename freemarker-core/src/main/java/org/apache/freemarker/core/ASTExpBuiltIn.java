@@ -113,7 +113,6 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
         putBI("hasContent", new BuiltInsForExistenceHandling.has_contentBI());
         putBI("hasNext", new BuiltInsForNestedContentParameters.has_nextBI());
         putBI("html", new BuiltInsForStringsEncoding.htmlBI());
-        putBI("ifExists", new BuiltInsForExistenceHandling.if_existsBI());
         putBI("index", new BuiltInsForNestedContentParameters.indexBI());
         putBI("indexOf", new BuiltInsForStringsBasic.index_ofBI(false));
         putBI("int", new intBI());
@@ -329,6 +328,13 @@ abstract class ASTExpBuiltIn extends ASTExpression implements Cloneable {
                 sb.append("\nThe correct name is: ").append(correctedKey);
             } else if (key.equals("exists")) {
                 sb.append("\nUse someExpression?? instead of someExpression?exists.");
+            } else if (key.equals("ifExists") || key.equals("if_exists")) {
+                sb.append("\nUse someExpression! instead of someExpression?" + key + ".");
+            } else if (key.equals("default")) {
+                sb.append("\nUse someExpression!defaultExpression instead of "
+                        + "someExpression?default(defaultExpression), or someExpression!(defaultExpression) if "
+                        + "defaultExpression contains operators that have lower precedence than the default value "
+                        + "operator (!). Also note that instead of x?default(y, z), you can write x!y!z.");
             } else {
                 sb.append(
                         "\nHelp (latest version): http://freemarker.org/docs/ref_builtins.html; "

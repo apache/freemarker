@@ -45,11 +45,5 @@ import org.apache.freemarker.core.util.TemplateLanguageUtils;
  * @see TemplateLanguageUtils#getTypeDescription(TemplateModel)
  */
 public interface TemplateModel {
-    
-    /**
-     * A general-purpose object to represent nothing. It acts as
-     * an empty string, false, empty sequence, empty hash, and
-     * null-returning method model.
-     */
-    TemplateModel NOTHING = GeneralPurposeNothing.INSTANCE;
+    // Empty
 }

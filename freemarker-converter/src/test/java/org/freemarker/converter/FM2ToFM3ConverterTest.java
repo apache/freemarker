@@ -520,9 +520,23 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
             assertEquals(1, (Object) e.getRow());
             assertEquals(14, (Object) e.getColumn());
         }
+        try {
+            convert("${f(x?default)}");
+            fail();
+        } catch (UnconvertableLegacyFeatureException e) {
+            assertEquals(1, (Object) e.getRow());
+            assertEquals(5, (Object) e.getColumn());
+        }
         assertConverted("${(s!d).a}", "${s?default(d).a}");
         assertConverted("${(s!d1!d2)!a}", "${s?default(d1, d2)!a}");
         assertConverted("${s!d + a}", "${s?default(d) + a}");
+        
+        assertConverted("${s!}", "${s?if_exists}");
+        assertConverted("${s <#-- c1 -->  <#-- c2 --> !}", "${s <#-- c1 --> ? <#-- c2 --> if_exists}");
+        assertConverted("${s!?c}", "${s?ifExists?c}");
+        assertConverted("${(s!).c}", "${s?ifExists.c}"); // Change to `s!.c` when the built-in variable syntax changes
+        assertConverted("${(s!)[c]}", "${s?ifExists[c]}");
+        assertConverted("${(s!)(c)}", "${s?ifExists(c)}");
     }
 
     @Test
@@ -536,6 +550,7 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         assertConvertedSame("${v!d?upperCase}");
         assertConvertedSame("${v!}");
         assertConvertedSame("${v!(d + 1)}");
+        assertConvertedSame("${v!?upperCase}");
         assertConvertedSame("${(v!) + 'x'}");
         assertConverted("${v!(+1)}", "${v!+1}"); 
         assertConverted("${v!(-1)}", "${v!-1}"); 

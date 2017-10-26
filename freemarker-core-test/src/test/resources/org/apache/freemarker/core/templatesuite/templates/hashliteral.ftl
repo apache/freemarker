@@ -62,7 +62,7 @@ ${test.bar}
 
 ${test.test1}
 ${test.test45}
-${test.hello?ifExists}
+${test.hello!}
 
 ${test.bar}
 ${test.hash}
@@ -72,7 +72,7 @@ ${test.newhash.temp}
 <p>Pathological case: zero item hash:</p>
 
 <#assign test = {}>
-${test.test1?ifExists}
+${test.test1!}
 
 <p>Hash of number literals:</p>
 <#assign test = {"1" : 2}>

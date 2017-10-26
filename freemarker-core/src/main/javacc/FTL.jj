@@ -1382,41 +1382,30 @@ ASTExpression ASTExpression() :
 }
 
 /**
- * PrimaryExpression followed by optional `!defaultExp` or `!`.
- * Note: Because x!y!z means x!(y!z), this consumes a whole chain of !defaultExp-s. 
+ * Deals with the operators that have the highest precedence. Also deals with `exp!default` and `exp!`, due to parser
+ * tricks needed because of the last.
  */
-ASTExpression PrimaryWithDefaultExpression() :
+ASTExpression HighestPrecedenceExpression() :
 {
-    Token exclamTk;
-    ASTExpression priExp, defaultExp;
+    ASTExpression exp;
 }
 {
-    priExp = PrimaryExpression()
-    [
-      exclamTk = <EXCLAM>
-      (
-          LOOKAHEAD(<ID><ASSIGNMENT_EQUALS>) { /* Do not consume */ }
-          |
-          [
-              LOOKAHEAD(PrimaryWithDefaultExpression())
-              defaultExp = PrimaryWithDefaultExpression()
-            {
-                ASTExpDefault result = new ASTExpDefault(priExp, defaultExp);
-                result.setLocation(template, priExp, defaultExp);
-                return result;
-            }
-          ]
-      )
-      // If we reach this, we had no defaultExp.
-      {
-          ASTExpDefault result = new ASTExpDefault(priExp, null);
-          result.setLocation(template, priExp, exclamTk);
-          return result;
-      }
-    ]
-    // If we reach this, we had no <EXCALM>.
+    exp = AtomicExpression()
+    (
+        exp = DotVariable(exp)
+        |
+        exp = DynamicKey(exp)
+        |
+        exp = FunctionCall(exp)
+        |
+        exp = ASTExpBuiltIn(exp)
+        |
+        exp = ASTExpDefault(exp) // See precedence notes at the product
+        |
+        exp = Exists(exp)
+    )*
     {
-        return priExp;
+        return exp;
     }
 }
 
@@ -1425,7 +1414,7 @@ ASTExpression PrimaryWithDefaultExpression() :
  * or a possibly more complex expression bounded
  * by parentheses.
  */
-ASTExpression PrimaryExpression() :
+ASTExpression AtomicExpression() :
 {
     ASTExpression exp;
 }
@@ -1447,10 +1436,6 @@ ASTExpression PrimaryExpression() :
         |   
         exp = ASTExpBuiltInVariable()
     )
-    (
-        LOOKAHEAD(<DOT> | <OPEN_BRACKET> |<OPEN_PAREN> | <BUILT_IN> | <EXISTS>)
-        exp = AddSubExpression(exp)
-    )*
     {
         return exp;
     }
@@ -1487,7 +1472,7 @@ ASTExpression UnaryPrefixExpression() :
         |
         result = ASTExpNot()
         |
-        result = PrimaryWithDefaultExpression()
+        result = HighestPrecedenceExpression()
     )
     {
         return result;
@@ -1504,7 +1489,7 @@ ASTExpression ASTExpNot() :
     (
         t = <EXCLAM> { nots.add(t); }
     )+
-    exp = PrimaryWithDefaultExpression()
+    exp = HighestPrecedenceExpression()
     {
         for (int i = 0; i < nots.size(); i++) {
             result = new ASTExpNot(exp);
@@ -1528,7 +1513,7 @@ ASTExpression ASTExpNegateOrPlus() :
         |
         t = <MINUS> { isMinus = true; }
     )
-    exp = PrimaryWithDefaultExpression()
+    exp = HighestPrecedenceExpression()
     {
         result = new ASTExpNegateOrPlus(exp, isMinus);  
         result.setLocation(template, t, exp);
@@ -1866,32 +1851,6 @@ ASTExpBuiltInVariable ASTExpBuiltInVariable() :
     }
 }
 
-/**
- * Production that builds up an expression
- * using the dot or dynamic key name
- * or the args list if this is a method invocation.
- */
-ASTExpression AddSubExpression(ASTExpression exp) :
-{
-    ASTExpression result = null;
-}
-{
-    (
-        result = DotVariable(exp)
-        |
-        result = DynamicKey(exp)
-        |
-        result = FunctionCall(exp)
-        |
-        result = ASTExpBuiltIn(exp)
-        |
-        result = Exists(exp)
-    )
-    {
-        return result;
-    }
-}
-
 ASTExpression Exists(ASTExpression exp) :
 {
     Token t;
@@ -1901,6 +1860,49 @@ ASTExpression Exists(ASTExpression exp) :
     {
         ASTExpExists result = new ASTExpExists(exp);
         result.setLocation(template, exp, t);
+        return result;
+    }
+}
+
+
+/**
+ * This stands for `exp!defaultExp` and `exp!`. Note `!` has lower precedence than `.`, `?` etc, i.e., it's not a
+ * HighestPrecedenceExpression. So `a.b!c.d` means `a.b!(c.d)`, not `(a.b!c).d`. But, parsing is tricky because
+ * the right operand is optional, so `exp!?foo` should mean `(exp!)?foo`, but if we "split" the expression at the `!`
+ * before descending into HighestPrecedenceExpression (the normal way in a recursive descent parsers), then later we end 
+ * up with a `?foo` expression, which is invalid in itself. Thus, we process `!` as if it had the as high precedence as
+ * `.` etc have, utilizing that those operators are left-associative (so the result is the same with the wrong
+ * precedence). Then, next trick, we consume the right-hand operand as HighestPrecedenceExpression. Thus, if `!`
+ * is not followed by a HighestPrecedenceExpression, but something like `?foo`, the parser will ascend back into the
+ * loop inside HighestPrecedenceExpression, which can consume it as it only expects an operator (like `?`) at this
+ * point, not a left hand operand. If, on the other hand, `!` is followed by a HighestPrecedenceExpression, then we
+ * consume it, stealing it from the HighestPrecedenceExpression that we will ascend back into, thus, the `!` behaves
+ * according its lower precedence on the right side (and also, note that `!` is right-associative).
+ */
+ASTExpression ASTExpDefault(ASTExpression exp) :
+{
+    Token exclamTk;
+    ASTExpression defaultExp;
+}
+{
+    exclamTk = <EXCLAM>
+    (
+        LOOKAHEAD(<ID><ASSIGNMENT_EQUALS>) { /* Do not consume */ }
+        |
+        [
+            LOOKAHEAD(HighestPrecedenceExpression())
+            defaultExp = HighestPrecedenceExpression()
+            {
+                ASTExpDefault result = new ASTExpDefault(exp, defaultExp);
+                result.setLocation(template, exp, defaultExp);
+                return result;
+            }
+        ]
+    )
+    // If we reach this, we had no defaultExp.
+    {
+        ASTExpDefault result = new ASTExpDefault(exp, null);
+        result.setLocation(template, exp, exclamTk);
         return result;
     }
 }

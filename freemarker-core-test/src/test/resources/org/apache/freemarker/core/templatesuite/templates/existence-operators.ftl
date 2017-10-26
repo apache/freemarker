@@ -32,8 +32,8 @@
 <@isNonFastIRE>${v}</@> <#-- To check that it isn't an IRE.FAST_INSTANCE -->
 <@assertEquals actual=v?? expected=false />
 <@assertEquals actual=(v)?? expected=false />
-<@assertEquals actual=v?ifExists expected='' />
-<@assertEquals actual=(v)?ifExists expected='' />
+<@assertEquals actual=v! expected='' />
+<@assertEquals actual=(v)! expected='' />
 <@assertEquals actual=v?hasContent expected=false />
 <@assertEquals actual=(v)?hasContent expected=false />
 
@@ -52,8 +52,8 @@
 	<@assertEquals actual=(v)!'-' expected=v />
 	<@assert v?? />
 	<@assert (v)?? />
-	<@assertEquals actual=v?ifExists expected=v />
-	<@assertEquals actual=(v)?ifExists expected=v />
+	<@assertEquals actual=v! expected=v />
+	<@assertEquals actual=(v)! expected=v />
 	<@assert v?hasContent />
 	<@assert (v)?hasContent />
 </#list>
@@ -69,8 +69,8 @@
 <@assertEquals actual=(u.v)!'-' expected='-' />
 <@isIRE>${u.v??}</@>
 <@assertEquals actual=(u.v)?? expected=false />
-<@isIRE>${u.v?ifExists}</@>
-<@assertEquals actual=(u.v)?ifExists expected='' />
+<@isIRE>${u.v!}</@>
+<@assertEquals actual=(u.v)! expected='' />
 <@isIRE>${u.v?hasContent}</@>
 <@assertEquals actual=(u.v)?hasContent expected=false />
 
@@ -83,8 +83,8 @@
 <@assertEquals actual=(u.v)!'-' expected='-' />
 <@assertEquals actual=u.v?? expected=false />
 <@assertEquals actual=(u.v)?? expected=false />
-<@assertEquals actual=u.v?ifExists expected='' />
-<@assertEquals actual=(u.v)?ifExists expected='' />
+<@assertEquals actual=u.v! expected='' />
+<@assertEquals actual=(u.v)! expected='' />
 <@assertEquals actual=u.v?hasContent expected=false />
 <@assertEquals actual=(u.v)?hasContent expected=false />
 
@@ -97,8 +97,8 @@
 <@assertEquals actual=(u.v)!'-' expected='V' />
 <@assert u.v?? />
 <@assert (u.v)?? />
-<@assertEquals actual=u.v?ifExists expected='V' />
-<@assertEquals actual=(u.v)?ifExists expected='V' />
+<@assertEquals actual=u.v! expected='V' />
+<@assertEquals actual=(u.v)! expected='V' />
 <@assert u.v?hasContent />
 <@assert (u.v)?hasContent />
 

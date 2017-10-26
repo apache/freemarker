@@ -1825,7 +1825,7 @@ public class FM2ASTToFM3SourceConverter {
     }
 
     private void printExpMethodCall(MethodCall node) throws ConverterException {
-        Expression callee = getParam(node, 0, ParameterRole.CALLEE, Expression.class);
+        Expression callee = getMethodCallCalleeExp(node);
         printExp(callee);
         
         if (callee instanceof BuiltIn
@@ -1845,6 +1845,10 @@ public class FM2ASTToFM3SourceConverter {
         printWithParamsTrailingSkippedTokens(")", node, argCnt);
     }
 
+    private Expression getMethodCallCalleeExp(MethodCall node) throws UnexpectedNodeContentException {
+        return getParam(node, 0, ParameterRole.CALLEE, Expression.class);
+    }
+
     private void printExpBuiltIn(BuiltIn node) throws ConverterException {
         Expression lho = getParam(node, 0, ParameterRole.LEFT_HAND_OPERAND, Expression.class);
         String rho = getParam(node, 1, ParameterRole.RIGHT_HAND_OPERAND, String.class);
@@ -1862,22 +1866,50 @@ public class FM2ASTToFM3SourceConverter {
             pos = printWSAndExpCommentsIfContainsComment(pos); // lho?< >exists
             pos = getPositionAfterIdentifier(pos); // lho?<exists>
             assertParamCount(node, 2);
+        } else if (rho.equals("if_exists") || rho.equals("ifExists")) {
+            // lho?if_exists -> lho!
+
+            ParentNodeRelation parentNodeRel = getParentNodeRelation(node);
+            boolean wholeExpNeedsParenthesis =
+                    parentNodeRel.is(MethodCall.class, ParameterRole.CALLEE)
+                    || parentNodeRel.is(DynamicKeyName.class, ParameterRole.LEFT_HAND_OPERAND)
+                    || parentNodeRel.is(Dot.class, ParameterRole.LEFT_HAND_OPERAND);
+
+            if (wholeExpNeedsParenthesis) {
+                print("(");
+            }
+            
+            // <lho>?if_exists
+            printExp(lho);
+            int pos = getEndPositionExclusive(lho);
+            
+            pos = printWSAndExpCommentsIfContainsComment(pos); // lho< >?if_exists
+            pos = skipRequiredString(pos, "?"); // lho<?>if_exists
+            pos = printWSAndExpCommentsIfContainsComment(pos); // lho?< >if_exists
+            pos = getPositionAfterIdentifier(pos); // lho?<if_exists>
+            assertParamCount(node, 2);
+
+            print("!");
+            
+            if (wholeExpNeedsParenthesis) {
+                print(")");
+            }
         } else if (rho.equals("default")) {
             // lho?default(exp) -> lho!exp
             
-            TemplateObject parentNode = getParentNode(node);
-            if (!(parentNode instanceof MethodCall)) {
+            ParentNodeRelation parentNodeRel = getParentNodeRelation(node);
+            if (!(parentNodeRel.is(MethodCall.class, ParameterRole.CALLEE))) {
                 throw new UnconvertableLegacyFeatureException(
                         "?default must be followed by a paramter list, like in ?default(1), "
                         + "otherwise it has no equivalent in FreeMarker 3.",
                         node.getBeginLine(), node.getBeginColumn());
             }
-            MethodCall parentCall = (MethodCall) parentNode;
+            MethodCall parentCall = (MethodCall) parentNodeRel.parentNode;
 
             // Sometimes parentheses must be added, e.g.:
             // - Needed: `a?default(b).x` -> `(a!b).x`
             // - Not needed: `a?default(b) + x` -> `a!b + x` 
-            TemplateObject grandParentNode = getParentNode(parentCall);
+            TemplateObject grandParentNode = getParentNodeRelation(parentCall).parentNode;
             boolean wholeExpNeedsParenthesis = grandParentNode instanceof Expression
                     && !needsParenthesisAsDefaultValue((Expression) grandParentNode)
                     && !(grandParentNode instanceof ParentheticalExpression);
@@ -2684,20 +2716,39 @@ public class FM2ASTToFM3SourceConverter {
         return src.substring(startPos, pos);
     }
     
-    private IdentityHashMap<TemplateObject, TemplateObject> parentsByChildrenNode = null;
+    private IdentityHashMap<TemplateObject, ParentNodeRelation> parentRelationsByChildrenNode = null;
     private IdentityHashMap<TemplateObject, Object> parentsProcessed = null;
     
-    private TemplateObject getParentNode(TemplateObject node) throws ConverterException {
-        if (parentsByChildrenNode == null) {
-            parentsByChildrenNode = new IdentityHashMap<>();
+    private static class ParentNodeRelation {
+        private final TemplateObject parentNode;
+        /** {@code null} if the node is not a child, but a parameter of the parent. */
+        private final Integer relationChildIndex;
+        /** {@code null} if the node is a parameter, but a child of the parent. */
+        private final ParameterRole relationParameterRole;
+        
+        ParentNodeRelation(TemplateObject parentNode, Integer relationChildIndex,
+                ParameterRole relationParameterRole) {
+            this.parentNode = parentNode;
+            this.relationChildIndex = relationChildIndex;
+            this.relationParameterRole = relationParameterRole;
+        }
+        
+        boolean is(Class<? extends TemplateObject> parentClass, ParameterRole paramRole) {
+            return parentClass.isInstance(parentNode) && relationParameterRole == paramRole;
+        }
+    }
+    
+    private ParentNodeRelation getParentNodeRelation(TemplateObject node) throws ConverterException {
+        if (parentRelationsByChildrenNode == null) {
+            parentRelationsByChildrenNode = new IdentityHashMap<>();
             parentsProcessed = new IdentityHashMap<>();
             collectParentNodesOfChildren(template.getRootTreeNode());
         }
-        TemplateObject parent = parentsByChildrenNode.get(node);
-        if (parent == null) {
+        ParentNodeRelation parentRelation = parentRelationsByChildrenNode.get(node);
+        if (parentRelation == null) {
             throw new ConverterException("Can't find the parent node of a(n) " + node.getClass().getName() + " node.");
         }
-        return parent;
+        return parentRelation;
     }
 
     private void collectParentNodesOfChildren(TemplateObject parentNode) {
@@ -2712,7 +2763,7 @@ public class FM2ASTToFM3SourceConverter {
             int childCnt = parentElement.getChildCount();
             for (int i = 0; i < childCnt; i++) {
                 TemplateElement child = parentElement.getChild(i);
-                parentsByChildrenNode.put(child, parentNode);
+                parentRelationsByChildrenNode.put(child, new ParentNodeRelation(parentNode, i, null));
                 collectParentNodesOfChildren(child);
             }
         }
@@ -2722,7 +2773,8 @@ public class FM2ASTToFM3SourceConverter {
             Object paramValue = parentNode.getParameterValue(i);
             if (paramValue instanceof TemplateObject) {
                 TemplateObject paramValueNode = (TemplateObject) paramValue;
-                parentsByChildrenNode.put(paramValueNode, parentNode);
+                parentRelationsByChildrenNode.put(
+                        paramValueNode, new ParentNodeRelation(parentNode, null, parentNode.getParameterRole(i)));
                 collectParentNodesOfChildren(paramValueNode);
             }
         }

@@ -64,14 +64,5 @@ class BuiltInsForExistenceHandling {
             return _eval(env) == TemplateBooleanModel.TRUE;
         }
     }
-
-    static class if_existsBI extends BuiltInsForExistenceHandling.ExistenceBuiltIn {
-        @Override
-        TemplateModel _eval(Environment env)
-                throws TemplateException {
-            TemplateModel model = evalMaybeNonexistentTarget(env);
-            return model == null ? TemplateModel.NOTHING : model;
-        }
-    }
     
 }

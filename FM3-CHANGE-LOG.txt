@@ -65,9 +65,12 @@ Major template language changes / features
     by name. In FM3 that won't work anymore, as now a parameter is either strictly positional or strictly named.
 - Operator for handing null/missing values were reworked:
   - The right-side operator precedence of the `exp!defaultExp` (and `exp!`) operator is now the same precedence on
-    both sides, which is lower as of `.`, but higher as of `+`. The converter takes care of cases where this would
-    change the meaning of the expression (like `x!y+1` is converted to `x!(x+1)`.)
-  - [TODO] Much more will happen here
+    both sides, which is lower as the precedence of `.`, but higher as the precedence of `+`. The converter takes
+    care of cases where this would change the meaning of the expression (like `x!y+1` is converted to `x!(x+1)`.)
+  - The value of `missing!` now can be used as boolean `false`, and as a function that returns `null` and accepts
+    any arguments, and as a directive that does nothing and allows any arguments (not only as "", empty sequence,
+    and empty hash).
+  - [TODO] Deeper changes are supposed to happen here later. (Some of the above changes will be meaningless then.)
 
 Smaller template language changes
 ---------------------------------
@@ -98,7 +101,9 @@ Node: Changes already mentioned above aren't repeated here!
 - Removed some long deprecated built-ins:
   - `webSafe` (converted to `html`)
   - `exists` (`foo?exists` is converted `foo??`)
-  - `default` (`foo?default(bar)` is converted to `foo!bar`) 
+  - `default` (`foo?default(bar)` is converted to `foo!bar`).
+  - `if_exists` and `ifExists` (`foo?if_exists` is converted to `foo!`).  (There's a slight difference though that
+     the return value can be called as directive (which does nothing), while with `?ifExists` that wasn't possible.)
 - Comma is now required between sequence literal items (such as `[a, b, c]`). It's not well known, but in FM2 the comma
   could be omitted.
 - #include has no "encoding" parameter anymore (as now only the Configuration is responsible ofr deciding the encoding)
@@ -447,7 +452,12 @@ Core / Models and Object wrapping
       it's not able to list its keys, almost all `isEmpty()` implementations in FM2 were just dummies returning `false`.)
       Note that `?hashContent` now returns `true` for `TemplateHashModel` that aren't also `TemplateHashModelEx2`-s,
       based on the idea that for some `key` (which you may don't know) `get(key)` might returns something.
+  - `TemplateModel.NOTHING` was removed without replacement.
 - BeanModel.keys() and values() are now final methods. Override BeanModel.keySet() and/or get(String) instead.
+- Methods that return void now return an empty string instead of `TemplateModel.NOTHING` (which was removed).
+  Thus, `${obj.voidReturningMethod()}` still works (it prints nothing, just as in FM2), but things like
+  `x + obj.voidReturningMethod()` now fail (unlike in FM2), as they are probably oversights.  This all applies to
+  Java methods wrapped by the DefaultObjectWrapper (which, in FM3, is also used in place of the FM2 BeansWrapper).
       
 Core / Template loading and caching
 ...................................

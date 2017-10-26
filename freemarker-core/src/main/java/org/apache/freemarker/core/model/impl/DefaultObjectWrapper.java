@@ -57,16 +57,16 @@ import org.apache.freemarker.core.model.ObjectWrappingException;
 import org.apache.freemarker.core.model.RichObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
-import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelAdapter;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.CommonBuilder;
@@ -992,7 +992,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
     /**
      * Invokes the specified method, wrapping the return value. The specialty
      * of this method is that if the return value is null, and the return type
-     * of the invoked method is void, {@link TemplateModel#NOTHING} is returned.
+     * of the invoked method is void, an empty string is returned.
      * @param object the object to invoke the method on
      * @param method the method to invoke
      * @param args the arguments to the method
@@ -1012,7 +1012,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
         Object retval = method.invoke(object, args);
         return
                 method.getReturnType() == void.class
-                        ? TemplateModel.NOTHING
+                        ? TemplateStringModel.EMPTY_STRING
                         : getOuterIdentity().wrap(retval);
     }
 
@@ -1487,6 +1487,7 @@ public class DefaultObjectWrapper implements RichObjectWrapper {
          * @see #hashCode()
          * @see #cloneForCacheKey()
          */
+        @Override
         public boolean equals(Object thatObj) {
             if (this == thatObj) return true;
             if (thatObj == null) return false;

@@ -109,5 +109,18 @@ public class DefaultExpressionTest extends TemplateTest {
                 + "<@m a=x! b=y! c=z! />",
                 "[][][] [x][y][z] [][Y][]");
     }
+
+    @Test
+    public void testDefaultNothing() throws Exception {
+        assertOutput("${missing!}", "");
+        assertOutput("<#if missing!>t<#else>f</#if>", "f");
+        assertOutput("${(missing!)(1, x=2)!'null'}", "null");
+        assertOutput("<@missing! 1 x=2>x</@>", "");
+        assertOutput("<#list xs! as x>x</#list>", "");
+        assertOutput("<#list xs! as k, v>x</#list>", "");
+        assertOutput("${xs!?length}", "0");
+        assertOutput("${(xs!)?length}", "0"); // same
+        assertOutput("${xs!?size}", "0");
+    }
     
 }

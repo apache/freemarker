@@ -20,7 +20,14 @@
 package org.apache.freemarker.core;
 
 
+import java.io.IOException;
+import java.io.Writer;
+
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
+import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
+import org.apache.freemarker.core.model.TemplateDirectiveModel;
+import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
@@ -30,11 +37,22 @@ import org.apache.freemarker.core.model.TemplateStringModel;
 /** {@code exp!defExp}, {@code (exp)!defExp} and the same two with {@code (exp)!}. */
 class ASTExpDefault extends ASTExpression {
 
-    static private class EmptyStringAndSequenceAndHash
-            implements TemplateStringModel, TemplateSequenceModel, TemplateHashModelEx {
+    static private class EmptyStringAndSequenceAndHashAndFalse
+            implements TemplateStringModel, TemplateBooleanModel,
+                    TemplateFunctionModel, TemplateDirectiveModel,
+                    TemplateSequenceModel, TemplateHashModelEx {
+        
+        private static final ArgumentArrayLayout ALLOW_ALL_ARG_LAYOUT
+                = ArgumentArrayLayout.create(0, true, null, true);
+        
         @Override
         public String getAsString() {
             return "";
+        }
+
+        @Override
+        public boolean getAsBoolean() throws TemplateException {
+            return false;
         }
 
         @Override
@@ -86,9 +104,36 @@ class ASTExpDefault extends ASTExpression {
         public TemplateHashModelEx.KeyValuePairIterator keyValuePairIterator() throws TemplateException {
             return TemplateHashModelEx.KeyValuePairIterator.EMPTY_KEY_VALUE_PAIR_ITERATOR;
         }
+
+        @Override
+        public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                throws TemplateException {
+            return null;
+        }
+
+        @Override
+        public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+            return ALLOW_ALL_ARG_LAYOUT;
+        }
+
+        @Override
+        public void execute(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env)
+                throws TemplateException, IOException {
+            // Do nothing
+        }
+
+        @Override
+        public boolean isNestedContentSupported() {
+            return true;
+        }
+
+        @Override
+        public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
+            return ALLOW_ALL_ARG_LAYOUT;
+        }
     }
 
-    private static final TemplateModel EMPTY_STRING_AND_SEQUENCE_AND_HASH = new EmptyStringAndSequenceAndHash();
+    private static final TemplateModel EMPTY_STRING_AND_SEQUENCE_AND_HASH = new EmptyStringAndSequenceAndHashAndFalse();
 	
 	private final ASTExpression lho, rho;
 	

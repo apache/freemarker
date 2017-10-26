@@ -455,8 +455,10 @@ public class _EvalUtils {
                         env);
             }
         } else if (tm instanceof TemplateBooleanModel) {
-            // [FM3] This should be before TemplateStringModel, but automatic boolean-to-string is only non-error since
-            // 2.3.20, so to keep backward compatibility we couldn't insert this before TemplateStringModel.
+            // TODO [FM3] It would be more logical if it's before TemplateStringModel (number etc. are before it as
+            // well). But currently, in FM3, `exp!` returns a multi-typed value that's also a boolean `false`, and so
+            // `${missing!}` wouldn't print `""` anymore if we reorder these. But, if and when `null` handling is
+            // reworked ("checked nulls"), this problem should go away, and so we should move this. 
             boolean booleanValue = ((TemplateBooleanModel) tm).getAsBoolean();
             return env.formatBoolean(booleanValue, false);
         } else {

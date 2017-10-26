@@ -87,6 +87,8 @@ public class ParsingErrorMessagesTest {
         assertErrorContains("${x?datetimeIfUnknown}", "The correct name is: dateTimeIfUnknown");
         assertErrorContains("${x?datetime_if_unknown}", "The correct name is: dateTimeIfUnknown");
         assertErrorContains("${x?exists}", "someExpression??");
+        assertErrorContains("${x?if_exists}", "someExpression!");
+        assertErrorContains("${x?default(1)}", "someExpression!defaultExpression");
     }
 
     @Test
