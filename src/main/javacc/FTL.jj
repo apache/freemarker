@@ -2085,7 +2085,8 @@ Expression DefaultTo(Expression exp) :
     {
         DefaultToExpression result = new DefaultToExpression(exp, rhs);
         if (rhs == null) {
-            result.setLocation(template, exp, t);
+            // <TERMINATING_EXCLAM> contains the whitespace after the `!`, so we have to use the t.beginXxx:
+            result.setLocation(template, exp.beginColumn, exp.beginLine, t.beginColumn, t.beginLine);
         } else {
             result.setLocation(template, exp, rhs);
         }
