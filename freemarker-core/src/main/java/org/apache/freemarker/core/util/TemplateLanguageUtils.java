@@ -26,21 +26,21 @@ import org.apache.freemarker.core._CoreAPI;
 import org.apache.freemarker.core.model.AdapterTemplateModel;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateCallableModel;
-import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateCollectionModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateDirectiveModel;
 import org.apache.freemarker.core.model.TemplateFunctionModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
+import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.model.TemplateNodeModel;
 import org.apache.freemarker.core.model.TemplateNodeModelEx;
 import org.apache.freemarker.core.model.TemplateNumberModel;
-import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.TemplateSequenceModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.WrapperTemplateModel;
 import org.apache.freemarker.core.model.impl.BeanAndStringModel;
 import org.apache.freemarker.core.model.impl.BeanModel;
@@ -187,7 +187,7 @@ public final class TemplateLanguageUtils {
     }
 
     /**
-     * Unescapes a string that was escaped to be part of an FTL string literal. The string to unescape most not include
+     * Unescapes a string that was escaped to be part of an FTL string literal. The string to unescape must not include
      * the two quotation marks or two apostrophe-quotes that delimit the literal.
      * <p>
      * \\, \", \', \n, \t, \r, \b and \f will be replaced according to
