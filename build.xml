@@ -622,7 +622,7 @@
     <u:manual offline="true" locale="en_US" />
   </target>
 
-  <target name="manualFreemarkerOrg" depends="init" description="Build the Manual to be upload to freemarker.org" >
+  <target name="manualOnline" depends="init" description="Build the Manual to be upload to the FreeMarker homepage" >
     <u:manual offline="false" locale="en_US" />
   </target>
   
@@ -630,7 +630,7 @@
     <u:manual offline="true" locale="zh_CN" />
   </target>
 
-  <target name="manualFreemarkerOrg_zh_CN" depends="init" description="Build the Manual to be upload to freemarker.org" >
+  <target name="manualOnline_zh_CN" depends="init" description="Build the Manual to be upload to the FreeMarker homepage" >
     <u:manual offline="false" locale="zh_CN" />
   </target>
   

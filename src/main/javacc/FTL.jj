@@ -1594,11 +1594,39 @@ Expression Expression() :
 }
 
 /**
+ * Deals with the operators that have the highest precedence. Also deals with `exp!default` and `exp!`, due to parser
+ * tricks needed because of the last.
+ */
+Expression HighestPrecedenceExpression() :
+{
+    Expression exp;
+}
+{
+    exp = AtomicExpression()
+    (
+        exp = DotVariable(exp)
+        |
+        exp = DynamicKey(exp)
+        |
+        exp = MethodArgs(exp)
+        |
+        exp = BuiltIn(exp)
+        |
+        exp = DefaultTo(exp)
+        |
+        exp = Exists(exp)
+    )*
+    {
+        return exp;
+    }
+}
+
+/**
  * Lowest level expression, a literal, a variable,
  * or a possibly more complex expression bounded
  * by parentheses.
  */
-Expression PrimaryExpression() :
+Expression AtomicExpression() :
 {
     Expression exp;
 }
@@ -1620,10 +1648,6 @@ Expression PrimaryExpression() :
         |   
         exp = BuiltinVariable()
     )
-    (
-        LOOKAHEAD(<DOT> | <OPEN_BRACKET> |<OPEN_PAREN> | <BUILT_IN> | <EXCLAM> | <TERMINATING_EXCLAM> | <EXISTS>)
-        exp = AddSubExpression(exp)
-    )*
     {
         return exp;
     }
@@ -1646,11 +1670,9 @@ Expression Parenthesis() :
 }
 
 /**
- * A primary expression preceded by zero or
- * more unary operators. (The only unary operator we
- * currently have is the NOT.)
+ * A primary expression preceded by zero or more unary prefix operators.
  */
-Expression UnaryExpression() :
+Expression UnaryPrefixExpression() :
 {
     Expression exp, result;
     boolean haveNot = false;
@@ -1662,7 +1684,7 @@ Expression UnaryExpression() :
         |
         result = NotExpression()
         |
-        result = PrimaryExpression()
+        result = HighestPrecedenceExpression()
     )
     {
         return result;
@@ -1679,7 +1701,7 @@ Expression NotExpression() :
     (
         t = <EXCLAM> { nots.add(t); }
     )+
-    exp = PrimaryExpression()
+    exp = HighestPrecedenceExpression()
     {
         for (int i = 0; i < nots.size(); i++) {
             result = new NotExpression(exp);
@@ -1703,7 +1725,7 @@ Expression UnaryPlusMinusExpression() :
         |
         t = <MINUS> { isMinus = true; }
     )
-    exp = PrimaryExpression()
+    exp = HighestPrecedenceExpression()
     {
         result = new UnaryPlusMinusExpression(exp, isMinus);  
         result.setLocation(template, t, exp);
@@ -1748,8 +1770,8 @@ Expression AdditiveExpression() :
 }
 
 /**
- * A unary expression followed by zero or more
- * unary expressions with operators in between.
+ * A unary prefix expression followed by zero or more
+ * unary prefix expressions with operators in between.
  */
 Expression MultiplicativeExpression() :
 {
@@ -1757,7 +1779,7 @@ Expression MultiplicativeExpression() :
     int operation = ArithmeticExpression.TYPE_MULTIPLICATION;
 }
 {
-    lhs = UnaryExpression() { result = lhs; }
+    lhs = UnaryPrefixExpression() { result = lhs; }
     (
         LOOKAHEAD(<TIMES>|<DIVIDE>|<PERCENT>)
         (
@@ -1769,7 +1791,7 @@ Expression MultiplicativeExpression() :
                 <PERCENT> {operation = ArithmeticExpression.TYPE_MODULO; }
             )
         )
-        rhs = UnaryExpression()
+        rhs = UnaryPrefixExpression()
         {
             numberLiteralOnly(lhs);
             numberLiteralOnly(rhs);
@@ -2043,34 +2065,6 @@ BuiltinVariable BuiltinVariable() :
     }
 }
 
-/**
- * Production that builds up an expression
- * using the dot or dynamic key name
- * or the args list if this is a method invocation.
- */
-Expression AddSubExpression(Expression exp) :
-{
-    Expression result = null;
-}
-{
-    (
-        result = DotVariable(exp)
-        |
-        result = DynamicKey(exp)
-        |
-        result = MethodArgs(exp)
-        |
-        result = BuiltIn(exp)
-        |
-        result = DefaultTo(exp)
-        |
-        result = Exists(exp)
-    )
-    {
-        return result;
-    }
-}
-
 Expression DefaultTo(Expression exp) :
 {
     Expression rhs = null;
@@ -2091,7 +2085,8 @@ Expression DefaultTo(Expression exp) :
     {
         DefaultToExpression result = new DefaultToExpression(exp, rhs);
         if (rhs == null) {
-            result.setLocation(template, exp, t);
+            // <TERMINATING_EXCLAM> contains the whitespace after the `!`, so we have to use the t.beginXxx:
+            result.setLocation(template, exp.beginColumn, exp.beginLine, t.beginColumn, t.beginLine);
         } else {
             result.setLocation(template, exp, rhs);
         }

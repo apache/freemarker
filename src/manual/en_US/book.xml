@@ -11280,7 +11280,7 @@ TemplateHashModel roundingModeEnums =
 
   &lt;!--
     Init-param documentation:
-    <link xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html</link>
+    <link xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">http://freemarker.apache.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html</link>
   --&gt;
 
   &lt;!-- FreemarkerServlet settings: --&gt;
@@ -11309,7 +11309,7 @@ TemplateHashModel roundingModeEnums =
     &lt;param-value&gt;2.3.27&lt;/param-value&gt;
     &lt;!--
       Recommended to set to a high value.
-      See: http://freemarker.org/docs/pgui_config_incompatible_improvements.html
+      See: http://freemarker.apache.org/docs/pgui_config_incompatible_improvements.html
     --&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;

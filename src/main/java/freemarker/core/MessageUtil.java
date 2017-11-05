@@ -178,7 +178,9 @@ class MessageUtil {
                 && !(argExp instanceof Dot)
                 && !(argExp instanceof DynamicKeyName)
                 && !(argExp instanceof MethodCall)
-                && !(argExp instanceof BuiltIn);
+                && !(argExp instanceof BuiltIn)
+                && !(argExp instanceof ExistsExpression)
+                && !(argExp instanceof ParentheticalExpression);
         if (needParen) sb.append('(');
         sb.append(argExp.getCanonicalForm());
         if (needParen) sb.append(')');
