@@ -1,4 +1,3 @@
-<#ftl outputFormat="HTML">
 <#--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -20,23 +19,13 @@
 <html>
 <body>
 
-<@spring.hasBindErrors "user"; errors>
-  <div class="errors">
-    <#list errors.allErrors as error>
-      <div class="error">
-        ${spring.message(message=error)!}
-      </div>
-    </#list>
-  </div>
-</@spring.hasBindErrors>
-
-<form method="POST" action="${spring.url('/users')}">
+<@spring.nestedPath "user">
   <table class="table">
     <tbody>
       <tr>
         <th>E-Mail</th>
         <td>
-          <@spring.bind "user.email"; status>
+          <@spring.bind "email"; status>
             <input type="text" name="email" value="${status.value!}" />
           </@spring.bind>
         </td>
@@ -44,7 +33,7 @@
       <tr>
         <th>First Name</th>
         <td>
-          <@spring.bind "user.firstName"; status>
+          <@spring.bind "firstName"; status>
             <input type="text" name="firstName" value="${status.value!}" />
           </@spring.bind>
         </td>
@@ -52,19 +41,14 @@
       <tr>
         <th>Last Name</th>
         <td>
-          <@spring.bind "user.lastName"; status>
+          <@spring.bind "lastName"; status>
             <input type="text" name="lastName" value="${status.value!}" />
           </@spring.bind>
         </td>
       </tr>
-      <tr>
-        <td colspan="2">
-          <input type="submit" name="save" value="Save" />
-        </td>
-      </tr>
     </tbody>
   </table>
-</form>
+</@spring.nestedPath>
 
 </body>
 </html>

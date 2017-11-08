@@ -1,4 +1,3 @@
-<#ftl outputFormat="HTML">
 <#--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -20,9 +19,22 @@
 <html>
 <body>
 
-<@spring.bind "user.birthDate"; status>
-  <div id="userBirthDate">${spring.transform(status.editor, status.actualValue)}</div>
-</@spring.bind>
+<div id="maxNumber">${spring.eval("T(java.lang.Math).max(12.34, 56.78)")}</div>
+
+<ul>
+  <#list users as user>
+    <li>
+      <div id="user-${spring.eval('user.id')!}">
+        ${spring.eval("user.firstName + ' ' + user.lastName")!}
+      </div>
+    </li>
+  </#list>
+</ul>
+
+<div id="firstUserId">${spring.eval("users[0].id")!}</div>
+
+<#assign numbers=spring.eval("{0,1,1,2,3,5,8,13}") />
+<div id="fibonacci"><#list numbers as number>${number}<#sep>, </#list></div>
 
 </body>
 </html>

@@ -1,4 +1,3 @@
-<#ftl outputFormat="HTML">
 <#--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -18,38 +17,29 @@
   under the License.
 -->
 <html>
+<head>
+<title>Spring MVC Form Example - Users</title>
+</head>
 <body>
 
-<@spring.nestedPath "user">
-  <table class="table">
-    <tbody>
-      <tr>
-        <th>E-Mail</th>
-        <td>
-          <@spring.bind "email"; status>
-            <input type="text" name="email" value="${status.value!}" />
-          </@spring.bind>
-        </td>
-      </tr>
-      <tr>
-        <th>First Name</th>
-        <td>
-          <@spring.bind "firstName"; status>
-            <input type="text" name="firstName" value="${status.value!}" />
-          </@spring.bind>
-        </td>
-      </tr>
-      <tr>
-        <th>Last Name</th>
-        <td>
-          <@spring.bind "lastName"; status>
-            <input type="text" name="lastName" value="${status.value!}" />
-          </@spring.bind>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</@spring.nestedPath>
+<h1>Users</h1>
+
+<table border="2">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>E-Mail</th>
+    </tr>
+  </thead>
+  <tbody>
+    <#list users as user>
+    <tr>
+      <td><a href="users/${user.id}">${user.firstName} ${user.lastName}</a></td>
+      <td><a href="mailto:${user.email}">${user.email}</a></td>
+    </tr>
+    </#list>
+  </tbody>
+</table>
 
 </body>
 </html>

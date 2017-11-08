@@ -1,4 +1,3 @@
-<#ftl outputFormat="HTML">
 <#--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -20,22 +19,13 @@
 <html>
 <body>
 
-<div id="maxNumber">${spring.eval("T(java.lang.Math).max(12.34, 56.78)")}</div>
-
-<ul>
-  <#list users as user>
-    <li>
-      <div id="user-${spring.eval('user.id')!}">
-        ${spring.eval("user.firstName + ' ' + user.lastName")!}
-      </div>
-    </li>
-  </#list>
-</ul>
-
-<div id="firstUserId">${spring.eval("users[0].id")!}</div>
-
-<#assign numbers=spring.eval("{0,1,1,2,3,5,8,13}") />
-<div id="fibonacci"><#list numbers as number>${number}<#sep>, </#list></div>
+<#if user??>
+  <div id="userId">${spring.message("user.id")!}</div>
+  <div id="userEmail">${spring.message("user.email")!}</div>
+  <div id="userInfoWithArgs">${spring.message("user.form.message", user.firstName, user.lastName, user.email)!}</div>
+<#else>
+  <div id="errorMessage">${spring.message(message=errorMessage)!}</div>
+</#if>
 
 </body>
 </html>
