@@ -17,7 +17,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-deployUrl: "http://freemarker.org/docs/"
+deployUrl: "http://freemarker.apache.org/docs/"
 onlineTrackerHTML: "docgen-misc/googleAnalytics.html"
 searchKey: "014728049242975963158:8awjt03uofm"
 validation: {
@@ -47,21 +47,21 @@ seoMeta: {
 }
 
 logo: {
-  href: "http://freemarker.org"
+  href: "http://freemarker.apache.org"
   src: logo.png,
   alt: "FreeMarker"
 }
 
 olinks: {
-  homepage: "http://freemarker.org/"
+  homepage: "http://freemarker.apache.org/"
   api: "api/index.html"
   
   // Homepage links:
-  freemarkerdownload: "http://freemarker.org/freemarkerdownload.html"
-  contribute: "http://freemarker.org/contribute.html"
-  history: "http://freemarker.org/history.html"
-  what-is-freemarker: "http://freemarker.org/"
-  mailing-lists: "http://freemarker.org/mailing-lists.html"
+  freemarkerdownload: "http://freemarker.apache.org/freemarkerdownload.html"
+  contribute: "http://freemarker.apache.org/contribute.html"
+  history: "http://freemarker.apache.org/history.html"
+  what-is-freemarker: "http://freemarker.apache.org/"
+  mailing-lists: "http://freemarker.apache.org/mailing-lists.html"
   
   // External URL-s:
   onlineTemplateTester: "http://freemarker-online.kenshoo.com/"
