@@ -64,12 +64,12 @@ olinks: {
   mailing-lists: "https://freemarker.apache.org/mailing-lists.html"
   
   // External URL-s:
-  onlineTemplateTester: "http://freemarker-online.kenshoo.com/"
+  onlineTemplateTester: "http://try.freemarker.org/"
   twitter: "https://twitter.com/freemarker"
   sourceforgeProject: "https://sourceforge.net/projects/freemarker/"
   githubProject: "https://github.com/freemarker/freemarker"
   newBugReport: "https://sourceforge.net/p/freemarker/bugs/new/"
-  newStackOverflowQuestion: "http://stackoverflow.com/questions/ask?tags=freemarker"
+  newStackOverflowQuestion: "https://stackoverflow.com/questions/ask?tags=freemarker"
 }
 
 internalBookmarks: {
