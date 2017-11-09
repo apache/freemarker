@@ -28,7 +28,7 @@ package freemarker.template;
  * design pattern (or simply through being able to get the parent
  * and child nodes).
  * 
- * <p>See the <a href="http://freemarker.apache.org/docs/xgui.html" target="_blank">XML
+ * <p>See the <a href="https://freemarker.apache.org/docs/xgui.html" target="_blank">XML
  * Processing Guide</a> for a concrete application.
  *
  * @since FreeMarker 2.3

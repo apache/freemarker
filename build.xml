@@ -838,7 +838,7 @@
     Google App Engine compliant variation of FreeMarker.
     FreeMarker is a "template engine"; a generic tool to generate text output based on templates.
   </description>
-  <url>http://freemarker.apache.org/</url>
+  <url>https://freemarker.apache.org/</url>
   <organization>
     <name>Apache Software Foundation</name>
     <url>http://apache.org</url>
@@ -1001,7 +1001,7 @@ Proceed? </input>
   >
     <echo>Getting dependencies...</echo>
     <echo>-------------------------------------------------------</echo>
-    <ivy:settings id="remote" url="http://freemarker.apache.org/repos/ivy/ivysettings-remote.xml" />
+    <ivy:settings id="remote" url="https://freemarker.apache.org/repos/ivy/ivysettings-remote.xml" />
     <!-- Build an own repository that will serve us even offline: -->
     <ivy:retrieve settingsRef="remote" sync="true"
       ivypattern=".ivy.part/repo/[organisation]/[module]/ivy-[revision].xml"
