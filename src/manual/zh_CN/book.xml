@@ -10207,7 +10207,7 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           linkend="ref_builtin_keep_before"><literal>keep_before</literal></link> 相同，
 		  但是保留参数最后一次出现之前的部分，而不是第一次出现之前。比如：</para>
 
-          <programlisting role="template">${"foo.bar.txt"?keep_after_last(".")}</programlisting>
+          <programlisting role="template">${"foo.bar.txt"?keep_before_last(".")}</programlisting>
 
           <para>将会输出</para>
 
