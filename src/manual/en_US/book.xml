@@ -13719,7 +13719,7 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           but keeps the part before the last occurrence of the parameter,
           rather than after the first. Example:</para>
 
-          <programlisting role="template">${"foo.bar.txt"?keep_after_last(".")}</programlisting>
+          <programlisting role="template">${"foo.bar.txt"?keep_before_last(".")}</programlisting>
 
           <para>will print</para>
 
