@@ -5332,9 +5332,9 @@ other@example.com, other@example.com, other@example.com</programlisting>
           FreeMarker 2.3.25), which means that they are only done when the
           imported library is actually used in the template. See the Java API
           documentation for more details: <link
-          xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setAutoImports-java.util.Map-">Configuration.setAutoImports</link>,
+          xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#setAutoImports-java.util.Map-">Configuration.setAutoImports</link>,
           <link
-          xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setLazyAutoImports-java.lang.Boolean-">Configuration.setLazyAutoImports</link>.</para>
+          xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#setLazyAutoImports-java.lang.Boolean-">Configuration.setLazyAutoImports</link>.</para>
         </section>
       </section>
 
@@ -7698,7 +7698,7 @@ public class RepeatDirective implements TemplateDirectiveModel {
               <para><literal>DefaultObjectWrapper</literal> has an
               <literal>incompatibleImprovements</literal> property, that's
               highly recommended to set it to a high value (see the <link
-              xlink:href="http://freemarker.org/docs/api/freemarker/template/DefaultObjectWrapper.html#DefaultObjectWrapper-freemarker.template.Version-">API
+              xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/DefaultObjectWrapper.html#DefaultObjectWrapper-freemarker.template.Version-">API
               documentation</link> for the effects). How to set it:</para>
 
               <itemizedlist>
@@ -8069,7 +8069,7 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
         <literal>default_encoding</literal>,
         <literal>template_exception_handler</literal>. The full list of
         settings can be found in the <link
-        xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setSetting-java.lang.String-java.lang.String-">Java
+        xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#setSetting-java.lang.String-java.lang.String-">Java
         API documentation of
         <literal>Configuration.setSetting(...)</literal></link>.</para>
 
@@ -8208,7 +8208,7 @@ myCfg.setObjectWrapper(owb.build());</programlisting>
             <literal>Confguration.setSetting(String name, String
             value)</literal> method; see available setting names and the
             format of the values in the <link
-            xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setSetting-java.lang.String-java.lang.String-">API
+            xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#setSetting-java.lang.String-java.lang.String-">API
             documentation of <literal>setSetting</literal></link>. Example for
             Spring Framework:</para>
 
@@ -10040,7 +10040,7 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
           that you are actually using. In older projects it's also usually
           better to keep this high, however you better check the changes
           activated (find them in <link
-          xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#Configuration-freemarker.template.Version-">the
+          xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#Configuration-freemarker.template.Version-">the
           API JavaDoc of the <literal>Configuration(Version)</literal>
           constructor</link>), at least if not only the 3rd version number
           (the micro version) of <quote>incompatible improvements</quote>
@@ -11280,7 +11280,7 @@ TemplateHashModel roundingModeEnums =
 
   &lt;!--
     Init-param documentation:
-    <link xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">http://freemarker.apache.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html</link>
+    <link xlink:href="https://freemarker.apache.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">https://freemarker.apache.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html</link>
   --&gt;
 
   &lt;!-- FreemarkerServlet settings: --&gt;
@@ -11309,7 +11309,7 @@ TemplateHashModel roundingModeEnums =
     &lt;param-value&gt;2.3.27&lt;/param-value&gt;
     &lt;!--
       Recommended to set to a high value.
-      See: http://freemarker.apache.org/docs/pgui_config_incompatible_improvements.html
+      See: https://freemarker.apache.org/docs/pgui_config_incompatible_improvements.html
     --&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
@@ -28333,7 +28333,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>New <literal>FreemarkerServlet</literal> init-params (see
               <link
-              xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">the
+              xlink:href="https://freemarker.apache.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">the
               <literal>FreemarkerSerlvet</literal> API documentation</link>
               for details):</para>
 
@@ -29515,7 +29515,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>ClasspathTlds</literal>
                   <literal>FreemarkerServlet</literal> init-params (see the
                   <link
-                  xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">Java
+                  xlink:href="https://freemarker.apache.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">Java
                   API documentation of
                   <literal>FreemarkerServlet</literal></link> for the
                   description of these). For example, if you run your
@@ -29543,7 +29543,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   respectively. Thus one can adjust these in the Eclipse run
                   configuration without modifying the
                   <literal>web.xml</literal>. (See the <link
-                  xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">Java
+                  xlink:href="https://freemarker.apache.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">Java
                   API documentation of
                   <literal>FreemarkerServlet</literal></link> for
                   more.)</para>
@@ -29913,7 +29913,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   of <literal>..</literal> after special steps like
                   <literal>.</literal> or <literal>*</literal>. See the full
                   list of differences in the <link
-                  xlink:href="http://freemarker.org/docs/api/freemarker/cache/TemplateNameFormat.html#DEFAULT_2_4_0">Java
+                  xlink:href="https://freemarker.apache.org/docs/api/freemarker/cache/TemplateNameFormat.html#DEFAULT_2_4_0">Java
                   API documentation of
                   <literal>TemplateNameFormat.DEFAULT_2_4_0</literal></link>.</para>
                 </listitem>
@@ -31821,7 +31821,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>If you set the
               <literal>incompatible_improvements</literal> setting (see <link
-              xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setIncompatibleImprovements%28freemarker.core.Version%29">here</link>)
+              xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#setIncompatibleImprovements%28freemarker.core.Version%29">here</link>)
               to <literal>2.3.20</literal> or higher, <literal>?html</literal>
               will escape apostrophe-quotes just like
               <literal>?xhtml</literal> does. Utilizing this is highly

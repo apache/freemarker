@@ -383,7 +383,7 @@ public class Template extends Configurable {
     /**
      * Like {@link #process(Object, Writer)}, but also sets a (XML-)node to be recursively processed by the template.
      * That node is accessed in the template with <tt>.node</tt>, <tt>#recurse</tt>, etc. See the
-     * <a href="http://freemarker.org/docs/xgui_declarative.html" target="_blank">Declarative XML Processing</a> as a
+     * <a href="https://freemarker.apache.org/docs/xgui_declarative.html" target="_blank">Declarative XML Processing</a> as a
      * typical example of recursive node processing.
      * 
      * @param rootNode The root node for recursive processing or {@code null}.
