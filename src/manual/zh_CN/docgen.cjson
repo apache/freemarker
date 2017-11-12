@@ -70,6 +70,7 @@ olinks: {
   githubProject: "https://github.com/freemarker/freemarker"
   newBugReport: "https://sourceforge.net/p/freemarker/bugs/new/"
   newStackOverflowQuestion: "https://stackoverflow.com/questions/ask?tags=freemarker"
+  asfIncubator: "http://incubator.apache.org/"
 }
 
 internalBookmarks: {
@@ -128,3 +129,7 @@ socialLinks: {
   "Twitter": { class: "twitter", href: "olink:twitter" }
   "Stack Overflow": { class: "stack-overflow", href: "olink:newStackOverflowQuestion" }
 }
+
+sideTOCLogos: [
+  { src: "apache-incubator.png", alt: "Apache Incubator", href: "olink:asfIncubator" }
+]
