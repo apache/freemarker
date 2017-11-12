@@ -35,7 +35,7 @@ removeNodesWhenOnline: [ "preface" ]
 
 copyrightHolder: "The Apache Software Foundation"
 copyrightHolderSite: "https://apache.org/"
-copyrightSuffix: "Apache FreeMarker, FreeMarker, Apache Incubator, Apache, the Apache FreeMarker logo are trademarks of The Apache Software Foundation."
+copyrightSuffix: "Apache FreeMarker, FreeMarker, Apache Incubator, Apache, the Apache FreeMarker logo are trademarks of The Apache Software Foundation. All other marks mentioned may be trademarks or registered trademarks of their respective owners."
 copyrightStartYear: 1999
 copyrightCommentFile: "docgen-misc/copyrightComment.txt"
 
