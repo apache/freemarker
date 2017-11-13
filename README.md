@@ -19,8 +19,8 @@ not necessarily a reflection of the completeness or stability of the
 code, it does indicate that the project has yet to be fully endorsed by
 the ASF.
 
-Regarding pull request on Github
---------------------------------
+Regarding pull requests on Github
+---------------------------------
 
 By sending a pull request you grant the Apache Software Foundation
 sufficient rights to use and release the submitted work under the
