@@ -29,7 +29,7 @@ Apache license. You grant the same rights (copyright license, patent
 license, etc.) to the Apache Software Foundation as if you have signed
 a [Contributor License Agreement](https://www.apache.org/dev/new-committers-guide.html#cla).
 For contributions that are judged to be non-trivial, you will be asked
-to actually signing a Contributor License Aggreement.
+to actually signing a Contributor License Agreement.
 
 
 What is Apache FreeMarker?
