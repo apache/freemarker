@@ -16,8 +16,10 @@ dependencies {
 
 // We have nothing to put into the jar, as we have test classes only
 jar.enabled = false
+sourcesJar.enabled = false
 
 javadoc.enabled = false
+javadocJar.enabled = false
 
 // Must not be deployed to a public Maven repository
 uploadArchives.enabled = false
