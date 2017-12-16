@@ -275,6 +275,7 @@ subprojects {
         archives jar
         archives sourcesJar
         archives javadocJar
+        // TODO Archies must contain META-INF/{LICENSE,NOTICE,DISCLAIMER}; see in 2.3.x
     }
 
     // The identical parts of Maven "deployer" and "installer" configuration:
