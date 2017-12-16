@@ -261,6 +261,22 @@ subprojects {
         }
     }
 
+    task sourcesJar(type: Jar) {
+        from sourceSets.main.allSource
+        classifier = 'sources'
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        from javadoc.destinationDir
+        classifier = 'javadoc'
+    }
+
+    artifacts {
+        archives jar
+        archives sourcesJar
+        archives javadocJar
+    }
+
     // The identical parts of Maven "deployer" and "installer" configuration:
     def mavenCommons = { callerDelegate ->
         delegate = callerDelegate
@@ -315,7 +331,6 @@ subprojects {
 
     uploadArchives {
         repositories {
-            // TODO We must deploy source and javadoc artifact as well; see old Ant build.xml
             mavenDeployer {
                 mavenCommons(delegate)
                 repository(
@@ -331,7 +346,6 @@ subprojects {
     }    
 
     install {
-        // TODO We must deploy source and javadoc artifact as well; see old Ant build.xml
         repositories {
             mavenInstaller {
                 mavenCommons(delegate)
