@@ -1152,7 +1152,7 @@ public class TaglibFactory implements TemplateHashModel {
         /**
          * @param rootContainerPattern
          *            The pattern against which the classpath root container URL-s will be matched. For example, to only
-         *            search in jar-s whose name contains "taglib", the patter should be {@code ".*taglib\.jar$"}. To
+         *            search in jar-s whose name ends with "taglib", the patter should be {@code ".*taglib\.jar$"}. To
          *            search everywhere, the pattern should be {@code ".*"}. The pattern need to match the whole URL,
          *            not just part of it.
          */
