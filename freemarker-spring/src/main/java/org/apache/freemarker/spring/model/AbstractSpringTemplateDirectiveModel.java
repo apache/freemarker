@@ -36,7 +36,7 @@ import org.springframework.web.servlet.support.RequestContext;
 /**
  * Abstract TemplateDirectiveModel for derived classes to support Spring MVC based templating environment.
  */
-abstract class AbstractSpringTemplateDirectiveModel extends AbstractSpringTemplateCallableModel
+public abstract class AbstractSpringTemplateDirectiveModel extends AbstractSpringTemplateCallableModel
         implements TemplateDirectiveModel {
 
     /**
