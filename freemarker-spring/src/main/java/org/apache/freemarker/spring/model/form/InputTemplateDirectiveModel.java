@@ -11,10 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.util.CallableUtils;
 import org.springframework.web.servlet.support.RequestContext;
 
 public class InputTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveModel {
@@ -32,16 +30,6 @@ public class InputTemplateDirectiveModel extends AbstractHtmlElementTemplateDire
                     )
             );
 
-    private static final int PATH_PARAM_IDX = 0;
-
-    private static final ArgumentArrayLayout ARGS_LAYOUT =
-            ArgumentArrayLayout.create(
-                    1,
-                    false,
-                    null,
-                    true
-                    );
-
     protected InputTemplateDirectiveModel(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
     }
@@ -52,16 +40,11 @@ public class InputTemplateDirectiveModel extends AbstractHtmlElementTemplateDire
     }
 
     @Override
-    public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
-        return ARGS_LAYOUT;
-    }
-
-    @Override
     protected void executeInternal(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
             throws TemplateException, IOException {
 
-        final String path = CallableUtils.getStringArgument(args, PATH_PARAM_IDX, this);
+        final String path = getPathArgument(args);
         setAttributes(args);
 
         // TODO: convert value properly and write tag and attributes properly.

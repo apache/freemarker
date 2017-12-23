@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
@@ -53,11 +54,26 @@ public abstract class AbstractHtmlElementTemplateDirectiveModel
                     "onkeydown")
             );
 
+    private static final int PATH_PARAM_IDX = 0;
+
+    private static final ArgumentArrayLayout ARGS_LAYOUT =
+            ArgumentArrayLayout.create(
+                    1,
+                    false,
+                    null,
+                    true
+                    );
+
     private Map<String, Object> attributes;
     private Map<String, Object> unmodifiableAttributes = Collections.emptyMap();
 
     protected AbstractHtmlElementTemplateDirectiveModel(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
+    }
+
+    @Override
+    public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
+        return ARGS_LAYOUT;
     }
 
     public Map<String, Object> getAttributes() {
@@ -79,6 +95,11 @@ public abstract class AbstractHtmlElementTemplateDirectiveModel
         }
 
         attributes.put(localName, value);
+    }
+
+    protected String getPathArgument(TemplateModel[] args) throws TemplateException {
+        final String path = CallableUtils.getStringArgument(args, PATH_PARAM_IDX, this);
+        return path;
     }
 
     protected boolean isAllowedAttribute(String localName, Object value) {

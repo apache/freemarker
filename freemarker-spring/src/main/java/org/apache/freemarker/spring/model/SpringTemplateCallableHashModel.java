@@ -30,6 +30,7 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
+import org.apache.freemarker.spring.model.form.SpringFormTemplateCallableHashModel;
 
 /**
  * TemplateHashModel wrapper for templates using Spring directives, functions and internal models.
@@ -67,6 +68,8 @@ public final class SpringTemplateCallableHashModel implements TemplateHashModel,
         modelsMap.put(TransformFunction.NAME, new TransformFunction(request, response));
         modelsMap.put(UrlFunction.NAME, new UrlFunction(request, response));
         modelsMap.put(EvalFunction.NAME, new EvalFunction(request, response));
+
+        modelsMap.put(SpringFormTemplateCallableHashModel.NAME, new SpringFormTemplateCallableHashModel(request, response));
     }
 
     @Override
