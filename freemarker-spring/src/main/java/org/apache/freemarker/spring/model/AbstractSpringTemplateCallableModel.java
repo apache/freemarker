@@ -130,9 +130,17 @@ abstract class AbstractSpringTemplateCallableModel implements TemplateCallableMo
     protected final TemplateModel getBindStatusTemplateModel(Environment env,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext, String path,
             boolean ignoreNestedPath) throws TemplateException {
+        BindStatus status = getBindStatus(env, objectWrapperAndUnwrapper, requestContext, path, ignoreNestedPath);
+        return (status != null) ? objectWrapperAndUnwrapper.wrap(status) : null;
+    }
+
+    // TODO: Javadocs
+    protected final BindStatus getBindStatus(Environment env,
+            ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext, String path,
+            boolean ignoreNestedPath) throws TemplateException {
         final String resolvedPath = (ignoreNestedPath) ? path : resolveNestedPath(env, objectWrapperAndUnwrapper, path);
         BindStatus status = requestContext.getBindStatus(resolvedPath, false);
-        return (status != null) ? objectWrapperAndUnwrapper.wrap(status) : null;
+        return status;
     }
 
     /**

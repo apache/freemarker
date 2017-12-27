@@ -1,10 +1,28 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.apache.freemarker.spring.model.form;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,13 +30,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
-import org.apache.freemarker.core.model.TemplateBooleanModel;
+import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
 import org.apache.freemarker.core.model.TemplateModel;
-import org.apache.freemarker.core.model.TemplateNumberModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util.CallableUtils;
-import org.apache.freemarker.core.util._KeyValuePair;
 
 /**
  * Corresponds to <code>org.springframework.web.servlet.tags.form.AbstractHtmlElementTag</code>.
@@ -34,7 +50,7 @@ public abstract class AbstractHtmlElementTemplateDirectiveModel
         return map;
     }
 
-    private static final Map<String, String> ALLOWED_ATTRIBUTES = Collections.unmodifiableMap(
+    private static final Map<String, String> REGISTERED_ATTRIBUTES = Collections.unmodifiableMap(
             createAttributeKeyNamePairsMap(
                     "class",
                     "style",
@@ -64,8 +80,10 @@ public abstract class AbstractHtmlElementTemplateDirectiveModel
                     true
                     );
 
-    private Map<String, Object> attributes;
-    private Map<String, Object> unmodifiableAttributes = Collections.emptyMap();
+    private Map<String, Object> registeredAttributes;
+    private Map<String, Object> unmodifiableRegisteredAttributes = Collections.emptyMap();
+    private Map<String, Object> dynamicAttributes;
+    private Map<String, Object> unmodifiableDynamicAttributes = Collections.emptyMap();
 
     protected AbstractHtmlElementTemplateDirectiveModel(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
@@ -76,25 +94,46 @@ public abstract class AbstractHtmlElementTemplateDirectiveModel
         return ARGS_LAYOUT;
     }
 
-    public Map<String, Object> getAttributes() {
-        return unmodifiableAttributes;
+    public Map<String, Object> getRegisteredAttributes() {
+        return unmodifiableRegisteredAttributes;
     }
 
-    public void setAttribute(String localName, Object value) {
+    public Map<String, Object> getDynamicAttributes() {
+        return unmodifiableDynamicAttributes;
+    }
+
+    public void setRegisteredAttribute(String localName, Object value) {
+        if (localName == null) {
+            throw new IllegalArgumentException("Attribute name must not be null.");
+        }
+
+        if (!isRegisteredAttribute(localName, value)) {
+            throw new IllegalArgumentException("Invalid attribute: " + localName + "=" + value);
+        }
+
+        if (registeredAttributes == null) {
+            registeredAttributes = new LinkedHashMap<String, Object>();
+            unmodifiableRegisteredAttributes = Collections.unmodifiableMap(registeredAttributes);
+        }
+
+        registeredAttributes.put(localName, value);
+    }
+
+    public void setDynamicAttribute(String localName, Object value) {
         if (localName == null) {
             throw new IllegalArgumentException("Attribute name must not be null.");
         }
 
         if (!isValidDynamicAttribute(localName, value)) {
-            throw new IllegalArgumentException("Invalid attribute: " + localName + "=" + value);
+            throw new IllegalArgumentException("Invalid dynamic attribute: " + localName + "=" + value);
         }
 
-        if (attributes == null) {
-            attributes = new LinkedHashMap<String, Object>();
-            unmodifiableAttributes = Collections.unmodifiableMap(attributes);
+        if (dynamicAttributes == null) {
+            dynamicAttributes = new LinkedHashMap<String, Object>();
+            unmodifiableDynamicAttributes = Collections.unmodifiableMap(dynamicAttributes);
         }
 
-        attributes.put(localName, value);
+        dynamicAttributes.put(localName, value);
     }
 
     protected String getPathArgument(TemplateModel[] args) throws TemplateException {
@@ -102,23 +141,19 @@ public abstract class AbstractHtmlElementTemplateDirectiveModel
         return path;
     }
 
-    protected boolean isAllowedAttribute(String localName, Object value) {
-        return ALLOWED_ATTRIBUTES.containsKey(localName.toUpperCase());
+    protected boolean isRegisteredAttribute(String localName, Object value) {
+        return REGISTERED_ATTRIBUTES.containsKey(localName.toUpperCase());
     }
 
     protected boolean isValidDynamicAttribute(String localName, Object value) {
         return true;
     }
 
-    protected void setAttributes(TemplateModel[] args) throws TemplateException {
+    protected void readRegisteredAndDynamicAttributes(TemplateModel[] args, ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper) throws TemplateException {
         final int attrsVarargsIndex = getDirectiveArgumentArrayLayout().getNamedVarargsArgumentIndex();
         final TemplateHashModelEx attrsHashModel = (TemplateHashModelEx) args[attrsVarargsIndex];
 
-        List<_KeyValuePair<String, String>> attrs = Collections.emptyList();
-
         if (!attrsHashModel.isEmptyHash()) {
-            attrs = new ArrayList<>();
-
             for (TemplateHashModelEx.KeyValuePairIterator attrIt = attrsHashModel.keyValuePairIterator(); attrIt.hasNext();) {
                 TemplateHashModelEx.KeyValuePair pair = attrIt.next();
                 TemplateModel attrNameModel = pair.getKey();
@@ -136,25 +171,28 @@ public abstract class AbstractHtmlElementTemplateDirectiveModel
                             "Attribute name must be a non-blank string.", this);
                 }
 
-                // TODO: Don't assume attribute value is string. Treat it as object and convert properly by using Spring utils.
+                final Object attrValue = objectWrapperAndUnwrapper.unwrap(attrValueModel);
 
-                String attrValue;
-
-                if (attrValueModel instanceof TemplateStringModel) {
-                    attrValue = ((TemplateStringModel) attrValueModel).getAsString();
-                } else if (attrValueModel instanceof TemplateNumberModel) {
-                    attrValue = ((TemplateNumberModel) attrValueModel).getAsNumber().toString();
-                } else if (attrValueModel instanceof TemplateBooleanModel) {
-                    attrValue = Boolean.toString(((TemplateBooleanModel) attrValueModel).getAsBoolean());
+                if (isRegisteredAttribute(attrName, attrValue)) {
+                    setRegisteredAttribute(attrName.toUpperCase(), attrValue);
                 } else {
-                    throw CallableUtils.newArgumentValueException(attrsVarargsIndex,
-                            "Format the attribute manually to properly coerce it to a URL parameter value string. "
-                                    + "e.g, date?string.iso, date?long, list?join('_'), etc.",
-                            this);
+                    setDynamicAttribute(attrName, attrValue);
                 }
-
-                setAttribute(attrName, attrValue);
             }
         }
+        
+        System.out.println("$$$$$ dynamicAttributes: " + this.getDynamicAttributes());
     }
+
+    protected void writeDefaultHtmlElementAttributes(TagOutputter tagOut) throws TemplateException, IOException {
+        super.writeDefaultHtmlElementAttributes(tagOut);
+
+        for (Map.Entry<String, String> entry : REGISTERED_ATTRIBUTES.entrySet()) {
+            String attrKey = entry.getKey();
+            String attrName = entry.getValue();
+            Object attrValue = getRegisteredAttributes().get(attrKey);
+            writeOptionalAttribute(tagOut, attrName, attrValue);
+        }
+    }
+
 }
