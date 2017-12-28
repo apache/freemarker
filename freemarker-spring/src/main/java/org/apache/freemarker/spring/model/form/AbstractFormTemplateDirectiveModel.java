@@ -19,20 +19,16 @@
 
 package org.apache.freemarker.spring.model.form;
 
+import java.beans.PropertyEditor;
 import java.io.IOException;
-import java.io.Writer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.freemarker.core.CallPlace;
-import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
-import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
-import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.spring.model.AbstractSpringTemplateDirectiveModel;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.servlet.support.RequestContext;
+import org.springframework.web.util.HtmlUtils;
 
 /**
  * Corresponds to <code>org.springframework.web.servlet.tags.form.AbstractFormTag</code>.
@@ -43,31 +39,34 @@ public abstract class AbstractFormTemplateDirectiveModel extends AbstractSpringT
         super(request, response);
     }
 
-    @Override
-    protected final void executeInternal(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env,
-            ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
-            throws TemplateException, IOException {
-        final TagOutputter tagOut = new TagOutputter(out);
-        writeDirectiveContent(args, callPlace, tagOut, env, objectWrapperAndUnwrapper, requestContext);
-    }
-
-    protected abstract void writeDirectiveContent(TemplateModel[] args, CallPlace callPlace, TagOutputter tagOut,
-            Environment env, ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
-            throws TemplateException;
-
     protected Object evaluate(String attributeName, Object value) throws TemplateException {
         return value;
     }
 
-    protected String getDisplayString(Object value) {
+    public static String getDisplayString(Object value, boolean htmlEscape) {
         String displayValue = ObjectUtils.getDisplayString(value);
-        return displayValue;
+        return (htmlEscape ? HtmlUtils.htmlEscape(displayValue) : displayValue);
+    }
+
+    public static String getDisplayString(Object value, PropertyEditor propertyEditor, boolean htmlEscape) {
+        if (propertyEditor != null && !(value instanceof String)) {
+            try {
+                propertyEditor.setValue(value);
+                String text = propertyEditor.getAsText();
+                if (text != null) {
+                    return getDisplayString(text, htmlEscape);
+                }
+            } catch (Throwable ex) {
+                // The PropertyEditor might not support this value... pass through.
+            }
+        }
+        return getDisplayString(value, htmlEscape);
     }
 
     protected final void writeOptionalAttribute(TagOutputter tagOut, String attrName, Object attrValue)
             throws TemplateException, IOException {
         if (attrValue != null) {
-            tagOut.writeOptionalAttributeValue(attrName, getDisplayString(evaluate(attrName, attrValue)));
+            tagOut.writeOptionalAttributeValue(attrName, getDisplayString(evaluate(attrName, attrValue), false));
         }
     }
 

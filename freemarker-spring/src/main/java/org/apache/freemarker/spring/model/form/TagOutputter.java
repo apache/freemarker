@@ -77,7 +77,7 @@ class TagOutputter {
         out.write(value);
     }
 
-    public void forceBlock() throws TemplateException, IOException {
+    public void forceBlock() throws TemplateException {
         TagEntry current = tagStack.peek();
 
         if (current.isBlockTag()) {
@@ -117,12 +117,17 @@ class TagOutputter {
         tagStack.pop();
     }
 
-    private void closeAndMarkAsBlockTag() throws TemplateException, IOException {
+    private void closeAndMarkAsBlockTag() throws TemplateException {
         TagEntry current = tagStack.peek();
 
         if (!current.isBlockTag()) {
             current.markAsBlockTag();
-            out.write(">");
+
+            try {
+                out.write(">");
+            } catch (IOException e) {
+                throw new TemplateException("Failed to write output.", e);
+            }
         }
     }
 

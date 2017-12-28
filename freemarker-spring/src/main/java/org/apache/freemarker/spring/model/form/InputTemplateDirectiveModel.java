@@ -20,8 +20,9 @@
 package org.apache.freemarker.spring.model.form;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
+import java.io.Writer;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,22 +30,61 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.freemarker.core.CallPlace;
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
+import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.util.CallableUtils;
+import org.apache.freemarker.core.util.StringToIndexMap;
+import org.apache.freemarker.core.util._CollectionUtils;
 import org.springframework.web.servlet.support.RequestContext;
 
-public class InputTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveModel {
+public class InputTemplateDirectiveModel extends AbstractHtmlInputElementTemplateDirectiveModel {
 
     public static final String NAME = "input";
 
-    private static final Map<String, String> REGISTERED_ATTRIBUTES = Collections.unmodifiableMap(
-            createAttributeKeyNamePairsMap(
-                    "size",
-                    "maxlength",
-                    "alt",
-                    "onselect",
-                    "readonly",
-                    "autocomplete"));
+    private static final int NAMED_ARGS_OFFSET = AbstractHtmlInputElementTemplateDirectiveModel.NAMED_ARGS_ENTRY_LIST
+            .size() + 1;
+
+    private static final int SIZE_PARAM_IDX = NAMED_ARGS_OFFSET;
+    private static final String SIZE_PARAM_NAME = "size";
+
+    private static final int MAXLENGTH_PARAM_IDX = NAMED_ARGS_OFFSET + 1;
+    private static final String MAXLENGTH_PARAM_NAME = "maxlength";
+
+    private static final int ALT_PARAM_IDX = NAMED_ARGS_OFFSET + 2;
+    private static final String ALT_PARAM_NAME = "alt";
+
+    private static final int ONSELECT_PARAM_IDX = NAMED_ARGS_OFFSET + 3;
+    private static final String ONSELECT_PARAM_NAME = "onselect";
+
+    private static final int AUTOCOMPLETE_PARAM_IDX = NAMED_ARGS_OFFSET + 4;
+    private static final String AUTOCOMPLETE_PARAM_NAME = "autocomplete";
+
+    protected static List<StringToIndexMap.Entry> NAMED_ARGS_ENTRY_LIST =
+            _CollectionUtils.mergeImmutableLists(false,
+                    AbstractHtmlInputElementTemplateDirectiveModel.NAMED_ARGS_ENTRY_LIST,
+                    Arrays.asList(
+                        new StringToIndexMap.Entry(SIZE_PARAM_NAME, SIZE_PARAM_IDX),
+                        new StringToIndexMap.Entry(MAXLENGTH_PARAM_NAME, MAXLENGTH_PARAM_IDX),
+                        new StringToIndexMap.Entry(ALT_PARAM_NAME, ALT_PARAM_IDX),
+                        new StringToIndexMap.Entry(ONSELECT_PARAM_NAME, ONSELECT_PARAM_IDX),
+                        new StringToIndexMap.Entry(AUTOCOMPLETE_PARAM_NAME, AUTOCOMPLETE_PARAM_IDX)
+                        )
+                    );
+
+    private static final ArgumentArrayLayout ARGS_LAYOUT =
+            ArgumentArrayLayout.create(
+                    1,
+                    false,
+                    StringToIndexMap.of(NAMED_ARGS_ENTRY_LIST.toArray(new StringToIndexMap.Entry[NAMED_ARGS_ENTRY_LIST.size()])),
+                    true
+                    );
+
+    private String size;
+    private String maxlength;
+    private String alt;
+    private String onselect;
+    private String autocomplete;
 
     protected InputTemplateDirectiveModel(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
@@ -56,59 +96,77 @@ public class InputTemplateDirectiveModel extends AbstractHtmlElementTemplateDire
     }
 
     @Override
-    protected void writeDirectiveContent(TemplateModel[] args, CallPlace callPlace, TagOutputter tagOut,
-            Environment env, ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
-            throws TemplateException {
-
-        final String path = getPathArgument(args);
-
-        try {
-            readRegisteredAndDynamicAttributes(args, objectWrapperAndUnwrapper);
-
-            tagOut.beginTag(NAME);
-
-            writeDefaultHtmlElementAttributes(tagOut);
-
-            if (!hasDynamicTypeAttribute()) {
-                tagOut.writeAttribute("type", (String) getRegisteredAttributes().get("type"));
-            }
-
-            writeValue(tagOut);
-
-            // custom optional attributes
-            for (Map.Entry<String, String> entry : REGISTERED_ATTRIBUTES.entrySet()) {
-                String attrKey = entry.getKey();
-                String attrName = entry.getValue();
-                Object attrValue = getRegisteredAttributes().get(attrKey);
-                writeOptionalAttribute(tagOut, attrName, attrValue);
-            }
-
-            tagOut.endTag();
-        } catch (IOException e) {
-            throw new TemplateException(e);
-        }
+    public ArgumentArrayLayout getDirectiveArgumentArrayLayout() {
+        return ARGS_LAYOUT;
     }
 
     @Override
-    protected boolean isRegisteredAttribute(String localName, Object value) {
-        return super.isRegisteredAttribute(localName, value) && REGISTERED_ATTRIBUTES.containsKey(localName);
+    protected void executeInternal(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env,
+            ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
+            throws TemplateException, IOException {
+
+        super.executeInternal(args, callPlace, out, env, objectWrapperAndUnwrapper, requestContext);
+
+        size = CallableUtils.getOptionalStringArgument(args, SIZE_PARAM_IDX, this);
+        maxlength = CallableUtils.getOptionalStringArgument(args, MAXLENGTH_PARAM_IDX, this);
+        alt = CallableUtils.getOptionalStringArgument(args, ALT_PARAM_IDX, this);
+        onselect = CallableUtils.getOptionalStringArgument(args, ONSELECT_PARAM_IDX, this);
+        autocomplete = CallableUtils.getOptionalStringArgument(args, AUTOCOMPLETE_PARAM_IDX, this);
+
+        TagOutputter tagOut = new TagOutputter(out);
+
+        tagOut.beginTag(NAME);
+
+        writeDefaultAttributes(tagOut);
+
+        if (!hasDynamicTypeAttribute()) {
+            tagOut.writeAttribute("type", getType());
+        }
+
+        writeValue(env, tagOut);
+
+        // more optional attributes by this tag
+        writeOptionalAttribute(tagOut, SIZE_PARAM_NAME, getSize());
+        writeOptionalAttribute(tagOut, MAXLENGTH_PARAM_NAME, getMaxlength());
+        writeOptionalAttribute(tagOut, ALT_PARAM_NAME, getAlt());
+        writeOptionalAttribute(tagOut, ONSELECT_PARAM_NAME, getOnselect());
+        writeOptionalAttribute(tagOut, AUTOCOMPLETE_PARAM_NAME, getAutocomplete());
+
+        tagOut.endTag();
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public String getMaxlength() {
+        return maxlength;
+    }
+
+    public String getAlt() {
+        return alt;
+    }
+
+    public String getOnselect() {
+        return onselect;
+    }
+
+    public String getAutocomplete() {
+        return autocomplete;
     }
 
     private boolean hasDynamicTypeAttribute() {
         return getDynamicAttributes().containsKey("type");
     }
 
-    protected void writeValue(TagOutputter tagOut) throws TemplateException {
-//        String value = getDisplayString(getBoundValue(), getPropertyEditor());
-//        String type = hasDynamicTypeAttribute() ? (String) getDynamicAttributes().get("type") : getType();
-//        tagWriter.writeAttribute("value", processFieldValue(getName(), value, type));
+    protected void writeValue(Environment env, TagOutputter tagOut) throws TemplateException, IOException {
+        String value = getDisplayString(getBindStatus().getValue(), getBindStatus().getEditor(), false);
+        String type = hasDynamicTypeAttribute() ? (String) getDynamicAttributes().get("type") : getType();
+        tagOut.writeAttribute("value", processFieldValue(env, getName(), value, type));
+    }
 
-        //FIXME
-        try {
-            tagOut.writeAttribute("value", "value");
-        } catch (IOException e) {
-            throw new TemplateException(e);
-        }
+    protected String getType() {
+        return "text";
     }
 
 }

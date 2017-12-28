@@ -20,7 +20,7 @@
 <body>
 
   <div id="userEmail">
-    <@spring.form.input 'user.email' type='text' value='${user.email!}' />
+    <@spring.form.input 'user.email' value='${user.email!}' />
   </div>
 
 </body>
