@@ -56,9 +56,11 @@ public abstract class AbstractHtmlElementTemplateDirectiveModel
 
     private static final int CSS_CLASS_PARAM_IDX = NAMED_ARGS_OFFSET;
     private static final String CSS_CLASS_PARAM_NAME = "cssClass";
+    private static final String CSS_CLASS_ATTR_NAME = "class";
 
     private static final int CSS_STYLE_PARAM_IDX = NAMED_ARGS_OFFSET + 1;
     private static final String CSS_STYLE_PARAM_NAME = "cssStyle";
+    private static final String CSS_STYLE_ATTR_NAME = "style";
 
     private static final int LANG_PARAM_IDX = NAMED_ARGS_OFFSET + 2;
     private static final String LANG_PARAM_NAME = "lang";
@@ -105,6 +107,7 @@ public abstract class AbstractHtmlElementTemplateDirectiveModel
     private static final int CSSERRORCLASS_PARAM_IDX = NAMED_ARGS_OFFSET + 16;
     private static final String CSSERRORCLASS_PARAM_NAME = "cssErrorClass";
 
+    @SuppressWarnings("unchecked")
     protected static List<StringToIndexMap.Entry> NAMED_ARGS_ENTRY_LIST =
             _CollectionUtils.mergeImmutableLists(false,
                     AbstractDataBoundFormElementTemplateDirectiveModel.NAMED_ARGS_ENTRY_LIST,
@@ -318,8 +321,9 @@ public abstract class AbstractHtmlElementTemplateDirectiveModel
     }
 
     protected void writeOptionalAttributes(TagOutputter tagOut) throws TemplateException, IOException {
-        tagOut.writeOptionalAttributeValue("class", resolveCssClass());
-        tagOut.writeOptionalAttributeValue("style", ObjectUtils.getDisplayString(evaluate("cssStyle", getCssStyle())));
+        tagOut.writeOptionalAttributeValue(CSS_CLASS_ATTR_NAME, resolveCssClass());
+        tagOut.writeOptionalAttributeValue(CSS_STYLE_ATTR_NAME,
+                ObjectUtils.getDisplayString(evaluate(CSS_STYLE_PARAM_NAME, getCssStyle())));
         writeOptionalAttribute(tagOut, LANG_PARAM_NAME, getLang());
         writeOptionalAttribute(tagOut, TITLE_PARAM_NAME, getTitle());
         writeOptionalAttribute(tagOut, DIR_PARAM_NAME, getDir());
@@ -335,9 +339,10 @@ public abstract class AbstractHtmlElementTemplateDirectiveModel
         writeOptionalAttribute(tagOut, ONKEYUP_PARAM_NAME, getOnkeyup());
         writeOptionalAttribute(tagOut, ONKEYDOWN_PARAM_NAME, getOnkeydown());
 
-        if (!this.unmodifiableDynamicAttributes.isEmpty()) {
-            for (String attr : this.dynamicAttributes.keySet()) {
-                tagOut.writeOptionalAttributeValue(attr, getDisplayString(this.dynamicAttributes.get(attr), false));
+        if (!unmodifiableDynamicAttributes.isEmpty()) {
+            for (String attr : unmodifiableDynamicAttributes.keySet()) {
+                tagOut.writeOptionalAttributeValue(attr,
+                        getDisplayString(unmodifiableDynamicAttributes.get(attr), false));
             }
         }
     }

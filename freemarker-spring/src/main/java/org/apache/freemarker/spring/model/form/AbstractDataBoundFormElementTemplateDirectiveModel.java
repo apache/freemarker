@@ -49,7 +49,11 @@ public abstract class AbstractDataBoundFormElementTemplateDirectiveModel extends
 
     private static final int ID_PARAM_IDX = 1;
 
-    private static final String ID_PARAM_NAME = "id";
+    private static final String ID_ATTR_NAME = "id";
+
+    private static final String NAME_ATTR_NAME = "name";
+
+    private static final String ID_PARAM_NAME = ID_ATTR_NAME;
 
     protected static List<StringToIndexMap.Entry> NAMED_ARGS_ENTRY_LIST = Arrays.asList(
             new StringToIndexMap.Entry(ID_PARAM_NAME, ID_PARAM_IDX)
@@ -102,13 +106,12 @@ public abstract class AbstractDataBoundFormElementTemplateDirectiveModel extends
     }
 
     protected void writeDefaultAttributes(TagOutputter tagOut) throws TemplateException, IOException {
-        // FIXME
-        writeOptionalAttribute(tagOut, "id", resolveId());
-        writeOptionalAttribute(tagOut, "name", getName());
+        writeOptionalAttribute(tagOut, ID_ATTR_NAME, resolveId());
+        writeOptionalAttribute(tagOut, NAME_ATTR_NAME, getName());
     }
 
     protected String resolveId() throws TemplateException {
-        Object id = evaluate("id", getId());
+        Object id = evaluate(ID_PARAM_NAME, getId());
 
         if (id != null) {
             String idString = id.toString();
@@ -123,29 +126,22 @@ public abstract class AbstractDataBoundFormElementTemplateDirectiveModel extends
     }
 
     protected String getName() throws TemplateException {
-        // FIXME
-        return "name";
-        //return getPropertyPath();
+        return getPropertyPath();
     }
 
-    protected String getPropertyPath(Environment env,
-            ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext, String path,
-            boolean ignoreNestedPath) throws TemplateException {
-        BindStatus status = getBindStatus(env, objectWrapperAndUnwrapper, requestContext, path, ignoreNestedPath);
-        String expression = status.getExpression();
+    protected String getPropertyPath() {
+        String expression = getBindStatus().getExpression();
         return (expression != null ? expression : "");
     }
 
     protected final String processFieldValue(Environment env, String name, String value, String type) throws TemplateException {
         RequestContext requestContext = getRequestContext(env, false);
         RequestDataValueProcessor processor = requestContext.getRequestDataValueProcessor();
+        HttpServletRequest request = getRequest();
 
-        // FIXME
-//        ServletRequest request = this.pageContext.getRequest();
-//
-//        if (processor != null && (request instanceof HttpServletRequest)) {
-//            value = processor.processFormFieldValue((HttpServletRequest) request, name, value, type);
-//        }
+        if (processor != null && request != null) {
+            value = processor.processFormFieldValue(request, name, value, type);
+        }
 
         return value;
     }

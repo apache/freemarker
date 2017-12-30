@@ -19,9 +19,30 @@
 <html>
 <body>
 
-  <div id="userEmail">
-    <@spring.form.input 'user.email' value='${user.email!}' />
-  </div>
+  <h1>Form 1</h1>
+  <hr/>
+  <form id="form1">
+    <table>
+      <tr>
+        <th>E-Mail:</th>
+        <td>
+          <@spring.form.input 'user.email' id="customEmailId" />
+        </td>
+      </tr>
+      <tr>
+        <th>First name:</th>
+        <td>
+          <@spring.form.input 'user.firstName' />
+        </td>
+      </tr>
+      <tr>
+        <th>Last name:</th>
+        <td>
+          <@spring.form.input 'user.lastName' />
+        </td>
+      </tr>
+    </table>
+  </form>
 
 </body>
 </html>

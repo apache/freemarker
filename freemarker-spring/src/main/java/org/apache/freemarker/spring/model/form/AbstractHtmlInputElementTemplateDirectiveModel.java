@@ -61,6 +61,7 @@ public abstract class AbstractHtmlInputElementTemplateDirectiveModel extends Abs
     private static final int READONLY_PARAM_IDX = NAMED_ARGS_OFFSET + 5;
     private static final String READONLY_PARAM_NAME = "readonly";
 
+    @SuppressWarnings("unchecked")
     protected static List<StringToIndexMap.Entry> NAMED_ARGS_ENTRY_LIST =
             _CollectionUtils.mergeImmutableLists(false,
                     AbstractHtmlElementTemplateDirectiveModel.NAMED_ARGS_ENTRY_LIST,

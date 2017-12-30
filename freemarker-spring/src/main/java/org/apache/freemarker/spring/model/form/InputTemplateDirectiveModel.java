@@ -60,6 +60,7 @@ public class InputTemplateDirectiveModel extends AbstractHtmlInputElementTemplat
     private static final int AUTOCOMPLETE_PARAM_IDX = NAMED_ARGS_OFFSET + 4;
     private static final String AUTOCOMPLETE_PARAM_NAME = "autocomplete";
 
+    @SuppressWarnings("unchecked")
     protected static List<StringToIndexMap.Entry> NAMED_ARGS_ENTRY_LIST =
             _CollectionUtils.mergeImmutableLists(false,
                     AbstractHtmlInputElementTemplateDirectiveModel.NAMED_ARGS_ENTRY_LIST,

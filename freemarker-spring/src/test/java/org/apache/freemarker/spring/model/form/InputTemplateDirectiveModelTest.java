@@ -37,6 +37,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration("classpath:META-INF/web-resources")
@@ -62,10 +63,10 @@ public class InputTemplateDirectiveModelTest {
         final User user = userRepository.getUser(userId);
         mockMvc.perform(get("/users/{userId}/", userId).param("viewName", "test/model/form/input-directive-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print());
-                // FIXME
-                //.andExpect(xpath("//div[@id='userEmail']/input/@type").string("text"));
-                //.andExpect(xpath("//div[@id='userEmail']/input/@value").string(user.getEmail()));
+                .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
+                .andExpect(xpath("//form[@id='form1']//input[@id='customEmailId' and @name='email']/@value").string(user.getEmail()))
+                .andExpect(xpath("//form[@id='form1']//input[@id='firstName' and @name='firstName']/@value").string(user.getFirstName()))
+                .andExpect(xpath("//form[@id='form1']//input[@id='lastName' and @name='lastName']/@value").string(user.getLastName()));
     }
 
 }
