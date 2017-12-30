@@ -107,6 +107,7 @@ public abstract class AbstractHtmlElementTemplateDirectiveModel
     private static final int CSSERRORCLASS_PARAM_IDX = NAMED_ARGS_OFFSET + 16;
     private static final String CSSERRORCLASS_PARAM_NAME = "cssErrorClass";
 
+    // TODO: It's a problem to see NAMED_ARGS_ENTRY_LIST is visible from child classes!
     @SuppressWarnings("unchecked")
     protected static List<StringToIndexMap.Entry> NAMED_ARGS_ENTRY_LIST =
             _CollectionUtils.mergeImmutableLists(false,

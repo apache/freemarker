@@ -46,6 +46,7 @@ public final class SpringFormTemplateCallableHashModel implements TemplateHashMo
     private final Map<String, TemplateModel> modelsMap = new HashMap<>();
 
     public SpringFormTemplateCallableHashModel(final HttpServletRequest request, final HttpServletResponse response) {
+        modelsMap.put(FormTemplateDirectiveModel.NAME, new FormTemplateDirectiveModel(request, response));
         modelsMap.put(InputTemplateDirectiveModel.NAME, new InputTemplateDirectiveModel(request, response));
     }
 
