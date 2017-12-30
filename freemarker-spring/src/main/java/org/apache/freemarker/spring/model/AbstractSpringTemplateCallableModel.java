@@ -38,7 +38,7 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
 /**
  * Abstract TemplateCallableModel for derived classes to support Spring MVC based templating environment.
  */
-abstract class AbstractSpringTemplateCallableModel implements TemplateCallableModel {
+public abstract class AbstractSpringTemplateCallableModel implements TemplateCallableModel {
 
     private final HttpServletRequest request;
     private final HttpServletResponse response;
