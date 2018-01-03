@@ -134,7 +134,20 @@ public abstract class AbstractSpringTemplateCallableModel implements TemplateCal
         return (status != null) ? objectWrapperAndUnwrapper.wrap(status) : null;
     }
 
-    // TODO: Javadocs
+    /**
+     * Find {@link BindStatus} with no {@code htmlEscape} option from {@link RequestContext} by the {@code path}.
+     * <P>
+     * <EM>NOTE:</EM> In FreeMarker, there is no need to depend on <code>BindStatus#htmlEscape</code> option
+     * as FreeMarker template expressions can easily set escape option by themselves.
+     * Therefore, this method always get a {@link BindStatus} with {@code htmlEscape} option set to {@code false}.
+     * @param env Environment
+     * @param objectWrapperAndUnwrapper ObjectWrapperAndUnwrapper
+     * @param requestContext Spring RequestContext
+     * @param path bind path
+     * @param ignoreNestedPath flag whether or not to ignore the nested path
+     * @return a {@link BindStatus} with no {@code htmlEscape} option from {@link RequestContext} by the {@code path}
+     * @throws TemplateException if template exception occurs
+     */
     protected final BindStatus getBindStatus(Environment env,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext, String path,
             boolean ignoreNestedPath) throws TemplateException {

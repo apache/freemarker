@@ -26,6 +26,9 @@ import java.util.Stack;
 import org.apache.freemarker.core.TemplateException;
 import org.springframework.util.StringUtils;
 
+/**
+ * Utility to writing HTML content.
+ */
 class TagOutputter {
 
     private final Writer out;

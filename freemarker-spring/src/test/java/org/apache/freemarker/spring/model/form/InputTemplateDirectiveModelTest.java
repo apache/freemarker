@@ -69,4 +69,39 @@ public class InputTemplateDirectiveModelTest {
                 .andExpect(xpath("//form[@id='form1']//input[@id='lastName' and @name='lastName']/@value").string(user.getLastName()));
     }
 
+    @Test
+    public void testDefaultAttributes() throws Exception {
+        final Long userId = userRepository.getUserIds().iterator().next();
+        mockMvc.perform(get("/users/{userId}/", userId).param("viewName", "test/model/form/input-directive-usages")
+                .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
+                .andExpect(xpath("//form[@id='form2']//input/@name").string("firstName"))
+                .andExpect(xpath("//form[@id='form2']//input/@class").string("my_cssClass"))
+                .andExpect(xpath("//form[@id='form2']//input/@style").string("my_cssStyle"))
+                .andExpect(xpath("//form[@id='form2']//input/@lang").string("my_lang"))
+                .andExpect(xpath("//form[@id='form2']//input/@title").string("my_title"))
+                .andExpect(xpath("//form[@id='form2']//input/@dir").string("my_dir"))
+                .andExpect(xpath("//form[@id='form2']//input/@tabindex").string("my_tabindex"))
+                .andExpect(xpath("//form[@id='form2']//input/@onclick").string("my_onclick()"))
+                .andExpect(xpath("//form[@id='form2']//input/@ondblclick").string("my_ondblclick()"))
+                .andExpect(xpath("//form[@id='form2']//input/@onmousedown").string("my_onmousedown()"))
+                .andExpect(xpath("//form[@id='form2']//input/@onmouseup").string("my_onmouseup()"))
+                .andExpect(xpath("//form[@id='form2']//input/@onmouseover").string("my_onmouseover()"))
+                .andExpect(xpath("//form[@id='form2']//input/@onmousemove").string("my_onmousemove()"))
+                .andExpect(xpath("//form[@id='form2']//input/@onmouseout").string("my_onmouseout()"))
+                .andExpect(xpath("//form[@id='form2']//input/@onkeypress").string("my_onkeypress()"))
+                .andExpect(xpath("//form[@id='form2']//input/@onkeyup").string("my_onkeyup()"))
+                .andExpect(xpath("//form[@id='form2']//input/@onkeydown").string("my_onkeydown()"))
+                .andExpect(xpath("//form[@id='form2']//input/@onfocus").string("my_onfocus()"))
+                .andExpect(xpath("//form[@id='form2']//input/@onblur").string("my_onblur()"))
+                .andExpect(xpath("//form[@id='form2']//input/@onchange").string("my_onchange()"))
+                .andExpect(xpath("//form[@id='form2']//input/@accesskey").string("my_accesskey"))
+                .andExpect(xpath("//form[@id='form2']//input/@disabled").string("disabled"))
+                .andExpect(xpath("//form[@id='form2']//input/@readonly").string("readonly"))
+                .andExpect(xpath("//form[@id='form2']//input/@size").string("my_size"))
+                .andExpect(xpath("//form[@id='form2']//input/@maxlength").string("my_maxlength"))
+                .andExpect(xpath("//form[@id='form2']//input/@alt").string("my_alt"))
+                .andExpect(xpath("//form[@id='form2']//input/@onselect").string("my_onselect()"))
+                .andExpect(xpath("//form[@id='form2']//input/@autocomplete").string("my_autocomplete"));
+    }
 }

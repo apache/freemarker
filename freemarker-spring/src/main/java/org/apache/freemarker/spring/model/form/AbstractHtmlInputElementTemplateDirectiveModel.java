@@ -38,7 +38,7 @@ import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util._CollectionUtils;
 import org.springframework.web.servlet.support.RequestContext;
 
-public abstract class AbstractHtmlInputElementTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveModel {
+abstract class AbstractHtmlInputElementTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveModel {
 
     private static final int NAMED_ARGS_OFFSET = AbstractHtmlElementTemplateDirectiveModel.NAMED_ARGS_ENTRY_LIST.size()
             + 1;

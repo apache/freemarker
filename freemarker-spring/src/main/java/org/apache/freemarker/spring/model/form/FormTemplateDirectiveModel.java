@@ -34,9 +34,12 @@ import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.ArgumentArrayLayout;
 import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util._CollectionUtils;
+import org.apache.freemarker.spring.model.SpringTemplateCallableHashModel;
+import org.springframework.beans.PropertyAccessor;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.RequestContext;
@@ -44,7 +47,34 @@ import org.springframework.web.servlet.support.RequestDataValueProcessor;
 import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriUtils;
 
-public class FormTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveModel {
+/**
+ * Provides <code>TemplateModel</code> for data-binding-aware HTML '{@code form}' element whose inner directives
+ * are bound to properties on a <em>form object</em>.
+ * <P>
+ * This directive supports the following parameters:
+ * <UL>
+ * <LI><code>modelAttribute</code>: The first positional parameter pointing to the bean or bean property as its form object.</LI>
+ * <LI>
+ *   ... TODO ...
+ * </LI>
+ * </UL>
+ * </P>
+ * <P>
+ * Some valid example(s):
+ * </P>
+ * <PRE>
+ * &lt;#assign form=spring.form /&gt;
+ * &lt;@form.form "user"&gt;
+ *   &lt;div&gt;First name: &lt;@form.input 'firstName' /&gt;&lt;/div&gt;
+ * &lt;/@form.form&gt;
+ * </PRE>
+ * <P>
+ * <EM>Note:</EM> Unlike Spring Framework's <code>&lt;form:input /&gt;</code> JSP Tag Library, this directive
+ * does not support <code>htmlEscape</code> parameter. It always renders HTML's without escaping
+ * because it is much easier to control escaping in FreeMarker Template expressions.
+ * </P>
+ */
+class FormTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveModel {
 
     public static final String NAME = "form";
 
@@ -205,10 +235,22 @@ public class FormTemplateDirectiveModel extends AbstractHtmlElementTemplateDirec
             tagOut.endTag();
         }
 
-        // TODO: expose the form object name for nested tags...
+        final String modelAttribute = getModelAttribute();
 
-        // TODO: save previous nestedPath value, build and expose current nestedPath value.
+        // save previous nestedPath value, build and expose current nestedPath value.
+        final SpringTemplateCallableHashModel springTemplateModel = getSpringTemplateCallableHashModel(env);
+        final TemplateStringModel prevNestedPathModel = springTemplateModel.getNestedPathModel();
+        final String newNestedPath = modelAttribute + PropertyAccessor.NESTED_PROPERTY_SEPARATOR;
+        final TemplateStringModel newNestedPathModel = (TemplateStringModel) objectWrapperAndUnwrapper
+                .wrap(newNestedPath);
 
+        try {
+            springTemplateModel.setNestedPathModel(newNestedPathModel);
+            callPlace.executeNestedContent(null, out, env);
+        } finally {
+            springTemplateModel.setNestedPathModel(prevNestedPathModel);
+            tagOut.endTag();
+        }
     }
 
     protected String getModelAttribute() {
@@ -271,13 +313,22 @@ public class FormTemplateDirectiveModel extends AbstractHtmlElementTemplateDirec
         return ("get".equalsIgnoreCase(method) || "post".equalsIgnoreCase(method));
     }
 
+    /**
+     * Resolve the form action attribute.
+     * <p>If the {@code action} attribute is specified, then that value is used.
+     * If the {@code servletRelativeAction} is specified, then the value is prepended with context and servlet paths.
+     * Otherwise, the {@link org.springframework.web.servlet.support.RequestContext#getRequestUri() originating URI} is used.
+     * @param env environment
+     * @return the value that is to be used for the form action attribute
+     * @throws TemplateException if template exception occurs
+     */
     protected String resolveAction(Environment env) throws TemplateException {
         RequestContext requestContext = getRequestContext(env, false);
         String action = getAction();
         String servletRelativeAction = getServletRelativeAction();
 
         if (StringUtils.hasText(action)) {
-            action = getDisplayString(evaluate(ACTION_PARAM_NAME, action), false);
+            action = getDisplayString(evaluate(ACTION_PARAM_NAME, action));
             return processAction(env, action);
         } else if (StringUtils.hasText(servletRelativeAction)) {
             String pathToServlet = requestContext.getPathToServlet();
@@ -287,7 +338,7 @@ public class FormTemplateDirectiveModel extends AbstractHtmlElementTemplateDirec
                 servletRelativeAction = pathToServlet + servletRelativeAction;
             }
 
-            servletRelativeAction = getDisplayString(evaluate(ACTION_PARAM_NAME, servletRelativeAction), false);
+            servletRelativeAction = getDisplayString(evaluate(ACTION_PARAM_NAME, servletRelativeAction));
             return processAction(env, servletRelativeAction);
         } else {
             String requestUri = requestContext.getRequestUri();
@@ -296,7 +347,7 @@ public class FormTemplateDirectiveModel extends AbstractHtmlElementTemplateDirec
             try {
                 requestUri = UriUtils.encodePath(requestUri, encoding);
             } catch (UnsupportedEncodingException ex) {
-                // shouldn't happen - if it does, proceed with requestUri as-is
+                // According to Spring MVC Javadoc, it shouldn't happen.
             }
 
             HttpServletResponse response = getResponse();
@@ -337,9 +388,11 @@ public class FormTemplateDirectiveModel extends AbstractHtmlElementTemplateDirec
     private String processAction(Environment env, String action) throws TemplateException {
         RequestDataValueProcessor processor = getRequestContext(env, false).getRequestDataValueProcessor();
         HttpServletRequest request = getRequest();
+
         if (processor != null && request != null) {
             action = processor.processAction((HttpServletRequest) request, action, getHttpMethod());
         }
+
         return action;
     }
 

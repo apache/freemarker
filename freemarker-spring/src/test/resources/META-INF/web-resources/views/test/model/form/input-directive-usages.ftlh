@@ -19,6 +19,8 @@
 <html>
 <body>
 
+  <#assign form=spring.form />
+
   <h1>Form 1</h1>
   <hr/>
   <form id="form1">
@@ -26,19 +28,63 @@
       <tr>
         <th>E-Mail:</th>
         <td>
-          <@spring.form.input 'user.email' id="customEmailId" />
+          <@form.input 'user.email' id="customEmailId" />
         </td>
       </tr>
       <tr>
         <th>First name:</th>
         <td>
-          <@spring.form.input 'user.firstName' />
+          <@form.input 'user.firstName' />
         </td>
       </tr>
       <tr>
         <th>Last name:</th>
         <td>
-          <@spring.form.input 'user.lastName' />
+          <@form.input 'user.lastName' />
+        </td>
+      </tr>
+    </table>
+  </form>
+
+  <hr/>
+
+  <h2>Testing default attributes</h2>
+  <form id="form2">
+    <table>
+      <tr>
+        <th>First name:</th>
+        <td>
+          <@form.input "user.firstName"
+                      id="my_id"
+                      cssClass="my_cssClass"
+                      cssStyle="my_cssStyle"
+                      lang="my_lang"
+                      title="my_title"
+                      dir="my_dir"
+                      tabindex="my_tabindex"
+                      onclick="my_onclick()"
+                      ondblclick="my_ondblclick()"
+                      onmousedown="my_onmousedown()"
+                      onmouseup="my_onmouseup()"
+                      onmouseover="my_onmouseover()"
+                      onmousemove="my_onmousemove()"
+                      onmouseout="my_onmouseout()"
+                      onkeypress="my_onkeypress()"
+                      onkeyup="my_onkeyup()"
+                      onkeydown="my_onkeydown()"
+                      cssErrorClass="my_cssErrorClass"
+                      onfocus="my_onfocus()"
+                      onblur="my_onblur()"
+                      onchange="my_onchange()"
+                      accesskey="my_accesskey"
+                      disabled=true
+                      readonly=true
+                      size="my_size"
+                      maxlength="my_maxlength"
+                      alt="my_alt"
+                      onselect="my_onselect()"
+                      autocomplete="my_autocomplete"
+          />
         </td>
       </tr>
     </table>

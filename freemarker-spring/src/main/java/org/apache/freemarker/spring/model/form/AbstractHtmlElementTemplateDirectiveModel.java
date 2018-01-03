@@ -48,7 +48,7 @@ import org.springframework.web.servlet.support.RequestContext;
 /**
  * Corresponds to <code>org.springframework.web.servlet.tags.form.AbstractHtmlElementTag</code>.
  */
-public abstract class AbstractHtmlElementTemplateDirectiveModel
+abstract class AbstractHtmlElementTemplateDirectiveModel
         extends AbstractDataBoundFormElementTemplateDirectiveModel {
 
     private static final int NAMED_ARGS_OFFSET = AbstractDataBoundFormElementTemplateDirectiveModel.NAMED_ARGS_ENTRY_LIST
@@ -107,7 +107,6 @@ public abstract class AbstractHtmlElementTemplateDirectiveModel
     private static final int CSSERRORCLASS_PARAM_IDX = NAMED_ARGS_OFFSET + 16;
     private static final String CSSERRORCLASS_PARAM_NAME = "cssErrorClass";
 
-    // TODO: It's a problem to see NAMED_ARGS_ENTRY_LIST is visible from child classes!
     @SuppressWarnings("unchecked")
     protected static List<StringToIndexMap.Entry> NAMED_ARGS_ENTRY_LIST =
             _CollectionUtils.mergeImmutableLists(false,
@@ -196,7 +195,7 @@ public abstract class AbstractHtmlElementTemplateDirectiveModel
         onkeydown = CallableUtils.getOptionalStringArgument(args, ONKEYDOWN_PARAM_IDX, this);
         cssErrorClass = CallableUtils.getOptionalStringArgument(args, CSSERRORCLASS_PARAM_IDX, this);
 
-        final int attrsVarargsIndex = ARGS_LAYOUT.getNamedVarargsArgumentIndex();
+        final int attrsVarargsIndex = getDirectiveArgumentArrayLayout().getNamedVarargsArgumentIndex();
         final TemplateHashModelEx attrsHashModel = (TemplateHashModelEx) args[attrsVarargsIndex];
 
         if (attrsHashModel != null && !attrsHashModel.isEmptyHash()) {
@@ -342,8 +341,7 @@ public abstract class AbstractHtmlElementTemplateDirectiveModel
 
         if (!unmodifiableDynamicAttributes.isEmpty()) {
             for (String attr : unmodifiableDynamicAttributes.keySet()) {
-                tagOut.writeOptionalAttributeValue(attr,
-                        getDisplayString(unmodifiableDynamicAttributes.get(attr), false));
+                tagOut.writeOptionalAttributeValue(attr, getDisplayString(unmodifiableDynamicAttributes.get(attr)));
             }
         }
     }

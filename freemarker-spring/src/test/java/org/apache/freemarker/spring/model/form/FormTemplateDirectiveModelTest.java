@@ -37,6 +37,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration("classpath:META-INF/web-resources")
@@ -62,7 +63,45 @@ public class FormTemplateDirectiveModelTest {
         final User user = userRepository.getUser(userId);
         mockMvc.perform(get("/users/{userId}/", userId).param("viewName", "test/model/form/form-directive-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print());
+                .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
+                .andExpect(xpath("//form[@id='form1']/@method").string("post"))
+                .andExpect(xpath("//form[@id='form1']//input[@name='firstName']/@value").string(user.getFirstName()))
+                .andExpect(xpath("//form[@id='form1']//input[@name='lastName']/@value").string(user.getLastName()));
+    }
+
+    @Test
+    public void testDefaultAttributes() throws Exception {
+        final Long userId = userRepository.getUserIds().iterator().next();
+        final User user = userRepository.getUser(userId);
+        mockMvc.perform(get("/users/{userId}/", userId).param("viewName", "test/model/form/form-directive-usages")
+                .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
+                .andExpect(xpath("//form[@id='form2']/@class").string("my_cssClass"))
+                .andExpect(xpath("//form[@id='form2']/@style").string("my_cssStyle"))
+                .andExpect(xpath("//form[@id='form2']/@lang").string("my_lang"))
+                .andExpect(xpath("//form[@id='form2']/@title").string("my_title"))
+                .andExpect(xpath("//form[@id='form2']/@dir").string("my_dir"))
+                .andExpect(xpath("//form[@id='form2']/@tabindex").string("my_tabindex"))
+                .andExpect(xpath("//form[@id='form2']/@onclick").string("my_onclick()"))
+                .andExpect(xpath("//form[@id='form2']/@ondblclick").string("my_ondblclick()"))
+                .andExpect(xpath("//form[@id='form2']/@onmousedown").string("my_onmousedown()"))
+                .andExpect(xpath("//form[@id='form2']/@onmouseup").string("my_onmouseup()"))
+                .andExpect(xpath("//form[@id='form2']/@onmouseover").string("my_onmouseover()"))
+                .andExpect(xpath("//form[@id='form2']/@onmousemove").string("my_onmousemove()"))
+                .andExpect(xpath("//form[@id='form2']/@onmouseout").string("my_onmouseout()"))
+                .andExpect(xpath("//form[@id='form2']/@onkeypress").string("my_onkeypress()"))
+                .andExpect(xpath("//form[@id='form2']/@onkeyup").string("my_onkeyup()"))
+                .andExpect(xpath("//form[@id='form2']/@onkeydown").string("my_onkeydown()"))
+                .andExpect(xpath("//form[@id='form2']/@action").string("my_action"))
+                .andExpect(xpath("//form[@id='form2']/@method").string("post"))
+                .andExpect(xpath("//form[@id='form2']/@target").string("my_target"))
+                .andExpect(xpath("//form[@id='form2']/@enctype").string("my_enctype"))
+                .andExpect(xpath("//form[@id='form2']/@acceptCharset").string("my_acceptCharset"))
+                .andExpect(xpath("//form[@id='form2']/@onsubmit").string("my_onsubmit()"))
+                .andExpect(xpath("//form[@id='form2']/@onreset").string("my_onreset()"))
+                .andExpect(xpath("//form[@id='form2']/@autocomplete").string("my_autocomplete"))
+                .andExpect(xpath("//form[@id='form2']/@name").string("my_name"))
+                .andExpect(xpath("//form[@id='form2']/@autocomplete").string("my_autocomplete"));
     }
 
 }

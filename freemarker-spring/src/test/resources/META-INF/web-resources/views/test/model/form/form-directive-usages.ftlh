@@ -19,24 +19,62 @@
 <html>
 <body>
 
+  <#assign form=spring.form />
+
   <h1>Form 1</h1>
   <hr/>
-  <@spring.form.form "user">
+  <@form.form "user" id="form1">
     <table>
       <tr>
         <th>First name:</th>
         <td>
-          <@spring.form.input 'user.firstName' />
+          <@form.input 'firstName' />
         </td>
       </tr>
       <tr>
         <th>Last name:</th>
         <td>
-          <@spring.form.input 'user.lastName' />
+          <@form.input 'lastName' />
         </td>
       </tr>
     </table>
-  </@spring.form.form>
+  </@form.form>
+
+  <hr/>
+
+  <h2>Testing default attributes</h2>
+  <@form.form "user" id="form2"
+                     cssClass="my_cssClass"
+                     cssStyle="my_cssStyle"
+                     lang="my_lang"
+                     title="my_title"
+                     dir="my_dir"
+                     tabindex="my_tabindex"
+                     onclick="my_onclick()"
+                     ondblclick="my_ondblclick()"
+                     onmousedown="my_onmousedown()"
+                     onmouseup="my_onmouseup()"
+                     onmouseover="my_onmouseover()"
+                     onmousemove="my_onmousemove()"
+                     onmouseout="my_onmouseout()"
+                     onkeypress="my_onkeypress()"
+                     onkeyup="my_onkeyup()"
+                     onkeydown="my_onkeydown()"
+                     cssErrorClass="my_cssErrorClass"
+                     action="my_action"
+                     method="post"
+                     target="my_target"
+                     enctype="my_enctype"
+                     acceptCharset="my_acceptCharset"
+                     onsubmit="my_onsubmit()"
+                     onreset="my_onreset()"
+                     autocomplete="my_autocomplete"
+                     name="my_name"
+                     value="my_value"
+                     type="my_type"
+                     servletRelativeAction="my_servletRelativeAction"
+                     methodParam="my_methodParam">
+  </@form.form>
 
 </body>
 </html>

@@ -38,7 +38,37 @@ import org.apache.freemarker.core.util.StringToIndexMap;
 import org.apache.freemarker.core.util._CollectionUtils;
 import org.springframework.web.servlet.support.RequestContext;
 
-public class InputTemplateDirectiveModel extends AbstractHtmlInputElementTemplateDirectiveModel {
+/**
+ * Provides <code>TemplateModel</code> for data-binding-aware HTML '{@code input}' element with a '{@code type}'
+ * of '{@code text}'.
+ * <P>
+ * This directive supports the following parameters:
+ * <UL>
+ * <LI><code>path</code>: The first positional parameter pointing to the bean or bean property to bind status information for.</LI>
+ * <LI>
+ *   ... TODO ...
+ * </LI>
+ * </UL>
+ * </P>
+ * <P>
+ * Some valid example(s):
+ * </P>
+ * <PRE>
+ *   &lt;#assign form=spring.form /&gt;
+ *   ...
+ *   &lt;@form.input 'user.firstName' /&gt;
+ *   
+ *   &lt;@form.input 'user.email' id="customEmailId" /&gt;
+ *   
+ *   ...
+ * </PRE>
+ * <P>
+ * <EM>Note:</EM> Unlike Spring Framework's <code>&lt;form:input /&gt;</code> JSP Tag Library, this directive
+ * does not support <code>htmlEscape</code> parameter. It always renders HTML's without escaping
+ * because it is much easier to control escaping in FreeMarker Template expressions.
+ * </P>
+ */
+class InputTemplateDirectiveModel extends AbstractHtmlInputElementTemplateDirectiveModel {
 
     public static final String NAME = "input";
 
@@ -161,7 +191,7 @@ public class InputTemplateDirectiveModel extends AbstractHtmlInputElementTemplat
     }
 
     protected void writeValue(Environment env, TagOutputter tagOut) throws TemplateException, IOException {
-        String value = getDisplayString(getBindStatus().getValue(), getBindStatus().getEditor(), false);
+        String value = getDisplayString(getBindStatus().getValue(), getBindStatus().getEditor());
         String type = hasDynamicTypeAttribute() ? (String) getDynamicAttributes().get("type") : getType();
         tagOut.writeAttribute("value", processFieldValue(env, getName(), value, type));
     }

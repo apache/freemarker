@@ -28,12 +28,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.spring.model.AbstractSpringTemplateDirectiveModel;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.util.HtmlUtils;
 
 /**
  * Corresponds to <code>org.springframework.web.servlet.tags.form.AbstractFormTag</code>.
  */
-public abstract class AbstractFormTemplateDirectiveModel extends AbstractSpringTemplateDirectiveModel {
+abstract class AbstractFormTemplateDirectiveModel extends AbstractSpringTemplateDirectiveModel {
 
     protected AbstractFormTemplateDirectiveModel(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
@@ -43,32 +42,32 @@ public abstract class AbstractFormTemplateDirectiveModel extends AbstractSpringT
         return value;
     }
 
-    public static String getDisplayString(Object value, boolean htmlEscape) {
+    public static String getDisplayString(Object value) {
         String displayValue = ObjectUtils.getDisplayString(value);
-        return (htmlEscape ? HtmlUtils.htmlEscape(displayValue) : displayValue);
+        return displayValue;
     }
 
-    public static String getDisplayString(Object value, PropertyEditor propertyEditor, boolean htmlEscape) {
+    public static String getDisplayString(Object value, PropertyEditor propertyEditor) {
         if (propertyEditor != null && !(value instanceof String)) {
             try {
                 propertyEditor.setValue(value);
                 String text = propertyEditor.getAsText();
 
                 if (text != null) {
-                    return getDisplayString(text, htmlEscape);
+                    return getDisplayString(text);
                 }
             } catch (Throwable ex) {
                 // Ignore error if the PropertyEditor doesn't support this text value.
             }
         }
 
-        return getDisplayString(value, htmlEscape);
+        return getDisplayString(value);
     }
 
     protected final void writeOptionalAttribute(TagOutputter tagOut, String attrName, Object attrValue)
             throws TemplateException, IOException {
         if (attrValue != null) {
-            tagOut.writeOptionalAttributeValue(attrName, getDisplayString(evaluate(attrName, attrValue), false));
+            tagOut.writeOptionalAttributeValue(attrName, getDisplayString(evaluate(attrName, attrValue)));
         }
     }
 

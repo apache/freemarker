@@ -33,7 +33,6 @@ import org.apache.freemarker.core.model.TemplateModel;
 /**
  * TemplateHashModel wrapper for templates using Spring directives, functions and internal models.
  */
-//TODO [FM3] Shouldn't this be a TemplateHashModelEx?
 public final class SpringFormTemplateCallableHashModel implements TemplateHashModel, Serializable {
 
     private static final long serialVersionUID = 1L;

@@ -43,7 +43,7 @@ import org.springframework.web.servlet.support.RequestDataValueProcessor;
 /**
  * Corresponds to <code>org.springframework.web.servlet.tags.form.AbstractDataBoundFormElementTag</code>.
  */
-public abstract class AbstractDataBoundFormElementTemplateDirectiveModel extends AbstractFormTemplateDirectiveModel {
+abstract class AbstractDataBoundFormElementTemplateDirectiveModel extends AbstractFormTemplateDirectiveModel {
 
     private static final int PATH_PARAM_IDX = 0;
 
