@@ -256,7 +256,7 @@ public final class StringToIndexMap {
     }
 
     /**
-     * Checks if all entries are in the {@code start} - {@code start}+{@code getCollectionSize()} (exclusive) index
+     * Checks if all entries are in the {@code start} - {@code start}+{@code size()} (exclusive) index
      * range.
      *
      * @throws IllegalArgumentException

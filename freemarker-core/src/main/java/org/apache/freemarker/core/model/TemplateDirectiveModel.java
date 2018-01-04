@@ -38,13 +38,13 @@ public interface TemplateDirectiveModel extends TemplateCallableModel {
      *         The array of argument values. Not {@code null}. If a parameter was omitted on the caller side, the
      *         corresponding array element will be {@code null}. The length of the array and the indexes correspond to
      *         the {@link ArgumentArrayLayout} returned by {@link #getDirectiveArgumentArrayLayout()}. {@link
-     *         ArgumentArrayLayout} os not {@code null}m and the caller doesn't keep argument layout rules (such as the
+     *         ArgumentArrayLayout} is not {@code null}, and the caller doesn't keep argument layout rules (such as the
      *         array is shorter than {@link ArgumentArrayLayout#getTotalLength()}, or the type of the values at {@link
      *         ArgumentArrayLayout#getPositionalVarargsArgumentIndex()} or at
      *         {@link ArgumentArrayLayout#getNamedVarargsArgumentIndex()}
      *         is improper), this method may throws {@link IndexOutOfBoundsException} or {@link ClassCastException}.
      *         Thus, user Java code that wishes to call {@link TemplateCallableModel}-s is responsible to ensure that
-     *         the argument array follows the layout described be {@link ArgumentArrayLayout}, as the {@code execute}
+     *         the argument array follows the layout described by {@link ArgumentArrayLayout}, as the {@code execute}
      *         method isn't meant to do validations on that level.
      * @param callPlace
      *         The place (in a template, normally) where this directive was called from. Not {@code null}; in case the

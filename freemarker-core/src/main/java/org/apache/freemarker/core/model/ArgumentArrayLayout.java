@@ -33,10 +33,10 @@ import org.apache.freemarker.core.util.StringToIndexMap;
  * values can always be accessed at these constant indexes; no runtime name lookup is needed inside the {@code
  * execute} method of the {@link TemplateCallableModel} implementation. The {@link ArgumentArrayLayout} object is
  * usually stored in a static final field of the {@link TemplateCallableModel} implementation class. Said constant
- * indexes are alsi usually defined in the {@link TemplateCallableModel} implementation as static final constants
- * (then feed into the {@link ArgumentArrayLayout}). Some {@link TemplateCallableModel} implementations, such those
- * stand for macros and functions defined in the template, decide the layout on runtime instead. Note the less, once
- * the {@link TemplateCallableModel} was crated, the layout is fixed.
+ * indexes are also usually defined in the {@link TemplateCallableModel} implementation as static final constants
+ * (then feed into the {@link ArgumentArrayLayout}). Some {@link TemplateCallableModel} implementations, such as those
+ * stand for macros and functions defined in the template, decide the layout on runtime instead. None the less, once
+ * the {@link TemplateCallableModel} was created, the layout is fixed.
  * <p>
  * The layout of the array is as follows:
  * <ol>
@@ -47,7 +47,7 @@ import org.apache.freemarker.core.util.StringToIndexMap;
  * <li>
  *     {@link #getPredefinedNamedArgumentsMap()}{@code .size()} elements for the predefined named arguments. These are
  *     at the indexes returned by {@link #getPredefinedNamedArgumentsMap()}{@code .get(String name)}. Yet again, for
- *     omitted arguments the corresponding array element is {@code null}. Within this index range reserved for the
+ *     omitted arguments the corresponding array element is {@code null}. Within the index range reserved for the
  *     named arguments, the {@link TemplateCallableModel} object is free to chose what index belongs to which name (as
  *     far as two names don't share the same index).
  * <li>
