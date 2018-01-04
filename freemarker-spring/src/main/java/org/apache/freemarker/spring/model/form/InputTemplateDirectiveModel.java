@@ -21,8 +21,6 @@ package org.apache.freemarker.spring.model.form;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,7 +33,7 @@ import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
-import org.apache.freemarker.core.util._CollectionUtils;
+import org.apache.freemarker.core.util._ArrayUtils;
 import org.springframework.web.servlet.support.RequestContext;
 
 /**
@@ -72,8 +70,7 @@ class InputTemplateDirectiveModel extends AbstractHtmlInputElementTemplateDirect
 
     public static final String NAME = "input";
 
-    private static final int NAMED_ARGS_OFFSET = AbstractHtmlInputElementTemplateDirectiveModel.NAMED_ARGS_ENTRY_LIST
-            .size() + 1;
+    private static final int NAMED_ARGS_OFFSET = AbstractHtmlInputElementTemplateDirectiveModel.NAMED_ARGS_ENTRIES.length + 1;
 
     private static final int SIZE_PARAM_IDX = NAMED_ARGS_OFFSET;
     private static final String SIZE_PARAM_NAME = "size";
@@ -90,24 +87,21 @@ class InputTemplateDirectiveModel extends AbstractHtmlInputElementTemplateDirect
     private static final int AUTOCOMPLETE_PARAM_IDX = NAMED_ARGS_OFFSET + 4;
     private static final String AUTOCOMPLETE_PARAM_NAME = "autocomplete";
 
-    @SuppressWarnings("unchecked")
-    protected static List<StringToIndexMap.Entry> NAMED_ARGS_ENTRY_LIST =
-            _CollectionUtils.mergeImmutableLists(false,
-                    AbstractHtmlInputElementTemplateDirectiveModel.NAMED_ARGS_ENTRY_LIST,
-                    Arrays.asList(
-                        new StringToIndexMap.Entry(SIZE_PARAM_NAME, SIZE_PARAM_IDX),
-                        new StringToIndexMap.Entry(MAXLENGTH_PARAM_NAME, MAXLENGTH_PARAM_IDX),
-                        new StringToIndexMap.Entry(ALT_PARAM_NAME, ALT_PARAM_IDX),
-                        new StringToIndexMap.Entry(ONSELECT_PARAM_NAME, ONSELECT_PARAM_IDX),
-                        new StringToIndexMap.Entry(AUTOCOMPLETE_PARAM_NAME, AUTOCOMPLETE_PARAM_IDX)
-                        )
+    protected static StringToIndexMap.Entry[] NAMED_ARGS_ENTRIES =
+            _ArrayUtils.addAll(
+                    AbstractHtmlInputElementTemplateDirectiveModel.NAMED_ARGS_ENTRIES,
+                    new StringToIndexMap.Entry(SIZE_PARAM_NAME, SIZE_PARAM_IDX),
+                    new StringToIndexMap.Entry(MAXLENGTH_PARAM_NAME, MAXLENGTH_PARAM_IDX),
+                    new StringToIndexMap.Entry(ALT_PARAM_NAME, ALT_PARAM_IDX),
+                    new StringToIndexMap.Entry(ONSELECT_PARAM_NAME, ONSELECT_PARAM_IDX),
+                    new StringToIndexMap.Entry(AUTOCOMPLETE_PARAM_NAME, AUTOCOMPLETE_PARAM_IDX)
                     );
 
     private static final ArgumentArrayLayout ARGS_LAYOUT =
             ArgumentArrayLayout.create(
                     1,
                     false,
-                    StringToIndexMap.of(NAMED_ARGS_ENTRY_LIST.toArray(new StringToIndexMap.Entry[NAMED_ARGS_ENTRY_LIST.size()])),
+                    StringToIndexMap.of(NAMED_ARGS_ENTRIES),
                     true
                     );
 

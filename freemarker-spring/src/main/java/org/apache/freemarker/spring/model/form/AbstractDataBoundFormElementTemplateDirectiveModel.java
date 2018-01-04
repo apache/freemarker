@@ -21,8 +21,6 @@ package org.apache.freemarker.spring.model.form;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -55,15 +53,15 @@ abstract class AbstractDataBoundFormElementTemplateDirectiveModel extends Abstra
 
     private static final String ID_PARAM_NAME = ID_ATTR_NAME;
 
-    protected static List<StringToIndexMap.Entry> NAMED_ARGS_ENTRY_LIST = Arrays.asList(
+    protected static StringToIndexMap.Entry[] NAMED_ARGS_ENTRIES = {
             new StringToIndexMap.Entry(ID_PARAM_NAME, ID_PARAM_IDX)
-    );
+    };
 
     private static final ArgumentArrayLayout ARGS_LAYOUT =
             ArgumentArrayLayout.create(
                     1,
                     false,
-                    StringToIndexMap.of(NAMED_ARGS_ENTRY_LIST.toArray(new StringToIndexMap.Entry[NAMED_ARGS_ENTRY_LIST.size()])),
+                    StringToIndexMap.of(NAMED_ARGS_ENTRIES),
                     true
                     );
 

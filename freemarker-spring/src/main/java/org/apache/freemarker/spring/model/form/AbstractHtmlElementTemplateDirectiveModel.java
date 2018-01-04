@@ -21,10 +21,8 @@ package org.apache.freemarker.spring.model.form;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,7 +38,7 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
-import org.apache.freemarker.core.util._CollectionUtils;
+import org.apache.freemarker.core.util._ArrayUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.support.RequestContext;
@@ -51,8 +49,8 @@ import org.springframework.web.servlet.support.RequestContext;
 abstract class AbstractHtmlElementTemplateDirectiveModel
         extends AbstractDataBoundFormElementTemplateDirectiveModel {
 
-    private static final int NAMED_ARGS_OFFSET = AbstractDataBoundFormElementTemplateDirectiveModel.NAMED_ARGS_ENTRY_LIST
-            .size() + 1;
+    private static final int NAMED_ARGS_OFFSET = AbstractDataBoundFormElementTemplateDirectiveModel.NAMED_ARGS_ENTRIES.length
+            + 1;
 
     private static final int CSS_CLASS_PARAM_IDX = NAMED_ARGS_OFFSET;
     private static final String CSS_CLASS_PARAM_NAME = "cssClass";
@@ -107,36 +105,33 @@ abstract class AbstractHtmlElementTemplateDirectiveModel
     private static final int CSSERRORCLASS_PARAM_IDX = NAMED_ARGS_OFFSET + 16;
     private static final String CSSERRORCLASS_PARAM_NAME = "cssErrorClass";
 
-    @SuppressWarnings("unchecked")
-    protected static List<StringToIndexMap.Entry> NAMED_ARGS_ENTRY_LIST =
-            _CollectionUtils.mergeImmutableLists(false,
-                    AbstractDataBoundFormElementTemplateDirectiveModel.NAMED_ARGS_ENTRY_LIST,
-                    Arrays.asList(
-                            new StringToIndexMap.Entry(CSS_CLASS_PARAM_NAME, CSS_CLASS_PARAM_IDX),
-                            new StringToIndexMap.Entry(CSS_STYLE_PARAM_NAME, CSS_STYLE_PARAM_IDX),
-                            new StringToIndexMap.Entry(LANG_PARAM_NAME, LANG_PARAM_IDX),
-                            new StringToIndexMap.Entry(TITLE_PARAM_NAME, TITLE_PARAM_IDX),
-                            new StringToIndexMap.Entry(DIR_PARAM_NAME, DIR_PARAM_IDX),
-                            new StringToIndexMap.Entry(TABINDEX_PARAM_NAME, TABINDEX_PARAM_IDX),
-                            new StringToIndexMap.Entry(ONCLICK_PARAM_NAME, ONCLICK_PARAM_IDX),
-                            new StringToIndexMap.Entry(ONDBLCLICK_PARAM_NAME, ONDBLCLICK_PARAM_IDX),
-                            new StringToIndexMap.Entry(ONMOUSEDOWN_PARAM_NAME, ONMOUSEDOWN_PARAM_IDX),
-                            new StringToIndexMap.Entry(ONMOUSEUP_PARAM_NAME, ONMOUSEUP_PARAM_IDX),
-                            new StringToIndexMap.Entry(ONMOUSEOVER_PARAM_NAME, ONMOUSEOVER_PARAM_IDX),
-                            new StringToIndexMap.Entry(ONMOUSEMOVE_PARAM_NAME, ONMOUSEMOVE_PARAM_IDX),
-                            new StringToIndexMap.Entry(ONMOUSEOUT_PARAM_NAME, ONMOUSEOUT_PARAM_IDX),
-                            new StringToIndexMap.Entry(ONKEYPRESS_PARAM_NAME, ONKEYPRESS_PARAM_IDX),
-                            new StringToIndexMap.Entry(ONKEYUP_PARAM_NAME, ONKEYUP_PARAM_IDX),
-                            new StringToIndexMap.Entry(ONKEYDOWN_PARAM_NAME, ONKEYDOWN_PARAM_IDX),
-                            new StringToIndexMap.Entry(CSSERRORCLASS_PARAM_NAME, CSSERRORCLASS_PARAM_IDX)
-                            )
+    protected static StringToIndexMap.Entry[] NAMED_ARGS_ENTRIES =
+            _ArrayUtils.addAll(
+                    AbstractDataBoundFormElementTemplateDirectiveModel.NAMED_ARGS_ENTRIES,
+                    new StringToIndexMap.Entry(CSS_CLASS_PARAM_NAME, CSS_CLASS_PARAM_IDX),
+                    new StringToIndexMap.Entry(CSS_STYLE_PARAM_NAME, CSS_STYLE_PARAM_IDX),
+                    new StringToIndexMap.Entry(LANG_PARAM_NAME, LANG_PARAM_IDX),
+                    new StringToIndexMap.Entry(TITLE_PARAM_NAME, TITLE_PARAM_IDX),
+                    new StringToIndexMap.Entry(DIR_PARAM_NAME, DIR_PARAM_IDX),
+                    new StringToIndexMap.Entry(TABINDEX_PARAM_NAME, TABINDEX_PARAM_IDX),
+                    new StringToIndexMap.Entry(ONCLICK_PARAM_NAME, ONCLICK_PARAM_IDX),
+                    new StringToIndexMap.Entry(ONDBLCLICK_PARAM_NAME, ONDBLCLICK_PARAM_IDX),
+                    new StringToIndexMap.Entry(ONMOUSEDOWN_PARAM_NAME, ONMOUSEDOWN_PARAM_IDX),
+                    new StringToIndexMap.Entry(ONMOUSEUP_PARAM_NAME, ONMOUSEUP_PARAM_IDX),
+                    new StringToIndexMap.Entry(ONMOUSEOVER_PARAM_NAME, ONMOUSEOVER_PARAM_IDX),
+                    new StringToIndexMap.Entry(ONMOUSEMOVE_PARAM_NAME, ONMOUSEMOVE_PARAM_IDX),
+                    new StringToIndexMap.Entry(ONMOUSEOUT_PARAM_NAME, ONMOUSEOUT_PARAM_IDX),
+                    new StringToIndexMap.Entry(ONKEYPRESS_PARAM_NAME, ONKEYPRESS_PARAM_IDX),
+                    new StringToIndexMap.Entry(ONKEYUP_PARAM_NAME, ONKEYUP_PARAM_IDX),
+                    new StringToIndexMap.Entry(ONKEYDOWN_PARAM_NAME, ONKEYDOWN_PARAM_IDX),
+                    new StringToIndexMap.Entry(CSSERRORCLASS_PARAM_NAME, CSSERRORCLASS_PARAM_IDX)
                     );
 
     private static final ArgumentArrayLayout ARGS_LAYOUT =
             ArgumentArrayLayout.create(
                     1,
                     false,
-                    StringToIndexMap.of(NAMED_ARGS_ENTRY_LIST.toArray(new StringToIndexMap.Entry[NAMED_ARGS_ENTRY_LIST.size()])),
+                    StringToIndexMap.of(NAMED_ARGS_ENTRIES),
                     true
                     );
 
