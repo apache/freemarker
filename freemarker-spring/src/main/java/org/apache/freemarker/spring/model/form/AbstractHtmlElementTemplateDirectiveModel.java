@@ -49,8 +49,8 @@ import org.springframework.web.servlet.support.RequestContext;
 abstract class AbstractHtmlElementTemplateDirectiveModel
         extends AbstractDataBoundFormElementTemplateDirectiveModel {
 
-    private static final int NAMED_ARGS_OFFSET = AbstractDataBoundFormElementTemplateDirectiveModel.NAMED_ARGS_ENTRIES.length
-            + 1;
+    private static final int NAMED_ARGS_OFFSET =
+            getLastPredefinedNamedArgumentIndex(AbstractDataBoundFormElementTemplateDirectiveModel.ARGS_LAYOUT) + 1;
 
     private static final int CSS_CLASS_PARAM_IDX = NAMED_ARGS_OFFSET;
     private static final String CSS_CLASS_PARAM_NAME = "cssClass";
@@ -105,9 +105,10 @@ abstract class AbstractHtmlElementTemplateDirectiveModel
     private static final int CSSERRORCLASS_PARAM_IDX = NAMED_ARGS_OFFSET + 16;
     private static final String CSSERRORCLASS_PARAM_NAME = "cssErrorClass";
 
-    protected static StringToIndexMap.Entry[] NAMED_ARGS_ENTRIES =
+    private static final StringToIndexMap.Entry[] NAMED_ARGS_ENTRIES =
             _ArrayUtils.addAll(
-                    AbstractDataBoundFormElementTemplateDirectiveModel.NAMED_ARGS_ENTRIES,
+                    AbstractDataBoundFormElementTemplateDirectiveModel.ARGS_LAYOUT.getPredefinedNamedArgumentsMap()
+                            .getInputEntries(),
                     new StringToIndexMap.Entry(CSS_CLASS_PARAM_NAME, CSS_CLASS_PARAM_IDX),
                     new StringToIndexMap.Entry(CSS_STYLE_PARAM_NAME, CSS_STYLE_PARAM_IDX),
                     new StringToIndexMap.Entry(LANG_PARAM_NAME, LANG_PARAM_IDX),
@@ -127,7 +128,7 @@ abstract class AbstractHtmlElementTemplateDirectiveModel
                     new StringToIndexMap.Entry(CSSERRORCLASS_PARAM_NAME, CSSERRORCLASS_PARAM_IDX)
                     );
 
-    private static final ArgumentArrayLayout ARGS_LAYOUT =
+    protected static final ArgumentArrayLayout ARGS_LAYOUT =
             ArgumentArrayLayout.create(
                     1,
                     false,

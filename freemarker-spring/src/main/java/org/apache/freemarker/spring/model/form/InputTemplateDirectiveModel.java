@@ -70,7 +70,8 @@ class InputTemplateDirectiveModel extends AbstractHtmlInputElementTemplateDirect
 
     public static final String NAME = "input";
 
-    private static final int NAMED_ARGS_OFFSET = AbstractHtmlInputElementTemplateDirectiveModel.NAMED_ARGS_ENTRIES.length + 1;
+    private static final int NAMED_ARGS_OFFSET =
+            getLastPredefinedNamedArgumentIndex(AbstractHtmlInputElementTemplateDirectiveModel.ARGS_LAYOUT) + 1;
 
     private static final int SIZE_PARAM_IDX = NAMED_ARGS_OFFSET;
     private static final String SIZE_PARAM_NAME = "size";
@@ -87,9 +88,10 @@ class InputTemplateDirectiveModel extends AbstractHtmlInputElementTemplateDirect
     private static final int AUTOCOMPLETE_PARAM_IDX = NAMED_ARGS_OFFSET + 4;
     private static final String AUTOCOMPLETE_PARAM_NAME = "autocomplete";
 
-    protected static StringToIndexMap.Entry[] NAMED_ARGS_ENTRIES =
+    private static final StringToIndexMap.Entry[] NAMED_ARGS_ENTRIES =
             _ArrayUtils.addAll(
-                    AbstractHtmlInputElementTemplateDirectiveModel.NAMED_ARGS_ENTRIES,
+                    AbstractHtmlInputElementTemplateDirectiveModel.ARGS_LAYOUT.getPredefinedNamedArgumentsMap()
+                            .getInputEntries(),
                     new StringToIndexMap.Entry(SIZE_PARAM_NAME, SIZE_PARAM_IDX),
                     new StringToIndexMap.Entry(MAXLENGTH_PARAM_NAME, MAXLENGTH_PARAM_IDX),
                     new StringToIndexMap.Entry(ALT_PARAM_NAME, ALT_PARAM_IDX),
@@ -97,7 +99,7 @@ class InputTemplateDirectiveModel extends AbstractHtmlInputElementTemplateDirect
                     new StringToIndexMap.Entry(AUTOCOMPLETE_PARAM_NAME, AUTOCOMPLETE_PARAM_IDX)
                     );
 
-    private static final ArgumentArrayLayout ARGS_LAYOUT =
+    protected static final ArgumentArrayLayout ARGS_LAYOUT =
             ArgumentArrayLayout.create(
                     1,
                     false,

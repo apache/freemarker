@@ -76,7 +76,8 @@ class FormTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveMod
 
     public static final String NAME = "form";
 
-    private static final int NAMED_ARGS_OFFSET = AbstractHtmlElementTemplateDirectiveModel.NAMED_ARGS_ENTRIES.length + 1;
+    private static final int NAMED_ARGS_OFFSET =
+            getLastPredefinedNamedArgumentIndex(AbstractHtmlElementTemplateDirectiveModel.ARGS_LAYOUT) + 1;
 
     private static final int ACTION_PARAM_IDX = NAMED_ARGS_OFFSET;
     private static final String ACTION_PARAM_NAME = "action";
@@ -117,9 +118,10 @@ class FormTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveMod
     private static final int METHOD_PARAM_PARAM_IDX = NAMED_ARGS_OFFSET + 12;
     private static final String METHOD_PARAM_PARAM_NAME = "methodParam";
 
-    protected static StringToIndexMap.Entry[] NAMED_ARGS_ENTRIES =
+    private static final StringToIndexMap.Entry[] NAMED_ARGS_ENTRIES =
             _ArrayUtils.addAll(
-                    AbstractHtmlElementTemplateDirectiveModel.NAMED_ARGS_ENTRIES,
+                    AbstractHtmlElementTemplateDirectiveModel.ARGS_LAYOUT.getPredefinedNamedArgumentsMap()
+                            .getInputEntries(),
                     new StringToIndexMap.Entry(ACTION_PARAM_NAME, ACTION_PARAM_IDX),
                     new StringToIndexMap.Entry(METHOD_PARAM_NAME, METHOD_PARAM_IDX),
                     new StringToIndexMap.Entry(TARGET_PARAM_NAME, TARGET_PARAM_IDX),
@@ -135,7 +137,7 @@ class FormTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveMod
                     new StringToIndexMap.Entry(METHOD_PARAM_PARAM_NAME, METHOD_PARAM_PARAM_IDX)
                     );
 
-    private static final ArgumentArrayLayout ARGS_LAYOUT =
+    protected static final ArgumentArrayLayout ARGS_LAYOUT =
             ArgumentArrayLayout.create(
                     1,
                     false,
