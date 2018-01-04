@@ -19,8 +19,6 @@
 <html>
 <body>
 
-  <#assign form=spring.form />
-
   <h1>Form 1</h1>
   <hr/>
   <@form.form "user" id="form1">
