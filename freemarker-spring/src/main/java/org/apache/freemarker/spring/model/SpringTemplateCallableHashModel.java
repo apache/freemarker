@@ -34,7 +34,6 @@ import org.apache.freemarker.core.model.TemplateStringModel;
 /**
  * TemplateHashModel wrapper for templates using Spring directives, functions and internal models.
  */
-//TODO [FM3] Shouldn't this be a TemplateHashModelEx?
 public final class SpringTemplateCallableHashModel implements TemplateHashModel, Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -74,19 +73,19 @@ public final class SpringTemplateCallableHashModel implements TemplateHashModel,
         return modelsMap.get(key);
     }
 
-    TemplateStringModel getNestedPathModel() throws TemplateException {
+    public TemplateStringModel getNestedPathModel() throws TemplateException {
         return (TemplateStringModel) get(NESTED_PATH_MODEL);
     }
 
-    void setNestedPathModel(TemplateStringModel nestedPathModel) {
+    public void setNestedPathModel(TemplateStringModel nestedPathModel) {
         modelsMap.put(NESTED_PATH_MODEL, nestedPathModel);
     }
 
-    TemplateModel getEvaluationContextModel() throws TemplateException {
+    public TemplateModel getEvaluationContextModel() throws TemplateException {
         return get(EVALUATION_CONTEXT_MODEL);
     }
 
-    void setEvaluationContextModel(TemplateModel evaluationContextModel) {
+    public void setEvaluationContextModel(TemplateModel evaluationContextModel) {
         modelsMap.put(EVALUATION_CONTEXT_MODEL, evaluationContextModel);
     }
 

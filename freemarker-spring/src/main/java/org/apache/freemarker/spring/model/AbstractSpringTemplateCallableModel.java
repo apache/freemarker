@@ -38,7 +38,7 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
 /**
  * Abstract TemplateCallableModel for derived classes to support Spring MVC based templating environment.
  */
-abstract class AbstractSpringTemplateCallableModel implements TemplateCallableModel {
+public abstract class AbstractSpringTemplateCallableModel implements TemplateCallableModel {
 
     private final HttpServletRequest request;
     private final HttpServletResponse response;
@@ -130,9 +130,30 @@ abstract class AbstractSpringTemplateCallableModel implements TemplateCallableMo
     protected final TemplateModel getBindStatusTemplateModel(Environment env,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext, String path,
             boolean ignoreNestedPath) throws TemplateException {
+        BindStatus status = getBindStatus(env, objectWrapperAndUnwrapper, requestContext, path, ignoreNestedPath);
+        return (status != null) ? objectWrapperAndUnwrapper.wrap(status) : null;
+    }
+
+    /**
+     * Find {@link BindStatus} with no {@code htmlEscape} option from {@link RequestContext} by the {@code path}.
+     * <P>
+     * <EM>NOTE:</EM> In FreeMarker, there is no need to depend on <code>BindStatus#htmlEscape</code> option
+     * as FreeMarker template expressions can easily set escape option by themselves.
+     * Therefore, this method always get a {@link BindStatus} with {@code htmlEscape} option set to {@code false}.
+     * @param env Environment
+     * @param objectWrapperAndUnwrapper ObjectWrapperAndUnwrapper
+     * @param requestContext Spring RequestContext
+     * @param path bind path
+     * @param ignoreNestedPath flag whether or not to ignore the nested path
+     * @return a {@link BindStatus} with no {@code htmlEscape} option from {@link RequestContext} by the {@code path}
+     * @throws TemplateException if template exception occurs
+     */
+    protected final BindStatus getBindStatus(Environment env,
+            ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext, String path,
+            boolean ignoreNestedPath) throws TemplateException {
         final String resolvedPath = (ignoreNestedPath) ? path : resolveNestedPath(env, objectWrapperAndUnwrapper, path);
         BindStatus status = requestContext.getBindStatus(resolvedPath, false);
-        return (status != null) ? objectWrapperAndUnwrapper.wrap(status) : null;
+        return status;
     }
 
     /**

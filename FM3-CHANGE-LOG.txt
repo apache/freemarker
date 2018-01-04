@@ -521,6 +521,9 @@ models by default like FreemarkerServlet does.
   - <spring:url ... /> : Replaced by spring.url(...) function.
   - <spring:param ... /> : No need since spring.url(...) function supports named vargs for variable length parameters.
   - <spring:eval /> : Replaced by spring.eval(...) function.
+- Directives Support to replace Spring Form JSP Tag Libraries in spring-form.tld:
+  - <form:form ... /> : Replaced by <@form.form ... /> directive.
+  - <form:input ... /> : Replaced by <@form.input ... /> directive.
 
 Core / Miscellaneous
 ....................

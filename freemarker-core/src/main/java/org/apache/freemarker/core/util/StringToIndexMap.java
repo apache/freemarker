@@ -37,6 +37,10 @@ public final class StringToIndexMap {
 
     private static final int MAX_VARIATIONS_TRIED = 4;
 
+    /** Input Entries from caller. */
+    private final Entry[] inputEntries;
+
+    /** Internal entry buckets. */
     private final Entry[] buckets;
     private final int bucketIndexMask;
     private final int bucketIndexOverlap;
@@ -131,6 +135,7 @@ public final class StringToIndexMap {
 
     // This is a very frequent case, so we optimize for it a bit.
     private StringToIndexMap(Entry entry) {
+        inputEntries = new Entry[] { entry };
         buckets = new Entry[] { entry };
         bucketIndexMask = 0;
         bucketIndexOverlap = 0;
@@ -143,11 +148,15 @@ public final class StringToIndexMap {
 
     private StringToIndexMap(Entry[] entries, int entriesLength) {
         if (entriesLength == 0) {
+            inputEntries = null;
             buckets = null;
             bucketIndexMask = 0;
             bucketIndexOverlap = 0;
             keys = Collections.emptyList();
         } else {
+            inputEntries = new Entry[entriesLength];
+            System.arraycopy(entries, 0, inputEntries, 0, entriesLength);
+
             String[] keyArray = new String[entriesLength];
             for (int i = 0; i < entriesLength; i++) {
                 keyArray[i] = entries[i].key;
@@ -271,6 +280,15 @@ public final class StringToIndexMap {
             }
         }
 
+    }
+
+    /**
+     * Return a cloned array from the original {@link Entry} array which was given by the caller through directly
+     * using {@link #of(Entry...)} or {@link #of(Entry[], int)} or indirectly using other methods such as {@link #of(String, int)}.
+     * @return a cloned array from the original {@link Entry} array which was given by the caller
+     */
+    public Entry[] getInputEntries() {
+        return inputEntries;
     }
 
     private static int getPowerOf2GreaterThanOrEqualTo(int n) {
