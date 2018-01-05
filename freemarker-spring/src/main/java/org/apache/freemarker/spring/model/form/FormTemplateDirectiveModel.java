@@ -75,8 +75,8 @@ class FormTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveMod
 
     public static final String NAME = "form";
 
-    private static final int NAMED_ARGS_OFFSET =
-            getLastPredefinedNamedArgumentIndex(AbstractHtmlElementTemplateDirectiveModel.ARGS_LAYOUT) + 1;
+    private static final int NAMED_ARGS_OFFSET = CallableUtils
+            .getLastPredefinedNamedArgumentIndex(AbstractHtmlElementTemplateDirectiveModel.ARGS_LAYOUT) + 1;
 
     private static final int ACTION_PARAM_IDX = NAMED_ARGS_OFFSET;
     private static final String ACTION_PARAM_NAME = "action";

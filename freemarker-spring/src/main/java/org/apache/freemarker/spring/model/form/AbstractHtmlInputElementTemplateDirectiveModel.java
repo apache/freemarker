@@ -37,8 +37,8 @@ import org.springframework.web.servlet.support.RequestContext;
 
 abstract class AbstractHtmlInputElementTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveModel {
 
-    private static final int NAMED_ARGS_OFFSET =
-            getLastPredefinedNamedArgumentIndex(AbstractHtmlElementTemplateDirectiveModel.ARGS_LAYOUT) + 1;
+    private static final int NAMED_ARGS_OFFSET = CallableUtils
+            .getLastPredefinedNamedArgumentIndex(AbstractHtmlElementTemplateDirectiveModel.ARGS_LAYOUT) + 1;
 
     private static final int ONFOCUS_PARAM_IDX = NAMED_ARGS_OFFSET;
     private static final String ONFOCUS_PARAM_NAME = "onfocus";

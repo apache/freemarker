@@ -48,8 +48,8 @@ import org.springframework.web.servlet.support.RequestContext;
 abstract class AbstractHtmlElementTemplateDirectiveModel
         extends AbstractDataBoundFormElementTemplateDirectiveModel {
 
-    private static final int NAMED_ARGS_OFFSET =
-            getLastPredefinedNamedArgumentIndex(AbstractDataBoundFormElementTemplateDirectiveModel.ARGS_LAYOUT) + 1;
+    private static final int NAMED_ARGS_OFFSET = CallableUtils
+            .getLastPredefinedNamedArgumentIndex(AbstractDataBoundFormElementTemplateDirectiveModel.ARGS_LAYOUT) + 1;
 
     private static final int CSS_CLASS_PARAM_IDX = NAMED_ARGS_OFFSET;
     private static final String CSS_CLASS_PARAM_NAME = "cssClass";

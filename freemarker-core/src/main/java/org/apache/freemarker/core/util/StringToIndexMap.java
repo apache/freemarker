@@ -142,7 +142,7 @@ public final class StringToIndexMap {
     public static StringToIndexMap of(StringToIndexMap baseMap, Entry... additionalEntries) {
         final int additionalEntriesLength = (additionalEntries != null) ? additionalEntries.length : 0;
         List<Entry> newEntries = new ArrayList<>(baseMap.size() + additionalEntriesLength);
-        baseMap.collectAllEntriesTo(newEntries);
+        baseMap.collectAllEntriesInto(newEntries);
         for (int i = 0; i < additionalEntriesLength; i++) {
             newEntries.add(additionalEntries[i]);
         }
@@ -357,7 +357,7 @@ public final class StringToIndexMap {
     /**
      * Traverse all the entries and collect all into the given {@code targetEntryCollection}.
      */
-    private void collectAllEntriesTo(Collection<Entry> targetEntryCollection) {
+    private void collectAllEntriesInto(Collection<Entry> targetEntryCollection) {
         if (buckets == null) {
             return;
         }
