@@ -19,6 +19,8 @@
 
 package org.apache.freemarker.core.util;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -37,10 +39,6 @@ public final class StringToIndexMap {
 
     private static final int MAX_VARIATIONS_TRIED = 4;
 
-    /** Input Entries from caller. */
-    private final Entry[] inputEntries;
-
-    /** Internal entry buckets. */
     private final Entry[] buckets;
     private final int bucketIndexMask;
     private final int bucketIndexOverlap;
@@ -133,9 +131,26 @@ public final class StringToIndexMap {
         return EMPTY;
     }
 
+    /**
+     * Create a new {@link StringToIndexMap} by inheriting all the entries in {@code baseMap} and appending all
+     * the entry items in {@code additionalEntries}.
+     * @param baseMap {@link StringToIndexMap} to inherit entries from
+     * @param additionalEntries additional entries
+     * @return a new {@link StringToIndexMap} by adding all the entries in {@code inherited} and appending all
+     * the entry items in {@code additionalEntries}
+     */
+    public static StringToIndexMap of(StringToIndexMap baseMap, Entry... additionalEntries) {
+        final int additionalEntriesLength = (additionalEntries != null) ? additionalEntries.length : 0;
+        List<Entry> newEntries = new ArrayList<>(baseMap.size() + additionalEntriesLength);
+        baseMap.collectAllEntriesTo(newEntries);
+        for (int i = 0; i < additionalEntriesLength; i++) {
+            newEntries.add(additionalEntries[i]);
+        }
+        return of(newEntries.toArray(new Entry[newEntries.size()]));
+    }
+
     // This is a very frequent case, so we optimize for it a bit.
     private StringToIndexMap(Entry entry) {
-        inputEntries = new Entry[] { entry };
         buckets = new Entry[] { entry };
         bucketIndexMask = 0;
         bucketIndexOverlap = 0;
@@ -148,15 +163,11 @@ public final class StringToIndexMap {
 
     private StringToIndexMap(Entry[] entries, int entriesLength) {
         if (entriesLength == 0) {
-            inputEntries = null;
             buckets = null;
             bucketIndexMask = 0;
             bucketIndexOverlap = 0;
             keys = Collections.emptyList();
         } else {
-            inputEntries = new Entry[entriesLength];
-            System.arraycopy(entries, 0, inputEntries, 0, entriesLength);
-
             String[] keyArray = new String[entriesLength];
             for (int i = 0; i < entriesLength; i++) {
                 keyArray[i] = entries[i].key;
@@ -177,7 +188,7 @@ public final class StringToIndexMap {
                         filledBucketCnt++;
                     }
                 }
-                // Ideally, filledBucketCnt == entriesLength. If less, we have buckets with more then 1 element.
+                // Ideally, filledBucketCnt == entriesLength. If less, we have buckets with more than 1 element.
                 int setupGoodness = filledBucketCnt - entriesLength;
 
                 if (bestSetup == null || bestSetupGoodness < setupGoodness) {
@@ -282,15 +293,6 @@ public final class StringToIndexMap {
 
     }
 
-    /**
-     * Return a cloned array from the original {@link Entry} array which was given by the caller through directly
-     * using {@link #of(Entry...)} or {@link #of(Entry[], int)} or indirectly using other methods such as {@link #of(String, int)}.
-     * @return a cloned array from the original {@link Entry} array which was given by the caller
-     */
-    public Entry[] getInputEntries() {
-        return inputEntries;
-    }
-
     private static int getPowerOf2GreaterThanOrEqualTo(int n) {
         if (n == 0) {
             return 0;
@@ -350,6 +352,21 @@ public final class StringToIndexMap {
             }
         }
         return null;
+    }
+
+    /**
+     * Traverse all the entries and collect all into the given {@code targetEntryCollection}.
+     */
+    private void collectAllEntriesTo(Collection<Entry> targetEntryCollection) {
+        if (buckets == null) {
+            return;
+        }
+        for (Entry entry : buckets) {
+            while (entry != null) {
+                targetEntryCollection.add(entry);
+                entry = entry.nextInSameBucket;
+            }
+        }
     }
 
     /*

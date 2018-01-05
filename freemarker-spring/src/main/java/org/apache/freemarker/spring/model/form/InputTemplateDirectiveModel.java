@@ -33,7 +33,6 @@ import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
-import org.apache.freemarker.core.util._ArrayUtils;
 import org.springframework.web.servlet.support.RequestContext;
 
 /**
@@ -88,22 +87,17 @@ class InputTemplateDirectiveModel extends AbstractHtmlInputElementTemplateDirect
     private static final int AUTOCOMPLETE_PARAM_IDX = NAMED_ARGS_OFFSET + 4;
     private static final String AUTOCOMPLETE_PARAM_NAME = "autocomplete";
 
-    private static final StringToIndexMap.Entry[] NAMED_ARGS_ENTRIES =
-            _ArrayUtils.addAll(
-                    AbstractHtmlInputElementTemplateDirectiveModel.ARGS_LAYOUT.getPredefinedNamedArgumentsMap()
-                            .getInputEntries(),
-                    new StringToIndexMap.Entry(SIZE_PARAM_NAME, SIZE_PARAM_IDX),
-                    new StringToIndexMap.Entry(MAXLENGTH_PARAM_NAME, MAXLENGTH_PARAM_IDX),
-                    new StringToIndexMap.Entry(ALT_PARAM_NAME, ALT_PARAM_IDX),
-                    new StringToIndexMap.Entry(ONSELECT_PARAM_NAME, ONSELECT_PARAM_IDX),
-                    new StringToIndexMap.Entry(AUTOCOMPLETE_PARAM_NAME, AUTOCOMPLETE_PARAM_IDX)
-                    );
-
     protected static final ArgumentArrayLayout ARGS_LAYOUT =
             ArgumentArrayLayout.create(
                     1,
                     false,
-                    StringToIndexMap.of(NAMED_ARGS_ENTRIES),
+                    StringToIndexMap.of(AbstractHtmlInputElementTemplateDirectiveModel.ARGS_LAYOUT.getPredefinedNamedArgumentsMap(),
+                            new StringToIndexMap.Entry(SIZE_PARAM_NAME, SIZE_PARAM_IDX),
+                            new StringToIndexMap.Entry(MAXLENGTH_PARAM_NAME, MAXLENGTH_PARAM_IDX),
+                            new StringToIndexMap.Entry(ALT_PARAM_NAME, ALT_PARAM_IDX),
+                            new StringToIndexMap.Entry(ONSELECT_PARAM_NAME, ONSELECT_PARAM_IDX),
+                            new StringToIndexMap.Entry(AUTOCOMPLETE_PARAM_NAME, AUTOCOMPLETE_PARAM_IDX)
+                            ),
                     true
                     );
 

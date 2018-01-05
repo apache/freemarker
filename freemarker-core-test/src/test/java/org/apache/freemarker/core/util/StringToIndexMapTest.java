@@ -19,13 +19,18 @@
 
 package org.apache.freemarker.core.util;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
 import org.apache.freemarker.core.util.StringToIndexMap.Entry;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class StringToIndexMapTest {
 
@@ -164,6 +169,27 @@ public class StringToIndexMapTest {
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), containsString("\"foo\""));
         }
+    }
+
+    @Test
+    public void testEntryInheritance() {
+        StringToIndexMap base = StringToIndexMap.of("i", 0, "j", 1);
+        StringToIndexMap derived =StringToIndexMap.of(base,
+                new StringToIndexMap.Entry("k", 2),
+                new StringToIndexMap.Entry("l", 3));
+
+        assertEquals(4, derived.size());
+        assertEquals(-1, derived.get("a"));
+        assertEquals(0, derived.get("i"));
+        assertEquals(1, derived.get("j"));
+        assertEquals(2, derived.get("k"));
+        assertEquals(3, derived.get("l"));
+        assertEquals(ImmutableList.of("i", "j", "k", "l"), derived.getKeys());
+        assertEquals("i", derived.getKeyOfValue(0));
+        assertEquals("j", derived.getKeyOfValue(1));
+        assertEquals("k", derived.getKeyOfValue(2));
+        assertEquals("l", derived.getKeyOfValue(3));
+        assertNull(derived.getKeyOfValue(4));
     }
 
 }

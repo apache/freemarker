@@ -33,7 +33,6 @@ import org.apache.freemarker.core.model.ObjectWrapperAndUnwrapper;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
-import org.apache.freemarker.core.util._ArrayUtils;
 import org.springframework.web.servlet.support.RequestContext;
 
 abstract class AbstractHtmlInputElementTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveModel {
@@ -59,23 +58,18 @@ abstract class AbstractHtmlInputElementTemplateDirectiveModel extends AbstractHt
     private static final int READONLY_PARAM_IDX = NAMED_ARGS_OFFSET + 5;
     private static final String READONLY_PARAM_NAME = "readonly";
 
-    private static final StringToIndexMap.Entry[] NAMED_ARGS_ENTRIES =
-            _ArrayUtils.addAll(
-                    AbstractHtmlElementTemplateDirectiveModel.ARGS_LAYOUT.getPredefinedNamedArgumentsMap()
-                            .getInputEntries(),
-                    new StringToIndexMap.Entry(ONFOCUS_PARAM_NAME, ONFOCUS_PARAM_IDX),
-                    new StringToIndexMap.Entry(ONBLUR_PARAM_NAME, ONBLUR_PARAM_IDX),
-                    new StringToIndexMap.Entry(ONCHANGE_PARAM_NAME, ONCHANGE_PARAM_IDX),
-                    new StringToIndexMap.Entry(ACCESSKEY_PARAM_NAME, ACCESSKEY_PARAM_IDX),
-                    new StringToIndexMap.Entry(DISABLED_PARAM_NAME, DISABLED_PARAM_IDX),
-                    new StringToIndexMap.Entry(READONLY_PARAM_NAME, READONLY_PARAM_IDX)
-                    );
-
     protected static final ArgumentArrayLayout ARGS_LAYOUT =
             ArgumentArrayLayout.create(
                     1,
                     false,
-                    StringToIndexMap.of(NAMED_ARGS_ENTRIES),
+                    StringToIndexMap.of(AbstractHtmlElementTemplateDirectiveModel.ARGS_LAYOUT.getPredefinedNamedArgumentsMap(),
+                            new StringToIndexMap.Entry(ONFOCUS_PARAM_NAME, ONFOCUS_PARAM_IDX),
+                            new StringToIndexMap.Entry(ONBLUR_PARAM_NAME, ONBLUR_PARAM_IDX),
+                            new StringToIndexMap.Entry(ONCHANGE_PARAM_NAME, ONCHANGE_PARAM_IDX),
+                            new StringToIndexMap.Entry(ACCESSKEY_PARAM_NAME, ACCESSKEY_PARAM_IDX),
+                            new StringToIndexMap.Entry(DISABLED_PARAM_NAME, DISABLED_PARAM_IDX),
+                            new StringToIndexMap.Entry(READONLY_PARAM_NAME, READONLY_PARAM_IDX)
+                            ),
                     true
                     );
 
