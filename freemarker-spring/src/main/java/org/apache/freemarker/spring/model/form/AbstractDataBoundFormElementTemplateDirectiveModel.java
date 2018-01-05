@@ -53,29 +53,11 @@ abstract class AbstractDataBoundFormElementTemplateDirectiveModel extends Abstra
 
     private static final String ID_PARAM_NAME = ID_ATTR_NAME;
 
-    private static final StringToIndexMap.Entry[] NAMED_ARGS_ENTRIES = {
-            new StringToIndexMap.Entry(ID_PARAM_NAME, ID_PARAM_IDX)
-    };
-
-    /**
-     * Returns the argument index of the last predefined named argument item in the {@code argsLayout}.
-     * <P>
-     * <EM>Note:</EM> It is strongly assumed that the predefined named arguments map contains only items with indexes,
-     * starting from the predefined positional argument count and incrementing by one sequentially.
-     * </P>
-     * @param argsLayout arguments layout
-     * @return the argument index of the last predefined named argument item in the {@code argsLayout}
-     */
-    protected static int getLastPredefinedNamedArgumentIndex(ArgumentArrayLayout argsLayout) {
-        return argsLayout.getPredefinedPositionalArgumentCount() + argsLayout.getPredefinedNamedArgumentsMap().size()
-                - 1;
-    }
-
     protected static final ArgumentArrayLayout ARGS_LAYOUT =
             ArgumentArrayLayout.create(
                     1,
                     false,
-                    StringToIndexMap.of(NAMED_ARGS_ENTRIES),
+                    StringToIndexMap.of(ID_PARAM_NAME, ID_PARAM_IDX),
                     true
                     );
 

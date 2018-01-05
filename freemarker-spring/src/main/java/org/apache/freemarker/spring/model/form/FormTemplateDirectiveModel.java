@@ -35,7 +35,6 @@ import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
-import org.apache.freemarker.core.util._ArrayUtils;
 import org.apache.freemarker.spring.model.SpringTemplateCallableHashModel;
 import org.springframework.beans.PropertyAccessor;
 import org.springframework.http.HttpMethod;
@@ -76,8 +75,8 @@ class FormTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveMod
 
     public static final String NAME = "form";
 
-    private static final int NAMED_ARGS_OFFSET =
-            getLastPredefinedNamedArgumentIndex(AbstractHtmlElementTemplateDirectiveModel.ARGS_LAYOUT) + 1;
+    private static final int NAMED_ARGS_OFFSET = CallableUtils
+            .getLastPredefinedNamedArgumentIndex(AbstractHtmlElementTemplateDirectiveModel.ARGS_LAYOUT) + 1;
 
     private static final int ACTION_PARAM_IDX = NAMED_ARGS_OFFSET;
     private static final String ACTION_PARAM_NAME = "action";
@@ -118,30 +117,25 @@ class FormTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveMod
     private static final int METHOD_PARAM_PARAM_IDX = NAMED_ARGS_OFFSET + 12;
     private static final String METHOD_PARAM_PARAM_NAME = "methodParam";
 
-    private static final StringToIndexMap.Entry[] NAMED_ARGS_ENTRIES =
-            _ArrayUtils.addAll(
-                    AbstractHtmlElementTemplateDirectiveModel.ARGS_LAYOUT.getPredefinedNamedArgumentsMap()
-                            .getInputEntries(),
-                    new StringToIndexMap.Entry(ACTION_PARAM_NAME, ACTION_PARAM_IDX),
-                    new StringToIndexMap.Entry(METHOD_PARAM_NAME, METHOD_PARAM_IDX),
-                    new StringToIndexMap.Entry(TARGET_PARAM_NAME, TARGET_PARAM_IDX),
-                    new StringToIndexMap.Entry(ENCTYPE_PARAM_NAME, ENCTYPE_PARAM_IDX),
-                    new StringToIndexMap.Entry(ACCEPT_CHARSET_PARAM_NAME, ACCEPT_CHARSET_PARAM_IDX),
-                    new StringToIndexMap.Entry(ONSUBMIT_PARAM_NAME, ONSUBMIT_PARAM_IDX),
-                    new StringToIndexMap.Entry(ONRESET_PARAM_NAME, ONRESET_PARAM_IDX),
-                    new StringToIndexMap.Entry(AUTOCOMPLETE_PARAM_NAME, AUTOCOMPLETE_PARAM_IDX),
-                    new StringToIndexMap.Entry(NAME_PARAM_NAME, NAME_PARAM_IDX),
-                    new StringToIndexMap.Entry(VALUE_PARAM_NAME, VALUE_PARAM_IDX),
-                    new StringToIndexMap.Entry(TYPE_PARAM_NAME, TYPE_PARAM_IDX),
-                    new StringToIndexMap.Entry(SERVLET_RELATIVE_ACTION_PARAM_NAME, SERVLET_RELATIVE_ACTION_PARAM_IDX),
-                    new StringToIndexMap.Entry(METHOD_PARAM_PARAM_NAME, METHOD_PARAM_PARAM_IDX)
-                    );
-
     protected static final ArgumentArrayLayout ARGS_LAYOUT =
             ArgumentArrayLayout.create(
                     1,
                     false,
-                    StringToIndexMap.of(NAMED_ARGS_ENTRIES),
+                    StringToIndexMap.of(AbstractHtmlElementTemplateDirectiveModel.ARGS_LAYOUT.getPredefinedNamedArgumentsMap(),
+                            new StringToIndexMap.Entry(ACTION_PARAM_NAME, ACTION_PARAM_IDX),
+                            new StringToIndexMap.Entry(METHOD_PARAM_NAME, METHOD_PARAM_IDX),
+                            new StringToIndexMap.Entry(TARGET_PARAM_NAME, TARGET_PARAM_IDX),
+                            new StringToIndexMap.Entry(ENCTYPE_PARAM_NAME, ENCTYPE_PARAM_IDX),
+                            new StringToIndexMap.Entry(ACCEPT_CHARSET_PARAM_NAME, ACCEPT_CHARSET_PARAM_IDX),
+                            new StringToIndexMap.Entry(ONSUBMIT_PARAM_NAME, ONSUBMIT_PARAM_IDX),
+                            new StringToIndexMap.Entry(ONRESET_PARAM_NAME, ONRESET_PARAM_IDX),
+                            new StringToIndexMap.Entry(AUTOCOMPLETE_PARAM_NAME, AUTOCOMPLETE_PARAM_IDX),
+                            new StringToIndexMap.Entry(NAME_PARAM_NAME, NAME_PARAM_IDX),
+                            new StringToIndexMap.Entry(VALUE_PARAM_NAME, VALUE_PARAM_IDX),
+                            new StringToIndexMap.Entry(TYPE_PARAM_NAME, TYPE_PARAM_IDX),
+                            new StringToIndexMap.Entry(SERVLET_RELATIVE_ACTION_PARAM_NAME, SERVLET_RELATIVE_ACTION_PARAM_IDX),
+                            new StringToIndexMap.Entry(METHOD_PARAM_PARAM_NAME, METHOD_PARAM_PARAM_IDX)
+                            ),
                     true
                     );
 

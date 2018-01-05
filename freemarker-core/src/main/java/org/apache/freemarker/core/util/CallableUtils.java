@@ -1056,6 +1056,20 @@ public final class CallableUtils {
         }
     }
 
+    /**
+     * Returns the argument index of the last predefined named argument item in the {@code argsLayout}.
+     * <P>
+     * <EM>Note:</EM> It is strongly assumed that the predefined named arguments map contains only items with indexes,
+     * starting from the predefined positional argument count and incrementing by one sequentially.
+     * </P>
+     * @param argsLayout arguments layout
+     * @return the argument index of the last predefined named argument item in the {@code argsLayout}
+     */
+    public static int getLastPredefinedNamedArgumentIndex(ArgumentArrayLayout argsLayout) {
+        return argsLayout.getPredefinedPositionalArgumentCount() + argsLayout.getPredefinedNamedArgumentsMap().size()
+                - 1;
+    }
+
     private static Object[] getMessagePartExpectedNArgumentButHadM(int argCnt, int minCnt, int maxCnt) {
         ArrayList<Object> desc = new ArrayList<>(20);
 
