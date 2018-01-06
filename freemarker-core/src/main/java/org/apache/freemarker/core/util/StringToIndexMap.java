@@ -19,8 +19,6 @@
 
 package org.apache.freemarker.core.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -141,12 +139,20 @@ public final class StringToIndexMap {
      */
     public static StringToIndexMap of(StringToIndexMap baseMap, Entry... additionalEntries) {
         final int additionalEntriesLength = (additionalEntries != null) ? additionalEntries.length : 0;
-        List<Entry> newEntries = new ArrayList<>(baseMap.size() + additionalEntriesLength);
-        baseMap.collectAllEntriesInto(newEntries);
-        for (int i = 0; i < additionalEntriesLength; i++) {
-            newEntries.add(additionalEntries[i]);
+        Entry[] newEntries = new Entry[baseMap.size() + additionalEntriesLength];
+        int index = 0;
+        if (baseMap.buckets != null) {
+            for (Entry entry : baseMap.buckets) {
+                while (entry != null) {
+                    newEntries[index++] = entry;
+                    entry = entry.nextInSameBucket;
+                }
+            }
         }
-        return of(newEntries.toArray(new Entry[newEntries.size()]));
+        if (additionalEntriesLength > 0) {
+            System.arraycopy(additionalEntries, 0, newEntries, index, additionalEntriesLength);
+        }
+        return of(newEntries);
     }
 
     // This is a very frequent case, so we optimize for it a bit.
@@ -352,21 +358,6 @@ public final class StringToIndexMap {
             }
         }
         return null;
-    }
-
-    /**
-     * Traverse all the entries and collect all into the given {@code targetEntryCollection}.
-     */
-    private void collectAllEntriesInto(Collection<Entry> targetEntryCollection) {
-        if (buckets == null) {
-            return;
-        }
-        for (Entry entry : buckets) {
-            while (entry != null) {
-                targetEntryCollection.add(entry);
-                entry = entry.nextInSameBucket;
-            }
-        }
     }
 
     /*
