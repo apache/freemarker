@@ -130,12 +130,20 @@ public final class StringToIndexMap {
     }
 
     /**
-     * Create a new {@link StringToIndexMap} by inheriting all the entries in {@code baseMap} and appending all
-     * the entry items in {@code additionalEntries}.
-     * @param baseMap {@link StringToIndexMap} to inherit entries from
-     * @param additionalEntries additional entries
-     * @return a new {@link StringToIndexMap} by adding all the entries in {@code inherited} and appending all
-     * the entry items in {@code additionalEntries}
+     * Creates a new {@link StringToIndexMap} by inheriting all the entries in {@code baseMap} and appending all the
+     * entries in {@code additionalEntries}.
+     * 
+     * @param baseMap
+     *            {@link StringToIndexMap} to inherit entries from
+     * @param additionalEntries
+     *            additional entries; it must not contain a name that's already in {@code baseMap}, or else
+     *            {@link DuplicateStringKeyException} will be thrown.
+     * 
+     * @return a new {@link StringToIndexMap} created by adding the entries in {@code baseMap} and
+     *         {@code additionalEntries}
+     *
+     * @throws DuplicateStringKeyException
+     *             if the same key occurs twice
      */
     public static StringToIndexMap of(StringToIndexMap baseMap, Entry... additionalEntries) {
         final int additionalEntriesLength = (additionalEntries != null) ? additionalEntries.length : 0;

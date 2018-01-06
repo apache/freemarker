@@ -207,8 +207,10 @@ public final class ArgumentArrayLayout {
     }
 
     /**
-     * Return the exclusive end index of the predefined named arguments.
-     * @return the exclusive end index of the predefined named arguments
+     * Returns the exclusive end index of the predefined named arguments. As it's the exclusive end, this works even
+     * when there are no named arguments.
+     * 
+     * @return 0 or greater (never -1) 
      */
     public int getPredefinedNamedArgumentsEndIndex() {
         return predefinedPositionalArgumentCount + predefinedNamedArgumentsMap.size();
