@@ -207,6 +207,14 @@ public final class ArgumentArrayLayout {
     }
 
     /**
+     * Return the exclusive end index of the predefined named arguments.
+     * @return the exclusive end index of the predefined named arguments
+     */
+    public int getPredefinedNamedArgumentsEndIndex() {
+        return predefinedPositionalArgumentCount + predefinedNamedArgumentsMap.size();
+    }
+
+    /**
      * Returns the index of the varargs argument into which positional arguments that aren't predefined are collected,
      * or -1 if there's no such varargs argument. The value of the positional varargs argument is a {@link
      * TemplateSequenceModel} that collects all positional arguments whose index would be greater than or equal to

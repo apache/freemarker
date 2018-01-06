@@ -69,8 +69,8 @@ class InputTemplateDirectiveModel extends AbstractHtmlInputElementTemplateDirect
 
     public static final String NAME = "input";
 
-    private static final int NAMED_ARGS_OFFSET = CallableUtils
-            .getLastPredefinedNamedArgumentIndex(AbstractHtmlInputElementTemplateDirectiveModel.ARGS_LAYOUT) + 1;
+    private static final int NAMED_ARGS_OFFSET = AbstractHtmlInputElementTemplateDirectiveModel.ARGS_LAYOUT
+            .getPredefinedNamedArgumentsEndIndex();
 
     private static final int SIZE_PARAM_IDX = NAMED_ARGS_OFFSET;
     private static final String SIZE_PARAM_NAME = "size";
