@@ -21,6 +21,9 @@ package org.apache.freemarker.core.model.impl;
 
 import static org.junit.Assert.*;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateHashModel;
@@ -50,6 +53,30 @@ public class FineTuneMethodAppearanceTest {
         assertTrue(thm.get("getV3") instanceof JavaMethodModel);
     }
     
+    @Test
+    public void existingPropertyReplacement() throws TemplateException {
+        for (Boolean replaceExistingProperty : new Boolean[] { null, false }) {
+            // The "real" property wins, no mater what:
+            assertSSubvariableValue(replaceExistingProperty, true, "from getS()");
+            assertSSubvariableValue(replaceExistingProperty, false, "from getS()");
+        }
+        
+        // replaceExistingProperty = true; the "real" property can be overridden:
+        assertSSubvariableValue(true, true, "from getS()");
+        assertSSubvariableValue(true, false, "from s()");
+    }
+
+    private void assertSSubvariableValue(Boolean replaceExistingProperty, boolean preferGetS, String expectedValue)
+            throws TemplateException {
+        DefaultObjectWrapper ow = new DefaultObjectWrapper.Builder(Configuration.VERSION_3_0_0)
+                .methodAppearanceFineTuner(
+                        new PropertyReplacementMethodAppearanceFineTuner(replaceExistingProperty, preferGetS))
+                .build();
+        assertEquals(expectedValue,
+                ((TemplateStringModel) ((TemplateHashModel) ow.wrap(new PropertyReplacementTestBean())).get("s"))
+                .getAsString());
+    }    
+    
     static public class C {
         
         public String v1 = "v1";
@@ -61,4 +88,51 @@ public class FineTuneMethodAppearanceTest {
         public String getV3() { return "getV3()"; }
     }
     
+    static public class PropertyReplacementTestBean {
+        
+        public String getS() {
+            return "from getS()";
+        }
+        
+        public String s() {
+            return "from s()";
+        }
+    }
+    
+    static class PropertyReplacementMethodAppearanceFineTuner implements MethodAppearanceFineTuner {
+        private final Boolean replaceExistingProperty; 
+        private final boolean preferGetS;
+        
+        PropertyReplacementMethodAppearanceFineTuner(Boolean replaceExistingProperty, boolean preferGetS) {
+            this.replaceExistingProperty = replaceExistingProperty;
+            this.preferGetS = preferGetS;
+        }
+
+        @Override
+        public void process(MethodAppearanceFineTuner.DecisionInput in, MethodAppearanceFineTuner.Decision out) {
+            if (replaceExistingProperty != null) {
+                out.setReplaceExistingProperty(replaceExistingProperty);
+            }
+            if (preferGetS) {
+                if (in.getMethod().getName().equals("getS")) {
+                    try {
+                        out.setExposeAsProperty(new PropertyDescriptor("s", in.getMethod(), null));
+                    } catch (IntrospectionException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }
+            } else {
+                if (in.getMethod().getName().equals("s")) {
+                    try {
+                        out.setExposeAsProperty(new PropertyDescriptor("s", in.getMethod(), null));
+                        out.setMethodShadowsProperty(false);
+                    } catch (IntrospectionException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }
+            }
+        }
+        
+    }
+        
 }

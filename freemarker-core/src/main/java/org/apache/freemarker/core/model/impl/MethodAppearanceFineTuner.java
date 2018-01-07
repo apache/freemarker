@@ -38,20 +38,24 @@ public interface MethodAppearanceFineTuner {
      * With this method you can do the following tweaks:
      * <ul>
      *   <li>Hide a method that would be otherwise shown by calling
-     *     {@link org.apache.freemarker.core.model.impl.MethodAppearanceFineTuner.Decision#setExposeMethodAs(String)}
+     *     {@link MethodAppearanceFineTuner.Decision#setExposeMethodAs(String)}
      *     with <tt>null</tt> parameter. Note that you can't un-hide methods
      *     that are not public or are considered to by unsafe
      *     (like {@link Object#wait()}) because
      *     {@link #process} is not called for those.</li>
      *   <li>Show the method with a different name in the data-model than its
      *     real name by calling
-     *     {@link org.apache.freemarker.core.model.impl.MethodAppearanceFineTuner.Decision#setExposeMethodAs(String)}
+     *     {@link MethodAppearanceFineTuner.Decision#setExposeMethodAs(String)}
      *     with non-<tt>null</tt> parameter.
      *   <li>Create a fake JavaBean property for this method by calling
-     *     {@link org.apache.freemarker.core.model.impl.MethodAppearanceFineTuner.Decision#setExposeAsProperty(PropertyDescriptor)}.
+     *     {@link MethodAppearanceFineTuner.Decision#setExposeAsProperty(PropertyDescriptor)}.
      *     For example, if you have <tt>int size()</tt> in a class, but you
      *     want it to be accessed from the templates as <tt>obj.size</tt>,
-     *     rather than as <tt>obj.size()</tt>, you can do that with this.
+     *     rather than as <tt>obj.size()</tt>, you can do that with this
+     *     (but remember calling
+     *     {@link Decision#setMethodShadowsProperty(boolean)
+     *     setMethodShadowsProperty(false)} as well, if the method name is exactly
+     *     the same as the property name).
      *     The default is {@code null}, which means that no fake property is
      *     created for the method. You need not and shouldn't set this
      *     to non-<tt>null</tt> for the getter methods of real JavaBean
@@ -61,12 +65,13 @@ public interface MethodAppearanceFineTuner {
      *     is given as the <tt>clazz</tt> parameter or it must be inherited from
      *     that class, or else whatever errors can occur later.
      *     {@link IndexedPropertyDescriptor}-s are supported.
-     *     If a real JavaBean property of the same name exists, it won't be
-     *     replaced by the fake one. Also if a fake property of the same name
-     *     was assigned earlier, it won't be replaced.
+     *     If a real JavaBean property of the same name exists, or a fake property
+     *     of the same name was already assigned earlier, it won't be
+     *     replaced by the new one by default, however this can be changed with
+     *     {@link Decision#setReplaceExistingProperty(boolean)}.
      *   <li>Prevent the method to hide a JavaBean property (fake or real) of
      *     the same name by calling
-     *     {@link org.apache.freemarker.core.model.impl.MethodAppearanceFineTuner.Decision#setMethodShadowsProperty(boolean)}
+     *     {@link MethodAppearanceFineTuner.Decision#setMethodShadowsProperty(boolean)}
      *     with <tt>false</tt>. The default is <tt>true</tt>, so if you have
      *     both a property and a method called "foo", then in the template
      *     <tt>myObject.foo</tt> will return the method itself instead
@@ -92,35 +97,78 @@ public interface MethodAppearanceFineTuner {
      */
     final class Decision {
         private PropertyDescriptor exposeAsProperty;
+        private boolean replaceExistingProperty;
         private String exposeMethodAs;
         private boolean methodShadowsProperty;
 
         void setDefaults(Method m) {
             exposeAsProperty = null;
+            replaceExistingProperty = false;
             exposeMethodAs = m.getName();
             methodShadowsProperty = true;
         }
 
+        /**
+         * See in the documentation of {@link MethodAppearanceFineTuner#process}. 
+         */
         public PropertyDescriptor getExposeAsProperty() {
             return exposeAsProperty;
         }
 
+        /**
+         * See in the documentation of {@link MethodAppearanceFineTuner#process}.
+         * Note that you may also want to call
+         * {@link #setMethodShadowsProperty(boolean) setMethodShadowsProperty(false)} when you call this. 
+         */
         public void setExposeAsProperty(PropertyDescriptor exposeAsProperty) {
             this.exposeAsProperty = exposeAsProperty;
         }
 
+        /**
+         * Getter pair of {@link #setReplaceExistingProperty(boolean)}.
+         */
+        public boolean getReplaceExistingProperty() {
+            return replaceExistingProperty;
+        }
+
+        /**
+         * If {@link #getExposeAsProperty()} is non-{@code null}, and a {@link PropertyDescriptor} with the same
+         * property name was already added to the class introspection data, this decides if that will be replaced
+         * with the {@link PropertyDescriptor} returned by {@link #getExposeAsProperty()}. The default is {@code false},
+         * that is, the old {@link PropertyDescriptor} is kept, and the new one is ignored.
+         * JavaBean properties discovered with the standard (non-{@link MethodAppearanceFineTuner}) mechanism
+         * are added before those created by the {@link MethodAppearanceFineTuner}, so with this you can decide if a
+         * real JavaBeans property can be replaced by the "fake" one created with
+         * {@link #setExposeAsProperty(PropertyDescriptor)}.
+         */
+        public void setReplaceExistingProperty(boolean overrideExistingProperty) {
+            this.replaceExistingProperty = overrideExistingProperty;
+        }
+
+        /**
+         * See in the documentation of {@link MethodAppearanceFineTuner#process}. 
+         */
         public String getExposeMethodAs() {
             return exposeMethodAs;
         }
 
+        /**
+         * See in the documentation of {@link MethodAppearanceFineTuner#process}. 
+         */
         public void setExposeMethodAs(String exposeMethodAs) {
             this.exposeMethodAs = exposeMethodAs;
         }
 
+        /**
+         * See in the documentation of {@link MethodAppearanceFineTuner#process}. 
+         */
         public boolean getMethodShadowsProperty() {
             return methodShadowsProperty;
         }
 
+        /**
+         * See in the documentation of {@link MethodAppearanceFineTuner#process}. 
+         */
         public void setMethodShadowsProperty(boolean methodShadowsProperty) {
             this.methodShadowsProperty = methodShadowsProperty;
         }
