@@ -55,7 +55,11 @@ public interface MethodAppearanceFineTuner {
      *     {@link MethodAppearanceDecision#setExposeAsProperty(PropertyDescriptor)}.
      *     For example, if you have <tt>int size()</tt> in a class, but you
      *     want it to be accessed from the templates as <tt>obj.size</tt>,
-     *     rather than as <tt>obj.size()</tt>, you can do that with this.
+     *     rather than as <tt>obj.size()</tt>, you can do that with this
+     *     (but remember calling
+     *     {@link MethodAppearanceDecision#setMethodShadowsProperty(boolean)
+     *     setMethodShadowsProperty(false)} as well, if the method name is exactly
+     *     the same as the property name).
      *     The default is {@code null}, which means that no fake property is
      *     created for the method. You need not and shouldn't set this
      *     to non-<tt>null</tt> for the getter methods of real JavaBean
@@ -65,9 +69,10 @@ public interface MethodAppearanceFineTuner {
      *     is given as the <tt>clazz</tt> parameter or it must be inherited from
      *     that class, or else whatever errors can occur later.
      *     {@link IndexedPropertyDescriptor}-s are supported.
-     *     If a real JavaBean property of the same name exists, it won't be
-     *     replaced by the fake one. Also if a fake property of the same name
-     *     was assigned earlier, it won't be replaced.
+     *     If a real JavaBean property of the same name exists, or a fake property
+     *     of the same name was already assigned earlier, it won't be
+     *     replaced by the new one by default, however this can be changed with
+     *     {@link MethodAppearanceDecision#setReplaceExistingProperty(boolean)}.
      *   <li>Prevent the method to hide a JavaBean property (fake or real) of
      *     the same name by calling
      *     {@link MethodAppearanceDecision#setMethodShadowsProperty(boolean)}

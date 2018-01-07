@@ -21,12 +21,17 @@ package freemarker.ext.beans;
 
 import static org.junit.Assert.*;
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecision;
+import freemarker.ext.beans.BeansWrapper.MethodAppearanceDecisionInput;
+import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateMethodModelEx;
@@ -70,7 +75,30 @@ public class FineTuneMethodAppearanceTest {
         assertEquals("getV3()", ((TemplateScalarModel) thm.get("v3")).getAsString());
         assertTrue(thm.get("getV3") instanceof TemplateMethodModelEx);
     }
-    
+
+    @Test
+    public void existingPropertyReplacement() throws TemplateModelException {
+        for (Boolean replaceExistingProperty : new Boolean[] { null, false }) {
+            // The "real" property wins, no mater what:
+            assertSSubvariableValue(replaceExistingProperty, true, "from getS()");
+            assertSSubvariableValue(replaceExistingProperty, false, "from getS()");
+        }
+        
+        // replaceExistingProperty = true; the "real" property can be overridden:
+        assertSSubvariableValue(true, true, "from getS()");
+        assertSSubvariableValue(true, false, "from s()");
+    }
+
+    private void assertSSubvariableValue(Boolean replaceExistingProperty, boolean preferGetS, String expectedValue)
+            throws TemplateModelException {
+        DefaultObjectWrapper ow = new DefaultObjectWrapper(Configuration.VERSION_2_3_27);
+        ow.setMethodAppearanceFineTuner(
+                new PropertyReplacementMethodAppearanceFineTuner(replaceExistingProperty, preferGetS));
+        assertEquals(expectedValue,
+                ((TemplateScalarModel) ((TemplateHashModel) ow.wrap(new PropertyReplacementTestBean())).get("s"))
+                .getAsString());
+    }
+
     static public class C {
         
         public String v1 = "v1";
@@ -98,4 +126,52 @@ public class FineTuneMethodAppearanceTest {
     }
     
     static class DefaultObjectWrapperOverrideExt extends DefaultObjectWrapperOverride { }
+    
+    static public class PropertyReplacementTestBean {
+        
+        public String getS() {
+            return "from getS()";
+        }
+        
+        public String s() {
+            return "from s()";
+        }
+    }
+    
+    static class PropertyReplacementMethodAppearanceFineTuner implements MethodAppearanceFineTuner {
+        private final Boolean replaceExistingProperty; 
+        private final boolean preferGetS;
+        
+        PropertyReplacementMethodAppearanceFineTuner(Boolean replaceExistingProperty, boolean preferGetS) {
+            this.replaceExistingProperty = replaceExistingProperty;
+            this.preferGetS = preferGetS;
+        }
+
+        public void process(MethodAppearanceDecisionInput in, MethodAppearanceDecision out) {
+            if (replaceExistingProperty != null) {
+                out.setReplaceExistingProperty(replaceExistingProperty);
+            }
+            if (preferGetS) {
+                if (in.getMethod().getName().equals("getS")) {
+                    try {
+                        out.setExposeAsProperty(new PropertyDescriptor("s", in.getMethod(), null));
+                    } catch (IntrospectionException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }
+            } else {
+                if (in.getMethod().getName().equals("s")) {
+                    try {
+                        out.setExposeAsProperty(new PropertyDescriptor("s", in.getMethod(), null));
+                        out.setMethodShadowsProperty(false);
+                    } catch (IntrospectionException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }
+            }
+        }
+        
+        
+    }
+    
 }

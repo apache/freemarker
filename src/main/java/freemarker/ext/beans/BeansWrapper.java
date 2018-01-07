@@ -1766,35 +1766,82 @@ public class BeansWrapper implements RichObjectWrapper, WriteProtectable {
      */
     static public final class MethodAppearanceDecision {
         private PropertyDescriptor exposeAsProperty;
+        private boolean replaceExistingProperty;
         private String exposeMethodAs;
         private boolean methodShadowsProperty;
         
         void setDefaults(Method m) {
             exposeAsProperty = null;
+            replaceExistingProperty = false;
             exposeMethodAs = m.getName();
             methodShadowsProperty = true;
         }
         
+        /**
+         * See in the documentation of {@link MethodAppearanceFineTuner#process}. 
+         */
         public PropertyDescriptor getExposeAsProperty() {
             return exposeAsProperty;
         }
         
+        /**
+         * See in the documentation of {@link MethodAppearanceFineTuner#process}.
+         * Note that you may also want to call
+         * {@link #setMethodShadowsProperty(boolean) setMethodShadowsProperty(false)} when you call this. 
+         */
         public void setExposeAsProperty(PropertyDescriptor exposeAsProperty) {
             this.exposeAsProperty = exposeAsProperty;
         }
-        
+
+        /**
+         * Getter pair of {@link #setReplaceExistingProperty(boolean)}.
+         * 
+         * @since 2.3.28
+         */
+        public boolean getReplaceExistingProperty() {
+            return replaceExistingProperty;
+        }
+
+        /**
+         * If {@link #getExposeAsProperty()} is non-{@code null}, and a {@link PropertyDescriptor} with the same
+         * property name was already added to the class introspection data, this decides if that will be replaced
+         * with the {@link PropertyDescriptor} returned by {@link #getExposeAsProperty()}. The default is {@code false},
+         * that is, the old {@link PropertyDescriptor} is kept, and the new one is ignored.
+         * JavaBean properties discovered with the standard (non-{@link MethodAppearanceFineTuner}) mechanism
+         * are added before those created by the {@link MethodAppearanceFineTuner}, so with this you can decide if a
+         * real JavaBeans property can be replaced by the "fake" one created with
+         * {@link #setExposeAsProperty(PropertyDescriptor)}.
+         * 
+         * @since 2.3.28
+         */
+        public void setReplaceExistingProperty(boolean overrideExistingProperty) {
+            this.replaceExistingProperty = overrideExistingProperty;
+        }
+
+        /**
+         * See in the documentation of {@link MethodAppearanceFineTuner#process}. 
+         */
         public String getExposeMethodAs() {
             return exposeMethodAs;
         }
         
+        /**
+         * See in the documentation of {@link MethodAppearanceFineTuner#process}. 
+         */
         public void setExposeMethodAs(String exposeAsMethod) {
             this.exposeMethodAs = exposeAsMethod;
         }
         
+        /**
+         * See in the documentation of {@link MethodAppearanceFineTuner#process}. 
+         */
         public boolean getMethodShadowsProperty() {
             return methodShadowsProperty;
         }
         
+        /**
+         * See in the documentation of {@link MethodAppearanceFineTuner#process}. 
+         */
         public void setMethodShadowsProperty(boolean shadowEarlierProperty) {
             this.methodShadowsProperty = shadowEarlierProperty;
         }

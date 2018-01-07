@@ -27070,6 +27070,46 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Version history</title>
 
+      <section xml:id="versions_2_3_28">
+        <title>2.3.28 (incubating at Apache)</title>
+
+        <para>Release date: [FIXME]</para>
+
+        <para><emphasis role="bold">This is a stable, final
+        release.</emphasis> The <quote>incubating</quote> suffix is required
+        by the Apache Software Foundation until the project becomes a fully
+        accepted (graduated) Apache project.</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>[FIXME]</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Added new property to
+              <literal>BeansWrapper.MethodAppearanceDecision</literal>:
+              <literal>replaceExistingProperty</literal>. This is useful when
+              a method like <literal>size()</literal> is exposed as a JavaBean
+              property via
+              <literal>MethodAppearanceDecision.exposeAsProperty</literal>,
+              but there's also a <quote>real</quote> JavaBean property (like
+              <literal>getSize()</literal>) with identical name. By default
+              the real property isn't replaced, but now with
+              <literal>replaceExistingProperty</literal> it can be.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
+
       <section xml:id="versions_2_3_27">
         <title>2.3.27 (incubating at Apache)</title>
 
