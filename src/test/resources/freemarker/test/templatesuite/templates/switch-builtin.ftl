@@ -16,6 +16,7 @@
   specific language governing permissions and limitations
   under the License.
 -->
+<#setting locale="en_US">
 <@assertEquals expected="A" actual="a"?switch("a", "A") />
 <@assertFails message="didn't match">${"b"?switch("a", "A")}</@>
 <@assertEquals expected="D" actual="b"?switch("a", "A", "D") />
