@@ -3985,6 +3985,13 @@ Creating mouse...
           overloaded to do string and sequence concatenation and hash
           addition. <literal>&lt;#assign x--&gt;</literal> is shorthand for
           <literal>&lt;#assign x -= 1&gt;</literal>.</para>
+
+          <note>
+            <para>The shorthand operators (like <literal>+=</literal>,
+            <literal>++</literal>, etc.) are only supported since FreeMarker
+            2.3.23. Before that, you could only use <literal>=</literal> in
+            itself, as in <literal>&lt;#assign x = x + 1&gt;</literal>.</para>
+          </note>
         </section>
 
         <section xml:id="dgui_template_exp_parentheses">
