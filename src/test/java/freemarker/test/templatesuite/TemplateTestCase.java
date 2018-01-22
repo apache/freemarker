@@ -25,6 +25,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -32,6 +33,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -137,6 +139,11 @@ public class TemplateTestCase extends FileTestCase {
         this.noOutput = noOutput;
         
         conf = new Configuration(incompatibleImprovements);
+        
+        // Ensure that the configuration settings don't depend on the machine that runs the test:
+        conf.setLocale(Locale.US);
+        conf.setDefaultEncoding(StandardCharsets.UTF_8.name());
+        conf.setTimeZone(TimeZone.getTimeZone("GMT+1"));
     }
     
     public void setSetting(String param, String value) throws IOException {
