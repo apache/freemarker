@@ -117,7 +117,7 @@
 
         <para>But the user's name ("John Doe" above) depends on who the
         logged-in user is, and the latest product information should come from
-        a database. Because this data changes, you cannot you cannot use
+        a database. Because this data changes, you cannot use
         static HTML. Instead, you can use a <emphasis
         role="term">template</emphasis> of the desired output. The template is
         the same as the static HTML would be, except that it contains some
