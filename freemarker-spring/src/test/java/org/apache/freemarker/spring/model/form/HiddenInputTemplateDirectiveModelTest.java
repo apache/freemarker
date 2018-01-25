@@ -42,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration("classpath:META-INF/web-resources")
 @ContextConfiguration(locations = { "classpath:org/apache/freemarker/spring/example/mvc/users/users-mvc-context.xml" })
-public class PasswordInputTemplateDirectiveModelTest {
+public class HiddenInputTemplateDirectiveModelTest {
 
     @Autowired
     private WebApplicationContext wac;
@@ -61,11 +61,11 @@ public class PasswordInputTemplateDirectiveModelTest {
     public void testBasicUsages() throws Exception {
         final Long userId = userRepository.getUserIds().iterator().next();
         final User user = userRepository.getUser(userId);
-        mockMvc.perform(get("/users/{userId}/", userId).param("viewName", "test/model/form/password-input-directive-usages")
+        mockMvc.perform(get("/users/{userId}/", userId).param("viewName", "test/model/form/hidden-input-directive-usages")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
-                .andExpect(xpath("//form[@id='form1']//input[@type='password' and @name='password']/@value").string(""))
-                .andExpect(xpath("//form[@id='form2']//input[@type='password' and @name='password']/@value").string(user.getPassword()))
-                .andExpect(xpath("//form[@id='form3']//input[@type='password' and @name='password']/@value").string(""));
+                .andExpect(xpath("//form[@id='form1']//input[@type='hidden' and @name='email']/@value").string(user.getEmail()))
+                .andExpect(xpath("//form[@id='form2']//input[@type='hidden' and @name='email']/@disabled").string("disabled"))
+                .andExpect(xpath("//form[@id='form2']//input[@type='hidden' and @name='email']/@value").string(user.getEmail()));
     }
 }

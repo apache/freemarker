@@ -36,7 +36,8 @@ import org.apache.freemarker.core.util.StringToIndexMap;
 import org.springframework.web.servlet.support.RequestContext;
 
 /**
- * Provides <code>TemplateModel</code> for data-binding-aware HTML '{@code textarea}' element.
+ * Provides <code>TemplateModel</code> for data-binding-aware HTML '{@code input}' element with a '{@code type}'
+ * of '{@code hidden}'.
  * <P>
  * This directive supports the following parameters:
  * <UL>
@@ -50,53 +51,38 @@ import org.springframework.web.servlet.support.RequestContext;
  * Some valid example(s):
  * </P>
  * <PRE>
- *   &lt;@form.textarea 'user.description' rows="10" cols="80" /&gt;
+ *   &lt;@form.hidden 'user.email' /&gt;
  * </PRE>
  * <P>
- * <EM>Note:</EM> Unlike Spring Framework's <code>&lt;form:textarea /&gt;</code> JSP Tag Library, this directive
+ * <EM>Note:</EM> Unlike Spring Framework's <code>&lt;form:hidden /&gt;</code> JSP Tag Library, this directive
  * does not support <code>htmlEscape</code> parameter. It always renders HTML's without escaping
  * because it is much easier to control escaping in FreeMarker Template expressions.
  * </P>
  */
-class TextareaTemplateDirectiveModel extends AbstractHtmlInputElementTemplateDirectiveModel {
 
-    public static final String NAME = "textarea";
+class HiddenInputTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveModel {
 
-    private static final int NAMED_ARGS_OFFSET = AbstractHtmlInputElementTemplateDirectiveModel.ARGS_LAYOUT
+    public static final String NAME = "hidden";
+
+    private static final int NAMED_ARGS_OFFSET = AbstractHtmlElementTemplateDirectiveModel.ARGS_LAYOUT
             .getPredefinedNamedArgumentsEndIndex();
 
-    private static final int ROWS_PARAM_IDX = NAMED_ARGS_OFFSET;
-    private static final String ROWS_PARAM_NAME = "rows";
-
-    private static final int COLS_PARAM_IDX = NAMED_ARGS_OFFSET + 1;
-    private static final String COLS_PARAM_NAME = "cols";
-
-    private static final int ONSELECT_PARAM_IDX = NAMED_ARGS_OFFSET + 2;
-    private static final String ONSELECT_PARAM_NAME = "onselect";
+    private static final int DISABLED_PARAM_IDX = NAMED_ARGS_OFFSET;
+    private static final String DISABLED_PARAM_NAME = "disabled";
 
     protected static final ArgumentArrayLayout ARGS_LAYOUT =
             ArgumentArrayLayout.create(
                     1,
                     false,
-                    StringToIndexMap.of(AbstractHtmlInputElementTemplateDirectiveModel.ARGS_LAYOUT.getPredefinedNamedArgumentsMap(),
-                            new StringToIndexMap.Entry(ROWS_PARAM_NAME, ROWS_PARAM_IDX),
-                            new StringToIndexMap.Entry(COLS_PARAM_NAME, COLS_PARAM_IDX),
-                            new StringToIndexMap.Entry(ONSELECT_PARAM_NAME, ONSELECT_PARAM_IDX)
+                    StringToIndexMap.of(AbstractHtmlElementTemplateDirectiveModel.ARGS_LAYOUT.getPredefinedNamedArgumentsMap(),
+                            new StringToIndexMap.Entry(DISABLED_PARAM_NAME, DISABLED_PARAM_IDX)
                             ),
-                    true
-                    );
+                    true);
 
-    private String rows;
-    private String cols;
-    private String onselect;
+    private boolean disabled;
 
-    protected TextareaTemplateDirectiveModel(HttpServletRequest request, HttpServletResponse response) {
+    protected HiddenInputTemplateDirectiveModel(HttpServletRequest request, HttpServletResponse response) {
         super(request, response);
-    }
-
-    @Override
-    public boolean isNestedContentSupported() {
-        return false;
     }
 
     @Override
@@ -105,43 +91,44 @@ class TextareaTemplateDirectiveModel extends AbstractHtmlInputElementTemplateDir
     }
 
     @Override
+    public boolean isNestedContentSupported() {
+        return false;
+    }
+
+    @Override
     protected void executeInternal(TemplateModel[] args, CallPlace callPlace, Writer out, Environment env,
             ObjectWrapperAndUnwrapper objectWrapperAndUnwrapper, RequestContext requestContext)
             throws TemplateException, IOException {
-
         super.executeInternal(args, callPlace, out, env, objectWrapperAndUnwrapper, requestContext);
 
-        rows = CallableUtils.getOptionalStringArgument(args, ROWS_PARAM_IDX, this);
-        cols = CallableUtils.getOptionalStringArgument(args, COLS_PARAM_IDX, this);
-        onselect = CallableUtils.getOptionalStringArgument(args, ONSELECT_PARAM_IDX, this);
+        disabled = CallableUtils.getOptionalBooleanArgument(args, DISABLED_PARAM_IDX, this, false);
 
         TagOutputter tagOut = new TagOutputter(out);
 
-        tagOut.beginTag(NAME);
+        tagOut.beginTag("input");
 
         writeDefaultAttributes(tagOut);
 
         // more optional attributes by this tag
-        writeOptionalAttribute(tagOut, ROWS_PARAM_NAME, getRows());
-        writeOptionalAttribute(tagOut, COLS_PARAM_NAME, getCols());
-        writeOptionalAttribute(tagOut, ONSELECT_PARAM_NAME, getOnselect());
+        tagOut.writeAttribute("type", "hidden");
+        if (isDisabled()) {
+            tagOut.writeAttribute(DISABLED_PARAM_NAME, "disabled");
+        }
 
         String value = getDisplayString(getBindStatus().getValue(), getBindStatus().getEditor());
-        tagOut.appendValue("\r\n" + processFieldValue(env, getName(), value, "textarea"));
+        tagOut.writeAttribute("value", processFieldValue(env, getName(), value, "hidden"));
 
         tagOut.endTag();
+
     }
 
-    public String getRows() {
-        return rows;
+    public boolean isDisabled() {
+        return disabled;
     }
 
-    public String getCols() {
-        return cols;
-    }
-
-    public String getOnselect() {
-        return onselect;
+    @Override
+    protected boolean isValidDynamicAttribute(String localName, Object value) {
+        return !"type".equals(localName);
     }
 
 }
