@@ -35,6 +35,9 @@ import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.springframework.web.servlet.support.RequestContext;
 
+/**
+ * Corresponds to <code>org.springframework.web.servlet.tags.form.AbstractHtmlInputElementTag</code>.
+ */
 abstract class AbstractHtmlInputElementTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveModel {
 
     private static final int NAMED_ARGS_OFFSET = AbstractHtmlElementTemplateDirectiveModel.ARGS_LAYOUT

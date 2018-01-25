@@ -60,7 +60,6 @@ import org.springframework.web.util.UriUtils;
  * Some valid example(s):
  * </P>
  * <PRE>
- * &lt;#assign form=spring.form /&gt;
  * &lt;@form.form "user"&gt;
  *   &lt;div&gt;First name: &lt;@form.input 'firstName' /&gt;&lt;/div&gt;
  * &lt;/@form.form&gt;

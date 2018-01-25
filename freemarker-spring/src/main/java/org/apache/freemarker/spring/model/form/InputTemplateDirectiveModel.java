@@ -51,8 +51,6 @@ import org.springframework.web.servlet.support.RequestContext;
  * Some valid example(s):
  * </P>
  * <PRE>
- *   &lt;#assign form=spring.form /&gt;
- *   ...
  *   &lt;@form.input 'user.firstName' /&gt;
  *   
  *   &lt;@form.input 'user.email' id="customEmailId" /&gt;
@@ -188,6 +186,16 @@ class InputTemplateDirectiveModel extends AbstractHtmlInputElementTemplateDirect
 
     protected String getType() {
         return "text";
+    }
+
+    @Override
+    protected boolean isValidDynamicAttribute(String localName, Object value) {
+        if ("type".equals(localName)) {
+            if ("checkbox".equals(value) || "radio".equals(value)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

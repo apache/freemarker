@@ -524,6 +524,7 @@ models by default like FreemarkerServlet does.
 - Directives Support to replace Spring Form JSP Tag Libraries in spring-form.tld:
   - <form:form ... /> : Replaced by <@form.form ... /> directive.
   - <form:input ... /> : Replaced by <@form.input ... /> directive.
+  - <form:password ... /> : Replaced by <@form.password ... /> directive.
 
 Core / Miscellaneous
 ....................

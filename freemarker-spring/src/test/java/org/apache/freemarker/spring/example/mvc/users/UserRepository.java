@@ -35,6 +35,7 @@ public class UserRepository {
         Long id = 101L;
         User user = new User(id);
         user.setEmail("john@example.com");
+        user.setPassword("johnpass");
         user.setFirstName("John");
         user.setLastName("Doe");
         Calendar birthDate = Calendar.getInstance();
@@ -47,6 +48,7 @@ public class UserRepository {
         id = 102L;
         user = new User(id);
         user.setEmail("jane@example.com");
+        user.setPassword("janepass");
         user.setFirstName("Jane");
         user.setLastName("Doe");
         birthDate = Calendar.getInstance();
