@@ -92,7 +92,9 @@ abstract class AbstractDataBoundFormElementTemplateDirectiveModel extends Abstra
         path = CallableUtils.getOptionalStringArgument(args, PATH_PARAM_IDX, this);
         id = CallableUtils.getOptionalStringArgument(args, ID_PARAM_IDX, this);
 
-        bindStatus = getBindStatus(env, objectWrapperAndUnwrapper, requestContext, path, false);
+        if (path != null) {
+            bindStatus = getBindStatus(env, objectWrapperAndUnwrapper, requestContext, path, false);
+        }
     }
 
     protected BindStatus getBindStatus() {

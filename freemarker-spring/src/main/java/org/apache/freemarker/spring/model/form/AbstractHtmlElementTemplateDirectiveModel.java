@@ -40,6 +40,7 @@ import org.apache.freemarker.core.util.CallableUtils;
 import org.apache.freemarker.core.util.StringToIndexMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.support.BindStatus;
 import org.springframework.web.servlet.support.RequestContext;
 
 /**
@@ -337,7 +338,9 @@ abstract class AbstractHtmlElementTemplateDirectiveModel
     }
 
     protected String resolveCssClass() throws TemplateException {
-        if (getBindStatus().isError() && StringUtils.hasText(getCssErrorClass())) {
+        final BindStatus bindStatus = getBindStatus();
+
+        if (bindStatus != null && bindStatus.isError() && StringUtils.hasText(getCssErrorClass())) {
             return ObjectUtils.getDisplayString(evaluate("cssErrorClass", getCssErrorClass()));
         } else {
             return ObjectUtils.getDisplayString(evaluate("cssClass", getCssClass()));

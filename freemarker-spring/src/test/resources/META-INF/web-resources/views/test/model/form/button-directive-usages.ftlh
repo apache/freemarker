@@ -24,36 +24,12 @@
   <form id="form1">
     <table>
       <tr>
-        <th>Hidden 1:</th>
         <td>
-          <@form.hidden 'user.email' />
-        </td>
-      </tr>
-    </table>
-  </form>
-
-  <hr/>
-
-  <form id="form2">
-    <table>
-      <tr>
-        <th>Hidden 2:</th>
-        <td>
-          <@form.hidden 'user.email' disabled=true />
-        </td>
-      </tr>
-    </table>
-  </form>
-
-  <hr/>
-
-  <h2>Testing with setting showPassword to false explicitly</h2>
-  <form id="form3">
-    <table>
-      <tr>
-        <th>Password:</th>
-        <td>
-          <@form.password 'user.password' showPassword=false />
+          <@form.button name="button1">
+            Something inside...
+          </@form.button>
+          <@form.button name="button2" value="Button 2" />
+          <@form.button name="button3" value="Button 3" disabled=true />
         </td>
       </tr>
     </table>
