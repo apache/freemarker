@@ -29,6 +29,7 @@ public class User {
     private String firstName;
     private String lastName;
     private Date birthDate;
+    private String description;
 
     public User() {
     }
@@ -81,9 +82,17 @@ public class User {
         this.birthDate = birthDate;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     @Override
     public String toString() {
         return super.toString() + " {id=" + id + ", firstName='" + firstName + "', lastName='" + lastName + "', email='"
-                + email + "', birthDate='" + birthDate + "'}";
+                + email + "', birthDate='" + birthDate + "', description='" + description + "'}";
     }
 }

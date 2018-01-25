@@ -43,6 +43,8 @@ public class UserRepository {
         birthDate.set(Calendar.MONTH, Calendar.JANUARY);
         birthDate.set(Calendar.DATE, 5);
         user.setBirthDate(birthDate.getTime());
+        user.setDescription("Lorem ipsum dolor sit amet, \r\nconsectetur adipiscing elit, \r\n"
+                + "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.");
         usersMap.put(id, user);
 
         id = 102L;
@@ -56,6 +58,8 @@ public class UserRepository {
         birthDate.set(Calendar.MONTH, Calendar.FEBRUARY);
         birthDate.set(Calendar.DATE, 7);
         user.setBirthDate(birthDate.getTime());
+        user.setDescription("Ut enim ad minim veniam, \r\n"
+                + "quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.");
         usersMap.put(id, user);
     }
 
@@ -100,6 +104,7 @@ public class UserRepository {
         clone.setFirstName(source.getFirstName());
         clone.setLastName(source.getLastName());
         clone.setBirthDate(source.getBirthDate());
+        clone.setDescription(source.getDescription());
         return clone;
     }
 }
