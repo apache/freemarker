@@ -18030,8 +18030,12 @@ Sorted by name.last:
             <primary>evaluate string</primary>
           </indexterm>
 
-          <para>This built-in evaluates a string as an FTL <emphasis>expression</emphasis>. For
-          example <literal>"1+2"?eval</literal> returns number 3.</para>
+          <para>This built-in evaluates a string as an FTL
+          <emphasis>expression</emphasis>. For example
+          <literal>"1+2"?eval</literal> returns the number 3. (To render a
+          template that's stored in a string, use the <link
+          linkend="ref_builtin_interpret"><literal>interpret</literal>
+          built-in</link> instead.)</para>
 
           <para>The evaluated expression sees the same variables (such as
           locals) that are visible at the place of the invocation of
@@ -18041,11 +18045,7 @@ Sorted by name.last:
           <literal><replaceable>s</replaceable></literal> there. Except, it
           can't use <link linkend="ref_builtins_loop_var">loop variable
           built-ins</link> that refer to a loop variable that was created
-          outside <literal><replaceable>s</replaceable></literal>.
-          Please note that the string accepts an expression, if you want to
-          render out a full-fledged template, please use the 
-          <link linkend="ref_builtin_interpret"><literal>interpret</literal>
-          built-in.</para>
+          outside <literal><replaceable>s</replaceable></literal>.</para>
 
           <para>Regarding the configuration settings that affect the parsing
           (like syntax) and evaluation the rules are the same as with the
