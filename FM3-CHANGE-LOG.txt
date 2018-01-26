@@ -526,6 +526,9 @@ models by default like FreemarkerServlet does.
   - <form:input ... /> : Replaced by <@form.input ... /> directive.
   - <form:password ... /> : Replaced by <@form.password ... /> directive.
   - <form:textarea ... /> : Replaced by <@form.textarea ... /> directive.
+  - <form:hidden ... /> : Replaced by <@form.hidden ... /> directive.
+  - <form:button ... /> : Replaced by <@form.button ... /> directive.
+  - <form:label ... /> : Replaced by <@form.label ... /> directive.
 
 Core / Miscellaneous
 ....................
