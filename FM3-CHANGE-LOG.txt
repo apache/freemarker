@@ -529,6 +529,7 @@ models by default like FreemarkerServlet does.
   - <form:hidden ... /> : Replaced by <@form.hidden ... /> directive.
   - <form:button ... /> : Replaced by <@form.button ... /> directive.
   - <form:label ... /> : Replaced by <@form.label ... /> directive.
+  - <form:errors ... /> : Replaced by <@form.errors ... /> directive.
 
 Core / Miscellaneous
 ....................

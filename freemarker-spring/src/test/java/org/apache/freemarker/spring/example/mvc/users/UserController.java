@@ -94,6 +94,16 @@ public class UserController {
                     new String[] { "user.error.invalid.email" }, new Object[] { user.getEmail() }, "E-Mail is blank."));
         }
 
+        if (!StringUtils.hasText(user.getFirstName())) {
+            bindingResult.addError(new FieldError("user", "firstName", user.getFirstName(), true,
+                    new String[] { "user.error.invalid.firstName" }, new Object[] { user.getFirstName() }, "First name is blank."));
+        }
+
+        if (!StringUtils.hasText(user.getLastName())) {
+            bindingResult.addError(new FieldError("user", "lastName", user.getLastName(), true,
+                    new String[] { "user.error.invalid.lastName" }, new Object[] { user.getLastName() }, "Last name is blank."));
+        }
+
         // No saving for now...
 
         return (StringUtils.hasText(viewName)) ? viewName : DEFAULT_USER_EDIT_VIEW_NAME;

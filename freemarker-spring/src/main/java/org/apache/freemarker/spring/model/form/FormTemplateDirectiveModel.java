@@ -138,6 +138,8 @@ class FormTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveMod
                     true
                     );
 
+    static final String MODEL_ATTRIBUTE_VARIABLE_NAME = FormTemplateDirectiveModel.class.getName() + ".modelAttribute";
+
     private static final String FORM_TAG_NAME = "form";
 
     private static final String INPUT_TAG_NAME = "input";
@@ -234,9 +236,11 @@ class FormTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveMod
                 .wrap(newNestedPath);
 
         try {
+            getRequest().setAttribute(MODEL_ATTRIBUTE_VARIABLE_NAME, modelAttribute);
             springTemplateModel.setNestedPathModel(newNestedPathModel);
             callPlace.executeNestedContent(null, out, env);
         } finally {
+            getRequest().removeAttribute(MODEL_ATTRIBUTE_VARIABLE_NAME);
             springTemplateModel.setNestedPathModel(prevNestedPathModel);
             tagOut.endTag();
         }
