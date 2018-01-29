@@ -16689,8 +16689,12 @@ red, green, blue.
             variable can be both string and sequence on the same time).</para>
           </note>
 
-          <para>Tells if the sequence contains the specified value. It has 1
-          parameter, the value to find. Example:</para>
+          <para>Tells if the sequence contains the specified value (according
+          the <link
+          linkend="dgui_template_exp_comparison"><literal>==</literal>
+          operator</link> of the template language, not according Java's
+          <literal>Object.equals</literal>). It has 1 parameter, the value to
+          find. Example:</para>
 
           <programlisting role="template">&lt;#assign x = ["red", 16, "blue", "cyan"]&gt;
 "blue": ${x?seq_contains("blue")?string("yes", "no")}
