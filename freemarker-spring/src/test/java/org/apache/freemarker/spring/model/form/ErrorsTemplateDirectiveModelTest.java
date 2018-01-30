@@ -64,11 +64,12 @@ public class ErrorsTemplateDirectiveModelTest {
                 .param("firstName", "").param("lastName", "").param("email", "")
                 .accept(MediaType.parseMediaType("text/html"))).andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith("text/html")).andDo(print())
-                .andExpect(xpath("string(//form[@id='form1']//div[@id='formErrors']/ul)").string(Matchers.containsString("First name")))
-                .andExpect(xpath("string(//form[@id='form1']//div[@id='formErrors']/ul)").string(Matchers.containsString("Last name")))
-                .andExpect(xpath("string(//form[@id='form1']//div[@id='formErrors']/ul)").string(Matchers.containsString("E-Mail")))
+                .andExpect(xpath("string(//form[@id='form1']//div[@id='formErrors1']/ul)").string(Matchers.containsString("First name")))
+                .andExpect(xpath("string(//form[@id='form1']//div[@id='formErrors1']/ul)").string(Matchers.containsString("Last name")))
+                .andExpect(xpath("string(//form[@id='form1']//div[@id='formErrors1']/ul)").string(Matchers.containsString("E-Mail")))
+                .andExpect(xpath("string(//form[@id='form1']//div[@id='formErrors2']/p)").string(Matchers.containsString("some errors")))
                 .andExpect(xpath("//form[@id='form1']//span[@class='errorFirstName']/text()").string(Matchers.containsString("First name")))
                 .andExpect(xpath("//form[@id='form1']//span[@class='errorLastName']/text()").string(Matchers.containsString("Last name")))
-                .andExpect(xpath("//form[@id='form1']//span[@class='errorEmail']/text()").string(Matchers.containsString("E-Mail")));
+                .andExpect(xpath("//form[@id='form1']//div[@class='errorEmail']/text()").string(Matchers.containsString("E-Mail")));
     }
 }

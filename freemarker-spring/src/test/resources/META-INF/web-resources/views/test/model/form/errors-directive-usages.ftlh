@@ -23,13 +23,18 @@
   <hr/>
 
   <@form.form 'user' id="form1">
-    <div id="formErrors">
+    <div id="formErrors1">
       <@form.errors '*'; messages>
         <ul>
           <#list messages as message>
             <li>${message}</li>
           </#list>
         </ul>
+      </@form.errors>
+    </div>
+    <div id="formErrors2">
+      <@form.errors '*'>
+        <p>There are some errors.</p>
       </@form.errors>
     </div>
     <table>
@@ -39,7 +44,7 @@
         </th>
         <td>
           <@form.input 'firstName' />
-          <@form.errors 'firstName' cssClass="errorFirstName"; messages />
+          <@form.errors 'firstName' cssClass="errorFirstName" />
         </td>
       </tr>
       <tr>
@@ -48,7 +53,7 @@
         </th>
         <td>
           <@form.input 'lastName' />
-          <@form.errors 'lastName' cssClass="errorLastName"; messages />
+          <@form.errors 'lastName' cssClass="errorLastName" />
         </td>
       </tr>
       <tr>
@@ -57,7 +62,7 @@
         </th>
         <td>
           <@form.input 'email' />
-          <@form.errors 'email' cssClass="errorEmail"; messages />
+          <@form.errors 'email' element="div" cssClass="errorEmail" />
         </td>
       </tr>
     </table>

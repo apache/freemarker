@@ -20,7 +20,6 @@
 package org.apache.freemarker.spring.model.form;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -142,25 +141,22 @@ class ErrorsTemplateDirectiveModel extends AbstractHtmlElementTemplateDirectiveM
         param = CallableUtils.getOptionalStringArgument(args, DELIMITER_PARAM_IDX, this);
         delimiter = (StringUtils.hasText(param)) ? param : DEFAULT_DELIMITER;
 
-        String nestedContent = null;
-
-        try {
-            List<String> messages = new ArrayList<String>();
-            messages.addAll(Arrays.asList(getBindStatus().getErrorMessages()));
-            SimpleCollection messagesModel = new SimpleCollection(messages, objectWrapperAndUnwrapper);
-            final TemplateModel[] nestedContentArgs = new TemplateModel[] { messagesModel };
-
-            StringWriter nestedOut = new StringWriter(1024);
-            callPlace.executeNestedContent(nestedContentArgs, nestedOut, env);
-            nestedContent = nestedOut.toString();
-        } finally {
-            if (StringUtils.hasText(nestedContent)) {
-                out.write(nestedContent);
-            } else {
-                TagOutputter tagOut = new TagOutputter(out);
-                renderDefaultContent(tagOut);
-            }
+        if (!callPlace.hasNestedContent()) {
+            TagOutputter tagOut = new TagOutputter(out);
+            renderDefaultContent(tagOut);
+            return;
         }
+
+        if (callPlace.getNestedContentParameterCount() == 0) {
+            callPlace.executeNestedContent(null, out, env);
+            return;
+        }
+
+        List<String> messages = new ArrayList<String>();
+        messages.addAll(Arrays.asList(getBindStatus().getErrorMessages()));
+        SimpleCollection messagesModel = new SimpleCollection(messages, objectWrapperAndUnwrapper);
+        final TemplateModel[] nestedContentArgs = new TemplateModel[] { messagesModel };
+        callPlace.executeNestedContent(nestedContentArgs, out, env);
     }
 
     public String getElement() {
