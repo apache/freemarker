@@ -48,8 +48,8 @@ public interface CallPlace {
      * The number of nested content parameters in this call (like 2 in {@code <@foo xs; k, v>...</@>}). If you want the
      * caller to specify a fixed number of nested content parameters, then this is not interesting for you, and just
      * pass an array of that length to {@link #executeNestedContent(TemplateModel[], Writer, Environment)}. If, however,
-     * you want to allow the caller to declare less parameters, then this is how you know how much parameters you should
-     * calculate and pass to {@link #executeNestedContent(TemplateModel[], Writer, Environment)}.
+     * you want to allow the directive/function call to declare fewer parameters, then this is how you know how many
+     * parameters you should calculate and pass to {@link #executeNestedContent(TemplateModel[], Writer, Environment)}.
      */
     int getNestedContentParameterCount();
 
