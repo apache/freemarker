@@ -349,7 +349,9 @@ class ClassIntrospector {
                     }
 
                     PropertyDescriptor propDesc = decision.getExposeAsProperty();
-                    if (propDesc != null && !(introspData.get(propDesc.getName()) instanceof FastPropertyDescriptor)) {
+                    if (propDesc != null &&
+                            (decision.getReplaceExistingProperty()
+                                    || !(introspData.get(propDesc.getName()) instanceof FastPropertyDescriptor))) {
                         addPropertyDescriptorToClassIntrospectionData(
                                 introspData, propDesc, clazz, accessibleMethods);
                     }

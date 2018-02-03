@@ -94,6 +94,8 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
             } finally {
                 pageContext.popWriter();
             }
+        } catch (TemplateException e) {
+            throw e;
         } catch (Exception e) {
             throw toTemplateModelExceptionOrRethrow(e);
         }
@@ -101,8 +103,12 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
     
     static final class TemplateExceptionWrapperJspException extends JspException {
 
-        public TemplateExceptionWrapperJspException(Throwable cause) {
+        public TemplateExceptionWrapperJspException(TemplateException cause) {
             super("Nested content has thrown template exception", cause);
+        }
+        
+        public TemplateException getCause() {
+            return (TemplateException) super.getCause();
         }
         
     }

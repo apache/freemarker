@@ -4527,7 +4527,7 @@ jsmith@other.com, jsmith@other.com, jsmith@other.com</programlisting>
 
           <para>如果你已经为其他人员编写一个有用的，高质量的库，你也许想把它放在网络上
           (就像 <link 
-		  xlink:href="http://freemarker.org/libraries.html">http://freemarker.org/libraries.html</link>)。
+		  xlink:href="https://freemarker.apache.org/libraries.html">https://freemarker.apache.org/libraries.html</link>)。
 		  为了防止和其他作者使用库的命名相冲突，而且引入其他库时要书写简单，
 		  这有一个事实上的标准，那就是指定库路径的格式。这个标准是：
 		  库的路径必须对模板和其他库可用(可引用)，就像这样：</para>
@@ -6068,7 +6068,7 @@ public class RepeatDirective implements TemplateDirectiveModel {
               <para><literal>DefaultObjectWrapper</literal> 有
               <literal>incompatibleImprovements</literal> 属性，
 			  这在 2.3.22 或更高版本中是极力推荐的(参看该效果的 <link
-              xlink:href="http://freemarker.org/docs/api/freemarker/template/DefaultObjectWrapper.html#DefaultObjectWrapper-freemarker.template.Version-">API文档</link>)。如何来设置：</para>
+              xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/DefaultObjectWrapper.html#DefaultObjectWrapper-freemarker.template.Version-">API文档</link>)。如何来设置：</para>
 
               <itemizedlist>
                 <listitem>
@@ -6408,7 +6408,7 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
 		例如：<literal>locale</literal>，<literal>number_format</literal>，
 		<literal>default_encoding</literal>，
         <literal>template_exception_handler</literal>。可以参考 <link
-        xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setSetting-java.lang.String-java.lang.String-">
+        xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#setSetting-java.lang.String-java.lang.String-">
 		<literal>Configuration.setSetting(...)</literal>的Java API 文档</link>
 		来查看配置设置的完整列表。</para>
 
@@ -6531,7 +6531,7 @@ myCfg.setDefaultEncoding("UTF-8");</programlisting>
 			在这种情况下，框架的作者大多数使用 <literal>Configuration</literal> 
 			对象的 <literal>setSetting(String name, String value) </literal>方法。
 			这可以参考<link
-            xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setSetting-java.lang.String-java.lang.String-"><literal>setSetting</literal>的API文档</link>
+            xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#setSetting-java.lang.String-java.lang.String-"><literal>setSetting</literal>的API文档</link>
 			部分来获取可用的设置名和参数的格式的信息。
 			而在Spring框架中，我们可以这样进行：</para>
 
@@ -7139,7 +7139,7 @@ c</programlisting>
 
           <para>在新项目中，应该将它设置为实际使用的FreeMarker版本号。
 		  而在老项目中，那么最好也将它设置的高一些，最好检查一下哪些修改是激活状态(可以在 <link
-          xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#Configuration-freemarker.template.Version-"><literal>Configuration(Version)</literal>
+          xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#Configuration-freemarker.template.Version-"><literal>Configuration(Version)</literal>
           构造方法的API JavaDoc文档</link> 中找到它们)，至少不仅仅是 
 		  <quote>不兼容改进</quote> 第三版本号(小版本)设置提高。通常来讲，
 		  只要为该设置增加最后的版本号，那么这些修改的风险就会小很多。</para>
@@ -9976,7 +9976,7 @@ Green Mouse</programlisting>
             <listitem>
               <para>如果程序员设置了FreeMarker(将 <literal>incompatible_improvements</literal> 
 			  设置为 <literal>2.3.20</literal> 或更高；更多内容请参考 <link
-              xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setIncompatibleImprovements%28freemarker.core.Version%29">这里</link>)，那么
+              xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#setIncompatibleImprovements%28freemarker.core.Version%29">这里</link>)，那么
 			  <literal>'</literal> 被替换为
               <literal>&amp;#39;</literal>。</para>
             </listitem>
@@ -10207,7 +10207,7 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           linkend="ref_builtin_keep_before"><literal>keep_before</literal></link> 相同，
 		  但是保留参数最后一次出现之前的部分，而不是第一次出现之前。比如：</para>
 
-          <programlisting role="template">${"foo.bar.txt"?keep_after_last(".")}</programlisting>
+          <programlisting role="template">${"foo.bar.txt"?keep_before_last(".")}</programlisting>
 
           <para>将会输出</para>
 
@@ -21579,7 +21579,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 				  <literal>MetaInfTldSources</literal> 和/或
                   <literal>ClasspathTlds</literal> (参考该内容描述的 
                   <link
-                  xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">
+                  xlink:href="https://freemarker.apache.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">
                   <literal>FreemarkerServlet</literal> Java API 文档 </link> )。
 				  比如，如果从 Eclipse 中使用内嵌的 Servlet 容器来运行应用程序，
 				  那么标签库的jar文件不在标准的路径下，但是在和其它依赖一样的类路径下，
@@ -21601,7 +21601,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>org.freemarker.jsp.classpathTlds</literal> 上，
 				  或者被它们的值所替换。因此可以在 Eclipse 运行配置中来调整它们而不需要修改 
 				  <literal>web.xml</literal>。(参考 <link
-                  xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">
+                  xlink:href="https://freemarker.apache.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">
                   <literal>FreemarkerServlet</literal> 的 Java API 文档</link> 来获得更多内容)</para>
                 </listitem>
 
@@ -21906,7 +21906,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>classpath:foo/bar.ftl</literal> 中。它修复了很多遗留问题
                   (bugs)，大多数都是和翻译特殊步骤之后的 <literal>..</literal> 相关，
 				  比如 <literal>.</literal> 或 <literal>*</literal>。请在 <link
-                  xlink:href="http://freemarker.org/docs/api/freemarker/cache/TemplateNameFormat.html#DEFAULT_2_4_0"> 
+                  xlink:href="https://freemarker.apache.org/docs/api/freemarker/cache/TemplateNameFormat.html#DEFAULT_2_4_0">
                   <literal>TemplateNameFormat.DEFAULT_2_4_0</literal>的 Java API 文档</link> 
 				  中参考各种相异之处。</para>
                 </listitem>
@@ -23749,7 +23749,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>If you set the
               <literal>incompatible_improvements</literal> setting (see <link
-              xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setIncompatibleImprovements%28freemarker.core.Version%29">here</link>)
+              xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#setIncompatibleImprovements%28freemarker.core.Version%29">here</link>)
               to <literal>2.3.20</literal> or higher, <literal>?html</literal>
               will escape apostrophe-quotes just like
               <literal>?xhtml</literal> does. Utilizing this is highly

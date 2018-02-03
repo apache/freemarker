@@ -4,7 +4,7 @@ Apache FreeMarker {version}
 [![Build Status](https://travis-ci.org/apache/incubator-freemarker.svg?branch=2.3-gae)](https://travis-ci.org/apache/incubator-freemarker)
 
 For the latest version or to report bugs visit:
-http://freemarker.apache.org/
+https://freemarker.apache.org/
 
 
 DISCLAIMER
@@ -18,6 +18,18 @@ consistent with other successful ASF projects. While incubation status is
 not necessarily a reflection of the completeness or stability of the
 code, it does indicate that the project has yet to be fully endorsed by
 the ASF.
+
+
+Regarding pull requests on Github
+---------------------------------
+
+By sending a pull request you grant the Apache Software Foundation
+sufficient rights to use and release the submitted work under the
+Apache license. You grant the same rights (copyright license, patent
+license, etc.) to the Apache Software Foundation as if you have signed
+a [Contributor License Agreement](https://www.apache.org/dev/new-committers-guide.html#cla).
+For contributions that are judged to be non-trivial, you will be asked
+to actually signing a Contributor License Agreement.
 
 
 What is Apache FreeMarker?
@@ -44,7 +56,7 @@ See the LICENSE file for more details!
 Documentation
 -------------
 
-Online: http://freemarker.apache.org/docs/
+Online: https://freemarker.apache.org/docs/
 
 Offline: The full documentation is available in the binary distribution
 in the documentation/index.html directory.
@@ -93,7 +105,7 @@ Change log
 ----------
 
 Online (for stable releases only):
-http://freemarker.apache.org/docs/app_versions.html
+https://freemarker.apache.org/docs/app_versions.html
 
 Offline:
 In the binary release, open documentation/index.html, and you will find the
@@ -105,7 +117,7 @@ Building FreeMarker
 
 If you haven't yet, download the source release, or checkout FreeMarker from
 the source code repository. See repository locations here:
-http://freemarker.apache.org/sourcecode.html
+https://freemarker.apache.org/sourcecode.html
 
 You need JDK 8 (not JDK 9!), Apache Ant (tested with 1.9.6) and Ivy (tested
 with 2.4.0) to be installed. To install Ivy (but be sure it's not already

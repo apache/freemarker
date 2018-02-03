@@ -117,11 +117,11 @@
 
         <para>But the user's name ("John Doe" above) depends on who the
         logged-in user is, and the latest product information should come from
-        a database. Because this data changes, you cannot you cannot use
-        static HTML. Instead, you can use a <emphasis
-        role="term">template</emphasis> of the desired output. The template is
-        the same as the static HTML would be, except that it contains some
-        instructions to FreeMarker that makes it dynamic:</para>
+        a database. Because this data changes, you cannot use static HTML.
+        Instead, you can use a <emphasis role="term">template</emphasis> of
+        the desired output. The template is the same as the static HTML would
+        be, except that it contains some instructions to FreeMarker that makes
+        it dynamic:</para>
 
         <programlisting role="template" xml:id="example.first">&lt;html&gt;
 &lt;head&gt;
@@ -3985,6 +3985,13 @@ Creating mouse...
           overloaded to do string and sequence concatenation and hash
           addition. <literal>&lt;#assign x--&gt;</literal> is shorthand for
           <literal>&lt;#assign x -= 1&gt;</literal>.</para>
+
+          <note>
+            <para>The shorthand operators (like <literal>+=</literal>,
+            <literal>++</literal>, etc.) are only supported since FreeMarker
+            2.3.23. Before that, you could only use <literal>=</literal> in
+            itself, as in <literal>&lt;#assign x = x + 1&gt;</literal>.</para>
+          </note>
         </section>
 
         <section xml:id="dgui_template_exp_parentheses">
@@ -5332,9 +5339,9 @@ other@example.com, other@example.com, other@example.com</programlisting>
           FreeMarker 2.3.25), which means that they are only done when the
           imported library is actually used in the template. See the Java API
           documentation for more details: <link
-          xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setAutoImports-java.util.Map-">Configuration.setAutoImports</link>,
+          xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#setAutoImports-java.util.Map-">Configuration.setAutoImports</link>,
           <link
-          xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setLazyAutoImports-java.lang.Boolean-">Configuration.setLazyAutoImports</link>.</para>
+          xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#setLazyAutoImports-java.lang.Boolean-">Configuration.setLazyAutoImports</link>.</para>
         </section>
       </section>
 
@@ -7698,7 +7705,7 @@ public class RepeatDirective implements TemplateDirectiveModel {
               <para><literal>DefaultObjectWrapper</literal> has an
               <literal>incompatibleImprovements</literal> property, that's
               highly recommended to set it to a high value (see the <link
-              xlink:href="http://freemarker.org/docs/api/freemarker/template/DefaultObjectWrapper.html#DefaultObjectWrapper-freemarker.template.Version-">API
+              xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/DefaultObjectWrapper.html#DefaultObjectWrapper-freemarker.template.Version-">API
               documentation</link> for the effects). How to set it:</para>
 
               <itemizedlist>
@@ -8069,7 +8076,7 @@ cfg.setSharedVariable("company", "Foo Inc.");</programlisting>
         <literal>default_encoding</literal>,
         <literal>template_exception_handler</literal>. The full list of
         settings can be found in the <link
-        xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setSetting-java.lang.String-java.lang.String-">Java
+        xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#setSetting-java.lang.String-java.lang.String-">Java
         API documentation of
         <literal>Configuration.setSetting(...)</literal></link>.</para>
 
@@ -8208,7 +8215,7 @@ myCfg.setObjectWrapper(owb.build());</programlisting>
             <literal>Confguration.setSetting(String name, String
             value)</literal> method; see available setting names and the
             format of the values in the <link
-            xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setSetting-java.lang.String-java.lang.String-">API
+            xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#setSetting-java.lang.String-java.lang.String-">API
             documentation of <literal>setSetting</literal></link>. Example for
             Spring Framework:</para>
 
@@ -10040,7 +10047,7 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
           that you are actually using. In older projects it's also usually
           better to keep this high, however you better check the changes
           activated (find them in <link
-          xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#Configuration-freemarker.template.Version-">the
+          xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#Configuration-freemarker.template.Version-">the
           API JavaDoc of the <literal>Configuration(Version)</literal>
           constructor</link>), at least if not only the 3rd version number
           (the micro version) of <quote>incompatible improvements</quote>
@@ -11280,7 +11287,7 @@ TemplateHashModel roundingModeEnums =
 
   &lt;!--
     Init-param documentation:
-    <link xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">http://freemarker.apache.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html</link>
+    <link xlink:href="https://freemarker.apache.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">https://freemarker.apache.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html</link>
   --&gt;
 
   &lt;!-- FreemarkerServlet settings: --&gt;
@@ -11309,7 +11316,7 @@ TemplateHashModel roundingModeEnums =
     &lt;param-value&gt;2.3.27&lt;/param-value&gt;
     &lt;!--
       Recommended to set to a high value.
-      See: http://freemarker.apache.org/docs/pgui_config_incompatible_improvements.html
+      See: https://freemarker.apache.org/docs/pgui_config_incompatible_improvements.html
     --&gt;
   &lt;/init-param&gt;
   &lt;init-param&gt;
@@ -13719,7 +13726,7 @@ String BEAN_NAME = "${beanName?j_string}";</programlisting>
           but keeps the part before the last occurrence of the parameter,
           rather than after the first. Example:</para>
 
-          <programlisting role="template">${"foo.bar.txt"?keep_after_last(".")}</programlisting>
+          <programlisting role="template">${"foo.bar.txt"?keep_before_last(".")}</programlisting>
 
           <para>will print</para>
 
@@ -16682,8 +16689,12 @@ red, green, blue.
             variable can be both string and sequence on the same time).</para>
           </note>
 
-          <para>Tells if the sequence contains the specified value. It has 1
-          parameter, the value to find. Example:</para>
+          <para>Tells if the sequence contains the specified value (according
+          the <link
+          linkend="dgui_template_exp_comparison"><literal>==</literal>
+          operator</link> of the template language, not according Java's
+          <literal>Object.equals</literal>). It has 1 parameter, the value to
+          find. Example:</para>
 
           <programlisting role="template">&lt;#assign x = ["red", 16, "blue", "cyan"]&gt;
 "blue": ${x?seq_contains("blue")?string("yes", "no")}
@@ -18023,8 +18034,12 @@ Sorted by name.last:
             <primary>evaluate string</primary>
           </indexterm>
 
-          <para>This built-in evaluates a string as an FTL expression. For
-          example <literal>"1+2"?eval</literal> returns number 3.</para>
+          <para>This built-in evaluates a string as an FTL
+          <emphasis>expression</emphasis>. For example
+          <literal>"1+2"?eval</literal> returns the number 3. (To render a
+          template that's stored in a string, use the <link
+          linkend="ref_builtin_interpret"><literal>interpret</literal>
+          built-in</link> instead.)</para>
 
           <para>The evaluated expression sees the same variables (such as
           locals) that are visible at the place of the invocation of
@@ -27070,6 +27085,59 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
     <appendix xml:id="app_versions">
       <title>Version history</title>
 
+      <section xml:id="versions_2_3_28">
+        <title>2.3.28 (incubating at Apache)</title>
+
+        <para>Release date: [FIXME]</para>
+
+        <para><emphasis role="bold">This is a stable, final
+        release.</emphasis> The <quote>incubating</quote> suffix is required
+        by the Apache Software Foundation until the project becomes a fully
+        accepted (graduated) Apache project.</para>
+
+        <section>
+          <title>Changes on the FTL side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>[FIXME]</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Changes on the Java side</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>Bug fixed (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-88">FREEMARKER-88</link>):
+              This is related to calling JSP tags from templates. If a
+              <literal>TemplateException</literal> that's not a
+              <literal>TemplateModelExceptoin</literal> has occurred in the
+              body of a JSP <literal>SimpleTag</literal> (typically, an
+              <literal>InvalidReferenceException</literal>), that has caused a
+              <literal>ClassCastException</literal> in the exception handling
+              code, thus the template processing has thrown that instead of
+              the original exception.</para>
+            </listitem>
+
+            <listitem>
+              <para>Added new property to
+              <literal>BeansWrapper.MethodAppearanceDecision</literal>:
+              <literal>replaceExistingProperty</literal>. This is useful when
+              a method like <literal>size()</literal> is exposed as a JavaBean
+              property via
+              <literal>MethodAppearanceDecision.exposeAsProperty</literal>,
+              but there's also a <quote>real</quote> JavaBean property (like
+              <literal>getSize()</literal>) with identical name. By default
+              the real property isn't replaced, but now with
+              <literal>replaceExistingProperty</literal> it can be.</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+      </section>
+
       <section xml:id="versions_2_3_27">
         <title>2.3.27 (incubating at Apache)</title>
 
@@ -28333,7 +28401,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>New <literal>FreemarkerServlet</literal> init-params (see
               <link
-              xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">the
+              xlink:href="https://freemarker.apache.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">the
               <literal>FreemarkerSerlvet</literal> API documentation</link>
               for details):</para>
 
@@ -29515,7 +29583,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   <literal>ClasspathTlds</literal>
                   <literal>FreemarkerServlet</literal> init-params (see the
                   <link
-                  xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">Java
+                  xlink:href="https://freemarker.apache.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">Java
                   API documentation of
                   <literal>FreemarkerServlet</literal></link> for the
                   description of these). For example, if you run your
@@ -29543,7 +29611,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   respectively. Thus one can adjust these in the Eclipse run
                   configuration without modifying the
                   <literal>web.xml</literal>. (See the <link
-                  xlink:href="http://freemarker.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">Java
+                  xlink:href="https://freemarker.apache.org/docs/api/freemarker/ext/servlet/FreemarkerServlet.html">Java
                   API documentation of
                   <literal>FreemarkerServlet</literal></link> for
                   more.)</para>
@@ -29913,7 +29981,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   of <literal>..</literal> after special steps like
                   <literal>.</literal> or <literal>*</literal>. See the full
                   list of differences in the <link
-                  xlink:href="http://freemarker.org/docs/api/freemarker/cache/TemplateNameFormat.html#DEFAULT_2_4_0">Java
+                  xlink:href="https://freemarker.apache.org/docs/api/freemarker/cache/TemplateNameFormat.html#DEFAULT_2_4_0">Java
                   API documentation of
                   <literal>TemplateNameFormat.DEFAULT_2_4_0</literal></link>.</para>
                 </listitem>
@@ -31821,7 +31889,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>If you set the
               <literal>incompatible_improvements</literal> setting (see <link
-              xlink:href="http://freemarker.org/docs/api/freemarker/template/Configuration.html#setIncompatibleImprovements%28freemarker.core.Version%29">here</link>)
+              xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#setIncompatibleImprovements%28freemarker.core.Version%29">here</link>)
               to <literal>2.3.20</literal> or higher, <literal>?html</literal>
               will escape apostrophe-quotes just like
               <literal>?xhtml</literal> does. Utilizing this is highly

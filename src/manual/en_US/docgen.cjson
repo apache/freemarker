@@ -17,7 +17,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-deployUrl: "http://freemarker.apache.org/docs/"
+deployUrl: "https://freemarker.apache.org/docs/"
 onlineTrackerHTML: "docgen-misc/googleAnalytics.html"
 searchKey: "003127866208504630097:arjqbv_znfw"
 validation: {
@@ -34,8 +34,8 @@ generateEclipseTOC
 removeNodesWhenOnline: [ "preface" ]
 
 copyrightHolder: "The Apache Software Foundation"
-copyrightHolderSite: "http://apache.org/"
-copyrightSuffix: "Apache FreeMarker, FreeMarker, Apache Incubator, Apache, the Apache FreeMarker logo are trademarks of The Apache Software Foundation."
+copyrightHolderSite: "https://apache.org/"
+copyrightSuffix: "Apache FreeMarker, FreeMarker, Apache Incubator, Apache, the Apache FreeMarker logo are trademarks of The Apache Software Foundation. All other marks mentioned may be trademarks or registered trademarks of their respective owners."
 copyrightStartYear: 1999
 copyrightCommentFile: "docgen-misc/copyrightComment.txt"
 
@@ -49,29 +49,30 @@ seoMeta: {
 }
 
 logo: {
-  href: "http://freemarker.apache.org"
+  href: "https://freemarker.apache.org"
   src: logo.png,
   alt: "FreeMarker"
 }
 
 olinks: {
-  homepage: "http://freemarker.apache.org/"
+  homepage: "https://freemarker.apache.org/"
   api: "api/index.html"
   
   // Homepage links:
-  freemarkerdownload: "http://freemarker.apache.org/freemarkerdownload.html"
-  contribute: "http://freemarker.apache.org/contribute.html"
-  history: "http://freemarker.apache.org/history.html"
-  what-is-freemarker: "http://freemarker.apache.org/"
-  mailing-lists: "http://freemarker.apache.org/mailing-lists.html"
+  freemarkerdownload: "https://freemarker.apache.org/freemarkerdownload.html"
+  contribute: "https://freemarker.apache.org/contribute.html"
+  history: "https://freemarker.apache.org/history.html"
+  what-is-freemarker: "https://freemarker.apache.org/"
+  mailing-lists: "https://freemarker.apache.org/mailing-lists.html"
   
   // External URL-s:
-  onlineTemplateTester: "http://freemarker-online.kenshoo.com/"
+  onlineTemplateTester: "http://try.freemarker.org/"
   twitter: "https://twitter.com/freemarker"
   sourceforgeProject: "https://sourceforge.net/projects/freemarker/"
   githubProject: "https://github.com/freemarker/freemarker"
   newBugReport: "https://issues.apache.org/jira/browse/FREEMARKER/"
-  newStackOverflowQuestion: "http://stackoverflow.com/questions/ask?tags=freemarker"
+  newStackOverflowQuestion: "https://stackoverflow.com/questions/ask?tags=freemarker"
+  asfIncubator: "http://incubator.apache.org/"
 }
 
 internalBookmarks: {
@@ -130,3 +131,7 @@ socialLinks: {
   "Twitter": { class: "twitter", href: "olink:twitter" }
   "Stack Overflow": { class: "stack-overflow", href: "olink:newStackOverflowQuestion" }
 }
+
+sideTOCLogos: [
+  { src: "apache-incubator.png", alt: "Apache Incubator", href: "olink:asfIncubator" }
+]

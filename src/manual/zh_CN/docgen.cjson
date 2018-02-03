@@ -17,7 +17,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-deployUrl: "http://freemarker.org/docs/"
+deployUrl: "https://freemarker.apache.org/docs/"
 onlineTrackerHTML: "docgen-misc/googleAnalytics.html"
 searchKey: "014728049242975963158:8awjt03uofm"
 validation: {
@@ -47,29 +47,30 @@ seoMeta: {
 }
 
 logo: {
-  href: "http://freemarker.org"
+  href: "https://freemarker.apache.org"
   src: logo.png,
   alt: "FreeMarker"
 }
 
 olinks: {
-  homepage: "http://freemarker.org/"
+  homepage: "https://freemarker.apache.org/"
   api: "api/index.html"
   
   // Homepage links:
-  freemarkerdownload: "http://freemarker.org/freemarkerdownload.html"
-  contribute: "http://freemarker.org/contribute.html"
-  history: "http://freemarker.org/history.html"
-  what-is-freemarker: "http://freemarker.org/"
-  mailing-lists: "http://freemarker.org/mailing-lists.html"
+  freemarkerdownload: "https://freemarker.apache.org/freemarkerdownload.html"
+  contribute: "https://freemarker.apache.org/contribute.html"
+  history: "https://freemarker.apache.org/history.html"
+  what-is-freemarker: "https://freemarker.apache.org/"
+  mailing-lists: "https://freemarker.apache.org/mailing-lists.html"
   
   // External URL-s:
-  onlineTemplateTester: "http://freemarker-online.kenshoo.com/"
+  onlineTemplateTester: "http://try.freemarker.org/"
   twitter: "https://twitter.com/freemarker"
   sourceforgeProject: "https://sourceforge.net/projects/freemarker/"
   githubProject: "https://github.com/freemarker/freemarker"
   newBugReport: "https://sourceforge.net/p/freemarker/bugs/new/"
-  newStackOverflowQuestion: "http://stackoverflow.com/questions/ask?tags=freemarker"
+  newStackOverflowQuestion: "https://stackoverflow.com/questions/ask?tags=freemarker"
+  asfIncubator: "http://incubator.apache.org/"
 }
 
 internalBookmarks: {
@@ -128,3 +129,7 @@ socialLinks: {
   "Twitter": { class: "twitter", href: "olink:twitter" }
   "Stack Overflow": { class: "stack-overflow", href: "olink:newStackOverflowQuestion" }
 }
+
+sideTOCLogos: [
+  { src: "apache-incubator.png", alt: "Apache Incubator", href: "olink:asfIncubator" }
+]
