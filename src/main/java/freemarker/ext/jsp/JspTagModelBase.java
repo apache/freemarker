@@ -143,7 +143,7 @@ class JspTagModelBase {
             throw (TemplateModelException) e;
         }
         if (e instanceof TemplateExceptionWrapperJspException) {
-            return (TemplateModelException) e.getCause();
+            return toTemplateModelExceptionOrRethrow(((TemplateExceptionWrapperJspException) e).getCause());
         }
         return new _TemplateModelException(e,
                 "Error while invoking the ", new _DelayedJQuote(tagName), " JSP custom tag; see cause exception");

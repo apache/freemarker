@@ -27110,6 +27110,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
+              <para>Bug fixed (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-88">FREEMARKER-88</link>):
+              This is related to calling JSP tags from templates. If a
+              <literal>TemplateException</literal> that's not a
+              <literal>TemplateModelExceptoin</literal> has occurred in the
+              body of a JSP <literal>SimpleTag</literal> (typically, an
+              <literal>InvalidReferenceException</literal>), that has caused a
+              <literal>ClassCastException</literal> in the exception handling
+              code, thus the template processing has thrown that instead of
+              the original exception.</para>
+            </listitem>
+
+            <listitem>
               <para>Added new property to
               <literal>BeansWrapper.MethodAppearanceDecision</literal>:
               <literal>replaceExistingProperty</literal>. This is useful when
