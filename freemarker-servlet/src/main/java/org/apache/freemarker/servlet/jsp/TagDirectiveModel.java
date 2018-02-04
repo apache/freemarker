@@ -134,6 +134,7 @@ class TagDirectiveModel extends JspTagModelBase implements TemplateDirectiveMode
         private final FreeMarkerPageContext pageContext;
         private boolean needPop = true;
         private final boolean needDoublePop;
+        private boolean closed = false;
 
         TagBodyContent(Writer out, Tag tag, FreeMarkerPageContext pageContext, boolean needDoublePop) {
             super((JspWriter) out, false);
@@ -244,6 +245,11 @@ class TagDirectiveModel extends JspTagModelBase implements TemplateDirectiveMode
 
         @Override
         public void close() {
+            if (closed) {
+                return;
+            }
+            closed = true;
+            
             if (needPop) {
                 pageContext.popWriter();
             }
