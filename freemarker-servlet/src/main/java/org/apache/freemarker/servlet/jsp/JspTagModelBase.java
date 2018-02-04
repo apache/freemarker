@@ -138,7 +138,7 @@ abstract class JspTagModelBase implements TemplateModelWithOriginName {
             throw (TemplateException) e;
         }
         if (e instanceof TemplateExceptionWrapperJspException) {
-            return (TemplateException) e.getCause();
+            return ((TemplateExceptionWrapperJspException) e).getCause();
         }
         return new TemplateException(e,
                 "Error while invoking the ", new _DelayedJQuote(tagName), " JSP custom tag; see cause exception");

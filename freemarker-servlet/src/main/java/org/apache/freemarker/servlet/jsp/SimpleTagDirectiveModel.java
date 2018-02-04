@@ -118,8 +118,13 @@ class SimpleTagDirectiveModel extends JspTagModelBase implements TemplateDirecti
 
     static final class TemplateExceptionWrapperJspException extends JspException {
 
-        public TemplateExceptionWrapperJspException(Throwable cause) {
+        public TemplateExceptionWrapperJspException(TemplateException cause) {
             super("Nested content has thrown template exception", cause);
+        }
+        
+        @Override
+        public TemplateException getCause() {
+            return (TemplateException) super.getCause();
         }
         
     }
