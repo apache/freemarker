@@ -27110,19 +27110,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>Bug fixed (<link
-              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-88">FREEMARKER-88</link>):
-              This is related to calling JSP tags from templates. If a
-              <literal>TemplateException</literal> that's not a
-              <literal>TemplateModelExceptoin</literal> has occurred in the
-              body of a JSP <literal>SimpleTag</literal> (typically, an
-              <literal>InvalidReferenceException</literal>), that has caused a
-              <literal>ClassCastException</literal> in the exception handling
-              code, thus the template processing has thrown that instead of
-              the original exception.</para>
-            </listitem>
-
-            <listitem>
               <para>Added new property to
               <literal>BeansWrapper.MethodAppearanceDecision</literal>:
               <literal>replaceExistingProperty</literal>. This is useful when
@@ -27133,6 +27120,34 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>getSize()</literal>) with identical name. By default
               the real property isn't replaced, but now with
               <literal>replaceExistingProperty</literal> it can be.</para>
+            </listitem>
+
+            <listitem>
+              <para>Improved exception handling when calling JSP tags:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para>Bug fixed (<link
+                  xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-88">FREEMARKER-88</link>):
+                  If a <literal>TemplateException</literal> that's not a
+                  <literal>TemplateModelExceptoin</literal> has occurred in
+                  the body of a JSP <literal>SimpleTag</literal> (typically,
+                  an <literal>InvalidReferenceException</literal>), that has
+                  caused a <literal>ClassCastException</literal> in the
+                  exception handling code, thus the template processing has
+                  thrown that instead of the original exception.</para>
+                </listitem>
+
+                <listitem>
+                  <para>Wrapping of
+                  non-<literal>TemplateModelException</literal>
+                  <literal>TemplateException</literal>-s (typically
+                  <literal>InvalidReferenceException</literal>-s) into
+                  <literal>TemplateModelException</literal>-s is now avoided
+                  when the <literal>TemplateException</literal> occurs in the
+                  body of a JSP tag.</para>
+                </listitem>
+              </itemizedlist>
             </listitem>
           </itemizedlist>
         </section>

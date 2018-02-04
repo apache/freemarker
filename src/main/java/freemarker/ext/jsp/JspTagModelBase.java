@@ -39,6 +39,7 @@ import freemarker.ext.jsp.SimpleTagDirectiveModel.TemplateExceptionWrapperJspExc
 import freemarker.template.ObjectWrapper;
 import freemarker.template.ObjectWrapperAndUnwrapper;
 import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.StringUtil;
@@ -145,8 +146,9 @@ class JspTagModelBase {
         if (e instanceof TemplateExceptionWrapperJspException) {
             return toTemplateModelExceptionOrRethrow(((TemplateExceptionWrapperJspException) e).getCause());
         }
-        return new _TemplateModelException(e,
-                "Error while invoking the ", new _DelayedJQuote(tagName), " JSP custom tag; see cause exception");
+        return new TemplateModelException(
+                "Error while invoking the " + StringUtil.jQuote(tagName) + " JSP custom tag; see cause exception",
+                e instanceof TemplateException, e);
     }
 
     /**
