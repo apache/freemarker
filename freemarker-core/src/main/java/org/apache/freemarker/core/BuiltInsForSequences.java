@@ -242,7 +242,7 @@ class BuiltInsForSequences {
                 throw new TemplateException(
                         "The sequence to join was right-unbounded numerical range, thus it's infinitely long.");
             }
-            return new BIMethodForIterable((TemplateIterableModel) model);
+            return new BIMethodForIterable(model);
         }
    
     }
@@ -330,7 +330,7 @@ class BuiltInsForSequences {
 
         @Override
         TemplateModel calculateResult(TemplateIterableModel model) throws TemplateException  {
-            return new BIMethod((TemplateIterableModel) model);
+            return new BIMethod(model);
         }
     
     }
@@ -807,7 +807,7 @@ class BuiltInsForSequences {
                     _EvalUtils.CMP_OP_EQUALS, null,
                     searchedItem, null,
                     null, false,
-                    true, true, true, // The last one is true to emulate an old bug for BC 
+                    true, true, true, // TODO [FM3] The last one is true to emulate an old bug for BC
                     env);
         } catch (TemplateException ex) {
             throw new TemplateException(ex,
