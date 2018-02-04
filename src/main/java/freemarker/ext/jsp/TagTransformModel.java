@@ -292,6 +292,7 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
         private final FreeMarkerPageContext pageContext;
         private boolean needPop = true;
         private final boolean needDoublePop;
+        private boolean closed = false;
         
         TagWriter(Writer out, Tag tag, FreeMarkerPageContext pageContext, boolean needDoublePop) {
             super((JspWriter) out, false);
@@ -393,6 +394,11 @@ class TagTransformModel extends JspTagModelBase implements TemplateTransformMode
         
         @Override
         public void close() {
+            if (closed) {
+                return;
+            }
+            closed = true;
+            
             if (needPop) {
                 pageContext.popWriter();
             }

@@ -875,6 +875,12 @@ public final class Environment extends Configurable {
 
     private void handleTemplateException(TemplateException templateException)
             throws TemplateException {
+        if (templateException instanceof TemplateModelException
+                && ((TemplateModelException) templateException).getReplaceWithCause()
+                && templateException.getCause() instanceof TemplateException) {
+            templateException = (TemplateException) templateException.getCause();
+        }
+        
         // Logic to prevent double-handling of the exception in
         // nested visit() calls.
         if (lastThrowable == templateException) {
