@@ -738,6 +738,7 @@
         <include name="*.txt" />
         <include name="osgi.bnd" />
         <include name=".git*" />
+        <include name="rat-excludes" />
       </fileset>
     </copy>
     
@@ -1136,14 +1137,14 @@ Proceed? </input>
       classpathref="ivy.dep"
     />  
     
-    <rat:report reportFile="build/rat-report-src.txt">
-        <fileset dir="src"/>
+    <rat:report reportFile="build/rat-report-root.txt">
+      <fileset dir="" excludesfile="rat-excludes" />
     </rat:report>
     <rat:report reportFile="build/rat-report-dist-src.txt">
-        <fileset dir="build/dist/src"/>
+      <fileset dir="${dist.src.dir}" excludesfile="rat-excludes" />
     </rat:report>
     <rat:report reportFile="build/rat-report-dist-bin.txt">
-        <fileset dir="build/dist/bin"/>
+      <fileset dir="${dist.bin.dir}" excludesfile="src/dist/bin/rat-excludes" />
     </rat:report>
     <echo level="info"><!--
     -->Rat reports were written into build/rat-report-*.txt<!--
