@@ -18,17 +18,13 @@
  */
 package org.apache.freemarker.spring;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.TemplateNotFoundException;
-import org.apache.freemarker.spring.SpringResourceTemplateLoader;
 import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.After;
 import org.junit.Before;
@@ -64,7 +60,7 @@ public class SpringResourceTemplateLoaderTest {
     @Test
     public void testSuccessful() throws Exception {
         for (int i = 0; i < 2; i++) {
-            assertEquals("foo", cfg.getTemplate("sub1/sub2/t.ftl").toString());
+            assertThat(cfg.getTemplate("sub1/sub2/t.ftl").toString(), endsWith("foo"));
         }
     }
 

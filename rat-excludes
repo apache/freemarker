@@ -1,0 +1,99 @@
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+# 
+#   http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+# In src/:
+# --------
+
+# Generated files basically; see details in the files:
+freemarker-manual/src/main/docgen/en_US/docgen-misc/googleAnalytics.html
+
+# Binaries/archives created in the FreeMarker project:
+freemarker-core/src/main/misc/overloadedNumberRules/prices.ods
+freemarker-manual/src/main/docgen/en_US/docgen-originals/figures/overview.odg
+freemarker-manual/src/main/docgen/en_US/docgen-originals/figures/overview.odg
+freemarker-manual/src/main/docgen/en_US/docgen-originals/figures/model2sketch_with_alpha.png
+freemarker-manual/src/main/docgen/en_US/docgen-originals/figures/tree_with_alpha.png
+freemarker-manual/src/main/docgen/en_US/favicon.png
+freemarker-manual/src/main/docgen/en_US/figures/model2sketch.png
+freemarker-manual/src/main/docgen/en_US/figures/overview.png
+freemarker-manual/src/main/docgen/en_US/figures/tree.png
+freemarker-manual/src/main/docgen/en_US/logo.png
+
+# Rat thinks it's a binary, but it's UTF-16 text:
+freemarker-core-test/src/test/resources/org/apache/freemarker/core/templatesuite/expected/output-encoding2.txt
+
+# Tooling/IDE generated files:
+# ----------------------------
+
+ide-dependencies/**
+.gradle/**
+gradle/**
+.git/**
+.bin/**
+bin/**
+build/**
+.build/**
+out/**
+.out/**
+target/**
+.settings/**
+.classpath
+.project
+.settings
+.idea/**
+*.iml
+*.iws
+*.ipr
+.idea_modules/**
+.out/**
+.DS_Store*
+.AppleDouble
+.LSOverride
+.directory
+.Trash*
+freemarker-*/ide-dependencies/**
+freemarker-*/.gradle/**
+freemarker-*/gradle/**
+freemarker-*/.git/**
+freemarker-*/.bin/**
+freemarker-*/bin/**
+freemarker-*/build/**
+freemarker-*/.build/**
+freemarker-*/out/**
+freemarker-*/.out/**
+freemarker-*/target/**
+freemarker-*/.settings/**
+freemarker-*/.classpath
+freemarker-*/.project
+freemarker-*/.settings
+freemarker-*/.idea/**
+freemarker-*/*.iml
+freemarker-*/*.iws
+freemarker-*/*.ipr
+freemarker-*/.idea_modules/**
+freemarker-*/.out/**
+freemarker-*/.DS_Store*
+freemarker-*/.AppleDouble
+freemarker-*/.LSOverride
+freemarker-*/.directory
+freemarker-*/.Trash*
+
+# Well known files that need no license note:
+# -------------------------------------------
+
+README.md
+gradlew.bat

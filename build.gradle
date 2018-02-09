@@ -55,6 +55,19 @@ ext.bannedLibraries = [
     "commons-logging:commons-logging"
 ] as Set
 
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+configurations {
+    rat
+}
+
+dependencies {
+    rat "org.apache.rat:apache-rat-tasks:0.12"
+}
+
 // Java boot-classpath setup:
 [7, 8].each { javaVersion ->
     // Name used in gradle.properties:
@@ -399,6 +412,18 @@ task aggregateJavadoc(type: Javadoc) {
     title "${project.title} ${versionCanonical} API"
     destinationDir = new File(new File(project.buildDir, 'docs'), 'javadoc')
     // source-s and classpath-s are added later, in the afterEvaluate of subprojects!
+}
+
+task rat {
+    doLast {
+        ant.taskdef(
+                name: 'ratReport', classname: 'org.apache.rat.anttasks.Report',
+                classpath: configurations.rat.asPath)
+        ant.ratReport(reportFile: "build/rat-report.txt") {
+            fileset(dir: "", excludesfile: "rat-excludes")
+        }
+        project.logger.lifecycle('Rat reports were written into build/rat-report.txt')
+    }
 }
 
 // TODO Build source distribution files
