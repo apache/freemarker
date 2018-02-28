@@ -33,35 +33,35 @@ import freemarker.template.DefaultNonListCollectionAdapter;
 import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateHashModelEx2;
 import freemarker.template.TemplateHashModelEx2.KeyValuePair;
 import freemarker.template.TemplateHashModelEx2.KeyValuePairIterator;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
-import freemarker.test.TemplateTest;
 
-public class TemplateModelUtilTest extends TemplateTest {
+public class TemplateModelUtilTest {
 
     @Test
     public void testGetKeyValuePairIterator() throws Exception {
         Map<Object, Object> map = new LinkedHashMap<Object, Object>();
         TemplateHashModelEx thme = new TemplateHashModelExOnly(map);
         
-        assertetKeyValuePairIteratorResult("", thme);
+        assertetGetKeyValuePairIteratorContent("", thme);
         
         map.put("k1", 11);
-        assertetKeyValuePairIteratorResult("str(k1): num(11)", thme);
+        assertetGetKeyValuePairIteratorContent("str(k1): num(11)", thme);
         
         map.put("k2", "v2");
-        assertetKeyValuePairIteratorResult("str(k1): num(11), str(k2): str(v2)", thme);
+        assertetGetKeyValuePairIteratorContent("str(k1): num(11), str(k2): str(v2)", thme);
 
         map.put("k2", null);
-        assertetKeyValuePairIteratorResult("str(k1): num(11), str(k2): null", thme);
+        assertetGetKeyValuePairIteratorContent("str(k1): num(11), str(k2): null", thme);
         
         map.put(3, 33);
         try {
-            assertetKeyValuePairIteratorResult("fails anyway...", thme);
+            assertetGetKeyValuePairIteratorContent("fails anyway...", thme);
             fail();
         } catch (TemplateModelException e) {
             assertThat(e.getMessage(),
@@ -71,7 +71,7 @@ public class TemplateModelUtilTest extends TemplateTest {
         
         map.put(null, 44);
         try {
-            assertetKeyValuePairIteratorResult("fails anyway...", thme);
+            assertetGetKeyValuePairIteratorContent("fails anyway...", thme);
             fail();
         } catch (TemplateModelException e) {
             assertThat(e.getMessage(),
@@ -83,19 +83,20 @@ public class TemplateModelUtilTest extends TemplateTest {
     public void testGetKeyValuePairIteratorWithEx2() throws Exception {
         Map<Object, Object> map = new LinkedHashMap<Object, Object>();
         TemplateHashModelEx thme = DefaultMapAdapter.adapt(
-                map, (ObjectWrapperWithAPISupport) getConfiguration().getObjectWrapper());
+                map, new DefaultObjectWrapperBuilder(Configuration.VERSION_2_3_27).build());
         
-        assertetKeyValuePairIteratorResult("", thme);
+        assertetGetKeyValuePairIteratorContent("", thme);
         
         map.put("k1", 11);
         map.put("k2", "v2");
         map.put("k2", null);
         map.put(3, 33);
         map.put(null, 44);
-        assertetKeyValuePairIteratorResult("str(k1): num(11), str(k2): null, num(3): num(33), null: num(44)", thme);
+        assertetGetKeyValuePairIteratorContent(
+                "str(k1): num(11), str(k2): null, num(3): num(33), null: num(44)", thme);
     }
     
-    private void assertetKeyValuePairIteratorResult(String expected, TemplateHashModelEx thme)
+    private void assertetGetKeyValuePairIteratorContent(String expected, TemplateHashModelEx thme)
             throws TemplateModelException {
          StringBuilder sb = new StringBuilder();
          KeyValuePairIterator kvpi = TemplateModelUtils.getKeyValuePairIterator(thme);
@@ -104,11 +105,12 @@ public class TemplateModelUtilTest extends TemplateTest {
              if (sb.length() != 0) {
                  sb.append(", ");
              }
-             sb.append(toAssertionString(kvp.getKey())).append(": ").append(toAssertionString(kvp.getValue()));
+             sb.append(toValueAssertionString(kvp.getKey())).append(": ")
+                     .append(toValueAssertionString(kvp.getValue()));
          }
     }
     
-    private String toAssertionString(TemplateModel model) throws TemplateModelException {
+    private String toValueAssertionString(TemplateModel model) throws TemplateModelException {
         if (model instanceof TemplateNumberModel) {
             return "num(" + ((TemplateNumberModel) model).getAsNumber() + ")";
         } else if (model instanceof TemplateScalarModel) {
@@ -120,6 +122,9 @@ public class TemplateModelUtilTest extends TemplateTest {
         throw new IllegalArgumentException("Type unsupported by test: " + model.getClass().getName());
     }
 
+    /**
+     * Deliberately doesn't implement {@link TemplateHashModelEx2}, only {@link TemplateHashModelEx}. 
+     */
     private static class TemplateHashModelExOnly implements TemplateHashModelEx {
         
         private final Map<?, ?> map;
@@ -139,7 +144,7 @@ public class TemplateModelUtilTest extends TemplateTest {
         }
 
         public int size() throws TemplateModelException {
-            return 2;
+            return map.size();
         }
 
         public TemplateCollectionModel keys() throws TemplateModelException {

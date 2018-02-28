@@ -23378,6 +23378,14 @@ There was no specific handler for node y
         </listitem>
 
         <listitem>
+          <para><literal>get_optional_template</literal>: This is a method
+          that's used when you need to include or import a template that's
+          possibly missing, and you need to handle that case on some special
+          way. <link linkend="ref_specvar_get_optional_template">More
+          details...</link></para>
+        </listitem>
+
+        <listitem>
           <para><literal>pass</literal>: This is a macro that does nothing. It
           has no parameters. Mostly used as no-op node handler in XML
           processing.</para>
@@ -23432,7 +23440,9 @@ There was no specific handler for node y
         </listitem>
 
         <listitem>
-          <para><literal>vars</literal>: Expression
+          <para><indexterm>
+              <primary>vars</primary>
+            </indexterm><literal>vars</literal>: Expression
           <literal>.vars.foo</literal> returns the same variable as expression
           <literal>foo</literal>. It's useful if for some reasons you have to
           use square bracket syntax, since that works only for hash sub
@@ -23459,6 +23469,140 @@ There was no specific handler for node y
           2.3.21-nightly_20140726T151800Z.</para>
         </listitem>
       </itemizedlist>
+
+      <simplesect xml:id="ref_specvar_get_optional_template">
+        <title>Using get_optional_template</title>
+
+        <indexterm>
+          <primary>get_optional_template</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>include optional</primary>
+        </indexterm>
+
+        <indexterm>
+          <primary>import optional</primary>
+        </indexterm>
+
+        <para>This special variable is used when you need to include or import
+        a template that's possibly missing, and you need to handle that case
+        on some special way. It a method (so you meant to call it) that has
+        the following parameters:</para>
+
+        <orderedlist>
+          <listitem>
+            <para>The name of the template (can be relative or absolute), like
+            <literal>"/commonds/footer.ftl"</literal>; similar to the first
+            parameter of the <link
+            linkend="ref.directive.include"><literal>include</literal>
+            directive</link>. Required, string.</para>
+          </listitem>
+
+          <listitem>
+            <para>An optional hash of options, like <literal>{ 'parse': false,
+            'encoding': 'UTF-16BE' }</literal>. The valid keys are
+            <literal>encoding</literal> and <literal>parse</literal>. The
+            meaning of these are the same as of the similarly named <link
+            linkend="ref.directive.include"><literal>include</literal>
+            directive</link> parameters.</para>
+          </listitem>
+        </orderedlist>
+
+        <para>This method returns a hash that contains the following
+        entries:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><literal>exists</literal>: A boolean that tells if the
+            template was found.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>include</literal>: A directive that, when called,
+            includes the template. Calling this directive is similar to
+            calling the <link
+            linkend="ref.directive.include"><literal>include</literal>
+            directive</link>, but of course with this you spare looking up the
+            template again. This directive has no parameters, nor nested
+            content. If <literal>exists</literal> is <literal>false</literal>,
+            this key will be missing; see later how can this be utilized with
+            <link linkend="dgui_template_exp_missing_default">the
+            <literal><replaceable>exp</replaceable>!<replaceable>default</replaceable></literal>
+            operator</link>.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>import</literal>: A method that, when called,
+            imports the template, and returns the namespace of the imported
+            template. Calling this method is similar to calling the
+            <literal>import</literal> directive, but of course with this you
+            spare looking up the template again, also, it doesn't assign the
+            namespace to anything, just returns it. The method has no
+            parameters. If <literal>exists</literal> is
+            <literal>false</literal>, this key will be missing; see later how
+            can this be utilized with <link
+            linkend="dgui_template_exp_missing_default">the
+            <literal><replaceable>exp</replaceable>!<replaceable>default</replaceable></literal>
+            operator</link>.</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>When this method is called (like
+        <literal>.get_optional_template('some.ftl')</literal>), it immediately
+        loads the template if it exists, but doesn't yet process it, so it
+        doesn't have any visible effect yet. The template will be processed
+        only when <literal>include</literal> or <literal>import</literal>
+        members of the returned structure is called. (Of course, when we say
+        that it loads the template, it actually looks it up in the template
+        cache, just like the <link
+        linkend="ref.directive.include"><literal>include</literal>
+        directive</link> does.)</para>
+
+        <para>While it's not an error if the template is missing, it's an
+        error if it does exist but still can't be loaded due to syntactical
+        errors in it, or due to some I/O error.</para>
+
+        <para>Example, in which depending on if <literal>some.ftl</literal>
+        exists, we either print <quote>Template was found:</quote> and the
+        include the template as <literal>&lt;#include 'some.ftl'&gt;</literal>
+        would, otherwise it we print <quote>Template was
+        missing.</quote>:</para>
+
+        <programlisting role="template">&lt;#assign optTemp = .get_optional_template('some.ftl')&gt;
+&lt;#if optTemp.exists&gt;
+  Template was found:
+  &lt;@optTemp.include /&gt;
+&lt;#else&gt;
+  Template was missing.
+&lt;/#if&gt;</programlisting>
+
+        <para>Example, in which we try to include <literal>some.ftl</literal>,
+        but if that's missing then we try to include
+        <literal>some-fallback.ftl</literal>, and if that's missing too then
+        we call the <literal>ultimateFallback</literal> macro instead of
+        including anything (note the <literal>!</literal>-s after the
+        <literal>include</literal>-s; they belong to <link
+        linkend="dgui_template_exp_missing_default">the
+        <literal><replaceable>exp</replaceable>!<replaceable>default</replaceable></literal>
+        operator</link>):</para>
+
+        <programlisting role="template">&lt;#macro ultimateFallback&gt;
+  Something
+&lt;/#macro&gt;
+
+&lt;@(
+  .get_optional_template('some.ftl').include!
+  .get_optional_template('some-fallback.ftl').include!
+  ultimateFallback
+) /&gt;</programlisting>
+
+        <para>Example, which behaves like <literal>&lt;#import 'tags.ftl' as
+        tags&gt;</literal>, except that if <literal>tags.ftl</literal> is
+        missing, then it creates an empty <literal>tags</literal> hash:</para>
+
+        <programlisting role="template">&lt;#assign tags = (.get_optional_template('tags.ftl').import())!{}&gt;</programlisting>
+      </simplesect>
     </chapter>
 
     <chapter xml:id="ref_reservednames">
