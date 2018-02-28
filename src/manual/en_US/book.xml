@@ -27244,7 +27244,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>[FIXME]</para>
+              <para>Added new <link linkend="ref_specvar">special
+              variable</link>, <literal>get_optional_template</literal>. It
+              can be used when you need to include or import a template that's
+              possibly missing, and you need to handle that case on some
+              special way. <link
+              linkend="ref_specvar_get_optional_template">See the details
+              here...</link></para>
             </listitem>
           </itemizedlist>
         </section>
