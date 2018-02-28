@@ -2595,9 +2595,12 @@ public final class Environment extends Configurable {
      *
      * @param loadedTemplate
      *            The template to import. Note that it does <em>not</em> need to be a template returned by
-     *            {@link #getTemplateForImporting(String name)}.
+     *            {@link #getTemplateForImporting(String name)}. Not {@code null}.
      * @param targetNsVarName
-     *            The name of the FTL variable that will store the namespace.
+     *            The name of the FTL variable that will store the namespace. If {@code null}, the namespace
+     *            won't be stored in a variable (but it's still returned).
+     *            
+     * @return The namespace of the imported template, already initialized. 
      *            
      * @see #getTemplateForImporting(String name)
      * @see #importLib(Template includedTemplate, String namespaceVarName)
