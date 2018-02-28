@@ -604,7 +604,7 @@ class BuiltInsForStringsBasic {
                             throw newIndexGreaterThanLengthException(1, endIdx, len);
                         }
                         if (beginIdx > endIdx) {
-                            throw MessageUtil.newMethodArgsInvalidValueException("?" + key,
+                            throw _MessageUtil.newMethodArgsInvalidValueException("?" + key,
                                     "The begin index argument, ", Integer.valueOf(beginIdx),
                                     ", shouldn't be greater than the end index argument, ",
                                     Integer.valueOf(endIdx), ".");
@@ -617,7 +617,7 @@ class BuiltInsForStringsBasic {
     
                 private TemplateModelException newIndexGreaterThanLengthException(
                         int argIdx, int idx, final int len) throws TemplateModelException {
-                    return MessageUtil.newMethodArgInvalidValueException(
+                    return _MessageUtil.newMethodArgInvalidValueException(
                             "?" + key, argIdx,
                             "The index mustn't be greater than the length of the string, ",
                             Integer.valueOf(len),
@@ -626,7 +626,7 @@ class BuiltInsForStringsBasic {
     
                 private TemplateModelException newIndexLessThan0Exception(
                         int argIdx, int idx) throws TemplateModelException {
-                    return MessageUtil.newMethodArgInvalidValueException(
+                    return _MessageUtil.newMethodArgInvalidValueException(
                             "?" + key, argIdx,
                             "The index must be at least 0, but was ", Integer.valueOf(idx), ".");
                 }

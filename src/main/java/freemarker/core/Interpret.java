@@ -100,9 +100,9 @@ class Interpret extends OutputFormatBoundBuiltIn {
         } catch (IOException e) {
             throw new _MiscTemplateException(this, e, env, new Object[] {
                         "Template parsing with \"?", key, "\" has failed with this error:\n\n",
-                        MessageUtil.EMBEDDED_MESSAGE_BEGIN,
+                        _MessageUtil.EMBEDDED_MESSAGE_BEGIN,
                         new _DelayedGetMessage(e),
-                        MessageUtil.EMBEDDED_MESSAGE_END,
+                        _MessageUtil.EMBEDDED_MESSAGE_END,
                         "\n\nThe failed expression:" });
         }
         
@@ -131,9 +131,9 @@ class Interpret extends OutputFormatBoundBuiltIn {
             } catch (Exception e) {
                 throw new _TemplateModelException(e,
                         "Template created with \"?", key, "\" has stopped with this error:\n\n",
-                        MessageUtil.EMBEDDED_MESSAGE_BEGIN,
+                        _MessageUtil.EMBEDDED_MESSAGE_BEGIN,
                         new _DelayedGetMessage(e),
-                        MessageUtil.EMBEDDED_MESSAGE_END);
+                        _MessageUtil.EMBEDDED_MESSAGE_END);
             }
     
             return new Writer(out)

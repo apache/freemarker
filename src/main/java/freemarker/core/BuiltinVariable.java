@@ -72,7 +72,8 @@ final class BuiltinVariable extends Expression {
     static final String URL_ESCAPING_CHARSET_CC = "urlEscapingCharset";
     static final String URL_ESCAPING_CHARSET = "url_escaping_charset";
     static final String NOW = "now";
-    
+    static final String GET_OPTIONAL_TEMPLATE = "get_optional_template";
+    static final String GET_OPTIONAL_TEMPLATE_CC = "getOptionalTemplate";
     static final String[] SPEC_VAR_NAMES = new String[] {
         AUTO_ESC_CC,
         AUTO_ESC,
@@ -83,6 +84,8 @@ final class BuiltinVariable extends Expression {
         DATA_MODEL_CC,
         DATA_MODEL,
         ERROR,
+        GET_OPTIONAL_TEMPLATE_CC,
+        GET_OPTIONAL_TEMPLATE,
         GLOBALS,
         INCOMPATIBLE_IMPROVEMENTS_CC,
         INCOMPATIBLE_IMPROVEMENTS,
@@ -238,6 +241,12 @@ final class BuiltinVariable extends Expression {
         }
         if (name == INCOMPATIBLE_IMPROVEMENTS || name == INCOMPATIBLE_IMPROVEMENTS_CC) {
             return new SimpleScalar(env.getConfiguration().getIncompatibleImprovements().toString());
+        }
+        if (name == GET_OPTIONAL_TEMPLATE) {
+            return GetOptionalTemplateMethod.INSTANCE;
+        }
+        if (name == GET_OPTIONAL_TEMPLATE_CC) {
+            return GetOptionalTemplateMethod.INSTANCE_CC;
         }
         
         throw new _MiscTemplateException(this,

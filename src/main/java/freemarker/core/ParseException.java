@@ -333,7 +333,7 @@ public class ParseException extends IOException implements FMParserConstants {
         String prefix;
         if (!isInJBossToolsMode()) {
             prefix = "Syntax error "
-                    + MessageUtil.formatLocationForSimpleParsingError(templateName, lineNumber, columnNumber)
+                    + _MessageUtil.formatLocationForSimpleParsingError(templateName, lineNumber, columnNumber)
                     + ":\n";  
         } else {
             prefix = "[col. " + columnNumber + "] ";

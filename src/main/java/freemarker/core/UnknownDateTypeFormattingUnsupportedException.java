@@ -29,7 +29,7 @@ import freemarker.template.TemplateDateModel;
 public final class UnknownDateTypeFormattingUnsupportedException extends UnformattableValueException {
 
     public UnknownDateTypeFormattingUnsupportedException() {
-        super(MessageUtil.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE);
+        super(_MessageUtil.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE);
     }
     
 }

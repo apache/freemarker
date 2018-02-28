@@ -400,7 +400,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     
     protected final void checkMethodArgCount(int argCnt, int expectedCnt) throws TemplateModelException {
         if (argCnt != expectedCnt) {
-            throw MessageUtil.newArgCntError("?" + key, argCnt, expectedCnt);
+            throw _MessageUtil.newArgCntError("?" + key, argCnt, expectedCnt);
         }
     }
 
@@ -410,7 +410,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
     
     protected final void checkMethodArgCount(int argCnt, int minCnt, int maxCnt) throws TemplateModelException {
         if (argCnt < minCnt || argCnt > maxCnt) {
-            throw MessageUtil.newArgCntError("?" + key, argCnt, minCnt, maxCnt);
+            throw _MessageUtil.newArgCntError("?" + key, argCnt, minCnt, maxCnt);
         }
     }
 
@@ -430,7 +430,7 @@ abstract class BuiltIn extends Expression implements Cloneable {
             throws TemplateModelException {
         TemplateModel arg = (TemplateModel) args.get(argIdx);
         if (!(arg instanceof TemplateScalarModel)) {
-            throw MessageUtil.newMethodArgMustBeStringException("?" + key, argIdx, arg);
+            throw _MessageUtil.newMethodArgMustBeStringException("?" + key, argIdx, arg);
         } else {
             return EvalUtil.modelToString((TemplateScalarModel) arg, null, null);
         }
@@ -443,18 +443,18 @@ abstract class BuiltIn extends Expression implements Cloneable {
             throws TemplateModelException {
         TemplateModel arg = (TemplateModel) args.get(argIdx);
         if (!(arg instanceof TemplateNumberModel)) {
-            throw MessageUtil.newMethodArgMustBeNumberException("?" + key, argIdx, arg);
+            throw _MessageUtil.newMethodArgMustBeNumberException("?" + key, argIdx, arg);
         } else {
             return EvalUtil.modelToNumber((TemplateNumberModel) arg, null);
         }
     }
     
     protected final TemplateModelException newMethodArgInvalidValueException(int argIdx, Object[] details) {
-        return MessageUtil.newMethodArgInvalidValueException("?" + key, argIdx, details);
+        return _MessageUtil.newMethodArgInvalidValueException("?" + key, argIdx, details);
     }
 
     protected final TemplateModelException newMethodArgsInvalidValueException(Object[] details) {
-        return MessageUtil.newMethodArgsInvalidValueException("?" + key, details);
+        return _MessageUtil.newMethodArgsInvalidValueException("?" + key, details);
     }
     
     @Override

@@ -1149,7 +1149,7 @@ public final class Environment extends Configurable {
         try {
             return EvalUtil.assertFormatResultNotNull(format.formatToPlainText(number));
         } catch (TemplateValueFormatException e) {
-            throw MessageUtil.newCantFormatNumberException(format, exp, e, useTempModelExc);
+            throw _MessageUtil.newCantFormatNumberException(format, exp, e, useTempModelExc);
         }
     }
 
@@ -1424,7 +1424,7 @@ public final class Environment extends Configurable {
         try {
             return EvalUtil.assertFormatResultNotNull(format.formatToPlainText(tdm));
         } catch (TemplateValueFormatException e) {
-            throw MessageUtil.newCantFormatDateException(format, tdmSourceExpr, e, useTempModelExc);
+            throw _MessageUtil.newCantFormatDateException(format, tdmSourceExpr, e, useTempModelExc);
         }
     }
 
@@ -1447,7 +1447,7 @@ public final class Environment extends Configurable {
         try {
             return EvalUtil.assertFormatResultNotNull(format.formatToPlainText(tdm));
         } catch (TemplateValueFormatException e) {
-            throw MessageUtil.newCantFormatDateException(format, blamedDateSourceExp, e, useTempModelExc);
+            throw _MessageUtil.newCantFormatDateException(format, blamedDateSourceExp, e, useTempModelExc);
         }
     }
 
@@ -1634,7 +1634,7 @@ public final class Environment extends Configurable {
         try {
             return getTemplateDateFormat(dateType, dateClass);
         } catch (UnknownDateTypeFormattingUnsupportedException e) {
-            throw MessageUtil.newCantFormatUnknownTypeDateException(blamedDateSourceExp, e);
+            throw _MessageUtil.newCantFormatUnknownTypeDateException(blamedDateSourceExp, e);
         } catch (TemplateValueFormatException e) {
             String settingName;
             String settingValue;
@@ -1677,7 +1677,7 @@ public final class Environment extends Configurable {
         try {
             return getTemplateDateFormat(formatString, dateType, dateClass);
         } catch (UnknownDateTypeFormattingUnsupportedException e) {
-            throw MessageUtil.newCantFormatUnknownTypeDateException(blamedDateSourceExp, e);
+            throw _MessageUtil.newCantFormatUnknownTypeDateException(blamedDateSourceExp, e);
         } catch (TemplateValueFormatException e) {
             _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                     "Can't create date/time/datetime format based on format string ",
@@ -2182,15 +2182,15 @@ public final class Environment extends Configurable {
     }
 
     static void appendInstructionStackItem(TemplateElement stackEl, StringBuilder sb) {
-        sb.append(MessageUtil.shorten(stackEl.getDescription(), 40));
+        sb.append(_MessageUtil.shorten(stackEl.getDescription(), 40));
 
         sb.append("  [");
         Macro enclosingMacro = getEnclosingMacro(stackEl);
         if (enclosingMacro != null) {
-            sb.append(MessageUtil.formatLocationForEvaluationError(
+            sb.append(_MessageUtil.formatLocationForEvaluationError(
                     enclosingMacro, stackEl.beginLine, stackEl.beginColumn));
         } else {
-            sb.append(MessageUtil.formatLocationForEvaluationError(
+            sb.append(_MessageUtil.formatLocationForEvaluationError(
                     stackEl.getTemplate(), stackEl.beginLine, stackEl.beginColumn));
         }
         sb.append("]");
@@ -2595,9 +2595,12 @@ public final class Environment extends Configurable {
      *
      * @param loadedTemplate
      *            The template to import. Note that it does <em>not</em> need to be a template returned by
-     *            {@link #getTemplateForImporting(String name)}.
+     *            {@link #getTemplateForImporting(String name)}. Not {@code null}.
      * @param targetNsVarName
-     *            The name of the FTL variable that will store the namespace.
+     *            The name of the FTL variable that will store the namespace. If {@code null}, the namespace
+     *            won't be stored in a variable (but it's still returned).
+     *            
+     * @return The namespace of the imported template, already initialized. 
      *            
      * @see #getTemplateForImporting(String name)
      * @see #importLib(Template includedTemplate, String namespaceVarName)

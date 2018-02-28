@@ -392,17 +392,8 @@ final class IteratorBlock extends TemplateElement {
                             listLoop: do {
                                 loopVar = keysIter.next();
                                 if (!(loopVar instanceof TemplateScalarModel)) {
-                                    throw new NonStringException(env,
-                                            new _ErrorDescriptionBuilder(
-                                                    "When listing key-value pairs of traditional hash "
-                                                    + "implementations, all keys must be strings, but one of them "
-                                                    + "was ",
-                                                    new _DelayedAOrAn(new _DelayedFTLTypeDescription(loopVar)), "."
-                                                    ).tip("The listed value's TemplateModel class was ",
-                                                            new _DelayedShortClassName(listedValue.getClass()),
-                                                            ", which doesn't implement ",
-                                                            new _DelayedShortClassName(TemplateHashModelEx2.class),
-                                                            ", which leads to this restriction."));
+                                    throw _MessageUtil.newKeyValuePairListingNonStringKeyExceptionMessage(
+                                                loopVar, (TemplateHashModelEx) listedValue);
                                 }
                                 loopVar2 = listedHash.get(((TemplateScalarModel) loopVar).getAsString());
                                 hasNext = keysIter.hasNext();

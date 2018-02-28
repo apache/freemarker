@@ -111,7 +111,7 @@ class BuiltInsForDates {
                                 new _DelayedJQuote(tzName));
                     }
                 } else {
-                    throw MessageUtil.newMethodArgUnexpectedTypeException(
+                    throw _MessageUtil.newMethodArgUnexpectedTypeException(
                             "?" + key, 0, "string or java.util.TimeZone", tzArgTM);
                 }
                 
@@ -193,7 +193,7 @@ class BuiltInsForDates {
                 throw new _MiscTemplateException(new _ErrorDescriptionBuilder(
                             "The value of the following has unknown date type, but ?", key,
                             " needs a value where it's known if it's a date (no time part), time, or date-time value:"                        
-                        ).blame(target).tip(MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIP));
+                        ).blame(target).tip(_MessageUtil.UNKNOWN_DATE_TYPE_ERROR_TIP));
             }
         }
     

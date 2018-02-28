@@ -373,7 +373,7 @@ class EvalUtil {
             try {
                 return assertFormatResultNotNull(format.format(tnm));
             } catch (TemplateValueFormatException e) {
-                throw MessageUtil.newCantFormatNumberException(format, exp, e, false);
+                throw _MessageUtil.newCantFormatNumberException(format, exp, e, false);
             }
         } else if (tm instanceof TemplateDateModel) {
             TemplateDateModel tdm = (TemplateDateModel) tm;
@@ -381,7 +381,7 @@ class EvalUtil {
             try {
                 return assertFormatResultNotNull(format.format(tdm));
             } catch (TemplateValueFormatException e) {
-                throw MessageUtil.newCantFormatDateException(format, exp, e, false);
+                throw _MessageUtil.newCantFormatDateException(format, exp, e, false);
             }
         } else if (tm instanceof TemplateMarkupOutputModel) {
             return tm;
@@ -408,7 +408,7 @@ class EvalUtil {
             try {
                 return ensureFormatResultString(format.format(tnm), exp, env);
             } catch (TemplateValueFormatException e) {
-                throw MessageUtil.newCantFormatNumberException(format, exp, e, false);
+                throw _MessageUtil.newCantFormatNumberException(format, exp, e, false);
             }
         } else if (tm instanceof TemplateDateModel) {
             TemplateDateModel tdm = (TemplateDateModel) tm;
@@ -416,7 +416,7 @@ class EvalUtil {
             try {
                 return ensureFormatResultString(format.format(tdm), exp, env);
             } catch (TemplateValueFormatException e) {
-                throw MessageUtil.newCantFormatDateException(format, exp, e, false);
+                throw _MessageUtil.newCantFormatDateException(format, exp, e, false);
             }
         } else { 
             return coerceModelToTextualCommon(tm, exp, seqTip, false, false, env);
