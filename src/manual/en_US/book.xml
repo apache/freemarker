@@ -30,7 +30,7 @@
 
     <titleabbrev>Manual</titleabbrev>
 
-    <productname>Freemarker 2.3.27</productname>
+    <productname>Freemarker 2.3.28</productname>
   </info>
 
   <preface role="index.html" xml:id="preface">
@@ -27156,6 +27156,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   body of a JSP tag.</para>
                 </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>TemplateModelUtils.getKeyValuePairIterator(TemplateHashModelEx)</literal>
+              static utility class, which can be used to get a
+              <literal>TemplateHashModelEx2.KeyValuePairIterator</literal>
+              even for a non-<literal>TemplateHashModelEx2</literal> object.
+              This simplifies Java code that iterates through key-value
+              pairs.</para>
             </listitem>
           </itemizedlist>
         </section>

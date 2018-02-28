@@ -322,10 +322,10 @@ public class _MessageUtil {
                 ? new _TemplateModelException(e, (Environment) null, desc)
                 : new _MiscTemplateException(e, (Environment) null, desc);
     }
-    
-    public static _ErrorDescriptionBuilder traditionalHashExKeyMustBeStringExceptionMessage(
+
+    public static TemplateModelException newKeyValuePairListingNonStringKeyExceptionMessage(
             TemplateModel key, TemplateHashModelEx listedHashEx) {
-        return new _ErrorDescriptionBuilder(
+        return new _TemplateModelException(new _ErrorDescriptionBuilder(
                 "When listing key-value pairs of traditional hash "
                 + "implementations, all keys must be strings, but one of them "
                 + "was ",
@@ -334,7 +334,7 @@ public class _MessageUtil {
                         new _DelayedShortClassName(listedHashEx.getClass()),
                         ", which doesn't implement ",
                         new _DelayedShortClassName(TemplateHashModelEx2.class),
-                        ", which leads to this restriction.");
+                        ", which leads to this restriction."));
     }
     
     /**
