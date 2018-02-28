@@ -716,7 +716,7 @@ TOKEN_MGR_DECLS:
                                     ))
                 + (namingConventionEstabilisher != null
                         ? "estabilished by auto-detection at "
-                            + MessageUtil.formatPosition(
+                            + _MessageUtil.formatPosition(
                                     namingConventionEstabilisher.beginLine, namingConventionEstabilisher.beginColumn)
                             + " by token " + StringUtil.jQuote(namingConventionEstabilisher.image.trim())
                         : "")

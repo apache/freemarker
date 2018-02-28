@@ -23,6 +23,8 @@ import java.util.ArrayList;
 
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateHashModelEx2;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.utility.StringUtil;
@@ -128,7 +130,7 @@ public class _MessageUtil {
      * If will truncate the string at line-breaks too.
      * The truncation is always signaled with a a {@code "..."} at the end of the result string.  
      */
-    static String shorten(String s, int maxLength) {
+    public static String shorten(String s, int maxLength) {
         if (maxLength < 5) maxLength = 5;
         
         boolean isTruncated = false;
@@ -168,7 +170,7 @@ public class _MessageUtil {
         }
     }
     
-    static StringBuilder appendExpressionAsUntearable(StringBuilder sb, Expression argExp) {
+    public static StringBuilder appendExpressionAsUntearable(StringBuilder sb, Expression argExp) {
         boolean needParen =
                 !(argExp instanceof NumberLiteral)
                 && !(argExp instanceof StringLiteral)
@@ -188,11 +190,11 @@ public class _MessageUtil {
         return sb;
     }
 
-    static TemplateModelException newArgCntError(String methodName, int argCnt, int expectedCnt) {
+    public static TemplateModelException newArgCntError(String methodName, int argCnt, int expectedCnt) {
         return newArgCntError(methodName, argCnt, expectedCnt, expectedCnt);
     }
     
-    static TemplateModelException newArgCntError(String methodName, int argCnt, int minCnt, int maxCnt) {
+    public static TemplateModelException newArgCntError(String methodName, int argCnt, int minCnt, int maxCnt) {
         ArrayList/*<Object>*/ desc = new ArrayList(20);
         
         desc.add(methodName);
@@ -234,34 +236,34 @@ public class _MessageUtil {
         return new _TemplateModelException(desc.toArray());
     }
 
-    static TemplateModelException newMethodArgMustBeStringException(String methodName, int argIdx, TemplateModel arg) {
+    public static TemplateModelException newMethodArgMustBeStringException(String methodName, int argIdx, TemplateModel arg) {
         return newMethodArgUnexpectedTypeException(methodName, argIdx, "string", arg);
     }
 
-    static TemplateModelException newMethodArgMustBeNumberException(String methodName, int argIdx, TemplateModel arg) {
+    public static TemplateModelException newMethodArgMustBeNumberException(String methodName, int argIdx, TemplateModel arg) {
         return newMethodArgUnexpectedTypeException(methodName, argIdx, "number", arg);
     }
     
-    static TemplateModelException newMethodArgMustBeBooleanException(String methodName, int argIdx, TemplateModel arg) {
+    public static TemplateModelException newMethodArgMustBeBooleanException(String methodName, int argIdx, TemplateModel arg) {
         return newMethodArgUnexpectedTypeException(methodName, argIdx, "boolean", arg);
     }
     
-    static TemplateModelException newMethodArgMustBeExtendedHashException(
+    public static TemplateModelException newMethodArgMustBeExtendedHashException(
             String methodName, int argIdx, TemplateModel arg) {
         return newMethodArgUnexpectedTypeException(methodName, argIdx, "extended hash", arg);
     }
     
-    static TemplateModelException newMethodArgMustBeSequenceException(
+    public static TemplateModelException newMethodArgMustBeSequenceException(
             String methodName, int argIdx, TemplateModel arg) {
         return newMethodArgUnexpectedTypeException(methodName, argIdx, "sequence", arg);
     }
     
-    static TemplateModelException newMethodArgMustBeSequenceOrCollectionException(
+    public static TemplateModelException newMethodArgMustBeSequenceOrCollectionException(
             String methodName, int argIdx, TemplateModel arg) {
         return newMethodArgUnexpectedTypeException(methodName, argIdx, "sequence or collection", arg);
     }
     
-    static TemplateModelException newMethodArgUnexpectedTypeException(
+    public static TemplateModelException newMethodArgUnexpectedTypeException(
             String methodName, int argIdx, String expectedType, TemplateModel arg) {
         return new _TemplateModelException(
                 methodName, "(...) expects ", new _DelayedAOrAn(expectedType), " as argument #", Integer.valueOf(argIdx + 1),
@@ -271,7 +273,7 @@ public class _MessageUtil {
     /**
      * The type of the argument was good, but it's value wasn't.
      */
-    static TemplateModelException newMethodArgInvalidValueException(
+    public static TemplateModelException newMethodArgInvalidValueException(
             String methodName, int argIdx, Object... details) {
         return new _TemplateModelException(
                 methodName, "(...) argument #", Integer.valueOf(argIdx + 1),
@@ -281,17 +283,17 @@ public class _MessageUtil {
     /**
      * The type of the argument was good, but the values of two or more arguments are inconsistent with each other.
      */
-    static TemplateModelException newMethodArgsInvalidValueException(
+    public static TemplateModelException newMethodArgsInvalidValueException(
             String methodName, Object... details) {
         return new _TemplateModelException(methodName, "(...) arguments have invalid value: ", details);
     }
     
-    static TemplateException newInstantiatingClassNotAllowedException(String className, Environment env) {
+    public static TemplateException newInstantiatingClassNotAllowedException(String className, Environment env) {
         return new _MiscTemplateException(env,
                 "Instantiating ", className, " is not allowed in the template for security reasons.");
     }
     
-    static _TemplateModelException newCantFormatUnknownTypeDateException(
+    public static _TemplateModelException newCantFormatUnknownTypeDateException(
             Expression dateSourceExpr, UnknownDateTypeFormattingUnsupportedException cause) {
         return new _TemplateModelException(cause, null, new _ErrorDescriptionBuilder(
                 _MessageUtil.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE)
@@ -299,7 +301,7 @@ public class _MessageUtil {
                 .tips(_MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
     }
 
-    static TemplateException newCantFormatDateException(TemplateDateFormat format, Expression dataSrcExp,
+    public static TemplateException newCantFormatDateException(TemplateDateFormat format, Expression dataSrcExp,
             TemplateValueFormatException e, boolean useTempModelExc) {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                 "Failed to format date/time/datetime with format ", new _DelayedJQuote(format.getDescription()), ": ",
@@ -310,7 +312,7 @@ public class _MessageUtil {
                 : new _MiscTemplateException(e, (Environment) null, desc);
     }
     
-    static TemplateException newCantFormatNumberException(TemplateNumberFormat format, Expression dataSrcExp,
+    public static TemplateException newCantFormatNumberException(TemplateNumberFormat format, Expression dataSrcExp,
             TemplateValueFormatException e, boolean useTempModelExc) {
         _ErrorDescriptionBuilder desc = new _ErrorDescriptionBuilder(
                 "Failed to format number with format ", new _DelayedJQuote(format.getDescription()), ": ",
@@ -321,10 +323,24 @@ public class _MessageUtil {
                 : new _MiscTemplateException(e, (Environment) null, desc);
     }
     
+    public static _ErrorDescriptionBuilder traditionalHashExKeyMustBeStringExceptionMessage(
+            TemplateModel key, TemplateHashModelEx listedHashEx) {
+        return new _ErrorDescriptionBuilder(
+                "When listing key-value pairs of traditional hash "
+                + "implementations, all keys must be strings, but one of them "
+                + "was ",
+                new _DelayedAOrAn(new _DelayedFTLTypeDescription(key)), "."
+                ).tip("The listed value's TemplateModel class was ",
+                        new _DelayedShortClassName(listedHashEx.getClass()),
+                        ", which doesn't implement ",
+                        new _DelayedShortClassName(TemplateHashModelEx2.class),
+                        ", which leads to this restriction.");
+    }
+    
     /**
      * @return "a" or "an" or "a(n)" (or "" for empty string) for an FTL type name
      */
-    static String getAOrAn(String s) {
+    static public String getAOrAn(String s) {
         if (s == null) return null;
         if (s.length() == 0) return "";
         
