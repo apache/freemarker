@@ -98,7 +98,7 @@ public abstract class TemplateObject {
      * where in the template source, this object is.
      */
     public String getStartLocation() {
-        return MessageUtil.formatLocationForEvaluationError(template, beginLine, beginColumn);
+        return _MessageUtil.formatLocationForEvaluationError(template, beginLine, beginColumn);
     }
 
     /**
@@ -110,7 +110,7 @@ public abstract class TemplateObject {
     }
 
     public String getEndLocation() {
-        return MessageUtil.formatLocationForEvaluationError(template, endLine, endColumn);
+        return _MessageUtil.formatLocationForEvaluationError(template, endLine, endColumn);
     }
 
     /**

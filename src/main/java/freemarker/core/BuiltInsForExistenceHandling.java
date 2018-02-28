@@ -84,7 +84,7 @@ class BuiltInsForExistenceHandling {
             new TemplateMethodModelEx() {
                 public Object exec(List args) throws TemplateModelException {
                     int argCnt = args.size();
-                    if (argCnt == 0) throw MessageUtil.newArgCntError("?default", argCnt, 1, Integer.MAX_VALUE);
+                    if (argCnt == 0) throw _MessageUtil.newArgCntError("?default", argCnt, 1, Integer.MAX_VALUE);
                     for (int i = 0; i < argCnt; i++ ) {
                         TemplateModel result = (TemplateModel) args.get(i);
                         if (result != null) return result;

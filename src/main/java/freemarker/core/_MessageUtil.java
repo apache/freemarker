@@ -28,9 +28,10 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.utility.StringUtil;
 
 /**
+ * Used internally only, might changes without notice!
  * Utilities for creating error messages (and other messages).
  */
-class MessageUtil {
+public class _MessageUtil {
 
     static final String UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE
             = "Can't convert the date-like value to string because it isn't "
@@ -54,7 +55,7 @@ class MessageUtil {
     static final String EMBEDDED_MESSAGE_END = "\n---end-message---";
 
     // Can't be instantiated
-    private MessageUtil() { }
+    private _MessageUtil() { }
         
     static String formatLocationForSimpleParsingError(Template template, int line, int column) {
         return formatLocation("in", template, line, column);
@@ -293,9 +294,9 @@ class MessageUtil {
     static _TemplateModelException newCantFormatUnknownTypeDateException(
             Expression dateSourceExpr, UnknownDateTypeFormattingUnsupportedException cause) {
         return new _TemplateModelException(cause, null, new _ErrorDescriptionBuilder(
-                MessageUtil.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE)
+                _MessageUtil.UNKNOWN_DATE_TO_STRING_ERROR_MESSAGE)
                 .blame(dateSourceExpr)
-                .tips(MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
+                .tips(_MessageUtil.UNKNOWN_DATE_TO_STRING_TIPS));
     }
 
     static TemplateException newCantFormatDateException(TemplateDateFormat format, Expression dataSrcExp,

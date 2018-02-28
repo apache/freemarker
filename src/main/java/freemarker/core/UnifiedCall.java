@@ -116,7 +116,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
         StringBuilder sb = new StringBuilder();
         if (canonical) sb.append('<');
         sb.append('@');
-        MessageUtil.appendExpressionAsUntearable(sb, nameExp);
+        _MessageUtil.appendExpressionAsUntearable(sb, nameExp);
         boolean nameIsInParen = sb.charAt(sb.length() - 1) == ')';
         if (positionalArgs != null) {
             for (int i = 0; i < positionalArgs.size(); i++) {
@@ -135,7 +135,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                 sb.append(' ');
                 sb.append(_CoreStringUtils.toFTLTopLevelIdentifierReference((String) entry.getKey()));
                 sb.append('=');
-                MessageUtil.appendExpressionAsUntearable(sb, argExp);
+                _MessageUtil.appendExpressionAsUntearable(sb, argExp);
             }
         }
         if (bodyParameterNames != null && !bodyParameterNames.isEmpty()) {

@@ -587,7 +587,7 @@ class BuiltInsForMultipleTypes {
                 if (cachedValue == null) {
                     if (defaultFormat == null) {
                         if (dateModel.getDateType() == TemplateDateModel.UNKNOWN) {
-                            throw MessageUtil.newCantFormatUnknownTypeDateException(target, null);
+                            throw _MessageUtil.newCantFormatUnknownTypeDateException(target, null);
                         } else {
                             throw new BugException();
                         }
@@ -596,7 +596,7 @@ class BuiltInsForMultipleTypes {
                         cachedValue = EvalUtil.assertFormatResultNotNull(defaultFormat.formatToPlainText(dateModel));
                     } catch (TemplateValueFormatException e) {
                         try {
-                            throw MessageUtil.newCantFormatDateException(defaultFormat, target, e, true);
+                            throw _MessageUtil.newCantFormatDateException(defaultFormat, target, e, true);
                         } catch (TemplateException e2) {
                             // `e` should always be a TemplateModelException here, but to be sure: 
                             throw _CoreAPI.ensureIsTemplateModelException("Failed to format date/time/datetime", e2); 

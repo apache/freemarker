@@ -95,7 +95,7 @@ final class TransformBlock extends TemplateElement {
                 sb.append(' ');
                 sb.append(entry.getKey());
                 sb.append('=');
-                MessageUtil.appendExpressionAsUntearable(sb, (Expression) entry.getValue());
+                _MessageUtil.appendExpressionAsUntearable(sb, (Expression) entry.getValue());
             }
         }
         if (canonical) {

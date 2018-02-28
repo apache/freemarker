@@ -66,7 +66,7 @@ public interface TemplateClassResolver {
             if (className.equals(ObjectConstructor.class.getName())
                     || className.equals(Execute.class.getName())
                     || className.equals("freemarker.template.utility.JythonRuntime")) {
-                throw MessageUtil.newInstantiatingClassNotAllowedException(className, env);
+                throw _MessageUtil.newInstantiatingClassNotAllowedException(className, env);
             }
             try {
                 return ClassUtil.forName(className);
@@ -84,7 +84,7 @@ public interface TemplateClassResolver {
 
         public Class resolve(String className, Environment env, Template template)
         throws TemplateException {
-            throw MessageUtil.newInstantiatingClassNotAllowedException(className, env);
+            throw _MessageUtil.newInstantiatingClassNotAllowedException(className, env);
         }
         
     };

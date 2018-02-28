@@ -119,7 +119,7 @@ public final class Macro extends TemplateElement implements TemplateModel {
                 if (function) {
                     sb.append(defaultExpr.getCanonicalForm());
                 } else {
-                    MessageUtil.appendExpressionAsUntearable(sb, defaultExpr);
+                    _MessageUtil.appendExpressionAsUntearable(sb, defaultExpr);
                 }
             }
         }

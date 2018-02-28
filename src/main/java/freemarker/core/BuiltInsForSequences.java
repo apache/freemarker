@@ -214,9 +214,9 @@ class BuiltInsForSequences {
                         } catch (TemplateException e) {
                             throw new _TemplateModelException(e,
                                     "\"?", key, "\" failed at index ", Integer.valueOf(idx), " with this error:\n\n",
-                                    MessageUtil.EMBEDDED_MESSAGE_BEGIN,
+                                    _MessageUtil.EMBEDDED_MESSAGE_BEGIN,
                                     new _DelayedGetMessageWithoutStackTop(e),
-                                    MessageUtil.EMBEDDED_MESSAGE_END);
+                                    _MessageUtil.EMBEDDED_MESSAGE_END);
                         }
                     }
                     idx++;
@@ -527,7 +527,7 @@ class BuiltInsForSequences {
                 // Should be:
                 // checkMethodArgCount(args, 1);
                 // But for BC:
-                if (args.size() < 1) throw MessageUtil.newArgCntError("?" + key, args.size(), 1);
+                if (args.size() < 1) throw _MessageUtil.newArgCntError("?" + key, args.size(), 1);
                 
                 String[] subvars;
                 Object obj = args.get(0);

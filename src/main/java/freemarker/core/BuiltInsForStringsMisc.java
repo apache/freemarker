@@ -89,9 +89,9 @@ class BuiltInsForStringsMisc {
             } catch (ParseException e) {
                 throw new _MiscTemplateException(this, env,
                         "Failed to \"?", key, "\" string with this error:\n\n",
-                        MessageUtil.EMBEDDED_MESSAGE_BEGIN,
+                        _MessageUtil.EMBEDDED_MESSAGE_BEGIN,
                         new _DelayedGetMessage(e),
-                        MessageUtil.EMBEDDED_MESSAGE_END,
+                        _MessageUtil.EMBEDDED_MESSAGE_END,
                         "\n\nThe failing expression:");
             }
             try {
@@ -99,9 +99,9 @@ class BuiltInsForStringsMisc {
             } catch (TemplateException e) {
                 throw new _MiscTemplateException(e, this, env,
                         "Failed to \"?", key, "\" string with this error:\n\n",
-                        MessageUtil.EMBEDDED_MESSAGE_BEGIN,
+                        _MessageUtil.EMBEDDED_MESSAGE_BEGIN,
                         new _DelayedGetMessageWithoutStackTop(e),
-                        MessageUtil.EMBEDDED_MESSAGE_END,
+                        _MessageUtil.EMBEDDED_MESSAGE_END,
                         "\n\nThe failing expression:");
             }
         }
