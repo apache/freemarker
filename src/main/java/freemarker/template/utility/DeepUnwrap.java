@@ -20,7 +20,8 @@
 package freemarker.template.utility;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import freemarker.core.Environment;
 import freemarker.ext.util.WrapperTemplateModel;
@@ -30,6 +31,9 @@ import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateCollectionModel;
 import freemarker.template.TemplateDateModel;
 import freemarker.template.TemplateHashModelEx;
+import freemarker.template.TemplateHashModelEx2;
+import freemarker.template.TemplateHashModelEx2.KeyValuePair;
+import freemarker.template.TemplateHashModelEx2.KeyValuePairIterator;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateModelIterator;
@@ -147,11 +151,21 @@ public class DeepUnwrap {
         }
         if (model instanceof TemplateHashModelEx) {
             TemplateHashModelEx hash = (TemplateHashModelEx) model;
-            HashMap map = new HashMap();
-            TemplateModelIterator keys = hash.keys().iterator();
-            while (keys.hasNext()) {
-                String key = (String) unwrap(keys.next(), nullModel, permissive); 
-                map.put(key, unwrap(hash.get(key), nullModel, permissive));
+            Map<Object, Object> map = new LinkedHashMap<Object, Object>();
+            if (model instanceof TemplateHashModelEx2) {
+                KeyValuePairIterator kvps = ((TemplateHashModelEx2) model).keyValuePairIterator();
+                while (kvps.hasNext()) {
+                    KeyValuePair kvp = kvps.next();
+                    map.put(
+                            unwrap(kvp.getKey(), nullModel, permissive),
+                            unwrap(kvp.getValue(), nullModel, permissive));
+                }
+            } else {
+                TemplateModelIterator keys = hash.keys().iterator();
+                while (keys.hasNext()) {
+                    String key = (String) unwrap(keys.next(), nullModel, permissive); 
+                    map.put(key, unwrap(hash.get(key), nullModel, permissive));
+                }
             }
             return map;
         }

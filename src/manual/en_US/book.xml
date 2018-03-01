@@ -27318,6 +27318,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               This simplifies Java code that iterates through key-value
               pairs.</para>
             </listitem>
+
+            <listitem>
+              <para><literal>freemarker.template.utility.DeepUnwrap</literal>
+              (a rarely used utility) now utilizes when the unwrapped
+              <literal>TemplateModel</literal> implements
+              <literal>TemplateHashModelEx2.getKeyValuePairIterator()</literal>,
+              and thus can unwrap such a hash value even if it has non-string
+              keys. Also, it nows keeps the iteration order of the hashes, as
+              it unwraps into a <literal>LinkedHashMap</literal> instead of
+              into a plain <literal>HashMap</literal>.</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>
