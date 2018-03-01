@@ -20,7 +20,9 @@
 package org.apache.freemarker.core.util;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.apache.freemarker.core.Environment;
 import org.apache.freemarker.core.TemplateException;
@@ -29,6 +31,8 @@ import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.TemplateBooleanModel;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
+import org.apache.freemarker.core.model.TemplateHashModelEx.KeyValuePair;
+import org.apache.freemarker.core.model.TemplateHashModelEx.KeyValuePairIterator;
 import org.apache.freemarker.core.model.TemplateIterableModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelIterator;
@@ -138,11 +142,16 @@ public class DeepUnwrap {
         }
         if (model instanceof TemplateHashModelEx) {
             TemplateHashModelEx hash = (TemplateHashModelEx) model;
-            HashMap map = new HashMap();
-            TemplateModelIterator keys = hash.keys().iterator();
-            while (keys.hasNext()) {
-                String key = (String) unwrap(keys.next(), nullModel, permissive); 
-                map.put(key, unwrap(hash.get(key), nullModel, permissive));
+            if (hash.isEmptyHash()) {
+                return Collections.emptyMap();
+            }
+            Map<Object, Object> map = new LinkedHashMap<Object, Object>((hash.getHashSize() + 1) * 4 / 3, 0.75f);
+            KeyValuePairIterator kvps = hash.keyValuePairIterator();
+            while (kvps.hasNext()) {
+                KeyValuePair kvp = kvps.next();
+                map.put(
+                        unwrap(kvp.getKey(), nullModel, permissive),
+                        unwrap(kvp.getValue(), nullModel, permissive));
             }
             return map;
         }
