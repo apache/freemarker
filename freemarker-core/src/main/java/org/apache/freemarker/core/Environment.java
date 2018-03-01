@@ -2572,6 +2572,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
         final boolean lazyImport;
         if (loadedTemplate != null) {
             lazyImport = false;
+            // TODO [FM3] 
             // As we have an already normalized name, we use it. 2.3.x note: We should use the template.sourceName as
             // namespace key, but historically we use the looked up name (template.name); check what lazy import does if
             // that will be fixed, as that can't do the template lookup, yet the keys must be the same.
