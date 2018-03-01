@@ -29,18 +29,19 @@ import java.util.Set;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateHashModelEx;
+import org.apache.freemarker.core.model.TemplateHashModelEx.KeyValuePair;
+import org.apache.freemarker.core.model.TemplateHashModelEx.KeyValuePairIterator;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.TemplateModelAdapter;
-import org.apache.freemarker.core.model.TemplateModelIterator;
 import org.apache.freemarker.core.util.UndeclaredThrowableException;
 
 /**
  * Adapts a {@link TemplateHashModel} to a {@link Map}.
  */
-class TemplateHashModelAdapter extends AbstractMap implements TemplateModelAdapter {
+class TemplateHashModelAdapter<K, V> extends AbstractMap<K, V> implements TemplateModelAdapter {
     private final DefaultObjectWrapper wrapper;
     private final TemplateHashModel model;
-    private Set entrySet;
+    private Set<Map.Entry<K, V>> entrySet;
     
     TemplateHashModelAdapter(TemplateHashModel model, DefaultObjectWrapper wrapper) {
         this.model = model;
@@ -61,10 +62,15 @@ class TemplateHashModelAdapter extends AbstractMap implements TemplateModelAdapt
         }
     }
     
+    @SuppressWarnings("unchecked")
     @Override
-    public Object get(Object key) {
+    public V get(Object key) {
+        // TODO [FM3] This restriction must be removed when TemplateHashModel allows non-string keys.
+        if (!(key instanceof String)) {
+            return null; 
+        }
         try {
-            return wrapper.unwrap(model.get(String.valueOf(key)));
+            return (V) wrapper.unwrap(model.get((String) key));
         } catch (TemplateException e) {
             throw new UndeclaredThrowableException(e);
         }
@@ -89,75 +95,103 @@ class TemplateHashModelAdapter extends AbstractMap implements TemplateModelAdapt
     }
     
     @Override
-    public Set entrySet() {
+    public Set<Map.Entry<K, V>> entrySet() {
         if (entrySet != null) {
             return entrySet;
         }
-        return entrySet = new AbstractSet() {
+        return entrySet = new AbstractSet<Map.Entry<K, V>>() {
             @Override
-            public Iterator iterator() {
-                final TemplateModelIterator iterator;
+            public Iterator<Map.Entry<K, V>> iterator() {
+                final KeyValuePairIterator kvpIter;
                 try {
-                     iterator = getModelEx().keys().iterator();
+                     kvpIter = getModelEx().keyValuePairIterator();
                 } catch (TemplateException e) {
                     throw new UndeclaredThrowableException(e);
                 }
-                return new Iterator() {
+                return new Iterator<Map.Entry<K, V>>() {
                     @Override
                     public boolean hasNext() {
                         try {
-                            return iterator.hasNext();
+                            return kvpIter.hasNext();
                         } catch (TemplateException e) {
                             throw new UndeclaredThrowableException(e);
                         }
                     }
                     
                     @Override
-                    public Object next() {
-                        final Object key;
+                    public Map.Entry<K, V> next() {
+                        final KeyValuePair kvp;
                         try {
-                            if (!iterator.hasNext()) {
+                            if (!kvpIter.hasNext()) {
                                 throw new NoSuchElementException();
                             }
-                            key = wrapper.unwrap(iterator.next());
+                            kvp = kvpIter.next();
                         } catch (TemplateException e) {
                             throw new UndeclaredThrowableException(e);
                         }
-                        return new Map.Entry() {
+                        return new Map.Entry<K, V>() {
+                            private boolean keyCalculated;
+                            private K key;
+                            
+                            private boolean valueCalculated;
+                            private V value;
+                            
+                            @SuppressWarnings("unchecked")
                             @Override
-                            public Object getKey() {
-                                return key;
+                            public K getKey() {
+                                    if (!keyCalculated) {
+                                        try {
+                                            key = (K) wrapper.unwrap(kvp.getKey());;
+                                        } catch (TemplateException e) {
+                                            throw new UndeclaredThrowableException(e);
+                                        }
+                                        keyCalculated = true;
+                                    }
+                                    return key;
+                            }
+                            
+                            @SuppressWarnings("unchecked")
+                            @Override
+                            public V getValue() {
+                                if (!valueCalculated) {
+                                    try {
+                                        value = (V) wrapper.unwrap(kvp.getValue());;
+                                    } catch (TemplateException e) {
+                                        throw new UndeclaredThrowableException(e);
+                                    }
+                                    valueCalculated = true;
+                                }
+                                return value;
                             }
                             
                             @Override
-                            public Object getValue() {
-                                return get(key);
-                            }
-                            
-                            @Override
-                            public Object setValue(Object value) {
+                            public V setValue(Object value) {
                                 throw new UnsupportedOperationException();
                             }
                             
+                            @SuppressWarnings("unchecked")
                             @Override
                             public boolean equals(Object o) {
-                                if (!(o instanceof Map.Entry))
+                                if (!(o instanceof Map.Entry)) {
                                     return false;
-                                Map.Entry e = (Map.Entry) o;
+                                }
+                                Map.Entry<K, V> e = (Map.Entry <K, V>) o;
                                 Object k1 = getKey();
                                 Object k2 = e.getKey();
                                 if (k1 == k2 || (k1 != null && k1.equals(k2))) {
                                     Object v1 = getValue();
                                     Object v2 = e.getValue();
-                                    if (v1 == v2 || (v1 != null && v1.equals(v2))) 
+                                    if (v1 == v2 || (v1 != null && v1.equals(v2))) { 
                                         return true;
+                                    }
                                 }
                                 return false;
                             }
                         
                             @Override
                             public int hashCode() {
-                                Object value = getValue();
+                                K key = getKey();
+                                V value = getValue();
                                 return (key == null ? 0 : key.hashCode()) ^
                                        (value == null ? 0 : value.hashCode());
                             }
