@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.freemarker.core.model.impl.org.apache.freemarker.core.model;
+package org.apache.freemarker.core.model.impl;
 
 import java.io.IOException;
 
