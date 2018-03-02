@@ -112,7 +112,7 @@ Node: Changes already mentioned above aren't repeated here!
      the return value can be called as directive (which does nothing), while with `?ifExists` that wasn't possible.)
 - Comma is now required between sequence literal items (such as `[a, b, c]`). It's not well known, but in FM2 the comma
   could be omitted.
-- #include has no "encoding" parameter anymore (as now only the Configuration is responsible ofr deciding the encoding)
+- #include has no "encoding" and "parse" parameter anymore (as now only the Configuration is responsible for deciding those)
 - You can't close #attempt/#recover with `</#recover>` anymore, only with `<#attempt>`. This was the
   standard form in FM2 as well, and is consistent with how #if/#else works. (The template converter
   tool does this conversion.)
@@ -128,8 +128,8 @@ Node: Changes already mentioned above aren't repeated here!
   Converter note: This conversion is done, but note that in the rare case where a template has no name (when
   creating a `Template` directly with its constructor using `null` as the `name` parameter) `.templateName` was an
   empty string, while `.currentTemplateName` will be null.
-- Refactroing of callable TemplateModel interfaces and related classes:
-  - TemplateDirectiveModel was redesigend (see in the major changes section)
+- Refactoring of callable TemplateModel interfaces and related classes:
+  - TemplateDirectiveModel was redesigned (see in the major changes section)
   - Removed `TemplateTransformModel`; `TemplateDirectiveModel` can do the same things, and more.
   - Renamed `DirectiveCallPlace` to `CallPlace`
   - Removed Environment.getDirectiveCallPlace(), as TemplateDirectiveModel-s now get the CallPlace as the
@@ -456,7 +456,7 @@ Core / Models and Object wrapping
        so now the two interfaces would be the same.
     - `TemplateHashModel` doesn't have `isEmpty()` method anymore. (As the point of a pure `TemplateHashModel` is that
       it's not able to list its keys, almost all `isEmpty()` implementations in FM2 were just dummies returning `false`.)
-      Note that `?hashContent` now returns `true` for `TemplateHashModel` that aren't also `TemplateHashModelEx2`-s,
+      Note that `?hasContent` now returns `true` for `TemplateHashModel` that aren't also `TemplateHashModelEx2`-s,
       based on the idea that for some `key` (which you may don't know) `get(key)` might returns something.
   - `TemplateModel.NOTHING` was removed without replacement.
 - BeanModel.keys() and values() are now final methods. Override BeanModel.keySet() and/or get(String) instead.
