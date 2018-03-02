@@ -57,6 +57,7 @@ final class ASTExpBuiltInVariable extends ASTExpression {
     static final String AUTO_ESC = "autoEsc";
     static final String URL_ESCAPING_CHARSET = "urlEscapingCharset";
     static final String NOW = "now";
+    static final String GET_OPTIONAL_TEMPLATE = "getOptionalTemplate";
     
     static final Set<String> BUILT_IN_VARIABLE_NAMES = new _SortedArraySet<>(
         // Must be sorted alphabetically!
@@ -64,6 +65,7 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         CURRENT_TEMPLATE_NAME,
         DATA_MODEL,
         ERROR,
+        GET_OPTIONAL_TEMPLATE,
         GLOBALS,
         INCOMPATIBLE_IMPROVEMENTS,
         LANG,
@@ -194,6 +196,9 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         if (name == INCOMPATIBLE_IMPROVEMENTS) {
             return new SimpleString(env.getConfiguration().getIncompatibleImprovements().toString());
         }
+        if (name == GET_OPTIONAL_TEMPLATE) {
+            return GetOptionalTemplateFunction.INSTANCE;
+        }        
         
         throw new TemplateException(this,
                 "Invalid special variable: ", name);
