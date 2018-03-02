@@ -110,16 +110,16 @@ public class GetOptionalTemplateTest extends TemplateTest {
     public void testRelativeAndAbsolutePath() throws Exception {
         addTemplate("lib/inc.ftl", "included");
         
-        addTemplate("test1.ftl", "<#include 'lib/inc.ftl'>");
+        addTemplate("test1.ftl", "<@.getOptionalTemplate('lib/inc.ftl').include />");
         assertOutputForNamed("test1.ftl", "included");
         
-        addTemplate("lib/test2.ftl", "<#include '/lib/inc.ftl'>");
+        addTemplate("lib/test2.ftl", "<@.getOptionalTemplate('/lib/inc.ftl').include />");
         assertOutputForNamed("lib/test2.ftl", "included");
         
-        addTemplate("lib/test3.ftl", "<#include 'inc.ftl'>");
+        addTemplate("lib/test3.ftl", "<@.getOptionalTemplate('inc.ftl').include />");
         assertOutputForNamed("lib/test3.ftl", "included");
         
-        addTemplate("sub/test4.ftl", "<#include '../lib/inc.ftl'>");
+        addTemplate("sub/test4.ftl", "<@.getOptionalTemplate('../lib/inc.ftl').include />");
         assertOutputForNamed("sub/test4.ftl", "included");
     }
 
@@ -174,6 +174,12 @@ public class GetOptionalTemplateTest extends TemplateTest {
                 "#2", "parse", "number", "boolean");
         assertErrorContains("<#assign t = .getOptionalTemplate('x', { 'encoding': 1 })>",
                 "#2", "encoding", "number", "string");
+        
+        addTemplate("inc.ftl", "Exists...");
+        assertErrorContains("<@.getOptionalTemplate('inc.ftl').include x=1 />", "no parameters");
+        assertErrorContains("<@.getOptionalTemplate('inc.ftl').include>x</@>", "no nested content");
+        assertErrorContains("<@.getOptionalTemplate('inc.ftl').include; x />", "no loop variables");
+        assertErrorContains("<#assign x = .getOptionalTemplate('inc.ftl').import(1)>", "no parameters");
     }
     
 }

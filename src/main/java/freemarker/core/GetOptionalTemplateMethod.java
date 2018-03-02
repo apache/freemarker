@@ -143,7 +143,7 @@ class GetOptionalTemplateMethod implements TemplateMethodModelEx {
         
         SimpleHash result = new SimpleHash(env.getObjectWrapper());
         result.put(RESULT_EXISTS, template != null);
-        // If the template is missing, result.include and such will be missing to, so that a default can be
+        // If the template is missing, result.include and such will be missing too, so that a default can be
         // conveniently provided like in <@optTemp.include!myDefaultMacro />.
         if (template != null) {
             result.put(RESULT_INCLUDE, new TemplateDirectiveModel() {
@@ -156,7 +156,7 @@ class GetOptionalTemplateMethod implements TemplateMethodModelEx {
                         throw new TemplateException("This directive supports no loop variables.", env);
                     }
                     if (body != null) {
-                        throw new TemplateException("This directive supports no nested conetnt.", env);
+                        throw new TemplateException("This directive supports no nested content.", env);
                     }
                     
                     env.include(template);
