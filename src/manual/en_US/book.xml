@@ -22065,6 +22065,16 @@ ${"'{}"}
                   <literal>"MM/dd/yyyy hh:mm:ss a"</literal> (where
                   <literal>"a"</literal> prints AM or PM, if the current
                   language is English).</para>
+
+                  <warning>
+                    <para>Be careful <emphasis>not</emphasis> to use
+                    <literal>YYYY</literal> (upper case, means <quote>week
+                    year</quote>) instead of <literal>yyyy</literal> (lower
+                    case, means year)! It's an easy mistake to do, and hard to
+                    notice during testing, as <quote>week year</quote> only
+                    differs from <quote>year</quote> near the edge of
+                    years.</para>
+                  </warning>
                 </listitem>
 
                 <listitem>
@@ -22251,9 +22261,12 @@ ${"'{}"}
               <para><indexterm>
                   <primary>time_zone</primary>
                 </indexterm><literal>time_zone</literal>: The name of the time
-              zone used to format times for display. By default, the default
-              time zone of the JVM is used. Can be any value that is accepted
-              by <link
+              zone used to format times for display. As with all settings, the
+              default is chosen by the programmers when they set up FreeMarker
+              (<phrase role="forProgrammers">via the
+              <literal>Configuration</literal> class</phrase>), but it's most
+              often the default time zone of the JVM. Can be any value that is
+              accepted by <link
               xlink:href="http://docs.oracle.com/javase/7/docs/api/java/util/TimeZone.html">Java
               TimeZone API</link>, or <literal>"JVM default"</literal> (since
               FreeMarker 2.3.21) to use the JVM default time zone. Examples:
@@ -22314,16 +22327,17 @@ ${"'{}"}
               role="forProgrammers">it writes into a
               <literal>java.io.Writer</literal></phrase>), it's not affected
               by the output encoding, but some macros/functions and built-ins
-              may want to used this information.</para>
+              may want to use this information.</para>
             </listitem>
 
             <listitem>
               <para><indexterm>
                   <primary>classic_compatible</primary>
-                </indexterm><literal>classic_compatible</literal>: This is for
-              experts. Its value should be a boolean. See the documentation of
-              <literal>freemarker.template.Configurable</literal> for more
-              information.</para>
+                </indexterm><literal>classic_compatible</literal>: Used for
+              better compatibility with very old FreeMarker versions (mostly
+              1.7.x). See the documentation of
+              <literal>freemarker.template.Configurable.isClassicCompatible()</literal>
+              for more information.</para>
             </listitem>
           </itemizedlist>
 
