@@ -208,5 +208,61 @@ public class TemplateNameSpecialVariablesTest extends TemplateTest {
                 "t=foo.ftl, ct=foo.ftl, mt=foo.ftl; "
                 + "t=foo.ftl->bar, ct=foo.ftl->bar, mt=foo.ftl");
     }
+
+    
+    @Test
+    public void testArgumentBugWithMacro() throws TemplateException, IOException {
+        StringTemplateLoader tl = new StringTemplateLoader();
+        tl.putTemplate("main.ftl", ""
+                + "<#include 'inc.ftl'>"
+                + "Before: ${.currentTemplateName}\n"
+                + "<@m p1=.currentTemplateName; x>"
+                + "Loop var: ${x}\n"
+                + "In nested: ${.currentTemplateName}\n"
+                + "</@>"
+                + "After: ${.currentTemplateName}");
+        tl.putTemplate("inc.ftl", ""
+                + "<#macro m p1 p2=.currentTemplateName>"
+                + "p1: ${p1}\n"
+                + "p2: ${p2}\n"
+                + "Inside: ${.currentTemplateName}\n"
+                + "<#nested .currentTemplateName>"
+                + "</#macro>");
+        Configuration cfg = getConfiguration();
+        cfg.setTemplateLoader(tl);
+        
+        for (boolean fixed : new boolean[] { false, true }) {
+            cfg.setIncompatibleImprovements(fixed ? Configuration.VERSION_2_3_28 : Configuration.VERSION_2_3_27);
+            assertOutputForNamed("main.ftl", ""
+                    + "Before: main.ftl\n"
+                    + "p1: " + (fixed ? "main.ftl" : "inc.ftl") + "\n"
+                    + "p2: inc.ftl\n"
+                    + "Inside: inc.ftl\n"
+                    + "Loop var: inc.ftl\n"
+                    + "In nested: main.ftl\n"
+                    + "After: main.ftl");
+        }
+    }
+
+    @Test
+    public void testArgumentBugWithFunction() throws TemplateException, IOException {
+        StringTemplateLoader tl = new StringTemplateLoader();
+        tl.putTemplate("main.ftl", ""
+                + "<#include 'inc.ftl'>"
+                + "${f(.currentTemplateName)}");
+        tl.putTemplate("inc.ftl", ""
+                + "<#function f(p1, p2=.currentTemplateName)>"
+                + "<#return 'p1=${p1}, p2=${p2}, inside=${.currentTemplateName}'>"
+                + "</#function>");
+        Configuration cfg = getConfiguration();
+        cfg.setTemplateLoader(tl);
+        
+        for (boolean fixed : new boolean[] { false, true }) {
+            cfg.setIncompatibleImprovements(fixed ? Configuration.VERSION_2_3_28 : Configuration.VERSION_2_3_27);
+            assertOutputForNamed("main.ftl", ""
+                    + "p1=" + (fixed ? "main.ftl" : "inc.ftl")
+                    + ", p2=inc.ftl, inside=inc.ftl");
+        }
+    }
     
 }

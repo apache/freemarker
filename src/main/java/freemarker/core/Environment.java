@@ -110,6 +110,7 @@ public final class Environment extends Configurable {
     }
 
     private final Configuration configuration;
+    private final boolean incompatibleImprovementsGE2328;
     private final TemplateHashModel rootDataModel;
     private TemplateElement[] instructionStack = new TemplateElement[16];
     private int instructionStackSize = 0;
@@ -199,6 +200,7 @@ public final class Environment extends Configurable {
     public Environment(Template template, final TemplateHashModel rootDataModel, Writer out) {
         super(template);
         configuration = template.getConfiguration();
+        incompatibleImprovementsGE2328 = configuration.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_28;
         this.globalNamespace = new Namespace(null);
         this.currentNamespace = mainNamespace = new Namespace(template);
         this.out = out;
@@ -735,10 +737,24 @@ public final class Environment extends Configurable {
             return;
         }
 
-        pushElement(macro);
+        boolean elementPushed;
+        if (!incompatibleImprovementsGE2328) {
+            // Doing this so early is wrong, as now the arguments will be evaluated while the called macro/function is
+            // in the element stack. Thus .current_template_name will be wrong for example.
+            pushElement(macro);
+            elementPushed = true;
+        } else {
+            elementPushed = false;
+        }
         try {
             final Macro.Context macroCtx = macro.new Context(this, childBuffer, bodyParameterNames);
+            // Causes the evaluation of argument expressions:
             setMacroContextLocalsFromArguments(macroCtx, macro, namedArgs, positionalArgs);
+            
+            if (!elementPushed) { // When incompatibleImprovements >= 2.3.28
+                pushElement(macro);
+                elementPushed = true;
+            }
 
             final Macro.Context prevMacroCtx = currentMacroContext;
             currentMacroContext = macroCtx;
@@ -762,7 +778,9 @@ public final class Environment extends Configurable {
                 currentNamespace = prevNamespace;
             }
         } finally {
-            popElement();
+            if (elementPushed) {
+                popElement();
+            }
         }
     }
 

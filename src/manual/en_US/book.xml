@@ -27267,6 +27267,22 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               linkend="ref_specvar_get_optional_template">See the details
               here...</link></para>
             </listitem>
+
+            <listitem>
+              <para>Bug fixed (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-83">FREEMARKER-83</link>);
+              this fix is only active when <link
+              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incomplatible_improvements</literal></link>
+              is set to 2.3.28 (or higher). When calling a macro or function
+              (things defined in a template, not directly in Java) and the
+              argument list contains
+              <literal>.current_template_name</literal>, now it will correctly
+              evaluate to the template that contains the call, rather than to
+              the template that contains the macro or function definition. (Of
+              course, the parameter default value expression is still
+              evaluated in the context of the called macro or
+              function.)</para>
+            </listitem>
           </itemizedlist>
         </section>
 
