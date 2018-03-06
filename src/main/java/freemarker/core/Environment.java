@@ -231,7 +231,8 @@ public final class Environment extends Configurable {
 
     /**
      * Returns the topmost {@link Template}, with other words, the one for which this {@link Environment} was created.
-     * That template will never change, like {@code #include} or macro calls don't change it.
+     * That template will never change, like {@code #include} or macro calls don't change it. This method never returns
+     * {@code null}.
      * 
      * @see #getCurrentNamespace()
      * 
@@ -244,7 +245,9 @@ public final class Environment extends Configurable {
     /**
      * Returns the {@link Template} that we are "lexically" inside at the moment. This template will change when
      * entering an {@code #include} or calling a macro or function in another template, or returning to yet another
-     * template with {@code #nested}.
+     * template with {@code #nested}. When you are calling a directive that's implemented in Java or a Java method
+     * from a template, the current template will be the last current template, not {@code null}. This method never
+     * returns {@code null}.  
      * 
      * @see #getMainTemplate()
      * @see #getCurrentNamespace()
