@@ -78,7 +78,7 @@ class JaxenXPathSupport implements XPathSupport {
     public TemplateModel executeQuery(Object context, String xpathQuery) throws TemplateException {
         try {
             BaseXPath xpath;
-            Map<String, BaseXPath> xpathCache = Environment.getCurrentEnvironmentNotNull().getCurrentTemplateNotNull()
+            Map<String, BaseXPath> xpathCache = Environment.getCurrentEnvironmentNotNull().getCurrentTemplate()
                     .getCustomState(XPATH_CACHE_ATTR);
             synchronized (xpathCache) {
                 xpath = xpathCache.get(xpathQuery);
@@ -177,7 +177,7 @@ class JaxenXPathSupport implements XPathSupport {
             try {
                 Template raw = getTemplate(uri);
                 _ObjectHolder<Document> docHolder = Environment.getCurrentEnvironmentNotNull()
-                        .getCurrentTemplateNotNull().getCustomState(FM_DOM_NAVIAGOTOR_CACHED_DOM);
+                        .getCurrentTemplate().getCustomState(FM_DOM_NAVIAGOTOR_CACHED_DOM);
                 synchronized (docHolder) {
                     Document doc = docHolder.get();
                     if (doc == null) {
