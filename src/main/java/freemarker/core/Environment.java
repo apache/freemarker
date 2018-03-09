@@ -594,7 +594,8 @@ public final class Environment extends Configurable {
     void invokeNestedContent(BodyInstruction.Context bodyCtx) throws TemplateException, IOException {
         Macro.Context invokingMacroContext = getCurrentMacroContext();
         LocalContextStack prevLocalContextStack = localContextStack;
-        TemplateElement[] nestedContentBuffer = invokingMacroContext.callPlace.getChildBuffer();
+        TemplateElement callPlace = invokingMacroContext.callPlace;
+        TemplateElement[] nestedContentBuffer = callPlace != null ? callPlace.getChildBuffer() : null;
         if (nestedContentBuffer != null) {
             this.currentMacroContext = invokingMacroContext.prevMacroContext;
             currentNamespace = invokingMacroContext.nestedContentNamespace;

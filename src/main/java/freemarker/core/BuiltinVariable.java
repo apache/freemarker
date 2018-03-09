@@ -260,7 +260,8 @@ final class BuiltinVariable extends Expression {
                 throw new TemplateException(
                         "Can't get ." + name + " here, as there's no macro call in context.", env);
             }
-            String name = ctx.callPlace.getTemplate().getName();
+            TemplateElement callPlace = ctx.callPlace;
+            String name = callPlace != null ? callPlace.getTemplate().getName() : null;
             return name != null ? new SimpleScalar(name) : TemplateScalarModel.EMPTY_STRING;
         }
         
