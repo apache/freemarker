@@ -74,6 +74,8 @@ final class BuiltinVariable extends Expression {
     static final String NOW = "now";
     static final String GET_OPTIONAL_TEMPLATE = "get_optional_template";
     static final String GET_OPTIONAL_TEMPLATE_CC = "getOptionalTemplate";
+    static final String MACRO_CALLER_TEMPLATE_NAME = "macro_caller_template_name";
+    static final String MACRO_CALLER_TEMPLATE_NAME_CC = "macroCallerTemplateName";
     static final String[] SPEC_VAR_NAMES = new String[] {
         AUTO_ESC_CC,
         AUTO_ESC,
@@ -94,6 +96,8 @@ final class BuiltinVariable extends Expression {
         LOCALE_OBJECT_CC,
         LOCALE_OBJECT,
         LOCALS,
+        MACRO_CALLER_TEMPLATE_NAME_CC,
+        MACRO_CALLER_TEMPLATE_NAME,
         MAIN,
         MAIN_TEMPLATE_NAME_CC,
         MAIN_TEMPLATE_NAME,
@@ -247,6 +251,16 @@ final class BuiltinVariable extends Expression {
         }
         if (name == GET_OPTIONAL_TEMPLATE_CC) {
             return GetOptionalTemplateMethod.INSTANCE_CC;
+        }
+        if (name == MACRO_CALLER_TEMPLATE_NAME || name == MACRO_CALLER_TEMPLATE_NAME_CC) {
+            UnifiedCall caller;
+            try {
+                caller = env.getMacroCaller();
+            } catch (IllegalStateException e) {
+                throw new TemplateException("Failed to resolve ." + name + ": " + e.getMessage(), e, env);
+            }
+            String name = caller.getTemplate().getName();
+            return name != null ? new SimpleScalar(name) : SimpleScalar.EMPTY_STRING;
         }
         
         throw new _MiscTemplateException(this,

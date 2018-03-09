@@ -863,7 +863,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *           argument list contains {@code .current_template_name}, now it will correctly evaluate to the template
      *           that contains the call, rather than to the template that contains the macro or function definition.
      *           (Of course, the parameter default value expression is still evaluated in the context of the called
-     *           macro or function.) 
+     *           macro or function.) Similarly, {@code .macro_caller_template_name} (which itself was added in 2.3.28),
+     *           when used in a macro call argument, won't be incorrectly evaluated in the context of the called macro.
      *     </ul>
      *   </li>
      * </ul>

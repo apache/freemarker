@@ -23311,6 +23311,27 @@ There was no specific handler for node y
         </listitem>
 
         <listitem>
+          <para><indexterm>
+              <primary>macro_caller_template_name</primary>
+            </indexterm><literal>macro_caller_template_name</literal>: Returns
+          the name (path) of the template from which the current macro was
+          called. It's mostly useful if you want to resolve paths relative to
+          the caller template. If the caller template is nameless, this will
+          be an empty string (not a missing value). Reading this variable will
+          cause error if you aren't inside a macro call, also if you are
+          inside an user-defined directive call
+          (<literal>&lt;@<replaceable>...</replaceable>&gt;</literal>) that's
+          nested inside the <literal>macro</literal> directive (as in
+          <literal>&lt;#macro
+          m&gt;&lt;@x&gt;${.macro_caller_template_name}&lt;#-- FAILS!
+          --&gt;&lt;/@&gt;&lt;/#macro&gt;</literal>). (Note that if <link
+          linkend="pgui_config_incompatible_improvements">incompatible
+          improvements</link> is set to less than 2.3.28, then when using this
+          variable in an argument to a macro, it will be incorrectly evaluated
+          to the caller of the called macro.)</para>
+        </listitem>
+
+        <listitem>
           <para><literal>main</literal>: A hash that you can use to access the
           main <link linkend="dgui_misc_namespace">namespace</link>. Note that
           global variables like the variables of data-model are
@@ -27266,6 +27287,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               some special way. <link
               linkend="ref_specvar_get_optional_template">See the details
               here...</link></para>
+            </listitem>
+
+            <listitem>
+              <para>Added new <link linkend="ref_specvar">special
+              variable</link>, <literal>macro_caller_template_name</literal>
+              (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-83">FREEMARKER-83</link>),
+              which returns the name (path) of the template from which the
+              current macro was called. It's mostly useful if you want to
+              resolve paths relative to the caller template.</para>
             </listitem>
 
             <listitem>
