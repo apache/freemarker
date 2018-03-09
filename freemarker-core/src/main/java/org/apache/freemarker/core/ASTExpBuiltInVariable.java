@@ -23,9 +23,11 @@ import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.Set;
 
+import org.apache.freemarker.core.ASTDirMacroOrFunction.Context;
 import org.apache.freemarker.core.model.TemplateDateModel;
 import org.apache.freemarker.core.model.TemplateHashModel;
 import org.apache.freemarker.core.model.TemplateModel;
+import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.SimpleDate;
 import org.apache.freemarker.core.model.impl.SimpleString;
 import org.apache.freemarker.core.util._SortedArraySet;
@@ -58,6 +60,7 @@ final class ASTExpBuiltInVariable extends ASTExpression {
     static final String URL_ESCAPING_CHARSET = "urlEscapingCharset";
     static final String NOW = "now";
     static final String GET_OPTIONAL_TEMPLATE = "getOptionalTemplate";
+    static final String MACRO_CALLER_TEMPLATE_NAME = "macroCallerTemplateName";    
     
     static final Set<String> BUILT_IN_VARIABLE_NAMES = new _SortedArraySet<>(
         // Must be sorted alphabetically!
@@ -72,6 +75,7 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         LOCALE,
         LOCALE_OBJECT,
         LOCALS,
+        MACRO_CALLER_TEMPLATE_NAME,
         MAIN,
         MAIN_TEMPLATE_NAME,
         NAMESPACE,
@@ -199,6 +203,15 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         if (name == GET_OPTIONAL_TEMPLATE) {
             return GetOptionalTemplateFunction.INSTANCE;
         }        
+        if (name == MACRO_CALLER_TEMPLATE_NAME) {
+            Context ctx = env.getCurrentMacroContext();
+            if (ctx == null) {
+                throw new TemplateException("Can't get " + MACRO_CALLER_TEMPLATE_NAME
+                        + " here, as there's no macro caller at this point.");
+            }
+            String name = ctx.callPlace.getTemplate().getLookupName();
+            return name != null ? new SimpleString(name) : TemplateStringModel.EMPTY_STRING;
+        }
         
         throw new TemplateException(this,
                 "Invalid special variable: ", name);
