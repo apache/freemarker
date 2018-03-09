@@ -206,8 +206,9 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         if (name == MACRO_CALLER_TEMPLATE_NAME) {
             Context ctx = env.getCurrentMacroContext();
             if (ctx == null) {
-                throw new TemplateException("Can't get " + MACRO_CALLER_TEMPLATE_NAME
-                        + " here, as there's no macro caller at this point.");
+                // TODO [FM3] Adjust error message if the special variable syntax is not `.someName` anymore.
+                throw new TemplateException(
+                        "Can't get ." + MACRO_CALLER_TEMPLATE_NAME + " here, as there's no macro call in context.");
             }
             String name = ctx.callPlace.getTemplate().getLookupName();
             return name != null ? new SimpleString(name) : TemplateStringModel.EMPTY_STRING;

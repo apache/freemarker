@@ -32,15 +32,15 @@ public class MacroCallerTemplateNameTest  extends TemplateTest {
 
     @Test
     public void testNoCaller() throws Exception {
-        assertErrorContains("${.macroCallerTemplateName}", "no macro caller");
+        assertErrorContains("${.macroCallerTemplateName}", "no macro call");
 
         assertErrorContains(""
                 + "<#macro m><#nested></#macro>"
                 + "<@m>${.macroCallerTemplateName}</@>",
-                "no macro caller");
+                "no macro call");
 
         addTemplate("main.ftl", "${.macroCallerTemplateName}");
-        assertErrorContainsForNamed("main.ftl", "no macro caller");
+        assertErrorContainsForNamed("main.ftl", "no macro call");
     }
 
     @Test
