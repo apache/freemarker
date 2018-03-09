@@ -27304,6 +27304,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para><literal>DirectiveCallPlace</literal> now has a
+              <literal>Template getTemplate()</literal> method.</para>
+            </listitem>
+
+            <listitem>
               <para>Fixes in exception handling when calling JSP tags:</para>
 
               <itemizedlist>
