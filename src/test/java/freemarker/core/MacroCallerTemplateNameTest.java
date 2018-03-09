@@ -35,28 +35,31 @@ public class MacroCallerTemplateNameTest extends TemplateTest {
 
     @Test
     public void testNoCaller() throws Exception {
-        assertErrorContains("${.macroCallerTemplateName}", "no macro caller", ".macroCallerTemplateName");
-        assertErrorContains("${.macro_caller_template_name}", "no macro caller", ".macro_caller_template_name");
+        assertErrorContains("${.macroCallerTemplateName}", "no macro call", ".macroCallerTemplateName");
+        assertErrorContains("${.macro_caller_template_name}", "no macro call", ".macro_caller_template_name");
 
         assertErrorContains(""
                 + "<#macro m><#nested></#macro>"
                 + "<@m>${.macroCallerTemplateName}</@>",
-                "nested", ".macroCallerTemplateName");
+                "no macro call", ".macroCallerTemplateName");
 
-        assertErrorContains(""
+        addTemplate("main.ftl", "${.macroCallerTemplateName}");
+        assertErrorContainsForNamed("main.ftl", "no macro call");
+    }
+
+    @Test
+    public void testNested() throws Exception {
+        assertOutput(""
                 + "<#macro m><#nested></#macro>"
                 + "<#macro m2><@m>${.macroCallerTemplateName}</@></#macro>"
-                + "<@m2/>",
-                "nested", ".macroCallerTemplateName");
+                + "[<@m2/>]",
+                "[]");
         assertOutput(""
                 + "<#macro m2>${.macroCallerTemplateName}</#macro>"
                 + "[<@m2/>]",
                 "[]");
-
-        addTemplate("main.ftl", "${.macroCallerTemplateName}");
-        assertErrorContainsForNamed("main.ftl", "no macro caller");
     }
-
+    
     @Test
     public void testSameTemplateCaller() throws Exception {
         addTemplate("main.ftl", ""
@@ -127,13 +130,12 @@ public class MacroCallerTemplateNameTest extends TemplateTest {
                 + "</#macro>"
                 + "<#macro m2><@m .macroCallerTemplateName /></#macro>");
         
-        assertOutputForNamed("main.ftl", ""
-                + "x: main.ftl; y: main.ftl; caller: main.ftl;"
-                + "x: main.ftl; y: inc.ftl; caller: inc.ftl;");
-        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_27);
-        assertOutputForNamed("main.ftl", ""
-                + "x: main.ftl; y: main.ftl; caller: main.ftl;"
-                + "x: inc.ftl; y: inc.ftl; caller: inc.ftl;");
+        for (int i = 0; i < 2; i++) {
+            assertOutputForNamed("main.ftl", ""
+                    + "x: main.ftl; y: main.ftl; caller: main.ftl;"
+                    + "x: main.ftl; y: inc.ftl; caller: inc.ftl;");
+            getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_27); // Has no effect
+        }
     }
     
     @Test

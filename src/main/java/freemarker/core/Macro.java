@@ -154,17 +154,17 @@ public final class Macro extends TemplateElement implements TemplateModel {
 
     class Context implements LocalContext {
         final Environment.Namespace localVars; 
-        final TemplateElement[] nestedContentBuffer;
+        final TemplateElement callPlace;
         final Environment.Namespace nestedContentNamespace;
         final List nestedContentParameterNames;
         final LocalContextStack prevLocalContextStack;
         final Context prevMacroContext;
         
         Context(Environment env, 
-                TemplateElement[] nestedContentBuffer,
+                TemplateElement callPlace,
                 List nestedContentParameterNames) {
             this.localVars = env.new Namespace(); 
-            this.nestedContentBuffer = nestedContentBuffer;
+            this.callPlace = callPlace;
             this.nestedContentNamespace = env.getCurrentNamespace();
             this.nestedContentParameterNames = nestedContentParameterNames;
             this.prevLocalContextStack = env.getLocalContextStack();

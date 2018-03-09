@@ -281,36 +281,6 @@ public final class Environment extends Configurable {
     }
 
     /**
-     * Gets the non-{@code null} {@link UnifiedCall} of the caller of the macro whose context we are in; note
-     * that you can't call this from everywhere. Specifically, the FTL call stack must not contain {@code #nested} or a
-     * call to user-defined-directive after the stack entry of the {@code #macro} directive. This practically means that
-     * this should be called on the top-level inside {@code #macro}, or inside some core directives like {@code #if}.
-     * 
-     * @throws IllegalStateException
-     *             If there's no macro caller or it can't be figured out at this point of the template execution.
-     */
-    UnifiedCall getMacroCaller() throws IllegalStateException {
-        for (int ln = instructionStackSize - 1; ln > 0; ln--) {
-            TemplateElement te = instructionStack[ln];
-            if (te instanceof Macro) {
-                TemplateElement macroCaller = instructionStack[ln - 1];
-                if (macroCaller instanceof UnifiedCall) {
-                    return (UnifiedCall) macroCaller;
-                }
-            }
-            // Avoid returning the caller of @nested in `<#macro called><@inner>${getMacroCallerHere()}</@></#macro>`;
-            // the #macro that defines "inner" would break our logic above.
-            if (te instanceof BodyInstruction) {
-                throw new IllegalStateException(
-                        "Can't get the location of the macro caller here, because you are inside an user-defined "
-                        + "directive call that's nested inside the #macro directive. (You may "
-                        + "need to get the caller location earlier, and store it in a local variable for later use.)");
-            }
-        }
-        throw new IllegalStateException("There's no macro caller at this point.");
-    }
-
-    /**
      * Deletes cached values that meant to be valid only during a single template execution.
      */
     private void clearCachedValues() {
@@ -624,7 +594,7 @@ public final class Environment extends Configurable {
     void invokeNestedContent(BodyInstruction.Context bodyCtx) throws TemplateException, IOException {
         Macro.Context invokingMacroContext = getCurrentMacroContext();
         LocalContextStack prevLocalContextStack = localContextStack;
-        TemplateElement[] nestedContentBuffer = invokingMacroContext.nestedContentBuffer;
+        TemplateElement[] nestedContentBuffer = invokingMacroContext.callPlace.getChildBuffer();
         if (nestedContentBuffer != null) {
             this.currentMacroContext = invokingMacroContext.prevMacroContext;
             currentNamespace = invokingMacroContext.nestedContentNamespace;
@@ -765,7 +735,7 @@ public final class Environment extends Configurable {
      */
     void invoke(Macro macro,
             Map namedArgs, List positionalArgs,
-            List bodyParameterNames, TemplateElement[] childBuffer) throws TemplateException, IOException {
+            List bodyParameterNames, TemplateElement callPlace) throws TemplateException, IOException {
         if (macro == Macro.DO_NOTHING_MACRO) {
             return;
         }
@@ -780,7 +750,7 @@ public final class Environment extends Configurable {
             elementPushed = false;
         }
         try {
-            final Macro.Context macroCtx = macro.new Context(this, childBuffer, bodyParameterNames);
+            final Macro.Context macroCtx = macro.new Context(this, callPlace, bodyParameterNames);
             // Causes the evaluation of argument expressions:
             setMacroContextLocalsFromArguments(macroCtx, macro, namedArgs, positionalArgs);
             

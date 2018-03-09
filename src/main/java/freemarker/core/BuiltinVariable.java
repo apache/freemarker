@@ -22,6 +22,7 @@ package freemarker.core;
 import java.util.Arrays;
 import java.util.Date;
 
+import freemarker.core.Macro.Context;
 import freemarker.template.Configuration;
 import freemarker.template.SimpleDate;
 import freemarker.template.SimpleScalar;
@@ -30,6 +31,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateScalarModel;
 import freemarker.template._TemplateAPI;
 import freemarker.template.utility.StringUtil;
 
@@ -253,14 +255,13 @@ final class BuiltinVariable extends Expression {
             return GetOptionalTemplateMethod.INSTANCE_CC;
         }
         if (name == MACRO_CALLER_TEMPLATE_NAME || name == MACRO_CALLER_TEMPLATE_NAME_CC) {
-            UnifiedCall caller;
-            try {
-                caller = env.getMacroCaller();
-            } catch (IllegalStateException e) {
-                throw new TemplateException("Failed to resolve ." + name + ": " + e.getMessage(), e, env);
+            Context ctx = env.getCurrentMacroContext();
+            if (ctx == null) {
+                throw new TemplateException(
+                        "Can't get ." + name + " here, as there's no macro call in context.", env);
             }
-            String name = caller.getTemplate().getName();
-            return name != null ? new SimpleScalar(name) : SimpleScalar.EMPTY_STRING;
+            String name = ctx.callPlace.getTemplate().getName();
+            return name != null ? new SimpleScalar(name) : TemplateScalarModel.EMPTY_STRING;
         }
         
         throw new _MiscTemplateException(this,
