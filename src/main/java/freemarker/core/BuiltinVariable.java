@@ -22,6 +22,7 @@ package freemarker.core;
 import java.util.Arrays;
 import java.util.Date;
 
+import freemarker.core.Macro.Context;
 import freemarker.template.Configuration;
 import freemarker.template.SimpleDate;
 import freemarker.template.SimpleScalar;
@@ -30,6 +31,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateHashModel;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateScalarModel;
 import freemarker.template._TemplateAPI;
 import freemarker.template.utility.StringUtil;
 
@@ -74,6 +76,8 @@ final class BuiltinVariable extends Expression {
     static final String NOW = "now";
     static final String GET_OPTIONAL_TEMPLATE = "get_optional_template";
     static final String GET_OPTIONAL_TEMPLATE_CC = "getOptionalTemplate";
+    static final String MACRO_CALLER_TEMPLATE_NAME = "macro_caller_template_name";
+    static final String MACRO_CALLER_TEMPLATE_NAME_CC = "macroCallerTemplateName";
     static final String[] SPEC_VAR_NAMES = new String[] {
         AUTO_ESC_CC,
         AUTO_ESC,
@@ -94,6 +98,8 @@ final class BuiltinVariable extends Expression {
         LOCALE_OBJECT_CC,
         LOCALE_OBJECT,
         LOCALS,
+        MACRO_CALLER_TEMPLATE_NAME_CC,
+        MACRO_CALLER_TEMPLATE_NAME,
         MAIN,
         MAIN_TEMPLATE_NAME_CC,
         MAIN_TEMPLATE_NAME,
@@ -247,6 +253,15 @@ final class BuiltinVariable extends Expression {
         }
         if (name == GET_OPTIONAL_TEMPLATE_CC) {
             return GetOptionalTemplateMethod.INSTANCE_CC;
+        }
+        if (name == MACRO_CALLER_TEMPLATE_NAME || name == MACRO_CALLER_TEMPLATE_NAME_CC) {
+            Context ctx = env.getCurrentMacroContext();
+            if (ctx == null) {
+                throw new TemplateException(
+                        "Can't get ." + name + " here, as there's no macro call in context.", env);
+            }
+            String name = ctx.callPlace.getTemplate().getName();
+            return name != null ? new SimpleScalar(name) : TemplateScalarModel.EMPTY_STRING;
         }
         
         throw new _MiscTemplateException(this,

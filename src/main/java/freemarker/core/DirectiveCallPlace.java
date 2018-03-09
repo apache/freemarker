@@ -36,12 +36,6 @@ import freemarker.template.utility.ObjectFactory;
  * directive call is first executed, via {@link #getOrCreateCustomData(Object, ObjectFactory)}.
  * 
  * <p>
- * Currently this method doesn't give you access to the {@link Template} object, because it's probable that future
- * versions of FreeMarker will be able to use the same parsed representation of a "file" for multiple {@link Template}
- * objects. Then the call place will be bound to the parsed representation, not to the {@link Template} objects that are
- * based on it.
- * 
- * <p>
  * <b>Don't implement this interface yourself</b>, as new methods can be added to it any time! It's only meant to be
  * implemented by the FreeMarker core.
  * 
@@ -54,7 +48,15 @@ import freemarker.template.utility.ObjectFactory;
  * @since 2.3.22
  */
 public interface DirectiveCallPlace {
-
+    
+    /**
+     * The template that contains this call; {@code null} if the call is not from a template (but directly from
+     * user Java code, for example).
+     * 
+     * @since 2.3.28
+     */
+    Template getTemplate();
+    
     /**
      * The 1-based column number of the first character of the directive call in the template source code, or -1 if it's
      * not known.

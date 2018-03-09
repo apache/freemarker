@@ -110,6 +110,7 @@ public final class Environment extends Configurable {
     }
 
     private final Configuration configuration;
+    private final boolean incompatibleImprovementsGE2328;
     private final TemplateHashModel rootDataModel;
     private TemplateElement[] instructionStack = new TemplateElement[16];
     private int instructionStackSize = 0;
@@ -199,6 +200,7 @@ public final class Environment extends Configurable {
     public Environment(Template template, final TemplateHashModel rootDataModel, Writer out) {
         super(template);
         configuration = template.getConfiguration();
+        incompatibleImprovementsGE2328 = configuration.getIncompatibleImprovements().intValue() >= _TemplateAPI.VERSION_INT_2_3_28;
         this.globalNamespace = new Namespace(null);
         this.currentNamespace = mainNamespace = new Namespace(template);
         this.out = out;
@@ -229,7 +231,8 @@ public final class Environment extends Configurable {
 
     /**
      * Returns the topmost {@link Template}, with other words, the one for which this {@link Environment} was created.
-     * That template will never change, like {@code #include} or macro calls don't change it.
+     * That template will never change, like {@code #include} or macro calls don't change it. This method never returns
+     * {@code null}.
      * 
      * @see #getCurrentNamespace()
      * 
@@ -242,7 +245,9 @@ public final class Environment extends Configurable {
     /**
      * Returns the {@link Template} that we are "lexically" inside at the moment. This template will change when
      * entering an {@code #include} or calling a macro or function in another template, or returning to yet another
-     * template with {@code #nested}.
+     * template with {@code #nested}. When you are calling a directive that's implemented in Java or a Java method
+     * from a template, the current template will be the last current template, not {@code null}. This method never
+     * returns {@code null}.  
      * 
      * @see #getMainTemplate()
      * @see #getCurrentNamespace()
@@ -589,7 +594,7 @@ public final class Environment extends Configurable {
     void invokeNestedContent(BodyInstruction.Context bodyCtx) throws TemplateException, IOException {
         Macro.Context invokingMacroContext = getCurrentMacroContext();
         LocalContextStack prevLocalContextStack = localContextStack;
-        TemplateElement[] nestedContentBuffer = invokingMacroContext.nestedContentBuffer;
+        TemplateElement[] nestedContentBuffer = invokingMacroContext.callPlace.getChildBuffer();
         if (nestedContentBuffer != null) {
             this.currentMacroContext = invokingMacroContext.prevMacroContext;
             currentNamespace = invokingMacroContext.nestedContentNamespace;
@@ -730,15 +735,29 @@ public final class Environment extends Configurable {
      */
     void invoke(Macro macro,
             Map namedArgs, List positionalArgs,
-            List bodyParameterNames, TemplateElement[] childBuffer) throws TemplateException, IOException {
+            List bodyParameterNames, TemplateElement callPlace) throws TemplateException, IOException {
         if (macro == Macro.DO_NOTHING_MACRO) {
             return;
         }
 
-        pushElement(macro);
+        boolean elementPushed;
+        if (!incompatibleImprovementsGE2328) {
+            // Doing this so early is wrong, as now the arguments will be evaluated while the called macro/function is
+            // in the element stack. Thus .current_template_name will be wrong for example.
+            pushElement(macro);
+            elementPushed = true;
+        } else {
+            elementPushed = false;
+        }
         try {
-            final Macro.Context macroCtx = macro.new Context(this, childBuffer, bodyParameterNames);
+            final Macro.Context macroCtx = macro.new Context(this, callPlace, bodyParameterNames);
+            // Causes the evaluation of argument expressions:
             setMacroContextLocalsFromArguments(macroCtx, macro, namedArgs, positionalArgs);
+            
+            if (!elementPushed) { // When incompatibleImprovements >= 2.3.28
+                pushElement(macro);
+                elementPushed = true;
+            }
 
             final Macro.Context prevMacroCtx = currentMacroContext;
             currentMacroContext = macroCtx;
@@ -762,7 +781,9 @@ public final class Environment extends Configurable {
                 currentNamespace = prevNamespace;
             }
         } finally {
-            popElement();
+            if (elementPushed) {
+                popElement();
+            }
         }
     }
 

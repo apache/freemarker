@@ -80,7 +80,7 @@ final class UnifiedCall extends TemplateElement implements DirectiveCallPlace {
                         + "Functions can only be called from expressions, like in ${f()}, ${x + f()} or ",
                         "<@someDirective someParam=f() />", ".");
             }    
-            env.invoke(macro, namedArgs, positionalArgs, bodyParameterNames, getChildBuffer());
+            env.invoke(macro, namedArgs, positionalArgs, bodyParameterNames, this);
         } else {
             boolean isDirectiveModel = tm instanceof TemplateDirectiveModel; 
             if (isDirectiveModel || tm instanceof TemplateTransformModel) {

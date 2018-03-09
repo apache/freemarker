@@ -417,6 +417,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
 
     /** FreeMarker version 2.3.27 (an {@link #Configuration(Version) incompatible improvements break-point}) */
     public static final Version VERSION_2_3_27 = new Version(2, 3, 27);
+
+    /** FreeMarker version 2.3.28 (an {@link #Configuration(Version) incompatible improvements break-point}) */
+    public static final Version VERSION_2_3_28 = new Version(2, 3, 28);
     
     /** The default of {@link #getIncompatibleImprovements()}, currently {@link #VERSION_2_3_0}. */
     public static final Version DEFAULT_INCOMPATIBLE_IMPROVEMENTS = Configuration.VERSION_2_3_0;
@@ -851,6 +854,17 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *          transformed block. It's very unlikely that user code is affected by this, partially because these aren't
      *          commonly implemented interfaces (especially not {@link TransformControl}), and because it's unlikely
      *          that templates utilize the the bug that's not fixed.
+     *     </ul>
+     *   </li>
+     *   <li><p>
+     *     2.3.28 (or higher):
+     *     <ul>
+     *       <li><p>When calling a macro or function (things defined in a template, not directly in Java) and the
+     *           argument list contains {@code .current_template_name}, now it will correctly evaluate to the template
+     *           that contains the call, rather than to the template that contains the macro or function definition.
+     *           (Of course, the parameter default value expression is still evaluated in the context of the called
+     *           macro or function.) Similarly, {@code .macro_caller_template_name} (which itself was added in 2.3.28),
+     *           when used in a macro call argument, won't be incorrectly evaluated in the context of the called macro.
      *     </ul>
      *   </li>
      * </ul>

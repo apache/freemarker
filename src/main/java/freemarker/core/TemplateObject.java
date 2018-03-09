@@ -165,10 +165,6 @@ public abstract class TemplateObject {
         return true;
     }
 
-    /**
-     * @deprecated This method will be removed in FreeMarker 2.4 because of architectural changes!
-     */
-    @Deprecated
     public Template getTemplate() {
         return template;
     }

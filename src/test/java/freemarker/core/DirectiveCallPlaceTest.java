@@ -198,7 +198,7 @@ public class DirectiveCallPlaceTest extends TemplateTest {
             Writer out = env.getOut();
             DirectiveCallPlace callPlace = env.getCurrentDirectiveCallPlace();
             out.write("[");
-            out.write(getTemplateSourceName(callPlace));
+            out.write(callPlace.getTemplate().getSourceName());
             out.write(":");
             out.write(Integer.toString(callPlace.getBeginLine()));
             out.write(":");
@@ -213,10 +213,6 @@ public class DirectiveCallPlaceTest extends TemplateTest {
             }
         }
 
-        private String getTemplateSourceName(DirectiveCallPlace callPlace) {
-            return ((UnifiedCall) callPlace).getTemplate().getSourceName();
-        }
-        
     }
 
     private static class ArgPrinterDirective implements TemplateDirectiveModel {
