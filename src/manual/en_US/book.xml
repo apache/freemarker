@@ -23212,6 +23212,28 @@ There was no specific handler for node y
 
         <listitem>
           <para><indexterm>
+              <primary>caller_template_name</primary>
+            </indexterm><literal>caller_template_name</literal> (available
+          since FreeMarker 2.3.28): Returns the name (path) of the template
+          from which the current <link
+          linkend="ref.directive.macro">macro</link> or <link
+          linkend="ref.directive.function">function</link> was called. It's
+          mostly useful if you want to resolve paths relative to the caller
+          template. To serve that purpose better, if the caller template is
+          nameless, this will be an empty string (not a missing value).
+          Reading this variable will cause error if you aren't inside a macro
+          or function call. In particular, directives and
+          <quote>methods</quote> implemented in Java will not influence the
+          value of this variable; it's only for macros and functions
+          implemented in templates. (<phrase
+          role="forProgrammers"><literal>TemplateDirectiveModel</literal>
+          implementations can get similar information via the
+          <literal>freemarker.core.DirectiveCallPlace</literal>
+          object.</phrase>)</para>
+        </listitem>
+
+        <listitem>
+          <para><indexterm>
               <primary>current_template_name</primary>
             </indexterm><literal>current_template_name</literal>: The name of
           the template where we are now (available since FreeMarker 2.3.23).
@@ -23308,18 +23330,6 @@ There was no specific handler for node y
           the local variables (the variables created with the
           <literal>local</literal> directive, and the parameters of
           macro).</para>
-        </listitem>
-
-        <listitem>
-          <para><indexterm>
-              <primary>macro_caller_template_name</primary>
-            </indexterm><literal>macro_caller_template_name</literal>: Returns
-          the name (path) of the template from which the current macro was
-          called. It's mostly useful if you want to resolve paths relative to
-          the caller template. To serve that purpose better, if the caller
-          template is nameless, this will be an empty string (not a missing
-          value). Reading this variable will cause error if you aren't inside
-          a macro call.</para>
         </listitem>
 
         <listitem>
@@ -27282,12 +27292,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>Added new <link linkend="ref_specvar">special
-              variable</link>, <literal>macro_caller_template_name</literal>
-              (<link
+              variable</link>, <literal>caller_template_name</literal> (<link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-83">FREEMARKER-83</link>),
               which returns the name (path) of the template from which the
-              current macro was called. It's mostly useful if you want to
-              resolve paths relative to the caller template.</para>
+              current macro or function was called. It's mostly useful if you
+              want to resolve paths relative to the caller template.</para>
             </listitem>
 
             <listitem>

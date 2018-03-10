@@ -73,7 +73,7 @@ final class MethodCall extends Expression {
             Writer prevOut = env.getOut();
             try {
                 env.setOut(NullWriter.INSTANCE);
-                env.invoke(func, null, arguments.items, null, null);
+                env.invoke(func, null, arguments.items, null, this);
             } catch (IOException e) {
                 // Should not occur
                 throw new TemplateException("Unexpected exception during function execution", e, env);

@@ -76,11 +76,14 @@ final class BuiltinVariable extends Expression {
     static final String NOW = "now";
     static final String GET_OPTIONAL_TEMPLATE = "get_optional_template";
     static final String GET_OPTIONAL_TEMPLATE_CC = "getOptionalTemplate";
-    static final String MACRO_CALLER_TEMPLATE_NAME = "macro_caller_template_name";
-    static final String MACRO_CALLER_TEMPLATE_NAME_CC = "macroCallerTemplateName";
+    static final String CALLER_TEMPLATE_NAME = "caller_template_name";
+    static final String CALLER_TEMPLATE_NAME_CC = "callerTemplateName";
     static final String[] SPEC_VAR_NAMES = new String[] {
+        // IMPORTANT! Keep this sorted alphabetically!
         AUTO_ESC_CC,
         AUTO_ESC,
+        CALLER_TEMPLATE_NAME_CC,
+        CALLER_TEMPLATE_NAME,
         CURRENT_NODE_CC,
         CURRENT_TEMPLATE_NAME_CC,
         CURRENT_NODE,
@@ -98,8 +101,6 @@ final class BuiltinVariable extends Expression {
         LOCALE_OBJECT_CC,
         LOCALE_OBJECT,
         LOCALS,
-        MACRO_CALLER_TEMPLATE_NAME_CC,
-        MACRO_CALLER_TEMPLATE_NAME,
         MAIN,
         MAIN_TEMPLATE_NAME_CC,
         MAIN_TEMPLATE_NAME,
@@ -254,13 +255,14 @@ final class BuiltinVariable extends Expression {
         if (name == GET_OPTIONAL_TEMPLATE_CC) {
             return GetOptionalTemplateMethod.INSTANCE_CC;
         }
-        if (name == MACRO_CALLER_TEMPLATE_NAME || name == MACRO_CALLER_TEMPLATE_NAME_CC) {
+        if (name == CALLER_TEMPLATE_NAME || name == CALLER_TEMPLATE_NAME_CC) {
             Context ctx = env.getCurrentMacroContext();
             if (ctx == null) {
                 throw new TemplateException(
-                        "Can't get ." + name + " here, as there's no macro call in context.", env);
+                        "Can't get ." + name + " here, as there's no macro or function (that's "
+                        + "implemented in the template) call in context.", env);
             }
-            TemplateElement callPlace = ctx.callPlace;
+            TemplateObject callPlace = ctx.callPlace;
             String name = callPlace != null ? callPlace.getTemplate().getName() : null;
             return name != null ? new SimpleScalar(name) : TemplateScalarModel.EMPTY_STRING;
         }
