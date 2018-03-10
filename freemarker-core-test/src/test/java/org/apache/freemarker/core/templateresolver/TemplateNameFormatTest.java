@@ -198,9 +198,22 @@ public class TemplateNameFormatTest {
         assertNormRBNameThrowsColonException("a/b:c/d", tnf);
         assertNormRBNameThrowsColonException("a/b:/..", tnf);
     }
+
+    @Test
+    public void testRootBasedNameToAbsoluteName() throws MalformedTemplateNameException {
+        final TemplateNameFormat tnf = DefaultTemplateNameFormat.INSTANCE;
+        
+        assertEquals("/foo/bar", tnf.rootBasedNameToAbsoluteName("foo/bar"));
+        assertEquals("scheme://foo/bar", tnf.rootBasedNameToAbsoluteName("scheme://foo/bar"));
+        assertEquals("/foo/bar", tnf.rootBasedNameToAbsoluteName("/foo/bar"));
+        // Lenient handling of malformed rootBasedName:
+        assertEquals("/a/b://c/d", tnf.rootBasedNameToAbsoluteName("a/b://c/d"));
+        assertEquals("b:/c/d", tnf.rootBasedNameToAbsoluteName("b:/c/d"));
+        assertEquals("b:c/d", tnf.rootBasedNameToAbsoluteName("b:c/d"));
+    }    
     
     @Test
-    public void assertBackslashNotAllowed() throws IOException {
+    public void testBackslashNotAllowed() throws IOException {
         Configuration cfg = new TestConfigurationBuilder()
                 .templateLoader(new ByteArrayTemplateLoader())
                 .templateNameFormat(DefaultTemplateNameFormat.INSTANCE)

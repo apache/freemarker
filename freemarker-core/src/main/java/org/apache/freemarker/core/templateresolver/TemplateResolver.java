@@ -199,12 +199,22 @@ public abstract class TemplateResolver {
      * returned), for example, "/foo.ftl" becomes to "foo.ftl".
      * 
      * @param name
-     *            The root based name. Not {@code null}.
+     *            The root based name (a name that's either absolute or relative to the root). Not {@code null}.
      * 
      * @return The normalized root based name. Not {@code null}.
      */
     public abstract String normalizeRootBasedName(String name) throws MalformedTemplateNameException;
 
+    /**
+     * Converts a root based name to an absolute name, which is useful if you need to pass a name to something that
+     * doesn't necessary resolve relative paths relative to the root (like the {@code #include} directive).
+     * 
+     * @param name
+     *            The root based name (a name that's either absolute or relative to the root). Not {@code null}.
+     */
+    // TODO [FM3] This is the kind of complication why normalized template names should just be absolute paths. 
+    public abstract String rootBasedNameToAbsoluteName(String name) throws MalformedTemplateNameException;
+    
     /**
      * Tells whether the {@link TemplateResolver} implementation depends on the
      * {@link Configuration#getTemplateLoader() templateLoader} {@link Configuration}. If it returns {@code false}

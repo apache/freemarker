@@ -242,7 +242,7 @@ public abstract class TemplateTest {
             throw new IllegalStateException("The templateLoader was null in the configuration");
         } else {
             throw new IllegalStateException(
-                    "The template loader was already set to a non-ByteArrayTemplateLoader non-MultiTemplateLoader: "
+                    "The template loader was set to a non-ByteArrayTemplateLoader non-MultiTemplateLoader: "
                             + tl);
         }
     }

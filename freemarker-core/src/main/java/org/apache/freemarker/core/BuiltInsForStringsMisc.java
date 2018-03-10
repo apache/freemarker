@@ -34,6 +34,9 @@ import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.BeanModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
+import org.apache.freemarker.core.model.impl.SimpleString;
+import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
+import org.apache.freemarker.core.util.CallableUtils;
 
 class BuiltInsForStringsMisc {
 
@@ -301,6 +304,55 @@ class BuiltInsForStringsMisc {
             }
 
         }
+    }
+
+    static class absolute_template_nameBI extends BuiltInForString {
+        @Override
+        TemplateModel calculateResult(String s, Environment env)  throws TemplateException {
+            return new AbsoluteTemplateNameResult(s, env);
+        }
+        
+        private class AbsoluteTemplateNameResult implements TemplateStringModel, TemplateFunctionModel {
+            private final String pathToResolve;
+            private final Environment env;
+
+            public AbsoluteTemplateNameResult(String pathToResolve, Environment env) {
+                this.pathToResolve = pathToResolve;
+                this.env = env;
+            }
+
+            @Override
+            public TemplateModel execute(TemplateModel[] args, CallPlace callPlace, Environment env)
+                    throws TemplateException {
+                return new SimpleString(resolvePath(CallableUtils.getStringArgument(args, 0, this)));
+            }
+
+            @Override
+            public ArgumentArrayLayout getFunctionArgumentArrayLayout() {
+                return ArgumentArrayLayout.SINGLE_POSITIONAL_PARAMETER;
+            }
+
+            @Override
+            public String getAsString() throws TemplateException {
+                return resolvePath(getTemplate().getLookupName());
+            }
+
+            /**
+             * @param basePath Maybe {@code null}
+             */
+            private String resolvePath(String basePath) throws TemplateException {
+                try {
+                    return env.rootBasedToAbsoluteTemplateName(env.toFullTemplateName(basePath, pathToResolve));
+                } catch (MalformedTemplateNameException e) {
+                    throw new TemplateException(e,
+                            "Can't resolve ", new _DelayedJQuote(pathToResolve),
+                            "to absolute template name using base ", new _DelayedJQuote(basePath),
+                            "; see cause exception");
+                }
+            }
+            
+        }
+        
     }
     
 }

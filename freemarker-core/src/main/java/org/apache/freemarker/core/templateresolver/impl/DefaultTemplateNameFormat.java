@@ -39,8 +39,8 @@ import org.apache.freemarker.core.util._StringUtils;
  * "example.com/foo.ftl"). The scheme name before the {@code ":"} (colon) can't contain {@code "/"}, and {@code ":"}
  * can only be used for denoting the scheme, or else {@link MalformedTemplateNameException} is thrown.
  * The scheme part can be separated either with {@code "://"} or just with {@code ":"} from the path, hence, {@code
- * myschme:/x} is normalized to {@code myschme:x}, while {@code myschme:///x} is normalized to {@code myschme://x},
- * but {@code myschme://x} or {@code myschme:/x} aren't changed by normalization. It's up the {@link TemplateLoader}
+ * myscheme:/x} is normalized to {@code myscheme:x}, while {@code myscheme:///x} is normalized to {@code myscheme://x},
+ * but {@code myscheme://x} or {@code myscheme:/x} aren't changed by normalization. It's up the {@link TemplateLoader}
  * (to which the normalized names are passed) to decide which of these scheme separation conventions are accepted.
  * <p>
  * Template names might end with {@code /}, like {@code "foo/"}, and the presence or lack of the terminating {@code
@@ -130,6 +130,17 @@ public final class DefaultTemplateNameFormat extends TemplateNameFormat {
         path = removeRedundantStarSteps(path);
         
         return scheme == null ? path : scheme + path;
+    }
+    
+    @Override
+    public String rootBasedNameToAbsoluteName(String name) throws MalformedTemplateNameException {
+        if (findSchemeSectionEnd(name) != 0) {
+            return name;
+        }
+        if (!name.startsWith("/")) {
+            return "/" + name;
+        }
+        return name;
     }
 
     private int findSchemeSectionEnd(String name) {

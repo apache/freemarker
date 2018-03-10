@@ -189,6 +189,11 @@ public class DefaultTemplateResolver extends TemplateResolver {
     }
 
     @Override
+    public String rootBasedNameToAbsoluteName(String name) throws MalformedTemplateNameException {
+        return templateNameFormat.rootBasedNameToAbsoluteName(name);
+    }
+
+    @Override
     public boolean supportsTemplateLoaderSetting() {
         return true;
     }

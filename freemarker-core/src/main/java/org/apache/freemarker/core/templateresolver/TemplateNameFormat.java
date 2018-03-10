@@ -39,6 +39,11 @@ public abstract class TemplateNameFormat {
      */
     public abstract String normalizeRootBasedName(String name) throws MalformedTemplateNameException;
 
+    /**
+     * Implements {@link TemplateResolver#rootBasedNameToAbsoluteName(String)}; see more there.
+     */
+    public abstract String rootBasedNameToAbsoluteName(String name) throws MalformedTemplateNameException;
+    
     protected void checkNameHasNoNullCharacter(final String name) throws MalformedTemplateNameException {
         if (name.indexOf(0) != -1) {
             throw new MalformedTemplateNameException(name,

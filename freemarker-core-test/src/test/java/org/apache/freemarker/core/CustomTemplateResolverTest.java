@@ -351,6 +351,11 @@ public class CustomTemplateResolverTest {
         }
 
         @Override
+        public String rootBasedNameToAbsoluteName(String name) throws MalformedTemplateNameException {
+            return name.startsWith(":") ? name : ":" + name;
+        }
+
+        @Override
         public boolean supportsTemplateLoaderSetting() {
             return TEMPLATE_LOADER_KEY.equals(supportedSetting);
         }
