@@ -60,11 +60,12 @@ final class ASTExpBuiltInVariable extends ASTExpression {
     static final String URL_ESCAPING_CHARSET = "urlEscapingCharset";
     static final String NOW = "now";
     static final String GET_OPTIONAL_TEMPLATE = "getOptionalTemplate";
-    static final String MACRO_CALLER_TEMPLATE_NAME = "macroCallerTemplateName";    
+    static final String CALLER_TEMPLATE_NAME = "callerTemplateName";    
     
     static final Set<String> BUILT_IN_VARIABLE_NAMES = new _SortedArraySet<>(
-        // Must be sorted alphabetically!
+        // IMPORTANT! Keep this sorted alphabetically!
         AUTO_ESC,
+        CALLER_TEMPLATE_NAME,
         CURRENT_TEMPLATE_NAME,
         DATA_MODEL,
         ERROR,
@@ -75,7 +76,6 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         LOCALE,
         LOCALE_OBJECT,
         LOCALS,
-        MACRO_CALLER_TEMPLATE_NAME,
         MAIN,
         MAIN_TEMPLATE_NAME,
         NAMESPACE,
@@ -203,12 +203,13 @@ final class ASTExpBuiltInVariable extends ASTExpression {
         if (name == GET_OPTIONAL_TEMPLATE) {
             return GetOptionalTemplateFunction.INSTANCE;
         }        
-        if (name == MACRO_CALLER_TEMPLATE_NAME) {
+        if (name == CALLER_TEMPLATE_NAME) {
             Context ctx = env.getCurrentMacroContext();
             if (ctx == null) {
                 // TODO [FM3] Adjust error message if the special variable syntax is not `.someName` anymore.
                 throw new TemplateException(
-                        "Can't get ." + MACRO_CALLER_TEMPLATE_NAME + " here, as there's no macro call in context.");
+                        "Can't get ." + CALLER_TEMPLATE_NAME + " here, as there's no macro or function (that's "
+                        + "implemented in the template) call in context.");
             }
             String name = ctx.callPlace.getTemplate().getLookupName();
             return name != null ? new SimpleString(name) : TemplateStringModel.EMPTY_STRING;
