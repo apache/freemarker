@@ -41,5 +41,10 @@ public final class _CacheAPI {
             throws MalformedTemplateNameException {
         return templateNameFormat.normalizeRootBasedName(name);
     }
+
+    public static String rootBasedNameToAbsoluteName(TemplateNameFormat templateNameFormat, String rootBasedName)
+            throws MalformedTemplateNameException {
+        return templateNameFormat.rootBasedNameToAbsoluteName(rootBasedName);
+    }
     
 }

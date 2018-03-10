@@ -223,7 +223,26 @@ public class TemplateNameFormatTest {
     }
     
     @Test
-    public void assertBackslashNotSpecialWith23() throws MalformedTemplateNameException, ParseException, IOException {
+    public void testRootBasedNameToAbsoluteName() throws MalformedTemplateNameException {
+        for (TemplateNameFormat tnf : new TemplateNameFormat[] {
+                TemplateNameFormat.DEFAULT_2_3_0, TemplateNameFormat.DEFAULT_2_4_0 }) {
+            assertEquals("/foo/bar", tnf.rootBasedNameToAbsoluteName("foo/bar"));
+            assertEquals("scheme://foo/bar", tnf.rootBasedNameToAbsoluteName("scheme://foo/bar"));
+            assertEquals("/foo/bar", tnf.rootBasedNameToAbsoluteName("/foo/bar"));
+        }
+        
+        assertEquals("a/b://c/d", TemplateNameFormat.DEFAULT_2_3_0.rootBasedNameToAbsoluteName("a/b://c/d"));
+        // Lenient handling of malformed rootBasedName:
+        assertEquals("/a/b://c/d", TemplateNameFormat.DEFAULT_2_4_0.rootBasedNameToAbsoluteName("a/b://c/d"));
+        
+        assertEquals("/b:/c/d", TemplateNameFormat.DEFAULT_2_3_0.rootBasedNameToAbsoluteName("b:/c/d"));
+        assertEquals("b:/c/d", TemplateNameFormat.DEFAULT_2_4_0.rootBasedNameToAbsoluteName("b:/c/d"));
+        assertEquals("/b:c/d", TemplateNameFormat.DEFAULT_2_3_0.rootBasedNameToAbsoluteName("b:c/d"));
+        assertEquals("b:c/d", TemplateNameFormat.DEFAULT_2_4_0.rootBasedNameToAbsoluteName("b:c/d"));
+    }
+    
+    @Test
+    public void testBackslashNotSpecialWith23() throws MalformedTemplateNameException, ParseException, IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_22);
 
         MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
@@ -273,7 +292,7 @@ public class TemplateNameFormatTest {
     }
 
     @Test
-    public void assertBackslashNotAllowedWith24() throws MalformedTemplateNameException, ParseException, IOException {
+    public void testBackslashNotAllowedWith24() throws MalformedTemplateNameException, ParseException, IOException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
         cfg.setTemplateNameFormat(TemplateNameFormat.DEFAULT_2_4_0);
         try {

@@ -2739,9 +2739,12 @@ public final class Environment extends Configurable {
 
     /**
      * Resolves a reference to a template (like the one used in {@code #include} or {@code #import}), assuming a base
-     * name. This gives a full (that is, absolute), even if non-normalized template name, that could be used for
-     * {@link Configuration#getTemplate(String)}. This is mostly used when a 
+     * name. This gives a root based, even if non-normalized and possibly non-absolute (but then relative to the root)
+     * template name, that could be used for {@link Configuration#getTemplate(String)}. This is mostly used when a
      * template refers to another template.
+     * <p>
+     * If you need to guarantee that the result is also an absolute path, then apply
+     * {@link #rootBasedToAbsoluteTemplateName(String)} on it.
      * 
      * @param baseName
      *            The name to which relative {@code targetName}-s are relative to. Maybe {@code null} (happens when
@@ -2770,6 +2773,25 @@ public final class Environment extends Configurable {
         }
 
         return _CacheAPI.toRootBasedName(configuration.getTemplateNameFormat(), baseName, targetName);
+    }
+
+    /**
+     * Converts a root based name (a name that's either relative to the root, or is absolute), which are typically used
+     * by the API (such as for {@link Configuration#getTemplate(String)}), to an absolute name, which can be safely
+     * passed to {@code <#include path>} and such, as it won't be misinterpreted to be relative to the directory of the
+     * template. For example, {@code "foo/bar.ftl"} is converted to {@code "/foo/bar.ftl"}, while {@code "/foo/bar"} or
+     * {@code "foo://bar/baz"} remains as is, as they are already absolute names (see {@link TemplateNameFormat} for
+     * more about the format of names).
+     * 
+     * <p>
+     * You only need this if the template name will be passed to {@code <#include name>}, {@code <#import name>},
+     * {@code .get_optional_template(name)} or a similar construct in a template, otherwise using non-absolute root
+     * based names is fine.
+     * 
+     * @since 2.3.28
+     */
+    public String rootBasedToAbsoluteTemplateName(String rootBasedName) throws MalformedTemplateNameException {
+        return _CacheAPI.rootBasedNameToAbsoluteName(configuration.getTemplateNameFormat(), rootBasedName);
     }
 
     String renderElementToString(TemplateElement te) throws IOException, TemplateException {
