@@ -12450,6 +12450,11 @@ grant codeBase "file:/path/to/freemarker.jar"
 
           <listitem>
             <para><link
+            linkend="ref_builtin_absolute_template_name">absolute_template_name</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link
             linkend="ref_builtin_ancestors">ancestors</link></para>
           </listitem>
 
@@ -17831,6 +17836,64 @@ Sorted by name.last:
         exceptional situations (debugging, advanced macros) they can be
         useful. If you need to use these in your normal page templates, you
         may revisit the data-model so you don't need to use these.</para>
+
+        <section xml:id="ref_builtin_absolute_template_name">
+          <title>absolute_template_name</title>
+
+          <indexterm>
+            <primary>absolute_template_name built-in</primary>
+          </indexterm>
+
+          <para>Converts a template name to an absolute name, which can be
+          safely passed to <literal>&lt;#include
+          <replaceable>name</replaceable>&gt;</literal> or
+          <literal>&lt;#import <replaceable>name</replaceable> as
+          <replaceable>ns</replaceable>&gt;</literal> or
+          <literal>.get_optional_template(<replaceable>name</replaceable>)</literal>
+          and such in <emphasis>another</emphasis> template, as it won't be
+          misinterpreted to be relative to the directory of the template that
+          contains the <literal>include</literal>, <literal>import</literal>,
+          etc. For example, if you are in template
+          <literal>"dir/here.ftl"</literal>, then
+          <literal>"target.ftl"</literal> is converted to
+          <literal>"/dir/target.ftl"</literal> (note the initial
+          <literal>/</literal>). If now you pass this value to a template in
+          <literal>"other-dir/there.ftl"</literal>, where it's passed to the
+          <literal>include</literal> directive, then it won't be
+          misinterpreted as <literal>"other-dir/target.ftl"</literal>, like
+          <literal>"target.ftl"</literal> would have been.</para>
+
+          <para>Optionally, you can specify a root based name (a name that's
+          either relative to the template root directory, or is absolute) that
+          will be used instead of the name of the current template, like
+          <literal><replaceable>pathToConver</replaceable>?absolute_template_name(<replaceable>otherTemplateName</replaceable>)</literal>.</para>
+
+          <para>Example of an application (also uses <link
+          linkend="ref_specvar_caller_template_name"><literal>.caller_template_name</literal></link>
+          and <link
+          linkend="ref_specvar_get_optional_template"><literal>.get_optional_template</literal></link>):</para>
+
+          <programlisting role="template">&lt;#--
+  &lt;@smileyInclude name /&gt; behaves like &lt;#include name&gt;, but prints a "(:" before the
+  template, or prints "):" instead if the template is missing.
+
+  Note that just like with #include, if name is relative, it's resolved based on the
+  directory of the caller template, not of the template that defines this macro. As
+  .get_optional_template resolves relative names based on the current template, we
+  had to convert the name to an absolute name based on the caller template before
+  passing it to it.
+--&gt;
+&lt;#macro smileyInclude name&gt;
+  &lt;#local t = .get_optional_template(
+      name<emphasis>?absolute_template_name</emphasis>(.caller_template_name))&gt;
+  &lt;#if t.exists&gt;
+    (:
+    &lt;@t.include /&gt;
+  &lt;#else&gt;
+    ):
+  &lt;/#if&gt;
+&lt;/#macro&gt;</programlisting>
+        </section>
 
         <section xml:id="ref_buitin_api_and_has_api">
           <title>api, has_api</title>
@@ -23219,10 +23282,11 @@ There was no specific handler for node y
           linkend="ref.directive.macro">macro</link> or <link
           linkend="ref.directive.function">function</link> was called. It's
           mostly useful if you want to resolve paths relative to the caller
-          template. To serve that purpose better, if the caller template is
-          nameless, this will be an empty string (not a missing value).
-          Reading this variable will cause error if you aren't inside a macro
-          or function call. In particular, directives and
+          template (<link linkend="ref_builtin_absolute_template_name">see an
+          example here</link>). To serve that purpose better, if the caller
+          template is nameless, this will be an empty string (not a missing
+          value). Reading this variable will cause error if you aren't inside
+          a macro or function call. In particular, directives and
           <quote>methods</quote> implemented in Java will not influence the
           value of this variable; it's only for macros and functions
           implemented in templates. (<phrase
@@ -23232,7 +23296,7 @@ There was no specific handler for node y
           object.</phrase>)</para>
         </listitem>
 
-        <listitem>
+        <listitem xml:id="ref_specvar_caller_template_name">
           <para><indexterm>
               <primary>current_template_name</primary>
             </indexterm><literal>current_template_name</literal>: The name of
@@ -27300,6 +27364,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added new built-in,
+              <literal><replaceable>templateName</replaceable>?absolute_template_name</literal>
+              or
+              <literal><replaceable>templateName</replaceable>?absolute_template_name(<replaceable>baseName</replaceable>)</literal>,
+              which can be used to convert a relative template name to an
+              absolute template name. <link
+              linkend="ref_builtin_absolute_template_name">See more
+              here...</link></para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed (<link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-83">FREEMARKER-83</link>);
               this fix is only active when <link
@@ -27336,7 +27411,24 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para><literal>DirectiveCallPlace</literal> now has a
-              <literal>Template getTemplate()</literal> method.</para>
+              <literal>Template getTemplate()</literal> method, so you can
+              query if from which template was your
+              <literal>TemplateDirectiveModel</literal> called. (This has
+              similar role as <literal>.caller_template_name</literal> for
+              macros/functions.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Added
+              <literal>Environment.rootBasedToAbsoluteTemplateName(String)</literal>,
+              which converts the root based names typically used for the
+              FreeMarker Java API-s (such as
+              <literal>Configuration.getTemplate(name)</literal>) to an
+              absolute path, which can be safely passed to
+              <literal>&lt;#include
+              <replaceable>path</replaceable>&gt;</literal> and such, as it
+              won't be misinterpreted to be relative to the directory of the
+              template.</para>
             </listitem>
 
             <listitem>

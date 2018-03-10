@@ -59,10 +59,10 @@ public abstract class TemplateNameFormat {
      * template names like {@code "classpath:foo.ftl"} interpreted as an absolute name with scheme {@code "classpath"}
      * and absolute path "foo.ftl". The scheme name before the {@code ":"} can't contain {@code "/"}, or else it's
      * treated as a malformed name. The scheme part can be separated either with {@code "://"} or just {@code ":"} from
-     * the path. Hence, {@code myschme:/x} is normalized to {@code myschme:x}, while {@code myschme:///x} is normalized
-     * to {@code myschme://x}, but {@code myschme://x} or {@code myschme:/x} aren't changed by normalization. It's up
-     * the {@link TemplateLoader} to which the normalized names are passed to decide which of these scheme separation
-     * conventions are valid (maybe both).</li>
+     * the path. Hence, {@code myscheme:/x} is normalized to {@code myscheme:x}, while {@code myscheme:///x} is
+     * normalized to {@code myscheme://x}, but {@code myscehme://x} or {@code myscheme:/x} aren't changed by
+     * normalization. It's up the {@link TemplateLoader} to which the normalized names are passed to decide which of
+     * these scheme separation conventions are valid (maybe both).</li>
      * 
      * <li>{@code ":"} is not allowed in template names, except as the scheme separator (see previous point).
      * 
@@ -131,11 +131,21 @@ public abstract class TemplateNameFormat {
      * becomes to "foo.ftl".
      * 
      * @param name
-     *            The root based name. Not {@code null}.
+     *            The root based name (a name that's either absolute or relative to the root). Not {@code null}.
      * 
      * @return The normalized root based name. Not {@code null}.
      */
     abstract String normalizeRootBasedName(String name) throws MalformedTemplateNameException;
+    
+    /**
+     * Converts a root based name to an absolute name, which is useful if you need to pass a name to something that
+     * doesn't necessary resolve relative paths relative to the root (like the {@code #include} directive).
+     * 
+     * @param name
+     *            The root based name (a name that's either absolute or relative to the root). Not {@code null}.
+     */
+    // TODO [FM3] This is the kind of complication why normalized template names should just be absolute paths. 
+    abstract String rootBasedNameToAbsoluteName(String name) throws MalformedTemplateNameException;
 
     private static final class Default020300 extends TemplateNameFormat {
         @Override
@@ -199,6 +209,17 @@ public abstract class TemplateNameFormat {
                 path = path.substring(1);
             }
             return path;
+        }
+
+        @Override
+        String rootBasedNameToAbsoluteName(String name) throws MalformedTemplateNameException {
+            if (name.indexOf("://") > 0) {
+                return name;
+            }
+            if (!name.startsWith("/")) {
+                return "/" + name;
+            }
+            return name;
         }
         
         @Override
@@ -428,6 +449,17 @@ public abstract class TemplateNameFormat {
             }
             
             return path;
+        }
+
+        @Override
+        String rootBasedNameToAbsoluteName(String name) throws MalformedTemplateNameException {
+            if (findSchemeSectionEnd(name) != 0) {
+                return name;
+            }
+            if (!name.startsWith("/")) {
+                return "/" + name;
+            }
+            return name;
         }
         
         @Override

@@ -20,12 +20,17 @@
 package freemarker.core;
 
 import java.io.StringReader;
+import java.util.List;
 
+import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.SimpleNumber;
 import freemarker.template.Template;
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
+import freemarker.template.TemplateModelException;
+import freemarker.template.TemplateScalarModel;
 
 class BuiltInsForStringsMisc {
 
@@ -117,6 +122,48 @@ class BuiltInsForStringsMisc {
                 throw NonNumericalException.newMalformedNumberException(this, s, env);
             }
         }
+    }
+    
+    static class absolute_template_nameBI extends BuiltInForString {
+        @Override
+        TemplateModel calculateResult(String s, Environment env)  throws TemplateException {
+            return new AbsoluteTemplateNameResult(s, env);
+        }
+        
+        private class AbsoluteTemplateNameResult implements TemplateScalarModel, TemplateMethodModelEx {
+            private final String pathToResolve;
+            private final Environment env;
+
+            public AbsoluteTemplateNameResult(String pathToResolve, Environment env) {
+                this.pathToResolve = pathToResolve;
+                this.env = env;
+            }
+
+            public Object exec(List args) throws TemplateModelException {
+                checkMethodArgCount(args, 1);
+                return resolvePath(getStringMethodArg(args, 0));
+            }
+
+            public String getAsString() throws TemplateModelException {
+                return resolvePath(getTemplate().getName());
+            }
+
+            /**
+             * @param basePath Maybe {@code null}
+             */
+            private String resolvePath(String basePath) throws TemplateModelException {
+                try {
+                    return env.rootBasedToAbsoluteTemplateName(env.toFullTemplateName(basePath, pathToResolve));
+                } catch (MalformedTemplateNameException e) {
+                    throw new _TemplateModelException(e,
+                            "Can't resolve ", new _DelayedJQuote(pathToResolve),
+                            "to absolute template name using base ", new _DelayedJQuote(basePath),
+                            "; see cause exception");
+                }
+            }
+            
+        }
+        
     }
 
     // Can't be instantiated
