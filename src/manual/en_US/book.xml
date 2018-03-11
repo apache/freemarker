@@ -27468,6 +27468,17 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>The default arithmetic engine
+              (<literal>ArithmeticEngine.BIGDECIMAL_ENGINE</literal>) can now
+              compare infinite (both positive and negative) to any other
+              standard type. Earlier, since <literal>BigDecimal</literal>
+              can't represent infinite, it was only working in certain special
+              cases. Also did some performance optimizations to slightly
+              decrease the impact and number of conversions to
+              <literal>BigDecimal</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para>Added
               <literal>TemplateModelUtils.getKeyValuePairIterator(TemplateHashModelEx)</literal>
               static utility class, which can be used to get a
