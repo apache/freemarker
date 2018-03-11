@@ -40,16 +40,90 @@ public class BigDecimalArithmeticEngine extends ArithmeticEngine {
         // We try to find the result based on the sign (+/-/0) first, because:
         // - It's much faster than converting to BigDecial, and comparing to 0 is the most common comparison.
         // - It doesn't require any type conversions, and thus things like "Infinity > 0" won't fail.
-        int firstSignum = _NumberUtils.getSignum(first);
+        int firstSignum = _NumberUtils.getSignum(first); 
         int secondSignum = _NumberUtils.getSignum(second);
         if (firstSignum != secondSignum) {
-            return firstSignum < secondSignum ? -1 : (firstSignum > secondSignum ? 1 : 0);
+            return firstSignum < secondSignum ? -1 : (firstSignum > secondSignum ? 1 : 0); 
         } else if (firstSignum == 0 && secondSignum == 0) {
             return 0;
         } else {
-            BigDecimal left = _NumberUtils.toBigDecimal(first);
-            BigDecimal right = _NumberUtils.toBigDecimal(second);
-            return left.compareTo(right);
+            // The most common case is comparing values of the same type. As BigDecimal can represent all of these
+            // with loseless round-trip (i.e., converting to BigDecimal and then back the original type gives the
+            // original value), we can avoid conversion to BigDecimal without changing the result.
+            if (first.getClass() == second.getClass()) {
+                // Bit of optimization for this is a very common case:
+                if (first instanceof BigDecimal) {
+                    return ((BigDecimal) first).compareTo((BigDecimal) second);
+                }
+                
+                if (first instanceof Integer) {
+                    return ((Integer) first).compareTo((Integer) second);
+                }
+                if (first instanceof Long) {
+                    return ((Long) first).compareTo((Long) second);
+                }
+                if (first instanceof Double) {
+                    return ((Double) first).compareTo((Double) second);
+                }
+                if (first instanceof Float) {
+                    return ((Float) first).compareTo((Float) second);
+                }
+                if (first instanceof Byte) {
+                    return ((Byte) first).compareTo((Byte) second);
+                }
+                if (first instanceof Short) {
+                    return ((Short) first).compareTo((Short) second);
+                }
+            }
+            // We are going to compare values of two different types.
+            
+            // Handle infinity before we try conversion to BigDecimal, as that BigDecimal can't represent that:
+            if (first instanceof Double) {
+                double firstD = first.doubleValue();
+                if (Double.isInfinite(firstD)) {
+                    if (_NumberUtils.hasTypeThatIsKnownToNotSupportInfiniteAndNaN(second)) {
+                        return  firstD == Double.NEGATIVE_INFINITY ? -1 : 1;
+                    }
+                    if (second instanceof Float) {
+                        return Double.compare(firstD, second.doubleValue());
+                    }
+                }
+            }
+            if (first instanceof Float) {
+                float firstF = first.floatValue();
+                if (Float.isInfinite(firstF)) {
+                    if (_NumberUtils.hasTypeThatIsKnownToNotSupportInfiniteAndNaN(second)) {
+                        return firstF == Float.NEGATIVE_INFINITY ? -1 : 1;
+                    }
+                    if (second instanceof Double) {
+                        return Double.compare(firstF, second.doubleValue());
+                    }
+                }
+            }
+            if (second instanceof Double) {
+                double secondD = second.doubleValue();
+                if (Double.isInfinite(secondD)) {
+                    if (_NumberUtils.hasTypeThatIsKnownToNotSupportInfiniteAndNaN(first)) {
+                        return secondD == Double.NEGATIVE_INFINITY ? 1 : -1;
+                    }
+                    if (first instanceof Float) {
+                        return Double.compare(first.doubleValue(), secondD);
+                    }
+                }
+            }
+            if (second instanceof Float) {
+                float secondF = second.floatValue();
+                if (Float.isInfinite(secondF)) {
+                    if (_NumberUtils.hasTypeThatIsKnownToNotSupportInfiniteAndNaN(first)) {
+                        return secondF == Float.NEGATIVE_INFINITY ? 1 : -1;
+                    }
+                    if (first instanceof Double) {
+                        return Double.compare(first.doubleValue(), secondF);
+                    }
+                }
+            }
+            
+            return _NumberUtils.toBigDecimal(first).compareTo(_NumberUtils.toBigDecimal(second));
         }
     }
 

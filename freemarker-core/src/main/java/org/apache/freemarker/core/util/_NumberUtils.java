@@ -39,7 +39,7 @@ public class _NumberUtils {
             return ((Double) num).isInfinite();
         } else if (num instanceof Float) {
             return ((Float) num).isInfinite();
-        } else if (isNonFPNumberOfSupportedClass(num)) {
+        } else if (hasTypeThatIsKnownToNotSupportInfiniteAndNaN(num)) {
             return false;
         } else {
             throw new UnsupportedNumberClassException(num.getClass());
@@ -51,7 +51,7 @@ public class _NumberUtils {
             return ((Double) num).isNaN();
         } else if (num instanceof Float) {
             return ((Float) num).isNaN();
-        } else if (isNonFPNumberOfSupportedClass(num)) {
+        } else if (hasTypeThatIsKnownToNotSupportInfiniteAndNaN(num)) {
             return false;
         } else {
             throw new UnsupportedNumberClassException(num.getClass());
@@ -110,7 +110,12 @@ public class _NumberUtils {
         // condition, but stripTrailingZeros was slower than setScale + compareTo.
     }
     
-    private static boolean isNonFPNumberOfSupportedClass(Number num) {
+    /**
+     * Tells if the type of the parameter number is known to not be able to represent infinite (positive or negative)
+     * and NaN. If this returns {@code false}, that doesn't mean that it can do that, because it's maybe just that this
+     * utility doesn't know that type.
+     */
+    public static boolean hasTypeThatIsKnownToNotSupportInfiniteAndNaN(Number num) {
         return num instanceof Integer || num instanceof BigDecimal || num instanceof Long
                 || num instanceof Short || num instanceof Byte || num instanceof BigInteger;
     }
@@ -199,10 +204,33 @@ public class _NumberUtils {
         return number;
     }
 
+    /**
+     * Convert a {@code Number} to {@link BigDecimal}.
+     * 
+     * @throws NumberFormatException
+     *             If the conversion is not possible, e.g. Infinite and NaN can't be converted to {@link BigDecimal}.
+     */
     public static BigDecimal toBigDecimal(Number num) {
+        if (num instanceof BigDecimal) {
+            return (BigDecimal) num;
+        }
+        if (num instanceof Integer || num instanceof Long || num instanceof Byte || num instanceof Short) {
+            return BigDecimal.valueOf(num.longValue());
+        }
+        if (num instanceof BigInteger) {
+            return new BigDecimal((BigInteger) num);
+        }
         try {
-            return num instanceof BigDecimal ? (BigDecimal) num : new BigDecimal(num.toString());
+            // Why toString? It's partly for backward compatibility. But it's also better for Double (and Float) values
+            // than new BigDecimal(someDouble), which is overly precise. For example, if you have `double d = 0.1`, then
+            // `new BigDecimal(d).equals(new BigDecimal("0.1"))` is `false`, while
+            // `new BigDecimal(Double.toString(d)).equals(new BigDecimal("0.1"))` is `true`.
+            return new BigDecimal(num.toString());
         } catch (NumberFormatException e) {
+            if (isInfinite(num)) {
+                throw new NumberFormatException("It's impossible to convert an infinte value ("
+                        + num.getClass().getSimpleName() + " " + num + ") to BigDecimal.");
+            }
             // The exception message is useless, so we add a new one:
             throw new NumberFormatException("Can't parse this as BigDecimal number: " + _StringUtils.jQuote(num));
         }
