@@ -35,9 +35,9 @@ abstract class BuiltInForIterable extends ASTExpBuiltIn {
                     TemplateIterableModel.class,
                     null, env);
         }
-        return calculateResult((TemplateIterableModel) model);
+        return calculateResult((TemplateIterableModel) model, env);
     }
 
-    abstract TemplateModel calculateResult(TemplateIterableModel model) throws TemplateException;
+    abstract TemplateModel calculateResult(TemplateIterableModel model, Environment env) throws TemplateException;
 
 }

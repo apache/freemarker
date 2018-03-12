@@ -168,7 +168,7 @@ class BuiltInsForSequences {
     static class firstBI extends BuiltInForIterable {
 
         @Override
-        TemplateModel calculateResult(TemplateIterableModel model) throws TemplateException {
+        TemplateModel calculateResult(TemplateIterableModel model, Environment env) throws TemplateException {
             TemplateModelIterator iter = model.iterator();
             if (!iter.hasNext()) {
                 return null;
@@ -237,7 +237,7 @@ class BuiltInsForSequences {
         }
 
         @Override
-        TemplateModel calculateResult(TemplateIterableModel model) throws TemplateException {
+        TemplateModel calculateResult(TemplateIterableModel model, Environment env) throws TemplateException {
             if (model instanceof RightUnboundedRangeModel) {
                 throw new TemplateException(
                         "The sequence to join was right-unbounded numerical range, thus it's infinitely long.");
@@ -329,7 +329,7 @@ class BuiltInsForSequences {
         }
 
         @Override
-        TemplateModel calculateResult(TemplateIterableModel model) throws TemplateException  {
+        TemplateModel calculateResult(TemplateIterableModel model, Environment env) throws TemplateException  {
             return new BIMethod(model);
         }
     
@@ -473,7 +473,7 @@ class BuiltInsForSequences {
         }
 
         @Override
-        TemplateModel calculateResult(TemplateIterableModel model) throws TemplateException {
+        TemplateModel calculateResult(TemplateIterableModel model, Environment env) throws TemplateException {
             return new BIMethod(model);
         }
     }
@@ -819,7 +819,7 @@ class BuiltInsForSequences {
     static class sequenceBI extends BuiltInForIterable {
 
         @Override
-        TemplateModel calculateResult(TemplateIterableModel model) throws TemplateException {
+        TemplateModel calculateResult(TemplateIterableModel model, Environment env) throws TemplateException {
             if (model instanceof TemplateSequenceModel) {
                 return model;
             }
@@ -835,6 +835,48 @@ class BuiltInsForSequences {
 
     }
 
+    private static abstract class MinOrMaxBI extends BuiltInForIterable {
+        
+        private final int comparatorOperator;
+        
+        protected MinOrMaxBI(int comparatorOperator) {
+            this.comparatorOperator = comparatorOperator;
+        }
+
+        @Override
+        TemplateModel calculateResult(TemplateIterableModel model, Environment env) throws TemplateException {
+            // TODO Auto-generated method stub
+            TemplateModel best = null;
+            TemplateModelIterator iter = model.iterator();
+            while (iter.hasNext()) {
+                TemplateModel cur = iter.next();
+                if (cur != null
+                        && (best == null || _EvalUtils.compare(cur, null, comparatorOperator, null, best,
+                                    null, this, true, false, false, false, env))) {
+                    best = cur;
+                }
+            }
+            return best;
+        }
+        
+    }    
+
+    static class maxBI extends MinOrMaxBI {
+
+        public maxBI() {
+            super(_EvalUtils.CMP_OP_GREATER_THAN);
+        }
+        
+    }
+
+    static class minBI extends MinOrMaxBI {
+
+        public minBI() {
+            super(_EvalUtils.CMP_OP_LESS_THAN);
+        }
+        
+    }
+    
     // Can't be instantiated
     private BuiltInsForSequences() { }
     
