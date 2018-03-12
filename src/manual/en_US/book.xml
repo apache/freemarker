@@ -12740,6 +12740,14 @@ grant codeBase "file:/path/to/freemarker.jar"
           </listitem>
 
           <listitem>
+            <para><link linkend="ref_builtin_min_max">max</link></para>
+          </listitem>
+
+          <listitem>
+            <para><link linkend="ref_builtin_min_max">min</link></para>
+          </listitem>
+
+          <listitem>
             <para><link
             linkend="ref_builtin_namespace">namespace</link></para>
           </listitem>
@@ -16662,6 +16670,41 @@ red, green, blue.
 
           <para>The last subvariable of the sequence. Template processing will
           die with error if the sequence is empty.</para>
+        </section>
+
+        <section xml:id="ref_builtin_min_max">
+          <title>min, max</title>
+
+          <indexterm>
+            <primary>min built-in</primary>
+          </indexterm>
+
+          <indexterm>
+            <primary>max built-in</primary>
+          </indexterm>
+
+          <para>Returns the smaller (<literal>min</literal>) or greatest
+          (<literal>max</literal>) item of the sequence (or collection). The
+          items must be either all numbers, or all date/time values of the
+          same kind (date-only, time-only, date-time), or else a comparison
+          error will occur. These are the same restrictions as for the <link
+          linkend="dgui_template_exp_comparison"><literal>&lt;</literal> and
+          <literal>&gt;</literal> operators</link>.</para>
+
+          <para>Missing items (i.e., Java <literal>null</literal>-s) will be
+          silently ignored. If the sequence is empty or it only contains
+          missing (Java <literal>null</literal>) items, the result itself will
+          be missing.</para>
+
+          <para>Example:</para>
+
+          <programlisting role="template">${[1, 2, 3]?min}
+${[1, 2, 3]?max}
+${[]?min!'-'}</programlisting>
+
+          <programlisting role="output">1
+3
+-</programlisting>
         </section>
 
         <section xml:id="ref_builtin_reverse">
@@ -27372,6 +27415,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               absolute template name. <link
               linkend="ref_builtin_absolute_template_name">See more
               here...</link></para>
+            </listitem>
+
+            <listitem>
+              <para>Added new built-ins: <literal>sequence?min</literal> and
+              <literal>sequence?max</literal> (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-86">FREEMARKER-86</link>),
+              which return the smallest and greatest item from a list of
+              numbers or date/time/date-times. <link
+              linkend="ref_builtin_min_max">See more here...</link></para>
             </listitem>
 
             <listitem>
