@@ -41,7 +41,7 @@ public class NumberUtil {
             return ((Double) num).isInfinite();
         } else if (num instanceof Float) {
             return ((Float) num).isInfinite();
-        } else if (isNonFPNumberOfSupportedClass(num)) {
+        } else if (hasTypeThatIsKnownToNotSupportInfiniteAndNaN(num)) {
             return false;
         } else {
             throw new UnsupportedNumberClassException(num.getClass());
@@ -53,7 +53,7 @@ public class NumberUtil {
             return ((Double) num).isNaN();
         } else if (num instanceof Float) {
             return ((Float) num).isNaN();
-        } else if (isNonFPNumberOfSupportedClass(num)) {
+        } else if (hasTypeThatIsKnownToNotSupportInfiniteAndNaN(num)) {
             return false;
         } else {
             throw new UnsupportedNumberClassException(num.getClass());
@@ -114,7 +114,14 @@ public class NumberUtil {
         // condition, but stripTrailingZeros was slower than setScale + compareTo.
     }
     
-    private static boolean isNonFPNumberOfSupportedClass(Number num) {
+    /**
+     * Tells if the type of the parameter number is known to not be able to represent infinite (positive or negative)
+     * and NaN. If this returns {@code false}, that doesn't mean that it can do that, because it's maybe just that this
+     * utility doesn't know that type.
+     * 
+     * @since 2.3.28
+     */
+    public static boolean hasTypeThatIsKnownToNotSupportInfiniteAndNaN(Number num) {
         return num instanceof Integer || num instanceof BigDecimal || num instanceof Long
                 || num instanceof Short || num instanceof Byte || num instanceof BigInteger;
     }

@@ -111,9 +111,8 @@ public abstract class ArithmeticEngine {
      * number it receives into {@link BigDecimal}, then operates on these
      * converted {@link BigDecimal}s.
      */
-    public static class BigDecimalEngine
-    extends
-        ArithmeticEngine {
+    public static class BigDecimalEngine extends ArithmeticEngine {
+        
         @Override
         public int compareNumbers(Number first, Number second) {
             // We try to find the result based on the sign (+/-/0) first, because:
@@ -126,9 +125,83 @@ public abstract class ArithmeticEngine {
             } else if (firstSignum == 0 && secondSignum == 0) {
                 return 0;
             } else {
-                BigDecimal left = toBigDecimal(first);
-                BigDecimal right = toBigDecimal(second);
-                return left.compareTo(right);
+                // The most common case is comparing values of the same type. As BigDecimal can represent all of these
+                // with loseless round-trip (i.e., converting to BigDecimal and then back the original type gives the
+                // original value), we can avoid conversion to BigDecimal without changing the result.
+                if (first.getClass() == second.getClass()) {
+                    // Bit of optimization for this is a very common case:
+                    if (first instanceof BigDecimal) {
+                        return ((BigDecimal) first).compareTo((BigDecimal) second);
+                    }
+                    
+                    if (first instanceof Integer) {
+                        return ((Integer) first).compareTo((Integer) second);
+                    }
+                    if (first instanceof Long) {
+                        return ((Long) first).compareTo((Long) second);
+                    }
+                    if (first instanceof Double) {
+                        return ((Double) first).compareTo((Double) second);
+                    }
+                    if (first instanceof Float) {
+                        return ((Float) first).compareTo((Float) second);
+                    }
+                    if (first instanceof Byte) {
+                        return ((Byte) first).compareTo((Byte) second);
+                    }
+                    if (first instanceof Short) {
+                        return ((Short) first).compareTo((Short) second);
+                    }
+                }
+                // We are going to compare values of two different types.
+                
+                // Handle infinity before we try conversion to BigDecimal, as that BigDecimal can't represent that:
+                if (first instanceof Double) {
+                    double firstD = first.doubleValue();
+                    if (Double.isInfinite(firstD)) {
+                        if (NumberUtil.hasTypeThatIsKnownToNotSupportInfiniteAndNaN(second)) {
+                            return  firstD == Double.NEGATIVE_INFINITY ? -1 : 1;
+                        }
+                        if (second instanceof Float) {
+                            return Double.compare(firstD, second.doubleValue());
+                        }
+                    }
+                }
+                if (first instanceof Float) {
+                    float firstF = first.floatValue();
+                    if (Float.isInfinite(firstF)) {
+                        if (NumberUtil.hasTypeThatIsKnownToNotSupportInfiniteAndNaN(second)) {
+                            return firstF == Float.NEGATIVE_INFINITY ? -1 : 1;
+                        }
+                        if (second instanceof Double) {
+                            return Double.compare(firstF, second.doubleValue());
+                        }
+                    }
+                }
+                if (second instanceof Double) {
+                    double secondD = second.doubleValue();
+                    if (Double.isInfinite(secondD)) {
+                        if (NumberUtil.hasTypeThatIsKnownToNotSupportInfiniteAndNaN(first)) {
+                            return secondD == Double.NEGATIVE_INFINITY ? 1 : -1;
+                        }
+                        if (first instanceof Float) {
+                            return Double.compare(first.doubleValue(), secondD);
+                        }
+                    }
+                }
+                if (second instanceof Float) {
+                    float secondF = second.floatValue();
+                    if (Float.isInfinite(secondF)) {
+                        if (NumberUtil.hasTypeThatIsKnownToNotSupportInfiniteAndNaN(first)) {
+                            return secondF == Float.NEGATIVE_INFINITY ? 1 : -1;
+                        }
+                        if (first instanceof Double) {
+                            return Double.compare(first.doubleValue(), secondF);
+                        }
+                    }
+                }
+                
+                return toBigDecimal(first).compareTo(toBigDecimal(second));
             }
         }
     
@@ -526,10 +599,33 @@ public abstract class ArithmeticEngine {
         }
     }
 
+    /**
+     * Convert a {@code Number} to {@link BigDecimal}.
+     * 
+     * @throws NumberFormatException
+     *             If the conversion is not possible, e.g. Infinite and NaN can't be converted to {@link BigDecimal}.
+     */
     private static BigDecimal toBigDecimal(Number num) {
+        if (num instanceof BigDecimal) {
+            return (BigDecimal) num;
+        }
+        if (num instanceof Integer || num instanceof Long || num instanceof Byte || num instanceof Short) {
+            return BigDecimal.valueOf(num.longValue());
+        }
+        if (num instanceof BigInteger) {
+            return new BigDecimal((BigInteger) num);
+        }
         try {
-            return num instanceof BigDecimal ? (BigDecimal) num : new BigDecimal(num.toString());
+            // Why toString? It's partly for backward compatibility. But it's also better for Double (and Float) values
+            // than new BigDecimal(someDouble), which is overly precise. For example, if you have `double d = 0.1`, then
+            // `new BigDecimal(d).equals(new BigDecimal("0.1"))` is `false`, while
+            // `new BigDecimal(Double.toString(d)).equals(new BigDecimal("0.1"))` is `true`.
+            return new BigDecimal(num.toString());
         } catch (NumberFormatException e) {
+            if (NumberUtil.isInfinite(num)) {
+                throw new NumberFormatException("It's impossible to convert an infinte value ("
+                        + num.getClass().getSimpleName() + " " + num + ") to BigDecimal.");
+            }
             // The exception message is useless, so we add a new one:
             throw new NumberFormatException("Can't parse this as BigDecimal number: " + StringUtil.jQuote(num));
         }

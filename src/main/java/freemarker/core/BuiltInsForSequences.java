@@ -884,6 +884,74 @@ class BuiltInsForSequences {
         }
     }
  
+    private static abstract class MinOrMaxBI extends BuiltIn {
+        
+        private final int comparatorOperator;
+        
+        protected MinOrMaxBI(int comparatorOperator) {
+            this.comparatorOperator = comparatorOperator;
+        }
+
+        @Override
+        TemplateModel _eval(Environment env)
+                throws TemplateException {
+            TemplateModel model = target.eval(env);
+            if (model instanceof TemplateCollectionModel) {
+                return calculateResultForColletion((TemplateCollectionModel) model, env);
+            } else if (model instanceof TemplateSequenceModel) {
+                return calculateResultForSequence((TemplateSequenceModel) model, env);
+            } else {
+                throw new NonSequenceOrCollectionException(target, model, env);
+            }
+        }        
+
+        private TemplateModel calculateResultForColletion(TemplateCollectionModel coll, Environment env)
+        throws TemplateException {
+            TemplateModel best = null;
+            TemplateModelIterator iter = coll.iterator();
+            while (iter.hasNext()) {
+                TemplateModel cur = iter.next();
+                if (cur != null
+                        && (best == null || EvalUtil.compare(cur, null, comparatorOperator, null, best,
+                                    null, this, true, false, false, false, env))) {
+                    best = cur;
+                }
+            }
+            return best;
+        }
+        
+        private TemplateModel calculateResultForSequence(TemplateSequenceModel seq, Environment env)
+        throws TemplateException {
+            TemplateModel best = null;
+            for (int i = 0; i < seq.size(); i++) {
+                TemplateModel cur = seq.get(i);
+                if (cur != null
+                        && (best == null || EvalUtil.compare(cur, null, comparatorOperator, null, best,
+                                    null, this, true, false, false, false, env))) {
+                    best = cur;
+                }
+            }
+            return best;
+        }
+        
+    }    
+
+    static class maxBI extends MinOrMaxBI {
+
+        public maxBI() {
+            super(EvalUtil.CMP_OP_GREATER_THAN);
+        }
+        
+    }
+
+    static class minBI extends MinOrMaxBI {
+
+        public minBI() {
+            super(EvalUtil.CMP_OP_LESS_THAN);
+        }
+        
+    }
+    
     // Can't be instantiated
     private BuiltInsForSequences() { }
     
