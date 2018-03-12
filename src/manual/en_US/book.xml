@@ -27531,6 +27531,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Avoided possible performance bottleneck when executing
+              templates on many threads, caused be that
+              <literal>java.beans.PropertyDescriptor.getReadMethod()</literal>
+              is synchronized (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-80">FREEMARKER-80</link>).</para>
+            </listitem>
+
+            <listitem>
               <para>Added
               <literal>TemplateModelUtils.getKeyValuePairIterator(TemplateHashModelEx)</literal>
               static utility class, which can be used to get a
@@ -27549,6 +27557,11 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               keys. Also, it nows keeps the iteration order of the hashes, as
               it unwraps into a <literal>LinkedHashMap</literal> instead of
               into a plain <literal>HashMap</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>freemarker.ext.beans.HashAdapter.size()</literal>
+              was overridden for better performance.</para>
             </listitem>
           </itemizedlist>
         </section>
