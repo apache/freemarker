@@ -10043,17 +10043,21 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
           implemented. Usually, it's a bad idea to left it on its default,
           which is 2.3.0 (maximum backward compatibility).</para>
 
-          <para>In new projects you should set this to the FreeMarker version
-          that you are actually using. In older projects it's also usually
-          better to keep this high, however you better check the changes
-          activated (find them in <link
+          <para>In new projects you should set this to the fixed FreeMarker
+          version (like <literal>Configuration.VERSION_2_3_28</literal>) that
+          you are actually using when starting the project. In older projects
+          it's also usually better to keep this high , however you should
+          check the changes activated (find them in <link
           xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#Configuration-freemarker.template.Version-">the
           API JavaDoc of the <literal>Configuration(Version)</literal>
-          constructor</link>), at least if not only the 3rd version number
+          constructor</link>), especially if not only the 3rd version number
           (the micro version) of <quote>incompatible improvements</quote>
           setting is increased. Generally, as far as you only increase the
-          last version number of this setting, the changes are low
-          risk.</para>
+          last (3rd) version number of this setting, the changes are low risk,
+          and whether you can afford that risk depends on the concrete
+          application. Never use a dynamic value like
+          <literal>Configuration.getVersion()</literal> though, as that way
+          upgrading FreeMarker can break your application!</para>
 
           <para>Bug fixes and improvements that are fully backward compatible,
           also those that are important security fixes, are enabled regardless
@@ -10081,14 +10085,14 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
               <literal>freemarker.template.Configuration</literal> object
               like:</para>
 
-              <programlisting role="unspecified">... = new Configuration(Configuration.VERSION_2_3_27)</programlisting>
+              <programlisting role="unspecified">... = new Configuration(Configuration.VERSION_2_3_28)</programlisting>
             </listitem>
 
             <listitem>
               <para>Or, alter the <literal>Configuration</literal> singleton
               where you initialize its other settings like:</para>
 
-              <programlisting role="unspecified">cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_27)</programlisting>
+              <programlisting role="unspecified">cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_28)</programlisting>
             </listitem>
 
             <listitem>
@@ -10096,7 +10100,7 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
               (<literal>*.properties</literal> file or
               <literal>java.util.Properties</literal> object), add:</para>
 
-              <programlisting role="unspecified">incompatible_improvements=2.3.27</programlisting>
+              <programlisting role="unspecified">incompatible_improvements=2.3.28</programlisting>
             </listitem>
 
             <listitem>
@@ -10107,7 +10111,7 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
 
               <programlisting role="unspecified">&lt;init-param&gt;
     &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
-    &lt;param-value&gt;2.3.27&lt;/param-value&gt;
+    &lt;param-value&gt;2.3.28&lt;/param-value&gt;
 &lt;/init-param&gt;</programlisting>
             </listitem>
           </itemizedlist>
@@ -10139,6 +10143,17 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
           <literal>DefaultObjectWrapper</literal> (for
           <literal>BeansWrapper</literal> it's the same, only with different
           class name of course).</para>
+
+          <warning>
+            <para>Do not ever use
+            <literal>Configuration.getVersion()</literal> to set the
+            <quote>incompatible improvements</quote> setting. Always use a
+            fixed value, like <literal>Configuration.VERSION_2_3_28</literal>.
+            Otherwise your application can break as you upgrade FreeMarker.
+            The whole point of <quote>incompatible improvements</quote> is to
+            protect you from that, while you still always get the
+            fixes/improvements that are backward compatible.</para>
+          </warning>
         </section>
       </section>
     </chapter>

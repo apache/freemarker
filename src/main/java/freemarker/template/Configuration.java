@@ -547,8 +547,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * <p><b>About the "incompatible improvements" setting</b>
      *
      * <p>This setting value is the FreeMarker version number where the not 100% backward compatible bug fixes and
-     * improvements that you want to enable were already implemented. In new projects you should set this to the
-     * version of FreeMarker that you start the development with. In older projects it's also usually better to keep
+     * improvements that you want to enable were already implemented. In new projects you should set this to the fixed
+     * FreeMarker version that you start the development with. In older projects it's also usually better to keep
      * this high, however you should check the changes activated (find them below), especially if not only the 3rd
      * version number (the micro version) of {@code incompatibleImprovements} is increased. Generally, as far as you
      * only increase the last version number of this setting, the changes are low risk. The default value is 2.3.0 to
@@ -556,6 +556,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * <p>Bugfixes and improvements that are fully backward compatible, also those that are important security fixes,
      * are enabled regardless of the incompatible improvements setting.
+     * 
+     * <p>Do NOT ever use {@link #getVersion()} to set the "incompatible improvements". Always use a fixed value, like
+     * {@link #VERSION_2_3_28}. Otherwise your application can break as you upgrade FreeMarker. 
      * 
      * <p>An important consequence of setting this setting is that now your application will check if the stated minimum
      * FreeMarker version requirement is met. Like if you set this setting to 2.3.22, but accidentally the application
@@ -1865,7 +1868,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
 
     /**
      * Use {@link #Configuration(Version)} instead if possible; see the meaning of the parameter there.
-     * If the default value of a setting depends on the {@code incompatibleImprovements} and the value of that setting
+     * 
+     * <p>Do NOT ever use {@link #getVersion()} to set the "incompatible improvements". Always use a fixed value, like
+     * {@link #VERSION_2_3_28}. Otherwise your application can break as you upgrade FreeMarker. 
+     * 
+     * <p>If the default value of a setting depends on the {@code incompatibleImprovements} and the value of that setting
      * was never set in this {@link Configuration} object through the public API, its value will be set to the default
      * value appropriate for the new {@code incompatibleImprovements}. (This adjustment of a setting value doesn't
      * count as setting that setting, so setting {@code incompatibleImprovements} for multiple times also works as
@@ -3393,7 +3400,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Returns the FreeMarker version information, most importantly the major.minor.micro version numbers.
+     * Returns FreeMarker version information, most importantly the major.minor.micro version numbers;
+     * do NOT use this as the value of the {@code incompatible_improvements} setting (as the parameter to
+     * {@link Configuration#Configuration(Version)}), as then your application can break when you upgrade FreeMarker!
+     * Use a constant value, like {@link #VERSION_2_3_28}, to protect your application from fixes/changes that aren't
+     * entirely backward compatible. Fixes and features that are backward compatible are always enabled. 
      * 
      * On FreeMarker version numbering rules:
      * <ul>
