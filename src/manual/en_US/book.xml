@@ -15568,6 +15568,13 @@ German people write: 12.345.678,00</programlisting>
               <primary>extended Java decimal format</primary>
             </indexterm>
 
+            <note>
+              <para>You need at least FreeMarker 2.3.24 for these to work.
+              Before that, extended Java decimal format parts are just
+              silently ignored by
+              <literal>java.text.DecimalFormat</literal>.</para>
+            </note>
+
             <para>FreeMarker extends the Java decimal format patterns with
             extra options. These options are name-value pairs, specified after
             two semicolons (<literal>;;</literal>) at the end of the format
@@ -15580,6 +15587,14 @@ Extended decimal format: ${10002.5?string[",000<emphasis>;; roundingMode=halfUp 
 
             <programlisting role="output">Standard decimal format: 10,002
 Extended decimal format: 10<emphasis>_</emphasis>00<emphasis>3</emphasis></programlisting>
+
+            <warning>
+              <para>A very easy mistake to make is just using a single
+              semicolon instead of two. It won't even result in an error, as
+              <literal>java.text.DecimalFormat</literal> thinks you have just
+              specified some weird format for negative numbers. So remember to
+              use two semicolons.</para>
+            </warning>
 
             <para>Above, in the extended decimal format, we have specified
             half-up rounding mode and group separator <literal>"_"</literal>.
