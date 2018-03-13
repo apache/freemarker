@@ -27578,6 +27578,13 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para><literal>freemarker.ext.beans.HashAdapter.size()</literal>
               was overridden for better performance.</para>
             </listitem>
+
+            <listitem>
+              <para>Fixed incorrect listing of valid
+              <literal>roundingMode</literal>-s in <link
+              linkend="topic.extendedJavaDecimalFormat">extended Java decimal
+              format</link> parsing error message</para>
+            </listitem>
           </itemizedlist>
         </section>
       </section>

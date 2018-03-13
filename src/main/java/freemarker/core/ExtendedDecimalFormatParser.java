@@ -80,7 +80,10 @@ class ExtendedDecimalFormatParser {
                 } else if (value.equals(PARAM_VALUE_RND_UNNECESSARY)) {
                     parsedValue = RoundingMode.UNNECESSARY;
                 } else {
-                    throw new InvalidParameterValueException("Should be one of: u, d, c, f, hd, he, hu, un");
+                    throw new InvalidParameterValueException("Should be one of: "
+                            + PARAM_VALUE_RND_UP + ", " + PARAM_VALUE_RND_DOWN + ", " + PARAM_VALUE_RND_CEILING + ", "
+                            + PARAM_VALUE_RND_FLOOR + ", " + PARAM_VALUE_RND_HALF_DOWN + ", "
+                            + PARAM_VALUE_RND_HALF_EVEN + ", " + PARAM_VALUE_RND_UNNECESSARY);
                 }
 
                 if (_JavaVersions.JAVA_6 == null) {
