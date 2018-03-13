@@ -1574,10 +1574,12 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
         /**
          * @param incompatibleImprovements
-         *         The initial value of the
-         *         {@link Configuration#getIncompatibleImprovements() incompatibleImprovements}; can't {@code null}.
-         *         This can be later changed via {@link #setIncompatibleImprovements(Version)}. The point here is
-         *         just to ensure that it's never {@code null}.
+         *            The initial value of the {@link Configuration#getIncompatibleImprovements()
+         *            incompatibleImprovements}; can't {@code null}. This can be later changed via
+         *            {@link #setIncompatibleImprovements(Version)}. The point here is just to ensure that it's never
+         *            {@code null}. Do NOT ever use {@link Configuration#getVersion()} to set this. Always use a fixed
+         *            value, like {@link #VERSION_3_0_0}, otherwise your application can break as you upgrade
+         *            FreeMarker.
          */
         protected ExtendableBuilder(Version incompatibleImprovements) {
             _NullArgumentException.check("incompatibleImprovements", incompatibleImprovements);
@@ -2346,6 +2348,9 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
         /**
          * Setter pair of {@link Configuration#getIncompatibleImprovements()}.
+         * 
+         * <p>Do NOT ever use {@link Configuration#getVersion()} to set the "incompatible improvements". Always use
+         * a fixed value, like {@link #VERSION_3_0_0}. Otherwise your application can break as you upgrade FreeMarker. 
          *
          * <p>This is not called from the {@link ExtendableBuilder#ExtendableBuilder(Version)}; the initial value is set
          * without this.

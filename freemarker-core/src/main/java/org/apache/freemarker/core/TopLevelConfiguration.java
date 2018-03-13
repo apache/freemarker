@@ -171,14 +171,17 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
     /**
      * Returns the value of the "incompatible improvements" setting; this is the FreeMarker version number where the
      * not 100% backward compatible bug fixes and improvements that you want to enable were already implemented. In
-     * new projects you should set this to the FreeMarker version that you are actually using. In older projects it's
-     * also usually better to keep this high, however you better check the changes activated (find them below), at
+     * new projects you should set this to the fixed FreeMarker version that you are actually using. In older projects
+     * it's also usually better to keep this high, however you better check the changes activated (find them below), at
      * least if not only the 3rd version number (the micro version) of {@code incompatibleImprovements} is increased.
      * Generally, as far as you only increase the last version number of this setting, the changes are always low
      * risk.
      * <p>
      * Bugfixes and improvements that are fully backward compatible, also those that are important security fixes,
      * are enabled regardless of the incompatible improvements setting.
+     * <p>
+     * Do NOT ever use {@link Configuration#getVersion()} to set the "incompatible improvements". Always use a fixed
+     * value, like {@link Configuration#VERSION_3_0_0}. Otherwise your application can break as you upgrade FreeMarker. 
      * <p>
      * An important consequence of setting this setting is that now your application will check if the stated minimum
      * FreeMarker version requirement is met. Like if you set this setting to 3.0.1, but accidentally the
