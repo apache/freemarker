@@ -28,6 +28,7 @@ import freemarker.template.Version;
 class LegacyConstructorParserConfiguration implements ParserConfiguration {
 
     private final int tagSyntax;
+    private final int interpolationSyntax;
     private final int namingConvention;
     private final boolean whitespaceStripping;
     private final boolean strictSyntaxMode;
@@ -38,11 +39,13 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
     private Integer tabSize;
     private final Version incompatibleImprovements;
 
-    public LegacyConstructorParserConfiguration(boolean strictSyntaxMode, boolean whitespaceStripping, int tagSyntax,
+    LegacyConstructorParserConfiguration(boolean strictSyntaxMode, boolean whitespaceStripping,
+            int tagSyntax, int interpolationSyntax,
             int namingConvention, Integer autoEscaping, OutputFormat outputFormat,
             Boolean recognizeStandardFileExtensions, Integer tabSize,
             Version incompatibleImprovements, ArithmeticEngine arithmeticEngine) {
         this.tagSyntax = tagSyntax;
+        this.interpolationSyntax = interpolationSyntax;
         this.namingConvention = namingConvention;
         this.whitespaceStripping = whitespaceStripping;
         this.strictSyntaxMode = strictSyntaxMode;
@@ -56,6 +59,10 @@ class LegacyConstructorParserConfiguration implements ParserConfiguration {
 
     public int getTagSyntax() {
         return tagSyntax;
+    }
+    
+    public int getInterpolationSyntax() {
+        return interpolationSyntax;
     }
 
     public int getNamingConvention() {

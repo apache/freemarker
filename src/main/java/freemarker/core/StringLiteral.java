@@ -22,6 +22,7 @@ package freemarker.core;
 import java.io.StringReader;
 import java.util.List;
 
+import freemarker.template.Configuration;
 import freemarker.template.SimpleScalar;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -47,10 +48,15 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
     void parseValue(FMParser parentParser, OutputFormat outputFormat) throws ParseException {
         // The way this works is incorrect (the literal should be parsed without un-escaping),
         // but we can't fix this backward compatibly.
-        if (value.length() > 3 && (value.indexOf("${") >= 0 || value.indexOf("#{") >= 0)) {
-            Template parentTemplate = getTemplate();
-            ParserConfiguration pcfg = parentTemplate.getParserConfiguration();
-
+        Template parentTemplate = getTemplate();
+        ParserConfiguration pcfg = parentTemplate.getParserConfiguration();
+        int intSyn = pcfg.getInterpolationSyntax();
+        if (value.length() > 3 && (
+                    (intSyn == Configuration.LEGACY_INTERPOLATION_SYNTAX
+                        || intSyn == Configuration.DOLLAR_INTERPOLATION_SYNTAX) 
+                        && (value.indexOf("${") >= 0
+                    || intSyn == Configuration.LEGACY_INTERPOLATION_SYNTAX && value.indexOf("#{") >= 0)
+                    || intSyn == Configuration.SQUARE_BRACKET_INTERPOLATION_SYNTAX && value.indexOf("[=") >= 0)) {
             try {
                 SimpleCharStream simpleCharacterStream = new SimpleCharStream(
                         new StringReader(value),

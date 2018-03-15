@@ -252,6 +252,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final String TAG_SYNTAX_KEY_CAMEL_CASE = "tagSyntax";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String TAG_SYNTAX_KEY = TAG_SYNTAX_KEY_SNAKE_CASE;
+
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.28 */
+    public static final String INTERPOLATION_SYNTAX_KEY_SNAKE_CASE = "interpolation_syntax";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.28 */
+    public static final String INTERPOLATION_SYNTAX_KEY_CAMEL_CASE = "interpolationSyntax";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String INTERPOLATION_SYNTAX_KEY = INTERPOLATION_SYNTAX_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String NAMING_CONVENTION_KEY_SNAKE_CASE = "naming_convention";
@@ -315,6 +322,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         CACHE_STORAGE_KEY_SNAKE_CASE,
         DEFAULT_ENCODING_KEY_SNAKE_CASE,
         INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE,
+        INTERPOLATION_SYNTAX_KEY_SNAKE_CASE,
         LOCALIZED_LOOKUP_KEY_SNAKE_CASE,
         NAMING_CONVENTION_KEY_SNAKE_CASE,
         OUTPUT_FORMAT_KEY_SNAKE_CASE,
@@ -337,6 +345,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         CACHE_STORAGE_KEY_CAMEL_CASE,
         DEFAULT_ENCODING_KEY_CAMEL_CASE,
         INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE,
+        INTERPOLATION_SYNTAX_KEY_CAMEL_CASE,
         LOCALIZED_LOOKUP_KEY_CAMEL_CASE,
         NAMING_CONVENTION_KEY_CAMEL_CASE,
         OUTPUT_FORMAT_KEY_CAMEL_CASE,
@@ -371,6 +380,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final int ANGLE_BRACKET_TAG_SYNTAX = 1;
     public static final int SQUARE_BRACKET_TAG_SYNTAX = 2;
 
+    /** <code>${expression}</code> and the deprecated <code>#{expression; numFormat}</code> @since 2.3.28 */
+    public static final int LEGACY_INTERPOLATION_SYNTAX = 0;
+    /** <code>${expression}</code> only (not <code>#{expression; numFormat}</code>) @since 2.3.28 */
+    public static final int DOLLAR_INTERPOLATION_SYNTAX = 1;
+    /** <code>[=expression]</code> @since 2.3.28 */
+    public static final int SQUARE_BRACKET_INTERPOLATION_SYNTAX = 2;
+    
     public static final int AUTO_DETECT_NAMING_CONVENTION = 10;
     public static final int LEGACY_NAMING_CONVENTION = 11;
     public static final int CAMEL_CASE_NAMING_CONVENTION = 12;
@@ -494,6 +510,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private Map<String, ? extends OutputFormat> registeredCustomOutputFormats = Collections.emptyMap(); 
     private Version incompatibleImprovements;
     private int tagSyntax = ANGLE_BRACKET_TAG_SYNTAX;
+    private int interpolationSyntax = LEGACY_INTERPOLATION_SYNTAX;
     private int namingConvention = AUTO_DETECT_NAMING_CONVENTION;
     private int tabSize = 8;  // Default from JavaCC 3.x
     private boolean preventStrippings;
@@ -2356,9 +2373,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Determines the syntax of the template files (angle bracket VS square bracket)
-     * that has no {@code #ftl} in it. The {@code tagSyntax}
-     * parameter must be one of:
+     * Determines the tag syntax (like {@code <#if x>} VS {@code [#if x]}) of the template files 
+     * that has no {@code #ftl} header to decide that. The {@code tagSyntax} parameter must be one of:
      * <ul>
      *   <li>{@link Configuration#AUTO_DETECT_TAG_SYNTAX}:
      *     use the syntax of the first FreeMarker tag (can be anything, like <tt>#list</tt>,
@@ -2377,6 +2393,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * <p>This setting is ignored for the templates that have {@code ftl} directive in
      * it. For those templates the syntax used for the {@code ftl} directive determines
      * the syntax.
+     * 
+     * @see #setInterpolationSyntax(int)
      */
     public void setTagSyntax(int tagSyntax) {
         _TemplateAPI.valideTagSyntaxValue(tagSyntax);
@@ -2390,6 +2408,30 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         return tagSyntax;
     }
 
+    /**
+     * Determines the interpolation syntax (like <code>${x}</code> VS <code>[=x]</code>) of the template files in which
+     * there's no {@code #ftl} hader with {@code interpolation_syntax} parameter. The
+     * {@code interpolationSyntax} parameter must be one of {@link Configuration#LEGACY_INTERPOLATION_SYNTAX},
+     * {@link Configuration#DOLLAR_INTERPOLATION_SYNTAX}, and {@link Configuration#SQUARE_BRACKET_INTERPOLATION_SYNTAX}.
+     * 
+     * @see #setTagSyntax(int)
+     * 
+     * @since 2.3.28
+     */
+    public void setInterpolationSyntax(int interpolationSyntax) {
+        _TemplateAPI.valideInterpolationSyntaxValue(interpolationSyntax);
+        this.interpolationSyntax = interpolationSyntax;
+    }
+    
+    /**
+     * The getter pair of {@link #setInterpolationSyntax(int)}.
+     * 
+     * @since 2.3.28
+     */
+    public int getInterpolationSyntax() {
+        return interpolationSyntax;
+    }
+    
     /**
      * Sets the naming convention used for the identifiers that are part of the template language. The available naming
      * conventions are legacy (directive (tag) names are all-lower-case {@code likethis}, others are snake case
@@ -3217,6 +3259,17 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                     setTagSyntax(ANGLE_BRACKET_TAG_SYNTAX);
                 } else if ("square_bracket".equals(value) || "squareBracket".equals(value)) {
                     setTagSyntax(SQUARE_BRACKET_TAG_SYNTAX);
+                } else {
+                    throw invalidSettingValueException(name, value);
+                }
+            } else if (INTERPOLATION_SYNTAX_KEY_SNAKE_CASE.equals(name)
+                    || INTERPOLATION_SYNTAX_KEY_CAMEL_CASE.equals(name)) {
+                if ("legacy".equals(value)) {
+                    setInterpolationSyntax(LEGACY_INTERPOLATION_SYNTAX);
+                } else if ("dollar".equals(value)) {
+                    setInterpolationSyntax(DOLLAR_INTERPOLATION_SYNTAX);
+                } else if ("square_bracket".equals(value) || "squareBracket".equals(value)) {
+                    setInterpolationSyntax(SQUARE_BRACKET_INTERPOLATION_SYNTAX);
                 } else {
                     throw invalidSettingValueException(name, value);
                 }

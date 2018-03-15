@@ -36,6 +36,13 @@ public interface ParserConfiguration {
     int getTagSyntax();
 
     /**
+     * See {@link Configuration#getInterpolationSyntax()}.
+     *
+     * @since 2.3.28
+     */
+    int getInterpolationSyntax();
+    
+    /**
      * See {@link Configuration#getNamingConvention()}.
      */
     int getNamingConvention();

@@ -2365,7 +2365,12 @@ public class Configurable {
      *   <li><p>{@code "tag_syntax"}:
      *       See {@link Configuration#setTagSyntax(int)}.
      *       <br>String value: Must be one of
-     *       {@code "auto_detect"}, {@code "angle_bracket"}, and {@code "square_bracket"}. 
+     *       {@code "auto_detect"}, {@code "angle_bracket"}, and {@code "square_bracket"}.
+     *        
+     *   <li><p>{@code "interpolation_syntax"} (since 2.3.28):
+     *       See {@link Configuration#setInterpolationSyntax(int)}.
+     *       <br>String value: Must be one of
+     *       {@code "legacy"}, {@code "dollar"}, and {@code "square_bracket"}. 
      *       
      *   <li><p>{@code "naming_convention"}:
      *       See {@link Configuration#setNamingConvention(int)}.

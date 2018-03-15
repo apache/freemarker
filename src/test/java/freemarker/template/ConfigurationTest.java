@@ -1616,6 +1616,34 @@ public class ConfigurationTest extends TestCase {
         assertEquals(Configuration.AUTO_DETECT_NAMING_CONVENTION, cfg.getNamingConvention());
     }
 
+    public void testInterpolationSyntaxSetting() throws TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_28);
+
+        // Default is "legacy":
+        assertEquals(Configuration.LEGACY_INTERPOLATION_SYNTAX, cfg.getInterpolationSyntax());
+        
+        cfg.setSetting("interpolation_syntax", "dollar");
+        assertEquals(Configuration.DOLLAR_INTERPOLATION_SYNTAX, cfg.getInterpolationSyntax());
+        
+        cfg.setSetting("interpolation_syntax", "square_bracket");
+        assertEquals(Configuration.SQUARE_BRACKET_INTERPOLATION_SYNTAX, cfg.getInterpolationSyntax());
+        
+        cfg.setSetting("interpolation_syntax", "legacy");
+        assertEquals(Configuration.LEGACY_INTERPOLATION_SYNTAX, cfg.getInterpolationSyntax());
+        
+        // Camel case:
+        cfg.setSetting("interpolationSyntax", "squareBracket");
+        assertEquals(Configuration.SQUARE_BRACKET_INTERPOLATION_SYNTAX, cfg.getInterpolationSyntax());
+        
+        try {
+            cfg.setSetting("interpolation_syntax", "no_such_syntax");
+            fail();
+        } catch (TemplateException e) {
+            assertThat(e.getMessage(), containsString("no_such_syntax"));
+        }
+        
+    }
+    
     public void testLazyImportsSetSetting() throws TemplateException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_0);
 
