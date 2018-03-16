@@ -1616,6 +1616,41 @@ public class ConfigurationTest extends TestCase {
         assertEquals(Configuration.AUTO_DETECT_NAMING_CONVENTION, cfg.getNamingConvention());
     }
 
+    public void testTagSyntaxSetting() throws TemplateException {
+        Configuration cfg = new Configuration(Configuration.VERSION_2_3_28);
+
+        // Default is "angle brackets":
+        assertEquals(Configuration.ANGLE_BRACKET_TAG_SYNTAX, cfg.getTagSyntax());
+
+        cfg.setSetting("tag_syntax", "angle_bracket");
+        assertEquals(Configuration.ANGLE_BRACKET_TAG_SYNTAX, cfg.getTagSyntax());
+        
+        cfg.setSetting("tag_syntax", "square_bracket");
+        assertEquals(Configuration.SQUARE_BRACKET_TAG_SYNTAX, cfg.getTagSyntax());
+        
+        cfg.setSetting("tag_syntax", "auto_detect");
+        assertEquals(Configuration.AUTO_DETECT_TAG_SYNTAX, cfg.getTagSyntax());
+        
+        // Camel case:
+        cfg.setSetting("tagSyntax", "squareBracket");
+        assertEquals(Configuration.SQUARE_BRACKET_TAG_SYNTAX, cfg.getTagSyntax());
+        
+        try {
+            cfg.setSetting("tag_syntax", "no_such_syntax");
+            fail();
+        } catch (TemplateException e) {
+            assertThat(e.getMessage(), containsString("no_such_syntax"));
+        }
+        
+        // Catch an oversight that's easy to do:
+        try {
+            cfg.setTagSyntax(Configuration.SQUARE_BRACKET_INTERPOLATION_SYNTAX);
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("SQUARE_BRACKET_TAG_SYNTAX"));
+        }
+    }
+    
     public void testInterpolationSyntaxSetting() throws TemplateException {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_28);
 
@@ -1641,7 +1676,14 @@ public class ConfigurationTest extends TestCase {
         } catch (TemplateException e) {
             assertThat(e.getMessage(), containsString("no_such_syntax"));
         }
-        
+
+        // Catch an oversight that's easy to do:
+        try {
+            cfg.setInterpolationSyntax(Configuration.SQUARE_BRACKET_TAG_SYNTAX);
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), containsString("SQUARE_BRACKET_INTERPOLATION_SYNTAX"));
+        }
     }
     
     public void testLazyImportsSetSetting() throws TemplateException {

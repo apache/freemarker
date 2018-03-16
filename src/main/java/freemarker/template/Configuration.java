@@ -381,11 +381,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final int SQUARE_BRACKET_TAG_SYNTAX = 2;
 
     /** <code>${expression}</code> and the deprecated <code>#{expression; numFormat}</code> @since 2.3.28 */
-    public static final int LEGACY_INTERPOLATION_SYNTAX = 0;
+    public static final int LEGACY_INTERPOLATION_SYNTAX = 20;
     /** <code>${expression}</code> only (not <code>#{expression; numFormat}</code>) @since 2.3.28 */
-    public static final int DOLLAR_INTERPOLATION_SYNTAX = 1;
+    public static final int DOLLAR_INTERPOLATION_SYNTAX = 21;
     /** <code>[=expression]</code> @since 2.3.28 */
-    public static final int SQUARE_BRACKET_INTERPOLATION_SYNTAX = 2;
+    public static final int SQUARE_BRACKET_INTERPOLATION_SYNTAX = 22;
     
     public static final int AUTO_DETECT_NAMING_CONVENTION = 10;
     public static final int LEGACY_NAMING_CONVENTION = 11;
