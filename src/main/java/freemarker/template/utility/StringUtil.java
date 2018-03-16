@@ -38,6 +38,10 @@ import freemarker.template.Version;
  */
 public class StringUtil {
     
+    /**
+     *  Used to look up if the chars with low code needs to be escaped, but note that it gives bad result for '=', as
+     *  there the it matters if it's after '['.
+     */
     private static final char[] ESCAPES = createEscapes();
     
     private static final char[] LT = new char[] { '&', 'l', 't', ';' };
@@ -426,6 +430,7 @@ public class StringUtil {
         escapes['\''] = '\'';
         escapes['"'] = '"';
         escapes['<'] = 'l';
+        // As '=' is only escaped if it's after '[', we can't handle it here
         escapes['>'] = 'g';
         escapes['&'] = 'a';
         escapes['\b'] = 'b';
@@ -480,10 +485,16 @@ public class StringUtil {
         StringBuilder buf = null;
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
-            char escape =
-                    c < escLn ? ESCAPES[c] :
-                    c == '{' && i > 0 && isInterpolationStart(s.charAt(i - 1)) ? '{' :
-                    0;
+            char escape;
+            if (c == '=') {
+                escape = i > 0 && s.charAt(i - 1) == '[' ? '=' : 0;
+            } else if (c < escLn) {
+                escape = ESCAPES[c]; //
+            } else if (c == '{' && i > 0 && isInterpolationStart(s.charAt(i - 1))) {
+                escape = '{';
+            } else {
+                escape = 0;
+            }
             if (escape == 0 || escape == otherQuotation) {
                 if (buf != null) {
                     buf.append(c);
@@ -605,7 +616,8 @@ public class StringUtil {
                     bidx = idx + 2;
                     break;
                 case '{':
-                    buf.append('{');
+                case '=':
+                    buf.append(c);
                     bidx = idx + 2;
                     break;
                 case 'x': {

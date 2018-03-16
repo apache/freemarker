@@ -71,6 +71,13 @@ public class InterpolationSyntaxTest extends TemplateTest {
         
         assertOutput("<@r'${1} #{1} [=1]'?interpret />", "${1} #{1} 1");
         assertOutput("[='\"${1} #{1} [=1]\"'?eval]", "${1} #{1} 1");
+        
+        assertErrorContains("[=", "end of file");
+        assertErrorContains("[=1", "unclosed \"[\"");
+        
+        assertOutput("[='[\\=1]']", "[=1]");
+        assertOutput("[='[\\=1][=2]']", "12"); // Usual legacy interpolation escaping glitch...
+        assertOutput("[=r'[=1]']", "[=1]");
     }
 
     @Test

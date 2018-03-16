@@ -2276,6 +2276,13 @@ this is a backslash: \</programlisting>
                 </tr>
 
                 <tr>
+                  <td><literal>\=</literal></td>
+
+                  <td>Equals character: <literal>=</literal> (Supported since
+                  FreeMarker 2.3.28.)</td>
+                </tr>
+
+                <tr>
                   <td><literal>\\</literal></td>
 
                   <td>Back slash (u005C)</td>
@@ -2349,15 +2356,20 @@ this is a backslash: \</programlisting>
             digit, you must use all 4 digits or else FreeMarker will
             misunderstand you.</para>
 
-            <para>Note that the character sequence <literal>${</literal> (and
-            <literal>#{</literal>) has special meaning. It's used to insert
-            the value of expressions (typically: the value of variables, as in
-            <literal>"Hello ${user}!"</literal>). This will be explained <link
+            <para>Note that the character sequence <literal>${</literal> and
+            <literal>#{</literal> (and rarely <literal>[=</literal> instead,
+            depending on <link linkend="dgui_misc_alternativesyntax">the
+            configured syntax</link>) has special meaning. They are used to
+            insert the value of expressions (typically: the value of
+            variables, as in <literal>"Hello ${user}!"</literal>). This will
+            be explained <link
             linkend="dgui_template_exp_stringop_interpolation">later</link>.
             If you want to print <literal>${</literal> or
-            <literal>#{</literal>, you should either use raw string literals
-            as explained below, or escape the <literal>{</literal> like in
-            <literal>"foo $\{bar}"</literal>.</para>
+            <literal>#{</literal> (or <literal>[=</literal>), you should
+            either use raw string literals as explained below, or escape the
+            <literal>{</literal> like in <literal>"foo $\{bar}"</literal> (or
+            the <literal>=</literal> like in <literal>"foo
+            [\=bar]"</literal>).</para>
 
             <indexterm>
               <primary>raw string literal</primary>
@@ -2838,6 +2850,14 @@ baz
             similarly as in <phrase role="markedText">text</phrase>
             sections</link> (so it goes through the same <emphasis>locale
             sensitive</emphasis> number and date/time formatting).</para>
+
+            <note>
+              <para>It's possible to configure FreeMarker's interpolation
+              syntax to use
+              <literal>[=<replaceable>...</replaceable>]</literal> instead;
+              <link linkend="dgui_misc_alternativesyntax_interpolation">see
+              here</link>.</para>
+            </note>
 
             <para>Example (assume that user is <quote>Big Joe</quote>):</para>
 
@@ -4200,7 +4220,7 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
           kind of expression (e.g. <literal>${100 + x}</literal>).</para>
 
           <note>
-            <para>Actually, FreeMarker can be configured to use
+            <para>FreeMarker can be configured to use
             <literal>[=<replaceable>expression</replaceable>]</literal> syntax
             instead. <link linkend="dgui_misc_alternativesyntax">See more
             about alternative syntaxes...</link></para>
@@ -27556,6 +27576,37 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               which return the smallest and greatest item from a list of
               numbers or date/time/date-times. <link
               linkend="ref_builtin_min_max">See more here...</link></para>
+            </listitem>
+
+            <listitem>
+              <para>The template language can now be configured to use
+              <literal>[=<replaceable>expression</replaceable>]</literal>
+              instead of
+              <literal>${<replaceable>expression</replaceable>}</literal> and
+              <literal>#{<replaceable>expression</replaceable>}</literal>,
+              which is very useful if you have a lot of
+              <literal>${<replaceable>...</replaceable>}</literal> or
+              <literal>#{<replaceable>...</replaceable>}</literal> in the text
+              that you are generating, and so they should be static text. See
+              <link linkend="dgui_misc_alternativesyntax_interpolation">more
+              about the square bracket interpolation syntax here.</link> The
+              template language can also be configured to only use
+              <literal>${<replaceable>expression</replaceable>}</literal>, and
+              treat
+              <literal>#{<replaceable>expression</replaceable>}</literal> as
+              static text. (See the <literal>interpolation_syntax</literal>
+              configuration setting, or the
+              <literal>Configuration.setInterpolationSyntax(int)</literal>
+              method.)</para>
+            </listitem>
+
+            <listitem>
+              <para>In string literals, <literal>\=</literal> is now a valid
+              escape sequence, resulting in a <literal>=</literal>. This is
+              useful when you are using the new
+              <literal>[=<replaceable>exp</replaceable>]</literal>
+              interpolation syntax, which can be escaped in a string literal
+              like <literal>"Literal [\=x]"</literal>.</para>
             </listitem>
 
             <listitem>
