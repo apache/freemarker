@@ -527,7 +527,7 @@ TOKEN_MGR_DECLS:
      * Keeps track of how deeply nested we have the hash literals. This is necessary since we need to be able to
      * distinguish the } used to close a hash literal and the one used to close a ${
      */
-    private int hashLiteralNesting;
+    private int curlyBracketNesting;
     private int parenthesisNesting;
     private int bracketNesting;
     private boolean inFTLHeader;
@@ -632,21 +632,20 @@ TOKEN_MGR_DECLS:
         SwitchTo(FM_EXPRESSION);
     }
 
-    /**
-     * @param tok
-     *         Assumed to be an '}', or something that is the closing pair of another "mirror image" character.
-     */
-    private void endInterpolation(Token tok) {
+    private void endInterpolation(Token closingTk) {
         if (postInterpolationLexState == -1) {
-            char c = tok.image.charAt(0);
-            throw new TokenMgrError(
-                    "You can't have an \"" + c + "\" here, as there's nothing open that it could close.",
-                    TokenMgrError.LEXICAL_ERROR,
-                    tok.beginLine, tok.beginColumn,
-                    tok.endLine, tok.endColumn);
+            throw newUnexpectedClosingTokenException(closingTk);
         }
         SwitchTo(postInterpolationLexState);
         postInterpolationLexState = -1;
+    }
+    
+    private TokenMgrError newUnexpectedClosingTokenException(Token closingTk) {
+            return new TokenMgrError(
+                    "You can't have an \"" + closingTk.image + "\" here, as there's nothing open that it could close.",
+                    TokenMgrError.LEXICAL_ERROR,
+                    closingTk.beginLine, closingTk.beginColumn,
+                    closingTk.endLine, closingTk.endColumn);
     }
 
     private void eatNewline() {
@@ -953,6 +952,7 @@ TOKEN:
     // Find related: [interpolation prefixes]
     <DOLLAR_INTERPOLATION_OPENING : "${"> { startInterpolation(matchedToken); }
     |
+    // Find related: [interpolation prefixes]
     <SQUARE_BRACKET_INTERPOLATION_OPENING : "[="> { startInterpolation(matchedToken); }
 }
 
@@ -1121,13 +1121,18 @@ TOKEN:
     |
     <OPENING_CURLY_BRACKET : "{">
     {
-        ++hashLiteralNesting;
+        ++curlyBracketNesting;
     }
     |
     <CLOSING_CURLY_BRACKET : "}">
     {
-        if (hashLiteralNesting == 0) endInterpolation(matchedToken);
-        else --hashLiteralNesting;
+        if (curlyBracketNesting > 0) {
+            --curlyBracketNesting;
+        } else if (interpolationSyntax != InterpolationSyntax.SQUARE_BRACKET) {
+            endInterpolation(matchedToken);
+        } else {
+            throw newUnexpectedClosingTokenException(matchedToken);
+        }
     }
     |
     <IN : "in">
