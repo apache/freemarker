@@ -20,8 +20,11 @@ package org.apache.freemarker.core.util;
 
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNull;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
@@ -43,8 +46,10 @@ public class TemplateLanguageUtilsTest {
         assertEquals("a\\'c\"d", TemplateLanguageUtils.escapeStringLiteralPart("a'c\"d", '\''));
         assertEquals("\\n\\r\\t\\f\\x0002\\\\", TemplateLanguageUtils.escapeStringLiteralPart("\n\r\t\f\u0002\\"));
         assertEquals("\\l\\g\\a", TemplateLanguageUtils.escapeStringLiteralPart("<>&"));
+        assertEquals("=[\\=]=", TemplateLanguageUtils.escapeStringLiteralPart("=[=]="));
+        assertEquals("[\\=", TemplateLanguageUtils.escapeStringLiteralPart("[="));
     }
-
+    
     @Test
     public void testEscapeStringLiteralAll() {
         assertFTLEsc("", "", "", "", "\"\"");
@@ -79,6 +84,20 @@ public class TemplateLanguageUtilsTest {
         assertEquals(
                 "'\"\n\b\u0000c><&{\\",
                 TemplateLanguageUtils.unescapeStringLiteralPart("\\'\\\"\\n\\b\\x0000c\\g\\l\\a\\{\\\\"));
+        
+        assertEquals("\nq", TemplateLanguageUtils.unescapeStringLiteralPart("\\x0Aq"));
+        assertEquals("\n\r1", TemplateLanguageUtils.unescapeStringLiteralPart("\\x0A\\x000D1"));
+        assertEquals("\n\r\t", TemplateLanguageUtils.unescapeStringLiteralPart("\\n\\r\\t"));
+        assertEquals("${1}#{2}[=3]", TemplateLanguageUtils.unescapeStringLiteralPart("$\\{1}#\\{2}[\\=3]"));
+        assertEquals("{=", TemplateLanguageUtils.unescapeStringLiteralPart("\\{\\="));
+        assertEquals("\\=", TemplateLanguageUtils.unescapeStringLiteralPart("\\\\="));
+           
+        try {
+            TemplateLanguageUtils.unescapeStringLiteralPart("\\[");
+            fail();
+        } catch (GenericParseException e) {
+            assertThat(e.getMessage(), containsString("\\["));
+        }
     }
 
     @Test

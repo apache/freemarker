@@ -91,6 +91,10 @@ public class InterpolationSyntaxTest extends TemplateTest {
         assertErrorContains("[=", "end of file");
         assertErrorContains("[=1", "unclosed \"[\"");
         
+        assertOutput("[='[\\=1]']", "[=1]");
+        assertOutput("[='[\\=1][=2]']", "12"); // Usual legacy interpolation escaping glitch...
+        assertOutput("[=r'[=1]']", "[=1]");        
+        
         StringWriter sw = new StringWriter();
         new Template(null, "[= 1 + '[= 2 ]' ]", getConfiguration()).dump(sw);
         assertEquals("[=1 + \"[=2]\"]", sw.toString());

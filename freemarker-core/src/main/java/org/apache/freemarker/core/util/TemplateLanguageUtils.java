@@ -53,6 +53,10 @@ import org.apache.freemarker.core.model.impl.JavaMethodModel;
 // TODO [FM3] This name won't be good if the template language isn't called "FTL"...
 public final class TemplateLanguageUtils {
 
+    /**
+     *  Used to look up if the chars with low code needs to be escaped, but note that it gives bad result for '=', as
+     *  there the it matters if it's after '['.
+     */
     private static final char[] ESCAPES = createEscapes();
 
     private TemplateLanguageUtils() {
@@ -68,6 +72,7 @@ public final class TemplateLanguageUtils {
         escapes['\''] = '\'';
         escapes['"'] = '"';
         escapes['<'] = 'l';
+        // As '=' is only escaped if it's after '[', we can't handle it here
         escapes['>'] = 'g';
         escapes['&'] = 'a';
         escapes['\b'] = 'b';
@@ -139,10 +144,16 @@ public final class TemplateLanguageUtils {
         StringBuilder buf = null;
         for (int i = 0; i < ln; i++) {
             char c = s.charAt(i);
-            char escape =
-                    c < escLn ? ESCAPES[c] :
-                            c == '{' && i > 0 && isInterpolationStart(s.charAt(i - 1)) ? '{' :
-                                    0;
+            char escape;
+            if (c == '=') {
+                escape = i > 0 && s.charAt(i - 1) == '[' ? '=' : 0;
+            } else if (c < escLn) {
+                escape = ESCAPES[c]; //
+            } else if (c == '{' && i > 0 && s.charAt(i - 1) == '$') {
+                escape = '{';
+            } else {
+                escape = 0;
+            }
             if (escape == 0 || escape == otherQuotation
                     || c == '&' && !escapeAmp || c == '<' && !escapeLT || c == '>' && !escapeGT) {
                 if (buf != null) {
@@ -179,11 +190,6 @@ public final class TemplateLanguageUtils {
             }
             return buf.toString();
         }
-    }
-
-    private static boolean isInterpolationStart(char c) {
-        // Find related: [interpolation prefixes]
-        return c == '$';
     }
 
     /**
@@ -267,7 +273,8 @@ public final class TemplateLanguageUtils {
                     bidx = idx + 2;
                     break;
                 case '{':
-                    buf.append('{');
+                case '=':
+                    buf.append(c);
                     bidx = idx + 2;
                     break;
                 case 'x': {
