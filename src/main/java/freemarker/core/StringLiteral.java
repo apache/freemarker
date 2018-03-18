@@ -54,9 +54,9 @@ final class StringLiteral extends Expression implements TemplateScalarModel {
         if (value.length() > 3 && (
                     (intSyn == Configuration.LEGACY_INTERPOLATION_SYNTAX
                         || intSyn == Configuration.DOLLAR_INTERPOLATION_SYNTAX) 
-                        && (value.indexOf("${") >= 0
-                    || intSyn == Configuration.LEGACY_INTERPOLATION_SYNTAX && value.indexOf("#{") >= 0)
-                    || intSyn == Configuration.SQUARE_BRACKET_INTERPOLATION_SYNTAX && value.indexOf("[=") >= 0)) {
+                        && (value.indexOf("${") != -1
+                    || intSyn == Configuration.LEGACY_INTERPOLATION_SYNTAX && value.indexOf("#{") != -1)
+                    || intSyn == Configuration.SQUARE_BRACKET_INTERPOLATION_SYNTAX && value.indexOf("[=") != -1)) {
             try {
                 SimpleCharStream simpleCharacterStream = new SimpleCharStream(
                         new StringReader(value),

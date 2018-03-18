@@ -28,7 +28,10 @@ import freemarker.template.TemplateException;
 import freemarker.template.utility.StringUtil;
 
 /**
- * An instruction that outputs the value of a numerical expression.
+ * An interpolation like <code>#{numericalExp; format}</code>; it's deprecated, but still supported. The class name is
+ * the remnant of old times, but as some users are using the package-visible AST API, it wasn't renamed.
+ * 
+ * @see DollarVariable
  */
 final class NumericalOutput extends Interpolation {
 

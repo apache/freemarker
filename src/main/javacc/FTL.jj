@@ -1194,7 +1194,7 @@ TOKEN:
     <#ESCAPED_CHAR :
         "\\"
         (
-            ("n" | "t" | "r" | "f" | "b" | "g" | "l" | "a" | "\\" | "'" | "\"" | "$" | "{" | "=")
+            ("n" | "t" | "r" | "f" | "b" | "g" | "l" | "a" | "\\" | "'" | "\"" | "{" | "=")
             |
             ("x" ["0"-"9", "A"-"F", "a"-"f"])
         )
@@ -2329,11 +2329,11 @@ StringLiteral StringLiteral(boolean interpolate) :
             int interpolationSyntax = pCfg.getInterpolationSyntax();
             if ((interpolationSyntax == LEGACY_INTERPOLATION_SYNTAX
                     || interpolationSyntax == DOLLAR_INTERPOLATION_SYNTAX)
-	                    && t.image.indexOf("${") >= 0
+	                    && t.image.indexOf("${") != -1
 	                || interpolationSyntax == LEGACY_INTERPOLATION_SYNTAX
-	                    && t.image.indexOf("#{") >= 0
+	                    && t.image.indexOf("#{") != -1
 	                || interpolationSyntax == SQUARE_BRACKET_INTERPOLATION_SYNTAX
-	                    && t.image.indexOf("[=") >= 0) {
+	                    && t.image.indexOf("[=") != -1) {
                 result.parseValue(this, outputFormat);
             }
         }
@@ -2400,7 +2400,7 @@ HashLiteral HashLiteral() :
 /**
  * A production representing the ${...} or [=...] that outputs a variable.
  */
-DollarVariable StringOutput() :
+DollarVariable NormalInterpolation() :
 {
     Expression exp;
     Token begin, end;
@@ -2410,26 +2410,19 @@ DollarVariable StringOutput() :
 	    (
 	        begin = <DOLLAR_INTERPOLATION_OPENING>
 	        exp = Expression()
-	            {
-	                notHashLiteral(exp, NonStringException.STRING_COERCABLE_TYPES_DESC);
-	                notListLiteral(exp, NonStringException.STRING_COERCABLE_TYPES_DESC);
-	            }
-	
 	        end = <CLOSING_CURLY_BRACKET>
 	    )
 	    |
 	    (
 	        begin = <SQUARE_BRACKET_INTERPOLATION_OPENING>
 	        exp = Expression()
-	            {
-	                notHashLiteral(exp, NonStringException.STRING_COERCABLE_TYPES_DESC);
-	                notListLiteral(exp, NonStringException.STRING_COERCABLE_TYPES_DESC);
-	            }
-	
 	        end = <CLOSE_BRACKET>
 	    )
     )
     {
+        notHashLiteral(exp, NonStringException.STRING_COERCABLE_TYPES_DESC);
+        notListLiteral(exp, NonStringException.STRING_COERCABLE_TYPES_DESC);
+                    
         DollarVariable result = new DollarVariable(
                 exp, escapedExpression(exp),
                 outputFormat,
@@ -2439,7 +2432,7 @@ DollarVariable StringOutput() :
     }
 }
 
-NumericalOutput NumericalOutput() :
+NumericalOutput NumericalInterpolation() :
 {
     Expression exp;
     Token fmt = null, begin, end;
@@ -4140,9 +4133,9 @@ TemplateElements MixedContentElements() :
         (
             elem = PCData()
             |
-            elem = StringOutput()
+            elem = NormalInterpolation()
             |
-            elem = NumericalOutput()
+            elem = NumericalInterpolation()
             |
             elem = FreemarkerDirective()
         )
@@ -4186,9 +4179,9 @@ MixedContent MixedContent() :
         (
             elem = PCData()
             |
-            elem = StringOutput()
+            elem = NormalInterpolation()
             |
-            elem = NumericalOutput()
+            elem = NumericalInterpolation()
             |
             elem = FreemarkerDirective()
         )
@@ -4243,9 +4236,9 @@ TemplateElement FreeMarkerText() :
         (
             elem = PCData()
             |
-            elem = StringOutput()
+            elem = NormalInterpolation()
             |
-            elem = NumericalOutput()
+            elem = NumericalInterpolation()
         )
         {
             if (begin == null) {
@@ -4495,12 +4488,12 @@ List<Object> StaticTextAndInterpolations() :
 	    (
 	        LOOKAHEAD(<DOLLAR_INTERPOLATION_OPENING>|<SQUARE_BRACKET_INTERPOLATION_OPENING>)
 		    (
-		        interpolation = StringOutput()
+		        interpolation = NormalInterpolation()
 	        )
 		    |
             LOOKAHEAD(<HASH_INTERPOLATION_OPENING>)
 		    (
-                interpolation = NumericalOutput()
+                interpolation = NumericalInterpolation()
 		    )
 	    )
 	    {

@@ -2409,8 +2409,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Determines the interpolation syntax (like <code>${x}</code> VS <code>[=x]</code>) of the template files in which
-     * there's no {@code #ftl} hader with {@code interpolation_syntax} parameter. The
+     * Determines the interpolation syntax (like <code>${x}</code> VS <code>[=x]</code>) of the template files. The
      * {@code interpolationSyntax} parameter must be one of {@link Configuration#LEGACY_INTERPOLATION_SYNTAX},
      * {@link Configuration#DOLLAR_INTERPOLATION_SYNTAX}, and {@link Configuration#SQUARE_BRACKET_INTERPOLATION_SYNTAX}.
      * 

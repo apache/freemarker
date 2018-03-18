@@ -1,9 +1,13 @@
 package freemarker.core;
 
 import static freemarker.template.Configuration.*;
+import static org.junit.Assert.*;
+
+import java.io.StringWriter;
 
 import org.junit.Test;
 
+import freemarker.template.Template;
 import freemarker.test.TemplateTest;
 
 public class InterpolationSyntaxTest extends TemplateTest {
@@ -78,6 +82,10 @@ public class InterpolationSyntaxTest extends TemplateTest {
         assertOutput("[='[\\=1]']", "[=1]");
         assertOutput("[='[\\=1][=2]']", "12"); // Usual legacy interpolation escaping glitch...
         assertOutput("[=r'[=1]']", "[=1]");
+        
+        StringWriter sw = new StringWriter();
+        new Template(null, "[= 1 + '[= 2 ]' ]", getConfiguration()).dump(sw);
+        assertEquals("[=1 + \"[=2]\"]", sw.toString());
     }
 
     @Test
