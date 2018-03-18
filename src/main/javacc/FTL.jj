@@ -116,29 +116,29 @@ public class FMParser {
      *            The template associated with this parser.
      * @param reader
      *            The character stream to use as input
-     * @param strictEscapeSyntax
+     * @param strictSyntaxMode
      *            Whether FreeMarker directives must start with a #
      *
      * @Deprecated This is an internal API of FreeMarker; will be removed in 2.4.
      */
-    public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace) {
-        this(template, reader, strictEscapeSyntax, stripWhitespace, Configuration.AUTO_DETECT_TAG_SYNTAX);
+    public FMParser(Template template, Reader reader, boolean strictSyntaxMode, boolean stripWhitespace) {
+        this(template, reader, strictSyntaxMode, stripWhitespace, Configuration.AUTO_DETECT_TAG_SYNTAX);
     }
 
     /**
      * @Deprecated This is an internal API of FreeMarker; will be changed in 2.4.
      */
-    public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace, int tagSyntax) {
-        this(template, reader, strictEscapeSyntax, stripWhitespace, tagSyntax,
+    public FMParser(Template template, Reader reader, boolean strictSyntaxMode, boolean stripWhitespace, int tagSyntax) {
+        this(template, reader, strictSyntaxMode, stripWhitespace, tagSyntax,
                 Configuration.PARSED_DEFAULT_INCOMPATIBLE_ENHANCEMENTS);
     }
 
     /**
      * @Deprecated This is an internal API of FreeMarker; will be changed in 2.4.
      */
-    public FMParser(Template template, Reader reader, boolean strictEscapeSyntax, boolean stripWhitespace,
+    public FMParser(Template template, Reader reader, boolean strictSyntaxMode, boolean stripWhitespace,
             int tagSyntax, int incompatibleImprovements) {
-        this(template, reader, strictEscapeSyntax, stripWhitespace,
+        this(template, reader, strictSyntaxMode, stripWhitespace,
                 tagSyntax, Configuration.AUTO_DETECT_NAMING_CONVENTION, incompatibleImprovements);
     }
 
@@ -240,7 +240,7 @@ public class FMParser {
 
         token_source.setParser(this);
 
-        token_source.strictEscapeSyntax = pCfg.getStrictSyntaxMode();
+        token_source.strictSyntaxMode = pCfg.getStrictSyntaxMode();
 
         int tagSyntax = pCfg.getTagSyntax();
         switch (tagSyntax) {
@@ -287,7 +287,7 @@ public class FMParser {
         token_source.initialNamingConvention = parentTokenSource.initialNamingConvention;
         token_source.namingConvention = parentTokenSource.namingConvention;
         token_source.namingConventionEstabilisher = parentTokenSource.namingConventionEstabilisher;
-        token_source.SwitchTo(NODIRECTIVE);
+        token_source.SwitchTo(NO_DIRECTIVE);
         
         this.outputFormat = outputFormat;
         recalculateAutoEscapingField();                                
@@ -621,11 +621,11 @@ TOKEN_MGR_DECLS:
      * Keeps track of how deeply nested we have the hash literals. This is necessary since we need to be able to
      * distinguish the } used to close a hash literal and the one used to close a ${
      */
-    private int hashLiteralNesting;
+    private int curlyBracketNesting;
     private int parenthesisNesting;
     private int bracketNesting;
     private boolean inFTLHeader;
-    boolean strictEscapeSyntax,
+    boolean strictSyntaxMode,
             squBracTagSyntax,
             autodetectTagSyntax,
             directiveSyntaxEstablished,
@@ -649,7 +649,7 @@ TOKEN_MGR_DECLS:
         
         // Non-strict syntax (deprecated) only supports legacy naming convention.
         // We didn't push this on the tokenizer because it made it slow, so we filter here.
-        if (!strictEscapeSyntax
+        if (!strictSyntaxMode
                 && (tokenNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION)
                 && !isStrictTag(image)) {
             tok.kind = STATIC_TEXT_NON_WS;
@@ -665,7 +665,7 @@ TOKEN_MGR_DECLS:
             return;
         }
         
-        if (!strictEscapeSyntax) {
+        if (!strictSyntaxMode) {
             // Legacy feature (or bug?): Tag syntax never gets estabilished in non-strict mode.
             // We do establilish the naming convention though.
             checkNamingConvention(tok, tokenNamingConvention);
@@ -824,21 +824,20 @@ TOKEN_MGR_DECLS:
         SwitchTo(FM_EXPRESSION);
     }
 
-    /**
-     * @param tok
-     *         Assumed to be an '}', or something that is the closing pair of another "mirror image" character.
-     */
-    private void endInterpolation(Token tok) {
+    private void endInterpolation(Token closingTk) {
         if (postInterpolationLexState == -1) {
-            char c = tok.image.charAt(0);
-            throw new TokenMgrError(
-                    "You can't have an \"" + c + "\" here, as there's nothing open that it could close.",
-                    TokenMgrError.LEXICAL_ERROR,
-                    tok.beginLine, tok.beginColumn,
-                    tok.endLine, tok.endColumn);
+            throw newUnexpectedClosingTokenException(closingTk);
         }
         SwitchTo(postInterpolationLexState);
         postInterpolationLexState = -1;
+    }
+    
+    private TokenMgrError newUnexpectedClosingTokenException(Token closingTk) {
+            return new TokenMgrError(
+                    "You can't have an \"" + closingTk.image + "\" here, as there's nothing open that it could close.",
+                    TokenMgrError.LEXICAL_ERROR,
+                    closingTk.beginLine, closingTk.beginColumn,
+                    closingTk.endLine, closingTk.endColumn);
     }
 
     private void eatNewline() {
@@ -1095,7 +1094,7 @@ TOKEN:
                 matchedToken.kind = STATIC_TEXT_NON_WS;
             } else if (firstChar == '[' && !squBracTagSyntax) {
                 matchedToken.kind = STATIC_TEXT_NON_WS;
-            } else if (strictEscapeSyntax) {
+            } else if (strictSyntaxMode) {
                 String dn = matchedToken.image;
                 int index = dn.indexOf('#');
                 dn = dn.substring(index + 1);
@@ -1149,7 +1148,7 @@ TOKEN:
     }
 }
 
-<DEFAULT, NODIRECTIVE> TOKEN :
+<DEFAULT, NO_DIRECTIVE> TOKEN :
 {
     <STATIC_TEXT_WS : ("\n" | "\r" | "\t" | " ")+>
     |
@@ -1330,13 +1329,18 @@ TOKEN:
     |
     <OPENING_CURLY_BRACKET : "{">
     {
-        ++hashLiteralNesting;
+        ++curlyBracketNesting;
     }
     |
     <CLOSING_CURLY_BRACKET : "}">
     {
-        if (hashLiteralNesting == 0) endInterpolation(matchedToken);
-        else --hashLiteralNesting;
+        if (curlyBracketNesting > 0) {
+            --curlyBracketNesting;
+        } else if (interpolationSyntax != SQUARE_BRACKET_INTERPOLATION_SYNTAX) {
+            endInterpolation(matchedToken);
+        } else {
+            throw newUnexpectedClosingTokenException(matchedToken);
+        }
     }
     |
     <IN : "in">
@@ -4341,7 +4345,7 @@ void HeaderElement() :
                         } else if (ks.equalsIgnoreCase("STRIP_TEXT") || ks.equals("stripText")) {
                             this.stripText = getBoolean(exp, true);
                         } else if (ks.equalsIgnoreCase("STRICT_SYNTAX") || ks.equals("strictSyntax")) {
-                            this.token_source.strictEscapeSyntax = getBoolean(exp, true);
+                            this.token_source.strictSyntaxMode = getBoolean(exp, true);
                         } else if (ks.equalsIgnoreCase("auto_esc") || ks.equals("autoEsc")) {
                             if (getBoolean(exp, false)) {
                                 autoEscRequester = key;

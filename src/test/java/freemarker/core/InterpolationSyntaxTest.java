@@ -78,6 +78,7 @@ public class InterpolationSyntaxTest extends TemplateTest {
         
         assertErrorContains("[=", "end of file");
         assertErrorContains("[=1", "unclosed \"[\"");
+        assertErrorContains("[=1}", "\"}\"", "open");
         
         assertOutput("[='[\\=1]']", "[=1]");
         assertOutput("[='[\\=1][=2]']", "12"); // Usual legacy interpolation escaping glitch...
