@@ -185,7 +185,7 @@ public class FMParser {
     }
     
     void setupStringLiteralMode(FMParserTokenManager parentTokenSource, OutputFormat outputFormat) {
-        token_source.SwitchTo(NODIRECTIVE);
+        token_source.SwitchTo(NO_DIRECTIVE);
         
         this.outputFormat = outputFormat;
         recalculateAutoEscapingField();                                
@@ -940,7 +940,7 @@ TOKEN:
     }
 }
 
-<DEFAULT, NODIRECTIVE> TOKEN :
+<DEFAULT, NO_DIRECTIVE> TOKEN :
 {
     <STATIC_TEXT_WS : ("\n" | "\r" | "\t" | " ")+>
     |
@@ -1383,16 +1383,16 @@ TOKEN:
 // expression syntax.
 
 /**
- * This is the same as ASTExpOr, since
+ * This is the same as Or, since
  * OR is the operator with the lowest
  * precedence.
  */
-ASTExpression ASTExpression() :
+ASTExpression Expression() :
 {
     ASTExpression exp;
 }
 {
-    exp = ASTExpOr()
+    exp = Or()
     {
         return exp;
     }
@@ -1415,9 +1415,9 @@ ASTExpression HighestPrecedenceExpression() :
         |
         exp = FunctionCall(exp)
         |
-        exp = ASTExpBuiltIn(exp)
+        exp = BuiltIn(exp)
         |
-        exp = ASTExpDefault(exp) // See precedence notes at the product
+        exp = Default(exp) // See precedence notes at the product
         |
         exp = Exists(exp)
     )*
@@ -1437,21 +1437,21 @@ ASTExpression AtomicExpression() :
 }
 {
     (
-        exp = ASTExpNumberLiteral()
+        exp = NumberLiteral()
         |   
-        exp = ASTExpHashLiteral()
+        exp = HashLiteral()
         |   
-        exp = ASTExpStringLiteral(true)
+        exp = StringLiteral(true)
         |   
-        exp = ASTExpBooleanLiteral()
+        exp = BooleanLiteral()
         |   
-        exp = ASTExpListLiteral()
+        exp = ListLiteral()
         |   
-        exp = ASTExpVariable()
+        exp = Variable()
         |   
         exp = Parenthesis()
         |   
-        exp = ASTExpBuiltInVariable()
+        exp = BuiltInVariable()
     )
     {
         return exp;
@@ -1465,7 +1465,7 @@ ASTExpression Parenthesis() :
 }
 {
     start = <OPEN_PAREN>
-    exp = ASTExpression()
+    exp = Expression()
     end = <CLOSE_PAREN>
     {
         result = new ASTExpParenthesis(exp);
@@ -1485,9 +1485,9 @@ ASTExpression UnaryPrefixExpression() :
 }
 {
     (
-        result = ASTExpNegateOrPlus()
+        result = NegateOrPlus()
         |
-        result = ASTExpNot()
+        result = Not()
         |
         result = HighestPrecedenceExpression()
     )
@@ -1496,7 +1496,7 @@ ASTExpression UnaryPrefixExpression() :
     }
 }
 
-ASTExpression ASTExpNot() : 
+ASTExpression Not() : 
 {
     Token t;
     ASTExpression exp, result = null;
@@ -1518,7 +1518,7 @@ ASTExpression ASTExpNot() :
     }
 }
 
-ASTExpression ASTExpNegateOrPlus() :
+ASTExpression NegateOrPlus() :
 {
     ASTExpression exp, result;
     boolean isMinus = false;
@@ -1729,10 +1729,7 @@ ASTExpression RangeExpression() :
     }
 }
 
-
-
-
-ASTExpression ASTExpAnd() :
+ASTExpression And() :
 {
     ASTExpression lhs, rhs, result;
     Token tk;
@@ -1756,17 +1753,17 @@ ASTExpression ASTExpAnd() :
     }
 }
 
-ASTExpression ASTExpOr() :
+ASTExpression Or() :
 {
     ASTExpression lhs, rhs, result;
     Token tk;
 }
 {
-    lhs = ASTExpAnd() { result = lhs; }
+    lhs = And() { result = lhs; }
     (
         LOOKAHEAD(<OR>)
         tk = <OR>
-        rhs = ASTExpAnd()
+        rhs = And()
         {
             booleanLiteralOnly(lhs);
             booleanLiteralOnly(rhs);
@@ -1780,7 +1777,7 @@ ASTExpression ASTExpOr() :
     }
 }
 
-ASTExpListLiteral ASTExpListLiteral() :
+ASTExpListLiteral ListLiteral() :
 {
     ArrayList values = new ArrayList();
     Token begin, end;
@@ -1796,7 +1793,7 @@ ASTExpListLiteral ASTExpListLiteral() :
     }
 }
 
-ASTExpression ASTExpNumberLiteral() :
+ASTExpNumberLiteral NumberLiteral() :
 {
     Token op = null, t;
 }
@@ -1808,14 +1805,14 @@ ASTExpression ASTExpNumberLiteral() :
     )
     {
         String s = t.image;
-        ASTExpression result = new ASTExpNumberLiteral(pCfg.getArithmeticEngine().toNumber(s));
+        ASTExpNumberLiteral result = new ASTExpNumberLiteral(pCfg.getArithmeticEngine().toNumber(s));
         Token startToken = (op != null) ? op : t;
         result.setLocation(template, startToken, t);
         return result;
     }
 }
 
-ASTExpVariable ASTExpVariable() :
+ASTExpVariable Variable() :
 {
     Token t;
 }
@@ -1834,16 +1831,16 @@ ASTExpression IdentifierOrStringLiteral() :
 }
 {
     (
-        exp = ASTExpVariable()
+        exp = Variable()
         |
-        exp = ASTExpStringLiteral(false)
+        exp = StringLiteral(false)
     )
     {
         return exp;
     }   
 }
 
-ASTExpBuiltInVariable ASTExpBuiltInVariable() :
+ASTExpBuiltInVariable BuiltInVariable() :
 {
     Token dot, name;
 }
@@ -1898,7 +1895,7 @@ ASTExpression Exists(ASTExpression exp) :
  * consume it, stealing it from the HighestPrecedenceExpression that we will ascend back into, thus, the `!` behaves
  * according its lower precedence on the right side (and also, note that `!` is right-associative).
  */
-ASTExpression ASTExpDefault(ASTExpression exp) :
+ASTExpression Default(ASTExpression exp) :
 {
     Token exclamTk;
     ASTExpression defaultExp;
@@ -1926,7 +1923,7 @@ ASTExpression ASTExpDefault(ASTExpression exp) :
     }
 }
 
-ASTExpression ASTExpBuiltIn(ASTExpression lhoExp) :
+ASTExpression BuiltIn(ASTExpression lhoExp) :
 {
     Token t = null;
     ASTExpBuiltIn result;
@@ -2062,7 +2059,7 @@ ASTExpression DynamicKey(ASTExpression exp) :
 }
 {
     <OPEN_BRACKET>
-    arg = ASTExpression()
+    arg = Expression()
     t = <CLOSE_BRACKET>
     {
         notBooleanLiteral(exp, "list or hash");
@@ -2094,7 +2091,7 @@ ASTExpFunctionCall FunctionCall(ASTExpression functionExp) :
         (
             t = <ID>
             <ASSIGNMENT_EQUALS>
-            exp = ASTExpression()
+            exp = Expression()
             {
                 if (prevChoiceComma == null && (positionalArgs != null || namedArgs != null)) {
                         throw new ParseException("Missing comma (\",\") before expression. "
@@ -2128,7 +2125,7 @@ ASTExpFunctionCall FunctionCall(ASTExpression functionExp) :
         )
         |
         (
-            exp = ASTExpression()
+            exp = Expression()
             {
                 if (namedArgs != null) {
                     throw new ParseException(
@@ -2183,7 +2180,7 @@ ASTExpFunctionCall FunctionCall(ASTExpression functionExp) :
 }
 
 
-ASTExpStringLiteral ASTExpStringLiteral(boolean interpolate) :
+ASTExpStringLiteral StringLiteral(boolean interpolate) :
 {
     Token t;
     boolean raw = false;
@@ -2220,7 +2217,7 @@ ASTExpStringLiteral ASTExpStringLiteral(boolean interpolate) :
     }
 }
 
-ASTExpression ASTExpBooleanLiteral() :
+ASTExpression BooleanLiteral() :
 {
     Token t;
     ASTExpression result;
@@ -2237,7 +2234,7 @@ ASTExpression ASTExpBooleanLiteral() :
     }
 }
 
-ASTExpHashLiteral ASTExpHashLiteral() :
+ASTExpHashLiteral HashLiteral() :
 {
     Token begin, end;
     ASTExpression key, value;
@@ -2247,9 +2244,9 @@ ASTExpHashLiteral ASTExpHashLiteral() :
 {
     begin = <OPENING_CURLY_BRACKET>
     [
-        key = ASTExpression()
+        key = Expression()
         (<COMMA>|<COLON>)
-        value = ASTExpression()
+        value = Expression()
         {
             stringLiteralOnly(key);
             keys.add(key);
@@ -2257,9 +2254,9 @@ ASTExpHashLiteral ASTExpHashLiteral() :
         }
         (
             <COMMA>
-            key = ASTExpression()
+            key = Expression()
             (<COMMA>|<COLON>)
-            value = ASTExpression()
+            value = Expression()
             {
                 stringLiteralOnly(key);
                 keys.add(key);
@@ -2278,7 +2275,7 @@ ASTExpHashLiteral ASTExpHashLiteral() :
 /**
  * ${exp}
  */
-ASTInterpolation ASTInterpolation() :
+ASTInterpolation Interpolation() :
 {
     ASTExpression exp;
     Token begin, end;
@@ -2287,13 +2284,13 @@ ASTInterpolation ASTInterpolation() :
     (
         (
             begin = <DOLLAR_INTERPOLATION_OPENING>
-            exp = ASTExpression()
+            exp = Expression()
             end = <CLOSING_CURLY_BRACKET>
         )
         |
         (
             begin = <SQUARE_BRACKET_INTERPOLATION_OPENING>
-            exp = ASTExpression()
+            exp = Expression()
             end = <CLOSE_BRACKET>
         )
     )
@@ -2320,7 +2317,7 @@ ASTElement If() :
 }
 {
     start = <IF>
-    condition = ASTExpression()
+    condition = Expression()
     end = <DIRECTIVE_END>
     children = MixedContentElements()
     {
@@ -2330,7 +2327,7 @@ ASTElement If() :
     }
     (
         t = <ELSE_IF>
-        condition = ASTExpression()
+        condition = Expression()
         end = <DIRECTIVE_END>
         children = MixedContentElements()
         {
@@ -2398,7 +2395,7 @@ ASTElement List() :
 }
 {
     start = <LIST>
-    exp = ASTExpression()
+    exp = Expression()
     [
         <AS>
         nestedContentParam = <ID>
@@ -2441,7 +2438,7 @@ ASTElement List() :
     }
     
     [
-        elseOfList = ASTDirElseOfList()
+        elseOfList = ElseOfList()
     ]
     
     end = <END_LIST>
@@ -2464,7 +2461,7 @@ ASTElement List() :
     }
 }
 
-ASTDirElseOfList ASTDirElseOfList() :
+ASTDirElseOfList ElseOfList() :
 {
     Token start;
     TemplateElements children;
@@ -2576,10 +2573,10 @@ ASTDirVisit Visit() :
 }
 {
     start = <VISIT>
-    targetNode = ASTExpression()
+    targetNode = Expression()
     [
         <USING>
-        namespaces = ASTExpression()
+        namespaces = Expression()
     ]
     end = LooseDirectiveEnd()
     {
@@ -2601,11 +2598,11 @@ ASTDirRecurse Recurse() :
         (
             start = <RECURSE>
             [
-                node = ASTExpression()
+                node = Expression()
             ]
             [
                 <USING>
-                namespaces = ASTExpression()
+                namespaces = Expression()
             ]
             end = LooseDirectiveEnd()
         )
@@ -2690,7 +2687,7 @@ ASTDirReturn Return() :
     (
         start = <SIMPLE_RETURN> { end = start; }
         |
-        start = <RETURN> exp = ASTExpression() end = LooseDirectiveEnd()
+        start = <RETURN> exp = Expression() end = LooseDirectiveEnd()
     )
     {
         if (inMacro) {
@@ -2722,7 +2719,7 @@ ASTDirStop Stop() :
     (
         start = <HALT>
         |
-        start = <STOP> exp = ASTExpression() LooseDirectiveEnd()
+        start = <STOP> exp = Expression() LooseDirectiveEnd()
     )
     {
         ASTDirStop result = new ASTDirStop(exp);
@@ -2840,7 +2837,7 @@ ASTElement Assign() :
 			        {
 			           equalsOp = token;
 			        }
-			        exp = ASTExpression()
+			        exp = Expression()
 		        )
 		        |
 		        (
@@ -2880,7 +2877,7 @@ ASTElement Assign() :
 	                    {
 	                       equalsOp = token;
 	                    }
-	                    exp = ASTExpression()
+	                    exp = Expression()
 	                )
 	                |
 	                (
@@ -2903,7 +2900,7 @@ ASTElement Assign() :
 	        )*
 	        [
 	            id = <IN>
-	            nsExp = ASTExpression()
+	            nsExp = Expression()
 	            {
 	                if (scope != ASTDirAssignment.NAMESPACE) {
 	                	throw new ParseException("Cannot assign to namespace here.", template, id);
@@ -2932,7 +2929,7 @@ ASTElement Assign() :
 	    (
 	        [
 	            id = <IN>
-	            nsExp = ASTExpression()
+	            nsExp = Expression()
 	            {
 	                if (scope != ASTDirAssignment.NAMESPACE) {
 	                	throw new ParseException("Cannot assign to namespace here.", template, id);
@@ -2981,12 +2978,12 @@ ASTDirInclude Include() :
 }
 {
     start = <_INCLUDE>
-    nameExp = ASTExpression()
+    nameExp = Expression()
     [<SEMICOLON>]
     (
         att = <ID>
         <ASSIGNMENT_EQUALS>
-        exp = ASTExpression()
+        exp = Expression()
         {
             String attString = att.image;
             if (attString.equalsIgnoreCase("ignore_missing") || attString.equals("ignoreMissing")) {
@@ -3020,7 +3017,7 @@ ASTDirImport Import() :
 }
 {
     start = <IMPORT>
-    nameExp = ASTExpression()
+    nameExp = Expression()
     <AS>
     ns = <ID>
     end = LooseDirectiveEnd()
@@ -3189,7 +3186,7 @@ ASTDirMacroOrFunction Macro() :
                     throw new ParseException("Varargs parameters can't have default value.", template, tk);
                 }
             }
-            defaultValueExp = ASTExpression()
+            defaultValueExp = Expression()
         ]
         {
             if (defaultValueExp == null && isPositional && !isVarargs) {
@@ -3323,7 +3320,7 @@ ASTElement DynamicTopLevelCall() :
 }
 {
     start = <DYNAMIC_TOP_LEVEL_CALL>
-    callableValueExp = ASTExpression()
+    callableValueExp = Expression()
     [<TERMINATING_WHITESPACE>]
     {
         topPositionalArgsLength = 0;
@@ -3336,7 +3333,7 @@ ASTElement DynamicTopLevelCall() :
         (
             t = <ID>
             <ASSIGNMENT_EQUALS>
-            exp = ASTExpression()
+            exp = Expression()
             {
                 if (prevChoiceComma != null) {
                     throw new ParseException(
@@ -3368,7 +3365,7 @@ ASTElement DynamicTopLevelCall() :
         )
         |
         (
-            exp = ASTExpression()
+            exp = Expression()
             {
                 if (topNamedArgsLength != 0) {
                     throw new ParseException(
@@ -3499,10 +3496,10 @@ ArrayList<ASTExpression> PositionalArgs() :
 }
 {
     [
-        arg = ASTExpression() { result.add(arg); }
+        arg = Expression() { result.add(arg); }
         (
             <COMMA>
-            arg = ASTExpression() { result.add(arg); }
+            arg = Expression() { result.add(arg); }
         )*
     ]
     {
@@ -3555,7 +3552,7 @@ ASTDirSwitch Switch() :
 {
     (
 	    start = <SWITCH>
-	    switchExp = ASTExpression()
+	    switchExp = Expression()
 	    <DIRECTIVE_END>
         [ ignoredSectionBeforeFirstCase = WhitespaceAndComments() ]
     )
@@ -3565,7 +3562,7 @@ ASTDirSwitch Switch() :
     }
     [
         (
-            caseOrDefault = ASTDirCase()
+            caseOrDefault = DirCase()
             {
                 if (caseOrDefault.condition == null) {
                     if (defaultFound) {
@@ -3591,7 +3588,7 @@ ASTDirSwitch Switch() :
     }
 }
 
-ASTDirCase ASTDirCase() :
+ASTDirCase DirCase() :
 {
     ASTExpression exp;
     TemplateElements children;
@@ -3599,7 +3596,7 @@ ASTDirCase ASTDirCase() :
 }
 {
     (
-        start = <CASE> exp = ASTExpression() <DIRECTIVE_END>
+        start = <CASE> exp = Expression() <DIRECTIVE_END>
         |
         start = <DEFAUL> { exp = null; }
     )
@@ -3630,7 +3627,7 @@ ASTDirEscape Escape() :
     }
     variable = <ID>
     <AS>
-    escapeExpr = ASTExpression()
+    escapeExpr = Expression()
     <DIRECTIVE_END>
     {
         ASTDirEscape result = new ASTDirEscape(variable.image, escapeExpr, escapedExpression(escapeExpr));
@@ -3680,7 +3677,7 @@ ASTDirOutputFormat OutputFormat() :
 }
 {
     start = <OUTPUTFORMAT>
-    paramExp = ASTExpression()
+    paramExp = Expression()
     <DIRECTIVE_END>
     {
         if (!paramExp.isLiteral()) {
@@ -3838,7 +3835,7 @@ ASTDirSetting Setting() :
     start = <SETTING>
     key = <ID>
     <ASSIGNMENT_EQUALS>
-    value = ASTExpression()
+    value = Expression()
     end = LooseDirectiveEnd()
     {
         ASTDirSetting result = new ASTDirSetting(key, token_source, value, template.getConfiguration());
@@ -3928,7 +3925,7 @@ ASTElement FreemarkerDirective() :
  * i.e. text that contains no
  * FreeMarker directives.
  */
-ASTStaticText PCData() :
+ASTStaticText StaticText() :
 {
     StringBuilder buf = new StringBuilder();
     Token t = null, start = null, prevToken = null;
@@ -4010,9 +4007,9 @@ TemplateElements MixedContentElements() :
     (
         LOOKAHEAD(1) // Just tells javacc that we know what we're doing.
         (
-            elem = PCData()
+            elem = StaticText()
             |
-            elem = ASTInterpolation()
+            elem = Interpolation()
             |
             elem = FreemarkerDirective()
         )
@@ -4036,92 +4033,6 @@ TemplateElements MixedContentElements() :
     {
         mixedContentNesting--;
         return childBuffer != null ? new TemplateElements(childBuffer, childCount) : TemplateElements.EMPTY;
-    }
-}
-
-/**
- * Not used anymore; kept for backward compatibility.
- *
- * @deprecated Use {@link #MixedContentElements} instead.
- */
-ASTImplicitParent ASTImplicitParent() :
-{
-    ASTImplicitParent mixedContent = new ASTImplicitParent();
-    ASTElement elem, begin = null;
-    mixedContentNesting++;
-}
-{
-    (
-        LOOKAHEAD(1) // Just tells javacc that we know what we're doing.
-        (
-            elem = PCData()
-            |
-            elem = ASTInterpolation()
-            |
-            elem = FreemarkerDirective()
-        )
-        {
-            if (begin == null) {
-                begin = elem;
-            }
-            mixedContent.addChild(elem);
-        }
-    )+
-    {
-        mixedContentNesting--;
-        mixedContent.setLocation(template, begin, elem);
-        return mixedContent;
-    }
-}
-
-/**
- * Not used anymore; kept for backward compatibility.
- *
- * <p>A production for a block of optional content.
- * Returns an empty Text block if there is no
- * content.
- *
- * @deprecated Use {@link #MixedContentElements} instead.
- */
-ASTElement OptionalBlock() :
-{
-    ASTElement tp = null;
-}
-{
-    [
-        LOOKAHEAD(1) // has no effect but to get rid of a spurious warning.
-        tp = ASTImplicitParent()
-    ]
-    {
-        return tp != null ? tp : new ASTStaticText(_CollectionUtils.EMPTY_CHAR_ARRAY, false);
-    }
-}
-
-/**
- * A production freemarker text that may contain ${...}, but no directives.
- */
-ASTElement FreeMarkerText() :
-{
-    ASTImplicitParent nodes = new ASTImplicitParent();
-    ASTElement elem, begin = null;
-}
-{
-    (
-        (
-            elem = PCData()
-            |
-            elem = ASTInterpolation()  // Find related: [interpolation prefixes]
-        )
-        {
-            if (begin == null) {
-            	begin = elem;
-            }
-            nodes.addChild(elem);
-        }
-    )+
-    {
-        nodes.setLocation(template, begin, elem);
-        return nodes;
     }
 }
 
@@ -4179,7 +4090,7 @@ void HeaderElement() :
             (
                 key = <ID>
                 <ASSIGNMENT_EQUALS>
-                exp = ASTExpression()
+                exp = Expression()
                 {
                     String ks = key.image;
                     TemplateModel value = null;
@@ -4373,9 +4284,9 @@ Map ParamList() :
 }
 {
     (
-        id = ASTExpVariable()
+        id = Variable()
         <ASSIGNMENT_EQUALS>
-        exp = ASTExpression() { result.put(id.toString(), exp); }
+        exp = Expression() { result.put(id.toString(), exp); }
         [<COMMA>]
     )+
     {
@@ -4416,7 +4327,7 @@ List<Object> StaticTextAndInterpolations() :
 	    }
 	    |
 	    (
-            interpolation = ASTInterpolation()
+            interpolation = Interpolation()
 	    )
 	    {
             if (staticTextCollector != null) {

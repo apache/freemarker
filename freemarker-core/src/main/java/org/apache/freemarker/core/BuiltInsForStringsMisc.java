@@ -93,7 +93,7 @@ class BuiltInsForStringsMisc {
                             pCfg, outputFormat, autoEscapingPolicy,
                             null);
                     
-                    exp = parser.ASTExpression();
+                    exp = parser.Expression();
                 } catch (TokenMgrError e) {
                     throw e.toParseException(parentTemplate);
                 }
