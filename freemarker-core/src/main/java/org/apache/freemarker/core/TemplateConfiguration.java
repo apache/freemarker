@@ -83,6 +83,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     
     private final TemplateLanguage templateLanguage;
     private final TagSyntax tagSyntax;
+    private final InterpolationSyntax interpolationSyntax;
     private final Boolean whitespaceStripping;
     private final AutoEscapingPolicy autoEscapingPolicy;
     private final Boolean recognizeStandardFileExtensions;
@@ -124,6 +125,7 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
 
         templateLanguage = builder.isTemplateLanguageSet() ? builder.getTemplateLanguage() : null;
         tagSyntax = builder.isTagSyntaxSet() ? builder.getTagSyntax() : null;
+        interpolationSyntax = builder.isInterpolationSyntaxSet() ? builder.getInterpolationSyntax() : null;
         whitespaceStripping = builder.isWhitespaceStrippingSet() ? builder.getWhitespaceStripping() : null;
         autoEscapingPolicy = builder.isAutoEscapingPolicySet() ? builder.getAutoEscapingPolicy() : null;
         recognizeStandardFileExtensions = builder.isRecognizeStandardFileExtensionsSet() ? builder.getRecognizeStandardFileExtensions() : null;
@@ -139,12 +141,25 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         }
         return tagSyntax;
     }
-
+    
     @Override
     public boolean isTagSyntaxSet() {
         return tagSyntax != null;
     }
 
+    @Override
+    public InterpolationSyntax getInterpolationSyntax() {
+        if (!isInterpolationSyntaxSet()) {
+            throw new CoreSettingValueNotSetException("interpolationSyntax");
+        }
+        return interpolationSyntax;
+    }
+
+    @Override
+    public boolean isInterpolationSyntaxSet() {
+        return interpolationSyntax != null;
+    }
+    
     @Override
     public TemplateLanguage getTemplateLanguage() {
         if (!isTemplateLanguageSet()) {
@@ -825,6 +840,9 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
             if (tc.isTagSyntaxSet()) {
                 setTagSyntax(tc.getTagSyntax());
             }
+            if (tc.isInterpolationSyntaxSet()) {
+                setInterpolationSyntax(tc.getInterpolationSyntax());
+            }
             if (tc.isTemplateLanguageSet()) {
                 setTemplateLanguage(tc.getTemplateLanguage());
             }
@@ -889,6 +907,11 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         @Override
         protected TagSyntax getDefaultTagSyntax() {
             throw new CoreSettingValueNotSetException("tagSyntax");
+        }
+        
+        @Override
+        protected InterpolationSyntax getDefaultInterpolationSyntax() {
+            throw new CoreSettingValueNotSetException("interpolationSyntax");
         }
 
         @Override

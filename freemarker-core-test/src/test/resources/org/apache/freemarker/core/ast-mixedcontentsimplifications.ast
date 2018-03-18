@@ -32,7 +32,7 @@
     #if  // o.a.f.c.ASTDirIfOrElseOrElseIf
         - condition: true  // o.a.f.c.ASTExpBooleanLiteral
         - AST-node subtype: "0"  // Integer
-        ${...}  // o.a.f.c.ASTDollarInterpolation
+        ${...}  // o.a.f.c.ASTInterpolation
             - content: x  // o.a.f.c.ASTExpVariable
     #text  // o.a.f.c.ASTStaticText
         - content: "\n"  // String

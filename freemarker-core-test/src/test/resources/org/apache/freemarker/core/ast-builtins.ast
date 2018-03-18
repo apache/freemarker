@@ -17,13 +17,13 @@
  * under the License.
  */
 #mixedContent  // o.a.f.c.ASTImplicitParent
-    ${...}  // o.a.f.c.ASTDollarInterpolation
+    ${...}  // o.a.f.c.ASTInterpolation
         - content: ?trim  // o.a.f.c.BuiltInsForStringsBasic$trimBI
             - left-hand operand: x  // o.a.f.c.ASTExpVariable
             - right-hand operand: "trim"  // String
     #text  // o.a.f.c.ASTStaticText
         - content: "\n"  // String
-    ${...}  // o.a.f.c.ASTDollarInterpolation
+    ${...}  // o.a.f.c.ASTInterpolation
         - content: ...(...)  // o.a.f.c.ASTExpFunctionCall
             - callee: ?leftPad  // o.a.f.c.BuiltInsForStringsBasic$padBI
                 - left-hand operand: x  // o.a.f.c.ASTExpVariable
@@ -31,7 +31,7 @@
             - argument value: 5  // o.a.f.c.ASTExpNumberLiteral
     #text  // o.a.f.c.ASTStaticText
         - content: "\n"  // String
-    ${...}  // o.a.f.c.ASTDollarInterpolation
+    ${...}  // o.a.f.c.ASTInterpolation
         - content: ...(...)  // o.a.f.c.ASTExpFunctionCall
             - callee: ?leftPad  // o.a.f.c.BuiltInsForStringsBasic$padBI
                 - left-hand operand: x  // o.a.f.c.ASTExpVariable
@@ -40,7 +40,7 @@
             - argument value: "-"  // o.a.f.c.ASTExpStringLiteral
     #text  // o.a.f.c.ASTStaticText
         - content: "\n"  // String
-    ${...}  // o.a.f.c.ASTDollarInterpolation
+    ${...}  // o.a.f.c.ASTInterpolation
         - content: ?then(...)  // o.a.f.c.BuiltInsWithParseTimeParameters$then_BI
             - left-hand operand: x  // o.a.f.c.ASTExpVariable
             - right-hand operand: "then"  // String
@@ -48,7 +48,7 @@
             - argument value: "n"  // o.a.f.c.ASTExpStringLiteral
     #text  // o.a.f.c.ASTStaticText
         - content: "\n"  // String
-    ${...}  // o.a.f.c.ASTDollarInterpolation
+    ${...}  // o.a.f.c.ASTInterpolation
         - content: ?switch(...)  // o.a.f.c.BuiltInsWithParseTimeParameters$switch_BI
             - left-hand operand: x  // o.a.f.c.ASTExpVariable
             - right-hand operand: "switch"  // String

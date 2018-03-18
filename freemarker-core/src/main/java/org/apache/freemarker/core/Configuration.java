@@ -184,6 +184,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
     private final TemplateLanguage templateLanguage;
     private final TagSyntax tagSyntax;
+    private final InterpolationSyntax interpolationSyntax;
     private final boolean whitespaceStripping;
     private final AutoEscapingPolicy autoEscapingPolicy;
     private final OutputFormat outputFormat;
@@ -349,6 +350,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
 
         templateLanguage = builder.getTemplateLanguage();
         tagSyntax = builder.getTagSyntax();
+        interpolationSyntax = builder.getInterpolationSyntax();
         whitespaceStripping = builder.getWhitespaceStripping();
         autoEscapingPolicy = builder.getAutoEscapingPolicy();
         outputFormat = builder.getOutputFormat();
@@ -815,13 +817,22 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
      * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
      * value in the {@link Configuration}.
      */
+    @Override
+    public boolean isTagSyntaxSet() {
+        return true;
+    }
 
+    @Override
+    public InterpolationSyntax getInterpolationSyntax() {
+        return interpolationSyntax;
+    }
+    
     /**
      * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
      * value in the {@link Configuration}.
      */
     @Override
-    public boolean isTagSyntaxSet() {
+    public boolean isInterpolationSyntaxSet() {
         return true;
     }
 
@@ -2331,6 +2342,11 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             return TagSyntax.ANGLE_BRACKET;
         }
 
+        @Override
+        protected InterpolationSyntax getDefaultInterpolationSyntax() {
+            return InterpolationSyntax.DOLLAR;
+        }
+        
         @Override
         protected TemplateLanguage getDefaultTemplateLanguage() {
             return TemplateLanguage.FTL;

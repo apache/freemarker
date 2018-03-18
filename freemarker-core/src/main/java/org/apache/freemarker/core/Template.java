@@ -123,6 +123,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     // Values from template content that are detected automatically:
     private Charset actualSourceEncoding;
     private TagSyntax actualTagSyntax;
+    private InterpolationSyntax interpolationSyntax;
 
     // Custom state:
     private final Object customStateMapLock = new Object();
@@ -319,6 +320,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
                     rootElement = null;
                 }
                 actualTagSyntax = parser._getLastTagSyntax();
+                interpolationSyntax = parsingConfiguration.getInterpolationSyntax();
             } catch (TokenMgrError exc) {
                 // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it
                 // to ParseException
@@ -681,9 +683,21 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * couldn't be determined (like because there was no tags in the template, or it was a plain text template), this
      * returns whatever the default is in the current configuration, so it's maybe
      * {@link TagSyntax#AUTO_DETECT}.
+     * 
+     * @see ParsingConfiguration#getTagSyntax()
      */
     public TagSyntax getActualTagSyntax() {
         return actualTagSyntax;
+    }
+    
+    /**
+     * Returns the interpolation syntax the parser has used for this template. Because the interpolation syntax is
+     * never auto-detected, it's not called "getActualInterpolationSyntax" (unlike {@link #getActualTagSyntax()}).
+     * 
+     * @see ParsingConfiguration#getInterpolationSyntax()
+     */
+    public InterpolationSyntax getInterpolationSyntax() {
+        return interpolationSyntax;
     }
     
     /**

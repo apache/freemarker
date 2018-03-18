@@ -49,12 +49,15 @@ final class ASTExpStringLiteral extends ASTExpression implements TemplateStringM
      *            inherit tokenizer-level auto-detected settings.
      */
     void parseValue(FMParserTokenManager parentTkMan, OutputFormat outputFormat) throws ParseException {
+        // TODO [FM3] (Find related: [interpolation prefixes])
         // The way this works is incorrect (the literal should be parsed without un-escaping),
         // but we can't fix this backward compatibly.
-        if (value.length() > 3 && value.indexOf("${") >= 0) { // Find related: [interpolation prefixes]
-            Template parentTemplate = getTemplate();
-            ParsingConfiguration pCfg = parentTemplate.getParsingConfiguration();
-
+        Template parentTemplate = getTemplate();
+        ParsingConfiguration pCfg = parentTemplate.getParsingConfiguration();
+        InterpolationSyntax intSyn = pCfg.getInterpolationSyntax();
+        if (value.length() > 3 && (
+                intSyn == InterpolationSyntax.DOLLAR && value.indexOf("${") != -1
+                || intSyn == InterpolationSyntax.SQUARE_BRACKET && value.indexOf("[=") != -1)) {        
             try {
                 SimpleCharStream simpleCharacterStream = new SimpleCharStream(
                         new StringReader(value),

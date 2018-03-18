@@ -76,7 +76,15 @@ public interface ParsingConfiguration {
      * configuration or throws a {@link CoreSettingValueNotSetException}.
      */
     boolean isTagSyntaxSet();
+    
+    
+    /**
+     * Determines the interpolation syntax (<code>${x}</code> VS <code>[=x]</code>) of the template files.
+     */
+    InterpolationSyntax getInterpolationSyntax();
 
+    boolean isInterpolationSyntaxSet();
+    
     /**
      * Whether the template parser will try to remove superfluous white-space around certain tags.
      */

@@ -18,7 +18,7 @@
  */
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core.ProcessingConfiguration.MISSING_VALUE_MARKER;
+import static org.apache.freemarker.core.ProcessingConfiguration.*;
 import static org.junit.Assert.*;
 
 import java.beans.BeanInfo;
@@ -192,6 +192,7 @@ public class TemplateConfigurationTest {
         // Parser-only settings:
         SETTING_ASSIGNMENTS.put("templateLanguage", TemplateLanguage.STATIC_TEXT);
         SETTING_ASSIGNMENTS.put("tagSyntax", TagSyntax.SQUARE_BRACKET);
+        SETTING_ASSIGNMENTS.put("interpolationSyntax", InterpolationSyntax.SQUARE_BRACKET);
         SETTING_ASSIGNMENTS.put("whitespaceStripping", false);
         SETTING_ASSIGNMENTS.put("strictSyntaxMode", false);
         SETTING_ASSIGNMENTS.put("autoEscapingPolicy", AutoEscapingPolicy.DISABLE);
@@ -548,6 +549,14 @@ public class TemplateConfigurationTest {
             TemplateConfiguration tc = tcb.build();
             assertOutputWithoutAndWithTC(tc, "[#if true]y[/#if]", "[#if true]y[/#if]", "y");
             testedProps.add(Configuration.ExtendableBuilder.TAG_SYNTAX_KEY);
+        }
+
+        {
+            TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+            tcb.setInterpolationSyntax(InterpolationSyntax.SQUARE_BRACKET);
+            TemplateConfiguration tc = tcb.build();
+            assertOutputWithoutAndWithTC(tc, "${1}[=2]", "1[=2]", "${1}2");
+            testedProps.add(Configuration.ExtendableBuilder.INTERPOLATION_SYNTAX_KEY);
         }
         
         {

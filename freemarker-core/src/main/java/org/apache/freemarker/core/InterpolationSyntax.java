@@ -20,14 +20,9 @@
 package org.apache.freemarker.core;
 
 /**
- * Used as the value of the {@link ParsingConfiguration#getTagSyntax()}  tagSyntax} setting.
+ * Used as the value of the {@link ParsingConfiguration#getInterpolationSyntax()}  interpolationSyntax} setting.
  */
-public enum TagSyntax {
-    /** The parser decides between {@link #ANGLE_BRACKET} and {@link #SQUARE_BRACKET} based on the first tag it mets. */
-    // TODO [FM3] Get rid of this, as it's too hard for tooling.
-    AUTO_DETECT,
-    /** For example {@code <#if x><@foo /></#if>} */
-    ANGLE_BRACKET,
-    /** For example {@code [#if x][@foo /][/#if]} */
-    SQUARE_BRACKET
+public enum InterpolationSyntax {
+    DOLLAR,
+    SQUARE_BRACKET;
 }

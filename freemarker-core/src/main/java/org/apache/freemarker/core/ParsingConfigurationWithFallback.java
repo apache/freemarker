@@ -58,6 +58,16 @@ final class ParsingConfigurationWithFallback implements ParsingConfiguration {
     }
 
     @Override
+    public InterpolationSyntax getInterpolationSyntax() {
+        return tCfg.isInterpolationSyntaxSet() ? tCfg.getInterpolationSyntax() : cfg.getInterpolationSyntax();
+    }
+
+    @Override
+    public boolean isInterpolationSyntaxSet() {
+        return true;
+    }
+    
+    @Override
     public boolean getWhitespaceStripping() {
         return tCfg.isWhitespaceStrippingSet() ? tCfg.getWhitespaceStripping() : cfg.getWhitespaceStripping();
     }

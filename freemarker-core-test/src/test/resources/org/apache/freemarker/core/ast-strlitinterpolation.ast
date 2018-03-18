@@ -23,58 +23,58 @@
         - callee: m  // o.a.f.c.ASTExpVariable
         - argument name: "x"  // String
         - argument value: dynamic "..."  // o.a.f.c.ASTExpStringLiteral
-            - value part: ${...}  // o.a.f.c.ASTDollarInterpolation
+            - value part: ${...}  // o.a.f.c.ASTInterpolation
                 - content: e1  // o.a.f.c.ASTExpVariable
         - argument name: "y"  // String
         - argument value: r"$\{e2}"  // o.a.f.c.ASTExpStringLiteral
     #text  // o.a.f.c.ASTStaticText
         - content: "\n2. "  // String
-    ${...}  // o.a.f.c.ASTDollarInterpolation
+    ${...}  // o.a.f.c.ASTInterpolation
         - content: dynamic "..."  // o.a.f.c.ASTExpStringLiteral
             - value part: "a"  // String
-            - value part: ${...}  // o.a.f.c.ASTDollarInterpolation
+            - value part: ${...}  // o.a.f.c.ASTInterpolation
                 - content: x  // o.a.f.c.ASTExpVariable
             - value part: "b"  // String
-            - value part: ${...}  // o.a.f.c.ASTDollarInterpolation
+            - value part: ${...}  // o.a.f.c.ASTInterpolation
                 - content: x  // o.a.f.c.ASTExpVariable
             - value part: "c"  // String
     #text  // o.a.f.c.ASTStaticText
         - content: "\n3. "  // String
-    ${...}  // o.a.f.c.ASTDollarInterpolation
+    ${...}  // o.a.f.c.ASTInterpolation
         - content: dynamic "..."  // o.a.f.c.ASTExpStringLiteral
-            - value part: ${...}  // o.a.f.c.ASTDollarInterpolation
+            - value part: ${...}  // o.a.f.c.ASTInterpolation
                 - content: x  // o.a.f.c.ASTExpVariable
             - value part: "b"  // String
     #text  // o.a.f.c.ASTStaticText
         - content: "\n4. "  // String
-    ${...}  // o.a.f.c.ASTDollarInterpolation
+    ${...}  // o.a.f.c.ASTInterpolation
         - content: dynamic "..."  // o.a.f.c.ASTExpStringLiteral
             - value part: "a"  // String
-            - value part: ${...}  // o.a.f.c.ASTDollarInterpolation
+            - value part: ${...}  // o.a.f.c.ASTInterpolation
                 - content: x  // o.a.f.c.ASTExpVariable
     #text  // o.a.f.c.ASTStaticText
         - content: "\n5. "  // String
-    ${...}  // o.a.f.c.ASTDollarInterpolation
+    ${...}  // o.a.f.c.ASTInterpolation
         - content: dynamic "..."  // o.a.f.c.ASTExpStringLiteral
-            - value part: ${...}  // o.a.f.c.ASTDollarInterpolation
+            - value part: ${...}  // o.a.f.c.ASTInterpolation
                 - content: x  // o.a.f.c.ASTExpVariable
-            - value part: ${...}  // o.a.f.c.ASTDollarInterpolation
+            - value part: ${...}  // o.a.f.c.ASTInterpolation
                 - content: y  // o.a.f.c.ASTExpVariable
     #text  // o.a.f.c.ASTStaticText
         - content: "\n6. "  // String
-    ${...}  // o.a.f.c.ASTDollarInterpolation
+    ${...}  // o.a.f.c.ASTInterpolation
         - content: dynamic "..."  // o.a.f.c.ASTExpStringLiteral
             - value part: "a b "  // String
-            - value part: ${...}  // o.a.f.c.ASTDollarInterpolation
+            - value part: ${...}  // o.a.f.c.ASTInterpolation
                 - content: x  // o.a.f.c.ASTExpVariable
             - value part: " c d"  // String
     #text  // o.a.f.c.ASTStaticText
         - content: "\n7. "  // String
-    ${...}  // o.a.f.c.ASTDollarInterpolation
+    ${...}  // o.a.f.c.ASTInterpolation
         - content: dynamic "..."  // o.a.f.c.ASTExpStringLiteral
-            - value part: ${...}  // o.a.f.c.ASTDollarInterpolation
+            - value part: ${...}  // o.a.f.c.ASTInterpolation
                 - content: x  // o.a.f.c.ASTExpVariable
             - value part: " a b "  // String
-            - value part: ${...}  // o.a.f.c.ASTDollarInterpolation
+            - value part: ${...}  // o.a.f.c.ASTInterpolation
                 - content: y  // o.a.f.c.ASTExpVariable
             - value part: " c$d"  // String

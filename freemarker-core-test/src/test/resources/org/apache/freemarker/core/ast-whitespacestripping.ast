@@ -30,7 +30,7 @@
         - nested content parameter: "xs"  // String
         #text  // o.a.f.c.ASTStaticText
             - content: "    "  // String
-        ${...}  // o.a.f.c.ASTDollarInterpolation
+        ${...}  // o.a.f.c.ASTInterpolation
             - content: x  // o.a.f.c.ASTExpVariable
         #text  // o.a.f.c.ASTStaticText
             - content: "\n"  // String

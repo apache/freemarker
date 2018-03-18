@@ -45,6 +45,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
 
+import org.apache.freemarker.core.Configuration.Builder;
 import org.apache.freemarker.core.model.TemplateStringModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
@@ -433,6 +434,24 @@ public class ConfigurationTest {
     }
 
     @Test
+    public void testInterpolationSyntaxSetting() throws TemplateException {
+        Builder cfgB = new Builder(VERSION_3_0_0);
+
+        // Default is "dollar":
+        assertEquals(InterpolationSyntax.DOLLAR, cfgB.getInterpolationSyntax());
+        
+        cfgB.setSetting("interpolationSyntax", "squareBracket");
+        assertEquals(InterpolationSyntax.SQUARE_BRACKET, cfgB.getInterpolationSyntax());
+        
+        try {
+            cfgB.setSetting("interpolationSyntax", "noSuchSyntax");
+            fail();
+        } catch (ConfigurationException e) {
+            assertThat(e.getMessage(), containsString("noSuchSyntax"));
+        }
+    }
+    
+    @Test
     public void testObjectWrapperSetSetting() throws Exception {
         Builder cfgB = new Builder(VERSION_3_0_0);
         {
@@ -617,7 +636,7 @@ public class ConfigurationTest {
         Builder cfgB = new Builder(VERSION_3_0_0);
         assertEquals(DEFAULT_INCOMPATIBLE_IMPROVEMENTS, cfgB.getIncompatibleImprovements());
         // This is the only valid value ATM:
-        cfgB.setSetting(INCOMPATIBLE_IMPROVEMENTS_KEY, "3.0.0");
+        cfgB.setSetting(MutableParsingAndProcessingConfiguration.INCOMPATIBLE_IMPROVEMENTS_KEY, "3.0.0");
         assertEquals(VERSION_3_0_0, cfgB.getIncompatibleImprovements());
     }
 

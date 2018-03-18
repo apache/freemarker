@@ -172,6 +172,8 @@ public class FMParser {
             throw new BugException("Unsupported tagSyntax: " + tagSyntax);
         }
 
+        token_source.interpolationSyntax = pCfg.getInterpolationSyntax();
+
         this.stripWhitespace = pCfg.getWhitespaceStripping();
 
         // If this is a Template under construction, we do the below.
@@ -519,12 +521,12 @@ TOKEN_MGR_DECLS:
      */
     String noParseTag;
 
+    private FMParser parser;
+    private int postInterpolationLexState = -1;
     /**
      * Keeps track of how deeply nested we have the hash literals. This is necessary since we need to be able to
      * distinguish the } used to close a hash literal and the one used to close a ${
      */
-    private FMParser parser;
-    private int postInterpolationLexState = -1;
     private int hashLiteralNesting;
     private int parenthesisNesting;
     private int bracketNesting;
@@ -533,6 +535,7 @@ TOKEN_MGR_DECLS:
             autodetectTagSyntax,
             directiveSyntaxEstablished,
             inNamedParameterExpression;
+    InterpolationSyntax interpolationSyntax;
     int incompatibleImprovements;
 
     void setParser(FMParser parser) {
@@ -605,25 +608,22 @@ TOKEN_MGR_DECLS:
         }
     }
 
-    private void closeBracket(Token tok) {
-        if (bracketNesting > 0) {
-            --bracketNesting;
-        } else {
-            tok.kind = DIRECTIVE_END;
-            if (inFTLHeader) {
-                eatNewline();
-                inFTLHeader = false;
-            }
-            SwitchTo(DEFAULT);
-        }
-    }
-    
     private void startInterpolation(Token tok) {
+        if ( 
+                interpolationSyntax == InterpolationSyntax.DOLLAR
+                    && tok.kind != DOLLAR_INTERPOLATION_OPENING
+                || interpolationSyntax == InterpolationSyntax.SQUARE_BRACKET
+                    && tok.kind != SQUARE_BRACKET_INTERPOLATION_OPENING) {
+            tok.kind = STATIC_TEXT_NON_WS;
+            return;
+        }
+        
         if (postInterpolationLexState != -1) {
             char c = tok.image.charAt(0);
             throw new TokenMgrError(
-                    "You can't start an interpolation (" + c + "{...}) here "
-                    + "as you are inside another interpolation.)",
+                    "You can't start an interpolation (" + tok.image + "..."
+                    + (interpolationSyntax == InterpolationSyntax.SQUARE_BRACKET ? "]" : "}")
+                    + ") here as you are inside another interpolation.)",
                     TokenMgrError.LEXICAL_ERROR,
                     tok.beginLine, tok.beginColumn,
                     tok.endLine, tok.endColumn);
@@ -952,6 +952,8 @@ TOKEN:
     |
     // Find related: [interpolation prefixes]
     <DOLLAR_INTERPOLATION_OPENING : "${"> { startInterpolation(matchedToken); }
+    |
+    <SQUARE_BRACKET_INTERPOLATION_OPENING : "[="> { startInterpolation(matchedToken); }
 }
 
 <FM_EXPRESSION, IN_PAREN> SKIP :
@@ -1086,7 +1088,21 @@ TOKEN:
     |
     <CLOSE_BRACKET : "]">
     {
-        closeBracket(matchedToken);
+        if (bracketNesting > 0) {
+            --bracketNesting;
+        } else if (interpolationSyntax == InterpolationSyntax.SQUARE_BRACKET
+                && (postInterpolationLexState != -1 || !squBracTagSyntax)) {
+            endInterpolation(matchedToken);
+        } else {
+            // TODO [FM3] Don't mimic this glitch anymore.
+            // Glitch where you can close any tag with `]`, like `<#if x]`. We keep it for backward compatibility.
+            matchedToken.kind = DIRECTIVE_END;
+            if (inFTLHeader) {
+                eatNewline();
+                inFTLHeader = false;
+            }
+            SwitchTo(DEFAULT);
+        }
     }
     |
     <OPEN_PAREN : "(">
@@ -1137,15 +1153,16 @@ TOKEN:
         }
     }
     |
-    <OPEN_MISPLACED_INTERPOLATION : "${"> // Find related: [interpolation prefixes]
+    <OPEN_MISPLACED_INTERPOLATION : "${" | "[="> // Find related: [interpolation prefixes]
     {
         if ("".length() == 0) {  // prevents unreachabe "break" compilation error in generated Java
-            char c = matchedToken.image.charAt(0);
+            char closerC = matchedToken.image.charAt(0) != '[' ? '}' : ']';
             throw new TokenMgrError(
-                    "You can't use \"" + c + "{\" here as you are already in FreeMarker-expression-mode. Thus, instead "
-                    + "of " + c + "{myExpression}, just write myExpression. "
-                    + "(" + c + "{...} is only needed where otherwise static text is expected, i.e, outside " 
-                    + "FreeMarker tags and ${...}-s.)",
+                    "You can't use " + matchedToken.image + "..." + closerC + " (an interpolation) here as you are "
+                    + "already in FreeMarker-expression-mode. Thus, instead of " + matchedToken.image + "myExpression"
+                    + closerC + ", just write myExpression. (" + matchedToken.image + "..." + closerC + " is only "
+                    + "used where otherwise static text is expected, i.e., outside FreeMarker tags and "
+                    + "interpolations, or inside string literals.)",
                     TokenMgrError.LEXICAL_ERROR,
                     matchedToken.beginLine, matchedToken.beginColumn,
                     matchedToken.endLine, matchedToken.endColumn);
@@ -2192,8 +2209,12 @@ ASTExpStringLiteral ASTExpStringLiteral(boolean interpolate) :
         ASTExpStringLiteral result = new ASTExpStringLiteral(s);
         result.setLocation(template, t, t);
         if (interpolate && !raw) {
-            // TODO: This logic is broken. It can't handle literals that contains both ${...} and $\{...}. 
-            if (t.image.indexOf("${") >= 0) result.parseValue(token_source, outputFormat);
+            // TODO [FM3]: This logic is broken. It can't handle literals that contains both ${...} and $\{...}. 
+            InterpolationSyntax intSyn = pCfg.getInterpolationSyntax();
+            if (intSyn == InterpolationSyntax.DOLLAR && t.image.indexOf("${") != -1
+                    || intSyn == InterpolationSyntax.SQUARE_BRACKET && t.image.indexOf("[=") != -1) {
+                result.parseValue(token_source, outputFormat);
+            }
         }
         return result;
     }
@@ -2215,7 +2236,6 @@ ASTExpression ASTExpBooleanLiteral() :
         return result;
     }
 }
-
 
 ASTExpHashLiteral ASTExpHashLiteral() :
 {
@@ -2258,21 +2278,30 @@ ASTExpHashLiteral ASTExpHashLiteral() :
 /**
  * ${exp}
  */
-ASTDollarInterpolation ASTDollarInterpolation() :
+ASTInterpolation ASTInterpolation() :
 {
     ASTExpression exp;
     Token begin, end;
 }
 {
-    begin = <DOLLAR_INTERPOLATION_OPENING>
-    exp = ASTExpression()
+    (
+        (
+            begin = <DOLLAR_INTERPOLATION_OPENING>
+            exp = ASTExpression()
+            end = <CLOSING_CURLY_BRACKET>
+        )
+        |
+        (
+            begin = <SQUARE_BRACKET_INTERPOLATION_OPENING>
+            exp = ASTExpression()
+            end = <CLOSE_BRACKET>
+        )
+    )
     {
         notHashLiteral(exp, MessageUtils.STRING_COERCABLE_TYPES_DESC);
         notListLiteral(exp, MessageUtils.STRING_COERCABLE_TYPES_DESC);
-    }
-    end = <CLOSING_CURLY_BRACKET>
-    {
-        ASTDollarInterpolation result = new ASTDollarInterpolation(
+        
+        ASTInterpolation result = new ASTInterpolation(
                 exp, escapedExpression(exp),
                 outputFormat,
                 autoEscaping);
@@ -3983,7 +4012,7 @@ TemplateElements MixedContentElements() :
         (
             elem = PCData()
             |
-            elem = ASTDollarInterpolation()
+            elem = ASTInterpolation()
             |
             elem = FreemarkerDirective()
         )
@@ -4027,7 +4056,7 @@ ASTImplicitParent ASTImplicitParent() :
         (
             elem = PCData()
             |
-            elem = ASTDollarInterpolation()
+            elem = ASTInterpolation()
             |
             elem = FreemarkerDirective()
         )
@@ -4081,7 +4110,7 @@ ASTElement FreeMarkerText() :
         (
             elem = PCData()
             |
-            elem = ASTDollarInterpolation()  // Find related: [interpolation prefixes]
+            elem = ASTInterpolation()  // Find related: [interpolation prefixes]
         )
         {
             if (begin == null) {
@@ -4387,7 +4416,7 @@ List<Object> StaticTextAndInterpolations() :
 	    }
 	    |
 	    (
-            interpolation = ASTDollarInterpolation()
+            interpolation = ASTInterpolation()
 	    )
 	    {
             if (staticTextCollector != null) {

@@ -235,7 +235,7 @@
         - namespace: null  // Null
     #text  // o.a.f.c.ASTStaticText
         - content: "\n"  // String
-    ${...}  // o.a.f.c.ASTDollarInterpolation
+    ${...}  // o.a.f.c.ASTInterpolation
         - content: ...(...)  // o.a.f.c.ASTExpFunctionCall
             - callee: f  // o.a.f.c.ASTExpVariable
             - argument value: ..  // o.a.f.c.ASTExpRange

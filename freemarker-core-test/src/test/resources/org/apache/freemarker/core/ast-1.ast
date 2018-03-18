@@ -73,19 +73,19 @@
             - AST-node subtype: "0"  // Integer
             #text  // o.a.f.c.ASTStaticText
                 - content: "foo"  // String
-            ${...}  // o.a.f.c.ASTDollarInterpolation
+            ${...}  // o.a.f.c.ASTInterpolation
                 - content: y  // o.a.f.c.ASTExpVariable
             #text  // o.a.f.c.ASTStaticText
                 - content: "bar"  // String
         #else  // o.a.f.c.ASTDirIfOrElseOrElseIf
             - condition: null  // Null
             - AST-node subtype: "1"  // Integer
-            ${...}  // o.a.f.c.ASTDollarInterpolation
+            ${...}  // o.a.f.c.ASTInterpolation
                 - content: "static"  // o.a.f.c.ASTExpStringLiteral
-            ${...}  // o.a.f.c.ASTDollarInterpolation
+            ${...}  // o.a.f.c.ASTInterpolation
                 - content: dynamic "..."  // o.a.f.c.ASTExpStringLiteral
                     - value part: "x"  // String
-                    - value part: ${...}  // o.a.f.c.ASTDollarInterpolation
+                    - value part: ${...}  // o.a.f.c.ASTInterpolation
                         - content: *  // o.a.f.c.ASTExpArithmetic
                             - left-hand operand: baaz  // o.a.f.c.ASTExpVariable
                             - right-hand operand: 10  // o.a.f.c.ASTExpNumberLiteral
@@ -151,7 +151,7 @@
                 - content: "["  // String
             #items  // o.a.f.c.ASTDirItems
                 - nested content parameter: "x"  // String
-                ${...}  // o.a.f.c.ASTDollarInterpolation
+                ${...}  // o.a.f.c.ASTInterpolation
                     - content: x  // o.a.f.c.ASTExpVariable
                 #sep  // o.a.f.c.ASTDirSep
                     #text  // o.a.f.c.ASTStaticText
@@ -170,10 +170,10 @@
     #outputFormat  // o.a.f.c.ASTDirOutputFormat
         - value: "XML"  // o.a.f.c.ASTExpStringLiteral
         #noAutoEsc  // o.a.f.c.ASTDirNoAutoEsc
-            ${...}  // o.a.f.c.ASTDollarInterpolation
+            ${...}  // o.a.f.c.ASTInterpolation
                 - content: a  // o.a.f.c.ASTExpVariable
             #autoEsc  // o.a.f.c.ASTDirAutoEsc
-                ${...}  // o.a.f.c.ASTDollarInterpolation
+                ${...}  // o.a.f.c.ASTInterpolation
                     - content: b  // o.a.f.c.ASTExpVariable
-            ${...}  // o.a.f.c.ASTDollarInterpolation
+            ${...}  // o.a.f.c.ASTInterpolation
                 - content: c  // o.a.f.c.ASTExpVariable
