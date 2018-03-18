@@ -42,6 +42,13 @@ public class InterpolationSyntaxTest extends TemplateTest {
         assertOutput(
                 "${{'x': 1}['x']} #{{'x': 1}['x']} [={'x': 1}['x']]",
                 "1 #{{'x': 1}['x']} [={'x': 1}['x']]");
+        
+        assertOutput("${'a[=1]b'}", "a[=1]b");
+        assertOutput("${'a${1}#{2}b'}", "a1#{2}b");
+        assertOutput("${'a${1}#{2}b[=3]'}", "a1#{2}b[=3]");
+        
+        assertOutput("<@r'${1} #{1} [=1]'?interpret />", "1 #{1} [=1]");
+        assertOutput("${'\"${1} #{1} [=1]\"'?eval}", "1 #{1} [=1]");        
     }
 
     @Test
@@ -60,9 +67,29 @@ public class InterpolationSyntaxTest extends TemplateTest {
         assertOutput("[ =1]", "[ =1]");
         
         assertErrorContains("<#if [true][0]]></#if>", "\"]\"", "nothing open");
+
+        setConfiguration(new TestConfigurationBuilder()
+                .tagSyntax(TagSyntax.SQUARE_BRACKET)
+                .interpolationSyntax(InterpolationSyntax.SQUARE_BRACKET)
+                .build());
+        assertOutput("[#if [true][0]]>[/#if]", ">");
+        assertOutput("[=1][=2]${3}", "12${3}");
+        setConfiguration(new TestConfigurationBuilder()
+                .tagSyntax(TagSyntax.ANGLE_BRACKET)
+                .interpolationSyntax(InterpolationSyntax.SQUARE_BRACKET)
+                .build());
         assertOutput("[#ftl][#if [true][0]]>[/#if]", ">");
-        
+        assertOutput("[#ftl][=1][=2]${3}", "12${3}");
+         
         assertOutput("[='a[=1]b']", "a1b");
+        assertOutput("[='a${1}#{2}b']", "a${1}#{2}b");
+        assertOutput("[='a${1}#{2}b[=3]']", "a${1}#{2}b3");
+        
+        assertOutput("<@r'${1} #{1} [=1]'?interpret />", "${1} #{1} 1");
+        assertOutput("[='\"${1} #{1} [=1]\"'?eval]", "${1} #{1} 1");
+        
+        assertErrorContains("[=", "end of file");
+        assertErrorContains("[=1", "unclosed \"[\"");
         
         StringWriter sw = new StringWriter();
         new Template(null, "[= 1 + '[= 2 ]' ]", getConfiguration()).dump(sw);
@@ -79,6 +106,7 @@ public class InterpolationSyntaxTest extends TemplateTest {
                     .build());
             
             assertOutput("[#if [true][0]]t[#else]f[/#if]", "t");
+            assertOutput("[@r'[#if [true][0]]t[#else]f[/#if]'?interpret /]", "t");
         }
     }
     
