@@ -22,11 +22,15 @@ package freemarker.core;
 import java.io.IOException;
 import java.io.Writer;
 
+import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import freemarker.template.utility.StringUtil;
 
 /**
- * An instruction that outputs the value of an <tt>Expression</tt>.
+ * An interpolation like <code>${exp}</code> or {@code [=exp]}. The class name is the remnant of old times, but as
+ * some users are using the package-visible AST API, it wasn't renamed.
+ * 
+ * @see NumericalOutput
  */
 final class DollarVariable extends Interpolation {
 
@@ -99,10 +103,11 @@ final class DollarVariable extends Interpolation {
     @Override
     protected String dump(boolean canonical, boolean inStringLiteral) {
         StringBuilder sb = new StringBuilder();
-        sb.append("${");
+        int syntax = getTemplate().getInterpolationSyntax();
+        sb.append(syntax != Configuration.SQUARE_BRACKET_INTERPOLATION_SYNTAX ? "${" : "[=");
         final String exprCF = expression.getCanonicalForm();
         sb.append(inStringLiteral ? StringUtil.FTLStringLiteralEnc(exprCF, '"') : exprCF);
-        sb.append("}");
+        sb.append(syntax != Configuration.SQUARE_BRACKET_INTERPOLATION_SYNTAX ? "}" : "]");
         if (!canonical && expression != escapedExpression) {
             sb.append(" auto-escaped");            
         }

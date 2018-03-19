@@ -78,6 +78,7 @@ public final class TemplateConfiguration extends Configurable implements ParserC
 
     private boolean parentConfigurationSet;
     private Integer tagSyntax;
+    private Integer interpolationSyntax;
     private Integer namingConvention;
     private Boolean whitespaceStripping;
     private Boolean strictSyntaxMode;
@@ -233,6 +234,9 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         }
         if (tc.isTagSyntaxSet()) {
             setTagSyntax(tc.getTagSyntax());
+        }
+        if (tc.isInterpolationSyntaxSet()) {
+            setInterpolationSyntax(tc.getInterpolationSyntax());
         }
         if (tc.isTemplateExceptionHandlerSet()) {
             setTemplateExceptionHandler(tc.getTemplateExceptionHandler());
@@ -412,6 +416,29 @@ public final class TemplateConfiguration extends Configurable implements ParserC
         return tagSyntax != null;
     }
 
+    /**
+     * See {@link Configuration#setInterpolationSyntax(int)}.
+     */
+    public void setInterpolationSyntax(int interpolationSyntax) {
+        _TemplateAPI.valideInterpolationSyntaxValue(interpolationSyntax);
+        this.interpolationSyntax = Integer.valueOf(interpolationSyntax);
+    }
+    
+    /**
+     * The getter pair of {@link #setInterpolationSyntax(int)}.
+     */
+    public int getInterpolationSyntax() {
+        return interpolationSyntax != null ? interpolationSyntax.intValue()
+                : getNonNullParentConfiguration().getInterpolationSyntax();
+    }
+
+    /**
+     * Tells if this setting is set directly in this object or its value is coming from the {@link #getParent() parent}.
+     */
+    public boolean isInterpolationSyntaxSet() {
+        return interpolationSyntax != null;
+    }
+    
     /**
      * See {@link Configuration#setNamingConvention(int)}.
      */

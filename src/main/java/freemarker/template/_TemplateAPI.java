@@ -154,8 +154,18 @@ public class _TemplateAPI {
             && tagSyntax != Configuration.SQUARE_BRACKET_TAG_SYNTAX
             && tagSyntax != Configuration.ANGLE_BRACKET_TAG_SYNTAX) {
             throw new IllegalArgumentException("\"tag_syntax\" can only be set to one of these: "
-                    + "Configuration.AUTO_DETECT_TAG_SYNTAX, Configuration.ANGLE_BRACKET_SYNTAX, "
-                    + "or Configuration.SQUARE_BRACKET_SYNTAX");
+                    + "Configuration.AUTO_DETECT_TAG_SYNTAX, Configuration.ANGLE_BRACKET_TAG_SYNTAX, "
+                    + "or Configuration.SQUARE_BRACKET_TAG_SYNTAX");
+        }
+    }
+
+    public static void valideInterpolationSyntaxValue(int interpolationSyntax) {
+        if (interpolationSyntax != Configuration.LEGACY_INTERPOLATION_SYNTAX
+            && interpolationSyntax != Configuration.DOLLAR_INTERPOLATION_SYNTAX
+            && interpolationSyntax != Configuration.SQUARE_BRACKET_INTERPOLATION_SYNTAX) {
+            throw new IllegalArgumentException("\"interpolation_syntax\" can only be set to one of these: "
+                    + "Configuration.LEGACY_INTERPOLATION_SYNTAX, Configuration.DOLLAR_INTERPOLATION_SYNTAX, "
+                    + "or Configuration.SQUARE_BRACKET_INTERPOLATION_SYNTAX");
         }
     }
     

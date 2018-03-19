@@ -183,6 +183,7 @@ public class TemplateConfigurationTest {
 
         // Parser-only settings:
         SETTING_ASSIGNMENTS.put("tagSyntax", Configuration.SQUARE_BRACKET_TAG_SYNTAX);
+        SETTING_ASSIGNMENTS.put("interpolationSyntax", Configuration.SQUARE_BRACKET_INTERPOLATION_SYNTAX);
         SETTING_ASSIGNMENTS.put("namingConvention", Configuration.LEGACY_NAMING_CONVENTION);
         SETTING_ASSIGNMENTS.put("whitespaceStripping", false);
         SETTING_ASSIGNMENTS.put("strictSyntaxMode", false);
@@ -603,6 +604,14 @@ public class TemplateConfigurationTest {
             tc.setTagSyntax(Configuration.SQUARE_BRACKET_TAG_SYNTAX);
             assertOutputWithoutAndWithTC(tc, "[#if true]y[/#if]", "[#if true]y[/#if]", "y");
             testedProps.add(Configuration.TAG_SYNTAX_KEY_CAMEL_CASE);
+        }
+
+        {
+            TemplateConfiguration tc = new TemplateConfiguration();
+            tc.setParentConfiguration(DEFAULT_CFG);
+            tc.setInterpolationSyntax(Configuration.SQUARE_BRACKET_INTERPOLATION_SYNTAX);
+            assertOutputWithoutAndWithTC(tc, "${1}#{2}[=3]", "12[=3]", "${1}#{2}3");
+            testedProps.add(Configuration.INTERPOLATION_SYNTAX_KEY_CAMEL_CASE);
         }
         
         {

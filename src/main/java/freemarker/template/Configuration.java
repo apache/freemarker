@@ -252,6 +252,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final String TAG_SYNTAX_KEY_CAMEL_CASE = "tagSyntax";
     /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
     public static final String TAG_SYNTAX_KEY = TAG_SYNTAX_KEY_SNAKE_CASE;
+
+    /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.28 */
+    public static final String INTERPOLATION_SYNTAX_KEY_SNAKE_CASE = "interpolation_syntax";
+    /** Modern, camel case ({@code likeThis}) variation of the setting name. @since 2.3.28 */
+    public static final String INTERPOLATION_SYNTAX_KEY_CAMEL_CASE = "interpolationSyntax";
+    /** Alias to the {@code ..._SNAKE_CASE} variation due to backward compatibility constraints. */
+    public static final String INTERPOLATION_SYNTAX_KEY = INTERPOLATION_SYNTAX_KEY_SNAKE_CASE;
     
     /** Legacy, snake case ({@code like_this}) variation of the setting name. @since 2.3.23 */
     public static final String NAMING_CONVENTION_KEY_SNAKE_CASE = "naming_convention";
@@ -315,6 +322,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         CACHE_STORAGE_KEY_SNAKE_CASE,
         DEFAULT_ENCODING_KEY_SNAKE_CASE,
         INCOMPATIBLE_IMPROVEMENTS_KEY_SNAKE_CASE,
+        INTERPOLATION_SYNTAX_KEY_SNAKE_CASE,
         LOCALIZED_LOOKUP_KEY_SNAKE_CASE,
         NAMING_CONVENTION_KEY_SNAKE_CASE,
         OUTPUT_FORMAT_KEY_SNAKE_CASE,
@@ -337,6 +345,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         CACHE_STORAGE_KEY_CAMEL_CASE,
         DEFAULT_ENCODING_KEY_CAMEL_CASE,
         INCOMPATIBLE_IMPROVEMENTS_KEY_CAMEL_CASE,
+        INTERPOLATION_SYNTAX_KEY_CAMEL_CASE,
         LOCALIZED_LOOKUP_KEY_CAMEL_CASE,
         NAMING_CONVENTION_KEY_CAMEL_CASE,
         OUTPUT_FORMAT_KEY_CAMEL_CASE,
@@ -371,6 +380,13 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     public static final int ANGLE_BRACKET_TAG_SYNTAX = 1;
     public static final int SQUARE_BRACKET_TAG_SYNTAX = 2;
 
+    /** <code>${expression}</code> and the deprecated <code>#{expression; numFormat}</code> @since 2.3.28 */
+    public static final int LEGACY_INTERPOLATION_SYNTAX = 20;
+    /** <code>${expression}</code> only (not <code>#{expression; numFormat}</code>) @since 2.3.28 */
+    public static final int DOLLAR_INTERPOLATION_SYNTAX = 21;
+    /** <code>[=expression]</code> @since 2.3.28 */
+    public static final int SQUARE_BRACKET_INTERPOLATION_SYNTAX = 22;
+    
     public static final int AUTO_DETECT_NAMING_CONVENTION = 10;
     public static final int LEGACY_NAMING_CONVENTION = 11;
     public static final int CAMEL_CASE_NAMING_CONVENTION = 12;
@@ -494,6 +510,7 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     private Map<String, ? extends OutputFormat> registeredCustomOutputFormats = Collections.emptyMap(); 
     private Version incompatibleImprovements;
     private int tagSyntax = ANGLE_BRACKET_TAG_SYNTAX;
+    private int interpolationSyntax = LEGACY_INTERPOLATION_SYNTAX;
     private int namingConvention = AUTO_DETECT_NAMING_CONVENTION;
     private int tabSize = 8;  // Default from JavaCC 3.x
     private boolean preventStrippings;
@@ -547,8 +564,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * <p><b>About the "incompatible improvements" setting</b>
      *
      * <p>This setting value is the FreeMarker version number where the not 100% backward compatible bug fixes and
-     * improvements that you want to enable were already implemented. In new projects you should set this to the
-     * version of FreeMarker that you start the development with. In older projects it's also usually better to keep
+     * improvements that you want to enable were already implemented. In new projects you should set this to the fixed
+     * FreeMarker version that you start the development with. In older projects it's also usually better to keep
      * this high, however you should check the changes activated (find them below), especially if not only the 3rd
      * version number (the micro version) of {@code incompatibleImprovements} is increased. Generally, as far as you
      * only increase the last version number of this setting, the changes are low risk. The default value is 2.3.0 to
@@ -556,6 +573,9 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * 
      * <p>Bugfixes and improvements that are fully backward compatible, also those that are important security fixes,
      * are enabled regardless of the incompatible improvements setting.
+     * 
+     * <p>Do NOT ever use {@link #getVersion()} to set the "incompatible improvements". Always use a fixed value, like
+     * {@link #VERSION_2_3_28}. Otherwise your application can break as you upgrade FreeMarker. 
      * 
      * <p>An important consequence of setting this setting is that now your application will check if the stated minimum
      * FreeMarker version requirement is met. Like if you set this setting to 2.3.22, but accidentally the application
@@ -865,6 +885,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *           (Of course, the parameter default value expression is still evaluated in the context of the called
      *           macro or function.) Similarly, {@code .macro_caller_template_name} (which itself was added in 2.3.28),
      *           when used in a macro call argument, won't be incorrectly evaluated in the context of the called macro.
+     *       <li><p>Fixed legacy parser glitch where a tag can be closed with an illegal {@code ]} (when it's not part
+     *           of an expression) despite that the tag syntax is set to angle brackets. For example {@code <#if x]}
+     *           worked just like {@code <#if x>}. Note that it doesn't affect the legal usage of {@code ]}, like
+     *           {@code <#if x[0]>} works correctly without this fix as well. 
      *     </ul>
      *   </li>
      * </ul>
@@ -1865,7 +1889,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
 
     /**
      * Use {@link #Configuration(Version)} instead if possible; see the meaning of the parameter there.
-     * If the default value of a setting depends on the {@code incompatibleImprovements} and the value of that setting
+     * 
+     * <p>Do NOT ever use {@link #getVersion()} to set the "incompatible improvements". Always use a fixed value, like
+     * {@link #VERSION_2_3_28}. Otherwise your application can break as you upgrade FreeMarker. 
+     * 
+     * <p>If the default value of a setting depends on the {@code incompatibleImprovements} and the value of that setting
      * was never set in this {@link Configuration} object through the public API, its value will be set to the default
      * value appropriate for the new {@code incompatibleImprovements}. (This adjustment of a setting value doesn't
      * count as setting that setting, so setting {@code incompatibleImprovements} for multiple times also works as
@@ -2349,9 +2377,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Determines the syntax of the template files (angle bracket VS square bracket)
-     * that has no {@code #ftl} in it. The {@code tagSyntax}
-     * parameter must be one of:
+     * Determines the tag syntax (like {@code <#if x>} VS {@code [#if x]}) of the template files 
+     * that has no {@code #ftl} header to decide that. The {@code tagSyntax} parameter must be one of:
      * <ul>
      *   <li>{@link Configuration#AUTO_DETECT_TAG_SYNTAX}:
      *     use the syntax of the first FreeMarker tag (can be anything, like <tt>#list</tt>,
@@ -2370,6 +2397,8 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * <p>This setting is ignored for the templates that have {@code ftl} directive in
      * it. For those templates the syntax used for the {@code ftl} directive determines
      * the syntax.
+     * 
+     * @see #setInterpolationSyntax(int)
      */
     public void setTagSyntax(int tagSyntax) {
         _TemplateAPI.valideTagSyntaxValue(tagSyntax);
@@ -2383,6 +2412,29 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         return tagSyntax;
     }
 
+    /**
+     * Determines the interpolation syntax (like <code>${x}</code> VS <code>[=x]</code>) of the template files. The
+     * {@code interpolationSyntax} parameter must be one of {@link Configuration#LEGACY_INTERPOLATION_SYNTAX},
+     * {@link Configuration#DOLLAR_INTERPOLATION_SYNTAX}, and {@link Configuration#SQUARE_BRACKET_INTERPOLATION_SYNTAX}.
+     * 
+     * @see #setTagSyntax(int)
+     * 
+     * @since 2.3.28
+     */
+    public void setInterpolationSyntax(int interpolationSyntax) {
+        _TemplateAPI.valideInterpolationSyntaxValue(interpolationSyntax);
+        this.interpolationSyntax = interpolationSyntax;
+    }
+    
+    /**
+     * The getter pair of {@link #setInterpolationSyntax(int)}.
+     * 
+     * @since 2.3.28
+     */
+    public int getInterpolationSyntax() {
+        return interpolationSyntax;
+    }
+    
     /**
      * Sets the naming convention used for the identifiers that are part of the template language. The available naming
      * conventions are legacy (directive (tag) names are all-lower-case {@code likethis}, others are snake case
@@ -3213,6 +3265,17 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 } else {
                     throw invalidSettingValueException(name, value);
                 }
+            } else if (INTERPOLATION_SYNTAX_KEY_SNAKE_CASE.equals(name)
+                    || INTERPOLATION_SYNTAX_KEY_CAMEL_CASE.equals(name)) {
+                if ("legacy".equals(value)) {
+                    setInterpolationSyntax(LEGACY_INTERPOLATION_SYNTAX);
+                } else if ("dollar".equals(value)) {
+                    setInterpolationSyntax(DOLLAR_INTERPOLATION_SYNTAX);
+                } else if ("square_bracket".equals(value) || "squareBracket".equals(value)) {
+                    setInterpolationSyntax(SQUARE_BRACKET_INTERPOLATION_SYNTAX);
+                } else {
+                    throw invalidSettingValueException(name, value);
+                }
             } else if (NAMING_CONVENTION_KEY_SNAKE_CASE.equals(name) || NAMING_CONVENTION_KEY_CAMEL_CASE.equals(name)) {
                 if ("auto_detect".equals(value) || "autoDetect".equals(value)) {
                     setNamingConvention(AUTO_DETECT_NAMING_CONVENTION);
@@ -3393,7 +3456,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Returns the FreeMarker version information, most importantly the major.minor.micro version numbers.
+     * Returns FreeMarker version information, most importantly the major.minor.micro version numbers;
+     * do NOT use this as the value of the {@code incompatible_improvements} setting (as the parameter to
+     * {@link Configuration#Configuration(Version)}), as then your application can break when you upgrade FreeMarker!
+     * Use a constant value, like {@link #VERSION_2_3_28}, to protect your application from fixes/changes that aren't
+     * entirely backward compatible. Fixes and features that are backward compatible are always enabled. 
      * 
      * On FreeMarker version numbering rules:
      * <ul>

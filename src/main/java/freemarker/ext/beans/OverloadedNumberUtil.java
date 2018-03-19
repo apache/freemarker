@@ -89,7 +89,7 @@ class OverloadedNumberUtil {
      * @param num the number to coerce
      * @param typeFlags the type flags of the target parameter position; see {@link TypeFlags}
      * 
-     * @returns The original number or a {@link NumberWithFallbackType}, depending on the actual value and the types
+     * @return The original number or a {@link NumberWithFallbackType}, depending on the actual value and the types
      *     indicated in the {@code targetNumTypes} parameter.
      */
     static Number addFallbackType(final Number num, final int typeFlags) {

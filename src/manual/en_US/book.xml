@@ -2276,6 +2276,13 @@ this is a backslash: \</programlisting>
                 </tr>
 
                 <tr>
+                  <td><literal>\=</literal></td>
+
+                  <td>Equals character: <literal>=</literal> (Supported since
+                  FreeMarker 2.3.28.)</td>
+                </tr>
+
+                <tr>
                   <td><literal>\\</literal></td>
 
                   <td>Back slash (u005C)</td>
@@ -2349,15 +2356,20 @@ this is a backslash: \</programlisting>
             digit, you must use all 4 digits or else FreeMarker will
             misunderstand you.</para>
 
-            <para>Note that the character sequence <literal>${</literal> (and
-            <literal>#{</literal>) has special meaning. It's used to insert
-            the value of expressions (typically: the value of variables, as in
-            <literal>"Hello ${user}!"</literal>). This will be explained <link
+            <para>Note that the character sequence <literal>${</literal> and
+            <literal>#{</literal> (and rarely <literal>[=</literal> instead,
+            depending on <link linkend="dgui_misc_alternativesyntax">the
+            configured syntax</link>) has special meaning. They are used to
+            insert the value of expressions (typically: the value of
+            variables, as in <literal>"Hello ${user}!"</literal>). This will
+            be explained <link
             linkend="dgui_template_exp_stringop_interpolation">later</link>.
             If you want to print <literal>${</literal> or
-            <literal>#{</literal>, you should either use raw string literals
-            as explained below, or escape the <literal>{</literal> like in
-            <literal>"foo $\{bar}"</literal>.</para>
+            <literal>#{</literal> (or <literal>[=</literal>), you should
+            either use raw string literals as explained below, or escape the
+            <literal>{</literal> like in <literal>"foo $\{bar}"</literal> (or
+            the <literal>=</literal> like in <literal>"foo
+            [\=bar]"</literal>).</para>
 
             <indexterm>
               <primary>raw string literal</primary>
@@ -2838,6 +2850,14 @@ baz
             similarly as in <phrase role="markedText">text</phrase>
             sections</link> (so it goes through the same <emphasis>locale
             sensitive</emphasis> number and date/time formatting).</para>
+
+            <note>
+              <para>It's possible to configure FreeMarker's interpolation
+              syntax to use
+              <literal>[=<replaceable>...</replaceable>]</literal> instead;
+              <link linkend="dgui_misc_alternativesyntax_interpolation">see
+              here</link>.</para>
+            </note>
 
             <para>Example (assume that user is <quote>Big Joe</quote>):</para>
 
@@ -4198,6 +4218,13 @@ ${("green " + "mouse")?upper_case}  &lt;#-- GREEN MOUSE --&gt;
           <literal>${<replaceable>expression</replaceable>}</literal>, where
           <literal><replaceable>expression</replaceable></literal> can be all
           kind of expression (e.g. <literal>${100 + x}</literal>).</para>
+
+          <note>
+            <para>FreeMarker can be configured to use
+            <literal>[=<replaceable>expression</replaceable>]</literal> syntax
+            instead. <link linkend="dgui_misc_alternativesyntax">See more
+            about alternative syntaxes...</link></para>
+          </note>
 
           <para>The interpolation is used to insert the value of the
           <literal><replaceable>expression</replaceable></literal> converted
@@ -6221,46 +6248,57 @@ That's all.</programlisting>
           <primary>square bracket syntax</primary>
         </indexterm>
 
-        <note>
-          <para>This feature exists since FreeMarker 2.3.4.</para>
-        </note>
+        <para>Both FreeMarker tags (such as <literal>&lt;#if x&gt;</literal>)
+        and FreeMarker interpolations (such as <literal>${x}</literal>) can be
+        set <emphasis>independently</emphasis> to use so called square bracket
+        syntax (<literal>[#if x]</literal>, and <literal>[=x]</literal>,
+        respectively). This is mostly useful to prevent clashes with the
+        generated content (such as when generating JSP files), or to work
+        around cases where some other tool is confused by the default
+        symbols.</para>
 
-        <para>FreeMarker supports an alternative syntax, where
-        <literal>[</literal> and <literal>]</literal> is used instead of
-        <literal>&lt;</literal> and <literal>&gt;</literal> in FreeMarker
-        directives and comments, for example:</para>
+        <section xml:id="dgui_misc_alternativesyntax_tag">
+          <title>Square bracket tag syntax</title>
 
-        <itemizedlist spacing="compact">
-          <listitem>
-            <para>Calling predefined directive: <literal>[#list animals as
-            animal]<replaceable>...</replaceable>[/#list]</literal></para>
-          </listitem>
+          <note>
+            <para>This feature exists since FreeMarker 2.3.4.</para>
+          </note>
 
-          <listitem>
-            <para>Calling user-defined directive: <literal>[@myMacro
-            /]</literal></para>
-          </listitem>
+          <para>FreeMarker supports an alternative tag syntax, where
+          <literal>[</literal> and <literal>]</literal> is used instead of
+          <literal>&lt;</literal> and <literal>&gt;</literal> in FreeMarker
+          directives and comments, for example:</para>
 
-          <listitem>
-            <para>Comment: <literal>[#-- the comment --]</literal></para>
-          </listitem>
-        </itemizedlist>
+          <itemizedlist spacing="compact">
+            <listitem>
+              <para>Calling predefined directive: <literal>[#list animals as
+              animal]<replaceable>...</replaceable>[/#list]</literal></para>
+            </listitem>
 
-        <para>To use the alternative syntax instead of the default one, start
-        the template with the <link
-        linkend="ref_directive_ftl"><literal>ftl</literal> directive</link>
-        using the alternative syntax. If you don't know what is the
-        <literal>ftl</literal> directive, just start the template with
-        <literal>[#ftl]</literal>, and remember that it should be the very
-        first thing in the file (except that <link
-        linkend="gloss.whiteSpace">white-space</link> can precede it). For
-        example, this is how the last example of the <link
-        linkend="dgui_quickstart_template">Getting Started</link> looks with
-        the alternative syntax (assuming it's a complete template, not just a
-        fragment):</para>
+            <listitem>
+              <para>Calling user-defined directive: <literal>[@myMacro
+              /]</literal></para>
+            </listitem>
 
-        <programlisting role="template"><emphasis>[#ftl]</emphasis>
-&lt;p&gt;We have these animals:
+            <listitem>
+              <para>Comment: <literal>[#-- the comment --]</literal></para>
+            </listitem>
+          </itemizedlist>
+
+          <para>To use the alternative tag syntax instead of the default one,
+          the programmers should configure FreeMarker so <phrase
+          role="forProgrammers">(see
+          <literal>Configuraton.setTagSyntax</literal>, or the
+          <literal>tag_syntax</literal> setting)</phrase>. However, the tag
+          syntax can also be enforced in the template, with the <link
+          linkend="ref_directive_ftl"><literal>ftl</literal> directive</link>
+          (see later).</para>
+
+          <para>For example, this is how the last example of the <link
+          linkend="dgui_quickstart_template">Getting Started</link> looks with
+          the alternative syntax:</para>
+
+          <programlisting role="template">&lt;p&gt;We have these animals:
 &lt;table border=1&gt;
   &lt;tr&gt;&lt;th&gt;Name&lt;th&gt;Price
   <emphasis>[#list animals as animal]</emphasis>
@@ -6273,33 +6311,79 @@ That's all.</programlisting>
   <emphasis>[/#list]</emphasis>
 &lt;/table&gt;</programlisting>
 
-        <para>The alternative (square bracket) and the default (angle bracket)
-        syntax are mutually exclusive within a template. That is, either the
-        whole template uses alternative syntax, or the whole template uses the
-        default syntax. If the template uses alternative syntax, things like
-        <literal>&lt;#if <replaceable>...</replaceable>&gt;</literal> are
-        count as static text, not as FTL tags. Similarly, if the template uses
-        the default syntax, things like <literal>[#if
-        <replaceable>...</replaceable>]</literal> count as static text, not as
-        FTL tags.</para>
+          <para>The alternative (square bracket) and the default (angle
+          bracket) syntax are mutually exclusive within a template. That is,
+          either the whole template uses square bracket tag syntax, or the
+          whole template uses the angle bracket tag syntax. If the template
+          uses square bracket tag syntax, then things like <literal>&lt;#if
+          <replaceable>...</replaceable>&gt;</literal> are count as static
+          text, not as FTL tags. Similarly, if the template uses the angle
+          brackets tag syntax, things like <literal>[#if
+          <replaceable>...</replaceable>]</literal> count as static text, not
+          as FTL tags.</para>
 
-        <para>If you start the file with <literal>[#ftl
-        <replaceable>...</replaceable>]</literal> (where the
-        <literal><replaceable>...</replaceable></literal> stands for the
-        optional parameters; of course <literal>[#ftl]</literal> works too)
-        the file will surely use the alternative (square bracket) syntax. If
-        you start the file with <literal>&lt;#ftl
-        <replaceable>...</replaceable>&gt;</literal> the file will surely use
-        the normal (angle bracket) syntax. If there is no
-        <literal>ftl</literal> directive in the file, then the programmer
-        decides what the syntax will be by configuring FreeMarker <phrase
-        role="forProgrammers">(programmers see
-        <literal>Configuration.setTagSyntax(int)</literal> in the API
-        javadocs)</phrase>. Most probably the programmers use the factory
-        default however. The factory default in 2.3.x is using the normal
-        syntax. The factory default in 2.4.x will be auto-detection, which
-        means that the first FreeMarker tag determines the syntax (it can be
-        anything, not just <literal>ftl</literal>).</para>
+          <para>If you start the file with <literal>[#ftl
+          <replaceable>...</replaceable>]</literal> (where the
+          <literal><replaceable>...</replaceable></literal> stands for the
+          optional parameters; of course <literal>[#ftl]</literal> works too)
+          the file will surely use the square bracket syntax. If you start the
+          file with <literal>&lt;#ftl
+          <replaceable>...</replaceable>&gt;</literal> the file will surely
+          use the normal (angle bracket) syntax. If there is no
+          <literal>ftl</literal> directive in the file, then the programmer
+          decides what the syntax will be by configuring FreeMarker <phrase
+          role="forProgrammers">(programmers see
+          <literal>Configuration.setTagSyntax(int)</literal> in the API
+          javadocs)</phrase>. Most probably the programmers use the factory
+          default however. The factory default in 2.3.x is using the normal
+          syntax. The factory default in 2.4.x will be auto-detection, which
+          means that the first FreeMarker tag determines the syntax (it can be
+          anything, not just <literal>ftl</literal>).</para>
+        </section>
+
+        <section xml:id="dgui_misc_alternativesyntax_interpolation">
+          <title>Square bracket interpolation syntax</title>
+
+          <note>
+            <para>This feature exists since FreeMarker 2.3.28</para>
+          </note>
+
+          <para>In this case instead of
+          <literal>${<replaceable>expression</replaceable>}</literal> (and
+          <literal>#{<replaceable>expression</replaceable>}</literal>) you
+          write <literal>[=<replaceable>expression</replaceable>]</literal>.
+          This syntax is usually activated by the programmers from the
+          configuration <phrase role="forProgrammers">(see
+          <literal>Configuration.setInterpolationSyntax</literal> in the Java
+          API)</phrase>. It can be used both together with, and without the
+          square bracket <emphasis>tag</emphasis> syntax (see that in the
+          <link linkend="dgui_misc_alternativesyntax_tag">previous
+          section</link>), although it's more likely to be used together with
+          it. Assuming both interpolation and tag syntax was set to square
+          bracket, the earlier example template will look like this:</para>
+
+          <programlisting role="template">&lt;p&gt;We have these animals:
+&lt;table border=1&gt;
+  &lt;tr&gt;&lt;th&gt;Name&lt;th&gt;Price
+  [#list animals as animal]
+  &lt;tr&gt;
+    &lt;td&gt;
+      [#if animal.size == "large"]&lt;b&gt;[/#if]
+      <emphasis>[=animal.name]</emphasis>
+      [#if animal.size == "large"]&lt;/b&gt;[/#if]
+    &lt;td&gt;<emphasis>[=animal.price]</emphasis> Euros
+  [/#list]
+&lt;/table&gt;</programlisting>
+
+          <para>When square bracket interpolation syntax is used,
+          <literal>${<replaceable>expression</replaceable>}</literal> and
+          <literal>#{<replaceable>expression</replaceable>}</literal> in the
+          template will be just static text, which is printed as is. This is
+          mostly useful if you generate output that should contain those
+          (especially
+          <literal>${<replaceable>expression</replaceable>}</literal> is
+          frequent), such as when generating JSP files.</para>
+        </section>
       </section>
     </chapter>
   </part>
@@ -10043,17 +10127,21 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
           implemented. Usually, it's a bad idea to left it on its default,
           which is 2.3.0 (maximum backward compatibility).</para>
 
-          <para>In new projects you should set this to the FreeMarker version
-          that you are actually using. In older projects it's also usually
-          better to keep this high, however you better check the changes
-          activated (find them in <link
+          <para>In new projects you should set this to the fixed FreeMarker
+          version (like <literal>Configuration.VERSION_2_3_28</literal>) that
+          you are actually using when starting the project. In older projects
+          it's also usually better to keep this high , however you should
+          check the changes activated (find them in <link
           xlink:href="https://freemarker.apache.org/docs/api/freemarker/template/Configuration.html#Configuration-freemarker.template.Version-">the
           API JavaDoc of the <literal>Configuration(Version)</literal>
-          constructor</link>), at least if not only the 3rd version number
+          constructor</link>), especially if not only the 3rd version number
           (the micro version) of <quote>incompatible improvements</quote>
           setting is increased. Generally, as far as you only increase the
-          last version number of this setting, the changes are low
-          risk.</para>
+          last (3rd) version number of this setting, the changes are low risk,
+          and whether you can afford that risk depends on the concrete
+          application. Never use a dynamic value like
+          <literal>Configuration.getVersion()</literal> though, as that way
+          upgrading FreeMarker can break your application!</para>
 
           <para>Bug fixes and improvements that are fully backward compatible,
           also those that are important security fixes, are enabled regardless
@@ -10081,14 +10169,14 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
               <literal>freemarker.template.Configuration</literal> object
               like:</para>
 
-              <programlisting role="unspecified">... = new Configuration(Configuration.VERSION_2_3_27)</programlisting>
+              <programlisting role="unspecified">... = new Configuration(Configuration.VERSION_2_3_28)</programlisting>
             </listitem>
 
             <listitem>
               <para>Or, alter the <literal>Configuration</literal> singleton
               where you initialize its other settings like:</para>
 
-              <programlisting role="unspecified">cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_27)</programlisting>
+              <programlisting role="unspecified">cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_28)</programlisting>
             </listitem>
 
             <listitem>
@@ -10096,7 +10184,7 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
               (<literal>*.properties</literal> file or
               <literal>java.util.Properties</literal> object), add:</para>
 
-              <programlisting role="unspecified">incompatible_improvements=2.3.27</programlisting>
+              <programlisting role="unspecified">incompatible_improvements=2.3.28</programlisting>
             </listitem>
 
             <listitem>
@@ -10107,7 +10195,7 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
 
               <programlisting role="unspecified">&lt;init-param&gt;
     &lt;param-name&gt;incompatible_improvements&lt;/param-name&gt;
-    &lt;param-value&gt;2.3.27&lt;/param-value&gt;
+    &lt;param-value&gt;2.3.28&lt;/param-value&gt;
 &lt;/init-param&gt;</programlisting>
             </listitem>
           </itemizedlist>
@@ -10139,6 +10227,17 @@ cfg.setNumberFormat("@ua 0.####;; roundingMode=halfUp");</programlisting>
           <literal>DefaultObjectWrapper</literal> (for
           <literal>BeansWrapper</literal> it's the same, only with different
           class name of course).</para>
+
+          <warning>
+            <para>Do not ever use
+            <literal>Configuration.getVersion()</literal> to set the
+            <quote>incompatible improvements</quote> setting. Always use a
+            fixed value, like <literal>Configuration.VERSION_2_3_28</literal>.
+            Otherwise your application can break as you upgrade FreeMarker.
+            The whole point of <quote>incompatible improvements</quote> is to
+            protect you from that, while you still always get the
+            fixes/improvements that are backward compatible.</para>
+          </warning>
         </section>
       </section>
     </chapter>
@@ -15553,6 +15652,13 @@ German people write: 12.345.678,00</programlisting>
               <primary>extended Java decimal format</primary>
             </indexterm>
 
+            <note>
+              <para>You need at least FreeMarker 2.3.24 for these to work.
+              Before that, extended Java decimal format parts are just
+              silently ignored by
+              <literal>java.text.DecimalFormat</literal>.</para>
+            </note>
+
             <para>FreeMarker extends the Java decimal format patterns with
             extra options. These options are name-value pairs, specified after
             two semicolons (<literal>;;</literal>) at the end of the format
@@ -15565,6 +15671,14 @@ Extended decimal format: ${10002.5?string[",000<emphasis>;; roundingMode=halfUp 
 
             <programlisting role="output">Standard decimal format: 10,002
 Extended decimal format: 10<emphasis>_</emphasis>00<emphasis>3</emphasis></programlisting>
+
+            <warning>
+              <para>A very easy mistake to make is just using a single
+              semicolon instead of two. It won't even result in an error, as
+              <literal>java.text.DecimalFormat</literal> thinks you have just
+              specified some weird format for negative numbers. So remember to
+              use two semicolons.</para>
+            </warning>
 
             <para>Above, in the extended decimal format, we have specified
             half-up rounding mode and group separator <literal>"_"</literal>.
@@ -24295,6 +24409,17 @@ some test
         linkend="ref_builtin_c"><literal>c</literal> built-in</link> (like
         <literal><replaceable>number</replaceable>?c</literal>).</para>
 
+        <para>While by default
+        <literal>#{<replaceable>...</replaceable>}</literal> is interpreted,
+        that can be disabled by setting the
+        <literal>interpolation_syntax</literal> configuration setting
+        (<literal>Configuration.setInterpolationSyntax</literal> in the Java
+        API) to <literal>dollar</literal>. Then
+        <literal>#{<replaceable>...</replaceable>}</literal> will be just
+        static text, and only
+        <literal>${<replaceable>...</replaceable>}</literal> will operate as
+        interpolation.</para>
+
         <section>
           <title>Synopsis</title>
 
@@ -26483,11 +26608,38 @@ End book</programlisting>
           </question>
 
           <answer>
-            <para>Starting from FreeMarker 2.3.4 you can use
-            <literal>[</literal> and <literal>]</literal> instead of
-            <literal>&lt;</literal> and <literal>&gt;</literal>. For more
-            details <link linkend="dgui_misc_alternativesyntax">read
-            this...</link></para>
+            <para>You can use <literal>[</literal> and <literal>]</literal>
+            instead of <literal>&lt;</literal> and <literal>&gt;</literal>;
+            see more about square bracket tag syntax <link
+            linkend="dgui_misc_alternativesyntax">here.</link> The comparison
+            operators, like <literal>&lt;</literal>, also have an alternative
+            syntax (<literal>lt</literal> and <literal>&amp;lt;</literal> in
+            this case); see more about them <link
+            linkend="dgui_template_exp_comparison">here</link>. Also, the
+            <literal>&amp;&amp;</literal> operator (which is not well-format
+            HTML/XML) can be written as <literal>\and</literal> or
+            <literal>&amp;amp;&amp;amp;</literal> since 2.3.27.</para>
+          </answer>
+        </qandaentry>
+
+        <qandaentry xml:id="faq_alternative_syntax_interpolation">
+          <question>
+            <para><literal>${<replaceable>...</replaceable>}</literal> and/or
+            <literal>#{<replaceable>...</replaceable>}</literal> is used in
+            the output I have to generate a lot, and FreeMarker tries to
+            resolve them. What to do?</para>
+          </question>
+
+          <answer>
+            <para>You can escape them like
+            <literal>${'$'}{<replaceable>...</replaceable>}</literal>, however
+            that's impractical if you have to do that often. So starting from
+            FreeMarker 2.3.28 you can use
+            <literal>[=<replaceable>...</replaceable></literal><literal>]</literal>
+            instead; see more about the square bracket interpolation syntax
+            <link linkend="dgui_misc_alternativesyntax">here.</link> If you
+            are going to generate JSP files or even FreeMarker templates, this
+            is very useful.</para>
           </answer>
         </qandaentry>
 
@@ -27427,6 +27579,37 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>The template language can now be configured to use
+              <literal>[=<replaceable>expression</replaceable>]</literal>
+              instead of
+              <literal>${<replaceable>expression</replaceable>}</literal> and
+              <literal>#{<replaceable>expression</replaceable>}</literal>,
+              which is very useful if you have a lot of
+              <literal>${<replaceable>...</replaceable>}</literal> or
+              <literal>#{<replaceable>...</replaceable>}</literal> in the text
+              that you are generating, and so they should be static text. See
+              <link linkend="dgui_misc_alternativesyntax_interpolation">more
+              about the square bracket interpolation syntax here.</link> The
+              template language can also be configured to only use
+              <literal>${<replaceable>expression</replaceable>}</literal>, and
+              treat
+              <literal>#{<replaceable>expression</replaceable>}</literal> as
+              static text. (See the <literal>interpolation_syntax</literal>
+              configuration setting, or the
+              <literal>Configuration.setInterpolationSyntax(int)</literal>
+              method.)</para>
+            </listitem>
+
+            <listitem>
+              <para>In string literals, <literal>\=</literal> is now a valid
+              escape sequence, resulting in a <literal>=</literal>. This is
+              useful when you are using the new
+              <literal>[=<replaceable>exp</replaceable>]</literal>
+              interpolation syntax, which can be escaped in a string literal
+              like <literal>"Literal [\=x]"</literal>.</para>
+            </listitem>
+
+            <listitem>
               <para>Bug fixed (<link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-83">FREEMARKER-83</link>);
               this fix is only active when <link
@@ -27448,6 +27631,46 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           <title>Changes on the Java side</title>
 
           <itemizedlist>
+            <listitem>
+              <para>Added new <literal>ParserConfiguration</literal> (such as
+              <literal>Configuration</literal> and
+              <literal>TemplateConfiguration</literal>) setting,
+              <literal>interpolation_syntax</literal>. It has 3 possible
+              values:</para>
+
+              <itemizedlist>
+                <listitem>
+                  <para><literal>legacy</literal> (the default):
+                  Interpolations look like
+                  <literal>${<replaceable>...</replaceable>}</literal> or
+                  <literal>#{<replaceable>...</replaceable>}</literal>. Note
+                  that <literal>#{<replaceable>...</replaceable>}</literal> is
+                  deprecated for a long time now.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>dollar</literal>: Interpolations look like
+                  <literal>${<replaceable>...</replaceable>}</literal>. With
+                  this syntax,
+                  <literal>#{<replaceable>...</replaceable>}</literal> will be
+                  just static text.</para>
+                </listitem>
+
+                <listitem>
+                  <para><literal>square_bracket</literal>: Interpolations look
+                  like <literal>[=<replaceable>...</replaceable>]</literal>.
+                  With this syntax
+                  <literal>${<replaceable>...</replaceable>}</literal> and
+                  <literal>#{<replaceable>...</replaceable>}</literal> will be
+                  just static text. So it's useful if you generate output in a
+                  format where those (typically
+                  <literal>${<replaceable>...</replaceable>}</literal>) are
+                  already used, such as to generate JSP pages, or to generate
+                  FreeMarker templates that use the default syntax.</para>
+                </listitem>
+              </itemizedlist>
+            </listitem>
+
             <listitem>
               <para>Added new property to
               <literal>BeansWrapper.MethodAppearanceDecision</literal>:
@@ -27531,6 +27754,14 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Avoided possible performance bottleneck when executing
+              templates on many threads, caused be that
+              <literal>java.beans.PropertyDescriptor.getReadMethod()</literal>
+              is synchronized (<link
+              xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-80">FREEMARKER-80</link>).</para>
+            </listitem>
+
+            <listitem>
               <para>Added
               <literal>TemplateModelUtils.getKeyValuePairIterator(TemplateHashModelEx)</literal>
               static utility class, which can be used to get a
@@ -27549,6 +27780,45 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               keys. Also, it nows keeps the iteration order of the hashes, as
               it unwraps into a <literal>LinkedHashMap</literal> instead of
               into a plain <literal>HashMap</literal>.</para>
+            </listitem>
+
+            <listitem>
+              <para><literal>freemarker.ext.beans.HashAdapter.size()</literal>
+              was overridden for better performance.</para>
+            </listitem>
+
+            <listitem>
+              <para>When the <link
+              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal>
+              setting</link> is set to 2.3.28 (or greater), fixed legacy
+              parser glitch where a tag can be closed with an illegal
+              <literal>]</literal> (when it's not part of an expression)
+              despite that the tag syntax is set to angle brackets. For
+              example <literal>&lt;#if x]</literal> worked just like
+              <literal>&lt;#if x&gt;</literal>. Note that it doesn't affect
+              the legal usage of <literal>]</literal>, like <literal>&lt;#if
+              x[0]&gt;</literal> works correctly without this fix as
+              well.</para>
+            </listitem>
+
+            <listitem>
+              <para>Fixed parser bug that disallowed using
+              <literal>&gt;</literal> at the top-level inside an interpolation
+              (<literal>${...}</literal>). It had the same reason why
+              <literal>&lt;#if x &gt; y&gt;</literal> doesn't work as naively
+              expected, but there's no real ambiguity in <literal>${x &gt;
+              y}</literal>, so now it's allowed. Note that <literal>${(x &gt;
+              y)?c}</literal> and <literal>${(x &gt; y)?string('y',
+              'n')}</literal>, which are how booleans are commonly printed,
+              have always worked, as the <literal>&gt;</literal> operation is
+              not on the top-level inside the interpolation.</para>
+            </listitem>
+
+            <listitem>
+              <para>Fixed incorrect listing of valid
+              <literal>roundingMode</literal>-s in <link
+              linkend="topic.extendedJavaDecimalFormat">extended Java decimal
+              format</link> parsing error message</para>
             </listitem>
           </itemizedlist>
         </section>

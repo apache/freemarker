@@ -89,6 +89,7 @@ public class Template extends Configurable {
     private TemplateElement rootElement;
     private String encoding, defaultNS;
     private Object customLookupCondition;
+    private int interpolationSyntax;
     private int actualTagSyntax;
     private int actualNamingConvention;
     private boolean autoEscaping;
@@ -260,6 +261,7 @@ public class Template extends Configurable {
                     rootElement = null;
                 }
                 this.actualTagSyntax = parser._getLastTagSyntax();
+                this.interpolationSyntax = actualParserConfiguration.getInterpolationSyntax();
                 this.actualNamingConvention = parser._getLastNamingConvention();
             } catch (TokenMgrError exc) {
                 // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it
@@ -642,10 +644,28 @@ public class Template extends Configurable {
      * returns whatever the default is in the current configuration, so it's maybe
      * {@link Configuration#AUTO_DETECT_TAG_SYNTAX}.
      * 
+     * @see Configuration#setTagSyntax(int)
+     * 
      * @since 2.3.20
      */
     public int getActualTagSyntax() {
         return actualTagSyntax;
+    }
+    
+    /**
+     * Returns the interpolation syntax the parser has used for this template. Because the interpolation syntax is
+     * never auto-detected, it's not called "getActualInterpolationSyntax" (unlike {@link #getActualTagSyntax()}).
+     * 
+     * @return A constant like {@link Configuration#LEGACY_INTERPOLATION_SYNTAX},
+     *          {@link Configuration#DOLLAR_INTERPOLATION_SYNTAX}, or
+     *          {@link Configuration#SQUARE_BRACKET_INTERPOLATION_SYNTAX}.
+     * 
+     * @see Configuration#setInterpolationSyntax(int)
+     * 
+     * @since 2.3.28
+     */
+    public int getInterpolationSyntax() {
+        return interpolationSyntax;
     }
     
     /**
@@ -654,6 +674,8 @@ public class Template extends Configurable {
      * couldn't be determined (like because there no identifier that's part of the template language was used where
      * the naming convention matters), this returns whatever the default is in the current configuration, so it's maybe
      * {@link Configuration#AUTO_DETECT_TAG_SYNTAX}.
+     * 
+     * @see Configuration#setNamingConvention(int)
      * 
      * @since 2.3.23
      */

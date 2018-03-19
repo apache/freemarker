@@ -19,23 +19,23 @@
 
 package freemarker.core;
 
-import static org.junit.Assert.*;
-
-import java.io.IOException;
+import static freemarker.template.Configuration.*;
 
 import org.junit.Test;
 
 import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.utility.StringUtil;
+import freemarker.test.TemplateTest;
 
-public class ParsingErrorMessagesTest {
+public class ParsingErrorMessagesTest extends TemplateTest {
 
-    private Configuration cfg = new Configuration(Configuration.VERSION_2_3_21);
-    {
+    @Override
+    protected Configuration createConfiguration() throws Exception {
+        Configuration cfg = super.createConfiguration();
+        cfg.setIncompatibleImprovements(Configuration.VERSION_2_3_21);
         cfg.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX);
+        return cfg;
     }
-    
+
     @Test
     public void testNeedlessInterpolation() {
         assertErrorContains("<#if ${x} == 3></#if>", "instead of ${");
@@ -77,45 +77,23 @@ public class ParsingErrorMessagesTest {
     }
     
     @Test
-    public void testInterpolatingClosingsErrors() {
-        assertErrorContains("${x", "unclosed");
+    public void testInterpolatingClosingsErrors() throws Exception {
+        assertErrorContains("<#ftl>${x", "unclosed");
         assertErrorContains("<#assign x = x}>", "\"}\"", "open");
-        // TODO assertErrorContains("<#assign x = '${x'>", "unclosed");
-    }
-    
-    private void assertErrorContains(String ftl, String... expectedSubstrings) {
-        assertErrorContains(false, ftl, expectedSubstrings);
-        assertErrorContains(true, ftl, expectedSubstrings);
-    }
-
-    private void assertErrorContains(boolean squareTags, String ftl, String... expectedSubstrings) {
-        try {
-            if (squareTags) {
-                ftl = ftl.replace('<', '[').replace('>', ']');
-            }
-            new Template("adhoc", ftl, cfg);
-            fail("The tempalte had to fail");
-        } catch (ParseException e) {
-            String msg = e.getMessage();
-            for (String needle: expectedSubstrings) {
-                if (needle.startsWith("\\!")) {
-                    String netNeedle = needle.substring(2); 
-                    if (msg.contains(netNeedle)) {
-                        fail("The message shouldn't contain substring " + StringUtil.jQuote(netNeedle) + ":\n" + msg);
-                    }
-                } else if (!msg.contains(needle)) {
-                    fail("The message didn't contain substring " + StringUtil.jQuote(needle) + ":\n" + msg);
-                }
-            }
-            showError(e);
-        } catch (IOException e) {
-            // Won't happen
-            throw new RuntimeException(e);
+        assertOutput("<#assign x = '${x'>", ""); // Legacy glitch... should fail in theory.
+        
+        for (int syntax : new int[] { LEGACY_INTERPOLATION_SYNTAX, DOLLAR_INTERPOLATION_SYNTAX }) {
+            getConfiguration().setInterpolationSyntax(syntax);
+            assertErrorContains("<#ftl>${'x']", "\"]\"", "open");
+            super.assertErrorContains("<#ftl>${'x'>", "end of file");
+            super.assertErrorContains("[#ftl]${'x'>", "end of file");
         }
     }
     
-    private void showError(Throwable e) {
-        //System.out.println(e);
+    protected Throwable assertErrorContains(String ftl, String... expectedSubstrings) {
+        super.assertErrorContains(ftl, expectedSubstrings);
+        ftl = ftl.replace('<', '[').replace('>', ']');
+        return super.assertErrorContains(ftl, expectedSubstrings);
     }
 
 }

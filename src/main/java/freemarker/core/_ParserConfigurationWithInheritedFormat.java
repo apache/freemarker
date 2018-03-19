@@ -44,6 +44,10 @@ public final class _ParserConfigurationWithInheritedFormat implements ParserConf
         return wrappedPCfg.getTagSyntax();
     }
 
+    public int getInterpolationSyntax() {
+        return wrappedPCfg.getInterpolationSyntax();
+    }
+
     public boolean getStrictSyntaxMode() {
         return wrappedPCfg.getStrictSyntaxMode();
     }
