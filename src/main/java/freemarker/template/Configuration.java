@@ -885,6 +885,10 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      *           (Of course, the parameter default value expression is still evaluated in the context of the called
      *           macro or function.) Similarly, {@code .macro_caller_template_name} (which itself was added in 2.3.28),
      *           when used in a macro call argument, won't be incorrectly evaluated in the context of the called macro.
+     *       <li><p>Fixed legacy parser glitch where a tag can be closed with an illegal {@code ]} (when it's not part
+     *           of an expression) despite that the tag syntax is set to angle brackets. For example {@code <#if x]}
+     *           worked just like {@code <#if x>}. Note that it doesn't affect the legal usage of {@code ]}, like
+     *           {@code <#if x[0]>} works correctly without this fix as well. 
      *     </ul>
      *   </li>
      * </ul>

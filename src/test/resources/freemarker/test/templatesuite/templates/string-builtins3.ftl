@@ -198,7 +198,7 @@
 <@assertEquals expected='aa' actual=27?lower_abc />
 <@assertEquals expected='ab' actual=28?lower_abc />
 <@assertEquals expected='cv' actual=100?lower_abc />
-<@assertFails messageRegexp='0|at least 1']>
+<@assertFails messageRegexp='0|at least 1'>
     ${0?lower_abc}
 </@assertFails>
 <@assertFails messageRegexp='0|at least 1'>
@@ -214,7 +214,7 @@
 <@assertEquals expected='AA' actual=27?upper_abc />
 <@assertEquals expected='AB' actual=28?upper_abc />
 <@assertEquals expected='CV' actual=100?upper_abc />
-<@assertFails messageRegexp='0|at least 1']>
+<@assertFails messageRegexp='0|at least 1'>
     ${0?upper_abc}
 </@assertFails>
 <@assertFails messageRegexp='0|at least 1'>

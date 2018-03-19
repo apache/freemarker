@@ -27788,6 +27788,33 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>When the <link
+              linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal>
+              setting</link> is set to 2.3.28 (or greater), fixed legacy
+              parser glitch where a tag can be closed with an illegal
+              <literal>]</literal> (when it's not part of an expression)
+              despite that the tag syntax is set to angle brackets. For
+              example <literal>&lt;#if x]</literal> worked just like
+              <literal>&lt;#if x&gt;</literal>. Note that it doesn't affect
+              the legal usage of <literal>]</literal>, like <literal>&lt;#if
+              x[0]&gt;</literal> works correctly without this fix as
+              well.</para>
+            </listitem>
+
+            <listitem>
+              <para>Fixed parser bug that disallowed using
+              <literal>&gt;</literal> at the top-level inside an interpolation
+              (<literal>${...}</literal>). It had the same reason why
+              <literal>&lt;#if x &gt; y&gt;</literal> doesn't work as naively
+              expected, but there's no real ambiguity in <literal>${x &gt;
+              y}</literal>, so now it's allowed. Note that <literal>${(x &gt;
+              y)?c}</literal> and <literal>${(x &gt; y)?string('y',
+              'n')}</literal>, which are how booleans are commonly printed,
+              have always worked, as the <literal>&gt;</literal> operation is
+              not on the top-level inside the interpolation.</para>
+            </listitem>
+
+            <listitem>
               <para>Fixed incorrect listing of valid
               <literal>roundingMode</literal>-s in <link
               linkend="topic.extendedJavaDecimalFormat">extended Java decimal

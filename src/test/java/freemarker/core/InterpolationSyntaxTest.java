@@ -7,6 +7,7 @@ import java.io.StringWriter;
 
 import org.junit.Test;
 
+import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.test.TemplateTest;
 
@@ -27,6 +28,9 @@ public class InterpolationSyntaxTest extends TemplateTest {
         
         assertOutput("<@r'${1} #{1} [=1]'?interpret />", "1 1 [=1]");
         assertOutput("${'\"${1} #{1} [=1]\"'?eval}", "1 1 [=1]");
+        
+        assertOutput("<#setting booleanFormat='y,n'>${2>1}", "y"); // Not an error since 2.3.28
+        assertOutput("[#ftl][#setting booleanFormat='y,n']${2>1}", "y"); // Not an error since 2.3.28
     }
 
     @Test
@@ -78,7 +82,9 @@ public class InterpolationSyntaxTest extends TemplateTest {
         
         assertErrorContains("[=", "end of file");
         assertErrorContains("[=1", "unclosed \"[\"");
-        assertErrorContains("[=1}", "\"}\"", "open");
+
+        assertOutput("<#setting booleanFormat='y,n'>[=2>1]", "y");
+        assertOutput("[#ftl][#setting booleanFormat='y,n'][=2>1]", "y");
         
         assertOutput("[='[\\=1]']", "[=1]");
         assertOutput("[='[\\=1][=2]']", "12"); // Usual legacy interpolation escaping glitch...
@@ -101,18 +107,35 @@ public class InterpolationSyntaxTest extends TemplateTest {
     
     @Test
     public void legacyTagSyntaxGlitchStillWorksTest() throws Exception {
-        String ftl = "<#if [true][0]]t<#else]f</#if]";
+        String badFtl1 = "<#if [true][0]]OK</#if>";
+        String badFtl2 = "<#if true>OK</#if]";
+        String badFtl3 = "<#assign x = 'OK'/]${x}";
+        String badFtl4 = " <#t/]OK\n";
         
+        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_27);
         for (int syntax : new int[] { LEGACY_INTERPOLATION_SYNTAX, DOLLAR_INTERPOLATION_SYNTAX }) {
             getConfiguration().setInterpolationSyntax(syntax);
-            assertOutput(ftl, "t");
+            assertOutput(badFtl1, "OK");
+            assertOutput(badFtl2, "OK");
+            assertOutput(badFtl3, "OK");
+            assertOutput(badFtl4, "OK");
         }
         
         // Legacy tag closing glitch is not emulated with this:
         getConfiguration().setInterpolationSyntax(SQUARE_BRACKET_INTERPOLATION_SYNTAX);
-        assertErrorContains(ftl, "\"]\"");
+        assertErrorContains(badFtl1, "\"]\"");
+        assertErrorContains(badFtl2, "\"]\"");
+        assertErrorContains(badFtl3, "\"]\"");
+        assertErrorContains(badFtl4, "\"]\"");
+        
+        getConfiguration().setInterpolationSyntax(LEGACY_INTERPOLATION_SYNTAX);
+        getConfiguration().setIncompatibleImprovements(Configuration.VERSION_2_3_28);
+        assertErrorContains(badFtl1, "\"]\"");
+        assertErrorContains(badFtl2, "\"]\"");
+        assertErrorContains(badFtl3, "\"]\"");
+        assertErrorContains(badFtl4, "\"]\"");
     }
-
+    
     @Test
     public void errorMessagesAreSquareBracketInterpolationSyntaxAwareTest() throws Exception {
         assertErrorContains("<#if ${x}></#if>", "${...}", "${myExpression}");

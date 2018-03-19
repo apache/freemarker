@@ -667,7 +667,7 @@ TOKEN_MGR_DECLS:
         
         if (!strictSyntaxMode) {
             // Legacy feature (or bug?): Tag syntax never gets estabilished in non-strict mode.
-            // We do establilish the naming convention though.
+            // We do establish the naming convention though.
             checkNamingConvention(tok, tokenNamingConvention);
             SwitchTo(newLexState);
             return;
@@ -683,6 +683,24 @@ TOKEN_MGR_DECLS:
         
         // We only get here if this is a strict FTL tag.
         directiveSyntaxEstablished = true;
+        
+        if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_28
+                || interpolationSyntax == SQUARE_BRACKET_INTERPOLATION_SYNTAX) {
+	        // For END_xxx tags, as they can't contain expressions, the whole tag is a single token. So this is the only
+	        // chance to check if we got something inconsistent like `</#if]`. (We can't do this at the #CLOSE_TAG1 or
+	        // such, as at that point it's possible that the tag syntax is not yet established.)
+	        char lastChar = image.charAt(image.length() - 1);
+	        // Is it an end tag?
+	        if (lastChar == ']' || lastChar == '>') {
+	            if (!squBracTagSyntax && lastChar != '>' || squBracTagSyntax && lastChar != ']') {
+		            throw new TokenMgrError(
+		                    "The tag shouldn't end with \""+ lastChar + "\".",
+		                    TokenMgrError.LEXICAL_ERROR,
+		                    tok.beginLine, tok.beginColumn,
+		                    tok.endLine, tok.endColumn);
+                }
+            } // if end-tag
+        }
         
         checkNamingConvention(tok, tokenNamingConvention);
         
@@ -825,9 +843,6 @@ TOKEN_MGR_DECLS:
     }
 
     private void endInterpolation(Token closingTk) {
-        if (postInterpolationLexState == -1) {
-            throw newUnexpectedClosingTokenException(closingTk);
-        }
         SwitchTo(postInterpolationLexState);
         postInterpolationLexState = -1;
     }
@@ -1298,11 +1313,19 @@ TOKEN:
     {
         if (bracketNesting > 0) {
             --bracketNesting;
-        } else if (interpolationSyntax == SQUARE_BRACKET_INTERPOLATION_SYNTAX
-                && (postInterpolationLexState != -1 || !squBracTagSyntax)) {
+        } else if (interpolationSyntax == SQUARE_BRACKET_INTERPOLATION_SYNTAX && postInterpolationLexState != -1) {
             endInterpolation(matchedToken);
         } else {
-            // Glitch where you can close any tag with `]`, like `<#if x]`. We keep it for backward compatibility.
+            // There's a legacy glitch where you can always close a tag with `]`, like `<#if x]`. We have to keep that
+            // working for backward compatibility, hence we don't always throw at !squBracTagSyntax:
+            if (!squBracTagSyntax
+                    && (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_28
+                            || interpolationSyntax == SQUARE_BRACKET_INTERPOLATION_SYNTAX)
+                    || postInterpolationLexState != -1 /* We're in an interpolation => We aren't in a tag */) {
+                throw newUnexpectedClosingTokenException(matchedToken);
+            }
+            
+            // Close tag, either legally or to emulate legacy glitch:
             matchedToken.kind = DIRECTIVE_END;
             if (inFTLHeader) {
                 eatNewline();
@@ -1336,7 +1359,7 @@ TOKEN:
     {
         if (curlyBracketNesting > 0) {
             --curlyBracketNesting;
-        } else if (interpolationSyntax != SQUARE_BRACKET_INTERPOLATION_SYNTAX) {
+        } else if (interpolationSyntax != SQUARE_BRACKET_INTERPOLATION_SYNTAX && postInterpolationLexState != -1) {
             endInterpolation(matchedToken);
         } else {
             throw newUnexpectedClosingTokenException(matchedToken);
@@ -1529,19 +1552,47 @@ TOKEN:
 {
     <DIRECTIVE_END : ">">
     {
-        if (inFTLHeader) eatNewline();
-        inFTLHeader = false;
-        if (squBracTagSyntax) {
+        if (inFTLHeader) {
+	        eatNewline();
+	        inFTLHeader = false;
+        }
+        if (squBracTagSyntax || postInterpolationLexState != -1 /* We are in an interpolation */) {
             matchedToken.kind = NATURAL_GT;
         } else {
+            if (directiveSyntaxEstablished && ( incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_28
+                    || interpolationSyntax == SQUARE_BRACKET_INTERPOLATION_SYNTAX)) {
+                if (squBracTagSyntax) {
+                    throw new TokenMgrError(
+                            "The tag shouldn't end with \"" + image.charAt(image.length() - 1) + "\".",
+                            TokenMgrError.LEXICAL_ERROR,
+                            matchedToken.beginLine, matchedToken.beginColumn,
+                            matchedToken.endLine, matchedToken.endColumn);
+                }
+            }
+        
             SwitchTo(DEFAULT);
         }
     }
     |
     <EMPTY_DIRECTIVE_END : "/>" | "/]">
     {
-        if (inFTLHeader) eatNewline();
-        inFTLHeader = false;
+        if (directiveSyntaxEstablished && (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_28
+                || interpolationSyntax == SQUARE_BRACKET_INTERPOLATION_SYNTAX)) {
+            String image = matchedToken.image;
+            char lastChar = image.charAt(image.length() - 1);
+            if (!squBracTagSyntax && lastChar != '>' || squBracTagSyntax && lastChar != ']') {
+                throw new TokenMgrError(
+                        "The tag shouldn't end with \""+ lastChar + "\".",
+                        TokenMgrError.LEXICAL_ERROR,
+                        matchedToken.beginLine, matchedToken.beginColumn,
+                        matchedToken.endLine, matchedToken.endColumn);
+            }
+        }
+    
+        if (inFTLHeader) {
+	        eatNewline();
+	        inFTLHeader = false;
+        }
         SwitchTo(DEFAULT);
     }
 }
