@@ -19,19 +19,20 @@
 
 package org.apache.freemarker.core;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 
-import org.apache.freemarker.core.util._StringUtils;
+import org.apache.freemarker.test.TemplateTest;
 import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
-public class ParsingErrorMessagesTest {
+public class ParsingErrorMessagesTest extends TemplateTest {
 
-    private Configuration cfg = new TestConfigurationBuilder()
-            .tagSyntax(TagSyntax.AUTO_DETECT)
-            .build();
+    @Override
+    protected Configuration createDefaultConfiguration() throws Exception {
+        return new TestConfigurationBuilder()
+                .tagSyntax(TagSyntax.AUTO_DETECT)
+                .build();
+    }
 
     @Test
     public void testNeedlessInterpolation() {
@@ -122,10 +123,14 @@ public class ParsingErrorMessagesTest {
     }
 
     @Test
-    public void testInterpolatingClosingsErrors() {
-        assertErrorContains("${x", "unclosed");
+    public void testInterpolatingClosingsErrors() throws Exception {
+        assertErrorContains("<#ftl>${x", "unclosed");        
         assertErrorContains("<#assign x = x}>", "\"}\"", "open");
-        // TODO assertErrorContains("<#assign x = '${x'>", "unclosed");
+        assertErrorContains("<#ftl>${'x']", "\"]\"", "open");
+        super.assertErrorContains("<#ftl>${'x'>", "end of file");
+        super.assertErrorContains("[#ftl]${'x'>", "end of file");
+        
+        assertOutput("<#assign x = '${x'>", ""); // TODO [FM3] Legacy glitch... should fail in theory.
     }
 
     @Test
@@ -167,43 +172,19 @@ public class ParsingErrorMessagesTest {
         assertErrorContains("<#function f(a=0, b)></#function>", "with default", "without a default");
         assertErrorContains("<#function f(a,)></#function>", "Comma without");
         assertErrorContains("<#macro m a{positional}, b{positional},></#macro>", "Comma without");
-        assertErrorContains(false, "<#function f(a, b></#function>");
-        assertErrorContains(false, "<#function f(></#function>");
-        assertErrorContains(false, "[#ftl][#function f(a, b][/#function]", "Missing closing \")\"");
-        assertErrorContains(false, "[#ftl][#function f(][/#function]", "Missing closing \")\"");
+        super.assertErrorContains("<#function f(a, b></#function>");
+        super.assertErrorContains("<#function f(></#function>");
+        super.assertErrorContains("[#ftl][#function f(a, b][/#function]", "Missing closing \")\"");
+        super.assertErrorContains("[#ftl][#function f(][/#function]", "Missing closing \")\"");
         assertErrorContains("<#macro m a b)></#macro>", "\")\" without", "opening");
         assertErrorContains("<#macro m a b a></#macro>", "\"a\"", "multiple");
     }
 
-    private void assertErrorContains(String ftl, String... expectedSubstrings) {
-        assertErrorContains(false, ftl, expectedSubstrings);
-        assertErrorContains(true, ftl, expectedSubstrings);
-    }
-
-    private void assertErrorContains(boolean convertToSquare, String ftl, String... expectedSubstrings) {
-        try {
-            if (convertToSquare) {
-                ftl = ftl.replace('<', '[').replace('>', ']');
-            }
-            new Template("adhoc", ftl, cfg);
-            fail("The template had to fail");
-        } catch (ParseException e) {
-            String msg = e.getMessage();
-            for (String needle: expectedSubstrings) {
-                if (needle.startsWith("\\!")) {
-                    String netNeedle = needle.substring(2);
-                    if (msg.contains(netNeedle)) {
-                        fail("The message shouldn't contain substring " + _StringUtils.jQuote(netNeedle) + ":\n" + msg);
-                    }
-                } else if (!msg.contains(needle)) {
-                    fail("The message didn't contain substring " + _StringUtils.jQuote(needle) + ":\n" + msg);
-                }
-            }
-            showError(e);
-        } catch (IOException e) {
-            // Won't happen
-            throw new RuntimeException(e);
-        }
+    @Override
+    protected Throwable assertErrorContains(String ftl, String... expectedSubstrings) {
+        super.assertErrorContains(ftl, expectedSubstrings);
+        ftl = ftl.replace('<', '[').replace('>', ']');
+        return super.assertErrorContains(ftl, expectedSubstrings);
     }
 
     private void showError(Throwable e) {

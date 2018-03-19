@@ -48,7 +48,10 @@ public class InterpolationSyntaxTest extends TemplateTest {
         assertOutput("${'a${1}#{2}b[=3]'}", "a1#{2}b[=3]");
         
         assertOutput("<@r'${1} #{1} [=1]'?interpret />", "1 #{1} [=1]");
-        assertOutput("${'\"${1} #{1} [=1]\"'?eval}", "1 #{1} [=1]");        
+        assertOutput("${'\"${1} #{1} [=1]\"'?eval}", "1 #{1} [=1]");
+        
+        assertOutput("<#setting booleanFormat='y,n'>${2>1}", "y"); // Not an error since 2.3.28
+        assertOutput("[#ftl][#setting booleanFormat='y,n']${2>1}", "y"); // Not an error since 2.3.28
     }
 
     @Test
@@ -94,7 +97,10 @@ public class InterpolationSyntaxTest extends TemplateTest {
         
         assertOutput("[='[\\=1]']", "[=1]");
         assertOutput("[='[\\=1][=2]']", "12"); // Usual legacy interpolation escaping glitch...
-        assertOutput("[=r'[=1]']", "[=1]");        
+        assertOutput("[=r'[=1]']", "[=1]");
+        
+        assertOutput("<#setting booleanFormat='y,n'>[=2>1]", "y");
+        assertOutput("[#ftl][#setting booleanFormat='y,n'][=2>1]", "y");
         
         StringWriter sw = new StringWriter();
         new Template(null, "[= 1 + '[= 2 ]' ]", getConfiguration()).dump(sw);
@@ -116,19 +122,28 @@ public class InterpolationSyntaxTest extends TemplateTest {
     }
     
     @Test
-    public void legacyTagSyntaxGlitchStillWorksTest() throws Exception {
-        String ftl = "<#if [true][0]]t<#else]f</#if]";
+    public void legacyTagSyntaxGlitchFixedTest() throws Exception {
+        String badFtl1 = "<#if [true][0]]OK</#if>";
+        String badFtl2 = "<#if true>OK</#if]";
+        String badFtl3 = "<#assign x = 'OK'/]${x}";
+        String badFtl4 = " <#t/]OK\n";
         
         setConfiguration(new TestConfigurationBuilder()
                 .interpolationSyntax(InterpolationSyntax.DOLLAR)
                 .build());
-        assertOutput(ftl, "t");
+        assertErrorContains(badFtl1, "\"]\"");
+        assertErrorContains(badFtl2, "\"]\"");
+        assertErrorContains(badFtl3, "\"]\"");
+        assertErrorContains(badFtl4, "\"]\"");
         
         // Glitch is not emulated with this:
         setConfiguration(new TestConfigurationBuilder()
                 .interpolationSyntax(InterpolationSyntax.SQUARE_BRACKET)
                 .build());
-        assertErrorContains(ftl, "\"]\"");
+        assertErrorContains(badFtl1, "\"]\"");
+        assertErrorContains(badFtl2, "\"]\"");
+        assertErrorContains(badFtl3, "\"]\"");
+        assertErrorContains(badFtl4, "\"]\"");
     }
 
     @Test

@@ -533,7 +533,7 @@ TOKEN_MGR_DECLS:
     private boolean inFTLHeader;
     boolean squBracTagSyntax,
             autodetectTagSyntax,
-            directiveSyntaxEstablished,
+            tagSyntaxEstablished,
             inNamedParameterExpression;
     InterpolationSyntax interpolationSyntax;
     int incompatibleImprovements;
@@ -550,7 +550,7 @@ TOKEN_MGR_DECLS:
         final String image = tok.image;
         
         char firstChar = image.charAt(0);
-        if (autodetectTagSyntax && !directiveSyntaxEstablished) {
+        if (autodetectTagSyntax && !tagSyntaxEstablished) {
             squBracTagSyntax = (firstChar == '[');
         }
         if ((firstChar == '[' && !squBracTagSyntax) || (firstChar == '<' && squBracTagSyntax)) {
@@ -558,7 +558,22 @@ TOKEN_MGR_DECLS:
             return;
         }
         
-        directiveSyntaxEstablished = true;
+        tagSyntaxEstablished = true;
+
+        // For END_xxx tags, as they can't contain expressions, the whole tag is a single token. So this is the only
+        // chance to check if we got something inconsistent like `</#if]`. (We can't do this at the #CLOSE_TAG1 or
+        // such, as at that point it's possible that the tag syntax is not yet established.)
+        char lastChar = image.charAt(image.length() - 1);
+        // Is it an end tag?
+        if (lastChar == ']' || lastChar == '>') {
+            if (!squBracTagSyntax && lastChar != '>' || squBracTagSyntax && lastChar != ']') {
+                throw new TokenMgrError(
+                        "The tag shouldn't end with \""+ lastChar + "\".",
+                        TokenMgrError.LEXICAL_ERROR,
+                        tok.beginLine, tok.beginColumn,
+                        tok.endLine, tok.endColumn);
+            }
+        } // if end-tag
         
         SwitchTo(newLexState);
     }
@@ -581,7 +596,7 @@ TOKEN_MGR_DECLS:
 
     private void dynamicTopLevelCall(Token tok) {
         char firstChar = tok.image.charAt(0);
-        if (autodetectTagSyntax && !directiveSyntaxEstablished) {
+        if (autodetectTagSyntax && !tagSyntaxEstablished) {
             squBracTagSyntax = (firstChar == '[');
         }
         if (squBracTagSyntax && firstChar == '<') {
@@ -592,7 +607,7 @@ TOKEN_MGR_DECLS:
             tok.kind = STATIC_TEXT_NON_WS;
             return;
         }
-        directiveSyntaxEstablished = true;
+        tagSyntaxEstablished = true;
         SwitchTo(NO_SPACE_EXPRESSION);
     }
 
@@ -633,9 +648,6 @@ TOKEN_MGR_DECLS:
     }
 
     private void endInterpolation(Token closingTk) {
-        if (postInterpolationLexState == -1) {
-            throw newUnexpectedClosingTokenException(closingTk);
-        }
         SwitchTo(postInterpolationLexState);
         postInterpolationLexState = -1;
     }
@@ -674,9 +686,9 @@ TOKEN_MGR_DECLS:
     }
 
     private void ftlHeader(Token matchedToken) {
-        if (!directiveSyntaxEstablished) {
+        if (!tagSyntaxEstablished) {
             squBracTagSyntax = matchedToken.image.charAt(0) == '[';
-            directiveSyntaxEstablished = true;
+            tagSyntaxEstablished = true;
             autodetectTagSyntax = false;
         }
         String img = matchedToken.image;
@@ -869,9 +881,9 @@ TOKEN:
     {
         char firstChar = matchedToken.image.charAt(0);
 
-        if (!directiveSyntaxEstablished && autodetectTagSyntax) {
+        if (!tagSyntaxEstablished && autodetectTagSyntax) {
             squBracTagSyntax = (firstChar == '[');
-            directiveSyntaxEstablished = true;
+            tagSyntaxEstablished = true;
         }
 
         if (firstChar == '<' && squBracTagSyntax) {
@@ -1090,18 +1102,18 @@ TOKEN:
     {
         if (bracketNesting > 0) {
             --bracketNesting;
-        } else if (interpolationSyntax == InterpolationSyntax.SQUARE_BRACKET
-                && (postInterpolationLexState != -1 || !squBracTagSyntax)) {
+        } else if (interpolationSyntax == InterpolationSyntax.SQUARE_BRACKET && postInterpolationLexState != -1) {
             endInterpolation(matchedToken);
-        } else {
-            // TODO [FM3] Don't mimic this glitch anymore.
-            // Glitch where you can close any tag with `]`, like `<#if x]`. We keep it for backward compatibility.
+        } else if (squBracTagSyntax
+                && postInterpolationLexState == -1 /* We're in an interpolation => We aren't in a tag */) {
             matchedToken.kind = DIRECTIVE_END;
             if (inFTLHeader) {
                 eatNewline();
                 inFTLHeader = false;
             }
             SwitchTo(DEFAULT);
+        } else {
+            throw newUnexpectedClosingTokenException(matchedToken);
         }
     }
     |
@@ -1128,7 +1140,7 @@ TOKEN:
     {
         if (curlyBracketNesting > 0) {
             --curlyBracketNesting;
-        } else if (interpolationSyntax != InterpolationSyntax.SQUARE_BRACKET) {
+        } else if (interpolationSyntax != InterpolationSyntax.SQUARE_BRACKET && postInterpolationLexState != -1) {
             endInterpolation(matchedToken);
         } else {
             throw newUnexpectedClosingTokenException(matchedToken);
@@ -1321,19 +1333,46 @@ TOKEN:
 {
     <DIRECTIVE_END : ">">
     {
-        if (inFTLHeader) eatNewline();
-        inFTLHeader = false;
-        if (squBracTagSyntax) {
+        if (inFTLHeader) {
+            eatNewline();
+            inFTLHeader = false;
+        }
+        if (squBracTagSyntax || postInterpolationLexState != -1 /* We are in an interpolation */) {
             matchedToken.kind = NATURAL_GT;
         } else {
+            if (tagSyntaxEstablished) {
+                if (squBracTagSyntax) {
+                    throw new TokenMgrError(
+                            "The tag shouldn't end with \"" + image.charAt(image.length() - 1) + "\".",
+                            TokenMgrError.LEXICAL_ERROR,
+                            matchedToken.beginLine, matchedToken.beginColumn,
+                            matchedToken.endLine, matchedToken.endColumn);
+                }
+            }
+          
             SwitchTo(DEFAULT);
         }
     }
     |
     <EMPTY_DIRECTIVE_END : "/>" | "/]">
     {
-        if (inFTLHeader) eatNewline();
-        inFTLHeader = false;
+        if (inFTLHeader) {
+            eatNewline();
+            inFTLHeader = false;
+        }
+
+        if (tagSyntaxEstablished) {
+            String image = matchedToken.image;
+            char lastChar = image.charAt(image.length() - 1);
+            if (!squBracTagSyntax && lastChar != '>' || squBracTagSyntax && lastChar != ']') {
+                throw new TokenMgrError(
+                        "The tag shouldn't end with \""+ lastChar + "\".",
+                        TokenMgrError.LEXICAL_ERROR,
+                        matchedToken.beginLine, matchedToken.beginColumn,
+                        matchedToken.endLine, matchedToken.endColumn);
+            }
+        }
+        
         SwitchTo(DEFAULT);
     }
 }
