@@ -464,37 +464,49 @@ public class _StringUtils {
 
     /**
      * Splits a string at the specified string.
+     * 
+     * @param sep
+     *            The string that separates the items of the resulting array. If this is 0 length, then each character
+     *            will be a separate item in the array.
      */
     public static String[] split(String s, String sep, boolean caseInsensitive) {
-        String splitString = caseInsensitive ? sep.toLowerCase() : sep;
-        String input = caseInsensitive ? s.toLowerCase() : s;
-        int i, b, e;
-        int cnt;
-        String res[];
-        int ln = s.length();
-        int sln = sep.length();
+        int sepLn = sep.length();
 
-        if (sln == 0) throw new IllegalArgumentException(
-                "The separator string has 0 length");
-
-        i = 0;
-        cnt = 1;
-        while ((i = input.indexOf(splitString, i)) != -1) {
-            cnt++;
-            i += sln;
+        String convertedS = caseInsensitive ? s.toLowerCase() : s;
+        int sLn = s.length();
+        
+        if (sepLn == 0) {
+            String[] res = new String[sLn];
+            for (int i = 0; i < sLn; i++) {
+                res[i] = String.valueOf(s.charAt(i));
+            }
+            return res;
         }
-        res = new String[cnt];
 
-        i = 0;
-        b = 0;
-        while (b <= ln) {
-            e = input.indexOf(splitString, b);
-            if (e == -1) e = ln;
-            res[i++] = s.substring(b, e);
-            b = e + sln;
+        String splitString = caseInsensitive ? sep.toLowerCase() : sep;
+        String res[];
+        
+        {
+            int next = 0;
+            int count = 1;
+            while ((next = convertedS.indexOf(splitString, next)) != -1) {
+                count++;
+                next += sepLn;
+            }
+            res = new String[count];
+        }
+
+        int dst = 0;
+        int next = 0;
+        while (next <= sLn) {
+            int end = convertedS.indexOf(splitString, next);
+            if (end == -1) end = sLn;
+            res[dst++] = s.substring(next, end);
+            next = end + sepLn;
         }
         return res;
     }
+
 
     /**
      * Same as {@link #replace(String, String, String, boolean, boolean)} with two {@code false} parameters. 

@@ -617,7 +617,7 @@ class BuiltInsForStringsBasic {
                         : 0;
                 String[] result;
                 if ((flags & RegexpHelper.RE_FLAG_REGEXP) == 0) {
-                    RegexpHelper.checkNonRegexpFlags("split", flags);
+                    RegexpHelper.checkNonRegexpFlags(key, flags);
                     result = _StringUtils.split(s, splitString,
                             (flags & RegexpHelper.RE_FLAG_CASE_INSENSITIVE) != 0);
                 } else {
