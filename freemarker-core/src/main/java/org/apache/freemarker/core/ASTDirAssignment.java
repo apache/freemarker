@@ -149,7 +149,7 @@ final class ASTDirAssignment extends ASTDirective {
             if (operatorType == OPERATOR_TYPE_PLUS_EQUALS) {  // Add or concat operation
                 if (lhoValue == null) {
                     throw InvalidReferenceException.getInstance(
-                            variableName, getOperatorTypeAsString(), env);
+                            scope, variableName, getOperatorTypeAsString(), env);
                 }
                 
                 value = valueExp.eval(env);
@@ -160,7 +160,7 @@ final class ASTDirAssignment extends ASTDirective {
                 if (lhoValue instanceof TemplateNumberModel) {
                     lhoNumber = _EvalUtils.modelToNumber((TemplateNumberModel) lhoValue, null);
                 } else if (lhoValue == null) {
-                    throw InvalidReferenceException.getInstance(variableName, getOperatorTypeAsString(), env);
+                    throw InvalidReferenceException.getInstance(scope, variableName, getOperatorTypeAsString(), env);
                 } else {
                     throw MessageUtils.newUnexpectedAssignmentTargetTypeException(
                             variableName, lhoValue, TemplateNumberModel.class, env);
@@ -278,6 +278,15 @@ final class ASTDirAssignment extends ASTDirective {
             return "--";
         } else {
             return ASTExpArithmetic.getOperatorSymbol(operatorType) + "=";
+        }
+    }
+    
+    static String scopeAsString(int scope) {
+        switch (scope) {
+        case NAMESPACE: return "template namespace";
+        case LOCAL: return "local scope";
+        case GLOBAL: return "global scope";
+        default: throw new AssertionError("Unsupported scope: " + scope);
         }
     }
     

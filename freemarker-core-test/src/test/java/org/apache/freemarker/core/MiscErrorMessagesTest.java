@@ -55,4 +55,11 @@ public class MiscErrorMessagesTest extends TemplateTest {
         assertEquals((Integer) 2, ((TemplateException) e).getLineNumber());
     }
     
+    @Test
+    public void incrementalAssignmentsTest() throws Exception {
+        assertErrorContains("<#assign x++>", "\"x\"", "++", "template namespace");
+        assertErrorContains("<#global x += 2>", "\"x\"", "+=", "global scope");
+        assertErrorContains("<#macro m><#local x--></#macro><@m/>", "\"x\"", "--", "local scope");
+    }
+    
 }
