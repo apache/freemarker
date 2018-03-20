@@ -14441,6 +14441,10 @@ foobar</programlisting>
           <literal>?split(",", "r")</literal> in the last example the last
           <literal>""</literal> would be missing from the output.</para>
 
+          <para>If the 1st parameter is an empty string, the string will be
+          split to characters (since FreeMarker 2.3.28 - earlier this has only
+          worked with the <literal>r</literal> flag).</para>
+
           <note>
             <para>To check if a strings ends with something and append it
             otherwise, use <link linkend="ref_builtin_ensure_ends_with">the
@@ -27634,6 +27638,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               course, the parameter default value expression is still
               evaluated in the context of the called macro or
               function.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Bug fixed: When
+              <literal><replaceable>string</replaceable>?split(<replaceable>separator</replaceable>)</literal>
+              is called with <literal>""</literal> as the argument, the string
+              will be split to characters now. Earlier it has thrown an
+              <literal>IllegalArgumentException</literal> (unless the
+              <literal>r</literal> flag was specified).</para>
             </listitem>
           </itemizedlist>
         </section>
