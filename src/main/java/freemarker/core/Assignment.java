@@ -152,7 +152,7 @@ final class Assignment extends TemplateElement {
                     if (env.isClassicCompatible()) {
                         lhoValue = TemplateScalarModel.EMPTY_STRING;
                     } else {
-                        throw InvalidReferenceException.getInstance(
+                        throw InvalidReferenceException.getInstance(scope,
                                 variableName, getOperatorTypeAsString(), env);
                     }
                 }
@@ -171,7 +171,7 @@ final class Assignment extends TemplateElement {
                 if (lhoValue instanceof TemplateNumberModel) {
                     lhoNumber = EvalUtil.modelToNumber((TemplateNumberModel) lhoValue, null);
                 } else if (lhoValue == null) {
-                    throw InvalidReferenceException.getInstance(variableName, getOperatorTypeAsString(), env);
+                    throw InvalidReferenceException.getInstance(scope, variableName, getOperatorTypeAsString(), env);
                 } else {
                     throw new NonNumericalException(variableName, lhoValue, null, env);
                 }
@@ -289,6 +289,15 @@ final class Assignment extends TemplateElement {
             return "--";
         } else {
             return ArithmeticExpression.getOperatorSymbol(operatorType) + "=";
+        }
+    }
+    
+    static String scopeAsString(int scope) {
+        switch (scope) {
+        case NAMESPACE: return "template namespace";
+        case LOCAL: return "local scope";
+        case GLOBAL: return "global scope";
+        default: throw new AssertionError("Unsupported scope: " + scope);
         }
     }
     
