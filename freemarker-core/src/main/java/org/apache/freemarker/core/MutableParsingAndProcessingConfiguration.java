@@ -91,8 +91,11 @@ public abstract class MutableParsingAndProcessingConfiguration<
                 if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
                     unsetOutputFormat();
                 } else {
-                    setOutputFormat((OutputFormat) _ObjectBuilderSettingEvaluator.eval(
-                            value, OutputFormat.class, true, _SettingEvaluationEnvironment.getCurrent()));
+                    OutputFormat stdOF = Configuration.STANDARD_OUTPUT_FORMATS.get(value);
+                    setOutputFormat(
+                            stdOF != null ? stdOF
+                            : (OutputFormat) _ObjectBuilderSettingEvaluator.eval(
+                                    value, OutputFormat.class, true, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (WHITESPACE_STRIPPING_KEY.equals(name)) {
                 setWhitespaceStripping(_StringUtils.getYesNo(value));

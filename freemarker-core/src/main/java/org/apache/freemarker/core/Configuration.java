@@ -132,7 +132,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     
     private static final String VERSION_PROPERTIES_PATH = "/org/apache/freemarker/core/version.properties";
 
-    private static final Map<String, OutputFormat> STANDARD_OUTPUT_FORMATS;
+    static final Map<String, OutputFormat> STANDARD_OUTPUT_FORMATS;
     static {
         STANDARD_OUTPUT_FORMATS = new HashMap<>();
         STANDARD_OUTPUT_FORMATS.put(UndefinedOutputFormat.INSTANCE.getName(), UndefinedOutputFormat.INSTANCE);

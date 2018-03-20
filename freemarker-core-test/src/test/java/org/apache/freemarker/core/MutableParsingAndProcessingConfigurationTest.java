@@ -85,6 +85,9 @@ public class MutableParsingAndProcessingConfigurationTest {
         cfgB.setSetting(Configuration.ExtendableBuilder.OUTPUT_FORMAT_KEY, HTMLOutputFormat.class.getSimpleName());
         assertEquals(HTMLOutputFormat.INSTANCE, cfgB.getOutputFormat());
 
+        cfgB.setSetting(Configuration.ExtendableBuilder.OUTPUT_FORMAT_KEY, XMLOutputFormat.INSTANCE.getName());
+        assertEquals(XMLOutputFormat.INSTANCE, cfgB.getOutputFormat());
+        
         cfgB.unsetOutputFormat();
         assertEquals(UndefinedOutputFormat.INSTANCE, cfgB.getOutputFormat());
         assertFalse(cfgB.isOutputFormatSet());
