@@ -27710,6 +27710,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>Added a new
+              <literal>Configuration.removeTemplateFromCache</literal>
+              overload that has a <literal>Object
+              customLookupCondition</literal> parameter. This is useful to
+              manually evacuate a template from the cache that was get via a
+              non-<literal>null</literal> custom lookup condition.</para>
+            </listitem>
+
+            <listitem>
               <para>Added new property to
               <literal>BeansWrapper.MethodAppearanceDecision</literal>:
               <literal>replaceExistingProperty</literal>. This is useful when

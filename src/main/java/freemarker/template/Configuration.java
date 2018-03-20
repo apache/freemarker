@@ -3056,38 +3056,58 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
     
     /**
-     * Equivalent to <tt>removeTemplateFromCache(name, thisCfg.getLocale(), thisCfg.getEncoding(thisCfg.getLocale()), true)</tt>.
+     * Equivalent to {@link
+     * #removeTemplateFromCache(String, Locale, Object, String, boolean)
+     * removeTemplateFromCache(name, thisCfg.getLocale(), null, thisCfg.getEncoding(thisCfg.getLocale()), true)}.
      * @since 2.3.19
      */
     public void removeTemplateFromCache(String name) throws IOException {
         Locale loc = getLocale();
-        removeTemplateFromCache(name, loc, getEncoding(loc), true);
+        removeTemplateFromCache(name, loc, null, getEncoding(loc), true);
     }
 
     /**
-     * Equivalent to <tt>removeTemplateFromCache(name, locale, thisCfg.getEncoding(locale), true)</tt>.
+     * Equivalent to {@link
+     * #removeTemplateFromCache(String, Locale, Object, String, boolean)
+     * removeTemplateFromCache(name, locale, null, thisCfg.getEncoding(locale), true)}.
      * @since 2.3.19
      */
     public void removeTemplateFromCache(String name, Locale locale) throws IOException {
-        removeTemplateFromCache(name, locale, getEncoding(locale), true);
+        removeTemplateFromCache(name, locale, null, getEncoding(locale), true);
     }
 
     /**
-     * Equivalent to <tt>removeTemplateFromCache(name, thisCfg.getLocale(), encoding, true)</tt>.
+     * Equivalent to {@link
+     * #removeTemplateFromCache(String, Locale, Object, String, boolean)
+     * removeTemplateFromCache(name, thisCfg.getLocale(), null, encoding, true)}.
      * @since 2.3.19
      */
     public void removeTemplateFromCache(String name, String encoding) throws IOException {
-        removeTemplateFromCache(name, getLocale(), encoding, true);
+        removeTemplateFromCache(name, getLocale(), null, encoding, true);
     }
 
     /**
-     * Equivalent to <tt>removeTemplateFromCache(name, locale, encoding, true)</tt>.
+     * Equivalent to {@link
+     * #removeTemplateFromCache(String, Locale, Object, String, boolean)
+     * removeTemplateFromCache(name, locale, null, encoding, true)}.
      * @since 2.3.19
      */
     public void removeTemplateFromCache(String name, Locale locale, String encoding) throws IOException {
-        removeTemplateFromCache(name, locale, encoding, true);
+        removeTemplateFromCache(name, locale, null, encoding, true);
     }
     
+    /**
+     * Equivalent to {@link
+     * #removeTemplateFromCache(String, Locale, Object, String, boolean)
+     * removeTemplateFromCache(name, locale, null, encoding, parse)}.
+     * @since 2.3.19
+     */
+    public void removeTemplateFromCache(
+            String name, Locale locale, String encoding, boolean parse)
+    throws IOException {
+        removeTemplateFromCache(name, locale, null, encoding, parse);
+    }    
+
     /**
      * Removes a template from the template cache, hence forcing the re-loading
      * of it when it's next time requested. This is to give the application
@@ -3095,16 +3115,16 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
      * alone does.
      * 
      * <p>For the meaning of the parameters, see
-     * {@link #getTemplate(String, Locale, String, boolean)}.
+     * {@link #getTemplate(String, Locale, Object, String, boolean, boolean)}.
      * 
      * <p>This method is thread-safe and can be called while the engine processes templates.
      * 
-     * @since 2.3.19
+     * @since 2.3.28
      */
     public void removeTemplateFromCache(
-            String name, Locale locale, String encoding, boolean parse)
+            String name, Locale locale, Object customLookupCondition, String encoding, boolean parse)
     throws IOException {
-        cache.removeTemplate(name, locale, encoding, parse);
+        cache.removeTemplate(name, locale, customLookupCondition, encoding, parse);
     }    
     
     /**
