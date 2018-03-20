@@ -26165,6 +26165,25 @@ End book</programlisting>
               </listitem>
 
               <listitem>
+                <para><link linkend="dgui_misc_autoescaping">Auto-escaping
+                option</link> to escape HTML and XML special characters
+                printed with
+                <literal>${<replaceable>...</replaceable>}</literal>. So you
+                can just write <literal>${x}</literal> instead of
+                <literal>&lt;c:out value="${x}"/&gt;</literal>, and most
+                importantly, you can't accidentally forget to do
+                escaping.</para>
+              </listitem>
+
+              <listitem>
+                <para>Locale-sensitive number and date formatting by default.
+                When you output for a human audience, all you need to do is
+                just write <literal>${x}</literal> rather than
+                <literal>&lt;fmt:formatNumber value="${x}"
+                /&gt;</literal>.</para>
+              </listitem>
+
+              <listitem>
                 <para>No servlet specific scopes and other highly technical
                 things in templates (unless, of course, you expose them into
                 the data-model deliberately). It was made for MVC from the
@@ -26174,14 +26193,6 @@ End book</programlisting>
               <listitem>
                 <para>You can load the templates from anywhere; from the class
                 path, from a data-base, etc.</para>
-              </listitem>
-
-              <listitem>
-                <para>Locale-sensitive number and date formatting by default.
-                When you output for a human audience, all you need to do is
-                just write <literal>${x}</literal> rather than
-                <literal>&lt;fmt:formatNumber value="${x}"
-                /&gt;</literal>.</para>
               </listitem>
 
               <listitem>
