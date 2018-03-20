@@ -75,6 +75,7 @@ import freemarker.core.TemplateDateFormatFactory;
 import freemarker.core.TemplateNumberFormatFactory;
 import freemarker.core.UndefinedOutputFormat;
 import freemarker.core.UnregisteredOutputFormatException;
+import freemarker.core.XHTMLOutputFormat;
 import freemarker.core.XMLOutputFormat;
 import freemarker.core._CoreStringUtils;
 import freemarker.ext.beans.BeansWrapperBuilder;
@@ -942,6 +943,10 @@ public class ConfigurationTest extends TestCase {
        
        cfg.setSetting(Configuration.OUTPUT_FORMAT_KEY_SNAKE_CASE, HTMLOutputFormat.class.getSimpleName());
        assertEquals(HTMLOutputFormat.INSTANCE, cfg.getOutputFormat());
+
+       // Set standard format by name instead of class name:
+       cfg.setSetting(Configuration.OUTPUT_FORMAT_KEY_CAMEL_CASE, XHTMLOutputFormat.INSTANCE.getName());
+       assertEquals(XHTMLOutputFormat.INSTANCE, cfg.getOutputFormat());
        
        cfg.unsetOutputFormat();
        assertEquals(UndefinedOutputFormat.INSTANCE, cfg.getOutputFormat());

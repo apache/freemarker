@@ -3178,8 +3178,11 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
                 if (value.equalsIgnoreCase(DEFAULT)) {
                     unsetOutputFormat();
                 } else {
-                    setOutputFormat((OutputFormat) _ObjectBuilderSettingEvaluator.eval(
-                            value, OutputFormat.class, true, _SettingEvaluationEnvironment.getCurrent()));
+                    OutputFormat stdOF = STANDARD_OUTPUT_FORMATS.get(value);
+                    setOutputFormat(
+                            stdOF != null ? stdOF
+                            : (OutputFormat) _ObjectBuilderSettingEvaluator.eval(
+                                    value, OutputFormat.class, true, _SettingEvaluationEnvironment.getCurrent()));
                 }
             } else if (REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_SNAKE_CASE.equals(name)
                     || REGISTERED_CUSTOM_OUTPUT_FORMATS_KEY_CAMEL_CASE.equals(name)) {

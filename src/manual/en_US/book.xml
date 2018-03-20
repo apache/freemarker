@@ -27696,6 +27696,20 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
+              <para>When specifying the <literal>output_format</literal>
+              configuration settings with
+              <literal>String</literal>-<literal>String</literal> key-value
+              pairs (like with <literal>Configuration.setSetting(String,
+              String)</literal> or in a <literal>.properties</literal> file),
+              it's now possible to specify the standard output formats by name
+              rather than by class name (like
+              <literal>output_format=HTML</literal>). (Custom formats still
+              has to be referred by class name, as FreeMarker can't discover
+              what their names are, since it's not aware of the custom
+              classes.)</para>
+            </listitem>
+
+            <listitem>
               <para>Added new property to
               <literal>BeansWrapper.MethodAppearanceDecision</literal>:
               <literal>replaceExistingProperty</literal>. This is useful when
