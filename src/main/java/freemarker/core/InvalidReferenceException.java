@@ -141,7 +141,7 @@ public class InvalidReferenceException extends TemplateException {
     /**
      * Used for assignments that use operators like {@code +=}, when the target variable was null/missing. 
      */
-    static InvalidReferenceException getInstance(String missingAssignedVarName, String assignmentOperator,
+    static InvalidReferenceException getInstance(int scope, String missingAssignedVarName, String assignmentOperator,
             Environment env) {
         if (env != null && env.getFastInvalidReferenceExceptions()) {
             return FAST_INSTANCE;
@@ -149,8 +149,8 @@ public class InvalidReferenceException extends TemplateException {
             final _ErrorDescriptionBuilder errDescBuilder = new _ErrorDescriptionBuilder(
                             "The target variable of the assignment, ",
                             new _DelayedJQuote(missingAssignedVarName),
-                            ", was null or missing, but the \"",
-                            assignmentOperator, "\" operator needs to get its value before assigning to it."
+                            ", was null or missing in the " + Assignment.scopeAsString(scope) + ", and the \"",
+                            assignmentOperator, "\" operator must get its value from there before assigning to it."
                     );
             if (missingAssignedVarName.startsWith("$")) {
                 errDescBuilder.tips(TIP_NO_DOLLAR, TIP_MISSING_ASSIGNMENT_TARGET);

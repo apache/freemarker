@@ -14441,6 +14441,10 @@ foobar</programlisting>
           <literal>?split(",", "r")</literal> in the last example the last
           <literal>""</literal> would be missing from the output.</para>
 
+          <para>If the 1st parameter is an empty string, the string will be
+          split to characters (since FreeMarker 2.3.28 - earlier this has only
+          worked with the <literal>r</literal> flag).</para>
+
           <note>
             <para>To check if a strings ends with something and append it
             otherwise, use <link linkend="ref_builtin_ensure_ends_with">the
@@ -26165,6 +26169,25 @@ End book</programlisting>
               </listitem>
 
               <listitem>
+                <para><link linkend="dgui_misc_autoescaping">Auto-escaping
+                option</link> to escape HTML and XML special characters
+                printed with
+                <literal>${<replaceable>...</replaceable>}</literal>. So you
+                can just write <literal>${x}</literal> instead of
+                <literal>&lt;c:out value="${x}"/&gt;</literal>, and most
+                importantly, you can't accidentally forget to do
+                escaping.</para>
+              </listitem>
+
+              <listitem>
+                <para>Locale-sensitive number and date formatting by default.
+                When you output for a human audience, all you need to do is
+                just write <literal>${x}</literal> rather than
+                <literal>&lt;fmt:formatNumber value="${x}"
+                /&gt;</literal>.</para>
+              </listitem>
+
+              <listitem>
                 <para>No servlet specific scopes and other highly technical
                 things in templates (unless, of course, you expose them into
                 the data-model deliberately). It was made for MVC from the
@@ -26174,14 +26197,6 @@ End book</programlisting>
               <listitem>
                 <para>You can load the templates from anywhere; from the class
                 path, from a data-base, etc.</para>
-              </listitem>
-
-              <listitem>
-                <para>Locale-sensitive number and date formatting by default.
-                When you output for a human audience, all you need to do is
-                just write <literal>${x}</literal> rather than
-                <literal>&lt;fmt:formatNumber value="${x}"
-                /&gt;</literal>.</para>
               </listitem>
 
               <listitem>
@@ -27624,6 +27639,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               evaluated in the context of the called macro or
               function.)</para>
             </listitem>
+
+            <listitem>
+              <para>Bug fixed: When
+              <literal><replaceable>string</replaceable>?split(<replaceable>separator</replaceable>)</literal>
+              is called with <literal>""</literal> as the argument, the string
+              will be split to characters now. Earlier it has thrown an
+              <literal>IllegalArgumentException</literal> (unless the
+              <literal>r</literal> flag was specified).</para>
+            </listitem>
           </itemizedlist>
         </section>
 
@@ -27669,6 +27693,29 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
                   FreeMarker templates that use the default syntax.</para>
                 </listitem>
               </itemizedlist>
+            </listitem>
+
+            <listitem>
+              <para>When specifying the <literal>output_format</literal>
+              configuration settings with
+              <literal>String</literal>-<literal>String</literal> key-value
+              pairs (like with <literal>Configuration.setSetting(String,
+              String)</literal> or in a <literal>.properties</literal> file),
+              it's now possible to specify the standard output formats by name
+              rather than by class name (like
+              <literal>output_format=HTML</literal>). (Custom formats still
+              has to be referred by class name, as FreeMarker can't discover
+              what their names are, since it's not aware of the custom
+              classes.)</para>
+            </listitem>
+
+            <listitem>
+              <para>Added a new
+              <literal>Configuration.removeTemplateFromCache</literal>
+              overload that has a <literal>Object
+              customLookupCondition</literal> parameter. This is useful to
+              manually evacuate a template from the cache that was get via a
+              non-<literal>null</literal> custom lookup condition.</para>
             </listitem>
 
             <listitem>

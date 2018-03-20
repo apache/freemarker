@@ -536,7 +536,7 @@ class BuiltInsForStringsBasic {
                 long flags = argCnt > 1 ? RegexpHelper.parseFlagString((String) args.get(1)) : 0;
                 String[] result = null;
                 if ((flags & RegexpHelper.RE_FLAG_REGEXP) == 0) {
-                    RegexpHelper.checkNonRegexpFlags("split", flags);
+                    RegexpHelper.checkNonRegexpFlags(key, flags);
                     result = StringUtil.split(s, splitString,
                             (flags & RegexpHelper.RE_FLAG_CASE_INSENSITIVE) != 0);
                 } else {

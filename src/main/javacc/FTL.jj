@@ -628,7 +628,7 @@ TOKEN_MGR_DECLS:
     boolean strictSyntaxMode,
             squBracTagSyntax,
             autodetectTagSyntax,
-            directiveSyntaxEstablished,
+            tagSyntaxEstablished,
             inInvocation;
     int interpolationSyntax;
     int initialNamingConvention;
@@ -644,7 +644,7 @@ TOKEN_MGR_DECLS:
     // FreeMarker directives must start with <#. It also handles
     // tag syntax detection. If you update this logic, take a look
     // at the UNKNOWN_DIRECTIVE token too.
-    private void strictSyntaxCheck(Token tok, int tokenNamingConvention, int newLexState) {
+    private void handleTagSyntaxAndSwitch(Token tok, int tokenNamingConvention, int newLexState) {
         final String image = tok.image;
         
         // Non-strict syntax (deprecated) only supports legacy naming convention.
@@ -657,7 +657,7 @@ TOKEN_MGR_DECLS:
         }
         
         char firstChar = image.charAt(0);
-        if (autodetectTagSyntax && !directiveSyntaxEstablished) {
+        if (autodetectTagSyntax && !tagSyntaxEstablished) {
             squBracTagSyntax = (firstChar == '[');
         }
         if ((firstChar == '[' && !squBracTagSyntax) || (firstChar == '<' && squBracTagSyntax)) {
@@ -682,7 +682,7 @@ TOKEN_MGR_DECLS:
         }
         
         // We only get here if this is a strict FTL tag.
-        directiveSyntaxEstablished = true;
+        tagSyntaxEstablished = true;
         
         if (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_28
                 || interpolationSyntax == SQUARE_BRACKET_INTERPOLATION_SYNTAX) {
@@ -751,8 +751,8 @@ TOKEN_MGR_DECLS:
     /**
      * Used for tags whose name isn't affected by naming convention.
      */
-    private void strictSyntaxCheck(Token tok, int newLexState) {
-        strictSyntaxCheck(tok, Configuration.AUTO_DETECT_NAMING_CONVENTION, newLexState);
+    private void handleTagSyntaxAndSwitch(Token tok, int newLexState) {
+        handleTagSyntaxAndSwitch(tok, Configuration.AUTO_DETECT_NAMING_CONVENTION, newLexState);
     }
     
     private boolean isStrictTag(String image) {
@@ -788,7 +788,7 @@ TOKEN_MGR_DECLS:
 
     private void unifiedCall(Token tok) {
         char firstChar = tok.image.charAt(0);
-        if (autodetectTagSyntax && !directiveSyntaxEstablished) {
+        if (autodetectTagSyntax && !tagSyntaxEstablished) {
             squBracTagSyntax = (firstChar == '[');
         }
         if (squBracTagSyntax && firstChar == '<') {
@@ -799,7 +799,7 @@ TOKEN_MGR_DECLS:
             tok.kind = STATIC_TEXT_NON_WS;
             return;
         }
-        directiveSyntaxEstablished = true;
+        tagSyntaxEstablished = true;
         SwitchTo(NO_SPACE_EXPRESSION);
     }
 
@@ -881,9 +881,9 @@ TOKEN_MGR_DECLS:
     }
 
     private void ftlHeader(Token matchedToken) {
-        if (!directiveSyntaxEstablished) {
+        if (!tagSyntaxEstablished) {
             squBracTagSyntax = matchedToken.image.charAt(0) == '[';
-            directiveSyntaxEstablished = true;
+            tagSyntaxEstablished = true;
             autodetectTagSyntax = false;
         }
         String img = matchedToken.image;
@@ -918,168 +918,168 @@ TOKEN:
     /*
      * ATTENTION: Update _CoreAPI.*_BUILT_IN_DIRECTIVE_NAMES if you add new directives!
      */
-    <ATTEMPT : <START_TAG> "attempt" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <ATTEMPT : <START_TAG> "attempt" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <RECOVER : <START_TAG> "recover" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); } 
+    <RECOVER : <START_TAG> "recover" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); } 
     |
-    <IF : <START_TAG> "if" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <IF : <START_TAG> "if" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
     <ELSE_IF : <START_TAG> "else" ("i" | "I") "f" <BLANK>> {
-        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 4), FM_EXPRESSION);
+        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 4), FM_EXPRESSION);
     }
     |
-    <LIST : <START_TAG> "list" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <LIST : <START_TAG> "list" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <ITEMS : <START_TAG> "items" (<BLANK>)+ <AS> <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <ITEMS : <START_TAG> "items" (<BLANK>)+ <AS> <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
     <SEP : <START_TAG> "sep" <CLOSE_TAG1>>
     |
     <FOREACH : <START_TAG> "for" ("e" | "E") "ach" <BLANK>> {
-        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 3), FM_EXPRESSION);
+        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 3), FM_EXPRESSION);
     }
     |
-    <SWITCH : <START_TAG> "switch" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <SWITCH : <START_TAG> "switch" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <CASE : <START_TAG> "case" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <CASE : <START_TAG> "case" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <ASSIGN : <START_TAG> "assign" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <ASSIGN : <START_TAG> "assign" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <GLOBALASSIGN : <START_TAG> "global" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <GLOBALASSIGN : <START_TAG> "global" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <LOCALASSIGN : <START_TAG> "local" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <LOCALASSIGN : <START_TAG> "local" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <_INCLUDE : <START_TAG> "include" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <_INCLUDE : <START_TAG> "include" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <IMPORT : <START_TAG> "import" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <IMPORT : <START_TAG> "import" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <FUNCTION : <START_TAG> "function" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <FUNCTION : <START_TAG> "function" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <MACRO : <START_TAG> "macro" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <MACRO : <START_TAG> "macro" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <TRANSFORM : <START_TAG> "transform" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <TRANSFORM : <START_TAG> "transform" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <VISIT : <START_TAG> "visit" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <VISIT : <START_TAG> "visit" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <STOP : <START_TAG> "stop" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <STOP : <START_TAG> "stop" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <RETURN : <START_TAG> "return" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <RETURN : <START_TAG> "return" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <CALL : <START_TAG> "call" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <CALL : <START_TAG> "call" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <SETTING : <START_TAG> "setting" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <SETTING : <START_TAG> "setting" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
     <OUTPUTFORMAT : <START_TAG> "output" ("f"|"F") "ormat" <BLANK>> {
-        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 6), FM_EXPRESSION);
+        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 6), FM_EXPRESSION);
     }
     |
     <AUTOESC : <START_TAG> "auto" ("e"|"E") "sc" <CLOSE_TAG1>> {
-        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 4), DEFAULT);
+        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 4), DEFAULT);
     }
     |
     <NOAUTOESC : <START_TAG> "no" ("autoe"|"AutoE") "sc" <CLOSE_TAG1>> {
-        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 2), DEFAULT);
+        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 2), DEFAULT);
     }
     |
-    <COMPRESS : <START_TAG> "compress" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <COMPRESS : <START_TAG> "compress" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
     <COMMENT : <START_TAG> "comment" <CLOSE_TAG1>> {
-        strictSyntaxCheck(matchedToken, NO_PARSE); noparseTag = "comment";
+        handleTagSyntaxAndSwitch(matchedToken, NO_PARSE); noparseTag = "comment";
     }
     |
-    <TERSE_COMMENT : ("<" | "[") "#--" > { noparseTag = "-->"; strictSyntaxCheck(matchedToken, NO_PARSE); }
+    <TERSE_COMMENT : ("<" | "[") "#--" > { noparseTag = "-->"; handleTagSyntaxAndSwitch(matchedToken, NO_PARSE); }
     |
     <NOPARSE: <START_TAG> "no" ("p" | "P") "arse" <CLOSE_TAG1>> {
         int tagNamingConvention = getTagNamingConvention(matchedToken, 2);
-        strictSyntaxCheck(matchedToken, tagNamingConvention, NO_PARSE);
+        handleTagSyntaxAndSwitch(matchedToken, tagNamingConvention, NO_PARSE);
         noparseTag = tagNamingConvention == Configuration.CAMEL_CASE_NAMING_CONVENTION ? "noParse" : "noparse";
     }
     |
-    <END_IF : <END_TAG> "if" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <END_IF : <END_TAG> "if" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <END_LIST : <END_TAG> "list" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <END_LIST : <END_TAG> "list" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <END_ITEMS : <END_TAG> "items" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <END_ITEMS : <END_TAG> "items" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <END_SEP : <END_TAG> "sep" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <END_SEP : <END_TAG> "sep" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <END_RECOVER : <END_TAG> "recover" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <END_RECOVER : <END_TAG> "recover" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <END_ATTEMPT : <END_TAG> "attempt" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <END_ATTEMPT : <END_TAG> "attempt" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
     <END_FOREACH : <END_TAG> "for" ("e" | "E") "ach" <CLOSE_TAG1>> {
-        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 3), DEFAULT);
+        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 3), DEFAULT);
     }
     |
-    <END_LOCAL : <END_TAG> "local" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <END_LOCAL : <END_TAG> "local" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <END_GLOBAL : <END_TAG> "global" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <END_GLOBAL : <END_TAG> "global" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <END_ASSIGN : <END_TAG> "assign" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <END_ASSIGN : <END_TAG> "assign" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <END_FUNCTION : <END_TAG> "function" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <END_FUNCTION : <END_TAG> "function" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <END_MACRO : <END_TAG> "macro" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <END_MACRO : <END_TAG> "macro" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
     <END_OUTPUTFORMAT : <END_TAG> "output" ("f" | "F") "ormat" <CLOSE_TAG1>> {
-        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 6), DEFAULT);
+        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 6), DEFAULT);
     }
     |
     <END_AUTOESC : <END_TAG> "auto" ("e" | "E") "sc" <CLOSE_TAG1>> {
-        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 4), DEFAULT);
+        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 4), DEFAULT);
     }
     |
     <END_NOAUTOESC : <END_TAG> "no" ("autoe"|"AutoE") "sc" <CLOSE_TAG1>> {
-        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 2), DEFAULT);
+        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 2), DEFAULT);
     }
     |
-    <END_COMPRESS : <END_TAG> "compress" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <END_COMPRESS : <END_TAG> "compress" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <END_TRANSFORM : <END_TAG> "transform" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <END_TRANSFORM : <END_TAG> "transform" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <END_SWITCH : <END_TAG> "switch" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <END_SWITCH : <END_TAG> "switch" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <ELSE : <START_TAG> "else" <CLOSE_TAG2>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <ELSE : <START_TAG> "else" <CLOSE_TAG2>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <BREAK : <START_TAG> "break" <CLOSE_TAG2>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <BREAK : <START_TAG> "break" <CLOSE_TAG2>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <CONTINUE : <START_TAG> "continue" <CLOSE_TAG2>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <CONTINUE : <START_TAG> "continue" <CLOSE_TAG2>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <SIMPLE_RETURN : <START_TAG> "return" <CLOSE_TAG2>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <SIMPLE_RETURN : <START_TAG> "return" <CLOSE_TAG2>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <HALT : <START_TAG> "stop" <CLOSE_TAG2>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <HALT : <START_TAG> "stop" <CLOSE_TAG2>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <FLUSH : <START_TAG> "flush" <CLOSE_TAG2>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <FLUSH : <START_TAG> "flush" <CLOSE_TAG2>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <TRIM : <START_TAG> "t" <CLOSE_TAG2>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <TRIM : <START_TAG> "t" <CLOSE_TAG2>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <LTRIM : <START_TAG> "lt" <CLOSE_TAG2>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <LTRIM : <START_TAG> "lt" <CLOSE_TAG2>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <RTRIM : <START_TAG> "rt" <CLOSE_TAG2>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <RTRIM : <START_TAG> "rt" <CLOSE_TAG2>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <NOTRIM : <START_TAG> "nt" <CLOSE_TAG2>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <NOTRIM : <START_TAG> "nt" <CLOSE_TAG2>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <DEFAUL : <START_TAG> "default" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <DEFAUL : <START_TAG> "default" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <SIMPLE_NESTED : <START_TAG> "nested" <CLOSE_TAG2>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <SIMPLE_NESTED : <START_TAG> "nested" <CLOSE_TAG2>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <NESTED : <START_TAG> "nested" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <NESTED : <START_TAG> "nested" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <SIMPLE_RECURSE : <START_TAG> "recurse" <CLOSE_TAG2>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <SIMPLE_RECURSE : <START_TAG> "recurse" <CLOSE_TAG2>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <RECURSE : <START_TAG> "recurse" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <RECURSE : <START_TAG> "recurse" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <FALLBACK : <START_TAG> "fallback" <CLOSE_TAG2>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <FALLBACK : <START_TAG> "fallback" <CLOSE_TAG2>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
-    <ESCAPE : <START_TAG> "escape" <BLANK>> { strictSyntaxCheck(matchedToken, FM_EXPRESSION); }
+    <ESCAPE : <START_TAG> "escape" <BLANK>> { handleTagSyntaxAndSwitch(matchedToken, FM_EXPRESSION); }
     |
-    <END_ESCAPE : <END_TAG> "escape" <CLOSE_TAG1>> { strictSyntaxCheck(matchedToken, DEFAULT); }
+    <END_ESCAPE : <END_TAG> "escape" <CLOSE_TAG1>> { handleTagSyntaxAndSwitch(matchedToken, DEFAULT); }
     |
     <NOESCAPE : <START_TAG> "no" ("e" | "E") "scape" <CLOSE_TAG1>> {
-        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 2), DEFAULT);
+        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 2), DEFAULT);
     }
     |
     <END_NOESCAPE : <END_TAG> "no" ("e" | "E") "scape" <CLOSE_TAG1>> {
-        strictSyntaxCheck(matchedToken, getTagNamingConvention(matchedToken, 2), DEFAULT);
+        handleTagSyntaxAndSwitch(matchedToken, getTagNamingConvention(matchedToken, 2), DEFAULT);
     }
     |
     <UNIFIED_CALL : "<@" | "[@" > { unifiedCall(matchedToken); }
@@ -1095,14 +1095,14 @@ TOKEN:
      */
     <UNKNOWN_DIRECTIVE : ("[#" | "[/#" | "<#" | "</#") (["a"-"z", "A"-"Z", "_"])+>
     {
-        if (!directiveSyntaxEstablished && incompatibleImprovements < _TemplateAPI.VERSION_INT_2_3_19) {
+        if (!tagSyntaxEstablished && incompatibleImprovements < _TemplateAPI.VERSION_INT_2_3_19) {
             matchedToken.kind = STATIC_TEXT_NON_WS;
         } else {
             char firstChar = matchedToken.image.charAt(0);
 
-            if (!directiveSyntaxEstablished && autodetectTagSyntax) {
+            if (!tagSyntaxEstablished && autodetectTagSyntax) {
                 squBracTagSyntax = (firstChar == '[');
-                directiveSyntaxEstablished = true;
+                tagSyntaxEstablished = true;
             }
 
             if (firstChar == '<' && squBracTagSyntax) {
@@ -1559,7 +1559,7 @@ TOKEN:
         if (squBracTagSyntax || postInterpolationLexState != -1 /* We are in an interpolation */) {
             matchedToken.kind = NATURAL_GT;
         } else {
-            if (directiveSyntaxEstablished && ( incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_28
+            if (tagSyntaxEstablished && ( incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_28
                     || interpolationSyntax == SQUARE_BRACKET_INTERPOLATION_SYNTAX)) {
                 if (squBracTagSyntax) {
                     throw new TokenMgrError(
@@ -1576,7 +1576,7 @@ TOKEN:
     |
     <EMPTY_DIRECTIVE_END : "/>" | "/]">
     {
-        if (directiveSyntaxEstablished && (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_28
+        if (tagSyntaxEstablished && (incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_28
                 || interpolationSyntax == SQUARE_BRACKET_INTERPOLATION_SYNTAX)) {
             String image = matchedToken.image;
             char lastChar = image.charAt(image.length() - 1);
