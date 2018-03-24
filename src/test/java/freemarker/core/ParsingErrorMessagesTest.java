@@ -38,62 +38,67 @@ public class ParsingErrorMessagesTest extends TemplateTest {
 
     @Test
     public void testNeedlessInterpolation() {
-        assertErrorContains("<#if ${x} == 3></#if>", "instead of ${");
-        assertErrorContains("<#if ${x == 3}></#if>", "instead of ${");
-        assertErrorContains("<@foo ${x == 3} />", "instead of ${");
+        assertErrorContainsAS("<#if ${x} == 3></#if>", "instead of ${");
+        assertErrorContainsAS("<#if ${x == 3}></#if>", "instead of ${");
+        assertErrorContainsAS("<@foo ${x == 3} />", "instead of ${");
+        getConfiguration().setInterpolationSyntax(Configuration.SQUARE_BRACKET_INTERPOLATION_SYNTAX);
     }
 
     @Test
     public void testWrongDirectiveNames() {
-        assertErrorContains("<#foo />", "nknown directive", "#foo");
-        assertErrorContains("<#set x = 1 />", "nknown directive", "#set", "#assign");
-        assertErrorContains("<#iterator></#iterator>", "nknown directive", "#iterator", "#list");
+        assertErrorContainsAS("<#foo />", "nknown directive", "#foo");
+        assertErrorContainsAS("<#set x = 1 />", "nknown directive", "#set", "#assign");
+        assertErrorContainsAS("<#iterator></#iterator>", "nknown directive", "#iterator", "#list");
     }
 
     @Test
     public void testBug402() {
-        assertErrorContains("<#list 1..i as k>${k}<#list>", "existing directive", "malformed", "#list");
-        assertErrorContains("<#assign>", "existing directive", "malformed", "#assign");
-        assertErrorContains("</#if x>", "existing directive", "malformed", "#if");
-        assertErrorContains("<#compress x>", "existing directive", "malformed", "#compress");
+        assertErrorContainsAS("<#list 1..i as k>${k}<#list>", "existing directive", "malformed", "#list");
+        assertErrorContainsAS("<#assign>", "existing directive", "malformed", "#assign");
+        assertErrorContainsAS("</#if x>", "existing directive", "malformed", "#if");
+        assertErrorContainsAS("<#compress x>", "existing directive", "malformed", "#compress");
     }
 
     @Test
     public void testUnclosedDirectives() {
-        assertErrorContains("<#macro x>", "#macro", "unclosed");
-        assertErrorContains("<#macro x></#function>", "macro end tag");
-        assertErrorContains("<#function x>", "#macro", "unclosed");
-        assertErrorContains("<#function x></#macro>", "function end tag");
-        assertErrorContains("<#assign x>", "#assign", "unclosed");
-        assertErrorContains("<#macro m><#local x>", "#local", "unclosed");
-        assertErrorContains("<#global x>", "#global", "unclosed");
-        assertErrorContains("<@foo>", "@...", "unclosed");
-        assertErrorContains("<#list xs as x>", "#list", "unclosed");
-        assertErrorContains("<#list xs as x><#if x>", "#if", "unclosed");
-        assertErrorContains("<#list xs as x><#if x><#if q><#else>", "#if", "unclosed");
-        assertErrorContains("<#list xs as x><#if x><#if q><#else><#macro x>qwe", "#macro", "unclosed");
-        assertErrorContains("${(blah", "\"(\"", "unclosed");
-        assertErrorContains("${blah", "\"{\"", "unclosed");
+        assertErrorContainsAS("<#macro x>", "#macro", "unclosed");
+        assertErrorContainsAS("<#macro x></#function>", "macro end tag");
+        assertErrorContainsAS("<#function x>", "#macro", "unclosed");
+        assertErrorContainsAS("<#function x></#macro>", "function end tag");
+        assertErrorContainsAS("<#assign x>", "#assign", "unclosed");
+        assertErrorContainsAS("<#macro m><#local x>", "#local", "unclosed");
+        assertErrorContainsAS("<#global x>", "#global", "unclosed");
+        assertErrorContainsAS("<@foo>", "@...", "unclosed");
+        assertErrorContainsAS("<#list xs as x>", "#list", "unclosed");
+        assertErrorContainsAS("<#list xs as x><#if x>", "#if", "unclosed");
+        assertErrorContainsAS("<#list xs as x><#if x><#if q><#else>", "#if", "unclosed");
+        assertErrorContainsAS("<#list xs as x><#if x><#if q><#else><#macro x>qwe", "#macro", "unclosed");
+        assertErrorContainsAS("${(blah", "\"(\"", "unclosed");
+        assertErrorContainsAS("${blah", "\"{\"", "unclosed");
     }
     
     @Test
     public void testInterpolatingClosingsErrors() throws Exception {
-        assertErrorContains("<#ftl>${x", "unclosed");
-        assertErrorContains("<#assign x = x}>", "\"}\"", "open");
+        assertErrorContainsAS("<#ftl>${x", "unclosed");
+        assertErrorContainsAS("<#assign x = x}>", "\"}\"", "open");
         assertOutput("<#assign x = '${x'>", ""); // Legacy glitch... should fail in theory.
         
         for (int syntax : new int[] { LEGACY_INTERPOLATION_SYNTAX, DOLLAR_INTERPOLATION_SYNTAX }) {
             getConfiguration().setInterpolationSyntax(syntax);
-            assertErrorContains("<#ftl>${'x']", "\"]\"", "open");
-            super.assertErrorContains("<#ftl>${'x'>", "end of file");
-            super.assertErrorContains("[#ftl]${'x'>", "end of file");
+            assertErrorContainsAS("<#ftl>${'x']", "\"]\"", "open");
+            assertErrorContains("<#ftl>${'x'>", "end of file");
+            assertErrorContains("[#ftl]${'x'>", "end of file");
         }
     }
     
-    protected Throwable assertErrorContains(String ftl, String... expectedSubstrings) {
-        super.assertErrorContains(ftl, expectedSubstrings);
-        ftl = ftl.replace('<', '[').replace('>', ']');
-        return super.assertErrorContains(ftl, expectedSubstrings);
+    /**
+     * "assertErrorContains" with both angle bracket and square bracket tag syntax, by converting the input tag syntax.
+     * Beware, it uses primitive search-and-replace.
+     */
+    protected Throwable assertErrorContainsAS(String angleBracketsFtl, String... expectedSubstrings) {
+        assertErrorContains(angleBracketsFtl, expectedSubstrings);
+        angleBracketsFtl = angleBracketsFtl.replace('<', '[').replace('>', ']');
+        return assertErrorContains(angleBracketsFtl, expectedSubstrings);
     }
 
 }
