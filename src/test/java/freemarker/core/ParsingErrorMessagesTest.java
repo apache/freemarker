@@ -42,6 +42,7 @@ public class ParsingErrorMessagesTest extends TemplateTest {
         assertErrorContainsAS("<#if ${x == 3}></#if>", "instead of ${");
         assertErrorContainsAS("<@foo ${x == 3} />", "instead of ${");
         getConfiguration().setInterpolationSyntax(Configuration.SQUARE_BRACKET_INTERPOLATION_SYNTAX);
+        assertErrorContainsAS("<@foo [= x == 3] />", "instead of [=");
     }
 
     @Test
