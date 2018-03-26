@@ -138,7 +138,8 @@ class GetOptionalTemplateMethod implements TemplateMethodModelEx {
             template = env.getTemplateForInclusion(absTemplateName, encoding, parse, true);
         } catch (IOException e) {
             throw new _TemplateModelException(
-                    "Error when trying to include template ", new _DelayedJQuote(absTemplateName));
+                    e, "Error when trying to include template ", new _DelayedJQuote(absTemplateName)
+                        + "; see cause exception");
         }
         
         SimpleHash result = new SimpleHash(env.getObjectWrapper());

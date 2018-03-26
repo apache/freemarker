@@ -6248,17 +6248,39 @@ That's all.</programlisting>
           <primary>square bracket syntax</primary>
         </indexterm>
 
-        <para>Both FreeMarker tags (such as <literal>&lt;#if x&gt;</literal>)
-        and FreeMarker interpolations (such as <literal>${x}</literal>) can be
-        set <emphasis>independently</emphasis> to use so called square bracket
-        syntax (<literal>[#if x]</literal>, and <literal>[=x]</literal>,
-        respectively). This is mostly useful to prevent clashes with the
-        generated content (such as when generating JSP files), or to work
-        around cases where some other tool is confused by the default
-        symbols.</para>
+        <para>Sometimes the generated content uses symbols that clashes with
+        the default FreeMarker syntax (typically,
+        <literal>${<replaceable>...</replaceable>}</literal>-s that FreeMarker
+        should print as is, without interpretation), or you use some tool that
+        is confused by the default FreeMarker syntax (typically by
+        <literal>&lt;</literal> and <literal>&gt;</literal>). While usually
+        there are tricks to work those cases around (like you can use
+        <literal>${'$'}{x}</literal> to print <literal>${x}</literal> as is) ,
+        they are often too inconvenient. Thus, the interpolation syntax can be
+        configured to be like <literal>[=x]</literal> instead of
+        <literal>${x}</literal>. Also, independently of that, the FreeMarker
+        tag syntax can be configured to use <literal>[]</literal>, like in
+        <literal>[#if x]<replaceable>...</replaceable>[/#if]</literal>.
+        </para>
+
+        <note>
+          <para>While both the <quote>tag syntax</quote> and
+          <quote>interpolation syntax</quote> can be configured to use square
+          brackets, they are totally independent configuration settings. Thus,
+          the overall syntax can be like <literal>[#if x]${y}[/#if]</literal>,
+          or like <literal>&lt;#if x&gt;[=y]&lt;/#if&gt;</literal> as
+          well.</para>
+        </note>
 
         <section xml:id="dgui_misc_alternativesyntax_tag">
           <title>Square bracket tag syntax</title>
+
+          <note>
+            <para>This section is about the <emphasis>tag</emphasis> syntax,
+            not the <link
+            linkend="dgui_misc_alternativesyntax_interpolation"><emphasis>interpolation</emphasis>
+            syntax</link>. Don't confuse the two, they are independent.</para>
+          </note>
 
           <note>
             <para>This feature exists since FreeMarker 2.3.4.</para>
@@ -6285,8 +6307,8 @@ That's all.</programlisting>
             </listitem>
           </itemizedlist>
 
-          <para>To use the alternative tag syntax instead of the default one,
-          the programmers should configure FreeMarker so <phrase
+          <para>To use square tag syntax instead of the default one, the
+          programmers should configure FreeMarker so <phrase
           role="forProgrammers">(see
           <literal>Configuraton.setTagSyntax</literal>, or the
           <literal>tag_syntax</literal> setting)</phrase>. However, the tag
@@ -6311,58 +6333,68 @@ That's all.</programlisting>
   <emphasis>[/#list]</emphasis>
 &lt;/table&gt;</programlisting>
 
-          <para>The alternative (square bracket) and the default (angle
-          bracket) syntax are mutually exclusive within a template. That is,
-          either the whole template uses square bracket tag syntax, or the
-          whole template uses the angle bracket tag syntax. If the template
-          uses square bracket tag syntax, then things like <literal>&lt;#if
-          <replaceable>...</replaceable>&gt;</literal> are count as static
-          text, not as FTL tags. Similarly, if the template uses the angle
-          brackets tag syntax, things like <literal>[#if
-          <replaceable>...</replaceable>]</literal> count as static text, not
-          as FTL tags.</para>
+          <para>The square bracket and the default (angle bracket) syntax are
+          mutually exclusive within a template; they can't be mixed. If the
+          template uses square bracket tag syntax, then things like
+          <literal>&lt;#if <replaceable>...</replaceable>&gt;</literal> will
+          be just static text, not FTL tags. Similarly, if the template uses
+          the angle brackets tag syntax, things like <literal>[#if
+          <replaceable>...</replaceable>]</literal> are static text, not FTL
+          tags.</para>
 
           <para>If you start the file with <literal>[#ftl
           <replaceable>...</replaceable>]</literal> (where the
           <literal><replaceable>...</replaceable></literal> stands for the
           optional parameters; of course <literal>[#ftl]</literal> works too)
-          the file will surely use the square bracket syntax. If you start the
-          file with <literal>&lt;#ftl
-          <replaceable>...</replaceable>&gt;</literal> the file will surely
-          use the normal (angle bracket) syntax. If there is no
+          the file will use square bracket <emphasis>tag</emphasis> syntax
+          regardless of the configuration settings (but that does
+          <emphasis>not</emphasis> change the interpolation syntax to
+          <literal>[=...]</literal>). Similarly, if you start the file with
+          <literal>&lt;#ftl <replaceable>...</replaceable>&gt;</literal> the
+          file will use the normal (angle bracket) tag syntax. If there is no
           <literal>ftl</literal> directive in the file, then the programmer
-          decides what the syntax will be by configuring FreeMarker <phrase
-          role="forProgrammers">(programmers see
-          <literal>Configuration.setTagSyntax(int)</literal> in the API
+          decides what the tag <emphasis>syntax</emphasis> will be by
+          configuring FreeMarker <phrase role="forProgrammers">(programmers
+          see <literal>Configuration.setTagSyntax(int)</literal> in the API
           javadocs)</phrase>. Most probably the programmers use the factory
-          default however. The factory default in 2.3.x is using the normal
-          syntax. The factory default in 2.4.x will be auto-detection, which
-          means that the first FreeMarker tag determines the syntax (it can be
-          anything, not just <literal>ftl</literal>).</para>
+          default.</para>
         </section>
 
         <section xml:id="dgui_misc_alternativesyntax_interpolation">
           <title>Square bracket interpolation syntax</title>
 
           <note>
+            <para>This section is about the <emphasis>interpolation</emphasis>
+            syntax, not the <link
+            linkend="dgui_misc_alternativesyntax_tag"><emphasis>tag</emphasis>
+            syntax</link>. Don't confuse the two, they are independent.</para>
+          </note>
+
+          <note>
             <para>This feature exists since FreeMarker 2.3.28</para>
           </note>
 
           <para>In this case instead of
-          <literal>${<replaceable>expression</replaceable>}</literal> (and
+          <literal>${<replaceable>expression</replaceable>}</literal> (and the
+          deprecated
           <literal>#{<replaceable>expression</replaceable>}</literal>) you
           write <literal>[=<replaceable>expression</replaceable>]</literal>.
-          This syntax is usually activated by the programmers from the
-          configuration <phrase role="forProgrammers">(see
+          This syntax is activated by the programmers from the configuration
+          <phrase role="forProgrammers">(see
           <literal>Configuration.setInterpolationSyntax</literal> in the Java
-          API)</phrase>. It can be used both together with, and without the
-          square bracket <emphasis>tag</emphasis> syntax (see that in the
-          <link linkend="dgui_misc_alternativesyntax_tag">previous
-          section</link>), although it's more likely to be used together with
-          it. Assuming both interpolation and tag syntax was set to square
-          bracket, the earlier example template will look like this:</para>
+          API)</phrase>; unlike the tag syntax, it can't be specified inside
+          the template. It can be used both together with, and without the
+          <link linkend="dgui_misc_alternativesyntax_tag">square bracket
+          <emphasis>tag</emphasis> syntax</link>, as they are technically
+          unrelated, but it's probably more aesthetic to use square bracket
+          tag syntax when you use square bracket interpolation syntax:</para>
 
-          <programlisting role="template">&lt;p&gt;We have these animals:
+          <programlisting role="template">[#--
+  Note:
+  This example uses both interpolation_syntax=squareBracket and tag_syntax=squareBracket,
+  but you can also use interpolation_syntax=squareBracket and tag_syntax=angleBracket.
+--]
+&lt;p&gt;We have these animals:
 &lt;table border=1&gt;
   &lt;tr&gt;&lt;th&gt;Name&lt;th&gt;Price
   [#list animals as animal]
@@ -6383,6 +6415,16 @@ That's all.</programlisting>
           (especially
           <literal>${<replaceable>expression</replaceable>}</literal> is
           frequent), such as when generating JSP files.</para>
+
+          <para>There's also a third tag syntax, <quote>dollar</quote>, where
+          only the interpolation syntax is
+          <literal>${<replaceable>expression</replaceable>}</literal>, and the
+          deprecated
+          <literal>#{<replaceable>expression</replaceable>}</literal> is just
+          static text. (The one where
+          <literal>#{<replaceable>expression</replaceable>}</literal> is still
+          an interpolation is called the <quote>legacy</quote> interpolation
+          syntax, and is the default for backward compatibility.)</para>
         </section>
       </section>
     </chapter>
