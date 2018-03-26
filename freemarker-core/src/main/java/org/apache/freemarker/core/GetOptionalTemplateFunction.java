@@ -62,7 +62,8 @@ class GetOptionalTemplateFunction implements TemplateFunctionModel {
             template = env.getTemplateForInclusion(absTemplateName, true);
         } catch (IOException e) {
             throw new TemplateException(
-                    "Error when trying to include template ", new _DelayedJQuote(absTemplateName));
+                    e, "Error when trying to include template ", new _DelayedJQuote(absTemplateName),
+                    "; see cause exception");
         }
         
         NativeHashEx result = new NativeHashEx();
