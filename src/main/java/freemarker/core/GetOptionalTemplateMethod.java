@@ -138,7 +138,7 @@ class GetOptionalTemplateMethod implements TemplateMethodModelEx {
             template = env.getTemplateForInclusion(absTemplateName, encoding, parse, true);
         } catch (IOException e) {
             throw new _TemplateModelException(
-                    e, "Error when trying to include template ", new _DelayedJQuote(absTemplateName),
+                    e, "I/O error when trying to load optional template ", new _DelayedJQuote(absTemplateName),
                         "; see cause exception");
         }
         
