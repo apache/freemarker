@@ -4,7 +4,7 @@ Apache FreeMarker {version}
 [![Build Status](https://travis-ci.org/apache/incubator-freemarker.svg?branch=3)](https://travis-ci.org/apache/incubator-freemarker)
 
 For the latest version or to report bugs visit:
-http://freemarker.org/
+https://freemarker.apache.org/
 
 
 Regarding pull requests on Github
@@ -208,7 +208,7 @@ Last tested on IntelliJ IDEA Community 2017.1.5.
     
 - First, build the project with Gradle if you haven't yet (see earlier how).
 - "New..." -> "Project from existing source"
-  - Point to the root project `incubator-freemarker`) directory
+  - Point to the project root directory
   - On the next screen, select "Import project from external model" and "Gradle"
   - On the next screen, select "Use gradle wrapper task configuration" [TODO: or keep default?].
     Be sure at least Java 8 is selected for Gradle. Other defaults should be fine.
