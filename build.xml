@@ -386,9 +386,6 @@
       />
     </copy>
     <copy toDir="build/classes/META-INF">
-      <fileset dir="." includes="DISCLAIMER" />
-    </copy>
-    <copy toDir="build/classes/META-INF">
       <fileset dir="src/dist/jar/META-INF" includes="*" />
     </copy>
     <delete dir="build/src-main-java-filtered" />
@@ -668,7 +665,6 @@
         <include name="README.md" />
         <!-- LICENSE is binary-distribution-specific, and is copied later. -->
         <include name="NOTICE" />
-        <include name="DISCLAIMER" />
         <include name="RELEASE-NOTES" />
       </fileset>
     </copy>
@@ -717,7 +713,6 @@
         <include name="README.md" />
         <include name="LICENSE" />
         <include name="NOTICE" />
-        <include name="DISCLAIMER" />
         <include name="RELEASE-NOTES" />
       </fileset>
     </copy>
@@ -914,12 +909,12 @@
       <fileset dir="${dist.src.dir}/src/main/resources" />
       <fileset dir="${dist.src.dir}/src/main/javacc/" />
       <fileset dir="build/generated-sources/java/" includes="**/*.java" />
-      <metainf dir="${dist.src.dir}" includes="LICENSE, NOTICE, DISCLAIMER" />
+      <metainf dir="${dist.src.dir}" includes="LICENSE, NOTICE" />
     </jar>
 
     <mkdir dir="build/javadoc-attachment-metainf"/>
     <copy todir="build/javadoc-attachment-metainf">
-      <fileset dir="${dist.bin.dir}" includes="DISCLAIMER, NOTICE" />
+      <fileset dir="${dist.bin.dir}" includes="NOTICE" />
     </copy>
     <copy todir="build/javadoc-attachment-metainf">
       <fileset dir="src/dist/javadoc/META-INF/" />
@@ -1099,7 +1094,6 @@ Proceed? </input>
       <patternset>
         <include name="META-INF/*"/>
         <exclude name="META-INF/LICENSE"/>
-        <exclude name="META-INF/DISCLAIMER"/>
         <exclude name="META-INF/NOTICE"/>
       </patternset>
     </unzip>
