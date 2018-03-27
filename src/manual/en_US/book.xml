@@ -20593,7 +20593,29 @@ All rights reserved.</emphasis></programlisting>
               ...&gt;</literal> will print nothing. When
               <literal>false</literal>, the template processing will stop with
               error if the template is missing. If you omit this option, then
-              it defaults to <literal>false</literal>.</para>
+              it defaults to <literal>false</literal>. A more flexible
+              approach to handle missing templates (such as if you need to do
+              something when the template is missing) is using the <link
+              linkend="ref_specvar_get_optional_template"><literal>get_optional_template</literal>
+              special variable</link>.</para>
+
+              <note>
+                <para>If <literal>ignore_missing</literal> is
+                <literal>true</literal>, yet the <literal>include</literal>
+                directive fails with <quote>Template inclusion failed</quote>
+                error when the template is missing, that's often because your
+                application uses a custom
+                <literal>freemarker.cache.TemplateLoader</literal>
+                implementation, which incorrectly (against the API
+                documentation) throws an <literal>IOException</literal>
+                instead of returning <literal>null</literal> if a template is
+                not found. If it's so, the Java programmers need to fix that.
+                Another possibility is of course that it was indeed not
+                possible to tell if the template exists or not due to some
+                technical issues, in which case stopping with error is the
+                correct behavior. See the cause <literal>IOException</literal>
+                in the Java stack trace to figure out which case it is.</para>
+              </note>
             </listitem>
           </itemizedlist>
 
@@ -23865,6 +23887,22 @@ There was no specific handler for node y
         <para>While it's not an error if the template is missing, it's an
         error if it does exist but still can't be loaded due to syntactical
         errors in it, or due to some I/O error.</para>
+
+        <note>
+          <para>If the template fails with <quote>I/O error when trying to
+          load optional template</quote> when the template is missing, that's
+          often because your application uses a custom
+          <literal>freemarker.cache.TemplateLoader</literal> implementation,
+          which incorrectly (against the API documentation) throws an
+          <literal>IOException</literal> instead of returning
+          <literal>null</literal> if a template is not found. If it's so, the
+          Java programmers need to fix that. Another possibility is of course
+          that it was indeed not possible to tell if the template exists or
+          not due to some technical issues, in which case stopping with error
+          is the correct behavior. See the cause
+          <literal>IOException</literal> in the Java stack trace to figure out
+          which case it is.</para>
+        </note>
 
         <para>Example, in which depending on if <literal>some.ftl</literal>
         exists, we either print <quote>Template was found:</quote> and the
