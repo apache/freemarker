@@ -20607,14 +20607,15 @@ All rights reserved.</emphasis></programlisting>
                 application uses a custom
                 <literal>freemarker.cache.TemplateLoader</literal>
                 implementation, which incorrectly (against the API
-                documentation) throws an <literal>IOException</literal>
-                instead of returning <literal>null</literal> if a template is
-                not found. If it's so, the Java programmers need to fix that.
-                Another possibility is of course that it was indeed not
-                possible to tell if the template exists or not due to some
-                technical issues, in which case stopping with error is the
-                correct behavior. See the cause <literal>IOException</literal>
-                in the Java stack trace to figure out which case it is.</para>
+                documentation) throws an <literal>IOException</literal> in the
+                <literal>findTemplateSource</literal> method instead of
+                returning <literal>null</literal> if a template is not found.
+                If it's so, the Java programmers need to fix that. Another
+                possibility is of course that it was indeed not possible to
+                tell if the template exists or not due to some technical
+                issues, in which case stopping with error is the correct
+                behavior. See the cause <literal>IOException</literal> in the
+                Java stack trace to figure out which case it is.</para>
               </note>
             </listitem>
           </itemizedlist>
@@ -23894,7 +23895,8 @@ There was no specific handler for node y
           often because your application uses a custom
           <literal>freemarker.cache.TemplateLoader</literal> implementation,
           which incorrectly (against the API documentation) throws an
-          <literal>IOException</literal> instead of returning
+          <literal>IOException</literal> in the
+          <literal>findTemplateSource</literal> method instead of returning
           <literal>null</literal> if a template is not found. If it's so, the
           Java programmers need to fix that. Another possibility is of course
           that it was indeed not possible to tell if the template exists or
