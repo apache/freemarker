@@ -47,16 +47,20 @@ public interface ParsingConfiguration {
 
     /**
      * Determines the syntax of the template files (angle bracket VS square bracket)
-     * that has no {@code #ftl} in it. The {@code tagSyntax}
-     * parameter must be one of:
+     * that has no {@code #ftl} in it.  Don't confuse this with the interpolation syntax
+     * ({@link #getInterpolationSyntax()}); they are independent.
+     * 
+     * <p>The {@code tagSyntax} parameter must be one of:
      * <ul>
      *   <li>{@link TagSyntax#AUTO_DETECT}:
-     *     use the syntax of the first FreeMarker tag (can be anything, like <tt>#list</tt>,
+     *     Use the syntax of the first FreeMarker tag (can be anything, like <tt>#list</tt>,
      *     <tt>#include</tt>, user defined, etc.)
      *   <li>{@link TagSyntax#ANGLE_BRACKET}:
-     *     use the angle bracket syntax (the normal syntax)
+     *     Use the angle bracket tag syntax (the normal syntax), like {@code <#include ...>}
      *   <li>{@link TagSyntax#SQUARE_BRACKET}:
-     *     use the square bracket syntax
+     *     Use the square bracket tag syntax, like {@code [#include ...]}. Note that this does <em>not</em> change
+     *     <code>${x}</code> to {@code [=...]}; that's <em>interpolation</em> syntax, so there the relevant one is
+     *     {@link #getInterpolationSyntax()}.
      * </ul>
      *
      * <p>In FreeMarker 2.3.x {@link TagSyntax#ANGLE_BRACKET} is the
@@ -80,6 +84,9 @@ public interface ParsingConfiguration {
     
     /**
      * Determines the interpolation syntax (<code>${x}</code> VS <code>[=x]</code>) of the template files.
+     * Don't confuse this with the tag syntax ({@link #getTagSyntax()}); they are independent.
+     * Note that {@link InterpolationSyntax#SQUARE_BRACKET} does <em>not</em> change {@code <#if x>} to
+     * {@code [#if x]}; that's <em>tag</em> syntax, so there the relevant one is {@link #getTagSyntax()}.
      */
     InterpolationSyntax getInterpolationSyntax();
 

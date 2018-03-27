@@ -23,6 +23,14 @@ package org.apache.freemarker.core;
  * Used as the value of the {@link ParsingConfiguration#getInterpolationSyntax()}  interpolationSyntax} setting.
  */
 public enum InterpolationSyntax {
+    
+    /** <code>${expression}</code> */
     DOLLAR,
+    
+    /**
+     * <code>[=expression]</code> instead of <code>${expression}</code>.
+     * It does <em>not</em> change {@code <#if x>} to {@code [#if x]}; that's square bracket <em>tag</em> syntax
+     * ({@link TagSyntax#SQUARE_BRACKET}).
+     */
     SQUARE_BRACKET;
 }

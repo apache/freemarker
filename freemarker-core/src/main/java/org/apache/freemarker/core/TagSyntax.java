@@ -23,11 +23,22 @@ package org.apache.freemarker.core;
  * Used as the value of the {@link ParsingConfiguration#getTagSyntax()}  tagSyntax} setting.
  */
 public enum TagSyntax {
-    /** The parser decides between {@link #ANGLE_BRACKET} and {@link #SQUARE_BRACKET} based on the first tag it mets. */
+    
+    /**
+     * The parser decides between {@link #ANGLE_BRACKET} and {@link #SQUARE_BRACKET} based on the first tag (like
+     * {@code [#if x]} or {@code <#if x>}) it mets. Note that {@code [=...]} is <em>not</em> a tag, but
+     * an interpolation, so it's not used for tag syntax auto-detection.
+     */
     // TODO [FM3] Get rid of this, as it's too hard for tooling.
     AUTO_DETECT,
+    
     /** For example {@code <#if x><@foo /></#if>} */
     ANGLE_BRACKET,
-    /** For example {@code [#if x][@foo /][/#if]} */
+    
+    /**
+      * For example {@code [#if x][@foo /][/#if]}.
+      * It does <em>not</em> change <code>${x}</code> to {@code [=x]}; that's square bracket <em>interpolation</em>
+      * syntax ({@link InterpolationSyntax#SQUARE_BRACKET}).
+      */
     SQUARE_BRACKET
 }

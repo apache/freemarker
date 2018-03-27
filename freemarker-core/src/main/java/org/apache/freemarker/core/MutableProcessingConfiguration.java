@@ -58,9 +58,9 @@ import org.apache.freemarker.core.templateresolver.OrMatcher;
 import org.apache.freemarker.core.templateresolver.PathGlobMatcher;
 import org.apache.freemarker.core.templateresolver.PathRegexMatcher;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateNameFormat;
-import org.apache.freemarker.core.util.TemplateLanguageUtils;
 import org.apache.freemarker.core.util.GenericParseException;
 import org.apache.freemarker.core.util.OptInTemplateClassResolver;
+import org.apache.freemarker.core.util.TemplateLanguageUtils;
 import org.apache.freemarker.core.util._ClassUtils;
 import org.apache.freemarker.core.util._CollectionUtils;
 import org.apache.freemarker.core.util._KeyValuePair;
@@ -1518,7 +1518,18 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *   <li><p>{@code "tagSyntax"}:
      *       See {@link ParsingConfiguration#getTagSyntax()}.
      *       <br>String value: Must be one of
-     *       {@code "autoDetect"}, {@code "squareBracket"}, and {@code "squareBracket"}.
+     *       {@code "autoDetect"}, {@code "squareBracket"}, and {@code "squareBracket"} (like {@code [#if x]}).
+     *       <br>Note that setting the {@code "tagSyntax"} to {@code "squareBracket"} does <em>not</em> change
+     *       <code>${x}</code> to {@code [=...]}; that's <em>interpolation</em> syntax, so use the
+     *       {@code "interpolationSyntax"} setting for that, not this setting..       
+     *
+     *   <li><p>{@code "interpolationSyntax"}:
+     *       See {@link ParsingConfiguration#getInterpolationSyntax()}.
+     *       <br>String value: Must be one of
+     *       {@code "legacy"}, {@code "dollar"}, and {@code "square_bracket"} (like {@code [=x]}). 
+     *       <br>Note that setting the {@code "interpolationSyntax"} to {@code "squareBracket"} does <em>not</em> change
+     *       {@code <#if x>} to {@code [#if x]}; that's <em>tag</em> syntax, so use the
+     *       {@code "tagSyntax"} setting for that, not this setting.       
      *       
      *   <li><p>{@code "incompatibleImprovements"}:
      *       See {@link Configuration#getIncompatibleImprovements()}.
