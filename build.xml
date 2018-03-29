@@ -849,9 +849,9 @@
   </licenses>
   
   <scm>
-    <connection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-freemarker.git</connection>
-    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-freemarker.git</developerConnection>
-    <url>https://git-wip-us.apache.org/repos/asf?p=incubator-freemarker.git</url>
+    <connection>scm:git:https://git-wip-us.apache.org/repos/asf/freemarker.git</connection>
+    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/freemarker.git</developerConnection>
+    <url>https://git-wip-us.apache.org/repos/asf?p=freemarker.git</url>
     <tag>v${version}</tag>
   </scm>
 
@@ -863,21 +863,21 @@
   <mailingLists>
     <mailingList>
         <name>FreeMarker developer list</name>
-        <post>dev@freemarker.incubator.apache.org</post>
-        <subscribe>dev-subscribe@freemarker.incubator.apache.org</subscribe>
-        <unsubscribe>dev-unsubscribe@freemarker.incubator.apache.org</unsubscribe>
-        <archive>http://mail-archives.apache.org/mod_mbox/incubator-freemarker-dev/</archive>
+        <post>dev@freemarker.apache.org</post>
+        <subscribe>dev-subscribe@freemarker.apache.org</subscribe>
+        <unsubscribe>dev-unsubscribe@freemarker.apache.org</unsubscribe>
+        <archive>http://mail-archives.apache.org/mod_mbox/freemarker-dev/</archive>
     </mailingList>
     <mailingList>
         <name>FreeMarker commit and Jira notifications list</name>
-        <post>notifications@freemarker.incubator.apache.org</post>
-        <subscribe>notifications-subscribe@freemarker.incubator.apache.org</subscribe>
-        <unsubscribe>notifications-unsubscribe@freemarker.incubator.apache.org</unsubscribe>
-        <archive>http://mail-archives.apache.org/mod_mbox/incubator-freemarker-notifications/</archive>
+        <post>notifications@freemarker.apache.org</post>
+        <subscribe>notifications-subscribe@freemarker.apache.org</subscribe>
+        <unsubscribe>notifications-unsubscribe@freemarker.apache.org</unsubscribe>
+        <archive>http://mail-archives.apache.org/mod_mbox/freemarker-notifications/</archive>
     </mailingList>
     <mailingList>
       <name>FreeMarker management private</name>
-      <post>private@freemarker.incubator.apache.org</post>
+      <post>private@freemarker.apache.org</post>
     </mailingList>
   </mailingLists>
   
