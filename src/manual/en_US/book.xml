@@ -6260,8 +6260,7 @@ That's all.</programlisting>
         configured to be like <literal>[=x]</literal> instead of
         <literal>${x}</literal>. Also, independently of that, the FreeMarker
         tag syntax can be configured to use <literal>[]</literal>, like in
-        <literal>[#if x]<replaceable>...</replaceable>[/#if]</literal>.
-        </para>
+        <literal>[#if x]<replaceable>...</replaceable>[/#if]</literal>.</para>
 
         <note>
           <para>While both the <quote>tag syntax</quote> and
@@ -9553,6 +9552,11 @@ cfg.setTemplateConfigurations(
 
         <section>
           <title>Overview</title>
+
+          <note>
+            <para>Custom formats (of the kind described here) exists since
+            FreeMarker 2.3.24.</para>
+          </note>
 
           <para>FreeMarker allows you to define your own number and
           date/time/datetime formats, and associate a name to them. This
