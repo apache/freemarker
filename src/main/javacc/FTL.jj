@@ -1658,10 +1658,11 @@ Expression Expression() :
 }
 
 /**
+ * Should be called HighestPrecedenceExpression.
  * Deals with the operators that have the highest precedence. Also deals with `exp!default` and `exp!`, due to parser
  * tricks needed because of the last.
  */
-Expression HighestPrecedenceExpression() :
+Expression PrimaryExpression() :
 {
     Expression exp;
 }
@@ -1734,9 +1735,10 @@ Expression Parenthesis() :
 }
 
 /**
+ * Should be called UnaryPrefixExpression.
  * A primary expression preceded by zero or more unary prefix operators.
  */
-Expression UnaryPrefixExpression() :
+Expression UnaryExpression() :
 {
     Expression exp, result;
     boolean haveNot = false;
@@ -1748,7 +1750,7 @@ Expression UnaryPrefixExpression() :
         |
         result = NotExpression()
         |
-        result = HighestPrecedenceExpression()
+        result = PrimaryExpression()
     )
     {
         return result;
@@ -1765,7 +1767,7 @@ Expression NotExpression() :
     (
         t = <EXCLAM> { nots.add(t); }
     )+
-    exp = HighestPrecedenceExpression()
+    exp = PrimaryExpression()
     {
         for (int i = 0; i < nots.size(); i++) {
             result = new NotExpression(exp);
@@ -1789,7 +1791,7 @@ Expression UnaryPlusMinusExpression() :
         |
         t = <MINUS> { isMinus = true; }
     )
-    exp = HighestPrecedenceExpression()
+    exp = PrimaryExpression()
     {
         result = new UnaryPlusMinusExpression(exp, isMinus);  
         result.setLocation(template, t, exp);
@@ -1843,7 +1845,7 @@ Expression MultiplicativeExpression() :
     int operation = ArithmeticExpression.TYPE_MULTIPLICATION;
 }
 {
-    lhs = UnaryPrefixExpression() { result = lhs; }
+    lhs = UnaryExpression() { result = lhs; }
     (
         LOOKAHEAD(<TIMES>|<DIVIDE>|<PERCENT>)
         (
@@ -1855,7 +1857,7 @@ Expression MultiplicativeExpression() :
                 <PERCENT> {operation = ArithmeticExpression.TYPE_MODULO; }
             )
         )
-        rhs = UnaryPrefixExpression()
+        rhs = UnaryExpression()
         {
             numberLiteralOnly(lhs);
             numberLiteralOnly(rhs);
@@ -2442,9 +2444,9 @@ HashLiteral HashLiteral() :
 }
 
 /**
- * A production representing the ${...} or [=...] that outputs a variable.
+ * A production representing the ${...} or [=...] that outputs a variable; should be called NormalInterpolation.
  */
-DollarVariable NormalInterpolation() :
+DollarVariable StringOutput() :
 {
     Expression exp;
     Token begin, end;
@@ -2476,7 +2478,8 @@ DollarVariable NormalInterpolation() :
     }
 }
 
-NumericalOutput NumericalInterpolation() :
+/** Should be called NumericalInterpolation */
+NumericalOutput NumericalOutput() :
 {
     Expression exp;
     Token fmt = null, begin, end;
@@ -4177,9 +4180,9 @@ TemplateElements MixedContentElements() :
         (
             elem = PCData()
             |
-            elem = NormalInterpolation()
+            elem = StringOutput()
             |
-            elem = NumericalInterpolation()
+            elem = NumericalOutput()
             |
             elem = FreemarkerDirective()
         )
@@ -4223,9 +4226,9 @@ MixedContent MixedContent() :
         (
             elem = PCData()
             |
-            elem = NormalInterpolation()
+            elem = StringOutput()
             |
-            elem = NumericalInterpolation()
+            elem = NumericalOutput()
             |
             elem = FreemarkerDirective()
         )
@@ -4280,9 +4283,9 @@ TemplateElement FreeMarkerText() :
         (
             elem = PCData()
             |
-            elem = NormalInterpolation()
+            elem = StringOutput()
             |
-            elem = NumericalInterpolation()
+            elem = NumericalOutput()
         )
         {
             if (begin == null) {
@@ -4532,12 +4535,12 @@ List<Object> StaticTextAndInterpolations() :
 	    (
 	        LOOKAHEAD(<DOLLAR_INTERPOLATION_OPENING>|<SQUARE_BRACKET_INTERPOLATION_OPENING>)
 		    (
-		        interpolation = NormalInterpolation()
+		        interpolation = StringOutput()
 	        )
 		    |
             LOOKAHEAD(<HASH_INTERPOLATION_OPENING>)
 		    (
-                interpolation = NumericalInterpolation()
+                interpolation = NumericalOutput()
 		    )
 	    )
 	    {
