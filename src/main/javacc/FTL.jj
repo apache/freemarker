@@ -1559,17 +1559,6 @@ TOKEN:
         if (squBracTagSyntax || postInterpolationLexState != -1 /* We are in an interpolation */) {
             matchedToken.kind = NATURAL_GT;
         } else {
-            if (tagSyntaxEstablished && ( incompatibleImprovements >= _TemplateAPI.VERSION_INT_2_3_28
-                    || interpolationSyntax == SQUARE_BRACKET_INTERPOLATION_SYNTAX)) {
-                if (squBracTagSyntax) {
-                    throw new TokenMgrError(
-                            "The tag shouldn't end with \"" + image.charAt(image.length() - 1) + "\".",
-                            TokenMgrError.LEXICAL_ERROR,
-                            matchedToken.beginLine, matchedToken.beginColumn,
-                            matchedToken.endLine, matchedToken.endColumn);
-                }
-            }
-        
             SwitchTo(DEFAULT);
         }
     }
@@ -1582,7 +1571,7 @@ TOKEN:
             char lastChar = image.charAt(image.length() - 1);
             if (!squBracTagSyntax && lastChar != '>' || squBracTagSyntax && lastChar != ']') {
                 throw new TokenMgrError(
-                        "The tag shouldn't end with \""+ lastChar + "\".",
+                        "The tag shouldn't end with \"" + lastChar + "\".",
                         TokenMgrError.LEXICAL_ERROR,
                         matchedToken.beginLine, matchedToken.beginColumn,
                         matchedToken.endLine, matchedToken.endColumn);
