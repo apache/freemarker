@@ -203,12 +203,10 @@
 
 =========================================================================
 
-The Apache FreeMarker (incubating) documentation contains the following
-binaries, which were created at the Apache FreeMarker (incubating)
-project, and hence are covered by the same license as the other source
-files of it:
+The Apache FreeMarker documentation contains the following binaries,
+which were created at the Apache FreeMarker project, and hence are
+covered by the same license as the other source files of it:
 
-    documentation/_html/apache-incubator.png
     documentation/_html/docgen-resources/img/patterned-bg.png
     documentation/_html/docgen-resources/img/xxe.png
     documentation/_html/favicon.png
@@ -217,14 +215,6 @@ files of it:
     documentation/_html/figures/tree.png
     documentation/_html/logo.png
     
-=========================================================================
-
-The Apache FreeMarker (incubating) documentation contains the following
-binaries, which were created at the Apache Incubator project, and hence
-are covered by the same license as Apache FreeMarker (incubating):
-    
-    documentation/_html/apache-incubator.png
-
 =========================================================================
 
 The documentation includes a selection of icons from various icon sets

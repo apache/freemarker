@@ -73,18 +73,6 @@
     <para>FreeMarker is <link
     xlink:href="http://www.fsf.org/philosophy/free-sw.html">Free</link>,
     released under the Apache License, Version 2.0.</para>
-
-    <para><emphasis role="bold">Disclaimer: </emphasis><emphasis>Apache
-    FreeMarker is an effort undergoing incubation at The Apache Software
-    Foundation (ASF), sponsored by the <link
-    xlink:href="http://incubator.apache.org">Apache Incubator</link>.
-    Incubation is required of all newly accepted projects until a further
-    review indicates that the infrastructure, communications, and decision
-    making process have stabilized in a manner consistent with other
-    successful ASF projects. While incubation status is not necessarily a
-    reflection of the completeness or stability of the code, it does indicate
-    that the project has yet to be fully endorsed by the
-    ASF.</emphasis></para>
   </preface>
 
   <part xml:id="dgui">
@@ -27626,14 +27614,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_28">
-        <title>2.3.28 (incubating at Apache)</title>
+        <title>2.3.28</title>
 
         <para>Release date: [FIXME]</para>
-
-        <para><emphasis role="bold">This is a stable, final
-        release.</emphasis> The <quote>incubating</quote> suffix is required
-        by the Apache Software Foundation until the project becomes a fully
-        accepted (graduated) Apache project.</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -27952,6 +27935,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>roundingMode</literal>-s in <link
               linkend="topic.extendedJavaDecimalFormat">extended Java decimal
               format</link> parsing error message</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Other changes</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>FreeMarker has graduated from the Apache Incubator (as of
+              2018-03-31), and now is a normal top-level project at Apache.
+              Therefore, the version number doesn't contain
+              <quote>-incubating</quote> anymore.</para>
             </listitem>
           </itemizedlist>
         </section>
