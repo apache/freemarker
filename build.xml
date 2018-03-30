@@ -675,7 +675,9 @@
     />
     <!-- Copy binary-distribution-specific files: -->
     <copy todir="${dist.bin.dir}/">
-      <fileset dir="src/dist/bin/" />
+      <fileset dir="src/dist/bin/">
+        <exclude name="rat-excludes" />
+      </fileset>
     </copy>
 
     <!-- Copy binary -->
