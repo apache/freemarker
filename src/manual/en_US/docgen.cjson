@@ -131,7 +131,3 @@ socialLinks: {
   "Twitter": { class: "twitter", href: "olink:twitter" }
   "Stack Overflow": { class: "stack-overflow", href: "olink:newStackOverflowQuestion" }
 }
-
-sideTOCLogos: [
-  { src: "apache-incubator.png", alt: "Apache Incubator", href: "olink:asfIncubator" }
-]

@@ -38,10 +38,6 @@ src/manual/zh_CN/figures/overview.png
 src/manual/zh_CN/figures/tree.png
 src/manual/zh_CN/logo.png
 
-# Binaries/archives created in the Incubatir project:
-src/manual/en_US/apache-incubator.png
-src/manual/zh_CN/apache-incubator.png
-
 # Rat thinks it's a binary, but it's UTF-16 text:
 src/test/resources/freemarker/test/templatesuite/expected/output-encoding2.txt
 

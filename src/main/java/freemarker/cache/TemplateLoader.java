@@ -117,6 +117,10 @@ public interface TemplateLoader {
      * template content (based on the {@code #ftl encoding=...} header), this method will be called for a second time
      * with the correct {@code encoding} parameter value.
      * 
+     * <p>
+     * Unlike {@link #findTemplateSource(String)}, this method must not tolerate if the template is not found, and
+     * must throw {@link IOException} in that case. 
+     * 
      * @param templateSource
      *            an object representing a template source, obtained through a prior call to
      *            {@link #findTemplateSource(String)}. This must be an object on which
@@ -126,9 +130,9 @@ public interface TemplateLoader {
      *            to the byte representation of the template stream, and instead directly obtain a character stream.
      *            These loaders should ignore the encoding parameter.
      * 
-     * @return A {@link Reader} representing the template character stream. It's the responsibility of the caller (which
-     *         is {@link TemplateCache} usually) to {@code close()} it. The {@link Reader} is not required to work after
-     *         the {@code templateSource} was closed ({@link #closeTemplateSource(Object)}).
+     * @return A {@link Reader} representing the template character stream; not {@code null}. It's the responsibility of
+     *         the caller (which is {@link TemplateCache} usually) to {@code close()} it. The {@link Reader} is not
+     *         required to work after the {@code templateSource} was closed ({@link #closeTemplateSource(Object)}).
      * 
      * @throws IOException
      *             if an I/O error occurs while accessing the stream.

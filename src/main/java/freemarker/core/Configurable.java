@@ -2365,12 +2365,18 @@ public class Configurable {
      *   <li><p>{@code "tag_syntax"}:
      *       See {@link Configuration#setTagSyntax(int)}.
      *       <br>String value: Must be one of
-     *       {@code "auto_detect"}, {@code "angle_bracket"}, and {@code "square_bracket"}.
+     *       {@code "auto_detect"}, {@code "angle_bracket"}, and {@code "square_bracket"} (like {@code [#if x]}).
+     *       <br>Note that setting the {@code "tagSyntax"} to {@code "square_bracket"} does <em>not</em> change
+     *       <code>${x}</code> to {@code [=...]}; that's <em>interpolation</em> syntax, so use the
+     *       {@code "interpolation_syntax"} setting for that, not this setting.
      *        
      *   <li><p>{@code "interpolation_syntax"} (since 2.3.28):
      *       See {@link Configuration#setInterpolationSyntax(int)}.
      *       <br>String value: Must be one of
-     *       {@code "legacy"}, {@code "dollar"}, and {@code "square_bracket"}. 
+     *       {@code "legacy"}, {@code "dollar"}, and {@code "square_bracket"} (like {@code [=x]}). 
+     *       <br>Note that setting the {@code "interpolation_syntax"} to {@code "square_bracket"} does <em>not</em>
+     *       change {@code <#if x>} to {@code [#if x]}; that's <em>tag</em> syntax, so use the
+     *       {@code "tag_syntax"} setting for that, not this setting.       
      *       
      *   <li><p>{@code "naming_convention"}:
      *       See {@link Configuration#setNamingConvention(int)}.

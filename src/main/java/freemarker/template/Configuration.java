@@ -376,15 +376,35 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
         STANDARD_OUTPUT_FORMATS.put(JSONOutputFormat.INSTANCE.getName(), JSONOutputFormat.INSTANCE);
     }
     
+    /**
+     * The parser decides between {@link #ANGLE_BRACKET_TAG_SYNTAX} and {@link #SQUARE_BRACKET_TAG_SYNTAX} based on the
+     * first tag (like {@code [#if x]} or {@code <#if x>}) it mets. Note that {@code [=...]} is <em>not</em> a tag, but
+     * an interpolation, so it's not used for tag syntax auto-detection.
+     */
     public static final int AUTO_DETECT_TAG_SYNTAX = 0;
+    
+    /** For example {@code <#if x><@foo /></#if>} */
     public static final int ANGLE_BRACKET_TAG_SYNTAX = 1;
+    
+    /**
+     * For example {@code [#if x][@foo /][/#if]}.
+     * It does <em>not</em> change <code>${x}</code> to {@code [=x]}; that's square bracket <em>interpolation</em>
+     * syntax ({@link #SQUARE_BRACKET_INTERPOLATION_SYNTAX}).
+     */
     public static final int SQUARE_BRACKET_TAG_SYNTAX = 2;
 
     /** <code>${expression}</code> and the deprecated <code>#{expression; numFormat}</code> @since 2.3.28 */
     public static final int LEGACY_INTERPOLATION_SYNTAX = 20;
+    
     /** <code>${expression}</code> only (not <code>#{expression; numFormat}</code>) @since 2.3.28 */
     public static final int DOLLAR_INTERPOLATION_SYNTAX = 21;
-    /** <code>[=expression]</code> @since 2.3.28 */
+    
+    /**
+     * <code>[=expression]</code> instead of <code>${expression}</code>.
+     * It does <em>not</em> change {@code <#if x>} to {@code [#if x]}; that's square bracket <em>tag</em> syntax
+     * ({@link #SQUARE_BRACKET_TAG_SYNTAX}).
+     * @since 2.3.28
+     */
     public static final int SQUARE_BRACKET_INTERPOLATION_SYNTAX = 22;
     
     public static final int AUTO_DETECT_NAMING_CONVENTION = 10;
@@ -2378,15 +2398,20 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
 
     /**
      * Determines the tag syntax (like {@code <#if x>} VS {@code [#if x]}) of the template files 
-     * that has no {@code #ftl} header to decide that. The {@code tagSyntax} parameter must be one of:
+     * that has no {@code #ftl} header to decide that. Don't confuse this with the interpolation syntax
+     * ({@link #setInterpolationSyntax(int)}); they are independent.
+     * 
+     * <p>The {@code tagSyntax} parameter must be one of:
      * <ul>
      *   <li>{@link Configuration#AUTO_DETECT_TAG_SYNTAX}:
-     *     use the syntax of the first FreeMarker tag (can be anything, like <tt>#list</tt>,
+     *     Use the syntax of the first FreeMarker tag (can be anything, like <tt>#list</tt>,
      *     <tt>#include</tt>, user defined, etc.)
      *   <li>{@link Configuration#ANGLE_BRACKET_TAG_SYNTAX}:
-     *     use the angle bracket syntax (the normal syntax)
+     *     Use the angle bracket tag syntax (the normal syntax), like {@code <#include ...>}
      *   <li>{@link Configuration#SQUARE_BRACKET_TAG_SYNTAX}:
-     *     use the square bracket syntax
+     *     Use the square bracket tag syntax, like {@code [#include ...]}. Note that this does <em>not</em> change
+     *     <code>${x}</code> to {@code [=...]}; that's <em>interpolation</em> syntax, so use
+     *     {@link #setInterpolationSyntax(int)} for that.
      * </ul>
      *
      * <p>In FreeMarker 2.3.x {@link Configuration#ANGLE_BRACKET_TAG_SYNTAX} is the
@@ -2413,9 +2438,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
     }
 
     /**
-     * Determines the interpolation syntax (like <code>${x}</code> VS <code>[=x]</code>) of the template files. The
-     * {@code interpolationSyntax} parameter must be one of {@link Configuration#LEGACY_INTERPOLATION_SYNTAX},
+     * Determines the interpolation syntax (like <code>${x}</code> VS <code>[=x]</code>) of the template files. Don't
+     * confuse this with the tag syntax ({@link #setTagSyntax(int)}); they are independent.
+     * 
+     * <p>
+     * The {@code interpolationSyntax} parameter must be one of {@link Configuration#LEGACY_INTERPOLATION_SYNTAX},
      * {@link Configuration#DOLLAR_INTERPOLATION_SYNTAX}, and {@link Configuration#SQUARE_BRACKET_INTERPOLATION_SYNTAX}.
+     * Note that {@link Configuration#SQUARE_BRACKET_INTERPOLATION_SYNTAX} does <em>not</em> change {@code <#if x>} to
+     * {@code [#if x]}; that's <em>tag</em> syntax, so use {@link #setTagSyntax(int)} for that.
      * 
      * @see #setTagSyntax(int)
      * 

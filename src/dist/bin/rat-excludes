@@ -20,7 +20,6 @@ freemarker.jar
 /documentation/_html/api/**
 
 # Images/binaries that were create at FreeMarker:
-documentation/_html/apache-incubator.png
 documentation/_html/docgen-resources/img/patterned-bg.png
 documentation/_html/docgen-resources/img/xxe.png
 documentation/_html/favicon.png
@@ -28,9 +27,6 @@ documentation/_html/figures/model2sketch.png
 documentation/_html/figures/overview.png
 documentation/_html/figures/tree.png
 documentation/_html/logo.png
-
-# Images/binaries that were create at other Apache projects:
-documentation/_html/apache-incubator.png
 
 # Fonts whose license is detailed in the LICENSE file:
 documentation/_html/docgen-resources/fonts/icomoon.eot

@@ -386,9 +386,6 @@
       />
     </copy>
     <copy toDir="build/classes/META-INF">
-      <fileset dir="." includes="DISCLAIMER" />
-    </copy>
-    <copy toDir="build/classes/META-INF">
       <fileset dir="src/dist/jar/META-INF" includes="*" />
     </copy>
     <delete dir="build/src-main-java-filtered" />
@@ -668,7 +665,6 @@
         <include name="README.md" />
         <!-- LICENSE is binary-distribution-specific, and is copied later. -->
         <include name="NOTICE" />
-        <include name="DISCLAIMER" />
         <include name="RELEASE-NOTES" />
       </fileset>
     </copy>
@@ -679,7 +675,9 @@
     />
     <!-- Copy binary-distribution-specific files: -->
     <copy todir="${dist.bin.dir}/">
-      <fileset dir="src/dist/bin/" />
+      <fileset dir="src/dist/bin/">
+        <exclude name="rat-excludes" />
+      </fileset>
     </copy>
 
     <!-- Copy binary -->
@@ -717,7 +715,6 @@
         <include name="README.md" />
         <include name="LICENSE" />
         <include name="NOTICE" />
-        <include name="DISCLAIMER" />
         <include name="RELEASE-NOTES" />
       </fileset>
     </copy>
@@ -853,9 +850,9 @@
   </licenses>
   
   <scm>
-    <connection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-freemarker.git</connection>
-    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/incubator-freemarker.git</developerConnection>
-    <url>https://git-wip-us.apache.org/repos/asf?p=incubator-freemarker.git</url>
+    <connection>scm:git:https://git-wip-us.apache.org/repos/asf/freemarker.git</connection>
+    <developerConnection>scm:git:https://git-wip-us.apache.org/repos/asf/freemarker.git</developerConnection>
+    <url>https://git-wip-us.apache.org/repos/asf?p=freemarker.git</url>
     <tag>v${version}</tag>
   </scm>
 
@@ -867,21 +864,21 @@
   <mailingLists>
     <mailingList>
         <name>FreeMarker developer list</name>
-        <post>dev@freemarker.incubator.apache.org</post>
-        <subscribe>dev-subscribe@freemarker.incubator.apache.org</subscribe>
-        <unsubscribe>dev-unsubscribe@freemarker.incubator.apache.org</unsubscribe>
-        <archive>http://mail-archives.apache.org/mod_mbox/incubator-freemarker-dev/</archive>
+        <post>dev@freemarker.apache.org</post>
+        <subscribe>dev-subscribe@freemarker.apache.org</subscribe>
+        <unsubscribe>dev-unsubscribe@freemarker.apache.org</unsubscribe>
+        <archive>http://mail-archives.apache.org/mod_mbox/freemarker-dev/</archive>
     </mailingList>
     <mailingList>
         <name>FreeMarker commit and Jira notifications list</name>
-        <post>notifications@freemarker.incubator.apache.org</post>
-        <subscribe>notifications-subscribe@freemarker.incubator.apache.org</subscribe>
-        <unsubscribe>notifications-unsubscribe@freemarker.incubator.apache.org</unsubscribe>
-        <archive>http://mail-archives.apache.org/mod_mbox/incubator-freemarker-notifications/</archive>
+        <post>notifications@freemarker.apache.org</post>
+        <subscribe>notifications-subscribe@freemarker.apache.org</subscribe>
+        <unsubscribe>notifications-unsubscribe@freemarker.apache.org</unsubscribe>
+        <archive>http://mail-archives.apache.org/mod_mbox/freemarker-notifications/</archive>
     </mailingList>
     <mailingList>
       <name>FreeMarker management private</name>
-      <post>private@freemarker.incubator.apache.org</post>
+      <post>private@freemarker.apache.org</post>
     </mailingList>
   </mailingLists>
   
@@ -913,12 +910,12 @@
       <fileset dir="${dist.src.dir}/src/main/resources" />
       <fileset dir="${dist.src.dir}/src/main/javacc/" />
       <fileset dir="build/generated-sources/java/" includes="**/*.java" />
-      <metainf dir="${dist.src.dir}" includes="LICENSE, NOTICE, DISCLAIMER" />
+      <metainf dir="${dist.src.dir}" includes="LICENSE, NOTICE" />
     </jar>
 
     <mkdir dir="build/javadoc-attachment-metainf"/>
     <copy todir="build/javadoc-attachment-metainf">
-      <fileset dir="${dist.bin.dir}" includes="DISCLAIMER, NOTICE" />
+      <fileset dir="${dist.bin.dir}" includes="NOTICE" />
     </copy>
     <copy todir="build/javadoc-attachment-metainf">
       <fileset dir="src/dist/javadoc/META-INF/" />
@@ -1098,7 +1095,6 @@ Proceed? </input>
       <patternset>
         <include name="META-INF/*"/>
         <exclude name="META-INF/LICENSE"/>
-        <exclude name="META-INF/DISCLAIMER"/>
         <exclude name="META-INF/NOTICE"/>
       </patternset>
     </unzip>

@@ -73,18 +73,6 @@
     <para>FreeMarker is <link
     xlink:href="http://www.fsf.org/philosophy/free-sw.html">Free</link>,
     released under the Apache License, Version 2.0.</para>
-
-    <para><emphasis role="bold">Disclaimer: </emphasis><emphasis>Apache
-    FreeMarker is an effort undergoing incubation at The Apache Software
-    Foundation (ASF), sponsored by the <link
-    xlink:href="http://incubator.apache.org">Apache Incubator</link>.
-    Incubation is required of all newly accepted projects until a further
-    review indicates that the infrastructure, communications, and decision
-    making process have stabilized in a manner consistent with other
-    successful ASF projects. While incubation status is not necessarily a
-    reflection of the completeness or stability of the code, it does indicate
-    that the project has yet to be fully endorsed by the
-    ASF.</emphasis></para>
   </preface>
 
   <part xml:id="dgui">
@@ -6260,8 +6248,7 @@ That's all.</programlisting>
         configured to be like <literal>[=x]</literal> instead of
         <literal>${x}</literal>. Also, independently of that, the FreeMarker
         tag syntax can be configured to use <literal>[]</literal>, like in
-        <literal>[#if x]<replaceable>...</replaceable>[/#if]</literal>.
-        </para>
+        <literal>[#if x]<replaceable>...</replaceable>[/#if]</literal>.</para>
 
         <note>
           <para>While both the <quote>tag syntax</quote> and
@@ -9553,6 +9540,11 @@ cfg.setTemplateConfigurations(
 
         <section>
           <title>Overview</title>
+
+          <note>
+            <para>Custom formats (of the kind described here) exists since
+            FreeMarker 2.3.24.</para>
+          </note>
 
           <para>FreeMarker allows you to define your own number and
           date/time/datetime formats, and associate a name to them. This
@@ -20607,14 +20599,15 @@ All rights reserved.</emphasis></programlisting>
                 application uses a custom
                 <literal>freemarker.cache.TemplateLoader</literal>
                 implementation, which incorrectly (against the API
-                documentation) throws an <literal>IOException</literal>
-                instead of returning <literal>null</literal> if a template is
-                not found. If it's so, the Java programmers need to fix that.
-                Another possibility is of course that it was indeed not
-                possible to tell if the template exists or not due to some
-                technical issues, in which case stopping with error is the
-                correct behavior. See the cause <literal>IOException</literal>
-                in the Java stack trace to figure out which case it is.</para>
+                documentation) throws an <literal>IOException</literal> in the
+                <literal>findTemplateSource</literal> method instead of
+                returning <literal>null</literal> if a template is not found.
+                If it's so, the Java programmers need to fix that. Another
+                possibility is of course that it was indeed not possible to
+                tell if the template exists or not due to some technical
+                issues, in which case stopping with error is the correct
+                behavior. See the cause <literal>IOException</literal> in the
+                Java stack trace to figure out which case it is.</para>
               </note>
             </listitem>
           </itemizedlist>
@@ -23894,7 +23887,8 @@ There was no specific handler for node y
           often because your application uses a custom
           <literal>freemarker.cache.TemplateLoader</literal> implementation,
           which incorrectly (against the API documentation) throws an
-          <literal>IOException</literal> instead of returning
+          <literal>IOException</literal> in the
+          <literal>findTemplateSource</literal> method instead of returning
           <literal>null</literal> if a template is not found. If it's so, the
           Java programmers need to fix that. Another possibility is of course
           that it was indeed not possible to tell if the template exists or
@@ -27620,14 +27614,9 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
       <title>Version history</title>
 
       <section xml:id="versions_2_3_28">
-        <title>2.3.28 (incubating at Apache)</title>
+        <title>2.3.28</title>
 
-        <para>Release date: [FIXME]</para>
-
-        <para><emphasis role="bold">This is a stable, final
-        release.</emphasis> The <quote>incubating</quote> suffix is required
-        by the Apache Software Foundation until the project becomes a fully
-        accepted (graduated) Apache project.</para>
+        <para>Release date: 2018-03-30 + release process</para>
 
         <section>
           <title>Changes on the FTL side</title>
@@ -27665,8 +27654,10 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             </listitem>
 
             <listitem>
-              <para>Added new built-ins: <literal>sequence?min</literal> and
-              <literal>sequence?max</literal> (<link
+              <para>Added new built-ins:
+              <literal><replaceable>sequence</replaceable>?min</literal> and
+              <literal><replaceable>sequence</replaceable>?max</literal>
+              (<link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-86">FREEMARKER-86</link>),
               which return the smallest and greatest item from a list of
               numbers or date/time/date-times. <link
@@ -27777,16 +27768,15 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
 
             <listitem>
               <para>When specifying the <literal>output_format</literal>
-              configuration settings with
+              configuration setting with
               <literal>String</literal>-<literal>String</literal> key-value
               pairs (like with <literal>Configuration.setSetting(String,
               String)</literal> or in a <literal>.properties</literal> file),
-              it's now possible to specify the standard output formats by name
-              rather than by class name (like
-              <literal>output_format=HTML</literal>). (Custom formats still
-              has to be referred by class name, as FreeMarker can't discover
-              what their names are, since it's not aware of the custom
-              classes.)</para>
+              it's now possible to specify the standard output formats by
+              short name (like <literal>output_format=HTML</literal>) rather
+              than by class name. (Custom formats still has to be referred by
+              class name, as FreeMarker can't discover what their names are,
+              since it's not aware of the custom classes.)</para>
             </listitem>
 
             <listitem>
@@ -27794,7 +27784,7 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>Configuration.removeTemplateFromCache</literal>
               overload that has a <literal>Object
               customLookupCondition</literal> parameter. This is useful to
-              manually evacuate a template from the cache that was get via a
+              manually evacuate a template from the cache that was get with a
               non-<literal>null</literal> custom lookup condition.</para>
             </listitem>
 
@@ -27873,16 +27863,16 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <para>The default arithmetic engine
               (<literal>ArithmeticEngine.BIGDECIMAL_ENGINE</literal>) can now
               compare infinite (both positive and negative) to any other
-              standard type. Earlier, since <literal>BigDecimal</literal>
-              can't represent infinite, it was only working in certain special
-              cases. Also did some performance optimizations to slightly
-              decrease the impact and number of conversions to
-              <literal>BigDecimal</literal>.</para>
+              standard numerical type. Earlier, since
+              <literal>BigDecimal</literal> can't represent infinite, it was
+              only working in certain special cases. Also there were some
+              performance optimizations to slightly decrease the impact and
+              number of conversions to <literal>BigDecimal</literal>.</para>
             </listitem>
 
             <listitem>
               <para>Avoided possible performance bottleneck when executing
-              templates on many threads, caused be that
+              templates on many threads, caused by that
               <literal>java.beans.PropertyDescriptor.getReadMethod()</literal>
               is synchronized (<link
               xlink:href="https://issues.apache.org/jira/browse/FREEMARKER-80">FREEMARKER-80</link>).</para>
@@ -27917,28 +27907,29 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
             <listitem>
               <para>When the <link
               linkend="pgui_config_incompatible_improvements_how_to_set"><literal>incompatible_improvements</literal>
-              setting</link> is set to 2.3.28 (or greater), fixed legacy
+              setting</link> is set to 2.3.28 (or greater): Fixed legacy
               parser glitch where a tag can be closed with an illegal
               <literal>]</literal> (when it's not part of an expression)
               despite that the tag syntax is set to angle brackets. For
               example <literal>&lt;#if x]</literal> worked just like
-              <literal>&lt;#if x&gt;</literal>. Note that it doesn't affect
-              the legal usage of <literal>]</literal>, like <literal>&lt;#if
-              x[0]&gt;</literal> works correctly without this fix as
-              well.</para>
+              <literal>&lt;#if x&gt;</literal>. Note that this legacy glitch
+              didn't affect the legal usage of <literal>]</literal>, like
+              <literal>&lt;#if x[0]&gt;</literal> has always worked
+              correctly.</para>
             </listitem>
 
             <listitem>
               <para>Fixed parser bug that disallowed using
-              <literal>&gt;</literal> at the top-level inside an interpolation
-              (<literal>${...}</literal>). It had the same reason why
-              <literal>&lt;#if x &gt; y&gt;</literal> doesn't work as naively
-              expected, but there's no real ambiguity in <literal>${x &gt;
-              y}</literal>, so now it's allowed. Note that <literal>${(x &gt;
-              y)?c}</literal> and <literal>${(x &gt; y)?string('y',
-              'n')}</literal>, which are how booleans are commonly printed,
-              have always worked, as the <literal>&gt;</literal> operation is
-              not on the top-level inside the interpolation.</para>
+              <literal>&gt;</literal> as the top-level expression inside an
+              interpolation (<literal>${...}</literal>). It had the same
+              reason why <literal>&lt;#if x &gt; y&gt;</literal> doesn't work
+              as naively expected, but there's no real ambiguity in
+              <literal>${x &gt; y}</literal>, so now it's allowed. Note that
+              <literal>${(x &gt; y)?c}</literal> and <literal>${(x &gt;
+              y)?string('y', 'n')}</literal>, which are how booleans are
+              commonly printed, have always worked, as the
+              <literal>&gt;</literal> operation is not on the top-level inside
+              the interpolation.</para>
             </listitem>
 
             <listitem>
@@ -27946,6 +27937,19 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
               <literal>roundingMode</literal>-s in <link
               linkend="topic.extendedJavaDecimalFormat">extended Java decimal
               format</link> parsing error message</para>
+            </listitem>
+          </itemizedlist>
+        </section>
+
+        <section>
+          <title>Other changes</title>
+
+          <itemizedlist>
+            <listitem>
+              <para>FreeMarker has graduated from the Apache Incubator (as of
+              2018-03-21), and now is a normal top-level project at Apache.
+              Therefore, the version number doesn't contain
+              <quote>-incubating</quote> anymore.</para>
             </listitem>
           </itemizedlist>
         </section>
@@ -28784,18 +28788,6 @@ TemplateModel x = env.getVariable("x");  // get variable x</programlisting>
           The license is still Apache License Version 2.0, just like earlier,
           but the owner is different. The official full product name has
           changed to Apache FreeMarker.</para>
-
-          <para><emphasis role="bold">Disclaimer:</emphasis><emphasis> Apache
-          FreeMarker is an effort undergoing incubation at The Apache Software
-          Foundation (ASF), sponsored by the <link
-          xlink:href="http://incubator.apache.org">Apache Incubator</link>.
-          Incubation is required of all newly accepted projects until a
-          further review indicates that the infrastructure, communications,
-          and decision making process have stabilized in a manner consistent
-          with other successful ASF projects. While incubation status is not
-          necessarily a reflection of the completeness or stability of the
-          code, it does indicate that the project has yet to be fully endorsed
-          by the ASF.</emphasis></para>
         </section>
 
         <section>
