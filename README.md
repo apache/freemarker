@@ -1,7 +1,7 @@
 Apache FreeMarker {version}
 ===========================
 
-[![Build Status](https://travis-ci.org/apache/incubator-freemarker.svg?branch=3)](https://travis-ci.org/apache/incubator-freemarker)
+[![Build Status](https://travis-ci.org/apache/freemarker.svg?branch=3)](https://travis-ci.org/apache/freemarker)
 
 For the latest version or to report bugs visit:
 https://freemarker.apache.org/
@@ -213,7 +213,7 @@ Last tested on IntelliJ IDEA Community 2017.1.5.
   - On the next screen, select "Use gradle wrapper task configuration" [TODO: or keep default?].
     Be sure at least Java 8 is selected for Gradle. Other defaults should be fine.
   - On the next window, all modules will be selected, that's fine, go on
-  - On the next window, it will prompt to remove the `incubator-freemarker` from the project.
+  - On the next window, it will prompt to remove the `freemarker` from the project.
     Let it do it (as it's an incorrect duplication of the `freemarker` root project).
   - At the end of this process you should have all modules Project tree view.
 - "File" -> "Project Structure..."
@@ -222,9 +222,9 @@ Last tested on IntelliJ IDEA Community 2017.1.5.
   "freemarker-core-test-java8_test", change the "Module SDK" to 1.8 (on the "Dependencies" tab).
 - "File" -> "Settings"
   - Under "Editor" / "Code style", import and use
-    incubator-freemarker/src/ide-settings/IntelliJ-IDEA/Java-code-style-FreeMarker.xml
+    freemarker/src/ide-settings/IntelliJ-IDEA/Java-code-style-FreeMarker.xml
   - Under "Editor" / "Inspections", import and use
-    incubator-freemarker/src/ide-settings/IntelliJ-IDEA/Editor-Inspections-FreeMarker.xml
+    freemarker/src/ide-settings/IntelliJ-IDEA/Editor-Inspections-FreeMarker.xml
   - Copy the copyright header comment from some of the java files, then
     under "Editor" / "Copyrigth" / "Copyrigth Profiles" click "+", enter "ASL2" as name,
     then pase the copyright header. Delete the `/*` and ` */` lines, and the ` *`
@@ -236,6 +236,6 @@ Last tested on IntelliJ IDEA Community 2017.1.5.
     expected. To do that from IntelliJ, create a run configuration:
     "Run" \ "Run Configurations..." \ "+" \ "Gradle" then:
     - Set "Name" to `All tests` for example
-    - Set "Gradle project" to the root project (`freemarker` aka. `incubator-freemarker`)
+    - Set "Gradle project" to the root project (`freemarker`)
     - Set "Tasks" to `test`
 - TODO Setting up the FindBugs plugin

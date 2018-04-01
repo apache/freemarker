@@ -18,9 +18,9 @@
  */
 
 // TODO: Versions should come form src/main/resource/o/a/f/c/version.properties
-ext.versionCanonical = "3.0.0-nightly-incubating"
+ext.versionCanonical = "3.0.0-nightly"
 ext.versionForMaven = "3.0.0-SNAPSHOT"
-ext.versionForOSGi = "3.0.0.nightly-incubating"
+ext.versionForOSGi = "3.0.0.nightly"
 ext.versionForMf = "2.97.0"
  
 allprojects {
@@ -58,6 +58,7 @@ ext.bannedLibraries = [
 repositories {
     mavenLocal()
     mavenCentral()
+    // You don't want to repos here usually, but to `subproject { ... repositories {...} ... }` below
 }
 
 configurations {
@@ -216,9 +217,12 @@ subprojects {
         mavenLocal()
         mavenCentral()
 
-        // This is only needed temporarily (remove before first stable release):
+        // These are only needed temporarily (remove before first stable release):
         maven {
             url "https://repository.apache.org/content/repositories/snapshots"
+        }
+        maven {
+            url "https://repository.apache.org/content/repositories/staging"
         }
     }
     
@@ -309,9 +313,9 @@ subprojects {
                 }
             }
             scm {
-                connection "scm:git:https://git-wip-us.apache.org/repos/asf/incubator-freemarker.git"
-                developerConnection "scm:git:https://git-wip-us.apache.org/repos/asf/incubator-freemarker.git"
-                url "https://git-wip-us.apache.org/repos/asf?p=incubator-freemarker.git"
+                connection "scm:git:https://git-wip-us.apache.org/repos/asf/freemarker.git"
+                developerConnection "scm:git:https://git-wip-us.apache.org/repos/asf/freemarker.git"
+                url "https://git-wip-us.apache.org/repos/asf?p=freemarker.git"
                 if (versionForOSGi.contains('.stable')) {
                     tag "v${version}"
                 }
@@ -323,21 +327,21 @@ subprojects {
             mailingLists {
                 mailingList {
                     name "FreeMarker developer list"
-                    post "dev@freemarker.incubator.apache.org"
-                    subscribe "dev-subscribe@freemarker.incubator.apache.org"
-                    unsubscribe "dev-unsubscribe@freemarker.incubator.apache.org"
-                    archive "http://mail-archives.apache.org/mod_mbox/incubator-freemarker-dev/"
+                    post "dev@freemarker.apache.org"
+                    subscribe "dev-subscribe@freemarker.apache.org"
+                    unsubscribe "dev-unsubscribe@freemarker.apache.org"
+                    archive "http://mail-archives.apache.org/mod_mbox/freemarker-dev/"
                 }
                 mailingList {
                     name "FreeMarker commit and Jira notifications list"
-                    post "notifications@freemarker.incubator.apache.org"
-                    subscribe "notifications-subscribe@freemarker.incubator.apache.org"
-                    unsubscribe "notifications-unsubscribe@freemarker.incubator.apache.org"
-                    archive "http://mail-archives.apache.org/mod_mbox/incubator-freemarker-notifications/"
+                    post "notifications@freemarker.apache.org"
+                    subscribe "notifications-subscribe@freemarker.apache.org"
+                    unsubscribe "notifications-unsubscribe@freemarker.apache.org"
+                    archive "http://mail-archives.apache.org/mod_mbox/freemarker-notifications/"
                 }
                 mailingList {
                     name "FreeMarker management private"
-                    post "private@freemarker.incubator.apache.org"
+                    post "private@freemarker.apache.org"
                 }
             }
         }
