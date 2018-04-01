@@ -681,8 +681,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * Returns the tag syntax the parser has chosen for this template. If the syntax could be determined, it's
      * {@link TagSyntax#SQUARE_BRACKET} or {@link TagSyntax#ANGLE_BRACKET}. If the syntax
      * couldn't be determined (like because there was no tags in the template, or it was a plain text template), this
-     * returns whatever the default is in the current configuration, so it's maybe
-     * {@link TagSyntax#AUTO_DETECT}.
+     * returns whatever the default is in the current configuration.
      * 
      * @see ParsingConfiguration#getTagSyntax()
      */

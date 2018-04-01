@@ -904,7 +904,7 @@ public class ObjectBuilderSettingsTest {
         assertEqualsEvaled(123, "org.apache.freemarker.core.ObjectBuilderSettingsTest$TestStaticFields.CONST");
         
         // With shorthand class name:
-        assertEqualsEvaled(TagSyntax.AUTO_DETECT, "TagSyntax.AUTO_DETECT");
+        assertEqualsEvaled(TagSyntax.SQUARE_BRACKET, "TagSyntax.SQUARE_BRACKET");
         
         try {
             _ObjectBuilderSettingEvaluator.eval(

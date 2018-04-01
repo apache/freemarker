@@ -52,21 +52,13 @@ public interface ParsingConfiguration {
      * 
      * <p>The {@code tagSyntax} parameter must be one of:
      * <ul>
-     *   <li>{@link TagSyntax#AUTO_DETECT}:
-     *     Use the syntax of the first FreeMarker tag (can be anything, like <tt>#list</tt>,
-     *     <tt>#include</tt>, user defined, etc.)
      *   <li>{@link TagSyntax#ANGLE_BRACKET}:
-     *     Use the angle bracket tag syntax (the normal syntax), like {@code <#include ...>}
+     *     Use the angle bracket tag syntax (the normal syntax), like {@code <#include ...>}. This is the default.
      *   <li>{@link TagSyntax#SQUARE_BRACKET}:
      *     Use the square bracket tag syntax, like {@code [#include ...]}. Note that this does <em>not</em> change
      *     <code>${x}</code> to {@code [=...]}; that's <em>interpolation</em> syntax, so there the relevant one is
      *     {@link #getInterpolationSyntax()}.
      * </ul>
-     *
-     * <p>In FreeMarker 2.3.x {@link TagSyntax#ANGLE_BRACKET} is the
-     * default for better backward compatibility. Starting from 2.4.x {@link
-     * TagSyntax#AUTO_DETECT} is the default, so it's recommended to use
-     * that even for 2.3.x.
      *
      * <p>This setting is ignored for the templates that have {@code ftl} directive in
      * it. For those templates the syntax used for the {@code ftl} directive determines

@@ -72,6 +72,7 @@ Major template language changes / features
     and empty hash).
   - [TODO] Deeper changes are supposed to happen here later. (Some of the above changes will be meaningless then.)
 
+  
 Smaller template language changes
 ---------------------------------
 
@@ -288,6 +289,8 @@ Core / Configuration
 - Removed the wrapUncheckedExceptions setting. FreeMarker now behaves as if it was true.
 - Removed the strictSyntax setting, and so also the support for FTL tags without #. This was a FreeMarker 1.x
   compatibility option.
+- The `tagSyntax` setting doesn't support the `autoDetect` value anymore. It was removed mostly because tools (editors)
+  could almost never implement it. Instead, there will be ([TODO]) separate file extensions for each syntax variation.
 - Renamed the `cacheStorage` Configuration setting to `templateCacheStorage`.
 - Renamed the `localizedLookup` Configuration setting to `localizedTemplateLookup`.
 - Renamed the `datetimeFormat` Configuration setting to `dateTimeFormat` (following Java 8 convention).

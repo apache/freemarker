@@ -27,13 +27,6 @@ import org.junit.Test;
 
 public class ParsingErrorMessagesTest extends TemplateTest {
 
-    @Override
-    protected Configuration createDefaultConfiguration() throws Exception {
-        return new TestConfigurationBuilder()
-                .tagSyntax(TagSyntax.AUTO_DETECT)
-                .build();
-    }
-
     @Test
     public void testNeedlessInterpolation() {
         assertErrorContainsAS("<#if ${x} == 3></#if>", "instead of ${");
@@ -177,10 +170,10 @@ public class ParsingErrorMessagesTest extends TemplateTest {
         assertErrorContainsAS("<#function f(a=0, b)></#function>", "with default", "without a default");
         assertErrorContainsAS("<#function f(a,)></#function>", "Comma without");
         assertErrorContainsAS("<#macro m a{positional}, b{positional},></#macro>", "Comma without");
-        assertErrorContains("<#function f(a, b></#function>");
-        assertErrorContainsAS("<#function f(></#function>");
-        assertErrorContainsAS("[#ftl][#function f(a, b][/#function]", "Missing closing \")\"");
-        assertErrorContainsAS("[#ftl][#function f(][/#function]", "Missing closing \")\"");
+        assertErrorContainsAS("<#function f(a, b></#function>",
+                    new String[] { ">" }, new String[] { "Missing closing \")\"" });
+        assertErrorContainsAS("<#function f(></#function>",
+                    new String[] { ">" }, new String[] { "Missing closing \")\"" });
         assertErrorContainsAS("<#macro m a b)></#macro>", "\")\" without", "opening");
         assertErrorContainsAS("<#macro m a b a></#macro>", "\"a\"", "multiple");
     }
@@ -190,9 +183,28 @@ public class ParsingErrorMessagesTest extends TemplateTest {
      * Beware, it uses primitive search-and-replace.
      */
     protected Throwable assertErrorContainsAS(String angleBracketsFtl, String... expectedSubstrings) {
-        assertErrorContains(angleBracketsFtl, expectedSubstrings);
-        angleBracketsFtl = angleBracketsFtl.replace('<', '[').replace('>', ']');
-        return assertErrorContains(angleBracketsFtl, expectedSubstrings);
+        return assertErrorContainsAS(angleBracketsFtl, expectedSubstrings, expectedSubstrings);
+    }
+    
+    protected Throwable assertErrorContainsAS(String angleBracketsFtl,
+            String[] expectedSubstringsA, String[] expectedSubstringsS) {
+        pushNamelessTemplateConfiguraitonSettings(new TemplateConfiguration.Builder()
+                    .tagSyntax(TagSyntax.ANGLE_BRACKET)
+                    .build());
+        try {
+            assertErrorContains(angleBracketsFtl, expectedSubstringsA);
+        } finally {
+            popNamelessTemplateConfiguraitonSettings();
+        }
+        
+        pushNamelessTemplateConfiguraitonSettings(new TemplateConfiguration.Builder()
+                .tagSyntax(TagSyntax.SQUARE_BRACKET)
+                .build());
+        try {
+            return assertErrorContains(angleBracketsFtl.replace('<', '[').replace('>', ']'), expectedSubstringsS);
+        } finally {
+            popNamelessTemplateConfiguraitonSettings();
+        }
     }
 
 }

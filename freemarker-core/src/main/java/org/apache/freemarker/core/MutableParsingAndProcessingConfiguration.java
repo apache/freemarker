@@ -127,17 +127,16 @@ public abstract class MutableParsingAndProcessingConfiguration<
                     throw new InvalidSettingValueException(name, value, "Unsupported template language name");
                 }
             } else if (TAG_SYNTAX_KEY.equals(name)) {
-                if ("autoDetect".equals(value)) {
-                    setTagSyntax(TagSyntax.AUTO_DETECT);
-                } else if ("angleBracket".equals(value)) {
+                if ("angleBracket".equals(value)) {
                     setTagSyntax(TagSyntax.ANGLE_BRACKET);
                 } else if ("squareBracket".equals(value)) {
                     setTagSyntax(TagSyntax.SQUARE_BRACKET);
                 } else {
                     throw new InvalidSettingValueException(name, value,
-                            "auto_detect".equals(value) ? "The correct value is: autoDetect" :
                             "angle_bracket".equals(value) ? "The correct value is: angleBracket" :
                             "square_bracket".equals(value) ? "The correct value is: squareBracket" :
+                            "autoDetect".equals(value) || "auto_detect".equals(value)
+                                    ? "The autoDetect tag syntax is not supported since 3.0.0." :
                             "No such predefined tag syntax name");
                 }
             } else if (INTERPOLATION_SYNTAX_KEY.equals(name)) {

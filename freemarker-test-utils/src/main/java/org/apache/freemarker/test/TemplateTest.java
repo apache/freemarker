@@ -30,6 +30,7 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
 
@@ -37,6 +38,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.ParseException;
 import org.apache.freemarker.core.Template;
+import org.apache.freemarker.core.TemplateConfiguration;
+import org.apache.freemarker.core.TemplateConfiguration.Builder;
 import org.apache.freemarker.core.TemplateException;
 import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.impl.ByteArrayTemplateLoader;
@@ -57,6 +60,7 @@ public abstract class TemplateTest {
     private boolean dataModelCreated;
     private Object dataModel;
     private Map<String, String> addedTemplates = new HashMap<>();
+    private LinkedList<TemplateConfiguration> tcStack = new LinkedList<>();
 
     /**
      * Gets the {@link Configuration} used, automatically creating and setting if it wasn't yet.
@@ -74,6 +78,8 @@ public abstract class TemplateTest {
 
     /**
      * @param configuration Usually should be built using {@link TestConfigurationBuilder}; not {@code null}.
+     * 
+     * @see #pushNamelessTemplateConfiguraitonSettings(TemplateConfiguration)
      */
     protected final void setConfiguration(Configuration configuration) {
         _NullArgumentException.check("configuration", configuration);
@@ -90,7 +96,7 @@ public abstract class TemplateTest {
     }
 
     private Template createTemplate(String ftl) throws IOException {
-        return new Template(null, ftl, getConfiguration());
+        return new Template(null, ftl, getConfiguration(), getNamelessTemplateConfiguration());
     }
 
     protected void assertOutputForNamed(String name, String expectedOut) throws IOException, TemplateException {
@@ -293,7 +299,7 @@ public abstract class TemplateTest {
             String... expectedSubstrings) {
         assertErrorContains(name, null, exceptionClass, expectedSubstrings);
     }
-    
+
     private Throwable assertErrorContains(String name, String ftl, Class<? extends Throwable> exceptionClass,
             String... expectedSubstrings) {
         try {
@@ -301,7 +307,7 @@ public abstract class TemplateTest {
             if (ftl == null) {
                 t = getConfiguration().getTemplate(name);
             } else {
-                t = new Template("adhoc", ftl, getConfiguration());
+                t = new Template("adhoc", ftl, getConfiguration(), getNamelessTemplateConfiguration());
             }
             t.process(getDataModel(), new StringWriter());
             fail("The template had to fail");
@@ -343,6 +349,38 @@ public abstract class TemplateTest {
     
     private String normalizeNewLines(String s) {
         return _StringUtils.replace(s, "\r\n", "\n").replace('\r', '\n');
+    }
+    
+    /**
+     * Adds a {@link TemplateConfiguration} that will be used for further templates tested, but not for templates that
+     * are tested with the "OfNamed" variants (which are coming from a {@link TemplateLoader}). If a
+     * {@link TemplateConfiguration} was added earlier, this new one will be merged into it.
+     * 
+     * @see #setConfiguration(Configuration)
+     */
+    protected void pushNamelessTemplateConfiguraitonSettings(TemplateConfiguration tc) {
+        TemplateConfiguration lastTC = tcStack.poll();
+        TemplateConfiguration mergedTC;
+        if (lastTC != null) {
+            Builder mergedTCB = new TemplateConfiguration.Builder();
+            mergedTCB.merge(lastTC);
+            mergedTCB.merge(tc);
+            mergedTC = mergedTCB.build();
+        } else {
+            mergedTC = tc;
+        }
+        tcStack.push(mergedTC);
+    }
+
+    /**
+     * Undoes the last {@link #pushNamelessTemplateConfiguraitonSettings(TemplateConfiguration)}.
+     */
+    protected void popNamelessTemplateConfiguraitonSettings() {
+        tcStack.pop();
+    }
+    
+    private TemplateConfiguration getNamelessTemplateConfiguration() {
+        return tcStack.peek();
     }
 
     public static class TestBean {

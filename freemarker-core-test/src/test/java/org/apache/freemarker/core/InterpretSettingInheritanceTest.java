@@ -56,15 +56,6 @@ public class InterpretSettingInheritanceTest  extends TemplateTest {
         assertOutput(FTL_S_S_A, OUT_S_A_WHEN_SYNTAX_IS_S);
         assertOutput(FTL_A_A_S, OUT_A_S_WHEN_SYNTAX_IS_S);
         assertOutput(FTL_A_S_A, OUT_S_A_WHEN_SYNTAX_IS_S);
-
-        setConfiguration(new TestConfigurationBuilder()
-                .tagSyntax(TagSyntax.AUTO_DETECT)
-                .build());
-        assertOutput(FTL_S_A_S, OUT_A_S_WHEN_SYNTAX_IS_A);
-        assertOutput(FTL_S_S_A, OUT_S_A_WHEN_SYNTAX_IS_S);
-        assertOutput(FTL_A_A_S, OUT_A_S_WHEN_SYNTAX_IS_A);
-        assertOutput(FTL_A_S_A, OUT_S_A_WHEN_SYNTAX_IS_S);
-        assertOutput("<@'[#ftl]x'?interpret />[#if true]y[/#if]", "x[#if true]y[/#if]");
     }
 
     @Test

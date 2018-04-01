@@ -31,7 +31,6 @@ public class ActualTagSyntaxTest {
 
     @Test
     public void testWithFtlHeader() throws IOException {
-        testWithFtlHeader(AUTO_DETECT);
         testWithFtlHeader(ANGLE_BRACKET);
         testWithFtlHeader(SQUARE_BRACKET);
     }
@@ -43,26 +42,15 @@ public class ActualTagSyntaxTest {
     
     @Test
     public void testUndecidable() throws IOException {
-        assertEquals(getActualTagSyntax("foo", AUTO_DETECT), ANGLE_BRACKET);
         assertEquals(getActualTagSyntax("foo", ANGLE_BRACKET), ANGLE_BRACKET);
         assertEquals(getActualTagSyntax("foo", SQUARE_BRACKET), SQUARE_BRACKET);
     }
 
-    @Test
-    public void testDecidableWithoutFtlHeader() throws IOException {
-        assertEquals(getActualTagSyntax("foo<#if true></#if>", AUTO_DETECT), ANGLE_BRACKET);
-        assertEquals(getActualTagSyntax("foo<#if true></#if>", ANGLE_BRACKET), ANGLE_BRACKET);
-        assertEquals(getActualTagSyntax("foo<#if true></#if>", SQUARE_BRACKET), SQUARE_BRACKET);
-        
-        assertEquals(getActualTagSyntax("foo[#if true][/#if]", AUTO_DETECT), SQUARE_BRACKET);
-        assertEquals(getActualTagSyntax("foo[#if true][/#if]", ANGLE_BRACKET), ANGLE_BRACKET);
-        assertEquals(getActualTagSyntax("foo[#if true][/#if]", SQUARE_BRACKET), SQUARE_BRACKET);
-    }
-    
     private TagSyntax getActualTagSyntax(String ftl, TagSyntax cfgTagSyntax) throws IOException {
         return new Template(
                 null, ftl,
-                new TestConfigurationBuilder().tagSyntax(cfgTagSyntax).build()).getActualTagSyntax();
+                new TestConfigurationBuilder().tagSyntax(cfgTagSyntax).build())
+                .getActualTagSyntax();
     }
     
 }

@@ -111,57 +111,6 @@ public class TagSyntaxVariationsTest extends TestCase {
                             cust_xxx + wrongx_xxx + dir_xxx,
                             null);
                 } // for wrongc
-            } // for squ
-
-            {
-                Configuration cfg = new TestConfigurationBuilder()
-                        .tagSyntax(TagSyntax.AUTO_DETECT)
-                        .sharedVariables(sharedVariables)
-                        .build();
-                for (int perm = 0; perm < 4; perm++) {
-                    // All 4 permutations
-                    String wrong_xxx = (perm & 1) == 0 ? WRONG_ANG : WRONG_SQU;
-                    String dir_xxx = (perm & 2) == 0 ? dir_ang : dir_squ;
-
-                    test(cfg,
-                            wrong_xxx + dir_xxx,
-                            null);
-                } // for perm
-            }
-
-            {
-                Configuration cfg = new TestConfigurationBuilder()
-                        .tagSyntax(TagSyntax.AUTO_DETECT)
-                        .sharedVariables(sharedVariables)
-                        .build();
-                // Permutations
-                for (int angOrSquStart = 0; angOrSquStart < 2; angOrSquStart++) {
-                    String hdr_xxx = angOrSquStart == 0 ? HDR_ANG : HDR_SQU;
-                    String cust_xxx = angOrSquStart == 0 ? CUST_ANG : CUST_SQU;
-                    String wrong_yyy = angOrSquStart != 0 ? WRONG_ANG : WRONG_SQU;
-                    String dir_xxx = angOrSquStart == 0 ? dir_ang : dir_squ;
-                    String dir_yyy = angOrSquStart != 0 ? dir_ang : dir_squ;
-
-                    test(cfg,
-                            cust_xxx + wrong_yyy + dir_xxx,
-                            CUST_OUT + wrong_yyy + dir_out);
-
-                    test(cfg,
-                            hdr_xxx + wrong_yyy + dir_xxx,
-                            wrong_yyy + dir_out);
-
-                    test(cfg,
-                            cust_xxx + wrong_yyy + dir_yyy,
-                            CUST_OUT + wrong_yyy + dir_yyy);
-
-                    test(cfg,
-                            hdr_xxx + wrong_yyy + dir_yyy,
-                            wrong_yyy + dir_yyy);
-
-                    test(cfg,
-                            dir_xxx + wrong_yyy + dir_yyy,
-                            dir_out + wrong_yyy + dir_yyy);
-                } // for squStart
             } // for assign
         }
     }

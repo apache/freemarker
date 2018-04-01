@@ -159,9 +159,6 @@ public class FMParser {
 
         TagSyntax tagSyntax = pCfg.getTagSyntax();
         switch (tagSyntax) {
-        case AUTO_DETECT:
-            token_source.autodetectTagSyntax = true;
-            break;
         case ANGLE_BRACKET:
             token_source.squBracTagSyntax = false;
             break;
@@ -532,7 +529,6 @@ TOKEN_MGR_DECLS:
     private int bracketNesting;
     private boolean inFTLHeader;
     boolean squBracTagSyntax,
-            autodetectTagSyntax,
             tagSyntaxEstablished,
             inNamedParameterExpression;
     InterpolationSyntax interpolationSyntax;
@@ -550,9 +546,6 @@ TOKEN_MGR_DECLS:
         final String image = tok.image;
         
         char firstChar = image.charAt(0);
-        if (autodetectTagSyntax && !tagSyntaxEstablished) {
-            squBracTagSyntax = (firstChar == '[');
-        }
         if ((firstChar == '[' && !squBracTagSyntax) || (firstChar == '<' && squBracTagSyntax)) {
             tok.kind = STATIC_TEXT_NON_WS;
             return;
@@ -596,9 +589,6 @@ TOKEN_MGR_DECLS:
 
     private void dynamicTopLevelCall(Token tok) {
         char firstChar = tok.image.charAt(0);
-        if (autodetectTagSyntax && !tagSyntaxEstablished) {
-            squBracTagSyntax = (firstChar == '[');
-        }
         if (squBracTagSyntax && firstChar == '<') {
             tok.kind = STATIC_TEXT_NON_WS;
             return;
@@ -689,7 +679,6 @@ TOKEN_MGR_DECLS:
         if (!tagSyntaxEstablished) {
             squBracTagSyntax = matchedToken.image.charAt(0) == '[';
             tagSyntaxEstablished = true;
-            autodetectTagSyntax = false;
         }
         String img = matchedToken.image;
         char firstChar = img.charAt(0);
@@ -880,11 +869,6 @@ TOKEN:
     <UNKNOWN_DIRECTIVE : ("[#" | "[/#" | "<#" | "</#") (["a"-"z", "A"-"Z", "_"])+>
     {
         char firstChar = matchedToken.image.charAt(0);
-
-        if (!tagSyntaxEstablished && autodetectTagSyntax) {
-            squBracTagSyntax = (firstChar == '[');
-            tagSyntaxEstablished = true;
-        }
 
         if (firstChar == '<' && squBracTagSyntax) {
             matchedToken.kind = STATIC_TEXT_NON_WS;

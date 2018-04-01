@@ -279,7 +279,7 @@ public class MutableProcessingConfigurationTest {
         new Template(
                 null, "${m?api.hashCode()}",
                 new Configuration.Builder(Configuration.VERSION_3_0_0).apiBuiltinEnabled(true).build())
-                .process(Collections.singletonMap("m", new HashMap()), _NullWriter.INSTANCE);
+                .process(Collections.singletonMap("m", new HashMap<>()), _NullWriter.INSTANCE);
     }
 
     @Test
