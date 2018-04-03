@@ -33,48 +33,7 @@ import org.apache.freemarker.core.util._StringUtils;
 // [FM3] Make this mature, or hide its somehow. Actually, parse can't be hidden because custom TemplateResolver-s need
 // to call it.
 public abstract class TemplateLanguage {
-
-    // FIXME [FM3] If we leave this here, FTL will be a required dependency of core (which is not nice if
-    // template languages will be pluggable).
-    public static final TemplateLanguage FTL = new TemplateLanguage("FreeMarker Template Language") {
-        @Override
-        public boolean getCanSpecifyCharsetInContent() {
-            return true;
-        }
-
-        @Override
-        public Template parse(String name, String sourceName, Reader reader, Configuration cfg,
-                TemplateConfiguration templateConfiguration, Charset encoding,
-                InputStream streamToUnmarkWhenEncEstabd) throws
-                IOException, ParseException {
-            return new Template(name, sourceName, reader, cfg, templateConfiguration,
-                    encoding, streamToUnmarkWhenEncEstabd);
-        }
-    };
-
-    public static final TemplateLanguage STATIC_TEXT = new TemplateLanguage("Static text") {
-        @Override
-        public boolean getCanSpecifyCharsetInContent() {
-            return false;
-        }
-
-        @Override
-        public Template parse(String name, String sourceName, Reader reader, Configuration cfg,
-                TemplateConfiguration templateConfiguration, Charset sourceEncoding,
-                InputStream streamToUnmarkWhenEncEstabd)
-                throws IOException, ParseException {
-            // Read the contents into a StringWriter, then construct a single-text-block template from it.
-            final StringBuilder sb = new StringBuilder();
-            final char[] buf = new char[4096];
-            int charsRead;
-            while ((charsRead = reader.read(buf)) > 0) {
-                sb.append(buf, 0, charsRead);
-            }
-            return Template.createPlainTextTemplate(name, sourceName, sb.toString(), cfg,
-                    sourceEncoding);
-        }
-    };
-
+    
     private final String name;
 
     // Package visibility to prevent user implementations until this API is mature.

@@ -2349,7 +2349,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         
         @Override
         protected TemplateLanguage getDefaultTemplateLanguage() {
-            return TemplateLanguage.FTL;
+            return DefaultTemplateLanguage.F3CC;
         }
 
         @Override

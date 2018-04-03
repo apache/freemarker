@@ -44,7 +44,7 @@ public class TemplateGetEncodingTest {
             tl.putTextTemplate("text", "test");
             tl.putTextTemplate("text-static", "<#test>");
             TemplateConfiguration.Builder staticTextTCB = new TemplateConfiguration.Builder();
-            staticTextTCB.setTemplateLanguage(TemplateLanguage.STATIC_TEXT);
+            staticTextTCB.setTemplateLanguage(StaticTextTemplateLanguage.INSTANCE);
             cfgB.setTemplateConfigurations(
                     new ConditionalTemplateConfigurationFactory(
                             new FileNameGlobMatcher("*-static*"), staticTextTCB.build()));

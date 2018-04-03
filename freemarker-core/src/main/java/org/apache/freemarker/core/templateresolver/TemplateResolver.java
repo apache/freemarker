@@ -45,7 +45,7 @@ import org.apache.freemarker.core.util._NullArgumentException;
  * settings, which should be reflected by the return value of the {@code supportsXxxSetting} methods (like
  * {@link #supportsTemplateLoaderSetting()}). (Note that there's no {@code supportsXxxSetting} method for
  * {@link Configuration#getTemplateLanguage() templateLanguage} and {@link Configuration#getSourceEncoding()
- * sourceEncoding}, as the must always be supported and are always exposed.) {@link TemplateResolverDependencies}
+ * sourceEncoding}, as that must always be supported and are always exposed.) {@link TemplateResolverDependencies}
  * will also expose the {@link TemplateResolverDependencies#parse} method, which is used to create a {@link Template}
  * from its source code in the later {@link #getTemplate(String, Locale, Serializable)} calls.
  */

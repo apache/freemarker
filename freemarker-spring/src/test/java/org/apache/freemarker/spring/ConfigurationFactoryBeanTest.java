@@ -28,10 +28,10 @@ import java.util.Properties;
 import org.apache.freemarker.core.AutoEscapingPolicy;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Configuration.ExtendableBuilder;
+import org.apache.freemarker.core.DefaultTemplateLanguage;
 import org.apache.freemarker.core.MutableParsingAndProcessingConfiguration;
 import org.apache.freemarker.core.TagSyntax;
 import org.apache.freemarker.core.Template;
-import org.apache.freemarker.core.TemplateLanguage;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
 import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
@@ -148,7 +148,7 @@ public class ConfigurationFactoryBeanTest {
         assertTrue(config.isWhitespaceStrippingSet());
         assertEquals(AutoEscapingPolicy.ENABLE_IF_SUPPORTED, config.getAutoEscapingPolicy());
         assertTrue(config.isRecognizeStandardFileExtensionsSet());
-        assertEquals(TemplateLanguage.FTL, config.getTemplateLanguage());
+        assertEquals(DefaultTemplateLanguage.F3CC, config.getTemplateLanguage());
         assertEquals(TagSyntax.SQUARE_BRACKET, config.getTagSyntax());
         assertEquals(4, config.getTabSize());
 
