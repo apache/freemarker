@@ -787,8 +787,7 @@
       </condition>
       <fail unless="signatureGood.y" message="Task aborted by user." />
     
-      <echo>Creating checksum files for "${archive.gzip}"...</echo>
-      <checksum file="${archive.gzip}" fileext=".md5" algorithm="MD5" forceOverwrite="yes" />
+      <echo>Creating checksum file for "${archive.gzip}"...</echo>
       <checksum file="${archive.gzip}" fileext=".sha512" algorithm="SHA-512" forceOverwrite="yes" />
     </sequential>
   </macrodef>
