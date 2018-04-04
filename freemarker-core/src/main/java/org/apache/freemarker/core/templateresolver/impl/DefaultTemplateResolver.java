@@ -21,10 +21,8 @@ package org.apache.freemarker.core.templateresolver.impl;
 
 import static org.apache.freemarker.core.Configuration.ExtendableBuilder.*;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -37,11 +35,11 @@ import java.util.StringTokenizer;
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.ConfigurationException;
 import org.apache.freemarker.core.InvalidSettingValueException;
+import org.apache.freemarker.core.MutableParsingAndProcessingConfiguration;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.TemplateConfiguration;
 import org.apache.freemarker.core.TemplateLanguage;
 import org.apache.freemarker.core.TemplateNotFoundException;
-import org.apache.freemarker.core.WrongTemplateCharsetException;
 import org.apache.freemarker.core.templateresolver.CacheStorage;
 import org.apache.freemarker.core.templateresolver.GetTemplateResult;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
@@ -121,10 +119,10 @@ public class DefaultTemplateResolver extends TemplateResolver {
         this.templateConfigurations = deps.getTemplateConfigurations();
 
         this.sourceEncoding = deps.getSourceEncoding();
-        checkDependencyNotNull(SOURCE_ENCODING_KEY, this.sourceEncoding);
+        checkDependencyNotNull(MutableParsingAndProcessingConfiguration.SOURCE_ENCODING_KEY, this.sourceEncoding);
 
         this.templateLanguage = deps.getTemplateLanguage();
-        checkDependencyNotNull(TEMPLATE_LANGUAGE_KEY, this.templateLanguage);
+        checkDependencyNotNull(MutableParsingAndProcessingConfiguration.TEMPLATE_LANGUAGE_KEY, this.templateLanguage);
     }
 
     private void checkDependencyNotNull(String name, Object value) {
@@ -171,7 +169,7 @@ public class DefaultTemplateResolver extends TemplateResolver {
         name = templateNameFormat.normalizeRootBasedName(name);
         
         if (templateLoader == null) {
-            return new GetTemplateResult(name, "The TemplateLoader (and TemplateLoader2) was null.");
+            return new GetTemplateResult(name, "The TemplateLoader was null.");
         }
         
         Template template = getTemplateInternal(name, locale, customLookupCondition);
@@ -534,64 +532,20 @@ public class DefaultTemplateResolver extends TemplateResolver {
 
         Template template;
         {
-            Reader reader = templateLoaderResult.getReader();
-            InputStream inputStream = templateLoaderResult.getInputStream();
-            InputStream markedInputStream;
-            if (reader != null) {
-                if (inputStream != null) {
-                    throw new IllegalStateException("For a(n) " + templateLoaderResult.getClass().getName()
-                            + ", both getReader() and getInputStream() has returned non-null.");
-                }
-                initialEncoding = null;  // No charset decoding has happened
-                markedInputStream = null;
-            } else if (inputStream != null) {
-                if (templateLanguage.getCanSpecifyCharsetInContent()) {
-                    // We need mark support, to restart if the charset suggested by <#ftl encoding=...> differs
-                    // from that we use initially.
-                    if (!inputStream.markSupported()) {
-                        inputStream = new BufferedInputStream(inputStream);
-                    }
-                    inputStream.mark(Integer.MAX_VALUE); // Mark is released after the 1st FTL tag
-                    markedInputStream = inputStream;
-                } else {
-                    markedInputStream = null;
-                }
-                // Regarding buffering worries: On the Reader side we should only read in chunks (like through a
-                // BufferedReader), so there shouldn't be a problem if the InputStream is not buffered. (Also, at least
-                // on Oracle JDK and OpenJDK 7 the InputStreamReader itself has an internal ~8K buffer.)
-                reader = new InputStreamReader(inputStream, initialEncoding);
-            } else {
-                throw new IllegalStateException("For a(n) " + templateLoaderResult.getClass().getName()
-                        + ", both getReader() and getInputStream() has returned null.");
-            }
-            
-            try {
-                try {
-                    template = getDependencies().parse(
-                            templateLanguage, name, sourceName, reader, tc,
-                            initialEncoding, markedInputStream);
-                } catch (WrongTemplateCharsetException charsetException) {
-                    final Charset templateSpecifiedEncoding = charsetException.getTemplateSpecifiedEncoding();
-
+            try (Reader reader = templateLoaderResult.getReader();
+                    InputStream inputStream = templateLoaderResult.getInputStream();) {
+                if (reader != null) {
                     if (inputStream != null) {
-                        // We restart InputStream to re-decode it with the new charset.
-                        inputStream.reset();
-
-                        // Don't close `reader`; it's an InputStreamReader that would close the wrapped InputStream.
-                        reader = new InputStreamReader(inputStream, templateSpecifiedEncoding);
-                    } else {
-                        throw new IllegalStateException(
-                                "TemplateLanguage " + _StringUtils.jQuote(templateLanguage.getName()) + " has thrown "
-                                + WrongTemplateCharsetException.class.getName()
-                                + ", but its canSpecifyCharsetInContent property is false.");
+                        throw new IllegalStateException("For a(n) " + templateLoaderResult.getClass().getName()
+                                + ", both getReader() and getInputStream() has returned non-null.");
                     }
-
-                    template = getDependencies().parse(
-                            templateLanguage, name, sourceName, reader, tc,
-                            templateSpecifiedEncoding, markedInputStream);
+                    template = getDependencies().newTemplate(name, sourceName, reader, tc);
+                } else if (inputStream != null) {
+                    template = getDependencies().newTemplate(name, sourceName, inputStream, initialEncoding, tc);
+                } else {
+                    throw new IllegalStateException("For a(n) " + templateLoaderResult.getClass().getName()
+                            + ", both getReader() and getInputStream() has returned null.");
                 }
-            } finally {
-                reader.close();
             }
         }
 

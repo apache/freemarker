@@ -80,12 +80,21 @@ public abstract class TemplateResolverDependencies {
     public abstract TemplateLanguage getTemplateLanguage();
 
     /**
-     * This simply calls {@link TemplateLanguage#parse(String, String, Reader, Configuration, TemplateConfiguration,
-     * Charset, InputStream)} without exposing the {@link Configuration}.
+     * Like the similar {@link Template} constructor, but as it has no {@link Configuration} parameter,
+     * it avoids exposing the {@link Configuration} to the {@link TemplateResolverDependencies} implementation.
      */
-    public abstract Template parse(
-            TemplateLanguage templateLanguage, String name, String sourceName, Reader reader,
-            TemplateConfiguration templateConfiguration, Charset encoding,
-            InputStream streamToUnmarkWhenEncEstabd) throws IOException, ParseException;
+    public abstract Template newTemplate(
+            String lookupName, String sourceName,
+            InputStream inputStream, Charset initialEncoding,
+            TemplateConfiguration templateConfiguration) throws IOException, ParseException;
 
+    /**
+     * Like the similar {@link Template} constructor, but as it has no {@link Configuration} parameter,
+     * it avoids exposing the {@link Configuration} to the {@link TemplateResolverDependencies} implementation.
+     */
+    public abstract Template newTemplate(
+            String lookupName, String sourceName,
+            Reader reader,
+            TemplateConfiguration templateConfiguration) throws IOException, ParseException;
+    
 }

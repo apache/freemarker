@@ -144,13 +144,20 @@ public class FMParser {
         this.incompatibleImprovements = incompatibleImprovements;
 
         {
-            OutputFormat outputFormatFromExt = pCfg.getRecognizeStandardFileExtensions() ? getFormatFromStdFileExt()
-                    : null;
+            // contextXxx is stronger than anything.
+            // TemplateLanguage.xxx (if it's non-null) stronger than the rest.
+            
+            OutputFormat outputFormatFromLang;
             outputFormat = contextOutputFormat != null ? contextOutputFormat
-                    : outputFormatFromExt != null ? outputFormatFromExt
-                    : pCfg.getOutputFormat();
+                    : (outputFormatFromLang = pCfg.getTemplateLanguage()
+                            .getOutputFormat(template.getConfiguration())) != null
+                            ? outputFormatFromLang
+                            : pCfg.getOutputFormat();
+
+            AutoEscapingPolicy autoEscapingPolicyFromLang;
             autoEscapingPolicy = contextAutoEscapingPolicy != null ? contextAutoEscapingPolicy
-                    : outputFormatFromExt != null ? AutoEscapingPolicy.ENABLE_IF_DEFAULT
+                    : (autoEscapingPolicyFromLang = pCfg.getTemplateLanguage().getAutoEscapingPolicy()) != null
+                            ? autoEscapingPolicyFromLang
                     : pCfg.getAutoEscapingPolicy();
         }
         recalculateAutoEscapingField();
@@ -192,42 +199,6 @@ public class FMParser {
         // Nothing to do ATM
     }
 
-    private OutputFormat getFormatFromStdFileExt() {
-        String name = template.getSourceOrLookupName();
-        if (name == null) {
-            return null;
-        }
-
-        int ln = name.length();
-        if (ln < 5) return null;
-
-        char c = name.charAt(ln - 5);
-        if (c != '.') return null;
-
-        c = name.charAt(ln - 4);
-        if (c != 'f' && c != 'F') return null;
-
-        c = name.charAt(ln - 3);
-        if (c != 't' && c != 'T') return null;
-
-        c = name.charAt(ln - 2);
-        if (c != 'l' && c != 'L') return null;
-
-        c = name.charAt(ln - 1);
-        try {
-            // Note: We get the output formats by name, so that custom overrides take effect.
-            if (c == 'h' || c == 'H') {
-                return template.getConfiguration().getOutputFormat(HTMLOutputFormat.INSTANCE.getName());
-                }
-            if (c == 'x' || c == 'X') {
-                return template.getConfiguration().getOutputFormat(XMLOutputFormat.INSTANCE.getName());
-            }
-        } catch (UnregisteredOutputFormatException e) {
-            throw new BugException("Unregistered std format", e);
-        }
-        return null;
-    }
-    
     /**
      * Updates the {@link #autoEscaping} field based on the {@link #autoEscapingPolicy} and {@link #outputFormat} fields.
      */

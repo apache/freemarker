@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.FilterReader;
 import java.io.IOException;
@@ -93,7 +94,8 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
 
     // Source (TemplateLoader) related information:
     private final String sourceName;
-    private final ArrayList lines = new ArrayList();
+    // TODO [FM3] Get rid of this...
+    private final ArrayList<String> lines = new ArrayList<>();
 
     // TODO [FM3] We want to get rid of these, then the same Template object could be reused for different lookups.
     // Template lookup parameters:
@@ -104,7 +106,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     // Inherited settings:
     private final transient Configuration cfg;
     private final transient TemplateConfiguration tCfg;
-    private final transient ParsingConfiguration parsingConfiguration;
+    private final transient ParsingConfiguration pCfg;
 
     // Values from the template content (#ftl header parameters usually), as opposed to from the TemplateConfiguration:
     private transient OutputFormat outputFormat; // TODO Deserialization: use the name of the output format
@@ -122,7 +124,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
     private AutoEscapingPolicy autoEscapingPolicy;
     // Values from template content that are detected automatically:
     private Charset actualSourceEncoding;
-    private TagSyntax actualTagSyntax;
+    TagSyntax actualTagSyntax; // TODO [FM3][CF] Should be private
     private InterpolationSyntax interpolationSyntax;
 
     // Custom state:
@@ -209,7 +211,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * encoding.
      *
      * @param actualSourceEncoding
-     *            This is the charset that was used to read the template. This can be {@code null} if the template
+     *            This is the charset that was used to read the template. This sould be {@code null} if the template
      *            was loaded from a source that returns it already as text. If this is not {@code null} and there's an
      *            {@code #ftl} header with {@code encoding} parameter, they must match, or else a
      *            {@link WrongTemplateCharsetException} is thrown.
@@ -231,67 +233,211 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      *            templates, and so it's not good for specifying template-specific settings. Settings that influence
      *            parsing always have an effect, while settings that influence processing only have effect when the
      *            template is the main template of the {@link Environment}.
-     * @param actualSourceEncoding
-     *            Same as in {@link #Template(String, String, Reader, Configuration, Charset)}.
-     */
-   public Template(
-           String lookupName, String sourceName, Reader reader,
-           Configuration cfg, TemplateConfiguration templateConfiguration,
-           Charset actualSourceEncoding) throws IOException {
-       this(lookupName, sourceName, reader, cfg, templateConfiguration, actualSourceEncoding, null);
-    }
-
-    /**
-     * Same as {@link #Template(String, String, Reader, Configuration, TemplateConfiguration, Charset)}, but allows
-     * specifying the {@code streamToUnmarkWhenEncEstabd}.
-     *
-     * @param streamToUnmarkWhenEncEstabd
-     *         If not {@code null}, when during the parsing we reach a point where we know that no {@link
-     *         WrongTemplateCharsetException} will be thrown, {@link InputStream#mark(int) mark(0)} will be called on this.
-     *         This is meant to be used when the reader parameter is a {@link InputStreamReader}, and this parameter is
-     *         the underlying {@link InputStream}, and you have a mark at the beginning of the {@link InputStream} so
-     *         that you can retry if a {@link WrongTemplateCharsetException} is thrown without extra I/O. As keeping that
-     *         mark consumes some resources, so you may want to release it as soon as possible.
      */
     public Template(
-            String lookupName, String sourceName, Reader reader,
-            Configuration cfg, TemplateConfiguration templateConfiguration,
-            Charset actualSourceEncoding, InputStream streamToUnmarkWhenEncEstabd) throws IOException, ParseException {
-        this(lookupName, sourceName, reader,
+            String lookupName, String sourceName,
+            Reader reader,
+            Configuration cfg, TemplateConfiguration templateConfiguration, Charset actualSourceEncoding)
+                    throws IOException, ParseException {
+        this(lookupName, sourceName,
+                null, actualSourceEncoding, reader,
                 cfg, templateConfiguration,
-                null, null,
-                actualSourceEncoding, streamToUnmarkWhenEncEstabd);
+                null, null);
     }
 
     /**
-     * Same as {@link #Template(String, String, Reader, Configuration, TemplateConfiguration, Charset, InputStream)},
-     * but allows specifying the output format and the auto escaping policy, with similar effect as if they were
-     * specified in the template content (like in the #ftl header).
+     * See {@link #Template(String, String, Reader, Configuration, TemplateConfiguration, Charset)}, except that this
+     * one expects an {@link InputStream} and an initial {@link Charset}.
+     * 
+     * @param initialEncoding
+     *            The {@link Charset} we try to decode the {@link InputStream} with. If the template language specifies
+     *            its own encoding, this will be overridden by that (hence it's just "inital"), however, that requires
+     *            that the template is still parseable with the initial encoding (in practice, that at least the
+     *            US-ASCII characters are decoded correctly).
+     */
+    public Template(
+            String lookupName, String sourceName,
+            InputStream inputStream, Charset initialEncoding,
+            Configuration cfg, TemplateConfiguration templateConfiguration) throws IOException, ParseException {
+        this(lookupName, sourceName,
+                inputStream, initialEncoding, null,
+                cfg, templateConfiguration,
+                null, null);
+    }
+    
+    /**
+     * Same as the other overloads, but allows specifying the output format and the auto escaping policy, with similar
+     * effect as if they were specified in the template content (like in the #ftl header).
      * <p>
-     * <p>This method is currently only used internally, as it's not generalized enough and so it carries too much
-     * backward compatibility risk. Also, the same functionality can be achieved by constructing an appropriate
+     * <p>
+     * This method is currently only used internally, as it's not generalized enough and so it carries too much backward
+     * compatibility risk. Also, the same functionality can be achieved by constructing an appropriate
      * {@link TemplateConfiguration}, only that's somewhat slower.
      *
+     * @param inputStream
+     *            Exactly one of this and the {@code reader} must be non-null. This is normally used if the source is
+     *            binary (not textual), that is, we have to use a charset to decode it to text.
+     * @param initialEncoding
+     *            If {@code inputStream} is not-{@code null} then this is the charset we try to use (and so it can't be
+     *            {@code null}), but might will be overridden in the template header, in which case this method manages
+     *            the re-decoding internally, and the caller need not worry about it. If {@code reader} is
+     *            non-{@code null}, and this is non-{@code null}, it's used to check if the charset specified in the
+     *            template (if any) matches, and if not, a {@link WrongTemplateCharsetException} is thrown that the
+     *            caller is expected to handle. If the template source code comes from a textual source, and so you
+     *            don't care about the charset specified in the template, then use {@code null} here (with a
+     *            non-{@code null} {@code reader} parameter of course), and then the check should be omitted by the
+     *            {@link TemplateLanguage} implementation, so you need not expect a
+     *            {@link WrongTemplateCharsetException}.
+     * @param reader
+     *            Exactly one of this and the {@code inputStream} must be non-null. This is normally used if the source
+     *            is textual (not binary), that is, we don't have to worry about the charset to interpret it.
      * @param contextOutputFormat
-     *         The output format of the enclosing lexical context, used when a template snippet is parsed on runtime. If
-     *         not {@code null}, this will override the value coming from the {@link TemplateConfiguration} or the
-     *         {@link Configuration}.
+     *            The output format of the enclosing lexical context, used when a template snippet is parsed on runtime.
+     *            If not {@code null}, this will override the value coming from the {@link TemplateConfiguration} or the
+     *            {@link Configuration}.
      * @param contextAutoEscapingPolicy
-     *         Similar to {@code contextOutputFormat}; usually this and the that is set together.
+     *            Similar to {@code contextOutputFormat}; usually this and the that is set together.
      */
-   Template(
-            String lookupName, String sourceName, Reader reader,
+    Template(
+            String lookupName, String sourceName,
+            InputStream inputStream, Charset initialEncoding, Reader reader,
             Configuration configuration, TemplateConfiguration templateConfiguration,
-            OutputFormat contextOutputFormat, AutoEscapingPolicy contextAutoEscapingPolicy,
-            Charset actualSourceEncoding, InputStream streamToUnmarkWhenEncEstabd) throws IOException, ParseException {
+            OutputFormat contextOutputFormat, AutoEscapingPolicy contextAutoEscapingPolicy)
+            throws IOException, ParseException {
         _NullArgumentException.check("configuration", configuration);
         this.cfg = configuration;
         this.tCfg = templateConfiguration;
-        this.parsingConfiguration = tCfg != null ? new ParsingConfigurationWithFallback(cfg, tCfg) : cfg;
+        // this.pCfg = ...
+        {
+            ParsingConfiguration pCfgWithFallback = tCfg != null
+                    ? new ParsingConfigurationWithFallback(tCfg, cfg) : cfg;
+            
+            TemplateLanguage tempLangFromPCfg = pCfgWithFallback.getTemplateLanguage();
+            TemplateLanguage tempLangFromExt = pCfgWithFallback.getRecognizeStandardFileExtensions()
+                    ? detectTemplateLanguageFromFileExtension(sourceName != null ? sourceName : lookupName)
+                            : null;
+            if (tempLangFromExt != null && tempLangFromExt != tempLangFromPCfg) {
+                this.pCfg = new ParsingConfigurationWithTemplateLanguageOverride(pCfgWithFallback, tempLangFromExt);
+            } else {
+                this.pCfg = pCfgWithFallback;
+            }
+        }
+        
         this.lookupName = lookupName;
         this.sourceName = sourceName;
+        
+        boolean inputStreamMarked;
+        Charset guessedEncoding = initialEncoding;
+        boolean closeReader;
+        if (reader != null) {
+            if (inputStream != null) {
+                throw new IllegalArgumentException("Both the Reader and InputStream was non-null.");
+            }
+            closeReader = false; // It wasn't created by this method, so it's not our responsibility
+            inputStreamMarked = false; // N/A
+        } else if (inputStream != null) {
+            if (pCfg.getTemplateLanguage().getCanSpecifyEncodingInContent()) {
+                // We need mark support, to restart if the charset suggested by the template content differs
+                // from the one we use initially.
+                if (!inputStream.markSupported()) {
+                    inputStream = new BufferedInputStream(inputStream);
+                }
+                inputStream.mark(Integer.MAX_VALUE); // Mark will be released as soon as we know the charset for sure.
+                inputStreamMarked = true;
+            } else {
+                inputStreamMarked = false;
+            }
+            // Regarding buffering worries: On the Reader side we should only read in chunks (like through a
+            // BufferedReader), so there shouldn't be a problem if the InputStream is not buffered. (Also, at least
+            // on Oracle JDK and OpenJDK 7 the InputStreamReader itself has an internal ~8K buffer.)
+            reader = new InputStreamReader(inputStream, initialEncoding);
+            closeReader = true; // Because it was created here.
+        } else {
+            throw new IllegalArgumentException("Both the Reader and InputStream was null.");
+        }
 
-        setActualSourceEncoding(actualSourceEncoding);
+        try {
+            try {
+                parseWithEncoding(
+                        reader,
+                        contextOutputFormat, contextAutoEscapingPolicy,
+                        guessedEncoding, inputStreamMarked ? inputStream : null);
+            } catch (WrongTemplateCharsetException charsetException) {
+                final Charset templateSpecifiedEncoding = charsetException.getTemplateSpecifiedEncoding();
+
+                if (inputStreamMarked) {
+                    // We restart InputStream to re-decode it with the new charset.
+                    inputStream.reset();
+
+                    // Don't close `reader`; it's an InputStreamReader that would close the wrapped InputStream.
+                    reader = new InputStreamReader(inputStream, templateSpecifiedEncoding);
+                } else {
+                    // We can't handle it, the caller should.
+                    throw charsetException;
+                }
+                parseWithEncoding(
+                        reader,
+                        contextOutputFormat, contextAutoEscapingPolicy,
+                        templateSpecifiedEncoding, inputStream);
+            }
+        } finally {
+            if (closeReader) {
+                reader.close();
+            }
+        }
+        
+        _DebuggerService.registerTemplate(this);
+        namespaceURIToPrefixLookup = _CollectionUtils.unmodifiableMap(namespaceURIToPrefixLookup);
+        prefixToNamespaceURILookup = _CollectionUtils.unmodifiableMap(prefixToNamespaceURILookup);
+
+       finishConstruction();
+    }
+
+    private TemplateLanguage detectTemplateLanguageFromFileExtension(String name) {
+        // TODO [FM3][CF] Emulates FM2 behavior temporarily, to make the test suite pass 
+        // TODO [FM3] Now it's hard-wired, but later user-defined languages need to be detected as well.
+        
+        if (name == null) {
+            return null;
+        }
+
+        int ln = name.length();
+        if (ln < 5) return null;
+
+        char c = name.charAt(ln - 5);
+        if (c != '.') return null;
+
+        c = name.charAt(ln - 4);
+        if (c != 'f' && c != 'F') return null;
+
+        c = name.charAt(ln - 3);
+        if (c != 't' && c != 'T') return null;
+
+        c = name.charAt(ln - 2);
+        if (c != 'l' && c != 'L') return null;
+
+        c = name.charAt(ln - 1);
+        if (c == 'h' || c == 'H') {
+            return DefaultTemplateLanguage.F3CH;
+        }
+        if (c == 'x' || c == 'X') {
+            return DefaultTemplateLanguage.F3CX;
+        }
+        return null;
+    }
+
+    /**
+     * This was extracted from the {@link Template} constructor, so that we can do this again if the attempted charset
+     * was incorrect.
+     * 
+     * @param streamToUnmarkWhenEncEstabd
+     *            When the parser meets a directive that established the charset, this is where it should release the
+     *            mark (so we don't buffer unnecessarily). Maybe {@code null}.
+     */
+    private void parseWithEncoding(
+            Reader reader, OutputFormat contextOutputFormat, AutoEscapingPolicy contextAutoEscapingPolicy,
+            Charset attemptedCharset, InputStream streamToUnmarkWhenEncEstabd) throws ParseException, IOException {
+        setActualSourceEncoding(attemptedCharset);
         LineTableBuilder ltbReader;
         try {
             // Ensure that the parameter Reader is only read in bigger chunks, as we don't know if the it's buffered.
@@ -300,16 +446,16 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
                 reader = new BufferedReader(reader, READER_BUFFER_SIZE);
             }
             
-            ltbReader = new LineTableBuilder(reader, parsingConfiguration);
+            lines.clear();
+            ltbReader = new LineTableBuilder(reader, pCfg, lines);
             reader = ltbReader;
             
             try {
-                FMParser parser = new FMParser(
-                        this, reader,
-                        parsingConfiguration, contextOutputFormat, contextAutoEscapingPolicy,
-                        streamToUnmarkWhenEncEstabd);
                 try {
-                    rootElement = parser.Root();
+                    rootElement = pCfg.getTemplateLanguage().parse(
+                            this, reader,
+                            pCfg, contextOutputFormat, contextAutoEscapingPolicy,
+                            streamToUnmarkWhenEncEstabd);
                 } catch (IndexOutOfBoundsException exc) {
                     // There's a JavaCC bug where the Reader throws a RuntimeExcepton and then JavaCC fails with
                     // IndexOutOfBoundsException. If that wasn't the case, we just rethrow. Otherwise we suppress the
@@ -319,8 +465,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
                     }
                     rootElement = null;
                 }
-                actualTagSyntax = parser._getLastTagSyntax();
-                interpolationSyntax = parsingConfiguration.getInterpolationSyntax();
+                interpolationSyntax = pCfg.getInterpolationSyntax();
             } catch (TokenMgrError exc) {
                 // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it
                 // to ParseException
@@ -333,13 +478,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         
         // Throws any exception that JavaCC has silently treated as EOF:
         ltbReader.throwFailure();
-        
-        _DebuggerService.registerTemplate(this);
-        namespaceURIToPrefixLookup = _CollectionUtils.unmodifiableMap(namespaceURIToPrefixLookup);
-        prefixToNamespaceURILookup = _CollectionUtils.unmodifiableMap(prefixToNamespaceURILookup);
-
-       finishConstruction();
-   }
+    }
 
     /**
      * {@link Template} is technically mutable (to simplify internals), but it has to be finalized and then write
@@ -631,8 +770,12 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         return tCfg;
     }
 
+    /**
+     * The {@link ParsingConfiguration} that was actually used to parse this template; this is deduced from the
+     * other configurations, and the {@link TemplateLanguage} detected from the file extension.
+     */
     public ParsingConfiguration getParsingConfiguration() {
-        return parsingConfiguration;
+        return pCfg;
     }
 
 
@@ -1167,10 +1310,12 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * Reader that builds up the line table info for us, and also helps in working around JavaCC's exception
      * suppression.
      */
-    private class LineTableBuilder extends FilterReader {
+    private static class LineTableBuilder extends FilterReader {
         
         private final int tabSize;
         private final StringBuilder lineBuf = new StringBuilder();
+        private final List<String> lines;
+        
         int lastChar;
         boolean closed;
         
@@ -1180,9 +1325,10 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         /**
          * @param r the character stream to wrap
          */
-        LineTableBuilder(Reader r, ParsingConfiguration parserConfiguration) {
+        LineTableBuilder(Reader r, ParsingConfiguration parserConfiguration, List<String> lines) {
             super(r);
             tabSize = parserConfiguration.getTabSize();
+            this.lines = lines;
         }
         
         public boolean hasFailure() {
@@ -1254,7 +1400,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
             if (c == '\n' || c == '\r') {
                 if (lastChar == '\r' && c == '\n') { // CRLF under Windoze
                     int lastIndex = lines.size() - 1;
-                    String lastLine = (String) lines.get(lastIndex);
+                    String lastLine = lines.get(lastIndex);
                     lines.set(lastIndex, lastLine + '\n');
                 } else {
                     lineBuf.append((char) c);

@@ -19,13 +19,17 @@
 package org.apache.freemarker.core.templateresolver;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.util.Locale;
 
 import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.ConfigurationException;
 import org.apache.freemarker.core.ParseException;
 import org.apache.freemarker.core.Template;
+import org.apache.freemarker.core.TemplateConfiguration;
 import org.apache.freemarker.core.TemplateNotFoundException;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.util._NullArgumentException;
@@ -46,8 +50,10 @@ import org.apache.freemarker.core.util._NullArgumentException;
  * {@link #supportsTemplateLoaderSetting()}). (Note that there's no {@code supportsXxxSetting} method for
  * {@link Configuration#getTemplateLanguage() templateLanguage} and {@link Configuration#getSourceEncoding()
  * sourceEncoding}, as that must always be supported and are always exposed.) {@link TemplateResolverDependencies}
- * will also expose the {@link TemplateResolverDependencies#parse} method, which is used to create a {@link Template}
- * from its source code in the later {@link #getTemplate(String, Locale, Serializable)} calls.
+ * will also expose the {@link TemplateResolverDependencies#newTemplate(String, String, Reader, TemplateConfiguration)}
+ * and {@link TemplateResolverDependencies#newTemplate(String, String, InputStream, Charset, TemplateConfiguration)}
+ * methods, which are used to create a {@link Template} from its source code in the later
+ * {@link #getTemplate(String, Locale, Serializable)} calls.
  */
 public abstract class TemplateResolver {
 

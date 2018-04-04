@@ -175,6 +175,7 @@ public interface ParsingConfiguration {
      * <p>The settings activated by these file extensions override the setting values dictated by the
      * {@link Configuration#getTemplateConfigurations templateConfigurations} setting of the {@link Configuration}.
      */
+    // TODO [FM3] If we will support user-defined languages, then this won't be "Standard" after all.
     boolean getRecognizeStandardFileExtensions();
 
     /**

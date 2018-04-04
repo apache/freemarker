@@ -22,7 +22,6 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.nio.charset.Charset;
 
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
@@ -31,12 +30,10 @@ import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
 
 // FIXME [FM3] If we leave this here, FTL will be a required dependency of core (which is not nice if
 // template languages will be pluggable).
-final public class DefaultTemplateLanguage extends TemplateLanguage {
+public final class DefaultTemplateLanguage extends TemplateLanguage {
 
     private final TagSyntax tagSyntax;
     private final InterpolationSyntax interpolationSyntax;
-    private final OutputFormat outputFormat;
-    private final AutoEscapingPolicy autoEscapingPolicy;
 
     /**
      * For the case when the file extension doesn't specify the exact syntax and the output format, instead both comes
@@ -44,6 +41,16 @@ final public class DefaultTemplateLanguage extends TemplateLanguage {
      */
     public static final TemplateLanguage F3CC = new DefaultTemplateLanguage("f3cc", null, null, null, null);
 
+    // TODO [FM3][CF] Temporary solution, will be removed
+    public static final TemplateLanguage F3CH = new DefaultTemplateLanguage("ftlh",
+            null, null,
+            HTMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT);
+    
+    // TODO [FM3][CF] Temporary solution, will be removed
+    public static final TemplateLanguage F3CX = new DefaultTemplateLanguage("ftlx",
+            null, null,
+            XMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT);
+    
     public static final TemplateLanguage F3AH = new DefaultTemplateLanguage("f3ah",
             TagSyntax.ANGLE_BRACKET, InterpolationSyntax.DOLLAR,
             HTMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT);
@@ -89,23 +96,43 @@ final public class DefaultTemplateLanguage extends TemplateLanguage {
             String name,
             TagSyntax tagSyntax, InterpolationSyntax interpolationSyntax,
             OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy) {
-        super(name);
+        super(name, outputFormat, autoEscapingPolicy);
         this.tagSyntax = tagSyntax;
         this.interpolationSyntax = interpolationSyntax;
-        this.outputFormat = outputFormat;
-        this.autoEscapingPolicy = autoEscapingPolicy;
     }
 
+    /**
+     * {@inheritDoc}
+     * 
+     * In {@link DefaultTemplateLanguage} this returns {@code true}.
+     */
     @Override
-    public boolean getCanSpecifyCharsetInContent() {
+    public boolean getCanSpecifyEncodingInContent() {
         return true;
     }
 
     @Override
-    public Template parse(String name, String sourceName, Reader reader, Configuration cfg,
-            TemplateConfiguration templateConfiguration, Charset encoding, InputStream streamToUnmarkWhenEncEstabd)
+    public ASTElement parse(Template template, Reader reader,
+            ParsingConfiguration pCfg, OutputFormat contextOutputFormat, AutoEscapingPolicy contextAutoEscapingPolicy,
+            InputStream streamToUnmarkWhenEncEstabd)
             throws IOException, ParseException {
-        return new Template(name, sourceName, reader, cfg, templateConfiguration, encoding,
+        FMParser parser = new FMParser(
+                template, reader,
+                pCfg,
+                contextOutputFormat,
+                contextAutoEscapingPolicy,
                 streamToUnmarkWhenEncEstabd);
+        ASTElement root = parser.Root();
+        template.actualTagSyntax = parser._getLastTagSyntax();
+        return root;
     }
+
+    public TagSyntax getTagSyntax() {
+        return tagSyntax;
+    }
+
+    public InterpolationSyntax getInterpolationSyntax() {
+        return interpolationSyntax;
+    }
+    
 }

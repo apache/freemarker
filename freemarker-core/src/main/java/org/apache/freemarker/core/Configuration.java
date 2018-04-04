@@ -753,6 +753,17 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
             return stdOF;
         }
     }
+    
+    /**
+     * Returns the argument {@link OutputFormat} as is, unless a {@link #getRegisteredCustomOutputFormats()
+     * customOutputFormats} contains
+     * another {@link OutputFormat} with the same name, in which case it returns that instead.
+     */
+    public OutputFormat getCustomOrArgumentOutputFormat(OutputFormat original) {
+        _NullArgumentException.check("original", original);
+        OutputFormat custOF = registeredCustomOutputFormatsByName.get(original.getName());
+        return custOF != null ? custOF : original;
+    }
 
     private MarkupOutputFormat getMarkupOutputFormatForCombined(String outerName)
             throws UnregisteredOutputFormatException {

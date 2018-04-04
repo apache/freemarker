@@ -173,12 +173,12 @@ class BuiltInsForStringsMisc {
             try {
                 // pCfg.outputFormat+autoEscapingPolicy is exceptional: it's inherited from the lexical context
                 interpretedTemplate = new Template(
-                        (parentTemplate.getLookupName() != null ? parentTemplate.getLookupName() : "nameless_template") + "->" + id,
+                        (parentTemplate.getLookupName() != null
+                                ? parentTemplate.getLookupName() : "nameless_template") + "->" + id,
                         null,
-                        new StringReader(templateSource),
+                        null, null, new StringReader(templateSource),
                         parentTemplate.getConfiguration(), parentTemplate.getTemplateConfiguration(),
-                        outputFormat, autoEscapingPolicy,
-                        null, null);
+                        outputFormat, autoEscapingPolicy);
             } catch (IOException e) {
                 throw new TemplateException(this, e, env,
                         "Template parsing with \"?", key, "\" has failed with this error:\n\n",

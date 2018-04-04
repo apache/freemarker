@@ -213,7 +213,6 @@ public class CustomTemplateResolverTest {
     static class CustomTemplateResolver extends TemplateResolver {
 
         private final String supportedSetting;
-        private TemplateLanguage templateLanguage;
 
         CustomTemplateResolver(String supportedSetting) {
             this.supportedSetting = supportedSetting;
@@ -300,7 +299,6 @@ public class CustomTemplateResolverTest {
                 }
             }
 
-            templateLanguage = deps.getTemplateLanguage();
             deps.getSourceEncoding();
         }
 
@@ -314,13 +312,13 @@ public class CustomTemplateResolverTest {
                 throws IOException {
             name = normalizeRootBasedName(name);
             return new GetTemplateResult(getDependencies()
-                    .parse(templateLanguage, name, name,
+                    .newTemplate(name, name,
                             new StringReader(
                                     "In " + name
                                     + (name.endsWith("includes")
                                         ? ", included: <#include 'inc'>"
                                         : "")),
-                            null, null, null));
+                            null));
         }
 
         @Override

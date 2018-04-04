@@ -25,21 +25,22 @@ import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 
 /**
- * Adds {@link Configuration} fallback to the {@link ParsingConfiguration} part of a {@link TemplateConfiguration}.
+ * Used when the {@link TemplateLanguage} in the {@link ParsingConfiguration} need to be replaced.
  */
-final class ParsingConfigurationWithFallback implements ParsingConfiguration {
+final class ParsingConfigurationWithTemplateLanguageOverride implements ParsingConfiguration {
 
-    private final Configuration cfg;
-    private final TemplateConfiguration tCfg;
-
-    ParsingConfigurationWithFallback(TemplateConfiguration tCfg, Configuration cfg) {
-        this.cfg = cfg;
-        this.tCfg = tCfg;
+    private final ParsingConfiguration pCfg;
+    private final TemplateLanguage templateLanguage;
+    
+    public ParsingConfigurationWithTemplateLanguageOverride(ParsingConfiguration pCfg,
+            TemplateLanguage templateLanguage) {
+        this.pCfg = pCfg;
+        this.templateLanguage = templateLanguage;
     }
 
     @Override
     public TemplateLanguage getTemplateLanguage() {
-        return tCfg.isTemplateLanguageSet() ? tCfg.getTemplateLanguage() : cfg.getTemplateLanguage();
+        return templateLanguage;
     }
 
     @Override
@@ -49,104 +50,105 @@ final class ParsingConfigurationWithFallback implements ParsingConfiguration {
 
     @Override
     public TagSyntax getTagSyntax() {
-        return tCfg.isTagSyntaxSet() ? tCfg.getTagSyntax() : cfg.getTagSyntax();
+        return pCfg.getTagSyntax();
     }
 
     @Override
     public boolean isTagSyntaxSet() {
-        return true;
+        return pCfg.isTagSyntaxSet();
     }
 
     @Override
     public InterpolationSyntax getInterpolationSyntax() {
-        return tCfg.isInterpolationSyntaxSet() ? tCfg.getInterpolationSyntax() : cfg.getInterpolationSyntax();
+        return pCfg.getInterpolationSyntax();
     }
 
     @Override
     public boolean isInterpolationSyntaxSet() {
-        return true;
+        return pCfg.isInterpolationSyntaxSet();
     }
-    
+
     @Override
     public boolean getWhitespaceStripping() {
-        return tCfg.isWhitespaceStrippingSet() ? tCfg.getWhitespaceStripping() : cfg.getWhitespaceStripping();
+        return pCfg.getWhitespaceStripping();
     }
 
     @Override
     public boolean isWhitespaceStrippingSet() {
-        return true;
+        return pCfg.isWhitespaceStrippingSet();
     }
 
     @Override
     public ArithmeticEngine getArithmeticEngine() {
-        return tCfg.isArithmeticEngineSet() ? tCfg.getArithmeticEngine() : cfg.getArithmeticEngine();
+        return pCfg.getArithmeticEngine();
     }
 
     @Override
     public boolean isArithmeticEngineSet() {
-        return true;
+        return pCfg.isArithmeticEngineSet();
     }
 
     @Override
     public AutoEscapingPolicy getAutoEscapingPolicy() {
-        return tCfg.isAutoEscapingPolicySet() ? tCfg.getAutoEscapingPolicy() : cfg.getAutoEscapingPolicy();
+        return pCfg.getAutoEscapingPolicy();
     }
 
     @Override
     public boolean isAutoEscapingPolicySet() {
-        return true;
+        return pCfg.isAutoEscapingPolicySet();
     }
 
     @Override
     public OutputFormat getOutputFormat() {
-        return tCfg.isOutputFormatSet() ? tCfg.getOutputFormat() : cfg.getOutputFormat();
+        return pCfg.getOutputFormat();
     }
 
     @Override
     public boolean isOutputFormatSet() {
-        return true;
+        return pCfg.isOutputFormatSet();
     }
 
     @Override
     public boolean getRecognizeStandardFileExtensions() {
-        return tCfg.isRecognizeStandardFileExtensionsSet() ? tCfg.getRecognizeStandardFileExtensions()
-                : cfg.getRecognizeStandardFileExtensions();
+        return pCfg.getRecognizeStandardFileExtensions();
     }
 
     @Override
     public boolean isRecognizeStandardFileExtensionsSet() {
-        return true;
+        return pCfg.isRecognizeStandardFileExtensionsSet();
     }
 
     @Override
     public Version getIncompatibleImprovements() {
-        // This can be only set on the Configuration-level
-        return cfg.getIncompatibleImprovements();
+        return pCfg.getIncompatibleImprovements();
     }
 
     @Override
     public boolean isIncompatibleImprovementsSet() {
-        // This can be only set on the Configuration-level
-        return cfg.isIncompatibleImprovementsSet();
+        return pCfg.isIncompatibleImprovementsSet();
     }
 
     @Override
     public int getTabSize() {
-        return tCfg.isTabSizeSet() ? tCfg.getTabSize() : cfg.getTabSize();
+        return pCfg.getTabSize();
     }
 
     @Override
     public boolean isTabSizeSet() {
-        return true;
+        return pCfg.isTabSizeSet();
     }
 
     @Override
     public Charset getSourceEncoding() {
-        return tCfg.isSourceEncodingSet() ? tCfg.getSourceEncoding() : cfg.getSourceEncoding();
+        return pCfg.getSourceEncoding();
     }
 
     @Override
     public boolean isSourceEncodingSet() {
-        return true;
+        return pCfg.isSourceEncodingSet();
     }
+    
+    
+    
+    
 }

@@ -111,10 +111,15 @@ class TemplateResolverDependenciesImpl extends TemplateResolverDependencies {
     }
 
     @Override
-    public Template parse(TemplateLanguage templateLanguage, String name, String sourceName, Reader reader,
-            TemplateConfiguration templateConfiguration, Charset encoding, InputStream streamToUnmarkWhenEncEstabd)
-            throws IOException, ParseException {
-        return templateLanguage.parse(name, sourceName, reader,
-                configuration, templateConfiguration, encoding, streamToUnmarkWhenEncEstabd);
+    public Template newTemplate(String lookupName, String sourceName, InputStream inputStream, Charset initialEncoding,
+            TemplateConfiguration templateConfiguration) throws IOException, ParseException {
+        return new Template(lookupName, sourceName, inputStream, initialEncoding, configuration, templateConfiguration);
     }
+
+    @Override
+    public Template newTemplate(String lookupName, String sourceName, Reader reader,
+            TemplateConfiguration templateConfiguration) throws IOException, ParseException {
+        return new Template(lookupName, sourceName, reader, configuration, templateConfiguration, null);
+    }
+
 }
