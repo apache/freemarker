@@ -39,6 +39,7 @@ import freemarker.template.utility.NullArgumentException;
  */ 
 public class _TemplateAPI {
     
+    // Constants for faster access... probably unnecessary and should be removed.
     public static final int VERSION_INT_2_3_0 = Configuration.VERSION_2_3_0.intValue();
     public static final int VERSION_INT_2_3_19 = Configuration.VERSION_2_3_19.intValue();
     public static final int VERSION_INT_2_3_20 = Configuration.VERSION_2_3_20.intValue();
@@ -50,6 +51,7 @@ public class _TemplateAPI {
     public static final int VERSION_INT_2_3_26 = Configuration.VERSION_2_3_26.intValue();
     public static final int VERSION_INT_2_3_27 = Configuration.VERSION_2_3_27.intValue();
     public static final int VERSION_INT_2_3_28 = Configuration.VERSION_2_3_28.intValue();
+    public static final int VERSION_INT_2_3_29 = Configuration.VERSION_2_3_29.intValue();
     public static final int VERSION_INT_2_4_0 = Version.intValueFor(2, 4, 0);
     
     public static void checkVersionNotNullAndSupported(Version incompatibleImprovements) {
