@@ -804,6 +804,42 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     public boolean isRecognizeStandardFileExtensionsSet() {
         return true;
     }
+    
+    private static final Map<String, TemplateLanguage> PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION;
+    static {
+        PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION = new HashMap<String, TemplateLanguage>(
+                (DefaultTemplateLanguage.STANDARD_INSTANCES.length + 1) * 2, 0.5f);
+        for (DefaultTemplateLanguage tl : DefaultTemplateLanguage.STANDARD_INSTANCES) {
+            PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION.put(tl.getFileExtension(), tl);            
+        }
+        PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION.put(
+                UnparsedTemplateLanguage.INSTANCE.getFileExtension(), UnparsedTemplateLanguage.INSTANCE);            
+    }
+    
+    /**
+     * Returns the {@link TemplateLanguage} associated to the template name based on its "file" extension (the section
+     * after the last dot). This lookup looks for a matching {@link TemplateLanguage#getFileExtension()}. The file
+     * extension lookup is case insensitive.
+     * 
+     * @param templateName
+     *            This is preferably the {@link Template#getSourceName()}, though if that's {@code null}, then you
+     *            should generally use the {@link Template#getLookupName()}. If {@code null}, the method returns
+     *            {@code null}.
+     * 
+     * @return The associated {@link TemplateLanguage}, or {@code null} if none matches the file extension, or if the
+     *         {@code templateName} parameter was {@code null}.
+     */
+    public TemplateLanguage getTemplateLanguageForTemplateName(String templateName) {
+        if (templateName == null) {
+            return null;
+        }
+        
+        int dotIdx = templateName.lastIndexOf('.');
+        if (dotIdx == -1) {
+            return null;
+        }
+        return PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION.get(templateName.substring(dotIdx + 1).toLowerCase());
+    }
 
     @Override
     public TemplateLanguage getTemplateLanguage() {

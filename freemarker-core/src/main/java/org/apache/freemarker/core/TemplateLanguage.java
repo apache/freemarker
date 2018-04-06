@@ -35,7 +35,7 @@ import org.apache.freemarker.core.util._StringUtils;
 // [TODO][FM3] Make this mature, or hide its API somehow, or at least prevent subclassing it by user.
 public abstract class TemplateLanguage {
     
-    private final String name;
+    private final String fileExtension;
     private final OutputFormat outputFormat;
     private final AutoEscapingPolicy autoEscapingPolicy;
     
@@ -49,13 +49,41 @@ public abstract class TemplateLanguage {
     public abstract boolean getCanSpecifyEncodingInContent();
 
     /**
-     * @param name See {@link #getName()}
-     * @param outputFormat See {@link #getOutputFormat(Configuration)}
-     * @param autoEscapingPolicy See {@link #getAutoEscapingPolicy()}
+     * @param fileExtension
+     *            See {@link #getFileExtension()}
+     * @param outputFormat
+     *            See {@link #getOutputFormat(Configuration)}
+     * @param autoEscapingPolicy
+     *            See {@link #getAutoEscapingPolicy()}
+     * 
+     * @throws IllegalArgumentException
+     *             If the {@code #fileExtension} argument contains upper case letter or dot, or if it starts with "f"
+     *             and the language isn't defined by the FreeMarker project.
      */
-    public TemplateLanguage(String name, OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy) {
-        _NullArgumentException.check("name", name);
-        this.name = name;
+    public TemplateLanguage(String fileExtension, OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy) {
+        this(fileExtension, false, outputFormat, autoEscapingPolicy);
+    }
+    
+    /**
+     * Non-public constructor used for languages defiend by the FreeMarker project.
+     */
+    TemplateLanguage(String fileExtension, boolean allowExtensionStartingWithF,
+            OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy) {
+        _NullArgumentException.check("fileExtension", fileExtension);
+        for (int i = 0; i < fileExtension.length(); i++) {
+            char c = fileExtension.charAt(i);
+            if (Character.isUpperCase(c)) {
+                throw new IllegalArgumentException("The \"fileExtension\" argument can't contain upper case letter.");
+            }
+            if (c == '.') {
+                throw new IllegalArgumentException("The \"fileExtension\" argument can't contain dot.");
+            }
+        }
+        if (!allowExtensionStartingWithF && fileExtension.length() > 0 && fileExtension.charAt(0) == 'f') {
+            throw new IllegalArgumentException(
+                    "The \"fileExtension\" argument can't start with 'f' for an user-defined language.");
+        }
+        this.fileExtension = fileExtension;
         this.outputFormat = outputFormat;
         this.autoEscapingPolicy = autoEscapingPolicy;
     }
@@ -72,19 +100,21 @@ public abstract class TemplateLanguage {
             throws IOException, ParseException;
 
     /**
-     * The informal name of this language; might be used in error messages. Not {@code null}.
+     * The file extension that should be used for this language. Not {@code null}. It can't contain upper-case letters,
+     * nor dot. It can't start with "f", unless it's defined by the FreeMarker project itself. 
      */
-    public String getName() {
-        return name;
+    public String getFileExtension() {
+        return fileExtension;
     }
 
     @Override
     public final String toString() {
-        return "TemplateLanguage(" + _StringUtils.jQuote(name) + ")";
+        return "TemplateLanguage(" + _StringUtils.jQuote(fileExtension) + ")";
     }
     
     /**
-     * The {@link OutputFormat} that this language enforces, or else {@code null}
+     * The {@link OutputFormat} that this language enforces, or else {@code null} (and it comes from the
+     * {@link ParsingConfiguration}).
      * 
      * @param cfg
      *            The {@link Configuration} used; this is needed for {@link Configuration}-level {@link OutputFormat}
@@ -97,7 +127,8 @@ public abstract class TemplateLanguage {
     }
 
     /**
-     * The {@link OutputFormat} that this language enforces, or else {@code null}
+     * The {@link OutputFormat} that this language enforces, or else {@code null} (and it comes from the
+     * {@link ParsingConfiguration})
      */
     public AutoEscapingPolicy getAutoEscapingPolicy() {
         return autoEscapingPolicy;

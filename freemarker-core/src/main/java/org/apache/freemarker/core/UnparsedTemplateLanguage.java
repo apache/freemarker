@@ -22,27 +22,27 @@ package org.apache.freemarker.core;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.io.StringReader;
 
 import org.apache.freemarker.core.outputformat.OutputFormat;
+import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 
 /**
- * Static text template language; a such template prints its content as is.
+ * When the whole template is just raw static text (there are no special symbols in it), that will be printed as is.
  */
-public final class StaticTextTemplateLanguage extends TemplateLanguage {
+public final class UnparsedTemplateLanguage extends TemplateLanguage {
     
     private static final int READ_BUFFER_SIZE = 4096;
     
-    public static final TemplateLanguage INSTANCE = new StaticTextTemplateLanguage("Static text");
+    public static final TemplateLanguage INSTANCE = new UnparsedTemplateLanguage();
 
-    private StaticTextTemplateLanguage(String name) {
-        super(name, null, null);
+    private UnparsedTemplateLanguage() {
+        super("f3uu", true, UndefinedOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT);
     }
 
     /**
      * {@inheritDoc}
      * 
-     * In {@link StaticTextTemplateLanguage} this returns {@code false}.
+     * In {@link UnparsedTemplateLanguage} this returns {@code false}.
      */
     @Override
     public boolean getCanSpecifyEncodingInContent() {
@@ -60,16 +60,9 @@ public final class StaticTextTemplateLanguage extends TemplateLanguage {
         while ((charsRead = reader.read(buf)) > 0) {
             sb.append(buf, 0, charsRead);
         }
-        
-        FMParser parser = new FMParser(
-                template, new StringReader(""),
-                pCfg,
-                contextOutputFormat,
-                contextAutoEscapingPolicy,
-                streamToUnmarkWhenEncEstabd);
-        
-        ASTElement root = parser.Root();
-        ((ASTStaticText) root).replaceText(sb.toString());
+        ASTStaticText root = new ASTStaticText(sb.toString());
+        root.setFieldsForRootElement();
+        root.setLocation(template, -1, -1, -1, -1); // TODO [FM3] Positions are dummy
         return root;
     }
     

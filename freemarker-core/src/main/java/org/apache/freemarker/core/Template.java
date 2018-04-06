@@ -314,8 +314,8 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
             
             TemplateLanguage tempLangFromPCfg = pCfgWithFallback.getTemplateLanguage();
             TemplateLanguage tempLangFromExt = pCfgWithFallback.getRecognizeStandardFileExtensions()
-                    ? detectTemplateLanguageFromFileExtension(sourceName != null ? sourceName : lookupName)
-                            : null;
+                    ? configuration.getTemplateLanguageForTemplateName(sourceName != null ? sourceName : lookupName)
+                    : null;
             if (tempLangFromExt != null && tempLangFromExt != tempLangFromPCfg) {
                 this.pCfg = new ParsingConfigurationWithTemplateLanguageOverride(pCfgWithFallback, tempLangFromExt);
             } else {
@@ -391,39 +391,6 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         prefixToNamespaceURILookup = _CollectionUtils.unmodifiableMap(prefixToNamespaceURILookup);
 
        finishConstruction();
-    }
-
-    private TemplateLanguage detectTemplateLanguageFromFileExtension(String name) {
-        // TODO [FM3][CF] Emulates FM2 behavior temporarily, to make the test suite pass 
-        // TODO [FM3] Now it's hard-wired, but later user-defined languages need to be detected as well.
-        
-        if (name == null) {
-            return null;
-        }
-
-        int ln = name.length();
-        if (ln < 5) return null;
-
-        char c = name.charAt(ln - 5);
-        if (c != '.') return null;
-
-        c = name.charAt(ln - 4);
-        if (c != 'f' && c != 'F') return null;
-
-        c = name.charAt(ln - 3);
-        if (c != 't' && c != 'T') return null;
-
-        c = name.charAt(ln - 2);
-        if (c != 'l' && c != 'L') return null;
-
-        c = name.charAt(ln - 1);
-        if (c == 'h' || c == 'H') {
-            return DefaultTemplateLanguage.F3CH;
-        }
-        if (c == 'x' || c == 'X') {
-            return DefaultTemplateLanguage.F3CX;
-        }
-        return null;
     }
 
     /**

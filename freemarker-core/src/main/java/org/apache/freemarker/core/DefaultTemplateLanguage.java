@@ -34,49 +34,63 @@ public final class DefaultTemplateLanguage extends TemplateLanguage {
 
     private final TagSyntax tagSyntax;
     private final InterpolationSyntax interpolationSyntax;
-
+    
     /**
      * For the case when the file extension doesn't specify the exact syntax and the output format, instead both comes
      * from the {@link Configuration} (or {@link TemplateConfiguration}). Avoid it, as it's problematic for tooling.
      */
-    public static final TemplateLanguage F3CC = new DefaultTemplateLanguage("f3cc", null, null, null, null);
+    public static final DefaultTemplateLanguage F3CC = new DefaultTemplateLanguage("f3cc", true,
+            null, null, null, null);
 
-    // TODO [FM3][CF] Temporary solution, will be removed
-    public static final TemplateLanguage F3CH = new DefaultTemplateLanguage("ftlh",
-            null, null,
-            HTMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT);
+    // TODO [FM3][CF] Emulates FM2 behavior temporarily, to make the test suite pass 
+    public static final DefaultTemplateLanguage F3CH = new DefaultTemplateLanguage("ftlh", true,
+            HTMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
+            null, null);
     
-    // TODO [FM3][CF] Temporary solution, will be removed
-    public static final TemplateLanguage F3CX = new DefaultTemplateLanguage("ftlx",
-            null, null,
-            XMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT);
+    // TODO [FM3][CF] Emulates FM2 behavior temporarily, to make the test suite pass 
+    public static final DefaultTemplateLanguage F3CX = new DefaultTemplateLanguage("ftlx", true,
+            XMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
+            null, null);
     
-    public static final TemplateLanguage F3AH = new DefaultTemplateLanguage("f3ah",
-            TagSyntax.ANGLE_BRACKET, InterpolationSyntax.DOLLAR,
-            HTMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT);
-    public static final TemplateLanguage F3AX = new DefaultTemplateLanguage("f3ax",
-            TagSyntax.ANGLE_BRACKET, InterpolationSyntax.DOLLAR,
-            XMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT);
-    public static final TemplateLanguage F3AU = new DefaultTemplateLanguage("f3au",
-            TagSyntax.ANGLE_BRACKET, InterpolationSyntax.DOLLAR,
-            UndefinedOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT);
+    public static final DefaultTemplateLanguage F3AH = new DefaultTemplateLanguage("f3ah", true,
+            HTMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
+            TagSyntax.ANGLE_BRACKET, InterpolationSyntax.DOLLAR);
+    public static final DefaultTemplateLanguage F3AX = new DefaultTemplateLanguage("f3ax", true,
+            XMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
+            TagSyntax.ANGLE_BRACKET, InterpolationSyntax.DOLLAR);
+    public static final DefaultTemplateLanguage F3AU = new DefaultTemplateLanguage("f3au", true,
+            UndefinedOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
+            TagSyntax.ANGLE_BRACKET, InterpolationSyntax.DOLLAR);
 
-    public static final TemplateLanguage F3SH = new DefaultTemplateLanguage("f3sh",
-            TagSyntax.SQUARE_BRACKET, InterpolationSyntax.SQUARE_BRACKET,
-            HTMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT);
-    public static final TemplateLanguage F3SX = new DefaultTemplateLanguage("f3sx",
-            TagSyntax.SQUARE_BRACKET, InterpolationSyntax.SQUARE_BRACKET,
-            XMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT);
-    public static final TemplateLanguage F3SU = new DefaultTemplateLanguage("f3su",
-            TagSyntax.SQUARE_BRACKET, InterpolationSyntax.SQUARE_BRACKET,
-            UndefinedOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT);
+    public static final DefaultTemplateLanguage F3SH = new DefaultTemplateLanguage("f3sh", true,
+            HTMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
+            TagSyntax.SQUARE_BRACKET, InterpolationSyntax.SQUARE_BRACKET);
+    public static final DefaultTemplateLanguage F3SX = new DefaultTemplateLanguage("f3sx", true,
+            XMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
+            TagSyntax.SQUARE_BRACKET, InterpolationSyntax.SQUARE_BRACKET);
+    public static final DefaultTemplateLanguage F3SU = new DefaultTemplateLanguage("f3su", true,
+            UndefinedOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
+            TagSyntax.SQUARE_BRACKET, InterpolationSyntax.SQUARE_BRACKET);
 
+    /**
+     * List all instances for which there's a constant in this class ({@link #F3AH} and such).
+     */
+    public static final DefaultTemplateLanguage[] STANDARD_INSTANCES = new DefaultTemplateLanguage[] {
+            F3CC, F3CH, F3CX,
+            F3AH, F3AX, F3AU, 
+            F3SH, F3SX, F3SU 
+    };
+    
     /**
      * Creates a new template language that's similar to the usual FreeMarker template language. You seldom need to
      * call this yourself; use constants like {@link #F3AH} instead when possible.
      * 
-     * @param name
-     *            The name of the template language
+     * @param fileExtension
+     *            See in {@link TemplateLanguage#TemplateLanguage(String, OutputFormat, AutoEscapingPolicy)}
+     * @param outputFormat
+     *            See in {@link TemplateLanguage#TemplateLanguage(String, OutputFormat, AutoEscapingPolicy)}
+     * @param autoEscapingPolicy
+     *            See in {@link TemplateLanguage#TemplateLanguage(String, OutputFormat, AutoEscapingPolicy)}
      * @param tagSyntax
      *            The tag syntax used, or {@code null} it it should come from the {@link ParsingConfiguration}. Using
      *            {@code null} is generally a bad idea, as it makes tooling harder, and can be confusing for users.
@@ -84,23 +98,27 @@ public final class DefaultTemplateLanguage extends TemplateLanguage {
      *            The interpolation syntax used, or {@code null} it it should come from the
      *            {@link ParsingConfiguration}. Using {@code null} is generally a bad idea, as it makes tooling harder,
      *            and can be confusing for users.
-     * @param outputFormat
-     *            The output format used, or {@code null} it it should come from the {@link ParsingConfiguration}. Using
-     *            {@code null} is generally a bad idea, as it makes tooling harder, and can be confusing for users.
-     * @param autoEscapingPolicy
-     *            The auto escaping policy used, or {@code null} it it should come from the
-     *            {@link ParsingConfiguration}. Using {@code null} is generally a bad idea, as it can be confusing for
-     *            users.
      */
     public DefaultTemplateLanguage(
-            String name,
-            TagSyntax tagSyntax, InterpolationSyntax interpolationSyntax,
-            OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy) {
-        super(name, outputFormat, autoEscapingPolicy);
+            String fileExtension,
+            OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy,
+            TagSyntax tagSyntax, InterpolationSyntax interpolationSyntax) {
+        this(fileExtension, false, outputFormat, autoEscapingPolicy, tagSyntax, interpolationSyntax);
+    }
+
+    /**
+     * Used internally to allow extensions starting with "f" 
+     */
+    DefaultTemplateLanguage(
+            String fileExtension,
+            boolean allowExtensionStartingWithF,
+            OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy,
+            TagSyntax tagSyntax, InterpolationSyntax interpolationSyntax) {
+        super(fileExtension, allowExtensionStartingWithF, outputFormat, autoEscapingPolicy);
         this.tagSyntax = tagSyntax;
         this.interpolationSyntax = interpolationSyntax;
     }
-
+    
     /**
      * {@inheritDoc}
      * 

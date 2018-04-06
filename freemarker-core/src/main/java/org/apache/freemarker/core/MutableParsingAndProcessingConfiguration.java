@@ -122,7 +122,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
                 if ("FTL".equals(value)) {
                     setTemplateLanguage(DefaultTemplateLanguage.F3CC);
                 } else if ("staticText".equals(value)) {
-                    setTemplateLanguage(StaticTextTemplateLanguage.INSTANCE);
+                    setTemplateLanguage(UnparsedTemplateLanguage.INSTANCE);
                 } else {
                     throw new InvalidSettingValueException(name, value, "Unsupported template language name");
                 }

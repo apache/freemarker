@@ -143,20 +143,21 @@ public class FMParser {
         token_source.incompatibleImprovements = incompatibleImprovements;
         this.incompatibleImprovements = incompatibleImprovements;
 
+        DefaultTemplateLanguage templateLanguage = (DefaultTemplateLanguage) pCfg.getTemplateLanguage();
+
         {
             // contextXxx is stronger than anything.
             // TemplateLanguage.xxx (if it's non-null) stronger than the rest.
             
             OutputFormat outputFormatFromLang;
             outputFormat = contextOutputFormat != null ? contextOutputFormat
-                    : (outputFormatFromLang = pCfg.getTemplateLanguage()
-                            .getOutputFormat(template.getConfiguration())) != null
+                    : (outputFormatFromLang = templateLanguage.getOutputFormat(template.getConfiguration())) != null
                             ? outputFormatFromLang
                             : pCfg.getOutputFormat();
 
             AutoEscapingPolicy autoEscapingPolicyFromLang;
             autoEscapingPolicy = contextAutoEscapingPolicy != null ? contextAutoEscapingPolicy
-                    : (autoEscapingPolicyFromLang = pCfg.getTemplateLanguage().getAutoEscapingPolicy()) != null
+                    : (autoEscapingPolicyFromLang = templateLanguage.getAutoEscapingPolicy()) != null
                             ? autoEscapingPolicyFromLang
                     : pCfg.getAutoEscapingPolicy();
         }
@@ -164,7 +165,14 @@ public class FMParser {
 
         token_source.setParser(this);
 
-        TagSyntax tagSyntax = pCfg.getTagSyntax();
+        TagSyntax tagSyntax;
+        {
+            TagSyntax tagSyntaxFromLang;
+            tagSyntax
+                    = (tagSyntaxFromLang = templateLanguage.getTagSyntax()) != null
+		                    ? tagSyntaxFromLang
+		                    : pCfg.getTagSyntax();
+        }
         switch (tagSyntax) {
         case ANGLE_BRACKET:
             token_source.squBracTagSyntax = false;
@@ -176,7 +184,13 @@ public class FMParser {
             throw new BugException("Unsupported tagSyntax: " + tagSyntax);
         }
 
-        token_source.interpolationSyntax = pCfg.getInterpolationSyntax();
+        {
+            InterpolationSyntax interpolationSyntaxFromLang;
+            token_source.interpolationSyntax
+                    = (interpolationSyntaxFromLang = templateLanguage.getInterpolationSyntax()) != null
+		                    ? interpolationSyntaxFromLang
+		                    : pCfg.getInterpolationSyntax();
+        }
 
         this.stripWhitespace = pCfg.getWhitespaceStripping();
 
