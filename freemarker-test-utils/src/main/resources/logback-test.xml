@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -19,17 +18,33 @@
 -->
 <configuration>
 
-	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} %-5level [%c] %C{20}:%L - %msg%n</pattern>
-		</encoder>
-	</appender>
-	
+	<property name="pattern"
+		value="%d{HH:mm:ss.SSS} %-5level [%c] %C{20}:%L - %msg%n" />
+
+	<if condition='p("org.apache.freemarker.test.logFile").equals("")'>
+		<then>
+            <appender name="APPENDER" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder>
+                    <pattern>${pattern}</pattern>
+                </encoder>
+            </appender>
+		</then>
+		<else>
+            <appender name="APPENDER" class="ch.qos.logback.core.FileAppender">
+                <file>${org.apache.freemarker.test.logFile}</file>
+                <encoder>
+                    <pattern>${pattern}</pattern>
+                </encoder>
+            </appender>
+		</else>
+	</if>
+
+
 	<logger name="org.eclipse.jetty" level="INFO" />
 	<!-- logger name="org.apache.freemarker" level="TRACE" / -->
 
 	<root level="debug">
-		<appender-ref ref="STDOUT" />
+		<appender-ref ref="APPENDER" />
 	</root>
-	
+
 </configuration>

@@ -35,6 +35,7 @@ dependencies {
 
     // Logging during testing:
     runtime "ch.qos.logback:logback-classic:1.1.8"
+    runtime "org.codehaus.janino:janino:3.0.6"
     runtime "org.slf4j:jcl-over-slf4j:$slf4jVersion"
     runtime "org.apache.logging.log4j:log4j-to-slf4j:2.8.2"
 }
