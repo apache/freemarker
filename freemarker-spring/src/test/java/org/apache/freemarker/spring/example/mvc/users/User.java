@@ -30,6 +30,7 @@ public class User {
     private String lastName;
     private Date birthDate;
     private String description;
+    private String favoriteSport;
 
     public User() {
     }
@@ -88,6 +89,14 @@ public class User {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getFavoriteSport() {
+        return favoriteSport;
+    }
+
+    public void setFavoriteSport(String favoriteSport) {
+        this.favoriteSport = favoriteSport;
     }
 
     @Override

@@ -52,6 +52,7 @@ public final class SpringFormTemplateCallableHashModel implements TemplateHashMo
         modelsMap.put(TextareaTemplateDirectiveModel.NAME, new TextareaTemplateDirectiveModel(request, response));
         modelsMap.put(ButtonTemplateDirectiveModel.NAME, new ButtonTemplateDirectiveModel(request, response));
         modelsMap.put(LabelTemplateDirectiveModel.NAME, new LabelTemplateDirectiveModel(request, response));
+        modelsMap.put(SelectTemplateDirectiveModel.NAME, new SelectTemplateDirectiveModel(request, response));
         modelsMap.put(ErrorsTemplateDirectiveModel.NAME, new ErrorsTemplateDirectiveModel(request, response));
     }
 
