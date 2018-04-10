@@ -42,8 +42,6 @@ public abstract class MutableParsingAndProcessingConfiguration<
     public static final String AUTO_ESCAPING_POLICY_KEY = "autoEscapingPolicy";
     public static final String RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY = "recognizeStandardFileExtensions";
     public static final String TEMPLATE_LANGUAGE_KEY = "templateLanguage";
-    public static final String TAG_SYNTAX_KEY = "tagSyntax";
-    public static final String INTERPOLATION_SYNTAX_KEY = "interpolationSyntax";
     public static final String TAB_SIZE_KEY = "tabSize";
     public static final String INCOMPATIBLE_IMPROVEMENTS_KEY = "incompatibleImprovements";
 
@@ -53,19 +51,15 @@ public abstract class MutableParsingAndProcessingConfiguration<
                 // Must be sorted alphabetically!
                 AUTO_ESCAPING_POLICY_KEY,
                 INCOMPATIBLE_IMPROVEMENTS_KEY,
-                INTERPOLATION_SYNTAX_KEY,
                 OUTPUT_FORMAT_KEY,
                 RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY,
                 SOURCE_ENCODING_KEY,
                 TAB_SIZE_KEY,
-                TAG_SYNTAX_KEY,
                 TEMPLATE_LANGUAGE_KEY,
                 WHITESPACE_STRIPPING_KEY
             ));
 
     private TemplateLanguage templateLanguage;
-    private TagSyntax tagSyntax;
-    private InterpolationSyntax interpolationSyntax;
     private Boolean whitespaceStripping;
     private AutoEscapingPolicy autoEscapingPolicy;
     private Boolean recognizeStandardFileExtensions;
@@ -119,37 +113,17 @@ public abstract class MutableParsingAndProcessingConfiguration<
                     setRecognizeStandardFileExtensions(_StringUtils.getYesNo(value));
                 }
             } else if (TEMPLATE_LANGUAGE_KEY.equals(name)) {
-                if ("FTL".equals(value)) {
-                    setTemplateLanguage(DefaultTemplateLanguage.F3CC);
-                } else if ("staticText".equals(value)) {
-                    setTemplateLanguage(UnparsedTemplateLanguage.INSTANCE);
-                } else {
-                    throw new InvalidSettingValueException(name, value, "Unsupported template language name");
+                TemplateLanguage templateLanguage = Configuration.PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION.get(
+                        value.toLowerCase());
+                if (templateLanguage == null) {
+                    if ("staticText".equals(value)) {
+                        templateLanguage = UnparsedTemplateLanguage.INSTANCE;
+                    } else {
+                        // TODO [FM3] Allow setting a custom template language by class name.
+                        throw new InvalidSettingValueException(name, value, "Unsupported template language name");
+                    }
                 }
-            } else if (TAG_SYNTAX_KEY.equals(name)) {
-                if ("angleBracket".equals(value)) {
-                    setTagSyntax(TagSyntax.ANGLE_BRACKET);
-                } else if ("squareBracket".equals(value)) {
-                    setTagSyntax(TagSyntax.SQUARE_BRACKET);
-                } else {
-                    throw new InvalidSettingValueException(name, value,
-                            "angle_bracket".equals(value) ? "The correct value is: angleBracket" :
-                            "square_bracket".equals(value) ? "The correct value is: squareBracket" :
-                            "autoDetect".equals(value) || "auto_detect".equals(value)
-                                    ? "The autoDetect tag syntax is not supported since 3.0.0." :
-                            "No such predefined tag syntax name");
-                }
-            } else if (INTERPOLATION_SYNTAX_KEY.equals(name)) {
-                if ("dollar".equals(value)) {
-                    setInterpolationSyntax(InterpolationSyntax.DOLLAR);
-                } else if ("squareBracket".equals(value)) {
-                    setInterpolationSyntax(InterpolationSyntax.SQUARE_BRACKET);
-                } else {
-                    throw new InvalidSettingValueException(name, value,
-                            "legacy".equals(value) ? "The supported alternative is: dollar" :
-                            "square_bracket".equals(value) ? "The correct value is: squareBracket" :
-                            "No such predefined interpolation syntax name");
-                }
+                setTemplateLanguage(templateLanguage);
             } else if (TAB_SIZE_KEY.equals(name)) {
                 setTabSize(Integer.parseInt(value));
             } else {
@@ -175,92 +149,6 @@ public abstract class MutableParsingAndProcessingConfiguration<
 
     public static Set<String> getSettingNames() {
         return SETTING_NAMES;
-    }
-
-    /**
-     * Setter pair of {@link #getTagSyntax()}.
-     *
-     * @param tagSyntax
-     *         Can't be {@code null}
-     */
-    public void setTagSyntax(TagSyntax tagSyntax) {
-        _NullArgumentException.check("tagSyntax", tagSyntax);
-        this.tagSyntax = tagSyntax;
-    }
-
-    /**
-     * Fluent API equivalent of {@link #tagSyntax(TagSyntax)}
-     */
-    public SelfT tagSyntax(TagSyntax tagSyntax) {
-        setTagSyntax(tagSyntax);
-        return self();
-    }
-
-    /**
-     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
-     * {@link ParsingConfiguration}).
-     */
-    public void unsetTagSyntax() {
-        this.tagSyntax = null;
-    }
-
-    @Override
-    public TagSyntax getTagSyntax() {
-        return isTagSyntaxSet() ? tagSyntax : getDefaultTagSyntax();
-    }
-    
-    /**
-     * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
-     * from another {@link ParsingConfiguration}, or throws {@link CoreSettingValueNotSetException}.
-     */
-    protected abstract TagSyntax getDefaultTagSyntax();
-
-    @Override
-    public boolean isTagSyntaxSet() {
-        return tagSyntax != null;
-    }
-    
-    /**
-     * Setter pair of {@link #getInterpolationSyntax()}.
-     *
-     * @param interpolationSyntax
-     *         Can't be {@code null}
-     */
-    public void setInterpolationSyntax(InterpolationSyntax interpolationSyntax) {
-        _NullArgumentException.check("interpolationSyntax", interpolationSyntax);
-        this.interpolationSyntax = interpolationSyntax;
-    }
-
-    /**
-     * Fluent API equivalent of {@link #interpolationSyntax(InterpolationSyntax)}
-     */
-    public SelfT interpolationSyntax(InterpolationSyntax interpolationSyntax) {
-        setInterpolationSyntax(interpolationSyntax);
-        return self();
-    }
-
-    /**
-     * Resets the setting value as if it was never set (but it doesn't affect the value inherited from another
-     * {@link ParsingConfiguration}).
-     */
-    public void unsetInterpolationSyntax() {
-        this.interpolationSyntax = null;
-    }
-
-    @Override
-    public InterpolationSyntax getInterpolationSyntax() {
-        return isInterpolationSyntaxSet() ? interpolationSyntax : getDefaultInterpolationSyntax();
-    }
-    
-    /**
-     * Returns the value the getter method returns when the setting is not set, possibly by inheriting the setting value
-     * from another {@link ParsingConfiguration}, or throws {@link CoreSettingValueNotSetException}.
-     */
-    protected abstract InterpolationSyntax getDefaultInterpolationSyntax();
-
-    @Override
-    public boolean isInterpolationSyntaxSet() {
-        return interpolationSyntax != null;
     }
 
     @Override

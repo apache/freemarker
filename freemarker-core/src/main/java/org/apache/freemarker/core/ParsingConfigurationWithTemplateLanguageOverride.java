@@ -49,26 +49,6 @@ final class ParsingConfigurationWithTemplateLanguageOverride implements ParsingC
     }
 
     @Override
-    public TagSyntax getTagSyntax() {
-        return pCfg.getTagSyntax();
-    }
-
-    @Override
-    public boolean isTagSyntaxSet() {
-        return pCfg.isTagSyntaxSet();
-    }
-
-    @Override
-    public InterpolationSyntax getInterpolationSyntax() {
-        return pCfg.getInterpolationSyntax();
-    }
-
-    @Override
-    public boolean isInterpolationSyntaxSet() {
-        return pCfg.isInterpolationSyntaxSet();
-    }
-
-    @Override
     public boolean getWhitespaceStripping() {
         return pCfg.getWhitespaceStripping();
     }
@@ -147,8 +127,5 @@ final class ParsingConfigurationWithTemplateLanguageOverride implements ParsingC
     public boolean isSourceEncodingSet() {
         return pCfg.isSourceEncodingSet();
     }
-    
-    
-    
     
 }

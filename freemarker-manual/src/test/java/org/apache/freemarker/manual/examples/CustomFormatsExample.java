@@ -53,7 +53,7 @@ public class CustomFormatsExample extends TemplateTest {
         addToDataModel("fd", new Date(1450904944213L));
         addToDataModel("let", new Date(1450904944213L));
         
-        assertOutputForNamed("CustomFormatsExample-alias1.ftlh");
+        assertOutputForNamed("CustomFormatsExample-alias1.f3ah");
     }
 
     @Test
@@ -64,7 +64,7 @@ public class CustomFormatsExample extends TemplateTest {
                         "oct", new AliasTemplateNumberFormatFactory("@base 8")))
                 .build());
 
-        assertOutputForNamed("CustomFormatsExample-alias2.ftlh");
+        assertOutputForNamed("CustomFormatsExample-alias2.f3ah");
     }
 
     @Test
@@ -77,7 +77,7 @@ public class CustomFormatsExample extends TemplateTest {
 
         addToDataModel("weight", new UnitAwareTemplateNumberModel(1.5, "kg"));
         
-        assertOutputForNamed("CustomFormatsExample-modelAware.ftlh");
+        assertOutputForNamed("CustomFormatsExample-modelAware.f3ah");
     }
 
 }

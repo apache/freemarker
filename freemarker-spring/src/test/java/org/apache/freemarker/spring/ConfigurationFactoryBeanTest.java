@@ -30,7 +30,6 @@ import org.apache.freemarker.core.Configuration;
 import org.apache.freemarker.core.Configuration.ExtendableBuilder;
 import org.apache.freemarker.core.DefaultTemplateLanguage;
 import org.apache.freemarker.core.MutableParsingAndProcessingConfiguration;
-import org.apache.freemarker.core.TagSyntax;
 import org.apache.freemarker.core.Template;
 import org.apache.freemarker.core.Version;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
@@ -72,8 +71,7 @@ public class ConfigurationFactoryBeanTest {
         settings.setProperty(MutableParsingAndProcessingConfiguration.WHITESPACE_STRIPPING_KEY, "true");
         settings.setProperty(MutableParsingAndProcessingConfiguration.AUTO_ESCAPING_POLICY_KEY, "enableIfSupported");
         settings.setProperty(MutableParsingAndProcessingConfiguration.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY, "true");
-        settings.setProperty(MutableParsingAndProcessingConfiguration.TEMPLATE_LANGUAGE_KEY, "FTL");
-        settings.setProperty(MutableParsingAndProcessingConfiguration.TAG_SYNTAX_KEY, "squareBracket");
+        settings.setProperty(MutableParsingAndProcessingConfiguration.TEMPLATE_LANGUAGE_KEY, "F3SC");
         settings.setProperty(MutableParsingAndProcessingConfiguration.TAB_SIZE_KEY, "4");
 
         settings.setProperty(ExtendableBuilder.OBJECT_WRAPPER_KEY, "restricted");
@@ -148,8 +146,7 @@ public class ConfigurationFactoryBeanTest {
         assertTrue(config.isWhitespaceStrippingSet());
         assertEquals(AutoEscapingPolicy.ENABLE_IF_SUPPORTED, config.getAutoEscapingPolicy());
         assertTrue(config.isRecognizeStandardFileExtensionsSet());
-        assertEquals(DefaultTemplateLanguage.F3CC, config.getTemplateLanguage());
-        assertEquals(TagSyntax.SQUARE_BRACKET, config.getTagSyntax());
+        assertEquals(DefaultTemplateLanguage.F3SC, config.getTemplateLanguage());
         assertEquals(4, config.getTabSize());
 
         assertTrue(config.getObjectWrapper() instanceof RestrictedObjectWrapper);

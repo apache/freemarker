@@ -24,12 +24,24 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.test.TemplateTest;
 import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class InterpolationSyntaxTest extends TemplateTest {
 
+    /** Non-standard template language */
+    private final TemplateLanguage F3ASU = new DefaultTemplateLanguage("dummy",
+            UndefinedOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
+            TagSyntax.ANGLE_BRACKET, InterpolationSyntax.SQUARE_BRACKET); 
+
+    /** Non-standard template language */
+    private final TemplateLanguage F3SDU = new DefaultTemplateLanguage("dummy",
+            UndefinedOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
+            TagSyntax.SQUARE_BRACKET, InterpolationSyntax.DOLLAR); 
+    
+    
     @Test
     public void fm2HashInterpolationNotRecognized() throws IOException, TemplateException {
         // Find related: [interpolation prefixes]
@@ -51,13 +63,17 @@ public class InterpolationSyntaxTest extends TemplateTest {
         assertOutput("${'\"${1} #{1} [=1]\"'?eval}", "1 #{1} [=1]");
         
         assertOutput("<#setting booleanFormat='y,n'>${2>1}", "y"); // Not an error since 2.3.28
-        assertOutput("[#ftl][#setting booleanFormat='y,n']${2>1}", "y"); // Not an error since 2.3.28
+        setConfiguration(new TestConfigurationBuilder()
+                .templateLanguage(F3SDU)
+                .build());
+        assertOutput("[#setting booleanFormat='y,n']${2>1}", "y"); // Not an error since 2.3.28
     }
 
     @Test
     public void squareBracketInterpolationSyntaxTest() throws Exception {
+        
         setConfiguration(new TestConfigurationBuilder()
-                .interpolationSyntax(InterpolationSyntax.SQUARE_BRACKET)
+                .templateLanguage(F3ASU)
                 .build());
         
         assertOutput("${1} #{1} [=1]", "${1} #{1} 1");
@@ -72,14 +88,12 @@ public class InterpolationSyntaxTest extends TemplateTest {
         assertErrorContains("<#if [true][0]]></#if>", "\"]\"", "nothing open");
 
         setConfiguration(new TestConfigurationBuilder()
-                .tagSyntax(TagSyntax.SQUARE_BRACKET)
-                .interpolationSyntax(InterpolationSyntax.SQUARE_BRACKET)
+                .templateLanguage(DefaultTemplateLanguage.F3SU)
                 .build());
         assertOutput("[#if [true][0]]>[/#if]", ">");
         assertOutput("[=1][=2]${3}", "12${3}");
         setConfiguration(new TestConfigurationBuilder()
-                .tagSyntax(TagSyntax.ANGLE_BRACKET)
-                .interpolationSyntax(InterpolationSyntax.SQUARE_BRACKET)
+                .templateLanguage(F3ASU)
                 .build());
         assertOutput("[#ftl][#if [true][0]]>[/#if]", ">");
         assertOutput("[#ftl][=1][=2]${3}", "12${3}");
@@ -109,11 +123,9 @@ public class InterpolationSyntaxTest extends TemplateTest {
 
     @Test
     public void squareBracketTagSyntaxStillWorks() throws Exception {
-        for (InterpolationSyntax intepolationSyntax : new InterpolationSyntax[] {
-                InterpolationSyntax.DOLLAR, InterpolationSyntax.SQUARE_BRACKET }) {
+        for (TemplateLanguage tempLang : new TemplateLanguage[] { F3SDU, DefaultTemplateLanguage.F3SU }) {
             setConfiguration(new TestConfigurationBuilder()
-                    .tagSyntax(TagSyntax.SQUARE_BRACKET)
-                    .interpolationSyntax(intepolationSyntax)
+                    .templateLanguage(tempLang)
                     .build());
             
             assertOutput("[#if [true][0]]t[#else]f[/#if]", "t");
@@ -129,16 +141,15 @@ public class InterpolationSyntaxTest extends TemplateTest {
         String badFtl4 = " <#t/]OK\n";
         
         setConfiguration(new TestConfigurationBuilder()
-                .interpolationSyntax(InterpolationSyntax.DOLLAR)
+                .templateLanguage(DefaultTemplateLanguage.F3AU)
                 .build());
         assertErrorContains(badFtl1, "\"]\"");
         assertErrorContains(badFtl2, "\"]\"");
         assertErrorContains(badFtl3, "\"]\"");
         assertErrorContains(badFtl4, "\"]\"");
         
-        // Glitch is not emulated with this:
         setConfiguration(new TestConfigurationBuilder()
-                .interpolationSyntax(InterpolationSyntax.SQUARE_BRACKET)
+                .templateLanguage(F3ASU)
                 .build());
         assertErrorContains(badFtl1, "\"]\"");
         assertErrorContains(badFtl2, "\"]\"");
@@ -157,7 +168,7 @@ public class InterpolationSyntaxTest extends TemplateTest {
         assertErrorContains("${1", "unclosed \"{\"");
         
         setConfiguration(new TestConfigurationBuilder()
-                .interpolationSyntax(InterpolationSyntax.SQUARE_BRACKET)
+                .templateLanguage(DefaultTemplateLanguage.F3SU)
                 .build());
         assertErrorContains("[=1", "unclosed \"[\"");
     }

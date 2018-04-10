@@ -20,7 +20,7 @@
 package org.apache.freemarker.core;
 
 /**
- * Used as the value of the {@link ParsingConfiguration#getInterpolationSyntax()}  interpolationSyntax} setting.
+ * Used as the value of the {@link DefaultTemplateLanguage#getInterpolationSyntax()}  interpolationSyntax} setting.
  */
 public enum InterpolationSyntax {
     

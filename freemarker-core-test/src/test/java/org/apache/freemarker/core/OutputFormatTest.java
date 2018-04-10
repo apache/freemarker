@@ -90,14 +90,14 @@ public class OutputFormatTest extends TemplateTest {
     public void testStandardFileExtensions() throws Exception {
         String commonContent = "${.outputFormat}";
         addTemplate("t", commonContent);
-        addTemplate("t.ftl", commonContent);
-        addTemplate("t.ftlh", commonContent);
-        addTemplate("t.FTLH", commonContent);
-        addTemplate("t.fTlH", commonContent);
-        addTemplate("t.ftlx", commonContent);
-        addTemplate("t.FTLX", commonContent);
-        addTemplate("t.fTlX", commonContent);
-        addTemplate("tWithHeader.ftlx", "<#ftl outputFormat='HTML'>" + commonContent);
+        addTemplate("t.f3ac", commonContent);
+        addTemplate("t.f3ah", commonContent);
+        addTemplate("t.F3AH", commonContent);
+        addTemplate("t.f3aH", commonContent);
+        addTemplate("t.f3ax", commonContent);
+        addTemplate("t.F3AX", commonContent);
+        addTemplate("t.f3aX", commonContent);
+        addTemplate("tWithHeader.f3ax", "<#ftl outputFormat='HTML'>" + commonContent);
         
         for (int setupNumber = 1; setupNumber <= 3; setupNumber++) {
             TestConfigurationBuilder cfgB = createDefaultConfigurationBuilder();
@@ -124,9 +124,9 @@ public class OutputFormatTest extends TemplateTest {
                 cfgB.setTemplateConfigurations(
                         new ConditionalTemplateConfigurationFactory(
                                 new OrMatcher(
-                                        new FileNameGlobMatcher("*.ftlh"),
-                                        new FileNameGlobMatcher("*.FTLH"),
-                                        new FileNameGlobMatcher("*.fTlH")),
+                                        new FileNameGlobMatcher("*.f3ah"),
+                                        new FileNameGlobMatcher("*.F3AH"),
+                                        new FileNameGlobMatcher("*.f3aH")),
                                 tcbXML.build()));
                 ftlhOutputFormat = HTMLOutputFormat.INSTANCE; // can't be overidden
                 ftlxOutputFormat = XMLOutputFormat.INSTANCE;
@@ -145,25 +145,25 @@ public class OutputFormatTest extends TemplateTest {
             }
             
             {
-                Template t = getConfiguration().getTemplate("t.ftl");
+                Template t = getConfiguration().getTemplate("t.f3ac");
                 assertEquals(cfgOutputFormat, t.getOutputFormat());
                 assertOutput(t, t.getOutputFormat().getName());
             }
             
-            for (String name : new String[] { "t.ftlh", "t.FTLH", "t.fTlH" }) {
+            for (String name : new String[] { "t.f3ah", "t.F3AH", "t.f3aH" }) {
                 Template t = getConfiguration().getTemplate(name);
                 assertEquals(ftlhOutputFormat, t.getOutputFormat());
                 assertOutput(t, t.getOutputFormat().getName());
             }
             
-            for (String name : new String[] { "t.ftlx", "t.FTLX", "t.fTlX" }) {
+            for (String name : new String[] { "t.f3ax", "t.F3AX", "t.f3aX" }) {
                 Template t = getConfiguration().getTemplate(name);
                 assertEquals(ftlxOutputFormat, t.getOutputFormat());
                 assertOutput(t, t.getOutputFormat().getName());
             }
 
             {
-                Template t = getConfiguration().getTemplate("tWithHeader.ftlx");
+                Template t = getConfiguration().getTemplate("tWithHeader.f3ax");
                 assertEquals(HTMLOutputFormat.INSTANCE, t.getOutputFormat());
                 assertOutput(t, t.getOutputFormat().getName());
             }
@@ -174,7 +174,7 @@ public class OutputFormatTest extends TemplateTest {
     
     @Test
     public void testStandardFileExtensionsSettingOverriding() throws Exception {
-        addTemplate("t.ftlx",
+        addTemplate("t.f3ax",
                 "${\"'\"} ${\"'\"?esc} ${\"'\"?noEsc}");
         addTemplate("t.ftl",
                 "${'{}'} ${'{}'?esc} ${'{}'?noEsc}");
@@ -193,37 +193,37 @@ public class OutputFormatTest extends TemplateTest {
 
         {
             setConfiguration(createDefaultConfigurationBuilder().outputFormat(HTMLOutputFormat.INSTANCE).build());
-            assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
+            assertOutputForNamed("t.f3ax", "&apos; &apos; '");  // Can't override it
             setConfiguration(createDefaultConfigurationBuilder().templateConfigurations(tcfHTML).build());
-            assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
+            assertOutputForNamed("t.f3ax", "&apos; &apos; '");  // Can't override it
             setConfiguration(createDefaultConfigurationBuilder().templateConfigurations(tcfNoAutoEsc).build());
-            assertOutputForNamed("t.ftlx", "&apos; &apos; '");  // Can't override it
+            assertOutputForNamed("t.f3ax", "&apos; &apos; '");  // Can't override it
         }
 
         {
             setConfiguration(createDefaultConfigurationBuilder().recognizeStandardFileExtensions(false).build());
-            assertErrorContainsForNamed("t.ftlx", UndefinedOutputFormat.INSTANCE.getName());
+            assertErrorContainsForNamed("t.f3ax", UndefinedOutputFormat.INSTANCE.getName());
 
             setConfiguration(createDefaultConfigurationBuilder()
                     .recognizeStandardFileExtensions(false)
                     .outputFormat(HTMLOutputFormat.INSTANCE).build());
-            assertOutputForNamed("t.ftlx", "&#39; &#39; '");
+            assertOutputForNamed("t.f3ax", "&#39; &#39; '");
 
             setConfiguration(createDefaultConfigurationBuilder()
                     .recognizeStandardFileExtensions(false)
                     .outputFormat(XMLOutputFormat.INSTANCE).build());
-            assertOutputForNamed("t.ftlx", "&apos; &apos; '");
+            assertOutputForNamed("t.f3ax", "&apos; &apos; '");
 
             setConfiguration(createDefaultConfigurationBuilder()
                     .recognizeStandardFileExtensions(false)
                     .templateConfigurations(tcfHTML).build());
-            assertOutputForNamed("t.ftlx", "&#39; &#39; '");
+            assertOutputForNamed("t.f3ax", "&#39; &#39; '");
 
             setConfiguration(createDefaultConfigurationBuilder()
                     .recognizeStandardFileExtensions(false)
                     .templateConfigurations(tcfNoAutoEsc)
                     .outputFormat(XMLOutputFormat.INSTANCE).build());
-            assertOutputForNamed("t.ftlx", "' &apos; '");
+            assertOutputForNamed("t.f3ax", "' &apos; '");
         }
     }
 
@@ -239,14 +239,14 @@ public class OutputFormatTest extends TemplateTest {
             assertEquals("'", out.toString());
         }
         {
-            Template t = new Template("foo.ftlx", commonFTL, cfg);
+            Template t = new Template("foo.f3ax", commonFTL, cfg);
             assertSame(XMLOutputFormat.INSTANCE, t.getOutputFormat());
             StringWriter out = new StringWriter();
             t.process(null, out);
             assertEquals("&apos;", out.toString());
         }
         {
-            Template t = new Template("foo.ftlh", commonFTL, cfg);
+            Template t = new Template("foo.f3ah", commonFTL, cfg);
             assertSame(HTMLOutputFormat.INSTANCE, t.getOutputFormat());
             StringWriter out = new StringWriter();
             t.process(null, out);
@@ -256,19 +256,19 @@ public class OutputFormatTest extends TemplateTest {
     
     @Test
     public void testStandardFileExtensionsFormatterImplOverriding() throws Exception {
-        addTemplate("t.ftlh", "${'a&x'}");
+        addTemplate("t.f3ah", "${'a&x'}");
 
-        assertOutputForNamed("t.ftlh", "a&amp;x");
+        assertOutputForNamed("t.f3ah", "a&amp;x");
 
         setConfiguration(new TestConfigurationBuilder()
                 .registeredCustomOutputFormats(Collections.<OutputFormat>singleton(CustomHTMLOutputFormat.INSTANCE))
                 .build());
-        assertOutputForNamed("t.ftlh", "a&amp;X");
+        assertOutputForNamed("t.f3ah", "a&amp;X");
 
         setConfiguration(new TestConfigurationBuilder()
                 .registeredCustomOutputFormats(Collections.<OutputFormat>emptyList())
                 .build());
-        assertOutputForNamed("t.ftlh", "a&amp;x");
+        assertOutputForNamed("t.f3ah", "a&amp;x");
     }
     
     @Test
@@ -527,18 +527,18 @@ public class OutputFormatTest extends TemplateTest {
     public void testSpecialVariables() throws Exception {
         String commonFTL = "${.outputFormat} ${.autoEsc?c}";
         
-        addTemplate("t.ftlx", commonFTL);
-        assertOutputForNamed("t.ftlx", "XML true");
+        addTemplate("t.f3ax", commonFTL);
+        assertOutputForNamed("t.f3ax", "XML true");
         
-        addTemplate("t.ftlh", commonFTL);
-        assertOutputForNamed("t.ftlh", "HTML true");
+        addTemplate("t.f3ah", commonFTL);
+        assertOutputForNamed("t.f3ah", "HTML true");
 
         addTemplate("t.ftl", commonFTL);
         assertOutputForNamed("t.ftl", "undefined false");
         
         addTemplate("tX.ftl", "<#ftl outputFormat='XML'>" + commonFTL);
-        addTemplate("tX.ftlx", commonFTL);
-        assertOutputForNamed("t.ftlx", "XML true");
+        addTemplate("tX.f3ax", commonFTL);
+        assertOutputForNamed("t.f3ax", "XML true");
         
         addTemplate("tN.ftl", "<#ftl outputFormat='RTF' autoEsc=false>" + commonFTL);
         assertOutputForNamed("tN.ftl", "RTF false");
@@ -549,11 +549,11 @@ public class OutputFormatTest extends TemplateTest {
     @Test
     public void testEscAndNoEscBIBasics() throws IOException, TemplateException {
         String commonFTL = "${'<x>'} ${'<x>'?esc} ${'<x>'?noEsc}";
-        addTemplate("t.ftlh", commonFTL);
-        addTemplate("t-noAuto.ftlh", "<#ftl autoEsc=false>" + commonFTL);
+        addTemplate("t.f3ah", commonFTL);
+        addTemplate("t-noAuto.f3ah", "<#ftl autoEsc=false>" + commonFTL);
         addTemplate("t.ftl", commonFTL);
-        assertOutputForNamed("t.ftlh", "&lt;x&gt; &lt;x&gt; <x>");
-        assertOutputForNamed("t-noAuto.ftlh", "<x> &lt;x&gt; <x>");
+        assertOutputForNamed("t.f3ah", "&lt;x&gt; &lt;x&gt; <x>");
+        assertOutputForNamed("t-noAuto.f3ah", "<x> &lt;x&gt; <x>");
         assertErrorContainsForNamed("t.ftl", "output format", "undefined");
     }
 
@@ -821,14 +821,14 @@ public class OutputFormatTest extends TemplateTest {
         String commonFTL
                 = "Eval: ${'.outputFormat'?eval}; "
                   + "Interpret: <#assign ipd = r\"${.outputFormat} ${'{&}'}\"?interpret><@ipd/>";
-        addTemplate("t.ftlh", commonFTL);
-        addTemplate("t2.ftlh", "<#outputFormat 'RTF'>" + commonFTL + "</#outputFormat>");
+        addTemplate("t.f3ah", commonFTL);
+        addTemplate("t2.f3ah", "<#outputFormat 'RTF'>" + commonFTL + "</#outputFormat>");
         
         assertOutputForNamed(
-                "t.ftlh",
+                "t.f3ah",
                 "Eval: HTML; Interpret: HTML {&amp;}");
         assertOutputForNamed(
-                "t2.ftlh",
+                "t2.f3ah",
                 "Eval: RTF; Interpret: RTF \\{&\\}");
         assertOutput(
                 commonFTL,
@@ -937,9 +937,9 @@ public class OutputFormatTest extends TemplateTest {
         assertOutput(
                 "<#ftl outputFormat='XML'>" + commonFtl,
                 commonOutput);
-        addTemplate("t.ftlx", commonFtl);
+        addTemplate("t.f3ax", commonFtl);
         assertOutputForNamed(
-                "t.ftlx",
+                "t.f3ax",
                 commonOutput);
         
         assertErrorContains(

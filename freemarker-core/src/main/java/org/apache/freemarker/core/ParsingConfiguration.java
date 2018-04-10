@@ -22,8 +22,11 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 
 import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
+import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
+import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.PlainTextOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
 
@@ -38,51 +41,22 @@ import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
 public interface ParsingConfiguration {
 
     /**
-     * The template language used; this is often overridden for certain file extension with the
+     * The template language used; this is often overridden for certain file extensions with
+     * {@link #getRecognizeStandardFileExtensions()} and/or
      * {@link Configuration#getTemplateConfigurations() templateConfigurations} setting of the {@link Configuration}.
+     * 
+     * <p>If a {@link TemplateLanguage} specifies a non-{@code null}
+     * {@link TemplateLanguage#getOutputFormat(Configuration) outputFormat}, or a non-{@code null}
+     * {@link TemplateLanguage#getAutoEscapingPolicy() autoEscapingPolicy}, that overrides the value of
+     * the {@linkplain #getOutputFormat() outputFormat} and {@link #getAutoEscapingPolicy() autoEscapingPolicy}
+     * settings that are coming from {@link Configuration#getTemplateConfigurations templateConfigurations}, from the
+     * {@link Configuration}, or from any other {@link ParsingConfiguration}.
+     * 
+     * @see ParsingConfiguration#getRecognizeStandardFileExtensions()
      */
     TemplateLanguage getTemplateLanguage();
 
     boolean isTemplateLanguageSet();
-
-    /**
-     * Determines the syntax of the template files (angle bracket VS square bracket)
-     * that has no {@code #ftl} in it.  Don't confuse this with the interpolation syntax
-     * ({@link #getInterpolationSyntax()}); they are independent.
-     * 
-     * <p>The {@code tagSyntax} parameter must be one of:
-     * <ul>
-     *   <li>{@link TagSyntax#ANGLE_BRACKET}:
-     *     Use the angle bracket tag syntax (the normal syntax), like {@code <#include ...>}. This is the default.
-     *   <li>{@link TagSyntax#SQUARE_BRACKET}:
-     *     Use the square bracket tag syntax, like {@code [#include ...]}. Note that this does <em>not</em> change
-     *     <code>${x}</code> to {@code [=...]}; that's <em>interpolation</em> syntax, so there the relevant one is
-     *     {@link #getInterpolationSyntax()}.
-     * </ul>
-     *
-     * <p>This setting is ignored for the templates that have {@code ftl} directive in
-     * it. For those templates the syntax used for the {@code ftl} directive determines
-     * the syntax.
-     */
-    TagSyntax getTagSyntax();
-
-    /**
-     * Tells if this setting is set directly in this object. If not, then depending on the implementing class, reading
-     * the setting might returns a default value, or returns the value of the setting from a parent parsing
-     * configuration or throws a {@link CoreSettingValueNotSetException}.
-     */
-    boolean isTagSyntaxSet();
-    
-    
-    /**
-     * Determines the interpolation syntax (<code>${x}</code> VS <code>[=x]</code>) of the template files.
-     * Don't confuse this with the tag syntax ({@link #getTagSyntax()}); they are independent.
-     * Note that {@link InterpolationSyntax#SQUARE_BRACKET} does <em>not</em> change {@code <#if x>} to
-     * {@code [#if x]}; that's <em>tag</em> syntax, so there the relevant one is {@link #getTagSyntax()}.
-     */
-    InterpolationSyntax getInterpolationSyntax();
-
-    boolean isInterpolationSyntaxSet();
     
     /**
      * Whether the template parser will try to remove superfluous white-space around certain tags.
@@ -110,7 +84,51 @@ public interface ParsingConfiguration {
     boolean isArithmeticEngineSet();
 
     /**
-     * See {@link Configuration#getAutoEscapingPolicy()}.
+     * Specifies when auto-escaping should be enabled depending on the current {@linkplain OutputFormat output format};
+     * default is {@link AutoEscapingPolicy#ENABLE_IF_DEFAULT}. It's important to know that the
+     * {@link #getTemplateLanguage() templateLanguage} setting will override this, if the {@link TemplateLanguage}
+     * specifies a non-{@code null} {@link TemplateLanguage#getAutoEscapingPolicy() autoEscapingPolicy}.
+     * 
+     * <p>Note that the default output format, {@link UndefinedOutputFormat}, is a non-escaping format, so there
+     * auto-escaping will be off. For most templates that's no used though, as the standard file extensions will set
+     * a {@link TemplateLanguage} that uses a different {@link OutputFormat}.
+     * 
+     * <p>Note that the templates can turn auto-escaping on/off locally with directives like
+     * {@code <#ftl auto_esc=...>}, {@code <#autoEsc>...</#autoEsc>}, and {@code <#noAutoEsc>...</#noAutoEsc>}, which
+     * are ignoring the auto-escaping policy.
+     *
+     * <p><b>About auto-escaping</b></p>
+     *
+     * <p>
+     * Auto-escaping has significance when a value is printed with <code>${...}</code>. If
+     * auto-escaping is on, FreeMarker will assume that the value is plain text (as opposed to markup or some kind of
+     * rich text), so it will escape it according the current output format (see {@link #getOutputFormat()}
+     * and {@link TemplateConfiguration.Builder#setOutputFormat(OutputFormat)}). If auto-escaping is off, FreeMarker
+     * will assume that the string value is already in the output format, so it prints it as is to the output.
+     *
+     * <p>Further notes on auto-escaping:
+     * <ul>
+     *   <li>When printing numbers, dates, and other kind of non-string values with <code>${...}</code>, they will be
+     *       first converted to string (according the formatting settings and locale), then they are escaped just like
+     *       string values.
+     *   <li>When printing {@link TemplateMarkupOutputModel}-s, they aren't escaped again (they are already escaped).
+     *   <li>Auto-escaping doesn't do anything if the current output format isn't an {@link MarkupOutputFormat}.
+     *       That's the case for the default output format, {@link UndefinedOutputFormat}, and also for
+     *       {@link PlainTextOutputFormat}.
+     *   <li>The output format inside a string literal expression is always {@link PlainTextOutputFormat}
+     *       (regardless of the output format of the containing template), which is a non-escaping format. Thus for
+     *       example, with <code>&lt;#assign s = "foo${bar}"&gt;</code>, {@code bar} will always get into {@code s}
+     *       without escaping, but with <code>&lt;#assign s&gt;foo${bar}&lt;#assign&gt;</code> it may will be escaped.
+     * </ul>
+     *
+     * <p>Note that what you set here is just a default, which can be overridden for individual templates with the
+     * {@linkplain Configuration#getTemplateConfigurations() template configurations setting}. This setting is also
+     * overridden by the standard file extensions; see them at {@link #getRecognizeStandardFileExtensions()}.
+     *
+     * @see Configuration.Builder#setAutoEscapingPolicy(AutoEscapingPolicy)
+     * @see TemplateConfiguration.Builder#setAutoEscapingPolicy(AutoEscapingPolicy)
+     * @see Configuration.Builder#setOutputFormat(OutputFormat)
+     * @see TemplateConfiguration.Builder#setOutputFormat(OutputFormat)
      */
     AutoEscapingPolicy getAutoEscapingPolicy();
 
@@ -123,12 +141,16 @@ public interface ParsingConfiguration {
 
     /**
      * The output format to use, which among others influences auto-escaping (see {@link #getAutoEscapingPolicy}
-     * autoEscapingPolicy}), and possibly the MIME type of the output.
+     * autoEscapingPolicy}), and possibly the MIME type of the output. It's important to know that the
+     * {@link #getTemplateLanguage() templateLanguage} setting will override this, if the
+     * {@link TemplateLanguage} specifies a non-{@code null}
+     * {@link TemplateLanguage#getOutputFormat(Configuration) outputFormat} (and most languages do).
      * <p>
      * On the {@link Configuration} level, usually, you should leave this on its default, which is
-     * {@link UndefinedOutputFormat#INSTANCE}, and then use standard file extensions like "ftlh" (for HTML) or "ftlx"
-     * (for XML) (and ensure that {@link #getRecognizeStandardFileExtensions() recognizeStandardFileExtensions} is
-     * {@code true}; see more there). Where you can't use the standard extensions, templates still can be associated
+     * {@link UndefinedOutputFormat#INSTANCE}, and then use standard file extensions like "f3ah" (for HTML) or "f3ax"
+     * (for XML) will set the {@link TemplateLanguage} and hence the output format as well (assuming that
+     * {@link #getRecognizeStandardFileExtensions() recognizeStandardFileExtensions} is on its default, {@code true}).
+     * Where you can't use the standard extensions, templates still can be associated
      * to output formats with patterns matching their name (their path) using the
      * {@link Configuration#getTemplateConfigurations() templateConfigurations} setting of the {@link Configuration}.
      * But if all templates will have the same output format, you may set the
@@ -152,28 +174,46 @@ public interface ParsingConfiguration {
     boolean isOutputFormatSet();
 
     /**
-     * Tells if the "file" extension part of the source name ({@link Template#getSourceName()}) will influence certain
-     * parsing settings. Defaults to {@code true}. When {@code true}, the following standard file extensions take
-     * their effect:
-     *
+     * Tells if the "file" extension part of the source name ({@link Template#getSourceName()}) will set the
+     * {@linkplain #getTemplateLanguage() template language setting}, when the file extension matches
+     * the {@link TemplateLanguage#getFileExtension()} of the {@link TemplateLanguage}-s known by the
+     * {@link Configuration}. Defaults to {@code true} This overrides the {@link TemplateLanguage} coming from
+     * {@link Configuration#getTemplateConfigurations templateConfigurations}, from the {@link Configuration}, or from
+     * any other {@link ParsingConfiguration}.
+     * 
+     * <p>As of this writing (2018-04-11; TODO [FM3] ensure this is up to date), the standard extensons are
+     * {@code f3ah}, {@code f3ax}, {@code f3au}, {@code f3ac},
+     * {@code f3sh}, {@code f3sx}, {@code f3su}, {@code f3sc},
+     * {@code f3uu}.
+     * 
+     * <p>The part after "f3" but before the last letter of the file extension specifies the syntax of the template:
      * <ul>
-     *   <li>{@code ftlh}: Sets the {@link #getOutputFormat() outputFormat} setting to {@code "HTML"}
-     *       (i.e., {@link HTMLOutputFormat#INSTANCE}, unless the {@code "HTML"} name is overridden by
-     *       the {@link Configuration#getRegisteredCustomOutputFormats registeredOutputFormats} setting) and
-     *       the {@link #getAutoEscapingPolicy() autoEscapingPolicy} setting to
-     *       {@link AutoEscapingPolicy#ENABLE_IF_DEFAULT}.
-     *   <li>{@code ftlx}: Sets the {@link #getOutputFormat() outputFormat} setting to
-     *       {@code "XML"} (i.e., {@link XMLOutputFormat#INSTANCE}, unless the {@code "XML"} name is overridden by
-     *       the {@link Configuration#getRegisteredCustomOutputFormats registeredOutputFormats} setting) and
-     *       the {@link #getAutoEscapingPolicy() autoEscapingPolicy} setting to
-     *       {@link AutoEscapingPolicy#ENABLE_IF_DEFAULT}.
+     *   <li>"a": {@link DefaultTemplateLanguage} where {@link DefaultTemplateLanguage#getTagSyntax()}
+     *       is {@link TagSyntax#ANGLE_BRACKET} and {@link DefaultTemplateLanguage#getInterpolationSyntax()} is
+     *       {@link InterpolationSyntax#DOLLAR}. 
+     *   <li>"s": {@link DefaultTemplateLanguage} where {@link DefaultTemplateLanguage#getTagSyntax()}
+     *       is {@link TagSyntax#SQUARE_BRACKET} and {@link DefaultTemplateLanguage#getInterpolationSyntax()} is also
+     *       {@link InterpolationSyntax#SQUARE_BRACKET}. 
      * </ul>
      *
-     * <p>These file extensions are not case sensitive. The file extension is the part after the last dot in the source
-     * name. If the source name contains no dot, then it has no file extension.
-     *
-     * <p>The settings activated by these file extensions override the setting values dictated by the
-     * {@link Configuration#getTemplateConfigurations templateConfigurations} setting of the {@link Configuration}.
+     * <p>The last letter of the file extension specifies the {@link OutputFormat} and the {@link AutoEscapingPolicy}
+     * used by the template:
+     * <ul>
+     *   <li>"h": {@code "HTML"} (i.e., {@link HTMLOutputFormat#INSTANCE}, unless the {@code "HTML"} name is overridden
+     *       by the {@link Configuration#getRegisteredCustomOutputFormats registeredOutputFormats} setting) and
+     *       the {@link #getAutoEscapingPolicy() autoEscapingPolicy} will be
+     *       {@link AutoEscapingPolicy#ENABLE_IF_DEFAULT}.
+     *   <li>"x": {@code "XML"} (i.e., {@link XMLOutputFormat#INSTANCE}, unless the {@code "XML"} name is overridden by
+     *       the {@link Configuration#getRegisteredCustomOutputFormats registeredOutputFormats} setting) and
+     *       the {@link #getAutoEscapingPolicy() autoEscapingPolicy} will be
+     *       {@link AutoEscapingPolicy#ENABLE_IF_DEFAULT}.
+      *   <li>"u": {@code "undefined"} (i.e., {@link UndefinedOutputFormat#INSTANCE}, unless the {@code "undefined"}
+      *      name is overridden by the {@link Configuration#getRegisteredCustomOutputFormats registeredOutputFormats}
+      *      setting) and the {@link #getAutoEscapingPolicy() autoEscapingPolicy} will be
+     *       {@link AutoEscapingPolicy#ENABLE_IF_DEFAULT}.
+      *   <li>"c": The output format comes from the "configuration", i.e., from {@link #getOutputFormat()}, also the
+     *       auto escaping policy comes from {@link #getAutoEscapingPolicy()}.
+    * </ul>
      */
     // TODO [FM3] If we will support user-defined languages, then this won't be "Standard" after all.
     boolean getRecognizeStandardFileExtensions();

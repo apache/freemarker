@@ -16,9 +16,9 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<#import '/AbsoluteTemplateNameBIExample-lib.ftl' as lib>
+<#import '/AbsoluteTemplateNameBIExample-lib.f3ah' as lib>
 
-<@lib.smileyInclude 'AbsoluteTemplateNameBIExample-foo.ftl' />
-<@lib.smileyInclude '../AbsoluteTemplateNameBIExample-foo.ftl' />
-<@lib.smileyInclude '/AbsoluteTemplateNameBIExample-foo.ftl' />
-<@lib.smileyInclude 'AbsoluteTemplateNameBIExample-missing.ftl' />
+<@lib.smileyInclude 'AbsoluteTemplateNameBIExample-foo.f3ah' />
+<@lib.smileyInclude '../AbsoluteTemplateNameBIExample-foo.f3ah' />
+<@lib.smileyInclude '/AbsoluteTemplateNameBIExample-foo.f3ah' />
+<@lib.smileyInclude 'AbsoluteTemplateNameBIExample-missing.f3ah' />

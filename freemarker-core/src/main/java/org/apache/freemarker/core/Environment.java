@@ -2551,7 +2551,7 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      *            paths.)
      */
     public Template getTemplateForImporting(String name) throws IOException {
-        return getTemplateForInclusion(name, true);
+        return getTemplateForInclusion(name, false);
     }
 
     /**

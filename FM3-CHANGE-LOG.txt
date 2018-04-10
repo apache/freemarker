@@ -240,7 +240,21 @@ Major changes / features
   Added org.slf4j:slf4j-api as required dependency instead.
 - Added Spring support to the FreeMarker project (freemarker-spring module), instead of relying Spring developers
   [Note: This is in very early stage, as of 2017-07-06.]
-
+- Added `Configuration.templateLangauge` and the `TemplateLanguage` class, which encapsulate the syntax and some of the
+  semantics, most importantly the `outputFormat`.
+- Each `TemplateLanguage` has an associated file extension, which should be sufficient for editors (IDE-s) to chose the
+  proper syntax highlighting. Syntax auto-detection was removed, as editors couldn't cope with it. Thus, the new file
+  extensions are somewhat complex, but serve tooling well. They are put together from 3 parts:
+  1. "f3" for FreeMarker 3. (Extensions starting with "f" are reserved for the FreeMarker project.)
+  2. Syntax: "a" for `ANGLE_BRACKET` `tagSyntax` and `DOLLAR` `interpolatonSyntax`, or "s" for `SQUARE_BRACKET`
+    `tagSyntax` and `SQUARE_BRACKET` `interpolationSyntax`. (Other permutations are possible, but has no standard
+     file extension reserved for them.)
+  3. Output format: Currently "h" for HTML, "x" for XML, "u" for undefined, "c" for configured (i.e., coming from
+     the `Configuration` or other kind of `ParsingConfiguration`). This is important for syntax highlighting of the
+     static parts, hence it's encoded into the file extension too. It's also important for security reasons, 
+  So a common file extensions will be "f3ah".
+  The FM2 file extensions, "ftl", "ftlh", and "ftlx" are banned to prevent confusion [TODO: not yet...].
+  
 
 Smaller Java API changes (categorized)
 --------------------------------------
@@ -343,9 +357,13 @@ Core / Configuration
     `TemplateConfiguration(sourceEncoding = "UTF-8")`, but `TemplateConfiguration(sourceEncoding = Charset("UTF-8"))`.
 - Configuration-related int constants were replaced with enums:
   - FM2 Configuration.${c}_TAG_SYNTAX with TagSyntax.${c}
+  - FM2 Configuration.${c}_INTERPOLATION_SYNTAX with InterpolationSyntax.${c}
   - FM2 Configuration.${c}_AUTO_ESCAPING_POLICY with AutoEscapingPolicy.${c}
 - Removed hasCustomFormats() from configuration related API-s (we don't need it anymore)
+- The tagSyntax and interpolationSyntax settings were moved inside the templateLanguage setting, as they are only
+  applicable if the templateLanguage is a DefaultTemplateLanguage instance.
 
+  
 Core / Models and Object wrapping
 .................................
 

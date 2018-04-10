@@ -20,7 +20,7 @@
 package org.apache.freemarker.core;
 
 /**
- * Used as the value of the {@link ParsingConfiguration#getTagSyntax()}  tagSyntax} setting.
+ * Used as the value of the {@link DefaultTemplateLanguage#getTagSyntax()}  tagSyntax} setting.
  */
 public enum TagSyntax {
     

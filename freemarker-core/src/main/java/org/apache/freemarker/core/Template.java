@@ -65,7 +65,6 @@ import org.apache.freemarker.core.valueformat.TemplateNumberFormatFactory;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
- * <p>
  * Stores an already parsed template, ready to be processed (rendered) for unlimited times, possibly from multiple
  * threads.
  * <p>
@@ -432,7 +431,6 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
                     }
                     rootElement = null;
                 }
-                interpolationSyntax = pCfg.getInterpolationSyntax();
             } catch (TokenMgrError exc) {
                 // TokenMgrError VS ParseException is not an interesting difference for the user, so we just convert it
                 // to ParseException
@@ -787,28 +785,6 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         this.customLookupCondition = customLookupCondition;
     }
 
-    /**
-     * Returns the tag syntax the parser has chosen for this template. If the syntax could be determined, it's
-     * {@link TagSyntax#SQUARE_BRACKET} or {@link TagSyntax#ANGLE_BRACKET}. If the syntax
-     * couldn't be determined (like because there was no tags in the template, or it was a plain text template), this
-     * returns whatever the default is in the current configuration.
-     * 
-     * @see ParsingConfiguration#getTagSyntax()
-     */
-    public TagSyntax getActualTagSyntax() {
-        return actualTagSyntax;
-    }
-    
-    /**
-     * Returns the interpolation syntax the parser has used for this template. Because the interpolation syntax is
-     * never auto-detected, it's not called "getActualInterpolationSyntax" (unlike {@link #getActualTagSyntax()}).
-     * 
-     * @see ParsingConfiguration#getInterpolationSyntax()
-     */
-    public InterpolationSyntax getInterpolationSyntax() {
-        return interpolationSyntax;
-    }
-    
     /**
      * Returns the output format (see {@link Configuration#getOutputFormat()}) used for this template.
      * The output format of a template can come from various places, in order of increasing priority:

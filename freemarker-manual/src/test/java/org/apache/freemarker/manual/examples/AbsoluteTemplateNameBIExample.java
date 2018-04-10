@@ -36,7 +36,7 @@ public class AbsoluteTemplateNameBIExample extends TemplateTest {
 
     @Test
     public void test() throws Exception {
-        assertOutputForNamed("dir/AbsoluteTemplateNameBIExample-main.ftl");
+        assertOutputForNamed("dir/AbsoluteTemplateNameBIExample-main.f3ah");
     }
     
 }

@@ -29,8 +29,18 @@ import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.util._StringUtils;
 
 /**
- * Represents a template language. Currently this class is not mature, so it can't be implemented outside FreeMarker,
- * also its methods shouldn't be called from outside FreeMarker.
+ * Represents a template language; a template language specifies the syntax, and usually also the {@link OutputFormat}
+ * and {@link AutoEscapingPolicy} of the template. In the future (TODO [FM3]) custom template languages may also
+ * specify the dialect (which is the set of core directives and functions).  
+ * 
+ * <p><em>Currently this class is not mature, so it can't be implemented outside FreeMarker,
+ * also its methods shouldn't be called from outside FreeMarker.</em>
+ * 
+ * The default list of available templates contains all the final constants from {@link DefaultTemplateLanguage}, and
+ * {@link UnparsedTemplateLanguage}.
+ * 
+ * @see ParsingConfiguration#getTemplateLanguage()
+ * @see ParsingConfiguration#getRecognizeStandardFileExtensions()
  */
 // [TODO][FM3] Make this mature, or hide its API somehow, or at least prevent subclassing it by user.
 public abstract class TemplateLanguage {
@@ -65,7 +75,7 @@ public abstract class TemplateLanguage {
     }
     
     /**
-     * Non-public constructor used for languages defiend by the FreeMarker project.
+     * Non-public constructor used for languages defined by the FreeMarker project.
      */
     TemplateLanguage(String fileExtension, boolean allowExtensionStartingWithF,
             OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy) {
@@ -100,7 +110,7 @@ public abstract class TemplateLanguage {
             throws IOException, ParseException;
 
     /**
-     * The file extension that should be used for this language. Not {@code null}. It can't contain upper-case letters,
+     * The file extension that should be used for this language; not {@code null}. It can't contain upper-case letters,
      * nor dot. It can't start with "f", unless it's defined by the FreeMarker project itself. 
      */
     public String getFileExtension() {

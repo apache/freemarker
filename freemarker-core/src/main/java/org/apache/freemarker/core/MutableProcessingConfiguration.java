@@ -1515,22 +1515,6 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *       Supported units are: "s" (seconds), "ms" (milliseconds), "m" (minutes), "h" (hours). The whitespace between
      *       the unit and the number is optional. Units are only supported since 2.3.23.
      *       
-     *   <li><p>{@code "tagSyntax"}:
-     *       See {@link ParsingConfiguration#getTagSyntax()}.
-     *       <br>String value: Must be one of
-     *       {@code "autoDetect"}, {@code "squareBracket"}, and {@code "squareBracket"} (like {@code [#if x]}).
-     *       <br>Note that setting the {@code "tagSyntax"} to {@code "squareBracket"} does <em>not</em> change
-     *       <code>${x}</code> to {@code [=...]}; that's <em>interpolation</em> syntax, so use the
-     *       {@code "interpolationSyntax"} setting for that, not this setting..       
-     *
-     *   <li><p>{@code "interpolationSyntax"}:
-     *       See {@link ParsingConfiguration#getInterpolationSyntax()}.
-     *       <br>String value: Must be one of
-     *       {@code "legacy"}, {@code "dollar"}, and {@code "square_bracket"} (like {@code [=x]}). 
-     *       <br>Note that setting the {@code "interpolationSyntax"} to {@code "squareBracket"} does <em>not</em> change
-     *       {@code <#if x>} to {@code [#if x]}; that's <em>tag</em> syntax, so use the
-     *       {@code "tagSyntax"} setting for that, not this setting.       
-     *       
      *   <li><p>{@code "incompatibleImprovements"}:
      *       See {@link Configuration#getIncompatibleImprovements()}.
      *       <br>String value: version number like {@code 2.3.20}.
@@ -1885,7 +1869,9 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      * it was removed, otherwise returns {@code null}.
      */
     protected Version getRemovalVersionForUnknownSetting(String name) {
-        if (name.equals("classic_compatible") || name.equals("classicCompatible")) {
+        if (name.equals("classic_compatible") || name.equals("classicCompatible")
+                || name.equals("tag_syntax") || name.equals("tagSyntax")
+                || name.equals("interpolation_syntax") || name.equals("interpolationSyntax")) {
             return Configuration.VERSION_3_0_0;
         }
         return null;

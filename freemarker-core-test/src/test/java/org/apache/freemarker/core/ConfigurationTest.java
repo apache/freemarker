@@ -434,24 +434,6 @@ public class ConfigurationTest {
     }
 
     @Test
-    public void testInterpolationSyntaxSetting() throws TemplateException {
-        Builder cfgB = new Builder(VERSION_3_0_0);
-
-        // Default is "dollar":
-        assertEquals(InterpolationSyntax.DOLLAR, cfgB.getInterpolationSyntax());
-        
-        cfgB.setSetting("interpolationSyntax", "squareBracket");
-        assertEquals(InterpolationSyntax.SQUARE_BRACKET, cfgB.getInterpolationSyntax());
-        
-        try {
-            cfgB.setSetting("interpolationSyntax", "noSuchSyntax");
-            fail();
-        } catch (ConfigurationException e) {
-            assertThat(e.getMessage(), containsString("noSuchSyntax"));
-        }
-    }
-    
-    @Test
     public void testObjectWrapperSetSetting() throws Exception {
         Builder cfgB = new Builder(VERSION_3_0_0);
         {

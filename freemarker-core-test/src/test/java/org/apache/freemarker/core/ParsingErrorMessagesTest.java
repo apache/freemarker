@@ -20,6 +20,7 @@
 package org.apache.freemarker.core;
 
 import java.io.IOException;
+import java.util.LinkedList;
 
 import org.apache.freemarker.test.TemplateTest;
 import org.apache.freemarker.test.TestConfigurationBuilder;
@@ -34,9 +35,9 @@ public class ParsingErrorMessagesTest extends TemplateTest {
         assertErrorContainsAS("<@foo ${x == 3} />", "instead of ${");
         
         setConfiguration(new TestConfigurationBuilder()
-                .interpolationSyntax(InterpolationSyntax.SQUARE_BRACKET)
+                .templateLanguage(DefaultTemplateLanguage.F3SU)
                 .build());
-        assertErrorContains("<@foo [= x == 3] />", "instead of [=");
+        assertErrorContains("[@foo [= x == 3] /]", "instead of [=");
     }
 
     @Test
@@ -124,9 +125,8 @@ public class ParsingErrorMessagesTest extends TemplateTest {
     public void testInterpolatingClosingsErrors() throws Exception {
         assertErrorContainsAS("<#ftl>${x", "unclosed");        
         assertErrorContainsAS("<#assign x = x}>", "\"}\"", "open");
-        assertErrorContainsAS("<#ftl>${'x']", "\"]\"", "open");
-        assertErrorContains("<#ftl>${'x'>", "end of file");
-        assertErrorContains("[#ftl]${'x'>", "end of file");
+        assertErrorContains("${'x']", "\"]\"", "open");
+        assertErrorContains("${'x'>", "end of file");
         
         assertOutput("<#assign x = '${x'>", ""); // TODO [FM3] Legacy glitch... should fail in theory.
     }
@@ -186,25 +186,74 @@ public class ParsingErrorMessagesTest extends TemplateTest {
         return assertErrorContainsAS(angleBracketsFtl, expectedSubstrings, expectedSubstrings);
     }
     
-    protected Throwable assertErrorContainsAS(String angleBracketsFtl,
+    protected Throwable assertErrorContainsAS(String f3aSrc,
             String[] expectedSubstringsA, String[] expectedSubstringsS) {
         pushNamelessTemplateConfiguraitonSettings(new TemplateConfiguration.Builder()
-                    .tagSyntax(TagSyntax.ANGLE_BRACKET)
-                    .build());
+                .templateLanguage(DefaultTemplateLanguage.F3AU)
+                .build());
         try {
-            assertErrorContains(angleBracketsFtl, expectedSubstringsA);
+            assertErrorContains(f3aSrc, expectedSubstringsA);
         } finally {
             popNamelessTemplateConfiguraitonSettings();
         }
         
         pushNamelessTemplateConfiguraitonSettings(new TemplateConfiguration.Builder()
-                .tagSyntax(TagSyntax.SQUARE_BRACKET)
+                .templateLanguage(DefaultTemplateLanguage.F3SU)
                 .build());
         try {
-            return assertErrorContains(angleBracketsFtl.replace('<', '[').replace('>', ']'), expectedSubstringsS);
+            return assertErrorContains(f3aToF3s(f3aSrc));
         } finally {
             popNamelessTemplateConfiguraitonSettings();
         }
+    }
+
+    /**
+     * Very naive F3A to F3S conversion (incorrect, but good enough for this test).
+     */
+    private String f3aToF3s(String f3aSrc) {
+        StringBuilder sb = new StringBuilder();
+        LinkedList<Character> openingStack = new LinkedList<>();
+        for (int i = 0; i < f3aSrc.length(); i++) {
+            char c = f3aSrc.charAt(i);
+            if (c == '<') {
+                char cNext = i + 1 < f3aSrc.length() ? f3aSrc.charAt(i + 1) : 0; 
+                if (cNext == '/' || cNext == '#' || cNext == '@') {
+                    sb.append("[");
+                    openingStack.push('A');
+                } else {
+                    sb.append(c);
+                    openingStack.push(c);
+                }
+            } else if (c == '{') {
+                if (i > 0 && f3aSrc.charAt(i - 1) == '$') {
+                    sb.deleteCharAt(i - 1);
+                    sb.append("[=");
+                    openingStack.push('D');
+                } else {
+                    sb.append(c);
+                    openingStack.push(c);
+                }
+            } else if (c == '>') {
+                Character top = openingStack.peek();
+                if (top != null && top == '<' || top == 'A') {
+                    openingStack.pop();
+                    sb.append(top == 'A' ? ']' : c);
+                } else {
+                    sb.append(c);
+                }
+            } else if (c == '}') {
+                Character top = openingStack.peek();
+                if (top != null && top == '{' || top == 'D') {
+                    openingStack.pop();
+                    sb.append(top == 'D' ? ']' : c);
+                } else {
+                    sb.append(c);
+                }
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
     }
 
 }

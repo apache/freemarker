@@ -54,7 +54,8 @@ final class ASTExpStringLiteral extends ASTExpression implements TemplateStringM
         // but we can't fix this backward compatibly.
         Template parentTemplate = getTemplate();
         ParsingConfiguration pCfg = parentTemplate.getParsingConfiguration();
-        InterpolationSyntax intSyn = pCfg.getInterpolationSyntax();
+        // TODO [FM3] This shouldn't assume DefaultTemplateLanguage.
+        InterpolationSyntax intSyn = ((DefaultTemplateLanguage) pCfg.getTemplateLanguage()).getInterpolationSyntax();
         if (value.length() > 3 && (
                 // Find related: [interpolation prefixes]
                 intSyn == InterpolationSyntax.DOLLAR && value.indexOf("${") != -1

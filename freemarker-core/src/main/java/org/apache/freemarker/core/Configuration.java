@@ -47,7 +47,6 @@ import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.arithmetic.impl.BigDecimalArithmeticEngine;
 import org.apache.freemarker.core.model.ObjectWrapper;
 import org.apache.freemarker.core.model.ObjectWrappingException;
-import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.model.TemplateModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.RestrictedObjectWrapper;
@@ -183,8 +182,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     // ParsingConfiguration settings:
 
     private final TemplateLanguage templateLanguage;
-    private final TagSyntax tagSyntax;
-    private final InterpolationSyntax interpolationSyntax;
     private final boolean whitespaceStripping;
     private final AutoEscapingPolicy autoEscapingPolicy;
     private final OutputFormat outputFormat;
@@ -349,8 +346,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         // ParsingConfiguration settings:
 
         templateLanguage = builder.getTemplateLanguage();
-        tagSyntax = builder.getTagSyntax();
-        interpolationSyntax = builder.getInterpolationSyntax();
         whitespaceStripping = builder.getWhitespaceStripping();
         autoEscapingPolicy = builder.getAutoEscapingPolicy();
         outputFormat = builder.getOutputFormat();
@@ -617,46 +612,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         return true;
     }
 
-    /**
-     * When auto-escaping should be enabled depending on the current {@linkplain OutputFormat output format};
-     * default is {@link AutoEscapingPolicy#ENABLE_IF_DEFAULT}. Note that the default output
-     * format, {@link UndefinedOutputFormat}, is a non-escaping format, so there auto-escaping will be off.
-     * Note that the templates can turn auto-escaping on/off locally with directives like {@code <#ftl auto_esc=...>},
-     * which will ignore the policy.
-     *
-     * <p><b>About auto-escaping</b></p>
-     *
-     * <p>
-     * Auto-escaping has significance when a value is printed with <code>${...}</code>. If
-     * auto-escaping is on, FreeMarker will assume that the value is plain text (as opposed to markup or some kind of
-     * rich text), so it will escape it according the current output format (see {@link #getOutputFormat()}
-     * and {@link TemplateConfiguration.Builder#setOutputFormat(OutputFormat)}). If auto-escaping is off, FreeMarker
-     * will assume that the string value is already in the output format, so it prints it as is to the output.
-     *
-     * <p>Further notes on auto-escaping:
-     * <ul>
-     *   <li>When printing numbers, dates, and other kind of non-string values with <code>${...}</code>, they will be
-     *       first converted to string (according the formatting settings and locale), then they are escaped just like
-     *       string values.
-     *   <li>When printing {@link TemplateMarkupOutputModel}-s, they aren't escaped again (they are already escaped).
-     *   <li>Auto-escaping doesn't do anything if the current output format isn't an {@link MarkupOutputFormat}.
-     *       That's the case for the default output format, {@link UndefinedOutputFormat}, and also for
-     *       {@link PlainTextOutputFormat}.
-     *   <li>The output format inside a string literal expression is always {@link PlainTextOutputFormat}
-     *       (regardless of the output format of the containing template), which is a non-escaping format. Thus for
-     *       example, with <code>&lt;#assign s = "foo${bar}"&gt;</code>, {@code bar} will always get into {@code s}
-     *       without escaping, but with <code>&lt;#assign s&gt;foo${bar}&lt;#assign&gt;</code> it may will be escaped.
-     * </ul>
-     *
-     * <p>Note that what you set here is just a default, which can be overridden for individual templates with the
-     * {@linkplain #getTemplateConfigurations() template configurations setting}. This setting is also overridden by
-     * the standard file extensions; see them at {@link #getRecognizeStandardFileExtensions()}.
-     *
-     * @see Configuration.Builder#setAutoEscapingPolicy(AutoEscapingPolicy)
-     * @see TemplateConfiguration.Builder#setAutoEscapingPolicy(AutoEscapingPolicy)
-     * @see Configuration.Builder#setOutputFormat(OutputFormat)
-     * @see TemplateConfiguration.Builder#setOutputFormat(OutputFormat)
-     */
     @Override
     public AutoEscapingPolicy getAutoEscapingPolicy() {
         return autoEscapingPolicy;
@@ -805,7 +760,7 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         return true;
     }
     
-    private static final Map<String, TemplateLanguage> PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION;
+    static final Map<String, TemplateLanguage> PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION;
     static {
         PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION = new HashMap<String, TemplateLanguage>(
                 (DefaultTemplateLanguage.STANDARD_INSTANCES.length + 1) * 2, 0.5f);
@@ -838,7 +793,19 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         if (dotIdx == -1) {
             return null;
         }
-        return PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION.get(templateName.substring(dotIdx + 1).toLowerCase());
+        
+        return getTemplateLanguageForFileExtension(templateName.substring(dotIdx + 1));
+    }
+
+    /**
+     * Returns the {@link TemplateLanguage} associated to given file extension, or {@code null} if none is associated
+     * with it. The lookup is case insensitive.
+     * 
+     * @param fileExtension Case insensitive, not {@code null}.
+     */
+    public TemplateLanguage getTemplateLanguageForFileExtension(String fileExtension) {
+        _NullArgumentException.check(fileExtension, "extension");
+        return PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION.get(fileExtension.toLowerCase());
     }
 
     @Override
@@ -852,34 +819,6 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
      */
     @Override
     public boolean isTemplateLanguageSet() {
-        return true;
-    }
-
-    @Override
-    public TagSyntax getTagSyntax() {
-        return tagSyntax;
-    }
-
-    /**
-     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
-     * value in the {@link Configuration}.
-     */
-    @Override
-    public boolean isTagSyntaxSet() {
-        return true;
-    }
-
-    @Override
-    public InterpolationSyntax getInterpolationSyntax() {
-        return interpolationSyntax;
-    }
-    
-    /**
-     * Always {@code true} in {@link Configuration}-s; even if this setting wasn't set in the builder, it gets a default
-     * value in the {@link Configuration}.
-     */
-    @Override
-    public boolean isInterpolationSyntaxSet() {
         return true;
     }
 
@@ -2383,20 +2322,10 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
         public void unsetSharedVariables() {
             this.sharedVariables = null;
         }
-
-        @Override
-        protected TagSyntax getDefaultTagSyntax() {
-            return TagSyntax.ANGLE_BRACKET;
-        }
-
-        @Override
-        protected InterpolationSyntax getDefaultInterpolationSyntax() {
-            return InterpolationSyntax.DOLLAR;
-        }
         
         @Override
         protected TemplateLanguage getDefaultTemplateLanguage() {
-            return DefaultTemplateLanguage.F3CC;
+            return DefaultTemplateLanguage.F3AC;
         }
 
         @Override

@@ -25,6 +25,7 @@ import java.io.Writer;
 import org.apache.freemarker.core.model.TemplateMarkupOutputModel;
 import org.apache.freemarker.core.outputformat.MarkupOutputFormat;
 import org.apache.freemarker.core.outputformat.OutputFormat;
+import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util.TemplateLanguageUtils;
 
 /**
@@ -112,8 +113,14 @@ final class ASTInterpolation extends ASTElement {
     }
 
     private String dump(boolean canonical, boolean inStringLiteral) {
+        TemplateLanguage tempLang = getTemplate().getParsingConfiguration().getTemplateLanguage();
+        if (!(tempLang instanceof DefaultTemplateLanguage)) {
+            // TODO [FM3]
+            throw new BugException("Dumping custom template langauges not yet supported");
+        }
+        InterpolationSyntax syntax = ((DefaultTemplateLanguage) tempLang).getInterpolationSyntax();
+
         StringBuilder sb = new StringBuilder();
-        InterpolationSyntax syntax = getTemplate().getInterpolationSyntax();
         sb.append(syntax != InterpolationSyntax.SQUARE_BRACKET ? "${" : "[=");
         final String exprCF = expression.getCanonicalForm();
         sb.append(inStringLiteral ? TemplateLanguageUtils.escapeStringLiteralPart(exprCF, '"') : exprCF);

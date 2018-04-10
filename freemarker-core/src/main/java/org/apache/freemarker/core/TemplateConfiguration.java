@@ -82,8 +82,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
     private final Map<Serializable, Object> customSettings;
     
     private final TemplateLanguage templateLanguage;
-    private final TagSyntax tagSyntax;
-    private final InterpolationSyntax interpolationSyntax;
     private final Boolean whitespaceStripping;
     private final AutoEscapingPolicy autoEscapingPolicy;
     private final Boolean recognizeStandardFileExtensions;
@@ -124,8 +122,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         customSettings = builder.getCustomSettings(false);
 
         templateLanguage = builder.isTemplateLanguageSet() ? builder.getTemplateLanguage() : null;
-        tagSyntax = builder.isTagSyntaxSet() ? builder.getTagSyntax() : null;
-        interpolationSyntax = builder.isInterpolationSyntaxSet() ? builder.getInterpolationSyntax() : null;
         whitespaceStripping = builder.isWhitespaceStrippingSet() ? builder.getWhitespaceStripping() : null;
         autoEscapingPolicy = builder.isAutoEscapingPolicySet() ? builder.getAutoEscapingPolicy() : null;
         recognizeStandardFileExtensions = builder.isRecognizeStandardFileExtensionsSet() ? builder.getRecognizeStandardFileExtensions() : null;
@@ -134,32 +130,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         tabSize = builder.isTabSizeSet() ? builder.getTabSize() : null;
     }
 
-    @Override
-    public TagSyntax getTagSyntax() {
-        if (!isTagSyntaxSet()) {
-            throw new CoreSettingValueNotSetException("tagSyntax");
-        }
-        return tagSyntax;
-    }
-    
-    @Override
-    public boolean isTagSyntaxSet() {
-        return tagSyntax != null;
-    }
-
-    @Override
-    public InterpolationSyntax getInterpolationSyntax() {
-        if (!isInterpolationSyntaxSet()) {
-            throw new CoreSettingValueNotSetException("interpolationSyntax");
-        }
-        return interpolationSyntax;
-    }
-
-    @Override
-    public boolean isInterpolationSyntaxSet() {
-        return interpolationSyntax != null;
-    }
-    
     @Override
     public TemplateLanguage getTemplateLanguage() {
         if (!isTemplateLanguageSet()) {
@@ -837,12 +807,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
             if (tc.isSQLDateAndTimeTimeZoneSet()) {
                 setSQLDateAndTimeTimeZone(tc.getSQLDateAndTimeTimeZone());
             }
-            if (tc.isTagSyntaxSet()) {
-                setTagSyntax(tc.getTagSyntax());
-            }
-            if (tc.isInterpolationSyntaxSet()) {
-                setInterpolationSyntax(tc.getInterpolationSyntax());
-            }
             if (tc.isTemplateLanguageSet()) {
                 setTemplateLanguage(tc.getTemplateLanguage());
             }
@@ -902,16 +866,6 @@ public final class TemplateConfiguration implements ParsingAndProcessingConfigur
         @Override
         public boolean isIncompatibleImprovementsSet() {
             return false;
-        }
-
-        @Override
-        protected TagSyntax getDefaultTagSyntax() {
-            throw new CoreSettingValueNotSetException("tagSyntax");
-        }
-        
-        @Override
-        protected InterpolationSyntax getDefaultInterpolationSyntax() {
-            throw new CoreSettingValueNotSetException("interpolationSyntax");
         }
 
         @Override

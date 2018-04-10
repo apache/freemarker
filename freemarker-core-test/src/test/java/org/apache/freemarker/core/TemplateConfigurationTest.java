@@ -545,22 +545,6 @@ public class TemplateConfigurationTest {
         
         {
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
-            tcb.setTagSyntax(TagSyntax.SQUARE_BRACKET);
-            TemplateConfiguration tc = tcb.build();
-            assertOutputWithoutAndWithTC(tc, "[#if true]y[/#if]", "[#if true]y[/#if]", "y");
-            testedProps.add(Configuration.ExtendableBuilder.TAG_SYNTAX_KEY);
-        }
-
-        {
-            TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
-            tcb.setInterpolationSyntax(InterpolationSyntax.SQUARE_BRACKET);
-            TemplateConfiguration tc = tcb.build();
-            assertOutputWithoutAndWithTC(tc, "${1}[=2]", "1[=2]", "${1}2");
-            testedProps.add(Configuration.ExtendableBuilder.INTERPOLATION_SYNTAX_KEY);
-        }
-        
-        {
-            TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
             tcb.setWhitespaceStripping(false);
             TemplateConfiguration tc = tcb.build();
             assertOutputWithoutAndWithTC(tc, "<#if true>\nx\n</#if>\n", "x\n", "\nx\n\n");
@@ -608,7 +592,7 @@ public class TemplateConfigurationTest {
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
             tcb.setRecognizeStandardFileExtensions(false);
             TemplateConfiguration tc = tcb.build();
-            assertOutputWithoutAndWithTC(tc, "adhoc.ftlh", "${.outputFormat}",
+            assertOutputWithoutAndWithTC(tc, "adhoc.f3ah", "${.outputFormat}",
                     HTMLOutputFormat.INSTANCE.getName(), UndefinedOutputFormat.INSTANCE.getName());
             testedProps.add(Configuration.ExtendableBuilder.RECOGNIZE_STANDARD_FILE_EXTENSIONS_KEY);
         }
@@ -626,7 +610,14 @@ public class TemplateConfigurationTest {
         }
 
         {
-            // As the TemplateLanguage-based parser selection happens in the TemplateResolver, we can't use
+            TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
+            tcb.setTemplateLanguage(DefaultTemplateLanguage.F3SH);
+            TemplateConfiguration tc = tcb.build();
+            assertOutputWithoutAndWithTC(tc, "[#if true]y[/#if]${1}[=2]", "[#if true]y[/#if]1[=2]", "y${1}2");
+            testedProps.add(Configuration.ExtendableBuilder.TEMPLATE_LANGUAGE_KEY);
+        }
+        {
+            // TemplateResolver-based TemplateLanguage selection, we can't use
             // assertOutput here, as that hard-coded to create an FTL Template.
 
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
@@ -658,7 +649,7 @@ public class TemplateConfigurationTest {
         }
 
         {
-            // As the TemplateLanguage-based parser selection happens in the TemplateResolver, we can't use
+            // As the charset-selection happens in the TemplateResolver, we can't use
             // assertOutput here, as that hard-coded to create an FTL Template.
 
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
@@ -797,7 +788,7 @@ public class TemplateConfigurationTest {
             TemplateConfiguration tc, String templateName, String ftl, String expectedDefaultOutput,
             String expectedConfiguredOutput) throws TemplateException, IOException {
         if (templateName == null) {
-            templateName = "adhoc.ftl";
+            templateName = "adhoc";
         }
         assertOutput(null, templateName, ftl, expectedDefaultOutput);
         assertOutput(tc, templateName, ftl, expectedConfiguredOutput);

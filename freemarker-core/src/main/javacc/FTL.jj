@@ -83,6 +83,7 @@ public class FMParser {
     private AutoEscapingPolicy autoEscapingPolicy;
     private boolean autoEscaping;
     private ParsingConfiguration pCfg;
+    DefaultTemplateLanguage templateLanguage;
     private InputStream streamToUnmarkWhenEncEstabd;
 
     /** Keeps track of #list nesting. */
@@ -143,7 +144,7 @@ public class FMParser {
         token_source.incompatibleImprovements = incompatibleImprovements;
         this.incompatibleImprovements = incompatibleImprovements;
 
-        DefaultTemplateLanguage templateLanguage = (DefaultTemplateLanguage) pCfg.getTemplateLanguage();
+        templateLanguage = (DefaultTemplateLanguage) pCfg.getTemplateLanguage();
 
         {
             // contextXxx is stronger than anything.
@@ -165,15 +166,7 @@ public class FMParser {
 
         token_source.setParser(this);
 
-        TagSyntax tagSyntax;
-        {
-            TagSyntax tagSyntaxFromLang;
-            tagSyntax
-                    = (tagSyntaxFromLang = templateLanguage.getTagSyntax()) != null
-		                    ? tagSyntaxFromLang
-		                    : pCfg.getTagSyntax();
-        }
-        switch (tagSyntax) {
+        switch (templateLanguage.getTagSyntax()) {
         case ANGLE_BRACKET:
             token_source.squBracTagSyntax = false;
             break;
@@ -181,16 +174,10 @@ public class FMParser {
             token_source.squBracTagSyntax = true;
             break;
         default:
-            throw new BugException("Unsupported tagSyntax: " + tagSyntax);
+            throw new BugException();
         }
 
-        {
-            InterpolationSyntax interpolationSyntaxFromLang;
-            token_source.interpolationSyntax
-                    = (interpolationSyntaxFromLang = templateLanguage.getInterpolationSyntax()) != null
-		                    ? interpolationSyntaxFromLang
-		                    : pCfg.getInterpolationSyntax();
-        }
+        token_source.interpolationSyntax = templateLanguage.getInterpolationSyntax();
 
         this.stripWhitespace = pCfg.getWhitespaceStripping();
 
@@ -2210,7 +2197,7 @@ ASTExpStringLiteral StringLiteral(boolean interpolate) :
         result.setLocation(template, t, t);
         if (interpolate && !raw) {
             // TODO [FM3]: This logic is broken. It can't handle literals that contains both ${...} and $\{...}. 
-            InterpolationSyntax intSyn = pCfg.getInterpolationSyntax();
+            InterpolationSyntax intSyn = templateLanguage.getInterpolationSyntax();
             if (intSyn == InterpolationSyntax.DOLLAR && t.image.indexOf("${") != -1
                     || intSyn == InterpolationSyntax.SQUARE_BRACKET && t.image.indexOf("[=") != -1) {
                 result.parseValue(token_source, outputFormat);

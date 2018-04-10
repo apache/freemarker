@@ -229,7 +229,10 @@ public class _ErrorDescriptionBuilder {
                                     || (partStr.charAt(1) == '/') && (partStr.charAt(2) == '#' || partStr.charAt(2) == '@')
                             )
                             && partStr.charAt(partStr.length() - 1) == '>') {
-                        if (template.getActualTagSyntax() == TagSyntax.SQUARE_BRACKET) {
+                        TemplateLanguage tempLang = template.getParsingConfiguration().getTemplateLanguage();
+                        // TODO [FM3] We shouldn't assume DefaultTemplateLanguage
+                        if (tempLang instanceof DefaultTemplateLanguage
+                                && ((DefaultTemplateLanguage) tempLang).getTagSyntax() == TagSyntax.SQUARE_BRACKET) {
                             sb.append('[');
                             sb.append(partStr.substring(1, partStr.length() - 1));
                             sb.append(']');

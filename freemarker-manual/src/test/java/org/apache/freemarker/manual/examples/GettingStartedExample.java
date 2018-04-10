@@ -53,7 +53,7 @@ public class GettingStartedExample {
         root.put("latestProduct", latest);
 
         /* Get the template (uses cache internally) */
-        Template temp = cfg.getTemplate("test.ftlh");
+        Template temp = cfg.getTemplate("test.f3ah");
 
         /* Merge data-model with template */
         Writer out = new OutputStreamWriter(System.out);

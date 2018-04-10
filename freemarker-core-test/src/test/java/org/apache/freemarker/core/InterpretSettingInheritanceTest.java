@@ -42,7 +42,7 @@ public class InterpretSettingInheritanceTest  extends TemplateTest {
     @Test
     public void tagSyntaxTest() throws IOException, TemplateException {
         setConfiguration(new TestConfigurationBuilder()
-                .tagSyntax(TagSyntax.ANGLE_BRACKET)
+                .templateLanguage(DefaultTemplateLanguage.F3AU)
                 .build());
         assertOutput(FTL_S_A_S, OUT_A_S_WHEN_SYNTAX_IS_A);
         assertOutput(FTL_S_S_A, OUT_S_A_WHEN_SYNTAX_IS_A);
@@ -50,7 +50,7 @@ public class InterpretSettingInheritanceTest  extends TemplateTest {
         assertOutput(FTL_A_S_A, OUT_S_A_WHEN_SYNTAX_IS_A);
 
         setConfiguration(new TestConfigurationBuilder()
-                .tagSyntax(TagSyntax.SQUARE_BRACKET)
+                .templateLanguage(DefaultTemplateLanguage.F3SU)
                 .build());
         assertOutput(FTL_S_A_S, OUT_A_S_WHEN_SYNTAX_IS_S);
         assertOutput(FTL_S_S_A, OUT_S_A_WHEN_SYNTAX_IS_S);
@@ -80,13 +80,13 @@ public class InterpretSettingInheritanceTest  extends TemplateTest {
     @Test
     public void evalTest() throws IOException, TemplateException {
         setConfiguration(new TestConfigurationBuilder()
-                .tagSyntax(TagSyntax.ANGLE_BRACKET)
+                .templateLanguage(DefaultTemplateLanguage.F3AU)
                 .build());
         assertOutput("<@'\"[#if true]s[/#if]<#if true>a</#if>\"?interpret'?eval />", OUT_S_A_WHEN_SYNTAX_IS_A);
         assertOutput("[#ftl][@'\"[#if true]s[/#if]<#if true>a</#if>\"?interpret'?eval /]", OUT_S_A_WHEN_SYNTAX_IS_A);
 
         setConfiguration(new TestConfigurationBuilder()
-                .tagSyntax(TagSyntax.SQUARE_BRACKET)
+                .templateLanguage(DefaultTemplateLanguage.F3SU)
                 .build());
         assertOutput("[@'\"[#if true]s[/#if]<#if true>a</#if>\"?interpret'?eval /]", OUT_S_A_WHEN_SYNTAX_IS_S);
         assertOutput("<#ftl><@'\"[#if true]s[/#if]<#if true>a</#if>\"?interpret'?eval />", OUT_S_A_WHEN_SYNTAX_IS_S);

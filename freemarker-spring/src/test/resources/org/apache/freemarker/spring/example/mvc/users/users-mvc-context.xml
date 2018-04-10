@@ -40,7 +40,7 @@
   <bean id="viewResolver" class="org.apache.freemarker.spring.web.view.FreeMarkerViewResolver">
     <property name="configuration" ref="configuration" />
     <property name="prefix" value="/views/" />
-    <property name="suffix" value=".ftlh" />
+    <property name="suffix" value=".f3ah" />
   </bean>
 
   <bean id="themeSource" class="org.springframework.ui.context.support.ResourceBundleThemeSource">

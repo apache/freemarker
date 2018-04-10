@@ -27,6 +27,7 @@ import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
 import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
+import org.apache.freemarker.core.util._NullArgumentException;
 
 // FIXME [FM3] If we leave this here, FTL will be a required dependency of core (which is not nice if
 // template languages will be pluggable).
@@ -39,19 +40,13 @@ public final class DefaultTemplateLanguage extends TemplateLanguage {
      * For the case when the file extension doesn't specify the exact syntax and the output format, instead both comes
      * from the {@link Configuration} (or {@link TemplateConfiguration}). Avoid it, as it's problematic for tooling.
      */
-    public static final DefaultTemplateLanguage F3CC = new DefaultTemplateLanguage("f3cc", true,
-            null, null, null, null);
+    public static final DefaultTemplateLanguage F3AC = new DefaultTemplateLanguage("f3ac", true,
+            null, null,
+            TagSyntax.ANGLE_BRACKET, InterpolationSyntax.DOLLAR);
+    public static final DefaultTemplateLanguage F3SC = new DefaultTemplateLanguage("f3sc", true,
+            null, null,
+            TagSyntax.SQUARE_BRACKET, InterpolationSyntax.SQUARE_BRACKET);
 
-    // TODO [FM3][CF] Emulates FM2 behavior temporarily, to make the test suite pass 
-    public static final DefaultTemplateLanguage F3CH = new DefaultTemplateLanguage("ftlh", true,
-            HTMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
-            null, null);
-    
-    // TODO [FM3][CF] Emulates FM2 behavior temporarily, to make the test suite pass 
-    public static final DefaultTemplateLanguage F3CX = new DefaultTemplateLanguage("ftlx", true,
-            XMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
-            null, null);
-    
     public static final DefaultTemplateLanguage F3AH = new DefaultTemplateLanguage("f3ah", true,
             HTMLOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT,
             TagSyntax.ANGLE_BRACKET, InterpolationSyntax.DOLLAR);
@@ -76,7 +71,7 @@ public final class DefaultTemplateLanguage extends TemplateLanguage {
      * List all instances for which there's a constant in this class ({@link #F3AH} and such).
      */
     public static final DefaultTemplateLanguage[] STANDARD_INSTANCES = new DefaultTemplateLanguage[] {
-            F3CC, F3CH, F3CX,
+            F3AC, F3SC,
             F3AH, F3AX, F3AU, 
             F3SH, F3SX, F3SU 
     };
@@ -92,12 +87,9 @@ public final class DefaultTemplateLanguage extends TemplateLanguage {
      * @param autoEscapingPolicy
      *            See in {@link TemplateLanguage#TemplateLanguage(String, OutputFormat, AutoEscapingPolicy)}
      * @param tagSyntax
-     *            The tag syntax used, or {@code null} it it should come from the {@link ParsingConfiguration}. Using
-     *            {@code null} is generally a bad idea, as it makes tooling harder, and can be confusing for users.
+     *            The tag syntax used; not {@code null}.
      * @param interpolationSyntax
-     *            The interpolation syntax used, or {@code null} it it should come from the
-     *            {@link ParsingConfiguration}. Using {@code null} is generally a bad idea, as it makes tooling harder,
-     *            and can be confusing for users.
+     *            The interpolation syntax used; not {@code null}.
      */
     public DefaultTemplateLanguage(
             String fileExtension,
@@ -115,6 +107,8 @@ public final class DefaultTemplateLanguage extends TemplateLanguage {
             OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy,
             TagSyntax tagSyntax, InterpolationSyntax interpolationSyntax) {
         super(fileExtension, allowExtensionStartingWithF, outputFormat, autoEscapingPolicy);
+        _NullArgumentException.check("tagSyntax", tagSyntax);
+        _NullArgumentException.check("interpolationSyntax", interpolationSyntax);
         this.tagSyntax = tagSyntax;
         this.interpolationSyntax = interpolationSyntax;
     }
@@ -145,10 +139,34 @@ public final class DefaultTemplateLanguage extends TemplateLanguage {
         return root;
     }
 
+    /**
+     * Determines the tag syntax (like {@code <#if x>} VS {@code [#if x]}) of the template files. Don't confuse this
+     * with the interpolation syntax ({@link #getInterpolationSyntax()}); they are independent.
+     * 
+     * <p>The value is one of:
+     * <ul>
+     *   <li>{@link TagSyntax#ANGLE_BRACKET}:
+     *     Use the angle bracket tag syntax (the normal syntax), like {@code <#include ...>}. This is the default.
+     *   <li>{@link TagSyntax#SQUARE_BRACKET}:
+     *     Use the square bracket tag syntax, like {@code [#include ...]}. Note that this does <em>not</em> change
+     *     <code>${x}</code> to {@code [=...]}; that's <em>interpolation</em> syntax, so there the relevant one is
+     *     {@link #getInterpolationSyntax()}.
+     * </ul>
+     * 
+     * @return Not {@code null}
+     */
     public TagSyntax getTagSyntax() {
         return tagSyntax;
     }
 
+    /**
+     * Determines the interpolation syntax (<code>${x}</code> VS <code>[=x]</code>) of the template files.
+     * Don't confuse this with the tag syntax ({@link #getTagSyntax()}); they are independent.
+     * Note that {@link InterpolationSyntax#SQUARE_BRACKET} does <em>not</em> change {@code <#if x>} to
+     * {@code [#if x]}; that's <em>tag</em> syntax, so there the relevant one is {@link #getTagSyntax()}.
+     *
+     * @return Not {@code null}
+     */
     public InterpolationSyntax getInterpolationSyntax() {
         return interpolationSyntax;
     }

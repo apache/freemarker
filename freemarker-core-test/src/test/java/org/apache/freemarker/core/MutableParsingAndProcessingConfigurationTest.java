@@ -273,7 +273,7 @@ public class MutableParsingAndProcessingConfigurationTest {
         assertEquals(TimeZone.getDefault(), cfgB.getTimeZone());
         assertFalse(cfgB.isTimeZoneSet());
 
-        cfgB.setSetting(Configuration.ExtendableBuilder.TIME_ZONE_KEY, "JVM default");
+        cfgB.setSetting(Configuration.Builder.TIME_ZONE_KEY, "JVM default");
         assertEquals(TimeZone.getDefault(), cfgB.getTimeZone());
         assertTrue(cfgB.isTimeZoneSet());
     }
@@ -311,6 +311,22 @@ public class MutableParsingAndProcessingConfigurationTest {
                 MutableParsingAndProcessingConfiguration.getSettingNames(),
                 MutableParsingAndProcessingConfiguration.class);
     }
+    
+    @Test
+    public void testTemplateLanguage() throws Exception {
+        Configuration.Builder cfgB = new Configuration.Builder(Configuration.VERSION_3_0_0);
+        cfgB.setSetting(Configuration.Builder.TEMPLATE_LANGUAGE_KEY, "f3ax");
+        assertEquals(DefaultTemplateLanguage.F3AX, cfgB.getTemplateLanguage());
+        cfgB.setSetting(Configuration.Builder.TEMPLATE_LANGUAGE_KEY, "f3SH");
+        assertEquals(DefaultTemplateLanguage.F3SH, cfgB.getTemplateLanguage());
+        try {
+            cfgB.setSetting(Configuration.Builder.TEMPLATE_LANGUAGE_KEY, "qqqq");
+            fail();
+        } catch (InvalidSettingValueException e) {
+            assertThat(e.getMessage(), allOf(containsString("qqqq"), containsString("language")));
+        }
+    }
+    
 
     @SuppressWarnings("boxing")
     private void assertStartsWith(List<String> list, List<String> headList) {

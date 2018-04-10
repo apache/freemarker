@@ -37,8 +37,6 @@ import junit.framework.TestCase;
  */
 public class TagSyntaxVariationsTest extends TestCase {
     
-    private static final String HDR_ANG = "<#ftl>";
-    private static final String HDR_SQU = squarify(HDR_ANG);
     private static final String IF_ANG = "<#if true>i</#if>";
     private static final String IF_SQU = squarify(IF_ANG);
     private static final String IF_OUT = "i";
@@ -75,15 +73,14 @@ public class TagSyntaxVariationsTest extends TestCase {
             // Permutations 
             for (int angOrSqu = 0; angOrSqu < 2; angOrSqu++) {
                 Configuration cfg = new TestConfigurationBuilder()
-                        .tagSyntax(angOrSqu == 0
-                                ? TagSyntax.ANGLE_BRACKET
-                                : TagSyntax.SQUARE_BRACKET)
+                        .templateLanguage(angOrSqu == 0
+                                ? DefaultTemplateLanguage.F3AU
+                                : DefaultTemplateLanguage.F3SU)
                         .sharedVariables(sharedVariables)
                         .build();
 
                 String dir_xxx = angOrSqu == 0 ? dir_ang : dir_squ;
                 String cust_xxx = angOrSqu == 0 ? CUST_ANG : CUST_SQU;
-                String hdr_xxx = angOrSqu == 0 ? HDR_ANG : HDR_SQU;
                 String wrong_xxx = angOrSqu == 0 ? WRONG_ANG : WRONG_SQU;
                 String wrongc_xxx = angOrSqu == 0 ? WRONGC_ANG : WRONGC_SQU;
 
@@ -101,10 +98,6 @@ public class TagSyntaxVariationsTest extends TestCase {
 
                     test(cfg,
                             dir_xxx + wrongx_xxx,
-                            null);
-
-                    test(cfg,
-                            hdr_xxx + wrongx_xxx,
                             null);
 
                     test(cfg,

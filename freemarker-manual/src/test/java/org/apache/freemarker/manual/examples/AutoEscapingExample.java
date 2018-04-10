@@ -27,42 +27,42 @@ public class AutoEscapingExample extends TemplateTest {
 
     @Test
     public void testInfoBox() throws Exception {
-        assertOutputForNamed("AutoEscapingExample-infoBox.ftlh");
+        assertOutputForNamed("AutoEscapingExample-infoBox.f3ah");
     }
 
     @Test
     public void testCapture() throws Exception {
-        assertOutputForNamed("AutoEscapingExample-capture.ftlh");
+        assertOutputForNamed("AutoEscapingExample-capture.f3ah");
     }
 
     @Test
     public void testMarkup() throws Exception {
-        assertOutputForNamed("AutoEscapingExample-markup.ftlh");
+        assertOutputForNamed("AutoEscapingExample-markup.f3ah");
     }
 
     @Test
     public void testConvert() throws Exception {
-        assertOutputForNamed("AutoEscapingExample-convert.ftlh");
+        assertOutputForNamed("AutoEscapingExample-convert.f3ah");
     }
 
     @Test
     public void testConvert2() throws Exception {
-        assertOutputForNamed("AutoEscapingExample-convert2.ftl");
+        assertOutputForNamed("AutoEscapingExample-convert2.f3au");
     }
 
     @Test
     public void testStringLiteral() throws Exception {
-        assertOutputForNamed("AutoEscapingExample-stringLiteral.ftlh");
+        assertOutputForNamed("AutoEscapingExample-stringLiteral.f3ah");
     }
 
     @Test
     public void testStringLiteral2() throws Exception {
-        assertOutputForNamed("AutoEscapingExample-stringLiteral2.ftlh");
+        assertOutputForNamed("AutoEscapingExample-stringLiteral2.f3ah");
     }
 
     @Test
     public void testStringConcat() throws Exception {
-        assertOutputForNamed("AutoEscapingExample-stringConcat.ftlh");
+        assertOutputForNamed("AutoEscapingExample-stringConcat.f3ah");
     }
 
     @Override
