@@ -57,7 +57,6 @@ import freemarker.core._CoreAPI;
 import freemarker.debug.impl.DebuggerService;
 
 /**
- * <p>
  * Stores an already parsed template, ready to be processed (rendered) for unlimited times, possibly from multiple
  * threads.
  * 

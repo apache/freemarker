@@ -2038,10 +2038,14 @@ public class Configuration extends Configurable implements Cloneable, ParserConf
 
     /**
      * Sets when auto-escaping should be enabled depending on the current {@linkplain OutputFormat output format};
-     * default is {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY}. Note that the default output format,
-     * {@link UndefinedOutputFormat}, is a non-escaping format, so there auto-escaping will be off.
-     * Note that the templates can turn auto-escaping on/off locally with directives like {@code <#ftl auto_esc=...>},
-     * which will ignore the policy.
+     * default is {@link #ENABLE_IF_DEFAULT_AUTO_ESCAPING_POLICY}.
+     * 
+     * <p>Note that the default output format, {@link UndefinedOutputFormat}, is a non-escaping format, so there
+     * auto-escaping will be off.
+     * 
+     * <p>Note that the templates can turn auto-escaping on/off locally with directives like
+     * {@code <#ftl auto_esc=...>}, {@code <#autoesc>...</#autoesc>}, and {@code <#noautoesc>...</#noautoesc>}, which
+     * are ignoring the auto-escaping policy.
      * 
      * <p><b>About auto-escaping</b></p>
      * 

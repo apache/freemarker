@@ -2664,14 +2664,14 @@ baz
             contain letters (including non-Latin letters), digits (including
             non-Latin digits), underline (<literal>_</literal>), dollar
             (<literal>$</literal>), at sign (<literal>@</literal>).
-            Furthermore, the first character can't be a ASCII digit
+            Furthermore, the first character can't be an ASCII digit
             (<literal>0</literal>-<literal>9</literal>). Starting from
             FreeMarker 2.3.22, the variable name can also contain minus
             (<literal>-</literal>), dot (<literal>.</literal>), and colon
             (<literal>:</literal>) at any position, but these must be escaped
-            with a preceding backslash (<literal>\</literal>), or else they
-            would be interpreted as operators. For example, to read the
-            variable whose name is <quote>data-id</quote>, the expression is
+            with a preceding backslash (<literal>\</literal>), otherwise they
+            are interpreted as operators. For example, to read the variable
+            whose name is <quote>data-id</quote>, the expression is
             <literal>data\-id</literal>, as <literal>data-id</literal> would
             be interpreted as <quote>data minus id</quote>. (Note that these
             escapes only work in identifiers, not in string literals.)</para>
