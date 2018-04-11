@@ -21,4 +21,4 @@
 
 WEB-INF/web.xml
 
-WEB-INF/templates/test.ftl
+WEB-INF/templates/test.f3ah

@@ -1,7 +1,3 @@
-
-  
-
-  <#ftl stripWhitespace="no">
 <#--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -20,7 +16,4 @@
   specific language governing permissions and limitations
   under the License.
 -->
-a
-<#assign x = 1>
-b
-<#include "wsstripinheader_inc.ftl">
+In classpath-test.f3ah

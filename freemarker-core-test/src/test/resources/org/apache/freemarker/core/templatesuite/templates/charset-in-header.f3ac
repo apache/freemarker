@@ -1,3 +1,4 @@
+<#ftl encoding="ISO-8859-2">
 <#--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -16,24 +17,11 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<#import "varlayers_lib.ftl" as lib>
-<@foo 1/>
-${x} = ${.dataModel.x} = ${.globals.x}
-<#assign x = 5>
-${x} = ${.main.x} = ${.namespace.x}
-<#global x = 6>
-${.globals.x} but ${.dataModel.x} = 4
-${y} = ${.globals.y} = ${.dataModel.y!"ERROR"}
-Invisiblity test 1.: <#if .main.y?? || .namespace.y??>failed<#else>passed</#if>
-Invisiblity test 2.: <#if .main.z?? || .namespace.z??>failed<#else>passed</#if>
-Invisiblity test 3.: <#global q = 1><#if .main.q?? || .namespace.q?? || .dataModel.q??>failed<#else>passed</#if>
---
-<@lib.foo/>
---
-<#macro foo x{positional}>
-  ${x} = ${.locals.x}
-  <#local x = 2>
-  ${x} = ${.locals.x}
-  <#local y = 3>
-  ${y} = ${.locals.y}
-</#macro>
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=UTF-8">
+</head>
+<body>
+ιαυϋ
+<#include "charset-in-header_inc1.f3ac">
+<#include "charset-in-header_inc2.f3ac">
+</body>

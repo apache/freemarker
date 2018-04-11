@@ -19,14 +19,14 @@
  
 // Only the files listed here will be part of the tested Web application deployment! 
 
-attributes.ftl
-customELFunctions1.ftl
+attributes.f3ah
+customELFunctions1.f3ah
 customELFunctions1.jsp
-customTags1.ftl
-elFunctionsTagNameClash.ftl
+customTags1.f3ah
+elFunctionsTagNameClash.f3ah
 elFunctionsTagNameClash.jsp
-trivial-jstl-@Ignore.ftl
-trivial.ftl
+trivial-jstl-@Ignore.f3ah
+trivial.f3ah
 trivial.jsp
 
 WEB-INF/el-function-tag-name-clash.tld

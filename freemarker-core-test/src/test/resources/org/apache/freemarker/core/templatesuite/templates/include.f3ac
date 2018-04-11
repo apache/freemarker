@@ -16,30 +16,32 @@
   specific language governing permissions and limitations
   under the License.
 -->
---
-<#-- import "/import_lib.ftl" as my -->
---
+<html>
+<head>
+<title>FreeMarker: Include Instruction Test</title>
+</head>
+<body>
 
-<#if mail?? || test??>
-  <#stop "mail or test should not exist">
+<p>A simple test follows:</p>
+
+${message}
+
+<#if message??>
+	<p>Message exists!
 </#if>
 
-${my.mail}
-<@my.test foo="bar"/>
+<p>Test normal includes:</p>
+<#include "included.f3ac">
 
-<#assign mail="jsmith@other1.com">
-${my.mail}
-<@my.test foo="bar"/>
+${foo}
+${nestedMessage}
 
-<#assign mail in my>
-  jsmith@other2.com<#t>
-</#assign>
-${my.mail}
-<@my.test foo="bar"/>
+<@twice>
+Kilroy
+</@twice>
 
-<#import "/import_lib.ftl" as my2>
-${my2.mail}
-<#assign mail="jsmith@other3.com" in my2>
-${my.mail}
+<p>Test subdir includes:</p>
+<#include "subdir/include-subdir.f3ac">
+</body>
+</html>
 
-${my2.doubleUp("foobar")}

@@ -19,15 +19,15 @@
  
 // Only the files listed here will be part of the tested Web application deployment! 
 
-test.ftl
+test.f3ah
 
 WEB-INF/web.xml
 
-WEB-INF/classes/test.ftl
+WEB-INF/classes/test.f3ah
 
-WEB-INF/classes/sub/test.ftl
+WEB-INF/classes/sub/test.f3ah
 
-WEB-INF/lib/templates.jar/sub/test2.ftl
+WEB-INF/lib/templates.jar/sub/test2.f3ah
 /org/apache/freemarker/servlet/jsp/webapps/config/WebappLocalFreemarkerServlet.class -> WEB-INF/lib/WebappLocalFreemarkerServlet.jar/org/apache/freemarker/servlet/jsp/webapps/config/WebappLocalFreemarkerServlet.class
 
-WEB-INF/templates/test.ftl
+WEB-INF/templates/test.f3ah

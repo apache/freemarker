@@ -24,8 +24,8 @@ import java.io.StringWriter;
 
 import org.apache.freemarker.core.templateresolver.impl.ClassTemplateLoader;
 import org.apache.freemarker.test.CopyrightCommentRemoverTemplateLoader;
-import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.apache.freemarker.test.FileTestCase;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 
 public class CanonicalFormTest extends FileTestCase {
 
@@ -34,23 +34,23 @@ public class CanonicalFormTest extends FileTestCase {
     }
 
     public void testCallableDefinitionCanonicalForm() throws Exception {
-        assertCanonicalFormOf("cano-macro-and-function.ftl");
+        assertCanonicalFormOf("cano-macro-and-function.f3ah");
     }
     
     public void testIdentifierEscapingCanonicalForm() throws Exception {
-        assertCanonicalFormOf("cano-identifier-escaping.ftl");
+        assertCanonicalFormOf("cano-identifier-escaping.f3au");
     }
 
     public void testAssignmentCanonicalForm() throws Exception {
-        assertCanonicalFormOf("cano-assignments.ftl");
+        assertCanonicalFormOf("cano-assignments.f3ah");
     }
 
     public void testBuiltInCanonicalForm() throws Exception {
-        assertCanonicalFormOf("cano-builtins.ftl");
+        assertCanonicalFormOf("cano-builtins.f3ah");
     }
 
     public void testStringLiteralInterpolationCanonicalForm() throws Exception {
-        assertCanonicalFormOf("cano-strlitinterpolation.ftl");
+        assertCanonicalFormOf("cano-strlitinterpolation.f3ah");
     }
     
     private void assertCanonicalFormOf(String ftlFileName)

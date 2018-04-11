@@ -62,7 +62,7 @@ import junit.framework.TestSuite;
  * <ol>
  * <li>Add a new <tt>testcase</tt> element to <tt>testcases.xml</tt></li>
  * <li>Add a template to <tt>templates/</tt> with fits the <tt>testcase</tt> added to the XML (by default it's the test
- * case name + ".ftl")</li>
+ * case name + ".f3ac")</li>
  * <li>Add the expected output to <tt>references/</tt> with fits the <tt>testcase</tt> added to the XML (by default
  * it's the test name + ".txt")</li>
  * <li>If you want to add items to the data-model or change the {@link Configuration}, modify the
@@ -219,7 +219,7 @@ public abstract class TemplateTestSuite extends TestSuite {
             
             {
                 String s = _StringUtils.emptyToNull(testCaseElem.getAttribute(ATTR_TEMPLATE));
-                templateName = s != null ? s : beforeEndTN + ".ftl";
+                templateName = s != null ? s : beforeEndTN + ".f3ac";
             }
     
             {

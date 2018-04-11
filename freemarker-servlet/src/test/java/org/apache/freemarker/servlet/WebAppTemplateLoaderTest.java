@@ -37,7 +37,7 @@ public class WebAppTemplateLoaderTest {
 
     @Test
     public void testTemplateFound() throws Exception {
-        assertThat(createConfiguration().getTemplate("test.ftl").toString(), endsWith("foo"));
+        assertThat(createConfiguration().getTemplate("test.f3ah").toString(), endsWith("foo"));
     }
 
     @Test

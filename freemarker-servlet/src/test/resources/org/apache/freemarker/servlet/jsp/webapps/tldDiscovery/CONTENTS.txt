@@ -19,8 +19,8 @@
  
 // Only the files listed here will be part of the tested Web application deployment! 
 
-test-noClasspath.ftl
-test1.ftl
+test-noClasspath.f3ah
+test1.f3ah
 
 WEB-INF/fmtesttag 2.tld
 WEB-INF/fmtesttag4.tld
@@ -34,4 +34,4 @@ WEB-INF/subdir-with-tld/fmtesttag3.tld
 
 not-auto-scanned/fmtesttag.tld
 
-subdir/test-rel.ftl
+subdir/test-rel.f3ah

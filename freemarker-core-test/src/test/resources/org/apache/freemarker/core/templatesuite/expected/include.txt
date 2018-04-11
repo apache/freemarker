@@ -43,9 +43,9 @@ Kilroy
  Can you see me? Kilroy
 
 <p>Test subdir includes:</p>
-<p>This is include-subdir.ftl</p>
+<p>This is include-subdir.f3ac</p>
 <p>Testing including from same directory</p>
-<p>This is include-subdir2.ftl</p>
+<p>This is include-subdir2.f3ac</p>
 <p>Testing including from relative parent</p>
 <p>A test of included files:</p>
 
@@ -61,7 +61,7 @@ Kilroy
 
  Can you see me? 
 <p>Testing including through acquisition</p>
-<p>This is include-subdir2.ftl</p>
+<p>This is include-subdir2.f3ac</p>
 </body>
 </html>
 

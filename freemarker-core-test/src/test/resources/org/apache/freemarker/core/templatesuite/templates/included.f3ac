@@ -16,12 +16,15 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<p>This is include-subdir.ftl</p>
-<p>Testing including from same directory</p>
-<#include "include-subdir2.ftl">
-<p>Testing including from relative parent</p>
-<#include "../included.ftl">
-<p>Testing including from loader root</p>
-<#include "/included.ftl">
-<p>Testing including through acquisition</p>
-<#include "*/subdir/include-subdir2.ftl">
+<p>A test of included files:</p>
+
+<#if .globals.message??>
+	<p>Message exists!:<br />
+        ${.globals.message}</p>
+<#else>
+        <p>No message :(</p>
+</#if>
+
+<#assign foo="assigning from included template", bar=" Can you see me? ">
+<#macro twice><#nested/>${bar}<#nested/></#macro>
+<#include "nestedinclude.f3ac">

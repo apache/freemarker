@@ -16,15 +16,23 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<p>A test of included files:</p>
-
-<#if .globals.message??>
-	<p>Message exists!:<br />
-        ${.globals.message}</p>
-<#else>
-        <p>No message :(</p>
-</#if>
-
-<#assign foo="assigning from included template", bar=" Can you see me? ">
-<#macro twice><#nested/>${bar}<#nested/></#macro>
-<#include "nestedinclude.ftl">
+<#-- Mostly just checks if the expressions doesn't fail -->
+<#assign works = .dataModel>
+<#attempt>
+  ${noSuchVariableExists}
+<#recover>
+  <#assign works = .error>
+</#attempt>
+<#assign works = .globals>
+${.lang} == en
+${.locale} == en_US
+<#assign works = .locals!>
+<#assign works = .main>
+<#assign works = .node!>
+${.outputEncoding?lowerCase} == utf-8
+${.currentTemplateName} == specialvars.f3ac
+${.urlEscapingCharset?lowerCase} == iso-8859-1
+<#assign foo = "x">
+${.vars['foo']} == x
+<#assign works = .version>
+${.now?isDatetime?c} == true

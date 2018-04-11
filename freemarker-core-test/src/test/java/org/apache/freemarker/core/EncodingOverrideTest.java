@@ -34,14 +34,14 @@ public class EncodingOverrideTest {
 
     @Test
     public void testMarchingCharset() throws Exception {
-        Template t = createConfig(StandardCharsets.UTF_8).getTemplate("encodingOverride-UTF-8.ftl");
+        Template t = createConfig(StandardCharsets.UTF_8).getTemplate("encodingOverride-UTF-8.f3ah");
         assertEquals(StandardCharsets.UTF_8, t.getActualSourceEncoding());
         checkTemplateOutput(t);
     }
 
     @Test
     public void testDifferentCharset() throws Exception {
-        Template t = createConfig(StandardCharsets.UTF_8).getTemplate("encodingOverride-ISO-8859-1.ftl");
+        Template t = createConfig(StandardCharsets.UTF_8).getTemplate("encodingOverride-ISO-8859-1.f3ah");
         assertEquals(StandardCharsets.ISO_8859_1, t.getActualSourceEncoding());
         checkTemplateOutput(t);
     }

@@ -147,7 +147,7 @@
 
   <servlet-mapping>
     <servlet-name>freemarker</servlet-name>
-    <url-pattern>*.ftl</url-pattern>
+    <url-pattern>*.f3ah</url-pattern>
   </servlet-mapping>
 
   <taglib>
@@ -168,7 +168,7 @@
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>FreeMarker MVC Views</web-resource-name>
-      <url-pattern>*.ftl</url-pattern>
+      <url-pattern>*.f3ah</url-pattern>
       <url-pattern>*.jsp</url-pattern>
     </web-resource-collection>
     <auth-constraint>

@@ -78,12 +78,12 @@ public class RealServletContainertTest extends WebAppTestCase {
     @Test
     @Ignore  // c:forEach fails because of EL context issues
     public void basicTrivialJSTL() throws Exception {
-        assertOutputsEqual(WEBAPP_BASIC, "tester?view=trivial.jsp", "tester?view=trivial-jstl-@Ignore.ftl");        
+        assertOutputsEqual(WEBAPP_BASIC, "tester?view=trivial.jsp", "tester?view=trivial-jstl-@Ignore.f3ah");        
     }
 
     @Test
     public void basicCustomTags1() throws Exception {
-        assertExpectedEqualsOutput(WEBAPP_BASIC, "customTags1.txt", "tester?view=customTags1.ftl", false);
+        assertExpectedEqualsOutput(WEBAPP_BASIC, "customTags1.txt", "tester?view=customTags1.f3ah", false);
     }
 
     @Test
@@ -91,12 +91,12 @@ public class RealServletContainertTest extends WebAppTestCase {
         restartWebAppIfStarted(WEBAPP_BASIC);  // To clear the application scope attributes
         assertExpectedEqualsOutput(WEBAPP_BASIC, "attributes.txt", "tester"
                 + "?action=" + AllKindOfContainersModel2Action.class.getName()
-                + "&view=attributes.ftl");
+                + "&view=attributes.f3ah");
 
         restartWebAppIfStarted(WEBAPP_BASIC);  // To clear the application scope attributes
         assertExpectedEqualsOutput(WEBAPP_BASIC, "attributes-modernModels.txt", "tester"
                 + "?action=" + AllKindOfContainersModel2Action.class.getName()
-                + "&view=attributes.ftl&viewServlet=freemarker-modernModels");
+                + "&view=attributes.f3ah&viewServlet=freemarker-modernModels");
         // [FM3] Won't need the "modern" servlet as soon as DOW defaults change to recommended values
     }
 
@@ -109,7 +109,7 @@ public class RealServletContainertTest extends WebAppTestCase {
     @Test
     public void basicELFunctionsTagNameClash() throws Exception {
         // System.out.println(getResponseContent(WEBAPP_BASIC, "tester?view=elFunctionsTagNameClash.jsp"));
-        // System.out.println(getResponseContent(WEBAPP_BASIC, "tester?view=elFunctionsTagNameClash.ftl"));
+        // System.out.println(getResponseContent(WEBAPP_BASIC, "tester?view=elFunctionsTagNameClash.f3ah"));
         assertJSPAndFTLOutputEquals(WEBAPP_BASIC, "tester?view=elFunctionsTagNameClash");
     }
     
@@ -117,7 +117,7 @@ public class RealServletContainertTest extends WebAppTestCase {
     public void tldDiscoveryBasic() throws Exception {
         try {
             restartWebAppIfStarted(WEBAPP_TLD_DISCOVERY);
-            assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY, "test1.txt", "tester?view=test1.ftl");
+            assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY, "test1.txt", "tester?view=test1.f3ah");
         } finally {
             JspTestFreemarkerServlet.resetToDefaults();
         }
@@ -128,7 +128,7 @@ public class RealServletContainertTest extends WebAppTestCase {
         try {
             restartWebAppIfStarted(WEBAPP_TLD_DISCOVERY);
             assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY, "test1.txt",
-                    "tester?view=test1.ftl&viewServlet=freemarker-defaultOverride");
+                    "tester?view=test1.f3ah&viewServlet=freemarker-defaultOverride");
         } finally {
             JspTestFreemarkerServlet.resetToDefaults();
         }
@@ -139,7 +139,7 @@ public class RealServletContainertTest extends WebAppTestCase {
         try {
             JspTestFreemarkerServlet.emulateNoJarURLConnections = true;
             restartWebAppIfStarted(WEBAPP_TLD_DISCOVERY);
-            assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY, "test1.txt", "tester?view=test1.ftl");
+            assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY, "test1.txt", "tester?view=test1.f3ah");
         } finally {
             JspTestFreemarkerServlet.resetToDefaults();
         }       
@@ -155,7 +155,7 @@ public class RealServletContainertTest extends WebAppTestCase {
                     FreemarkerServlet.SYSTEM_PROPERTY_CLASSPATH_TLDS,
                     "META-INF/tldDiscovery MetaInfTldSources-1.tld");
             restartWebAppIfStarted(WEBAPP_TLD_DISCOVERY);
-            assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY, "test1.txt", "tester?view=test1.ftl");
+            assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY, "test1.txt", "tester?view=test1.f3ah");
         } finally {
             JspTestFreemarkerServlet.resetToDefaults();
             System.clearProperty(FreemarkerServlet.SYSTEM_PROPERTY_CLASSPATH_TLDS);
@@ -167,7 +167,7 @@ public class RealServletContainertTest extends WebAppTestCase {
         try {
             System.setProperty(FreemarkerServlet.SYSTEM_PROPERTY_META_INF_TLD_SOURCES, "clear, classpath");
             restartWebAppIfStarted(WEBAPP_TLD_DISCOVERY);
-            assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY, "test1.txt", "tester?view=test1.ftl");
+            assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY, "test1.txt", "tester?view=test1.f3ah");
         } finally {
             JspTestFreemarkerServlet.resetToDefaults();
             System.clearProperty(FreemarkerServlet.SYSTEM_PROPERTY_META_INF_TLD_SOURCES);
@@ -185,7 +185,7 @@ public class RealServletContainertTest extends WebAppTestCase {
             System.setProperty(FreemarkerServlet.SYSTEM_PROPERTY_META_INF_TLD_SOURCES, "clear, webInfPerLibJars");
             restartWebAppIfStarted(WEBAPP_TLD_DISCOVERY);
             assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY,
-                    "test-noClasspath.txt", "tester?view=test-noClasspath.ftl");
+                    "test-noClasspath.txt", "tester?view=test-noClasspath.f3ah");
         } finally {
             JspTestFreemarkerServlet.resetToDefaults();
             System.clearProperty(FreemarkerServlet.SYSTEM_PROPERTY_META_INF_TLD_SOURCES);
@@ -194,7 +194,7 @@ public class RealServletContainertTest extends WebAppTestCase {
     
     @Test
     public void tldDiscoveryRelative() throws Exception {
-        assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY, "subdir/test-rel.txt", "tester?view=subdir/test-rel.ftl");
+        assertExpectedEqualsOutput(WEBAPP_TLD_DISCOVERY, "subdir/test-rel.txt", "tester?view=subdir/test-rel.f3ah");
     }
     
     @Test
@@ -204,77 +204,77 @@ public class RealServletContainertTest extends WebAppTestCase {
         Assert.assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS, "failing-parsetime.jsp"));
         
         Assert.assertEquals(200, getResponseStatusCode(WEBAPP_ERRORS,
-                "tester?view=not-failing.ftl&viewServlet=freemarker-default-dev"));
+                "tester?view=not-failing.f3ah&viewServlet=freemarker-default-dev"));
         Assert.assertEquals(404, getResponseStatusCode(WEBAPP_ERRORS,
-                "tester?view=missing.ftl&viewServlet=freemarker-default-dev"));
+                "tester?view=missing.f3ah&viewServlet=freemarker-default-dev"));
         Assert.assertEquals(200, getResponseStatusCode(WEBAPP_ERRORS,
-                "tester?view=failing-runtime.ftl&viewServlet=freemarker-default-dev"));
+                "tester?view=failing-runtime.f3ah&viewServlet=freemarker-default-dev"));
         Assert.assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS,
-                "tester?view=failing-parsetime.ftlnv&viewServlet=freemarker-default-dev"));
+                "tester?view=failing-parsetime.f3ahnv&viewServlet=freemarker-default-dev"));
         
         Assert.assertEquals(200, getResponseStatusCode(WEBAPP_ERRORS,
-                "tester?view=not-failing.ftl&viewServlet=freemarker-default-prod"));
+                "tester?view=not-failing.f3ah&viewServlet=freemarker-default-prod"));
         Assert.assertEquals(404, getResponseStatusCode(WEBAPP_ERRORS,
-                "tester?view=missing.ftl&viewServlet=freemarker-default-prod"));
+                "tester?view=missing.f3ah&viewServlet=freemarker-default-prod"));
         Assert.assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS,
-                "tester?view=failing-runtime.ftl&viewServlet=freemarker-default-prod"));
+                "tester?view=failing-runtime.f3ah&viewServlet=freemarker-default-prod"));
         Assert.assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS,
-                "tester?view=failing-parsetime.ftlnv&viewServlet=freemarker-default-prod"));
+                "tester?view=failing-parsetime.f3ahnv&viewServlet=freemarker-default-prod"));
         
         Assert.assertEquals(200, getResponseStatusCode(WEBAPP_ERRORS,
-                "tester?view=not-failing.ftl&viewServlet=freemarker-future-prod"));
+                "tester?view=not-failing.f3ah&viewServlet=freemarker-future-prod"));
         Assert.assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS,
-                "tester?view=missing.ftl&viewServlet=freemarker-future-prod"));
+                "tester?view=missing.f3ah&viewServlet=freemarker-future-prod"));
         Assert.assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS,
-                "tester?view=failing-runtime.ftl&viewServlet=freemarker-future-prod"));
+                "tester?view=failing-runtime.f3ah&viewServlet=freemarker-future-prod"));
         Assert.assertEquals(500, getResponseStatusCode(WEBAPP_ERRORS,
-                "tester?view=failing-parsetime.ftlnv&viewServlet=freemarker-future-prod"));
+                "tester?view=failing-parsetime.f3ahnv&viewServlet=freemarker-future-prod"));
     }
     
     @Test
     public void testTemplateLoaderConfig() throws Exception {
         Assert.assertEquals("from /WEB-INF/classes", getResponseContent(WEBAPP_CONFIG,
-                "tester?view=test.ftl&viewServlet=freemarker-class-root"));
+                "tester?view=test.f3ah&viewServlet=freemarker-class-root"));
         Assert.assertEquals("from WEB-INF/lib/templates.jar/sub", getResponseContent(WEBAPP_CONFIG,
-                "tester?view=sub/test2.ftl&viewServlet=freemarker-class-root"));
+                "tester?view=sub/test2.f3ah&viewServlet=freemarker-class-root"));
         Assert.assertEquals("from /WEB-INF/classes/sub", getResponseContent(WEBAPP_CONFIG,
-                "tester?view=test.ftl&viewServlet=freemarker-class-sub"));
+                "tester?view=test.f3ah&viewServlet=freemarker-class-sub"));
         Assert.assertEquals("from WEB-INF/lib/templates.jar/sub", getResponseContent(WEBAPP_CONFIG,
-                "tester?view=test2.ftl&viewServlet=freemarker-class-sub"));
+                "tester?view=test2.f3ah&viewServlet=freemarker-class-sub"));
         
         Assert.assertEquals("from /WEB-INF/classes", getResponseContent(WEBAPP_CONFIG,
-                "tester?view=test.ftl&viewServlet=freemarker-classpath-root"));
+                "tester?view=test.f3ah&viewServlet=freemarker-classpath-root"));
         Assert.assertEquals("from WEB-INF/lib/templates.jar/sub", getResponseContent(WEBAPP_CONFIG,
-                "tester?view=sub/test2.ftl&viewServlet=freemarker-classpath-root"));
+                "tester?view=sub/test2.f3ah&viewServlet=freemarker-classpath-root"));
         Assert.assertEquals("from /WEB-INF/classes/sub", getResponseContent(WEBAPP_CONFIG,
-                "tester?view=test.ftl&viewServlet=freemarker-classpath-sub"));
+                "tester?view=test.f3ah&viewServlet=freemarker-classpath-sub"));
         Assert.assertEquals("from WEB-INF/lib/templates.jar/sub", getResponseContent(WEBAPP_CONFIG,
-                "tester?view=test2.ftl&viewServlet=freemarker-classpath-sub"));
+                "tester?view=test2.f3ah&viewServlet=freemarker-classpath-sub"));
         
         Assert.assertEquals("from /WEB-INF/templates", getResponseContent(WEBAPP_CONFIG,
-                "tester?view=test.ftl&viewServlet=freemarker-webinfPerTemplates"));
+                "tester?view=test.f3ah&viewServlet=freemarker-webinfPerTemplates"));
         Assert.assertEquals("from /", getResponseContent(WEBAPP_CONFIG,
-                "tester?view=test.ftl&viewServlet=freemarker-contentRoot"));
+                "tester?view=test.f3ah&viewServlet=freemarker-contentRoot"));
     }
     
     @Test
     public void testConfigurationDefaults() throws Exception {
         Assert.assertEquals(200, getResponseStatusCode(WEBAPP_CONFIG,
-                "tester?view=test.ftl&viewServlet=freemarker-assertDefaultsFreemarkerServlet"));
+                "tester?view=test.f3ah&viewServlet=freemarker-assertDefaultsFreemarkerServlet"));
         Assert.assertEquals(200, getResponseStatusCode(WEBAPP_CONFIG,
-                "tester?view=test.ftl&viewServlet=freemarker-assertCustomizedDefaultsFreemarkerServlet"));
+                "tester?view=test.f3ah&viewServlet=freemarker-assertCustomizedDefaultsFreemarkerServlet"));
         Assert.assertEquals(200, getResponseStatusCode(WEBAPP_CONFIG,
-                "tester?view=test.ftl&viewServlet=freemarker-assertObjectWrapperDefaults1FreemarkerServlet"));
+                "tester?view=test.f3ah&viewServlet=freemarker-assertObjectWrapperDefaults1FreemarkerServlet"));
         Assert.assertEquals(200, getResponseStatusCode(WEBAPP_CONFIG,
-                "tester?view=test.ftl&viewServlet=freemarker-assertObjectWrapperDefaults2FreemarkerServlet"));
+                "tester?view=test.f3ah&viewServlet=freemarker-assertObjectWrapperDefaults2FreemarkerServlet"));
     }
     
     @Test
     public void testMultipleLoaders() throws Exception {
-       Assert.assertEquals("In test.ftl",
-               getResponseContent(WEBAPP_MULTIPLE_LOADERS, "tester?view=test.ftl")); 
-       Assert.assertEquals("In classpath-test.ftl",
-               getResponseContent(WEBAPP_MULTIPLE_LOADERS, "tester?view=classpath-test.ftl")); 
+       Assert.assertEquals("In test.f3ah",
+               getResponseContent(WEBAPP_MULTIPLE_LOADERS, "tester?view=test.f3ah")); 
+       Assert.assertEquals("In classpath-test.f3ah",
+               getResponseContent(WEBAPP_MULTIPLE_LOADERS, "tester?view=classpath-test.f3ah")); 
     }
 
     public static class AllKindOfContainersModel2Action extends DefaultModel2TesterAction {

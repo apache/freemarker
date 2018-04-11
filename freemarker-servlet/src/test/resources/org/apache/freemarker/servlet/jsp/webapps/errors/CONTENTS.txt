@@ -19,10 +19,10 @@
  
 // Only the files listed here will be part of the tested Web application deployment! 
 
-failing-parsetime.ftlnv
+failing-parsetime.f3ahnv
 failing-parsetime.jsp
-failing-runtime.ftl
+failing-runtime.f3ah
 failing-runtime.jsp
-not-failing.ftl
+not-failing.f3ah
 
 WEB-INF/web.xml

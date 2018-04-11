@@ -1,3 +1,8 @@
+<#ftl nsPrefixes={
+    "D": "http://freemarker.org/test/namespace-test",
+    "n": "http://freemarker.org/test/foo",
+    "bar": "http://freemarker.org/test/bar"
+}>
 <#--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -16,23 +21,16 @@
   specific language governing permissions and limitations
   under the License.
 -->
-<#-- Mostly just checks if the expressions doesn't fail -->
-<#assign works = .dataModel>
-<#attempt>
-  ${noSuchVariableExists}
-<#recover>
-  <#assign works = .error>
-</#attempt>
-<#assign works = .globals>
-${.lang} == en
-${.locale} == en_US
-<#assign works = .locals!>
-<#assign works = .main>
-<#assign works = .node!>
-${.outputEncoding?lowerCase} == utf-8
-${.currentTemplateName} == specialvars.ftl
-${.urlEscapingCharset?lowerCase} == iso-8859-1
-<#assign foo = "x">
-${.vars['foo']} == x
-<#assign works = .version>
-${.now?isDatetime?c} == true
+//e: ${doc['//D:e']}, ${doc.root.e}
+//n:e: ${doc['//n:e']}, ${doc.root['n:e']}
+//bar:e: ${doc['//bar:e']}, ${doc.root['bar:e']}
+
+Included:
+<#include "xml-ns_prefix-scope-lib.f3ac">
+${libResult}
+<@m />
+
+Imported:
+<#import "xml-ns_prefix-scope-lib.f3ac" as lib>
+${libResult}
+<@lib.m />

@@ -24,8 +24,8 @@ import java.io.IOException;
 
 import org.apache.freemarker.core.ASTPrinter.Options;
 import org.apache.freemarker.core.util._StringUtils;
-import org.apache.freemarker.test.TestUtils;
 import org.apache.freemarker.test.FileTestCase;
+import org.apache.freemarker.test.TestUtils;
 
 public class ASTTest extends FileTestCase {
 
@@ -84,7 +84,7 @@ public class ASTTest extends FileTestCase {
     }
 
     private void testAST(String testName, Options ops) throws FileNotFoundException, IOException {
-        final String templateName = testName + ".ftl";
+        final String templateName = testName + ".f3ah";
         assertExpectedFileEqualsString(
                 testName + ".ast",
                 ASTPrinter.getASTAsString(templateName,

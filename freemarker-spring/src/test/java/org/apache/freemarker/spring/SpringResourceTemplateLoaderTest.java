@@ -60,7 +60,7 @@ public class SpringResourceTemplateLoaderTest {
     @Test
     public void testSuccessful() throws Exception {
         for (int i = 0; i < 2; i++) {
-            assertThat(cfg.getTemplate("sub1/sub2/t.ftl").toString(), endsWith("foo"));
+            assertThat(cfg.getTemplate("sub1/sub2/t.f3ah").toString(), endsWith("foo"));
         }
     }
 

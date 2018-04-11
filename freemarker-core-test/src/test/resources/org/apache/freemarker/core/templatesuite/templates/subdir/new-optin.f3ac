@@ -23,8 +23,4 @@ ${"org.apache.freemarker.core.templatesuite.models.NewTestModel2"?new("works")}
 fails
 </#attempt>
 
-<#include "subdir/new-optin.ftl">
-
-<#include "subdir/new-optin-2.ftl">
-
-<#include "subdir/subsub/new-optin.ftl">
+<#include "new-optin-2.f3ac">

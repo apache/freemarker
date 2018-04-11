@@ -208,7 +208,7 @@ public class ConfigurationTest {
                 .templateLoader(new ClassTemplateLoader(getClass(), "nosuchpackage"))
                 .build();
         try {
-            cfg.getTemplate("missing.ftl");
+            cfg.getTemplate("missing.f3ah");
             fail();
         } catch (TemplateNotFoundException e) {
             assertThat(e.getMessage(), not(containsString("wasn't set")));
@@ -256,10 +256,10 @@ public class ConfigurationTest {
     @SuppressWarnings("boxing")
     public void testGetTemplateOverloads() throws Exception {
         final Locale hu = new Locale("hu", "HU");
-        final String tFtl = "t.ftl";
-        final String tHuFtl = "t_hu.ftl";
-        final String tEnFtl = "t_en.ftl";
-        final String tUtf8Ftl = "utf8.ftl";
+        final String tFtl = "t.f3ah";
+        final String tHuFtl = "t_hu.f3ah";
+        final String tEnFtl = "t_en.f3ah";
+        final String tUtf8Ftl = "utf8.f3ah";
         final Serializable custLookupCond = 12345;
 
         ByteArrayTemplateLoader tl = new ByteArrayTemplateLoader();
@@ -348,12 +348,12 @@ public class ConfigurationTest {
 
         // 4 args:
         try {
-            cfg.getTemplate("missing.ftl", hu, custLookupCond, false);
+            cfg.getTemplate("missing.f3ah", hu, custLookupCond, false);
             fail();
         } catch (TemplateNotFoundException e) {
             // Expected
         }
-        assertNull(cfg.getTemplate("missing.ftl", hu, custLookupCond, true));
+        assertNull(cfg.getTemplate("missing.f3ah", hu, custLookupCond, true));
         {
             Template t = cfg.getTemplate(tFtl, hu, custLookupCond, false);
             assertEquals(tFtl, t.getLookupName());
@@ -393,13 +393,13 @@ public class ConfigurationTest {
         cfgB.setTemplateLoader(new ClassTemplateLoader(ConfigurationTest.class, ""));
         Configuration cfg = cfgB.build();
         assertEquals(0, cache.getSize());
-        cfg.getTemplate("toCache1.ftl");
+        cfg.getTemplate("toCache1.f3ah");
         assertEquals(1, cache.getSize());
-        cfg.getTemplate("toCache2.ftl");
+        cfg.getTemplate("toCache2.f3ah");
         assertEquals(2, cache.getSize());
         cfg.clearTemplateCache();
         assertEquals(0, cache.getSize());
-        cfg.getTemplate("toCache1.ftl");
+        cfg.getTemplate("toCache1.f3ah");
         assertEquals(1, cache.getSize());
         cfgB.setTemplateLoader(cfgB.getTemplateLoader());
         assertEquals(1, cache.getSize());
@@ -408,18 +408,18 @@ public class ConfigurationTest {
     @Test
     public void testTemplateNameFormat() throws Exception {
         StringTemplateLoader tl = new StringTemplateLoader();
-        tl.putTemplate("a/b.ftl", "In a/b.ftl");
-        tl.putTemplate("b.ftl", "In b.ftl");
+        tl.putTemplate("a/b.f3ah", "In a/b.f3ah");
+        tl.putTemplate("b.f3ah", "In b.f3ah");
 
         {
             Configuration cfg = new Builder(VERSION_3_0_0)
                     .templateLoader(tl)
                     .templateNameFormat(DefaultTemplateNameFormat.INSTANCE)
                     .build();
-            final Template template = cfg.getTemplate("a/./../b.ftl");
-            assertEquals("b.ftl", template.getLookupName());
-            assertEquals("b.ftl", template.getSourceName());
-            assertEquals("In b.ftl", template.toString());
+            final Template template = cfg.getTemplate("a/./../b.f3ah");
+            assertEquals("b.f3ah", template.getLookupName());
+            assertEquals("b.f3ah", template.getSourceName());
+            assertEquals("In b.f3ah", template.toString());
         }
     }
 
@@ -455,7 +455,7 @@ public class ConfigurationTest {
                 .templateLoader(new ClassTemplateLoader(ConfigurationTest.class, ""))
                 .build();
         assertSame(DefaultTemplateLookupStrategy.INSTANCE, cfg.getTemplateLookupStrategy());
-        assertEquals("toCache1.ftl", cfg.getTemplate("toCache1.ftl").getSourceName());
+        assertEquals("toCache1.f3ah", cfg.getTemplate("toCache1.f3ah").getSourceName());
     }
 
     @Test
@@ -463,7 +463,7 @@ public class ConfigurationTest {
         final TemplateLookupStrategy myStrategy = new TemplateLookupStrategy() {
             @Override
             public TemplateLookupResult lookup(TemplateLookupContext ctx) throws IOException {
-                return ctx.lookupWithAcquisitionStrategy("toCache2.ftl");
+                return ctx.lookupWithAcquisitionStrategy("toCache2.f3ah");
             }
         };
 
@@ -472,7 +472,7 @@ public class ConfigurationTest {
                 .templateLookupStrategy(myStrategy)
                 .build();
         assertSame(myStrategy, cfg.getTemplateLookupStrategy());
-        assertEquals("toCache2.ftl", cfg.getTemplate("toCache1.ftl").getSourceName());
+        assertEquals("toCache2.f3ah", cfg.getTemplate("toCache1.f3ah").getSourceName());
     }
 
     @Test
@@ -481,10 +481,10 @@ public class ConfigurationTest {
         assertNull(cfgB.getTemplateConfigurations());
 
         StringTemplateLoader tl = new StringTemplateLoader();
-        tl.putTemplate("t.de.ftlh", "");
-        tl.putTemplate("t.fr.ftlx", "");
-        tl.putTemplate("t.ftlx", "");
-        tl.putTemplate("Stat/t.de.ftlx", "");
+        tl.putTemplate("t.de.f3ah", "");
+        tl.putTemplate("t.fr.f3ax", "");
+        tl.putTemplate("t.f3ax", "");
+        tl.putTemplate("Stat/t.de.f3ax", "");
         cfgB.setTemplateLoader(tl);
         
         cfgB.setTimeZone(TimeZone.getTimeZone("GMT+09"));
@@ -500,9 +500,9 @@ public class ConfigurationTest {
                     + "), "
                     + "FirstMatchTemplateConfigurationFactory("
                         + "ConditionalTemplateConfigurationFactory("
-                            + "FileExtensionMatcher('ftlh'), TemplateConfiguration(booleanFormat='TODO,HTML')), "
+                            + "FileExtensionMatcher('f3ah'), TemplateConfiguration(booleanFormat='TODO,HTML')), "
                         + "ConditionalTemplateConfigurationFactory("
-                            + "FileExtensionMatcher('ftlx'), TemplateConfiguration(booleanFormat='TODO,XML')), "
+                            + "FileExtensionMatcher('f3ax'), TemplateConfiguration(booleanFormat='TODO,XML')), "
                         + "noMatchErrorDetails='Unrecognized template file extension'"
                     + "), "
                     + "ConditionalTemplateConfigurationFactory("
@@ -513,22 +513,22 @@ public class ConfigurationTest {
 
         Configuration cfg = cfgB.build();
         {
-            Template t = cfg.getTemplate("t.de.ftlh");
+            Template t = cfg.getTemplate("t.de.f3ah");
             assertEquals("TODO,HTML", t.getBooleanFormat());
             assertEquals(TimeZone.getTimeZone("GMT+01"), t.getTimeZone());
         }
         {
-            Template t = cfg.getTemplate("t.fr.ftlx");
+            Template t = cfg.getTemplate("t.fr.f3ax");
             assertEquals("TODO,XML", t.getBooleanFormat());
             assertEquals(TimeZone.getTimeZone("GMT"), t.getTimeZone());
         }
         {
-            Template t = cfg.getTemplate("t.ftlx");
+            Template t = cfg.getTemplate("t.f3ax");
             assertEquals("TODO,XML", t.getBooleanFormat());
             assertEquals(TimeZone.getTimeZone("GMT+09"), t.getTimeZone());
         }
         {
-            Template t = cfg.getTemplate("Stat/t.de.ftlx");
+            Template t = cfg.getTemplate("Stat/t.de.f3ax");
             assertEquals("TODO,XML", t.getBooleanFormat());
             assertEquals(_DateUtils.UTC, t.getTimeZone());
         }
@@ -868,8 +868,8 @@ public class ConfigurationTest {
         assertEquals("Y,N", cfg.getTemplateConfigurations().get("t.yn", null).getBooleanFormat());
         assertNotNull(cfg.getCustomNumberFormat("hex"));
         assertNotNull(cfg.getCustomDateFormat("epoch"));
-        assertEquals(ImmutableMap.of("lib", "lib.ftl"), cfg.getAutoImports());
-        assertEquals(ImmutableList.of("inc.ftl"), cfg.getAutoIncludes());
+        assertEquals(ImmutableMap.of("lib", "lib.f3ah"), cfg.getAutoImports());
+        assertEquals(ImmutableList.of("inc.f3ah"), cfg.getAutoIncludes());
         assertEquals(ImmutableMap.of("v", 1), cfg.getSharedVariables());
         assertEquals(ImmutableList.of(CustomHTMLOutputFormat.INSTANCE, DummyOutputFormat.INSTANCE),
                 cfg.getRegisteredCustomOutputFormats());
@@ -890,8 +890,8 @@ public class ConfigurationTest {
                 )
                 .customNumberFormats(ImmutableMap.of("baseN", BaseNTemplateNumberFormatFactory.INSTANCE))
                 .customDateFormats(ImmutableMap.of("epochDiv", EpochMillisDivTemplateDateFormatFactory.INSTANCE))
-                .autoImports(ImmutableMap.of("lib2", "lib2.ftl"))
-                .autoIncludes(ImmutableList.of("inc2.ftl"))
+                .autoImports(ImmutableMap.of("lib2", "lib2.f3ah"))
+                .autoIncludes(ImmutableList.of("inc2.f3ah"))
                 .sharedVariables(ImmutableMap.of("v2", 2))
                 .registeredCustomOutputFormats(
                         SeldomEscapedOutputFormat.INSTANCE, NameClashingDummyOutputFormat.INSTANCE)
@@ -907,9 +907,9 @@ public class ConfigurationTest {
         assertNotNull(cfg.getCustomDateFormat("epoch"));
         assertNotNull(cfg.getCustomDateFormat("epochDiv"));
 
-        assertEquals(ImmutableMap.of("lib", "lib.ftl", "lib2", "lib2.ftl"), cfg.getAutoImports());
+        assertEquals(ImmutableMap.of("lib", "lib.f3ah", "lib2", "lib2.f3ah"), cfg.getAutoImports());
 
-        assertEquals(ImmutableList.of("inc.ftl", "inc2.ftl"), cfg.getAutoIncludes());
+        assertEquals(ImmutableList.of("inc.f3ah", "inc2.f3ah"), cfg.getAutoIncludes());
 
         assertEquals(ImmutableMap.of("v", 1, "v2", 2), cfg.getSharedVariables());
 
@@ -972,12 +972,12 @@ public class ConfigurationTest {
 
         @Override
         protected Map<String, String> getImpliedAutoImports() {
-            return ImmutableMap.of("lib", "lib.ftl");
+            return ImmutableMap.of("lib", "lib.f3ah");
         }
 
         @Override
         protected List<String> getImpliedAutoIncludes() {
-            return ImmutableList.of("inc.ftl");
+            return ImmutableList.of("inc.f3ah");
         }
 
         @Override

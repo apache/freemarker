@@ -1,8 +1,3 @@
-<#ftl nsPrefixes={
-    "D": "http://freemarker.org/test/namespace-test",
-    "n": "http://freemarker.org/test/foo",
-    "bar": "http://freemarker.org/test/bar"
-}>
 <#--
   Licensed to the Apache Software Foundation (ASF) under one
   or more contributor license agreements.  See the NOTICE file
@@ -21,16 +16,17 @@
   specific language governing permissions and limitations
   under the License.
 -->
-//e: ${doc['//D:e']}, ${doc.root.e}
-//n:e: ${doc['//n:e']}, ${doc.root['n:e']}
-//bar:e: ${doc['//bar:e']}, ${doc.root['bar:e']}
+<#include "include2" + "-included.f3ac">
+<#assign s = "de">
+<#include "inclu" + s + "2-included.f3ac">
 
-Included:
-<#include "xml-ns_prefix-scope-lib.ftl">
-${libResult}
-<@m />
+<#assign bTrue=true>
+<#assign bFalse=false>
+<#include "include2-included.f3ac" ignoreMissing=true>
+<#include "include2-included.f3ac" ignoreMissing=bTrue>
+<#include "include2-included.f3ac" ignoreMissing=false>
+<#include "include2-included.f3ac" ignoreMissing=bFalse>
 
-Imported:
-<#import "xml-ns_prefix-scope-lib.ftl" as lib>
-${libResult}
-<@lib.m />
+<@assertFails message="not found"><#include "missing.f3ac"></@>
+[<#include "missing.f3ac" ignoreMissing=true>]
+[<#include "missing.f3ac" ignoreMissing=bTrue>]
