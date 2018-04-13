@@ -1363,12 +1363,12 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *   <li><p>{@code "autoImports"}:
      *       See {@link Configuration#getAutoImports()}
      *       <br>String value is something like:
-     *       <br>{@code /lib/form.ftl as f, /lib/widget as w, "/lib/odd name.ftl" as odd}
+     *       <br>{@code /lib/form.f3ah as f, /lib/widget as w, "/lib/odd name.f3ah" as odd}
      *       
      *   <li><p>{@code "autoInclude"}: Sets the list of auto-includes.
      *       See {@link Configuration#getAutoIncludes()}
      *       <br>String value is something like:
-     *       <br>{@code /include/common.ftl, "/include/evil name.ftl"}
+     *       <br>{@code /include/common.f3ah, "/include/evil name.f3ah"}
      *       
      *   <li><p>{@code "lazyAutoImports"}:
      *       See {@link Configuration#getLazyAutoImports()}.
@@ -1403,14 +1403,14 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *               <tr>
      *                 <td>
      *                   {@code allowedClasses: com.example.C1, com.example.C2,
-     *                   trustedTemplates: lib/*, safe.ftl}
+     *                   trustedTemplates: lib/*, safe.f3ah}
      *                 <td>
      *                   Only allow instantiating the {@code com.example.C1} and
      *                   {@code com.example.C2} classes. But, allow templates
      *                   within the {@code lib/} directory (like
-     *                   {@code lib/foo/bar.ftl}) and template {@code safe.ftl}
-     *                   (that does not match {@code foo/safe.ftl}, only
-     *                   exactly {@code safe.ftl}) to instantiate anything
+     *                   {@code lib/foo/bar.f3ah}) and template {@code safe.f3ah}
+     *                   (that does not match {@code foo/safe.f3ah}, only
+     *                   exactly {@code safe.f3ah}) to instantiate anything
      *                   that {@link TemplateClassResolver#UNRESTRICTED} allows.
      *               <tr>
      *                 <td>
@@ -1420,11 +1420,11 @@ public abstract class MutableProcessingConfiguration<SelfT extends MutableProces
      *                   trusted templates.
      *               <tr>
      *                 <td>
-                         {@code trustedTemplates: lib/*, safe.ftl}
+                         {@code trustedTemplates: lib/*, safe.f3ah}
      *                 <td>
      *                   Do not allow instantiating any classes, except in
      *                   templates inside {@code lib/} or in template 
-     *                   {@code safe.ftl}.
+     *                   {@code safe.f3ah}.
      *             </table>
      *             
      *             <p>For more details see {@link OptInTemplateClassResolver}.

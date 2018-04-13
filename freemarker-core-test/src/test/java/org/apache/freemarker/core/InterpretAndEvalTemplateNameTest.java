@@ -39,31 +39,31 @@ public class InterpretAndEvalTemplateNameTest extends TemplateTest {
                 }) {
             StringTemplateLoader tl = new StringTemplateLoader();
             tl.putTemplate(
-                    "main.ftl",
+                    "main.f3au",
                     getTemplateNames + " "
-                    + "{<#include 'sub/t.ftl'>}");
+                    + "{<#include 'sub/t.f3au'>}");
             tl.putTemplate(
-                    "sub/t.ftl",
+                    "sub/t.f3au",
                     getTemplateNames + " "
-                    + "i{<@r'" + getTemplateNames + " {<#include \"a.ftl\">'?interpret />}} "
-                    + "i{<@[r'" + getTemplateNames + " {<#include \"a.ftl\">','named_interpreted']?interpret />}}");
-            tl.putTemplate("sub/a.ftl", "In sub/a.ftl, " + getTemplateNames);
-            tl.putTemplate("a.ftl", "In a.ftl");
+                    + "i{<@r'" + getTemplateNames + " {<#include \"a.f3au\">'?interpret />}} "
+                    + "i{<@[r'" + getTemplateNames + " {<#include \"a.f3au\">','named_interpreted']?interpret />}}");
+            tl.putTemplate("sub/a.f3au", "In sub/a.f3au, " + getTemplateNames);
+            tl.putTemplate("a.f3au", "In a.f3au");
 
             setConfiguration(new TestConfigurationBuilder().templateLoader(tl).build());
             
-            assertOutputForNamed("main.ftl",
-                    "c=main.ftl, m=main.ftl "
+            assertOutputForNamed("main.f3au",
+                    "c=main.f3au, m=main.f3au "
                     + "{"
-                        + "c=sub/t.ftl, m=main.ftl "
-                        + "i{c=sub/t.ftl->anonymous_interpreted, m=main.ftl {In sub/a.ftl, c=sub/a.ftl, m=main.ftl}} "
-                        + "i{c=sub/t.ftl->named_interpreted, m=main.ftl {In sub/a.ftl, c=sub/a.ftl, m=main.ftl}}"
+                    + "c=sub/t.f3au, m=main.f3au "
+                    + "i{c=sub/t.f3au->anonymous_interpreted, m=main.f3au {In sub/a.f3au, c=sub/a.f3au, m=main.f3au}} "
+                    + "i{c=sub/t.f3au->named_interpreted, m=main.f3au {In sub/a.f3au, c=sub/a.f3au, m=main.f3au}}"
                     + "}");
             
-            assertOutputForNamed("sub/t.ftl",
-                    "c=sub/t.ftl, m=sub/t.ftl "
-                    + "i{c=sub/t.ftl->anonymous_interpreted, m=sub/t.ftl {In sub/a.ftl, c=sub/a.ftl, m=sub/t.ftl}} "
-                    + "i{c=sub/t.ftl->named_interpreted, m=sub/t.ftl {In sub/a.ftl, c=sub/a.ftl, m=sub/t.ftl}}");
+            assertOutputForNamed("sub/t.f3au",
+                    "c=sub/t.f3au, m=sub/t.f3au "
+                    + "i{c=sub/t.f3au->anonymous_interpreted, m=sub/t.f3au {In sub/a.f3au, c=sub/a.f3au, m=sub/t.f3au}} "
+                    + "i{c=sub/t.f3au->named_interpreted, m=sub/t.f3au {In sub/a.f3au, c=sub/a.f3au, m=sub/t.f3au}}");
         }
     }
     

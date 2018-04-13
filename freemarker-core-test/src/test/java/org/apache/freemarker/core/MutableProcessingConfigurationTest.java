@@ -95,13 +95,13 @@ public class MutableProcessingConfigurationTest {
         {
             assertTrue(_CollectionUtils.isMapKnownToBeUnmodifiable(mpc.getAutoImports()));
             Map<String, String> mutableValue = new HashMap<>();
-            mutableValue.put("x", "x.ftl");
+            mutableValue.put("x", "x.f3ah");
             mpc.setAutoImports(mutableValue);
             Map<String, String> immutableValue = mpc.getAutoImports();
             assertNotSame(mutableValue, immutableValue); // Must be a copy
             assertTrue(_CollectionUtils.isMapKnownToBeUnmodifiable(immutableValue));
             assertEquals(mutableValue, immutableValue);
-            mutableValue.put("y", "y.ftl");
+            mutableValue.put("y", "y.f3ah");
             assertNotEquals(mutableValue, immutableValue); // No aliasing
         }
 

@@ -176,7 +176,7 @@ public class OutputFormatTest extends TemplateTest {
     public void testStandardFileExtensionsSettingOverriding() throws Exception {
         addTemplate("t.f3ax",
                 "${\"'\"} ${\"'\"?esc} ${\"'\"?noEsc}");
-        addTemplate("t.ftl",
+        addTemplate("t.f3ah",
                 "${'{}'} ${'{}'?esc} ${'{}'?noEsc}");
         
         ConditionalTemplateConfigurationFactory tcfHTML = new ConditionalTemplateConfigurationFactory(
@@ -231,8 +231,8 @@ public class OutputFormatTest extends TemplateTest {
     public void testStandardFileExtensionsWithConstructor() throws Exception {
         Configuration cfg = getConfiguration();
         String commonFTL = "${'\\''}";
-        {
-            Template t = new Template("foo.ftl", commonFTL, cfg);
+        for (String ext : new String[] { "f3au", "f3ac" } ){
+            Template t = new Template("foo." + ext, commonFTL, cfg);
             assertSame(UndefinedOutputFormat.INSTANCE, t.getOutputFormat());
             StringWriter out = new StringWriter();
             t.process(null, out);
@@ -533,15 +533,16 @@ public class OutputFormatTest extends TemplateTest {
         addTemplate("t.f3ah", commonFTL);
         assertOutputForNamed("t.f3ah", "HTML true");
 
-        addTemplate("t.ftl", commonFTL);
-        assertOutputForNamed("t.ftl", "undefined false");
+        addTemplate("t.f3au", commonFTL);
+        assertOutputForNamed("t.f3au", "undefined false");
         
-        addTemplate("tX.ftl", "<#ftl outputFormat='XML'>" + commonFTL);
+        addTemplate("tX.f3ah", "<#ftl outputFormat='XML'>" + commonFTL);
+        assertOutputForNamed("tX.f3ah", "XML true");
         addTemplate("tX.f3ax", commonFTL);
         assertOutputForNamed("t.f3ax", "XML true");
         
-        addTemplate("tN.ftl", "<#ftl outputFormat='RTF' autoEsc=false>" + commonFTL);
-        assertOutputForNamed("tN.ftl", "RTF false");
+        addTemplate("tN.f3ac", "<#ftl outputFormat='RTF' autoEsc=false>" + commonFTL);
+        assertOutputForNamed("tN.f3ac", "RTF false");
         
         assertOutput("${.outputFormat} ${.autoEsc?c}", "undefined false");
     }
@@ -551,10 +552,10 @@ public class OutputFormatTest extends TemplateTest {
         String commonFTL = "${'<x>'} ${'<x>'?esc} ${'<x>'?noEsc}";
         addTemplate("t.f3ah", commonFTL);
         addTemplate("t-noAuto.f3ah", "<#ftl autoEsc=false>" + commonFTL);
-        addTemplate("t.ftl", commonFTL);
+        addTemplate("t.f3au", commonFTL);
         assertOutputForNamed("t.f3ah", "&lt;x&gt; &lt;x&gt; <x>");
         assertOutputForNamed("t-noAuto.f3ah", "<x> &lt;x&gt; <x>");
-        assertErrorContainsForNamed("t.ftl", "output format", "undefined");
+        assertErrorContainsForNamed("t.f3au", "output format", "undefined");
     }
 
     @Test

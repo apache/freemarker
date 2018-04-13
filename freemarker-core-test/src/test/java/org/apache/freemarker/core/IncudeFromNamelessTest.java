@@ -36,18 +36,18 @@ public class IncudeFromNamelessTest extends TestCase {
     
     public void test() throws IOException, TemplateException {
         StringTemplateLoader loader = new StringTemplateLoader();
-        loader.putTemplate("i.ftl", "[i]");
-        loader.putTemplate("sub/i.ftl", "[sub/i]");
-        loader.putTemplate("import.ftl", "<#assign x = 1>");
+        loader.putTemplate("i.f3ah", "[i]");
+        loader.putTemplate("sub/i.f3ah", "[sub/i]");
+        loader.putTemplate("import.f3ah", "<#assign x = 1>");
 
         Configuration cfg = new TestConfigurationBuilder().templateLoader(loader).build();
 
         Template t = new Template(null, new StringReader(
-                    "<#include 'i.ftl'>\n"
-                    + "<#include '/i.ftl'>\n"
-                    + "<#include 'sub/i.ftl'>\n"
-                    + "<#include '/sub/i.ftl'>"
-                    + "<#import 'import.ftl' as i>${i.x}"
+                    "<#include 'i.f3ah'>\n"
+                    + "<#include '/i.f3ah'>\n"
+                    + "<#include 'sub/i.f3ah'>\n"
+                    + "<#include '/sub/i.f3ah'>"
+                    + "<#import 'import.f3ah' as i>${i.x}"
                 ),
                 cfg);
         StringWriter out = new StringWriter();

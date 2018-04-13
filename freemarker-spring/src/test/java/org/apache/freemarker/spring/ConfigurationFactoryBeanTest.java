@@ -82,8 +82,8 @@ public class ConfigurationFactoryBeanTest {
         sharedVars.put("sharedVar2", "sharedVal2");
 
         final Map<String, String> autoImports = new HashMap<>();
-        autoImports.put("mylib1", "/libs/mylib1.ftl");
-        autoImports.put("mylib2", "/libs/mylib2.ftl");
+        autoImports.put("mylib1", "/libs/mylib1.f3ah");
+        autoImports.put("mylib2", "/libs/mylib2.f3ah");
 
         final StringTemplateLoader templateLoader = new StringTemplateLoader();
         templateLoader.putTemplate("fooTemplate", "foo");
@@ -108,8 +108,8 @@ public class ConfigurationFactoryBeanTest {
         //   </property>
         //   <property name="autoImports">
         //     <map>
-        //       <entry key="mylib1" value="/libs/mylib1.ftl" />
-        //       <entry key="mylib2" value="/libs/mylib2.ftl" />
+        //       <entry key="mylib1" value="/libs/mylib1.f3ah" />
+        //       <entry key="mylib2" value="/libs/mylib2.f3ah" />
         //     </map>
         //   </property>
         //   <property name="templateUpdateDelayMilliseconds" value="60000" />
@@ -160,8 +160,8 @@ public class ConfigurationFactoryBeanTest {
         assertEquals("sharedVal1", config.getSharedVariables().get("sharedVar1"));
         assertEquals("sharedVal2", config.getSharedVariables().get("sharedVar2"));
 
-        assertEquals("/libs/mylib1.ftl", config.getAutoImports().get("mylib1"));
-        assertEquals("/libs/mylib2.ftl", config.getAutoImports().get("mylib2"));
+        assertEquals("/libs/mylib1.f3ah", config.getAutoImports().get("mylib1"));
+        assertEquals("/libs/mylib2.f3ah", config.getAutoImports().get("mylib2"));
 
         final Template fooTemplate = config.getTemplate("fooTemplate");
         assertEquals("foo", fooTemplate.toString());

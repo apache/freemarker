@@ -42,7 +42,7 @@ public abstract class TemplateLookupContext<R extends TemplateLookupResult> {
      * TemplateLoaderSession)}.
      * 
      * @param templateName
-     *            Must be a normalized name, like {@code "foo/bar/baaz.ftl"}. A name is not normalized when, among
+     *            Must be a normalized name, like {@code "foo/bar/baaz.f3ah"}. A name is not normalized when, among
      *            others, it starts with {@code /}, or contains {@code .} or {@code ..} path steps, or it uses
      *            backslash ({@code \}) instead of {@code /}. A normalized name might contains "*" path steps
      *            (acquisition).

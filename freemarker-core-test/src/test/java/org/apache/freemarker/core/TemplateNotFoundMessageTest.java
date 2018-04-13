@@ -193,7 +193,7 @@ public class TemplateNotFoundMessageTest {
     }
 
     private String failWith(TemplateLoader tl) {
-        return failWith(tl, "missing.ftl", null);
+        return failWith(tl, "missing.f3ah", null);
     }
 
     @SuppressWarnings("serial")

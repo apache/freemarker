@@ -50,7 +50,7 @@ public class FileTemplateLoaderTest {
         if (!sub2Dir.mkdirs()) {
             throw new IOException("Failed to invoke subdirectories");
         }
-        File tFile = new File(sub2Dir, "t.ftl");
+        File tFile = new File(sub2Dir, "t.f3ah");
         FileUtils.write(tFile, "foo");
 
         cfg = new TestConfigurationBuilder().templateLoader(new FileTemplateLoader(templateRootDir)).build();
@@ -59,7 +59,7 @@ public class FileTemplateLoaderTest {
     @Test
     public void testSuccessful() throws Exception {
         for (int i = 0; i < 2; i++) {
-            assertEquals("foo", cfg.getTemplate("sub1/sub2/t.ftl").toString());
+            assertEquals("foo", cfg.getTemplate("sub1/sub2/t.f3ah").toString());
         }
     }
 
@@ -68,7 +68,7 @@ public class FileTemplateLoaderTest {
         ((FileTemplateLoader) cfg.getTemplateLoader()).setEmulateCaseSensitiveFileSystem(true);
         for (int i = 0; i < 2; i++) {
             cfg.clearTemplateCache();
-            assertEquals("foo", cfg.getTemplate("sub1/sub2/t.ftl").toString());
+            assertEquals("foo", cfg.getTemplate("sub1/sub2/t.f3ah").toString());
         }
     }
     
@@ -77,7 +77,7 @@ public class FileTemplateLoaderTest {
     public void testNotFound() throws Exception {
         for (int i = 0; i < 2; i++) {
             try {
-                cfg.getTemplate("sub1X/sub2/t.ftl");
+                cfg.getTemplate("sub1X/sub2/t.f3ah");
                 fail();
             } catch (TemplateNotFoundException e) {
                 assertThat(e.getMessage(), containsString("sub1X"));
@@ -89,7 +89,8 @@ public class FileTemplateLoaderTest {
     @Test
     public void testCaseSensitivity() throws Exception {
         for (boolean emuCaseSensFS : new boolean[] { false, true }) {
-            for (String nameWithBadCase : new String[] { "SUB1/sub2/t.ftl", "sub1/SUB2/t.ftl", "sub1/sub2/T.FTL" }) {
+            for (String nameWithBadCase : new String[] {
+                    "SUB1/sub2/t.f3ah", "sub1/SUB2/t.f3ah", "sub1/sub2/T.F3AH" }) {
                 ((FileTemplateLoader) cfg.getTemplateLoader()).setEmulateCaseSensitiveFileSystem(emuCaseSensFS);
                 cfg.clearTemplateCache();
                 

@@ -31,19 +31,19 @@ import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
  * 
  * <p>
  * Through an example: Assuming localized template lookup is enabled and that a template is requested for the name
- * {@code example.ftl} and {@code Locale("es", "ES", "Traditional_WIN")}, it will try the following template names,
- * in this order: {@code "foo_en_AU_Traditional_WIN.ftl"}, {@code "foo_en_AU_Traditional.ftl"},
- * {@code "foo_en_AU.ftl"}, {@code "foo_en.ftl"}, {@code "foo.ftl"}. It stops at the first variation where it finds
+ * {@code example.f3ah} and {@code Locale("es", "ES", "Traditional_WIN")}, it will try the following template names,
+ * in this order: {@code "foo_en_AU_Traditional_WIN.f3ah"}, {@code "foo_en_AU_Traditional.f3ah"},
+ * {@code "foo_en_AU.f3ah"}, {@code "foo_en.f3ah"}, {@code "foo.f3ah"}. It stops at the first variation where it finds
  * a template. (If the template name contains "*" steps, finding the template for the attempted localized variation
  * happens with the template acquisition mechanism.) If localized template lookup is disabled, it won't try to add any
- * locale strings, so it just looks for {@code "foo.ftl"}.
+ * locale strings, so it just looks for {@code "foo.f3ah"}.
  * 
  * <p>
  * The generation of the localized name variation with the default lookup strategy, happens like this: It removes
  * the file extension (the part starting with the <em>last</em> dot), then appends {@link Locale#toString()} after
  * it, and puts back the extension. Then it starts to remove the parts from the end of the locale, considering
  * {@code "_"} as the separator between the parts. It won't remove parts that are not part of the locale string
- * (like if the requested template name is {@code foo_bar.ftl}, it won't remove the {@code "_bar"}).
+ * (like if the requested template name is {@code foo_bar.f3ah}, it won't remove the {@code "_bar"}).
  */
 public class DefaultTemplateLookupStrategy extends TemplateLookupStrategy {
     

@@ -25,8 +25,8 @@ import org.apache.freemarker.core.util._StringUtils;
 
 /**
  * As opposed to {@link PathGlobMatcher}, it only compares the "file name" part (the part after the last {@code /}) of
- * the source name with the given glob. For example, the file name glob {@code *.ftlh} matches both {@code foo.ftlh} and
- * {@code foo/bar.ftlh}. With other words, that file name glob is equivalent with the {@code **}{@code /*.ftlh})
+ * the source name with the given glob. For example, the file name glob {@code *.f3ah} matches both {@code foo.f3ah} and
+ * {@code foo/bar.f3ah}. With other words, that file name glob is equivalent with the {@code **}{@code /*.f3ah})
  * <em>path</em> glob ( {@link PathGlobMatcher}).
  */
 public class FileNameGlobMatcher extends TemplateSourceMatcher {

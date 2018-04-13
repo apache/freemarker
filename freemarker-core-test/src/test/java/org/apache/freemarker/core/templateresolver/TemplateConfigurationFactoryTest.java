@@ -36,10 +36,10 @@ public class TemplateConfigurationFactoryTest {
     public void testCondition1() throws IOException, TemplateConfigurationFactoryException {
         TemplateConfiguration tc = newTemplateConfiguration(1);
         
-        TemplateConfigurationFactory tcf = new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*.ftlx"), tc);
+        TemplateConfigurationFactory tcf = new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*.tx"), tc);
 
-        assertNotApplicable(tcf, "x.ftl");
-        assertApplicable(tcf, "x.ftlx", tc);
+        assertNotApplicable(tcf, "x.t");
+        assertApplicable(tcf, "x.tx", tc);
     }
 
     @Test
@@ -47,13 +47,13 @@ public class TemplateConfigurationFactoryTest {
         TemplateConfiguration tc = newTemplateConfiguration(1);
         
         TemplateConfigurationFactory tcf = new ConditionalTemplateConfigurationFactory(
-                new FileNameGlobMatcher("*.ftlx"),
+                new FileNameGlobMatcher("*.tx"),
                 new ConditionalTemplateConfigurationFactory(
                         new FileNameGlobMatcher("x.*"), tc));
 
-        assertNotApplicable(tcf, "x.ftl");
-        assertNotApplicable(tcf, "y.ftlx");
-        assertApplicable(tcf, "x.ftlx", tc);
+        assertNotApplicable(tcf, "x.t");
+        assertNotApplicable(tcf, "y.tx");
+        assertApplicable(tcf, "x.tx", tc);
     }
 
     @Test
@@ -63,20 +63,20 @@ public class TemplateConfigurationFactoryTest {
         TemplateConfiguration tc3 = newTemplateConfiguration(3);
         
         TemplateConfigurationFactory tcf = new MergingTemplateConfigurationFactory(
-                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*.ftlx"), tc1),
+                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*.tx"), tc1),
                 new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*a*.*"), tc2),
                 new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*b*.*"), tc3));
 
-        assertNotApplicable(tcf, "x.ftl");
-        assertApplicable(tcf, "x.ftlx", tc1);
-        assertApplicable(tcf, "a.ftl", tc2);
-        assertApplicable(tcf, "b.ftl", tc3);
-        assertApplicable(tcf, "a.ftlx", tc1, tc2);
-        assertApplicable(tcf, "b.ftlx", tc1, tc3);
-        assertApplicable(tcf, "ab.ftl", tc2, tc3);
-        assertApplicable(tcf, "ab.ftlx", tc1, tc2, tc3);
+        assertNotApplicable(tcf, "x.t");
+        assertApplicable(tcf, "x.tx", tc1);
+        assertApplicable(tcf, "a.t", tc2);
+        assertApplicable(tcf, "b.t", tc3);
+        assertApplicable(tcf, "a.tx", tc1, tc2);
+        assertApplicable(tcf, "b.tx", tc1, tc3);
+        assertApplicable(tcf, "ab.t", tc2, tc3);
+        assertApplicable(tcf, "ab.tx", tc1, tc2, tc3);
         
-        assertNotApplicable(new MergingTemplateConfigurationFactory(), "x.ftl");
+        assertNotApplicable(new MergingTemplateConfigurationFactory(), "x.t");
     }
 
     @Test
@@ -86,34 +86,34 @@ public class TemplateConfigurationFactoryTest {
         TemplateConfiguration tc3 = newTemplateConfiguration(3);
         
         FirstMatchTemplateConfigurationFactory tcf = new FirstMatchTemplateConfigurationFactory(
-                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*.ftlx"), tc1),
+                new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*.tx"), tc1),
                 new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*a*.*"), tc2),
                 new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*b*.*"), tc3));
 
         try {
-            assertNotApplicable(tcf, "x.ftl");
+            assertNotApplicable(tcf, "x.t");
         } catch (TemplateConfigurationFactoryException e) {
-            assertThat(e.getMessage(), containsString("x.ftl"));
+            assertThat(e.getMessage(), containsString("x.t"));
         }
         tcf.setNoMatchErrorDetails("Test details");
         try {
-            assertNotApplicable(tcf, "x.ftl");
+            assertNotApplicable(tcf, "x.t");
         } catch (TemplateConfigurationFactoryException e) {
             assertThat(e.getMessage(), containsString("Test details"));
         }
         
         tcf.setAllowNoMatch(true);
         
-        assertNotApplicable(tcf, "x.ftl");
-        assertApplicable(tcf, "x.ftlx", tc1);
-        assertApplicable(tcf, "a.ftl", tc2);
-        assertApplicable(tcf, "b.ftl", tc3);
-        assertApplicable(tcf, "a.ftlx", tc1);
-        assertApplicable(tcf, "b.ftlx", tc1);
-        assertApplicable(tcf, "ab.ftl", tc2);
-        assertApplicable(tcf, "ab.ftlx", tc1);
+        assertNotApplicable(tcf, "x.t");
+        assertApplicable(tcf, "x.tx", tc1);
+        assertApplicable(tcf, "a.t", tc2);
+        assertApplicable(tcf, "b.T", tc3);
+        assertApplicable(tcf, "a.tx", tc1);
+        assertApplicable(tcf, "b.tx", tc1);
+        assertApplicable(tcf, "ab.t", tc2);
+        assertApplicable(tcf, "ab.tx", tc1);
         
-        assertNotApplicable(new FirstMatchTemplateConfigurationFactory().allowNoMatch(true), "x.ftl");
+        assertNotApplicable(new FirstMatchTemplateConfigurationFactory().allowNoMatch(true), "x.t");
     }
 
     @Test
@@ -141,12 +141,12 @@ public class TemplateConfigurationFactoryTest {
                         .allowNoMatch(true),
                 new ConditionalTemplateConfigurationFactory(new FileNameGlobMatcher("*.nws.*"), tcNWS));
 
-        assertNotApplicable(tcf, "x.ftl");
-        assertApplicable(tcf, "b/x.ftl", tcBCommon);
-        assertApplicable(tcf, "b/x.s.ftl", tcBCommon, tcBSpec);
-        assertApplicable(tcf, "b/x.s.ftlh", tcBCommon, tcBSpec, tcHtml);
-        assertApplicable(tcf, "b/x.s.nws.ftlx", tcBCommon, tcBSpec, tcXml, tcNWS);
-        assertApplicable(tcf, "a/x.s.nws.ftlx", tcA, tcXml, tcNWS);
+        assertNotApplicable(tcf, "x.t");
+        assertApplicable(tcf, "b/x.t", tcBCommon);
+        assertApplicable(tcf, "b/x.s.t", tcBCommon, tcBSpec);
+        assertApplicable(tcf, "b/x.s.th", tcBCommon, tcBSpec, tcHtml);
+        assertApplicable(tcf, "b/x.s.nws.tx", tcBCommon, tcBSpec, tcXml, tcNWS);
+        assertApplicable(tcf, "a/x.s.nws.tx", tcA, tcXml, tcNWS);
         assertApplicable(tcf, "a.hh", tcHH);
         assertApplicable(tcf, "a.nws.hh", tcHH, tcNWS);
     }

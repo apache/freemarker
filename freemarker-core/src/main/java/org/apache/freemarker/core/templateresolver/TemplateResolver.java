@@ -172,7 +172,7 @@ public abstract class TemplateResolver {
     /**
      * Converts a name to a template root directory based name, so that it can be used to find a template without
      * knowing what (like which template) has referred to it. The rules depend on the name format, but a typical example
-     * is converting "t.ftl" with base "sub/contex.ftl" to "sub/t.ftl".
+     * is converting "t.f3ah" with base "sub/contex.f3ah" to "sub/t.f3ah".
      * <p>
      * Some implementations, notably {@link DefaultTemplateResolver}, delegate this task to a
      * {@link TemplateNameFormat}.
@@ -197,12 +197,12 @@ public abstract class TemplateResolver {
     /**
      * Normalizes a template root directory based name (relative to the root or absolute), so that equivalent names
      * become equivalent according {@link String#equals(Object)} too. The rules depend on the name format, but typical
-     * examples are "sub/../t.ftl" to "t.ftl", "sub/./t.ftl" to "sub/t.ftl" and "/t.ftl" to "t.ftl".
+     * examples are "sub/../t.f3ah" to "t.f3ah", "sub/./t.f3ah" to "sub/t.f3ah" and "/t.f3ah" to "t.f3ah".
      * <p>
      * Some implementations, notably {@link DefaultTemplateResolver}, delegates this check to a
      * {@link TemplateNameFormat}. The standard {@link TemplateNameFormat} implementations shipped with FreeMarker
      * always return a root relative path (except if the name starts with an URI schema, in which case a full URI is
-     * returned), for example, "/foo.ftl" becomes to "foo.ftl".
+     * returned), for example, "/foo.f3ah" becomes to "foo.f3ah".
      * 
      * @param name
      *            The root based name (a name that's either absolute or relative to the root). Not {@code null}.

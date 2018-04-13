@@ -44,8 +44,8 @@ import org.apache.freemarker.core.Template;
  * used as the basis for resolving relative inclusions/imports in the template. The source name is pretty much only used
  * in error messages as error location, and of course, to actually load the template "file".
  * <li>Understand the impact of the last point if your template lookup strategy fiddles not only with the file name part
- * of the template name, but also with the directory part. For example, one may want to map "foo.ftl" to "en/foo.ftl",
- * "fr/foo.ftl", etc. That's legal, but the result is kind of like if you had several root directories ("en/", "fr/",
+ * of the template name, but also with the directory part. For example, one may want to map "foo.f3ah" to "en/foo.f3ah",
+ * "fr/foo.f3ah", etc. That's legal, but the result is kind of like if you had several root directories ("en/", "fr/",
  * etc.) that are layered over each other to form a single merged directory. (This is what's desirable in typical
  * applications, yet it can be confusing.)
  * </ul>

@@ -174,18 +174,18 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * @param lookupName
      *            The name (path) with which the template was get (usually via
      *            {@link Configuration#getTemplate(String)}), after basic normalization. (Basic normalization means
-     *            things that doesn't require accessing the backing storage, such as {@code "/a/../b/foo.ftl"}
-     *            becomes to {@code "b/foo.ftl"}).
+     *            things that doesn't require accessing the backing storage, such as {@code "/a/../b/foo.f3ah"}
+     *            becomes to {@code "b/foo.f3ah"}).
      *            This is usually the path of the template file relatively to the (virtual) directory that you use to
      *            store the templates (except if the {@link #getSourceName()}  sourceName} differs from it).
      *            Shouldn't start with {@code '/'}. Should use {@code '/'}, not {@code '\'}. Check
      *            {@link #getLookupName()} to see how the name will be used. The name should be independent of the actual
      *            storage mechanism and physical location as far as possible. Even when the templates are stored
      *            straightforwardly in real files (they often aren't; see {@link TemplateLoader}), the name shouldn't be
-     *            an absolute file path. Like if the template is stored in {@code "/www/templates/forum/main.ftl"}, and
+     *            an absolute file path. Like if the template is stored in {@code "/www/templates/forum/main.f3ah"}, and
      *            you are using {@code "/www/templates/"} as the template root directory via
      *            {@link FileTemplateLoader#FileTemplateLoader(java.io.File)}, then the template name will be
-     *            {@code "forum/main.ftl"}. The name can be {@code null} (should be used for template made on-the-fly
+     *            {@code "forum/main.f3ah"}. The name can be {@code null} (should be used for template made on-the-fly
      *            instead of being loaded from somewhere), in which case relative paths in it will be relative to
      *            the template root directory (and here again, it's the {@link TemplateLoader} that knows what that
      *            "physically" means).
@@ -678,8 +678,8 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * 
      * <p>
      * Relative paths to other templates in this template will be resolved relatively to the directory part of this.
-     * Like if the template name is {@code "foo/this.ftl"}, then {@code <#include "other.ftl">} gets the template with
-     * name {@code "foo/other.ftl"}.
+     * Like if the template name is {@code "foo/this.f3ah"}, then {@code <#include "other.f3ah">} gets the template with
+     * name {@code "foo/other.f3ah"}.
      * </p>
      * 
      * <p>
@@ -689,9 +689,9 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * </p>
      * 
      * <p>
-     * Some frameworks use URL-like template names like {@code "someSchema://foo/bar.ftl"}. FreeMarker understands this
-     * notation, so an absolute path like {@code "/baaz.ftl"} in that template will be resolved too
-     * {@code "someSchema://baaz.ftl"}.
+     * Some frameworks use URL-like template names like {@code "someSchema://foo/bar.f3ah"}. FreeMarker understands this
+     * notation, so an absolute path like {@code "/baaz.f3ah"} in that template will be resolved too
+     * {@code "someSchema://baaz.f3ah"}.
      */
     public String getLookupName() {
         return lookupName;
@@ -703,10 +703,10 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      * messages as the error location. This is usually the same as {@link #getLookupName()}, except when localized
      * template lookup, template acquisition ({@code *} step in the name), or other {@link TemplateLookupStrategy}
      * transforms the requested name ({@link #getLookupName()}) to a different final {@link TemplateLoader}-level
-     * name. For example, when you get a template with name {@code "foo .ftl"} then because of localized template
-     * lookup, it's possible that something like {@code "foo_en.ftl"} will be loaded behind the scenes. While the
-     * template name will be still the same as the requested template name ({@code "foo .ftl"}), errors should point
-     * to {@code "foo_de.ftl"}. Note that relative paths are always resolved relatively to the {@code name}, not to
+     * name. For example, when you get a template with name {@code "foo .f3ah"} then because of localized template
+     * lookup, it's possible that something like {@code "foo_en.f3ah"} will be loaded behind the scenes. While the
+     * template name will be still the same as the requested template name ({@code "foo .f3ah"}), errors should point
+     * to {@code "foo_de.f3ah"}. Note that relative paths are always resolved relatively to the {@code name}, not to
      * the {@code sourceName}.
      */
     public String getSourceName() {

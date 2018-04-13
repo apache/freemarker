@@ -21,6 +21,11 @@ package org.apache.freemarker.core.util;
 
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -168,33 +173,33 @@ public class StringUtilsTest {
 
     @Test
     public void testGlobToRegularExpression() {
-        assertGlobMatches("a/b/c.ftl", "a/b/c.ftl");
-        assertGlobDoesNotMatch("/a/b/cxftl", "/a/b/c.ftl", "a/b/C.ftl");
+        assertGlobMatches("a/b/c.f3ah", "a/b/c.f3ah");
+        assertGlobDoesNotMatch("/a/b/cxftl", "/a/b/c.f3ah", "a/b/C.f3ah");
         
-        assertGlobMatches("a/b/*.ftl", "a/b/.ftl", "a/b/x.ftl", "a/b/xx.ftl");
-        assertGlobDoesNotMatch("a/b/*.ftl", "a/c/x.ftl", "a/b/c/x.ftl", "/a/b/x.ftl", "a/b/xxftl");
+        assertGlobMatches("a/b/*.f3ah", "a/b/.f3ah", "a/b/x.f3ah", "a/b/xx.f3ah");
+        assertGlobDoesNotMatch("a/b/*.f3ah", "a/c/x.f3ah", "a/b/c/x.f3ah", "/a/b/x.f3ah", "a/b/xxftl");
         
-        assertGlobMatches("a/b/?.ftl", "a/b/x.ftl");
-        assertGlobDoesNotMatch("a/b/?.ftl", "a/c/x.ftl", "a/b/.ftl", "a/b/xx.ftl", "a/b/xxftl");
+        assertGlobMatches("a/b/?.f3ah", "a/b/x.f3ah");
+        assertGlobDoesNotMatch("a/b/?.f3ah", "a/c/x.f3ah", "a/b/.f3ah", "a/b/xx.f3ah", "a/b/xxftl");
         
-        assertGlobMatches("a/**/c.ftl", "a/b/c.ftl", "a/c.ftl", "a/b/b2/b3/c.ftl", "a//c.ftl");
-        assertGlobDoesNotMatch("a/**/c.ftl", "x/b/c.ftl", "a/b/x.ftl");
+        assertGlobMatches("a/**/c.f3ah", "a/b/c.f3ah", "a/c.f3ah", "a/b/b2/b3/c.f3ah", "a//c.f3ah");
+        assertGlobDoesNotMatch("a/**/c.f3ah", "x/b/c.f3ah", "a/b/x.f3ah");
         
-        assertGlobMatches("**/c.ftl", "a/b/c.ftl", "c.ftl", "/c.ftl", "///c.ftl");
-        assertGlobDoesNotMatch("**/c.ftl", "a/b/x.ftl");
+        assertGlobMatches("**/c.f3ah", "a/b/c.f3ah", "c.f3ah", "/c.f3ah", "///c.f3ah");
+        assertGlobDoesNotMatch("**/c.f3ah", "a/b/x.f3ah");
 
-        assertGlobMatches("a/b/**", "a/b/c.ftl", "a/b/c2/c.ftl", "a/b/", "a/b/c/");
-        assertGlobDoesNotMatch("a/b.ftl");
+        assertGlobMatches("a/b/**", "a/b/c.f3ah", "a/b/c2/c.f3ah", "a/b/", "a/b/c/");
+        assertGlobDoesNotMatch("a/b.f3ah");
 
-        assertGlobMatches("**", "a/b/c.ftl", "");
+        assertGlobMatches("**", "a/b/c.f3ah", "");
 
         assertGlobMatches("\\[\\{\\*\\?\\}\\]\\\\", "[{*?}]\\");
         assertGlobDoesNotMatch("\\[\\{\\*\\?\\}\\]\\\\", "[{xx}]\\");
 
-        assertGlobMatches("a/b/\\?.ftl", "a/b/?.ftl");
-        assertGlobDoesNotMatch("a/b/\\?.ftl", "a/b/x.ftl");
+        assertGlobMatches("a/b/\\?.f3ah", "a/b/?.f3ah");
+        assertGlobDoesNotMatch("a/b/\\?.f3ah", "a/b/x.f3ah");
 
-        assertGlobMatches("\\?\\?.ftl", "??.ftl");
+        assertGlobMatches("\\?\\?.f3ah", "??.f3ah");
         assertGlobMatches("\\\\\\\\", "\\\\");
         assertGlobMatches("\\\\\\\\?", "\\\\x");
         assertGlobMatches("x\\", "x");
@@ -202,8 +207,8 @@ public class StringUtilsTest {
         assertGlobMatches("???*", "123", "1234", "12345");
         assertGlobDoesNotMatch("???*", "12", "1", "");
 
-        assertGlobMatches("**/a??/b*.ftl", "a11/b1.ftl", "x/a11/b123.ftl", "x/y/a11/b.ftl");
-        assertGlobDoesNotMatch("**/a??/b*.ftl", "a1/b1.ftl", "x/a11/c123.ftl");
+        assertGlobMatches("**/a??/b*.f3ah", "a11/b1.f3ah", "x/a11/b123.f3ah", "x/y/a11/b.f3ah");
+        assertGlobDoesNotMatch("**/a??/b*.f3ah", "a1/b1.f3ah", "x/a11/c123.f3ah");
         
         assertFalse(_StringUtils.globToRegularExpression("ab*").matcher("aBc").matches());
         assertTrue(_StringUtils.globToRegularExpression("ab*", true).matcher("aBc").matches());

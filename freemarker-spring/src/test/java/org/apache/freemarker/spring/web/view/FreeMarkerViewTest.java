@@ -18,7 +18,7 @@
  */
 package org.apache.freemarker.spring.web.view;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -90,9 +90,9 @@ public class FreeMarkerViewTest {
         request.setContextPath("/mycontext");
         request.setServletPath("/myservlet");
 
-        templateLoader.putTemplate("hello.ftl", "Hello, ${name!\"World\"}! Visit count: ${visitCount!0}");
+        templateLoader.putTemplate("hello.f3ah", "Hello, ${name!\"World\"}! Visit count: ${visitCount!0}");
 
-        FreeMarkerView view = createFreemarkerView("hello.ftl");
+        FreeMarkerView view = createFreemarkerView("hello.f3ah");
 
         int visitCount = 0;
         Map<String, Object> model = new HashMap<String, Object>();
@@ -121,12 +121,12 @@ public class FreeMarkerViewTest {
         request.setSession(session);
         request.setAttribute("promotion", "Fresh blue berries");
 
-        templateLoader.putTemplate("default-model.ftl",
+        templateLoader.putTemplate("default-model.f3ah",
                 "${name!}, you have ${Session.itemCountInCart!0} items in cart. " + "Hot deal: ${Request.promotion}. "
                         + "BTW, you're ${Application.visitorCount}th visitor. "
                         + "(token1: ${RequestParameters['token1']!})");
 
-        FreeMarkerView view = createFreemarkerView("default-model.ftl");
+        FreeMarkerView view = createFreemarkerView("default-model.f3ah");
 
         Map<String, Object> model = new HashMap<String, Object>();
         model.put("name", "Dan");
@@ -144,12 +144,12 @@ public class FreeMarkerViewTest {
         request.setContextPath("/mycontext");
         request.setServletPath("/myservlet");
 
-        templateLoader.putTemplate("taglibs.ftl",
+        templateLoader.putTemplate("taglibs.f3ah",
                 "<#assign e=JspTaglibs ['http://freemarker.org/jsp/example/echo'] >"
                 + "<#assign msg=\"Hello!\" />"
                 + "<@e.echo message=msg />");
 
-        FreeMarkerView view = createFreemarkerView("taglibs.ftl");
+        FreeMarkerView view = createFreemarkerView("taglibs.f3ah");
 
         Map<String, Object> model = new HashMap<String, Object>();
         MockHttpServletResponse response = new MockHttpServletResponse();

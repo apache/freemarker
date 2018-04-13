@@ -34,9 +34,9 @@ import org.apache.freemarker.core.util._StringUtils;
  * treated specially with the same meaning as in UN*X paths. Directory name {@code "*"} is treated as acquisition
  * mark (see {@link Configuration#getTemplate(String, Locale, Serializable, boolean)}).
  * <p>
- * The name may starts with scheme part, like in {@code "classpath:com/example/bar.ftl"} (scheme "classpath" and
- * absolute path "com/example/bar.ftl") or {@code "cms://example.com/foo.ftl"} (scheme "cms" and absolute path
- * "example.com/foo.ftl"). The scheme name before the {@code ":"} (colon) can't contain {@code "/"}, and {@code ":"}
+ * The name may starts with scheme part, like in {@code "classpath:com/example/bar.f3ah"} (scheme "classpath" and
+ * absolute path "com/example/bar.f3ah") or {@code "cms://example.com/foo.f3ah"} (scheme "cms" and absolute path
+ * "example.com/foo.f3ah"). The scheme name before the {@code ":"} (colon) can't contain {@code "/"}, and {@code ":"}
  * can only be used for denoting the scheme, or else {@link MalformedTemplateNameException} is thrown.
  * The scheme part can be separated either with {@code "://"} or just with {@code ":"} from the path, hence, {@code
  * myscheme:/x} is normalized to {@code myscheme:x}, while {@code myscheme:///x} is normalized to {@code myscheme://x},
@@ -50,7 +50,7 @@ import org.apache.freemarker.core.util._StringUtils;
  * it doesn't end with {@code /}).
  * <p>
  * {@code //} is normalized to {@code /}, except of course if it's in the scheme name terminator. Like {@code
- * foo//bar///baaz.ftl} is normalized to {@code foo/bar/baaz.ftl}. Hence 0 length step names aren't possible.
+ * foo//bar///baaz.f3ah} is normalized to {@code foo/bar/baaz.f3ah}. Hence 0 length step names aren't possible.
  * <p>
  * Multiple consecutive {@code "*"} steps are normalized to one
  */
@@ -80,7 +80,7 @@ public final class DefaultTemplateNameFormat extends TemplateNameFormat {
                 // Not a directory name => get containing directory name
                 int baseEnd = baseName.lastIndexOf("/") + 1;
                 if (baseEnd == 0) {
-                    // For something like "classpath:t.ftl", must not remove the scheme part:
+                    // For something like "classpath:t.f3ah", must not remove the scheme part:
                     baseEnd = findSchemeSectionEnd(baseName);
                 }
                 baseName = baseName.substring(0, baseEnd);

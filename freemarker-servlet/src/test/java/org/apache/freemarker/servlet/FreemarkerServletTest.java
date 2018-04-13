@@ -53,20 +53,20 @@ import org.springframework.mock.web.MockServletContext;
 
 public class FreemarkerServletTest {
 
-    private static final String OUTPUT_FORMAT_HEADER_FTL = "outputFormatHeader.ftl";
-    private static final String CONTENT_TYPE_ATTR_FTL = "contentTypeAttr.ftl";
-    private static final String CONTENT_TYPE_ATTR_WITH_CHARSET_FTL = "contentTypeAttrWithCharset.ftl";
-    private static final String FOO_FTL = "foo.ftl";
-    private static final String FOO_SRC_UTF8_FTL = "foo-src-utf8.ftl";
-    private static final String FOO_OUT_UTF8_FTL = "foo-out-utf8.ftl";
-    private static final String STD_OUTPUT_FORMAT_HTML_FTL = "stdOutputFormatHTML.ftl";
-    private static final String STD_OUTPUT_FORMAT_XML_FTL = "stdOutputFormatXML.ftl";
-    private static final String STD_OUTPUT_FORMAT_XHTML_FTL = "stdOutputFormatXHTML.ftl";
-    private static final String STD_OUTPUT_FORMAT_JAVA_SCRIPT_FTL = "stdOutputFormatJavaScript.ftl";
-    private static final String STD_OUTPUT_FORMAT_JSON_FTL = "stdOutputFormatJSON.ftl";
-    private static final String STD_OUTPUT_FORMAT_CSS_FTL = "stdOutputFormatCSS.ftl";
-    private static final String STD_OUTPUT_FORMAT_PLAIN_TEXT_FTL = "stdOutputFormatPlainText.ftl";
-    private static final String STD_OUTPUT_FORMAT_RTF_FTL = "stdOutputFormatRTF.ftl";
+    private static final String OUTPUT_FORMAT_HEADER_FTL = "outputFormatHeader.f3ac";
+    private static final String CONTENT_TYPE_ATTR_FTL = "contentTypeAttr.f3ac";
+    private static final String CONTENT_TYPE_ATTR_WITH_CHARSET_FTL = "contentTypeAttrWithCharset.f3ac";
+    private static final String FOO_FTL = "foo.f3ac";
+    private static final String FOO_SRC_UTF8_FTL = "foo-src-utf8.f3ac";
+    private static final String FOO_OUT_UTF8_FTL = "foo-out-utf8.f3ac";
+    private static final String STD_OUTPUT_FORMAT_HTML_FTL = "stdOutputFormatHTML.f3ac";
+    private static final String STD_OUTPUT_FORMAT_XML_FTL = "stdOutputFormatXML.f3ac";
+    private static final String STD_OUTPUT_FORMAT_XHTML_FTL = "stdOutputFormatXHTML.f3ac";
+    private static final String STD_OUTPUT_FORMAT_JAVA_SCRIPT_FTL = "stdOutputFormatJavaScript.f3ac";
+    private static final String STD_OUTPUT_FORMAT_JSON_FTL = "stdOutputFormatJSON.f3ac";
+    private static final String STD_OUTPUT_FORMAT_CSS_FTL = "stdOutputFormatCSS.f3ac";
+    private static final String STD_OUTPUT_FORMAT_PLAIN_TEXT_FTL = "stdOutputFormatPlainText.f3ac";
+    private static final String STD_OUTPUT_FORMAT_RTF_FTL = "stdOutputFormatRTF.f3ac";
 
     private static final Locale DEFAULT_LOCALE = Locale.US;
     private static final Charset CFG_DEFAULT_ENCODING = StandardCharsets.US_ASCII;

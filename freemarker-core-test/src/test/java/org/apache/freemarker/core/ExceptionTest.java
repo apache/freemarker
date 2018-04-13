@@ -70,22 +70,22 @@ public class ExceptionTest extends TestCase {
     @SuppressWarnings("boxing")
     public void testTemplateExceptionLocationInformation() throws IOException {
         StringTemplateLoader tl = new StringTemplateLoader();
-        tl.putTemplate("foo_en.ftl", "\n\nxxx${noSuchVariable}");
+        tl.putTemplate("foo_en.f3ah", "\n\nxxx${noSuchVariable}");
 
         Template t = new TestConfigurationBuilder().templateLoader(tl).build()
-                .getTemplate("foo.ftl", Locale.US);
+                .getTemplate("foo.f3ah", Locale.US);
         try {
             t.process(null, _NullWriter.INSTANCE);
             fail();
         } catch (TemplateException e) {
-            assertEquals("foo.ftl", t.getLookupName());
-            assertEquals("foo.ftl", e.getTemplateLookupName());
-            assertEquals("foo_en.ftl", e.getTemplateSourceName());
+            assertEquals("foo.f3ah", t.getLookupName());
+            assertEquals("foo.f3ah", e.getTemplateLookupName());
+            assertEquals("foo_en.f3ah", e.getTemplateSourceName());
             assertEquals(3, (int) e.getLineNumber());
             assertEquals(6, (int) e.getColumnNumber());
             assertEquals(3, (int) e.getEndLineNumber());
             assertEquals(19, (int) e.getEndColumnNumber());
-            assertThat(e.getMessage(), containsString("foo_en.ftl"));
+            assertThat(e.getMessage(), containsString("foo_en.f3ah"));
             assertThat(e.getMessage(), containsString("noSuchVariable"));
         }
     }
@@ -93,21 +93,21 @@ public class ExceptionTest extends TestCase {
     @SuppressWarnings("cast")
     public void testParseExceptionLocationInformation() throws IOException {
         StringTemplateLoader tl = new StringTemplateLoader();
-        tl.putTemplate("foo_en.ftl", "\n\nxxx<#noSuchDirective>");
+        tl.putTemplate("foo_en.f3ah", "\n\nxxx<#noSuchDirective>");
 
         try {
             new TestConfigurationBuilder().templateLoader(tl).build()
-                    .getTemplate("foo.ftl", Locale.US);
+                    .getTemplate("foo.f3ah", Locale.US);
             fail();
         } catch (ParseException e) {
             System.out.println(e.getMessage());
-            assertEquals("foo_en.ftl", e.getTemplateSourceName());
-            assertEquals("foo.ftl", e.getTemplateLookupName());
+            assertEquals("foo_en.f3ah", e.getTemplateSourceName());
+            assertEquals("foo.f3ah", e.getTemplateLookupName());
             assertEquals(3, e.getLineNumber());
             assertEquals(5, e.getColumnNumber());
             assertEquals(3, e.getEndLineNumber());
             assertEquals(20, e.getEndColumnNumber());
-            assertThat(e.getMessage(), containsString("foo_en.ftl"));
+            assertThat(e.getMessage(), containsString("foo_en.f3ah"));
             assertThat(e.getMessage(), containsString("noSuchDirective"));
         }
     }

@@ -115,7 +115,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  *  ...
  *  
  *  // Later, whenever the application needs a template (so you may do this a lot, and from multiple threads):
- *  {@link Template Template} myTemplate = cfg.{@link #getTemplate(String) getTemplate}("myTemplate.ftlh");
+ *  {@link Template Template} myTemplate = cfg.{@link #getTemplate(String) getTemplate}("myTemplate.f3ah");
  *  myTemplate.{@link Template#process(Object, java.io.Writer) process}(dataModel, out);</pre>
  * 
  * <p>Note that you certainly want to set the {@link #getTemplateLoader templateLoader} setting, as its default
@@ -1269,11 +1269,11 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
      *            First, the name is expected to be a hierarchical path, with path components separated by a slash
      *            character (not with backslash!). The path (the name) given here is always interpreted relative to
      *            the "template root directory" and must <em>not</em> begin with slash. Then, the {@code ..} and
-     *            {@code .} path meta-elements will be resolved. For example, if the name is {@code a/../b/./c.ftl},
-     *            then it will be simplified to {@code b/c.ftl}. The rules regarding this are the same as with
+     *            {@code .} path meta-elements will be resolved. For example, if the name is {@code a/../b/./c.f3ah},
+     *            then it will be simplified to {@code b/c.f3ah}. The rules regarding this are the same as with
      *            conventional UN*X paths. The path must not reach outside the template root directory, that is, it
-     *            can't be something like {@code "../templates/my.ftl"} (not even if this path happens to be
-     *            equivalent with {@code "/my.ftl"}). Furthermore, the path is allowed to contain at most one path
+     *            can't be something like {@code "../templates/my.f3ah"} (not even if this path happens to be
+     *            equivalent with {@code "/my.f3ah"}). Furthermore, the path is allowed to contain at most one path
      *            element whose name is {@code *} (asterisk). This path meta-element triggers the <i>acquisition
      *            mechanism</i>. If the template is not found in the location described by the concatenation of the
      *            path left to the asterisk (called base path) and the part to the right of the asterisk (called
@@ -1288,12 +1288,12 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
      *            parameter can be {@code null} since 2.3.22, in which case it defaults to
      *            {@link Configuration#getLocale()} (note that {@link Template#getLocale()} will give the default value,
      *            not {@code null}). This parameter also drives localized template lookup. Assuming that you have
-     *            specified {@code en_US} as the locale and {@code myTemplate.ftl} as the name of the template, and the
+     *            specified {@code en_US} as the locale and {@code myTemplate.f3ah} as the name of the template, and the
      *            default {@link TemplateLookupStrategy} is used and
      *            {@code #setLocalizedTemplateLookup(boolean) localizedTemplateLookup} is {@code true}, FreeMarker will first try to
-     *            retrieve {@code myTemplate_en_US.html}, then {@code myTemplate.en.ftl}, and finally
-     *            {@code myTemplate.ftl}. Note that that the template's locale will be {@code en_US} even if it only
-     *            finds {@code myTemplate.ftl}. Note that when the {@code locale} setting is overridden with a
+     *            retrieve {@code myTemplate_en_US.html}, then {@code myTemplate.en.f3ah}, and finally
+     *            {@code myTemplate.f3ah}. Note that that the template's locale will be {@code en_US} even if it only
+     *            finds {@code myTemplate.f3ah}. Note that when the {@code locale} setting is overridden with a
      *            {@link TemplateConfiguration} provided by {@link #getTemplateConfigurations()}, that overrides the
      *            value specified here, but only after the localized template lookup, that is, it modifies the template
      *            found by the localized template lookup.

@@ -116,9 +116,9 @@ public class TemplateConfigurationTest {
     static {
         TestConfigurationBuilder cfgB = new TestConfigurationBuilder();
         StringTemplateLoader stl = new StringTemplateLoader();
-        stl.putTemplate("t1.ftl", "<#global loaded = (loaded!) + 't1;'>In t1;");
-        stl.putTemplate("t2.ftl", "<#global loaded = (loaded!) + 't2;'>In t2;");
-        stl.putTemplate("t3.ftl", "<#global loaded = (loaded!) + 't3;'>In t3;");
+        stl.putTemplate("t1.f3ah", "<#global loaded = (loaded!) + 't1;'>In t1;");
+        stl.putTemplate("t2.f3ah", "<#global loaded = (loaded!) + 't2;'>In t2;");
+        stl.putTemplate("t3.f3ah", "<#global loaded = (loaded!) + 't3;'>In t3;");
         try {
             DEFAULT_CFG = cfgB.templateLoader(stl).build();
         } catch (ConfigurationException e) {
@@ -201,8 +201,8 @@ public class TemplateConfigurationTest {
         SETTING_ASSIGNMENTS.put("tabSize", 1);
         SETTING_ASSIGNMENTS.put("lazyImports", Boolean.TRUE);
         SETTING_ASSIGNMENTS.put("lazyAutoImports", Boolean.FALSE);
-        SETTING_ASSIGNMENTS.put("autoImports", ImmutableMap.of("a", "/lib/a.ftl"));
-        SETTING_ASSIGNMENTS.put("autoIncludes", ImmutableList.of("/lib/b.ftl"));
+        SETTING_ASSIGNMENTS.put("autoImports", ImmutableMap.of("a", "/lib/a.f3ah"));
+        SETTING_ASSIGNMENTS.put("autoIncludes", ImmutableList.of("/lib/b.f3ah"));
         
         // Special settings:
         SETTING_ASSIGNMENTS.put("sourceEncoding", NON_DEFAULT_ENCODING);
@@ -332,7 +332,7 @@ public class TemplateConfigurationTest {
         tcb1.setCustomNumberFormats(ImmutableMap.of(
                 "hex", HexTemplateNumberFormatFactory.INSTANCE,
                 "x", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE));
-        tcb1.setAutoImports(ImmutableMap.of("a", "a1.ftl", "b", "b1.ftl"));
+        tcb1.setAutoImports(ImmutableMap.of("a", "a1.f3ah", "b", "b1.f3ah"));
         
         TemplateConfiguration.Builder tcb2 = new TemplateConfiguration.Builder();
         tcb2.setCustomDateFormats(ImmutableMap.of(
@@ -341,7 +341,7 @@ public class TemplateConfigurationTest {
         tcb2.setCustomNumberFormats(ImmutableMap.of(
                 "loc", LocaleSensitiveTemplateNumberFormatFactory.INSTANCE,
                 "x", BaseNTemplateNumberFormatFactory.INSTANCE));
-        tcb2.setAutoImports(ImmutableMap.of("b", "b2.ftl", "c", "c2.ftl"));
+        tcb2.setAutoImports(ImmutableMap.of("b", "b2.f3ah", "c", "c2.f3ah"));
         
         tcb1.merge(tcb2.build());
         
@@ -356,9 +356,9 @@ public class TemplateConfigurationTest {
         assertEquals(BaseNTemplateNumberFormatFactory.INSTANCE, mergedCustomNumberFormats.get("x"));
 
         Map<String, String> mergedAutoImports = tcb1.getAutoImports();
-        assertEquals("a1.ftl", mergedAutoImports.get("a"));
-        assertEquals("b2.ftl", mergedAutoImports.get("b"));
-        assertEquals("c2.ftl", mergedAutoImports.get("c"));
+        assertEquals("a1.f3ah", mergedAutoImports.get("a"));
+        assertEquals("b2.f3ah", mergedAutoImports.get("b"));
+        assertEquals("c2.f3ah", mergedAutoImports.get("c"));
         
         // Empty map merging optimization:
         tcb1.merge(new TemplateConfiguration.Builder().build());
@@ -375,14 +375,14 @@ public class TemplateConfigurationTest {
     @Test
     public void testMergeListSettings() throws Exception {
         TemplateConfiguration.Builder tcb1 = new TemplateConfiguration.Builder();
-        tcb1.setAutoIncludes(ImmutableList.of("a.ftl", "x.ftl", "b.ftl"));
+        tcb1.setAutoIncludes(ImmutableList.of("a.f3ah", "x.f3ah", "b.f3ah"));
         
         TemplateConfiguration.Builder tcb2 = new TemplateConfiguration.Builder();
-        tcb2.setAutoIncludes(ImmutableList.of("c.ftl", "x.ftl", "d.ftl"));
+        tcb2.setAutoIncludes(ImmutableList.of("c.f3ah", "x.f3ah", "d.f3ah"));
         
         tcb1.merge(tcb2.build());
         
-        assertEquals(ImmutableList.of("a.ftl", "b.ftl", "c.ftl", "x.ftl", "d.ftl"), tcb1.getAutoIncludes());
+        assertEquals(ImmutableList.of("a.f3ah", "b.f3ah", "c.f3ah", "x.f3ah", "d.f3ah"), tcb1.getAutoIncludes());
     }
     
     @Test
@@ -628,7 +628,7 @@ public class TemplateConfigurationTest {
                     new ConditionalTemplateConfigurationFactory(new FileExtensionMatcher("txt"), tcb.build()));
 
             StringTemplateLoader templateLoader = new StringTemplateLoader();
-            templateLoader.putTemplate("adhoc.ftl", "${1+1}");
+            templateLoader.putTemplate("adhoc.f3ah", "${1+1}");
             templateLoader.putTemplate("adhoc.txt", "${1+1}");
             cfgB.setTemplateLoader(templateLoader);
 
@@ -636,7 +636,7 @@ public class TemplateConfigurationTest {
             
             {
                 StringWriter out = new StringWriter();
-                cfg.getTemplate("adhoc.ftl").process(null, out);
+                cfg.getTemplate("adhoc.f3ah").process(null, out);
                 assertEquals("2", out.toString());
             }
             {
@@ -658,23 +658,23 @@ public class TemplateConfigurationTest {
             TestConfigurationBuilder cfgB = new TestConfigurationBuilder();
             cfgB.setSourceEncoding(StandardCharsets.UTF_8);
             cfgB.setTemplateConfigurations(new ConditionalTemplateConfigurationFactory(
-                    new FileNameGlobMatcher("latin1.ftl"), tcb.build()));
+                    new FileNameGlobMatcher("latin1.f3ah"), tcb.build()));
 
             MonitoredTemplateLoader templateLoader = new MonitoredTemplateLoader();
-            templateLoader.putBinaryTemplate("utf8.ftl", "próba", StandardCharsets.UTF_8, 1);
-            templateLoader.putBinaryTemplate("latin1.ftl", "próba", StandardCharsets.ISO_8859_1, 1);
+            templateLoader.putBinaryTemplate("utf8.f3ah", "próba", StandardCharsets.UTF_8, 1);
+            templateLoader.putBinaryTemplate("latin1.f3ah", "próba", StandardCharsets.ISO_8859_1, 1);
             cfgB.setTemplateLoader(templateLoader);
 
             Configuration cfg = cfgB.build();
             
             {
                 StringWriter out = new StringWriter();
-                cfg.getTemplate("utf8.ftl").process(null, out);
+                cfg.getTemplate("utf8.f3ah").process(null, out);
                 assertEquals("próba", out.toString());
             }
             {
                 StringWriter out = new StringWriter();
-                cfg.getTemplate("latin1.ftl").process(null, out);
+                cfg.getTemplate("latin1.f3ah").process(null, out);
                 assertEquals("próba", out.toString());
             }
 
@@ -705,17 +705,17 @@ public class TemplateConfigurationTest {
     @Test
     public void testAutoImport() throws TemplateException, IOException {
         TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
-        tcb.setAutoImports(ImmutableMap.of("t1", "t1.ftl", "t2", "t2.ftl"));
+        tcb.setAutoImports(ImmutableMap.of("t1", "t1.f3ah", "t2", "t2.f3ah"));
         TemplateConfiguration tc = tcb.build();
-        assertOutputWithoutAndWithTC(tc, "<#import 't3.ftl' as t3>${loaded}", "t3;", "t1;t2;t3;");
+        assertOutputWithoutAndWithTC(tc, "<#import 't3.f3ah' as t3>${loaded}", "t3;", "t1;t2;t3;");
     }
 
     @Test
     public void testAutoIncludes() throws TemplateException, IOException {
         TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
-        tcb.setAutoIncludes(ImmutableList.of("t1.ftl", "t2.ftl"));
+        tcb.setAutoIncludes(ImmutableList.of("t1.f3ah", "t2.f3ah"));
         TemplateConfiguration tc = tcb.build();
-        assertOutputWithoutAndWithTC(tc, "<#include 't3.ftl'>", "In t3;", "In t1;In t2;In t3;");
+        assertOutputWithoutAndWithTC(tc, "<#include 't3.f3ah'>", "In t3;", "In t1;In t2;In t3;");
     }
     
     @Test

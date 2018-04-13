@@ -636,10 +636,10 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         converter.execute();
 
         assertFalse(new File(dstDir, "t.txt").exists());
-        assertTrue(new File(dstDir, "t.fm3").exists());
-        assertTrue(new File(dstDir, "t.fm3").exists());
+        assertTrue(new File(dstDir, "t.f3ac").exists());
+        assertTrue(new File(dstDir, "t.f3ac").exists());
         assertFalse(new File(dstDir, "t.ftlfoo").exists());
-        assertTrue(new File(dstDir, "U.fm3h").exists());
+        assertTrue(new File(dstDir, "U.f3ah").exists());
     }
 
     @Test
@@ -663,13 +663,13 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
 
         assertTrue(new File(dstDir, "t1").exists());
         assertTrue(new File(dstDir, "t2.foo").exists());
-        assertTrue(new File(dstDir, "t3.fm3").exists());
-        assertTrue(new File(dstDir, "t4.fm3h").exists());
-        assertTrue(new File(dstDir, "t5.fm3x").exists());
-        assertTrue(new File(dstDir, "t6.fm3s").exists());
-        assertTrue(new File(dstDir, "t7.fm3sh").exists());
-        assertTrue(new File(dstDir, "t8.fm3sx").exists());
-        assertTrue(new File(dstDir, "t9.fm3").exists());
+        assertTrue(new File(dstDir, "t3.f3ac").exists());
+        assertTrue(new File(dstDir, "t4.f3ah").exists());
+        assertTrue(new File(dstDir, "t5.f3ax").exists());
+        assertTrue(new File(dstDir, "t6.f3sc").exists());
+        assertTrue(new File(dstDir, "t7.f3sh").exists());
+        assertTrue(new File(dstDir, "t8.f3sx").exists());
+        assertTrue(new File(dstDir, "t9.f3ac").exists());
         assertTrue(new File(dstDir, "t10.Foo3").exists());
     }
 
@@ -697,9 +697,9 @@ public class FM2ToFM3ConverterTest extends ConverterTest {
         converter.setDestinationDirectory(dstDir);
         converter.execute();
 
-        assertThat(FileUtils.readFileToString(new File(dstDir, "t1.fm3"), StandardCharsets.ISO_8859_1),
+        assertThat(FileUtils.readFileToString(new File(dstDir, "t1.f3ac"), StandardCharsets.ISO_8859_1),
                 containsString("béka"));
-        assertThat(FileUtils.readFileToString(new File(dstDir, "t2.fm3"), UTF_8),
+        assertThat(FileUtils.readFileToString(new File(dstDir, "t2.f3ac"), UTF_8),
                 containsString("béka"));
     }
 

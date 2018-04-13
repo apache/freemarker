@@ -29,7 +29,7 @@ import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
  * cache entries were generated from the same physical resource or not. Comparing the template names isn't enough,
  * because a {@link TemplateLoader} may uses some kind of fallback mechanism, such as delegating to other
  * {@link TemplateLoader}-s until the template is found. Like if we have two {@link FileTemplateLoader}-s with different
- * physical root directories, both can contain {@code "foo/bar.ftl"}, but obviously the two files aren't the same.
+ * physical root directories, both can contain {@code "foo/bar.f3ah"}, but obviously the two files aren't the same.
  * 
  * <p>
  * When implementing this interface, check these:

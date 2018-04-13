@@ -64,8 +64,8 @@ public abstract class TemplateLoaderBasedTemplateLookupResult extends TemplateLo
          * @param templateSourceName
          *            The name of the matching template found. This is not necessarily the same as the template name
          *            with which the template was originally requested. For example, one may gets a template for the
-         *            {@code "foo.ftl"} name, but due to localized template lookup the template is actually loaded from
-         *            {@code "foo_de.ftl"}. Then this parameter must be {@code "foo_de.ftl"}, not {@code "foo.ftl"}. Not
+         *            {@code "foo.f3ah"} name, but due to localized template lookup the template is actually loaded from
+         *            {@code "foo_de.f3ah"}. Then this parameter must be {@code "foo_de.f3ah"}, not {@code "foo.f3ah"}. Not
          *            {@code null}.
          * 
          * @param templateLoaderResult

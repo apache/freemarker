@@ -2667,9 +2667,9 @@ public final class Environment extends MutableProcessingConfiguration<Environmen
      * Converts a root based name (a name that's either relative to the root, or is absolute), which are typically used
      * by the API (such as for {@link Configuration#getTemplate(String)}), to an absolute name, which can be safely
      * passed to {@code <#include path>} and such, as it won't be misinterpreted to be relative to the directory of the
-     * template. For example, {@code "foo/bar.ftl"} is converted to {@code "/foo/bar.ftl"}, while {@code "/foo/bar"} or
-     * {@code "foo://bar/baz"} remains as is, as they are already absolute names (see {@link DefaultTemplateNameFormat}
-     * for more about the format of names).
+     * template. For example, {@code "foo/bar.f3ah"} is converted to {@code "/foo/bar.f3ah"}, while {@code "/foo/bar"}
+     * or {@code "foo://bar/baz"} remains as is, as they are already absolute names (see
+     * {@link DefaultTemplateNameFormat} for more about the format of names).
      * 
      * <p>
      * You only need this if the template name will be passed to {@code <#include name>}, {@code <#import name>},

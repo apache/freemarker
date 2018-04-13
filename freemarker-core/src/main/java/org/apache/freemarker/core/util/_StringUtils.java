@@ -1461,14 +1461,14 @@ public class _StringUtils {
      * <ul>
      *   <li>{@code ?}: Wildcard that matches exactly one character, other than {@code /} 
      *   <li>{@code *}: Wildcard that matches zero, one or multiple characters, other than {@code /}
-     *   <li>{@code **}: Wildcard that matches zero, one or multiple directories. For example, {@code **}{@code /head.ftl}
-     *       matches {@code foo/bar/head.ftl}, {@code foo/head.ftl} and {@code head.ftl} too. {@code **} must be either
+     *   <li>{@code **}: Wildcard that matches zero, one or multiple directories. For example, {@code **}{@code /head.f3ah}
+     *       matches {@code foo/bar/head.f3ah}, {@code foo/head.f3ah} and {@code head.f3ah} too. {@code **} must be either
      *       preceded by {@code /} or be at the beginning of the glob. {@code **} must be either followed by {@code /} or be
      *       at the end of the glob. When {@code **} is at the end of the glob, it also matches file names, like
-     *       {@code a/**} matches {@code a/b/c.ftl}. If the glob only consist of a {@code **}, it will be a match for
+     *       {@code a/**} matches {@code a/b/c.f3ah}. If the glob only consist of a {@code **}, it will be a match for
      *       everything.
-     *   <li>{@code \} (backslash): Makes the next character non-special (a literal). For example {@code How\?.ftl} will
-     *       match {@code How?.ftl}, but not {@code HowX.ftl}. Naturally, two backslashes produce one literal backslash. 
+     *   <li>{@code \} (backslash): Makes the next character non-special (a literal). For example {@code How\?.f3ah} will
+     *       match {@code How?.f3ah}, but not {@code HowX.f3ah}. Naturally, two backslashes produce one literal backslash. 
      *   <li>{@code [}: Reserved for future purposes; can't be used
      *   <li><code>{</code>: Reserved for future purposes; can't be used
      * </ul>

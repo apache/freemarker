@@ -148,7 +148,7 @@ public class WebAppTestCase {
      * 
      * @param webAppRelURLWithoutExt
      *            something like {@code "tester?view=foo"}, which will be extended to {@code "tester?view=foo.jsp"} and
-     *            {@code "tester?view=foo.ftl"}, and then the output of these extended URL-s will be compared.
+     *            {@code "tester?view=foo.f3ah"}, and then the output of these extended URL-s will be compared.
      */
     protected void assertJSPAndFTLOutputEquals(String webAppName, String webAppRelURLWithoutExt) throws Exception {
         assertOutputsEqual(webAppName, webAppRelURLWithoutExt + ".jsp", webAppRelURLWithoutExt + ".f3ah");

@@ -18,7 +18,7 @@
  */
 package org.apache.freemarker.spring.web.view;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -48,7 +48,7 @@ public class FreeMarkerViewResolverTest {
 
     private String prefix = "/WEB-INF/freemarker/";
     private String normalizedPrefix = "WEB-INF/freemarker/";
-    private String suffix = ".ftl";
+    private String suffix = ".f3ah";
 
     @Before
     public void setUp() throws Exception {

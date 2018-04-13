@@ -32,73 +32,73 @@ public class TemplateNameSpecialVariablesTest extends TemplateTest {
     @Test
     public void testMainTemplateName() throws IOException, TemplateException {
         addTemplateNameTestTemplates(".mainTemplateName");
-        assertOutputForNamed("main.ftl",
-                "In main: main.ftl\n"
-                + "In imp: main.ftl\n"
-                + "In main: main.ftl\n"
-                + "main.ftl\n"
-                + "{main.ftl}\n"
+        assertOutputForNamed("main.f3au",
+                "In main: main.f3au\n"
+                + "In imp: main.f3au\n"
+                + "In main: main.f3au\n"
+                + "main.f3au\n"
+                + "{main.f3au}\n"
                 + "In imp call imp:\n"
-                + "main.ftl\n"
-                + "{main.ftl}\n"
-                + "After: main.ftl\n"
-                + "In main: main.ftl\n"
-                + "In inc: main.ftl\n"
+                + "main.f3au\n"
+                + "{main.f3au}\n"
+                + "After: main.f3au\n"
+                + "In main: main.f3au\n"
+                + "In inc: main.f3au\n"
                 + "In inc call imp:\n"
-                + "main.ftl\n"
-                + "{main.ftl}\n"
-                + "In main: main.ftl\n"
-                + "main.ftl\n"
-                + "{main.ftl}\n"
+                + "main.f3au\n"
+                + "{main.f3au}\n"
+                + "In main: main.f3au\n"
+                + "main.f3au\n"
+                + "{main.f3au}\n"
                 + "In inc call imp:\n"
-                + "main.ftl\n"
-                + "{main.ftl}\n"
-                + "In main: main.ftl\n");
+                + "main.f3au\n"
+                + "{main.f3au}\n"
+                + "In main: main.f3au\n");
     }
 
     @Test
     public void testCurrentTemplateName() throws IOException, TemplateException {
         addTemplateNameTestTemplates(".currentTemplateName");
-        assertOutputForNamed("main.ftl",
-                "In main: main.ftl\n"
-                + "In imp: imp.ftl\n"
-                + "In main: main.ftl\n"
-                + "imp.ftl\n"
-                + "{main.ftl}\n"
+        assertOutputForNamed("main.f3au",
+                "In main: main.f3au\n"
+                + "In imp: imp.f3au\n"
+                + "In main: main.f3au\n"
+                + "imp.f3au\n"
+                + "{main.f3au}\n"
                 + "In imp call imp:\n"
-                + "imp.ftl\n"
-                + "{imp.ftl}\n"
-                + "After: imp.ftl\n"
-                + "In main: main.ftl\n"
-                + "In inc: inc.ftl\n"
+                + "imp.f3au\n"
+                + "{imp.f3au}\n"
+                + "After: imp.f3au\n"
+                + "In main: main.f3au\n"
+                + "In inc: inc.f3au\n"
                 + "In inc call imp:\n"
-                + "imp.ftl\n"
-                + "{inc.ftl}\n"
-                + "In main: main.ftl\n"
-                + "inc.ftl\n"
-                + "{main.ftl}\n"
+                + "imp.f3au\n"
+                + "{inc.f3au}\n"
+                + "In main: main.f3au\n"
+                + "inc.f3au\n"
+                + "{main.f3au}\n"
                 + "In inc call imp:\n"
-                + "imp.ftl\n"
-                + "{inc.ftl}\n"
-                + "In main: main.ftl\n");
+                + "imp.f3au\n"
+                + "{inc.f3au}\n"
+                + "In main: main.f3au\n");
     }
 
     private void addTemplateNameTestTemplates(String specVar) {
-        addTemplate("main.ftl",
+        addTemplate("main.f3au",
                 "In main: ${" + specVar + "}\n"
-                        + "<#import 'imp.ftl' as i>"
+                        + "<#import 'imp.f3au' as i>"
                         + "In imp: ${inImp}\n"
                         + "In main: ${" + specVar + "}\n"
                         + "<@i.impM>${" + specVar + "}</@>\n"
                         + "<@i.impM2 />\n"
                         + "In main: ${" + specVar + "}\n"
-                        + "<#include 'inc.ftl'>"
+                        + "<#include 'inc.f3au'>"
                         + "In main: ${" + specVar + "}\n"
                         + "<@incM>${" + specVar + "}</@>\n"
                         + "<@incM2 />\n"
                         + "In main: ${" + specVar + "}\n"
         );
-        addTemplate("imp.ftl",
+        addTemplate("imp.f3au",
                 "<#global inImp = " + specVar + ">"
                         + "<#macro impM>"
                         + "${" + specVar + "}\n"
@@ -110,7 +110,7 @@ public class TemplateNameSpecialVariablesTest extends TemplateTest {
                         + "After: ${" + specVar + "}"
                         + "</#macro>"
         );
-        addTemplate("inc.ftl",
+        addTemplate("inc.f3au",
                 "In inc: ${" + specVar + "}\n"
                         + "In inc call imp:\n"
                         + "<@i.impM>${" + specVar + "}</@>\n"
@@ -127,28 +127,28 @@ public class TemplateNameSpecialVariablesTest extends TemplateTest {
 
     @Test
     public void testInAdhocTemplate() throws TemplateException, IOException {
-        addTemplate("inc.ftl", "Inc: " + PRINT_ALL_FTL);
+        addTemplate("inc.f3au", "Inc: " + PRINT_ALL_FTL);
 
         // In nameless templates, the deprecated .templateName is "", but the new variables are missing values. 
-        assertOutput(new Template(null, PRINT_ALL_FTL + "; <#include 'inc.ftl'>", getConfiguration()),
-                "ct=-, mt=-; Inc: ct=inc.ftl, mt=-");
+        assertOutput(new Template(null, PRINT_ALL_FTL + "; <#include 'inc.f3au'>", getConfiguration()),
+                "ct=-, mt=-; Inc: ct=inc.f3au, mt=-");
         
-        assertOutput(new Template("foo.ftl", PRINT_ALL_FTL + "; <#include 'inc.ftl'>", getConfiguration()),
-                "ct=foo.ftl, mt=foo.ftl; Inc: ct=inc.ftl, mt=foo.ftl");
+        assertOutput(new Template("foo.f3au", PRINT_ALL_FTL + "; <#include 'inc.f3au'>", getConfiguration()),
+                "ct=foo.f3au, mt=foo.f3au; Inc: ct=inc.f3au, mt=foo.f3au");
     }
 
     @Test
     public void testInInterpretTemplate() throws TemplateException, IOException {
         addToDataModel("t", PRINT_ALL_FTL);
-        assertOutput(new Template("foo.ftl", PRINT_ALL_FTL + "; <@t?interpret />", getConfiguration()),
-                "ct=foo.ftl, mt=foo.ftl; "
-                + "ct=foo.ftl->anonymous_interpreted, mt=foo.ftl");
+        assertOutput(new Template("foo.f3au", PRINT_ALL_FTL + "; <@t?interpret />", getConfiguration()),
+                "ct=foo.f3au, mt=foo.f3au; "
+                + "ct=foo.f3au->anonymous_interpreted, mt=foo.f3au");
         assertOutput(new Template(null, PRINT_ALL_FTL + "; <@t?interpret />", getConfiguration()),
                 "ct=-, mt=-; "
                 + "ct=nameless_template->anonymous_interpreted, mt=-");
-        assertOutput(new Template("foo.ftl", PRINT_ALL_FTL + "; <@[t,'bar']?interpret />", getConfiguration()),
-                "ct=foo.ftl, mt=foo.ftl; "
-                + "ct=foo.ftl->bar, mt=foo.ftl");
+        assertOutput(new Template("foo.f3au", PRINT_ALL_FTL + "; <@[t,'bar']?interpret />", getConfiguration()),
+                "ct=foo.f3au, mt=foo.f3au; "
+                + "ct=foo.f3au->bar, mt=foo.f3au");
     }
 
     @Override

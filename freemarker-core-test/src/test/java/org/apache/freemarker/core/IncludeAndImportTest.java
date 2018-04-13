@@ -39,41 +39,41 @@ public class IncludeAndImportTest extends TemplateTest {
 
     @Override
     protected void addCommonTemplates() {
-        addTemplate("inc1.ftl", "[inc1]<#global inc1Cnt = (inc1Cnt!0) + 1><#global history = (history!) + 'I'>");
-        addTemplate("inc2.ftl", "[inc2]");
-        addTemplate("inc3.ftl", "[inc3]");
-        addTemplate("lib1.ftl", "<#global lib1Cnt = (lib1Cnt!0) + 1><#global history = (history!) + 'L1'>"
+        addTemplate("inc1.f3ah", "[inc1]<#global inc1Cnt = (inc1Cnt!0) + 1><#global history = (history!) + 'I'>");
+        addTemplate("inc2.f3ah", "[inc2]");
+        addTemplate("inc3.f3ah", "[inc3]");
+        addTemplate("lib1.f3ah", "<#global lib1Cnt = (lib1Cnt!0) + 1><#global history = (history!) + 'L1'>"
                 + "<#macro m>In lib1</#macro>");
-        addTemplate("lib2.ftl", "<#global history = (history!) + 'L2'>"
+        addTemplate("lib2.f3ah", "<#global history = (history!) + 'L2'>"
                 + "<#macro m>In lib2</#macro>");
-        addTemplate("lib3.ftl", "<#global history = (history!) + 'L3'>"
+        addTemplate("lib3.f3ah", "<#global history = (history!) + 'L3'>"
                 + "<#macro m>In lib3</#macro>");
         
-        addTemplate("lib2CallsLib1.ftl", "<#global history = (history!) + 'L2'>"
+        addTemplate("lib2CallsLib1.f3ah", "<#global history = (history!) + 'L2'>"
                 + "<#macro m>In lib2 (<@lib1.m/>)</#macro>");
-        addTemplate("lib3ImportsLib1.ftl", "<#import 'lib1.ftl' as lib1><#global history = (history!) + 'L3'>"
+        addTemplate("lib3ImportsLib1.f3ah", "<#import 'lib1.f3ah' as lib1><#global history = (history!) + 'L3'>"
                 + "<#macro m>In lib3 (<@lib1.m/>)</#macro>");
         
-        addTemplate("lib_de.ftl", "<#global history = (history!) + 'LDe'><#assign initLocale=.locale>"
+        addTemplate("lib_de.f3ah", "<#global history = (history!) + 'LDe'><#assign initLocale=.locale>"
                 + "<#macro m>de</#macro>");
-        addTemplate("lib_en.ftl", "<#global history = (history!) + 'LEn'><#assign initLocale=.locale>"
+        addTemplate("lib_en.f3ah", "<#global history = (history!) + 'LEn'><#assign initLocale=.locale>"
                 + "<#macro m>en</#macro>");
     }
 
     @Test
     public void includeSameTwice() throws IOException, TemplateException {
-        assertOutput("<#include 'inc1.ftl'>${inc1Cnt}<#include 'inc1.ftl'>${inc1Cnt}", "[inc1]1[inc1]2");
+        assertOutput("<#include 'inc1.f3ah'>${inc1Cnt}<#include 'inc1.f3ah'>${inc1Cnt}", "[inc1]1[inc1]2");
     }
 
     @Test
     public void importSameTwice() throws IOException, TemplateException {
-        assertOutput("<#import 'lib1.ftl' as i1>${lib1Cnt} <#import 'lib1.ftl' as i2>${lib1Cnt}", "1 1");
+        assertOutput("<#import 'lib1.f3ah' as i1>${lib1Cnt} <#import 'lib1.f3ah' as i2>${lib1Cnt}", "1 1");
     }
 
     @Test
     public void importInMainCreatesGlobal() throws IOException, TemplateException {
         String ftl = "${.main.lib1???c} ${.globals.lib1???c}"
-                + "<#import 'lib1.ftl' as lib1> ${.main.lib1???c} ${.globals.lib1???c}";
+                + "<#import 'lib1.f3ah' as lib1> ${.main.lib1???c} ${.globals.lib1???c}";
         String expectedOut = "false false true true";
         assertOutput(ftl, expectedOut);
     }
@@ -82,8 +82,8 @@ public class IncludeAndImportTest extends TemplateTest {
     public void importInMainCreatesGlobalBugfix() throws IOException, TemplateException {
         // An import in the main namespace should invoke a global variable, even if the imported library was already
         // initialized elsewhere.
-        String ftl = "<#import 'lib3ImportsLib1.ftl' as lib3>${lib1Cnt} ${.main.lib1???c} ${.globals.lib1???c}, "
-        + "<#import 'lib1.ftl' as lib1>${lib1Cnt} ${.main.lib1???c} ${.globals.lib1???c}";
+        String ftl = "<#import 'lib3ImportsLib1.f3ah' as lib3>${lib1Cnt} ${.main.lib1???c} ${.globals.lib1???c}, "
+        + "<#import 'lib1.f3ah' as lib1>${lib1Cnt} ${.main.lib1???c} ${.globals.lib1???c}";
         assertOutput(ftl, "1 false false, 1 true true");
     }
 
@@ -94,13 +94,13 @@ public class IncludeAndImportTest extends TemplateTest {
     public void autoIncludeAndAutoImport() throws IOException, TemplateException {
         setConfiguration(new TestConfigurationBuilder()
                 .autoImports(ImmutableMap.of(
-                        "lib1", "lib1.ftl",
-                        "lib2", "lib2CallsLib1.ftl"
+                        "lib1", "lib1.f3ah",
+                        "lib2", "lib2CallsLib1.f3ah"
                 ))
-                .autoIncludes("inc1.ftl", "inc2.ftl")
+                .autoIncludes("inc1.f3ah", "inc2.f3ah")
                 .build());
         assertOutput(
-                "<#include 'inc3.ftl'>[main] ${inc1Cnt}, ${history}, <@lib1.m/>, <@lib2.m/>",
+                "<#include 'inc3.f3ah'>[main] ${inc1Cnt}, ${history}, <@lib1.m/>, <@lib2.m/>",
                 "[inc1][inc2][inc3][main] 1, L1L2I, In lib1, In lib2 (In lib1)");
     }
     
@@ -113,23 +113,23 @@ public class IncludeAndImportTest extends TemplateTest {
         // As only the name of the template is used for the finding the already existing namespace, the settings that
         // influence the lookup are erroneously ignored.
         assertOutput(
-                "<#setting locale='en_US'><#import 'lib.ftl' as ns1>"
-                + "<#setting locale='de_DE'><#import 'lib.ftl' as ns2>"
+                "<#setting locale='en_US'><#import 'lib.f3ah' as ns1>"
+                + "<#setting locale='de_DE'><#import 'lib.f3ah' as ns2>"
                 + "<@ns1.m/> <@ns2.m/> ${history}",
                 "en en LEn");
         
         // The opposite of the previous, where different names refer to the same template after a lookup:
         assertOutput(
                 "<#setting locale='en_US'>"
-                + "<#import 'x/*/lib.ftl' as ns1>"
-                + "<#import 'lib.ftl' as ns2>"
+                + "<#import 'x/*/lib.f3ah' as ns1>"
+                + "<#import 'lib.f3ah' as ns2>"
                 + "<@ns1.m/> <@ns2.m/> ${history}",
                 "en en LEnLEn");
     }
     
     @Test
     public void lazyImportBasics() throws IOException, TemplateException {
-        String ftlImports = "<#import 'lib1.ftl' as l1><#import 'lib2.ftl' as l2><#import 'lib3ImportsLib1.ftl' as l3>";
+        String ftlImports = "<#import 'lib1.f3ah' as l1><#import 'lib2.f3ah' as l2><#import 'lib3ImportsLib1.f3ah' as l3>";
         String ftlCalls = "<@l2.m/>, <@l1.m/>; ${history}";
         String ftl = ftlImports + ftlCalls;
         
@@ -144,7 +144,7 @@ public class IncludeAndImportTest extends TemplateTest {
     @Test
     public void lazyImportAndLocale() throws IOException, TemplateException {
         setConfiguration(new TestConfigurationBuilder().lazyImports(true).build());
-        assertOutput("<#setting locale = 'de_DE'><#import 'lib.ftl' as lib>"
+        assertOutput("<#setting locale = 'de_DE'><#import 'lib.f3ah' as lib>"
                 + "[${history!}] "
                 + "<#setting locale = 'en'>"
                 + "<@lib.m/> ${lib.initLocale} [${history}]",
@@ -154,9 +154,9 @@ public class IncludeAndImportTest extends TemplateTest {
     @Test
     public void lazyAutoImportSettings() throws IOException, TemplateException {
         ImmutableMap<String, String> autoImports = ImmutableMap.of(
-                "l1", "lib1.ftl",
-                "l2", "lib2.ftl",
-                "l3", "lib3.ftl"
+                "l1", "lib1.f3ah",
+                "l2", "lib2.f3ah",
+                "l3", "lib3.f3ah"
         );
         String ftl = "<@l2.m/>, <@l1.m/>; ${history}";
         String expectedEagerOutput = "In lib2, In lib1; L1L2L3";
@@ -205,9 +205,9 @@ public class IncludeAndImportTest extends TemplateTest {
     @Test
     public void lazyAutoImportMixedWithManualImport() throws IOException, TemplateException {
         ImmutableMap<String, String> autoImports = ImmutableMap.of(
-                "l1", "lib1.ftl",
-                "l2", "/./lib2.ftl",
-                "l3", "lib3.ftl");
+                "l1", "lib1.f3ah",
+                "l2", "/./lib2.f3ah",
+                "l3", "lib3.f3ah");
         String ftl = "<@l2.m/>, <@l1.m/>; ${history}";
         String expectOutputWithoutHistory = "In lib2, In lib1; ";
         String expecedOutput = expectOutputWithoutHistory + "L2L1";
@@ -217,20 +217,20 @@ public class IncludeAndImportTest extends TemplateTest {
                 .lazyAutoImports(true)
                 .build());
         assertOutput(ftl, expecedOutput);
-        assertOutput("<#import 'lib1.ftl' as l1>" + ftl, expectOutputWithoutHistory + "L1L2");
-        assertOutput("<#import './x/../lib1.ftl' as l1>" + ftl, expectOutputWithoutHistory + "L1L2");
-        assertOutput("<#import 'lib2.ftl' as l2>" + ftl, expecedOutput);
-        assertOutput("<#import 'lib3.ftl' as l3>" + ftl, expectOutputWithoutHistory + "L3L2L1");
+        assertOutput("<#import 'lib1.f3ah' as l1>" + ftl, expectOutputWithoutHistory + "L1L2");
+        assertOutput("<#import './x/../lib1.f3ah' as l1>" + ftl, expectOutputWithoutHistory + "L1L2");
+        assertOutput("<#import 'lib2.f3ah' as l2>" + ftl, expecedOutput);
+        assertOutput("<#import 'lib3.f3ah' as l3>" + ftl, expectOutputWithoutHistory + "L3L2L1");
 
         setConfiguration(new TestConfigurationBuilder()
                 .autoImports(autoImports)
                 .lazyAutoImports(true)
                 .lazyImports(true)
                 .build());
-        assertOutput("<#import 'lib1.ftl' as l1>" + ftl, expecedOutput);
-        assertOutput("<#import './x/../lib1.ftl' as l1>" + ftl, expecedOutput);
-        assertOutput("<#import 'lib2.ftl' as l2>" + ftl, expecedOutput);
-        assertOutput("<#import 'lib3.ftl' as l3>" + ftl, expecedOutput);
+        assertOutput("<#import 'lib1.f3ah' as l1>" + ftl, expecedOutput);
+        assertOutput("<#import './x/../lib1.f3ah' as l1>" + ftl, expecedOutput);
+        assertOutput("<#import 'lib2.f3ah' as l2>" + ftl, expecedOutput);
+        assertOutput("<#import 'lib3.f3ah' as l3>" + ftl, expecedOutput);
     }
 
     @Test
@@ -238,11 +238,11 @@ public class IncludeAndImportTest extends TemplateTest {
         setConfiguration(new TestConfigurationBuilder()
                 .lazyImports(true)
                 .build());
-        assertOutput("<#import 'noSuchTemplate.ftl' as wrong>x", "x");
+        assertOutput("<#import 'noSuchTemplate.f3ah' as wrong>x", "x");
         
         setConfiguration(new TestConfigurationBuilder()
                 .lazyImports(true)
-                .autoImports(ImmutableMap.of("wrong", "noSuchTemplate.ftl"))
+                .autoImports(ImmutableMap.of("wrong", "noSuchTemplate.f3ah"))
                 .build());
         assertOutput("x", "x");
 
@@ -251,17 +251,17 @@ public class IncludeAndImportTest extends TemplateTest {
             fail();
         } catch (TemplateException e) {
             assertThat(e.getMessage(),
-                    allOf(containsString("Lazy initialization"), containsString("noSuchTemplate.ftl")));
+                    allOf(containsString("Lazy initialization"), containsString("noSuchTemplate.f3ah")));
             assertThat(e.getCause(), instanceOf(TemplateNotFoundException.class));
         }
         
-        addTemplate("containsError.ftl", "${noSuchVar}");
+        addTemplate("containsError.f3ah", "${noSuchVar}");
         try {
-            assertOutput("<#import 'containsError.ftl' as lib>${lib.x}", "");
+            assertOutput("<#import 'containsError.f3ah' as lib>${lib.x}", "");
             fail();
         } catch (TemplateException e) {
             assertThat(e.getMessage(),
-                    allOf(containsString("Lazy initialization"), containsString("containsError.ftl")));
+                    allOf(containsString("Lazy initialization"), containsString("containsError.f3ah")));
             assertThat(e.getCause(), instanceOf(InvalidReferenceException.class));
             assertThat(e.getCause().getMessage(), containsString("noSuchVar"));
         }

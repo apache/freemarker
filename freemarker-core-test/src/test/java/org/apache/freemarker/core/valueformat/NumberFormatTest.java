@@ -260,11 +260,11 @@ public class NumberFormatTest extends TemplateTest {
         String commonFtl = "${1?string.@f} ${1?string.@d} "
                 + "<#setting locale='fr_FR'>${1.5?string.@d} "
                 + "<#attempt>${10?string.@i}<#recover>E</#attempt>";
-        addTemplate("t1.ftl", commonFtl);
-        addTemplate("t2.ftl", commonFtl);
+        addTemplate("t1.f3ah", commonFtl);
+        addTemplate("t2.f3ah", commonFtl);
         
-        assertOutputForNamed("t1.ftl", "1f 1.0 1,5 E");
-        assertOutputForNamed("t2.ftl", "1f 1d 1,5d a");
+        assertOutputForNamed("t1.f3ah", "1f 1.0 1,5 E");
+        assertOutputForNamed("t2.f3ah", "1f 1d 1,5d a");
     }
 
     @Test

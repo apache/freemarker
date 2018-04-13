@@ -210,9 +210,9 @@ public interface TopLevelConfiguration extends ParsingAndProcessingConfiguration
      * <p>
      * With the default {@link TemplateLookupStrategy}, localized template lookup works like this: Let's say your
      * locale setting is {@code Locale("en", "AU")}, and you call
-     * {@link Configuration#getTemplate(String) cfg.getTemplate("foo.ftl")}. Then FreeMarker will look for the
-     * template under these names, stopping at the first that exists: {@code "foo_en_AU.ftl"}, {@code "foo_en.ftl"},
-     * {@code "foo.ftl"}. See the description of the default value at {@link #getTemplateLookupStrategy()} for a more
+     * {@link Configuration#getTemplate(String) cfg.getTemplate("foo.f3ah")}. Then FreeMarker will look for the
+     * template under these names, stopping at the first that exists: {@code "foo_en_AU.f3ah"}, {@code "foo_en.f3ah"},
+     * {@code "foo.f3ah"}. See the description of the default value at {@link #getTemplateLookupStrategy()} for a more
      * details. If you need to generate different template names, set your own a {@link TemplateLookupStrategy}
      * implementation as the value of the {@link #getTemplateLookupStrategy() templateLookupStrategy} setting.
      * <p>

@@ -355,12 +355,12 @@ public class DateFormatTest extends TemplateTest {
         String commonFtl = "${d?string.@d} ${d?string.@m} "
                 + "<#setting locale='fr_FR'>${d?string.@m} "
                 + "<#attempt>${d?string.@i}<#recover>E</#attempt>";
-        addTemplate("t1.ftl", commonFtl);
-        addTemplate("t2.ftl", commonFtl);
+        addTemplate("t1.f3ah", commonFtl);
+        addTemplate("t2.f3ah", commonFtl);
         
         // 2015-09-06T12:00:00Z
-        assertOutputForNamed("t1.ftl", "2015-Sep-06 2015-Sep 2015-sept. E");
-        assertOutputForNamed("t2.ftl", "2015-Sep-06 2015-September 2015-septembre " + T);
+        assertOutputForNamed("t1.f3ah", "2015-Sep-06 2015-Sep 2015-sept. E");
+        assertOutputForNamed("t2.f3ah", "2015-Sep-06 2015-September 2015-septembre " + T);
     }
     
     @Test

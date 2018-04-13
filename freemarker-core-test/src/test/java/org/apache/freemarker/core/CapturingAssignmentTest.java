@@ -35,13 +35,13 @@ public class CapturingAssignmentTest extends TemplateTest {
 
     @Test
     public void testAssignNs() throws IOException, TemplateException {
-        addTemplate("lib.ftl", "");
-        assertOutput("<#import 'lib.ftl' as lib>"
+        addTemplate("lib.f3ah", "");
+        assertOutput("<#import 'lib.f3ah' as lib>"
                 + "<#assign x in lib></#assign>[${lib.x}]", "[]");
-        assertOutput("<#import 'lib.ftl' as lib>"
+        assertOutput("<#import 'lib.f3ah' as lib>"
                 + "<#assign x in lib><p>${1 + 1}</#assign>${lib.x + '&'}", "<p>2&");
         assertOutput("<#ftl outputFormat='HTML'>"
-                + "<#import 'lib.ftl' as lib>"
+                + "<#import 'lib.f3ah' as lib>"
                 + "<#assign x in lib><p>${1 + 1}</#assign>${lib.x + '&'}", "<p>2&amp;");
     }
 

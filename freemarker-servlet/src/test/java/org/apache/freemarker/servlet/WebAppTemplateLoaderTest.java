@@ -43,7 +43,7 @@ public class WebAppTemplateLoaderTest {
     @Test
     public void testTemplateNotFound() throws IOException {
         try {
-            createConfiguration().getTemplate("missing.ftl");
+            createConfiguration().getTemplate("missing.f3ah");
             fail();
         } catch (TemplateNotFoundException e) {
             LOG.debug("Expected result", e);

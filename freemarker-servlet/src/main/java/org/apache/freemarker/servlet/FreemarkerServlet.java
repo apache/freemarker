@@ -75,7 +75,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 /**
  * FreeMarker MVC View servlet that can be used similarly to JSP views. That is, you put the variables to expose into
  * HTTP servlet request attributes, then forward to an FTL file (instead of to a JSP file) that's mapped to this servet
- * (usually via the {@code <url-pattern>*.ftl<url-pattern>}). See web.xml example (and more) in the FreeMarker Manual!
+ * (usually via the {@code <url-pattern>*.f3ah<url-pattern>}). See web.xml example (and more) in the FreeMarker Manual!
  * 
  * 
  * <p>

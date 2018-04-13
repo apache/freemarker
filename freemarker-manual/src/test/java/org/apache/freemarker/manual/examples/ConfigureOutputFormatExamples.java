@@ -39,7 +39,7 @@ public class ConfigureOutputFormatExamples extends TemplateTest {
     
     @Test
     public void test() throws Exception {
-        addTemplate("mail/t.ftl", "");
+        addTemplate("mail/news", "");
         addTemplate("t.html", "");
         addTemplate("t.htm", "");
         addTemplate("t.xml", "");
@@ -65,7 +65,7 @@ public class ConfigureOutputFormatExamples extends TemplateTest {
                         : new TestConfigurationBuilder()
                                 .settings(loadPropertiesFile("ConfigureOutputFormatExamples1.properties"))
                                 .build());
-        assertEquals(HTMLOutputFormat.INSTANCE, getConfiguration().getTemplate("mail/t.ftl").getOutputFormat());
+        assertEquals(HTMLOutputFormat.INSTANCE, getConfiguration().getTemplate("mail/news").getOutputFormat());
     }
 
     private void example3(boolean javaCfg) throws IOException {

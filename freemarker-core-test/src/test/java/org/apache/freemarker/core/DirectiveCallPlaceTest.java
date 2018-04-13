@@ -40,13 +40,13 @@ public class DirectiveCallPlaceTest extends TemplateTest {
     @Test
     public void testCustomDataBasics() throws IOException, TemplateException {
         addTemplate(
-                "customDataBasics.ftl",
+                "customDataBasics.f3ah",
                 "<@uc>Abc</@uc> <@uc>x=${x}</@uc> <@uc>Ab<#-- -->c</@uc> <@lc/><@lc></@lc> <@lc>Abc</@lc>");
         
         CachingTextConverterDirective.resetCacheRecreationCount();
         for (int i = 0; i < 3; i++) {
             assertOutputForNamed(
-                    "customDataBasics.ftl",
+                    "customDataBasics.f3ah",
                     "ABC[cached 1] X=123 ABC[cached 2]  abc[cached 3]");
         }
     }
@@ -54,33 +54,33 @@ public class DirectiveCallPlaceTest extends TemplateTest {
     @Test
     public void testCustomDataProviderMismatch() throws IOException, TemplateException {
         addTemplate(
-                "customDataProviderMismatch.ftl",
+                "customDataProviderMismatch.f3ah",
                 "<#list [uc, lc, uc] as d><#list 1..2 as _><@d>Abc</@d></#list></#list>");
         
         CachingTextConverterDirective.resetCacheRecreationCount();
         assertOutputForNamed(
-                "customDataProviderMismatch.ftl",
+                "customDataProviderMismatch.f3ah",
                 "ABC[cached 1]ABC[cached 1]abc[cached 2]abc[cached 2]ABC[cached 3]ABC[cached 3]");
         assertOutputForNamed(
-                "customDataProviderMismatch.ftl",
+                "customDataProviderMismatch.f3ah",
                 "ABC[cached 3]ABC[cached 3]abc[cached 4]abc[cached 4]ABC[cached 5]ABC[cached 5]");
     }
     
     @Test
     public void testPositions() throws IOException, TemplateException {
         addTemplate(
-                "positions.ftl",
+                "positions.f3ah",
                 "<@pa />\n"
                 + "..<@pa\n"
                 + "/><@pa>xxx</@>\n"
                 + "<@pa>{<@pa/> <@pa/>}</@>\n");
         
         assertOutputForNamed(
-                "positions.ftl",
-                "[positions.ftl:1:1-1:7]"
-                + "..[positions.ftl:2:3-3:2]"
-                + "[positions.ftl:3:3-3:14]xxx\n"
-                + "[positions.ftl:4:1-4:24]{[positions.ftl:4:7-4:12] [positions.ftl:4:14-4:19]}\n");
+                "positions.f3ah",
+                "[positions.f3ah:1:1-1:7]"
+                + "..[positions.f3ah:2:3-3:2]"
+                + "[positions.f3ah:3:3-3:14]xxx\n"
+                + "[positions.f3ah:4:1-4:24]{[positions.f3ah:4:7-4:12] [positions.f3ah:4:14-4:19]}\n");
     }
     
     @SuppressWarnings("boxing")

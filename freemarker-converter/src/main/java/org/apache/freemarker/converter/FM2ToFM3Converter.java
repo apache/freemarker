@@ -78,10 +78,10 @@ public class FM2ToFM3Converter extends Converter {
 
     public static final Map<String, String> PREDEFINED_FILE_EXTENSION_SUBSTITUTIONS
             = new ImmutableMap.Builder<String,String>()
-                    .put("ftl", "fm3")
-                    .put("ftlh", "fm3h")
-                    .put("ftlx", "fm3x")
-                    .put("fm", "fm3")
+                    .put("ftl", "f3ac")
+                    .put("ftlh", "f3ah")
+                    .put("ftlx", "f3ax")
+                    .put("fm", "f3ac")
                     .build();
 
     private static final Logger LOG = LoggerFactory.getLogger(Converter.class);
@@ -158,7 +158,7 @@ public class FM2ToFM3Converter extends Converter {
         }
 
         if (template.getActualTagSyntax() == Configuration.SQUARE_BRACKET_TAG_SYNTAX) {
-            replacementExt = replacementExt.replace("3", "3s");
+            replacementExt = replacementExt.replace("3a", "3s");
         }
 
         return srcFileName.substring(0, lastDotIdx + 1) + replacementExt;

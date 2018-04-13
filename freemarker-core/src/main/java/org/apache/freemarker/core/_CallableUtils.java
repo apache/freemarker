@@ -19,7 +19,7 @@
 
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core.util.TemplateLanguageUtils.getCallableTypeName;
+import static org.apache.freemarker.core.util.TemplateLanguageUtils.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -204,7 +204,7 @@ public class _CallableUtils {
     }
 
     /**
-     * Something like {@code "When calling function \"lib.ftl:foo\": " or "When calling ?leftPad: "}
+     * Something like {@code "When calling function \"lib.f3ah:foo\": " or "When calling ?leftPad: "}
      */
     public static Object getMessagePartWhenCallingSomethingColon(
             TemplateCallableModel callable, boolean calledAsFunction) {

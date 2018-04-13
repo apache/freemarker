@@ -35,18 +35,18 @@ public class MultiTemplateLoaderTest {
     @Test
     public void testBasics() throws IOException {
         StringTemplateLoader stl1 = new StringTemplateLoader();
-        stl1.putTemplate("1.ftl", "1");
-        stl1.putTemplate("both.ftl", "both 1");
+        stl1.putTemplate("1.f3ah", "1");
+        stl1.putTemplate("both.f3ah", "both 1");
 
         StringTemplateLoader stl2 = new StringTemplateLoader();
-        stl2.putTemplate("2.ftl", "2");
-        stl2.putTemplate("both.ftl", "both 2");
+        stl2.putTemplate("2.f3ah", "2");
+        stl2.putTemplate("both.f3ah", "both 2");
         
         MultiTemplateLoader mtl = new MultiTemplateLoader(stl1, stl2);
-        assertEquals("1", getTemplateContent(mtl, "1.ftl"));
-        assertEquals("2", getTemplateContent(mtl, "2.ftl"));
-        assertEquals("both 1", getTemplateContent(mtl, "both.ftl"));
-        assertNull(getTemplateContent(mtl, "neither.ftl"));
+        assertEquals("1", getTemplateContent(mtl, "1.f3ah"));
+        assertEquals("2", getTemplateContent(mtl, "2.f3ah"));
+        assertEquals("both 1", getTemplateContent(mtl, "both.f3ah"));
+        assertNull(getTemplateContent(mtl, "neither.f3ah"));
     }
 
     @Test
@@ -61,21 +61,21 @@ public class MultiTemplateLoaderTest {
     
     private void testStickiness(boolean sticky) throws IOException {
         StringTemplateLoader stl1 = new StringTemplateLoader();
-        stl1.putTemplate("both.ftl", "both 1");
+        stl1.putTemplate("both.f3ah", "both 1");
         
         ByteArrayTemplateLoader stl2 = new ByteArrayTemplateLoader();
-        stl2.putTemplate("both.ftl", "both 2".getBytes(StandardCharsets.UTF_8));
+        stl2.putTemplate("both.f3ah", "both 2".getBytes(StandardCharsets.UTF_8));
 
         MultiTemplateLoader mtl = new MultiTemplateLoader(stl1, stl2);
         mtl.setSticky(sticky);
         
-        assertEquals("both 1", getTemplateContent(mtl, "both.ftl"));
-        assertTrue(stl1.removeTemplate("both.ftl"));
-        assertEquals("both 2", getTemplateContent(mtl, "both.ftl"));
-        stl1.putTemplate("both.ftl", "both 1");
-        assertEquals(sticky ? "both 2" : "both 1", getTemplateContent(mtl, "both.ftl"));
-        assertTrue(stl2.removeTemplate("both.ftl"));
-        assertEquals("both 1", getTemplateContent(mtl, "both.ftl"));
+        assertEquals("both 1", getTemplateContent(mtl, "both.f3ah"));
+        assertTrue(stl1.removeTemplate("both.f3ah"));
+        assertEquals("both 2", getTemplateContent(mtl, "both.f3ah"));
+        stl1.putTemplate("both.f3ah", "both 1");
+        assertEquals(sticky ? "both 2" : "both 1", getTemplateContent(mtl, "both.f3ah"));
+        assertTrue(stl2.removeTemplate("both.f3ah"));
+        assertEquals("both 1", getTemplateContent(mtl, "both.f3ah"));
     }
     
     private String getTemplateContent(TemplateLoader tl, String name) throws IOException {

@@ -39,8 +39,8 @@ public class TemplateConstructorsTest {
     public void test() throws IOException {
         final Configuration cfg = new TestConfigurationBuilder().sourceEncoding(StandardCharsets.ISO_8859_1).build();
         
-        final String name = "foo/bar.ftl";
-        final String sourceName = "foo/bar_de.ftl";
+        final String name = "foo/bar.f3ah";
+        final String sourceName = "foo/bar_de.f3ah";
         final Charset sourceEncoding = StandardCharsets.UTF_16LE;
         {
             Template t = new Template(name, createReader(), cfg);

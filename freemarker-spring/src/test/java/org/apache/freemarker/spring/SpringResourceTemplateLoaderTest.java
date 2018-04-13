@@ -68,7 +68,7 @@ public class SpringResourceTemplateLoaderTest {
     public void testNotFound() throws Exception {
         for (int i = 0; i < 2; i++) {
             try {
-                cfg.getTemplate("sub1X/sub2/t.ftl");
+                cfg.getTemplate("sub1X/sub2/t.f3ah");
                 fail();
             } catch (TemplateNotFoundException e) {
                 assertThat(e.getMessage(), containsString("sub1X"));

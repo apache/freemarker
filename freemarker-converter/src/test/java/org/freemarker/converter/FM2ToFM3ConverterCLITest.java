@@ -60,8 +60,8 @@ public class FM2ToFM3ConverterCLITest extends ConverterTest {
     public void testBasic() {
         assertCLIResult(SUCCESS_EXIT_STATUS, "2 file", null,
                 srcDir.toString(), "-d", dstDir.toString());
-        assertTrue(new File(dstDir, "1.fm3").exists());
-        assertTrue(new File(dstDir, "2.fm3").exists());
+        assertTrue(new File(dstDir, "1.f3ac").exists());
+        assertTrue(new File(dstDir, "2.f3ac").exists());
         assertFalse(new File(dstDir, "3.txt").exists());
     }
 
@@ -76,8 +76,8 @@ public class FM2ToFM3ConverterCLITest extends ConverterTest {
         assertCLIResult(SUCCESS_EXIT_STATUS, "2 file", null,
                 srcDir.toString(), "-d", dstDir.toString(),
                 "--include", ".*", "--exclude", ".*2\\.ftl");
-        assertTrue(new File(dstDir, "1.fm3").exists());
-        assertFalse(new File(dstDir, "2.fm3").exists());
+        assertTrue(new File(dstDir, "1.f3ac").exists());
+        assertFalse(new File(dstDir, "2.f3ac").exists());
         assertTrue(new File(dstDir, "3.txt").exists());
     }
 
@@ -86,7 +86,7 @@ public class FM2ToFM3ConverterCLITest extends ConverterTest {
         assertCLIResult(SUCCESS_EXIT_STATUS, null, null,
                 srcDir.toString(), "-d", dstDir.toString(),
                 "--include", ".*", "-Etxt=txt3");
-        assertTrue(new File(dstDir, "1.fm3").exists());
+        assertTrue(new File(dstDir, "1.f3ac").exists());
         assertTrue(new File(dstDir, "3.txt3").exists());
     }
 

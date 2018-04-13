@@ -35,26 +35,26 @@ public class IncludeAndImportConfigurableLayersTest {
     @Test
     public void test3LayerImportNoClashes() throws Exception {
         TestConfigurationBuilder cfgB = createConfigurationBuilder()
-                .autoImports(ImmutableMap.of("t1", "t1.ftl"))
+                .autoImports(ImmutableMap.of("t1", "t1.f3ah"))
                 .templateConfigurations(
                         new ConditionalTemplateConfigurationFactory(
-                                new FileNameGlobMatcher("main.ftl"),
+                                new FileNameGlobMatcher("main.f3ah"),
                                 new TemplateConfiguration.Builder()
-                                        .autoImports(ImmutableMap.of("t2", "t2.ftl"))
+                                        .autoImports(ImmutableMap.of("t2", "t2.f3ah"))
                                         .build()));
         Configuration cfg = cfgB.build();
 
         {
-            Template t = cfg.getTemplate("main.ftl");
+            Template t = cfg.getTemplate("main.f3ah");
             StringWriter sw = new StringWriter();
             t.createProcessingEnvironment(null, sw)
-                    .autoImports(ImmutableMap.of("t3", "t3.ftl"))
+                    .autoImports(ImmutableMap.of("t3", "t3.f3ah"))
                     .process();
             assertEquals("In main: t1;t2;t3;", sw.toString());
         }
 
         {
-            Template t = cfg.getTemplate("main.ftl");
+            Template t = cfg.getTemplate("main.f3ah");
             StringWriter sw = new StringWriter();
             t.createProcessingEnvironment(null, sw)
                     .process();
@@ -62,10 +62,10 @@ public class IncludeAndImportConfigurableLayersTest {
         }
         
         {
-            Template t = cfg.getTemplate("main2.ftl");
+            Template t = cfg.getTemplate("main2.f3ah");
             StringWriter sw = new StringWriter();
             t.createProcessingEnvironment(null, sw)
-                    .autoImports(ImmutableMap.of("t3", "t3.ftl"))
+                    .autoImports(ImmutableMap.of("t3", "t3.f3ah"))
                     .process();
             assertEquals("In main2: t1;t3;", sw.toString());
         }
@@ -75,37 +75,37 @@ public class IncludeAndImportConfigurableLayersTest {
     public void test3LayerImportClashes() throws Exception {
         Configuration cfg = createConfigurationBuilder()
                 .autoImports(ImmutableMap.of(
-                        "t1", "t1.ftl",
-                        "t2", "t2.ftl",
-                        "t3", "t3.ftl"))
+                        "t1", "t1.f3ah",
+                        "t2", "t2.f3ah",
+                        "t3", "t3.f3ah"))
                 .templateConfigurations(
                         new ConditionalTemplateConfigurationFactory(
-                                new FileNameGlobMatcher("main.ftl"),
+                                new FileNameGlobMatcher("main.f3ah"),
                                 new TemplateConfiguration.Builder()
-                                        .autoImports(ImmutableMap.of("t2", "t2b.ftl"))
+                                        .autoImports(ImmutableMap.of("t2", "t2b.f3ah"))
                                         .build()))
                 .build();
 
         {
-            Template t = cfg.getTemplate("main.ftl");
+            Template t = cfg.getTemplate("main.f3ah");
             StringWriter sw = new StringWriter();
             t.createProcessingEnvironment(null, sw)
-                    .autoImports(ImmutableMap.of("t3", "t3b.ftl"))
+                    .autoImports(ImmutableMap.of("t3", "t3b.f3ah"))
                     .process();
             assertEquals("In main: t1;t2b;t3b;", sw.toString());
         }
         
         {
-            Template t = cfg.getTemplate("main2.ftl");
+            Template t = cfg.getTemplate("main2.f3ah");
             StringWriter sw = new StringWriter();
             t.createProcessingEnvironment(null, sw)
-                    .autoImports(ImmutableMap.of("t3", "t3b.ftl"))
+                    .autoImports(ImmutableMap.of("t3", "t3b.f3ah"))
                     .process();
             assertEquals("In main2: t1;t2;t3b;", sw.toString());
         }
         
         {
-            Template t = cfg.getTemplate("main.ftl");
+            Template t = cfg.getTemplate("main.f3ah");
             StringWriter sw = new StringWriter();
             t.createProcessingEnvironment(null, sw)
                     .process();
@@ -116,26 +116,26 @@ public class IncludeAndImportConfigurableLayersTest {
     @Test
     public void test3LayerIncludesNoClashes() throws Exception {
         Configuration cfg = createConfigurationBuilder()
-                .autoIncludes("t1.ftl")
+                .autoIncludes("t1.f3ah")
                 .templateConfigurations(
                         new ConditionalTemplateConfigurationFactory(
-                                new FileNameGlobMatcher("main.ftl"),
+                                new FileNameGlobMatcher("main.f3ah"),
                                 new TemplateConfiguration.Builder()
-                                        .autoIncludes("t2.ftl")
+                                        .autoIncludes("t2.f3ah")
                                         .build()))
                 .build();
 
         {
-            Template t = cfg.getTemplate("main.ftl");
+            Template t = cfg.getTemplate("main.f3ah");
             StringWriter sw = new StringWriter();
             t.createProcessingEnvironment(null, sw)
-                    .autoIncludes("t3.ftl")
+                    .autoIncludes("t3.f3ah")
                     .process();
             assertEquals("T1;T2;T3;In main: t1;t2;t3;", sw.toString());
         }
 
         {
-            Template t = cfg.getTemplate("main.ftl");
+            Template t = cfg.getTemplate("main.f3ah");
             StringWriter sw = new StringWriter();
             t.createProcessingEnvironment(null, sw)
                     .process();
@@ -143,10 +143,10 @@ public class IncludeAndImportConfigurableLayersTest {
         }
         
         {
-            Template t = cfg.getTemplate("main2.ftl");
+            Template t = cfg.getTemplate("main2.f3ah");
             StringWriter sw = new StringWriter();
             t.createProcessingEnvironment(null, sw)
-                    .autoIncludes("t3.ftl")
+                    .autoIncludes("t3.f3ah")
                     .process();
             assertEquals("T1;T3;In main2: t1;t3;", sw.toString());
         }
@@ -155,34 +155,34 @@ public class IncludeAndImportConfigurableLayersTest {
     @Test
     public void test3LayerIncludeClashes() throws Exception {
         Configuration cfg = createConfigurationBuilder()
-                .autoIncludes("t1.ftl", "t2.ftl", "t3.ftl")
+                .autoIncludes("t1.f3ah", "t2.f3ah", "t3.f3ah")
                 .templateConfigurations(new ConditionalTemplateConfigurationFactory(
-                        new FileNameGlobMatcher("main.ftl"),
+                        new FileNameGlobMatcher("main.f3ah"),
                         new TemplateConfiguration.Builder()
-                                .autoIncludes("t2.ftl")
+                                .autoIncludes("t2.f3ah")
                                 .build()))
                 .build();
 
         {
-            Template t = cfg.getTemplate("main.ftl");
+            Template t = cfg.getTemplate("main.f3ah");
             StringWriter sw = new StringWriter();
             t.createProcessingEnvironment(null, sw)
-                    .autoIncludes("t3.ftl")
+                    .autoIncludes("t3.f3ah")
                     .process();
             assertEquals("T1;T2;T3;In main: t1;t2;t3;", sw.toString());
         }
         
         {
-            Template t = cfg.getTemplate("main2.ftl");
+            Template t = cfg.getTemplate("main2.f3ah");
             StringWriter sw = new StringWriter();
             t.createProcessingEnvironment(null, sw)
-                    .autoIncludes("t3.ftl")
+                    .autoIncludes("t3.f3ah")
                     .process();
             assertEquals("T1;T2;T3;In main2: t1;t2;t3;", sw.toString());
         }
         
         {
-            Template t = cfg.getTemplate("main.ftl");
+            Template t = cfg.getTemplate("main.f3ah");
             StringWriter sw = new StringWriter();
             t.createProcessingEnvironment(null, sw)
                     .process();
@@ -190,10 +190,10 @@ public class IncludeAndImportConfigurableLayersTest {
         }
         
         {
-            Template t = cfg.getTemplate("main.ftl");
+            Template t = cfg.getTemplate("main.f3ah");
             StringWriter sw = new StringWriter();
             t.createProcessingEnvironment(null, sw)
-                    .autoIncludes("t1.ftl")
+                    .autoIncludes("t1.f3ah")
                     .process();
             assertEquals("T3;T2;T1;In main: t3;t2;t1;", sw.toString());
         }
@@ -202,20 +202,20 @@ public class IncludeAndImportConfigurableLayersTest {
     @Test
     public void test3LayerIncludesClashes2() throws Exception {
         Configuration cfg = createConfigurationBuilder()
-                .autoIncludes("t1.ftl", "t1.ftl")
+                .autoIncludes("t1.f3ah", "t1.f3ah")
                 .templateConfigurations(
                         new ConditionalTemplateConfigurationFactory(
-                                new FileNameGlobMatcher("main.ftl"),
+                                new FileNameGlobMatcher("main.f3ah"),
                                 new TemplateConfiguration.Builder()
-                                        .autoIncludes("t2.ftl", "t2.ftl")
+                                        .autoIncludes("t2.f3ah", "t2.f3ah")
                                         .build()))
                 .build();
 
         {
-            Template t = cfg.getTemplate("main.ftl");
+            Template t = cfg.getTemplate("main.f3ah");
             StringWriter sw = new StringWriter();
             t.createProcessingEnvironment(null, sw)
-                    .autoIncludes("t3.ftl", "t3.ftl", "t1.ftl", "t1.ftl")
+                    .autoIncludes("t3.f3ah", "t3.f3ah", "t1.f3ah", "t1.f3ah")
                     .process();
             assertEquals("T2;T3;T1;In main: t2;t3;t1;", sw.toString());
         }
@@ -250,7 +250,7 @@ public class IncludeAndImportConfigurableLayersTest {
         Configuration cfg;
         {
             TestConfigurationBuilder cfgB = createConfigurationBuilder()
-                    .autoImports(ImmutableMap.of("t1", "t1.ftl"));
+                    .autoImports(ImmutableMap.of("t1", "t1.f3ah"));
             if (layer == Configuration.class) {
                 setLazinessOfConfigurable(cfgB, lazyImports, lazyAutoImports, setLazyAutoImports);
             }
@@ -266,7 +266,7 @@ public class IncludeAndImportConfigurableLayersTest {
             tc = null;
         }
 
-        Template t = new Template(null, "<#import 't2.ftl' as t2>${loaded!}", cfg, tc);
+        Template t = new Template(null, "<#import 't2.f3ah' as t2>${loaded!}", cfg, tc);
         StringWriter sw = new StringWriter();
 
         Environment env = t.createProcessingEnvironment(null, sw);
@@ -291,14 +291,14 @@ public class IncludeAndImportConfigurableLayersTest {
     
     private TestConfigurationBuilder createConfigurationBuilder() {
         StringTemplateLoader loader = new StringTemplateLoader();
-        loader.putTemplate("main.ftl", "In main: ${loaded}");
-        loader.putTemplate("main2.ftl", "In main2: ${loaded}");
-        loader.putTemplate("t1.ftl", "<#global loaded = (loaded!) + 't1;'>T1;");
-        loader.putTemplate("t2.ftl", "<#global loaded = (loaded!) + 't2;'>T2;");
-        loader.putTemplate("t3.ftl", "<#global loaded = (loaded!) + 't3;'>T3;");
-        loader.putTemplate("t1b.ftl", "<#global loaded = (loaded!) + 't1b;'>T1b;");
-        loader.putTemplate("t2b.ftl", "<#global loaded = (loaded!) + 't2b;'>T2b;");
-        loader.putTemplate("t3b.ftl", "<#global loaded = (loaded!) + 't3b;'>T3b;");
+        loader.putTemplate("main.f3ah", "In main: ${loaded}");
+        loader.putTemplate("main2.f3ah", "In main2: ${loaded}");
+        loader.putTemplate("t1.f3ah", "<#global loaded = (loaded!) + 't1;'>T1;");
+        loader.putTemplate("t2.f3ah", "<#global loaded = (loaded!) + 't2;'>T2;");
+        loader.putTemplate("t3.f3ah", "<#global loaded = (loaded!) + 't3;'>T3;");
+        loader.putTemplate("t1b.f3ah", "<#global loaded = (loaded!) + 't1b;'>T1b;");
+        loader.putTemplate("t2b.f3ah", "<#global loaded = (loaded!) + 't2b;'>T2b;");
+        loader.putTemplate("t3b.f3ah", "<#global loaded = (loaded!) + 't3b;'>T3b;");
 
         return new TestConfigurationBuilder().templateLoader(loader);
     }

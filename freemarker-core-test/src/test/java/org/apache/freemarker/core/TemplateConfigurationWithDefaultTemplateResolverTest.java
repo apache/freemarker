@@ -18,7 +18,7 @@
  */
 package org.apache.freemarker.core;
 
-import static org.apache.freemarker.core.ProcessingConfiguration.MISSING_VALUE_MARKER;
+import static org.apache.freemarker.core.ProcessingConfiguration.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -52,27 +52,27 @@ public class TemplateConfigurationWithDefaultTemplateResolverTest {
         Configuration cfg = createCommonEncodingTesterConfig();
         
         {
-            Template t = cfg.getTemplate("utf8.ftl");
+            Template t = cfg.getTemplate("utf8.f3ah");
             assertEquals(StandardCharsets.UTF_8, t.getActualSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
         {
-            Template t = cfg.getTemplate("utf16.ftl");
+            Template t = cfg.getTemplate("utf16.f3ah");
             assertEquals(StandardCharsets.UTF_16LE, t.getActualSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
         {
-            Template t = cfg.getTemplate("default.ftl");
+            Template t = cfg.getTemplate("default.f3ah");
             assertEquals(StandardCharsets.ISO_8859_1, t.getActualSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
         {
-            Template t = cfg.getTemplate("utf8-latin2.ftl");
+            Template t = cfg.getTemplate("utf8-latin2.f3ah");
             assertEquals(ISO_8859_2, t.getActualSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
         {
-            Template t = cfg.getTemplate("default-latin2.ftl");
+            Template t = cfg.getTemplate("default-latin2.f3ah");
             assertEquals(ISO_8859_2, t.getActualSourceEncoding());
             assertEquals(TEXT_WITH_ACCENTS, getTemplateOutput(t));
         }
@@ -82,25 +82,25 @@ public class TemplateConfigurationWithDefaultTemplateResolverTest {
     public void testIncludeAndEncoding() throws Exception {
         Configuration cfg = createCommonEncodingTesterConfig();
         ByteArrayTemplateLoader tl = (ByteArrayTemplateLoader) cfg.getTemplateLoader();
-        tl.putTemplate("main.ftl", (
-                        "<#include 'utf8.ftl'>"
-                        + "<#include 'utf16.ftl'>"
-                        + "<#include 'default.ftl'>"
-                        + "<#include 'utf8-latin2.ftl'>"
+        tl.putTemplate("main.f3ah", (
+                        "<#include 'utf8.f3ah'>"
+                        + "<#include 'utf16.f3ah'>"
+                        + "<#include 'default.f3ah'>"
+                        + "<#include 'utf8-latin2.f3ah'>"
                 ).getBytes(StandardCharsets.ISO_8859_1));
         assertEquals(
                 TEXT_WITH_ACCENTS + TEXT_WITH_ACCENTS + TEXT_WITH_ACCENTS + TEXT_WITH_ACCENTS,
-                getTemplateOutput(cfg.getTemplate("main.ftl")));
+                getTemplateOutput(cfg.getTemplate("main.f3ah")));
     }
 
     @Test
     public void testLocale() throws Exception {
         StringTemplateLoader loader = new StringTemplateLoader();
-        loader.putTemplate("(de).ftl", "${.locale}");
-        loader.putTemplate("default.ftl", "${.locale}");
-        loader.putTemplate("(de)-fr.ftl",
+        loader.putTemplate("(de).f3ah", "${.locale}");
+        loader.putTemplate("default.f3ah", "${.locale}");
+        loader.putTemplate("(de)-fr.f3ah",
                 ("<#ftl locale='fr_FR'>${.locale}"));
-        loader.putTemplate("default-fr.ftl",
+        loader.putTemplate("default-fr.f3ah",
                 ("<#ftl locale='fr_FR'>${.locale}"));
 
         Configuration cfg = new TestConfigurationBuilder()
@@ -114,22 +114,22 @@ public class TemplateConfigurationWithDefaultTemplateResolverTest {
                 .build();
 
         {
-            Template t = cfg.getTemplate("(de).ftl");
+            Template t = cfg.getTemplate("(de).f3ah");
             assertEquals(Locale.GERMANY, t.getLocale());
             assertEquals("de_DE", getTemplateOutput(t));
         }
         {
-            Template t = cfg.getTemplate("(de).ftl", Locale.ITALY);
+            Template t = cfg.getTemplate("(de).f3ah", Locale.ITALY);
             assertEquals(Locale.GERMANY, t.getLocale());
             assertEquals("de_DE", getTemplateOutput(t));
         }
         {
-            Template t = cfg.getTemplate("default.ftl");
+            Template t = cfg.getTemplate("default.f3ah");
             assertEquals(Locale.US, t.getLocale());
             assertEquals("en_US", getTemplateOutput(t));
         }
         {
-            Template t = cfg.getTemplate("default.ftl", Locale.ITALY);
+            Template t = cfg.getTemplate("default.f3ah", Locale.ITALY);
             assertEquals(Locale.ITALY, t.getLocale());
             assertEquals("it_IT", getTemplateOutput(t));
         }
@@ -237,12 +237,12 @@ public class TemplateConfigurationWithDefaultTemplateResolverTest {
 
     private Configuration createCommonEncodingTesterConfig() throws UnsupportedEncodingException {
         ByteArrayTemplateLoader tl = new ByteArrayTemplateLoader();
-        tl.putTemplate("utf8.ftl", TEXT_WITH_ACCENTS.getBytes(StandardCharsets.UTF_8));
-        tl.putTemplate("utf16.ftl", TEXT_WITH_ACCENTS.getBytes(StandardCharsets.UTF_16LE));
-        tl.putTemplate("default.ftl", TEXT_WITH_ACCENTS.getBytes(ISO_8859_2));
-        tl.putTemplate("utf8-latin2.ftl",
+        tl.putTemplate("utf8.f3ah", TEXT_WITH_ACCENTS.getBytes(StandardCharsets.UTF_8));
+        tl.putTemplate("utf16.f3ah", TEXT_WITH_ACCENTS.getBytes(StandardCharsets.UTF_16LE));
+        tl.putTemplate("default.f3ah", TEXT_WITH_ACCENTS.getBytes(ISO_8859_2));
+        tl.putTemplate("utf8-latin2.f3ah",
                 ("<#ftl encoding='iso-8859-2'>" + TEXT_WITH_ACCENTS).getBytes(ISO_8859_2));
-        tl.putTemplate("default-latin2.ftl",
+        tl.putTemplate("default-latin2.f3ah",
                 ("<#ftl encoding='iso-8859-2'>" + TEXT_WITH_ACCENTS).getBytes(ISO_8859_2));
 
         return new TestConfigurationBuilder()

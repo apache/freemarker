@@ -112,14 +112,14 @@ public class TemplateConfigurationExamples extends TemplateTest {
         }
         setConfiguration(cfgB.build());
 
-        addTemplate("t.subject.ftl", "");
-        addTemplate("mail/t.subject.ftl", "");
-        addTemplate("mail/t.body.ftl", "");
+        addTemplate("t.subject.t", "");
+        addTemplate("mail/t.subject.t", "");
+        addTemplate("mail/t.body.t", "");
 
         Configuration cfg = getConfiguration();
-        assertEquals(UndefinedOutputFormat.INSTANCE, cfg.getTemplate("t.subject.ftl").getOutputFormat());
-        assertEquals(PlainTextOutputFormat.INSTANCE, cfg.getTemplate("mail/t.subject.ftl").getOutputFormat());
-        assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("mail/t.body.ftl").getOutputFormat());
+        assertEquals(UndefinedOutputFormat.INSTANCE, cfg.getTemplate("t.subject.t").getOutputFormat());
+        assertEquals(PlainTextOutputFormat.INSTANCE, cfg.getTemplate("mail/t.subject.t").getOutputFormat());
+        assertEquals(HTMLOutputFormat.INSTANCE, cfg.getTemplate("mail/t.body.t").getOutputFormat());
     }
 
     @Test

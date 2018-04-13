@@ -32,21 +32,21 @@ public class CallerTemplateNameTest  extends TemplateTest {
 
     @Test
     public void testBaics() throws Exception {
-        addTemplate("main.ftl", ""
+        addTemplate("main.f3ah", ""
                 + "<#macro m>${.callerTemplateName}</#macro>"
                 + "<#function f()><#return .callerTemplateName></#function>"
-                + "<@m /> ${f()} [<#include 'other.ftl'>] <@m /> ${f()}");
-        addTemplate("other.ftl", ""
-                + "<@m /> ${f()} [<#include 'yet-another.ftl'>] <@m /> ${f()}");
-        addTemplate("yet-another.ftl", ""
+                + "<@m /> ${f()} [<#include 'other.f3ah'>] <@m /> ${f()}");
+        addTemplate("other.f3ah", ""
+                + "<@m /> ${f()} [<#include 'yet-another.f3ah'>] <@m /> ${f()}");
+        addTemplate("yet-another.f3ah", ""
                 + "<@m /> ${f()}");
         
-        assertOutputForNamed("main.ftl", ""
-                + "main.ftl main.ftl "
-                + "[other.ftl other.ftl "
-                + "[yet-another.ftl yet-another.ftl] "
-                + "other.ftl other.ftl] "
-                + "main.ftl main.ftl");
+        assertOutputForNamed("main.f3ah", ""
+                + "main.f3ah main.f3ah "
+                + "[other.f3ah other.f3ah "
+                + "[yet-another.f3ah yet-another.f3ah] "
+                + "other.f3ah other.f3ah] "
+                + "main.f3ah main.f3ah");
     }
     
     @Test
@@ -58,8 +58,8 @@ public class CallerTemplateNameTest  extends TemplateTest {
                 + "<@m>${.callerTemplateName}</@>",
                 "no macro or function");
 
-        addTemplate("main.ftl", "${.callerTemplateName}");
-        assertErrorContainsForNamed("main.ftl", "no macro or function");
+        addTemplate("main.f3ah", "${.callerTemplateName}");
+        assertErrorContainsForNamed("main.f3ah", "no macro or function");
     }
 
     @Test
@@ -72,77 +72,77 @@ public class CallerTemplateNameTest  extends TemplateTest {
 
     @Test
     public void testNested() throws Exception {
-        addTemplate("main.ftl", ""
-                + "<#include 'lib1.ftl'>"
-                + "<#include 'lib2.ftl'>"
+        addTemplate("main.f3ah", ""
+                + "<#include 'lib1.f3ah'>"
+                + "<#include 'lib2.f3ah'>"
                 + "<@m1 />");
-        addTemplate("lib1.ftl", ""
+        addTemplate("lib1.f3ah", ""
                 + "<#macro m1>"
                 + "${.callerTemplateName} [<@m2>${.callerTemplateName}</@m2>] ${.callerTemplateName}"
                 + "</#macro>");
-        addTemplate("lib2.ftl", ""
+        addTemplate("lib2.f3ah", ""
                 + "<#macro m2>"
                 + "${.callerTemplateName} [<#nested>] ${.callerTemplateName}"
                 + "</#macro>");
-        assertOutputForNamed("main.ftl", ""
-                + "main.ftl [lib1.ftl [main.ftl] lib1.ftl] main.ftl");
+        assertOutputForNamed("main.f3ah", ""
+                + "main.f3ah [lib1.f3ah [main.f3ah] lib1.f3ah] main.f3ah");
     }
     
     @Test
     public void testSelfCaller() throws Exception {
-        addTemplate("main.ftl", ""
+        addTemplate("main.f3ah", ""
                 + "<#macro m>${.callerTemplateName}</#macro>"
                 + "<@m />");
-        assertOutputForNamed("main.ftl", "main.ftl");
+        assertOutputForNamed("main.f3ah", "main.f3ah");
     }
 
     @Test
     public void testImportedTemplateCaller() throws Exception {
-        addTemplate("main.ftl", ""
-                + "<#import 'lib/foo.ftl' as foo>"
+        addTemplate("main.f3ah", ""
+                + "<#import 'lib/foo.f3ah' as foo>"
                 + "<@foo.m />, <@foo.m2 />");
-        addTemplate("lib/foo.ftl", ""
+        addTemplate("lib/foo.f3ah", ""
                 + "<#macro m>${.callerTemplateName}</#macro>"
                 + "<#macro m2><@m3/></#macro>"
                 + "<#macro m3>${.callerTemplateName}</#macro>");
-        assertOutputForNamed("main.ftl",
-                "main.ftl, lib/foo.ftl");
+        assertOutputForNamed("main.f3ah",
+                "main.f3ah, lib/foo.f3ah");
     }
     
     @Test
     public void testNestedIntoNonUserDirectives() throws Exception {
-        addTemplate("main.ftl", ""
+        addTemplate("main.f3ah", ""
                 + "<#macro m><#list 1..2 as _><#if true>${.callerTemplateName}</#if>;</#list></#macro>"
                 + "<@m/>");
-        assertOutputForNamed("main.ftl", "main.ftl;main.ftl;");
+        assertOutputForNamed("main.f3ah", "main.f3ah;main.f3ah;");
     }
 
     @Test
     public void testUsedInArgument() throws Exception {
-        addTemplate("main.ftl", ""
-                + "<#include 'inc.ftl'>"
+        addTemplate("main.f3ah", ""
+                + "<#include 'inc.f3ah'>"
                 + "<#macro start>"
                 + "<@m .callerTemplateName />"
                 + "<@m2 />"
                 + "</#macro>"
                 + "<@start />");
-        addTemplate("inc.ftl", ""
+        addTemplate("inc.f3ah", ""
                 + "<#macro m x{positional}, y{positional}=.callerTemplateName>"
                 + "x: ${x}; y: ${y}; caller: ${.callerTemplateName};"
                 + "</#macro>"
                 + "<#macro m2><@m .callerTemplateName /></#macro>");
         
-        assertOutputForNamed("main.ftl", ""
-                + "x: main.ftl; y: main.ftl; caller: main.ftl;"
-                + "x: main.ftl; y: inc.ftl; caller: inc.ftl;");
+        assertOutputForNamed("main.f3ah", ""
+                + "x: main.f3ah; y: main.f3ah; caller: main.f3ah;"
+                + "x: main.f3ah; y: inc.f3ah; caller: inc.f3ah;");
     }
     
     @Test
     public void testReturnsLookupName() throws Exception {
-        addTemplate("main_en.ftl", ""
+        addTemplate("main_en.f3ah", ""
                 + "<#macro m>${.callerTemplateName}</#macro>"
                 + "<@m />");
-        assertOutputForNamed("main.ftl", "main.ftl"); // Not main_en.ftl
+        assertOutputForNamed("main.f3ah", "main.f3ah"); // Not main_en.f3ah
     }
     
 }

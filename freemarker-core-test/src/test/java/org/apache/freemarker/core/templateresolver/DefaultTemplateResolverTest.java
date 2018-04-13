@@ -152,23 +152,23 @@ public class DefaultTemplateResolverTest {
                 .templateUpdateDelayMilliseconds(Long.MAX_VALUE)
                 .build();
 
-        loader.putTemplate("1.ftl", "1 v1");
-        loader.putTemplate("2.ftl", "2 v1");
-        assertEquals("1 v1", cfg.getTemplate("1.ftl").toString()); 
-        assertEquals("2 v1", cfg.getTemplate("2.ftl").toString());
+        loader.putTemplate("1.f3ah", "1 v1");
+        loader.putTemplate("2.f3ah", "2 v1");
+        assertEquals("1 v1", cfg.getTemplate("1.f3ah").toString()); 
+        assertEquals("2 v1", cfg.getTemplate("2.f3ah").toString());
         
-        loader.putTemplate("1.ftl", "1 v2");
-        loader.putTemplate("2.ftl", "2 v2");
-        assertEquals("1 v1", cfg.getTemplate("1.ftl").toString()); // no change 
-        assertEquals("2 v1", cfg.getTemplate("2.ftl").toString()); // no change
+        loader.putTemplate("1.f3ah", "1 v2");
+        loader.putTemplate("2.f3ah", "2 v2");
+        assertEquals("1 v1", cfg.getTemplate("1.f3ah").toString()); // no change 
+        assertEquals("2 v1", cfg.getTemplate("2.f3ah").toString()); // no change
         
-        cfg.removeTemplateFromCache("1.ftl", cfg.getLocale(), null);
-        assertEquals("1 v2", cfg.getTemplate("1.ftl").toString()); // changed 
-        assertEquals("2 v1", cfg.getTemplate("2.ftl").toString());
+        cfg.removeTemplateFromCache("1.f3ah", cfg.getLocale(), null);
+        assertEquals("1 v2", cfg.getTemplate("1.f3ah").toString()); // changed 
+        assertEquals("2 v1", cfg.getTemplate("2.f3ah").toString());
         
-        cfg.removeTemplateFromCache("2.ftl", cfg.getLocale(), null);
-        assertEquals("1 v2", cfg.getTemplate("1.ftl").toString()); 
-        assertEquals("2 v2", cfg.getTemplate("2.ftl").toString()); // changed
+        cfg.removeTemplateFromCache("2.f3ah", cfg.getLocale(), null);
+        assertEquals("1 v2", cfg.getTemplate("1.f3ah").toString()); 
+        assertEquals("2 v2", cfg.getTemplate("2.f3ah").toString()); // changed
     }
 
     @Test
@@ -180,36 +180,36 @@ public class DefaultTemplateResolverTest {
                 .templateUpdateDelayMilliseconds(Long.MAX_VALUE)
                 .build();
 
-        loader.putTemplate("1_en_US.ftl", "1_en_US v1");
-        loader.putTemplate("1_en.ftl", "1_en v1");
-        loader.putTemplate("1.ftl", "1 v1");
+        loader.putTemplate("1_en_US.f3ah", "1_en_US v1");
+        loader.putTemplate("1_en.f3ah", "1_en v1");
+        loader.putTemplate("1.f3ah", "1 v1");
         
-        assertEquals("1_en_US v1", cfg.getTemplate("1.ftl").toString());        
-        assertEquals("1_en v1", cfg.getTemplate("1.ftl", Locale.UK).toString());        
-        assertEquals("1 v1", cfg.getTemplate("1.ftl", Locale.GERMANY).toString());
+        assertEquals("1_en_US v1", cfg.getTemplate("1.f3ah").toString());        
+        assertEquals("1_en v1", cfg.getTemplate("1.f3ah", Locale.UK).toString());        
+        assertEquals("1 v1", cfg.getTemplate("1.f3ah", Locale.GERMANY).toString());
         
-        loader.putTemplate("1_en_US.ftl", "1_en_US v2");
-        loader.putTemplate("1_en.ftl", "1_en v2");
-        loader.putTemplate("1.ftl", "1 v2");
-        assertEquals("1_en_US v1", cfg.getTemplate("1.ftl").toString());        
-        assertEquals("1_en v1", cfg.getTemplate("1.ftl", Locale.UK).toString());        
-        assertEquals("1 v1", cfg.getTemplate("1.ftl", Locale.GERMANY).toString());
+        loader.putTemplate("1_en_US.f3ah", "1_en_US v2");
+        loader.putTemplate("1_en.f3ah", "1_en v2");
+        loader.putTemplate("1.f3ah", "1 v2");
+        assertEquals("1_en_US v1", cfg.getTemplate("1.f3ah").toString());        
+        assertEquals("1_en v1", cfg.getTemplate("1.f3ah", Locale.UK).toString());        
+        assertEquals("1 v1", cfg.getTemplate("1.f3ah", Locale.GERMANY).toString());
         
-        cfg.removeTemplateFromCache("1.ftl", cfg.getLocale(), null);
-        assertEquals("1_en_US v2", cfg.getTemplate("1.ftl").toString());        
-        assertEquals("1_en v1", cfg.getTemplate("1.ftl", Locale.UK).toString());        
-        assertEquals("1 v1", cfg.getTemplate("1.ftl", Locale.GERMANY).toString());
-        assertEquals("1 v2", cfg.getTemplate("1.ftl", Locale.ITALY).toString());
+        cfg.removeTemplateFromCache("1.f3ah", cfg.getLocale(), null);
+        assertEquals("1_en_US v2", cfg.getTemplate("1.f3ah").toString());        
+        assertEquals("1_en v1", cfg.getTemplate("1.f3ah", Locale.UK).toString());        
+        assertEquals("1 v1", cfg.getTemplate("1.f3ah", Locale.GERMANY).toString());
+        assertEquals("1 v2", cfg.getTemplate("1.f3ah", Locale.ITALY).toString());
         
-        cfg.removeTemplateFromCache("1.ftl", Locale.GERMANY, null);
-        assertEquals("1_en v1", cfg.getTemplate("1.ftl", Locale.UK).toString());        
-        assertEquals("1 v2", cfg.getTemplate("1.ftl", Locale.GERMANY).toString());
+        cfg.removeTemplateFromCache("1.f3ah", Locale.GERMANY, null);
+        assertEquals("1_en v1", cfg.getTemplate("1.f3ah", Locale.UK).toString());        
+        assertEquals("1 v2", cfg.getTemplate("1.f3ah", Locale.GERMANY).toString());
 
-        cfg.removeTemplateFromCache("1.ftl", Locale.CANADA, null);
-        assertEquals("1_en v1", cfg.getTemplate("1.ftl", Locale.UK).toString());
+        cfg.removeTemplateFromCache("1.f3ah", Locale.CANADA, null);
+        assertEquals("1_en v1", cfg.getTemplate("1.f3ah", Locale.UK).toString());
         
-        cfg.removeTemplateFromCache("1.ftl", Locale.UK, null);
-        assertEquals("1_en v2", cfg.getTemplate("1.ftl", Locale.UK).toString());        
+        cfg.removeTemplateFromCache("1.f3ah", Locale.UK, null);
+        assertEquals("1_en v2", cfg.getTemplate("1.f3ah", Locale.UK).toString());        
     }
 
     @Test
@@ -223,34 +223,34 @@ public class DefaultTemplateResolverTest {
                     .templateUpdateDelayMilliseconds(0L)
                     .build();
             for (int i = 1; i <= 3; i++) {
-                loader.putTextTemplate("t.ftl", "v" + i);
-                assertEquals("v" + i, cfg.getTemplate("t.ftl").toString());
+                loader.putTextTemplate("t.f3ah", "v" + i);
+                assertEquals("v" + i, cfg.getTemplate("t.f3ah").toString());
             }
 
             loader.clearEvents();
-            loader.putTextTemplate("t.ftl", "v8");
-            assertEquals("v8", cfg.getTemplate("t.ftl").toString());
-            assertEquals("v8", cfg.getTemplate("t.ftl").toString());
-            loader.putTextTemplate("t.ftl", "v9");
-            assertEquals("v9", cfg.getTemplate("t.ftl").toString());
-            assertEquals("v9", cfg.getTemplate("t.ftl").toString());
+            loader.putTextTemplate("t.f3ah", "v8");
+            assertEquals("v8", cfg.getTemplate("t.f3ah").toString());
+            assertEquals("v8", cfg.getTemplate("t.f3ah").toString());
+            loader.putTextTemplate("t.f3ah", "v9");
+            assertEquals("v9", cfg.getTemplate("t.f3ah").toString());
+            assertEquals("v9", cfg.getTemplate("t.f3ah").toString());
             assertEquals(
                     ImmutableList.of(
-                            new LoadEvent("t_en_US.ftl", TemplateLoadingResultStatus.NOT_FOUND), // v8
-                            new LoadEvent("t_en.ftl", TemplateLoadingResultStatus.NOT_FOUND),
-                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.OPENED),
+                            new LoadEvent("t_en_US.f3ah", TemplateLoadingResultStatus.NOT_FOUND), // v8
+                            new LoadEvent("t_en.f3ah", TemplateLoadingResultStatus.NOT_FOUND),
+                            new LoadEvent("t.f3ah", TemplateLoadingResultStatus.OPENED),
 
-                            new LoadEvent("t_en_US.ftl", TemplateLoadingResultStatus.NOT_FOUND), // v8
-                            new LoadEvent("t_en.ftl", TemplateLoadingResultStatus.NOT_FOUND),
-                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.NOT_MODIFIED),
+                            new LoadEvent("t_en_US.f3ah", TemplateLoadingResultStatus.NOT_FOUND), // v8
+                            new LoadEvent("t_en.f3ah", TemplateLoadingResultStatus.NOT_FOUND),
+                            new LoadEvent("t.f3ah", TemplateLoadingResultStatus.NOT_MODIFIED),
 
-                            new LoadEvent("t_en_US.ftl", TemplateLoadingResultStatus.NOT_FOUND), // v9
-                            new LoadEvent("t_en.ftl", TemplateLoadingResultStatus.NOT_FOUND),
-                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.OPENED),
+                            new LoadEvent("t_en_US.f3ah", TemplateLoadingResultStatus.NOT_FOUND), // v9
+                            new LoadEvent("t_en.f3ah", TemplateLoadingResultStatus.NOT_FOUND),
+                            new LoadEvent("t.f3ah", TemplateLoadingResultStatus.OPENED),
 
-                            new LoadEvent("t_en_US.ftl", TemplateLoadingResultStatus.NOT_FOUND), // v9
-                            new LoadEvent("t_en.ftl", TemplateLoadingResultStatus.NOT_FOUND),
-                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.NOT_MODIFIED)
+                            new LoadEvent("t_en_US.f3ah", TemplateLoadingResultStatus.NOT_FOUND), // v9
+                            new LoadEvent("t_en.f3ah", TemplateLoadingResultStatus.NOT_FOUND),
+                            new LoadEvent("t.f3ah", TemplateLoadingResultStatus.NOT_MODIFIED)
                     ),
                     loader.getEvents(LoadEvent.class));
         }
@@ -263,26 +263,26 @@ public class DefaultTemplateResolverTest {
                     .localizedTemplateLookup(false)
                     .build();
             loader.clearEvents();
-            loader.putTextTemplate("t.ftl", "v10");
-            assertEquals("v10", cfg.getTemplate("t.ftl").toString());
-            loader.putTextTemplate("t.ftl", "v11"); // same time stamp, different content
-            assertEquals("v11", cfg.getTemplate("t.ftl").toString());
-            assertEquals("v11", cfg.getTemplate("t.ftl").toString());
-            assertEquals("v11", cfg.getTemplate("t.ftl").toString());
+            loader.putTextTemplate("t.f3ah", "v10");
+            assertEquals("v10", cfg.getTemplate("t.f3ah").toString());
+            loader.putTextTemplate("t.f3ah", "v11"); // same time stamp, different content
+            assertEquals("v11", cfg.getTemplate("t.f3ah").toString());
+            assertEquals("v11", cfg.getTemplate("t.f3ah").toString());
+            assertEquals("v11", cfg.getTemplate("t.f3ah").toString());
             Thread.sleep(17L);
-            assertEquals("v11", cfg.getTemplate("t.ftl").toString());
-            loader.putTextTemplate("t.ftl", "v12");
-            assertEquals("v12", cfg.getTemplate("t.ftl").toString());
-            assertEquals("v12", cfg.getTemplate("t.ftl").toString());
+            assertEquals("v11", cfg.getTemplate("t.f3ah").toString());
+            loader.putTextTemplate("t.f3ah", "v12");
+            assertEquals("v12", cfg.getTemplate("t.f3ah").toString());
+            assertEquals("v12", cfg.getTemplate("t.f3ah").toString());
             assertEquals(
                     ImmutableList.of(
-                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.OPENED), // v10
-                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.OPENED), // v11
-                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.NOT_MODIFIED),
-                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.NOT_MODIFIED),
-                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.NOT_MODIFIED),
-                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.OPENED), // v12
-                            new LoadEvent("t.ftl", TemplateLoadingResultStatus.NOT_MODIFIED)
+                            new LoadEvent("t.f3ah", TemplateLoadingResultStatus.OPENED), // v10
+                            new LoadEvent("t.f3ah", TemplateLoadingResultStatus.OPENED), // v11
+                            new LoadEvent("t.f3ah", TemplateLoadingResultStatus.NOT_MODIFIED),
+                            new LoadEvent("t.f3ah", TemplateLoadingResultStatus.NOT_MODIFIED),
+                            new LoadEvent("t.f3ah", TemplateLoadingResultStatus.NOT_MODIFIED),
+                            new LoadEvent("t.f3ah", TemplateLoadingResultStatus.OPENED), // v12
+                            new LoadEvent("t.f3ah", TemplateLoadingResultStatus.NOT_MODIFIED)
                     ),
                     loader.getEvents(LoadEvent.class));
         }
@@ -291,24 +291,24 @@ public class DefaultTemplateResolverTest {
     @Test
     public void testWrongEncodingReload() throws Exception {
         MonitoredTemplateLoader loader = new MonitoredTemplateLoader();
-        loader.putBinaryTemplate("utf-8_en.ftl", "<#ftl encoding='utf-8'>Béka");
-        loader.putBinaryTemplate("utf-8.ftl", "Bar");
-        loader.putBinaryTemplate("iso-8859-1_en_US.ftl", "<#ftl encoding='ISO-8859-1'>Béka",
+        loader.putBinaryTemplate("utf-8_en.f3ah", "<#ftl encoding='utf-8'>Béka");
+        loader.putBinaryTemplate("utf-8.f3ah", "Bar");
+        loader.putBinaryTemplate("iso-8859-1_en_US.f3ah", "<#ftl encoding='ISO-8859-1'>Béka",
                 StandardCharsets.ISO_8859_1, "v1");
         Configuration cfg = new TestConfigurationBuilder().templateLoader(loader).build();
 
         {
-            Template t = cfg.getTemplate("utf-8.ftl");
-            assertEquals("utf-8.ftl", t.getLookupName());
-            assertEquals("utf-8_en.ftl", t.getSourceName());
+            Template t = cfg.getTemplate("utf-8.f3ah");
+            assertEquals("utf-8.f3ah", t.getLookupName());
+            assertEquals("utf-8_en.f3ah", t.getSourceName());
             assertEquals(StandardCharsets.UTF_8, t.getActualSourceEncoding());
             assertEquals("Béka", t.toString());
             
             assertEquals(
                     ImmutableList.of(
                             CreateSessionEvent.INSTANCE,
-                            new LoadEvent("utf-8_en_US.ftl", TemplateLoadingResultStatus.NOT_FOUND),
-                            new LoadEvent("utf-8_en.ftl", TemplateLoadingResultStatus.OPENED),
+                            new LoadEvent("utf-8_en_US.f3ah", TemplateLoadingResultStatus.NOT_FOUND),
+                            new LoadEvent("utf-8_en.f3ah", TemplateLoadingResultStatus.OPENED),
                             CloseSessionEvent.INSTANCE),
                     loader.getEvents());
         }
@@ -316,16 +316,16 @@ public class DefaultTemplateResolverTest {
         {
             loader.clearEvents();
             
-            Template t = cfg.getTemplate("iso-8859-1.ftl");
-            assertEquals("iso-8859-1.ftl", t.getLookupName());
-            assertEquals("iso-8859-1_en_US.ftl", t.getSourceName());
+            Template t = cfg.getTemplate("iso-8859-1.f3ah");
+            assertEquals("iso-8859-1.f3ah", t.getLookupName());
+            assertEquals("iso-8859-1_en_US.f3ah", t.getSourceName());
             assertEquals(StandardCharsets.ISO_8859_1, t.getActualSourceEncoding());
             assertEquals("Béka", t.toString());
             
             assertEquals(
                     ImmutableList.of(
                             CreateSessionEvent.INSTANCE,
-                            new LoadEvent("iso-8859-1_en_US.ftl", TemplateLoadingResultStatus.OPENED),
+                            new LoadEvent("iso-8859-1_en_US.f3ah", TemplateLoadingResultStatus.OPENED),
                             CloseSessionEvent.INSTANCE),
                     loader.getEvents());
         }
@@ -334,22 +334,22 @@ public class DefaultTemplateResolverTest {
     @Test
     public void testNoWrongEncodingForTemplateLoader2WithReader() throws Exception {
         MonitoredTemplateLoader loader = new MonitoredTemplateLoader();
-        loader.putTextTemplate("foo_en.ftl", "<#ftl encoding='utf-8'>ő");
-        loader.putTextTemplate("foo.ftl", "B");
+        loader.putTextTemplate("foo_en.f3ah", "<#ftl encoding='utf-8'>ő");
+        loader.putTextTemplate("foo.f3ah", "B");
         Configuration cfg = new TestConfigurationBuilder().templateLoader(loader).build();
         
         {
-            Template t = cfg.getTemplate("foo.ftl");
-            assertEquals("foo.ftl", t.getLookupName());
-            assertEquals("foo_en.ftl", t.getSourceName());
+            Template t = cfg.getTemplate("foo.f3ah");
+            assertEquals("foo.f3ah", t.getLookupName());
+            assertEquals("foo_en.f3ah", t.getSourceName());
             assertNull(t.getActualSourceEncoding());
             assertEquals("ő", t.toString());
             
             assertEquals(
                     ImmutableList.of(
                             CreateSessionEvent.INSTANCE,
-                            new LoadEvent("foo_en_US.ftl", TemplateLoadingResultStatus.NOT_FOUND),
-                            new LoadEvent("foo_en.ftl", TemplateLoadingResultStatus.OPENED),
+                            new LoadEvent("foo_en_US.f3ah", TemplateLoadingResultStatus.NOT_FOUND),
+                            new LoadEvent("foo_en.f3ah", TemplateLoadingResultStatus.OPENED),
                             CloseSessionEvent.INSTANCE),                
                     loader.getEvents());
         }

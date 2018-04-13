@@ -22,13 +22,13 @@ public class GetOptionalTemplateTest extends TemplateTest {
 
     @Test
     public void testBasicsWhenTemplateExists() throws Exception {
-        addTemplate("inc.ftl", "<#assign x = (x!0) + 1>inc ${x}");
+        addTemplate("inc.f3ah", "<#assign x = (x!0) + 1>inc ${x}");
         assertOutput(""
-                + "<#assign t = .getOptionalTemplate('inc.ftl')>"
+                + "<#assign t = .getOptionalTemplate('inc.f3ah')>"
                 + "Exists: ${t.exists?c}; "
                 + "Include: <@t.include />, <@t.include />; "
                 + "Import: <#assign ns1 = t.import()><#assign ns2 = t.import()>${ns1.x}, ${ns2.x}; "
-                + "Aliased: <#assign x = 9 in ns1>${ns1.x}, ${ns2.x}, <#import 'inc.ftl' as ns3>${ns3.x}",
+                + "Aliased: <#assign x = 9 in ns1>${ns1.x}, ${ns2.x}, <#import 'inc.f3ah' as ns3>${ns3.x}",
                 "Exists: true; "
                 + "Include: inc 1, inc 2; "
                 + "Import: 1, 1; "
@@ -39,7 +39,7 @@ public class GetOptionalTemplateTest extends TemplateTest {
     @Test
     public void testBasicsWhenTemplateIsMissing() throws Exception {
         assertOutput(""
-                + "<#assign t = .getOptionalTemplate('missing.ftl')>"
+                + "<#assign t = .getOptionalTemplate('missing.f3ah')>"
                 + "Exists: ${t.exists?c}; "
                 + "Include: ${t.include???c}; "
                 + "Import: ${t.import???c}",
@@ -51,24 +51,24 @@ public class GetOptionalTemplateTest extends TemplateTest {
 
     @Test
     public void testRelativeAndAbsolutePath() throws Exception {
-        addTemplate("lib/inc.ftl", "included");
+        addTemplate("lib/inc.f3ah", "included");
         
-        addTemplate("test1.ftl", "<@.getOptionalTemplate('lib/inc.ftl').include />");
-        assertOutputForNamed("test1.ftl", "included");
+        addTemplate("test1.f3ah", "<@.getOptionalTemplate('lib/inc.f3ah').include />");
+        assertOutputForNamed("test1.f3ah", "included");
         
-        addTemplate("lib/test2.ftl", "<@.getOptionalTemplate('/lib/inc.ftl').include />");
-        assertOutputForNamed("lib/test2.ftl", "included");
+        addTemplate("lib/test2.f3ah", "<@.getOptionalTemplate('/lib/inc.f3ah').include />");
+        assertOutputForNamed("lib/test2.f3ah", "included");
         
-        addTemplate("lib/test3.ftl", "<@.getOptionalTemplate('inc.ftl').include />");
-        assertOutputForNamed("lib/test3.ftl", "included");
+        addTemplate("lib/test3.f3ah", "<@.getOptionalTemplate('inc.f3ah').include />");
+        assertOutputForNamed("lib/test3.f3ah", "included");
         
-        addTemplate("sub/test4.ftl", "<@.getOptionalTemplate('../lib/inc.ftl').include />");
-        assertOutputForNamed("sub/test4.ftl", "included");
+        addTemplate("sub/test4.f3ah", "<@.getOptionalTemplate('../lib/inc.f3ah').include />");
+        assertOutputForNamed("sub/test4.f3ah", "included");
     }
 
     @Test
     public void testUseCase1() throws Exception {
-        addTemplate("lib/inc.ftl", "included");
+        addTemplate("lib/inc.f3ah", "included");
         assertOutput(""
                 + "<#macro test templateName{positional}>"
                 + "<#local t = .getOptionalTemplate(templateName)>"
@@ -78,27 +78,27 @@ public class GetOptionalTemplateTest extends TemplateTest {
                 + "missing"
                 + "</#if>"
                 + "</#macro>"
-                + "<@test 'lib/inc.ftl' />; "
-                + "<@test 'inc.ftl' />",
+                + "<@test 'lib/inc.f3ah' />; "
+                + "<@test 'inc.f3ah' />",
                 "before included after; missing");
     }
 
     @Test
     public void testUseCase2() throws Exception {
-        addTemplate("found.ftl", "found");
+        addTemplate("found.f3ah", "found");
         assertOutput(""
                 + "<@("
-                + ".getOptionalTemplate('missing1.ftl').include!"
-                + ".getOptionalTemplate('missing2.ftl').include!"
-                + ".getOptionalTemplate('found.ftl').include!"
-                + ".getOptionalTemplate('missing3.ftl').include"
+                + ".getOptionalTemplate('missing1.f3ah').include!"
+                + ".getOptionalTemplate('missing2.f3ah').include!"
+                + ".getOptionalTemplate('found.f3ah').include!"
+                + ".getOptionalTemplate('missing3.f3ah').include"
                 + ") />",
                 "found");
         assertOutput(""
                 + "<#macro fallback>fallback</#macro>"
                 + "<@("
-                + ".getOptionalTemplate('missing1.ftl').include!"
-                + ".getOptionalTemplate('missing2.ftl').include!"
+                + ".getOptionalTemplate('missing1.f3ah').include!"
+                + ".getOptionalTemplate('missing2.f3ah').include!"
                 + "fallback"
                 + ") />",
                 "fallback");

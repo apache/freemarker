@@ -219,7 +219,7 @@ public class TemplateNameFormatTest {
                 .templateNameFormat(DefaultTemplateNameFormat.INSTANCE)
                 .build();
         try {
-            cfg.getTemplate("././foo\\bar.ftl", Locale.US);
+            cfg.getTemplate("././foo\\bar.f3ah", Locale.US);
             fail();
         } catch (MalformedTemplateNameException e) {
             assertThat(e.getMessage(), containsStringIgnoringCase("backslash"));

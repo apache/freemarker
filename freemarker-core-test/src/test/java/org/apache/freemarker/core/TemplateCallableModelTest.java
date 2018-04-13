@@ -247,8 +247,8 @@ public class TemplateCallableModelTest extends TemplateTest {
         assertErrorContains("<#function myF(p1)></#function>${myF()}", "function", "\"myF\"", "1st", "null");
         assertErrorContains("${'x'?leftPad(1, 2)}", "?leftPad", "2nd", "string", "number");
         assertErrorContains("${'x'?leftPad(null)}", "?leftPad", "1st", "null");
-        addTemplate("foo.ftl", "<#macro m n1></#macro>");
-        assertErrorContains("<#import 'foo.ftl' as f><@f.m/>", "macro", "\"foo.ftl:m\"");
+        addTemplate("foo.f3ah", "<#macro m n1></#macro>");
+        assertErrorContains("<#import 'foo.f3ah' as f><@f.m/>", "macro", "\"foo.f3ah:m\"");
         assertErrorContains("<#function myF(p1)></#function><#assign f2 = myF>${f2()}", "\"myF\"");
         addToDataModel("bean", new TestBean());
         assertErrorContains("${bean.intMP()}", "method", "org.apache.freemarker.test.TemplateTest$TestBean.intMP");
@@ -316,11 +316,11 @@ public class TemplateCallableModelTest extends TemplateTest {
         // Default expression sees previous argument:
         assertOutput("<#macro m a{positional} b=a>${a}${b}</#macro><@m 1/> <@m 2 b=3/>", "11 23");
 
-        addTemplate("lib.ftl", ""
+        addTemplate("lib.f3ah", ""
                 + "<#assign defaultA=1>"
                 + "<#assign b=2>"
                 + "<#macro m a=defaultA>${a} ${b}[<#nested>]${b} ${a}</#macro>");
-        assertOutput("<#import 'lib.ftl' as lib>"
+        assertOutput("<#import 'lib.f3ah' as lib>"
                 + "<#assign a='a'>"
                 + "<#assign b='b'>"
                 + "<@lib.m>${a}${b}</@> "
