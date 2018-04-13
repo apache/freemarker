@@ -253,7 +253,8 @@ Major changes / features
      the `Configuration` or other kind of `ParsingConfiguration`). This is important for syntax highlighting of the
      static parts, hence it's encoded into the file extension too. It's also important for security reasons, 
   So a common file extensions will be "f3ah".
-  The FM2 file extensions, "ftl", "ftlh", and "ftlx" are banned to prevent confusion [TODO: not yet...].
+  The FM2 file extensions, "ftl", "ftlh", and "ftlx" by default give error (FM 2 templates not supported) to
+  prevent confusion.
   
 
 Smaller Java API changes (categorized)

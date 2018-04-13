@@ -762,13 +762,16 @@ public final class Configuration implements TopLevelConfiguration, CustomStateSc
     
     static final Map<String, TemplateLanguage> PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION;
     static {
-        PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION = new HashMap<String, TemplateLanguage>(
-                (DefaultTemplateLanguage.STANDARD_INSTANCES.length + 1) * 2, 0.5f);
-        for (DefaultTemplateLanguage tl : DefaultTemplateLanguage.STANDARD_INSTANCES) {
+        PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION = new HashMap<String, TemplateLanguage>(32);
+        
+        for (TemplateLanguage tl : DefaultTemplateLanguage.STANDARD_INSTANCES) {
+            PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION.put(tl.getFileExtension(), tl);            
+        }
+        for (TemplateLanguage tl : UnsupportedFM2TemplateLanguage.INSTANCES) {
             PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION.put(tl.getFileExtension(), tl);            
         }
         PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION.put(
-                UnparsedTemplateLanguage.INSTANCE.getFileExtension(), UnparsedTemplateLanguage.INSTANCE);            
+                UnparsedTemplateLanguage.F3UU.getFileExtension(), UnparsedTemplateLanguage.F3UU);            
     }
     
     /**

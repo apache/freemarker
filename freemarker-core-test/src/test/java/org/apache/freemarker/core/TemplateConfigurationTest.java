@@ -190,7 +190,7 @@ public class TemplateConfigurationTest {
                 ImmutableMap.of("dummy", EpochMillisTemplateDateFormatFactory.INSTANCE));
 
         // Parser-only settings:
-        SETTING_ASSIGNMENTS.put("templateLanguage", UnparsedTemplateLanguage.INSTANCE);
+        SETTING_ASSIGNMENTS.put("templateLanguage", UnparsedTemplateLanguage.F3UU);
         SETTING_ASSIGNMENTS.put("tagSyntax", TagSyntax.SQUARE_BRACKET);
         SETTING_ASSIGNMENTS.put("interpolationSyntax", InterpolationSyntax.SQUARE_BRACKET);
         SETTING_ASSIGNMENTS.put("whitespaceStripping", false);
@@ -621,7 +621,7 @@ public class TemplateConfigurationTest {
             // assertOutput here, as that hard-coded to create an FTL Template.
 
             TemplateConfiguration.Builder tcb = new TemplateConfiguration.Builder();
-            tcb.setTemplateLanguage(UnparsedTemplateLanguage.INSTANCE);
+            tcb.setTemplateLanguage(UnparsedTemplateLanguage.F3UU);
 
             TestConfigurationBuilder cfgB = new TestConfigurationBuilder();
             cfgB.setTemplateConfigurations(

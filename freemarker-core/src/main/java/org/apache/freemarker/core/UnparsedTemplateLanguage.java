@@ -33,10 +33,13 @@ public final class UnparsedTemplateLanguage extends TemplateLanguage {
     
     private static final int READ_BUFFER_SIZE = 4096;
     
-    public static final TemplateLanguage INSTANCE = new UnparsedTemplateLanguage();
+    /**
+     * Instance with {@link UndefinedOutputFormat} output format. 
+     */
+    public static final UnparsedTemplateLanguage F3UU = new UnparsedTemplateLanguage(UndefinedOutputFormat.INSTANCE);
 
-    private UnparsedTemplateLanguage() {
-        super("f3uu", true, UndefinedOutputFormat.INSTANCE, AutoEscapingPolicy.ENABLE_IF_DEFAULT);
+    private UnparsedTemplateLanguage(OutputFormat outputFormat) {
+        super("f3uu", true, outputFormat, AutoEscapingPolicy.ENABLE_IF_DEFAULT);
     }
 
     /**
@@ -63,6 +66,12 @@ public final class UnparsedTemplateLanguage extends TemplateLanguage {
         ASTStaticText root = new ASTStaticText(sb.toString());
         root.setFieldsForRootElement();
         root.setLocation(template, -1, -1, -1, -1); // TODO [FM3] Positions are dummy
+        
+        template.setOutputFormat(contextOutputFormat != null ? contextOutputFormat
+                : getOutputFormat(template.getConfiguration()));
+        template.setAutoEscapingPolicy(contextAutoEscapingPolicy != null ? contextAutoEscapingPolicy
+                : getAutoEscapingPolicy());
+        
         return root;
     }
     

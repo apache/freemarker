@@ -19,6 +19,7 @@
 
 package org.apache.freemarker.core;
 
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
@@ -26,12 +27,17 @@ import java.io.InputStream;
 import java.io.Reader;
 
 import org.apache.freemarker.core.outputformat.OutputFormat;
+import org.apache.freemarker.core.outputformat.impl.HTMLOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.RTFOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.UndefinedOutputFormat;
+import org.apache.freemarker.core.outputformat.impl.XMLOutputFormat;
+import org.apache.freemarker.test.TestConfigurationBuilder;
 import org.junit.Test;
 
 public class TemplateLanguageTest {
     
     @Test
-    public void fileExtensionRestrictionsTest() {
+    public void testFileExtensionRestrictions() {
         new DummyTemplateLanguage("xfoo", null, null);
         
         new DummyTemplateLanguage("ffoo", true, null, null);
@@ -81,6 +87,71 @@ public class TemplateLanguageTest {
             throw new RuntimeException("Not implemented");
         }
         
+    }
+    
+    @Test
+    public void testDefaultFileExtensionsRecognized() throws Exception {
+        Configuration cfg = new TestConfigurationBuilder()
+                .outputFormat(RTFOutputFormat.INSTANCE)
+                .build();
+        
+        assertLanguageAndOutputFormat(
+                new Template("foo.f3ac", "", cfg),
+                DefaultTemplateLanguage.F3AC, RTFOutputFormat.INSTANCE);
+        assertLanguageAndOutputFormat(
+                new Template("foo.notRecognized", "", cfg),
+                DefaultTemplateLanguage.F3AC, RTFOutputFormat.INSTANCE);
+        assertLanguageAndOutputFormat(
+                new Template("foo.f3au", "", cfg),
+                DefaultTemplateLanguage.F3AU, UndefinedOutputFormat.INSTANCE);
+        assertLanguageAndOutputFormat(
+                new Template("foo.f3ah", "", cfg),
+                DefaultTemplateLanguage.F3AH, HTMLOutputFormat.INSTANCE);
+        assertLanguageAndOutputFormat(
+                new Template("foo.f3ax", "", cfg),
+                DefaultTemplateLanguage.F3AX, XMLOutputFormat.INSTANCE);
+        
+        assertLanguageAndOutputFormat(
+                new Template("foo.f3sc", "", cfg),
+                DefaultTemplateLanguage.F3SC, RTFOutputFormat.INSTANCE);
+        assertLanguageAndOutputFormat(
+                new Template("foo.f3su", "", cfg),
+                DefaultTemplateLanguage.F3SU, UndefinedOutputFormat.INSTANCE);
+        assertLanguageAndOutputFormat(
+                new Template("foo.f3sh", "", cfg),
+                DefaultTemplateLanguage.F3SH, HTMLOutputFormat.INSTANCE);
+        assertLanguageAndOutputFormat(
+                new Template("foo.f3sx", "", cfg),
+                DefaultTemplateLanguage.F3SX, XMLOutputFormat.INSTANCE);
+        
+        assertLanguageAndOutputFormat(
+                new Template("foo.f3uu", "", cfg),
+                UnparsedTemplateLanguage.F3UU, UndefinedOutputFormat.INSTANCE);
+        
+       try {
+           new Template("foo.ftl", "", cfg);
+           fail();
+       } catch (ParseException e) {
+           assertThat(e.getMessage(), allOf(containsString("FreeMarker 2"), containsString("*.ftl")));
+       }
+       try {
+           new Template("foo.ftlh", "", cfg);
+           fail();
+       } catch (ParseException e) {
+           assertThat(e.getMessage(), allOf(containsString("FreeMarker 2"), containsString("*.ftlh")));
+       }
+       try {
+           new Template("foo.ftlx", "", cfg);
+           fail();
+       } catch (ParseException e) {
+           assertThat(e.getMessage(), allOf(containsString("FreeMarker 2"), containsString("*.ftlx")));
+       }
+    }
+
+    private void assertLanguageAndOutputFormat(Template template, TemplateLanguage expectedLanguage,
+            OutputFormat expectedOutputFromat) {
+        assertEquals(expectedLanguage, template.getParsingConfiguration().getTemplateLanguage());
+        assertEquals(expectedOutputFromat, template.getOutputFormat());
     }
 
 }

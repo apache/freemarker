@@ -117,7 +117,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
                         value.toLowerCase());
                 if (templateLanguage == null) {
                     if ("staticText".equals(value)) {
-                        templateLanguage = UnparsedTemplateLanguage.INSTANCE;
+                        templateLanguage = UnparsedTemplateLanguage.F3UU;
                     } else {
                         // TODO [FM3] Allow setting a custom template language by class name.
                         throw new InvalidSettingValueException(name, value, "Unsupported template language name");
