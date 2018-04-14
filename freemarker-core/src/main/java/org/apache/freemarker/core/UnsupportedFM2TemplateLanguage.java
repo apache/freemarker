@@ -51,7 +51,6 @@ class UnsupportedFM2TemplateLanguage extends TemplateLanguage {
 
     @Override
     public ASTElement parse(Template template, Reader reader, ParsingConfiguration pCfg,
-            OutputFormat contextOutputFormat, AutoEscapingPolicy contextAutoEscapingPolicy,
             InputStream streamToUnmarkWhenEncEstabd) throws IOException, ParseException {
         throw new ParseException(
                 "FreeMarker 2 templates (*." + getFileExtension() + ") aren't supported in FreeMarker 3. "

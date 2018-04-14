@@ -35,6 +35,7 @@ import org.apache.freemarker.core.model.impl.BeanModel;
 import org.apache.freemarker.core.model.impl.DefaultObjectWrapper;
 import org.apache.freemarker.core.model.impl.SimpleNumber;
 import org.apache.freemarker.core.model.impl.SimpleString;
+import org.apache.freemarker.core.outputformat.OutputFormat;
 import org.apache.freemarker.core.templateresolver.MalformedTemplateNameException;
 import org.apache.freemarker.core.util.CallableUtils;
 
@@ -65,19 +66,31 @@ class BuiltInsForStringsMisc {
 
     static class evalBI extends OutputFormatBoundBuiltIn {
         
+        private ParsingConfiguration pCfg;
+        
         @Override
         protected TemplateModel calculateResult(Environment env) throws TemplateException {
             return calculateResult(BuiltInForString.getTargetString(target, env), env);
         }
         
+        @Override
+        void bindToOutputFormat(OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy) {
+            super.bindToOutputFormat(outputFormat, autoEscapingPolicy);
+            Template template = getTemplate();
+            ParsingConfiguration pCfg = template.getParsingConfiguration();
+            if (pCfg.getOutputFormat() != outputFormat || pCfg.getAutoEscapingPolicy() != autoEscapingPolicy) {
+                pCfg = new FinalParsingConfiguration(pCfg, pCfg.getTemplateLanguage(), outputFormat, autoEscapingPolicy,
+                        template.getConfiguration());
+            }
+            this.pCfg = pCfg; 
+        }
+
         TemplateModel calculateResult(String s, Environment env) throws TemplateException {
             Template parentTemplate = getTemplate();
             
             ASTExpression exp;
             try {
                 try {
-                    ParsingConfiguration pCfg = parentTemplate.getParsingConfiguration();
-                    
                     SimpleCharStream simpleCharStream = new SimpleCharStream(
                             new StringReader("(" + s + ")"),
                             RUNTIME_EVAL_LINE_DISPLACEMENT, 1,
@@ -90,7 +103,7 @@ class BuiltInsForStringsMisc {
                     // pCfg.outputFormat+autoEscapingPolicy is exceptional: it's inherited from the lexical context
                     FMParser parser = new FMParser(
                             parentTemplate, false, tkMan,
-                            pCfg, outputFormat, autoEscapingPolicy,
+                            pCfg,
                             null);
                     
                     exp = parser.Expression();
@@ -260,10 +273,8 @@ class BuiltInsForStringsMisc {
         class ConstructorFunction extends BuiltInCallableImpl implements TemplateFunctionModel {
 
             private final Class<?> cl;
-            private final Environment env;
             
             ConstructorFunction(String classname, Environment env, Template template) throws TemplateException {
-                this.env = env;
                 cl = env.getNewBuiltinClassResolver().resolve(classname, env, template);
                 if (!TemplateModel.class.isAssignableFrom(cl)) {
                     throw new TemplateException(newBI.this, env,

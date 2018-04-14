@@ -125,14 +125,12 @@ public final class DefaultTemplateLanguage extends TemplateLanguage {
 
     @Override
     public ASTElement parse(Template template, Reader reader,
-            ParsingConfiguration pCfg, OutputFormat contextOutputFormat, AutoEscapingPolicy contextAutoEscapingPolicy,
+            ParsingConfiguration pCfg,
             InputStream streamToUnmarkWhenEncEstabd)
             throws IOException, ParseException {
         FMParser parser = new FMParser(
                 template, reader,
                 pCfg,
-                contextOutputFormat,
-                contextAutoEscapingPolicy,
                 streamToUnmarkWhenEncEstabd);
         ASTElement root = parser.Root();
         template.actualTagSyntax = parser._getLastTagSyntax();

@@ -114,10 +114,10 @@ public class FMParser {
     private int topNestedContentParamNamesLength;
 
     FMParser(Template template, Reader reader,
-            ParsingConfiguration pCfg, OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy,
+            ParsingConfiguration pCfg,
             InputStream streamToUnmarkWhenEncEstabd) {
         this(template, true, readerToTokenManager(reader, pCfg),
-                pCfg, outputFormat, autoEscapingPolicy,
+                pCfg,
                 streamToUnmarkWhenEncEstabd);
     }
 
@@ -128,8 +128,7 @@ public class FMParser {
     }
 
     FMParser(Template template, boolean newTemplate, FMParserTokenManager tkMan,
-            ParsingConfiguration pCfg, OutputFormat contextOutputFormat, AutoEscapingPolicy contextAutoEscapingPolicy,
-    		InputStream streamToUnmarkWhenEncEstabd) {
+            ParsingConfiguration pCfg, InputStream streamToUnmarkWhenEncEstabd) {
         this(tkMan);
 
         _NullArgumentException.check(pCfg);
@@ -146,22 +145,8 @@ public class FMParser {
 
         templateLanguage = (DefaultTemplateLanguage) pCfg.getTemplateLanguage();
 
-        {
-            // contextXxx is stronger than anything.
-            // TemplateLanguage.xxx (if it's non-null) stronger than the rest.
-            
-            OutputFormat outputFormatFromLang;
-            outputFormat = contextOutputFormat != null ? contextOutputFormat
-                    : (outputFormatFromLang = templateLanguage.getOutputFormat(template.getConfiguration())) != null
-                            ? outputFormatFromLang
-                            : pCfg.getOutputFormat();
-
-            AutoEscapingPolicy autoEscapingPolicyFromLang;
-            autoEscapingPolicy = contextAutoEscapingPolicy != null ? contextAutoEscapingPolicy
-                    : (autoEscapingPolicyFromLang = templateLanguage.getAutoEscapingPolicy()) != null
-                            ? autoEscapingPolicyFromLang
-                    : pCfg.getAutoEscapingPolicy();
-        }
+        outputFormat = pCfg.getOutputFormat();
+        autoEscapingPolicy = pCfg.getAutoEscapingPolicy();
         recalculateAutoEscapingField();
 
         token_source.setParser(this);
@@ -180,13 +165,6 @@ public class FMParser {
         token_source.interpolationSyntax = templateLanguage.getInterpolationSyntax();
 
         this.stripWhitespace = pCfg.getWhitespaceStripping();
-
-        // If this is a Template under construction, we do the below.
-        // If this is just the enclosing Template for ?eval or such, we must not modify it.
-        if (newTemplate) {
-            template.setAutoEscapingPolicy(autoEscapingPolicy);
-            template.setOutputFormat(outputFormat);
-        }
     }
     
     void setupStringLiteralMode(FMParserTokenManager parentTokenSource, OutputFormat outputFormat) {

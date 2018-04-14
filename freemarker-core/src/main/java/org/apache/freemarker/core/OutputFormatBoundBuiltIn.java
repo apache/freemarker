@@ -27,6 +27,11 @@ abstract class OutputFormatBoundBuiltIn extends SpecialBuiltIn {
     protected OutputFormat outputFormat;
     protected AutoEscapingPolicy autoEscapingPolicy;
     
+    /**
+     * Binds the {@link ASTNode} to the output format and auto-escaping context of its lexical context.
+     * Called when the {@link ASTNode} location was already set (so {@link #getTemplate()} will return
+     * non-{@code null}).
+     */
     void bindToOutputFormat(OutputFormat outputFormat, AutoEscapingPolicy autoEscapingPolicy) {
         _NullArgumentException.check(outputFormat);
         this.outputFormat = outputFormat;

@@ -82,7 +82,6 @@ public class TemplateLanguageTest {
 
         @Override
         public ASTElement parse(Template template, Reader reader, ParsingConfiguration pCfg,
-                OutputFormat contextOutputFormat, AutoEscapingPolicy contextAutoEscapingPolicy,
                 InputStream streamToUnmarkWhenEncEstabd) throws IOException, ParseException {
             throw new RuntimeException("Not implemented");
         }

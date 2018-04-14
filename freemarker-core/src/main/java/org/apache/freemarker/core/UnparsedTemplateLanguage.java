@@ -54,7 +54,7 @@ public final class UnparsedTemplateLanguage extends TemplateLanguage {
 
     @Override
     public ASTElement parse(Template template, Reader reader,
-            ParsingConfiguration pCfg, OutputFormat contextOutputFormat, AutoEscapingPolicy contextAutoEscapingPolicy,
+            ParsingConfiguration pCfg,
             InputStream streamToUnmarkWhenEncEstabd)
             throws IOException, ParseException {
         final StringBuilder sb = new StringBuilder();
@@ -66,11 +66,6 @@ public final class UnparsedTemplateLanguage extends TemplateLanguage {
         ASTStaticText root = new ASTStaticText(sb.toString());
         root.setFieldsForRootElement();
         root.setLocation(template, -1, -1, -1, -1); // TODO [FM3] Positions are dummy
-        
-        template.setOutputFormat(contextOutputFormat != null ? contextOutputFormat
-                : getOutputFormat(template.getConfiguration()));
-        template.setAutoEscapingPolicy(contextAutoEscapingPolicy != null ? contextAutoEscapingPolicy
-                : getAutoEscapingPolicy());
         
         return root;
     }

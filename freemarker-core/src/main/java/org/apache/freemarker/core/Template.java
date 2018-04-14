@@ -310,17 +310,22 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         {
             ParsingConfiguration pCfgWithFallback = tCfg != null
                     ? new ParsingConfigurationWithFallback(tCfg, cfg) : cfg;
-            
-            TemplateLanguage tempLangFromPCfg = pCfgWithFallback.getTemplateLanguage();
-            TemplateLanguage tempLangFromExt = pCfgWithFallback.getRecognizeStandardFileExtensions()
-                    ? configuration.getTemplateLanguageForTemplateName(sourceName != null ? sourceName : lookupName)
-                    : null;
-            if (tempLangFromExt != null && tempLangFromExt != tempLangFromPCfg) {
-                this.pCfg = new ParsingConfigurationWithTemplateLanguageOverride(pCfgWithFallback, tempLangFromExt);
-            } else {
-                this.pCfg = pCfgWithFallback;
-            }
+            TemplateLanguage tempLangFromExt;
+            this.pCfg = new FinalParsingConfiguration(
+                    pCfgWithFallback,
+                    pCfgWithFallback.getRecognizeStandardFileExtensions()
+                            && (tempLangFromExt = configuration.getTemplateLanguageForTemplateName(
+                                    sourceName != null ? sourceName : lookupName)) != null
+                            ? tempLangFromExt
+                            : pCfgWithFallback.getTemplateLanguage(),
+                    contextOutputFormat, contextAutoEscapingPolicy,
+                    cfg);
         }
+        
+        // The template can change these with some header directive, so they are stored in the Template as well, not
+        // only in the ParsingConfiguration:
+        setOutputFormat(pCfg.getOutputFormat());
+        setAutoEscapingPolicy(pCfg.getAutoEscapingPolicy());
         
         this.lookupName = lookupName;
         this.sourceName = sourceName;
@@ -357,10 +362,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
 
         try {
             try {
-                parseWithEncoding(
-                        reader,
-                        contextOutputFormat, contextAutoEscapingPolicy,
-                        guessedEncoding, inputStreamMarked ? inputStream : null);
+                parseWithEncoding(reader, guessedEncoding, inputStreamMarked ? inputStream : null);
             } catch (WrongTemplateCharsetException charsetException) {
                 final Charset templateSpecifiedEncoding = charsetException.getTemplateSpecifiedEncoding();
 
@@ -374,10 +376,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
                     // We can't handle it, the caller should.
                     throw charsetException;
                 }
-                parseWithEncoding(
-                        reader,
-                        contextOutputFormat, contextAutoEscapingPolicy,
-                        templateSpecifiedEncoding, inputStream);
+                parseWithEncoding(reader, templateSpecifiedEncoding, inputStream);
             }
         } finally {
             if (closeReader) {
@@ -401,7 +400,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
      *            mark (so we don't buffer unnecessarily). Maybe {@code null}.
      */
     private void parseWithEncoding(
-            Reader reader, OutputFormat contextOutputFormat, AutoEscapingPolicy contextAutoEscapingPolicy,
+            Reader reader,
             Charset attemptedCharset, InputStream streamToUnmarkWhenEncEstabd) throws ParseException, IOException {
         setActualSourceEncoding(attemptedCharset);
         LineTableBuilder ltbReader;
@@ -418,10 +417,7 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
             
             try {
                 try {
-                    rootElement = pCfg.getTemplateLanguage().parse(
-                            this, reader,
-                            pCfg, contextOutputFormat, contextAutoEscapingPolicy,
-                            streamToUnmarkWhenEncEstabd);
+                    rootElement = pCfg.getTemplateLanguage().parse(this, reader, pCfg, streamToUnmarkWhenEncEstabd);
                 } catch (IndexOutOfBoundsException exc) {
                     // There's a JavaCC bug where the Reader throws a RuntimeExcepton and then JavaCC fails with
                     // IndexOutOfBoundsException. If that wasn't the case, we just rethrow. Otherwise we suppress the

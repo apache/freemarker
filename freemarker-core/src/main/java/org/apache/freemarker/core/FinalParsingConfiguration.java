@@ -25,17 +25,55 @@ import org.apache.freemarker.core.arithmetic.ArithmeticEngine;
 import org.apache.freemarker.core.outputformat.OutputFormat;
 
 /**
- * Used when the {@link TemplateLanguage} in the {@link ParsingConfiguration} need to be replaced.
+ * Used for creating the final {@link ParsingConfiguration} passed to
+ * {@link TemplateLanguage#parse(Template, java.io.Reader, ParsingConfiguration, java.io.InputStream)}.
+ * Overrides the {@link TemplateLanguage} in a {@link ParsingConfiguration}, also the {@link OutputFormat} and/or
+ * {@link AutoEscapingPolicy} if the {@link TemplateLanguage} or the context requires that.
  */
-final class ParsingConfigurationWithTemplateLanguageOverride implements ParsingConfiguration {
+final class FinalParsingConfiguration implements ParsingConfiguration {
 
     private final ParsingConfiguration pCfg;
     private final TemplateLanguage templateLanguage;
-    
-    public ParsingConfigurationWithTemplateLanguageOverride(ParsingConfiguration pCfg,
-            TemplateLanguage templateLanguage) {
+    private final OutputFormat outputFormat;
+    private final AutoEscapingPolicy autoEscapingPolicy;
+
+    /**
+     * @param pCfg
+     *            The {@link ParsingConfiguration} where we override some settings; not {@code null}
+     * @param templateLanguage
+     *            The final {@link TemplateLanguage} to be used; not {@code null}.
+     * @param contextOutputFormat
+     *            See similar parameter in {@link Template#Template(String, String, java.io.InputStream, Charset,
+     *            java.io.Reader, Configuration, TemplateConfiguration, OutputFormat, AutoEscapingPolicy)};
+     *            maybe {@code null}.
+     * @param contextAutoEscapingPolicy
+     *            See similar parameter in {@link Template#Template(String, String, java.io.InputStream, Charset,
+     *            java.io.Reader, Configuration, TemplateConfiguration, OutputFormat, AutoEscapingPolicy)};
+     *            maybe {@code null}.
+     * @param cfg
+     *            Not {@code null}
+     */
+    FinalParsingConfiguration(
+            ParsingConfiguration pCfg, TemplateLanguage templateLanguage,
+            OutputFormat contextOutputFormat, AutoEscapingPolicy contextAutoEscapingPolicy,
+            Configuration cfg) {
         this.pCfg = pCfg;
         this.templateLanguage = templateLanguage;
+
+        // contextXxx is stronger than anything.
+        // TemplateLanguage.xxx (if it's non-null) stronger than the rest.
+        
+        OutputFormat tempLangOutputFormat;
+        this.outputFormat = contextOutputFormat != null ? contextOutputFormat
+                : (tempLangOutputFormat = templateLanguage.getOutputFormat(cfg)) != null
+                        ? tempLangOutputFormat
+                : pCfg.getOutputFormat();
+        
+        AutoEscapingPolicy tempLangAutoEscapingPolicy; 
+        this.autoEscapingPolicy = contextAutoEscapingPolicy != null ? contextAutoEscapingPolicy
+                : (tempLangAutoEscapingPolicy = templateLanguage.getAutoEscapingPolicy()) != null
+                        ? tempLangAutoEscapingPolicy
+                : pCfg.getAutoEscapingPolicy();
     }
 
     @Override
@@ -70,22 +108,22 @@ final class ParsingConfigurationWithTemplateLanguageOverride implements ParsingC
 
     @Override
     public AutoEscapingPolicy getAutoEscapingPolicy() {
-        return pCfg.getAutoEscapingPolicy();
+        return autoEscapingPolicy;
     }
 
     @Override
     public boolean isAutoEscapingPolicySet() {
-        return pCfg.isAutoEscapingPolicySet();
+        return autoEscapingPolicy != null;
     }
 
     @Override
     public OutputFormat getOutputFormat() {
-        return pCfg.getOutputFormat();
+        return outputFormat;
     }
 
     @Override
     public boolean isOutputFormatSet() {
-        return pCfg.isOutputFormatSet();
+        return outputFormat != null;
     }
 
     @Override

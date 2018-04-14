@@ -102,10 +102,17 @@ public abstract class TemplateLanguage {
      * This is what
      * {@link Template#Template(String, String, InputStream, Charset, Reader, Configuration, TemplateConfiguration,
      * OutputFormat, AutoEscapingPolicy)} calls internally to do the actual parsing.
+     * 
+     * @param template
+     *            The {@link Template} for which AST (Abstract Syntax Tree) needs to be built.
+     * 
+     * @param pCfg
+     *            Contains the final {@link ParsingConfiguration}; overrides from the {@link TemplateLanguage} are
+     *            already applied to this.
      */
     // TODO [FM3] This is not the final API, or else it can't be public (because ASTElement isn't public for example).
     public abstract ASTElement parse(Template template, Reader reader,
-            ParsingConfiguration pCfg, OutputFormat contextOutputFormat, AutoEscapingPolicy contextAutoEscapingPolicy,
+            ParsingConfiguration pCfg,
             InputStream streamToUnmarkWhenEncEstabd)
             throws IOException, ParseException;
 
