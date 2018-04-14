@@ -65,7 +65,7 @@ public final class UnparsedTemplateLanguage extends TemplateLanguage {
         }
         ASTStaticText root = new ASTStaticText(sb.toString());
         root.setFieldsForRootElement();
-        root.setLocation(template, -1, -1, -1, -1); // TODO [FM3] Positions are dummy
+        root.setLocation(template, 0, 0, 0, 0); // TODO [FM3] Positions are dummy
         
         return root;
     }

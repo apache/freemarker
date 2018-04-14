@@ -40,23 +40,23 @@ public class TemplateGetEncodingTest {
             cfgB.setSourceEncoding(ISO_8859_2);
             MonitoredTemplateLoader tl = new MonitoredTemplateLoader();
             tl.putBinaryTemplate("bin", "test");
-            tl.putBinaryTemplate("bin-static", "<#test>");
+            tl.putBinaryTemplate("bin-unparsed", "<#test>");
             tl.putTextTemplate("text", "test");
-            tl.putTextTemplate("text-static", "<#test>");
-            TemplateConfiguration.Builder staticTextTCB = new TemplateConfiguration.Builder();
-            staticTextTCB.setTemplateLanguage(UnparsedTemplateLanguage.F3UU);
+            tl.putTextTemplate("text-unparsed", "<#test>");
+            TemplateConfiguration.Builder unparsedTCB = new TemplateConfiguration.Builder();
+            unparsedTCB.setTemplateLanguage(UnparsedTemplateLanguage.F3UU);
             cfgB.setTemplateConfigurations(
                     new ConditionalTemplateConfigurationFactory(
-                            new FileNameGlobMatcher("*-static*"), staticTextTCB.build()));
+                            new FileNameGlobMatcher("*-unparsed*"), unparsedTCB.build()));
             cfgB.setTemplateLoader(tl);
             cfgB.setTemplateCacheStorage(new StrongCacheStorage());
         }
 
         Configuration cfg = cfgB.build();
         assertEquals(ISO_8859_2, cfg.getTemplate("bin").getActualSourceEncoding());
-        assertEquals(ISO_8859_2, cfg.getTemplate("bin-static").getActualSourceEncoding());
+        assertEquals(ISO_8859_2, cfg.getTemplate("bin-unparsed").getActualSourceEncoding());
         assertNull(cfg.getTemplate("text").getActualSourceEncoding());
-        assertNull(cfg.getTemplate("text-static").getActualSourceEncoding());
+        assertNull(cfg.getTemplate("text-unparsed").getActualSourceEncoding());
         assertNull(new Template(null, "test", cfg).getActualSourceEncoding());
         assertNull(Template.createPlainTextTemplate(null, "<#test>", cfg).getActualSourceEncoding());
     }

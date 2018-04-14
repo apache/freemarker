@@ -116,7 +116,7 @@ public abstract class MutableParsingAndProcessingConfiguration<
                 TemplateLanguage templateLanguage = Configuration.PREDEFINED_TEMPLATE_LANGUAGES_BY_EXTENSION.get(
                         value.toLowerCase());
                 if (templateLanguage == null) {
-                    if ("staticText".equals(value)) {
+                    if ("unparsed".equals(value)) {
                         templateLanguage = UnparsedTemplateLanguage.F3UU;
                     } else {
                         // TODO [FM3] Allow setting a custom template language by class name.
