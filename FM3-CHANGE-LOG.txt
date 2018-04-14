@@ -610,6 +610,7 @@ Core / Miscellaneous
 - Added `org.apache.freemarker.core.util.CallableUtils`, to help in implementing (and invoking) `TemplateCallableModel`-s.
 - Renamed `Environment.getDataModel()` to `getDataModelWithSharedVariableFallback()`
   Renamed `Environment.getGlobalVariables()` to `getGloballyVisibleVariables()()`
+- Removed `Template.createPlainTextTemplate`, as this convenience methods was hardly ever used.
 
 Build / development process changes
 -----------------------------------

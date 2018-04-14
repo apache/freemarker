@@ -399,18 +399,23 @@ public class OutputFormatTest extends TemplateTest {
     
     @Test
     public void testUnparsedTemplate() throws IOException, TemplateException {
+        TemplateConfiguration tc = new TemplateConfiguration.Builder()
+                .templateLanguage(new UnparsedTemplateLanguage("x", null))
+                .recognizeStandardFileExtensions(false)
+                .build(); 
+        
         String content = "<#ftl>a<#foo>b${x}";
+        
         {
-            Template t = Template.createPlainTextTemplate("x", content, getConfiguration());
+            Template t = new Template("x", content, getConfiguration(), tc);
             Writer sw = new StringWriter();
             t.process(null, sw);
             assertEquals(content, sw.toString());
             assertEquals(UndefinedOutputFormat.INSTANCE, t.getOutputFormat());
         }
-        
         {
             setConfiguration(new TestConfigurationBuilder().outputFormat(HTMLOutputFormat.INSTANCE).build());
-            Template t = Template.createPlainTextTemplate("x", content, getConfiguration());
+            Template t = new Template("x", content, getConfiguration(), tc);
             Writer sw = new StringWriter();
             t.process(null, sw);
             assertEquals(content, sw.toString());

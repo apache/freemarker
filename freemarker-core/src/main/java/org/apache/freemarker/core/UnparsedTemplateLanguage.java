@@ -36,10 +36,16 @@ public final class UnparsedTemplateLanguage extends TemplateLanguage {
     /**
      * Instance with {@link UndefinedOutputFormat} output format. 
      */
-    public static final UnparsedTemplateLanguage F3UU = new UnparsedTemplateLanguage(UndefinedOutputFormat.INSTANCE);
+    public static final UnparsedTemplateLanguage F3UU = new UnparsedTemplateLanguage(
+            "f3uu", true, UndefinedOutputFormat.INSTANCE);
 
-    private UnparsedTemplateLanguage(OutputFormat outputFormat) {
-        super("f3uu", true, outputFormat, AutoEscapingPolicy.ENABLE_IF_DEFAULT);
+    public UnparsedTemplateLanguage(String fileExtension, OutputFormat outputFormat) {
+        this(fileExtension, false, outputFormat);
+    }
+    
+    private UnparsedTemplateLanguage(String fileExtension, boolean allowExtensionStartingWithF,
+            OutputFormat outputFormat) {
+        super(fileExtension, allowExtensionStartingWithF, outputFormat, AutoEscapingPolicy.ENABLE_IF_DEFAULT);
     }
 
     /**

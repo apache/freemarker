@@ -56,7 +56,6 @@ import org.apache.freemarker.core.templateresolver.TemplateLoader;
 import org.apache.freemarker.core.templateresolver.TemplateLookupStrategy;
 import org.apache.freemarker.core.templateresolver.impl.DefaultTemplateResolver;
 import org.apache.freemarker.core.templateresolver.impl.FileTemplateLoader;
-import org.apache.freemarker.core.util.BugException;
 import org.apache.freemarker.core.util._CollectionUtils;
 import org.apache.freemarker.core.util._NullArgumentException;
 import org.apache.freemarker.core.valueformat.TemplateDateFormatFactory;
@@ -455,45 +454,6 @@ public class Template implements ProcessingConfiguration, CustomStateScope {
         if (writeProtected) {
             throw new IllegalStateException("Template can't be modified anymore");
         }
-    }
-
-    /**
-     * Same as {@link #createPlainTextTemplate(String, String, String, Configuration, Charset)} with {@code null}
-     * {@code sourceName} argument.
-     */
-    static public Template createPlainTextTemplate(String lookupName, String content, Configuration config) {
-        return createPlainTextTemplate(lookupName, null, content, config, null);
-    }
-
-    /**
-     * Creates a {@link Template} that only contains a single block of static text, no dynamic content.
-     * 
-     * @param lookupName
-     *            See {@link #getLookupName} for more details.
-     * @param sourceName
-     *            See {@link #getSourceName} for more details. If {@code null}, it will be the same as the {@code name}.
-     * @param content
-     *            the block of text that this template represents
-     * @param config
-     *            the configuration to which this template belongs
-     *
-     * @param sourceEncoding The charset used to decode the template content to the {@link String} passed in with the
-     *            {@code content} parameter. If that information is not known or irrelevant, this should be
-     *            {@code null}.
-     */
-    static public Template createPlainTextTemplate(String lookupName, String sourceName, String content, Configuration config,
-               Charset sourceEncoding) {
-        Template template;
-        try {
-            template = new Template(lookupName, sourceName, new StringReader(""), config, sourceEncoding);
-        } catch (IOException e) {
-            throw new BugException("Plain text template creation failed", e);
-        }
-        ((ASTStaticText) template.rootElement).replaceText(content);
-
-        _DebuggerService.registerTemplate(template);
-
-        return template;
     }
 
     /**

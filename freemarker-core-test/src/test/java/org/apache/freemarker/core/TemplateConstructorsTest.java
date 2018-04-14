@@ -85,7 +85,11 @@ public class TemplateConstructorsTest {
             assertEquals(StandardCharsets.UTF_16LE, t.getActualSourceEncoding());
         }
         {
-            Template t = Template.createPlainTextTemplate(name, CONTENT, cfg);
+            Template t = new Template(name, CONTENT, cfg,
+                    new TemplateConfiguration.Builder()
+                    .templateLanguage(UnparsedTemplateLanguage.F3UU)
+                    .recognizeStandardFileExtensions(false)
+                    .build());
             assertEquals(name, t.getLookupName());
             assertNull(t.getSourceName());
             assertEquals(CONTENT, t.toString());

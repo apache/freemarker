@@ -58,7 +58,6 @@ public class TemplateGetEncodingTest {
         assertNull(cfg.getTemplate("text").getActualSourceEncoding());
         assertNull(cfg.getTemplate("text-unparsed").getActualSourceEncoding());
         assertNull(new Template(null, "test", cfg).getActualSourceEncoding());
-        assertNull(Template.createPlainTextTemplate(null, "<#test>", cfg).getActualSourceEncoding());
     }
 
 }
